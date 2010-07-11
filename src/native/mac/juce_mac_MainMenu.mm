@@ -53,7 +53,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class JuceMainMenuHandler   : private MenuBarModelListener,
+class JuceMainMenuHandler   : private MenuBarModel::Listener,
                               private DeletedAtShutdown
 {
 public:

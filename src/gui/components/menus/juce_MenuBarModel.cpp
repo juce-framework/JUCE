@@ -61,12 +61,12 @@ void MenuBarModel::setApplicationCommandManagerToWatch (ApplicationCommandManage
     }
 }
 
-void MenuBarModel::addListener (MenuBarModelListener* const newListener) throw()
+void MenuBarModel::addListener (Listener* const newListener) throw()
 {
     listeners.add (newListener);
 }
 
-void MenuBarModel::removeListener (MenuBarModelListener* const listenerToRemove) throw()
+void MenuBarModel::removeListener (Listener* const listenerToRemove) throw()
 {
     // Trying to remove a listener that isn't on the list!
     // If this assertion happens because this object is a dangling pointer, make sure you've not
@@ -79,12 +79,12 @@ void MenuBarModel::removeListener (MenuBarModelListener* const listenerToRemove)
 //==============================================================================
 void MenuBarModel::handleAsyncUpdate()
 {
-    listeners.call (&MenuBarModelListener::menuBarItemsChanged, this);
+    listeners.call (&Listener::menuBarItemsChanged, this);
 }
 
 void MenuBarModel::applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info)
 {
-    listeners.call (&MenuBarModelListener::menuCommandInvoked, this, info);
+    listeners.call (&Listener::menuCommandInvoked, this, info);
 }
 
 void MenuBarModel::applicationCommandListChanged()

@@ -491,7 +491,6 @@
               <File RelativePath="..\..\src\gui\components\controls\juce_ProgressBar.h"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_Slider.cpp"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_Slider.h"/>
-              <File RelativePath="..\..\src\gui\components\controls\juce_SliderListener.h"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_TableHeaderComponent.cpp"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_TableHeaderComponent.h"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_TableListBox.cpp"/>

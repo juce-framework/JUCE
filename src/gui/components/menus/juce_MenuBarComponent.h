@@ -36,7 +36,7 @@
     @see MenuBarModel
 */
 class JUCE_API  MenuBarComponent  : public Component,
-                                    private MenuBarModelListener,
+                                    private MenuBarModel::Listener,
                                     private Timer
 {
 public:

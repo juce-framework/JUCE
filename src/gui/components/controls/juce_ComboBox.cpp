@@ -623,12 +623,12 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 }
 
 //==============================================================================
-void ComboBox::addListener (ComboBoxListener* const listener) throw()
+void ComboBox::addListener (Listener* const listener) throw()
 {
     listeners.add (listener);
 }
 
-void ComboBox::removeListener (ComboBoxListener* const listener) throw()
+void ComboBox::removeListener (Listener* const listener) throw()
 {
     listeners.remove (listener);
 }
@@ -636,7 +636,7 @@ void ComboBox::removeListener (ComboBoxListener* const listener) throw()
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBoxListener::comboBoxChanged, this);
+    listeners.callChecked (checker, &Listener::comboBoxChanged, this);
 }
 
 

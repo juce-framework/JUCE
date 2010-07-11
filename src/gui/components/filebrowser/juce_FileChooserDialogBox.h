@@ -66,7 +66,7 @@
     @see FileChooser
 */
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
-                                       public ButtonListener,
+                                       public Button::Listener,
                                        public FileBrowserListener
 {
 public:

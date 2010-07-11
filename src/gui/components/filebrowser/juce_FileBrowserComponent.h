@@ -48,9 +48,9 @@
 class JUCE_API  FileBrowserComponent  : public Component,
                                         public ChangeBroadcaster,
                                         private FileBrowserListener,
-                                        private TextEditorListener,
-                                        private ButtonListener,
-                                        private ComboBoxListener,
+                                        private TextEditor::Listener,
+                                        private Button::Listener,
+                                        private ComboBox::Listener,
                                         private FileFilter
 {
 public:

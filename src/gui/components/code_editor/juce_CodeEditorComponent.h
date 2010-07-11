@@ -43,7 +43,7 @@
 class JUCE_API  CodeEditorComponent   : public Component,
                                         public TextInputTarget,
                                         public Timer,
-                                        public ScrollBarListener,
+                                        public ScrollBar::Listener,
                                         public CodeDocument::Listener,
                                         public AsyncUpdater
 {

@@ -326,9 +326,6 @@
 #ifndef __JUCE_SLIDER_JUCEHEADER__
  #include "gui/components/controls/juce_Slider.h"
 #endif
-#ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
- #include "gui/components/controls/juce_SliderListener.h"
-#endif
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
  #include "gui/components/controls/juce_TableHeaderComponent.h"
 #endif

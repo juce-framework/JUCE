@@ -172,7 +172,7 @@ private:
 };
 
 //==============================================================================
-class MissingItemsComponent  : public PopupMenuCustomComponent
+class Toolbar::MissingItemsComponent  : public PopupMenuCustomComponent
 {
 public:
     MissingItemsComponent (Toolbar& owner_, const int height_)
@@ -782,8 +782,8 @@ private:
     Toolbar* const toolbar;
 
     class CustomiserPanel  : public Component,
-                             private ComboBoxListener,
-                             private ButtonListener
+                             private ComboBox::Listener,
+                             private Button::Listener
     {
     public:
         CustomiserPanel (ToolbarItemFactory& factory_,

@@ -607,7 +607,6 @@
 		1DB68310EA4D6180FF948AA0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ProgressBar.h; path = ../../src/gui/components/controls/juce_ProgressBar.h; sourceTree = SOURCE_ROOT; };
 		3CE16163A43A6E67428385EE = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Slider.cpp; path = ../../src/gui/components/controls/juce_Slider.cpp; sourceTree = SOURCE_ROOT; };
 		E698677EEC8E88CAFF542764 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Slider.h; path = ../../src/gui/components/controls/juce_Slider.h; sourceTree = SOURCE_ROOT; };
-		BBF1D5E94840603712BDB13D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_SliderListener.h; path = ../../src/gui/components/controls/juce_SliderListener.h; sourceTree = SOURCE_ROOT; };
 		6BB68B37C7B0BB4DA8326647 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_TableHeaderComponent.cpp; path = ../../src/gui/components/controls/juce_TableHeaderComponent.cpp; sourceTree = SOURCE_ROOT; };
 		1EA844F7CC5377A14B0FD21C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_TableHeaderComponent.h; path = ../../src/gui/components/controls/juce_TableHeaderComponent.h; sourceTree = SOURCE_ROOT; };
 		76E073B2A3F59A3ACD20CC87 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_TableListBox.cpp; path = ../../src/gui/components/controls/juce_TableListBox.cpp; sourceTree = SOURCE_ROOT; };
@@ -1319,7 +1318,6 @@
 				1DB68310EA4D6180FF948AA0,
 				3CE16163A43A6E67428385EE,
 				E698677EEC8E88CAFF542764,
-				BBF1D5E94840603712BDB13D,
 				6BB68B37C7B0BB4DA8326647,
 				1EA844F7CC5377A14B0FD21C,
 				76E073B2A3F59A3ACD20CC87,

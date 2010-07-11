@@ -43,7 +43,7 @@
 class JUCE_API  FileSearchPathListComponent  : public Component,
                                                public SettableTooltipClient,
                                                public FileDragAndDropTarget,
-                                               private ButtonListener,
+                                               private Button::Listener,
                                                private ListBoxModel
 {
 public:

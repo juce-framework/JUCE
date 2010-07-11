@@ -619,8 +619,6 @@
                   file="src/gui/components/controls/juce_Slider.cpp"/>
             <FILE id="dvlZ7M2B1" name="juce_Slider.h" compile="0" resource="0"
                   file="src/gui/components/controls/juce_Slider.h"/>
-            <FILE id="HpGigit7h" name="juce_SliderListener.h" compile="0" resource="0"
-                  file="src/gui/components/controls/juce_SliderListener.h"/>
             <FILE id="dkEQwSTAl" name="juce_TableHeaderComponent.cpp" compile="1"
                   resource="0" file="src/gui/components/controls/juce_TableHeaderComponent.cpp"/>
             <FILE id="EJ1tYAzIS" name="juce_TableHeaderComponent.h" compile="0"

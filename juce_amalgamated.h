@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	41
+#define JUCE_BUILDNUMBER	42
 
 /** Current Juce version number.
 
@@ -34208,26 +34208,6 @@ private:
 #endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
 /*** End of inlined file: juce_TooltipWindow.h ***/
 
-class Button;
-
-/**
-	Used to receive callbacks when a button is clicked.
-
-	@see Button::addButtonListener, Button::removeButtonListener
-*/
-class JUCE_API  ButtonListener
-{
-public:
-	/** Destructor. */
-	virtual ~ButtonListener()				   {}
-
-	/** Called when the button is clicked. */
-	virtual void buttonClicked (Button* button) = 0;
-
-	/** Called when the button's state changes. */
-	virtual void buttonStateChanged (Button*)		   {}
-};
-
 /**
 	A base class for buttons.
 
@@ -34358,19 +34338,37 @@ public:
 	*/
 	int getRadioGroupId() const throw()			 { return radioGroupId; }
 
+	/**
+		Used to receive callbacks when a button is clicked.
+
+		@see Button::addButtonListener, Button::removeButtonListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener()					 {}
+
+		/** Called when the button is clicked. */
+		virtual void buttonClicked (Button* button) = 0;
+
+		/** Called when the button's state changes. */
+		virtual void buttonStateChanged (Button*)		   {}
+	};
+
 	/** Registers a listener to receive events when this button's state changes.
 
 		If the listener is already registered, this will not register it again.
 
 		@see removeButtonListener
 	*/
-	void addButtonListener (ButtonListener* newListener);
+	void addButtonListener (Listener* newListener);
 
 	/** Removes a previously-registered button listener
 
 		@see addButtonListener
 	*/
-	void removeButtonListener (ButtonListener* listener);
+	void removeButtonListener (Listener* listener);
 
 	/** Causes the button to act as if it's been clicked.
 
@@ -34625,7 +34623,7 @@ private:
 	Array <KeyPress> shortcuts;
 	Component::SafePointer<Component> keySource;
 	String text;
-	ListenerList <ButtonListener> buttonListeners;
+	ListenerList <Listener> buttonListeners;
 
 	class RepeatTimer;
 	friend class RepeatTimer;
@@ -34661,33 +34659,11 @@ private:
 	Button& operator= (const Button&);
 };
 
+/** This typedef is just for compatibility with old code - newer code should use Button::Listener instead. */
+typedef Button::Listener ButtonListener;
+
 #endif   // __JUCE_BUTTON_JUCEHEADER__
 /*** End of inlined file: juce_Button.h ***/
-
-class ScrollBar;
-
-/**
-	A class for receiving events from a ScrollBar.
-
-	You can register a ScrollBarListener with a ScrollBar using the ScrollBar::addListener()
-	method, and it will be called when the bar's position changes.
-
-	@see ScrollBar::addListener, ScrollBar::removeListener
-*/
-class JUCE_API  ScrollBarListener
-{
-public:
-	/** Destructor. */
-	virtual ~ScrollBarListener() {}
-
-	/** Called when a ScrollBar is moved.
-
-		@param scrollBarThatHasMoved	the bar that has moved
-		@param newRangeStart		the new range start of this bar
-	*/
-	virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
-								 double newRangeStart) = 0;
-};
 
 /**
 	A scrollbar component.
@@ -34696,7 +34672,7 @@ public:
 	sets the range of values it can represent. Then you can use setCurrentRange() to
 	change the position and size of the scrollbar's 'thumb'.
 
-	Registering a ScrollBarListener with the scrollbar will allow you to find out when
+	Registering a ScrollBar::Listener with the scrollbar will allow you to find out when
 	the user moves it, and you can use the getCurrentRangeStart() to find out where
 	they moved it to.
 
@@ -34706,7 +34682,7 @@ public:
 	For most purposes, it's probably easier to use a ViewportContainer or ListBox
 	instead of handling a scrollbar directly.
 
-	@see ScrollBarListener
+	@see ScrollBar::Listener
 */
 class JUCE_API  ScrollBar  : public Component,
 							 public AsyncUpdater,
@@ -34793,7 +34769,7 @@ public:
 	/** Changes the position of the scrollbar's 'thumb'.
 
 		If this method call actually changes the scrollbar's position, it will trigger an
-		asynchronous call to ScrollBarListener::scrollBarMoved() for all the listeners that
+		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
 		are registered.
 
 		@see getCurrentRange. setCurrentRangeStart
@@ -34806,7 +34782,7 @@ public:
 		changing the size, you can use setCurrentRangeStart().
 
 		If this method call actually changes the scrollbar's position, it will trigger an
-		asynchronous call to ScrollBarListener::scrollBarMoved() for all the listeners that
+		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
 		are registered.
 
 		@param newStart	 the top (or left) of the thumb, in the range
@@ -34825,7 +34801,7 @@ public:
 		that the maximum thumb start position is (getMaximumRangeLimit() - getCurrentRangeSize()).
 
 		If this method call actually changes the scrollbar's position, it will trigger an
-		asynchronous call to ScrollBarListener::scrollBarMoved() for all the listeners that
+		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
 		are registered.
 
 		@see setCurrentRange
@@ -34911,11 +34887,34 @@ public:
 		trackColourId		   = 0x1000401	 /**< A base colour to use for the slot area of the bar. The look and feel will probably use variations on this colour. */
 	};
 
+	/**
+		A class for receiving events from a ScrollBar.
+
+		You can register a ScrollBar::Listener with a ScrollBar using the ScrollBar::addListener()
+		method, and it will be called when the bar's position changes.
+
+		@see ScrollBar::addListener, ScrollBar::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when a ScrollBar is moved.
+
+			@param scrollBarThatHasMoved	the bar that has moved
+			@param newRangeStart		the new range start of this bar
+		*/
+		virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
+									 double newRangeStart) = 0;
+	};
+
 	/** Registers a listener that will be called when the scrollbar is moved. */
-	void addListener (ScrollBarListener* listener);
+	void addListener (Listener* listener);
 
 	/** Deregisters a previously-registered listener. */
-	void removeListener (ScrollBarListener* listener);
+	void removeListener (Listener* listener);
 
 	/** @internal */
 	bool keyPressed (const KeyPress& key);
@@ -34949,7 +34948,7 @@ private:
 	class ScrollbarButton;
 	friend class ScopedPointer<ScrollbarButton>;
 	ScopedPointer<ScrollbarButton> upButton, downButton;
-	ListenerList <ScrollBarListener> listeners;
+	ListenerList <Listener> listeners;
 
 	void updateThumbPosition();
 	void timerCallback();
@@ -34957,6 +34956,9 @@ private:
 	ScrollBar (const ScrollBar&);
 	ScrollBar& operator= (const ScrollBar&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
+typedef ScrollBar::Listener ScrollBarListener;
 
 #endif   // __JUCE_SCROLLBAR_JUCEHEADER__
 /*** End of inlined file: juce_ScrollBar.h ***/
@@ -34975,7 +34977,7 @@ private:
 */
 class JUCE_API  Viewport  : public Component,
 							private ComponentListener,
-							private ScrollBarListener
+							private ScrollBar::Listener
 {
 public:
 
@@ -35623,39 +35625,13 @@ public:
 #endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 /*** End of inlined file: juce_TextInputTarget.h ***/
 
-class TextEditor;
-
-/**
-	Receives callbacks from a TextEditor component when it changes.
-
-	@see TextEditor::addListener
-*/
-class JUCE_API  TextEditorListener
-{
-public:
-	/** Destructor. */
-	virtual ~TextEditorListener()  {}
-
-	/** Called when the user changes the text in some way. */
-	virtual void textEditorTextChanged (TextEditor& editor) = 0;
-
-	/** Called when the user presses the return key. */
-	virtual void textEditorReturnKeyPressed (TextEditor& editor) = 0;
-
-	/** Called when the user presses the escape key. */
-	virtual void textEditorEscapeKeyPressed (TextEditor& editor) = 0;
-
-	/** Called when the text editor loses focus. */
-	virtual void textEditorFocusLost (TextEditor& editor) = 0;
-};
-
 /**
 	A component containing text that can be edited.
 
 	A TextEditor can either be in single- or multi-line mode, and supports mixed
 	fonts and colours.
 
-	@see TextEditorListener, Label
+	@see TextEditor::Listener, Label
 */
 class JUCE_API  TextEditor  : public Component,
 							  public TextInputTarget,
@@ -35699,7 +35675,7 @@ public:
 	/** Changes the behaviour of the return key.
 
 		If set to true, the return key will insert a new-line into the text; if false
-		it will trigger a call to the TextEditorListener::textEditorReturnKeyPressed()
+		it will trigger a call to the TextEditor::Listener::textEditorReturnKeyPressed()
 		method. By default this is set to false, and when true it will only insert
 		new-lines when in multi-line mode (see setMultiLine()).
 	*/
@@ -35899,17 +35875,41 @@ public:
 	*/
 	void setScrollBarButtonVisibility (bool buttonsVisible);
 
+	/**
+		Receives callbacks from a TextEditor component when it changes.
+
+		@see TextEditor::addListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener()  {}
+
+		/** Called when the user changes the text in some way. */
+		virtual void textEditorTextChanged (TextEditor& editor) = 0;
+
+		/** Called when the user presses the return key. */
+		virtual void textEditorReturnKeyPressed (TextEditor& editor) = 0;
+
+		/** Called when the user presses the escape key. */
+		virtual void textEditorEscapeKeyPressed (TextEditor& editor) = 0;
+
+		/** Called when the text editor loses focus. */
+		virtual void textEditorFocusLost (TextEditor& editor) = 0;
+	};
+
 	/** Registers a listener to be told when things happen to the text.
 
 		@see removeListener
 	*/
-	void addListener (TextEditorListener* newListener);
+	void addListener (Listener* newListener);
 
 	/** Deregisters a listener.
 
 		@see addListener
 	*/
-	void removeListener (TextEditorListener* listenerToRemove);
+	void removeListener (Listener* listenerToRemove);
 
 	/** Returns the entire contents of the editor. */
 	const String getText() const;
@@ -36227,7 +36227,7 @@ private:
 	} dragType;
 
 	String allowedCharacters;
-	ListenerList <TextEditorListener> listeners;
+	ListenerList <Listener> listeners;
 
 	void coalesceSimilarSections();
 	void splitSection (int sectionIndex, int charToSplitAt);
@@ -36257,31 +36257,11 @@ private:
 	TextEditor& operator= (const TextEditor&);
 };
 
+/** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
+typedef TextEditor::Listener TextEditorListener;
+
 #endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
 /*** End of inlined file: juce_TextEditor.h ***/
-
-class Label;
-
-/**
-	A class for receiving events from a Label.
-
-	You can register a LabelListener with a Label using the Label::addListener()
-	method, and it will be called when the text of the label changes, either because
-	of a call to Label::setText() or by the user editing the text (if the label is
-	editable).
-
-	@see Label::addListener, Label::removeListener
-*/
-class JUCE_API  LabelListener
-{
-public:
-	/** Destructor. */
-	virtual ~LabelListener() {}
-
-	/** Called when a Label's text has changed.
-	*/
-	virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
-};
 
 /**
 	A component that displays a text string, and can optionally become a text
@@ -36289,7 +36269,7 @@ public:
 */
 class JUCE_API  Label  : public Component,
 						 public SettableTooltipClient,
-						 protected TextEditorListener,
+						 protected TextEditor::Listener,
 						 private ComponentListener,
 						 private Value::Listener
 {
@@ -36309,11 +36289,10 @@ public:
 	/** Changes the label text.
 
 		If broadcastChangeMessage is true and the new text is different to the current
-		text, then the class will broadcast a change message to any LabelListeners that
-		are registered.
+		text, then the class will broadcast a change message to any Label::Listener objects
+		that are registered.
 	*/
-	void setText (const String& newText,
-				  bool broadcastChangeMessage);
+	void setText (const String& newText, bool broadcastChangeMessage);
 
 	/** Returns the label's current text.
 
@@ -36419,11 +36398,32 @@ public:
 
 	float getMinimumHorizontalScale() const throw()				 { return minimumHorizontalScale; }
 
+	/**
+		A class for receiving events from a Label.
+
+		You can register a Label::Listener with a Label using the Label::addListener()
+		method, and it will be called when the text of the label changes, either because
+		of a call to Label::setText() or by the user editing the text (if the label is
+		editable).
+
+		@see Label::addListener, Label::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when a Label's text has changed.
+		*/
+		virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
+	};
+
 	/** Registers a listener that will be called when the label's text changes. */
-	void addListener (LabelListener* listener) throw();
+	void addListener (Listener* listener) throw();
 
 	/** Deregisters a previously-registered listener. */
-	void removeListener (LabelListener* listener) throw();
+	void removeListener (Listener* listener) throw();
 
 	/** Makes the label turn into a TextEditor when clicked.
 
@@ -36484,26 +36484,20 @@ public:
 
 protected:
 	/** Creates the TextEditor component that will be used when the user has clicked on the label.
-
 		Subclasses can override this if they need to customise this component in some way.
 	*/
 	virtual TextEditor* createEditorComponent();
 
-	/** Called after the user changes the text.
-	*/
+	/** Called after the user changes the text. */
 	virtual void textWasEdited();
 
-	/** Called when the text has been altered.
-	*/
+	/** Called when the text has been altered. */
 	virtual void textWasChanged();
 
-	/** Called when the text editor has just appeared, due to a user click or other
-		focus change.
-	*/
+	/** Called when the text editor has just appeared, due to a user click or other focus change. */
 	virtual void editorShown (TextEditor* editorComponent);
 
-	/** Called when the text editor is going to be deleted, after editing has finished.
-	*/
+	/** Called when the text editor is going to be deleted, after editing has finished. */
 	virtual void editorAboutToBeHidden (TextEditor* editorComponent);
 
 	/** @internal */
@@ -36547,7 +36541,7 @@ private:
 	Font font;
 	Justification justification;
 	ScopedPointer <TextEditor> editor;
-	ListenerList <LabelListener> listeners;
+	ListenerList <Listener> listeners;
 	Component::SafePointer<Component> ownerComponent;
 	int horizontalBorderSize, verticalBorderSize;
 	float minimumHorizontalScale;
@@ -36563,29 +36557,11 @@ private:
 	Label& operator= (const Label&);
 };
 
+/** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
+typedef Label::Listener LabelListener;
+
 #endif   // __JUCE_LABEL_JUCEHEADER__
 /*** End of inlined file: juce_Label.h ***/
-
-class ComboBox;
-
-/**
-	A class for receiving events from a ComboBox.
-
-	You can register a ComboBoxListener with a ComboBox using the ComboBox::addListener()
-	method, and it will be called when the selected item in the box changes.
-
-	@see ComboBox::addListener, ComboBox::removeListener
-*/
-class JUCE_API  ComboBoxListener
-{
-public:
-	/** Destructor. */
-	virtual ~ComboBoxListener() {}
-
-	/** Called when a ComboBox has its selected item changed.
-	*/
-	virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
-};
 
 /**
 	A component that lets the user choose from a drop-down list of choices.
@@ -36597,14 +36573,14 @@ public:
 	either be read-only text, or editable.
 
 	To find out when the user selects a different item or edits the text, you
-	can register a ComboBoxListener to receive callbacks.
+	can register a ComboBox::Listener to receive callbacks.
 
-	@see ComboBoxListener
+	@see ComboBox::Listener
 */
 class JUCE_API  ComboBox  : public Component,
 							public SettableTooltipClient,
-							private LabelListener,
 							private AsyncUpdater,
+							private Label::Listener,
 							private Value::Listener
 {
 public:
@@ -36813,11 +36789,29 @@ public:
 	/** Pops up the combo box's list. */
 	void showPopup();
 
+	/**
+		A class for receiving events from a ComboBox.
+
+		You can register a ComboBox::Listener with a ComboBox using the ComboBox::addListener()
+		method, and it will be called when the selected item in the box changes.
+
+		@see ComboBox::addListener, ComboBox::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when a ComboBox has its selected item changed. */
+		virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
+	};
+
 	/** Registers a listener that will be called when the box's content changes. */
-	void addListener (ComboBoxListener* listener) throw();
+	void addListener (Listener* listener) throw();
 
 	/** Deregisters a previously-registered listener. */
-	void removeListener (ComboBoxListener* listener) throw();
+	void removeListener (Listener* listener) throw();
 
 	/** Sets a message to display when there is no item currently selected.
 
@@ -36918,7 +36912,7 @@ private:
 	Value currentId;
 	int lastCurrentId;
 	bool isButtonDown, separatorPending, menuActive, textIsCustom;
-	ListenerList <ComboBoxListener> listeners;
+	ListenerList <Listener> listeners;
 	ScopedPointer<Label> label;
 	String textWhenNothingSelected, noChoicesMessage;
 
@@ -36928,6 +36922,9 @@ private:
 	ComboBox (const ComboBox&);
 	ComboBox& operator= (const ComboBox&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
+typedef ComboBox::Listener ComboBoxListener;
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__
 /*** End of inlined file: juce_ComboBox.h ***/
@@ -40466,7 +40463,7 @@ private:
 class JUCE_API  PluginListComponent   : public Component,
 										public ListBoxModel,
 										public ChangeListener,
-										public ButtonListener,
+										public Button::Listener,
 										public Timer
 {
 public:
@@ -44528,7 +44525,6 @@ private:
 
 class ToolbarItemComponent;
 class ToolbarItemFactory;
-class MissingItemsComponent;
 
 /**
 	A toolbar component.
@@ -44549,7 +44545,7 @@ class MissingItemsComponent;
 class JUCE_API  Toolbar   : public Component,
 							public DragAndDropContainer,
 							public DragAndDropTarget,
-							private ButtonListener
+							private Button::Listener
 {
 public:
 
@@ -44787,6 +44783,7 @@ private:
 	bool vertical, isEditingActive;
 	ToolbarItemStyle toolbarStyle;
 	ComponentAnimator animator;
+	class MissingItemsComponent;
 	friend class MissingItemsComponent;
 	Array <ToolbarItemComponent*> items;
 
@@ -45468,7 +45465,7 @@ public:
 class JUCE_API  CodeEditorComponent   : public Component,
 										public TextInputTarget,
 										public Timer,
-										public ScrollBarListener,
+										public ScrollBar::Listener,
 										public CodeDocument::Listener,
 										public AsyncUpdater
 {
@@ -45894,59 +45891,6 @@ private:
 #ifndef __JUCE_SLIDER_JUCEHEADER__
 #define __JUCE_SLIDER_JUCEHEADER__
 
-
-/*** Start of inlined file: juce_SliderListener.h ***/
-#ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
-#define __JUCE_SLIDERLISTENER_JUCEHEADER__
-
-class Slider;
-
-/**
-	A class for receiving callbacks from a Slider.
-
-	To be told when a slider's value changes, you can register a SliderListener
-	object using Slider::addListener().
-
-	@see Slider::addListener, Slider::removeListener
-*/
-class JUCE_API  SliderListener
-{
-public:
-
-	/** Destructor. */
-	virtual ~SliderListener() {}
-
-	/** Called when the slider's value is changed.
-
-		This may be caused by dragging it, or by typing in its text entry box,
-		or by a call to Slider::setValue().
-
-		You can find out the new value using Slider::getValue().
-
-		@see Slider::valueChanged
-	*/
-	virtual void sliderValueChanged (Slider* slider) = 0;
-
-	/** Called when the slider is about to be dragged.
-
-		This is called when a drag begins, then it's followed by multiple calls
-		to sliderValueChanged(), and then sliderDragEnded() is called after the
-		user lets go.
-
-		@see sliderDragEnded, Slider::startedDragging
-	*/
-	virtual void sliderDragStarted (Slider* slider);
-
-	/** Called after a drag operation has finished.
-
-		@see sliderDragStarted, Slider::stoppedDragging
-	*/
-	virtual void sliderDragEnded (Slider* slider);
-};
-
-#endif   // __JUCE_SLIDERLISTENER_JUCEHEADER__
-/*** End of inlined file: juce_SliderListener.h ***/
-
 /**
 	A slider control for changing a value.
 
@@ -45962,16 +45906,16 @@ public:
 	some of the virtual methods, such as changing the scaling, changing the format of
 	the text display, custom ways of limiting the values, etc.
 
-	You can register SliderListeners with a slider, which will be informed when the value
-	changes, or a subclass can override valueChanged() to be informed synchronously.
+	You can register Slider::Listener objects with a slider, and they'll be called when
+	the value changes.
 
-	@see SliderListener
+	@see Slider::Listener
 */
 class JUCE_API  Slider  : public Component,
 						  public SettableTooltipClient,
 						  private AsyncUpdater,
-						  private ButtonListener,
-						  private LabelListener,
+						  private Button::Listener,
+						  private Label::Listener,
 						  private Value::Listener
 {
 public:
@@ -46238,7 +46182,7 @@ public:
 
 	/** Changes the slider's current value.
 
-		This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
+		This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
 		that are registered, and will synchronously call the valueChanged() method in case subclasses
 		want to handle it.
 
@@ -46246,8 +46190,8 @@ public:
 										minimum and maximum range, and will be snapped to the
 										nearest interval if one has been set
 		@param sendUpdateMessage	if false, a change to the value will not trigger a call to
-										any SliderListeners or the valueChanged() method
-		@param sendMessageSynchronously if true, then a call to the SliderListeners will be made
+										any Slider::Listeners or the valueChanged() method
+		@param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
 										synchronously; if false, it will be asynchronous
 	*/
 	void setValue (double newValue,
@@ -46311,7 +46255,7 @@ public:
 
 	/** For a slider with two or three thumbs, this sets the lower of its values.
 
-		This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
+		This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
 		that are registered, and will synchronously call the valueChanged() method in case subclasses
 		want to handle it.
 
@@ -46319,8 +46263,8 @@ public:
 										minimum and maximum range, and will be snapped to the nearest
 										interval if one has been set.
 		@param sendUpdateMessage	if false, a change to the value will not trigger a call to
-										any SliderListeners or the valueChanged() method
-		@param sendMessageSynchronously if true, then a call to the SliderListeners will be made
+										any Slider::Listeners or the valueChanged() method
+		@param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
 										synchronously; if false, it will be asynchronous
 		@param allowNudgingOfOtherValues  if false, this value will be restricted to being below the
 										max value (in a two-value slider) or the mid value (in a three-value
@@ -46353,7 +46297,7 @@ public:
 
 	/** For a slider with two or three thumbs, this sets the lower of its values.
 
-		This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
+		This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
 		that are registered, and will synchronously call the valueChanged() method in case subclasses
 		want to handle it.
 
@@ -46361,8 +46305,8 @@ public:
 										minimum and maximum range, and will be snapped to the nearest
 										interval if one has been set.
 		@param sendUpdateMessage	if false, a change to the value will not trigger a call to
-										any SliderListeners or the valueChanged() method
-		@param sendMessageSynchronously if true, then a call to the SliderListeners will be made
+										any Slider::Listeners or the valueChanged() method
+		@param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
 										synchronously; if false, it will be asynchronous
 		@param allowNudgingOfOtherValues  if false, this value will be restricted to being above the
 										min value (in a two-value slider) or the mid value (in a three-value
@@ -46375,11 +46319,53 @@ public:
 					  bool sendMessageSynchronously = false,
 					  bool allowNudgingOfOtherValues = false);
 
+	/** A class for receiving callbacks from a Slider.
+
+		To be told when a slider's value changes, you can register a Slider::Listener
+		object using Slider::addListener().
+
+		@see Slider::addListener, Slider::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when the slider's value is changed.
+
+			This may be caused by dragging it, or by typing in its text entry box,
+			or by a call to Slider::setValue().
+
+			You can find out the new value using Slider::getValue().
+
+			@see Slider::valueChanged
+		*/
+		virtual void sliderValueChanged (Slider* slider) = 0;
+
+		/** Called when the slider is about to be dragged.
+
+			This is called when a drag begins, then it's followed by multiple calls
+			to sliderValueChanged(), and then sliderDragEnded() is called after the
+			user lets go.
+
+			@see sliderDragEnded, Slider::startedDragging
+		*/
+		virtual void sliderDragStarted (Slider* slider);
+
+		/** Called after a drag operation has finished.
+
+			@see sliderDragStarted, Slider::stoppedDragging
+		*/
+		virtual void sliderDragEnded (Slider* slider);
+	};
+
 	/** Adds a listener to be called when this slider's value changes. */
-	void addListener (SliderListener* listener);
+	void addListener (Listener* listener);
 
 	/** Removes a previously-registered listener. */
-	void removeListener (SliderListener* listener);
+	void removeListener (Listener* listener);
 
 	/** This lets you choose whether double-clicking moves the slider to a given position.
 
@@ -46462,19 +46448,19 @@ public:
 
 	/** Callback to indicate that the user is about to start dragging the slider.
 
-		@see SliderListener::sliderDragStarted
+		@see Slider::Listener::sliderDragStarted
 	*/
 	virtual void startedDragging();
 
 	/** Callback to indicate that the user has just stopped dragging the slider.
 
-		@see SliderListener::sliderDragEnded
+		@see Slider::Listener::sliderDragEnded
 	*/
 	virtual void stoppedDragging();
 
 	/** Callback to indicate that the user has just moved the slider.
 
-		@see SliderListener::sliderValueChanged
+		@see Slider::Listener::sliderValueChanged
 	*/
 	virtual void valueChanged();
 
@@ -46640,7 +46626,7 @@ protected:
 	int getNumDecimalPlacesToDisplay() const throw()	{ return numDecimalPlaces; }
 
 private:
-	ListenerList <SliderListener> listeners;
+	ListenerList <Listener> listeners;
 	Value currentValue, valueMin, valueMax;
 	double lastCurrentValue, lastValueMin, lastValueMax;
 	double minimum, maximum, interval, doubleClickReturnValue;
@@ -46684,12 +46670,12 @@ private:
 	Slider& operator= (const Slider&);
 };
 
+/** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
+typedef Slider::Listener SliderListener;
+
 #endif   // __JUCE_SLIDER_JUCEHEADER__
 /*** End of inlined file: juce_Slider.h ***/
 
-
-#endif
-#ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
@@ -46697,47 +46683,6 @@ private:
 /*** Start of inlined file: juce_TableHeaderComponent.h ***/
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 #define __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
-
-class TableHeaderComponent;
-
-/**
-	Receives events from a TableHeaderComponent when columns are resized, moved, etc.
-
-	You can register one of these objects for table events using TableHeaderComponent::addListener()
-	and TableHeaderComponent::removeListener().
-
-	@see TableHeaderComponent
-*/
-class JUCE_API  TableHeaderListener
-{
-public:
-
-	TableHeaderListener() {}
-
-	/** Destructor. */
-	virtual ~TableHeaderListener() {}
-
-	/** This is called when some of the table's columns are added, removed, hidden,
-		or rearranged.
-	*/
-	virtual void tableColumnsChanged (TableHeaderComponent* tableHeader) = 0;
-
-	/** This is called when one or more of the table's columns are resized.
-	*/
-	virtual void tableColumnsResized (TableHeaderComponent* tableHeader) = 0;
-
-	/** This is called when the column by which the table should be sorted is changed.
-	*/
-	virtual void tableSortOrderChanged (TableHeaderComponent* tableHeader) = 0;
-
-	/** This is called when the user begins or ends dragging one of the columns around.
-
-		When the user starts dragging a column, this is called with the ID of that
-		column. When they finish dragging, it is called again with 0 as the ID.
-	*/
-	virtual void tableColumnDraggingChanged (TableHeaderComponent* tableHeader,
-											 int columnIdNowBeingDragged);
-};
 
 /**
 	A component that displays a strip of column headings for a table, and allows these
@@ -46750,7 +46695,7 @@ public:
 	To use one of these, create it and use addColumn() to add all the columns that you need.
 	Each column must be given a unique ID number that's used to refer to it.
 
-	@see TableListBox, TableHeaderListener
+	@see TableListBox, TableHeaderComponent::Listener
 */
 class JUCE_API  TableHeaderComponent   : public Component,
 										 private AsyncUpdater
@@ -46999,11 +46944,50 @@ public:
 	*/
 	void restoreFromString (const String& storedVersion);
 
+	/**
+		Receives events from a TableHeaderComponent when columns are resized, moved, etc.
+
+		You can register one of these objects for table events using TableHeaderComponent::addListener()
+		and TableHeaderComponent::removeListener().
+
+		@see TableHeaderComponent
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+
+		Listener() {}
+
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** This is called when some of the table's columns are added, removed, hidden,
+			or rearranged.
+		*/
+		virtual void tableColumnsChanged (TableHeaderComponent* tableHeader) = 0;
+
+		/** This is called when one or more of the table's columns are resized.
+		*/
+		virtual void tableColumnsResized (TableHeaderComponent* tableHeader) = 0;
+
+		/** This is called when the column by which the table should be sorted is changed.
+		*/
+		virtual void tableSortOrderChanged (TableHeaderComponent* tableHeader) = 0;
+
+		/** This is called when the user begins or ends dragging one of the columns around.
+
+			When the user starts dragging a column, this is called with the ID of that
+			column. When they finish dragging, it is called again with 0 as the ID.
+		*/
+		virtual void tableColumnDraggingChanged (TableHeaderComponent* tableHeader,
+												 int columnIdNowBeingDragged);
+	};
+
 	/** Adds a listener to be informed about things that happen to the header. */
-	void addListener (TableHeaderListener* newListener);
+	void addListener (Listener* newListener);
 
 	/** Removes a previously-registered listener. */
-	void removeListener (TableHeaderListener* listenerToRemove);
+	void removeListener (Listener* listenerToRemove);
 
 	/** This can be overridden to handle a mouse-click on one of the column headers.
 
@@ -47069,7 +47053,7 @@ private:
 	};
 
 	OwnedArray <ColumnInfo> columns;
-	Array <TableHeaderListener*> listeners;
+	Array <Listener*> listeners;
 	ScopedPointer <Component> dragOverlayComp;
 
 	bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
@@ -47089,6 +47073,9 @@ private:
 	TableHeaderComponent (const TableHeaderComponent&);
 	TableHeaderComponent operator= (const TableHeaderComponent&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
+typedef TableHeaderComponent::Listener TableHeaderListener;
 
 #endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 /*** End of inlined file: juce_TableHeaderComponent.h ***/
@@ -47260,7 +47247,7 @@ public:
 */
 class JUCE_API  TableListBox   : public ListBox,
 								 private ListBoxModel,
-								 private TableHeaderListener
+								 private TableHeaderComponent::Listener
 {
 public:
 
@@ -48778,9 +48765,9 @@ private:
 class JUCE_API  FileBrowserComponent  : public Component,
 										public ChangeBroadcaster,
 										private FileBrowserListener,
-										private TextEditorListener,
-										private ButtonListener,
-										private ComboBoxListener,
+										private TextEditor::Listener,
+										private Button::Listener,
+										private ComboBox::Listener,
 										private FileFilter
 {
 public:
@@ -50450,7 +50437,7 @@ private:
 	@see FileChooser
 */
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
-									   public ButtonListener,
+									   public Button::Listener,
 									   public FileBrowserListener
 {
 public:
@@ -50676,8 +50663,8 @@ class JUCE_API  FilenameComponent  : public Component,
 									 public SettableTooltipClient,
 									 public FileDragAndDropTarget,
 									 private AsyncUpdater,
-									 private ButtonListener,
-									 private ComboBoxListener
+									 private Button::Listener,
+									 private ComboBox::Listener
 {
 public:
 
@@ -50843,7 +50830,7 @@ private:
 class JUCE_API  FileSearchPathListComponent  : public Component,
 											   public SettableTooltipClient,
 											   public FileDragAndDropTarget,
-											   private ButtonListener,
+											   private Button::Listener,
 											   private ListBoxModel
 {
 public:
@@ -51364,7 +51351,7 @@ private:
 class JUCE_API  KeyMappingEditorComponent  : public Component,
 											 public TreeViewItem,
 											 public ChangeListener,
-											 private ButtonListener
+											 private Button::Listener
 {
 public:
 
@@ -51718,7 +51705,7 @@ private:
 */
 class JUCE_API  TabbedButtonBar  : public Component,
 								   public ChangeBroadcaster,
-								   public ButtonListener
+								   public Button::Listener
 {
 public:
 
@@ -52121,37 +52108,13 @@ private:
 #ifndef __JUCE_MENUBARMODEL_JUCEHEADER__
 #define __JUCE_MENUBARMODEL_JUCEHEADER__
 
-class MenuBarModel;
-
-/**
-	A class to receive callbacks when a MenuBarModel changes.
-
-	@see MenuBarModel::addListener, MenuBarModel::removeListener, MenuBarModel::menuItemsChanged
-*/
-class JUCE_API  MenuBarModelListener
-{
-public:
-	/** Destructor. */
-	virtual ~MenuBarModelListener() {}
-
-	/** This callback is made when items are changed in the menu bar model.
-	*/
-	virtual void menuBarItemsChanged (MenuBarModel* menuBarModel) = 0;
-
-	/** This callback is made when an application command is invoked that
-		is represented by one of the items in the menu bar model.
-	*/
-	virtual void menuCommandInvoked (MenuBarModel* menuBarModel,
-									 const ApplicationCommandTarget::InvocationInfo& info) = 0;
-};
-
 /**
 	A class for controlling MenuBar components.
 
 	This class is used to tell a MenuBar what menus to show, and to respond
 	to a menu being selected.
 
-	@see MenuBarModelListener, MenuBarComponent, PopupMenu
+	@see MenuBarModel::Listener, MenuBarComponent, PopupMenu
 */
 class JUCE_API  MenuBarModel	  : private AsyncUpdater,
 									private ApplicationCommandManagerListener
@@ -52185,6 +52148,27 @@ public:
 	*/
 	void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager) throw();
 
+	/** A class to receive callbacks when a MenuBarModel changes.
+
+		@see MenuBarModel::addListener, MenuBarModel::removeListener, MenuBarModel::menuItemsChanged
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** This callback is made when items are changed in the menu bar model.
+		*/
+		virtual void menuBarItemsChanged (MenuBarModel* menuBarModel) = 0;
+
+		/** This callback is made when an application command is invoked that
+			is represented by one of the items in the menu bar model.
+		*/
+		virtual void menuCommandInvoked (MenuBarModel* menuBarModel,
+										 const ApplicationCommandTarget::InvocationInfo& info) = 0;
+	};
+
 	/** Registers a listener for callbacks when the menu items in this model change.
 
 		The listener object will get callbacks when this object's menuItemsChanged()
@@ -52192,13 +52176,13 @@ public:
 
 		@see removeListener
 	*/
-	void addListener (MenuBarModelListener* listenerToAdd) throw();
+	void addListener (Listener* listenerToAdd) throw();
 
 	/** Removes a listener.
 
 		@see addListener
 	*/
-	void removeListener (MenuBarModelListener* listenerToRemove) throw();
+	void removeListener (Listener* listenerToRemove) throw();
 
 	/** This method must return a list of the names of the menus. */
 	virtual const StringArray getMenuBarNames() = 0;
@@ -52257,11 +52241,14 @@ public:
 
 private:
 	ApplicationCommandManager* manager;
-	ListenerList <MenuBarModelListener> listeners;
+	ListenerList <Listener> listeners;
 
 	MenuBarModel (const MenuBarModel&);
 	MenuBarModel& operator= (const MenuBarModel&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
+typedef MenuBarModel::Listener MenuBarModelListener;
 
 #endif   // __JUCE_MENUBARMODEL_JUCEHEADER__
 /*** End of inlined file: juce_MenuBarModel.h ***/
@@ -52272,7 +52259,7 @@ private:
 	@see MenuBarModel
 */
 class JUCE_API  MenuBarComponent  : public Component,
-									private MenuBarModelListener,
+									private MenuBarModel::Listener,
 									private Timer
 {
 public:
@@ -53402,7 +53389,7 @@ private:
 	@see ThreadWithProgressWindow
 */
 class JUCE_API  AlertWindow  : public TopLevelWindow,
-							   private ButtonListener
+							   private Button::Listener
 {
 public:
 
@@ -55317,7 +55304,7 @@ private:
 	@see PropertyComponent
 */
 class JUCE_API  BooleanPropertyComponent  : public PropertyComponent,
-											private ButtonListener
+											private Button::Listener
 {
 protected:
 
@@ -55391,7 +55378,7 @@ private:
 	@see PropertyComponent
 */
 class JUCE_API  ButtonPropertyComponent  : public PropertyComponent,
-										   private ButtonListener
+										   private Button::Listener
 {
 public:
 
@@ -55460,7 +55447,7 @@ private:
 	@see PropertyComponent, PropertyPanel
 */
 class JUCE_API  ChoicePropertyComponent	: public PropertyComponent,
-											 private ComboBoxListener
+											 private ComboBox::Listener
 {
 protected:
 	/** Creates the component.
@@ -55557,7 +55544,7 @@ private:
 	@see PropertyComponent, Slider
 */
 class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
-											private SliderListener
+											private Slider::Listener
 {
 protected:
 
@@ -55830,8 +55817,8 @@ private:
 	@see AudioDeviceManager
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
-												public ComboBoxListener,
-												public ButtonListener,
+												public ComboBox::Listener,
+												public Button::Listener,
 												public ChangeListener
 {
 public:
@@ -56167,7 +56154,7 @@ private:
 */
 class JUCE_API  ColourSelector  : public Component,
 								  public ChangeBroadcaster,
-								  protected SliderListener
+								  protected Slider::Listener
 {
 public:
 
@@ -57204,7 +57191,7 @@ private:
 	for each of these pages.
 */
 class JUCE_API  PreferencesPanel  : public Component,
-									private ButtonListener
+									private Button::Listener
 {
 public:
 
@@ -60297,27 +60284,7 @@ private:
 #if JUCE_USE_CAMERA || DOXYGEN
 
 /**
-	Receives callbacks with images from a CameraDevice.
-
-	@see CameraDevice::addListener
-*/
-class CameraImageListener
-{
-public:
-	CameraImageListener() {}
-	virtual ~CameraImageListener() {}
-
-	/** This method is called when a new image arrives.
-
-		This may be called by any thread, so be careful about thread-safety,
-		and make sure that you process the data as quickly as possible to
-		avoid glitching!
-	*/
-	virtual void imageReceived (const Image& image) = 0;
-};
-
-/**
-	Controls any camera capture devices that might be available.
+	Controls any video capture devices that might be available.
 
 	Use getAvailableDevices() to list the devices that are attached to the
 	system, then call openDevice to open one for use. Once you have a CameraDevice
@@ -60389,16 +60356,36 @@ public:
 	*/
 	const Time getTimeOfFirstRecordedFrame() const;
 
+	/**
+		Receives callbacks with images from a CameraDevice.
+
+		@see CameraDevice::addListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		Listener() {}
+		virtual ~Listener() {}
+
+		/** This method is called when a new image arrives.
+
+			This may be called by any thread, so be careful about thread-safety,
+			and make sure that you process the data as quickly as possible to
+			avoid glitching!
+		*/
+		virtual void imageReceived (const Image& image) = 0;
+	};
+
 	/** Adds a listener to receive images from the camera.
 
 		Be very careful not to delete the listener without first removing it by calling
 		removeListener().
 	*/
-	void addListener (CameraImageListener* listenerToAdd);
+	void addListener (Listener* listenerToAdd);
 
 	/** Removes a listener that was previously added with addListener().
 	*/
-	void removeListener (CameraImageListener* listenerToRemove);
+	void removeListener (Listener* listenerToRemove);
 
 	juce_UseDebuggingNewOperator
 
@@ -60414,6 +60401,9 @@ private:
 	CameraDevice (const CameraDevice&);
 	CameraDevice& operator= (const CameraDevice&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the CameraDevice::Listener class directly. */
+typedef CameraDevice::Listener CameraImageListener;
 
 #endif
 #endif   // __JUCE_CAMERADEVICE_JUCEHEADER__

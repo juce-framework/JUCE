@@ -30,9 +30,9 @@
 
 //==============================================================================
 class CameraDemo  : public Component,
-                    public ComboBoxListener,
-                    public ButtonListener,
-                    public CameraImageListener
+                    public ComboBox::Listener,
+                    public Button::Listener,
+                    public CameraDevice::Listener
 {
 public:
     //==============================================================================

@@ -27,32 +27,6 @@
 #define __JUCE_MENUBARMODEL_JUCEHEADER__
 
 #include "juce_PopupMenu.h"
-class MenuBarModel;
-
-
-//==============================================================================
-/**
-    A class to receive callbacks when a MenuBarModel changes.
-
-    @see MenuBarModel::addListener, MenuBarModel::removeListener, MenuBarModel::menuItemsChanged
-*/
-class JUCE_API  MenuBarModelListener
-{
-public:
-    /** Destructor. */
-    virtual ~MenuBarModelListener() {}
-
-    //==============================================================================
-    /** This callback is made when items are changed in the menu bar model.
-    */
-    virtual void menuBarItemsChanged (MenuBarModel* menuBarModel) = 0;
-
-    /** This callback is made when an application command is invoked that
-        is represented by one of the items in the menu bar model.
-    */
-    virtual void menuCommandInvoked (MenuBarModel* menuBarModel,
-                                     const ApplicationCommandTarget::InvocationInfo& info) = 0;
-};
 
 
 //==============================================================================
@@ -62,7 +36,7 @@ public:
     This class is used to tell a MenuBar what menus to show, and to respond
     to a menu being selected.
 
-    @see MenuBarModelListener, MenuBarComponent, PopupMenu
+    @see MenuBarModel::Listener, MenuBarComponent, PopupMenu
 */
 class JUCE_API  MenuBarModel      : private AsyncUpdater,
                                     private ApplicationCommandManagerListener
@@ -97,6 +71,29 @@ public:
     */
     void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager) throw();
 
+    //==============================================================================
+    /** A class to receive callbacks when a MenuBarModel changes.
+
+        @see MenuBarModel::addListener, MenuBarModel::removeListener, MenuBarModel::menuItemsChanged
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        //==============================================================================
+        /** This callback is made when items are changed in the menu bar model.
+        */
+        virtual void menuBarItemsChanged (MenuBarModel* menuBarModel) = 0;
+
+        /** This callback is made when an application command is invoked that
+            is represented by one of the items in the menu bar model.
+        */
+        virtual void menuCommandInvoked (MenuBarModel* menuBarModel,
+                                         const ApplicationCommandTarget::InvocationInfo& info) = 0;
+    };
+
     /** Registers a listener for callbacks when the menu items in this model change.
 
         The listener object will get callbacks when this object's menuItemsChanged()
@@ -104,13 +101,13 @@ public:
 
         @see removeListener
     */
-    void addListener (MenuBarModelListener* listenerToAdd) throw();
+    void addListener (Listener* listenerToAdd) throw();
 
     /** Removes a listener.
 
         @see addListener
     */
-    void removeListener (MenuBarModelListener* listenerToRemove) throw();
+    void removeListener (Listener* listenerToRemove) throw();
 
     //==============================================================================
     /** This method must return a list of the names of the menus. */
@@ -172,11 +169,14 @@ public:
 
 private:
     ApplicationCommandManager* manager;
-    ListenerList <MenuBarModelListener> listeners;
+    ListenerList <Listener> listeners;
 
     MenuBarModel (const MenuBarModel&);
     MenuBarModel& operator= (const MenuBarModel&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
+typedef MenuBarModel::Listener MenuBarModelListener;
 
 
 #endif   // __JUCE_MENUBARMODEL_JUCEHEADER__

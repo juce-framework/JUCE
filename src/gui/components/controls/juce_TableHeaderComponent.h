@@ -29,50 +29,6 @@
 #include "../menus/juce_PopupMenu.h"
 #include "../../../events/juce_AsyncUpdater.h"
 
-class TableHeaderComponent;
-
-
-//==============================================================================
-/**
-    Receives events from a TableHeaderComponent when columns are resized, moved, etc.
-
-    You can register one of these objects for table events using TableHeaderComponent::addListener()
-    and TableHeaderComponent::removeListener().
-
-    @see TableHeaderComponent
-*/
-class JUCE_API  TableHeaderListener
-{
-public:
-    //==============================================================================
-    TableHeaderListener() {}
-
-    /** Destructor. */
-    virtual ~TableHeaderListener() {}
-
-    //==============================================================================
-    /** This is called when some of the table's columns are added, removed, hidden,
-        or rearranged.
-    */
-    virtual void tableColumnsChanged (TableHeaderComponent* tableHeader) = 0;
-
-    /** This is called when one or more of the table's columns are resized.
-    */
-    virtual void tableColumnsResized (TableHeaderComponent* tableHeader) = 0;
-
-    /** This is called when the column by which the table should be sorted is changed.
-    */
-    virtual void tableSortOrderChanged (TableHeaderComponent* tableHeader) = 0;
-
-    /** This is called when the user begins or ends dragging one of the columns around.
-
-        When the user starts dragging a column, this is called with the ID of that
-        column. When they finish dragging, it is called again with 0 as the ID.
-    */
-    virtual void tableColumnDraggingChanged (TableHeaderComponent* tableHeader,
-                                             int columnIdNowBeingDragged);
-};
-
 
 //==============================================================================
 /**
@@ -86,7 +42,7 @@ public:
     To use one of these, create it and use addColumn() to add all the columns that you need.
     Each column must be given a unique ID number that's used to refer to it.
 
-    @see TableListBox, TableHeaderListener
+    @see TableListBox, TableHeaderComponent::Listener
 */
 class JUCE_API  TableHeaderComponent   : public Component,
                                          private AsyncUpdater
@@ -340,11 +296,51 @@ public:
     void restoreFromString (const String& storedVersion);
 
     //==============================================================================
+    /**
+        Receives events from a TableHeaderComponent when columns are resized, moved, etc.
+
+        You can register one of these objects for table events using TableHeaderComponent::addListener()
+        and TableHeaderComponent::removeListener().
+
+        @see TableHeaderComponent
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        //==============================================================================
+        Listener() {}
+
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        //==============================================================================
+        /** This is called when some of the table's columns are added, removed, hidden,
+            or rearranged.
+        */
+        virtual void tableColumnsChanged (TableHeaderComponent* tableHeader) = 0;
+
+        /** This is called when one or more of the table's columns are resized.
+        */
+        virtual void tableColumnsResized (TableHeaderComponent* tableHeader) = 0;
+
+        /** This is called when the column by which the table should be sorted is changed.
+        */
+        virtual void tableSortOrderChanged (TableHeaderComponent* tableHeader) = 0;
+
+        /** This is called when the user begins or ends dragging one of the columns around.
+
+            When the user starts dragging a column, this is called with the ID of that
+            column. When they finish dragging, it is called again with 0 as the ID.
+        */
+        virtual void tableColumnDraggingChanged (TableHeaderComponent* tableHeader,
+                                                 int columnIdNowBeingDragged);
+    };
+
     /** Adds a listener to be informed about things that happen to the header. */
-    void addListener (TableHeaderListener* newListener);
+    void addListener (Listener* newListener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (TableHeaderListener* listenerToRemove);
+    void removeListener (Listener* listenerToRemove);
 
     //==============================================================================
     /** This can be overridden to handle a mouse-click on one of the column headers.
@@ -412,7 +408,7 @@ private:
     };
 
     OwnedArray <ColumnInfo> columns;
-    Array <TableHeaderListener*> listeners;
+    Array <Listener*> listeners;
     ScopedPointer <Component> dragOverlayComp;
 
     bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
@@ -432,6 +428,9 @@ private:
     TableHeaderComponent (const TableHeaderComponent&);
     TableHeaderComponent operator= (const TableHeaderComponent&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
+typedef TableHeaderComponent::Listener TableHeaderListener;
 
 
 #endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__

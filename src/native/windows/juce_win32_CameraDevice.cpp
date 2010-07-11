@@ -338,7 +338,7 @@ public:
     }
 
     //==============================================================================
-    void addListener (CameraImageListener* listenerToAdd)
+    void addListener (CameraDevice::Listener* listenerToAdd)
     {
         const ScopedLock sl (listenerLock);
 
@@ -348,7 +348,7 @@ public:
         listeners.addIfNotAlreadyThere (listenerToAdd);
     }
 
-    void removeListener (CameraImageListener* listenerToRemove)
+    void removeListener (CameraDevice::Listener* listenerToRemove)
     {
         const ScopedLock sl (listenerLock);
         listeners.removeValue (listenerToRemove);
@@ -363,7 +363,7 @@ public:
 
         for (int i = listeners.size(); --i >= 0;)
         {
-            CameraImageListener* const l = listeners[i];
+            CameraDevice::Listener* const l = listeners[i];
 
             if (l != 0)
                 l->imageReceived (image);
@@ -647,7 +647,7 @@ private:
     };
 
     ComSmartPtr <GrabberCallback> callback;
-    Array <CameraImageListener*> listeners;
+    Array <CameraDevice::Listener*> listeners;
     CriticalSection listenerLock;
 
     //==============================================================================
@@ -706,7 +706,7 @@ void CameraDevice::stopRecording()
     }
 }
 
-void CameraDevice::addListener (CameraImageListener* listenerToAdd)
+void CameraDevice::addListener (Listener* listenerToAdd)
 {
     DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
 
@@ -714,7 +714,7 @@ void CameraDevice::addListener (CameraImageListener* listenerToAdd)
         d->addListener (listenerToAdd);
 }
 
-void CameraDevice::removeListener (CameraImageListener* listenerToRemove)
+void CameraDevice::removeListener (Listener* listenerToRemove)
 {
     DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
 

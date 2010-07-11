@@ -26,7 +26,6 @@
 #ifndef __JUCE_SLIDER_JUCEHEADER__
 #define __JUCE_SLIDER_JUCEHEADER__
 
-#include "juce_SliderListener.h"
 #include "juce_Label.h"
 #include "../buttons/juce_Button.h"
 #include "../../../events/juce_AsyncUpdater.h"
@@ -49,16 +48,16 @@
     some of the virtual methods, such as changing the scaling, changing the format of
     the text display, custom ways of limiting the values, etc.
 
-    You can register SliderListeners with a slider, which will be informed when the value
-    changes, or a subclass can override valueChanged() to be informed synchronously.
+    You can register Slider::Listener objects with a slider, and they'll be called when
+    the value changes.
 
-    @see SliderListener
+    @see Slider::Listener
 */
 class JUCE_API  Slider  : public Component,
                           public SettableTooltipClient,
                           private AsyncUpdater,
-                          private ButtonListener,
-                          private LabelListener,
+                          private Button::Listener,
+                          private Label::Listener,
                           private Value::Listener
 {
 public:
@@ -333,7 +332,7 @@ public:
     //==============================================================================
     /** Changes the slider's current value.
 
-        This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
+        This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
         that are registered, and will synchronously call the valueChanged() method in case subclasses
         want to handle it.
 
@@ -341,8 +340,8 @@ public:
                                         minimum and maximum range, and will be snapped to the
                                         nearest interval if one has been set
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
-                                        any SliderListeners or the valueChanged() method
-        @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
+                                        any Slider::Listeners or the valueChanged() method
+        @param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
                                         synchronously; if false, it will be asynchronous
     */
     void setValue (double newValue,
@@ -408,7 +407,7 @@ public:
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
-        This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
+        This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
         that are registered, and will synchronously call the valueChanged() method in case subclasses
         want to handle it.
 
@@ -416,8 +415,8 @@ public:
                                         minimum and maximum range, and will be snapped to the nearest
                                         interval if one has been set.
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
-                                        any SliderListeners or the valueChanged() method
-        @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
+                                        any Slider::Listeners or the valueChanged() method
+        @param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
                                         synchronously; if false, it will be asynchronous
         @param allowNudgingOfOtherValues  if false, this value will be restricted to being below the
                                         max value (in a two-value slider) or the mid value (in a three-value
@@ -450,7 +449,7 @@ public:
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
-        This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
+        This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
         that are registered, and will synchronously call the valueChanged() method in case subclasses
         want to handle it.
 
@@ -458,8 +457,8 @@ public:
                                         minimum and maximum range, and will be snapped to the nearest
                                         interval if one has been set.
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
-                                        any SliderListeners or the valueChanged() method
-        @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
+                                        any Slider::Listeners or the valueChanged() method
+        @param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
                                         synchronously; if false, it will be asynchronous
         @param allowNudgingOfOtherValues  if false, this value will be restricted to being above the
                                         min value (in a two-value slider) or the mid value (in a three-value
@@ -473,11 +472,55 @@ public:
                       bool allowNudgingOfOtherValues = false);
 
     //==============================================================================
+    /** A class for receiving callbacks from a Slider.
+
+        To be told when a slider's value changes, you can register a Slider::Listener
+        object using Slider::addListener().
+
+        @see Slider::addListener, Slider::removeListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        //==============================================================================
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        //==============================================================================
+        /** Called when the slider's value is changed.
+
+            This may be caused by dragging it, or by typing in its text entry box,
+            or by a call to Slider::setValue().
+
+            You can find out the new value using Slider::getValue().
+
+            @see Slider::valueChanged
+        */
+        virtual void sliderValueChanged (Slider* slider) = 0;
+
+        //==============================================================================
+        /** Called when the slider is about to be dragged.
+
+            This is called when a drag begins, then it's followed by multiple calls
+            to sliderValueChanged(), and then sliderDragEnded() is called after the
+            user lets go.
+
+            @see sliderDragEnded, Slider::startedDragging
+        */
+        virtual void sliderDragStarted (Slider* slider);
+
+        /** Called after a drag operation has finished.
+
+            @see sliderDragStarted, Slider::stoppedDragging
+        */
+        virtual void sliderDragEnded (Slider* slider);
+    };
+
     /** Adds a listener to be called when this slider's value changes. */
-    void addListener (SliderListener* listener);
+    void addListener (Listener* listener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (SliderListener* listener);
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** This lets you choose whether double-clicking moves the slider to a given position.
@@ -563,19 +606,19 @@ public:
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.
 
-        @see SliderListener::sliderDragStarted
+        @see Slider::Listener::sliderDragStarted
     */
     virtual void startedDragging();
 
     /** Callback to indicate that the user has just stopped dragging the slider.
 
-        @see SliderListener::sliderDragEnded
+        @see Slider::Listener::sliderDragEnded
     */
     virtual void stoppedDragging();
 
     /** Callback to indicate that the user has just moved the slider.
 
-        @see SliderListener::sliderValueChanged
+        @see Slider::Listener::sliderValueChanged
     */
     virtual void valueChanged();
 
@@ -749,7 +792,7 @@ protected:
     int getNumDecimalPlacesToDisplay() const throw()        { return numDecimalPlaces; }
 
 private:
-    ListenerList <SliderListener> listeners;
+    ListenerList <Listener> listeners;
     Value currentValue, valueMin, valueMax;
     double lastCurrentValue, lastValueMin, lastValueMax;
     double minimum, maximum, interval, doubleClickReturnValue;
@@ -792,6 +835,9 @@ private:
     Slider (const Slider&);
     Slider& operator= (const Slider&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
+typedef Slider::Listener SliderListener;
 
 
 #endif   // __JUCE_SLIDER_JUCEHEADER__

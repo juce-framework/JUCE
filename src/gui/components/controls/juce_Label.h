@@ -27,30 +27,6 @@
 #define __JUCE_LABEL_JUCEHEADER__
 
 #include "juce_TextEditor.h"
-class Label;
-
-
-//==============================================================================
-/**
-    A class for receiving events from a Label.
-
-    You can register a LabelListener with a Label using the Label::addListener()
-    method, and it will be called when the text of the label changes, either because
-    of a call to Label::setText() or by the user editing the text (if the label is
-    editable).
-
-    @see Label::addListener, Label::removeListener
-*/
-class JUCE_API  LabelListener
-{
-public:
-    /** Destructor. */
-    virtual ~LabelListener() {}
-
-    /** Called when a Label's text has changed.
-    */
-    virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
-};
 
 
 //==============================================================================
@@ -60,7 +36,7 @@ public:
 */
 class JUCE_API  Label  : public Component,
                          public SettableTooltipClient,
-                         protected TextEditorListener,
+                         protected TextEditor::Listener,
                          private ComponentListener,
                          private Value::Listener
 {
@@ -81,11 +57,10 @@ public:
     /** Changes the label text.
 
         If broadcastChangeMessage is true and the new text is different to the current
-        text, then the class will broadcast a change message to any LabelListeners that
-        are registered.
+        text, then the class will broadcast a change message to any Label::Listener objects
+        that are registered.
     */
-    void setText (const String& newText,
-                  bool broadcastChangeMessage);
+    void setText (const String& newText, bool broadcastChangeMessage);
 
     /** Returns the label's current text.
 
@@ -195,11 +170,32 @@ public:
     float getMinimumHorizontalScale() const throw()                             { return minimumHorizontalScale; }
 
     //==============================================================================
+    /**
+        A class for receiving events from a Label.
+
+        You can register a Label::Listener with a Label using the Label::addListener()
+        method, and it will be called when the text of the label changes, either because
+        of a call to Label::setText() or by the user editing the text (if the label is
+        editable).
+
+        @see Label::addListener, Label::removeListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        /** Called when a Label's text has changed.
+        */
+        virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
+    };
+
     /** Registers a listener that will be called when the label's text changes. */
-    void addListener (LabelListener* listener) throw();
+    void addListener (Listener* listener) throw();
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (LabelListener* listener) throw();
+    void removeListener (Listener* listener) throw();
 
     //==============================================================================
     /** Makes the label turn into a TextEditor when clicked.
@@ -262,26 +258,20 @@ public:
 
 protected:
     /** Creates the TextEditor component that will be used when the user has clicked on the label.
-
         Subclasses can override this if they need to customise this component in some way.
     */
     virtual TextEditor* createEditorComponent();
 
-    /** Called after the user changes the text.
-    */
+    /** Called after the user changes the text. */
     virtual void textWasEdited();
 
-    /** Called when the text has been altered.
-    */
+    /** Called when the text has been altered. */
     virtual void textWasChanged();
 
-    /** Called when the text editor has just appeared, due to a user click or other
-        focus change.
-    */
+    /** Called when the text editor has just appeared, due to a user click or other focus change. */
     virtual void editorShown (TextEditor* editorComponent);
 
-    /** Called when the text editor is going to be deleted, after editing has finished.
-    */
+    /** Called when the text editor is going to be deleted, after editing has finished. */
     virtual void editorAboutToBeHidden (TextEditor* editorComponent);
 
     //==============================================================================
@@ -326,7 +316,7 @@ private:
     Font font;
     Justification justification;
     ScopedPointer <TextEditor> editor;
-    ListenerList <LabelListener> listeners;
+    ListenerList <Listener> listeners;
     Component::SafePointer<Component> ownerComponent;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
@@ -341,6 +331,9 @@ private:
     Label (const Label&);
     Label& operator= (const Label&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
+typedef Label::Listener LabelListener;
 
 
 #endif   // __JUCE_LABEL_JUCEHEADER__

@@ -34,33 +34,6 @@
 #include "../menus/juce_PopupMenu.h"
 #include "../../../containers/juce_Value.h"
 #include "../keyboard/juce_TextInputTarget.h"
-class TextEditor;
-
-
-//==============================================================================
-/**
-    Receives callbacks from a TextEditor component when it changes.
-
-    @see TextEditor::addListener
-*/
-class JUCE_API  TextEditorListener
-{
-public:
-    /** Destructor. */
-    virtual ~TextEditorListener()  {}
-
-    /** Called when the user changes the text in some way. */
-    virtual void textEditorTextChanged (TextEditor& editor) = 0;
-
-    /** Called when the user presses the return key. */
-    virtual void textEditorReturnKeyPressed (TextEditor& editor) = 0;
-
-    /** Called when the user presses the escape key. */
-    virtual void textEditorEscapeKeyPressed (TextEditor& editor) = 0;
-
-    /** Called when the text editor loses focus. */
-    virtual void textEditorFocusLost (TextEditor& editor) = 0;
-};
 
 
 //==============================================================================
@@ -70,7 +43,7 @@ public:
     A TextEditor can either be in single- or multi-line mode, and supports mixed
     fonts and colours.
 
-    @see TextEditorListener, Label
+    @see TextEditor::Listener, Label
 */
 class JUCE_API  TextEditor  : public Component,
                               public TextInputTarget,
@@ -117,7 +90,7 @@ public:
     /** Changes the behaviour of the return key.
 
         If set to true, the return key will insert a new-line into the text; if false
-        it will trigger a call to the TextEditorListener::textEditorReturnKeyPressed()
+        it will trigger a call to the TextEditor::Listener::textEditorReturnKeyPressed()
         method. By default this is set to false, and when true it will only insert
         new-lines when in multi-line mode (see setMultiLine()).
     */
@@ -328,17 +301,41 @@ public:
     void setScrollBarButtonVisibility (bool buttonsVisible);
 
     //==============================================================================
+    /**
+        Receives callbacks from a TextEditor component when it changes.
+
+        @see TextEditor::addListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener()  {}
+
+        /** Called when the user changes the text in some way. */
+        virtual void textEditorTextChanged (TextEditor& editor) = 0;
+
+        /** Called when the user presses the return key. */
+        virtual void textEditorReturnKeyPressed (TextEditor& editor) = 0;
+
+        /** Called when the user presses the escape key. */
+        virtual void textEditorEscapeKeyPressed (TextEditor& editor) = 0;
+
+        /** Called when the text editor loses focus. */
+        virtual void textEditorFocusLost (TextEditor& editor) = 0;
+    };
+
     /** Registers a listener to be told when things happen to the text.
 
         @see removeListener
     */
-    void addListener (TextEditorListener* newListener);
+    void addListener (Listener* newListener);
 
     /** Deregisters a listener.
 
         @see addListener
     */
-    void removeListener (TextEditorListener* listenerToRemove);
+    void removeListener (Listener* listenerToRemove);
 
     //==============================================================================
     /** Returns the entire contents of the editor. */
@@ -661,7 +658,7 @@ private:
     } dragType;
 
     String allowedCharacters;
-    ListenerList <TextEditorListener> listeners;
+    ListenerList <Listener> listeners;
 
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
@@ -690,5 +687,9 @@ private:
     TextEditor (const TextEditor&);
     TextEditor& operator= (const TextEditor&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
+typedef TextEditor::Listener TextEditorListener;
+
 
 #endif   // __JUCE_TEXTEDITOR_JUCEHEADER__

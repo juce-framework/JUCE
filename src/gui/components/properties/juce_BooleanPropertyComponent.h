@@ -40,7 +40,7 @@
     @see PropertyComponent
 */
 class JUCE_API  BooleanPropertyComponent  : public PropertyComponent,
-                                            private ButtonListener
+                                            private Button::Listener
 {
 protected:
     //==============================================================================

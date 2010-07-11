@@ -1650,9 +1650,6 @@
     <ClInclude Include="..\..\src\gui\components\controls\juce_Slider.h">
       <Filter>Juce\Source\gui\components\controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\components\controls\juce_SliderListener.h">
-      <Filter>Juce\Source\gui\components\controls</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\components\controls\juce_TableHeaderComponent.h">
       <Filter>Juce\Source\gui\components\controls</Filter>
     </ClInclude>

@@ -159,7 +159,7 @@ void Slider::handleAsyncUpdate()
     cancelPendingUpdate();
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &SliderListener::sliderValueChanged, this);
+    listeners.callChecked (checker, &Listener::sliderValueChanged, this);
 }
 
 void Slider::sendDragStart()
@@ -167,7 +167,7 @@ void Slider::sendDragStart()
     startedDragging();
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &SliderListener::sliderDragStarted, this);
+    listeners.callChecked (checker, &Listener::sliderDragStarted, this);
 }
 
 void Slider::sendDragEnd()
@@ -177,15 +177,15 @@ void Slider::sendDragEnd()
     sliderBeingDragged = -1;
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &SliderListener::sliderDragEnded, this);
+    listeners.callChecked (checker, &Listener::sliderDragEnded, this);
 }
 
-void Slider::addListener (SliderListener* const listener)
+void Slider::addListener (Listener* const listener)
 {
     listeners.add (listener);
 }
 
-void Slider::removeListener (SliderListener* const listener)
+void Slider::removeListener (Listener* const listener)
 {
     listeners.remove (listener);
 }
@@ -1423,11 +1423,11 @@ void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float w
     }
 }
 
-void SliderListener::sliderDragStarted (Slider*)
+void Slider::Listener::sliderDragStarted (Slider*)
 {
 }
 
-void SliderListener::sliderDragEnded (Slider*)
+void Slider::Listener::sliderDragEnded (Slider*)
 {
 }
 

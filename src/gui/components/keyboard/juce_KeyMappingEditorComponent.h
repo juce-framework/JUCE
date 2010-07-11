@@ -41,7 +41,7 @@
 class JUCE_API  KeyMappingEditorComponent  : public Component,
                                              public TreeViewItem,
                                              public ChangeListener,
-                                             private ButtonListener
+                                             private Button::Listener
 {
 public:
     //==============================================================================

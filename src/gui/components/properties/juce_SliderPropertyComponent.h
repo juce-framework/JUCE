@@ -37,7 +37,7 @@
     @see PropertyComponent, Slider
 */
 class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
-                                            private SliderListener
+                                            private Slider::Listener
 {
 protected:
     //==============================================================================

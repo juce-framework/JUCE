@@ -1274,12 +1274,12 @@ void TextEditor::escapePressed()
     postCommandMessage (TextEditorDefs::escapeKeyMessageId);
 }
 
-void TextEditor::addListener (TextEditorListener* const newListener)
+void TextEditor::addListener (Listener* const newListener)
 {
     listeners.add (newListener);
 }
 
-void TextEditor::removeListener (TextEditorListener* const listenerToRemove)
+void TextEditor::removeListener (Listener* const listenerToRemove)
 {
     listeners.remove (listenerToRemove);
 }
@@ -2207,19 +2207,19 @@ void TextEditor::handleCommandMessage (const int commandId)
     switch (commandId)
     {
     case TextEditorDefs::textChangeMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorTextChanged, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorTextChanged, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::returnKeyMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorReturnKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorReturnKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::escapeKeyMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorEscapeKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorEscapeKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::focusLossMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorFocusLost, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorFocusLost, (TextEditor&) *this);
         break;
 
     default:

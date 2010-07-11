@@ -28,31 +28,10 @@
 
 #if JUCE_USE_CAMERA || DOXYGEN
 
-//==============================================================================
-/**
-    Receives callbacks with images from a CameraDevice.
-
-    @see CameraDevice::addListener
-*/
-class CameraImageListener
-{
-public:
-    CameraImageListener() {}
-    virtual ~CameraImageListener() {}
-
-    /** This method is called when a new image arrives.
-
-        This may be called by any thread, so be careful about thread-safety,
-        and make sure that you process the data as quickly as possible to
-        avoid glitching!
-    */
-    virtual void imageReceived (const Image& image) = 0;
-};
-
 
 //==============================================================================
 /**
-    Controls any camera capture devices that might be available.
+    Controls any video capture devices that might be available.
 
     Use getAvailableDevices() to list the devices that are attached to the
     system, then call openDevice to open one for use. Once you have a CameraDevice
@@ -128,16 +107,36 @@ public:
     const Time getTimeOfFirstRecordedFrame() const;
 
     //==============================================================================
+    /**
+        Receives callbacks with images from a CameraDevice.
+
+        @see CameraDevice::addListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        Listener() {}
+        virtual ~Listener() {}
+
+        /** This method is called when a new image arrives.
+
+            This may be called by any thread, so be careful about thread-safety,
+            and make sure that you process the data as quickly as possible to
+            avoid glitching!
+        */
+        virtual void imageReceived (const Image& image) = 0;
+    };
+
     /** Adds a listener to receive images from the camera.
 
         Be very careful not to delete the listener without first removing it by calling
         removeListener().
     */
-    void addListener (CameraImageListener* listenerToAdd);
+    void addListener (Listener* listenerToAdd);
 
     /** Removes a listener that was previously added with addListener().
     */
-    void removeListener (CameraImageListener* listenerToRemove);
+    void removeListener (Listener* listenerToRemove);
 
 
     //==============================================================================
@@ -155,6 +154,9 @@ private:
     CameraDevice (const CameraDevice&);
     CameraDevice& operator= (const CameraDevice&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the CameraDevice::Listener class directly. */
+typedef CameraDevice::Listener CameraImageListener;
 
 
 #endif

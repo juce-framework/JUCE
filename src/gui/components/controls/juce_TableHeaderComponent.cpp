@@ -492,12 +492,12 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
 }
 
 //==============================================================================
-void TableHeaderComponent::addListener (TableHeaderListener* const newListener)
+void TableHeaderComponent::addListener (Listener* const newListener)
 {
     listeners.addIfNotAlreadyThere (newListener);
 }
 
-void TableHeaderComponent::removeListener (TableHeaderListener* const listenerToRemove)
+void TableHeaderComponent::removeListener (Listener* const listenerToRemove)
 {
     listeners.removeValue (listenerToRemove);
 }
@@ -937,7 +937,7 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
     }
 }
 
-void TableHeaderListener::tableColumnDraggingChanged (TableHeaderComponent*, int)
+void TableHeaderComponent::Listener::tableColumnDraggingChanged (TableHeaderComponent*, int)
 {
 }
 

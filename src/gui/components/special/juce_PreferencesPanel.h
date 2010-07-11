@@ -49,7 +49,7 @@
     for each of these pages.
 */
 class JUCE_API  PreferencesPanel  : public Component,
-                                    private ButtonListener
+                                    private Button::Listener
 {
 public:
     //==============================================================================

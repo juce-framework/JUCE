@@ -118,7 +118,7 @@ public:
 //==============================================================================
 class TreeViewDemo  : public Component,
                       public DragAndDropContainer,
-                      public ButtonListener
+                      public Button::Listener
 {
     XmlElement* treeXml;
 

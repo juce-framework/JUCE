@@ -31,7 +31,6 @@
 #include "../buttons/juce_Button.h"
 class ToolbarItemComponent;
 class ToolbarItemFactory;
-class MissingItemsComponent;
 
 
 //==============================================================================
@@ -54,7 +53,7 @@ class MissingItemsComponent;
 class JUCE_API  Toolbar   : public Component,
                             public DragAndDropContainer,
                             public DragAndDropTarget,
-                            private ButtonListener
+                            private Button::Listener
 {
 public:
     //==============================================================================
@@ -299,6 +298,7 @@ private:
     bool vertical, isEditingActive;
     ToolbarItemStyle toolbarStyle;
     ComponentAnimator animator;
+    class MissingItemsComponent;
     friend class MissingItemsComponent;
     Array <ToolbarItemComponent*> items;
 

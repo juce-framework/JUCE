@@ -31,7 +31,7 @@
     This is our top-level component for our plugin..
 */
 class JuceDemoBrowserPlugin  : public BrowserPluginComponent,
-                               public ButtonListener
+                               public Button::Listener
 {
 public:
     JuceDemoBrowserPlugin()

@@ -46,7 +46,7 @@
     @see ThreadWithProgressWindow
 */
 class JUCE_API  AlertWindow  : public TopLevelWindow,
-                               private ButtonListener
+                               private Button::Listener
 {
 public:
     //==============================================================================

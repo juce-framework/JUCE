@@ -207,9 +207,9 @@ private:
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
-                                 public ComboBoxListener,
                                  public ChangeListener,
-                                 public ButtonListener
+                                 public ComboBox::Listener,
+                                 public Button::Listener
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType* type_,

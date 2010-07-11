@@ -576,7 +576,6 @@
     <ClInclude Include="..\..\src\gui\components\controls\juce_ListBox.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_ProgressBar.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_Slider.h"/>
-    <ClInclude Include="..\..\src\gui\components\controls\juce_SliderListener.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_TableHeaderComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_TableListBox.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_TextEditor.h"/>

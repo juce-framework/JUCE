@@ -93,7 +93,7 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
     delaySlider->setValue (ourProcessor->delay, false);
 }
 
-// This is our SliderListener callback, when the user drags a slider.
+// This is our Slider::Listener callback, when the user drags a slider.
 void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 {
     if (slider == gainSlider)

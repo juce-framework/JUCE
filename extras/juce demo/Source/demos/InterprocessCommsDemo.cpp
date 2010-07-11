@@ -28,8 +28,8 @@
 
 //==============================================================================
 class InterprocessCommsDemo  : public Component,
-                               public ButtonListener,
-                               public ComboBoxListener
+                               public Button::Listener,
+                               public ComboBox::Listener
 {
 public:
     //==============================================================================

@@ -32,27 +32,6 @@
 #include "../../../containers/juce_SortedSet.h"
 #include "../../../containers/juce_Value.h"
 #include "../windows/juce_TooltipWindow.h"
-class Button;
-
-
-//==============================================================================
-/**
-    Used to receive callbacks when a button is clicked.
-
-    @see Button::addButtonListener, Button::removeButtonListener
-*/
-class JUCE_API  ButtonListener
-{
-public:
-    /** Destructor. */
-    virtual ~ButtonListener()                               {}
-
-    /** Called when the button is clicked. */
-    virtual void buttonClicked (Button* button) = 0;
-
-    /** Called when the button's state changes. */
-    virtual void buttonStateChanged (Button*)               {}
-};
 
 
 //==============================================================================
@@ -191,19 +170,37 @@ public:
     int getRadioGroupId() const throw()                         { return radioGroupId; }
 
     //==============================================================================
+    /**
+        Used to receive callbacks when a button is clicked.
+
+        @see Button::addButtonListener, Button::removeButtonListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener()                                     {}
+
+        /** Called when the button is clicked. */
+        virtual void buttonClicked (Button* button) = 0;
+
+        /** Called when the button's state changes. */
+        virtual void buttonStateChanged (Button*)               {}
+    };
+
     /** Registers a listener to receive events when this button's state changes.
 
         If the listener is already registered, this will not register it again.
 
         @see removeButtonListener
     */
-    void addButtonListener (ButtonListener* newListener);
+    void addButtonListener (Listener* newListener);
 
     /** Removes a previously-registered button listener
 
         @see addButtonListener
     */
-    void removeButtonListener (ButtonListener* listener);
+    void removeButtonListener (Listener* listener);
 
     //==============================================================================
     /** Causes the button to act as if it's been clicked.
@@ -471,7 +468,7 @@ private:
     Array <KeyPress> shortcuts;
     Component::SafePointer<Component> keySource;
     String text;
-    ListenerList <ButtonListener> buttonListeners;
+    ListenerList <Listener> buttonListeners;
 
     class RepeatTimer;
     friend class RepeatTimer;
@@ -506,6 +503,9 @@ private:
     Button (const Button&);
     Button& operator= (const Button&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use Button::Listener instead. */
+typedef Button::Listener ButtonListener;
 
 
 #endif   // __JUCE_BUTTON_JUCEHEADER__

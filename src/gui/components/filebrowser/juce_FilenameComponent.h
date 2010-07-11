@@ -72,8 +72,8 @@ class JUCE_API  FilenameComponent  : public Component,
                                      public SettableTooltipClient,
                                      public FileDragAndDropTarget,
                                      private AsyncUpdater,
-                                     private ButtonListener,
-                                     private ComboBoxListener
+                                     private Button::Listener,
+                                     private ComboBox::Listener
 {
 public:
     //==============================================================================

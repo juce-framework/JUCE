@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class DocumentWindow::ButtonListenerProxy  : public ButtonListener
+class DocumentWindow::ButtonListenerProxy  : public Button::Listener
 {
 public:
     ButtonListenerProxy (DocumentWindow& owner_)

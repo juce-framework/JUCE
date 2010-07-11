@@ -30,32 +30,6 @@
 #include "../../../containers/juce_Range.h"
 #include "../../../events/juce_Timer.h"
 #include "../buttons/juce_Button.h"
-class ScrollBar;
-
-
-//==============================================================================
-/**
-    A class for receiving events from a ScrollBar.
-
-    You can register a ScrollBarListener with a ScrollBar using the ScrollBar::addListener()
-    method, and it will be called when the bar's position changes.
-
-    @see ScrollBar::addListener, ScrollBar::removeListener
-*/
-class JUCE_API  ScrollBarListener
-{
-public:
-    /** Destructor. */
-    virtual ~ScrollBarListener() {}
-
-    /** Called when a ScrollBar is moved.
-
-        @param scrollBarThatHasMoved    the bar that has moved
-        @param newRangeStart            the new range start of this bar
-    */
-    virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
-                                 double newRangeStart) = 0;
-};
 
 
 //==============================================================================
@@ -66,7 +40,7 @@ public:
     sets the range of values it can represent. Then you can use setCurrentRange() to
     change the position and size of the scrollbar's 'thumb'.
 
-    Registering a ScrollBarListener with the scrollbar will allow you to find out when
+    Registering a ScrollBar::Listener with the scrollbar will allow you to find out when
     the user moves it, and you can use the getCurrentRangeStart() to find out where
     they moved it to.
 
@@ -76,7 +50,7 @@ public:
     For most purposes, it's probably easier to use a ViewportContainer or ListBox
     instead of handling a scrollbar directly.
 
-    @see ScrollBarListener
+    @see ScrollBar::Listener
 */
 class JUCE_API  ScrollBar  : public Component,
                              public AsyncUpdater,
@@ -166,7 +140,7 @@ public:
     /** Changes the position of the scrollbar's 'thumb'.
 
         If this method call actually changes the scrollbar's position, it will trigger an
-        asynchronous call to ScrollBarListener::scrollBarMoved() for all the listeners that
+        asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
         are registered.
 
         @see getCurrentRange. setCurrentRangeStart
@@ -179,7 +153,7 @@ public:
         changing the size, you can use setCurrentRangeStart().
 
         If this method call actually changes the scrollbar's position, it will trigger an
-        asynchronous call to ScrollBarListener::scrollBarMoved() for all the listeners that
+        asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
         are registered.
 
         @param newStart     the top (or left) of the thumb, in the range
@@ -198,7 +172,7 @@ public:
         that the maximum thumb start position is (getMaximumRangeLimit() - getCurrentRangeSize()).
 
         If this method call actually changes the scrollbar's position, it will trigger an
-        asynchronous call to ScrollBarListener::scrollBarMoved() for all the listeners that
+        asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
         are registered.
 
         @see setCurrentRange
@@ -287,11 +261,34 @@ public:
     };
 
     //==============================================================================
+    /**
+        A class for receiving events from a ScrollBar.
+
+        You can register a ScrollBar::Listener with a ScrollBar using the ScrollBar::addListener()
+        method, and it will be called when the bar's position changes.
+
+        @see ScrollBar::addListener, ScrollBar::removeListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        /** Called when a ScrollBar is moved.
+
+            @param scrollBarThatHasMoved    the bar that has moved
+            @param newRangeStart            the new range start of this bar
+        */
+        virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
+                                     double newRangeStart) = 0;
+    };
+
     /** Registers a listener that will be called when the scrollbar is moved. */
-    void addListener (ScrollBarListener* listener);
+    void addListener (Listener* listener);
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (ScrollBarListener* listener);
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** @internal */
@@ -326,7 +323,7 @@ private:
     class ScrollbarButton;
     friend class ScopedPointer<ScrollbarButton>;
     ScopedPointer<ScrollbarButton> upButton, downButton;
-    ListenerList <ScrollBarListener> listeners;
+    ListenerList <Listener> listeners;
 
     void updateThumbPosition();
     void timerCallback();
@@ -334,6 +331,9 @@ private:
     ScrollBar (const ScrollBar&);
     ScrollBar& operator= (const ScrollBar&);
 };
+
+/** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
+typedef ScrollBar::Listener ScrollBarListener;
 
 
 #endif   // __JUCE_SCROLLBAR_JUCEHEADER__

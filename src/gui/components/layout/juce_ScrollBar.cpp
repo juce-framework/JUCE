@@ -186,12 +186,12 @@ void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
 }
 
 //==============================================================================
-void ScrollBar::addListener (ScrollBarListener* const listener)
+void ScrollBar::addListener (Listener* const listener)
 {
     listeners.add (listener);
 }
 
-void ScrollBar::removeListener (ScrollBarListener* const listener)
+void ScrollBar::removeListener (Listener* const listener)
 {
     listeners.remove (listener);
 }
@@ -199,7 +199,7 @@ void ScrollBar::removeListener (ScrollBarListener* const listener)
 void ScrollBar::handleAsyncUpdate()
 {
     double start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
-    listeners.call (&ScrollBarListener::scrollBarMoved, this, start);
+    listeners.call (&Listener::scrollBarMoved, this, start);
 }
 
 //==============================================================================

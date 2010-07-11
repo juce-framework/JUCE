@@ -41,7 +41,7 @@
 class JUCE_API  PluginListComponent   : public Component,
                                         public ListBoxModel,
                                         public ChangeListener,
-                                        public ButtonListener,
+                                        public Button::Listener,
                                         public Timer
 {
 public:

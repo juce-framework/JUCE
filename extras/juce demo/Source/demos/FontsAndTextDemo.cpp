@@ -29,8 +29,8 @@
 //==============================================================================
 class FontsAndTextDemo  : public Component,
                           public ListBoxModel,
-                          public ButtonListener,
-                          public SliderListener
+                          public Button::Listener,
+                          public Slider::Listener
 {
     Array<Font> fonts;
     ListBox* listBox;

@@ -2907,7 +2907,7 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
 
                 if (peer->isFocused() && currentlyFocusedComponent != this)
                 {
-                    Component* const componentLosingFocus = currentlyFocusedComponent;
+                    SafePointer<Component> componentLosingFocus (currentlyFocusedComponent);
 
                     currentlyFocusedComponent = this;
 
@@ -2915,7 +2915,7 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
 
                     // call this after setting currentlyFocusedComponent so that the one that's
                     // losing it has a chance to see where focus is going
-                    if (componentLosingFocus->isValidComponent())
+                    if (componentLosingFocus != 0)
                         componentLosingFocus->internalFocusLoss (cause);
 
                     if (currentlyFocusedComponent == this)
@@ -3047,11 +3047,12 @@ Component* JUCE_CALLTYPE Component::getCurrentlyFocusedComponent() throw()
 void Component::giveAwayFocus()
 {
     // use a copy so we can clear the value before the call
-    Component* const componentLosingFocus = currentlyFocusedComponent;
+    SafePointer<Component> componentLosingFocus (currentlyFocusedComponent);
+
     currentlyFocusedComponent = 0;
     Desktop::getInstance().triggerFocusCallback();
 
-    if (componentLosingFocus->isValidComponent())
+    if (componentLosingFocus != 0)
         componentLosingFocus->internalFocusLoss (focusChangedDirectly);
 }
 

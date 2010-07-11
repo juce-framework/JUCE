@@ -199,7 +199,7 @@ public:
 */
 class JUCE_API  TableListBox   : public ListBox,
                                  private ListBoxModel,
-                                 private TableHeaderListener
+                                 private TableHeaderComponent::Listener
 {
 public:
     //==============================================================================

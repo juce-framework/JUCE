@@ -403,12 +403,12 @@ KeyboardFocusTraverser* Label::createFocusTraverser()
 }
 
 //==============================================================================
-void Label::addListener (LabelListener* const listener) throw()
+void Label::addListener (Listener* const listener) throw()
 {
     listeners.add (listener);
 }
 
-void Label::removeListener (LabelListener* const listener) throw()
+void Label::removeListener (Listener* const listener) throw()
 {
     listeners.remove (listener);
 }
@@ -416,7 +416,7 @@ void Label::removeListener (LabelListener* const listener) throw()
 void Label::callChangeListeners()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &LabelListener::labelTextChanged, this);
+    listeners.callChecked (checker, &Listener::labelTextChanged, this);
 }
 
 //==============================================================================

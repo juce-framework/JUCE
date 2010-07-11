@@ -351,12 +351,12 @@ void Button::handleCommandMessage (int commandId)
 }
 
 //==============================================================================
-void Button::addButtonListener (ButtonListener* const newListener)
+void Button::addButtonListener (Listener* const newListener)
 {
     buttonListeners.add (newListener);
 }
 
-void Button::removeButtonListener (ButtonListener* const listener)
+void Button::removeButtonListener (Listener* const listener)
 {
     buttonListeners.remove (listener);
 }
@@ -377,7 +377,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     clicked (modifiers);
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &ButtonListener::buttonClicked, this);
+        buttonListeners.callChecked (checker, &Listener::buttonClicked, this);
 }
 
 void Button::sendStateMessage()
@@ -387,7 +387,7 @@ void Button::sendStateMessage()
     buttonStateChanged();
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &ButtonListener::buttonStateChanged, this);
+        buttonListeners.callChecked (checker, &Listener::buttonStateChanged, this);
 }
 
 //==============================================================================

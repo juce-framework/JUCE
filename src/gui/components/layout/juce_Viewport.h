@@ -44,7 +44,7 @@
 */
 class JUCE_API  Viewport  : public Component,
                             private ComponentListener,
-                            private ScrollBarListener
+                            private ScrollBar::Listener
 {
 public:
     //==============================================================================
