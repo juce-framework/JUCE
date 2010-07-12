@@ -46,22 +46,16 @@
     e.g. @code
         class MyJUCEApp  : public JUCEApplication
         {
-            // NEVER put objects inside a JUCEApplication class - only use pointers to
-            // objects, which you must create in the initialise() method.
             MyApplicationWindow* myMainWindow;
 
         public:
             MyJUCEApp()
                 : myMainWindow (0)
             {
-                // never create any Juce objects in the constructor - do all your initialisation
-                // in the initialise() method.
             }
 
             ~MyJUCEApp()
             {
-                // all your shutdown code must have already been done in the shutdown() method -
-                // nothing should happen in this destructor.
             }
 
             void initialise (const String& commandLine)
@@ -91,12 +85,6 @@
         START_JUCE_APPLICATION (MyJUCEApp)
     @endcode
 
-    Because this object will be created before Juce has properly initialised, you must
-    NEVER add any member variable objects that will be automatically constructed. Likewise
-    don't put ANY code in the constructor that could call Juce functions. Any objects that
-    you want to add to the class must be pointers, which you should instantiate during the
-    initialise() method, and delete in the shutdown() method.
-
     @see MessageManager, DeletedAtShutdown
 */
 class JUCE_API  JUCEApplication  : public ApplicationCommandTarget,
@@ -123,7 +111,7 @@ public:
 
     //==============================================================================
     /** Returns the global instance of the application object being run. */
-    static JUCEApplication* getInstance() throw();
+    static JUCEApplication* getInstance() throw()           { return appInstance; }
 
     //==============================================================================
     /** Called when the application starts.
@@ -151,7 +139,7 @@ public:
         This is handy for things like splash screens to know when the app's up-and-running
         properly.
     */
-    bool isInitialising() const throw();
+    bool isInitialising() const throw()                     { return stillInitialising; }
 
     /* Called to allow the application to clear up before exiting.
 
@@ -175,11 +163,8 @@ public:
     virtual const String getApplicationName() = 0;
 
     /** Returns the application's version number.
-
-        An application can implement this to give itself a version.
-        (The default implementation of this just returns an empty string).
     */
-    virtual const String getApplicationVersion();
+    virtual const String getApplicationVersion() = 0;
 
     /** Checks whether multiple instances of the app are allowed.
 
@@ -266,13 +251,9 @@ public:
     static int main (const String& commandLine, JUCEApplication* newApp);
     /** @internal */
     static int main (int argc, const char* argv[], JUCEApplication* newApp);
-
     /** @internal */
-    static void sendUnhandledException (const std::exception* e,
-                                        const char* sourceFile,
-                                        int lineNumber);
+    static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
 
-    //==============================================================================
     /** @internal */
     ApplicationCommandTarget* getNextCommandTarget();
     /** @internal */
@@ -287,6 +268,8 @@ public:
     bool initialiseApp (const String& commandLine);
     /** @internal */
     int shutdownApp();
+    /** @internal */
+    static bool isStandaloneApp;
 
 private:
     //==============================================================================

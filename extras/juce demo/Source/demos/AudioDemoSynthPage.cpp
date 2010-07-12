@@ -203,7 +203,7 @@ public:
         BigInteger allNotes;
         allNotes.setRange (0, 128, true);
 
-        synth.addSound (new SamplerSound (T("demo sound"),
+        synth.addSound (new SamplerSound ("demo sound",
                                           *audioReader,
                                           allNotes,
                                           74,   // root midi note

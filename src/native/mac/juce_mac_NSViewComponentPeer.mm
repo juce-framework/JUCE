@@ -328,15 +328,15 @@ END_JUCE_NAMESPACE
 //==============================================================================
 - (void) mouseDown: (NSEvent*) ev
 {
-    // In some host situations, the host will stop modal loops from working
-    // correctly if they're called from a mouse event, so we'll trigger
-    // the event asynchronously..
-    if (JUCEApplication::getInstance() == 0)
+    if (JUCEApplication::isStandaloneApp)
+        [self asyncMouseDown: ev];
+    else
+        // In some host situations, the host will stop modal loops from working
+        // correctly if they're called from a mouse event, so we'll trigger
+        // the event asynchronously..
         [self performSelectorOnMainThread: @selector (asyncMouseDown:)
                                withObject: ev
                             waitUntilDone: NO];
-    else
-        [self asyncMouseDown: ev];
 }
 
 - (void) asyncMouseDown: (NSEvent*) ev
@@ -347,15 +347,15 @@ END_JUCE_NAMESPACE
 
 - (void) mouseUp: (NSEvent*) ev
 {
-    // In some host situations, the host will stop modal loops from working
-    // correctly if they're called from a mouse event, so we'll trigger
-    // the event asynchronously..
-    if (JUCEApplication::getInstance() == 0)
+    if (! JUCEApplication::isStandaloneApp)
+        [self asyncMouseUp: ev];
+    else
+        // In some host situations, the host will stop modal loops from working
+        // correctly if they're called from a mouse event, so we'll trigger
+        // the event asynchronously..
         [self performSelectorOnMainThread: @selector (asyncMouseUp:)
                                withObject: ev
                             waitUntilDone: NO];
-    else
-        [self asyncMouseUp: ev];
 }
 
 - (void) asyncMouseUp: (NSEvent*) ev

@@ -26,50 +26,30 @@
 #include "jucedemo_headers.h"
 #include "MainDemoWindow.h"
 
+
 //==============================================================================
 class JUCEDemoApplication : public JUCEApplication
 {
-    /* Important! NEVER embed objects directly inside your JUCEApplication class! Use
-       ONLY pointers to objects, which you should create during the initialise() method
-       (NOT in the constructor!) and delete in the shutdown() method (NOT in the
-       destructor!)
-
-       This is because the application object gets created before Juce has been properly
-       initialised, so any embedded objects would also get constructed too soon.
-    */
-    MainDemoWindow* theMainWindow;
-
 public:
     //==============================================================================
     JUCEDemoApplication()
-        : theMainWindow (0)
     {
-        // NEVER do anything in here that could involve any Juce function being called
-        // - leave all your startup tasks until the initialise() method.
     }
 
     ~JUCEDemoApplication()
     {
-        // Your shutdown() method should already have done all the things necessary to
-        // clean up this app object, so you should never need to put anything in
-        // the destructor.
-
-        // Making any Juce calls in here could be very dangerous...
     }
 
     //==============================================================================
     void initialise (const String& /*commandLine*/)
     {
-        // just create the main window...
-        theMainWindow = new MainDemoWindow();
-
-#if JUCE_IPHONE
-        theMainWindow->setVisible (true);
-        theMainWindow->setBounds (0, 20, 320, 460);
-#else
-        theMainWindow->centreWithSize (700, 600);
-#endif
-        theMainWindow->setVisible (true);
+      #if JUCE_IPHONE
+        theMainWindow.setVisible (true);
+        theMainWindow.setBounds (0, 20, 320, 460);
+      #else
+        theMainWindow.centreWithSize (700, 600);
+        theMainWindow.setVisible (true);
+      #endif
 
         // this little function just demonstrates a few system info calls
         Logger::outputDebugString (collectSomeSystemInfo());
@@ -85,18 +65,24 @@ public:
 
     void shutdown()
     {
-        delete theMainWindow;
-        theMainWindow = 0;
+        // This method is where your app should do any cleaning-up that's needed
+        // before being shut down.
     }
 
     //==============================================================================
     const String getApplicationName()
     {
-        return T("JUCE Demo");
+        // When you use the Jucer to auto-generate a project, it puts the project's name and version in
+        // this constant, so we can use that here as our return value. Alternatively you can return
+        // your own string here, of course.
+        return ProjectInfo::projectName;
     }
 
     const String getApplicationVersion()
     {
+        // When you use the Jucer to auto-generate a project, it puts the project's name and version in
+        // this constant, so we can use that here as our return value. Alternatively you can return
+        // your own string here, of course.
         return ProjectInfo::versionString;
     }
 
@@ -112,6 +98,9 @@ public:
     }
 
 private:
+    // This is the main demo window component.
+    MainDemoWindow theMainWindow;
+
     //==============================================================================
     // this little function just demonstrates a few system info calls
     static const String collectSomeSystemInfo()
@@ -131,7 +120,7 @@ private:
           << "\nCPU has SSE2: " << (SystemStats::hasSSE2() ? "yes" : "no")
           << "\nCPU has 3DNOW: " << (SystemStats::has3DNow() ? "yes" : "no")
           << "\nMemory size: " << SystemStats::getMemorySizeInMegabytes() << "MB"
-          << "\nFound network card MAC addresses: " << SystemStats::getMACAddressStrings().joinIntoString (T(", "))
+          << "\nFound network card MAC addresses: " << SystemStats::getMACAddressStrings().joinIntoString (", ")
           << "\nCurrent executable file: " << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
           << "\nCurrent application file: " << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
           << "\nCurrent working directory: " << File::getCurrentWorkingDirectory().getFullPathName()

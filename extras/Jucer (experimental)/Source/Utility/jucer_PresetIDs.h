@@ -100,6 +100,7 @@ namespace Ids
     DECLARE_ID (className);
     DECLARE_ID (classDesc);
     DECLARE_ID (controlPoint);
+    DECLARE_ID (createCallback);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

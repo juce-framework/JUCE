@@ -456,14 +456,14 @@ static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName,
     [item release];
 
     item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Hide Others", nil)
-                        action: @selector (hideOtherApplications:)  keyEquivalent: @"h"];
+                                      action: @selector (hideOtherApplications:)  keyEquivalent: @"h"];
     [item setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
     [item setTarget: NSApp];
     [menu addItem: item];
     [item release];
 
     item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Show All", nil)
-                            action: @selector (unhideAllApplications:)  keyEquivalent: @""];
+                                      action: @selector (unhideAllApplications:)  keyEquivalent: @""];
     [item setTarget: NSApp];
     [menu addItem: item];
     [item release];
@@ -485,7 +485,7 @@ static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName,
 static void rebuildMainMenu (const PopupMenu* extraItems)
 {
     // this can't be used in a plugin!
-    jassert (JUCEApplication::getInstance() != 0);
+    jassert (JUCEApplication::isStandaloneApp);
 
     if (JUCEApplication::getInstance() != 0)
     {
@@ -543,10 +543,9 @@ MenuBarModel* MenuBarModel::getMacMainMenu()
             ? JuceMainMenuHandler::instance->currentModel : 0;
 }
 
-
-void initialiseMainMenu()
+void juce_initialiseMacMainMenu()
 {
-    if (JUCEApplication::getInstance() != 0) // only needed in an app
+    if (JuceMainMenuHandler::instance == 0)
         rebuildMainMenu (0);
 }
 

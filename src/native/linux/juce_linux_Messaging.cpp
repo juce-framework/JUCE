@@ -253,7 +253,7 @@ namespace LinuxErrorHandling
     {
         DBG ("ERROR: connection to X server broken.. terminating.");
 
-        if (JUCEApplication::getInstance() != 0)
+        if (JUCEApplication::isStandaloneApp)
             MessageManager::getInstance()->stopDispatchLoop();
 
         errorOccurred = true;
@@ -322,7 +322,7 @@ void MessageManager::doPlatformSpecificInitialisation()
             // This is fatal!  Print error and closedown
             Logger::outputDebugString ("Failed to initialise xlib thread support.");
 
-            if (JUCEApplication::getInstance() != 0)
+            if (JUCEApplication::isStandaloneApp)
                 Process::terminate();
 
             return;
@@ -424,7 +424,7 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
         {
             LinuxErrorHandling::errorOccurred = true;
 
-            if (JUCEApplication::getInstance() != 0)
+            if (JUCEApplication::isStandaloneApp)
                 Process::terminate();
 
             break;

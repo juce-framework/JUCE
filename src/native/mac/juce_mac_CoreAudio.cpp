@@ -1145,7 +1145,6 @@ public:
 
             if (OK (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, devs)))
             {
-                static bool alreadyLogged = false;
                 const int num = size / (int) sizeof (AudioDeviceID);
                 for (int i = 0; i < num; ++i)
                 {
@@ -1156,10 +1155,6 @@ public:
                     if (OK (AudioObjectGetPropertyData (devs[i], &pa, 0, 0, &size, name)))
                     {
                         const String nameString (String::fromUTF8 (name, (int) strlen (name)));
-
-                        if (! alreadyLogged)
-                            log ("CoreAudio device: " + nameString);
-
                         const int numIns = getNumChannels (devs[i], true);
                         const int numOuts = getNumChannels (devs[i], false);
 
@@ -1176,8 +1171,6 @@ public:
                         }
                     }
                 }
-
-                alreadyLogged = true;
             }
         }
 

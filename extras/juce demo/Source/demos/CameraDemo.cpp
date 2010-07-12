@@ -38,22 +38,22 @@ public:
     //==============================================================================
     CameraDemo()
     {
-        setName (T("Camera"));
+        setName ("Camera");
 
         cameraDevice = 0;
         cameraPreviewComp = 0;
         recordingMovie = false;
 
-        addAndMakeVisible (cameraSelectorComboBox = new ComboBox (T("Camera")));
+        addAndMakeVisible (cameraSelectorComboBox = new ComboBox ("Camera"));
         createListOfCameras();
         cameraSelectorComboBox->setSelectedId (1);
         cameraSelectorComboBox->addListener (this);
 
-        addAndMakeVisible (snapshotButton = new TextButton (T("Take a snapshot")));
+        addAndMakeVisible (snapshotButton = new TextButton ("Take a snapshot"));
         snapshotButton->addButtonListener (this);
         snapshotButton->setEnabled (false);
 
-        addAndMakeVisible (recordMovieButton = new TextButton (T("Record a movie file (to your desktop)...")));
+        addAndMakeVisible (recordMovieButton = new TextButton ("Record a movie file (to your desktop)..."));
         recordMovieButton->addButtonListener (this);
         recordMovieButton->setEnabled (false);
 
@@ -133,18 +133,18 @@ public:
                     recordingMovie = true;
 
                     File file (File::getSpecialLocation (File::userDesktopDirectory)
-                                .getNonexistentChildFile (T("JuceCameraDemo"),
+                                .getNonexistentChildFile ("JuceCameraDemo",
                                                           CameraDevice::getFileExtension()));
 
                     cameraDevice->startRecordingToFile (file);
-                    recordMovieButton->setButtonText (T("Stop Recording"));
+                    recordMovieButton->setButtonText ("Stop Recording");
                 }
                 else
                 {
                     // Already recording, so stop...
                     recordingMovie = false;
                     cameraDevice->stopRecording();
-                    recordMovieButton->setButtonText (T("Start recording (to a file on your desktop)"));
+                    recordMovieButton->setButtonText ("Start recording (to a file on your desktop)");
                 }
             }
             else

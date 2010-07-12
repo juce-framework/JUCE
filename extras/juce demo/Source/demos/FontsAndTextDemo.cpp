@@ -49,11 +49,11 @@ public:
     //==============================================================================
     FontsAndTextDemo()
     {
-        setName (T("Fonts"));
+        setName ("Fonts");
 
         Font::findFonts (fonts);
 
-        addAndMakeVisible (listBox = new ListBox (T("fonts"), this));
+        addAndMakeVisible (listBox = new ListBox ("fonts", this));
         listBox->setRowHeight (28);
 
         addAndMakeVisible (textBox = new TextEditor());
@@ -63,12 +63,12 @@ public:
 
         textBox->setMultiLine (true, true);
         textBox->setReturnKeyStartsNewLine (true);
-        textBox->setText (T("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789"));
+        textBox->setText ("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789");
 
-        addAndMakeVisible (boldButton = new ToggleButton (T("bold")));
+        addAndMakeVisible (boldButton = new ToggleButton ("bold"));
         boldButton->addButtonListener (this);
 
-        addAndMakeVisible (italicButton = new ToggleButton (T("italic")));
+        addAndMakeVisible (italicButton = new ToggleButton ("italic"));
         italicButton->addButtonListener (this);
 
         addAndMakeVisible (sizeSlider = new Slider ("Size"));

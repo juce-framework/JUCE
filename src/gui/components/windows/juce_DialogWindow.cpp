@@ -68,7 +68,7 @@ public:
     TempDialogWindow (const String& title, const Colour& colour, const bool escapeCloses)
         : DialogWindow (title, colour, escapeCloses, true)
     {
-        if (JUCEApplication::getInstance() == 0)
+        if (! JUCEApplication::isStandaloneApp)
             setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
     }
 

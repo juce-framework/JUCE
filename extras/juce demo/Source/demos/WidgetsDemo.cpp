@@ -513,7 +513,7 @@ public:
 
         //==============================================================================
         // create an image-only button from these drawables..
-        db = new DrawableButton (T("Button 2"), DrawableButton::ImageFitted);
+        db = new DrawableButton ("Button 2", DrawableButton::ImageFitted);
         db->setImages (&normal, &over, &down);
         db->setClickingTogglesState (true);
 
@@ -524,7 +524,7 @@ public:
 
         //==============================================================================
         // create an image-on-button-shape button from the same drawables..
-        db = new DrawableButton (T("Button 3"), DrawableButton::ImageOnButtonBackground);
+        db = new DrawableButton ("Button 3", DrawableButton::ImageOnButtonBackground);
         db->setImages (&normal, 0, 0);
 
         addAndMakeVisible (db);
@@ -532,7 +532,7 @@ public:
         db->setTooltip ("this is a DrawableButton on a standard button background");
 
         //==============================================================================
-        db = new DrawableButton (T("Button 4"), DrawableButton::ImageOnButtonBackground);
+        db = new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground);
         db->setImages (&normal, &over, &down);
         db->setClickingTogglesState (true);
         db->setBackgroundColours (Colours::white, Colours::yellow);
@@ -1144,7 +1144,7 @@ public:
         enableButton = new ToggleButton ("enable/disable components");
         addAndMakeVisible (enableButton);
         enableButton->setBounds (230, 10, 180, 24);
-        enableButton->setTooltip (T("toggle button"));
+        enableButton->setTooltip ("toggle button");
         enableButton->setToggleState (true, false);
         enableButton->addButtonListener (this);
     }

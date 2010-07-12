@@ -27,6 +27,8 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+
+//==============================================================================
 /* When you use multiple DLLs which share similarly-named obj-c classes - like
    for example having more than one juce plugin loaded into a host, then when a
    method is called, the actual code that runs might actually be in a different module
@@ -170,6 +172,7 @@ using namespace JUCE_NAMESPACE;
 
 #define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
 
+//==============================================================================
 @interface JuceAppDelegate   : NSObject
 {
 @private
@@ -201,7 +204,7 @@ using namespace JUCE_NAMESPACE;
 
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
-    if (JUCEApplication::getInstance() != 0)
+    if (JUCEApplication::isStandaloneApp)
     {
         oldDelegate = [NSApp delegate];
         [NSApp setDelegate: self];
@@ -287,6 +290,7 @@ using namespace JUCE_NAMESPACE;
 
 @end
 
+//==============================================================================
 BEGIN_JUCE_NAMESPACE
 
 static JuceAppDelegate* juceAppDelegate = 0;
@@ -448,8 +452,6 @@ void MessageManager::doPlatformSpecificInitialisation()
         [NSThread detachNewThreadSelector: @selector (dummyMethod)
                                  toTarget: juceAppDelegate
                                withObject: nil];
-
-    initialiseMainMenu();
 }
 
 void MessageManager::doPlatformSpecificShutdown()
@@ -473,8 +475,7 @@ void MessageManager::broadcastMessage (const String& value) throw()
 {
 }
 
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback,
-                                                   void* data)
+void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)
 {
     if (isThisTheMessageThread())
     {

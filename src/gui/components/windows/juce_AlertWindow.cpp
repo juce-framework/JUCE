@@ -106,7 +106,7 @@ AlertWindow::AlertWindow (const String& title,
         }
     }
 
-    if (JUCEApplication::getInstance() == 0)
+    if (! JUCEApplication::isStandaloneApp)
         setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
 
     lookAndFeelChanged();

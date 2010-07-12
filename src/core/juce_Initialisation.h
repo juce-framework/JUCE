@@ -139,6 +139,7 @@ public:
   #define START_JUCE_APPLICATION(AppClass) \
     int main (int argc, char* argv[]) \
     { \
+        JUCE_NAMESPACE::JUCEApplication::isStandaloneApp = true; \
         JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
         return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
     }
@@ -149,6 +150,7 @@ public:
     #define START_JUCE_APPLICATION(AppClass) \
         int main (int, char* argv[]) \
         { \
+            JUCE_NAMESPACE::JUCEApplication::isStandaloneApp = true; \
             JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
             return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
         }
@@ -157,6 +159,7 @@ public:
       #define START_JUCE_APPLICATION(AppClass) \
           int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
           { \
+              JUCE_NAMESPACE::JUCEApplication::isStandaloneApp = true; \
               JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
               return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
           }
@@ -164,6 +167,7 @@ public:
       #define START_JUCE_APPLICATION(AppClass) \
           int __stdcall WinMain (int, int, const char*, int) \
           { \
+              JUCE_NAMESPACE::JUCEApplication::isStandaloneApp = true; \
               JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
               return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
           }

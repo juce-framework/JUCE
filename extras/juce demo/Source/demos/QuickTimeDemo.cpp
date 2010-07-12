@@ -38,14 +38,14 @@ public:
         addAndMakeVisible (qtComp = new QuickTimeMovieComponent());
 
         // and a file-chooser..
-        addAndMakeVisible (fileChooser = new FilenameComponent (T("movie"),
+        addAndMakeVisible (fileChooser = new FilenameComponent ("movie",
                                                                 File::nonexistent,
                                                                 true, false, false,
-                                                                T("*.*"),
+                                                                "*.*",
                                                                 String::empty,
-                                                                T("(choose a video file to play)")));
+                                                                "(choose a video file to play)"));
         fileChooser->addListener (this);
-        fileChooser->setBrowseButtonText (T("browse"));
+        fileChooser->setBrowseButtonText ("browse");
     }
 
     ~QuickTimeWindowWithFileBrowser()
@@ -71,8 +71,8 @@ public:
         else
         {
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         T("Couldn't load the file!"),
-                                         T("Sorry, QuickTime didn't manage to load that file!"));
+                                         "Couldn't load the file!",
+                                         "Sorry, QuickTime didn't manage to load that file!");
         }
     }
 
@@ -89,7 +89,7 @@ public:
     //==============================================================================
     QuickTimeDemo()
     {
-        setName (T("QuickTime"));
+        setName ("QuickTime");
 
         // add a movie component..
         addAndMakeVisible (qtComp1 = new QuickTimeWindowWithFileBrowser());

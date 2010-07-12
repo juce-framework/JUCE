@@ -36,13 +36,16 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_PlatformUtilities.h"
 #include "../text/juce_LocalisedStrings.h"
 
+#if JUCE_MAC
+ extern void juce_initialiseMacMainMenu();
+#endif
 
 //==============================================================================
 JUCEApplication::JUCEApplication()
     : appReturnValue (0),
       stillInitialising (true)
 {
-    jassert (appInstance == 0);
+    jassert (isStandaloneApp && appInstance == 0);
     appInstance = this;
 }
 
@@ -58,24 +61,10 @@ JUCEApplication::~JUCEApplication()
     appInstance = 0;
 }
 
+bool JUCEApplication::isStandaloneApp = false;
 JUCEApplication* JUCEApplication::appInstance = 0;
 
-JUCEApplication* JUCEApplication::getInstance() throw()
-{
-    return appInstance;
-}
-
-bool JUCEApplication::isInitialising() const throw()
-{
-    return stillInitialising;
-}
-
 //==============================================================================
-const String JUCEApplication::getApplicationVersion()
-{
-    return String::empty;
-}
-
 bool JUCEApplication::moreThanOneInstanceAllowed()
 {
     return true;
@@ -182,6 +171,10 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
 
     // let the app do its setting-up..
     initialise (commandLineParameters);
+
+#if JUCE_MAC
+    juce_initialiseMacMainMenu(); // needs to be called after the app object has created, to get its name
+#endif
 
     // register for broadcast new app messages
     MessageManager::getInstance()->registerBroadcastListener (this);

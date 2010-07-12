@@ -107,9 +107,9 @@ public:
     //==============================================================================
     const StringArray getMenuBarNames()
     {
-        const tchar* const names[] = { T("Demo"), T("Look-and-feel"), 0 };
+        const char* const names[] = { "Demo", "Look-and-feel", 0 };
 
-        return StringArray ((const tchar**) names);
+        return StringArray (names);
     }
 
     const PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/)
@@ -224,61 +224,61 @@ public:
     // that this object can perform..
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
     {
-        const String generalCategory (T("General"));
-        const String demosCategory (T("Demos"));
+        const String generalCategory ("General");
+        const String demosCategory ("Demos");
 
         switch (commandID)
         {
         case showRendering:
-            result.setInfo (T("Graphics Rendering"), T("Shows the graphics demo"), demosCategory, 0);
+            result.setInfo ("Graphics Rendering", "Shows the graphics demo", demosCategory, 0);
             result.setTicked (currentDemoId == showRendering);
             result.addDefaultKeypress (T('1'), ModifierKeys::commandModifier);
             break;
 
         case showFontsAndText:
-            result.setInfo (T("Fonts and Text"), T("Shows the fonts & text demo"), demosCategory, 0);
+            result.setInfo ("Fonts and Text", "Shows the fonts & text demo", demosCategory, 0);
             result.setTicked (currentDemoId == showFontsAndText);
             result.addDefaultKeypress (T('2'), ModifierKeys::commandModifier);
             break;
 
         case showWidgets:
-            result.setInfo (T("Widgets"), T("Shows the widgets demo"), demosCategory, 0);
+            result.setInfo ("Widgets", "Shows the widgets demo", demosCategory, 0);
             result.setTicked (currentDemoId == showWidgets);
             result.addDefaultKeypress (T('3'), ModifierKeys::commandModifier);
             break;
 
         case showThreading:
-            result.setInfo (T("Multithreading"), T("Shows the threading demo"), demosCategory, 0);
+            result.setInfo ("Multithreading", "Shows the threading demo", demosCategory, 0);
             result.setTicked (currentDemoId == showThreading);
             result.addDefaultKeypress (T('4'), ModifierKeys::commandModifier);
             break;
 
         case showTreeView:
-            result.setInfo (T("Treeviews"), T("Shows the treeviews demo"), demosCategory, 0);
+            result.setInfo ("Treeviews", "Shows the treeviews demo", demosCategory, 0);
             result.setTicked (currentDemoId == showTreeView);
             result.addDefaultKeypress (T('5'), ModifierKeys::commandModifier);
             break;
 
         case showTable:
-            result.setInfo (T("Table Components"), T("Shows the table component demo"), demosCategory, 0);
+            result.setInfo ("Table Components", "Shows the table component demo", demosCategory, 0);
             result.setTicked (currentDemoId == showTable);
             result.addDefaultKeypress (T('6'), ModifierKeys::commandModifier);
             break;
 
         case showAudio:
-            result.setInfo (T("Audio"), T("Shows the audio demo"), demosCategory, 0);
+            result.setInfo ("Audio", "Shows the audio demo", demosCategory, 0);
             result.setTicked (currentDemoId == showAudio);
             result.addDefaultKeypress (T('7'), ModifierKeys::commandModifier);
             break;
 
         case showDragAndDrop:
-            result.setInfo (T("Drag-and-drop"), T("Shows the drag & drop demo"), demosCategory, 0);
+            result.setInfo ("Drag-and-drop", "Shows the drag & drop demo", demosCategory, 0);
             result.setTicked (currentDemoId == showDragAndDrop);
             result.addDefaultKeypress (T('8'), ModifierKeys::commandModifier);
             break;
 
         case showOpenGL:
-            result.setInfo (T("OpenGL"), T("Shows the OpenGL demo"), demosCategory, 0);
+            result.setInfo ("OpenGL", "Shows the OpenGL demo", demosCategory, 0);
             result.addDefaultKeypress (T('9'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showOpenGL);
 #if ! JUCE_OPENGL
@@ -287,7 +287,7 @@ public:
             break;
 
         case showQuicktime:
-            result.setInfo (T("Quicktime"), T("Shows the Quicktime demo"), demosCategory, 0);
+            result.setInfo ("Quicktime", "Shows the Quicktime demo", demosCategory, 0);
             result.addDefaultKeypress (T('b'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showQuicktime);
 #if ! (JUCE_QUICKTIME && ! JUCE_LINUX)
@@ -296,7 +296,7 @@ public:
             break;
 
         case showCamera:
-            result.setInfo (T("Camera Capture"), T("Shows the camera demo"), demosCategory, 0);
+            result.setInfo ("Camera Capture", "Shows the camera demo", demosCategory, 0);
             result.addDefaultKeypress (T('c'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showCamera);
 #if ! JUCE_USE_CAMERA
@@ -305,7 +305,7 @@ public:
             break;
 
         case showWebBrowser:
-            result.setInfo (T("Web Browser"), T("Shows the web browser demo"), demosCategory, 0);
+            result.setInfo ("Web Browser", "Shows the web browser demo", demosCategory, 0);
             result.addDefaultKeypress (T('i'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showWebBrowser);
 #if (! JUCE_WEB_BROWSER) || JUCE_LINUX
@@ -314,42 +314,42 @@ public:
             break;
 
         case showCodeEditor:
-            result.setInfo (T("Code Editor"), T("Shows the code editor demo"), demosCategory, 0);
+            result.setInfo ("Code Editor", "Shows the code editor demo", demosCategory, 0);
             result.addDefaultKeypress (T('e'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showCodeEditor);
             break;
 
         case showInterprocessComms:
-            result.setInfo (T("Interprocess Comms"), T("Shows the interprocess communications demo"), demosCategory, 0);
+            result.setInfo ("Interprocess Comms", "Shows the interprocess communications demo", demosCategory, 0);
             result.addDefaultKeypress (T('0'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showInterprocessComms);
             break;
 
         case setDefaultLookAndFeel:
-            result.setInfo (T("Use default look-and-feel"), String::empty, generalCategory, 0);
+            result.setInfo ("Use default look-and-feel", String::empty, generalCategory, 0);
             result.setTicked ((typeid (LookAndFeel) == typeid (getLookAndFeel())) != 0);
             break;
 
         case setOldSchoolLookAndFeel:
-            result.setInfo (T("Use the old, original juce look-and-feel"), String::empty, generalCategory, 0);
+            result.setInfo ("Use the old, original juce look-and-feel", String::empty, generalCategory, 0);
             result.setTicked ((typeid (OldSchoolLookAndFeel) == typeid (getLookAndFeel())) != 0);
             break;
 
         case useNativeTitleBar:
-            result.setInfo (T("Use native window title bar"), String::empty, generalCategory, 0);
+            result.setInfo ("Use native window title bar", String::empty, generalCategory, 0);
             result.setTicked (mainWindow->isUsingNativeTitleBar());
             break;
 
 #if JUCE_MAC
         case useNativeMenus:
-            result.setInfo (T("Use the native OSX menu bar"), String::empty, generalCategory, 0);
+            result.setInfo ("Use the native OSX menu bar", String::empty, generalCategory, 0);
             result.setTicked (MenuBarModel::getMacMainMenu() != 0);
             break;
 #endif
 
 #if ! JUCE_LINUX
         case goToKioskMode:
-            result.setInfo (T("Show full-screen kiosk mode"), String::empty, generalCategory, 0);
+            result.setInfo ("Show full-screen kiosk mode", String::empty, generalCategory, 0);
             result.setTicked (Desktop::getInstance().getKioskModeComponent() != 0);
             break;
 #endif
@@ -509,11 +509,11 @@ public:
         g.fillAll (Colours::lightblue);
         g.setColour (Colours::black);
         g.setFont ((float) icon.getHeight(), Font::bold);
-        g.drawText (T("j"), 0, 0, icon.getWidth(), icon.getHeight(), Justification::centred, false);
+        g.drawText ("j", 0, 0, icon.getWidth(), icon.getHeight(), Justification::centred, false);
 
         setIconImage (icon);
 
-        setIconTooltip (T("Juce Demo App!"));
+        setIconTooltip ("Juce Demo App!");
     }
 
     ~DemoTaskbarComponent()
@@ -523,7 +523,7 @@ public:
     void mouseDown (const MouseEvent&)
     {
         PopupMenu m;
-        m.addItem (1, T("Quit the Juce demo"));
+        m.addItem (1, "Quit the Juce demo");
 
         const int result = m.show();
 
@@ -536,7 +536,7 @@ public:
 
 //==============================================================================
 MainDemoWindow::MainDemoWindow()
-    : DocumentWindow (T("JUCE Demo!"),
+    : DocumentWindow ("JUCE Demo!",
                       Colours::azure,
                       DocumentWindow::allButtons,
                       true)

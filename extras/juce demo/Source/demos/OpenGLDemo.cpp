@@ -271,7 +271,7 @@ public:
     //==============================================================================
     OpenGLDemo()
     {
-        setName (T("OpenGL"));
+        setName ("OpenGL");
 
         canvas = new DemoOpenGLCanvas();
         addAndMakeVisible (canvas);
