@@ -159,7 +159,7 @@ void Slider::handleAsyncUpdate()
     cancelPendingUpdate();
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &Listener::sliderValueChanged, this);
+    listeners.callChecked (checker, &Slider::Listener::sliderValueChanged, this);
 }
 
 void Slider::sendDragStart()
@@ -167,7 +167,7 @@ void Slider::sendDragStart()
     startedDragging();
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &Listener::sliderDragStarted, this);
+    listeners.callChecked (checker, &Slider::Listener::sliderDragStarted, this);
 }
 
 void Slider::sendDragEnd()
@@ -177,7 +177,7 @@ void Slider::sendDragEnd()
     sliderBeingDragged = -1;
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &Listener::sliderDragEnded, this);
+    listeners.callChecked (checker, &Slider::Listener::sliderDragEnded, this);
 }
 
 void Slider::addListener (Listener* const listener)

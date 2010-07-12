@@ -416,7 +416,7 @@ void Label::removeListener (Listener* const listener) throw()
 void Label::callChangeListeners()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &Listener::labelTextChanged, this);
+    listeners.callChecked (checker, &Label::Listener::labelTextChanged, this);
 }
 
 //==============================================================================

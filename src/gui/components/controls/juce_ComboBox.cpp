@@ -636,7 +636,7 @@ void ComboBox::removeListener (Listener* const listener) throw()
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &Listener::comboBoxChanged, this);
+    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
 }
 
 

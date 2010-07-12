@@ -238,6 +238,7 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
             else
             {
                 jobs.removeValue (job);
+                job->pool = 0;
             }
         }
     }
@@ -274,6 +275,8 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
 
                     if (deleteInactiveJobs)
                         delete job;
+                    else
+                        job->pool = 0;
                 }
             }
         }
