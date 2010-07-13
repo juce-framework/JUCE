@@ -48,9 +48,9 @@
 class JUCE_API  FileBrowserComponent  : public Component,
                                         public ChangeBroadcaster,
                                         private FileBrowserListener,
-                                        private TextEditor::Listener,
-                                        private Button::Listener,
-                                        private ComboBox::Listener,
+                                        private TextEditorListener,
+                                        private ButtonListener,
+                                        private ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
                                         private FileFilter
 {
 public:

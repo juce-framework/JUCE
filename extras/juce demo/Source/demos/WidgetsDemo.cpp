@@ -477,7 +477,7 @@ static Component* createRadioButtonPage()
 
 //==============================================================================
 class ButtonsPage   : public Component,
-                      public Button::Listener
+                      public ButtonListener
 {
 public:
     ButtonsPage (ButtonListener* buttonListener)
@@ -643,8 +643,8 @@ static Component* createMiscPage()
 
 //==============================================================================
 class ToolbarDemoComp   : public Component,
-                          public Slider::Listener,
-                          public Button::Listener
+                          public SliderListener,
+                          public ButtonListener
 {
 public:
     ToolbarDemoComp()
@@ -917,7 +917,7 @@ private:
 
 //==============================================================================
 class DemoTabbedComponent  : public TabbedComponent,
-                             public Button::Listener
+                             public ButtonListener
 {
 public:
     DemoTabbedComponent()
@@ -1115,7 +1115,7 @@ public:
 const int numGroups = 4;
 
 class WidgetsDemo  : public Component,
-                     public Button::Listener
+                     public ButtonListener
 {
     TextButton* menuButton;
     ToggleButton* enableButton;

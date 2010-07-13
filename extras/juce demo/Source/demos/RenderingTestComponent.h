@@ -38,8 +38,8 @@ class RenderingTestCanvas;
                                                                     //[/Comments]
 */
 class RenderingTestComponent  : public Component,
-                                public ComboBox::Listener,
-                                public Slider::Listener
+                                public ComboBoxListener,
+                                public SliderListener
 {
 public:
     //==============================================================================

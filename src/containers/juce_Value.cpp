@@ -214,7 +214,7 @@ void Value::removeListener (Listener* const listener)
 void Value::callListeners()
 {
     Value v (*this); // (create a copy in case this gets deleted by a callback)
-    listeners.call (&Listener::valueChanged, v);
+    listeners.call (&Value::Listener::valueChanged, v);
 }
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value)

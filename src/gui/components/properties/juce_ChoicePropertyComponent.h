@@ -50,7 +50,7 @@
     @see PropertyComponent, PropertyPanel
 */
 class JUCE_API  ChoicePropertyComponent    : public PropertyComponent,
-                                             private ComboBox::Listener
+                                             private ComboBoxListener  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
 {
 protected:
     /** Creates the component.

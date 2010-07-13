@@ -782,8 +782,8 @@ private:
     Toolbar* const toolbar;
 
     class CustomiserPanel  : public Component,
-                             private ComboBox::Listener,
-                             private Button::Listener
+                             private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+                             private ButtonListener
     {
     public:
         CustomiserPanel (ToolbarItemFactory& factory_,

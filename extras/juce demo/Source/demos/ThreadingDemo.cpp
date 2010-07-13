@@ -211,7 +211,7 @@ public:
 //==============================================================================
 class ThreadingDemo  : public Component,
                        public Timer,
-                       public Button::Listener
+                       public ButtonListener
 {
     bool isUsingPool;
     ThreadPool pool;

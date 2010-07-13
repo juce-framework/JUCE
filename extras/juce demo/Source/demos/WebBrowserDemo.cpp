@@ -66,7 +66,7 @@ private:
 //==============================================================================
 class WebBrowserDemo   : public Component,
                          public TextEditor::Listener,
-                         public Button::Listener
+                         public ButtonListener
 {
 public:
     //==============================================================================

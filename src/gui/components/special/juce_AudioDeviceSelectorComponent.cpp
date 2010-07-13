@@ -208,8 +208,8 @@ private:
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
                                  public ChangeListener,
-                                 public ComboBox::Listener,
-                                 public Button::Listener
+                                 public ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+                                 public ButtonListener
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType* type_,

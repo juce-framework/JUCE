@@ -38,7 +38,7 @@
     that the other plugin wrappers use.
 */
 class StandaloneFilterWindow    : public DocumentWindow,
-                                  public Button::Listener
+                                  public ButtonListener   // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
     //==============================================================================

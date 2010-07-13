@@ -79,12 +79,12 @@ void MenuBarModel::removeListener (Listener* const listenerToRemove) throw()
 //==============================================================================
 void MenuBarModel::handleAsyncUpdate()
 {
-    listeners.call (&Listener::menuBarItemsChanged, this);
+    listeners.call (&MenuBarModel::Listener::menuBarItemsChanged, this);
 }
 
 void MenuBarModel::applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info)
 {
-    listeners.call (&Listener::menuCommandInvoked, this, info);
+    listeners.call (&MenuBarModel::Listener::menuCommandInvoked, this, info);
 }
 
 void MenuBarModel::applicationCommandListChanged()

@@ -2207,19 +2207,19 @@ void TextEditor::handleCommandMessage (const int commandId)
     switch (commandId)
     {
     case TextEditorDefs::textChangeMessageId:
-        listeners.callChecked (checker, &Listener::textEditorTextChanged, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditor::Listener::textEditorTextChanged, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::returnKeyMessageId:
-        listeners.callChecked (checker, &Listener::textEditorReturnKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditor::Listener::textEditorReturnKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::escapeKeyMessageId:
-        listeners.callChecked (checker, &Listener::textEditorEscapeKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditor::Listener::textEditorEscapeKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::focusLossMessageId:
-        listeners.callChecked (checker, &Listener::textEditorFocusLost, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditor::Listener::textEditorFocusLost, (TextEditor&) *this);
         break;
 
     default:

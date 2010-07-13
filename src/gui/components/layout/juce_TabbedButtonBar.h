@@ -105,7 +105,7 @@ private:
 */
 class JUCE_API  TabbedButtonBar  : public Component,
                                    public ChangeBroadcaster,
-                                   public Button::Listener
+                                   public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
     //==============================================================================

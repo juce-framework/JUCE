@@ -377,7 +377,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     clicked (modifiers);
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &Listener::buttonClicked, this);
+        buttonListeners.callChecked (checker, &ButtonListener::buttonClicked, this);  // (can't use Button::Listener due to idiotic VC2005 bug)
 }
 
 void Button::sendStateMessage()
@@ -387,7 +387,7 @@ void Button::sendStateMessage()
     buttonStateChanged();
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &Listener::buttonStateChanged, this);
+        buttonListeners.callChecked (checker, &ButtonListener::buttonStateChanged, this);
 }
 
 //==============================================================================

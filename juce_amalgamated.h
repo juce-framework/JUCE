@@ -36567,9 +36567,9 @@ typedef Label::Listener LabelListener;
 */
 class JUCE_API  ComboBox  : public Component,
 							public SettableTooltipClient,
-							private AsyncUpdater,
-							private Label::Listener,
-							private Value::Listener
+							public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
+							public Value::Listener,
+							private AsyncUpdater
 {
 public:
 
@@ -40451,7 +40451,7 @@ private:
 class JUCE_API  PluginListComponent   : public Component,
 										public ListBoxModel,
 										public ChangeListener,
-										public Button::Listener,
+										public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
 										public Timer
 {
 public:
@@ -44533,7 +44533,7 @@ class ToolbarItemFactory;
 class JUCE_API  Toolbar   : public Component,
 							public DragAndDropContainer,
 							public DragAndDropTarget,
-							private Button::Listener
+							private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
 
@@ -45902,8 +45902,8 @@ private:
 class JUCE_API  Slider  : public Component,
 						  public SettableTooltipClient,
 						  private AsyncUpdater,
-						  private Button::Listener,
-						  private Label::Listener,
+						  private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+						  private LabelListener,
 						  private Value::Listener
 {
 public:
@@ -48753,9 +48753,9 @@ private:
 class JUCE_API  FileBrowserComponent  : public Component,
 										public ChangeBroadcaster,
 										private FileBrowserListener,
-										private TextEditor::Listener,
-										private Button::Listener,
-										private ComboBox::Listener,
+										private TextEditorListener,
+										private ButtonListener,
+										private ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
 										private FileFilter
 {
 public:
@@ -50425,7 +50425,7 @@ private:
 	@see FileChooser
 */
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
-									   public Button::Listener,
+									   public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
 									   public FileBrowserListener
 {
 public:
@@ -50651,8 +50651,8 @@ class JUCE_API  FilenameComponent  : public Component,
 									 public SettableTooltipClient,
 									 public FileDragAndDropTarget,
 									 private AsyncUpdater,
-									 private Button::Listener,
-									 private ComboBox::Listener
+									 private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+									 private ComboBoxListener
 {
 public:
 
@@ -50818,7 +50818,7 @@ private:
 class JUCE_API  FileSearchPathListComponent  : public Component,
 											   public SettableTooltipClient,
 											   public FileDragAndDropTarget,
-											   private Button::Listener,
+											   private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
 											   private ListBoxModel
 {
 public:
@@ -51339,7 +51339,7 @@ private:
 class JUCE_API  KeyMappingEditorComponent  : public Component,
 											 public TreeViewItem,
 											 public ChangeListener,
-											 private Button::Listener
+											 private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
 
@@ -51693,7 +51693,7 @@ private:
 */
 class JUCE_API  TabbedButtonBar  : public Component,
 								   public ChangeBroadcaster,
-								   public Button::Listener
+								   public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
 
@@ -53377,7 +53377,7 @@ private:
 	@see ThreadWithProgressWindow
 */
 class JUCE_API  AlertWindow  : public TopLevelWindow,
-							   private Button::Listener
+							   private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
 
@@ -55292,7 +55292,7 @@ private:
 	@see PropertyComponent
 */
 class JUCE_API  BooleanPropertyComponent  : public PropertyComponent,
-											private Button::Listener
+											private ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 protected:
 
@@ -55366,7 +55366,7 @@ private:
 	@see PropertyComponent
 */
 class JUCE_API  ButtonPropertyComponent  : public PropertyComponent,
-										   private Button::Listener
+										   private ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
 
@@ -55435,7 +55435,7 @@ private:
 	@see PropertyComponent, PropertyPanel
 */
 class JUCE_API  ChoicePropertyComponent	: public PropertyComponent,
-											 private ComboBox::Listener
+											 private ComboBoxListener  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
 {
 protected:
 	/** Creates the component.
@@ -55532,7 +55532,7 @@ private:
 	@see PropertyComponent, Slider
 */
 class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
-											private Slider::Listener
+											private SliderListener  // (can't use Slider::Listener due to idiotic VC2005 bug)
 {
 protected:
 
@@ -55805,8 +55805,8 @@ private:
 	@see AudioDeviceManager
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
-												public ComboBox::Listener,
-												public Button::Listener,
+												public ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+												public ButtonListener,
 												public ChangeListener
 {
 public:
@@ -56142,7 +56142,7 @@ private:
 */
 class JUCE_API  ColourSelector  : public Component,
 								  public ChangeBroadcaster,
-								  protected Slider::Listener
+								  protected SliderListener
 {
 public:
 
@@ -57179,7 +57179,7 @@ private:
 	for each of these pages.
 */
 class JUCE_API  PreferencesPanel  : public Component,
-									private Button::Listener
+									private ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
 

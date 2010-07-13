@@ -39,8 +39,8 @@ class DemoThumbnailComp;
 */
 class AudioDemoPlaybackPage  : public Component,
                                public FileBrowserListener,
-                               public Button::Listener,
-                               public Slider::Listener
+                               public ButtonListener,
+                               public SliderListener
 {
 public:
     //==============================================================================

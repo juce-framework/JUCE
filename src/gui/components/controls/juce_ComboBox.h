@@ -48,9 +48,9 @@
 */
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,
-                            private AsyncUpdater,
-                            private Label::Listener,
-                            private Value::Listener
+                            public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
+                            public Value::Listener,
+                            private AsyncUpdater
 {
 public:
     //==============================================================================

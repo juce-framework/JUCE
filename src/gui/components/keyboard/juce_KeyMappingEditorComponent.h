@@ -41,7 +41,7 @@
 class JUCE_API  KeyMappingEditorComponent  : public Component,
                                              public TreeViewItem,
                                              public ChangeListener,
-                                             private Button::Listener
+                                             private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
     //==============================================================================

@@ -723,7 +723,7 @@ void CodeDocument::sendListenerChangeMessage (const int startLine, const int end
     Position startPos (this, startLine, 0);
     Position endPos (this, endLine, 0);
 
-    listeners.call (&Listener::codeDocumentChanged, startPos, endPos);
+    listeners.call (&CodeDocument::Listener::codeDocumentChanged, startPos, endPos);
 }
 
 //==============================================================================
