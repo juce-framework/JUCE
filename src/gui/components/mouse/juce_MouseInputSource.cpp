@@ -358,8 +358,7 @@ public:
 
     void handleAsyncUpdate()
     {
-        if (! isDragging())
-            setScreenPos (Desktop::getMousePosition(), jmax (lastTime, Time::currentTimeMillis()), true);
+        setScreenPos (Desktop::getMousePosition(), jmax (lastTime, Time::currentTimeMillis()), true);
     }
 
     //==============================================================================

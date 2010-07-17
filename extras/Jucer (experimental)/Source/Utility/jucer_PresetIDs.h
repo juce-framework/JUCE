@@ -101,6 +101,10 @@ namespace Ids
     DECLARE_ID (classDesc);
     DECLARE_ID (controlPoint);
     DECLARE_ID (createCallback);
+    DECLARE_ID (parentClasses);
+    DECLARE_ID (constructorParams);
+    DECLARE_ID (memberInitialisers);
+    DECLARE_ID (lossOfFocusDiscardsChanges);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

@@ -171,7 +171,7 @@ void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMetho
             String x, y, w, h;
             positionToCode (imageAnchor, code.document->getComponentLayout(), x, y, w, h);
 
-            s << "g.setTiledImageFill (*";
+            s << "g.setTiledImageFill (";
 
             const String indent (String::repeatedString (T(" "), s.length()));
 

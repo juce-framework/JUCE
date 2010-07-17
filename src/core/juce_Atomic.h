@@ -230,8 +230,8 @@ template <typename Type>
 inline Type Atomic<Type>::get() const throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier (0, (int32_t*) &value))
-                              : castFrom64Bit ((int64) OSAtomicAdd64Barrier (0, (int64_t*) &value));
+    return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier (0, (volatile int32_t*) &value))
+                              : castFrom64Bit ((int64) OSAtomicAdd64Barrier (0, (volatile int64_t*) &value));
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
                               : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
@@ -258,8 +258,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (int32_t*) &value)
-                              : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (int64_t*) &value);
+    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (volatile int32_t*) &value)
+                              : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (volatile int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
                               : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
@@ -278,8 +278,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator++() throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((int32_t*) &value)
-                              : (Type) OSAtomicIncrement64Barrier ((int64_t*) &value);
+    return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((volatile int32_t*) &value)
+                              : (Type) OSAtomicIncrement64Barrier ((volatile int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
                               : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
@@ -292,8 +292,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator--() throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((int32_t*) &value)
-                              : (Type) OSAtomicDecrement64Barrier ((int64_t*) &value);
+    return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((volatile int32_t*) &value)
+                              : (Type) OSAtomicDecrement64Barrier ((volatile int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
                               : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
@@ -306,8 +306,8 @@ template <typename Type>
 inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (int32_t*) &value)
-                              : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (int64_t*) &value);
+    return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (volatile int32_t*) &value)
+                              : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (volatile int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
   #elif JUCE_ATOMICS_GCC

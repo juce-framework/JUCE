@@ -95,16 +95,6 @@ bool juce_setThreadPriority (void* handle, int priority)
     if (pthread_getschedparam ((pthread_t) handle, &policy, &param) == 0
          && policy != SCHED_OTHER)
     {
-        int minp = sched_get_priority_min (policy);
-        int maxp = sched_get_priority_max (policy);
-
-        int pri = ((maxp - minp) / 2) * (priority - 1) / 9;
-
-        if (param.sched_priority >= (minp + (maxp - minp) / 2))
-            param.sched_priority = minp + ((maxp - minp) / 2) + pri;  // (realtime)
-        else
-            param.sched_priority = minp + pri;  // (high)
-
         param.sched_priority = jlimit (1, 127, 1 + (priority * 126) / 11);
         return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
     }

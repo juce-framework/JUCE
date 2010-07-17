@@ -919,7 +919,7 @@ private:
 //==============================================================================
 void TreeView::showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) throw()
 {
-    beginDragAutoRepeat (1000 / 30);
+    beginDragAutoRepeat (100);
 
     if (dragInsertPointHighlight == 0)
     {
