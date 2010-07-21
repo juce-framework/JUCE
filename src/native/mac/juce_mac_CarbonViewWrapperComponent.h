@@ -242,7 +242,7 @@ public:
         {
             case kEventWindowHandleDeactivate:
                 ActivateWindow (wrapperWindow, TRUE);
-                break;
+                return noErr;
 
             case kEventWindowGetClickActivation:
             {
@@ -254,11 +254,11 @@ public:
                                    sizeof (ClickActivationResult), &howToHandleClick);
 
                 HIViewSetNeedsDisplay (embeddedView, true);
+                return noErr;
             }
-            break;
         }
 
-        return noErr;
+        return eventNotHandledErr;
     }
 
     static pascal OSStatus carbonEventCallback (EventHandlerCallRef nextHandlerRef,

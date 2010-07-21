@@ -158,9 +158,6 @@ private:
     int currentReaderTrack;
     ScopedPointer <AudioFormatReader> reader;
     AudioCDReader (const File& volume);
-public:
-    static int compareElements (const File&, const File&);
-private:
 
 #elif JUCE_WINDOWS
     int numTracks;

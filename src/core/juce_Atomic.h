@@ -230,8 +230,8 @@ template <typename Type>
 inline Type Atomic<Type>::get() const throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier (0, (volatile int32_t*) &value))
-                              : castFrom64Bit ((int64) OSAtomicAdd64Barrier (0, (volatile int64_t*) &value));
+    return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (volatile int32_t*) &value))
+                              : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (volatile int64_t*) &value));
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
                               : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));

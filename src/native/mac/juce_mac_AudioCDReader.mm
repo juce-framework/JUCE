@@ -80,30 +80,34 @@ AudioCDReader::~AudioCDReader()
 {
 }
 
-static int juce_getCDTrackNumber (const File& file)
-{
-    return file.getFileName()
-               .initialSectionContainingOnly ("0123456789")
-               .getIntValue();
-}
-
-int AudioCDReader::compareElements (const File& first, const File& second)
-{
-    const int firstTrack  = juce_getCDTrackNumber (first);
-    const int secondTrack = juce_getCDTrackNumber (second);
-
-    jassert (firstTrack > 0 && secondTrack > 0);
-
-    return firstTrack - secondTrack;
-}
-
 void AudioCDReader::refreshTrackLengths()
 {
     tracks.clear();
     trackStartSamples.clear();
     volumeDir.findChildFiles (tracks, File::findFiles | File::ignoreHiddenFiles, false, "*.aiff");
 
-    tracks.sort (*this);
+    struct CDTrackSorter
+    {
+        static int getCDTrackNumber (const File& file)
+        {
+            return file.getFileName()
+                       .initialSectionContainingOnly ("0123456789")
+                       .getIntValue();
+        }
+
+        static int compareElements (const File& first, const File& second)
+        {
+            const int firstTrack  = getCDTrackNumber (first);
+            const int secondTrack = getCDTrackNumber (second);
+
+            jassert (firstTrack > 0 && secondTrack > 0);
+
+            return firstTrack - secondTrack;
+        }
+    };
+
+    CDTrackSorter sorter;
+    tracks.sort (sorter);
 
     AiffAudioFormat format;
     int sample = 0;
