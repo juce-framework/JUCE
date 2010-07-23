@@ -248,11 +248,15 @@ public:
     // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
     /** @internal */
-    static int main (const String& commandLine, JUCEApplication* newApp);
+    static int main (const String& commandLine);
     /** @internal */
-    static int main (int argc, const char* argv[], JUCEApplication* newApp);
+    static int main (int argc, const char* argv[]);
     /** @internal */
     static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
+
+    /** Returns true if this executable is running as an app (as opposed to being a plugin
+        or other kind of shared library. */
+    static inline bool isStandaloneApp() throw()    { return createInstance != 0; }
 
     /** @internal */
     ApplicationCommandTarget* getNextCommandTarget();
@@ -269,7 +273,9 @@ public:
     /** @internal */
     int shutdownApp();
     /** @internal */
-    static bool isStandaloneApp;
+    typedef JUCEApplication* (*CreateInstanceFunction)();
+    /** @internal */
+    static CreateInstanceFunction createInstance;
 
 private:
     //==============================================================================

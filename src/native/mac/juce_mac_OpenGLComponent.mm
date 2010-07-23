@@ -317,7 +317,7 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
         p = aglNextPixelFormat (p);
     }*/
 
-    //jassertfalse  //xxx can't see how you do this in cocoa!
+    //jassertfalse  // can't see how you do this in cocoa!
 }
 
 #else

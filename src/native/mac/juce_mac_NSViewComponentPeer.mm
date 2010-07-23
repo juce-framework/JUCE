@@ -328,7 +328,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 - (void) mouseDown: (NSEvent*) ev
 {
-    if (JUCEApplication::isStandaloneApp)
+    if (JUCEApplication::isStandaloneApp())
         [self asyncMouseDown: ev];
     else
         // In some host situations, the host will stop modal loops from working
@@ -347,7 +347,7 @@ END_JUCE_NAMESPACE
 
 - (void) mouseUp: (NSEvent*) ev
 {
-    if (! JUCEApplication::isStandaloneApp)
+    if (! JUCEApplication::isStandaloneApp())
         [self asyncMouseUp: ev];
     else
         // In some host situations, the host will stop modal loops from working

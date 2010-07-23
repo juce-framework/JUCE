@@ -375,7 +375,7 @@ public:
                 Component* current = getComponentUnderMouse();
                 if (current != 0)
                     Desktop::setMousePosition (current->getScreenBounds()
-                                                    .getConstrainedPoint (current->getMouseXYRelative()));
+                                                 .getConstrainedPoint (lastScreenPos));
             }
 
             isUnboundedMouseModeOn = enable;

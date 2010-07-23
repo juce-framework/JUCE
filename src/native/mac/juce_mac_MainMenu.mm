@@ -485,7 +485,7 @@ static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName,
 static void rebuildMainMenu (const PopupMenu* extraItems)
 {
     // this can't be used in a plugin!
-    jassert (JUCEApplication::isStandaloneApp);
+    jassert (JUCEApplication::isStandaloneApp());
 
     if (JUCEApplication::getInstance() != 0)
     {

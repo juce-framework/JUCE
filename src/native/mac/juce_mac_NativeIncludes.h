@@ -78,6 +78,7 @@
 #include <ifaddrs.h>
 #include <net/if_dl.h>
 #include <mach/mach_time.h>
+#include <mach-o/dyld.h>
 
 #if MACOS_10_4_OR_EARLIER
  #include <GLUT/glut.h>

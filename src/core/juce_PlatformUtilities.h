@@ -226,7 +226,7 @@ private:
     ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
 
-#define JUCE_AUTORELEASEPOOL  const ScopedAutoReleasePool pool;
+#define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool pool;
 
 #else
 

@@ -132,13 +132,25 @@ const String SystemStats::getOperatingSystemName()
     return "Mac OS X";
 }
 
+#if ! JUCE_IOS
+int PlatformUtilities::getOSXMinorVersionNumber()
+{
+    SInt32 versionMinor = 0;
+    OSErr err = Gestalt (gestaltSystemVersionMinor, &versionMinor);
+    (void) err;
+    jassert (err == noErr);
+    return (int) versionMinor;
+}
+#endif
+
 bool SystemStats::isOperatingSystem64Bit()
 {
-#if JUCE_64BIT
+#if JUCE_IOS
+    return false;
+#elif JUCE_64BIT
     return true;
 #else
-    //xxx not sure how to find this out?..
-    return false;
+    return PlatformUtilities::getOSXMinorVersionNumber() >= 6;
 #endif
 }
 

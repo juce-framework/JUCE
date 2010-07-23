@@ -45,7 +45,7 @@ JUCEApplication::JUCEApplication()
     : appReturnValue (0),
       stillInitialising (true)
 {
-    jassert (isStandaloneApp && appInstance == 0);
+    jassert (isStandaloneApp() && appInstance == 0);
     appInstance = this;
 }
 
@@ -61,7 +61,7 @@ JUCEApplication::~JUCEApplication()
     appInstance = 0;
 }
 
-bool JUCEApplication::isStandaloneApp = false;
+JUCEApplication::CreateInstanceFunction JUCEApplication::createInstance = 0;
 JUCEApplication* JUCEApplication::appInstance = 0;
 
 //==============================================================================
@@ -200,9 +200,12 @@ int JUCEApplication::shutdownApp()
 }
 
 //==============================================================================
-int JUCEApplication::main (const String& commandLine, JUCEApplication* const app)
+int JUCEApplication::main (const String& commandLine)
 {
-    const ScopedPointer<JUCEApplication> appDeleter (app);
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+
+    jassert (createInstance != 0);
+    const ScopedPointer<JUCEApplication> app (createInstance());
 
     if (! app->initialiseApp (commandLine))
         return 0;
@@ -225,23 +228,23 @@ int JUCEApplication::main (const String& commandLine, JUCEApplication* const app
  extern const char* juce_Argv0;
 #endif
 
-int JUCEApplication::main (int argc, const char* argv[], JUCEApplication* const newApp)
+int JUCEApplication::main (int argc, const char* argv[])
 {
     JUCE_AUTORELEASEPOOL
 
   #if ! JUCE_WINDOWS
+    jassert (createInstance != 0);
     juce_Argv0 = argv[0];
   #endif
 
   #if JUCE_IOS
-    const ScopedPointer<JUCEApplication> appDeleter (newApp);
     return juce_iOSMain (argc, argv);
   #else
     String cmd;
     for (int i = 1; i < argc; ++i)
         cmd << argv[i] << ' ';
 
-    return JUCEApplication::main (cmd, newApp);
+    return JUCEApplication::main (cmd);
   #endif
 }
 

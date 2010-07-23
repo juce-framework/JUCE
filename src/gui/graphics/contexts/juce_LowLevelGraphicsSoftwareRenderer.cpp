@@ -2176,7 +2176,10 @@ public:
         {
             const float fontHeight = font.getHeight();
             const AffineTransform transform (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                             .translated (0.0f, -0.5f));
+#if JUCE_MAC || JUCE_IOS
+                                                             .translated (0.0f, -0.5f)
+#endif
+                                             );
 
             edgeTable = new EdgeTable (glyphPath.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
                                        glyphPath, transform);

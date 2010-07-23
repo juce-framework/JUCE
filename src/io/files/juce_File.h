@@ -814,6 +814,9 @@ public:
         */
         invokedExecutableFile,
 
+        /** In a plugin, this will return the path of the host executable. */
+        hostApplicationPath,
+
         /** The directory in which applications normally get installed.
 
             So on windows, this would be something like "c:\program files", on the

@@ -59,15 +59,6 @@ void PlatformUtilities::addItemToDock (const File& file)
     }
 }
 
-int PlatformUtilities::getOSXMinorVersionNumber()
-{
-    SInt32 versionMinor = 0;
-    OSErr err = Gestalt (gestaltSystemVersionMinor, &versionMinor);
-    (void) err;
-    jassert (err == noErr);
-    return (int) versionMinor;
-}
-
 
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY

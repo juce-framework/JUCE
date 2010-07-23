@@ -439,7 +439,14 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
             GetModuleFileName (moduleHandle, dest, numElementsInArray (dest));
             return File (String (dest));
         }
-        break;
+
+        case hostApplicationPath:
+        {
+            WCHAR dest [MAX_PATH + 256];
+            dest[0] = 0;
+            GetModuleFileName (0, dest, numElementsInArray (dest));
+            return File (String (dest));
+        }
 
         default:
             jassertfalse; // unknown type?

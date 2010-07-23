@@ -166,6 +166,16 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     case currentApplicationFile:
         return juce_getExecutableFile();
 
+    case hostApplicationPath:
+    {
+        unsigned int size = 8192;
+        HeapBlock<char> buffer;
+        buffer.calloc (size + 8);
+
+        readlink ("/proc/self/exe", buffer.getData(), size);
+        return String::fromUTF8 (buffer, size);
+    }
+
     default:
         jassertfalse; // unknown type?
         break;

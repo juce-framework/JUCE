@@ -44,17 +44,17 @@ END_JUCE_NAMESPACE
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
-    String dummy;
+    initialiseJuce_GUI();
 
-    if (! JUCEApplication::getInstance()->initialiseApp (dummy))
+    if (! JUCEApplication::createInstance()->initialiseApp (String::empty))
         exit (0);
 }
 
 - (void) applicationWillTerminate: (UIApplication*) application
 {
+    jassert (JUCEApplication::getInstance() != 0);
     JUCEApplication::getInstance()->shutdownApp();
 
-    // need to do this stuff because the OS kills the process before our scope-based cleanup code gets executed..
     delete JUCEApplication::getInstance();
     shutdownJuce_GUI();
 }

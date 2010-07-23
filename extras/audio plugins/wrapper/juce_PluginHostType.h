@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_MAC
- #include <mach-o/dyld.h>
-#endif
 
 //==============================================================================
 class PluginHostType
@@ -103,7 +100,7 @@ public:
 private:
     static HostType getHostType() throw()
     {
-        const String hostPath (getHostPath());
+        const String hostPath (File::getSpecialLocation (File::hostApplicationPath).getFullPath());
         const String hostFilename (File (hostPath).getFileName());
 
 #if JUCE_MAC
@@ -143,26 +140,5 @@ private:
         #error
 #endif
         return UnknownHost;
-    }
-
-    static const String getHostPath() throw()
-    {
-        unsigned int size = 8192;
-        HeapBlock<char> buffer;
-        buffer.calloc (size + 8);
-
-#if JUCE_WINDOWS
-        WCHAR* w = reinterpret_cast <WCHAR*> (buffer.getData());
-        GetModuleFileNameW (0, w, size / sizeof (WCHAR));
-        return String (w, size);
-#elif JUCE_MAC
-        _NSGetExecutablePath (buffer.getData(), &size);
-        return String::fromUTF8 (buffer, size);
-#elif JUCE_LINUX
-        readlink ("/proc/self/exe", buffer.getData(), size);
-        return String::fromUTF8 (buffer, size);
-#else
-        #error
-#endif
     }
 };

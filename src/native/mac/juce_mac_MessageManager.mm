@@ -204,7 +204,7 @@ using namespace JUCE_NAMESPACE;
 
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
-    if (JUCEApplication::isStandaloneApp)
+    if (JUCEApplication::isStandaloneApp())
     {
         oldDelegate = [NSApp delegate];
         [NSApp setDelegate: self];

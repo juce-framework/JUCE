@@ -200,6 +200,16 @@ const File File::getSpecialLocation (const SpecialLocationType type)
                 : exe;
     }
 
+    case hostApplicationPath:
+    {
+        unsigned int size = 8192;
+        HeapBlock<char> buffer;
+        buffer.calloc (size + 8);
+
+        _NSGetExecutablePath (buffer.getData(), &size);
+        return String::fromUTF8 (buffer, size);
+    }
+
     default:
         jassertfalse; // unknown type?
         break;
