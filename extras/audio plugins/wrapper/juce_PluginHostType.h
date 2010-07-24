@@ -100,7 +100,7 @@ public:
 private:
     static HostType getHostType() throw()
     {
-        const String hostPath (File::getSpecialLocation (File::hostApplicationPath).getFullPath());
+        const String hostPath (File::getSpecialLocation (File::hostApplicationPath).getFullPathName());
         const String hostFilename (File (hostPath).getFileName());
 
 #if JUCE_MAC
