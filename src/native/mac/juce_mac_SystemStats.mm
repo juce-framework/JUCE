@@ -78,34 +78,30 @@ void SystemStats::initialiseStats()
     {
         initialised = true;
 
-        #if JUCE_MAC
-            // extremely annoying: adding this line stops the apple menu items from working. Of
-            // course, not adding it means that carbon windows (e.g. in plugins) won't get
-            // any events.
-            //NSApplicationLoad();
-            [NSApplication sharedApplication];
-        #endif
+      #if JUCE_MAC
+        [NSApplication sharedApplication];
+      #endif
 
-        #if JUCE_INTEL
-            unsigned int familyModel, extFeatures;
-            const unsigned int features = getCPUIDWord (familyModel, extFeatures);
+      #if JUCE_INTEL
+        unsigned int familyModel, extFeatures;
+        const unsigned int features = getCPUIDWord (familyModel, extFeatures);
 
-            cpuFlags.hasMMX = ((features & (1 << 23)) != 0);
-            cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
-            cpuFlags.hasSSE2 = ((features & (1 << 26)) != 0);
-            cpuFlags.has3DNow = ((extFeatures & (1 << 31)) != 0);
-        #else
-            cpuFlags.hasMMX = false;
-            cpuFlags.hasSSE = false;
-            cpuFlags.hasSSE2 = false;
-            cpuFlags.has3DNow = false;
-        #endif
+        cpuFlags.hasMMX = ((features & (1 << 23)) != 0);
+        cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
+        cpuFlags.hasSSE2 = ((features & (1 << 26)) != 0);
+        cpuFlags.has3DNow = ((extFeatures & (1 << 31)) != 0);
+      #else
+        cpuFlags.hasMMX = false;
+        cpuFlags.hasSSE = false;
+        cpuFlags.hasSSE2 = false;
+        cpuFlags.has3DNow = false;
+      #endif
 
-        #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-            cpuFlags.numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
-        #else
-            cpuFlags.numCpus = (int) MPProcessors();
-        #endif
+      #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+        cpuFlags.numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+      #else
+        cpuFlags.numCpus = (int) MPProcessors();
+      #endif
 
         mach_timebase_info_data_t timebase;
         (void) mach_timebase_info (&timebase);

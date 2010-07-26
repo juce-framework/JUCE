@@ -118,6 +118,7 @@
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioCDBurner.h"/>
+            <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioCDReader.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioCDReader.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormat.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormat.h"/>

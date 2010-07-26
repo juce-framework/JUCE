@@ -193,6 +193,9 @@
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.cpp">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioCDReader.cpp">
+      <Filter>Juce\Source\audio\audio_file_formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormat.cpp">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClCompile>

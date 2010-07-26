@@ -632,7 +632,7 @@ public:
             CloseHandle (scsiHandle);
     }
 
-    bool readTOC (TOC* lpToc, bool useMSF);
+    bool readTOC (TOC* lpToc);
     bool readAudio (CDReadBuffer* buffer, CDReadBuffer* overlapBuffer = 0);
     void openDrawer (bool shouldBeOpen);
 
@@ -1206,7 +1206,7 @@ int CDController::getLastIndex()
 }
 
 //==============================================================================
-bool CDDeviceHandle::readTOC (TOC* lpToc, bool useMSF)
+bool CDDeviceHandle::readTOC (TOC* lpToc)
 {
     HANDLE event = CreateEvent (0, TRUE, FALSE, 0);
 
@@ -1224,7 +1224,7 @@ bool CDDeviceHandle::readTOC (TOC* lpToc, bool useMSF)
     s.SRB_CDBLen = 0x0A;
     s.SRB_PostProc = event;
     s.CDBByte[0] = 0x43;
-    s.CDBByte[1] = (BYTE)(useMSF ? 0x02 : 0x00);
+    s.CDBByte[1] = 0x00;
     s.CDBByte[7] = 0x03;
     s.CDBByte[8] = 0x24;
 
@@ -1596,11 +1596,6 @@ static int getAddressOf (const TOCTRACK* const t)
            (((DWORD)t->addr[2]) << 8) + ((DWORD)t->addr[3]);
 }
 
-static int getMSFAddressOf (const TOCTRACK* const t)
-{
-    return 60 * t->addr[1] + t->addr[2];
-}
-
 static const int samplesPerFrame = 44100 / 75;
 static const int bytesPerFrame = samplesPerFrame * 4;
 
@@ -1715,7 +1710,6 @@ AudioCDReader::AudioCDReader (void* handle_)
 
     sampleRate = 44100.0;
     bitsPerSample = 16;
-    lengthInSamples = getPositionOfTrackStart (numTracks);
     numChannels = 2;
     usesFloatingPointData = false;
 
@@ -1821,7 +1815,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
 
                 // sometimes the read fails for just the very last couple of blocks, so
                 // we'll ignore and errors in the last half-second of the disk..
-                ok = startSampleInFile > (trackStarts [numTracks] - 20000);
+                ok = startSampleInFile > (trackStartSamples [getNumTracks()] - 20000);
                 break;
             }
         }
@@ -1836,50 +1830,35 @@ bool AudioCDReader::isCDStillPresent() const
     TOC toc;
     zerostruct (toc);
 
-    return ((CDDeviceWrapper*) handle)->cdH->readTOC (&toc, false);
-}
-
-int AudioCDReader::getNumTracks() const
-{
-    return numTracks;
-}
-
-int AudioCDReader::getPositionOfTrackStart (int trackNum) const
-{
-    using namespace CDReaderHelpers;
-    return (trackNum >= 0 && trackNum <= numTracks) ? trackStarts [trackNum] * samplesPerFrame
-                                                    : 0;
+    return ((CDDeviceWrapper*) handle)->cdH->readTOC (&toc);
 }
 
 void AudioCDReader::refreshTrackLengths()
 {
     using namespace CDReaderHelpers;
-    zeromem (trackStarts, sizeof (trackStarts));
+    trackStartSamples.clear();
     zeromem (audioTracks, sizeof (audioTracks));
 
     TOC toc;
     zerostruct (toc);
 
-    if (((CDDeviceWrapper*)handle)->cdH->readTOC (&toc, false))
+    if (((CDDeviceWrapper*)handle)->cdH->readTOC (&toc))
     {
-        numTracks = 1 + toc.lastTrack - toc.firstTrack;
+        int numTracks = 1 + toc.lastTrack - toc.firstTrack;
 
         for (int i = 0; i <= numTracks; ++i)
         {
-            trackStarts[i] = getAddressOf (&toc.tracks[i]);
-            audioTracks[i] = ((toc.tracks[i].ADR & 4) == 0);
+            trackStartSamples.add (samplesPerFrame * getAddressOf (&toc.tracks [i]));
+            audioTracks [i] = ((toc.tracks[i].ADR & 4) == 0);
         }
     }
-    else
-    {
-        numTracks = 0;
-    }
+
+    lengthInSamples = getPositionOfTrackStart (getNumTracks());
 }
 
 bool AudioCDReader::isTrackAudio (int trackNum) const
 {
-    return (trackNum >= 0 && trackNum <= numTracks) ? audioTracks [trackNum]
-                                                    : false;
+    return trackNum >= 0 && trackNum < getNumTracks() && audioTracks [trackNum];
 }
 
 void AudioCDReader::enableIndexScanning (bool b)
@@ -2023,44 +2002,6 @@ const Array <int> AudioCDReader::findIndexesInTrack (const int trackNumber)
     }
 
     return indexes;
-}
-
-int AudioCDReader::getCDDBId()
-{
-    using namespace CDReaderHelpers;
-    refreshTrackLengths();
-
-    if (numTracks > 0)
-    {
-        TOC toc;
-        zerostruct (toc);
-
-        if (((CDDeviceWrapper*) handle)->cdH->readTOC (&toc, true))
-        {
-            int n = 0;
-
-            for (int i = numTracks; --i >= 0;)
-            {
-                int j = getMSFAddressOf (&toc.tracks[i]);
-
-                while (j > 0)
-                {
-                    n += (j % 10);
-                    j /= 10;
-                }
-            }
-
-            if (n != 0)
-            {
-                const int t = getMSFAddressOf (&toc.tracks[numTracks])
-                                - getMSFAddressOf (&toc.tracks[0]);
-
-                return ((n % 0xff) << 24) | (t << 8) | numTracks;
-            }
-        }
-    }
-
-    return 0;
 }
 
 void AudioCDReader::ejectDisk()

@@ -28,20 +28,98 @@
 #if JUCE_INCLUDED_FILE && JUCE_USE_CDREADER
 
 //==============================================================================
-static void juce_findCDs (Array<File>& cds)
+namespace CDReaderHelpers
 {
-    File volumes ("/Volumes");
-    volumes.findChildFiles (cds, File::findDirectories, false);
+    inline const XmlElement* getElementForKey (const XmlElement& xml, const String& key)
+    {
+        forEachXmlChildElementWithTagName (xml, child, "key")
+            if (child->getAllSubText() == key)
+                return child->getNextElement();
 
-    for (int i = cds.size(); --i >= 0;)
-        if (! cds.getReference(i).getChildFile (".TOC.plist").exists())
-            cds.remove (i);
+        return 0;
+    }
+
+    static int getIntValueForKey (const XmlElement& xml, const String& key, int defaultValue = -1)
+    {
+        const XmlElement* const block = getElementForKey (xml, key);
+        return block != 0 ? block->getAllSubText().getIntValue() : defaultValue;
+    }
+
+    // Get the track offsets for a CD given an XmlElement representing its TOC.Plist.
+    // Returns NULL on success, otherwise a const char* representing an error.
+    static const char* getTrackOffsets (XmlDocument& xmlDocument, Array<int>& offsets)
+    {
+        const ScopedPointer<XmlElement> xml (xmlDocument.getDocumentElement());
+        if (xml == 0)
+            return "Couldn't parse XML in file";
+
+        const XmlElement* const dict = xml->getChildByName ("dict");
+        if (dict == 0)
+            return "Couldn't get top level dictionary";
+
+        const XmlElement* const sessions = getElementForKey (*dict, "Sessions");
+        if (sessions == 0)
+            return "Couldn't find sessions key";
+
+        const XmlElement* const session = sessions->getFirstChildElement();
+        if (session == 0)
+            return "Couldn't find first session";
+
+        const int leadOut = getIntValueForKey (*session, "Leadout Block");
+        if (leadOut < 0)
+            return "Couldn't find Leadout Block";
+
+        const XmlElement* const trackArray = getElementForKey (*session, "Track Array");
+        if (trackArray == 0)
+            return "Couldn't find Track Array";
+
+        forEachXmlChildElement (*trackArray, track)
+        {
+            const int trackValue = getIntValueForKey (*track, "Start Block");
+            if (trackValue < 0)
+                return "Couldn't find Start Block in the track";
+
+            offsets.add (trackValue * AudioCDReader::samplesPerFrame - 88200);
+        }
+
+        offsets.add (leadOut * AudioCDReader::samplesPerFrame - 88200);
+        return 0;
+    }
+
+    static void findDevices (Array<File>& cds)
+    {
+        File volumes ("/Volumes");
+        volumes.findChildFiles (cds, File::findDirectories, false);
+
+        for (int i = cds.size(); --i >= 0;)
+            if (! cds.getReference(i).getChildFile (".TOC.plist").exists())
+                cds.remove (i);
+    }
+
+    struct TrackSorter
+    {
+        static int getCDTrackNumber (const File& file)
+        {
+            return file.getFileName().initialSectionContainingOnly ("0123456789").getIntValue();
+        }
+
+        static int compareElements (const File& first, const File& second)
+        {
+            const int firstTrack  = getCDTrackNumber (first);
+            const int secondTrack = getCDTrackNumber (second);
+
+            jassert (firstTrack > 0 && secondTrack > 0);
+
+            return firstTrack - secondTrack;
+        }
+    };
 }
 
+//==============================================================================
 const StringArray AudioCDReader::getAvailableCDNames()
 {
     Array<File> cds;
-    juce_findCDs (cds);
+    CDReaderHelpers::findDevices (cds);
 
     StringArray names;
 
@@ -54,7 +132,7 @@ const StringArray AudioCDReader::getAvailableCDNames()
 AudioCDReader* AudioCDReader::createReaderForCD (const int index)
 {
     Array<File> cds;
-    juce_findCDs (cds);
+    CDReaderHelpers::findDevices (cds);
 
     if (cds[index].exists())
         return new AudioCDReader (cds[index]);
@@ -84,51 +162,23 @@ void AudioCDReader::refreshTrackLengths()
 {
     tracks.clear();
     trackStartSamples.clear();
+    lengthInSamples = 0;
+
     volumeDir.findChildFiles (tracks, File::findFiles | File::ignoreHiddenFiles, false, "*.aiff");
 
-    struct CDTrackSorter
-    {
-        static int getCDTrackNumber (const File& file)
-        {
-            return file.getFileName()
-                       .initialSectionContainingOnly ("0123456789")
-                       .getIntValue();
-        }
-
-        static int compareElements (const File& first, const File& second)
-        {
-            const int firstTrack  = getCDTrackNumber (first);
-            const int secondTrack = getCDTrackNumber (second);
-
-            jassert (firstTrack > 0 && secondTrack > 0);
-
-            return firstTrack - secondTrack;
-        }
-    };
-
-    CDTrackSorter sorter;
+    CDReaderHelpers::TrackSorter sorter;
     tracks.sort (sorter);
 
-    AiffAudioFormat format;
-    int sample = 0;
+    const File toc (volumeDir.getChildFile (".TOC.plist"));
 
-    for (int i = 0; i < tracks.size(); ++i)
+    if (toc.exists())
     {
-        trackStartSamples.add (sample);
+        XmlDocument doc (toc);
+        const char* error = CDReaderHelpers::getTrackOffsets (doc, trackStartSamples);
+        (void) error; // could be logged..
 
-        FileInputStream* const in = tracks.getReference(i).createInputStream();
-
-        if (in != 0)
-        {
-            ScopedPointer <AudioFormatReader> r (format.createReaderFor (in, true));
-
-            if (r != 0)
-                sample += (int) r->lengthInSamples;
-        }
+        lengthInSamples = trackStartSamples.getLast() - trackStartSamples.getFirst();
     }
-
-    trackStartSamples.add (sample);
-    lengthInSamples = sample;
 }
 
 bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -190,19 +240,9 @@ bool AudioCDReader::isCDStillPresent() const
     return volumeDir.exists();
 }
 
-int AudioCDReader::getNumTracks() const
-{
-    return tracks.size();
-}
-
-int AudioCDReader::getPositionOfTrackStart (int trackNum) const
-{
-    return trackStartSamples [trackNum];
-}
-
 bool AudioCDReader::isTrackAudio (int trackNum) const
 {
-    return tracks [trackNum] != File::nonexistent;
+    return tracks [trackNum].hasFileExtension (".aiff");
 }
 
 void AudioCDReader::enableIndexScanning (bool b)
@@ -218,11 +258,6 @@ int AudioCDReader::getLastIndex() const
 const Array <int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 {
     return Array <int>();
-}
-
-int AudioCDReader::getCDDBId()
-{
-    return 0; //xxx
 }
 
 #endif

@@ -173,6 +173,9 @@ END_JUCE_NAMESPACE
     [self addSubview: hiddenTextField];
     hiddenTextField.delegate = self;
 
+    hiddenTextField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    hiddenTextField.autocorrectionType = UITextAutocorrectionTypeNo;
+
     return self;
 }
 

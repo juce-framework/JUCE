@@ -69,6 +69,8 @@
                 file="src/audio/audio_file_formats/juce_AiffAudioFormat.h"/>
           <FILE id="iaSLTdAgX" name="juce_AudioCDBurner.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioCDBurner.h"/>
+          <FILE id="0iwk53E" name="juce_AudioCDReader.cpp" compile="1" resource="0"
+                file="src/audio/audio_file_formats/juce_AudioCDReader.cpp"/>
           <FILE id="RV1XmJohc" name="juce_AudioCDReader.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioCDReader.h"/>
           <FILE id="7bdvMw9hr" name="juce_AudioFormat.cpp" compile="1" resource="0"

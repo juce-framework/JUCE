@@ -45,6 +45,7 @@ OBJECTS := \
   $(OBJDIR)/juce_ApplicationCommandTarget_90a89aa9.o \
   $(OBJDIR)/juce_ApplicationProperties_a76b5c30.o \
   $(OBJDIR)/juce_AiffAudioFormat_ffbda971.o \
+  $(OBJDIR)/juce_AudioCDReader_c730f7a6.o \
   $(OBJDIR)/juce_AudioFormat_6605d0f9.o \
   $(OBJDIR)/juce_AudioFormatManager_949148fe.o \
   $(OBJDIR)/juce_AudioSubsectionReader_65f61a0a.o \
@@ -383,6 +384,11 @@ $(OBJDIR)/juce_ApplicationProperties_a76b5c30.o: ../../src/application/juce_Appl
 $(OBJDIR)/juce_AiffAudioFormat_ffbda971.o: ../../src/audio/audio_file_formats/juce_AiffAudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_AiffAudioFormat.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AudioCDReader_c730f7a6.o: ../../src/audio/audio_file_formats/juce_AudioCDReader.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_AudioCDReader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioFormat_6605d0f9.o: ../../src/audio/audio_file_formats/juce_AudioFormat.cpp

@@ -12,6 +12,7 @@
 		CD59C8E60146B04575CD61E6 = { isa = PBXBuildFile; fileRef = 415BD77DF4B2F4760D138735; };
 		76890501626BFFF310A94F15 = { isa = PBXBuildFile; fileRef = BA97FEDA576503A21D971F1E; };
 		46151070FA7D3426EC35280F = { isa = PBXBuildFile; fileRef = 1AA8BE2D76E153874FB08197; };
+		983FCD60625A60993546F850 = { isa = PBXBuildFile; fileRef = 0877D5750D6F21C5231687CA; };
 		416D6F00E88DC74879B4DF2B = { isa = PBXBuildFile; fileRef = 7D85530D76756C33795ECCE9; };
 		9C709BC2F4F0EE60BF52FACA = { isa = PBXBuildFile; fileRef = 93006D32B18174D9FE0A5E9E; };
 		FB21B7E6A7CE55D3C0E3C37E = { isa = PBXBuildFile; fileRef = 59597FA0A88A08937801D198; };
@@ -349,6 +350,7 @@
 		1AA8BE2D76E153874FB08197 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AiffAudioFormat.cpp; path = ../../src/audio/audio_file_formats/juce_AiffAudioFormat.cpp; sourceTree = SOURCE_ROOT; };
 		05C5C546E12C6422D865D864 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AiffAudioFormat.h; path = ../../src/audio/audio_file_formats/juce_AiffAudioFormat.h; sourceTree = SOURCE_ROOT; };
 		1F5A667524FB005D872340E1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioCDBurner.h; path = ../../src/audio/audio_file_formats/juce_AudioCDBurner.h; sourceTree = SOURCE_ROOT; };
+		0877D5750D6F21C5231687CA = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioCDReader.cpp; path = ../../src/audio/audio_file_formats/juce_AudioCDReader.cpp; sourceTree = SOURCE_ROOT; };
 		1BBE03BB0D71FEEEA440682B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioCDReader.h; path = ../../src/audio/audio_file_formats/juce_AudioCDReader.h; sourceTree = SOURCE_ROOT; };
 		7D85530D76756C33795ECCE9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioFormat.cpp; path = ../../src/audio/audio_file_formats/juce_AudioFormat.cpp; sourceTree = SOURCE_ROOT; };
 		013E8938EE1C6B4F63016B55 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioFormat.h; path = ../../src/audio/audio_file_formats/juce_AudioFormat.h; sourceTree = SOURCE_ROOT; };
@@ -1033,6 +1035,7 @@
 				1AA8BE2D76E153874FB08197,
 				05C5C546E12C6422D865D864,
 				1F5A667524FB005D872340E1,
+				0877D5750D6F21C5231687CA,
 				1BBE03BB0D71FEEEA440682B,
 				7D85530D76756C33795ECCE9,
 				013E8938EE1C6B4F63016B55,
@@ -1898,6 +1901,7 @@
 				CD59C8E60146B04575CD61E6,
 				76890501626BFFF310A94F15,
 				46151070FA7D3426EC35280F,
+				983FCD60625A60993546F850,
 				416D6F00E88DC74879B4DF2B,
 				9C709BC2F4F0EE60BF52FACA,
 				FB21B7E6A7CE55D3C0E3C37E,

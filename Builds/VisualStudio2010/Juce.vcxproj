@@ -128,6 +128,7 @@
     <ClCompile Include="..\..\src\application\juce_ApplicationCommandTarget.cpp"/>
     <ClCompile Include="..\..\src\application\juce_ApplicationProperties.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.cpp"/>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioCDReader.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatManager.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.cpp"/>

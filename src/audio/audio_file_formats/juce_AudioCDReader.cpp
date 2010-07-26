@@ -23,64 +23,47 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_linux_NativeCode.cpp, rather than being
-// compiled on its own).
-#if JUCE_INCLUDED_FILE && JUCE_USE_CDREADER
+#include "../../core/juce_StandardHeader.h"
+
+#if JUCE_USE_CDREADER
+
+BEGIN_JUCE_NAMESPACE
+
+#include "juce_AudioCDReader.h"
 
 
 //==============================================================================
-AudioCDReader::AudioCDReader()
-    : AudioFormatReader (0, "CD Audio")
+int AudioCDReader::getNumTracks() const
 {
+    return trackStartSamples.size() - 1;
 }
 
-const StringArray AudioCDReader::getAvailableCDNames()
+int AudioCDReader::getPositionOfTrackStart (int trackNum) const
 {
-    StringArray names;
-    return names;
+    return trackStartSamples [trackNum];
 }
 
-AudioCDReader* AudioCDReader::createReaderForCD (const int index)
+const Array<int>& AudioCDReader::getTrackOffsets() const
 {
-    return 0;
+    return trackStartSamples;
 }
 
-AudioCDReader::~AudioCDReader()
+int AudioCDReader::getCDDBId()
 {
+    int checksum = 0;
+    const int numTracks = getNumTracks();
+
+    for (int i = 0; i < numTracks; ++i)
+        for (int offset = (trackStartSamples.getUnchecked(i) + 88200) / 44100; offset > 0; offset /= 10)
+            checksum += offset % 10;
+
+    const int length = (trackStartSamples.getLast() - trackStartSamples.getFirst()) / 44100;
+
+    // CCLLLLTT: checksum, length, tracks
+    return ((checksum & 0xff) << 24) | (length << 8) | numTracks;
 }
 
-void AudioCDReader::refreshTrackLengths()
-{
-}
 
-bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                                 int64 startSampleInFile, int numSamples)
-{
-    return false;
-}
-
-bool AudioCDReader::isCDStillPresent() const
-{
-    return false;
-}
-
-bool AudioCDReader::isTrackAudio (int trackNum) const
-{
-    return false;
-}
-
-void AudioCDReader::enableIndexScanning (bool b)
-{
-}
-
-int AudioCDReader::getLastIndex() const
-{
-    return 0;
-}
-
-const Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
-{
-    return Array<int>();
-}
+END_JUCE_NAMESPACE
 
 #endif

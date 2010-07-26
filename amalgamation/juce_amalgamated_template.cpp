@@ -168,6 +168,7 @@
  #include "../src/audio/audio_file_formats/juce_AudioThumbnailCache.cpp"
  #include "../src/audio/audio_file_formats/juce_QuickTimeAudioFormat.cpp"
  #include "../src/audio/audio_file_formats/juce_WavAudioFormat.cpp"
+ #include "../src/audio/audio_file_formats/juce_AudioCDReader.cpp"
  #include "../src/audio/audio_sources/juce_AudioFormatReaderSource.cpp"
  #include "../src/audio/audio_sources/juce_AudioSourcePlayer.cpp"
  #include "../src/audio/audio_sources/juce_AudioTransportSource.cpp"

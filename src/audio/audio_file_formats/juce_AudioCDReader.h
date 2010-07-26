@@ -87,7 +87,8 @@ public:
 
     /** Finds the sample offset of the start of a track.
 
-        @param trackNum     the track number, where 0 is the first track.
+        @param trackNum     the track number, where trackNum = 0 is the first track
+                            and trackNum = getNumTracks() means the end of the CD.
     */
     int getPositionOfTrackStart (int trackNum) const;
 
@@ -96,6 +97,11 @@ public:
         @param trackNum     the track number, where 0 is the first track.
     */
     bool isTrackAudio (int trackNum) const;
+
+    /** Returns an array of sample offsets for the start of each track, followed by
+        the sample position of the end of the CD.
+    */
+    const Array<int>& getTrackOffsets() const;
 
     /** Refreshes the object's table of contents.
 
@@ -147,21 +153,23 @@ public:
     void ejectDisk();
 
     //==============================================================================
+    static const int framesPerSecond = 75;
+    static const int samplesPerFrame = 44100 / framesPerSecond;
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
+    Array<int> trackStartSamples;
 
 #if JUCE_MAC
     File volumeDir;
     Array<File> tracks;
-    Array<int> trackStartSamples;
     int currentReaderTrack;
     ScopedPointer <AudioFormatReader> reader;
     AudioCDReader (const File& volume);
 
 #elif JUCE_WINDOWS
-    int numTracks;
-    int trackStarts[100];
     bool audioTracks [100];
     void* handle;
     bool indexingEnabled;
