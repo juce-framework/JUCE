@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	45
+#define JUCE_BUILDNUMBER	46
 
 /** Current Juce version number.
 
@@ -338,7 +338,7 @@
 	reduce code size.
 */
 #ifndef JUCE_USE_CDREADER
-  #define JUCE_USE_CDREADER 1
+  #define JUCE_USE_CDREADER 0
 #endif
 
 /** JUCE_USE_CAMERA: Enables web-cam support using the CameraDevice class (Mac and Windows).
