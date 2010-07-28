@@ -358,7 +358,7 @@ public:
 
     void handleAsyncUpdate()
     {
-        setScreenPos (Desktop::getMousePosition(), jmax (lastTime, Time::currentTimeMillis()), true);
+        setScreenPos (lastScreenPos, jmax (lastTime, Time::currentTimeMillis()), true);
     }
 
     //==============================================================================

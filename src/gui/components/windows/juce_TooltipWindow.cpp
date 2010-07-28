@@ -79,6 +79,9 @@ void TooltipWindow::mouseEnter (const MouseEvent&)
 void TooltipWindow::showFor (const String& tip)
 {
     jassert (tip.isNotEmpty());
+    if (tipShowing != tip)
+        repaint();
+
     tipShowing = tip;
 
     Point<int> mousePos (Desktop::getMousePosition());

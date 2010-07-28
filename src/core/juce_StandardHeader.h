@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      52
-#define JUCE_BUILDNUMBER        46
+#define JUCE_BUILDNUMBER        47
 
 /** Current Juce version number.
 

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	46
+#define JUCE_BUILDNUMBER	47
 
 /** Current Juce version number.
 
@@ -5863,12 +5863,18 @@ private:
 	  || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
 
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+	#define JUCE_MAC_ATOMICS_VOLATILE
+  #else
+	#define JUCE_MAC_ATOMICS_VOLATILE volatile
+  #endif
+
   #if JUCE_PPC || JUCE_IOS
 	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
-	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
-	template <typename Type> static Type OSAtomicIncrement64Barrier (volatile Type* a) throw()	 { jassertfalse; return ++*a; }
-	template <typename Type> static Type OSAtomicDecrement64Barrier (volatile Type* a) throw()	 { jassertfalse; return --*a; }
-	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, volatile Type* value) throw()
+	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()   { jassertfalse; return *a += b; }
+	template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return ++*a; }
+	template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return --*a; }
+	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) throw()
 		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
 	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
@@ -5929,8 +5935,8 @@ template <typename Type>
 inline Type Atomic<Type>::get() const throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (volatile int32_t*) &value))
-							  : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (volatile int64_t*) &value));
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
+							  : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value));
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
 							  : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
@@ -5957,8 +5963,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (volatile int32_t*) &value)
-							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (volatile int64_t*) &value);
+	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
 							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
@@ -5977,8 +5983,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator++() throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((volatile int32_t*) &value)
-							  : (Type) OSAtomicIncrement64Barrier ((volatile int64_t*) &value);
+	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicIncrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
@@ -5991,8 +5997,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator--() throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((volatile int32_t*) &value)
-							  : (Type) OSAtomicDecrement64Barrier ((volatile int64_t*) &value);
+	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicDecrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
@@ -6005,8 +6011,8 @@ template <typename Type>
 inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (volatile int32_t*) &value)
-							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (volatile int64_t*) &value);
+	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
   #elif JUCE_ATOMICS_GCC
