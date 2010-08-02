@@ -242,8 +242,12 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
         for (i = itemsToRemove.size(); --i >= 0;)
         {
             ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
+
             if (itemToRemove != 0)
+            {
+                OpenDocumentManager::getInstance()->closeFile (itemToRemove->getFile(), false);
                 itemToRemove->deleteItem();
+            }
         }
     }
 }

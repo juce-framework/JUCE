@@ -48,39 +48,36 @@ namespace pnglibNamespace
 
 #if JUCE_INCLUDE_PNGLIB_CODE
 
- #if _MSC_VER != 1310
-  using ::calloc; // (causes conflict in VS.NET 2003)
-  using ::malloc;
-  using ::free;
- #endif
+  #if _MSC_VER != 1310
+   using ::calloc; // (causes conflict in VS.NET 2003)
+   using ::malloc;
+   using ::free;
+  #endif
 
-  extern "C"
-  {
-    using ::abs;
-    #define PNG_INTERNAL
-    #define NO_DUMMY_DECL
-    #define PNG_SETJMP_NOT_SUPPORTED
+  using ::abs;
+  #define PNG_INTERNAL
+  #define NO_DUMMY_DECL
+  #define PNG_SETJMP_NOT_SUPPORTED
 
-    #include "pnglib/png.h"
-    #include "pnglib/pngconf.h"
+  #include "pnglib/png.h"
+  #include "pnglib/pngconf.h"
 
-    #define PNG_NO_EXTERN
-    #include "pnglib/png.c"
-    #include "pnglib/pngerror.c"
-    #include "pnglib/pngget.c"
-    #include "pnglib/pngmem.c"
-    #include "pnglib/pngread.c"
-    #include "pnglib/pngpread.c"
-    #include "pnglib/pngrio.c"
-    #include "pnglib/pngrtran.c"
-    #include "pnglib/pngrutil.c"
-    #include "pnglib/pngset.c"
-    #include "pnglib/pngtrans.c"
-    #include "pnglib/pngwio.c"
-    #include "pnglib/pngwrite.c"
-    #include "pnglib/pngwtran.c"
-    #include "pnglib/pngwutil.c"
-  }
+  #define PNG_NO_EXTERN
+  #include "pnglib/png.c"
+  #include "pnglib/pngerror.c"
+  #include "pnglib/pngget.c"
+  #include "pnglib/pngmem.c"
+  #include "pnglib/pngread.c"
+  #include "pnglib/pngpread.c"
+  #include "pnglib/pngrio.c"
+  #include "pnglib/pngrtran.c"
+  #include "pnglib/pngrutil.c"
+  #include "pnglib/pngset.c"
+  #include "pnglib/pngtrans.c"
+  #include "pnglib/pngwio.c"
+  #include "pnglib/pngwrite.c"
+  #include "pnglib/pngwtran.c"
+  #include "pnglib/pngwutil.c"
 #else
   extern "C"
   {

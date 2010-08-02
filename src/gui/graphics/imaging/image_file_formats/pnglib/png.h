@@ -448,7 +448,7 @@
 
 /* Inhibit C++ name-mangling for libpng functions but not for system calls. */
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif /* __cplusplus */
 
 /* This file is arranged in several sections.  The first section contains
@@ -3531,7 +3531,7 @@ png_infop info_ptr, png_uint_32 *res_x, png_uint_32 *res_y, int *unit_type));
 #endif /* PNG_INTERNAL */
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif /* PNG_VERSION_INFO_ONLY */

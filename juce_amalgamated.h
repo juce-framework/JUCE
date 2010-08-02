@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	47
+#define JUCE_BUILDNUMBER	48
 
 /** Current Juce version number.
 
@@ -536,7 +536,7 @@
 
 	@see Logger::outputDebugString
   */
-  #define DBG(dbgtext)		  JUCE_NAMESPACE::Logger::outputDebugString (dbgtext);
+  #define DBG(dbgtext)		{ String tempDbgBuf; tempDbgBuf << dbgtext; JUCE_NAMESPACE::Logger::outputDebugString (tempDbgBuf); }
 
   // Assertions..
 
@@ -16772,7 +16772,8 @@ private:
 #ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 
-/** Writes data to an internal memory buffer, which grows as required.
+/**
+	Writes data to an internal memory buffer, which grows as required.
 
 	The data that was written into the stream can then be accessed later as
 	a contiguous block of memory.

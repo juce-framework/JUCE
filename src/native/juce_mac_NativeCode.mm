@@ -53,6 +53,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/streams/juce_MemoryInputStream.h"
 #include "../io/streams/juce_BufferedInputStream.h"
 #include "../core/juce_PlatformUtilities.h"
+#include "../core/juce_Initialisation.h"
 #include "../text/juce_LocalisedStrings.h"
 #include "../text/juce_XmlDocument.h"
 #include "../utilities/juce_DeletedAtShutdown.h"

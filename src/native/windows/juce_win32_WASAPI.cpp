@@ -841,7 +841,7 @@ public:
 
         while (! threadShouldExit())
         {
-            const DWORD result = useExclusiveMode ? WaitForSingleObject (inputDevice->clientEvent, 1000)
+            const DWORD result = useExclusiveMode ? (inputDevice != 0 ? WaitForSingleObject (inputDevice->clientEvent, 1000) : S_OK)
                                                   : WaitForMultipleObjects (numEvents, events, true, 1000);
             if (result == WAIT_TIMEOUT)
                 continue;

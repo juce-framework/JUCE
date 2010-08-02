@@ -34,7 +34,7 @@
 #include "zconf.h"
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 
 #define ZLIB_VERSION "1.2.3"
@@ -1352,7 +1352,7 @@ ZEXTERN int            ZEXPORT inflateSyncPoint OF((z_streamp z));
 ZEXTERN const uLongf * ZEXPORT get_crc_table    OF((void));
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif /* ZLIB_H */

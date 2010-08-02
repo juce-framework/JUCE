@@ -33,33 +33,30 @@
 namespace zlibNamespace
 {
 #if JUCE_INCLUDE_ZLIB_CODE
-  extern "C"
-  {
-    #undef OS_CODE
-    #undef fdopen
-    #define ZLIB_INTERNAL
-    #define NO_DUMMY_DECL
-    #include "zlib/zlib.h"
-    #include "zlib/adler32.c"
-    #include "zlib/compress.c"
-    #undef DO1
-    #undef DO8
-    #include "zlib/crc32.c"
-    #include "zlib/deflate.c"
-    #include "zlib/inffast.c"
-    #undef PULLBYTE
-    #undef LOAD
-    #undef RESTORE
-    #undef INITBITS
-    #undef NEEDBITS
-    #undef DROPBITS
-    #undef BYTEBITS
-    #include "zlib/inflate.c"
-    #include "zlib/inftrees.c"
-    #include "zlib/trees.c"
-    #include "zlib/zutil.c"
-    #undef Byte
-  }
+  #undef OS_CODE
+  #undef fdopen
+  #define ZLIB_INTERNAL
+  #define NO_DUMMY_DECL
+  #include "zlib/zlib.h"
+  #include "zlib/adler32.c"
+  #include "zlib/compress.c"
+  #undef DO1
+  #undef DO8
+  #include "zlib/crc32.c"
+  #include "zlib/deflate.c"
+  #include "zlib/inffast.c"
+  #undef PULLBYTE
+  #undef LOAD
+  #undef RESTORE
+  #undef INITBITS
+  #undef NEEDBITS
+  #undef DROPBITS
+  #undef BYTEBITS
+  #include "zlib/inflate.c"
+  #include "zlib/inftrees.c"
+  #include "zlib/trees.c"
+  #include "zlib/zutil.c"
+  #undef Byte
 #else
   #include <zlib.h>
 #endif

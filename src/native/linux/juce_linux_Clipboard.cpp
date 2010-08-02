@@ -28,10 +28,6 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-#if JUCE_DEBUG
-  #define JUCE_DEBUG_XERRORS 1
-#endif
-
 extern Display* display;
 extern Window juce_messageWindowHandle;
 
