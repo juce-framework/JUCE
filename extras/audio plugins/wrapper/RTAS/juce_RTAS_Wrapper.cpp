@@ -157,9 +157,7 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 public:
     //==============================================================================
     JucePlugInProcess()
-        : midiBufferNode (0),
-          midiTransport (0),
-          prepared (false),
+        : prepared (false),
           sampleRate (44100.0)
     {
         juceFilter = createPluginFilter();
@@ -175,8 +173,8 @@ public:
         if (mLoggedIn)
             MIDILogOut();
 
-        deleteAndZero (midiBufferNode);
-        deleteAndZero (midiTransport);
+        midiBufferNode = 0;
+        midiTransport = 0;
 
         if (prepared)
             juceFilter->releaseResources();
@@ -204,9 +202,7 @@ public:
         JuceCustomUIView (AudioProcessor* const filter_,
                           JucePlugInProcess* const process_)
             : filter (filter_),
-              process (process_),
-              wrapper (0),
-              editorComp (0)
+              process (process_)
         {
             // setting the size in here crashes PT for some reason, so keep it simple..
         }
@@ -262,8 +258,7 @@ public:
 #else
                 void* const hostWindow = (void*) GetWindowFromPort (port);
 #endif
-                deleteAndZero (wrapper);
-
+                wrapper = 0;
                 wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
 
                 process->touchAllParameters();
@@ -296,8 +291,8 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        JUCE_NAMESPACE::Component* wrapper;
-        AudioProcessorEditor* editorComp;
+        ScopedPointer<JUCE_NAMESPACE::Component> wrapper;
+        ScopedPointer<AudioProcessorEditor> editorComp;
 
         void deleteEditorComp()
         {
@@ -314,8 +309,8 @@ public:
 
                 filter->editorBeingDeleted (editorComp);
 
-                deleteAndZero (editorComp);
-                deleteAndZero (wrapper);
+                editorComp = 0;
+                wrapper = 0;
             }
         }
 
@@ -550,22 +545,25 @@ protected:
 
         const Cmn_UInt32 bufferSize = mRTGlobals->mHWBufferSizeInSamples;
 
-        if (midiBufferNode->GetAdvanceScheduleTime() != bufferSize)
-            midiBufferNode->SetAdvanceScheduleTime (bufferSize);
-
-        if (midiBufferNode->FillMIDIBuffer (mRTGlobals->mRunningTime, numSamples) == noErr)
+        if (midiBufferNode != 0)
         {
-            jassert (midiBufferNode->GetBufferPtr() != 0);
-            const int numMidiEvents = midiBufferNode->GetBufferSize();
+            if (midiBufferNode->GetAdvanceScheduleTime() != bufferSize)
+                midiBufferNode->SetAdvanceScheduleTime (bufferSize);
 
-            for (int i = 0; i < numMidiEvents; ++i)
+            if (midiBufferNode->FillMIDIBuffer (mRTGlobals->mRunningTime, numSamples) == noErr)
             {
-                const DirectMidiPacket& m = midiBuffer[i];
+                jassert (midiBufferNode->GetBufferPtr() != 0);
+                const int numMidiEvents = midiBufferNode->GetBufferSize();
 
-                jassert ((int) m.mTimestamp < numSamples);
+                for (int i = 0; i < numMidiEvents; ++i)
+                {
+                    const DirectMidiPacket& m = midiBuffer[i];
 
-                midiEvents.addEvent (m.mData, m.mLength,
-                                     jlimit (0, (int) numSamples - 1, (int) m.mTimestamp));
+                    jassert ((int) m.mTimestamp < numSamples);
+
+                    midiEvents.addEvent (m.mData, m.mLength,
+                                         jlimit (0, (int) numSamples - 1, (int) m.mTimestamp));
+                }
             }
         }
 #endif
@@ -809,8 +807,8 @@ protected:
 private:
     AudioProcessor* juceFilter;
     MidiBuffer midiEvents;
-    CEffectMIDIOtherBufferedNode* midiBufferNode;
-    CEffectMIDITransport* midiTransport;
+    ScopedPointer<CEffectMIDIOtherBufferedNode> midiBufferNode;
+    ScopedPointer<CEffectMIDITransport> midiTransport;
     DirectMidiPacket midiBuffer [midiBufferSize];
 
     JUCE_NAMESPACE::MemoryBlock tempFilterData;

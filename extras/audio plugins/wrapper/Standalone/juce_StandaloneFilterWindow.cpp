@@ -39,16 +39,13 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
     : DocumentWindow (title, backgroundColour,
                       DocumentWindow::minimiseButton
                        | DocumentWindow::closeButton),
-      filter (0),
-      deviceManager (0),
-      optionsButton (0)
+      optionsButton ("options")
 {
     setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
-    optionsButton = new TextButton ("options");
-    Component::addAndMakeVisible (optionsButton);
-    optionsButton->addButtonListener (this);
-    optionsButton->setTriggeredOnMouseDown (true);
+    Component::addAndMakeVisible (&optionsButton);
+    optionsButton.addButtonListener (this);
+    optionsButton.setTriggeredOnMouseDown (true);
 
     JUCE_TRY
     {
@@ -115,8 +112,6 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
     globalSettings->setValue ("windowX", getX());
     globalSettings->setValue ("windowY", getY());
 
-    deleteAndZero (optionsButton);
-
     if (globalSettings != 0 && deviceManager != 0)
     {
         XmlElement* const xml = deviceManager->createStateXml();
@@ -124,7 +119,7 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
         delete xml;
     }
 
-    deleteAndZero (deviceManager);
+    deviceManager = 0;
 
     if (globalSettings != 0 && filter != 0)
     {
@@ -149,7 +144,7 @@ void StandaloneFilterWindow::deleteFilter()
         setContentComponent (0, true);
     }
 
-    deleteAndZero (filter);
+    filter = 0;
 }
 
 void StandaloneFilterWindow::resetFilter()
@@ -258,8 +253,7 @@ void StandaloneFilterWindow::resized()
 {
     DocumentWindow::resized();
 
-    if (optionsButton != 0)
-        optionsButton->setBounds (8, 6, 60, getTitleBarHeight() - 8);
+    optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
 }
 
 void StandaloneFilterWindow::buttonClicked (Button*)
@@ -275,7 +269,7 @@ void StandaloneFilterWindow::buttonClicked (Button*)
     m.addSeparator();
     m.addItem (4, TRANS("Reset to default state"));
 
-    switch (m.showAt (optionsButton))
+    switch (m.showAt (&optionsButton))
     {
     case 1:
         showAudioSettingsDialog();

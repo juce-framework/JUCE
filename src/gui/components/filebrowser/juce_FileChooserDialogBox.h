@@ -145,7 +145,7 @@ private:
     class ContentComponent  : public Component
     {
     public:
-        ContentComponent();
+        ContentComponent (const String& name, const String& instructions, FileBrowserComponent& chooserComponent);
         ~ContentComponent();
 
         void paint (Graphics& g);
@@ -154,10 +154,8 @@ private:
         String instructions;
         GlyphArrangement text;
 
-        FileBrowserComponent* chooserComponent;
-        FilePreviewComponent* previewComponent;
-        TextButton* okButton;
-        TextButton* cancelButton;
+        FileBrowserComponent& chooserComponent;
+        TextButton okButton, cancelButton;
     };
 
     ContentComponent* content;

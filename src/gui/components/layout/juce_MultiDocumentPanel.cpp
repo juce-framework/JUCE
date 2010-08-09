@@ -115,7 +115,6 @@ public:
 //==============================================================================
 MultiDocumentPanel::MultiDocumentPanel()
     : mode (MaximisedWindowsWithTabs),
-      tabComponent (0),
       backgroundColour (Colours::lightblue),
       maximumNumDocuments (0),
       numDocsBeforeTabsUsed (0)
@@ -309,7 +308,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
                 delete component;
 
             if (tabComponent != 0 && tabComponent->getNumTabs() <= numDocsBeforeTabsUsed)
-                deleteAndZero (tabComponent);
+                tabComponent = 0;
 
             components.removeValue (component);
 
@@ -410,7 +409,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
 
         if (mode == FloatingWindows)
         {
-            deleteAndZero (tabComponent);
+            tabComponent = 0;
         }
         else
         {

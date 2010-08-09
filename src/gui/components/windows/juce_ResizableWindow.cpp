@@ -78,8 +78,7 @@ ResizableWindow::~ResizableWindow()
 {
     resizableCorner = 0;
     resizableBorder = 0;
-    delete static_cast <Component*> (contentComponent);
-    contentComponent = 0;
+    contentComponent.deleteAndZero();
 
     // have you been adding your own components directly to this window..? tut tut tut.
     // Read the instructions for using a ResizableWindow!
@@ -106,8 +105,8 @@ void ResizableWindow::setContentComponent (Component* const newContentComponent,
     if (newContentComponent != static_cast <Component*> (contentComponent))
     {
         if (deleteOldOne)
-            delete static_cast <Component*> (contentComponent); // (avoid using a scoped pointer for this, so that it survives
-                                                                //  external deletion of the content comp)
+            contentComponent.deleteAndZero(); // (avoid using a scoped pointer for this, so that it survives
+                                              //  external deletion of the content comp)
         else
             removeChildComponent (contentComponent);
 

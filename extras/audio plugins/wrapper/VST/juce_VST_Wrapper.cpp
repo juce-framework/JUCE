@@ -275,7 +275,6 @@ public:
                        filter_->getNumParameters()),
          filter (filter_)
     {
-        editorComp = 0;
         chunkMemoryTime = 0;
         isProcessing = false;
         hasShutdown = false;
@@ -1128,7 +1127,7 @@ public:
 
             filter->editorBeingDeleted (editorComp->getEditorComp());
 
-            deleteAndZero (editorComp);
+            editorComp = 0;
 
             // there's some kind of component currently modal, but the host
             // is trying to delete our plugin. You should try to avoid this happening..
@@ -1420,7 +1419,7 @@ private:
     AudioProcessor* filter;
     JUCE_NAMESPACE::MemoryBlock chunkMemory;
     JUCE_NAMESPACE::uint32 chunkMemoryTime;
-    EditorCompWrapper* editorComp;
+    ScopedPointer<EditorCompWrapper> editorComp;
     ERect editorSize;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;

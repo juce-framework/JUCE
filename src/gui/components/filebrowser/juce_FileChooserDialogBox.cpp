@@ -42,35 +42,19 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     : ResizableWindow (name, backgroundColour, true),
       warnAboutOverwritingExistingFiles (warnAboutOverwritingExistingFiles_)
 {
-    content = new ContentComponent();
-    content->setName (name);
-    content->instructions = instructions;
-    content->chooserComponent = &chooserComponent;
-
-    content->addAndMakeVisible (&chooserComponent);
-
-    content->okButton = new TextButton (chooserComponent.getActionVerb());
-    content->addAndMakeVisible (content->okButton);
-    content->okButton->addButtonListener (this);
-    content->okButton->setEnabled (chooserComponent.currentFileIsValid());
-    content->okButton->addShortcut (KeyPress (KeyPress::returnKey, 0, 0));
-
-    content->cancelButton = new TextButton (TRANS("Cancel"));
-    content->addAndMakeVisible (content->cancelButton);
-    content->cancelButton->addButtonListener (this);
-    content->cancelButton->addShortcut (KeyPress (KeyPress::escapeKey, 0, 0));
-
-    setContentComponent (content);
+    setContentComponent (content = new ContentComponent (name, instructions, chooserComponent));
 
     setResizable (true, true);
     setResizeLimits (300, 300, 1200, 1000);
 
-    content->chooserComponent->addListener (this);
+    content->okButton.addButtonListener (this);
+    content->cancelButton.addButtonListener (this);
+    content->chooserComponent.addListener (this);
 }
 
 FileChooserDialogBox::~FileChooserDialogBox()
 {
-    content->chooserComponent->removeListener (this);
+    content->chooserComponent.removeListener (this);
 }
 
 //==============================================================================
@@ -83,7 +67,7 @@ bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
 {
     if (w <= 0)
     {
-        Component* const previewComp = content->chooserComponent->getPreviewComponent();
+        Component* const previewComp = content->chooserComponent.getPreviewComponent();
         if (previewComp != 0)
             w = 400 + previewComp->getWidth();
         else
@@ -106,16 +90,16 @@ bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
 //==============================================================================
 void FileChooserDialogBox::buttonClicked (Button* button)
 {
-    if (button == content->okButton)
+    if (button == &(content->okButton))
     {
         if (warnAboutOverwritingExistingFiles
-             && content->chooserComponent->isSaveMode()
-             && content->chooserComponent->getSelectedFile(0).exists())
+             && content->chooserComponent.isSaveMode()
+             && content->chooserComponent.getSelectedFile(0).exists())
         {
             if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                                 TRANS("File already exists"),
                                                 TRANS("There's already a file called:")
-                                                  + "\n\n" + content->chooserComponent->getSelectedFile(0).getFullPathName()
+                                                  + "\n\n" + content->chooserComponent.getSelectedFile(0).getFullPathName()
                                                   + "\n\n" + TRANS("Are you sure you want to overwrite it?"),
                                                 TRANS("overwrite"),
                                                 TRANS("cancel")))
@@ -126,8 +110,10 @@ void FileChooserDialogBox::buttonClicked (Button* button)
 
         exitModalState (1);
     }
-    else if (button == content->cancelButton)
+    else if (button == &(content->cancelButton))
+    {
         closeButtonPressed();
+    }
 }
 
 void FileChooserDialogBox::closeButtonPressed()
@@ -137,7 +123,7 @@ void FileChooserDialogBox::closeButtonPressed()
 
 void FileChooserDialogBox::selectionChanged()
 {
-    content->okButton->setEnabled (content->chooserComponent->currentFileIsValid());
+    content->okButton.setEnabled (content->chooserComponent.currentFileIsValid());
 }
 
 void FileChooserDialogBox::fileClicked (const File&, const MouseEvent&)
@@ -147,19 +133,30 @@ void FileChooserDialogBox::fileClicked (const File&, const MouseEvent&)
 void FileChooserDialogBox::fileDoubleClicked (const File&)
 {
     selectionChanged();
-    content->okButton->triggerClick();
+    content->okButton.triggerClick();
 }
 
 //==============================================================================
-FileChooserDialogBox::ContentComponent::ContentComponent()
+FileChooserDialogBox::ContentComponent::ContentComponent (const String& name, const String& instructions_, FileBrowserComponent& chooserComponent_)
+    : Component (name), instructions (instructions_),
+      chooserComponent (chooserComponent_),
+      okButton (chooserComponent_.getActionVerb()),
+      cancelButton (TRANS ("Cancel"))
 {
+    addAndMakeVisible (&chooserComponent);
+
+    addAndMakeVisible (&okButton);
+    okButton.setEnabled (chooserComponent.currentFileIsValid());
+    okButton.addShortcut (KeyPress (KeyPress::returnKey, 0, 0));
+
+    addAndMakeVisible (&cancelButton);
+    cancelButton.addShortcut (KeyPress (KeyPress::escapeKey, 0, 0));
+
     setInterceptsMouseClicks (false, true);
 }
 
 FileChooserDialogBox::ContentComponent::~ContentComponent()
 {
-    delete okButton;
-    delete cancelButton;
 }
 
 void FileChooserDialogBox::ContentComponent::paint (Graphics& g)
@@ -178,13 +175,13 @@ void FileChooserDialogBox::ContentComponent::resized()
     const int buttonHeight = 26;
     const int buttonY = getHeight() - buttonHeight - 8;
 
-    chooserComponent->setBounds (0, y, getWidth(), buttonY - y - 20);
+    chooserComponent.setBounds (0, y, getWidth(), buttonY - y - 20);
 
-    okButton->setBounds (proportionOfWidth (0.25f), buttonY,
-                         proportionOfWidth (0.2f), buttonHeight);
+    okButton.setBounds (proportionOfWidth (0.25f), buttonY,
+                        proportionOfWidth (0.2f), buttonHeight);
 
-    cancelButton->setBounds (proportionOfWidth (0.55f), buttonY,
-                             proportionOfWidth (0.2f), buttonHeight);
+    cancelButton.setBounds (proportionOfWidth (0.55f), buttonY,
+                            proportionOfWidth (0.2f), buttonHeight);
 }
 
 

@@ -290,7 +290,7 @@ public:
 private:
     LayoutMode mode;
     Array <Component*> components;
-    TabbedComponent* tabComponent;
+    ScopedPointer<TabbedComponent> tabComponent;
     Colour backgroundColour;
     int maximumNumDocuments, numDocsBeforeTabsUsed;
 

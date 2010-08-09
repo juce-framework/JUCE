@@ -853,10 +853,9 @@ class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& plugin_, const bool createGenericViewIfNeeded)
         : AudioProcessorEditor (&plugin_),
-          plugin (plugin_),
-          wrapper (0)
+          plugin (plugin_)
     {
-        addAndMakeVisible (wrapper = new NSViewComponent());
+        addAndMakeVisible (&wrapper);
 
         setOpaque (true);
         setVisible (true);
@@ -869,15 +868,13 @@ public:
     {
         const bool wasValid = isValid();
 
-        wrapper->setView (0);
+        wrapper.setView (0);
 
         if (wasValid)
             plugin.editorBeingDeleted (this);
-
-        delete wrapper;
     }
 
-    bool isValid() const        { return wrapper->getView() != 0; }
+    bool isValid() const        { return wrapper.getView() != 0; }
 
     void paint (Graphics& g)
     {
@@ -886,12 +883,12 @@ public:
 
     void resized()
     {
-        wrapper->setSize (getWidth(), getHeight());
+        wrapper.setSize (getWidth(), getHeight());
     }
 
 private:
     AudioUnitPluginInstance& plugin;
-    NSViewComponent* wrapper;
+    NSViewComponent wrapper;
 
     bool createView (const bool createGenericViewIfNeeded)
     {
@@ -937,7 +934,7 @@ private:
         if (createGenericViewIfNeeded && (pluginView == 0))
             pluginView = [[AUGenericView alloc] initWithAudioUnit: plugin.audioUnit];
 
-        wrapper->setView (pluginView);
+        wrapper.setView (pluginView);
 
         if (pluginView != 0)
             setSize ([pluginView frame].size.width,

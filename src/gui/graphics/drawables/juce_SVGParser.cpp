@@ -830,12 +830,12 @@ private:
 
                 Path path;
                 Drawable* s = parseShape (*e, path);
-                delete s;
+                delete s;  // xxx not finished!
             }
             else if (e->hasTagName ("tspan"))
             {
                 Drawable* s = parseText (*e);
-                delete s;
+                delete s;  // xxx not finished!
             }
         }
 

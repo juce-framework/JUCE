@@ -27298,6 +27298,9 @@ public:
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
 		const ComponentType* operator->() const throw()	 { jassert (comp != 0); return comp; }
 
+		/** If the component is valid, this deletes it and sets this pointer to null. */
+		void deleteAndZero()				{ delete comp; jassert (comp == 0); }
+
 		juce_UseDebuggingNewOperator
 
 	private:
@@ -50521,7 +50524,7 @@ private:
 	class ContentComponent  : public Component
 	{
 	public:
-		ContentComponent();
+		ContentComponent (const String& name, const String& instructions, FileBrowserComponent& chooserComponent);
 		~ContentComponent();
 
 		void paint (Graphics& g);
@@ -50530,10 +50533,8 @@ private:
 		String instructions;
 		GlyphArrangement text;
 
-		FileBrowserComponent* chooserComponent;
-		FilePreviewComponent* previewComponent;
-		TextButton* okButton;
-		TextButton* cancelButton;
+		FileBrowserComponent& chooserComponent;
+		TextButton okButton, cancelButton;
 	};
 
 	ContentComponent* content;
@@ -52830,7 +52831,7 @@ public:
 private:
 	LayoutMode mode;
 	Array <Component*> components;
-	TabbedComponent* tabComponent;
+	ScopedPointer<TabbedComponent> tabComponent;
 	Colour backgroundColour;
 	int maximumNumDocuments, numDocsBeforeTabsUsed;
 

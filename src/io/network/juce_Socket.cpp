@@ -546,7 +546,7 @@ DatagramSocket::~DatagramSocket()
 {
     close();
 
-    delete ((struct sockaddr_in*) serverAddress);
+    delete static_cast <struct sockaddr_in*> (serverAddress);
     serverAddress = 0;
 }
 

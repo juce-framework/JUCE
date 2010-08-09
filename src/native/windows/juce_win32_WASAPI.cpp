@@ -584,9 +584,7 @@ public:
           Thread ("Juce WASAPI"),
           isOpen_ (false),
           isStarted (false),
-          outputDevice (0),
           outputDeviceId (outputDeviceId_),
-          inputDevice (0),
           inputDeviceId (inputDeviceId_),
           useExclusiveMode (useExclusiveMode_),
           currentBufferSizeSamples (0),
@@ -598,9 +596,6 @@ public:
     ~WASAPIAudioIODevice()
     {
         close();
-
-        deleteAndZero (inputDevice);
-        deleteAndZero (outputDevice);
     }
 
     bool initialise()
@@ -624,7 +619,8 @@ public:
             }
             else
             {
-                WASAPIDeviceBase* const d = inputDevice != 0 ? (WASAPIDeviceBase*) inputDevice : (WASAPIDeviceBase*) outputDevice;
+                WASAPIDeviceBase* d = inputDevice != 0 ? static_cast<WASAPIDeviceBase*> (inputDevice)
+                                                       : static_cast<WASAPIDeviceBase*> (outputDevice);
                 defaultSampleRate = d->defaultSampleRate;
                 minBufferSize = d->minBufferSize;
                 defaultBufferSize = d->defaultBufferSize;
@@ -718,6 +714,7 @@ public:
 
         if (inputDevice != 0)
             ResetEvent (inputDevice->clientEvent);
+
         if (outputDevice != 0)
             ResetEvent (outputDevice->clientEvent);
 
@@ -891,8 +888,8 @@ public:
 
 private:
     // Device stats...
-    WASAPIInputDevice* inputDevice;
-    WASAPIOutputDevice* outputDevice;
+    ScopedPointer<WASAPIInputDevice> inputDevice;
+    ScopedPointer<WASAPIOutputDevice> outputDevice;
     const bool useExclusiveMode;
     double defaultSampleRate;
     int minBufferSize, defaultBufferSize;

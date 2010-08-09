@@ -250,8 +250,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
 MidiOutput::~MidiOutput()
 {
-    MidiOutputDevice* const device = (MidiOutputDevice*) internal;
-    delete device;
+    delete static_cast <MidiOutputDevice*> (internal);
 }
 
 void MidiOutput::reset()
@@ -269,7 +268,7 @@ void MidiOutput::setVolume (float leftVol, float rightVol)
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    ((MidiOutputDevice*) internal)->sendMessageNow (message);
+    static_cast <MidiOutputDevice*> (internal)->sendMessageNow (message);
 }
 
 
@@ -365,18 +364,17 @@ MidiInput::MidiInput (const String& name_)
 MidiInput::~MidiInput()
 {
     stop();
-    MidiInputThread* const thread = (MidiInputThread*) internal;
-    delete thread;
+    delete static_cast <MidiInputThread*> (internal);
 }
 
 void MidiInput::start()
 {
-    ((MidiInputThread*) internal)->startThread();
+    static_cast <MidiInputThread*> (internal)->startThread();
 }
 
 void MidiInput::stop()
 {
-    ((MidiInputThread*) internal)->stopThread (3000);
+    static_cast <MidiInputThread*> (internal)->stopThread (3000);
 }
 
 int MidiInput::getDefaultDeviceIndex()

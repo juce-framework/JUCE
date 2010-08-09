@@ -392,7 +392,6 @@ public:
           isMouseOver (false),
           hasCreatedCaret (false),
           currentWindowIcon (0),
-          taskBarIcon (0),
           dropTarget (0)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
@@ -407,16 +406,12 @@ public:
             if (shadower != 0)
                 shadower->setOwner (component);
         }
-        else
-        {
-            shadower = 0;
-        }
     }
 
     ~Win32ComponentPeer()
     {
         setTaskBarIcon (Image());
-        deleteAndZero (shadower);
+        shadower = 0;
 
         // do this before the next bit to avoid messages arriving for this window
         // before it's destroyed
@@ -779,7 +774,7 @@ public:
             taskBarIcon->uFlags = 0;
             Shell_NotifyIcon (NIM_DELETE, taskBarIcon);
             DestroyIcon (taskBarIcon->hIcon);
-            deleteAndZero (taskBarIcon);
+            taskBarIcon = 0;
         }
     }
 
@@ -846,11 +841,11 @@ public:
 
 private:
     HWND hwnd;
-    DropShadower* shadower;
+    ScopedPointer<DropShadower> shadower;
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret;
     BorderSize windowBorder;
     HICON currentWindowIcon;
-    NOTIFYICONDATA* taskBarIcon;
+    ScopedPointer<NOTIFYICONDATA> taskBarIcon;
     IDropTarget* dropTarget;
 
     //==============================================================================

@@ -77,9 +77,9 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    AudioProcessor* filter;
-    AudioFilterStreamingDeviceManager* deviceManager;
-    Button* optionsButton;
+    ScopedPointer<AudioProcessor> filter;
+    ScopedPointer<AudioFilterStreamingDeviceManager> deviceManager;
+    TextButton optionsButton;
 
     void deleteFilter();
 

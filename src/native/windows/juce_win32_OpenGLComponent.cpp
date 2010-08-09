@@ -81,7 +81,6 @@ public:
                        HGLRC contextToShareWith,
                        const OpenGLPixelFormat& pixelFormat)
         : renderContext (0),
-          nativeWindow (0),
           dc (0),
           component (component_)
     {
@@ -117,7 +116,7 @@ public:
     {
         deleteContext();
         ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
-        delete nativeWindow;
+        nativeWindow = 0;
     }
 
     void deleteContext()
@@ -270,7 +269,7 @@ public:
             // old one and create a new one..
             jassert (nativeWindow != 0);
             ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
-            delete nativeWindow;
+            nativeWindow = 0;
 
             createNativeWindow();
 
@@ -385,7 +384,7 @@ public:
     HGLRC renderContext;
 
 private:
-    Win32ComponentPeer* nativeWindow;
+    ScopedPointer<Win32ComponentPeer> nativeWindow;
     Component* const component;
     HDC dc;
 

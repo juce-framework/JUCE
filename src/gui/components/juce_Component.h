@@ -1978,6 +1978,9 @@ public:
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
         const ComponentType* operator->() const throw()     { jassert (comp != 0); return comp; }
 
+        /** If the component is valid, this deletes it and sets this pointer to null. */
+        void deleteAndZero()                                { delete comp; jassert (comp == 0); }
+
         //==============================================================================
         juce_UseDebuggingNewOperator
 

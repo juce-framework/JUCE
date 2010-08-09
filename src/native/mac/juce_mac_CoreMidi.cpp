@@ -308,7 +308,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
 MidiOutput::~MidiOutput()
 {
-    delete (MidiPortAndEndpoint*) internal;
+    delete static_cast<MidiPortAndEndpoint*> (internal);
 }
 
 void MidiOutput::reset()
@@ -326,7 +326,7 @@ void MidiOutput::setVolume (float /*leftVol*/, float /*rightVol*/)
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*) internal;
+    MidiPortAndEndpoint* const mpe = static_cast<MidiPortAndEndpoint*> (internal);
 
     if (message.isSysEx())
     {
@@ -619,7 +619,7 @@ MidiInput::MidiInput (const String& name_)
 
 MidiInput::~MidiInput()
 {
-    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
+    MidiPortAndCallback* const mpc = static_cast<MidiPortAndCallback*> (internal);
     mpc->active = false;
 
     {
@@ -637,13 +637,13 @@ MidiInput::~MidiInput()
 void MidiInput::start()
 {
     const ScopedLock sl (CoreMidiCallbacks::callbackLock);
-    ((MidiPortAndCallback*) internal)->active = true;
+    static_cast<MidiPortAndCallback*> (internal)->active = true;
 }
 
 void MidiInput::stop()
 {
     const ScopedLock sl (CoreMidiCallbacks::callbackLock);
-    ((MidiPortAndCallback*) internal)->active = false;
+    static_cast<MidiPortAndCallback*> (internal)->active = false;
 }
 
 #undef log

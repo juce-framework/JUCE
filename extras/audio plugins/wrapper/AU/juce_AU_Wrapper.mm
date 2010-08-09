@@ -1139,13 +1139,12 @@ public:
 class JuceAUView  : public AUCarbonViewBase
 {
     AudioProcessor* juceFilter;
-    Component* windowComp;
+    ScopedPointer<Component> windowComp;
 
 public:
     JuceAUView (AudioUnitCarbonView auview)
       : AUCarbonViewBase (auview),
-        juceFilter (0),
-        windowComp (0)
+        juceFilter (0)
     {
     }
 
@@ -1206,7 +1205,7 @@ private:
             if (windowComp != 0 && windowComp->getChildComponent(0) != 0)
                 juceFilter->editorBeingDeleted ((AudioProcessorEditor*) windowComp->getChildComponent(0));
 
-            deleteAndZero (windowComp);
+            windowComp = 0;
         }
     }
 
