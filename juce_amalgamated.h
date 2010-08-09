@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	48
+#define JUCE_BUILDNUMBER	49
 
 /** Current Juce version number.
 
@@ -5963,7 +5963,7 @@ template <typename Type>
 inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
 							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
@@ -45921,10 +45921,10 @@ private:
 */
 class JUCE_API  Slider  : public Component,
 						  public SettableTooltipClient,
-						  private AsyncUpdater,
-						  private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-						  private LabelListener,
-						  private Value::Listener
+						  public AsyncUpdater,
+						  public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+						  public LabelListener,
+						  public Value::Listener
 {
 public:
 

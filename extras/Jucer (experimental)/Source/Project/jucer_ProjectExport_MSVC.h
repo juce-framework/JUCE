@@ -597,7 +597,7 @@ protected:
             XmlElement* const group = createGroup (groupName, parent);
 
             for (int i = 0; i < files.size(); ++i)
-                if (files.getReference(i).hasFileExtension ("cpp;c;cc;h;hpp;rc;ico"))
+                if (files.getReference(i).hasFileExtension ("cpp;c;cc;cxx;h;hpp;hxx;rc;ico"))
                     addFile (files.getReference(i), *group, false,
                              useStdcall && shouldFileBeCompiledByDefault (files.getReference(i)));
         }
@@ -1037,7 +1037,7 @@ private:
         if (projectItem.isGroup())
         {
             out << "# Begin Group \"" << projectItem.getName() << '"' << newLine
-                << "# PROP Default_Filter \"cpp;c;cxx;rc;def;r;odl;idl;hpj;bat\"" << newLine;
+                << "# PROP Default_Filter \"cpp;c;cc;cxx;rc;def;r;odl;idl;hpj;bat\"" << newLine;
 
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 writeFiles (out, projectItem.getChild (i));
@@ -1057,7 +1057,7 @@ private:
         {
             out << "# Begin Group \"" << groupName << '"' << newLine;
             for (int i = 0; i < files.size(); ++i)
-                if (files.getReference(i).hasFileExtension ("cpp;c;h"))
+                if (files.getReference(i).hasFileExtension ("cpp;cc;c;cxx;h;hpp;hxx"))
                     writeFile (out, files.getReference(i), false);
 
             out << "# End Group" << newLine;
@@ -1401,7 +1401,7 @@ protected:
     {
         jassert (file.getRoot() == RelativePath::buildTargetFolder);
 
-        if (file.hasFileExtension ("cpp;c"))
+        if (file.hasFileExtension ("cpp;cc;cxx;c"))
         {
             XmlElement* e = cpps.createNewChildElement ("ClCompile");
             e->setAttribute ("Include", file.toWindowsStyle());
@@ -1440,7 +1440,7 @@ protected:
             {
                 const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-                if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;c") && projectItem.shouldBeCompiled()))
+                if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;cc;c;cxx") && projectItem.shouldBeCompiled()))
                     addFileToCompile (path, cpps, headers, false, false);
             }
         }

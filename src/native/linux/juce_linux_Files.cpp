@@ -107,6 +107,26 @@ bool File::isHidden() const
 }
 
 //==============================================================================
+static const File juce_readlink (const char* const utf8, const File& defaultFile)
+{
+    const int size = 8192;
+    HeapBlock<char> buffer;
+    buffer.malloc (size + 4);
+
+    const size_t numBytes = readlink (utf8, buffer, size);
+
+    if (numBytes > 0 && numBytes <= size)
+        return File (String::fromUTF8 (buffer, (int) numBytes));
+
+    return defaultFile;
+}
+
+const File File::getLinkedTarget() const
+{
+    return juce_readlink (getFullPathName().toUTF8(), *this);
+}
+
+//==============================================================================
 const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp
 
 const File File::getSpecialLocation (const SpecialLocationType type)
@@ -167,14 +187,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         return juce_getExecutableFile();
 
     case hostApplicationPath:
-    {
-        unsigned int size = 8192;
-        HeapBlock<char> buffer;
-        buffer.calloc (size + 8);
-
-        readlink ("/proc/self/exe", buffer.getData(), size);
-        return String::fromUTF8 (buffer, size);
-    }
+        return juce_readlink ("/proc/self/exe", juce_getExecutableFile());
 
     default:
         jassertfalse; // unknown type?
@@ -188,19 +201,6 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 const String File::getVersion() const
 {
     return String::empty; // xxx not yet implemented
-}
-
-//==============================================================================
-const File File::getLinkedTarget() const
-{
-    char buffer [4096];
-    size_t numChars = readlink (getFullPathName().toUTF8(),
-                                buffer, sizeof (buffer));
-
-    if (numChars > 0 && numChars <= sizeof (buffer))
-        return File (String::fromUTF8 (buffer, (int) numChars));
-
-    return *this;
 }
 
 //==============================================================================

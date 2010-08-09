@@ -171,7 +171,7 @@ const String SourceFileTreeViewItem::getDisplayName() const
 
 static const File findCorrespondingHeaderOrCpp (const File& f)
 {
-    if (f.hasFileExtension ("cpp;c;mm;m"))
+    if (f.hasFileExtension (sourceFileExtensions))
         return f.withFileExtension (".h");
     else if (f.hasFileExtension (headerFileExtensions))
         return f.withFileExtension (".cpp");

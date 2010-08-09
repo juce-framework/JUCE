@@ -771,7 +771,7 @@ private:
 
     static const String getFileType (const RelativePath& file)
     {
-        if (file.hasFileExtension (".cpp"))                      return "sourcecode.cpp.cpp";
+        if (file.hasFileExtension ("cpp;cc;cxx"))                return "sourcecode.cpp.cpp";
         else if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
         else if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
         else if (file.hasFileExtension (headerFileExtensions))   return "sourcecode.c.h";
@@ -1065,7 +1065,7 @@ private:
 
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const
     {
-        return file.hasFileExtension ("cpp;mm;c;m");
+        return file.hasFileExtension (sourceFileExtensions);
     }
 
     //==============================================================================

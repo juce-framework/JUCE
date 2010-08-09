@@ -264,7 +264,7 @@ const String Project::getRelativePathForFile (const File& file) const
 //==============================================================================
 bool Project::shouldBeAddedToBinaryResourcesByDefault (const File& file)
 {
-    return ! file.hasFileExtension (sourceFileExtensions);
+    return ! file.hasFileExtension (sourceOrHeaderFileExtensions);
 }
 
 //==============================================================================
@@ -454,7 +454,7 @@ Project::Item Project::createNewItem (const File& file)
     Item item (*this, ValueTree (Tags::file));
     item.initialiseNodeValues();
     item.getName() = file.getFileName();
-    item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m");
+    item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m;cc;cxx");
     item.getShouldAddToResourceValue() = shouldBeAddedToBinaryResourcesByDefault (file);
     return item;
 }

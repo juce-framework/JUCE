@@ -264,7 +264,7 @@ template <typename Type>
 inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
                               : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)

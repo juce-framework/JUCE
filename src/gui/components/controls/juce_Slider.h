@@ -55,10 +55,10 @@
 */
 class JUCE_API  Slider  : public Component,
                           public SettableTooltipClient,
-                          private AsyncUpdater,
-                          private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                          private LabelListener,
-                          private Value::Listener
+                          public AsyncUpdater,
+                          public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+                          public LabelListener,
+                          public Value::Listener
 {
 public:
     //==============================================================================

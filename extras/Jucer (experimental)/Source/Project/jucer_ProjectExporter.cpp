@@ -146,7 +146,7 @@ const RelativePath ProjectExporter::getJucePathFromTargetFolder() const
 
 bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const
 {
-    return file.hasFileExtension ("cpp;c");
+    return file.hasFileExtension ("cpp;cc;c;cxx");
 }
 
 void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)

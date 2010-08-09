@@ -429,8 +429,7 @@ class AXBrowserPluginHolderComponent    : public Component
 public:
     //==============================================================================
     AXBrowserPluginHolderComponent()
-        : child (0),
-          parentHWND (0),
+        : parentHWND (0),
           browser (0)
     {
         setOpaque (true);
@@ -443,7 +442,7 @@ public:
     ~AXBrowserPluginHolderComponent()
     {
         setWindow (0);
-        deleteAndZero (child);
+        child = 0;
     }
 
     //==============================================================================
@@ -522,7 +521,7 @@ public:
 
 private:
     //==============================================================================
-    BrowserPluginComponent* child;
+    ScopedPointer<BrowserPluginComponent> child;
     HWND parentHWND;
     IWebBrowser2* browser;
 };
@@ -581,17 +580,15 @@ class JuceActiveXObject     : public IUnknown,
 {
 public:
     JuceActiveXObject()
-        : refCount (0)
+        : site (0), refCount (0)
     {
         log ("JuceActiveXObject");
-        site = 0;
-        holderComp = 0;
     }
 
     ~JuceActiveXObject()
     {
-        deleteHolderComp();
         log ("~JuceActiveXObject");
+        holderComp = 0;
     }
 
     HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
@@ -670,26 +667,31 @@ public:
 
     void createHolderComp()
     {
-        if (numActivePlugins++ == 0)
-        {
-            log ("initialiseJuce_GUI()");
-            initialiseJuce_GUI();
-
-            browserVersionDesc = "Internet Explorer " + getExeVersion (getExePath(), "FileVersion");
-        }
-
         if (holderComp == 0)
+        {
+            if (numActivePlugins++ == 0)
+            {
+                log ("initialiseJuce_GUI()");
+                initialiseJuce_GUI();
+
+                browserVersionDesc = "Internet Explorer " + getExeVersion (getExePath(), "FileVersion");
+            }
+
             holderComp = new AXBrowserPluginHolderComponent();
+        }
     }
 
     void deleteHolderComp()
     {
-        deleteAndZero (holderComp);
-
-        if (--numActivePlugins == 0)
+        if (holderComp != 0)
         {
-            log ("shutdownJuce_GUI()");
-            shutdownJuce_GUI();
+            holderComp = 0;
+
+            if (--numActivePlugins == 0)
+            {
+                log ("shutdownJuce_GUI()");
+                shutdownJuce_GUI();
+            }
         }
     }
 
@@ -735,7 +737,7 @@ public:
 private:
     IUnknown* site;
     int refCount;
-    AXBrowserPluginHolderComponent* holderComp;
+    ScopedPointer<AXBrowserPluginHolderComponent> holderComp;
     IDispatchHelper iDispatchHelper;
 
     JuceActiveXObject (const JuceActiveXObject&);
