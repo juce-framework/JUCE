@@ -48,12 +48,12 @@ public:
     {}
 
     RelativePath (const String& path_, const RootFolder root_)
-        : path (path_), root (root_)
+        : path (path_.replaceCharacter ('\\', '/')), root (root_)
     {
     }
 
     RelativePath (const File& file, const File& rootFolder, const RootFolder root_)
-        : path (file.getRelativePathFrom (rootFolder)), root (root_)
+        : path (file.getRelativePathFrom (rootFolder).replaceCharacter ('\\', '/')), root (root_)
     {
     }
 

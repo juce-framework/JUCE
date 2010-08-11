@@ -132,13 +132,13 @@ XmlElement* PropertySet::getXmlValue (const String& keyName) const
     return doc.getDocumentElement();
 }
 
-void PropertySet::setValue (const String& keyName,
-                            const String& value) throw()
+void PropertySet::setValue (const String& keyName, const var& v)
 {
     jassert (keyName.isNotEmpty()); // shouldn't use an empty key name!
 
     if (keyName.isNotEmpty())
     {
+        const String value (v.toString());
         const ScopedLock sl (lock);
 
         const int index = properties.getAllKeys().indexOf (keyName, ignoreCaseOfKeys);
@@ -151,7 +151,7 @@ void PropertySet::setValue (const String& keyName,
     }
 }
 
-void PropertySet::removeValue (const String& keyName) throw()
+void PropertySet::removeValue (const String& keyName)
 {
     if (keyName.isNotEmpty())
     {
@@ -166,25 +166,10 @@ void PropertySet::removeValue (const String& keyName) throw()
     }
 }
 
-void PropertySet::setValue (const String& keyName, const int value) throw()
-{
-    setValue (keyName, String (value));
-}
-
-void PropertySet::setValue (const String& keyName, const double value) throw()
-{
-    setValue (keyName, String (value));
-}
-
-void PropertySet::setValue (const String& keyName, const bool value) throw()
-{
-    setValue (keyName, String (value ? "1" : "0"));
-}
-
 void PropertySet::setValue (const String& keyName, const XmlElement* const xml)
 {
-    setValue (keyName, (xml == 0) ? String::empty
-                                  : xml->createDocument (String::empty, true));
+    setValue (keyName, xml == 0 ? var::null
+                                : var (xml->createDocument (String::empty, true)));
 }
 
 bool PropertySet::containsKey (const String& keyName) const throw()

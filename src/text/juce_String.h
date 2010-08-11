@@ -546,7 +546,7 @@ public:
     /** Returns the start of this string, up to the last occurrence of a substring.
 
         Similar to upToFirstOccurrenceOf(), but this finds the last occurrence rather than the first.
-        If the substring isn't found, this will return an empty string.
+        If the substring isn't found, this will return the whole of the original string.
 
         @see upToFirstOccurrenceOf, fromFirstOccurrenceOf
     */

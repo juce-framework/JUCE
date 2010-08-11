@@ -28,6 +28,7 @@
 
 #include "../text/juce_StringPairArray.h"
 #include "../text/juce_XmlElement.h"
+#include "../containers/juce_Variant.h"
 
 
 //==============================================================================
@@ -128,33 +129,12 @@ public:
     XmlElement* getXmlValue (const String& keyName) const;
 
     //==============================================================================
-    /** Sets a named property as a string.
+    /** Sets a named property.
 
         @param keyName      the name of the property to set. (This mustn't be an empty string)
         @param value        the new value to set it to
     */
-    void setValue (const String& keyName, const String& value) throw();
-
-    /** Sets a named property to an integer.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-    */
-    void setValue (const String& keyName, const int value) throw();
-
-    /** Sets a named property to a double.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-    */
-    void setValue (const String& keyName, const double value) throw();
-
-    /** Sets a named property to a boolean.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-    */
-    void setValue (const String& keyName, const bool value) throw();
+    void setValue (const String& keyName, const var& value);
 
     /** Sets a named property to an XML element.
 
@@ -170,7 +150,7 @@ public:
 
         @param keyName      the name of the property to delete. (This mustn't be an empty string)
     */
-    void removeValue (const String& keyName) throw();
+    void removeValue (const String& keyName);
 
     /** Returns true if the properies include the given key. */
     bool containsKey (const String& keyName) const throw();
