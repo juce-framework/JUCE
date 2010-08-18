@@ -63,7 +63,7 @@ public:
 
         @see isLooping
     */
-    void setLooping (const bool shouldLoop) throw();
+    void setLooping (bool shouldLoop);
 
     /** Returns whether loop-mode is turned on or not. */
     bool isLooping() const                                      { return looping; }

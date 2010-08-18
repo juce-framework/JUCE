@@ -94,6 +94,7 @@ OBJECTS := \
   $(OBJDIR)/juce_Synthesiser_2bffa1dd.o \
   $(OBJDIR)/juce_BigInteger_63589133.o \
   $(OBJDIR)/juce_DynamicObject_69d02ab3.o \
+  $(OBJDIR)/juce_Expression_1e9a5aad.o \
   $(OBJDIR)/juce_Identifier_89fa043e.o \
   $(OBJDIR)/juce_MemoryBlock_edd65761.o \
   $(OBJDIR)/juce_NamedValueSet_6b0793df.o \
@@ -629,6 +630,11 @@ $(OBJDIR)/juce_BigInteger_63589133.o: ../../src/containers/juce_BigInteger.cpp
 $(OBJDIR)/juce_DynamicObject_69d02ab3.o: ../../src/containers/juce_DynamicObject.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_DynamicObject.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Expression_1e9a5aad.o: ../../src/containers/juce_Expression.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_Expression.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Identifier_89fa043e.o: ../../src/containers/juce_Identifier.cpp

@@ -142,7 +142,7 @@ private:
 /**
 */
 class RelativeRectangleLayoutManager    : public ComponentListener,
-                                          public RelativeCoordinate::NamedCoordinateFinder,
+                                          public Expression::EvaluationContext,
                                           public AsyncUpdater
 {
 public:
@@ -169,7 +169,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    const Expression getSymbolValue (const String& symbol) const;
     /** @internal */
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
     /** @internal */

@@ -41,6 +41,9 @@
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
  #include "containers/juce_ElementComparator.h"
 #endif
+#ifndef __JUCE_EXPRESSION_JUCEHEADER__
+ #include "containers/juce_Expression.h"
+#endif
 #ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
  #include "containers/juce_HeapBlock.h"
 #endif

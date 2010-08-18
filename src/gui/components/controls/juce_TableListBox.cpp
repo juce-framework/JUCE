@@ -94,6 +94,7 @@ public:
             row = newRow;
             isSelected = isNowSelected;
             repaint();
+            deleteAllChildren();
         }
 
         if (row < owner.getNumRows())
@@ -105,13 +106,12 @@ public:
 
             const TableHeaderComponent* const header = owner.getHeader();
             const int numColumns = header->getNumColumns (true);
-            int i;
 
             columnsWithComponents.clear();
 
             if (owner.getModel() != 0)
             {
-                for (i = 0; i < numColumns; ++i)
+                for (int i = 0; i < numColumns; ++i)
                 {
                     const int columnId = header->getColumnIdOfIndex (i, true);
 
@@ -133,7 +133,7 @@ public:
                 }
             }
 
-            for (i = getNumChildComponents(); --i >= 0;)
+            for (int i = getNumChildComponents(); --i >= 0;)
             {
                 Component* const c = getChildComponent (i);
 

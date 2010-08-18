@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	49
+#define JUCE_BUILDNUMBER	50
 
 /** Current Juce version number.
 
@@ -536,7 +536,7 @@
 
 	@see Logger::outputDebugString
   */
-  #define DBG(dbgtext)		{ String tempDbgBuf; tempDbgBuf << dbgtext; JUCE_NAMESPACE::Logger::outputDebugString (tempDbgBuf); }
+  #define DBG(dbgtext)		{ JUCE_NAMESPACE::String tempDbgBuf; tempDbgBuf << dbgtext; JUCE_NAMESPACE::Logger::outputDebugString (tempDbgBuf); }
 
   // Assertions..
 
@@ -6370,23 +6370,11 @@ private:
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+#ifndef __JUCE_EXPRESSION_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
-
-/*** Start of inlined file: juce_OwnedArray.h ***/
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
-#define __JUCE_OWNEDARRAY_JUCEHEADER__
+/*** Start of inlined file: juce_Expression.h ***/
+#ifndef __JUCE_EXPRESSION_JUCEHEADER__
+#define __JUCE_EXPRESSION_JUCEHEADER__
 
 
 /*** Start of inlined file: juce_ScopedPointer.h ***/
@@ -6561,6 +6549,206 @@ inline bool operator!= (const ScopedPointer<ObjectType>& pointer1, const ObjectT
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
 /*** End of inlined file: juce_ScopedPointer.h ***/
+
+/**
+	A class for dynamically evaluating simple numeric expressions.
+
+	This class can parse a simple C-style string expression involving floating point
+	numbers, named symbols and functions. The basic arithmetic operations of +, -, *, /
+	are supported, as well as parentheses, and any alphanumeric identifiers are
+	assumed to be named symbols which will be resolved when the expression is
+	evaluated.
+
+	Expressions which use identifiers and functions require a subclass of
+	Expression::EvaluationContext to be supplied when evaluating them, and this object
+	is expected to be able to resolve the symbol names and perform the functions that
+	are used.
+*/
+class JUCE_API  Expression
+{
+public:
+
+	/** Creates a simple expression with a value of 0. */
+	Expression();
+
+	/** Destructor. */
+	~Expression();
+
+	/** Creates a simple expression with a specified constant value. */
+	explicit Expression (const double constant);
+
+	/** Creates a copy of an expression. */
+	Expression (const Expression& other);
+
+	/** Copies another expression. */
+	Expression& operator= (const Expression& other);
+
+	/** Creates an expression by parsing a string.
+		If there's a syntax error in the string, this will throw a ParseError exception.
+		@throws ParseError
+	*/
+	explicit Expression (const String& stringToParse);
+
+	/** Returns a string version of the expression. */
+	const String toString() const;
+
+	/** Returns an expression which is an addtion operation of two existing expressions. */
+	const Expression operator+ (const Expression& other) const;
+	/** Returns an expression which is a subtraction operation of two existing expressions. */
+	const Expression operator- (const Expression& other) const;
+	/** Returns an expression which is a multiplication operation of two existing expressions. */
+	const Expression operator* (const Expression& other) const;
+	/** Returns an expression which is a division operation of two existing expressions. */
+	const Expression operator/ (const Expression& other) const;
+	/** Returns an expression which is a negation operation of two existing expressions. */
+	const Expression operator-() const;
+
+	/** Returns an Expression which is an identifier reference. */
+	static const Expression symbol (const String& symbol);
+
+	/** Returns an Expression which is a function call. */
+	static const Expression function (const String& functionName, const Array<Expression>& parameters);
+
+	/** Returns an Expression which parses a string from a specified character index.
+
+		The index value is incremented so that on return, it indicates the character that follows
+		the end of the expression that was parsed.
+
+		If there's a syntax error in the string, this will throw a ParseError exception.
+		@throws ParseError
+	*/
+	static const Expression parse (const String& stringToParse, int& textIndexToStartFrom);
+
+	/** When evaluating an Expression object, this class is used to resolve symbols and
+		perform functions that the expression uses.
+	*/
+	class EvaluationContext
+	{
+	public:
+		EvaluationContext();
+		virtual ~EvaluationContext();
+
+		/** Returns the value of a symbol.
+			If the symbol is unknown, this can throw an Expression::EvaluationError exception.
+			@throws Expression::EvaluationError
+		*/
+		virtual const Expression getSymbolValue (const String& symbol) const;
+
+		/** Executes a named function.
+			If the function name is unknown, this can throw an Expression::EvaluationError exception.
+			@throws Expression::EvaluationError
+		*/
+		virtual double evaluateFunction (const String& functionName, const double* parameters, int numParams) const;
+	};
+
+	/** Evaluates this expression, without using an EvaluationContext.
+		Without an EvaluationContext, no symbols can be used, and only basic functions such as sin, cos, tan,
+		min, max are available.
+	*/
+	double evaluate() const;
+
+	/** Evaluates this expression, providing a context that should be able to evaluate any symbols
+		or functions that it uses.
+	*/
+	double evaluate (const EvaluationContext& context) const;
+
+	/** Attempts to return an expression which is a copy of this one, but with a constant adjusted
+		to make the expression resolve to a target value.
+
+		E.g. if the expression is "x + 10" and x is 5, then asking for a target value of 8 will return
+		the expression "x + 3". Obviously some expressions can't be reversed in this way, in which
+		case they might just be adjusted by adding a constant to them.
+	*/
+	const Expression adjustedToGiveNewResult (double targetValue, const EvaluationContext& context) const;
+
+	/** Returns a copy of this expression in which all instances of a given symbol have been renamed. */
+	const Expression withRenamedSymbol (const String& oldSymbol, const String& newSymbol) const;
+
+	/** Returns true if this expression makes use of the specified symbol.
+		If a suitable context is supplied, the search will dereference and recursively check
+		all symbols, so that it can be determined whether this expression relies on the given
+		symbol at any level in its evaluation.
+	*/
+	bool referencesSymbol (const String& symbol, const EvaluationContext& context) const;
+
+	/** Returns true if this expression contains any symbols. */
+	bool usesAnySymbols() const;
+
+	/** An exception that can be thrown by Expression::parse(). */
+	class ParseError  : public std::exception
+	{
+	public:
+		ParseError (const String& message);
+
+		String description;
+	};
+
+	/** An exception that can be thrown by Expression::evaluate(). */
+	class EvaluationError  : public std::exception
+	{
+	public:
+		EvaluationError (const String& message);
+
+		String description;
+	};
+
+	juce_UseDebuggingNewOperator
+
+private:
+	class Helpers;
+	friend class Helpers;
+
+	class Term  : public ReferenceCountedObject
+	{
+	public:
+		Term() {}
+		virtual ~Term() {}
+
+		virtual Term* clone() const = 0;
+		virtual double evaluate (const EvaluationContext&, int recursionDepth) const = 0;
+		virtual int getNumInputs() const = 0;
+		virtual Term* getInput (int index) const = 0;
+		virtual int getInputIndexFor (const Term* possibleInput) const;
+		virtual const String toString() const = 0;
+		virtual int getOperatorPrecedence() const;
+		virtual bool referencesSymbol (const String& symbol, const EvaluationContext&, int recursionDepth) const;
+		virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, Term* inputTerm,
+																				 double overallTarget, Term* topLevelTerm) const;
+		juce_UseDebuggingNewOperator
+
+	private:
+		Term (const Term& other);
+		Term& operator= (const Term&);
+	};
+
+	friend class ScopedPointer<Term>;
+	ReferenceCountedObjectPtr<Term> term;
+
+	explicit Expression (Term* term);
+};
+
+#endif   // __JUCE_EXPRESSION_JUCEHEADER__
+/*** End of inlined file: juce_Expression.h ***/
+
+
+#endif
+#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+
+/*** Start of inlined file: juce_OwnedArray.h ***/
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+#define __JUCE_OWNEDARRAY_JUCEHEADER__
 
 /** An array designed for holding objects.
 
@@ -29868,6 +30056,15 @@ struct JUCE_API  AudioSourceChannelInfo
 /**
 	Base class for objects that can produce a continuous stream of audio.
 
+	An AudioSource has two states: 'prepared' and 'unprepared'.
+
+	When a source needs to be played, it is first put into a 'prepared' state by a call to
+	prepareToPlay(), and then repeated calls will be made to its getNextAudioBlock() method to
+	process the audio data.
+
+	Once playback has finished, the releaseResources() method is called to put the stream
+	back into an 'unprepared' state.
+
 	@see AudioFormatReaderSource, ResamplingAudioSource
 */
 class JUCE_API  AudioSource
@@ -29883,7 +30080,14 @@ public:
 
 	/** Tells the source to prepare for playing.
 
-		The source can use this opportunity to initialise anything it needs to.
+		An AudioSource has two states: prepared and unprepared.
+
+		The prepareToPlay() method is guaranteed to be called at least once on an 'unpreprared'
+		source to put it into a 'prepared' state before any calls will be made to getNextAudioBlock().
+		This callback allows the source to initialise any resources it might need when playing.
+
+		Once playback has finished, the releaseResources() method is called to put the stream
+		back into an 'unprepared' state.
 
 		Note that this method could be called more than once in succession without
 		a matching call to releaseResources(), so make sure your code is robust and
@@ -31295,6 +31499,9 @@ public:
 
 	/** Returns true if this source is actually playing in a loop. */
 	virtual bool isLooping() const = 0;
+
+	/** Tells the source whether you'd like it to play in a loop. */
+	virtual void setLooping (bool shouldLoop)	   { (void) shouldLoop; }
 };
 
 #endif   // __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
@@ -31329,7 +31536,7 @@ public:
 
 		@see isLooping
 	*/
-	void setLooping (const bool shouldLoop) throw();
+	void setLooping (bool shouldLoop);
 
 	/** Returns whether loop-mode is turned on or not. */
 	bool isLooping() const					  { return looping; }
@@ -36616,7 +36823,8 @@ public:
 
 		@param newItemText	  the text of the item to show in the list
 		@param newItemId	an associated ID number that can be set or retrieved - see
-								getSelectedId() and setSelectedId()
+								getSelectedId() and setSelectedId(). Note that this value can not
+								be 0!
 		@see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
 	*/
 	void addItem (const String& newItemText,
@@ -42813,21 +43021,7 @@ private:
 #define __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 
 /**
-	Expresses a coordinate as an absolute or proportional distance from other
-	named coordinates.
-
-	A RelativeCoordinate represents a position as either:
-		- an absolute distance from the origin
-		- an absolute distance from another named RelativeCoordinate
-		- a proportion of the distance between two other named RelativeCoordinates
-
-	Of course, the coordinates that this one is relative to may themselves be relative
-	to other coordinates, so complex arrangements can be built up (as long as you're careful
-	not to create recursive loops!)
-
-	Rather than keeping pointers to the coordinates that this one is dependent on, it
-	stores their names, and when resolving this coordinate to an absolute value, a
-	NamedCoordinateFinder class is required to retrieve these coordinates by name.
+	Expresses a coordinate as a dynamically evaluated expression.
 
 	@see RelativePoint, RelativeRectangle
 */
@@ -42837,6 +43031,9 @@ public:
 
 	/** Creates a zero coordinate. */
 	RelativeCoordinate();
+	RelativeCoordinate (const Expression& expression);
+	RelativeCoordinate (const RelativeCoordinate& other);
+	RelativeCoordinate& operator= (const RelativeCoordinate& other);
 
 	/** Creates an absolute position from the parent origin on either the X or Y axis.
 
@@ -42844,52 +43041,16 @@ public:
 	*/
 	RelativeCoordinate (double absoluteDistanceFromOrigin);
 
-	/** Creates an absolute position relative to a named coordinate.
-
-		@param absoluteDistanceFromAnchor   the distance to add to the named anchor point
-		@param anchorPoint	  the name of the coordinate from which this one will be relative. See the constructor
-								notes for a description of the syntax for coordinate names.
-	*/
-	RelativeCoordinate (double absoluteDistanceFromAnchor, const String& anchorPoint);
-
-	/** Creates a relative position between two named points.
-
-		@param relativeProportionBetweenAnchors	 a value between 0 and 1 indicating this coordinate's relative position
-								between anchorPoint1 and anchorPoint2.
-		@param anchorPoint1	 the name of the first coordinate from which this one will be relative. See the constructor
-								notes for a description of the syntax for coordinate names.
-		@param anchorPoint2	 the name of the first coordinate from which this one will be relative. See the constructor
-								notes for a description of the syntax for coordinate names.
-	*/
-	RelativeCoordinate (double relativeProportionBetweenAnchors, const String& anchorPoint1, const String& anchorPoint2);
-
 	/** Recreates a coordinate from a string description.
 
-		The string can be in one of the following formats:
-			- "123"                         = 123 pixels from parent origin (this is equivalent to "parent.left + 123"
-												or "parent.top + 123", depending on which axis the coordinate is using)
-			- "anchor"                      = the same position as the coordinate named "anchor"
-			- "anchor + 123"                = the coordinate named "anchor" + 123 pixels
-			- "anchor - 123"                = the coordinate named "anchor" - 123 pixels
-			- "50%"                         = 50% of the distance between the coordinate space's top-left origin and its extent
-												(this is equivalent to "50% * parent.left -> parent.right" or "50% * parent.top -> parent.bottom")
-			- "50% * anchor"                = 50% of the distance between the coordinate space's origin and the coordinate named "anchor"
-												(this is equivalent to "50% * parent.left -> anchor" or "50% * parent.top -> anchor")
-			- "50% * anchor1 -> anchor2"    = 50% of the distance between the coordinate "anchor1" and the coordinate "anchor2"
+		The string will be parsed by ExpressionParser::parse().
 
-		An anchor name can either be just a single identifier (letters, digits and underscores only - no spaces),
-		e.g. "marker1", or it can be a two-part name in the form "objectName.edge". For example "parent.left" is
-		the origin, or "myComponent.top" is the top edge of a component called "myComponent". The exact names that
-		will be recognised are dependent on the NamedCoordinateFinder that you provide for looking them up, but
-		"parent.left" and "parent.top" are always available, meaning the origin. "parent.right" and "parent.bottom"
-		may also be available if the coordinate space has a fixed size.
-
-		@param stringVersion	the string to parse
+		@param stringVersion	the expression to use
 		@param isHorizontal	 this must be true if this is an X coordinate, or false if it's on the Y axis.
 
 		@see toString
 	*/
-	RelativeCoordinate (const String& stringVersion, bool isHorizontal);
+	RelativeCoordinate (const String& stringVersion);
 
 	/** Destructor. */
 	~RelativeCoordinate();
@@ -42897,44 +43058,20 @@ public:
 	bool operator== (const RelativeCoordinate& other) const throw();
 	bool operator!= (const RelativeCoordinate& other) const throw();
 
-	/**
-		Provides an interface for looking up the position of a named anchor when resolving a RelativeCoordinate.
-
-		When using RelativeCoordinates, to resolve their names you need to provide a subclass of this which
-		can retrieve a coordinate by name.
-	*/
-	class JUCE_API  NamedCoordinateFinder
-	{
-	public:
-		/** Destructor. */
-		virtual ~NamedCoordinateFinder() {}
-
-		/** Returns the coordinate for a given name.
-
-			The objectName parameter will be the first section of the name, and the edge the name of the second part.
-			E.g. for "parent.right", objectName would be "parent" and edge would be "right". If the name
-			has no dot, the edge parameter will be an empty string.
-
-			This method must be able to resolve "parent.left", "parent.top", "parent.right" and "parent.bottom", as
-			well as any other objects that your application uses.
-		*/
-		virtual const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const = 0;
-	};
-
 	/** Calculates the absolute position of this coordinate.
 
-		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
+		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
 		be needed to calculate the result.
 	*/
-	double resolve (const NamedCoordinateFinder* nameFinder) const;
+	double resolve (const Expression::EvaluationContext* evaluationContext) const;
 
 	/** Returns true if this coordinate uses the specified coord name at any level in its evaluation.
 		This will recursively check any coordinates upon which this one depends.
 	*/
-	bool references (const String& coordName, const NamedCoordinateFinder* nameFinder) const;
+	bool references (const String& coordName, const Expression::EvaluationContext* evaluationContext) const;
 
 	/** Returns true if there's a recursive loop when trying to resolve this coordinate's position. */
-	bool isRecursive (const NamedCoordinateFinder* nameFinder) const;
+	bool isRecursive (const Expression::EvaluationContext* evaluationContext) const;
 
 	/** Returns true if this coordinate depends on any other coordinates for its position. */
 	bool isDynamic() const;
@@ -42945,62 +43082,7 @@ public:
 		or relative position to whatever value is necessary to make its resultant position
 		match the position that is provided.
 	*/
-	void moveToAbsolute (double absoluteTargetPosition, const NamedCoordinateFinder* nameFinder);
-
-	/** Returns true if the coordinate is calculated as a proportion of the distance between two other points.
-		@see toggleProportionality
-	*/
-	bool isProportional() const throw()			 { return anchor2.isNotEmpty(); }
-
-	/** Toggles the coordinate between using a proportional or absolute position.
-		Note that calling this will reset the names of any anchor points, and just make the
-		coordinate relative to the parent origin and parent size.
-	*/
-	void toggleProportionality (const NamedCoordinateFinder* nameFinder,
-								const String& proportionalAnchor1, const String& proportionalAnchor2);
-
-	/** Returns a value that can be edited to set this coordinate's position.
-		The meaning of this number depends on the coordinate's mode. If the coordinate is
-		proportional, the number will be a percentage between 0 and 100. If the
-		coordinate is absolute, then it will be the number of pixels from its anchor point.
-		@see setEditableNumber
-	 */
-	const double getEditableNumber() const;
-
-	/** Sets the value that controls this coordinate's position.
-		The meaning of this number depends on the coordinate's mode. If the coordinate is
-		proportional, the number must be a percentage between 0 and 100. If the
-		coordinate is absolute, then it indicates the number of pixels from its anchor point.
-		@see setEditableNumber
-	*/
-	void setEditableNumber (const double newValue);
-
-	/** Returns the name of the first anchor point from which this coordinate is relative.
-	*/
-	const String getAnchorName1 (const String& returnValueIfOrigin) const;
-
-	/** Returns the name of the second anchor point from which this coordinate is relative.
-		The second anchor is only valid if the coordinate is in proportional mode.
-	*/
-	const String getAnchorName2 (const String& returnValueIfOrigin) const;
-
-	/** Returns the first anchor point as a coordinate. */
-	const RelativeCoordinate getAnchorCoordinate1() const;
-
-	/** Returns the first anchor point as a coordinate.
-		The second anchor is only valid if the coordinate is in proportional mode.
-	*/
-	const RelativeCoordinate getAnchorCoordinate2() const;
-
-	/** Changes the first anchor point, keeping the resultant position of this coordinate in
-		the same place it was previously.
-	*/
-	void changeAnchor1 (const String& newAnchor, const NamedCoordinateFinder* nameFinder);
-
-	/** Changes the second anchor point, keeping the resultant position of this coordinate in
-		the same place it was previously.
-	*/
-	void changeAnchor2 (const String& newAnchor, const NamedCoordinateFinder* nameFinder);
+	void moveToAbsolute (double absoluteTargetPosition, const Expression::EvaluationContext* evaluationContext);
 
 	/** Tells the coordinate that an object is changing its name or being deleted.
 
@@ -43009,8 +43091,11 @@ public:
 		this coordinate was using it, the coordinate is changed to be relative to the origin
 		instead.
 	*/
-	void renameAnchorIfUsed (const String& oldName, const String& newName,
-							 const NamedCoordinateFinder* nameFinder);
+	void renameSymbolIfUsed (const String& oldName, const String& newName,
+							 const Expression::EvaluationContext* evaluationContext);
+
+	/** Returns the expression that defines this coordinate. */
+	const Expression& getExpression() const	 { return term; }
 
 	/** Returns a string which represents this coordinate.
 		For details of the string syntax, see the constructor notes.
@@ -43039,11 +43124,10 @@ public:
 
 private:
 
-	String anchor1, anchor2;
-	double value;
+	Expression term;
 
-	double resolve (const NamedCoordinateFinder* nameFinder, int recursionCounter) const;
-	static double resolveAnchor (const String& anchorName, const NamedCoordinateFinder* nameFinder, int recursionCounter);
+//	double resolve (const Expression::EvaluationContext* evaluationContext, int recursionCounter) const;
+  //  static double resolveAnchor (const String& anchorName, const Expression::EvaluationContext* evaluationContext, int recursionCounter);
 };
 
 /**
@@ -43078,10 +43162,10 @@ public:
 
 	/** Calculates the absolute position of this point.
 
-		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
+		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
 		be needed to calculate the result.
 	*/
-	const Point<float> resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+	const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
 
 	/** Changes the values of this point's coordinates to make it resolve to the specified position.
 
@@ -43089,7 +43173,7 @@ public:
 		or relative positions to whatever values are necessary to make the resultant position
 		match the position that is provided.
 	*/
-	void moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+	void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
 
 	/** Returns a string which represents this point.
 		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
@@ -43101,8 +43185,8 @@ public:
 	/** Tells the point that an object is changing its name or being deleted.
 		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
 	*/
-	void renameAnchorIfUsed (const String& oldName, const String& newName,
-							 const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+	void renameSymbolIfUsed (const String& oldName, const String& newName,
+							 const Expression::EvaluationContext* evaluationContext);
 
 	/** Returns true if this point depends on any other coordinates for its position. */
 	bool isDynamic() const;
@@ -43145,10 +43229,10 @@ public:
 
 	/** Calculates the absolute position of this rectangle.
 
-		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
+		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
 		be needed to calculate the result.
 	*/
-	const Rectangle<float> resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+	const Rectangle<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
 
 	/** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
 
@@ -43156,7 +43240,7 @@ public:
 		or relative positions to whatever values are necessary to make the resultant position
 		match the position that is provided.
 	*/
-	void moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
 
 	/** Returns a string which represents this point.
 		This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
@@ -43166,10 +43250,10 @@ public:
 	const String toString() const;
 
 	/** Tells the rectangle that an object is changing its name or being deleted.
-		This calls RelativeCoordinate::renameAnchorIfUsed() on the rectangle's coordinates.
+		This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
 	*/
-	void renameAnchorIfUsed (const String& oldName, const String& newName,
-							 const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+	void renameSymbolIfUsed (const String& oldName, const String& newName,
+							 const Expression::EvaluationContext* evaluationContext);
 
 	// The actual rectangle coords...
 	RelativeCoordinate left, right, top, bottom;
@@ -43194,7 +43278,7 @@ public:
 	~RelativePointPath();
 
 	/** Resolves this points in this path and adds them to a normal Path object. */
-	void createPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder);
+	void createPath (Path& path, Expression::EvaluationContext* coordFinder);
 
 	/** Returns true if the path contains any non-fixed points. */
 	bool containsAnyDynamicPoints() const;
@@ -43226,7 +43310,7 @@ public:
 		ElementBase (ElementType type);
 		virtual ~ElementBase() {}
 		virtual const ValueTree createTree() const = 0;
-		virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
+		virtual void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const = 0;
 		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
 		const ElementType type;
@@ -43242,7 +43326,7 @@ public:
 		StartSubPath (const RelativePoint& pos);
 		~StartSubPath() {}
 		const ValueTree createTree() const;
-		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint startPos;
@@ -43258,7 +43342,7 @@ public:
 		CloseSubPath();
 		~CloseSubPath() {}
 		const ValueTree createTree() const;
-		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
 	private:
@@ -43272,7 +43356,7 @@ public:
 		LineTo (const RelativePoint& endPoint);
 		~LineTo() {}
 		const ValueTree createTree() const;
-		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint endPoint;
@@ -43288,7 +43372,7 @@ public:
 		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
 		~QuadraticTo() {}
 		const ValueTree createTree() const;
-		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint controlPoints[2];
@@ -43304,7 +43388,7 @@ public:
 		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
 		~CubicTo() {}
 		const ValueTree createTree() const;
-		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint controlPoints[3];
@@ -43339,11 +43423,11 @@ public:
 	RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
 	~RelativeParallelogram();
 
-	void resolveThreePoints (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
-	void resolveFourCorners (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
-	const Rectangle<float> getBounds (RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
-	void getPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
-	const AffineTransform resetToPerpendicular (RelativeCoordinate::NamedCoordinateFinder* coordFinder);
+	void resolveThreePoints (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
+	void resolveFourCorners (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
+	const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
+	void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+	const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
 
 	bool operator== (const RelativeParallelogram& other) const throw();
 	bool operator!= (const RelativeParallelogram& other) const throw();
@@ -43566,7 +43650,7 @@ public:
 
 		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
 											RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
-											RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+											Expression::EvaluationContext* nameFinder,
 											ImageProvider* imageProvider);
 
 		static void writeFillType (ValueTree& v, const FillType& fillType,
@@ -59069,7 +59153,7 @@ protected:
 	@see Drawable
 */
 class JUCE_API  DrawableComposite  : public Drawable,
-									 public RelativeCoordinate::NamedCoordinateFinder
+									 public Expression::EvaluationContext
 {
 public:
 
@@ -59230,7 +59314,7 @@ public:
 	/** @internal */
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 	/** @internal */
-	const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+	const Expression getSymbolValue (const String& symbol) const;
 
 	/** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
 	class ValueTreeWrapper   : public ValueTreeWrapperBase
@@ -59506,14 +59590,14 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+		const FillType getMainFill (Expression::EvaluationContext* nameFinder,
 									ImageProvider* imageProvider) const;
 		ValueTree getMainFillState();
 		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
 						  const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
 						  ImageProvider* imageProvider, UndoManager* undoManager);
 
-		const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+		const FillType getStrokeFill (Expression::EvaluationContext* nameFinder,
 									  ImageProvider* imageProvider) const;
 		ValueTree getStrokeFillState();
 		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
@@ -59540,7 +59624,7 @@ public:
 			const RelativePoint getStartPoint() const;
 			const RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
-			float getLength (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+			float getLength (Expression::EvaluationContext* nameFinder) const;
 
 			ValueTreeWrapper getParent() const;
 			Element getPreviousElement() const;
@@ -59549,11 +59633,11 @@ public:
 			void setModeOfEndPoint (const String& newMode, UndoManager* undoManager);
 
 			void convertToLine (UndoManager* undoManager);
-			void convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+			void convertToCubic (Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
 			void convertToPathBreak (UndoManager* undoManager);
-			ValueTree insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+			ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
 			void removePoint (UndoManager* undoManager);
-			float findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+			float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const;
 
 			static const Identifier mode, startSubPathElement, closeSubPathElement,
 									lineToElement, quadraticToElement, cubicToElement;

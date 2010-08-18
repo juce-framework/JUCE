@@ -167,8 +167,6 @@ public:
         [renderContext setValues: &swapInterval forParameter: NSOpenGLCPSwapInterval];
 
         [view setOpenGLContext: renderContext];
-        [renderContext setView: view];
-
         [format release];
 
         viewHolder = new NSViewComponentInternal (view, component);
@@ -192,6 +190,10 @@ public:
     bool makeActive() const throw()
     {
         jassert (renderContext != 0);
+
+        if ([renderContext view] != view)
+            [renderContext setView: view];
+
         [view makeActive];
         return isActive();
     }

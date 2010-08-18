@@ -199,7 +199,7 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* co
 }
 
 const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2, RelativePoint* const gp3,
-                                                             RelativeCoordinate::NamedCoordinateFinder* const nameFinder, ImageProvider* imageProvider)
+                                                             Expression::EvaluationContext* const nameFinder, ImageProvider* imageProvider)
 {
     const String newType (v[type].toString());
 

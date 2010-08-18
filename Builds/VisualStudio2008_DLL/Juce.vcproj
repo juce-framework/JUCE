@@ -352,6 +352,8 @@
           <File RelativePath="..\..\src\containers\juce_DynamicObject.cpp"/>
           <File RelativePath="..\..\src\containers\juce_DynamicObject.h"/>
           <File RelativePath="..\..\src\containers\juce_ElementComparator.h"/>
+          <File RelativePath="..\..\src\containers\juce_Expression.cpp"/>
+          <File RelativePath="..\..\src\containers\juce_Expression.h"/>
           <File RelativePath="..\..\src\containers\juce_HeapBlock.h"/>
           <File RelativePath="..\..\src\containers\juce_Identifier.cpp"/>
           <File RelativePath="..\..\src\containers\juce_Identifier.h"/>

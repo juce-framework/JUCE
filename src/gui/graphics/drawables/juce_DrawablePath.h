@@ -129,14 +129,14 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+        const FillType getMainFill (Expression::EvaluationContext* nameFinder,
                                     ImageProvider* imageProvider) const;
         ValueTree getMainFillState();
         void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
                           const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
                           ImageProvider* imageProvider, UndoManager* undoManager);
 
-        const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+        const FillType getStrokeFill (Expression::EvaluationContext* nameFinder,
                                       ImageProvider* imageProvider) const;
         ValueTree getStrokeFillState();
         void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
@@ -163,7 +163,7 @@ public:
             const RelativePoint getStartPoint() const;
             const RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
-            float getLength (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+            float getLength (Expression::EvaluationContext* nameFinder) const;
 
             ValueTreeWrapper getParent() const;
             Element getPreviousElement() const;
@@ -172,11 +172,11 @@ public:
             void setModeOfEndPoint (const String& newMode, UndoManager* undoManager);
 
             void convertToLine (UndoManager* undoManager);
-            void convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+            void convertToCubic (Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
             void convertToPathBreak (UndoManager* undoManager);
-            ValueTree insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+            ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
             void removePoint (UndoManager* undoManager);
-            float findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+            float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const;
 
             static const Identifier mode, startSubPathElement, closeSubPathElement,
                                     lineToElement, quadraticToElement, cubicToElement;

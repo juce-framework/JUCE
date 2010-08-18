@@ -1017,6 +1017,8 @@ public:
     {
         if (viewComponent != 0)
         {
+            log ("Closing AU GUI: " + plugin.getName());
+
             CloseComponent (viewComponent);
             viewComponent = 0;
         }
@@ -1071,8 +1073,6 @@ private:
 
         void removeView (HIViewRef)
         {
-            log ("Closing AU GUI: " + owner->plugin.getName());
-
             owner->closeViewComponent();
         }
 

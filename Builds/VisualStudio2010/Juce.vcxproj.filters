@@ -379,6 +379,9 @@
     <ClCompile Include="..\..\src\containers\juce_DynamicObject.cpp">
       <Filter>Juce\Source\containers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\containers\juce_Expression.cpp">
+      <Filter>Juce\Source\containers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\containers\juce_Identifier.cpp">
       <Filter>Juce\Source\containers</Filter>
     </ClCompile>
@@ -1426,6 +1429,9 @@
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_ElementComparator.h">
+      <Filter>Juce\Source\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\containers\juce_Expression.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_HeapBlock.h">

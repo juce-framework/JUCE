@@ -333,12 +333,15 @@ void RelativeRectangleLayoutManager::applyLayout()
     }
 }
 
-const RelativeCoordinate RelativeRectangleLayoutManager::findNamedCoordinate (const String& objectName, const String& edge) const
+const Expression RelativeRectangleLayoutManager::getSymbolValue (const String& symbol) const
 {
+    const String objectName (symbol.upToFirstOccurrenceOf (".", false, false).trim());
+    const String edge (symbol.fromFirstOccurrenceOf (".", false, false).trim());
+
     if (objectName == RelativeCoordinate::Strings::parent)
     {
-        if (edge == RelativeCoordinate::Strings::right)     return RelativeCoordinate ((double) parent->getWidth());
-        if (edge == RelativeCoordinate::Strings::bottom)    return RelativeCoordinate ((double) parent->getHeight());
+        if (edge == RelativeCoordinate::Strings::right)     return Expression ((double) parent->getWidth());
+        if (edge == RelativeCoordinate::Strings::bottom)    return Expression ((double) parent->getHeight());
     }
 
     if (objectName.isNotEmpty() && edge.isNotEmpty())
@@ -349,10 +352,10 @@ const RelativeCoordinate RelativeRectangleLayoutManager::findNamedCoordinate (co
 
             if (c->name == objectName)
             {
-                if (edge == RelativeCoordinate::Strings::left)   return c->coords.left;
-                if (edge == RelativeCoordinate::Strings::right)  return c->coords.right;
-                if (edge == RelativeCoordinate::Strings::top)    return c->coords.top;
-                if (edge == RelativeCoordinate::Strings::bottom) return c->coords.bottom;
+                if (edge == RelativeCoordinate::Strings::left)   return c->coords.left.getTerm();
+                if (edge == RelativeCoordinate::Strings::right)  return c->coords.right.getTerm();
+                if (edge == RelativeCoordinate::Strings::top)    return c->coords.top.getTerm();
+                if (edge == RelativeCoordinate::Strings::bottom) return c->coords.bottom.getTerm();
             }
         }
     }
@@ -362,10 +365,10 @@ const RelativeCoordinate RelativeRectangleLayoutManager::findNamedCoordinate (co
         MarkerPosition* m = markers.getUnchecked(i);
 
         if (m->markerName == objectName)
-            return m->position;
+            return m->position.getTerm();
     }
 
-    return RelativeCoordinate();
+    return Expression();
 }
 
 void RelativeRectangleLayoutManager::componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)

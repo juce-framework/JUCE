@@ -177,6 +177,7 @@
     <ClCompile Include="..\..\src\audio\synthesisers\juce_Synthesiser.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_BigInteger.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_DynamicObject.cpp"/>
+    <ClCompile Include="..\..\src\containers\juce_Expression.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_Identifier.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_MemoryBlock.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_NamedValueSet.cpp"/>
@@ -502,6 +503,7 @@
     <ClInclude Include="..\..\src\containers\juce_BigInteger.h"/>
     <ClInclude Include="..\..\src\containers\juce_DynamicObject.h"/>
     <ClInclude Include="..\..\src\containers\juce_ElementComparator.h"/>
+    <ClInclude Include="..\..\src\containers\juce_Expression.h"/>
     <ClInclude Include="..\..\src\containers\juce_HeapBlock.h"/>
     <ClInclude Include="..\..\src\containers\juce_Identifier.h"/>
     <ClInclude Include="..\..\src\containers\juce_MemoryBlock.h"/>

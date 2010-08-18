@@ -359,6 +359,10 @@
               file="src/containers/juce_DynamicObject.h"/>
         <FILE id="RNHQjBFmS" name="juce_ElementComparator.h" compile="0" resource="0"
               file="src/containers/juce_ElementComparator.h"/>
+        <FILE id="01ekjVT" name="juce_Expression.cpp" compile="1" resource="0"
+              file="src/containers/juce_Expression.cpp"/>
+        <FILE id="MpE62KG" name="juce_Expression.h" compile="0" resource="0"
+              file="src/containers/juce_Expression.h"/>
         <FILE id="ssHjnrvya" name="juce_HeapBlock.h" compile="0" resource="0"
               file="src/containers/juce_HeapBlock.h"/>
         <FILE id="3Wo76GZwg" name="juce_Identifier.cpp" compile="1" resource="0"

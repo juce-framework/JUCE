@@ -74,6 +74,15 @@ struct JUCE_API  AudioSourceChannelInfo
 /**
     Base class for objects that can produce a continuous stream of audio.
 
+    An AudioSource has two states: 'prepared' and 'unprepared'.
+
+    When a source needs to be played, it is first put into a 'prepared' state by a call to
+    prepareToPlay(), and then repeated calls will be made to its getNextAudioBlock() method to
+    process the audio data.
+
+    Once playback has finished, the releaseResources() method is called to put the stream
+    back into an 'unprepared' state.
+
     @see AudioFormatReaderSource, ResamplingAudioSource
 */
 class JUCE_API  AudioSource
@@ -90,7 +99,14 @@ public:
     //==============================================================================
     /** Tells the source to prepare for playing.
 
-        The source can use this opportunity to initialise anything it needs to.
+        An AudioSource has two states: prepared and unprepared.
+
+        The prepareToPlay() method is guaranteed to be called at least once on an 'unpreprared'
+        source to put it into a 'prepared' state before any calls will be made to getNextAudioBlock().
+        This callback allows the source to initialise any resources it might need when playing.
+
+        Once playback has finished, the releaseResources() method is called to put the stream
+        back into an 'unprepared' state.
 
         Note that this method could be called more than once in succession without
         a matching call to releaseResources(), so make sure your code is robust and

@@ -143,6 +143,8 @@ void DrawablePath::render (const Drawable::RenderingContext& context) const
         FillType f (mainFill);
         if (f.isGradient())
             f.gradient->multiplyOpacity (context.opacity);
+        else
+            f.setOpacity (f.getOpacity() * context.opacity);
 
         f.transform = f.transform.followedBy (context.transform);
         context.g.setFillType (f);
@@ -154,6 +156,8 @@ void DrawablePath::render (const Drawable::RenderingContext& context) const
         FillType f (strokeFill);
         if (f.isGradient())
             f.gradient->multiplyOpacity (context.opacity);
+        else
+            f.setOpacity (f.getOpacity() * context.opacity);
 
         f.transform = f.transform.followedBy (context.transform);
         context.g.setFillType (f);
@@ -226,7 +230,7 @@ ValueTree DrawablePath::ValueTreeWrapper::getStrokeFillState()
     return getStrokeFillState();
 }
 
-const FillType DrawablePath::ValueTreeWrapper::getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+const FillType DrawablePath::ValueTreeWrapper::getMainFill (Expression::EvaluationContext* nameFinder,
                                                             ImageProvider* imageProvider) const
 {
     return readFillType (state.getChildWithName (fill), 0, 0, 0, nameFinder, imageProvider);
@@ -240,7 +244,7 @@ void DrawablePath::ValueTreeWrapper::setMainFill (const FillType& newFill, const
     writeFillType (v, newFill, gp1, gp2, gp3, imageProvider, undoManager);
 }
 
-const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (Expression::EvaluationContext* nameFinder,
                                                               ImageProvider* imageProvider) const
 {
     return readFillType (state.getChildWithName (stroke), 0, 0, 0, nameFinder, imageProvider);
@@ -368,7 +372,7 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
     return RelativePoint();
 }
 
-float DrawablePath::ValueTreeWrapper::Element::getLength (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+float DrawablePath::ValueTreeWrapper::Element::getLength (Expression::EvaluationContext* nameFinder) const
 {
     const Identifier i (state.getType());
 
@@ -419,7 +423,7 @@ void DrawablePath::ValueTreeWrapper::Element::convertToLine (UndoManager* undoMa
     }
 }
 
-void DrawablePath::ValueTreeWrapper::Element::convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager)
+void DrawablePath::ValueTreeWrapper::Element::convertToCubic (Expression::EvaluationContext* nameFinder, UndoManager* undoManager)
 {
     const Identifier i (state.getType());
 
@@ -473,7 +477,7 @@ static const Point<float> findQuadraticSubdivisionPoint (float proportion, const
     return mid1 + (mid2 - mid1) * proportion;
 }
 
-float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const
 {
     const Identifier i (state.getType());
     float bestProp = 0;
@@ -529,7 +533,7 @@ float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Po
     return bestProp;
 }
 
-ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager)
+ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder, UndoManager* undoManager)
 {
     ValueTree newTree;
     const Identifier i (state.getType());

@@ -479,8 +479,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                     ++len;
                 }
 
-                XmlElement* const e = new XmlElement ((int) 0);
-                e->setText (String (inputStart, len));
+                XmlElement* const e = XmlElement::createTextElement (String (inputStart, len));
 
                 if (lastChildNode != 0)
                     lastChildNode->nextElement = e;

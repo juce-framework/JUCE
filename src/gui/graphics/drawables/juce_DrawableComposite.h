@@ -36,7 +36,7 @@
     @see Drawable
 */
 class JUCE_API  DrawableComposite  : public Drawable,
-                                     public RelativeCoordinate::NamedCoordinateFinder
+                                     public Expression::EvaluationContext
 {
 public:
     //==============================================================================
@@ -201,7 +201,7 @@ public:
     /** @internal */
     const Identifier getValueTreeType() const    { return valueTreeType; }
     /** @internal */
-    const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    const Expression getSymbolValue (const String& symbol) const;
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */

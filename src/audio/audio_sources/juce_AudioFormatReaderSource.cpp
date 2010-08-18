@@ -55,7 +55,7 @@ void AudioFormatReaderSource::setNextReadPosition (int newPosition)
     nextPlayPos = newPosition;
 }
 
-void AudioFormatReaderSource::setLooping (const bool shouldLoop) throw()
+void AudioFormatReaderSource::setLooping (bool shouldLoop)
 {
     looping = shouldLoop;
 }

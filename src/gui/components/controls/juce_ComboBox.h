@@ -97,7 +97,8 @@ public:
 
         @param newItemText      the text of the item to show in the list
         @param newItemId        an associated ID number that can be set or retrieved - see
-                                getSelectedId() and setSelectedId()
+                                getSelectedId() and setSelectedId(). Note that this value can not
+                                be 0!
         @see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
     */
     void addItem (const String& newItemText,

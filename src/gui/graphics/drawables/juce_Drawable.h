@@ -250,7 +250,7 @@ public:
 
         static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
                                             RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
-                                            RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+                                            Expression::EvaluationContext* nameFinder,
                                             ImageProvider* imageProvider);
 
         static void writeFillType (ValueTree& v, const FillType& fillType,

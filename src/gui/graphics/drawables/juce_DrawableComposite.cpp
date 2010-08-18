@@ -247,33 +247,26 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
     }
 }
 
-const RelativeCoordinate DrawableComposite::findNamedCoordinate (const String& objectName, const String& edge) const
+const Expression DrawableComposite::getSymbolValue (const String& symbol) const
 {
-    if (objectName == RelativeCoordinate::Strings::parent)
-    {
-        if (edge == RelativeCoordinate::Strings::right || edge == RelativeCoordinate::Strings::bottom)
-        {
-            jassertfalse; // a Drawable doesn't have a fixed right-hand or bottom edge - use a marker instead if you need a point of reference.
-            return RelativeCoordinate (100.0);
-        }
-    }
+    jassert (! symbol.containsChar ('.')) // the only symbols available in a Drawable are markers.
 
     int i;
     for (i = 0; i < markersX.size(); ++i)
     {
         Marker* const m = markersX.getUnchecked(i);
-        if (m->name == objectName)
-            return m->position;
+        if (m->name == symbol)
+            return m->position.getExpression();
     }
 
     for (i = 0; i < markersY.size(); ++i)
     {
         Marker* const m = markersY.getUnchecked(i);
-        if (m->name == objectName)
-            return m->position;
+        if (m->name == symbol)
+            return m->position.getExpression();
     }
 
-    return RelativeCoordinate();
+    return Expression::EvaluationContext::getSymbolValue (symbol);
 }
 
 const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool includeMarkers) const
@@ -535,7 +528,7 @@ const DrawableComposite::Marker DrawableComposite::ValueTreeWrapper::getMarker (
 {
     jassert (containsMarker (xAxis, state));
 
-    return Marker (state [nameProperty], RelativeCoordinate (state [posProperty].toString(), xAxis));
+    return Marker (state [nameProperty], RelativeCoordinate (state [posProperty].toString()));
 }
 
 void DrawableComposite::ValueTreeWrapper::setMarker (bool xAxis, const Marker& m, UndoManager* undoManager)

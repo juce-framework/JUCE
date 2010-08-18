@@ -110,6 +110,7 @@
  #include "../src/containers/juce_Variant.cpp"
  #include "../src/containers/juce_NamedValueSet.cpp"
  #include "../src/containers/juce_DynamicObject.cpp"
+ #include "../src/containers/juce_Expression.cpp"
  #include "../src/cryptography/juce_BlowFish.cpp"
  #include "../src/cryptography/juce_MD5.cpp"
  #include "../src/cryptography/juce_Primes.cpp"
