@@ -340,8 +340,11 @@ public:
     //==============================================================================
     void fillRect (const Rectangle<int>& r, const bool replaceExistingContents)
     {
-        CGRect cgRect = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
+        fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), replaceExistingContents);
+    }
 
+    void fillCGRect (const CGRect& cgRect, const bool replaceExistingContents)
+    {
         if (replaceExistingContents)
         {
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
@@ -355,7 +358,7 @@ public:
                 CGContextSetBlendMode (context, kCGBlendModeCopy);
 #endif
 
-            fillRect (r, false);
+            fillCGRect (cgRect, false);
             CGContextSetBlendMode (context, kCGBlendModeNormal);
         }
         else
@@ -472,38 +475,61 @@ public:
     //==============================================================================
     void drawLine (const Line<float>& line)
     {
-        CGContextSetLineCap (context, kCGLineCapSquare);
-        CGContextSetLineWidth (context, 1.0f);
-        CGContextSetRGBStrokeColor (context,
-                                    state->fillType.colour.getFloatRed(), state->fillType.colour.getFloatGreen(),
-                                    state->fillType.colour.getFloatBlue(), state->fillType.colour.getFloatAlpha());
+        if (state->fillType.isColour())
+        {
+            CGContextSetLineCap (context, kCGLineCapSquare);
+            CGContextSetLineWidth (context, 1.0f);
+            CGContextSetRGBStrokeColor (context,
+                                        state->fillType.colour.getFloatRed(), state->fillType.colour.getFloatGreen(),
+                                        state->fillType.colour.getFloatBlue(), state->fillType.colour.getFloatAlpha());
 
-        CGPoint cgLine[] = { { (CGFloat) line.getStartX(), flipHeight - (CGFloat) line.getStartY() },
-                             { (CGFloat) line.getEndX(),   flipHeight - (CGFloat) line.getEndY()   } };
+            CGPoint cgLine[] = { { (CGFloat) line.getStartX(), flipHeight - (CGFloat) line.getStartY() },
+                                 { (CGFloat) line.getEndX(),   flipHeight - (CGFloat) line.getEndY()   } };
 
-        CGContextStrokeLineSegments (context, cgLine, 1);
+            CGContextStrokeLineSegments (context, cgLine, 1);
+        }
+        else
+        {
+            Path p;
+            p.addLineSegment (line, 1.0f);
+            fillPath (p, AffineTransform::identity);
+        }
     }
 
     void drawVerticalLine (const int x, float top, float bottom)
     {
-#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
-        CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
-#else
-        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x co-ord slightly to trick it..
-        CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
-#endif
+        if (state->fillType.isColour())
+        {
+          #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
+            CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
+          #else
+            // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
+            // the x co-ord slightly to trick it..
+            CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
+          #endif
+        }
+        else
+        {
+            fillCGRect (CGRectMake ((float) x, flipHeight - bottom, 1.0f, bottom - top), false);
+        }
     }
 
     void drawHorizontalLine (const int y, float left, float right)
     {
-#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
-        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
-#else
-        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
-        // the x co-ord slightly to trick it..
-        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
-#endif
+        if (state->fillType.isColour())
+        {
+          #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
+            CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
+          #else
+            // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
+            // the x co-ord slightly to trick it..
+            CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
+          #endif
+        }
+        else
+        {
+            fillCGRect (CGRectMake (left, flipHeight - (y + 1), right - left, 1.0f), false);
+        }
     }
 
     void setFont (const Font& newFont)

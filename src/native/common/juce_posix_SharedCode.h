@@ -615,3 +615,104 @@ void InterProcessLock::exit()
     if (pimpl != 0 && --(pimpl->refCount) == 0)
         pimpl = 0;
 }
+
+//==============================================================================
+void JUCE_API juce_threadEntryPoint (void*);
+
+void* threadEntryProc (void* userData)
+{
+    JUCE_AUTORELEASEPOOL
+    juce_threadEntryPoint (userData);
+    return 0;
+}
+
+void* juce_createThread (void* userData)
+{
+    pthread_t handle = 0;
+
+    if (pthread_create (&handle, 0, threadEntryProc, userData) == 0)
+    {
+        pthread_detach (handle);
+        return (void*) handle;
+    }
+
+    return 0;
+}
+
+void juce_killThread (void* handle)
+{
+    if (handle != 0)
+        pthread_cancel ((pthread_t) handle);
+}
+
+void juce_setCurrentThreadName (const String& /*name*/)
+{
+}
+
+bool juce_setThreadPriority (void* handle, int priority)
+{
+    struct sched_param param;
+    int policy;
+    priority = jlimit (0, 10, priority);
+
+    if (handle == 0)
+        handle = (void*) pthread_self();
+
+    if (pthread_getschedparam ((pthread_t) handle, &policy, &param) != 0)
+        return false;
+
+    policy = priority == 0 ? SCHED_OTHER : SCHED_RR;
+
+    const int minPriority = sched_get_priority_min (policy);
+    const int maxPriority = sched_get_priority_max (policy);
+
+    param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
+    return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
+}
+
+Thread::ThreadID Thread::getCurrentThreadId()
+{
+    return (ThreadID) pthread_self();
+}
+
+void Thread::yield()
+{
+    sched_yield();
+}
+
+//==============================================================================
+/* Remove this macro if you're having problems compiling the cpu affinity
+   calls (the API for these has changed about quite a bit in various Linux
+   versions, and a lot of distros seem to ship with obsolete versions)
+*/
+#if defined (CPU_ISSET) && ! defined (SUPPORT_AFFINITIES)
+  #define SUPPORT_AFFINITIES 1
+#endif
+
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+{
+#if SUPPORT_AFFINITIES
+    cpu_set_t affinity;
+    CPU_ZERO (&affinity);
+
+    for (int i = 0; i < 32; ++i)
+        if ((affinityMask & (1 << i)) != 0)
+            CPU_SET (i, &affinity);
+
+    /*
+       N.B. If this line causes a compile error, then you've probably not got the latest
+       version of glibc installed.
+
+       If you don't want to update your copy of glibc and don't care about cpu affinities,
+       then you can just disable all this stuff by setting the SUPPORT_AFFINITIES macro to 0.
+    */
+    sched_setaffinity (getpid(), sizeof (cpu_set_t), &affinity);
+    sched_yield();
+
+#else
+    /* affinities aren't supported because either the appropriate header files weren't found,
+       or the SUPPORT_AFFINITIES macro was turned off
+    */
+    jassertfalse;
+#endif
+}

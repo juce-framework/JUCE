@@ -35,6 +35,8 @@ BEGIN_JUCE_NAMESPACE
 class Expression::Helpers
 {
 public:
+    typedef ReferenceCountedObjectPtr<Term> TermPtr;
+
     //==============================================================================
     class Constant  : public Term
     {
@@ -45,6 +47,11 @@ public:
         double evaluate (const EvaluationContext&, int) const   { return value; }
         int getNumInputs() const                                { return 0; }
         Term* getInput (int) const                              { return 0; }
+
+        const TermPtr negated()
+        {
+            return new Constant (-value);
+        }
 
         const String toString() const
         {
@@ -69,7 +76,14 @@ public:
             if (++recursionDepth > 256)
                 throw EvaluationError ("Recursive symbol references");
 
-            return c.getSymbolValue (symbol).term->evaluate (c, recursionDepth);
+            try
+            {
+                return c.getSymbolValue (symbol).term->evaluate (c, recursionDepth);
+            }
+            catch (...)
+            {}
+
+            return 0;
         }
 
         Term* clone() const                                     { return new Symbol (symbol); }
@@ -150,7 +164,7 @@ public:
     class Negate  : public Term
     {
     public:
-        Negate (Term* const input_) : input (input_)
+        Negate (const TermPtr& input_) : input (input_)
         {
             jassert (input_ != 0);
         }
@@ -161,18 +175,19 @@ public:
         Term* clone() const                                     { return new Negate (input->clone()); }
         double evaluate (const EvaluationContext& c, int recursionDepth) const    { return -input->evaluate (c, recursionDepth); }
 
-        const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, Term* input_, double overallTarget, Term* topLevelTerm) const
+        const TermPtr negated()
+        {
+            return input;
+        }
+
+        const TermPtr createTermToEvaluateInput (const EvaluationContext& context, const Term* input_, double overallTarget, Term* topLevelTerm) const
         {
             jassert (input_ == input);
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
-            Term* newDest;
-            if (dest == 0)
-                newDest = new Constant (overallTarget);
-            else
-                newDest = dest->clone();
 
-            return new Negate (newDest);
+            return new Negate (dest == 0 ? new Constant (overallTarget)
+                                         : dest->createTermToEvaluateInput (context, this, overallTarget, topLevelTerm));
         }
 
         const String toString() const
@@ -189,7 +204,7 @@ public:
         }
 
     private:
-        const ReferenceCountedObjectPtr<Term> input;
+        const TermPtr input;
     };
 
     //==============================================================================
@@ -216,7 +231,7 @@ public:
         }
 
     protected:
-        const ReferenceCountedObjectPtr<Term> left, right;
+        const TermPtr left, right;
 
         const String createString (const String& op) const
         {
@@ -238,7 +253,7 @@ public:
             return s;
         }
 
-        Term* createDestinationTerm (const EvaluationContext&, Term* input, double overallTarget, Term* topLevelTerm) const
+        const TermPtr createDestinationTerm (const EvaluationContext& context, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
             jassert (input == left || input == right);
             if (input != left && input != right)
@@ -249,7 +264,7 @@ public:
             if (dest == 0)
                 return new Constant (overallTarget);
 
-            return dest->clone();
+            return dest->createTermToEvaluateInput (context, this, overallTarget, topLevelTerm);
         }
     };
 
@@ -264,9 +279,9 @@ public:
         const String toString() const       { return createString ("+"); }
         int getOperatorPrecedence() const   { return 2; }
 
-        const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext& c, Term* input, double overallTarget, Term* topLevelTerm) const
+        const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            Term* const newDest = createDestinationTerm (c, input, overallTarget, topLevelTerm);
+            const TermPtr newDest (createDestinationTerm (c, input, overallTarget, topLevelTerm));
             if (newDest == 0)
                 return 0;
 
@@ -285,9 +300,9 @@ public:
         const String toString() const       { return createString ("-"); }
         int getOperatorPrecedence() const   { return 2; }
 
-        const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext& c, Term* input, double overallTarget, Term* topLevelTerm) const
+        const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            Term* const newDest = createDestinationTerm (c, input, overallTarget, topLevelTerm);
+            const TermPtr newDest (createDestinationTerm (c, input, overallTarget, topLevelTerm));
             if (newDest == 0)
                 return 0;
 
@@ -309,9 +324,9 @@ public:
         const String toString() const       { return createString ("*"); }
         int getOperatorPrecedence() const   { return 1; }
 
-        const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext& c, Term* input, double overallTarget, Term* topLevelTerm) const
+        const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            Term* const newDest = createDestinationTerm (c, input, overallTarget, topLevelTerm);
+            const TermPtr newDest (createDestinationTerm (c, input, overallTarget, topLevelTerm));
             if (newDest == 0)
                 return 0;
 
@@ -330,9 +345,9 @@ public:
         const String toString() const       { return createString ("/"); }
         int getOperatorPrecedence() const   { return 1; }
 
-        const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext& c, Term* input, double overallTarget, Term* topLevelTerm) const
+        const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            Term* const newDest = createDestinationTerm (c, input, overallTarget, topLevelTerm);
+            const TermPtr newDest (createDestinationTerm (c, input, overallTarget, topLevelTerm));
             if (newDest == 0)
                 return 0;
 
@@ -435,25 +450,25 @@ public:
             text = textString;
         }
 
-        Term* readExpression()
+        const TermPtr readExpression()
         {
-            ScopedPointer<Term> lhs (readMultiplyOrDivideExpression());
+            TermPtr lhs (readMultiplyOrDivideExpression());
 
             char opType;
             while (lhs != 0 && readOperator ("+-", &opType))
             {
-                Term* rhs = readMultiplyOrDivideExpression();
+                TermPtr rhs (readMultiplyOrDivideExpression());
 
                 if (rhs == 0)
                     throw ParseError ("Expected expression after \"" + String::charToString (opType) + "\"");
 
                 if (opType == '+')
-                    lhs = new Add (lhs.release(), rhs);
+                    lhs = new Add (lhs, rhs);
                 else
-                    lhs = new Subtract (lhs.release(), rhs);
+                    lhs = new Subtract (lhs, rhs);
             }
 
-            return lhs.release();
+            return lhs;
         }
 
     private:
@@ -590,39 +605,39 @@ public:
             return t;
         }
 
-        Term* readMultiplyOrDivideExpression()
+        const TermPtr readMultiplyOrDivideExpression()
         {
-            ScopedPointer<Term> lhs (readUnaryExpression());
+            TermPtr lhs (readUnaryExpression());
 
             char opType;
             while (lhs != 0 && readOperator ("*/", &opType))
             {
-                Term* rhs = readUnaryExpression();
+                TermPtr rhs (readUnaryExpression());
 
                 if (rhs == 0)
                     throw ParseError ("Expected expression after \"" + String::charToString (opType) + "\"");
 
                 if (opType == '*')
-                    lhs = new Multiply (lhs.release(), rhs);
+                    lhs = new Multiply (lhs, rhs);
                 else
-                    lhs = new Divide (lhs.release(), rhs);
+                    lhs = new Divide (lhs, rhs);
             }
 
-            return lhs.release();
+            return lhs;
         }
 
-        Term* readUnaryExpression()
+        const TermPtr readUnaryExpression()
         {
             char opType;
             if (readOperator ("+-", &opType))
             {
-                Term* term = readUnaryExpression();
+                TermPtr term (readUnaryExpression());
 
                 if (term == 0)
                     throw ParseError ("Expected expression after \"" + String::charToString (opType) + "\"");
 
                 if (opType == '-')
-                    term = new Negate (term);
+                    term = term->negated();
 
                 return term;
             }
@@ -630,9 +645,9 @@ public:
             return readPrimaryExpression();
         }
 
-        Term* readPrimaryExpression()
+        const TermPtr readPrimaryExpression()
         {
-            Term* e = readParenthesisedExpression();
+            TermPtr e (readParenthesisedExpression());
             if (e != 0)
                 return e;
 
@@ -648,7 +663,7 @@ public:
                     Function* f = new Function (identifier, ReferenceCountedArray<Term>());
                     ScopedPointer<Term> func (f);  // (can't use ScopedPointer<Function> in MSVC)
 
-                    Term* param = readExpression();
+                    TermPtr param (readExpression());
 
                     if (param == 0)
                     {
@@ -684,19 +699,16 @@ public:
             return 0;
         }
 
-        Term* readParenthesisedExpression()
+        const TermPtr readParenthesisedExpression()
         {
             if (! readOperator ("("))
                 return 0;
 
-            ScopedPointer<Term> e (readExpression());
-            if (e == 0)
+            const TermPtr e (readExpression());
+            if (e == 0 || ! readOperator (")"))
                 return 0;
 
-            if (! readOperator (")"))
-                e = 0;
-
-            return e.release();
+            return e;
         }
 
         Parser (const Parser&);
@@ -749,7 +761,7 @@ Expression::Expression (const String& stringToParse)
 const Expression Expression::parse (const String& stringToParse, int& textIndexToStartFrom)
 {
     Helpers::Parser parser (stringToParse, textIndexToStartFrom);
-    Term* term = parser.readExpression();
+    const Helpers::TermPtr term (parser.readExpression());
 
     if (term != 0)
         return Expression (term);
@@ -789,7 +801,7 @@ const Expression Expression::operator/ (const Expression& other) const
 
 const Expression Expression::operator-() const
 {
-    return Expression (new Helpers::Negate (term));
+    return Expression (term->negated());
 }
 
 const String Expression::toString() const
@@ -837,7 +849,7 @@ const Expression Expression::adjustedToGiveNewResult (const double targetValue,
     }
     else
     {
-        const ReferenceCountedObjectPtr<Term> reverseTerm (parent->createTermToEvaluateInput (context, termToAdjust, targetValue, newTerm));
+        const Helpers::TermPtr reverseTerm (parent->createTermToEvaluateInput (context, termToAdjust, targetValue, newTerm));
 
         if (reverseTerm == 0)
             return Expression();
@@ -883,21 +895,28 @@ int Expression::Term::getInputIndexFor (const Term*) const
     return -1;
 }
 
-const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::createTermToEvaluateInput (const EvaluationContext&, Term*, double, Term*) const
+const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::createTermToEvaluateInput (const EvaluationContext&, const Term*, double, Term*) const
 {
     jassertfalse;
     return 0;
+}
+
+const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::negated()
+{
+    return new Helpers::Negate (this);
 }
 
 //==============================================================================
 Expression::ParseError::ParseError (const String& message)
     : description (message)
 {
+    DBG ("Expression::ParseError: " + message);
 }
 
 Expression::EvaluationError::EvaluationError (const String& message)
     : description (message)
 {
+    DBG ("Expression::EvaluationError: " + message);
 }
 
 //==============================================================================

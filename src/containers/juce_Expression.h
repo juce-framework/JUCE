@@ -198,8 +198,9 @@ private:
         virtual const String toString() const = 0;
         virtual int getOperatorPrecedence() const;
         virtual bool referencesSymbol (const String& symbol, const EvaluationContext&, int recursionDepth) const;
-        virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, Term* inputTerm,
+        virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, const Term* inputTerm,
                                                                                  double overallTarget, Term* topLevelTerm) const;
+        virtual const ReferenceCountedObjectPtr<Term> negated();
         juce_UseDebuggingNewOperator
 
     private:

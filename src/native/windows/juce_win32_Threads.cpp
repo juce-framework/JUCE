@@ -188,18 +188,12 @@ bool juce_setThreadPriority (void* threadHandle, int priority)
 {
     int pri = THREAD_PRIORITY_TIME_CRITICAL;
 
-    if (priority < 1)
-        pri = THREAD_PRIORITY_IDLE;
-    else if (priority < 2)
-        pri = THREAD_PRIORITY_LOWEST;
-    else if (priority < 5)
-        pri = THREAD_PRIORITY_BELOW_NORMAL;
-    else if (priority < 7)
-        pri = THREAD_PRIORITY_NORMAL;
-    else if (priority < 9)
-        pri = THREAD_PRIORITY_ABOVE_NORMAL;
-    else if (priority < 10)
-        pri = THREAD_PRIORITY_HIGHEST;
+    if (priority < 1)       pri = THREAD_PRIORITY_IDLE;
+    else if (priority < 2)  pri = THREAD_PRIORITY_LOWEST;
+    else if (priority < 5)  pri = THREAD_PRIORITY_BELOW_NORMAL;
+    else if (priority < 7)  pri = THREAD_PRIORITY_NORMAL;
+    else if (priority < 9)  pri = THREAD_PRIORITY_ABOVE_NORMAL;
+    else if (priority < 10) pri = THREAD_PRIORITY_HIGHEST;
 
     if (threadHandle == 0)
         threadHandle = GetCurrentThread();

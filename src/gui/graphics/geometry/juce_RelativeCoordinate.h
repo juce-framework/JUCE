@@ -144,9 +144,6 @@ public:
 private:
     //==============================================================================
     Expression term;
-
-//    double resolve (const Expression::EvaluationContext* evaluationContext, int recursionCounter) const;
-  //  static double resolveAnchor (const String& anchorName, const Expression::EvaluationContext* evaluationContext, int recursionCounter);
 };
 
 

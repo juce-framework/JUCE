@@ -185,7 +185,7 @@ const String RelativeCoordinate::toString() const
 void RelativeCoordinate::renameSymbolIfUsed (const String& oldName, const String& newName,
                                              const Expression::EvaluationContext* context)
 {
-    jassert (newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
+    jassert (newName.isNotEmpty() && newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
 
     if (term.referencesSymbol (oldName, *context))
     {
@@ -276,9 +276,9 @@ RelativeRectangle::RelativeRectangle (const RelativeCoordinate& left_, const Rel
 
 RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect, const String& componentName)
     : left (rect.getX()),
-      right (componentName + "." + RelativeCoordinate::Strings::left + " + " + String (rect.getWidth())),
+      right (Expression::symbol (componentName + "." + RelativeCoordinate::Strings::left) + Expression ((double) rect.getWidth())),
       top (rect.getY()),
-      bottom (componentName + "." + RelativeCoordinate::Strings::top + " + " + String (rect.getHeight()))
+      bottom (Expression::symbol (componentName + "." + RelativeCoordinate::Strings::top) + Expression ((double) rect.getHeight()))
 {
 }
 

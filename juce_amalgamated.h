@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	50
+#define JUCE_BUILDNUMBER	51
 
 /** Current Juce version number.
 
@@ -6712,8 +6712,9 @@ private:
 		virtual const String toString() const = 0;
 		virtual int getOperatorPrecedence() const;
 		virtual bool referencesSymbol (const String& symbol, const EvaluationContext&, int recursionDepth) const;
-		virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, Term* inputTerm,
+		virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, const Term* inputTerm,
 																				 double overallTarget, Term* topLevelTerm) const;
+		virtual const ReferenceCountedObjectPtr<Term> negated();
 		juce_UseDebuggingNewOperator
 
 	private:
@@ -43125,9 +43126,6 @@ public:
 private:
 
 	Expression term;
-
-//	double resolve (const Expression::EvaluationContext* evaluationContext, int recursionCounter) const;
-  //  static double resolveAnchor (const String& anchorName, const Expression::EvaluationContext* evaluationContext, int recursionCounter);
 };
 
 /**

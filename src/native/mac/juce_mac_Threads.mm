@@ -34,67 +34,6 @@
 */
 
 //==============================================================================
-void JUCE_API juce_threadEntryPoint (void*);
-
-void* threadEntryProc (void* userData)
-{
-    const ScopedAutoReleasePool pool;
-    juce_threadEntryPoint (userData);
-    return 0;
-}
-
-void* juce_createThread (void* userData)
-{
-    pthread_t handle = 0;
-
-    if (pthread_create (&handle, 0, threadEntryProc, userData) == 0)
-    {
-        pthread_detach (handle);
-        return (void*) handle;
-    }
-
-    return 0;
-}
-
-void juce_killThread (void* handle)
-{
-    if (handle != 0)
-        pthread_cancel ((pthread_t) handle);
-}
-
-void juce_setCurrentThreadName (const String& /*name*/)
-{
-}
-
-bool juce_setThreadPriority (void* handle, int priority)
-{
-    if (handle == 0)
-        handle = (void*) pthread_self();
-
-    struct sched_param param;
-    int policy;
-    pthread_getschedparam ((pthread_t) handle, &policy, &param);
-    param.sched_priority = jlimit (1, 127, 1 + (priority * 126) / 11);
-    return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
-}
-
-Thread::ThreadID Thread::getCurrentThreadId()
-{
-    return static_cast <ThreadID> (pthread_self());
-}
-
-void Thread::yield()
-{
-    sched_yield();
-}
-
-void Thread::setCurrentThreadAffinityMask (const uint32 /*affinityMask*/)
-{
-    // xxx
-    jassertfalse;
-}
-
-//==============================================================================
 bool Process::isForegroundProcess()
 {
 #if JUCE_MAC

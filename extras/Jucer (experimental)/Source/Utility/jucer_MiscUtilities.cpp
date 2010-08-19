@@ -352,10 +352,10 @@ const Expression RelativeRectangleLayoutManager::getSymbolValue (const String& s
 
             if (c->name == objectName)
             {
-                if (edge == RelativeCoordinate::Strings::left)   return c->coords.left.getTerm();
-                if (edge == RelativeCoordinate::Strings::right)  return c->coords.right.getTerm();
-                if (edge == RelativeCoordinate::Strings::top)    return c->coords.top.getTerm();
-                if (edge == RelativeCoordinate::Strings::bottom) return c->coords.bottom.getTerm();
+                if (edge == RelativeCoordinate::Strings::left)   return c->coords.left.getExpression();
+                if (edge == RelativeCoordinate::Strings::right)  return c->coords.right.getExpression();
+                if (edge == RelativeCoordinate::Strings::top)    return c->coords.top.getExpression();
+                if (edge == RelativeCoordinate::Strings::bottom) return c->coords.bottom.getExpression();
             }
         }
     }
@@ -365,7 +365,7 @@ const Expression RelativeRectangleLayoutManager::getSymbolValue (const String& s
         MarkerPosition* m = markers.getUnchecked(i);
 
         if (m->markerName == objectName)
-            return m->position.getTerm();
+            return m->position.getExpression();
     }
 
     return Expression();
