@@ -41,16 +41,17 @@ public:
     class Constant  : public Term
     {
     public:
-        Constant (const double value_) : value (value_), isResolutionTarget (false) {}
+        Constant (const double value_, bool isResolutionTarget_)
+            : value (value_), isResolutionTarget (isResolutionTarget_) {}
 
-        Term* clone() const                                     { return new Constant (value); }
+        Term* clone() const                                     { return new Constant (value, isResolutionTarget); }
         double evaluate (const EvaluationContext&, int) const   { return value; }
         int getNumInputs() const                                { return 0; }
         Term* getInput (int) const                              { return 0; }
 
         const TermPtr negated()
         {
-            return new Constant (-value);
+            return new Constant (-value, isResolutionTarget);
         }
 
         const String toString() const
@@ -186,7 +187,7 @@ public:
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
-            return new Negate (dest == 0 ? new Constant (overallTarget)
+            return new Negate (dest == 0 ? new Constant (overallTarget, false)
                                          : dest->createTermToEvaluateInput (context, this, overallTarget, topLevelTerm));
         }
 
@@ -262,7 +263,7 @@ public:
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
             if (dest == 0)
-                return new Constant (overallTarget);
+                return new Constant (overallTarget, false);
 
             return dest->createTermToEvaluateInput (context, this, overallTarget, topLevelTerm);
         }
@@ -383,14 +384,15 @@ public:
             return c;
 
         int i;
-        for (i = term->getNumInputs(); --i >= 0;)
+        const int numIns = term->getNumInputs();
+        for (i = 0; i < numIns; ++i)
         {
             Constant* c = dynamic_cast<Constant*> (term->getInput (i));
             if (c != 0 && (c->isResolutionTarget || ! mustBeFlagged))
                 return c;
         }
 
-        for (i = term->getNumInputs(); --i >= 0;)
+        for (i = 0; i < numIns; ++i)
         {
             Constant* c = findTermToAdjust (term->getInput (i), mustBeFlagged);
             if (c != 0)
@@ -552,6 +554,7 @@ public:
             {
                 ++i;
                 skipWhitespace (i);
+                textIndex = i;
             }
 
             int numDigits = 0;
@@ -599,8 +602,7 @@ public:
                     return 0;
             }
 
-            Constant* t = new Constant (String (text + textIndex, i - textIndex).getDoubleValue());
-            t->isResolutionTarget = isResolutionTarget;
+            Constant* t = new Constant (String (text + textIndex, i - textIndex).getDoubleValue(), isResolutionTarget);
             textIndex = i;
             return t;
         }
@@ -718,7 +720,7 @@ public:
 
 //==============================================================================
 Expression::Expression()
-    : term (new Expression::Helpers::Constant (0))
+    : term (new Expression::Helpers::Constant (0, false))
 {
 }
 
@@ -733,7 +735,7 @@ Expression::Expression (Term* const term_)
 }
 
 Expression::Expression (const double constant)
-    : term (new Expression::Helpers::Constant (constant))
+    : term (new Expression::Helpers::Constant (constant, false))
 {
 }
 
@@ -755,7 +757,7 @@ Expression::Expression (const String& stringToParse)
     term = parser.readExpression();
 
     if (term == 0)
-        term = new Helpers::Constant (0);
+        term = new Helpers::Constant (0, false);
 }
 
 const Expression Expression::parse (const String& stringToParse, int& textIndexToStartFrom)
@@ -779,30 +781,11 @@ double Expression::evaluate (const Expression::EvaluationContext& context) const
     return term->evaluate (context, 0);
 }
 
-const Expression Expression::operator+ (const Expression& other) const
-{
-    return Expression (new Helpers::Add (term, other.term));
-}
-
-const Expression Expression::operator- (const Expression& other) const
-{
-    return Expression (new Helpers::Subtract (term, other.term));
-}
-
-const Expression Expression::operator* (const Expression& other) const
-{
-    return Expression (new Helpers::Multiply (term, other.term));
-}
-
-const Expression Expression::operator/ (const Expression& other) const
-{
-    return Expression (new Helpers::Divide (term, other.term));
-}
-
-const Expression Expression::operator-() const
-{
-    return Expression (term->negated());
-}
+const Expression Expression::operator+ (const Expression& other) const  { return Expression (new Helpers::Add (term, other.term)); }
+const Expression Expression::operator- (const Expression& other) const  { return Expression (new Helpers::Subtract (term, other.term)); }
+const Expression Expression::operator* (const Expression& other) const  { return Expression (new Helpers::Multiply (term, other.term)); }
+const Expression Expression::operator/ (const Expression& other) const  { return Expression (new Helpers::Divide (term, other.term)); }
+const Expression Expression::operator-() const                          { return Expression (term->negated()); }
 
 const String Expression::toString() const
 {
@@ -835,7 +818,7 @@ const Expression Expression::adjustedToGiveNewResult (const double targetValue,
 
     if (termToAdjust == 0)
     {
-        newTerm = new Helpers::Add (newTerm.release(), new Helpers::Constant (0));
+        newTerm = new Helpers::Add (newTerm.release(), new Helpers::Constant (0, false));
         termToAdjust = Helpers::findTermToAdjust (newTerm, false);
     }
 

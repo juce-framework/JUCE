@@ -331,9 +331,9 @@ private:
             << "#ifndef " << headerGuard << newLine
             << "#define " << headerGuard << newLine
             << newLine
-            << "#define JucePlugin_Build_VST    " << ((bool) project.shouldBuildVST().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_Build_AU     " << ((bool) project.shouldBuildAU().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_Build_RTAS   " << ((bool) project.shouldBuildRTAS().getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_Build_VST    " << ((bool) project.shouldBuildVST().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_AU     " << ((bool) project.shouldBuildAU().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_RTAS   " << ((bool) project.shouldBuildRTAS().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
             << newLine
             << "#define JucePlugin_Name                 " << project.getPluginName().toString().quoted() << newLine
             << "#define JucePlugin_Desc                 " << project.getPluginDesc().toString().quoted() << newLine

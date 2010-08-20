@@ -151,8 +151,7 @@ static int numInstances = 0;
 class JucePlugInProcess  : public CEffectProcessMIDI,
                            public CEffectProcessRTAS,
                            public AudioProcessorListener,
-                           public AudioPlayHead,
-                           public AsyncUpdater
+                           public AudioPlayHead
 {
 public:
     //==============================================================================
@@ -160,6 +159,7 @@ public:
         : prepared (false),
           sampleRate (44100.0)
     {
+        asyncUpdater = new InternalAsyncUpdater (*this);
         juceFilter = createPluginFilter();
         jassert (juceFilter != 0);
 
@@ -180,6 +180,7 @@ public:
             juceFilter->releaseResources();
 
         delete juceFilter;
+        asyncUpdater = 0;
 
         if (--numInstances == 0)
         {
@@ -529,7 +530,7 @@ protected:
     {
         if (! prepared)
         {
-            triggerAsyncUpdate();
+            asyncUpdater->triggerAsyncUpdate();
             bypassBuffers (inputs, outputs, numSamples);
             return;
         }
@@ -803,6 +804,19 @@ protected:
         }
     }
 
+public:
+    // Need to use an intermediate class here rather than inheriting from AsyncUpdater, so that it can
+    // be deleted before shutting down juce in our destructor.
+    class InternalAsyncUpdater  : public AsyncUpdater
+    {
+    public:
+        InternalAsyncUpdater (JucePlugInProcess& owner_)  : owner (owner_) {}
+        void handleAsyncUpdate()    { owner.handleAsyncUpdate(); }
+
+    private:
+        JucePlugInProcess& owner;
+    };
+
     //==============================================================================
 private:
     AudioProcessor* juceFilter;
@@ -810,6 +824,8 @@ private:
     ScopedPointer<CEffectMIDIOtherBufferedNode> midiBufferNode;
     ScopedPointer<CEffectMIDITransport> midiTransport;
     DirectMidiPacket midiBuffer [midiBufferSize];
+
+    ScopedPointer<InternalAsyncUpdater> asyncUpdater;
 
     JUCE_NAMESPACE::MemoryBlock tempFilterData;
     HeapBlock <float*> channels;

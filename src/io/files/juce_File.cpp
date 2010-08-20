@@ -153,7 +153,10 @@ const String File::parseAbsolutePath (const String& p)
     }
 #endif
 
-    return path.trimCharactersAtEnd (separatorString);
+    while (path.endsWithChar (separator) && path != separatorString) // careful not to turn a single "/" into an empty string.
+        path = path.dropLastCharacters (1);
+
+    return path;
 }
 
 const String File::addTrailingSeparator (const String& path)
