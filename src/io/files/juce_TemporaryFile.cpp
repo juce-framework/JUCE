@@ -64,18 +64,18 @@ void TemporaryFile::createTempFile (const File& parentDirectory, String name,
 
 TemporaryFile::~TemporaryFile()
 {
-    // Have a few attempts at deleting the file before giving up..
-    for (int i = 5; --i >= 0;)
+    if (! deleteTemporaryFile())
     {
-        if (temporaryFile.deleteFile())
-            return;
+        /* Failed to delete our temporary file! The most likely reason for this would be
+           that you've not closed an output stream that was being used to write to file.
 
-        Thread::sleep (50);
+           If you find that something beyond your control is changing permissions on
+           your temporary files and preventing them from being deleted, you may want to
+           call TemporaryFile::deleteTemporaryFile() to detect those error cases and
+           handle them appropriately.
+        */
+        jassertfalse;
     }
-
-    // Failed to delete our temporary file! Check that you've deleted all the
-    // file output streams that were using it!
-    jassertfalse;
 }
 
 //==============================================================================
@@ -106,5 +106,18 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
     return false;
 }
 
+bool TemporaryFile::deleteTemporaryFile() const
+{
+    // Have a few attempts at deleting the file before giving up..
+    for (int i = 5; --i >= 0;)
+    {
+        if (temporaryFile.deleteFile())
+            return true;
+
+        Thread::sleep (50);
+    }
+
+    return false;
+}
 
 END_JUCE_NAMESPACE

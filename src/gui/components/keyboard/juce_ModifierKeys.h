@@ -191,6 +191,10 @@ public:
 
         This is only needed in special circumstances for up-to-date modifier information
         at times when the app's event loop isn't running normally.
+
+        Another reason to avoid this method is that it's not stateless, and calling it may
+        update the value returned by getCurrentModifiers(), which could cause subtle changes
+        in the behaviour of some components.
     */
     static const ModifierKeys getCurrentModifiersRealtime() throw();
 

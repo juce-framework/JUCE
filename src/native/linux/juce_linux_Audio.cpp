@@ -123,6 +123,7 @@ public:
         : handle (0),
           bitDepth (16),
           numChannelsRunning (0),
+          latency (0),
           isInput (forInput),
           sampleFormat (AudioDataConverters::int16LE)
     {
@@ -197,6 +198,14 @@ public:
         {
             return false;
         }
+
+        snd_pcm_uframes_t frames = 0;
+
+        if (failed (snd_pcm_hw_params_get_period_size (hwParams, &frames, &dir))
+             || failed (snd_pcm_hw_params_get_periods (hwParams, &periods, &dir)))
+            latency = 0;
+        else
+            latency = frames * (periods - 1); // (this is the method JACK uses to guess the latency..)
 
         snd_pcm_sw_params_t* swParams;
         snd_pcm_sw_params_alloca (&swParams);
@@ -316,7 +325,7 @@ public:
 
     snd_pcm_t* handle;
     String error;
-    int bitDepth, numChannelsRunning;
+    int bitDepth, numChannelsRunning, latency;
 
     //==============================================================================
 private:
@@ -346,6 +355,8 @@ public:
         : Thread ("Juce ALSA"),
           sampleRate (0),
           bufferSize (0),
+          outputLatency (0),
+          inputLatency (0),
           callback (0),
           inputId (inputId_),
           outputId (outputId_),
@@ -427,6 +438,8 @@ public:
                 outputDevice = 0;
                 return;
             }
+
+            outputLatency = outputDevice->latency;
         }
 
         if (inputChannelDataForCallback.size() > 0 && inputId.isNotEmpty())
@@ -450,6 +463,8 @@ public:
                 inputDevice = 0;
                 return;
             }
+
+            inputLatency = inputDevice->latency;
         }
 
         if (outputDevice == 0 && inputDevice == 0)
@@ -573,7 +588,7 @@ public:
 
     String error;
     double sampleRate;
-    int bufferSize;
+    int bufferSize, outputLatency, inputLatency;
     BigInteger currentInputChans, currentOutputChans;
 
     Array <int> sampleRates;
@@ -648,30 +663,14 @@ public:
     {
     }
 
-    const StringArray getOutputChannelNames()
-    {
-        return internal.channelNamesOut;
-    }
+    const StringArray getOutputChannelNames()       { return internal.channelNamesOut; }
+    const StringArray getInputChannelNames()        { return internal.channelNamesIn; }
 
-    const StringArray getInputChannelNames()
-    {
-        return internal.channelNamesIn;
-    }
+    int getNumSampleRates()                         { return internal.sampleRates.size(); }
+    double getSampleRate (int index)                { return internal.sampleRates [index]; }
 
-    int getNumSampleRates()
-    {
-        return internal.sampleRates.size();
-    }
-
-    double getSampleRate (int index)
-    {
-        return internal.sampleRates [index];
-    }
-
-    int getNumBufferSizesAvailable()
-    {
-        return 50;
-    }
+    int getDefaultBufferSize()                      { return 512; }
+    int getNumBufferSizesAvailable()                { return 50; }
 
     int getBufferSizeSamples (int index)
     {
@@ -683,11 +682,6 @@ public:
                                                : (n < 2048 ? 128 : 256)));
 
         return n;
-    }
-
-    int getDefaultBufferSize()
-    {
-        return 512;
     }
 
     const String open (const BigInteger& inputChannels,
@@ -726,45 +720,19 @@ public:
         isOpen_ = false;
     }
 
-    bool isOpen()
-    {
-        return isOpen_;
-    }
+    bool isOpen()                           { return isOpen_; }
+    bool isPlaying()                        { return isStarted && internal.error.isEmpty(); }
+    const String getLastError()             { return internal.error; }
 
-    int getCurrentBufferSizeSamples()
-    {
-        return internal.bufferSize;
-    }
+    int getCurrentBufferSizeSamples()       { return internal.bufferSize; }
+    double getCurrentSampleRate()           { return internal.sampleRate; }
+    int getCurrentBitDepth()                { return internal.getBitDepth(); }
 
-    double getCurrentSampleRate()
-    {
-        return internal.sampleRate;
-    }
+    const BigInteger getActiveOutputChannels() const    { return internal.currentOutputChans; }
+    const BigInteger getActiveInputChannels() const     { return internal.currentInputChans; }
 
-    int getCurrentBitDepth()
-    {
-        return internal.getBitDepth();
-    }
-
-    const BigInteger getActiveOutputChannels() const
-    {
-        return internal.currentOutputChans;
-    }
-
-    const BigInteger getActiveInputChannels() const
-    {
-        return internal.currentInputChans;
-    }
-
-    int getOutputLatencyInSamples()
-    {
-        return 0;
-    }
-
-    int getInputLatencyInSamples()
-    {
-        return 0;
-    }
+    int getOutputLatencyInSamples()         { return internal.outputLatency; }
+    int getInputLatencyInSamples()          { return internal.inputLatency; }
 
     void start (AudioIODeviceCallback* callback)
     {
@@ -787,16 +755,6 @@ public:
 
         if (oldCallback != 0)
             oldCallback->audioDeviceStopped();
-    }
-
-    bool isPlaying()
-    {
-        return isStarted && internal.error.isEmpty();
-    }
-
-    const String getLastError()
-    {
-        return internal.error;
     }
 
     String inputId, outputId;
@@ -834,8 +792,8 @@ public:
         outputNames.clear();
         outputIds.clear();
 
-        snd_ctl_t* handle;
-        snd_ctl_card_info_t* info;
+        snd_ctl_t* handle = 0;
+        snd_ctl_card_info_t* info = 0;
         snd_ctl_card_info_alloca (&info);
 
         int cardNum = -1;

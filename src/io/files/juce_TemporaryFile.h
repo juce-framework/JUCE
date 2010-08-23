@@ -143,6 +143,11 @@ public:
     */
     bool overwriteTargetFileWithTemporary() const;
 
+    /** Attempts to delete the temporary file, if it exists.
+        @returns true if the file is successfully deleted (or if it didn't exist).
+    */
+    bool deleteTemporaryFile() const;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
