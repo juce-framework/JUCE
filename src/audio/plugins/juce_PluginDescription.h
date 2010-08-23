@@ -45,10 +45,10 @@ class JUCE_API  PluginDescription
 {
 public:
     //==============================================================================
-    PluginDescription() throw();
-    PluginDescription (const PluginDescription& other) throw();
-    PluginDescription& operator= (const PluginDescription& other) throw();
-    ~PluginDescription() throw();
+    PluginDescription();
+    PluginDescription (const PluginDescription& other);
+    PluginDescription& operator= (const PluginDescription& other);
+    ~PluginDescription();
 
     //==============================================================================
     /** The name of the plugin. */
@@ -114,7 +114,7 @@ public:
         plugin's file location, so can be used to store a plugin ID for use
         across different machines.
     */
-    const String createIdentifierString() const throw();
+    const String createIdentifierString() const;
 
     //==============================================================================
     /** Creates an XML object containing these details.

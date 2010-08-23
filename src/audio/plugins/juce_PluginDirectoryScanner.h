@@ -89,7 +89,7 @@ public:
         This is handy if you want to show the user which file is currently getting
         scanned.
     */
-    const String getNextPluginFileThatWillBeScanned() const throw();
+    const String getNextPluginFileThatWillBeScanned() const;
 
     /** Returns the estimated progress, between 0 and 1.
     */
@@ -112,8 +112,8 @@ private:
     int nextIndex;
     float progress;
 
-    const StringArray getDeadMansPedalFile() throw();
-    void setDeadMansPedalFile (const StringArray& newContents) throw();
+    const StringArray getDeadMansPedalFile();
+    void setDeadMansPedalFile (const StringArray& newContents);
 
     PluginDirectoryScanner (const PluginDirectoryScanner&);
     PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);

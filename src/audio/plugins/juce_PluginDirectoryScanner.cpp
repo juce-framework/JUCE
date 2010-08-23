@@ -67,7 +67,7 @@ PluginDirectoryScanner::~PluginDirectoryScanner()
 }
 
 //==============================================================================
-const String PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const throw()
+const String PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const
 {
     return format.getNameOfPluginFromIdentifier (filesOrIdentifiersToScan [nextIndex]);
 }
@@ -108,7 +108,7 @@ bool PluginDirectoryScanner::scanNextFile (const bool dontRescanIfAlreadyInList)
     return nextIndex < filesOrIdentifiersToScan.size();
 }
 
-const StringArray PluginDirectoryScanner::getDeadMansPedalFile() throw()
+const StringArray PluginDirectoryScanner::getDeadMansPedalFile()
 {
     StringArray lines;
 
@@ -121,7 +121,7 @@ const StringArray PluginDirectoryScanner::getDeadMansPedalFile() throw()
     return lines;
 }
 
-void PluginDirectoryScanner::setDeadMansPedalFile (const StringArray& newContents) throw()
+void PluginDirectoryScanner::setDeadMansPedalFile (const StringArray& newContents)
 {
     if (deadMansPedalFile != File::nonexistent)
         deadMansPedalFile.replaceWithText (newContents.joinIntoString ("\n"), true, true);

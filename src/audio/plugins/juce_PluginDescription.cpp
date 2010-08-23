@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PluginDescription::PluginDescription() throw()
+PluginDescription::PluginDescription()
     : uid (0),
       isInstrument (false),
       numInputChannels (0),
@@ -40,11 +40,11 @@ PluginDescription::PluginDescription() throw()
 {
 }
 
-PluginDescription::~PluginDescription() throw()
+PluginDescription::~PluginDescription()
 {
 }
 
-PluginDescription::PluginDescription (const PluginDescription& other) throw()
+PluginDescription::PluginDescription (const PluginDescription& other)
     : name (other.name),
       pluginFormatName (other.pluginFormatName),
       category (other.category),
@@ -59,7 +59,7 @@ PluginDescription::PluginDescription (const PluginDescription& other) throw()
 {
 }
 
-PluginDescription& PluginDescription::operator= (const PluginDescription& other) throw()
+PluginDescription& PluginDescription::operator= (const PluginDescription& other)
 {
     name = other.name;
     pluginFormatName = other.pluginFormatName;
@@ -82,7 +82,7 @@ bool PluginDescription::isDuplicateOf (const PluginDescription& other) const
             && uid == other.uid;
 }
 
-const String PluginDescription::createIdentifierString() const throw()
+const String PluginDescription::createIdentifierString() const
 {
     return pluginFormatName
             + "-" + name

@@ -71,7 +71,7 @@ public:
                                             the user has finished typing and pressed the return
                                             key.
     */
-    const String getText (bool returnActiveEditorContents = false) const throw();
+    const String getText (bool returnActiveEditorContents = false) const;
 
     /** Returns the text content as a Value object.
         You can call Value::referTo() on this object to make the label read and control
@@ -84,7 +84,7 @@ public:
 
         @see getFont
     */
-    void setFont (const Font& newFont) throw();
+    void setFont (const Font& newFont);
 
     /** Returns the font currently being used.
 
@@ -116,7 +116,7 @@ public:
 
         (The default is Justification::centredLeft)
     */
-    void setJustificationType (const Justification& justification) throw();
+    void setJustificationType (const Justification& justification);
 
     /** Returns the type of justification, as set in setJustificationType(). */
     const Justification getJustificationType() const throw()                    { return justification; }
@@ -192,10 +192,10 @@ public:
     };
 
     /** Registers a listener that will be called when the label's text changes. */
-    void addListener (Listener* listener) throw();
+    void addListener (Listener* listener);
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (Listener* listener) throw();
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** Makes the label turn into a TextEditor when clicked.
@@ -220,7 +220,7 @@ public:
     */
     void setEditable (bool editOnSingleClick,
                       bool editOnDoubleClick = false,
-                      bool lossOfFocusDiscardsChanges = false) throw();
+                      bool lossOfFocusDiscardsChanges = false);
 
     /** Returns true if this option was set using setEditable(). */
     bool isEditableOnSingleClick() const throw()                        { return editSingleClick; }

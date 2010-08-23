@@ -967,10 +967,10 @@ public:
 private:
     static CEffectProcess* createNewProcess()
     {
-        // Juce setup
-#if JUCE_WINDOWS
+      #if JUCE_WINDOWS
         PlatformUtilities::setCurrentModuleInstanceHandle (gThisModule);
-#endif
+      #endif
+
         initialiseJuce_GUI();
 
         return new JucePlugInProcess();
@@ -978,44 +978,25 @@ private:
 
     static const String createRTASName()
     {
-        return String (JucePlugin_Name) + T("\n")
-                    + String (JucePlugin_Name).substring (0, 4);
+        return String (JucePlugin_Name) + "\n"
+                 + String (JucePlugin_Name).substring (0, 4);
     }
 
     static EPlugIn_StemFormat getFormatForChans (const int numChans) throw()
     {
         switch (numChans)
         {
-        case 0:
-            return ePlugIn_StemFormat_Generic;
+            case 0:   return ePlugIn_StemFormat_Generic;
+            case 1:   return ePlugIn_StemFormat_Mono;
+            case 2:   return ePlugIn_StemFormat_Stereo;
+            case 3:   return ePlugIn_StemFormat_LCR;
+            case 4:   return ePlugIn_StemFormat_Quad;
+            case 5:   return ePlugIn_StemFormat_5dot0;
+            case 6:   return ePlugIn_StemFormat_5dot1;
+            case 7:   return ePlugIn_StemFormat_6dot1;
+            case 8:   return ePlugIn_StemFormat_7dot1;
 
-        case 1:
-            return ePlugIn_StemFormat_Mono;
-
-        case 2:
-            return ePlugIn_StemFormat_Stereo;
-
-        case 3:
-            return ePlugIn_StemFormat_LCR;
-
-        case 4:
-            return ePlugIn_StemFormat_Quad;
-
-        case 5:
-            return ePlugIn_StemFormat_5dot0;
-
-        case 6:
-            return ePlugIn_StemFormat_5dot1;
-
-        case 7:
-            return ePlugIn_StemFormat_6dot1;
-
-        case 8:
-            return ePlugIn_StemFormat_7dot1;
-
-        default:
-            jassertfalse // hmm - not a valid number of chans for RTAS..
-            break;
+            default:  jassertfalse; break; // hmm - not a valid number of chans for RTAS..
         }
 
         return ePlugIn_StemFormat_Generic;
@@ -1026,9 +1007,10 @@ void initialiseMacRTAS();
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {
-#if JUCE_MAC
+  #if JUCE_MAC
     initialiseMacRTAS();
-#endif
+  #endif
+
     initialiseJuce_NonGUI();
     return new JucePlugInGroup();
 }

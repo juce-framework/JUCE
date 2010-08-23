@@ -32,8 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-int MidiMessage::readVariableLengthVal (const uint8* data,
-                                        int& numBytesUsed) throw()
+int MidiMessage::readVariableLengthVal (const uint8* data, int& numBytesUsed) throw()
 {
     numBytesUsed = 0;
     int v = 0;

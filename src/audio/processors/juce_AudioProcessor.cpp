@@ -64,13 +64,13 @@ void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead) throw()
     playHead = newPlayHead;
 }
 
-void AudioProcessor::addListener (AudioProcessorListener* const newListener) throw()
+void AudioProcessor::addListener (AudioProcessorListener* const newListener)
 {
     const ScopedLock sl (listenerLock);
     listeners.addIfNotAlreadyThere (newListener);
 }
 
-void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRemove) throw()
+void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRemove)
 {
     const ScopedLock sl (listenerLock);
     listeners.removeValue (listenerToRemove);

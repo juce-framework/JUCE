@@ -160,6 +160,31 @@ namespace MidiFileHelpers
             return time / (((timeFormat & 0x7fff) >> 8) * (timeFormat & 0xff));
         }
     }
+
+    // a comparator that puts all the note-offs before note-ons that have the same time
+    struct Sorter
+    {
+        static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
+                                    const MidiMessageSequence::MidiEventHolder* const second) throw()
+        {
+            const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
+
+            if (diff == 0)
+            {
+                if (first->message.isNoteOff() && second->message.isNoteOn())
+                    return -1;
+                else if (first->message.isNoteOn() && second->message.isNoteOff())
+                    return 1;
+                else
+                    return 0;
+            }
+            else
+            {
+                return (diff > 0) ? 1 : -1;
+            }
+        }
+    };
+
 }
 
 //==============================================================================
@@ -305,27 +330,6 @@ bool MidiFile::readFrom (InputStream& sourceStream)
     return false;
 }
 
-// a comparator that puts all the note-offs before note-ons that have the same time
-int MidiFile::compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                               const MidiMessageSequence::MidiEventHolder* const second)
-{
-    const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
-
-    if (diff == 0)
-    {
-        if (first->message.isNoteOff() && second->message.isNoteOn())
-            return -1;
-        else if (first->message.isNoteOn() && second->message.isNoteOff())
-            return 1;
-        else
-            return 0;
-    }
-    else
-    {
-        return (diff > 0) ? 1 : -1;
-    }
-}
-
 void MidiFile::readNextTrack (const uint8* data, int size)
 {
     double time = 0;
@@ -358,7 +362,8 @@ void MidiFile::readNextTrack (const uint8* data, int size)
     }
 
     // use a sort that puts all the note-offs before note-ons that have the same time
-    result.list.sort (*this, true);
+    MidiFileHelpers::Sorter sorter;
+    result.list.sort (sorter, true);
 
     result.updateMatchedPairs();
 

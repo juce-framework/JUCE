@@ -56,7 +56,7 @@ public:
     MidiBuffer& operator= (const MidiBuffer& other) throw();
 
     /** Destructor */
-    ~MidiBuffer() throw();
+    ~MidiBuffer();
 
     //==============================================================================
     /** Removes all events from the buffer. */
@@ -67,8 +67,7 @@ public:
         All events for which (start <= event position < start + numSamples) will
         be removed.
     */
-    void clear (const int start,
-                const int numSamples) throw();
+    void clear (int start, int numSamples);
 
     /** Returns true if the buffer is empty.
 
@@ -95,8 +94,7 @@ public:
 
         To retrieve events, use a MidiBuffer::Iterator object
     */
-    void addEvent (const MidiMessage& midiMessage,
-                   const int sampleNumber) throw();
+    void addEvent (const MidiMessage& midiMessage, int sampleNumber);
 
     /** Adds an event to the buffer from raw midi data.
 
@@ -114,9 +112,9 @@ public:
 
         To retrieve events, use a MidiBuffer::Iterator object
     */
-    void addEvent (const uint8* const rawMidiData,
-                   const int maxBytesOfMidiData,
-                   const int sampleNumber) throw();
+    void addEvent (const void* rawMidiData,
+                   int maxBytesOfMidiData,
+                   int sampleNumber);
 
     /** Adds some events from another buffer to this one.
 
@@ -133,9 +131,9 @@ public:
                                     that are added to this buffer
     */
     void addEvents (const MidiBuffer& otherBuffer,
-                    const int startSample,
-                    const int numSamples,
-                    const int sampleDeltaToAdd) throw();
+                    int startSample,
+                    int numSamples,
+                    int sampleDeltaToAdd);
 
     /** Returns the sample number of the first event in the buffer.
 
@@ -186,7 +184,7 @@ public:
         /** Repositions the iterator so that the next event retrieved will be the first
             one whose sample position is at greater than or equal to the given position.
         */
-        void setNextSamplePosition (const int samplePosition) throw();
+        void setNextSamplePosition (int samplePosition) throw();
 
         /** Retrieves a copy of the next event from the buffer.
 
@@ -236,7 +234,7 @@ private:
     int bytesUsed;
 
     uint8* getData() const throw();
-    uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
+    uint8* findEventAfter (uint8* d, int samplePosition) const throw();
     static int getEventTime (const void* d) throw();
     static uint16 getEventDataSize (const void* d) throw();
     static uint16 getEventTotalSize (const void* d) throw();

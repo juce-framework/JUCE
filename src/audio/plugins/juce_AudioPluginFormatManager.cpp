@@ -38,11 +38,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-AudioPluginFormatManager::AudioPluginFormatManager() throw()
+AudioPluginFormatManager::AudioPluginFormatManager()
 {
 }
 
-AudioPluginFormatManager::~AudioPluginFormatManager() throw()
+AudioPluginFormatManager::~AudioPluginFormatManager()
 {
     clearSingletonInstance();
 }
@@ -91,17 +91,17 @@ void AudioPluginFormatManager::addDefaultFormats()
 #endif
 }
 
-int AudioPluginFormatManager::getNumFormats() throw()
+int AudioPluginFormatManager::getNumFormats()
 {
     return formats.size();
 }
 
-AudioPluginFormat* AudioPluginFormatManager::getFormat (const int index) throw()
+AudioPluginFormat* AudioPluginFormatManager::getFormat (const int index)
 {
     return formats [index];
 }
 
-void AudioPluginFormatManager::addFormat (AudioPluginFormat* const format) throw()
+void AudioPluginFormatManager::addFormat (AudioPluginFormat* const format)
 {
     formats.add (format);
 }

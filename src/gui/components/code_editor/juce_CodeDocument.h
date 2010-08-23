@@ -103,9 +103,9 @@ public:
         Position (const Position& other) throw();
 
         /** Destructor. */
-        ~Position() throw();
+        ~Position();
 
-        Position& operator= (const Position& other) throw();
+        Position& operator= (const Position& other);
         bool operator== (const Position& other) const throw();
         bool operator!= (const Position& other) const throw();
 
@@ -115,7 +115,7 @@ public:
             inside.
             @see getPosition, setLineAndIndex
         */
-        void setPosition (int charactersFromStartOfDocument) throw();
+        void setPosition (int charactersFromStartOfDocument);
 
         /** Returns the position as the number of characters from the start of the document.
             @see setPosition, getLineNumber, getIndexInLine
@@ -131,7 +131,7 @@ public:
             Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
             they will be adjusted to keep them within its limits.
         */
-        void setLineAndIndex (int newLine, int newIndexInLine) throw();
+        void setLineAndIndex (int newLine, int newIndexInLine);
 
         /** Returns the line number of this position.
             The first line in the document is numbered zero, not one!
@@ -152,35 +152,35 @@ public:
             when the document has text inserted or deleted, this position will be automatically
             moved to keep it at the same position in the text.
         */
-        void setPositionMaintained (bool isMaintained) throw();
+        void setPositionMaintained (bool isMaintained);
 
         //==============================================================================
         /** Moves the position forwards or backwards by the specified number of characters.
             @see movedBy
         */
-        void moveBy (int characterDelta) throw();
+        void moveBy (int characterDelta);
 
         /** Returns a position which is the same as this one, moved by the specified number of
             characters.
             @see moveBy
         */
-        const Position movedBy (int characterDelta) const throw();
+        const Position movedBy (int characterDelta) const;
 
         /** Returns a position which is the same as this one, moved up or down by the specified
             number of lines.
             @see movedBy
         */
-        const Position movedByLines (int deltaLines) const throw();
+        const Position movedByLines (int deltaLines) const;
 
         /** Returns the character in the document at this position.
             @see getLineText
         */
-        const juce_wchar getCharacter() const throw();
+        const juce_wchar getCharacter() const;
 
         /** Returns the line from the document that this position is within.
             @see getCharacter, getLineNumber
         */
-        const String getLineText() const throw();
+        const String getLineText() const;
 
         //==============================================================================
     private:
@@ -191,10 +191,10 @@ public:
 
     //==============================================================================
     /** Returns the full text of the document. */
-    const String getAllContent() const throw();
+    const String getAllContent() const;
 
     /** Returns a section of the document's text. */
-    const String getTextBetween (const Position& start, const Position& end) const throw();
+    const String getTextBetween (const Position& start, const Position& end) const;
 
     /** Returns a line from the document. */
     const String getLine (int lineIndex) const throw();

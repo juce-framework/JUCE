@@ -87,7 +87,7 @@ bool KnownPluginList::addType (const PluginDescription& type)
     return true;
 }
 
-void KnownPluginList::removeType (const int index) throw()
+void KnownPluginList::removeType (const int index)
 {
     types.remove (index);
     sendChangeMessage (this);
@@ -95,11 +95,8 @@ void KnownPluginList::removeType (const int index) throw()
 
 static Time getFileModTime (const String& fileOrIdentifier) throw()
 {
-    if (fileOrIdentifier.startsWithChar ('/')
-        || fileOrIdentifier[1] == ':')
-    {
+    if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
         return File (fileOrIdentifier).getLastModificationTime();
-    }
 
     return Time (0);
 }

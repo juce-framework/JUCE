@@ -67,7 +67,7 @@ public:
         @returns a pointer to the track, or 0 if the index is out-of-range
         @see getNumTracks, addTrack
     */
-    const MidiMessageSequence* getTrack (const int index) const throw();
+    const MidiMessageSequence* getTrack (int index) const throw();
 
     /** Adds a midi track to the file.
 
@@ -106,7 +106,7 @@ public:
         @param ticksPerQuarterNote  e.g. 96, 960
         @see setSmpteTimeFormat
     */
-    void setTicksPerQuarterNote (const int ticksPerQuarterNote) throw();
+    void setTicksPerQuarterNote (int ticksPerQuarterNote) throw();
 
     /** Sets the time format to use when this file is written to a stream.
 
@@ -120,8 +120,8 @@ public:
                                     timing, setSmpteTimeFormat (25, 40)
         @see setTicksPerBeat
     */
-    void setSmpteTimeFormat (const int framesPerSecond,
-                             const int subframeResolution) throw();
+    void setSmpteTimeFormat (int framesPerSecond,
+                             int subframeResolution) throw();
 
     //==============================================================================
     /** Makes a list of all the tempo-change meta-events from all tracks in the midi file.
@@ -176,10 +176,6 @@ public:
 
     //==============================================================================
     juce_UseDebuggingNewOperator
-
-    /** @internal */
-    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                const MidiMessageSequence::MidiEventHolder* const second);
 
 private:
     OwnedArray <MidiMessageSequence> tracks;

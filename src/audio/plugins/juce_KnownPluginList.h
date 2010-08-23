@@ -81,7 +81,7 @@ public:
     bool addType (const PluginDescription& type);
 
     /** Removes a type. */
-    void removeType (int index) throw();
+    void removeType (int index);
 
     /** Looks for all types that can be loaded from a given file, and adds them
         to the list.

@@ -149,10 +149,10 @@ public:
 
         @see broadcastMessage
     */
-    void registerBroadcastListener (ActionListener* listener) throw();
+    void registerBroadcastListener (ActionListener* listener);
 
     /** Deregisters a broadcast listener. */
-    void deregisterBroadcastListener (ActionListener* listener) throw();
+    void deregisterBroadcastListener (ActionListener* listener);
 
     //==============================================================================
     /** @internal */
@@ -275,7 +275,7 @@ public:
         @endcode
 
     */
-    MessageManagerLock (Thread* threadToCheckForExitSignal = 0) throw();
+    MessageManagerLock (Thread* threadToCheckForExitSignal = 0);
 
     //==============================================================================
     /** This has the same behaviour as the other constructor, but takes a ThreadPoolJob
@@ -283,7 +283,7 @@ public:
 
         See the MessageManagerLock (Thread*) constructor for details on how this works.
     */
-    MessageManagerLock (ThreadPoolJob* jobToCheckForExitSignal) throw();
+    MessageManagerLock (ThreadPoolJob* jobToCheckForExitSignal);
 
 
     //==============================================================================
@@ -310,7 +310,7 @@ private:
     SharedEvents* sharedEvents;
     bool locked;
 
-    void init (Thread* thread, ThreadPoolJob* job) throw();
+    void init (Thread* thread, ThreadPoolJob* job);
 
     MessageManagerLock (const MessageManagerLock&);
     MessageManagerLock& operator= (const MessageManagerLock&);

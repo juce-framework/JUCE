@@ -184,7 +184,7 @@ void MessageManager::deliverBroadcastMessage (const String& value)
         broadcastListeners->sendActionMessage (value);
 }
 
-void MessageManager::registerBroadcastListener (ActionListener* const listener) throw()
+void MessageManager::registerBroadcastListener (ActionListener* const listener)
 {
     if (broadcastListeners == 0)
         broadcastListeners = new ActionListenerList();
@@ -192,7 +192,7 @@ void MessageManager::registerBroadcastListener (ActionListener* const listener) 
     broadcastListeners->addActionListener (listener);
 }
 
-void MessageManager::deregisterBroadcastListener (ActionListener* const listener) throw()
+void MessageManager::deregisterBroadcastListener (ActionListener* const listener)
 {
     if (broadcastListeners != 0)
         broadcastListeners->removeActionListener (listener);
@@ -271,21 +271,21 @@ private:
 };
 
 //==============================================================================
-MessageManagerLock::MessageManagerLock (Thread* const threadToCheck) throw()
+MessageManagerLock::MessageManagerLock (Thread* const threadToCheck)
     : sharedEvents (0),
       locked (false)
 {
     init (threadToCheck, 0);
 }
 
-MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal) throw()
+MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal)
     : sharedEvents (0),
       locked (false)
 {
     init (0, jobToCheckForExitSignal);
 }
 
-void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const job) throw()
+void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const job)
 {
     if (MessageManager::instance != 0)
     {

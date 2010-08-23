@@ -41,10 +41,10 @@ class JUCE_API  AudioPluginFormatManager  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    AudioPluginFormatManager() throw();
+    AudioPluginFormatManager();
 
     /** Destructor. */
-    ~AudioPluginFormatManager() throw();
+    ~AudioPluginFormatManager();
 
     juce_DeclareSingleton_SingleThreaded (AudioPluginFormatManager, false);
 
@@ -58,20 +58,20 @@ public:
 
         Use getFormat() to get one of them.
     */
-    int getNumFormats() throw();
+    int getNumFormats();
 
     /** Returns one of the available formats.
 
         @see getNumFormats
     */
-    AudioPluginFormat* getFormat (const int index) throw();
+    AudioPluginFormat* getFormat (const int index);
 
     //==============================================================================
     /** Adds a format to the list.
 
         The object passed in will be owned and deleted by the manager.
     */
-    void addFormat (AudioPluginFormat* const format) throw();
+    void addFormat (AudioPluginFormat* const format);
 
 
     //==============================================================================

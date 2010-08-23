@@ -77,7 +77,7 @@ bool ComboBox::isTextEditable() const throw()
     return label->isEditable();
 }
 
-void ComboBox::setJustificationType (const Justification& justification) throw()
+void ComboBox::setJustificationType (const Justification& justification)
 {
     label->setJustificationType (justification);
 }
@@ -94,8 +94,7 @@ void ComboBox::setTooltip (const String& newTooltip)
 }
 
 //==============================================================================
-void ComboBox::addItem (const String& newItemText,
-                        const int newItemId) throw()
+void ComboBox::addItem (const String& newItemText, const int newItemId)
 {
     // you can't add empty strings to the list..
     jassert (newItemText.isNotEmpty());
@@ -128,12 +127,12 @@ void ComboBox::addItem (const String& newItemText,
     }
 }
 
-void ComboBox::addSeparator() throw()
+void ComboBox::addSeparator()
 {
     separatorPending = (items.size() > 0);
 }
 
-void ComboBox::addSectionHeading (const String& headingName) throw()
+void ComboBox::addSectionHeading (const String& headingName)
 {
     // you can't add empty strings to the list..
     jassert (headingName.isNotEmpty());
@@ -160,8 +159,7 @@ void ComboBox::addSectionHeading (const String& headingName) throw()
     }
 }
 
-void ComboBox::setItemEnabled (const int itemId,
-                               const bool shouldBeEnabled) throw()
+void ComboBox::setItemEnabled (const int itemId, const bool shouldBeEnabled)
 {
     ItemInfo* const item = getItemForId (itemId);
 
@@ -169,8 +167,7 @@ void ComboBox::setItemEnabled (const int itemId,
         item->isEnabled = shouldBeEnabled;
 }
 
-void ComboBox::changeItemText (const int itemId,
-                               const String& newText) throw()
+void ComboBox::changeItemText (const int itemId, const String& newText)
 {
     ItemInfo* const item = getItemForId (itemId);
 
@@ -240,7 +237,7 @@ int ComboBox::getNumItems() const throw()
     return n;
 }
 
-const String ComboBox::getItemText (const int index) const throw()
+const String ComboBox::getItemText (const int index) const
 {
     const ItemInfo* const item = getItemForIndex (index);
 
@@ -278,7 +275,7 @@ int ComboBox::indexOfItemId (const int itemId) const throw()
 }
 
 //==============================================================================
-int ComboBox::getSelectedItemIndex() const throw()
+int ComboBox::getSelectedItemIndex() const
 {
     int index = indexOfItemId (currentId.getValue());
 
@@ -288,8 +285,7 @@ int ComboBox::getSelectedItemIndex() const throw()
     return index;
 }
 
-void ComboBox::setSelectedItemIndex (const int index,
-                                     const bool dontSendChangeMessage) throw()
+void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChangeMessage)
 {
     setSelectedId (getItemId (index), dontSendChangeMessage);
 }
@@ -298,13 +294,10 @@ int ComboBox::getSelectedId() const throw()
 {
     const ItemInfo* const item = getItemForId (currentId.getValue());
 
-    return (item != 0 && getText() == item->name)
-                ? item->itemId
-                : 0;
+    return (item != 0 && getText() == item->name) ? item->itemId : 0;
 }
 
-void ComboBox::setSelectedId (const int newItemId,
-                              const bool dontSendChangeMessage) throw()
+void ComboBox::setSelectedId (const int newItemId, const bool dontSendChangeMessage)
 {
     const ItemInfo* const item = getItemForId (newItemId);
     const String newItemText (item != 0 ? item->name : String::empty);
@@ -329,13 +322,12 @@ void ComboBox::valueChanged (Value&)
 }
 
 //==============================================================================
-const String ComboBox::getText() const throw()
+const String ComboBox::getText() const
 {
     return label->getText();
 }
 
-void ComboBox::setText (const String& newText,
-                        const bool dontSendChangeMessage) throw()
+void ComboBox::setText (const String& newText, const bool dontSendChangeMessage)
 {
     for (int i = items.size(); --i >= 0;)
     {
@@ -371,7 +363,7 @@ void ComboBox::showEditor()
 }
 
 //==============================================================================
-void ComboBox::setTextWhenNothingSelected (const String& newMessage) throw()
+void ComboBox::setTextWhenNothingSelected (const String& newMessage)
 {
     if (textWhenNothingSelected != newMessage)
     {
@@ -380,17 +372,17 @@ void ComboBox::setTextWhenNothingSelected (const String& newMessage) throw()
     }
 }
 
-const String ComboBox::getTextWhenNothingSelected() const throw()
+const String ComboBox::getTextWhenNothingSelected() const
 {
     return textWhenNothingSelected;
 }
 
-void ComboBox::setTextWhenNoChoicesAvailable (const String& newMessage) throw()
+void ComboBox::setTextWhenNoChoicesAvailable (const String& newMessage)
 {
     noChoicesMessage = newMessage;
 }
 
-const String ComboBox::getTextWhenNoChoicesAvailable() const throw()
+const String ComboBox::getTextWhenNoChoicesAvailable() const
 {
     return noChoicesMessage;
 }
@@ -623,12 +615,12 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 }
 
 //==============================================================================
-void ComboBox::addListener (Listener* const listener) throw()
+void ComboBox::addListener (Listener* const listener)
 {
     listeners.add (listener);
 }
 
-void ComboBox::removeListener (Listener* const listener) throw()
+void ComboBox::removeListener (Listener* const listener)
 {
     listeners.remove (listener);
 }

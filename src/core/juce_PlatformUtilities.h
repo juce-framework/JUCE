@@ -195,11 +195,6 @@ public:
                                          const String& procedureName);
 #endif
 
-#if JUCE_LINUX || DOXYGEN
-    //==============================================================================
-
-#endif
-
 private:
     PlatformUtilities();
     PlatformUtilities (const PlatformUtilities&);

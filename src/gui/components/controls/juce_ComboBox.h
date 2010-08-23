@@ -85,7 +85,7 @@ public:
         The default is Justification::centredLeft. The text is displayed using a
         Label component inside the ComboBox.
     */
-    void setJustificationType (const Justification& justification) throw();
+    void setJustificationType (const Justification& justification);
 
     /** Returns the current justification for the text box.
         @see setJustificationType
@@ -101,14 +101,13 @@ public:
                                 be 0!
         @see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
     */
-    void addItem (const String& newItemText,
-                  int newItemId) throw();
+    void addItem (const String& newItemText, int newItemId);
 
     /** Adds a separator line to the drop-down list.
 
         This is like adding a separator to a popup menu. See PopupMenu::addSeparator().
     */
-    void addSeparator() throw();
+    void addSeparator();
 
     /** Adds a heading to the drop-down list, so that you can group the items into
         different sections.
@@ -119,7 +118,7 @@ public:
 
         @see addItem, addSeparator
     */
-    void addSectionHeading (const String& headingName) throw();
+    void addSectionHeading (const String& headingName);
 
     /** This allows items in the drop-down list to be selectively disabled.
 
@@ -129,13 +128,11 @@ public:
         If you disable an item which is already selected, this won't change the
         current selection - it just stops the user choosing that item from the list.
     */
-    void setItemEnabled (int itemId,
-                         bool shouldBeEnabled) throw();
+    void setItemEnabled (int itemId, bool shouldBeEnabled);
 
     /** Changes the text for an existing item.
     */
-    void changeItemText (int itemId,
-                         const String& newText) throw();
+    void changeItemText (int itemId, const String& newText);
 
     /** Removes all the items from the drop-down list.
 
@@ -158,7 +155,7 @@ public:
 
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
-    const String getItemText (int index) const throw();
+    const String getItemText (int index) const;
 
     /** Returns the ID for one of the items in the list.
 
@@ -189,7 +186,7 @@ public:
         You can call Value::referTo() on this object to make the combo box control
         another Value object.
     */
-    Value& getSelectedIdAsValue() throw()                   { return currentId; }
+    Value& getSelectedIdAsValue()                       { return currentId; }
 
     /** Sets one of the items to be the current selection.
 
@@ -201,8 +198,7 @@ public:
                                         change notification
         @see getSelectedId, setSelectedItemIndex, setText
     */
-    void setSelectedId (int newItemId,
-                        bool dontSendChangeMessage = false) throw();
+    void setSelectedId (int newItemId, bool dontSendChangeMessage = false);
 
     //==============================================================================
     /** Returns the index of the item that's currently shown in the box.
@@ -213,7 +209,7 @@ public:
 
         @see setSelectedItemIndex, getSelectedId, getText
     */
-    int getSelectedItemIndex() const throw();
+    int getSelectedItemIndex() const;
 
     /** Sets one of the items to be the current selection.
 
@@ -225,8 +221,7 @@ public:
                                         change notification
         @see getSelectedItemIndex, setSelectedId, setText
     */
-    void setSelectedItemIndex (int newItemIndex,
-                               bool dontSendChangeMessage = false) throw();
+    void setSelectedItemIndex (int newItemIndex, bool dontSendChangeMessage = false);
 
     //==============================================================================
     /** Returns the text that is currently shown in the combo-box's text field.
@@ -237,7 +232,7 @@ public:
 
         @see setText, getSelectedId, getSelectedItemIndex
     */
-    const String getText() const throw();
+    const String getText() const;
 
     /** Sets the contents of the combo-box's text field.
 
@@ -251,8 +246,7 @@ public:
                                         change notification
         @see getText
     */
-    void setText (const String& newText,
-                  bool dontSendChangeMessage = false) throw();
+    void setText (const String& newText, bool dontSendChangeMessage = false);
 
     /** Programmatically opens the text editor to allow the user to edit the current item.
 
@@ -284,23 +278,23 @@ public:
     };
 
     /** Registers a listener that will be called when the box's content changes. */
-    void addListener (Listener* listener) throw();
+    void addListener (Listener* listener);
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (Listener* listener) throw();
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** Sets a message to display when there is no item currently selected.
 
         @see getTextWhenNothingSelected
     */
-    void setTextWhenNothingSelected (const String& newMessage) throw();
+    void setTextWhenNothingSelected (const String& newMessage);
 
     /** Returns the text that is shown when no item is selected.
 
         @see setTextWhenNothingSelected
     */
-    const String getTextWhenNothingSelected() const throw();
+    const String getTextWhenNothingSelected() const;
 
 
     /** Sets the message to show when there are no items in the list, and the user clicks
@@ -309,12 +303,12 @@ public:
         By default it just says "no choices", but this lets you change it to something more
         meaningful.
     */
-    void setTextWhenNoChoicesAvailable (const String& newMessage) throw();
+    void setTextWhenNoChoicesAvailable (const String& newMessage);
 
     /** Returns the text shown when no items have been added to the list.
         @see setTextWhenNoChoicesAvailable
     */
-    const String getTextWhenNoChoicesAvailable() const throw();
+    const String getTextWhenNoChoicesAvailable() const;
 
     //==============================================================================
     /** Gives the ComboBox a tooltip. */

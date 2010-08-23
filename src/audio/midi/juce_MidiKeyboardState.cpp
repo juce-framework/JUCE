@@ -180,13 +180,13 @@ void MidiKeyboardState::processNextMidiBuffer (MidiBuffer& buffer,
 }
 
 //==============================================================================
-void MidiKeyboardState::addListener (MidiKeyboardStateListener* const listener) throw()
+void MidiKeyboardState::addListener (MidiKeyboardStateListener* const listener)
 {
     const ScopedLock sl (lock);
     listeners.addIfNotAlreadyThere (listener);
 }
 
-void MidiKeyboardState::removeListener (MidiKeyboardStateListener* const listener) throw()
+void MidiKeyboardState::removeListener (MidiKeyboardStateListener* const listener)
 {
     const ScopedLock sl (lock);
     listeners.removeValue (listener);

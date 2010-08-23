@@ -155,7 +155,7 @@ public:
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& font,
                float x, const int y, const int baselineOffset, const int lineHeight,
-               const Colour& highlightColour) const throw()
+               const Colour& highlightColour) const
     {
         if (highlightColumnStart < highlightColumnEnd)
         {
@@ -244,7 +244,7 @@ private:
         source = lastIterator;
     }
 
-    static void replaceTabsWithSpaces (Array <SyntaxToken>& tokens, const int spacesPerTab) throw()
+    static void replaceTabsWithSpaces (Array <SyntaxToken>& tokens, const int spacesPerTab)
     {
         int x = 0;
         for (int i = 0; i < tokens.size(); ++i)
@@ -414,7 +414,7 @@ void CodeEditorComponent::paint (Graphics& g)
     }
 }
 
-void CodeEditorComponent::setScrollbarThickness (const int thickness) throw()
+void CodeEditorComponent::setScrollbarThickness (const int thickness)
 {
     if (scrollbarThickness != thickness)
     {
@@ -605,7 +605,7 @@ void CodeEditorComponent::scrollToKeepCaretOnScreen()
         scrollToColumn (column);
 }
 
-const Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const throw()
+const Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const
 {
     return Rectangle<int> (roundToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
                            (pos.getLineNumber() - firstLineOnScreen) * lineHeight,
@@ -1111,7 +1111,7 @@ void CodeEditorComponent::focusLost (FocusChangeType)
 }
 
 //==============================================================================
-void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpaces) throw()
+void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpaces)
 {
     useSpacesForTabs = insertSpaces;
 
@@ -1190,7 +1190,7 @@ void CodeEditorComponent::setColourForTokenType (const int tokenType, const Colo
     repaint();
 }
 
-const Colour CodeEditorComponent::getColourForTokenType (const int tokenType) const throw()
+const Colour CodeEditorComponent::getColourForTokenType (const int tokenType) const
 {
     if (((unsigned int) tokenType) >= (unsigned int) coloursForTokenCategories.size())
         return findColour (CodeEditorComponent::defaultTextColourId);
@@ -1198,7 +1198,7 @@ const Colour CodeEditorComponent::getColourForTokenType (const int tokenType) co
     return coloursForTokenCategories.getReference (tokenType);
 }
 
-void CodeEditorComponent::clearCachedIterators (const int firstLineToBeInvalid) throw()
+void CodeEditorComponent::clearCachedIterators (const int firstLineToBeInvalid)
 {
     int i;
     for (i = cachedIterators.size(); --i >= 0;)

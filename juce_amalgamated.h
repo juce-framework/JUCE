@@ -14225,10 +14225,6 @@ public:
 										 const String& procedureName);
 #endif
 
-#if JUCE_LINUX || DOXYGEN
-
-#endif
-
 private:
 	PlatformUtilities();
 	PlatformUtilities (const PlatformUtilities&);
@@ -33917,7 +33913,7 @@ public:
 	MidiBuffer& operator= (const MidiBuffer& other) throw();
 
 	/** Destructor */
-	~MidiBuffer() throw();
+	~MidiBuffer();
 
 	/** Removes all events from the buffer. */
 	void clear() throw();
@@ -33927,8 +33923,7 @@ public:
 		All events for which (start <= event position < start + numSamples) will
 		be removed.
 	*/
-	void clear (const int start,
-				const int numSamples) throw();
+	void clear (int start, int numSamples);
 
 	/** Returns true if the buffer is empty.
 
@@ -33955,8 +33950,7 @@ public:
 
 		To retrieve events, use a MidiBuffer::Iterator object
 	*/
-	void addEvent (const MidiMessage& midiMessage,
-				   const int sampleNumber) throw();
+	void addEvent (const MidiMessage& midiMessage, int sampleNumber);
 
 	/** Adds an event to the buffer from raw midi data.
 
@@ -33974,9 +33968,9 @@ public:
 
 		To retrieve events, use a MidiBuffer::Iterator object
 	*/
-	void addEvent (const uint8* const rawMidiData,
-				   const int maxBytesOfMidiData,
-				   const int sampleNumber) throw();
+	void addEvent (const void* rawMidiData,
+				   int maxBytesOfMidiData,
+				   int sampleNumber);
 
 	/** Adds some events from another buffer to this one.
 
@@ -33993,9 +33987,9 @@ public:
 									that are added to this buffer
 	*/
 	void addEvents (const MidiBuffer& otherBuffer,
-					const int startSample,
-					const int numSamples,
-					const int sampleDeltaToAdd) throw();
+					int startSample,
+					int numSamples,
+					int sampleDeltaToAdd);
 
 	/** Returns the sample number of the first event in the buffer.
 
@@ -34043,7 +34037,7 @@ public:
 		/** Repositions the iterator so that the next event retrieved will be the first
 			one whose sample position is at greater than or equal to the given position.
 		*/
-		void setNextSamplePosition (const int samplePosition) throw();
+		void setNextSamplePosition (int samplePosition) throw();
 
 		/** Retrieves a copy of the next event from the buffer.
 
@@ -34090,7 +34084,7 @@ private:
 	int bytesUsed;
 
 	uint8* getData() const throw();
-	uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
+	uint8* findEventAfter (uint8* d, int samplePosition) const throw();
 	static int getEventTime (const void* d) throw();
 	static uint16 getEventDataSize (const void* d) throw();
 	static uint16 getEventTotalSize (const void* d) throw();
@@ -36510,7 +36504,7 @@ public:
 											the user has finished typing and pressed the return
 											key.
 	*/
-	const String getText (bool returnActiveEditorContents = false) const throw();
+	const String getText (bool returnActiveEditorContents = false) const;
 
 	/** Returns the text content as a Value object.
 		You can call Value::referTo() on this object to make the label read and control
@@ -36522,7 +36516,7 @@ public:
 
 		@see getFont
 	*/
-	void setFont (const Font& newFont) throw();
+	void setFont (const Font& newFont);
 
 	/** Returns the font currently being used.
 
@@ -36552,7 +36546,7 @@ public:
 
 		(The default is Justification::centredLeft)
 	*/
-	void setJustificationType (const Justification& justification) throw();
+	void setJustificationType (const Justification& justification);
 
 	/** Returns the type of justification, as set in setJustificationType(). */
 	const Justification getJustificationType() const throw()			{ return justification; }
@@ -36627,10 +36621,10 @@ public:
 	};
 
 	/** Registers a listener that will be called when the label's text changes. */
-	void addListener (Listener* listener) throw();
+	void addListener (Listener* listener);
 
 	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener) throw();
+	void removeListener (Listener* listener);
 
 	/** Makes the label turn into a TextEditor when clicked.
 
@@ -36654,7 +36648,7 @@ public:
 	*/
 	void setEditable (bool editOnSingleClick,
 					  bool editOnDoubleClick = false,
-					  bool lossOfFocusDiscardsChanges = false) throw();
+					  bool lossOfFocusDiscardsChanges = false);
 
 	/** Returns true if this option was set using setEditable(). */
 	bool isEditableOnSingleClick() const throw()			{ return editSingleClick; }
@@ -36822,7 +36816,7 @@ public:
 		The default is Justification::centredLeft. The text is displayed using a
 		Label component inside the ComboBox.
 	*/
-	void setJustificationType (const Justification& justification) throw();
+	void setJustificationType (const Justification& justification);
 
 	/** Returns the current justification for the text box.
 		@see setJustificationType
@@ -36837,14 +36831,13 @@ public:
 								be 0!
 		@see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
 	*/
-	void addItem (const String& newItemText,
-				  int newItemId) throw();
+	void addItem (const String& newItemText, int newItemId);
 
 	/** Adds a separator line to the drop-down list.
 
 		This is like adding a separator to a popup menu. See PopupMenu::addSeparator().
 	*/
-	void addSeparator() throw();
+	void addSeparator();
 
 	/** Adds a heading to the drop-down list, so that you can group the items into
 		different sections.
@@ -36855,7 +36848,7 @@ public:
 
 		@see addItem, addSeparator
 	*/
-	void addSectionHeading (const String& headingName) throw();
+	void addSectionHeading (const String& headingName);
 
 	/** This allows items in the drop-down list to be selectively disabled.
 
@@ -36865,13 +36858,11 @@ public:
 		If you disable an item which is already selected, this won't change the
 		current selection - it just stops the user choosing that item from the list.
 	*/
-	void setItemEnabled (int itemId,
-						 bool shouldBeEnabled) throw();
+	void setItemEnabled (int itemId, bool shouldBeEnabled);
 
 	/** Changes the text for an existing item.
 	*/
-	void changeItemText (int itemId,
-						 const String& newText) throw();
+	void changeItemText (int itemId, const String& newText);
 
 	/** Removes all the items from the drop-down list.
 
@@ -36894,7 +36885,7 @@ public:
 
 		@param index	the item's index from 0 to (getNumItems() - 1)
 	*/
-	const String getItemText (int index) const throw();
+	const String getItemText (int index) const;
 
 	/** Returns the ID for one of the items in the list.
 
@@ -36924,7 +36915,7 @@ public:
 		You can call Value::referTo() on this object to make the combo box control
 		another Value object.
 	*/
-	Value& getSelectedIdAsValue() throw()		   { return currentId; }
+	Value& getSelectedIdAsValue()			   { return currentId; }
 
 	/** Sets one of the items to be the current selection.
 
@@ -36936,8 +36927,7 @@ public:
 										change notification
 		@see getSelectedId, setSelectedItemIndex, setText
 	*/
-	void setSelectedId (int newItemId,
-						bool dontSendChangeMessage = false) throw();
+	void setSelectedId (int newItemId, bool dontSendChangeMessage = false);
 
 	/** Returns the index of the item that's currently shown in the box.
 
@@ -36947,7 +36937,7 @@ public:
 
 		@see setSelectedItemIndex, getSelectedId, getText
 	*/
-	int getSelectedItemIndex() const throw();
+	int getSelectedItemIndex() const;
 
 	/** Sets one of the items to be the current selection.
 
@@ -36959,8 +36949,7 @@ public:
 										change notification
 		@see getSelectedItemIndex, setSelectedId, setText
 	*/
-	void setSelectedItemIndex (int newItemIndex,
-							   bool dontSendChangeMessage = false) throw();
+	void setSelectedItemIndex (int newItemIndex, bool dontSendChangeMessage = false);
 
 	/** Returns the text that is currently shown in the combo-box's text field.
 
@@ -36970,7 +36959,7 @@ public:
 
 		@see setText, getSelectedId, getSelectedItemIndex
 	*/
-	const String getText() const throw();
+	const String getText() const;
 
 	/** Sets the contents of the combo-box's text field.
 
@@ -36984,8 +36973,7 @@ public:
 										change notification
 		@see getText
 	*/
-	void setText (const String& newText,
-				  bool dontSendChangeMessage = false) throw();
+	void setText (const String& newText, bool dontSendChangeMessage = false);
 
 	/** Programmatically opens the text editor to allow the user to edit the current item.
 
@@ -37016,22 +37004,22 @@ public:
 	};
 
 	/** Registers a listener that will be called when the box's content changes. */
-	void addListener (Listener* listener) throw();
+	void addListener (Listener* listener);
 
 	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener) throw();
+	void removeListener (Listener* listener);
 
 	/** Sets a message to display when there is no item currently selected.
 
 		@see getTextWhenNothingSelected
 	*/
-	void setTextWhenNothingSelected (const String& newMessage) throw();
+	void setTextWhenNothingSelected (const String& newMessage);
 
 	/** Returns the text that is shown when no item is selected.
 
 		@see setTextWhenNothingSelected
 	*/
-	const String getTextWhenNothingSelected() const throw();
+	const String getTextWhenNothingSelected() const;
 
 	/** Sets the message to show when there are no items in the list, and the user clicks
 		on the drop-down box.
@@ -37039,12 +37027,12 @@ public:
 		By default it just says "no choices", but this lets you change it to something more
 		meaningful.
 	*/
-	void setTextWhenNoChoicesAvailable (const String& newMessage) throw();
+	void setTextWhenNoChoicesAvailable (const String& newMessage);
 
 	/** Returns the text shown when no items have been added to the list.
 		@see setTextWhenNoChoicesAvailable
 	*/
-	const String getTextWhenNoChoicesAvailable() const throw();
+	const String getTextWhenNoChoicesAvailable() const;
 
 	/** Gives the ComboBox a tooltip. */
 	void setTooltip (const String& newTooltip);
@@ -37988,7 +37976,7 @@ public:
 		@returns a pointer to the track, or 0 if the index is out-of-range
 		@see getNumTracks, addTrack
 	*/
-	const MidiMessageSequence* getTrack (const int index) const throw();
+	const MidiMessageSequence* getTrack (int index) const throw();
 
 	/** Adds a midi track to the file.
 
@@ -38027,7 +38015,7 @@ public:
 		@param ticksPerQuarterNote  e.g. 96, 960
 		@see setSmpteTimeFormat
 	*/
-	void setTicksPerQuarterNote (const int ticksPerQuarterNote) throw();
+	void setTicksPerQuarterNote (int ticksPerQuarterNote) throw();
 
 	/** Sets the time format to use when this file is written to a stream.
 
@@ -38041,8 +38029,8 @@ public:
 									timing, setSmpteTimeFormat (25, 40)
 		@see setTicksPerBeat
 	*/
-	void setSmpteTimeFormat (const int framesPerSecond,
-							 const int subframeResolution) throw();
+	void setSmpteTimeFormat (int framesPerSecond,
+							 int subframeResolution) throw();
 
 	/** Makes a list of all the tempo-change meta-events from all tracks in the midi file.
 
@@ -38093,10 +38081,6 @@ public:
 	void convertTimestampTicksToSeconds();
 
 	juce_UseDebuggingNewOperator
-
-	/** @internal */
-	static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-								const MidiMessageSequence::MidiEventHolder* const second);
 
 private:
 	OwnedArray <MidiMessageSequence> tracks;
@@ -38269,13 +38253,13 @@ public:
 
 		@see removeListener
 	*/
-	void addListener (MidiKeyboardStateListener* const listener) throw();
+	void addListener (MidiKeyboardStateListener* listener);
 
 	/** Deregisters a listener.
 
 		@see addListener
 	*/
-	void removeListener (MidiKeyboardStateListener* const listener) throw();
+	void removeListener (MidiKeyboardStateListener* listener);
 
 	juce_UseDebuggingNewOperator
 
@@ -39099,10 +39083,10 @@ public:
 	virtual void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
 
 	/** Adds a listener that will be called when an aspect of this processor changes. */
-	void addListener (AudioProcessorListener* const newListener) throw();
+	void addListener (AudioProcessorListener* const newListener);
 
 	/** Removes a previously added listener. */
-	void removeListener (AudioProcessorListener* const listenerToRemove) throw();
+	void removeListener (AudioProcessorListener* const listenerToRemove);
 
 	/** Not for public use - this is called before deleting an editor component. */
 	void editorBeingDeleted (AudioProcessorEditor* const editor) throw();
@@ -39182,10 +39166,10 @@ class JUCE_API  PluginDescription
 {
 public:
 
-	PluginDescription() throw();
-	PluginDescription (const PluginDescription& other) throw();
-	PluginDescription& operator= (const PluginDescription& other) throw();
-	~PluginDescription() throw();
+	PluginDescription();
+	PluginDescription (const PluginDescription& other);
+	PluginDescription& operator= (const PluginDescription& other);
+	~PluginDescription();
 
 	/** The name of the plugin. */
 	String name;
@@ -39249,7 +39233,7 @@ public:
 		plugin's file location, so can be used to store a plugin ID for use
 		across different machines.
 	*/
-	const String createIdentifierString() const throw();
+	const String createIdentifierString() const;
 
 	/** Creates an XML object containing these details.
 
@@ -39730,10 +39714,10 @@ class JUCE_API  AudioPluginFormatManager  : public DeletedAtShutdown
 {
 public:
 
-	AudioPluginFormatManager() throw();
+	AudioPluginFormatManager();
 
 	/** Destructor. */
-	~AudioPluginFormatManager() throw();
+	~AudioPluginFormatManager();
 
 	juce_DeclareSingleton_SingleThreaded (AudioPluginFormatManager, false);
 
@@ -39745,19 +39729,19 @@ public:
 
 		Use getFormat() to get one of them.
 	*/
-	int getNumFormats() throw();
+	int getNumFormats();
 
 	/** Returns one of the available formats.
 
 		@see getNumFormats
 	*/
-	AudioPluginFormat* getFormat (const int index) throw();
+	AudioPluginFormat* getFormat (const int index);
 
 	/** Adds a format to the list.
 
 		The object passed in will be owned and deleted by the manager.
 	*/
-	void addFormat (AudioPluginFormat* const format) throw();
+	void addFormat (AudioPluginFormat* const format);
 
 	/** Tries to load the type for this description, by trying all the formats
 		that this manager knows about.
@@ -39846,7 +39830,7 @@ public:
 	bool addType (const PluginDescription& type);
 
 	/** Removes a type. */
-	void removeType (int index) throw();
+	void removeType (int index);
 
 	/** Looks for all types that can be loaded from a given file, and adds them
 		to the list.
@@ -39997,7 +39981,7 @@ public:
 		This is handy if you want to show the user which file is currently getting
 		scanned.
 	*/
-	const String getNextPluginFileThatWillBeScanned() const throw();
+	const String getNextPluginFileThatWillBeScanned() const;
 
 	/** Returns the estimated progress, between 0 and 1.
 	*/
@@ -40019,8 +40003,8 @@ private:
 	int nextIndex;
 	float progress;
 
-	const StringArray getDeadMansPedalFile() throw();
-	void setDeadMansPedalFile (const StringArray& newContents) throw();
+	const StringArray getDeadMansPedalFile();
+	void setDeadMansPedalFile (const StringArray& newContents);
 
 	PluginDirectoryScanner (const PluginDirectoryScanner&);
 	PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
@@ -42624,10 +42608,10 @@ public:
 
 		@see broadcastMessage
 	*/
-	void registerBroadcastListener (ActionListener* listener) throw();
+	void registerBroadcastListener (ActionListener* listener);
 
 	/** Deregisters a broadcast listener. */
-	void deregisterBroadcastListener (ActionListener* listener) throw();
+	void deregisterBroadcastListener (ActionListener* listener);
 
 	/** @internal */
 	void deliverMessage (Message*);
@@ -42746,14 +42730,14 @@ public:
 		@endcode
 
 	*/
-	MessageManagerLock (Thread* threadToCheckForExitSignal = 0) throw();
+	MessageManagerLock (Thread* threadToCheckForExitSignal = 0);
 
 	/** This has the same behaviour as the other constructor, but takes a ThreadPoolJob
 		instead of a thread.
 
 		See the MessageManagerLock (Thread*) constructor for details on how this works.
 	*/
-	MessageManagerLock (ThreadPoolJob* jobToCheckForExitSignal) throw();
+	MessageManagerLock (ThreadPoolJob* jobToCheckForExitSignal);
 
 	/** Releases the current thread's lock on the message manager.
 
@@ -42776,7 +42760,7 @@ private:
 	SharedEvents* sharedEvents;
 	bool locked;
 
-	void init (Thread* thread, ThreadPoolJob* job) throw();
+	void init (Thread* thread, ThreadPoolJob* job);
 
 	MessageManagerLock (const MessageManagerLock&);
 	MessageManagerLock& operator= (const MessageManagerLock&);
@@ -45192,9 +45176,9 @@ public:
 		Position (const Position& other) throw();
 
 		/** Destructor. */
-		~Position() throw();
+		~Position();
 
-		Position& operator= (const Position& other) throw();
+		Position& operator= (const Position& other);
 		bool operator== (const Position& other) const throw();
 		bool operator!= (const Position& other) const throw();
 
@@ -45204,7 +45188,7 @@ public:
 			inside.
 			@see getPosition, setLineAndIndex
 		*/
-		void setPosition (int charactersFromStartOfDocument) throw();
+		void setPosition (int charactersFromStartOfDocument);
 
 		/** Returns the position as the number of characters from the start of the document.
 			@see setPosition, getLineNumber, getIndexInLine
@@ -45220,7 +45204,7 @@ public:
 			Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
 			they will be adjusted to keep them within its limits.
 		*/
-		void setLineAndIndex (int newLine, int newIndexInLine) throw();
+		void setLineAndIndex (int newLine, int newIndexInLine);
 
 		/** Returns the line number of this position.
 			The first line in the document is numbered zero, not one!
@@ -45241,34 +45225,34 @@ public:
 			when the document has text inserted or deleted, this position will be automatically
 			moved to keep it at the same position in the text.
 		*/
-		void setPositionMaintained (bool isMaintained) throw();
+		void setPositionMaintained (bool isMaintained);
 
 		/** Moves the position forwards or backwards by the specified number of characters.
 			@see movedBy
 		*/
-		void moveBy (int characterDelta) throw();
+		void moveBy (int characterDelta);
 
 		/** Returns a position which is the same as this one, moved by the specified number of
 			characters.
 			@see moveBy
 		*/
-		const Position movedBy (int characterDelta) const throw();
+		const Position movedBy (int characterDelta) const;
 
 		/** Returns a position which is the same as this one, moved up or down by the specified
 			number of lines.
 			@see movedBy
 		*/
-		const Position movedByLines (int deltaLines) const throw();
+		const Position movedByLines (int deltaLines) const;
 
 		/** Returns the character in the document at this position.
 			@see getLineText
 		*/
-		const juce_wchar getCharacter() const throw();
+		const juce_wchar getCharacter() const;
 
 		/** Returns the line from the document that this position is within.
 			@see getCharacter, getLineNumber
 		*/
-		const String getLineText() const throw();
+		const String getLineText() const;
 
 	private:
 		CodeDocument* owner;
@@ -45277,10 +45261,10 @@ public:
 	};
 
 	/** Returns the full text of the document. */
-	const String getAllContent() const throw();
+	const String getAllContent() const;
 
 	/** Returns a section of the document's text. */
-	const String getTextBetween (const Position& start, const Position& end) const throw();
+	const String getTextBetween (const Position& start, const Position& end) const;
 
 	/** Returns a line from the document. */
 	const String getLine (int lineIndex) const throw();
@@ -45605,7 +45589,7 @@ public:
 	/** Returns the on-screen position of a character in the document.
 		The rectangle returned is relative to this component's top-left origin.
 	*/
-	const Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const throw();
+	const Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const;
 
 	/** Finds the character at a given on-screen position.
 		The co-ordinates are relative to this component's top-left origin.
@@ -45655,8 +45639,7 @@ public:
 		This lets you change the tab size and whether pressing the tab key inserts a
 		tab character, or its equivalent number of spaces.
 	*/
-	void setTabSize (int numSpacesPerTab,
-					 bool insertSpacesInsteadOfTabCharacters) throw();
+	void setTabSize (int numSpacesPerTab, bool insertSpacesInsteadOfTabCharacters);
 
 	/** Returns the current number of spaces per tab.
 		@see setTabSize
@@ -45694,7 +45677,7 @@ public:
 		CodeTokeniser::getTokenTypes() to get a list of the token types.
 		@see setColourForTokenType
 	*/
-	const Colour getColourForTokenType (int tokenType) const throw();
+	const Colour getColourForTokenType (int tokenType) const;
 
 	/** A set of colour IDs to use to change the colour of various aspects of the editor.
 
@@ -45714,7 +45697,7 @@ public:
 	};
 
 	/** Changes the size of the scrollbars. */
-	void setScrollbarThickness (int thickness) throw();
+	void setScrollbarThickness (int thickness);
 
 	/** Returns the thickness of the scrollbars. */
 	int getScrollbarThickness() const throw()	   { return scrollbarThickness; }
@@ -45788,7 +45771,7 @@ private:
 	void rebuildLineTokens();
 
 	OwnedArray <CodeDocument::Iterator> cachedIterators;
-	void clearCachedIterators (int firstLineToBeInvalid) throw();
+	void clearCachedIterators (int firstLineToBeInvalid);
 	void updateCachedIterators (int maxLineNum);
 	void getIteratorForPosition (int position, CodeDocument::Iterator& result);
 	void moveLineDelta (int delta, bool selecting);

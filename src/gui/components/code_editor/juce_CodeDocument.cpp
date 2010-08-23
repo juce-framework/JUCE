@@ -242,12 +242,12 @@ CodeDocument::Position::Position (const Position& other) throw()
     jassert (*this == other);
 }
 
-CodeDocument::Position::~Position() throw()
+CodeDocument::Position::~Position()
 {
     setPositionMaintained (false);
 }
 
-CodeDocument::Position& CodeDocument::Position::operator= (const Position& other) throw()
+CodeDocument::Position& CodeDocument::Position::operator= (const Position& other)
 {
     if (this != &other)
     {
@@ -283,7 +283,7 @@ bool CodeDocument::Position::operator!= (const Position& other) const throw()
     return ! operator== (other);
 }
 
-void CodeDocument::Position::setLineAndIndex (const int newLine, const int newIndexInLine) throw()
+void CodeDocument::Position::setLineAndIndex (const int newLine, const int newIndexInLine)
 {
     jassert (owner != 0);
 
@@ -322,7 +322,7 @@ void CodeDocument::Position::setLineAndIndex (const int newLine, const int newIn
     }
 }
 
-void CodeDocument::Position::setPosition (const int newPosition) throw()
+void CodeDocument::Position::setPosition (const int newPosition)
 {
     jassert (owner != 0);
 
@@ -369,7 +369,7 @@ void CodeDocument::Position::setPosition (const int newPosition) throw()
     }
 }
 
-void CodeDocument::Position::moveBy (int characterDelta) throw()
+void CodeDocument::Position::moveBy (int characterDelta)
 {
     jassert (owner != 0);
 
@@ -390,33 +390,33 @@ void CodeDocument::Position::moveBy (int characterDelta) throw()
     setPosition (characterPos + characterDelta);
 }
 
-const CodeDocument::Position CodeDocument::Position::movedBy (const int characterDelta) const throw()
+const CodeDocument::Position CodeDocument::Position::movedBy (const int characterDelta) const
 {
     CodeDocument::Position p (*this);
     p.moveBy (characterDelta);
     return p;
 }
 
-const CodeDocument::Position CodeDocument::Position::movedByLines (const int deltaLines) const throw()
+const CodeDocument::Position CodeDocument::Position::movedByLines (const int deltaLines) const
 {
     CodeDocument::Position p (*this);
     p.setLineAndIndex (getLineNumber() + deltaLines, getIndexInLine());
     return p;
 }
 
-const juce_wchar CodeDocument::Position::getCharacter() const throw()
+const juce_wchar CodeDocument::Position::getCharacter() const
 {
     const CodeDocumentLine* const l = owner->lines [line];
     return l == 0 ? 0 : l->line [getIndexInLine()];
 }
 
-const String CodeDocument::Position::getLineText() const throw()
+const String CodeDocument::Position::getLineText() const
 {
     const CodeDocumentLine* const l = owner->lines [line];
     return l == 0 ? String::empty : l->line;
 }
 
-void CodeDocument::Position::setPositionMaintained (const bool isMaintained) throw()
+void CodeDocument::Position::setPositionMaintained (const bool isMaintained)
 {
     if (isMaintained != positionMaintained)
     {
@@ -453,13 +453,13 @@ CodeDocument::~CodeDocument()
 {
 }
 
-const String CodeDocument::getAllContent() const throw()
+const String CodeDocument::getAllContent() const
 {
     return getTextBetween (Position (this, 0),
                            Position (this, lines.size(), 0));
 }
 
-const String CodeDocument::getTextBetween (const Position& start, const Position& end) const throw()
+const String CodeDocument::getTextBetween (const Position& start, const Position& end) const
 {
     if (end.getPosition() <= start.getPosition())
         return String::empty;

@@ -186,13 +186,13 @@ public:
 
         @see removeListener
     */
-    void addListener (MidiKeyboardStateListener* const listener) throw();
+    void addListener (MidiKeyboardStateListener* listener);
 
     /** Deregisters a listener.
 
         @see addListener
     */
-    void removeListener (MidiKeyboardStateListener* const listener) throw();
+    void removeListener (MidiKeyboardStateListener* listener);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

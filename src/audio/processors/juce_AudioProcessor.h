@@ -523,10 +523,10 @@ public:
 
     //==============================================================================
     /** Adds a listener that will be called when an aspect of this processor changes. */
-    void addListener (AudioProcessorListener* const newListener) throw();
+    void addListener (AudioProcessorListener* const newListener);
 
     /** Removes a previously added listener. */
-    void removeListener (AudioProcessorListener* const listenerToRemove) throw();
+    void removeListener (AudioProcessorListener* const listenerToRemove);
 
     //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */

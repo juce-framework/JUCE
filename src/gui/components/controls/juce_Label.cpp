@@ -87,7 +87,7 @@ void Label::setText (const String& newText,
     }
 }
 
-const String Label::getText (const bool returnActiveEditorContents) const throw()
+const String Label::getText (const bool returnActiveEditorContents) const
 {
     return (returnActiveEditorContents && isBeingEdited())
                 ? editor->getText()
@@ -101,7 +101,7 @@ void Label::valueChanged (Value&)
 }
 
 //==============================================================================
-void Label::setFont (const Font& newFont) throw()
+void Label::setFont (const Font& newFont)
 {
     if (font != newFont)
     {
@@ -117,7 +117,7 @@ const Font& Label::getFont() const throw()
 
 void Label::setEditable (const bool editOnSingleClick,
                          const bool editOnDoubleClick,
-                         const bool lossOfFocusDiscardsChanges_) throw()
+                         const bool lossOfFocusDiscardsChanges_)
 {
     editSingleClick = editOnSingleClick;
     editDoubleClick = editOnDoubleClick;
@@ -127,7 +127,7 @@ void Label::setEditable (const bool editOnSingleClick,
     setFocusContainer (editOnSingleClick || editOnDoubleClick);
 }
 
-void Label::setJustificationType (const Justification& newJustification) throw()
+void Label::setJustificationType (const Justification& newJustification)
 {
     if (justification != newJustification)
     {
@@ -403,12 +403,12 @@ KeyboardFocusTraverser* Label::createFocusTraverser()
 }
 
 //==============================================================================
-void Label::addListener (Listener* const listener) throw()
+void Label::addListener (Listener* const listener)
 {
     listeners.add (listener);
 }
 
-void Label::removeListener (Listener* const listener) throw()
+void Label::removeListener (Listener* const listener)
 {
     listeners.remove (listener);
 }

@@ -98,7 +98,7 @@ public:
 
     //==============================================================================
 private:
-    static HostType getHostType() throw()
+    static HostType getHostType()
     {
         const String hostPath (File::getSpecialLocation (File::hostApplicationPath).getFullPathName());
         const String hostFilename (File (hostPath).getFileName());
