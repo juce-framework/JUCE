@@ -287,9 +287,9 @@ public:
     /** @internal */
     void itemDropped (const String&, Component*, int, int);
     /** @internal */
-    void updateAllItemPositions (const bool animate);
+    void updateAllItemPositions (bool animate);
     /** @internal */
-    static ToolbarItemComponent* createItem (ToolbarItemFactory&, const int itemId);
+    static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
 
     juce_UseDebuggingNewOperator
 
@@ -305,9 +305,9 @@ private:
     friend class ItemDragAndDropOverlayComponent;
     static const char* const toolbarDragDescriptor;
 
-    void addItemInternal (ToolbarItemFactory& factory, const int itemId, const int insertIndex);
+    void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);
 
-    ToolbarItemComponent* getNextActiveComponent (int index, const int delta) const;
+    ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;
 
     Toolbar (const Toolbar&);
     Toolbar& operator= (const Toolbar&);

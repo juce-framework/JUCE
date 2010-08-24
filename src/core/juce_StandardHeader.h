@@ -150,7 +150,7 @@ BEGIN_JUCE_NAMESPACE
 extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
-  extern void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw();
+  extern void JUCE_API juce_LogAssertion (const char* filename, int lineNum) throw();
 #endif
 
 #include "juce_Memory.h"

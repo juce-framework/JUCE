@@ -62,91 +62,91 @@ typedef juce_wchar                tchar;
 class JUCE_API  CharacterFunctions
 {
 public:
-    static int length (const char* const s) throw();
-    static int length (const juce_wchar* const s) throw();
+    static int length (const char* s) throw();
+    static int length (const juce_wchar* s) throw();
 
-    static void copy (char* dest, const char* src, const int maxBytes) throw();
-    static void copy (juce_wchar* dest, const juce_wchar* src, const int maxChars) throw();
+    static void copy (char* dest, const char* src, int maxBytes) throw();
+    static void copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw();
 
-    static void copy (juce_wchar* dest, const char* src, const int maxChars) throw();
-    static void copy (char* dest, const juce_wchar* src, const int maxBytes) throw();
+    static void copy (juce_wchar* dest, const char* src, int maxChars) throw();
+    static void copy (char* dest, const juce_wchar* src, int maxBytes) throw();
     static int bytesRequiredForCopy (const juce_wchar* src) throw();
 
     static void append (char* dest, const char* src) throw();
     static void append (juce_wchar* dest, const juce_wchar* src) throw();
 
-    static int compare (const char* const s1, const char* const s2) throw();
+    static int compare (const char* s1, const char* s2) throw();
     static int compare (const juce_wchar* s1, const juce_wchar* s2) throw();
     static int compare (const juce_wchar* s1, const char* s2) throw();
     static int compare (const char* s1, const juce_wchar* s2) throw();
 
-    static int compare (const char* const s1, const char* const s2, const int maxChars) throw();
+    static int compare (const char* s1, const char* s2, int maxChars) throw();
     static int compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
 
-    static int compareIgnoreCase (const char* const s1, const char* const s2) throw();
+    static int compareIgnoreCase (const char* s1, const char* s2) throw();
     static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2) throw();
     static int compareIgnoreCase (const juce_wchar* s1, const char* s2) throw();
 
-    static int compareIgnoreCase (const char* const s1, const char* const s2, const int maxChars) throw();
+    static int compareIgnoreCase (const char* s1, const char* s2, int maxChars) throw();
     static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
 
-    static const char* find (const char* const haystack, const char* const needle) throw();
-    static const juce_wchar* find (const juce_wchar* haystack, const juce_wchar* const needle) throw();
+    static const char* find (const char* haystack, const char* needle) throw();
+    static const juce_wchar* find (const juce_wchar* haystack, const juce_wchar* needle) throw();
 
-    static int indexOfChar (const char* const haystack, const char needle, const bool ignoreCase) throw();
-    static int indexOfChar (const juce_wchar* const haystack, const juce_wchar needle, const bool ignoreCase) throw();
+    static int indexOfChar (const char* haystack, char needle, bool ignoreCase) throw();
+    static int indexOfChar (const juce_wchar* haystack, juce_wchar needle, bool ignoreCase) throw();
 
-    static int indexOfCharFast (const char* const haystack, const char needle) throw();
-    static int indexOfCharFast (const juce_wchar* const haystack, const juce_wchar needle) throw();
+    static int indexOfCharFast (const char* haystack, char needle) throw();
+    static int indexOfCharFast (const juce_wchar* haystack, juce_wchar needle) throw();
 
-    static int getIntialSectionContainingOnly (const char* const text, const char* const allowedChars) throw();
-    static int getIntialSectionContainingOnly (const juce_wchar* const text, const juce_wchar* const allowedChars) throw();
+    static int getIntialSectionContainingOnly (const char* text, const char* allowedChars) throw();
+    static int getIntialSectionContainingOnly (const juce_wchar* text, const juce_wchar* allowedChars) throw();
 
-    static int ftime (char* const dest, const int maxChars, const char* const format, const struct tm* const tm) throw();
-    static int ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw();
+    static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
+    static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
 
-    static int getIntValue (const char* const s) throw();
+    static int getIntValue (const char* s) throw();
     static int getIntValue (const juce_wchar* s) throw();
 
     static int64 getInt64Value (const char* s) throw();
     static int64 getInt64Value (const juce_wchar* s) throw();
 
-    static double getDoubleValue (const char* const s) throw();
-    static double getDoubleValue (const juce_wchar* const s) throw();
+    static double getDoubleValue (const char* s) throw();
+    static double getDoubleValue (const juce_wchar* s) throw();
 
     //==============================================================================
-    static char toUpperCase (const char character) throw();
-    static juce_wchar toUpperCase (const juce_wchar character) throw();
+    static char toUpperCase (char character) throw();
+    static juce_wchar toUpperCase (juce_wchar character) throw();
     static void toUpperCase (char* s) throw();
 
     static void toUpperCase (juce_wchar* s) throw();
-    static bool isUpperCase (const char character) throw();
-    static bool isUpperCase (const juce_wchar character) throw();
+    static bool isUpperCase (char character) throw();
+    static bool isUpperCase (juce_wchar character) throw();
 
-    static char toLowerCase (const char character) throw();
-    static juce_wchar toLowerCase (const juce_wchar character) throw();
+    static char toLowerCase (char character) throw();
+    static juce_wchar toLowerCase (juce_wchar character) throw();
     static void toLowerCase (char* s) throw();
     static void toLowerCase (juce_wchar* s) throw();
-    static bool isLowerCase (const char character) throw();
-    static bool isLowerCase (const juce_wchar character) throw();
+    static bool isLowerCase (char character) throw();
+    static bool isLowerCase (juce_wchar character) throw();
 
     //==============================================================================
-    static bool isWhitespace (const char character) throw();
-    static bool isWhitespace (const juce_wchar character) throw();
+    static bool isWhitespace (char character) throw();
+    static bool isWhitespace (juce_wchar character) throw();
 
-    static bool isDigit (const char character) throw();
-    static bool isDigit (const juce_wchar character) throw();
+    static bool isDigit (char character) throw();
+    static bool isDigit (juce_wchar character) throw();
 
-    static bool isLetter (const char character) throw();
-    static bool isLetter (const juce_wchar character) throw();
+    static bool isLetter (char character) throw();
+    static bool isLetter (juce_wchar character) throw();
 
-    static bool isLetterOrDigit (const char character) throw();
-    static bool isLetterOrDigit (const juce_wchar character) throw();
+    static bool isLetterOrDigit (char character) throw();
+    static bool isLetterOrDigit (juce_wchar character) throw();
 
     /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legel
         hex digit.
     */
-    static int getHexDigitValue (const juce_wchar digit) throw();
+    static int getHexDigitValue (juce_wchar digit) throw();
 };
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__

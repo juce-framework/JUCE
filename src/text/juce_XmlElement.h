@@ -708,7 +708,7 @@ private:
     void copyChildrenAndAttributesFrom (const XmlElement& other);
     void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
     void getChildElementsAsArray (XmlElement**) const throw();
-    void reorderChildElements (XmlElement** const, const int) throw();
+    void reorderChildElements (XmlElement**, int) throw();
 };
 
 

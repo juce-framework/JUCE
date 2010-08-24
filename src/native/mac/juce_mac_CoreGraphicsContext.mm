@@ -186,6 +186,10 @@ public:
 
         if (lastClipRectIsValid)
         {
+            // This is actually incorrect, because the actual clip region may be complex, and
+            // clipping its bounds to a rect may not be right... But, removing this shortcut
+            // doesn't actually fix anything because CoreGraphics also ignores complex regions
+            // when calculating the resultant clip bounds, and makes the same mistake!
             lastClipRect = lastClipRect.getIntersection (r);
             return ! lastClipRect.isEmpty();
         }

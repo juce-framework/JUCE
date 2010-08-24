@@ -528,7 +528,7 @@ const String URL::removeEscapeChars (const String& s)
         if ((hexDigit1 = CharacterFunctions::getHexDigitValue (result [nextPercent + 1])) >= 0
              && (hexDigit2 = CharacterFunctions::getHexDigitValue (result [nextPercent + 2])) >= 0)
         {
-            const juce_wchar replacementChar = (juce_wchar) ((hexDigit1 << 16) + hexDigit2);
+            const juce_wchar replacementChar = (juce_wchar) ((hexDigit1 << 4) + hexDigit2);
             result = result.replaceSection (nextPercent, 3, String::charToString (replacementChar));
         }
 

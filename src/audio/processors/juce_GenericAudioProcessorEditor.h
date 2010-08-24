@@ -44,7 +44,7 @@ class JUCE_API  GenericAudioProcessorEditor      : public AudioProcessorEditor
 {
 public:
     //==============================================================================
-    GenericAudioProcessorEditor (AudioProcessor* const owner);
+    GenericAudioProcessorEditor (AudioProcessor* owner);
     ~GenericAudioProcessorEditor();
 
     //==============================================================================

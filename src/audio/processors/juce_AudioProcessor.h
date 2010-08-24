@@ -199,14 +199,14 @@ public:
         The host might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
-    virtual const String getInputChannelName (const int channelIndex) const = 0;
+    virtual const String getInputChannelName (int channelIndex) const = 0;
 
     /** Returns the name of one of the output channels, as returned by the host.
 
         The host might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
-    virtual const String getOutputChannelName (const int channelIndex) const = 0;
+    virtual const String getOutputChannelName (int channelIndex) const = 0;
 
     /** Returns true if the specified channel is part of a stereo pair with its neighbour. */
     virtual bool isInputChannelStereoPair (int index) const = 0;
@@ -227,7 +227,7 @@ public:
         The filter should call this as soon as it can during initialisation, and can call it
         later if the value changes.
     */
-    void setLatencySamples (const int newLatency);
+    void setLatencySamples (int newLatency);
 
     /** Returns true if the processor wants midi messages. */
     virtual bool acceptsMidi() const = 0;
@@ -277,7 +277,7 @@ public:
 
         @see getCallbackLock
     */
-    void suspendProcessing (const bool shouldBeSuspended);
+    void suspendProcessing (bool shouldBeSuspended);
 
     /** Returns true if processing is currently suspended.
         @see suspendProcessing
@@ -309,7 +309,7 @@ public:
 
         Whatever value is passed-in will be
     */
-    void setNonRealtime (const bool isNonRealtime) throw();
+    void setNonRealtime (bool isNonRealtime) throw();
 
     //==============================================================================
     /** Creates the filter's UI.
@@ -523,22 +523,22 @@ public:
 
     //==============================================================================
     /** Adds a listener that will be called when an aspect of this processor changes. */
-    void addListener (AudioProcessorListener* const newListener);
+    void addListener (AudioProcessorListener* newListener);
 
     /** Removes a previously added listener. */
-    void removeListener (AudioProcessorListener* const listenerToRemove);
+    void removeListener (AudioProcessorListener* listenerToRemove);
 
     //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
-    void editorBeingDeleted (AudioProcessorEditor* const editor) throw();
+    void editorBeingDeleted (AudioProcessorEditor* editor) throw();
 
     /** Not for public use - this is called to initialise the processor. */
-    void setPlayHead (AudioPlayHead* const newPlayHead) throw();
+    void setPlayHead (AudioPlayHead* newPlayHead) throw();
 
     /** Not for public use - this is called to initialise the processor before playing. */
-    void setPlayConfigDetails (const int numIns, const int numOuts,
-                               const double sampleRate,
-                               const int blockSize) throw();
+    void setPlayConfigDetails (int numIns, int numOuts,
+                               double sampleRate,
+                               int blockSize) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -562,13 +562,13 @@ protected:
         an XmlElement object that the caller must delete when no longer needed.
     */
     static XmlElement* getXmlFromBinary (const void* data,
-                                         const int sizeInBytes);
+                                         int sizeInBytes);
 
     /** @internal */
     AudioPlayHead* playHead;
 
     /** @internal */
-    void sendParamChangeMessageToListeners (const int parameterIndex, const float newValue);
+    void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
 private:
     Array <AudioProcessorListener*> listeners;

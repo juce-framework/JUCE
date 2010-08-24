@@ -58,7 +58,7 @@ public:
     explicit MD5 (const MemoryBlock& data);
 
     /** Creates a checksum for a block of binary data. */
-    MD5 (const void* data, const size_t numBytes);
+    MD5 (const void* data, size_t numBytes);
 
     /** Creates a checksum for a string.
 

@@ -771,7 +771,7 @@ BEGIN_JUCE_NAMESPACE
 extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
-  extern void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw();
+  extern void JUCE_API juce_LogAssertion (const char* filename, int lineNum) throw();
 #endif
 
 
@@ -1495,89 +1495,89 @@ typedef juce_wchar		tchar;
 class JUCE_API  CharacterFunctions
 {
 public:
-	static int length (const char* const s) throw();
-	static int length (const juce_wchar* const s) throw();
+	static int length (const char* s) throw();
+	static int length (const juce_wchar* s) throw();
 
-	static void copy (char* dest, const char* src, const int maxBytes) throw();
-	static void copy (juce_wchar* dest, const juce_wchar* src, const int maxChars) throw();
+	static void copy (char* dest, const char* src, int maxBytes) throw();
+	static void copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw();
 
-	static void copy (juce_wchar* dest, const char* src, const int maxChars) throw();
-	static void copy (char* dest, const juce_wchar* src, const int maxBytes) throw();
+	static void copy (juce_wchar* dest, const char* src, int maxChars) throw();
+	static void copy (char* dest, const juce_wchar* src, int maxBytes) throw();
 	static int bytesRequiredForCopy (const juce_wchar* src) throw();
 
 	static void append (char* dest, const char* src) throw();
 	static void append (juce_wchar* dest, const juce_wchar* src) throw();
 
-	static int compare (const char* const s1, const char* const s2) throw();
+	static int compare (const char* s1, const char* s2) throw();
 	static int compare (const juce_wchar* s1, const juce_wchar* s2) throw();
 	static int compare (const juce_wchar* s1, const char* s2) throw();
 	static int compare (const char* s1, const juce_wchar* s2) throw();
 
-	static int compare (const char* const s1, const char* const s2, const int maxChars) throw();
+	static int compare (const char* s1, const char* s2, int maxChars) throw();
 	static int compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
 
-	static int compareIgnoreCase (const char* const s1, const char* const s2) throw();
+	static int compareIgnoreCase (const char* s1, const char* s2) throw();
 	static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2) throw();
 	static int compareIgnoreCase (const juce_wchar* s1, const char* s2) throw();
 
-	static int compareIgnoreCase (const char* const s1, const char* const s2, const int maxChars) throw();
+	static int compareIgnoreCase (const char* s1, const char* s2, int maxChars) throw();
 	static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
 
-	static const char* find (const char* const haystack, const char* const needle) throw();
-	static const juce_wchar* find (const juce_wchar* haystack, const juce_wchar* const needle) throw();
+	static const char* find (const char* haystack, const char* needle) throw();
+	static const juce_wchar* find (const juce_wchar* haystack, const juce_wchar* needle) throw();
 
-	static int indexOfChar (const char* const haystack, const char needle, const bool ignoreCase) throw();
-	static int indexOfChar (const juce_wchar* const haystack, const juce_wchar needle, const bool ignoreCase) throw();
+	static int indexOfChar (const char* haystack, char needle, bool ignoreCase) throw();
+	static int indexOfChar (const juce_wchar* haystack, juce_wchar needle, bool ignoreCase) throw();
 
-	static int indexOfCharFast (const char* const haystack, const char needle) throw();
-	static int indexOfCharFast (const juce_wchar* const haystack, const juce_wchar needle) throw();
+	static int indexOfCharFast (const char* haystack, char needle) throw();
+	static int indexOfCharFast (const juce_wchar* haystack, juce_wchar needle) throw();
 
-	static int getIntialSectionContainingOnly (const char* const text, const char* const allowedChars) throw();
-	static int getIntialSectionContainingOnly (const juce_wchar* const text, const juce_wchar* const allowedChars) throw();
+	static int getIntialSectionContainingOnly (const char* text, const char* allowedChars) throw();
+	static int getIntialSectionContainingOnly (const juce_wchar* text, const juce_wchar* allowedChars) throw();
 
-	static int ftime (char* const dest, const int maxChars, const char* const format, const struct tm* const tm) throw();
-	static int ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw();
+	static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
+	static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
 
-	static int getIntValue (const char* const s) throw();
+	static int getIntValue (const char* s) throw();
 	static int getIntValue (const juce_wchar* s) throw();
 
 	static int64 getInt64Value (const char* s) throw();
 	static int64 getInt64Value (const juce_wchar* s) throw();
 
-	static double getDoubleValue (const char* const s) throw();
-	static double getDoubleValue (const juce_wchar* const s) throw();
+	static double getDoubleValue (const char* s) throw();
+	static double getDoubleValue (const juce_wchar* s) throw();
 
-	static char toUpperCase (const char character) throw();
-	static juce_wchar toUpperCase (const juce_wchar character) throw();
+	static char toUpperCase (char character) throw();
+	static juce_wchar toUpperCase (juce_wchar character) throw();
 	static void toUpperCase (char* s) throw();
 
 	static void toUpperCase (juce_wchar* s) throw();
-	static bool isUpperCase (const char character) throw();
-	static bool isUpperCase (const juce_wchar character) throw();
+	static bool isUpperCase (char character) throw();
+	static bool isUpperCase (juce_wchar character) throw();
 
-	static char toLowerCase (const char character) throw();
-	static juce_wchar toLowerCase (const juce_wchar character) throw();
+	static char toLowerCase (char character) throw();
+	static juce_wchar toLowerCase (juce_wchar character) throw();
 	static void toLowerCase (char* s) throw();
 	static void toLowerCase (juce_wchar* s) throw();
-	static bool isLowerCase (const char character) throw();
-	static bool isLowerCase (const juce_wchar character) throw();
+	static bool isLowerCase (char character) throw();
+	static bool isLowerCase (juce_wchar character) throw();
 
-	static bool isWhitespace (const char character) throw();
-	static bool isWhitespace (const juce_wchar character) throw();
+	static bool isWhitespace (char character) throw();
+	static bool isWhitespace (juce_wchar character) throw();
 
-	static bool isDigit (const char character) throw();
-	static bool isDigit (const juce_wchar character) throw();
+	static bool isDigit (char character) throw();
+	static bool isDigit (juce_wchar character) throw();
 
-	static bool isLetter (const char character) throw();
-	static bool isLetter (const juce_wchar character) throw();
+	static bool isLetter (char character) throw();
+	static bool isLetter (juce_wchar character) throw();
 
-	static bool isLetterOrDigit (const char character) throw();
-	static bool isLetterOrDigit (const juce_wchar character) throw();
+	static bool isLetterOrDigit (char character) throw();
+	static bool isLetterOrDigit (juce_wchar character) throw();
 
 	/** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legel
 		hex digit.
 	*/
-	static int getHexDigitValue (const juce_wchar digit) throw();
+	static int getHexDigitValue (juce_wchar digit) throw();
 };
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
@@ -10023,7 +10023,7 @@ private:
 	void copyChildrenAndAttributesFrom (const XmlElement& other);
 	void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
 	void getChildElementsAsArray (XmlElement**) const throw();
-	void reorderChildElements (XmlElement** const, const int) throw();
+	void reorderChildElements (XmlElement**, int) throw();
 };
 
 #endif   // __JUCE_XMLELEMENT_JUCEHEADER__
@@ -14319,7 +14319,7 @@ public:
 		will be true and then false. Others only send a single event when the
 		button is pressed.
 	*/
-	virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
+	virtual void buttonPressed (ButtonType buttonId, bool isDown) = 0;
 
 	/** Starts the device running and responding to events.
 
@@ -14330,7 +14330,7 @@ public:
 								false, it will be shared with other apps.
 		@see stop
 	*/
-	bool start (const bool inExclusiveMode);
+	bool start (bool inExclusiveMode);
 
 	/** Stops the device running.
 		@see start
@@ -14355,7 +14355,7 @@ private:
 	void* queue;
 	int remoteId;
 
-	bool open (const bool openInExclusiveMode);
+	bool open (bool openInExclusiveMode);
 
 	AppleRemoteDevice (const AppleRemoteDevice&);
 	AppleRemoteDevice& operator= (const AppleRemoteDevice&);
@@ -15089,7 +15089,7 @@ public:
 	explicit MD5 (const MemoryBlock& data);
 
 	/** Creates a checksum for a block of binary data. */
-	MD5 (const void* data, const size_t numBytes);
+	MD5 (const void* data, size_t numBytes);
 
 	/** Creates a checksum for a string.
 
@@ -17401,7 +17401,7 @@ private:
 	bool needToLoadDTD, ignoreEmptyTextElements;
 	ScopedPointer <InputSource> inputSource;
 
-	void setLastError (const String& desc, const bool carryOn);
+	void setLastError (const String& desc, bool carryOn);
 	void skipHeader();
 	void skipNextWhiteSpace();
 	juce_wchar readNextChar() throw();
@@ -28079,7 +28079,7 @@ private:
 	ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
 
 	friend class CommandTargetMessageInvoker;
-	bool tryToInvoke (const InvocationInfo& info, const bool async);
+	bool tryToInvoke (const InvocationInfo& info, bool async);
 
 	ApplicationCommandTarget (const ApplicationCommandTarget&);
 	ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
@@ -38098,7 +38098,7 @@ private:
 	MidiFile& operator= (const MidiFile&);
 
 	void readNextTrack (const uint8* data, int size);
-	void writeTrack (OutputStream& mainOut, const int trackNum);
+	void writeTrack (OutputStream& mainOut, int trackNum);
 };
 
 #endif   // __JUCE_MIDIFILE_JUCEHEADER__
@@ -38185,7 +38185,7 @@ public:
 		The channel number must be between 1 and 16. If you want to see if any notes are
 		on for a range of channels, use the isNoteOnForChannels() method.
 	*/
-	bool isNoteOn (const int midiChannel, const int midiNoteNumber) const throw();
+	bool isNoteOn (int midiChannel, int midiNoteNumber) const throw();
 
 	/** Returns true if the given midi key is currently held down on any of a set of midi channels.
 
@@ -38194,7 +38194,7 @@ public:
 
 		If a note is on for at least one of the specified channels, this returns true.
 	*/
-	bool isNoteOnForChannels (const int midiChannelMask, const int midiNoteNumber) const throw();
+	bool isNoteOnForChannels (int midiChannelMask, int midiNoteNumber) const throw();
 
 	/** Turns a specified note on.
 
@@ -38204,7 +38204,7 @@ public:
 		It will also trigger a synchronous callback to the listeners to tell them that the key has
 		gone down.
 	*/
-	void noteOn (const int midiChannel, const int midiNoteNumber, const float velocity);
+	void noteOn (int midiChannel, int midiNoteNumber, float velocity);
 
 	/** Turns a specified note off.
 
@@ -38216,7 +38216,7 @@ public:
 
 		But if the note isn't acutally down for the given channel, this method will in fact do nothing.
 	*/
-	void noteOff (const int midiChannel, const int midiNoteNumber);
+	void noteOff (int midiChannel, int midiNoteNumber);
 
 	/** This will turn off any currently-down notes for the given midi channel.
 
@@ -38225,7 +38225,7 @@ public:
 		Calling this method will make calls to noteOff(), so can trigger synchronous callbacks
 		and events being added to the midi stream.
 	*/
-	void allNotesOff (const int midiChannel);
+	void allNotesOff (int midiChannel);
 
 	/** Looks at a key-up/down event and uses it to update the state of this object.
 
@@ -38253,9 +38253,9 @@ public:
 		instead.
 	*/
 	void processNextMidiBuffer (MidiBuffer& buffer,
-								const int startSample,
-								const int numSamples,
-								const bool injectIndirectEvents);
+								int startSample,
+								int numSamples,
+								bool injectIndirectEvents);
 
 	/** Registers a listener for callbacks when keys go up or down.
 
@@ -38277,8 +38277,8 @@ private:
 	MidiBuffer eventsToAdd;
 	Array <MidiKeyboardStateListener*> listeners;
 
-	void noteOnInternal  (const int midiChannel, const int midiNoteNumber, const float velocity);
-	void noteOffInternal  (const int midiChannel, const int midiNoteNumber);
+	void noteOnInternal (int midiChannel, int midiNoteNumber, float velocity);
+	void noteOffInternal (int midiChannel, int midiNoteNumber);
 
 	MidiKeyboardState (const MidiKeyboardState&);
 	MidiKeyboardState& operator= (const MidiKeyboardState&);
@@ -38418,7 +38418,7 @@ protected:
 
 	/** Creates an editor for the specified processor.
 	*/
-	AudioProcessorEditor (AudioProcessor* const owner);
+	AudioProcessorEditor (AudioProcessor* owner);
 
 public:
 	/** Destructor. */
@@ -38776,14 +38776,14 @@ public:
 		The host might not supply very useful names for channels, and this might be
 		something like "1", "2", "left", "right", etc.
 	*/
-	virtual const String getInputChannelName (const int channelIndex) const = 0;
+	virtual const String getInputChannelName (int channelIndex) const = 0;
 
 	/** Returns the name of one of the output channels, as returned by the host.
 
 		The host might not supply very useful names for channels, and this might be
 		something like "1", "2", "left", "right", etc.
 	*/
-	virtual const String getOutputChannelName (const int channelIndex) const = 0;
+	virtual const String getOutputChannelName (int channelIndex) const = 0;
 
 	/** Returns true if the specified channel is part of a stereo pair with its neighbour. */
 	virtual bool isInputChannelStereoPair (int index) const = 0;
@@ -38804,7 +38804,7 @@ public:
 		The filter should call this as soon as it can during initialisation, and can call it
 		later if the value changes.
 	*/
-	void setLatencySamples (const int newLatency);
+	void setLatencySamples (int newLatency);
 
 	/** Returns true if the processor wants midi messages. */
 	virtual bool acceptsMidi() const = 0;
@@ -38853,7 +38853,7 @@ public:
 
 		@see getCallbackLock
 	*/
-	void suspendProcessing (const bool shouldBeSuspended);
+	void suspendProcessing (bool shouldBeSuspended);
 
 	/** Returns true if processing is currently suspended.
 		@see suspendProcessing
@@ -38884,7 +38884,7 @@ public:
 
 		Whatever value is passed-in will be
 	*/
-	void setNonRealtime (const bool isNonRealtime) throw();
+	void setNonRealtime (bool isNonRealtime) throw();
 
 	/** Creates the filter's UI.
 
@@ -39091,21 +39091,21 @@ public:
 	virtual void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
 
 	/** Adds a listener that will be called when an aspect of this processor changes. */
-	void addListener (AudioProcessorListener* const newListener);
+	void addListener (AudioProcessorListener* newListener);
 
 	/** Removes a previously added listener. */
-	void removeListener (AudioProcessorListener* const listenerToRemove);
+	void removeListener (AudioProcessorListener* listenerToRemove);
 
 	/** Not for public use - this is called before deleting an editor component. */
-	void editorBeingDeleted (AudioProcessorEditor* const editor) throw();
+	void editorBeingDeleted (AudioProcessorEditor* editor) throw();
 
 	/** Not for public use - this is called to initialise the processor. */
-	void setPlayHead (AudioPlayHead* const newPlayHead) throw();
+	void setPlayHead (AudioPlayHead* newPlayHead) throw();
 
 	/** Not for public use - this is called to initialise the processor before playing. */
-	void setPlayConfigDetails (const int numIns, const int numOuts,
-							   const double sampleRate,
-							   const int blockSize) throw();
+	void setPlayConfigDetails (int numIns, int numOuts,
+							   double sampleRate,
+							   int blockSize) throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -39128,13 +39128,13 @@ protected:
 		an XmlElement object that the caller must delete when no longer needed.
 	*/
 	static XmlElement* getXmlFromBinary (const void* data,
-										 const int sizeInBytes);
+										 int sizeInBytes);
 
 	/** @internal */
 	AudioPlayHead* playHead;
 
 	/** @internal */
-	void sendParamChangeMessageToListeners (const int parameterIndex, const float newValue);
+	void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
 private:
 	Array <AudioProcessorListener*> listeners;
@@ -41160,7 +41160,7 @@ public:
 		The processor that is passed in will not be deleted or owned by this object.
 		To stop anything playing, pass in 0 to this method.
 	*/
-	void setProcessor (AudioProcessor* const processorToPlay);
+	void setProcessor (AudioProcessor* processorToPlay);
 
 	/** Returns the current audio processor that is being played.
 	*/
@@ -41454,7 +41454,7 @@ class JUCE_API  GenericAudioProcessorEditor	  : public AudioProcessorEditor
 {
 public:
 
-	GenericAudioProcessorEditor (AudioProcessor* const owner);
+	GenericAudioProcessorEditor (AudioProcessor* owner);
 	~GenericAudioProcessorEditor();
 
 	void paint (Graphics& g);
@@ -44845,9 +44845,9 @@ public:
 	/** @internal */
 	void itemDropped (const String&, Component*, int, int);
 	/** @internal */
-	void updateAllItemPositions (const bool animate);
+	void updateAllItemPositions (bool animate);
 	/** @internal */
-	static ToolbarItemComponent* createItem (ToolbarItemFactory&, const int itemId);
+	static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
 
 	juce_UseDebuggingNewOperator
 
@@ -44863,9 +44863,9 @@ private:
 	friend class ItemDragAndDropOverlayComponent;
 	static const char* const toolbarDragDescriptor;
 
-	void addItemInternal (ToolbarItemFactory& factory, const int itemId, const int insertIndex);
+	void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);
 
-	ToolbarItemComponent* getNextActiveComponent (int index, const int delta) const;
+	ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;
 
 	Toolbar (const Toolbar&);
 	Toolbar& operator= (const Toolbar&);
@@ -49271,11 +49271,7 @@ private:
 	bool inDestructor, reentrant;
 
 	void updateShadows();
-	void setShadowImage (const Image& src,
-						 const int num,
-						 const int w, const int h,
-						 const int sx, const int sy);
-
+	void setShadowImage (const Image& src, int num, int w, int h, int sx, int sy);
 	void bringShadowWindowsToFront();
 	void deleteShadowWindows();
 

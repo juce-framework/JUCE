@@ -62,7 +62,7 @@ public:
         The processor that is passed in will not be deleted or owned by this object.
         To stop anything playing, pass in 0 to this method.
     */
-    void setProcessor (AudioProcessor* const processorToPlay);
+    void setProcessor (AudioProcessor* processorToPlay);
 
     /** Returns the current audio processor that is being played.
     */

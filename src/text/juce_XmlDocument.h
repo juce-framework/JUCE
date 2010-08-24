@@ -140,7 +140,7 @@ private:
     bool needToLoadDTD, ignoreEmptyTextElements;
     ScopedPointer <InputSource> inputSource;
 
-    void setLastError (const String& desc, const bool carryOn);
+    void setLastError (const String& desc, bool carryOn);
     void skipHeader();
     void skipNextWhiteSpace();
     juce_wchar readNextChar() throw();

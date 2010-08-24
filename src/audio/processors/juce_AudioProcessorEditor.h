@@ -45,7 +45,7 @@ protected:
     //==============================================================================
     /** Creates an editor for the specified processor.
     */
-    AudioProcessorEditor (AudioProcessor* const owner);
+    AudioProcessorEditor (AudioProcessor* owner);
 
 public:
     /** Destructor. */

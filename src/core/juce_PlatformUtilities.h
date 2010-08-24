@@ -297,7 +297,7 @@ public:
         will be true and then false. Others only send a single event when the
         button is pressed.
     */
-    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
+    virtual void buttonPressed (ButtonType buttonId, bool isDown) = 0;
 
     //==============================================================================
     /** Starts the device running and responding to events.
@@ -309,7 +309,7 @@ public:
                                 false, it will be shared with other apps.
         @see stop
     */
-    bool start (const bool inExclusiveMode);
+    bool start (bool inExclusiveMode);
 
     /** Stops the device running.
         @see start
@@ -335,7 +335,7 @@ private:
     void* queue;
     int remoteId;
 
-    bool open (const bool openInExclusiveMode);
+    bool open (bool openInExclusiveMode);
 
     AppleRemoteDevice (const AppleRemoteDevice&);
     AppleRemoteDevice& operator= (const AppleRemoteDevice&);

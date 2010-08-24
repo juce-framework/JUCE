@@ -108,7 +108,7 @@ public:
         The channel number must be between 1 and 16. If you want to see if any notes are
         on for a range of channels, use the isNoteOnForChannels() method.
     */
-    bool isNoteOn (const int midiChannel, const int midiNoteNumber) const throw();
+    bool isNoteOn (int midiChannel, int midiNoteNumber) const throw();
 
     /** Returns true if the given midi key is currently held down on any of a set of midi channels.
 
@@ -117,7 +117,7 @@ public:
 
         If a note is on for at least one of the specified channels, this returns true.
     */
-    bool isNoteOnForChannels (const int midiChannelMask, const int midiNoteNumber) const throw();
+    bool isNoteOnForChannels (int midiChannelMask, int midiNoteNumber) const throw();
 
     /** Turns a specified note on.
 
@@ -127,7 +127,7 @@ public:
         It will also trigger a synchronous callback to the listeners to tell them that the key has
         gone down.
     */
-    void noteOn (const int midiChannel, const int midiNoteNumber, const float velocity);
+    void noteOn (int midiChannel, int midiNoteNumber, float velocity);
 
     /** Turns a specified note off.
 
@@ -139,7 +139,7 @@ public:
 
         But if the note isn't acutally down for the given channel, this method will in fact do nothing.
     */
-    void noteOff (const int midiChannel, const int midiNoteNumber);
+    void noteOff (int midiChannel, int midiNoteNumber);
 
     /** This will turn off any currently-down notes for the given midi channel.
 
@@ -148,7 +148,7 @@ public:
         Calling this method will make calls to noteOff(), so can trigger synchronous callbacks
         and events being added to the midi stream.
     */
-    void allNotesOff (const int midiChannel);
+    void allNotesOff (int midiChannel);
 
     //==============================================================================
     /** Looks at a key-up/down event and uses it to update the state of this object.
@@ -177,9 +177,9 @@ public:
         instead.
     */
     void processNextMidiBuffer (MidiBuffer& buffer,
-                                const int startSample,
-                                const int numSamples,
-                                const bool injectIndirectEvents);
+                                int startSample,
+                                int numSamples,
+                                bool injectIndirectEvents);
 
     //==============================================================================
     /** Registers a listener for callbacks when keys go up or down.
@@ -203,13 +203,12 @@ private:
     MidiBuffer eventsToAdd;
     Array <MidiKeyboardStateListener*> listeners;
 
-    void noteOnInternal  (const int midiChannel, const int midiNoteNumber, const float velocity);
-    void noteOffInternal  (const int midiChannel, const int midiNoteNumber);
+    void noteOnInternal (int midiChannel, int midiNoteNumber, float velocity);
+    void noteOffInternal (int midiChannel, int midiNoteNumber);
 
     MidiKeyboardState (const MidiKeyboardState&);
     MidiKeyboardState& operator= (const MidiKeyboardState&);
 };
-
 
 
 #endif   // __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
