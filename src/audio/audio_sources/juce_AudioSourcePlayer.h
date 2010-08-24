@@ -77,7 +77,7 @@ public:
     /** Sets a gain to apply to the audio data.
         @see getGain
     */
-    void setGain (const float newGain) throw();
+    void setGain (float newGain) throw();
 
     /** Returns the current gain.
         @see setGain

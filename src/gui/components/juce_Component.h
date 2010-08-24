@@ -1054,7 +1054,7 @@ public:
         be focused, but where you don't want the user to be able to affect it directly
         by clicking.
     */
-    void setMouseClickGrabsKeyboardFocus (const bool shouldGrabFocus);
+    void setMouseClickGrabsKeyboardFocus (bool shouldGrabFocus);
 
     /** Returns the last value set with setMouseClickGrabsKeyboardFocus().
 

@@ -64,14 +64,14 @@ public:
 
         @see getNumFormats
     */
-    AudioPluginFormat* getFormat (const int index);
+    AudioPluginFormat* getFormat (int index);
 
     //==============================================================================
     /** Adds a format to the list.
 
         The object passed in will be owned and deleted by the manager.
     */
-    void addFormat (AudioPluginFormat* const format);
+    void addFormat (AudioPluginFormat* format);
 
 
     //==============================================================================

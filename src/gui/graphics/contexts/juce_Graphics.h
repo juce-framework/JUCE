@@ -92,7 +92,7 @@ public:
 
         A value of 0.0 is completely transparent, 1.0 is completely opaque.
     */
-    void setOpacity (const float newOpacity);
+    void setOpacity (float newOpacity);
 
     /** Sets the context to use a gradient for its fill pattern.
     */
@@ -630,7 +630,7 @@ public:
         For internal use only.
         NB. The context will NOT be deleted by this object when it is deleted.
     */
-    Graphics (LowLevelGraphicsContext* const internalContext) throw();
+    Graphics (LowLevelGraphicsContext* internalContext) throw();
 
     /** @internal */
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }

@@ -152,9 +152,7 @@ public:
     //==============================================================================
     const String getFormatName();
     bool canUnderstand (InputStream& input);
-
     const Image decodeImage (InputStream& input);
-
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 
@@ -178,15 +176,12 @@ public:
         @param newQuality  a value 0 to 1.0, where 0 is low quality, 1.0 is best, or
                            any negative value is "default" quality
     */
-    void setQuality (const float newQuality);
+    void setQuality (float newQuality);
 
     //==============================================================================
     const String getFormatName();
-
     bool canUnderstand (InputStream& input);
-
     const Image decodeImage (InputStream& input);
-
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 
 private:

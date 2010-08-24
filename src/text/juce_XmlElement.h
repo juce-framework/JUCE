@@ -497,7 +497,7 @@ public:
         @see getFirstChildElement, getNextElement, getNumChildElements,
              getChildElement, removeChildElement
     */
-    void addChildElement (XmlElement* const newChildElement) throw();
+    void addChildElement (XmlElement* newChildElement) throw();
 
     /** Inserts an element into this element's list of children.
 
@@ -561,7 +561,7 @@ public:
     void deleteAllChildElementsWithTagName (const String& tagName) throw();
 
     /** Returns true if the given element is a child of this one. */
-    bool containsChildElement (const XmlElement* const possibleChild) const throw();
+    bool containsChildElement (const XmlElement* possibleChild) const throw();
 
     /** Recursively searches all sub-elements to find one that contains the specified
         child element.

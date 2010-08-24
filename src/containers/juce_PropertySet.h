@@ -50,7 +50,7 @@ public:
         @param ignoreCaseOfKeyNames         if true, the names of properties are compared in a
                                             case-insensitive way
     */
-    PropertySet (const bool ignoreCaseOfKeyNames = false) throw();
+    PropertySet (bool ignoreCaseOfKeyNames = false) throw();
 
     /** Creates a copy of another PropertySet.
     */
@@ -143,7 +143,7 @@ public:
                             an empty string
         @see getXmlValue
     */
-    void setValue (const String& keyName, const XmlElement* const xml);
+    void setValue (const String& keyName, const XmlElement* xml);
 
     //==============================================================================
     /** Deletes a property.

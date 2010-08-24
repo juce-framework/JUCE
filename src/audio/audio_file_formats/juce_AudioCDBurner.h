@@ -99,7 +99,7 @@ public:
         @returns    true if it's now enabled. If the device doesn't support it, this
                     will always return false.
     */
-    bool setBufferUnderrunProtection (const bool shouldBeEnabled);
+    bool setBufferUnderrunProtection (bool shouldBeEnabled);
 
     //==============================================================================
     /** Returns the number of free blocks on the disk.

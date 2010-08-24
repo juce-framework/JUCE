@@ -2682,8 +2682,8 @@ public:
 		If deleteOldLogger is set to true, the existing logger will be
 		deleted (if there is one).
 	*/
-	static void JUCE_CALLTYPE setCurrentLogger (Logger* const newLogger,
-												const bool deleteOldLogger = false);
+	static void JUCE_CALLTYPE setCurrentLogger (Logger* newLogger,
+												bool deleteOldLogger = false);
 
 	/** Writes a string to the current logger.
 
@@ -4626,7 +4626,7 @@ public:
 	/** Changes the sign of the number to be positive or negative.
 		@see isNegative, negate
 	*/
-	void setNegative (const bool shouldBeNegative) throw();
+	void setNegative (bool shouldBeNegative) throw();
 
 	/** Inverts the sign of the number.
 		@see isNegative, setNegative
@@ -4872,7 +4872,7 @@ public:
 		@param dataToInitialiseFrom	 some data to copy into this block
 		@param sizeInBytes		  how much space to use
 	*/
-	MemoryBlock (const void* const dataToInitialiseFrom,
+	MemoryBlock (const void* dataToInitialiseFrom,
 				 const size_t sizeInBytes) throw();
 
 	/** Destructor. */
@@ -4954,7 +4954,7 @@ public:
 
 		This block's size will be increased accordingly.
 	*/
-	void append (const void* const data,
+	void append (const void* data,
 				 const size_t numBytes) throw();
 
 	/** Exchanges the contents of this and another memory block.
@@ -9816,7 +9816,7 @@ public:
 		@see getFirstChildElement, getNextElement, getNumChildElements,
 			 getChildElement, removeChildElement
 	*/
-	void addChildElement (XmlElement* const newChildElement) throw();
+	void addChildElement (XmlElement* newChildElement) throw();
 
 	/** Inserts an element into this element's list of children.
 
@@ -9880,7 +9880,7 @@ public:
 	void deleteAllChildElementsWithTagName (const String& tagName) throw();
 
 	/** Returns true if the given element is a child of this one. */
-	bool containsChildElement (const XmlElement* const possibleChild) const throw();
+	bool containsChildElement (const XmlElement* possibleChild) const throw();
 
 	/** Recursively searches all sub-elements to find one that contains the specified
 		child element.
@@ -10047,7 +10047,7 @@ public:
 		@param ignoreCaseOfKeyNames	 if true, the names of properties are compared in a
 											case-insensitive way
 	*/
-	PropertySet (const bool ignoreCaseOfKeyNames = false) throw();
+	PropertySet (bool ignoreCaseOfKeyNames = false) throw();
 
 	/** Creates a copy of another PropertySet.
 	*/
@@ -10138,7 +10138,7 @@ public:
 							an empty string
 		@see getXmlValue
 	*/
-	void setValue (const String& keyName, const XmlElement* const xml);
+	void setValue (const String& keyName, const XmlElement* xml);
 
 	/** Deletes a property.
 
@@ -14987,10 +14987,10 @@ public:
 
 		@see getRawData
 	*/
-	Uuid (const uint8* const rawData);
+	Uuid (const uint8* rawData);
 
 	/** Sets this UUID from 16-bytes of raw data. */
-	Uuid& operator= (const uint8* const rawData);
+	Uuid& operator= (const uint8* rawData);
 
 	juce_UseDebuggingNewOperator
 
@@ -15142,7 +15142,7 @@ private:
 
 		void processBlock (const void* data, size_t dataSize);
 		void transform (const void* buffer);
-		void finish (void* const result);
+		void finish (void* result);
 	};
 
 	void processStream (InputStream& input, int64 numBytesToRead);
@@ -17261,7 +17261,7 @@ public:
 	/** Indicates whether to use a case-insensitive search when looking up a string.
 		This defaults to true.
 	*/
-	void setIgnoresCase (const bool shouldIgnoreCase);
+	void setIgnoresCase (bool shouldIgnoreCase);
 
 	juce_UseDebuggingNewOperator
 
@@ -17358,7 +17358,7 @@ public:
 					there was an error.
 		@see getLastParseError
 	*/
-	XmlElement* getDocumentElement (const bool onlyReadOuterDocumentElement = false);
+	XmlElement* getDocumentElement (bool onlyReadOuterDocumentElement = false);
 
 	/** Returns the parsing error that occurred the last time getDocumentElement was called.
 
@@ -17377,7 +17377,7 @@ public:
 
 		@see InputSource
 	*/
-	void setInputSource (InputSource* const newSource) throw();
+	void setInputSource (InputSource* newSource) throw();
 
 	/** Sets a flag to change the treatment of empty text elements.
 
@@ -17386,7 +17386,7 @@ public:
 		whitespace-only text, then you should set this to false before calling the
 		getDocumentElement() method.
 	*/
-	void setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw();
+	void setEmptyTextElementsIgnored (bool shouldBeIgnored) throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -17405,7 +17405,7 @@ private:
 	void skipHeader();
 	void skipNextWhiteSpace();
 	juce_wchar readNextChar() throw();
-	XmlElement* readNextElement (const bool alsoParseSubElements);
+	XmlElement* readNextElement (bool alsoParseSubElements);
 	void readChildElements (XmlElement* parent);
 	int findNextTokenLength() throw();
 	void readQuotedString (String& result);
@@ -24134,7 +24134,7 @@ public:
 
 		A value of 0.0 is completely transparent, 1.0 is completely opaque.
 	*/
-	void setOpacity (const float newOpacity);
+	void setOpacity (float newOpacity);
 
 	/** Sets the context to use a gradient for its fill pattern.
 	*/
@@ -24661,7 +24661,7 @@ public:
 		For internal use only.
 		NB. The context will NOT be deleted by this object when it is deleted.
 	*/
-	Graphics (LowLevelGraphicsContext* const internalContext) throw();
+	Graphics (LowLevelGraphicsContext* internalContext) throw();
 
 	/** @internal */
 	LowLevelGraphicsContext* getInternalContext() const throw()	 { return context; }
@@ -26573,7 +26573,7 @@ public:
 		be focused, but where you don't want the user to be able to affect it directly
 		by clicking.
 	*/
-	void setMouseClickGrabsKeyboardFocus (const bool shouldGrabFocus);
+	void setMouseClickGrabsKeyboardFocus (bool shouldGrabFocus);
 
 	/** Returns the last value set with setMouseClickGrabsKeyboardFocus().
 
@@ -28064,7 +28064,7 @@ private:
 	class CommandTargetMessageInvoker  : public MessageListener
 	{
 	public:
-		CommandTargetMessageInvoker (ApplicationCommandTarget* const owner);
+		CommandTargetMessageInvoker (ApplicationCommandTarget* owner);
 		~CommandTargetMessageInvoker();
 
 		void handleMessage (const Message& message);
@@ -30534,7 +30534,7 @@ public:
 		@returns	true if it's now enabled. If the device doesn't support it, this
 					will always return false.
 	*/
-	bool setBufferUnderrunProtection (const bool shouldBeEnabled);
+	bool setBufferUnderrunProtection (bool shouldBeEnabled);
 
 	/** Returns the number of free blocks on the disk.
 
@@ -31537,8 +31537,8 @@ public:
 												when this object is deleted; if false it will be
 												left up to the caller to manage its lifetime
 	*/
-	AudioFormatReaderSource (AudioFormatReader* const sourceReader,
-							 const bool deleteReaderWhenThisIsDeleted);
+	AudioFormatReaderSource (AudioFormatReader* sourceReader,
+							 bool deleteReaderWhenThisIsDeleted);
 
 	/** Destructor. */
 	~AudioFormatReaderSource();
@@ -31943,7 +31943,7 @@ public:
 	/** Sets a gain to apply to the audio data.
 		@see getGain
 	*/
-	void setGain (const float newGain) throw();
+	void setGain (float newGain) throw();
 
 	/** Returns the current gain.
 		@see setGain
@@ -32018,7 +32018,7 @@ public:
 		@param numberOfSamplesToBuffer  the size of buffer to use for reading ahead
 	*/
 	BufferingAudioSource (PositionableAudioSource* source,
-						  const bool deleteSourceWhenDeleted,
+						  bool deleteSourceWhenDeleted,
 						  int numberOfSamplesToBuffer);
 
 	/** Destructor.
@@ -32094,8 +32094,8 @@ public:
 										this object is deleted
 		@param numChannels		  the number of channels to process
 	*/
-	ResamplingAudioSource (AudioSource* const inputSource,
-						   const bool deleteInputWhenDeleted,
+	ResamplingAudioSource (AudioSource* inputSource,
+						   bool deleteInputWhenDeleted,
 						   int numChannels = 2);
 
 	/** Destructor. */
@@ -32109,7 +32109,7 @@ public:
 											values will speed it up; lower values will slow it
 											down. The ratio must be greater than 0
 	*/
-	void setResamplingRatio (const double samplesInPerOutputSample);
+	void setResamplingRatio (double samplesInPerOutputSample);
 
 	/** Returns the current resampling ratio.
 
@@ -32136,7 +32136,7 @@ private:
 	HeapBlock<float*> destBuffers, srcBuffers;
 
 	void setFilterCoefficients (double c1, double c2, double c3, double c4, double c5, double c6);
-	void createLowPass (const double proportionalRate);
+	void createLowPass (double proportionalRate);
 
 	struct FilterState
 	{
@@ -32198,7 +32198,7 @@ public:
 												adjusted to maintain playback at the correct pitch. If
 												this is 0, no sample-rate adjustment will be performed
 	*/
-	void setSource (PositionableAudioSource* const newSource,
+	void setSource (PositionableAudioSource* newSource,
 					int readAheadBufferSize = 0,
 					double sourceSampleRateToCorrectFor = 0.0);
 
@@ -32243,7 +32243,7 @@ public:
 		@param newGain  a factor by which to multiply the outgoing samples,
 						so 1.0 = 0dB, 0.5 = -6dB, 2.0 = 6dB, etc.
 	*/
-	void setGain (const float newGain) throw();
+	void setGain (float newGain) throw();
 
 	/** Returns the current gain setting.
 
@@ -32332,8 +32332,8 @@ public:
 							when this object is deleted, if false, the caller is
 							responsible for its deletion
 	*/
-	ChannelRemappingAudioSource (AudioSource* const source,
-								 const bool deleteSourceWhenDeleted);
+	ChannelRemappingAudioSource (AudioSource* source,
+								 bool deleteSourceWhenDeleted);
 
 	/** Destructor. */
 	~ChannelRemappingAudioSource();
@@ -32341,14 +32341,14 @@ public:
 	/** Specifies a number of channels that this audio source must produce from its
 		getNextAudioBlock() callback.
 	*/
-	void setNumberOfChannelsToProduce (const int requiredNumberOfChannels) throw();
+	void setNumberOfChannelsToProduce (int requiredNumberOfChannels);
 
 	/** Clears any mapped channels.
 
 		After this, no channels are mapped, so this object will produce silence. Create
 		some mappings with setInputChannelMapping() and setOutputChannelMapping().
 	*/
-	void clearAllMappings() throw();
+	void clearAllMappings();
 
 	/** Creates an input channel mapping.
 
@@ -32360,8 +32360,8 @@ public:
 		@param sourceChannelIndex   the index of the input channel in the incoming audio data buffer
 									during our getNextAudioBlock() callback
 	*/
-	void setInputChannelMapping (const int destChannelIndex,
-								 const int sourceChannelIndex) throw();
+	void setInputChannelMapping (int destChannelIndex,
+								 int sourceChannelIndex);
 
 	/** Creates an output channel mapping.
 
@@ -32373,30 +32373,30 @@ public:
 		@param destChannelIndex	 the index of the output channel in the incoming audio data buffer
 									during our getNextAudioBlock() callback
 	*/
-	void setOutputChannelMapping (const int sourceChannelIndex,
-								  const int destChannelIndex) throw();
+	void setOutputChannelMapping (int sourceChannelIndex,
+								  int destChannelIndex);
 
 	/** Returns the channel from our input that will be sent to channel inputChannelIndex of
 		our input audio source.
 	*/
-	int getRemappedInputChannel (const int inputChannelIndex) const throw();
+	int getRemappedInputChannel (int inputChannelIndex) const;
 
 	/** Returns the output channel to which channel outputChannelIndex of our input audio
 		source will be sent to.
 	*/
-	int getRemappedOutputChannel (const int outputChannelIndex) const throw();
+	int getRemappedOutputChannel (int outputChannelIndex) const;
 
 	/** Returns an XML object to encapsulate the state of the mappings.
 
 		@see restoreFromXml
 	*/
-	XmlElement* createXml() const throw();
+	XmlElement* createXml() const;
 
 	/** Restores the mappings from an XML object created by createXML().
 
 		@see createXml
 	*/
-	void restoreFromXml (const XmlElement& e) throw();
+	void restoreFromXml (const XmlElement& e);
 
 	void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
 	void releaseResources();
@@ -32564,8 +32564,8 @@ public:
 		@param deleteInputWhenDeleted   if true, the input source will be deleted when
 										this object is deleted
 	*/
-	IIRFilterAudioSource (AudioSource* const inputSource,
-						  const bool deleteInputWhenDeleted);
+	IIRFilterAudioSource (AudioSource* inputSource,
+						  bool deleteInputWhenDeleted);
 
 	/** Destructor. */
 	~IIRFilterAudioSource();
@@ -32632,8 +32632,7 @@ public:
 									called (unless the source is previously removed
 									with the removeInputSource method)
 	*/
-	void addInputSource (AudioSource* newInput,
-						 const bool deleteWhenRemoved);
+	void addInputSource (AudioSource* newInput, bool deleteWhenRemoved);
 
 	/** Removes an input source.
 
@@ -32643,8 +32642,7 @@ public:
 		@param input		the source to remove
 		@param deleteSource	 whether to delete this source after it's been removed
 	*/
-	void removeInputSource (AudioSource* input,
-							const bool deleteSource);
+	void removeInputSource (AudioSource* input, bool deleteSource);
 
 	/** Removes all the input sources.
 
@@ -32718,10 +32716,10 @@ public:
 	~ToneGeneratorAudioSource();
 
 	/** Sets the signal's amplitude. */
-	void setAmplitude (const float newAmplitude);
+	void setAmplitude (float newAmplitude);
 
 	/** Sets the signal's frequency. */
-	void setFrequency (const double newFrequencyHz);
+	void setFrequency (double newFrequencyHz);
 
 	/** Implementation of the AudioSource method. */
 	void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
@@ -34856,9 +34854,9 @@ private:
 	void repeatTimerCallback();
 	RepeatTimer& getRepeatTimer();
 
-	ButtonState updateState (const MouseEvent* const e);
+	ButtonState updateState (const MouseEvent*);
 	bool isShortcutPressed() const;
-	void turnOffOtherButtonsInGroup (const bool sendChangeNotification);
+	void turnOffOtherButtonsInGroup (bool sendChangeNotification);
 
 	void flashButtonState();
 	void sendClickMessage (const ModifierKeys& modifiers);
@@ -39743,13 +39741,13 @@ public:
 
 		@see getNumFormats
 	*/
-	AudioPluginFormat* getFormat (const int index);
+	AudioPluginFormat* getFormat (int index);
 
 	/** Adds a format to the list.
 
 		The object passed in will be owned and deleted by the manager.
 	*/
-	void addFormat (AudioPluginFormat* const format);
+	void addFormat (AudioPluginFormat* format);
 
 	/** Tries to load the type for this description, by trying all the formats
 		that this manager knows about.
@@ -45904,7 +45902,7 @@ public:
 		By default this is on, and the progress bar will display a text string showing
 		its current percentage.
 	*/
-	void setPercentageDisplay (const bool shouldDisplayPercentage);
+	void setPercentageDisplay (bool shouldDisplayPercentage);
 
 	/** Gives the progress bar a string to display inside it.
 
@@ -49544,7 +49542,7 @@ public:
 	virtual void resizeEnd();
 
 	/** Checks the given bounds, and then sets the component to the corrected size. */
-	void setBoundsForComponent (Component* const component,
+	void setBoundsForComponent (Component* component,
 								const Rectangle<int>& bounds,
 								bool isStretchingTop,
 								bool isStretchingLeft,
@@ -49622,7 +49620,7 @@ public:
 									from going offscreen
 		@see dragComponent
 	*/
-	void startDraggingComponent (Component* const componentToDrag,
+	void startDraggingComponent (Component* componentToDrag,
 								 ComponentBoundsConstrainer* constrainer);
 
 	/** Call this from your mouseDrag() callback to move the component.
@@ -49636,7 +49634,7 @@ public:
 		@param e			the current mouse-drag event
 		@see dragComponent
 	*/
-	void dragComponent (Component* const componentToDrag,
+	void dragComponent (Component* componentToDrag,
 						const MouseEvent& e);
 
 	juce_UseDebuggingNewOperator
@@ -55123,7 +55121,7 @@ public:
 									is invoked. You can change this setting later with
 									the setHoverTimeMillisecs() method
 	*/
-	MouseHoverDetector (const int hoverTimeMillisecs = 400);
+	MouseHoverDetector (int hoverTimeMillisecs = 400);
 
 	/** Destructor. */
 	virtual ~MouseHoverDetector();
@@ -55131,14 +55129,14 @@ public:
 	/** Changes the time for which the mouse has to stay still before it's considered
 		to be hovering.
 	*/
-	void setHoverTimeMillisecs (const int newTimeInMillisecs);
+	void setHoverTimeMillisecs (int newTimeInMillisecs);
 
 	/** Changes the component that's being monitored for hovering.
 
 		Be careful not to delete a component that's being monitored without first
 		stopping or deleting the hover detector.
 	*/
-	void setHoverComponent (Component* const newSourceComponent);
+	void setHoverComponent (Component* newSourceComponent);
 
 protected:
 
@@ -60791,9 +60789,7 @@ public:
 
 	const String getFormatName();
 	bool canUnderstand (InputStream& input);
-
 	const Image decodeImage (InputStream& input);
-
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 
@@ -60814,14 +60810,11 @@ public:
 		@param newQuality  a value 0 to 1.0, where 0 is low quality, 1.0 is best, or
 						   any negative value is "default" quality
 	*/
-	void setQuality (const float newQuality);
+	void setQuality (float newQuality);
 
 	const String getFormatName();
-
 	bool canUnderstand (InputStream& input);
-
 	const Image decodeImage (InputStream& input);
-
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 
 private:

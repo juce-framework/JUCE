@@ -58,7 +58,7 @@ public:
         @param dataToInitialiseFrom     some data to copy into this block
         @param sizeInBytes              how much space to use
     */
-    MemoryBlock (const void* const dataToInitialiseFrom,
+    MemoryBlock (const void* dataToInitialiseFrom,
                  const size_t sizeInBytes) throw();
 
     /** Destructor. */
@@ -145,7 +145,7 @@ public:
 
         This block's size will be increased accordingly.
     */
-    void append (const void* const data,
+    void append (const void* data,
                  const size_t numBytes) throw();
 
     /** Exchanges the contents of this and another memory block.

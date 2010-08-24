@@ -53,7 +53,7 @@ public:
         @param numberOfSamplesToBuffer  the size of buffer to use for reading ahead
     */
     BufferingAudioSource (PositionableAudioSource* source,
-                          const bool deleteSourceWhenDeleted,
+                          bool deleteSourceWhenDeleted,
                           int numberOfSamplesToBuffer);
 
     /** Destructor.

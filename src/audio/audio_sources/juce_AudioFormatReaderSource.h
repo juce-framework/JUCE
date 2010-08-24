@@ -49,8 +49,8 @@ public:
                                                 when this object is deleted; if false it will be
                                                 left up to the caller to manage its lifetime
     */
-    AudioFormatReaderSource (AudioFormatReader* const sourceReader,
-                             const bool deleteReaderWhenThisIsDeleted);
+    AudioFormatReaderSource (AudioFormatReader* sourceReader,
+                             bool deleteReaderWhenThisIsDeleted);
 
     /** Destructor. */
     ~AudioFormatReaderSource();

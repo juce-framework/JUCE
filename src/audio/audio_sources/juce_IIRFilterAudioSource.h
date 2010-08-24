@@ -45,8 +45,8 @@ public:
         @param deleteInputWhenDeleted   if true, the input source will be deleted when
                                         this object is deleted
     */
-    IIRFilterAudioSource (AudioSource* const inputSource,
-                          const bool deleteInputWhenDeleted);
+    IIRFilterAudioSource (AudioSource* inputSource,
+                          bool deleteInputWhenDeleted);
 
     /** Destructor. */
     ~IIRFilterAudioSource();

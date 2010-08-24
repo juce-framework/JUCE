@@ -240,7 +240,7 @@ private:
     class CommandTargetMessageInvoker  : public MessageListener
     {
     public:
-        CommandTargetMessageInvoker (ApplicationCommandTarget* const owner);
+        CommandTargetMessageInvoker (ApplicationCommandTarget* owner);
         ~CommandTargetMessageInvoker();
 
         void handleMessage (const Message& message);

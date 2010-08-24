@@ -492,9 +492,9 @@ private:
     void repeatTimerCallback();
     RepeatTimer& getRepeatTimer();
 
-    ButtonState updateState (const MouseEvent* const e);
+    ButtonState updateState (const MouseEvent*);
     bool isShortcutPressed() const;
-    void turnOffOtherButtonsInGroup (const bool sendChangeNotification);
+    void turnOffOtherButtonsInGroup (bool sendChangeNotification);
 
     void flashButtonState();
     void sendClickMessage (const ModifierKeys& modifiers);

@@ -47,8 +47,8 @@ public:
                                         this object is deleted
         @param numChannels              the number of channels to process
     */
-    ResamplingAudioSource (AudioSource* const inputSource,
-                           const bool deleteInputWhenDeleted,
+    ResamplingAudioSource (AudioSource* inputSource,
+                           bool deleteInputWhenDeleted,
                            int numChannels = 2);
 
     /** Destructor. */
@@ -62,7 +62,7 @@ public:
                                             values will speed it up; lower values will slow it
                                             down. The ratio must be greater than 0
     */
-    void setResamplingRatio (const double samplesInPerOutputSample);
+    void setResamplingRatio (double samplesInPerOutputSample);
 
     /** Returns the current resampling ratio.
 
@@ -91,7 +91,7 @@ private:
     HeapBlock<float*> destBuffers, srcBuffers;
 
     void setFilterCoefficients (double c1, double c2, double c3, double c4, double c5, double c6);
-    void createLowPass (const double proportionalRate);
+    void createLowPass (double proportionalRate);
 
     struct FilterState
     {

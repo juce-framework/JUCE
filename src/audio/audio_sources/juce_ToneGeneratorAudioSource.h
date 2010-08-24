@@ -46,10 +46,10 @@ public:
 
     //==============================================================================
     /** Sets the signal's amplitude. */
-    void setAmplitude (const float newAmplitude);
+    void setAmplitude (float newAmplitude);
 
     /** Sets the signal's frequency. */
-    void setFrequency (const double newFrequencyHz);
+    void setFrequency (double newFrequencyHz);
 
 
     //==============================================================================

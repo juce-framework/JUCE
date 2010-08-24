@@ -116,7 +116,7 @@ private:
 
         void processBlock (const void* data, size_t dataSize);
         void transform (const void* buffer);
-        void finish (void* const result);
+        void finish (void* result);
     };
 
     void processStream (InputStream& input, int64 numBytesToRead);

@@ -96,7 +96,7 @@ public:
                     there was an error.
         @see getLastParseError
     */
-    XmlElement* getDocumentElement (const bool onlyReadOuterDocumentElement = false);
+    XmlElement* getDocumentElement (bool onlyReadOuterDocumentElement = false);
 
     /** Returns the parsing error that occurred the last time getDocumentElement was called.
 
@@ -115,7 +115,7 @@ public:
 
         @see InputSource
     */
-    void setInputSource (InputSource* const newSource) throw();
+    void setInputSource (InputSource* newSource) throw();
 
     /** Sets a flag to change the treatment of empty text elements.
 
@@ -124,7 +124,7 @@ public:
         whitespace-only text, then you should set this to false before calling the
         getDocumentElement() method.
     */
-    void setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw();
+    void setEmptyTextElementsIgnored (bool shouldBeIgnored) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -144,7 +144,7 @@ private:
     void skipHeader();
     void skipNextWhiteSpace();
     juce_wchar readNextChar() throw();
-    XmlElement* readNextElement (const bool alsoParseSubElements);
+    XmlElement* readNextElement (bool alsoParseSubElements);
     void readChildElements (XmlElement* parent);
     int findNextTokenLength() throw();
     void readQuotedString (String& result);

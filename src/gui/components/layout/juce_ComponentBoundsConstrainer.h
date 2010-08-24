@@ -156,7 +156,7 @@ public:
     virtual void resizeEnd();
 
     /** Checks the given bounds, and then sets the component to the corrected size. */
-    void setBoundsForComponent (Component* const component,
+    void setBoundsForComponent (Component* component,
                                 const Rectangle<int>& bounds,
                                 bool isStretchingTop,
                                 bool isStretchingLeft,

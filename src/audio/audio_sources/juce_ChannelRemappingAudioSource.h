@@ -58,8 +58,8 @@ public:
                             when this object is deleted, if false, the caller is
                             responsible for its deletion
     */
-    ChannelRemappingAudioSource (AudioSource* const source,
-                                 const bool deleteSourceWhenDeleted);
+    ChannelRemappingAudioSource (AudioSource* source,
+                                 bool deleteSourceWhenDeleted);
 
     /** Destructor. */
     ~ChannelRemappingAudioSource();
@@ -68,14 +68,14 @@ public:
     /** Specifies a number of channels that this audio source must produce from its
         getNextAudioBlock() callback.
     */
-    void setNumberOfChannelsToProduce (const int requiredNumberOfChannels) throw();
+    void setNumberOfChannelsToProduce (int requiredNumberOfChannels);
 
     /** Clears any mapped channels.
 
         After this, no channels are mapped, so this object will produce silence. Create
         some mappings with setInputChannelMapping() and setOutputChannelMapping().
     */
-    void clearAllMappings() throw();
+    void clearAllMappings();
 
     /** Creates an input channel mapping.
 
@@ -87,8 +87,8 @@ public:
         @param sourceChannelIndex   the index of the input channel in the incoming audio data buffer
                                     during our getNextAudioBlock() callback
     */
-    void setInputChannelMapping (const int destChannelIndex,
-                                 const int sourceChannelIndex) throw();
+    void setInputChannelMapping (int destChannelIndex,
+                                 int sourceChannelIndex);
 
     /** Creates an output channel mapping.
 
@@ -100,18 +100,18 @@ public:
         @param destChannelIndex     the index of the output channel in the incoming audio data buffer
                                     during our getNextAudioBlock() callback
     */
-    void setOutputChannelMapping (const int sourceChannelIndex,
-                                  const int destChannelIndex) throw();
+    void setOutputChannelMapping (int sourceChannelIndex,
+                                  int destChannelIndex);
 
     /** Returns the channel from our input that will be sent to channel inputChannelIndex of
         our input audio source.
     */
-    int getRemappedInputChannel (const int inputChannelIndex) const throw();
+    int getRemappedInputChannel (int inputChannelIndex) const;
 
     /** Returns the output channel to which channel outputChannelIndex of our input audio
         source will be sent to.
     */
-    int getRemappedOutputChannel (const int outputChannelIndex) const throw();
+    int getRemappedOutputChannel (int outputChannelIndex) const;
 
 
     //==============================================================================
@@ -119,13 +119,13 @@ public:
 
         @see restoreFromXml
     */
-    XmlElement* createXml() const throw();
+    XmlElement* createXml() const;
 
     /** Restores the mappings from an XML object created by createXML().
 
         @see createXml
     */
-    void restoreFromXml (const XmlElement& e) throw();
+    void restoreFromXml (const XmlElement& e);
 
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate);

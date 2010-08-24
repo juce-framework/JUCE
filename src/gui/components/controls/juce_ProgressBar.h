@@ -70,7 +70,7 @@ public:
         By default this is on, and the progress bar will display a text string showing
         its current percentage.
     */
-    void setPercentageDisplay (const bool shouldDisplayPercentage);
+    void setPercentageDisplay (bool shouldDisplayPercentage);
 
     /** Gives the progress bar a string to display inside it.
 

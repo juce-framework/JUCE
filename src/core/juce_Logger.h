@@ -57,8 +57,8 @@ public:
         If deleteOldLogger is set to true, the existing logger will be
         deleted (if there is one).
     */
-    static void JUCE_CALLTYPE setCurrentLogger (Logger* const newLogger,
-                                                const bool deleteOldLogger = false);
+    static void JUCE_CALLTYPE setCurrentLogger (Logger* newLogger,
+                                                bool deleteOldLogger = false);
 
     /** Writes a string to the current logger.
 

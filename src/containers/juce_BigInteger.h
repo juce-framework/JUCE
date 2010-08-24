@@ -262,7 +262,7 @@ public:
     /** Changes the sign of the number to be positive or negative.
         @see isNegative, negate
     */
-    void setNegative (const bool shouldBeNegative) throw();
+    void setNegative (bool shouldBeNegative) throw();
 
     /** Inverts the sign of the number.
         @see isNegative, setNegative

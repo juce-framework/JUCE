@@ -50,13 +50,13 @@ ChannelRemappingAudioSource::~ChannelRemappingAudioSource()
 }
 
 //==============================================================================
-void ChannelRemappingAudioSource::setNumberOfChannelsToProduce (const int requiredNumberOfChannels_) throw()
+void ChannelRemappingAudioSource::setNumberOfChannelsToProduce (const int requiredNumberOfChannels_)
 {
     const ScopedLock sl (lock);
     requiredNumberOfChannels = requiredNumberOfChannels_;
 }
 
-void ChannelRemappingAudioSource::clearAllMappings() throw()
+void ChannelRemappingAudioSource::clearAllMappings()
 {
     const ScopedLock sl (lock);
 
@@ -64,7 +64,7 @@ void ChannelRemappingAudioSource::clearAllMappings() throw()
     remappedOutputs.clear();
 }
 
-void ChannelRemappingAudioSource::setInputChannelMapping (const int destIndex, const int sourceIndex) throw()
+void ChannelRemappingAudioSource::setInputChannelMapping (const int destIndex, const int sourceIndex)
 {
     const ScopedLock sl (lock);
 
@@ -74,7 +74,7 @@ void ChannelRemappingAudioSource::setInputChannelMapping (const int destIndex, c
     remappedInputs.set (destIndex, sourceIndex);
 }
 
-void ChannelRemappingAudioSource::setOutputChannelMapping (const int sourceIndex, const int destIndex) throw()
+void ChannelRemappingAudioSource::setOutputChannelMapping (const int sourceIndex, const int destIndex)
 {
     const ScopedLock sl (lock);
 
@@ -84,7 +84,7 @@ void ChannelRemappingAudioSource::setOutputChannelMapping (const int sourceIndex
     remappedOutputs.set (sourceIndex, destIndex);
 }
 
-int ChannelRemappingAudioSource::getRemappedInputChannel (const int inputChannelIndex) const throw()
+int ChannelRemappingAudioSource::getRemappedInputChannel (const int inputChannelIndex) const
 {
     const ScopedLock sl (lock);
 
@@ -94,7 +94,7 @@ int ChannelRemappingAudioSource::getRemappedInputChannel (const int inputChannel
     return -1;
 }
 
-int ChannelRemappingAudioSource::getRemappedOutputChannel (const int outputChannelIndex) const throw()
+int ChannelRemappingAudioSource::getRemappedOutputChannel (const int outputChannelIndex) const
 {
     const ScopedLock sl (lock);
 
@@ -161,7 +161,7 @@ void ChannelRemappingAudioSource::getNextAudioBlock (const AudioSourceChannelInf
 }
 
 //==============================================================================
-XmlElement* ChannelRemappingAudioSource::createXml() const throw()
+XmlElement* ChannelRemappingAudioSource::createXml() const
 {
     XmlElement* e = new XmlElement ("MAPPINGS");
 
@@ -182,7 +182,7 @@ XmlElement* ChannelRemappingAudioSource::createXml() const throw()
     return e;
 }
 
-void ChannelRemappingAudioSource::restoreFromXml (const XmlElement& e) throw()
+void ChannelRemappingAudioSource::restoreFromXml (const XmlElement& e)
 {
     if (e.hasTagName ("MAPPINGS"))
     {

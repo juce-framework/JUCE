@@ -75,7 +75,7 @@ public:
                                     from going offscreen
         @see dragComponent
     */
-    void startDraggingComponent (Component* const componentToDrag,
+    void startDraggingComponent (Component* componentToDrag,
                                  ComponentBoundsConstrainer* constrainer);
 
     /** Call this from your mouseDrag() callback to move the component.
@@ -89,7 +89,7 @@ public:
         @param e                    the current mouse-drag event
         @see dragComponent
     */
-    void dragComponent (Component* const componentToDrag,
+    void dragComponent (Component* componentToDrag,
                         const MouseEvent& e);
 
 
