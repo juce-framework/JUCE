@@ -109,20 +109,25 @@ bool File::isOnRemovableDrive() const
 
 static bool juce_isHiddenFile (const String& path)
 {
-#if JUCE_IOS
-    return File (path).getFileName().startsWithChar ('.');
+#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+    const ScopedAutoReleasePool pool;
+    NSNumber* hidden = nil;
+    NSError* err = nil;
+
+    return [[NSURL fileURLWithPath: juceStringToNS (path)]
+                getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
+            && [hidden boolValue];
 #else
+  #if JUCE_IOS
+    return File (path).getFileName().startsWithChar ('.');
+  #else
     FSRef ref;
-    if (! PlatformUtilities::makeFSRefFromPath (&ref, path))
-        return false;
+    LSItemInfoRecord info;
 
-    FSCatalogInfo info;
-    FSGetCatalogInfo (&ref, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &info, 0, 0, 0);
-
-    if ((info.nodeFlags & kFSNodeIsDirectoryBit) != 0)
-        return (((FolderInfo*) &info.finderInfo)->finderFlags & kIsInvisible) != 0;
-
-    return (((FileInfo*) &info.finderInfo)->finderFlags & kIsInvisible) != 0;
+    return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
+             && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
+             && (info.flags & kLSItemInfoIsInvisible) != 0;
+  #endif
 #endif
 }
 
@@ -292,7 +297,7 @@ public:
           wildCard (wildCard_),
           enumerator (0)
     {
-        ScopedAutoReleasePool pool;
+        const ScopedAutoReleasePool pool;
 
         enumerator = [[[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory.getFullPathName())] retain];
 
@@ -308,7 +313,7 @@ public:
                bool* const isDir, bool* const isHidden, int64* const fileSize,
                Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
-        ScopedAutoReleasePool pool;
+        const ScopedAutoReleasePool pool;
 
         for (;;)
         {
@@ -408,28 +413,24 @@ bool PlatformUtilities::openDocument (const String& fileName, const String& para
 
     bool ok = false;
 
-    FSRef ref;
-    if (PlatformUtilities::makeFSRefFromPath (&ref, fileName))
+    if (PlatformUtilities::isBundle (fileName))
     {
-        if (PlatformUtilities::isBundle (fileName))
-        {
-            NSMutableArray* urls = [NSMutableArray array];
+        NSMutableArray* urls = [NSMutableArray array];
 
-            StringArray docs;
-            docs.addTokens (parameters, true);
-            for (int i = 0; i < docs.size(); ++i)
-                [urls addObject: juceStringToNS (docs[i])];
+        StringArray docs;
+        docs.addTokens (parameters, true);
+        for (int i = 0; i < docs.size(); ++i)
+            [urls addObject: juceStringToNS (docs[i])];
 
-            ok = [[NSWorkspace sharedWorkspace] openURLs: urls
-                                 withAppBundleIdentifier: [[NSBundle bundleWithPath: juceStringToNS (fileName)] bundleIdentifier]
-                                                 options: 0
-                          additionalEventParamDescriptor: nil
-                                       launchIdentifiers: nil];
-        }
-        else
-        {
-            ok = juce_launchExecutable ("\"" + fileName + "\" " + parameters);
-        }
+        ok = [[NSWorkspace sharedWorkspace] openURLs: urls
+                             withAppBundleIdentifier: [[NSBundle bundleWithPath: juceStringToNS (fileName)] bundleIdentifier]
+                                             options: 0
+                      additionalEventParamDescriptor: nil
+                                   launchIdentifiers: nil];
+    }
+    else if (File (fileName).exists())
+    {
+        ok = juce_launchExecutable ("\"" + fileName + "\" " + parameters);
     }
 
     return ok;
@@ -475,7 +476,7 @@ OSType PlatformUtilities::getTypeOfFile (const String& filename)
 #else
     NSDictionary* fileDict = [[NSFileManager defaultManager] fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
 #endif
-    //return (OSType) [fileDict objectForKey: NSFileHFSTypeCode];
+
     return [fileDict fileHFSTypeCode];
 }
 

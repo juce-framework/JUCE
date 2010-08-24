@@ -37,10 +37,11 @@ juce_ImplementSingleton (ApplicationProperties)
 
 
 //==============================================================================
-ApplicationProperties::ApplicationProperties() throw()
+ApplicationProperties::ApplicationProperties()
     : msBeforeSaving (3000),
       options (PropertiesFile::storeAsBinary),
-      commonSettingsAreReadOnly (0)
+      commonSettingsAreReadOnly (0),
+      processLock (0)
 {
 }
 
@@ -55,13 +56,15 @@ void ApplicationProperties::setStorageParameters (const String& applicationName,
                                                   const String& fileNameSuffix,
                                                   const String& folderName_,
                                                   const int millisecondsBeforeSaving,
-                                                  const int propertiesFileOptions) throw()
+                                                  const int propertiesFileOptions,
+                                                  InterProcessLock* processLock_)
 {
     appName = applicationName;
     fileSuffix = fileNameSuffix;
     folderName = folderName_;
     msBeforeSaving = millisecondsBeforeSaving;
     options = propertiesFileOptions;
+    processLock = processLock_;
 }
 
 bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
@@ -98,7 +101,7 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
 }
 
 //==============================================================================
-void ApplicationProperties::openFiles() throw()
+void ApplicationProperties::openFiles()
 {
     // You need to call setStorageParameters() before trying to get hold of the
     // properties!
@@ -108,17 +111,17 @@ void ApplicationProperties::openFiles() throw()
     {
         if (userProps == 0)
             userProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
-                                                                        false, msBeforeSaving, options);
+                                                                        false, msBeforeSaving, options, processLock);
 
         if (commonProps == 0)
             commonProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
-                                                                          true, msBeforeSaving, options);
+                                                                          true, msBeforeSaving, options, processLock);
 
         userProps->setFallbackPropertySet (commonProps);
     }
 }
 
-PropertiesFile* ApplicationProperties::getUserSettings() throw()
+PropertiesFile* ApplicationProperties::getUserSettings()
 {
     if (userProps == 0)
         openFiles();
@@ -126,7 +129,7 @@ PropertiesFile* ApplicationProperties::getUserSettings() throw()
     return userProps;
 }
 
-PropertiesFile* ApplicationProperties::getCommonSettings (const bool returnUserPropsIfReadOnly) throw()
+PropertiesFile* ApplicationProperties::getCommonSettings (const bool returnUserPropsIfReadOnly)
 {
     if (commonProps == 0)
         openFiles();

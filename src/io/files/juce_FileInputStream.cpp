@@ -31,26 +31,23 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-void* juce_fileOpen (const File& file, bool forWriting);
-void juce_fileClose (void* handle);
-int juce_fileRead (void* handle, void* buffer, int size);
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
 
 //==============================================================================
 FileInputStream::FileInputStream (const File& f)
     : file (f),
+      fileHandle (0),
       currentPosition (0),
+      totalSize (0),
       needToSeek (true)
 {
-    totalSize = f.getSize();
-
-    fileHandle = juce_fileOpen (f, false);
+    openHandle();
 }
 
 FileInputStream::~FileInputStream()
 {
-    juce_fileClose (fileHandle);
+    closeHandle();
 }
 
 //==============================================================================
@@ -71,7 +68,7 @@ int FileInputStream::read (void* buffer, int bytesToRead)
         needToSeek = false;
     }
 
-    num = juce_fileRead (fileHandle, buffer, bytesToRead);
+    num = readInternal (buffer, bytesToRead);
     currentPosition += num;
 
     return num;

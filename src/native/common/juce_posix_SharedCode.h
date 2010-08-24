@@ -337,52 +337,7 @@ void File::createDirectoryInternal (const String& fileName) const
     mkdir (fileName.toUTF8(), 0777);
 }
 
-void* juce_fileOpen (const File& file, bool forWriting)
-{
-    int flags = O_RDONLY;
-
-    if (forWriting)
-    {
-        if (file.exists())
-        {
-            const int f = open (file.getFullPathName().toUTF8(), O_RDWR, 00644);
-
-            if (f != -1)
-                lseek (f, 0, SEEK_END);
-
-            return (void*) f;
-        }
-        else
-        {
-            flags = O_RDWR + O_CREAT;
-        }
-    }
-
-    return (void*) open (file.getFullPathName().toUTF8(), flags, 00644);
-}
-
-void juce_fileClose (void* handle)
-{
-    if (handle != 0)
-        close ((int) (pointer_sized_int) handle);
-}
-
-int juce_fileRead (void* handle, void* buffer, int size)
-{
-    if (handle != 0)
-        return jmax (0, (int) read ((int) (pointer_sized_int) handle, buffer, size));
-
-    return 0;
-}
-
-int juce_fileWrite (void* handle, const void* buffer, int size)
-{
-    if (handle != 0)
-        return (int) write ((int) (pointer_sized_int) handle, buffer, size);
-
-    return 0;
-}
-
+//==============================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     if (handle != 0 && lseek ((int) (pointer_sized_int) handle, pos, SEEK_SET) == pos)
@@ -391,12 +346,74 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
     return -1;
 }
 
-int64 FileOutputStream::getPositionInternal() const
+void FileInputStream::openHandle()
+{
+    totalSize = file.getSize();
+
+    const int f = open (file.getFullPathName().toUTF8(), O_RDONLY, 00644);
+
+    if (f != -1)
+        fileHandle = (void*) f;
+}
+
+void FileInputStream::closeHandle()
 {
     if (fileHandle != 0)
-        return lseek ((int) (pointer_sized_int) fileHandle, 0, SEEK_CUR);
+    {
+        close ((int) (pointer_sized_int) fileHandle);
+        fileHandle = 0;
+    }
+}
 
-    return -1;
+size_t FileInputStream::readInternal (void* const buffer, const size_t numBytes)
+{
+    if (fileHandle != 0)
+        return jmax ((ssize_t) 0, ::read ((int) (pointer_sized_int) fileHandle, buffer, numBytes));
+
+    return 0;
+}
+
+//==============================================================================
+void FileOutputStream::openHandle()
+{
+    if (file.exists())
+    {
+        const int f = open (file.getFullPathName().toUTF8(), O_RDWR, 00644);
+
+        if (f != -1)
+        {
+            currentPosition = lseek (f, 0, SEEK_END);
+
+            if (currentPosition >= 0)
+                fileHandle = (void*) f;
+            else
+                close (f);
+        }
+    }
+    else
+    {
+        const int f = open (file.getFullPathName().toUTF8(), O_RDWR + O_CREAT, 00644);
+
+        if (f != -1)
+            fileHandle = (void*) f;
+    }
+}
+
+void FileOutputStream::closeHandle()
+{
+    if (fileHandle != 0)
+    {
+        close ((int) (pointer_sized_int) fileHandle);
+        fileHandle = 0;
+    }
+}
+
+int FileOutputStream::writeInternal (const void* const data, const int numBytes)
+{
+    if (fileHandle != 0)
+        return (int) ::write ((int) (pointer_sized_int) fileHandle, data, numBytes);
+
+    return 0;
 }
 
 void FileOutputStream::flushInternal()
@@ -405,6 +422,7 @@ void FileOutputStream::flushInternal()
         fsync ((int) (pointer_sized_int) fileHandle);
 }
 
+//==============================================================================
 const File juce_getExecutableFile()
 {
     Dl_info exeInfo;

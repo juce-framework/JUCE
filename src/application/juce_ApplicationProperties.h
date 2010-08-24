@@ -63,10 +63,9 @@ public:
         Before using it, you must call setStorageParameters() to give it the info
         it needs to create the property files.
     */
-    ApplicationProperties() throw();
+    ApplicationProperties();
 
-    /** Destructor.
-    */
+    /** Destructor. */
     ~ApplicationProperties();
 
     //==============================================================================
@@ -82,7 +81,8 @@ public:
                                const String& fileNameSuffix,
                                const String& folderName,
                                int millisecondsBeforeSaving,
-                               int propertiesFileOptions) throw();
+                               int propertiesFileOptions,
+                               InterProcessLock* processLock = 0);
 
     /** Tests whether the files can be successfully written to, and can show
         an error message if not.
@@ -110,7 +110,7 @@ public:
 
         @see getCommonSettings
     */
-    PropertiesFile* getUserSettings() throw();
+    PropertiesFile* getUserSettings();
 
     /** Returns the common settings file.
 
@@ -126,7 +126,7 @@ public:
                             the common settings, even if any changes to them can't be saved.
         @see getUserSettings
     */
-    PropertiesFile* getCommonSettings (bool returnUserPropsIfReadOnly) throw();
+    PropertiesFile* getCommonSettings (bool returnUserPropsIfReadOnly);
 
     //==============================================================================
     /** Saves both files if they need to be saved.
@@ -154,11 +154,12 @@ private:
     String appName, fileSuffix, folderName;
     int msBeforeSaving, options;
     int commonSettingsAreReadOnly;
+    InterProcessLock* processLock;
 
     ApplicationProperties (const ApplicationProperties&);
     ApplicationProperties& operator= (const ApplicationProperties&);
 
-    void openFiles() throw();
+    void openFiles();
 };
 
 

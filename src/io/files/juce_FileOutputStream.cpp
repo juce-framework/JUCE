@@ -29,41 +29,25 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_FileOutputStream.h"
 
-void* juce_fileOpen (const File& file, bool forWriting);
-void juce_fileClose (void* handle);
-int juce_fileWrite (void* handle, const void* buffer, int size);
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
 
 //==============================================================================
-FileOutputStream::FileOutputStream (const File& f,
-                                    const int bufferSize_)
+FileOutputStream::FileOutputStream (const File& f, const int bufferSize_)
     : file (f),
+      fileHandle (0),
+      currentPosition (0),
       bufferSize (bufferSize_),
-      bytesInBuffer (0)
+      bytesInBuffer (0),
+      buffer (jmax (bufferSize_, 16))
 {
-    fileHandle = juce_fileOpen (f, true);
-
-    if (fileHandle != 0)
-    {
-        currentPosition = getPositionInternal();
-
-        if (currentPosition < 0)
-        {
-            jassertfalse;
-            juce_fileClose (fileHandle);
-            fileHandle = 0;
-        }
-    }
-
-    buffer.malloc (jmax (bufferSize_, 16));
+    openHandle();
 }
 
 FileOutputStream::~FileOutputStream()
 {
     flush();
-
-    juce_fileClose (fileHandle);
+    closeHandle();
 }
 
 int64 FileOutputStream::getPosition()
@@ -86,7 +70,7 @@ void FileOutputStream::flush()
 {
     if (bytesInBuffer > 0)
     {
-        juce_fileWrite (fileHandle, buffer, bytesInBuffer);
+        writeInternal (buffer, bytesInBuffer);
         bytesInBuffer = 0;
     }
 
@@ -106,7 +90,7 @@ bool FileOutputStream::write (const void* const src, const int numBytes)
         if (bytesInBuffer > 0)
         {
             // flush the reservoir
-            const bool wroteOk = (juce_fileWrite (fileHandle, buffer, bytesInBuffer) == bytesInBuffer);
+            const bool wroteOk = (writeInternal (buffer, bytesInBuffer) == bytesInBuffer);
             bytesInBuffer = 0;
 
             if (! wroteOk)
@@ -121,9 +105,12 @@ bool FileOutputStream::write (const void* const src, const int numBytes)
         }
         else
         {
-            const int bytesWritten = juce_fileWrite (fileHandle, src, numBytes);
-            currentPosition += bytesWritten;
+            const int bytesWritten = writeInternal (src, numBytes);
 
+            if (bytesWritten < 0)
+                return false;
+
+            currentPosition += bytesWritten;
             return bytesWritten == numBytes;
         }
     }

@@ -523,8 +523,15 @@ const String URL::removeEscapeChars (const String& s)
         if (nextPercent < 0)
             break;
 
-        juce_wchar replacementChar = (juce_wchar) result.substring (nextPercent + 1, nextPercent + 3).getHexValue32();
-        result = result.replaceSection (nextPercent, 3, String::charToString (replacementChar));
+        int hexDigit1 = 0, hexDigit2 = 0;
+
+        if ((hexDigit1 = CharacterFunctions::getHexDigitValue (result [nextPercent + 1])) >= 0
+             && (hexDigit2 = CharacterFunctions::getHexDigitValue (result [nextPercent + 2])) >= 0)
+        {
+            const juce_wchar replacementChar = (juce_wchar) ((hexDigit1 << 16) + hexDigit2);
+            result = result.replaceSection (nextPercent, 3, String::charToString (replacementChar));
+        }
+
         ++nextPercent;
     }
 

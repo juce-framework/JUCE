@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	52
+#define JUCE_BUILDNUMBER	53
 
 /** Current Juce version number.
 
@@ -15470,6 +15470,10 @@ private:
 	int64 currentPosition, totalSize;
 	bool needToSeek;
 
+	void openHandle();
+	void closeHandle();
+	size_t readInternal (void* buffer, size_t numBytes);
+
 	FileInputStream (const FileInputStream&);
 	FileInputStream& operator= (const FileInputStream&);
 };
@@ -15538,8 +15542,11 @@ private:
 	int bufferSize, bytesInBuffer;
 	HeapBlock <char> buffer;
 
+	void openHandle();
+	void closeHandle();
 	void flushInternal();
-	int64 getPositionInternal() const;
+	int64 setPositionInternal (int64 newPosition);
+	int writeInternal (const void* data, int numBytes);
 
 	FileOutputStream (const FileOutputStream&);
 	FileOutputStream& operator= (const FileOutputStream&);
@@ -29300,10 +29307,9 @@ public:
 		Before using it, you must call setStorageParameters() to give it the info
 		it needs to create the property files.
 	*/
-	ApplicationProperties() throw();
+	ApplicationProperties();
 
-	/** Destructor.
-	*/
+	/** Destructor. */
 	~ApplicationProperties();
 
 	juce_DeclareSingleton (ApplicationProperties, false)
@@ -29317,7 +29323,8 @@ public:
 							   const String& fileNameSuffix,
 							   const String& folderName,
 							   int millisecondsBeforeSaving,
-							   int propertiesFileOptions) throw();
+							   int propertiesFileOptions,
+							   InterProcessLock* processLock = 0);
 
 	/** Tests whether the files can be successfully written to, and can show
 		an error message if not.
@@ -29344,7 +29351,7 @@ public:
 
 		@see getCommonSettings
 	*/
-	PropertiesFile* getUserSettings() throw();
+	PropertiesFile* getUserSettings();
 
 	/** Returns the common settings file.
 
@@ -29360,7 +29367,7 @@ public:
 							the common settings, even if any changes to them can't be saved.
 		@see getUserSettings
 	*/
-	PropertiesFile* getCommonSettings (bool returnUserPropsIfReadOnly) throw();
+	PropertiesFile* getCommonSettings (bool returnUserPropsIfReadOnly);
 
 	/** Saves both files if they need to be saved.
 
@@ -29385,11 +29392,12 @@ private:
 	String appName, fileSuffix, folderName;
 	int msBeforeSaving, options;
 	int commonSettingsAreReadOnly;
+	InterProcessLock* processLock;
 
 	ApplicationProperties (const ApplicationProperties&);
 	ApplicationProperties& operator= (const ApplicationProperties&);
 
-	void openFiles() throw();
+	void openFiles();
 };
 
 #endif   // __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__

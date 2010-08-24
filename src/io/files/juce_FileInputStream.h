@@ -70,6 +70,10 @@ private:
     int64 currentPosition, totalSize;
     bool needToSeek;
 
+    void openHandle();
+    void closeHandle();
+    size_t readInternal (void* buffer, size_t numBytes);
+
     FileInputStream (const FileInputStream&);
     FileInputStream& operator= (const FileInputStream&);
 };

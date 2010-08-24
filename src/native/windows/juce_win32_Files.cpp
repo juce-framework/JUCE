@@ -146,53 +146,6 @@ void File::createDirectoryInternal (const String& fileName) const
 }
 
 //==============================================================================
-// return 0 if not possible
-void* juce_fileOpen (const File& file, bool forWriting)
-{
-    HANDLE h;
-
-    if (forWriting)
-    {
-        h = CreateFile (file.getFullPathName(), GENERIC_WRITE, FILE_SHARE_READ, 0,
-                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-
-        if (h != INVALID_HANDLE_VALUE)
-            SetFilePointer (h, 0, 0, FILE_END);
-        else
-            h = 0;
-    }
-    else
-    {
-        h = CreateFile (file.getFullPathName(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
-                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
-
-        if (h == INVALID_HANDLE_VALUE)
-            h = 0;
-    }
-
-    return h;
-}
-
-void juce_fileClose (void* handle)
-{
-    CloseHandle (handle);
-}
-
-//==============================================================================
-int juce_fileRead (void* handle, void* buffer, int size)
-{
-    DWORD num = 0;
-    ReadFile ((HANDLE) handle, buffer, size, &num, 0);
-    return (int) num;
-}
-
-int juce_fileWrite (void* handle, const void* buffer, int size)
-{
-    DWORD num;
-    WriteFile ((HANDLE) handle, buffer, size, &num, 0);
-    return (int) num;
-}
-
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     LARGE_INTEGER li;
@@ -201,15 +154,69 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
     return li.QuadPart;
 }
 
-int64 FileOutputStream::getPositionInternal() const
+void FileInputStream::openHandle()
 {
-    if (fileHandle == 0)
-        return -1;
+    totalSize = file.getSize();
 
-    LARGE_INTEGER li;
-    li.QuadPart = 0;
-    li.LowPart = SetFilePointer ((HANDLE) fileHandle, 0, &li.HighPart, FILE_CURRENT);  // (returns -1 if it fails)
-    return jmax ((int64) 0, li.QuadPart);
+    HANDLE h = CreateFile (file.getFullPathName(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
+                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
+
+    if (h != INVALID_HANDLE_VALUE)
+        fileHandle = (void*) h;
+}
+
+void FileInputStream::closeHandle()
+{
+    CloseHandle ((HANDLE) fileHandle);
+}
+
+size_t FileInputStream::readInternal (void* buffer, size_t numBytes)
+{
+    if (fileHandle != 0)
+    {
+        DWORD actualNum = 0;
+        ReadFile ((HANDLE) fileHandle, buffer, numBytes, &actualNum, 0);
+        return (size_t) actualNum;
+    }
+
+    return 0;
+}
+
+//==============================================================================
+void FileOutputStream::openHandle()
+{
+    HANDLE h = CreateFile (file.getFullPathName(), GENERIC_WRITE, FILE_SHARE_READ, 0,
+                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+
+    if (h != INVALID_HANDLE_VALUE)
+    {
+        LARGE_INTEGER li;
+        li.QuadPart = 0;
+        li.LowPart = SetFilePointer (h, 0, &li.HighPart, FILE_END);
+
+        if (li.LowPart != INVALID_SET_FILE_POINTER)
+        {
+            fileHandle = (void*) h;
+            currentPosition = li.QuadPart;
+        }
+    }
+}
+
+void FileOutputStream::closeHandle()
+{
+    CloseHandle ((HANDLE) fileHandle);
+}
+
+int FileOutputStream::writeInternal (const void* buffer, int numBytes)
+{
+    if (fileHandle != 0)
+    {
+        DWORD actualNum = 0;
+        WriteFile ((HANDLE) fileHandle, buffer, numBytes, &actualNum, 0);
+        return (int) actualNum;
+    }
+
+    return 0;
 }
 
 void FileOutputStream::flushInternal()
@@ -218,6 +225,7 @@ void FileOutputStream::flushInternal()
         FlushFileBuffers ((HANDLE) fileHandle);
 }
 
+//==============================================================================
 int64 File::getSize() const
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
@@ -259,22 +267,23 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
 
 bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const
 {
-    void* const h = juce_fileOpen (fullPath, true);
     bool ok = false;
+    HANDLE h = CreateFile (fullPath, GENERIC_WRITE, FILE_SHARE_READ, 0,
+                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 
-    if (h != 0)
+    if (h != INVALID_HANDLE_VALUE)
     {
         FILETIME m, a, c;
         timeToFileTime (modificationTime, &m);
         timeToFileTime (accessTime, &a);
         timeToFileTime (creationTime, &c);
 
-        ok = SetFileTime ((HANDLE) h,
+        ok = SetFileTime (h,
                           creationTime > 0     ? &c : 0,
                           accessTime > 0       ? &a : 0,
                           modificationTime > 0 ? &m : 0) != 0;
 
-        juce_fileClose (h);
+        CloseHandle (h);
     }
 
     return ok;
