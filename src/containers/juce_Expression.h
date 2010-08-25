@@ -57,7 +57,7 @@ public:
     ~Expression();
 
     /** Creates a simple expression with a specified constant value. */
-    explicit Expression (const double constant);
+    explicit Expression (double constant);
 
     /** Creates a copy of an expression. */
     Expression (const Expression& other);

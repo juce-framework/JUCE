@@ -6575,7 +6575,7 @@ public:
 	~Expression();
 
 	/** Creates a simple expression with a specified constant value. */
-	explicit Expression (const double constant);
+	explicit Expression (double constant);
 
 	/** Creates a copy of an expression. */
 	Expression (const Expression& other);
@@ -30362,7 +30362,7 @@ public:
 		@see AudioFormatReader
 	*/
 	virtual AudioFormatReader* createReaderFor (InputStream* sourceStream,
-												const bool deleteStreamIfOpeningFails) = 0;
+												bool deleteStreamIfOpeningFails) = 0;
 
 	/** Tries to create an object that can write to a stream with this audio format.
 
@@ -30446,7 +30446,7 @@ public:
 #endif
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
-										const bool deleteStreamIfOpeningFails);
+										bool deleteStreamIfOpeningFails);
 
 	AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
 										double sampleRateToUse,
@@ -31210,7 +31210,7 @@ public:
 	bool isCompressed();
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
-										const bool deleteStreamIfOpeningFails);
+										bool deleteStreamIfOpeningFails);
 
 	AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
 										double sampleRateToUse,
@@ -31270,7 +31270,7 @@ public:
 	int estimateOggFileQuality (const File& source);
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
-										const bool deleteStreamIfOpeningFails);
+										bool deleteStreamIfOpeningFails);
 
 	AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
 										double sampleRateToUse,
@@ -31320,7 +31320,7 @@ public:
 	bool canDoMono();
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
-										const bool deleteStreamIfOpeningFails);
+										bool deleteStreamIfOpeningFails);
 
 	AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
 										double sampleRateToUse,
@@ -31437,7 +31437,7 @@ public:
 	bool canDoMono();
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
-										const bool deleteStreamIfOpeningFails);
+										bool deleteStreamIfOpeningFails);
 
 	AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
 										double sampleRateToUse,
@@ -40782,7 +40782,7 @@ public:
 
 		/** The actual processor object that this node represents.
 		*/
-		AudioProcessor* const processor;
+		const ScopedPointer<AudioProcessor> processor;
 
 		/** A set of user-definable properties that are associated with this node.
 
@@ -41016,8 +41016,8 @@ public:
 		void releaseResources();
 		void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
 
-		const String getInputChannelName (const int channelIndex) const;
-		const String getOutputChannelName (const int channelIndex) const;
+		const String getInputChannelName (int channelIndex) const;
+		const String getOutputChannelName (int channelIndex) const;
 		bool isInputChannelStereoPair (int index) const;
 		bool isOutputChannelStereoPair (int index) const;
 		bool acceptsMidi() const;
@@ -41061,8 +41061,8 @@ public:
 	void releaseResources();
 	void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
 
-	const String getInputChannelName (const int channelIndex) const;
-	const String getOutputChannelName (const int channelIndex) const;
+	const String getInputChannelName (int channelIndex) const;
+	const String getOutputChannelName (int channelIndex) const;
 	bool isInputChannelStereoPair (int index) const;
 	bool isOutputChannelStereoPair (int index) const;
 
@@ -41775,9 +41775,9 @@ public:
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
 	*/
-	virtual void noteOn (const int midiChannel,
-						 const int midiNoteNumber,
-						 const float velocity);
+	virtual void noteOn (int midiChannel,
+						 int midiNoteNumber,
+						 float velocity);
 
 	/** Triggers a note-off event.
 
@@ -41789,9 +41789,9 @@ public:
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
 	*/
-	virtual void noteOff (const int midiChannel,
-						  const int midiNoteNumber,
-						  const bool allowTailOff);
+	virtual void noteOff (int midiChannel,
+						  int midiNoteNumber,
+						  bool allowTailOff);
 
 	/** Turns off all notes.
 
@@ -41806,8 +41806,8 @@ public:
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
 	*/
-	virtual void allNotesOff (const int midiChannel,
-							  const bool allowTailOff);
+	virtual void allNotesOff (int midiChannel,
+							  bool allowTailOff);
 
 	/** Sends a pitch-wheel message.
 
@@ -41820,8 +41820,8 @@ public:
 		@param midiChannel	  the midi channel for the event
 		@param wheelValue	   the wheel position, from 0 to 0x3fff, as returned by MidiMessage::getPitchWheelValue()
 	*/
-	virtual void handlePitchWheel (const int midiChannel,
-								   const int wheelValue);
+	virtual void handlePitchWheel (int midiChannel,
+								   int wheelValue);
 
 	/** Sends a midi controller message.
 
@@ -41835,9 +41835,9 @@ public:
 		@param controllerNumber	 the midi controller type, as returned by MidiMessage::getControllerNumber()
 		@param controllerValue	  the midi controller value, between 0 and 127, as returned by MidiMessage::getControllerValue()
 	*/
-	virtual void handleController (const int midiChannel,
-								   const int controllerNumber,
-								   const int controllerValue);
+	virtual void handleController (int midiChannel,
+								   int controllerNumber,
+								   int controllerValue);
 
 	/** Tells the synthesiser what the sample rate is for the audio it's being used to
 		render.
@@ -41845,7 +41845,7 @@ public:
 		This value is propagated to the voices so that they can use it to render the correct
 		pitches.
 	*/
-	void setCurrentPlaybackSampleRate (const double sampleRate);
+	void setCurrentPlaybackSampleRate (double sampleRate);
 
 	/** Creates the next block of audio output.
 

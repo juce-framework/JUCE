@@ -724,10 +724,10 @@ public:
 
     AudioProcessorEditor* createEditor();
 
-    const String getInputChannelName (const int index) const;
+    const String getInputChannelName (int index) const;
     bool isInputChannelStereoPair (int index) const;
 
-    const String getOutputChannelName (const int index) const;
+    const String getOutputChannelName (int index) const;
     bool isOutputChannelStereoPair (int index) const;
 
     //==============================================================================
@@ -2727,7 +2727,7 @@ const String VSTPluginInstance::getCurrentProgramName()
 }
 
 //==============================================================================
-const String VSTPluginInstance::getInputChannelName (const int index) const
+const String VSTPluginInstance::getInputChannelName (int index) const
 {
     if (index >= 0 && index < getNumInputChannels())
     {
@@ -2751,7 +2751,7 @@ bool VSTPluginInstance::isInputChannelStereoPair (int index) const
     return true;
 }
 
-const String VSTPluginInstance::getOutputChannelName (const int index) const
+const String VSTPluginInstance::getOutputChannelName (int index) const
 {
     if (index >= 0 && index < getNumOutputChannels())
     {

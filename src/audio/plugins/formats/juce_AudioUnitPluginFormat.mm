@@ -233,10 +233,10 @@ public:
 
     AudioProcessorEditor* createEditor();
 
-    const String getInputChannelName (const int index) const;
+    const String getInputChannelName (int index) const;
     bool isInputChannelStereoPair (int index) const;
 
-    const String getOutputChannelName (const int index) const;
+    const String getOutputChannelName (int index) const;
     bool isOutputChannelStereoPair (int index) const;
 
     //==============================================================================
@@ -1296,7 +1296,7 @@ void AudioUnitPluginInstance::changeProgramName (int index, const String& newNam
 }
 
 //==============================================================================
-const String AudioUnitPluginInstance::getInputChannelName (const int index) const
+const String AudioUnitPluginInstance::getInputChannelName (int index) const
 {
     if (((unsigned int) index) < (unsigned int) getNumInputChannels())
         return "Input " + String (index + 1);
@@ -1313,7 +1313,7 @@ bool AudioUnitPluginInstance::isInputChannelStereoPair (int index) const
     return true;
 }
 
-const String AudioUnitPluginInstance::getOutputChannelName (const int index) const
+const String AudioUnitPluginInstance::getOutputChannelName (int index) const
 {
     if (((unsigned int) index) < (unsigned int) getNumOutputChannels())
         return "Output " + String (index + 1);

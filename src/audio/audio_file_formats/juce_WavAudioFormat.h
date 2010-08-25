@@ -126,7 +126,7 @@ public:
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
+                                        bool deleteStreamIfOpeningFails);
 
     AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
                                         double sampleRateToUse,

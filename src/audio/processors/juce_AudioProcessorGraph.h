@@ -83,7 +83,7 @@ public:
 
         /** The actual processor object that this node represents.
         */
-        AudioProcessor* const processor;
+        const ScopedPointer<AudioProcessor> processor;
 
         /** A set of user-definable properties that are associated with this node.
 
@@ -328,8 +328,8 @@ public:
         void releaseResources();
         void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
 
-        const String getInputChannelName (const int channelIndex) const;
-        const String getOutputChannelName (const int channelIndex) const;
+        const String getInputChannelName (int channelIndex) const;
+        const String getOutputChannelName (int channelIndex) const;
         bool isInputChannelStereoPair (int index) const;
         bool isOutputChannelStereoPair (int index) const;
         bool acceptsMidi() const;
@@ -374,8 +374,8 @@ public:
     void releaseResources();
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
 
-    const String getInputChannelName (const int channelIndex) const;
-    const String getOutputChannelName (const int channelIndex) const;
+    const String getInputChannelName (int channelIndex) const;
+    const String getOutputChannelName (int channelIndex) const;
     bool isInputChannelStereoPair (int index) const;
     bool isOutputChannelStereoPair (int index) const;
 

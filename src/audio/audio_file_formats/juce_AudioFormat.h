@@ -112,7 +112,7 @@ public:
         @see AudioFormatReader
     */
     virtual AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                                const bool deleteStreamIfOpeningFails) = 0;
+                                                bool deleteStreamIfOpeningFails) = 0;
 
     /** Tries to create an object that can write to a stream with this audio format.
 
