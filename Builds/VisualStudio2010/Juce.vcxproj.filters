@@ -1096,6 +1096,9 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_CameraDevice.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_Direct2DGraphicsContext.cpp">
+      <Filter>Juce\Source\native\windows</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_DirectSound.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>

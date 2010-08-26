@@ -28,3 +28,8 @@
  #pragma comment (lib, "Strmiids.lib")
  #pragma comment (lib, "wmvcore.lib")
 #endif
+
+#if JUCE_DIRECT2D
+ #pragma comment (lib, "Dwrite.lib")
+ #pragma comment (lib, "D2d1.lib")
+#endif

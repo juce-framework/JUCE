@@ -135,7 +135,7 @@ public:
     float** getArrayOfChannels() const throw()          { return channels; }
 
     //==============================================================================
-    /** Chages the buffer's size or number of channels.
+    /** Changes the buffer's size or number of channels.
 
         This can expand or contract the buffer's length, and add or remove channels.
 

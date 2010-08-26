@@ -521,7 +521,7 @@ void ComponentPeer::addMaskedRegion (int x, int y, int w, int h)
 }
 
 //==============================================================================
-const StringArray ComponentPeer::getAvailableRenderingEngines() throw()
+const StringArray ComponentPeer::getAvailableRenderingEngines()
 {
     StringArray s;
     s.add ("Software Renderer");
@@ -533,7 +533,7 @@ int ComponentPeer::getCurrentRenderingEngine() throw()
     return 0;
 }
 
-void ComponentPeer::setCurrentRenderingEngine (int /*index*/) throw()
+void ComponentPeer::setCurrentRenderingEngine (int /*index*/)
 {
 }
 

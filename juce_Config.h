@@ -117,6 +117,13 @@
   #define JUCE_OPENGL 1
 #endif
 
+/** JUCE_DIRECT2D: Enables the Windows 7 Direct2D renderer.
+    If you're building on a platform older than Vista, you won't be able to compile with this feature.
+*/
+#ifndef JUCE_DIRECT2D
+  #define JUCE_DIRECT2D 0
+#endif
+
 //=============================================================================
 /** JUCE_USE_FLAC: Enables the FLAC audio codec classes (available on all platforms).
     If your app doesn't need to read FLAC files, you might want to disable this to

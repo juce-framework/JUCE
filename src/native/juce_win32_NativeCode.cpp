@@ -97,8 +97,9 @@ BEGIN_JUCE_NAMESPACE
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #include "windows/juce_win32_Messaging.cpp"
- #include "windows/juce_win32_Windowing.cpp"
  #include "windows/juce_win32_Fonts.cpp"
+ #include "windows/juce_win32_Direct2DGraphicsContext.cpp"
+ #include "windows/juce_win32_Windowing.cpp"
  #include "windows/juce_win32_FileChooser.cpp"
  #include "windows/juce_win32_Misc.cpp"
  #include "windows/juce_win32_ActiveXComponent.cpp"

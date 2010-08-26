@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	54
+#define JUCE_BUILDNUMBER	55
 
 /** Current Juce version number.
 
@@ -307,6 +307,13 @@
 */
 #ifndef JUCE_OPENGL
   #define JUCE_OPENGL 1
+#endif
+
+/** JUCE_DIRECT2D: Enables the Windows 7 Direct2D renderer.
+	If you're building on a platform older than Vista, you won't be able to compile with this feature.
+*/
+#ifndef JUCE_DIRECT2D
+  #define JUCE_DIRECT2D 0
 #endif
 
 /** JUCE_USE_FLAC: Enables the FLAC audio codec classes (available on all platforms).
@@ -29733,7 +29740,7 @@ public:
 	*/
 	float** getArrayOfChannels() const throw()	  { return channels; }
 
-	/** Chages the buffer's size or number of channels.
+	/** Changes the buffer's size or number of channels.
 
 		This can expand or contract the buffer's length, and add or remove channels.
 
@@ -58136,9 +58143,9 @@ public:
 
 	static void bringModalComponentToFront();
 
-	virtual const StringArray getAvailableRenderingEngines() throw();
+	virtual const StringArray getAvailableRenderingEngines();
 	virtual int getCurrentRenderingEngine() throw();
-	virtual void setCurrentRenderingEngine (int index) throw();
+	virtual void setCurrentRenderingEngine (int index);
 
 	juce_UseDebuggingNewOperator
 
@@ -61391,6 +61398,11 @@ END_JUCE_NAMESPACE
 #if JUCE_USE_CAMERA
  #pragma comment (lib, "Strmiids.lib")
  #pragma comment (lib, "wmvcore.lib")
+#endif
+
+#if JUCE_DIRECT2D
+ #pragma comment (lib, "Dwrite.lib")
+ #pragma comment (lib, "D2d1.lib")
 #endif
 /*** End of inlined file: juce_win32_AutoLinkLibraries.h ***/
 

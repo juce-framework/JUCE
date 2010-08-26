@@ -1359,6 +1359,8 @@
                 resource="0" file="src/native/windows/juce_win32_AutoLinkLibraries.h"/>
           <FILE id="Ay6VgqxOG" name="juce_win32_CameraDevice.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_CameraDevice.cpp"/>
+          <FILE id="c4BNPC" name="juce_win32_Direct2DGraphicsContext.cpp" compile="1"
+                resource="0" file="src/native/windows/juce_win32_Direct2DGraphicsContext.cpp"/>
           <FILE id="CVNbte6ov" name="juce_win32_DirectSound.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_DirectSound.cpp"/>
           <FILE id="4w3jvZBLt" name="juce_win32_DynamicLibraryLoader.cpp" compile="1"
@@ -1508,5 +1510,6 @@
                JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_USE_XRENDER="default"
                JUCE_PLUGINHOST_VST="default" JUCE_PLUGINHOST_AU="default" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
                JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
-               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_USE_XCURSOR="default"/>
+               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_USE_XCURSOR="default"
+               JUCE_DIRECT2D="default"/>
 </JUCERPROJECT>

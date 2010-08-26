@@ -183,6 +183,11 @@
  #pragma warning (pop)
 #endif
 
+#if JUCE_DIRECT2D
+ #include <d2d1.h>
+ #include <dwrite.h>
+#endif
+
 //==============================================================================
 /** A simple COM smart pointer.
     Avoids having to include ATL just to get one of these.
@@ -237,7 +242,10 @@ public:
 
     HRESULT __stdcall QueryInterface (REFIID refId, void __RPC_FAR* __RPC_FAR* result)
     {
+      #ifndef __MINGW32__
         if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
+      #endif
+
         if (refId == IID_IUnknown)          { AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
 
         *result = 0;

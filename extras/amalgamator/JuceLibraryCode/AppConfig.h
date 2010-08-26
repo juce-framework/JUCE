@@ -19,6 +19,7 @@
 //#define  JUCE_ALSA
 //#define  JUCE_QUICKTIME
 //#define  JUCE_OPENGL
+//#define  JUCE_DIRECT2D
 //#define  JUCE_USE_FLAC
 //#define  JUCE_USE_OGGVORBIS
 //#define  JUCE_USE_CDBURNER

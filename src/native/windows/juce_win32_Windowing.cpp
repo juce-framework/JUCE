@@ -382,11 +382,22 @@ static void* callFunctionIfNotLocked (MessageCallbackFunction* callback, void* u
 class Win32ComponentPeer  : public ComponentPeer
 {
 public:
+    enum RenderingEngineType
+    {
+        softwareRenderingEngine = 0,
+        direct2DRenderingEngine
+    };
+
     //==============================================================================
     Win32ComponentPeer (Component* const component,
                         const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
           dontRepaint (false),
+      #if JUCE_DIRECT2D
+          currentRenderingEngine (direct2DRenderingEngine),
+      #else
+          currentRenderingEngine (softwareRenderingEngine),
+      #endif
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
@@ -427,6 +438,10 @@ public:
             dropTarget->Release();
             dropTarget = 0;
         }
+
+      #if JUCE_DIRECT2D
+        direct2DContext = 0;
+      #endif
     }
 
     //==============================================================================
@@ -478,6 +493,11 @@ public:
                                        info.rcWindow.bottom - info.rcClient.bottom,
                                        info.rcWindow.right - info.rcClient.right);
         }
+
+      #if JUCE_DIRECT2D
+        if (direct2DContext != 0)
+            direct2DContext->resized();
+      #endif
     }
 
     void setSize (int w, int h)
@@ -842,6 +862,10 @@ public:
 private:
     HWND hwnd;
     ScopedPointer<DropShadower> shadower;
+    RenderingEngineType currentRenderingEngine;
+  #if JUCE_DIRECT2D
+    ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
+  #endif
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret;
     BorderSize windowBorder;
     HICON currentWindowIcon;
@@ -988,6 +1012,10 @@ private:
 
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
 
+      #if JUCE_DIRECT2D
+        updateDirect2DContext();
+      #endif
+
         if (hwnd != 0)
         {
             SetWindowLongPtr (hwnd, 0, 0);
@@ -1084,129 +1112,146 @@ private:
     //==============================================================================
     void handlePaintMessage()
     {
-        HRGN rgn = CreateRectRgn (0, 0, 0, 0);
-        const int regionType = GetUpdateRgn (hwnd, rgn, false);
-
-        PAINTSTRUCT paintStruct;
-        HDC dc = BeginPaint (hwnd, &paintStruct); // Note this can immediately generate a WM_NCPAINT
-                                                  // message and become re-entrant, but that's OK
-
-        // if something in a paint handler calls, e.g. a message box, this can become reentrant and
-        // corrupt the image it's using to paint into, so do a check here.
-        static bool reentrant = false;
-        if (reentrant)
+#if JUCE_DIRECT2D
+        if (direct2DContext != 0)
         {
-            DeleteObject (rgn);
-            EndPaint (hwnd, &paintStruct);
-            return;
-        }
-
-        reentrant = true;
-
-        // this is the rectangle to update..
-        int x = paintStruct.rcPaint.left;
-        int y = paintStruct.rcPaint.top;
-        int w = paintStruct.rcPaint.right - x;
-        int h = paintStruct.rcPaint.bottom - y;
-
-        const bool transparent = isTransparent();
-
-        if (transparent)
-        {
-            // it's not possible to have a transparent window with a title bar at the moment!
-            jassert (! hasTitleBar());
-
             RECT r;
-            GetWindowRect (hwnd, &r);
-            x = y = 0;
-            w = r.right - r.left;
-            h = r.bottom - r.top;
+
+            if (GetUpdateRect (hwnd, &r, false))
+            {
+                direct2DContext->start();
+                direct2DContext->clipToRectangle (Rectangle<int> (r.left, r.top, r.right - r.left, r.bottom - r.top));
+                handlePaint (*direct2DContext);
+                direct2DContext->end();
+            }
         }
-
-        if (w > 0 && h > 0)
+        else
+#endif
         {
-            clearMaskedRegion();
+            HRGN rgn = CreateRectRgn (0, 0, 0, 0);
+            const int regionType = GetUpdateRgn (hwnd, rgn, false);
 
-            Image offscreenImage (offscreenImageGenerator.getImage (transparent, w, h));
+            PAINTSTRUCT paintStruct;
+            HDC dc = BeginPaint (hwnd, &paintStruct); // Note this can immediately generate a WM_NCPAINT
+                                                      // message and become re-entrant, but that's OK
 
-            RectangleList contextClip;
-            const Rectangle<int> clipBounds (0, 0, w, h);
-
-            bool needToPaintAll = true;
-
-            if (regionType == COMPLEXREGION && ! transparent)
+            // if something in a paint handler calls, e.g. a message box, this can become reentrant and
+            // corrupt the image it's using to paint into, so do a check here.
+            static bool reentrant = false;
+            if (reentrant)
             {
-                HRGN clipRgn = CreateRectRgnIndirect (&paintStruct.rcPaint);
-                CombineRgn (rgn, rgn, clipRgn, RGN_AND);
-                DeleteObject (clipRgn);
-
-                char rgnData [8192];
-                const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) rgnData);
-
-                if (res > 0 && res <= sizeof (rgnData))
-                {
-                    const RGNDATAHEADER* const hdr = &(((const RGNDATA*) rgnData)->rdh);
-
-                    if (hdr->iType == RDH_RECTANGLES
-                         && hdr->rcBound.right - hdr->rcBound.left >= w
-                         && hdr->rcBound.bottom - hdr->rcBound.top >= h)
-                    {
-                        needToPaintAll = false;
-
-                        const RECT* rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
-                        int num = ((RGNDATA*) rgnData)->rdh.nCount;
-
-                        while (--num >= 0)
-                        {
-                            if (rects->right <= x + w && rects->bottom <= y + h)
-                            {
-                                // (need to move this one pixel to the left because of a win32 bug)
-                                const int cx = jmax (x, (int) rects->left - 1);
-                                contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y, rects->right - cx, rects->bottom - rects->top)
-                                                                   .getIntersection (clipBounds));
-                            }
-                            else
-                            {
-                                needToPaintAll = true;
-                                break;
-                            }
-
-                            ++rects;
-                        }
-                    }
-                }
+                DeleteObject (rgn);
+                EndPaint (hwnd, &paintStruct);
+                return;
             }
 
-            if (needToPaintAll)
-            {
-                contextClip.clear();
-                contextClip.addWithoutMerging (Rectangle<int> (w, h));
-            }
+            reentrant = true;
+
+            // this is the rectangle to update..
+            int x = paintStruct.rcPaint.left;
+            int y = paintStruct.rcPaint.top;
+            int w = paintStruct.rcPaint.right - x;
+            int h = paintStruct.rcPaint.bottom - y;
+
+            const bool transparent = isTransparent();
 
             if (transparent)
             {
-                RectangleList::Iterator i (contextClip);
+                // it's not possible to have a transparent window with a title bar at the moment!
+                jassert (! hasTitleBar());
 
-                while (i.next())
-                    offscreenImage.clear (*i.getRectangle());
+                RECT r;
+                GetWindowRect (hwnd, &r);
+                x = y = 0;
+                w = r.right - r.left;
+                h = r.bottom - r.top;
             }
 
-            // if the component's not opaque, this won't draw properly unless the platform can support this
-            jassert (Desktop::canUseSemiTransparentWindows() || component->isOpaque());
+            if (w > 0 && h > 0)
+            {
+                clearMaskedRegion();
 
-            updateCurrentModifiers();
+                Image offscreenImage (offscreenImageGenerator.getImage (transparent, w, h));
 
-            LowLevelGraphicsSoftwareRenderer context (offscreenImage, -x, -y, contextClip);
-            handlePaint (context);
+                RectangleList contextClip;
+                const Rectangle<int> clipBounds (0, 0, w, h);
 
-            if (! dontRepaint)
-                static_cast <WindowsBitmapImage*> (offscreenImage.getSharedImage())
-                    ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion);
+                bool needToPaintAll = true;
+
+                if (regionType == COMPLEXREGION && ! transparent)
+                {
+                    HRGN clipRgn = CreateRectRgnIndirect (&paintStruct.rcPaint);
+                    CombineRgn (rgn, rgn, clipRgn, RGN_AND);
+                    DeleteObject (clipRgn);
+
+                    char rgnData [8192];
+                    const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) rgnData);
+
+                    if (res > 0 && res <= sizeof (rgnData))
+                    {
+                        const RGNDATAHEADER* const hdr = &(((const RGNDATA*) rgnData)->rdh);
+
+                        if (hdr->iType == RDH_RECTANGLES
+                             && hdr->rcBound.right - hdr->rcBound.left >= w
+                             && hdr->rcBound.bottom - hdr->rcBound.top >= h)
+                        {
+                            needToPaintAll = false;
+
+                            const RECT* rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
+                            int num = ((RGNDATA*) rgnData)->rdh.nCount;
+
+                            while (--num >= 0)
+                            {
+                                if (rects->right <= x + w && rects->bottom <= y + h)
+                                {
+                                    // (need to move this one pixel to the left because of a win32 bug)
+                                    const int cx = jmax (x, (int) rects->left - 1);
+                                    contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y, rects->right - cx, rects->bottom - rects->top)
+                                                                       .getIntersection (clipBounds));
+                                }
+                                else
+                                {
+                                    needToPaintAll = true;
+                                    break;
+                                }
+
+                                ++rects;
+                            }
+                        }
+                    }
+                }
+
+                if (needToPaintAll)
+                {
+                    contextClip.clear();
+                    contextClip.addWithoutMerging (Rectangle<int> (w, h));
+                }
+
+                if (transparent)
+                {
+                    RectangleList::Iterator i (contextClip);
+
+                    while (i.next())
+                        offscreenImage.clear (*i.getRectangle());
+                }
+
+                // if the component's not opaque, this won't draw properly unless the platform can support this
+                jassert (Desktop::canUseSemiTransparentWindows() || component->isOpaque());
+
+                updateCurrentModifiers();
+
+                LowLevelGraphicsSoftwareRenderer context (offscreenImage, -x, -y, contextClip);
+                handlePaint (context);
+
+                if (! dontRepaint)
+                    static_cast <WindowsBitmapImage*> (offscreenImage.getSharedImage())
+                        ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion);
+            }
+
+            DeleteObject (rgn);
+            EndPaint (hwnd, &paintStruct);
+            reentrant = false;
         }
-
-        DeleteObject (rgn);
-        EndPaint (hwnd, &paintStruct);
-        reentrant = false;
 
 #ifndef JUCE_GCC  //xxx should add this fn for gcc..
         _fpreset(); // because some graphics cards can unmask FP exceptions
@@ -1219,6 +1264,48 @@ private:
     void doMouseEvent (const Point<int>& position)
     {
         handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
+    }
+
+    const StringArray getAvailableRenderingEngines()
+    {
+        StringArray s (ComponentPeer::getAvailableRenderingEngines());
+
+#if JUCE_DIRECT2D
+        // xxx is this correct? Seems to enable it on Vista too??
+        OSVERSIONINFO info;
+        zerostruct (info);
+        info.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
+        GetVersionEx (&info);
+        if (info.dwMajorVersion >= 6)
+            s.add ("Direct2D");
+#endif
+        return s;
+    }
+
+    int getCurrentRenderingEngine() throw()
+    {
+        return currentRenderingEngine;
+    }
+
+#if JUCE_DIRECT2D
+    void updateDirect2DContext()
+    {
+        if (currentRenderingEngine != direct2DRenderingEngine)
+            direct2DContext = 0;
+        else if (direct2DContext == 0)
+            direct2DContext = new Direct2DLowLevelGraphicsContext (hwnd);
+    }
+#endif
+
+    void setCurrentRenderingEngine (int index)
+    {
+        (void) index;
+
+#if JUCE_DIRECT2D
+        currentRenderingEngine = index == 1 ? direct2DRenderingEngine : softwareRenderingEngine;
+        updateDirect2DContext();
+        repaint (component->getLocalBounds());
+#endif
     }
 
     void doMouseMove (const Point<int>& position)

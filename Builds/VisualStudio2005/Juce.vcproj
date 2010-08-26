@@ -893,6 +893,7 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_AudioCDReader.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_AutoLinkLibraries.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_CameraDevice.cpp"/>
+            <File RelativePath="..\..\src\native\windows\juce_win32_Direct2DGraphicsContext.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_DirectSound.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.h"/>

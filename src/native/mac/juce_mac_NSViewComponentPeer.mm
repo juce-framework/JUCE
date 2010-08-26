@@ -170,9 +170,9 @@ public:
     void toFront (bool makeActiveWindow);
     void toBehind (ComponentPeer* other);
     void setIcon (const Image& newIcon);
-    const StringArray getAvailableRenderingEngines() throw();
+    const StringArray getAvailableRenderingEngines();
     int getCurrentRenderingEngine() throw();
-    void setCurrentRenderingEngine (int index) throw();
+    void setCurrentRenderingEngine (int index);
 
     /* When you use multiple DLLs which share similarly-named obj-c classes - like
        for example having more than one juce plugin loaded into a host, then when a
@@ -1567,10 +1567,9 @@ void NSViewComponentPeer::drawRect (NSRect r)
     }
 }
 
-const StringArray NSViewComponentPeer::getAvailableRenderingEngines() throw()
+const StringArray NSViewComponentPeer::getAvailableRenderingEngines()
 {
-    StringArray s;
-    s.add ("Software Renderer");
+    StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
 #if USE_COREGRAPHICS_RENDERING
     s.add ("CoreGraphics Renderer");
@@ -1584,7 +1583,7 @@ int NSViewComponentPeer::getCurrentRenderingEngine() throw()
     return usingCoreGraphics ? 1 : 0;
 }
 
-void NSViewComponentPeer::setCurrentRenderingEngine (int index) throw()
+void NSViewComponentPeer::setCurrentRenderingEngine (int index)
 {
 #if USE_COREGRAPHICS_RENDERING
     if (usingCoreGraphics != (index > 0))

@@ -37,6 +37,7 @@ public:
           recordedSound (1, 1),
           playingSampleNum (0),
           recordedSampleNum (-1),
+          sampleRate (0),
           isRunning (false),
           resultsBox (resultsBox_)
     {
