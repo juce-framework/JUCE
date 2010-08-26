@@ -36,8 +36,7 @@ MemoryBlock::MemoryBlock() throw()
 {
 }
 
-MemoryBlock::MemoryBlock (const size_t initialSize,
-                          const bool initialiseToZero) throw()
+MemoryBlock::MemoryBlock (const size_t initialSize, const bool initialiseToZero)
 {
     if (initialSize > 0)
     {
@@ -50,7 +49,7 @@ MemoryBlock::MemoryBlock (const size_t initialSize,
     }
 }
 
-MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
+MemoryBlock::MemoryBlock (const MemoryBlock& other)
     : size (other.size)
 {
     if (size > 0)
@@ -61,8 +60,7 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
     }
 }
 
-MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
-                          const size_t sizeInBytes) throw()
+MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t sizeInBytes)
     : size (jmax ((size_t) 0, sizeInBytes))
 {
     jassert (sizeInBytes >= 0);
@@ -84,7 +82,7 @@ MemoryBlock::~MemoryBlock() throw()
     jassert (size == 0 || data != 0); // non-zero size but no data allocated?
 }
 
-MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other) throw()
+MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 {
     if (this != &other)
     {
@@ -114,8 +112,7 @@ bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const thr
 
 //==============================================================================
 // this will resize the block to this size
-void MemoryBlock::setSize (const size_t newSize,
-                           const bool initialiseToZero) throw()
+void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
 {
     if (size != newSize)
     {
@@ -143,8 +140,7 @@ void MemoryBlock::setSize (const size_t newSize,
     }
 }
 
-void MemoryBlock::ensureSize (const size_t minimumSize,
-                              const bool initialiseToZero) throw()
+void MemoryBlock::ensureSize (const size_t minimumSize, const bool initialiseToZero)
 {
     if (size < minimumSize)
         setSize (minimumSize, initialiseToZero);
@@ -162,8 +158,7 @@ void MemoryBlock::fillWith (const uint8 value) throw()
     memset (data, (int) value, size);
 }
 
-void MemoryBlock::append (const void* const srcData,
-                          const size_t numBytes) throw()
+void MemoryBlock::append (const void* const srcData, const size_t numBytes)
 {
     if (numBytes > 0)
     {
@@ -215,7 +210,7 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const throw()
         memcpy (d, data + offset, num);
 }
 
-void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove) throw()
+void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove)
 {
     if (startByte < 0)
     {
@@ -237,7 +232,7 @@ void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove) thro
     }
 }
 
-const String MemoryBlock::toString() const throw()
+const String MemoryBlock::toString() const
 {
     return String (static_cast <const char*> (getData()), size);
 }
@@ -291,7 +286,7 @@ void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int b
 }
 
 //==============================================================================
-void MemoryBlock::loadFromHexString (const String& hex) throw()
+void MemoryBlock::loadFromHexString (const String& hex)
 {
     ensureSize (hex.length() >> 1);
     char* dest = data;
@@ -339,7 +334,7 @@ void MemoryBlock::loadFromHexString (const String& hex) throw()
 //==============================================================================
 const char* const MemoryBlock::encodingTable = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
 
-const String MemoryBlock::toBase64Encoding() const throw()
+const String MemoryBlock::toBase64Encoding() const
 {
     const size_t numChars = ((size << 3) + 5) / 6;
 
@@ -359,7 +354,7 @@ const String MemoryBlock::toBase64Encoding() const throw()
     return destString;
 }
 
-bool MemoryBlock::fromBase64Encoding (const String& s) throw()
+bool MemoryBlock::fromBase64Encoding (const String& s)
 {
     const int startPos = s.indexOfChar ('.') + 1;
 

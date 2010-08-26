@@ -29,7 +29,6 @@
 #include "juce_ArrayAllocationBase.h"
 #include "juce_ElementComparator.h"
 #include "../threads/juce_CriticalSection.h"
-#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -301,26 +300,33 @@ public:
     {
         if (indexToChange >= 0)
         {
-            ScopedPointer <ObjectClass> toDelete;
-            const ScopedLockType lock (getLock());
+            ObjectClass* toDelete = 0;
 
-            if (indexToChange < numUsed)
             {
-                if (deleteOldElement)
+                const ScopedLockType lock (getLock());
+
+                if (indexToChange < numUsed)
                 {
-                    toDelete = data.elements [indexToChange];
+                    if (deleteOldElement)
+                    {
+                        toDelete = data.elements [indexToChange];
 
-                    if (toDelete == newObject)
-                        toDelete = 0;
+                        if (toDelete == newObject)
+                            toDelete = 0;
+                    }
+
+                    data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
                 }
+                else
+                {
+                    data.ensureAllocatedSize (numUsed + 1);
+                    data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+                }
+            }
 
-                data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
-            }
-            else
-            {
-                data.ensureAllocatedSize (numUsed + 1);
-                data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-            }
+            delete toDelete; // don't want to use a ScopedPointer here because if the
+                             // object has a private destructor, both OwnedArray and
+                             // ScopedPointer would need to be friend classes..
         }
     }
 
@@ -481,25 +487,32 @@ public:
     void remove (const int indexToRemove,
                  const bool deleteObject = true)
     {
-        ScopedPointer <ObjectClass> toDelete;
-        const ScopedLockType lock (getLock());
+        ObjectClass* toDelete = 0;
 
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
-            ObjectClass** const e = data.elements + indexToRemove;
+            const ScopedLockType lock (getLock());
 
-            if (deleteObject)
-                toDelete = *e;
+            if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+            {
+                ObjectClass** const e = data.elements + indexToRemove;
 
-            --numUsed;
-            const int numToShift = numUsed - indexToRemove;
+                if (deleteObject)
+                    toDelete = *e;
 
-            if (numToShift > 0)
-                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+                --numUsed;
+                const int numToShift = numUsed - indexToRemove;
 
-            if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
+                if (numToShift > 0)
+                    memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+            }
         }
+
+        delete toDelete; // don't want to use a ScopedPointer here because if the
+                         // object has a private destructor, both OwnedArray and
+                         // ScopedPointer would need to be friend classes..
+
+        if ((numUsed << 1) < data.numAllocated)
+            minimiseStorageOverheads();
     }
 
     /** Removes and returns an object from the array without deleting it.

@@ -33,6 +33,7 @@
 #include "../colour/juce_Colours.h"
 #include "../colour/juce_ColourGradient.h"
 #include "juce_RectanglePlacement.h"
+#include "../../../containers/juce_ScopedPointer.h"
 class LowLevelGraphicsContext;
 class Image;
 class FillType;

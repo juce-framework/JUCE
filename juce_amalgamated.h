@@ -4869,18 +4869,17 @@ public:
 		@param initialiseToZero	 whether to clear the memory or just leave it uninitialised
 	*/
 	MemoryBlock (const size_t initialSize,
-				 const bool initialiseToZero = false) throw();
+				 bool initialiseToZero = false);
 
 	/** Creates a copy of another memory block. */
-	MemoryBlock (const MemoryBlock& other) throw();
+	MemoryBlock (const MemoryBlock& other);
 
 	/** Creates a memory block using a copy of a block of data.
 
 		@param dataToInitialiseFrom	 some data to copy into this block
 		@param sizeInBytes		  how much space to use
 	*/
-	MemoryBlock (const void* dataToInitialiseFrom,
-				 const size_t sizeInBytes) throw();
+	MemoryBlock (const void* dataToInitialiseFrom, size_t sizeInBytes);
 
 	/** Destructor. */
 	~MemoryBlock() throw();
@@ -4889,7 +4888,7 @@ public:
 
 		This block will be resized and copied to exactly match the other one.
 	*/
-	MemoryBlock& operator= (const MemoryBlock& other) throw();
+	MemoryBlock& operator= (const MemoryBlock& other);
 
 	/** Compares two memory blocks.
 
@@ -4937,7 +4936,7 @@ public:
 		@see ensureSize
 	*/
 	void setSize (const size_t newSize,
-				  const bool initialiseNewSpaceToZero = false) throw();
+				  bool initialiseNewSpaceToZero = false);
 
 	/** Increases the block's size only if it's smaller than a given size.
 
@@ -4949,20 +4948,19 @@ public:
 		@see setSize
 	*/
 	void ensureSize (const size_t minimumSize,
-					 const bool initialiseNewSpaceToZero = false) throw();
+					 bool initialiseNewSpaceToZero = false);
 
 	/** Fills the entire memory block with a repeated byte value.
 
 		This is handy for clearing a block of memory to zero.
 	*/
-	void fillWith (const uint8 valueToUse) throw();
+	void fillWith (uint8 valueToUse) throw();
 
 	/** Adds another block of data to the end of this one.
 
 		This block's size will be increased accordingly.
 	*/
-	void append (const void* data,
-				 const size_t numBytes) throw();
+	void append (const void* data, size_t numBytes);
 
 	/** Exchanges the contents of this and another memory block.
 		No actual copying is required for this, so it's very fast.
@@ -4998,11 +4996,11 @@ public:
 
 		If the range specified goes beyond the size of the block, it will be clipped.
 	*/
-	void removeSection (size_t startByte, size_t numBytesToRemove) throw();
+	void removeSection (size_t startByte, size_t numBytesToRemove);
 
 	/** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
 		characters in the system's default encoding. */
-	const String toString() const throw();
+	const String toString() const;
 
 	/** Parses a string of hexadecimal numbers and writes this data into the memory block.
 
@@ -5011,7 +5009,7 @@ public:
 
 		@see String::toHexString()
 	*/
-	void loadFromHexString (const String& sourceHexString) throw();
+	void loadFromHexString (const String& sourceHexString);
 
 	/** Sets a number of bits in the memory block, treating it as a long binary sequence. */
 	void setBitRange (size_t bitRangeStart,
@@ -5029,7 +5027,7 @@ public:
 
 		@see fromBase64Encoding
 	*/
-	const String toBase64Encoding() const throw();
+	const String toBase64Encoding() const;
 
 	/** Takes a string of encoded characters and turns it into binary data.
 
@@ -5038,7 +5036,7 @@ public:
 
 		@see toBase64Encoding
 	*/
-	bool fromBase64Encoding  (const String& encodedString) throw();
+	bool fromBase64Encoding  (const String& encodedString);
 
 	juce_UseDebuggingNewOperator
 
@@ -7024,26 +7022,33 @@ public:
 	{
 		if (indexToChange >= 0)
 		{
-			ScopedPointer <ObjectClass> toDelete;
-			const ScopedLockType lock (getLock());
+			ObjectClass* toDelete = 0;
 
-			if (indexToChange < numUsed)
 			{
-				if (deleteOldElement)
+				const ScopedLockType lock (getLock());
+
+				if (indexToChange < numUsed)
 				{
-					toDelete = data.elements [indexToChange];
+					if (deleteOldElement)
+					{
+						toDelete = data.elements [indexToChange];
 
-					if (toDelete == newObject)
-						toDelete = 0;
+						if (toDelete == newObject)
+							toDelete = 0;
+					}
+
+					data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
 				}
+				else
+				{
+					data.ensureAllocatedSize (numUsed + 1);
+					data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+				}
+			}
 
-				data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
-			}
-			else
-			{
-				data.ensureAllocatedSize (numUsed + 1);
-				data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-			}
+			delete toDelete; // don't want to use a ScopedPointer here because if the
+							 // object has a private destructor, both OwnedArray and
+							 // ScopedPointer would need to be friend classes..
 		}
 	}
 
@@ -7203,25 +7208,32 @@ public:
 	void remove (const int indexToRemove,
 				 const bool deleteObject = true)
 	{
-		ScopedPointer <ObjectClass> toDelete;
-		const ScopedLockType lock (getLock());
+		ObjectClass* toDelete = 0;
 
-		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
 		{
-			ObjectClass** const e = data.elements + indexToRemove;
+			const ScopedLockType lock (getLock());
 
-			if (deleteObject)
-				toDelete = *e;
+			if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+			{
+				ObjectClass** const e = data.elements + indexToRemove;
 
-			--numUsed;
-			const int numToShift = numUsed - indexToRemove;
+				if (deleteObject)
+					toDelete = *e;
 
-			if (numToShift > 0)
-				memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+				--numUsed;
+				const int numToShift = numUsed - indexToRemove;
 
-			if ((numUsed << 1) < data.numAllocated)
-				minimiseStorageOverheads();
+				if (numToShift > 0)
+					memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+			}
 		}
+
+		delete toDelete; // don't want to use a ScopedPointer here because if the
+						 // object has a private destructor, both OwnedArray and
+						 // ScopedPointer would need to be friend classes..
+
+		if ((numUsed << 1) < data.numAllocated)
+			minimiseStorageOverheads();
 	}
 
 	/** Removes and returns an object from the array without deleting it.
