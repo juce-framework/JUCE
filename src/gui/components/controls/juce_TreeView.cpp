@@ -1427,6 +1427,17 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
     const int indent = getIndentX();
     const int itemW = itemWidth < 0 ? width - indent : itemWidth;
 
+    {
+        g.saveState();
+        g.setOrigin (indent, 0);
+
+        if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0,
+                                drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
+            paintItem (g, itemW, itemHeight);
+
+        g.restoreState();
+    }
+
     g.setColour (ownerView->findColour (TreeView::linesColourId));
 
     const float halfH = itemHeight * 0.5f;
@@ -1487,17 +1498,6 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
             g.restoreState();
         }
-    }
-
-    {
-        g.saveState();
-        g.setOrigin (indent, 0);
-
-        if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0,
-                                drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
-            paintItem (g, itemW, itemHeight);
-
-        g.restoreState();
     }
 
     if (isOpen())

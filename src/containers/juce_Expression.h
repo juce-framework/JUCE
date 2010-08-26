@@ -113,9 +113,11 @@ public:
 
         /** Returns the value of a symbol.
             If the symbol is unknown, this can throw an Expression::EvaluationError exception.
+            The member value is set to the part of the symbol that followed the dot, if there is
+            one, e.g. for "foo.bar", symbol = "foo" and member = "bar".
             @throws Expression::EvaluationError
         */
-        virtual const Expression getSymbolValue (const String& symbol) const;
+        virtual const Expression getSymbolValue (const String& symbol, const String& member) const;
 
         /** Executes a named function.
             If the function name is unknown, this can throw an Expression::EvaluationError exception.

@@ -263,8 +263,6 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
 
     if (fc.browseForFileToSave (warnAboutOverwritingExistingFiles))
     {
-        setLastDocumentOpened (fc.getResult());
-
         File chosen (fc.getResult());
         if (chosen.getFileExtension().isEmpty())
         {
@@ -285,6 +283,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
             }
         }
 
+        setLastDocumentOpened (chosen);
         return saveAs (chosen, false, false, true);
     }
 

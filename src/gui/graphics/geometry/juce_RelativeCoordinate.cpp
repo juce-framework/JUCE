@@ -185,7 +185,7 @@ const String RelativeCoordinate::toString() const
 void RelativeCoordinate::renameSymbolIfUsed (const String& oldName, const String& newName,
                                              const Expression::EvaluationContext* context)
 {
-    jassert (newName.isNotEmpty() && newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
+    jassert (newName.isNotEmpty() && newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_"));
 
     if (term.referencesSymbol (oldName, *context))
     {

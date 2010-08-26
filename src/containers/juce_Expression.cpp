@@ -70,7 +70,15 @@ public:
     class Symbol  : public Term
     {
     public:
-        Symbol (const String& symbol_) : symbol (symbol_) {}
+        explicit Symbol (const String& symbol_)
+            : mainSymbol (symbol_.upToFirstOccurrenceOf (".", false, false).trim()),
+              member (symbol_.fromFirstOccurrenceOf (".", false, false).trim())
+        {}
+
+        Symbol (const String& symbol_, const String& member_)
+            : mainSymbol (symbol_),
+              member (member_)
+        {}
 
         double evaluate (const EvaluationContext& c, int recursionDepth) const
         {
@@ -79,7 +87,7 @@ public:
 
             try
             {
-                return c.getSymbolValue (symbol).term->evaluate (c, recursionDepth);
+                return c.getSymbolValue (mainSymbol, member).term->evaluate (c, recursionDepth);
             }
             catch (...)
             {}
@@ -87,23 +95,35 @@ public:
             return 0;
         }
 
-        Term* clone() const                                     { return new Symbol (symbol); }
+        Term* clone() const                                     { return new Symbol (mainSymbol, member); }
         int getNumInputs() const                                { return 0; }
         Term* getInput (int) const                              { return 0; }
-        const String toString() const                           { return symbol; }
+
+        const String toString() const
+        {
+            return member.isEmpty() ? mainSymbol
+                                    : mainSymbol + "." + member;
+        }
 
         bool referencesSymbol (const String& s, const EvaluationContext& c, int recursionDepth) const
         {
-            if (s == symbol)
+            if (s == mainSymbol)
                 return true;
 
             if (++recursionDepth > 256)
                 throw EvaluationError ("Recursive symbol references");
 
-            return c.getSymbolValue (symbol).term->referencesSymbol (s, c, recursionDepth);
+            try
+            {
+                return c.getSymbolValue (mainSymbol, member).term->referencesSymbol (s, c, recursionDepth);
+            }
+            catch (EvaluationError&)
+            {
+                return false;
+            }
         }
 
-        String symbol;
+        String mainSymbol, member;
     };
 
     //==============================================================================
@@ -383,6 +403,9 @@ public:
         if (c != 0 && (c->isResolutionTarget || ! mustBeFlagged))
             return c;
 
+        if (dynamic_cast<Function*> (term) != 0)
+            return 0;
+
         int i;
         const int numIns = term->getNumInputs();
         for (i = 0; i < numIns; ++i)
@@ -416,20 +439,12 @@ public:
 
     static bool renameSymbol (Term* const t, const String& oldName, const String& newName)
     {
-        Symbol* sym = dynamic_cast <Symbol*> (t);
+        Symbol* const sym = dynamic_cast <Symbol*> (t);
 
-        if (sym != 0)
+        if (sym != 0 && sym->mainSymbol == oldName)
         {
-            if (sym->symbol == oldName)
-            {
-                sym->symbol = newName;
-                return true;
-            }
-            else if (sym->symbol.startsWith (oldName + "."))
-            {
-                sym->symbol = newName + "." + sym->symbol.substring (0, oldName.length() + 1);
-                return true;
-            }
+            sym->mainSymbol = newName;
+            return true;
         }
 
         bool anyChanged = false;
@@ -557,6 +572,12 @@ public:
                 textIndex = i;
             }
 
+            if (text[i] == '-')
+            {
+                ++i;
+                skipWhitespace (i);
+            }
+
             int numDigits = 0;
 
             while (isDecimalDigit (text[i]))
@@ -602,9 +623,9 @@ public:
                     return 0;
             }
 
-            Constant* t = new Constant (String (text + textIndex, i - textIndex).getDoubleValue(), isResolutionTarget);
+            const int start = textIndex;
             textIndex = i;
-            return t;
+            return new Constant (String (text + start, i - start).getDoubleValue(), isResolutionTarget);
         }
 
         const TermPtr readMultiplyOrDivideExpression()
@@ -835,7 +856,7 @@ const Expression Expression::adjustedToGiveNewResult (const double targetValue,
         const Helpers::TermPtr reverseTerm (parent->createTermToEvaluateInput (context, termToAdjust, targetValue, newTerm));
 
         if (reverseTerm == 0)
-            return Expression();
+            return Expression (targetValue);
 
         termToAdjust->value = reverseTerm->evaluate (context, 0);
     }
@@ -845,7 +866,7 @@ const Expression Expression::adjustedToGiveNewResult (const double targetValue,
 
 const Expression Expression::withRenamedSymbol (const String& oldSymbol, const String& newSymbol) const
 {
-    jassert (newSymbol.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
+    jassert (newSymbol.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_"));
 
     Expression newExpression (term->clone());
     Helpers::renameSymbol (newExpression.term, oldSymbol, newSymbol);
@@ -906,9 +927,9 @@ Expression::EvaluationError::EvaluationError (const String& message)
 Expression::EvaluationContext::EvaluationContext()  {}
 Expression::EvaluationContext::~EvaluationContext() {}
 
-const Expression Expression::EvaluationContext::getSymbolValue (const String& symbol) const
+const Expression Expression::EvaluationContext::getSymbolValue (const String& symbol, const String& member) const
 {
-    throw EvaluationError ("Unknown symbol: \"" + symbol + "\"");
+    throw EvaluationError ("Unknown symbol: \"" + symbol + (member.isEmpty() ? "\"" : ("." + member + "\"")));
 }
 
 double Expression::EvaluationContext::evaluateFunction (const String& functionName, const double* parameters, int numParams) const

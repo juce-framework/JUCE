@@ -247,9 +247,9 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
     }
 }
 
-const Expression DrawableComposite::getSymbolValue (const String& symbol) const
+const Expression DrawableComposite::getSymbolValue (const String& symbol, const String& member) const
 {
-    jassert (! symbol.containsChar ('.')) // the only symbols available in a Drawable are markers.
+    jassert (member.isEmpty()) // the only symbols available in a Drawable are markers.
 
     int i;
     for (i = 0; i < markersX.size(); ++i)
@@ -266,7 +266,7 @@ const Expression DrawableComposite::getSymbolValue (const String& symbol) const
             return m->position.getExpression();
     }
 
-    return Expression::EvaluationContext::getSymbolValue (symbol);
+    return Expression::EvaluationContext::getSymbolValue (symbol, member);
 }
 
 const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool includeMarkers) const

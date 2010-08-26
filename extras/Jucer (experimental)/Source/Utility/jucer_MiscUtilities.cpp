@@ -333,11 +333,8 @@ void RelativeRectangleLayoutManager::applyLayout()
     }
 }
 
-const Expression RelativeRectangleLayoutManager::getSymbolValue (const String& symbol) const
+const Expression RelativeRectangleLayoutManager::getSymbolValue (const String& objectName, const String& edge) const
 {
-    const String objectName (symbol.upToFirstOccurrenceOf (".", false, false).trim());
-    const String edge (symbol.fromFirstOccurrenceOf (".", false, false).trim());
-
     if (objectName == RelativeCoordinate::Strings::parent)
     {
         if (edge == RelativeCoordinate::Strings::right)     return Expression ((double) parent->getWidth());

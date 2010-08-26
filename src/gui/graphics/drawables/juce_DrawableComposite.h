@@ -201,7 +201,7 @@ public:
     /** @internal */
     const Identifier getValueTreeType() const    { return valueTreeType; }
     /** @internal */
-    const Expression getSymbolValue (const String& symbol) const;
+    const Expression getSymbolValue (const String& symbol, const String& member) const;
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */

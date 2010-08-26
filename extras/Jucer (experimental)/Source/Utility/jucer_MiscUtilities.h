@@ -169,7 +169,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    const Expression getSymbolValue (const String& symbol) const;
+    const Expression getSymbolValue (const String& symbol, const String& member) const;
     /** @internal */
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
     /** @internal */
