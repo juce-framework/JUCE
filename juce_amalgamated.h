@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	55
+#define JUCE_BUILDNUMBER	56
 
 /** Current Juce version number.
 
@@ -60797,7 +60797,7 @@ public:
 };
 
 /**
-	A type of ImageFileFormat for reading and writing PNG files.
+	A subclass of ImageFileFormat for reading and writing PNG files.
 
 	@see ImageFileFormat, JPEGImageFormat
 */
@@ -60815,7 +60815,7 @@ public:
 };
 
 /**
-	A type of ImageFileFormat for reading and writing JPEG files.
+	A subclass of ImageFileFormat for reading and writing JPEG files.
 
 	@see ImageFileFormat, PNGImageFormat
 */
@@ -60840,6 +60840,24 @@ public:
 
 private:
 	float quality;
+};
+
+/**
+	A subclass of ImageFileFormat for reading GIF files.
+
+	@see ImageFileFormat, PNGImageFormat, JPEGImageFormat
+*/
+class JUCE_API  GIFImageFormat  : public ImageFileFormat
+{
+public:
+
+	GIFImageFormat();
+	~GIFImageFormat();
+
+	const String getFormatName();
+	bool canUnderstand (InputStream& input);
+	const Image decodeImage (InputStream& input);
+	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 
 #endif   // __JUCE_IMAGEFILEFORMAT_JUCEHEADER__

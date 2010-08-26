@@ -707,7 +707,6 @@
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_Rectangle.h"/>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RectangleList.h"/>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.h"/>
-    <ClInclude Include="..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.h"/>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_CameraDevice.h"/>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_Image.h"/>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_ImageCache.h"/>

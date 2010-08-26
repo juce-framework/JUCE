@@ -768,7 +768,6 @@
             <Filter Name="imaging">
               <Filter Name="image_file_formats">
                 <File RelativePath="..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.cpp"/>
-                <File RelativePath="..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.h"/>
                 <File RelativePath="..\..\src\gui\graphics\imaging\image_file_formats\juce_JPEGLoader.cpp"/>
                 <File RelativePath="..\..\src\gui\graphics\imaging\image_file_formats\juce_PNGLoader.cpp"/>
               </Filter>

@@ -1129,8 +1129,6 @@
             <GROUP id="UpDEgf4Fr" name="image_file_formats">
               <FILE id="82P2bqp" name="juce_GIFLoader.cpp" compile="1" resource="0"
                     file="src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.cpp"/>
-              <FILE id="mvmvVPw1S" name="juce_GIFLoader.h" compile="0" resource="0"
-                    file="src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.h"/>
               <FILE id="SuwswXcCp" name="juce_JPEGLoader.cpp" compile="1" resource="0"
                     file="src/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp"/>
               <FILE id="GbTEpJRyd" name="juce_PNGLoader.cpp" compile="1" resource="0"

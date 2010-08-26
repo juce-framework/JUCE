@@ -770,4 +770,42 @@ LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()
     return new CoreGraphicsContext (context, height);
 }
 
+//==============================================================================
+#if USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
+const Image juce_loadWithCoreImage (InputStream& input)
+{
+    MemoryBlock data;
+    input.readIntoMemoryBlock (data, -1);
+
+    CGDataProviderRef provider = CGDataProviderCreateWithData (0, data.getData(), data.getSize(), 0);
+    CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider (provider, 0);
+    CGDataProviderRelease (provider);
+
+    if (imageSource != 0)
+    {
+        CGImageRef loadedImage = CGImageSourceCreateImageAtIndex (imageSource, 0, 0);
+        CFRelease (imageSource);
+
+        if (loadedImage != 0)
+        {
+            const bool hasAlphaChan = CGImageGetAlphaInfo (loadedImage) != kCGImageAlphaNone;
+            Image image (hasAlphaChan ? Image::ARGB : Image::RGB,
+                         (int) CGImageGetWidth (loadedImage), (int) CGImageGetHeight (loadedImage),
+                         hasAlphaChan, Image::NativeImage);
+
+            CoreGraphicsImage* const cgImage = dynamic_cast<CoreGraphicsImage*> (image.getSharedImage());
+            jassert (cgImage != 0); // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsImage class should have been used.
+
+            CGContextDrawImage (cgImage->context, CGRectMake (0, 0, image.getWidth(), image.getHeight()), loadedImage);
+            CGContextFlush (cgImage->context);
+            CFRelease (loadedImage);
+
+            return image;
+        }
+    }
+
+    return Image::null;
+}
+#endif
+
 #endif

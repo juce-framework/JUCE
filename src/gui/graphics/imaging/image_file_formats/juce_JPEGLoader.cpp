@@ -249,8 +249,15 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
     return false;
 }
 
+#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
+  const Image juce_loadWithCoreImage (InputStream& input);
+#endif
+
 const Image JPEGImageFormat::decodeImage (InputStream& in)
 {
+#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
+    return juce_loadWithCoreImage (in);
+#else
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
@@ -344,6 +351,7 @@ const Image JPEGImageFormat::decodeImage (InputStream& in)
     }
 
     return image;
+#endif
 }
 
 bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)

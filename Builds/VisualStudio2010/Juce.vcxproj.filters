@@ -2043,9 +2043,6 @@
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.h">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.h">
-      <Filter>Juce\Source\gui\graphics\imaging\image_file_formats</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_CameraDevice.h">
       <Filter>Juce\Source\gui\graphics\imaging</Filter>
     </ClInclude>

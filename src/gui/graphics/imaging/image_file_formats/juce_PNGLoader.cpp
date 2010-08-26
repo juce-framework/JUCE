@@ -148,8 +148,15 @@ bool PNGImageFormat::canUnderstand (InputStream& in)
             && header[3] == 'G';
 }
 
+#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
+  const Image juce_loadWithCoreImage (InputStream& input);
+#endif
+
 const Image PNGImageFormat::decodeImage (InputStream& in)
 {
+#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
+    return juce_loadWithCoreImage (in);
+#else
     using namespace pnglibNamespace;
     Image image;
 
@@ -257,6 +264,7 @@ const Image PNGImageFormat::decodeImage (InputStream& in)
     }
 
     return image;
+#endif
 }
 
 bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)

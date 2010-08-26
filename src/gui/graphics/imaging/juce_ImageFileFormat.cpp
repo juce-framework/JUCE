@@ -31,43 +31,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../io/streams/juce_MemoryInputStream.h"
 #include "../../../io/files/juce_FileInputStream.h"
 #include "../../../io/streams/juce_BufferedInputStream.h"
-#include "image_file_formats/juce_GIFLoader.h"
-
-
-//==============================================================================
-class GIFImageFormat  : public ImageFileFormat
-{
-public:
-    GIFImageFormat()    {}
-    ~GIFImageFormat()   {}
-
-    const String getFormatName()
-    {
-        return "GIF";
-    }
-
-    bool canUnderstand (InputStream& in)
-    {
-        const int bytesNeeded = 4;
-        char header [bytesNeeded];
-
-        return (in.read (header, bytesNeeded) == bytesNeeded)
-                && header[0] == 'G'
-                && header[1] == 'I'
-                && header[2] == 'F';
-    }
-
-    const Image decodeImage (InputStream& in)
-    {
-        const ScopedPointer <GIFLoader> loader (new GIFLoader (in));
-        return loader->getImage();
-    }
-
-    bool writeImageToStream (const Image& /*sourceImage*/, OutputStream& /*destStream*/)
-    {
-        return false;
-    }
-};
 
 
 //==============================================================================
