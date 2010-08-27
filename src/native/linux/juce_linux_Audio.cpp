@@ -27,9 +27,6 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_ALSA
 
-//==============================================================================
-static const int maxNumChans = 64;
-
 
 //==============================================================================
 static void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)

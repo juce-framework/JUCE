@@ -36,8 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 #if JUCE_DEBUG
-static CriticalSection activeStreamLock;
-static Array<void*> activeStreams;
+static Array<void*, CriticalSection> activeStreams;
 
 void juce_CheckForDanglingStreams()
 {
@@ -54,18 +53,16 @@ void juce_CheckForDanglingStreams()
 //==============================================================================
 OutputStream::OutputStream()
 {
-#if JUCE_DEBUG
-    const ScopedLock sl (activeStreamLock);
+  #if JUCE_DEBUG
     activeStreams.add (this);
-#endif
+  #endif
 }
 
 OutputStream::~OutputStream()
 {
-#if JUCE_DEBUG
-    const ScopedLock sl (activeStreamLock);
+  #if JUCE_DEBUG
     activeStreams.removeValue (this);
-#endif
+  #endif
 }
 
 //==============================================================================

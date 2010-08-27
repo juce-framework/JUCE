@@ -140,7 +140,7 @@ public:
                                 method of the broadcast listeners in the other app.
         @see registerBroadcastListener, ActionListener
     */
-    static void broadcastMessage (const String& messageText) throw();
+    static void broadcastMessage (const String& messageText);
 
     /** Registers a listener to get told about broadcast messages.
 

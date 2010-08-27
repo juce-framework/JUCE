@@ -29,9 +29,9 @@
 #if JUCE_ALSA
 
 //==============================================================================
-static snd_seq_t* iterateDevices (const bool forInput,
-                                  StringArray& deviceNamesFound,
-                                  const int deviceIndexToOpen)
+static snd_seq_t* iterateMidiDevices (const bool forInput,
+                                      StringArray& deviceNamesFound,
+                                      const int deviceIndexToOpen)
 {
     snd_seq_t* returnedHandle = 0;
     snd_seq_t* seqHandle;
@@ -118,8 +118,8 @@ static snd_seq_t* iterateDevices (const bool forInput,
     return returnedHandle;
 }
 
-static snd_seq_t* createDevice (const bool forInput,
-                                const String& deviceNameToOpen)
+static snd_seq_t* createMidiDevice (const bool forInput,
+                                    const String& deviceNameToOpen)
 {
     snd_seq_t* seqHandle = 0;
 
@@ -208,7 +208,7 @@ private:
 const StringArray MidiOutput::getDevices()
 {
     StringArray devices;
-    iterateDevices (false, devices, -1);
+    iterateMidiDevices (false, devices, -1);
     return devices;
 }
 
@@ -222,7 +222,7 @@ MidiOutput* MidiOutput::openDevice (int deviceIndex)
     MidiOutput* newDevice = 0;
 
     StringArray devices;
-    snd_seq_t* const handle = iterateDevices (false, devices, deviceIndex);
+    snd_seq_t* const handle = iterateMidiDevices (false, devices, deviceIndex);
 
     if (handle != 0)
     {
@@ -237,7 +237,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 {
     MidiOutput* newDevice = 0;
 
-    snd_seq_t* const handle = createDevice (false, deviceName);
+    snd_seq_t* const handle = createMidiDevice (false, deviceName);
 
     if (handle != 0)
     {
@@ -385,7 +385,7 @@ int MidiInput::getDefaultDeviceIndex()
 const StringArray MidiInput::getDevices()
 {
     StringArray devices;
-    iterateDevices (true, devices, -1);
+    iterateMidiDevices (true, devices, -1);
     return devices;
 }
 
@@ -394,7 +394,7 @@ MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
     MidiInput* newDevice = 0;
 
     StringArray devices;
-    snd_seq_t* const handle = iterateDevices (true, devices, deviceIndex);
+    snd_seq_t* const handle = iterateMidiDevices (true, devices, deviceIndex);
 
     if (handle != 0)
     {
@@ -409,7 +409,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 {
     MidiInput* newDevice = 0;
 
-    snd_seq_t* const handle = createDevice (true, deviceName);
+    snd_seq_t* const handle = createMidiDevice (true, deviceName);
 
     if (handle != 0)
     {

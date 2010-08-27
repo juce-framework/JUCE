@@ -38,8 +38,7 @@ class ActionMessage  : public Message
 public:
     const String message;
 
-    ActionMessage (const String& messageText,
-                   void* const listener_) throw()
+    ActionMessage (const String& messageText, void* const listener_) throw()
         : message (messageText)
     {
         pointerParameter = listener_;
@@ -56,15 +55,15 @@ private:
 };
 
 //==============================================================================
-ActionListenerList::ActionListenerList() throw()
+ActionListenerList::ActionListenerList()
 {
 }
 
-ActionListenerList::~ActionListenerList() throw()
+ActionListenerList::~ActionListenerList()
 {
 }
 
-void ActionListenerList::addActionListener (ActionListener* const listener) throw()
+void ActionListenerList::addActionListener (ActionListener* const listener)
 {
     const ScopedLock sl (actionListenerLock_);
 
@@ -75,7 +74,7 @@ void ActionListenerList::addActionListener (ActionListener* const listener) thro
         actionListeners_.add (listener);
 }
 
-void ActionListenerList::removeActionListener  (ActionListener* const listener) throw()
+void ActionListenerList::removeActionListener  (ActionListener* const listener)
 {
     const ScopedLock sl (actionListenerLock_);
 
@@ -84,7 +83,7 @@ void ActionListenerList::removeActionListener  (ActionListener* const listener) 
     actionListeners_.removeValue (listener);
 }
 
-void ActionListenerList::removeAllActionListeners() throw()
+void ActionListenerList::removeAllActionListeners()
 {
     const ScopedLock sl (actionListenerLock_);
     actionListeners_.clear();

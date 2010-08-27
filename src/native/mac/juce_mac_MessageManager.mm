@@ -393,7 +393,9 @@ static bool isEventBlockedByModalComps (NSEvent* e)
             }
             else
             {
-                if (JUCEApplication::isStandaloneApp()
+                NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
+
+                if ((nsViewPeer == 0 || ! nsViewPeer->isSharedWindow)
                         ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
                         : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
                     return false;
@@ -472,7 +474,7 @@ bool juce_postMessageToSystemQueue (Message* message)
     return true;
 }
 
-void MessageManager::broadcastMessage (const String& value) throw()
+void MessageManager::broadcastMessage (const String& value)
 {
 }
 

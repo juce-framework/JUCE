@@ -177,12 +177,11 @@ bool juce_postMessageToSystemQueue (Message* message)
     return true;
 }
 
-void MessageManager::broadcastMessage (const String& value) throw()
+void MessageManager::broadcastMessage (const String& value)
 {
 }
 
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback,
-                                                   void* data)
+void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)
 {
     if (isThisTheMessageThread())
     {

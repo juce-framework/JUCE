@@ -46,26 +46,26 @@ class JUCE_API  ChangeListenerList  : public MessageListener
 public:
     //==============================================================================
     /** Creates an empty list. */
-    ChangeListenerList() throw();
+    ChangeListenerList();
 
     /** Destructor. */
-    ~ChangeListenerList() throw();
+    ~ChangeListenerList();
 
     //==============================================================================
     /** Adds a listener to the list.
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void addChangeListener (ChangeListener* listener) throw();
+    void addChangeListener (ChangeListener* listener);
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void removeChangeListener (ChangeListener* listener) throw();
+    void removeChangeListener (ChangeListener* listener);
 
     /** Removes all listeners from the list. */
-    void removeAllChangeListeners() throw();
+    void removeAllChangeListeners();
 
     //==============================================================================
     /** Posts an asynchronous change message to all the listeners.
@@ -85,7 +85,7 @@ public:
                                         and can be any value the application needs
         @see sendSynchronousChangeMessage
     */
-    void sendChangeMessage (void* objectThatHasChanged) throw();
+    void sendChangeMessage (void* objectThatHasChanged);
 
     /** This will synchronously callback all the ChangeListeners.
 

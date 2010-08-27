@@ -41,7 +41,7 @@ AsyncUpdater::~AsyncUpdater()
 {
 }
 
-void AsyncUpdater::triggerAsyncUpdate() throw()
+void AsyncUpdater::triggerAsyncUpdate()
 {
     if (! asyncMessagePending)
     {

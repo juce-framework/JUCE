@@ -46,26 +46,26 @@ class JUCE_API  ActionListenerList  : public MessageListener
 public:
     //==============================================================================
     /** Creates an empty list. */
-    ActionListenerList() throw();
+    ActionListenerList();
 
     /** Destructor. */
-    ~ActionListenerList() throw();
+    ~ActionListenerList();
 
     //==============================================================================
     /** Adds a listener to the list.
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void addActionListener (ActionListener* listener) throw();
+    void addActionListener (ActionListener* listener);
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void removeActionListener (ActionListener* listener) throw();
+    void removeActionListener (ActionListener* listener);
 
     /** Removes all listeners from the list. */
-    void removeAllActionListeners() throw();
+    void removeAllActionListeners();
 
     /** Broadcasts a message to all the registered listeners.
 

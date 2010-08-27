@@ -104,7 +104,7 @@ static const String getMangledParameters (const StringPairArray& parameters)
     for (int i = 0; i < parameters.size(); ++i)
     {
         if (i > 0)
-            p += '&';
+            p << '&';
 
         p << URL::addEscapeChars (parameters.getAllKeys() [i], true)
           << '='

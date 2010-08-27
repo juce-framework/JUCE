@@ -44,12 +44,12 @@ ChangeBroadcaster::~ChangeBroadcaster()
     jassert (MessageManager::instance != 0);
 }
 
-void ChangeBroadcaster::addChangeListener (ChangeListener* const listener) throw()
+void ChangeBroadcaster::addChangeListener (ChangeListener* const listener)
 {
     changeListenerList.addChangeListener (listener);
 }
 
-void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener) throw()
+void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener)
 {
     jassert (changeListenerList.isValidMessageListener());
 
@@ -57,12 +57,12 @@ void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener) th
         changeListenerList.removeChangeListener (listener);
 }
 
-void ChangeBroadcaster::removeAllChangeListeners() throw()
+void ChangeBroadcaster::removeAllChangeListeners()
 {
     changeListenerList.removeAllChangeListeners();
 }
 
-void ChangeBroadcaster::sendChangeMessage (void* objectThatHasChanged) throw()
+void ChangeBroadcaster::sendChangeMessage (void* objectThatHasChanged)
 {
     changeListenerList.sendChangeMessage (objectThatHasChanged);
 }

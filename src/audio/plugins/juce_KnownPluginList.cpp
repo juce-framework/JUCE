@@ -49,7 +49,7 @@ void KnownPluginList::clear()
     }
 }
 
-PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const throw()
+PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
 {
     for (int i = 0; i < types.size(); ++i)
         if (types.getUnchecked(i)->fileOrIdentifier == fileOrIdentifier)
@@ -58,7 +58,7 @@ PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifi
     return 0;
 }
 
-PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const throw()
+PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
 {
     for (int i = 0; i < types.size(); ++i)
         if (types.getUnchecked(i)->createIdentifierString() == identifierString)
@@ -93,7 +93,7 @@ void KnownPluginList::removeType (const int index)
     sendChangeMessage (this);
 }
 
-static Time getFileModTime (const String& fileOrIdentifier) throw()
+static const Time getPluginFileModTime (const String& fileOrIdentifier)
 {
     if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
         return File (fileOrIdentifier).getLastModificationTime();
@@ -106,7 +106,7 @@ static bool timesAreDifferent (const Time& t1, const Time& t2) throw()
     return t1 != t2 || t1 == Time (0);
 }
 
-bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const throw()
+bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const
 {
     if (getTypeForFile (fileOrIdentifier) == 0)
         return false;
@@ -116,7 +116,7 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const t
         const PluginDescription* const d = types.getUnchecked(i);
 
         if (d->fileOrIdentifier == fileOrIdentifier
-             && timesAreDifferent (d->lastFileModTime, getFileModTime (fileOrIdentifier)))
+             && timesAreDifferent (d->lastFileModTime, getPluginFileModTime (fileOrIdentifier)))
         {
             return false;
         }
@@ -143,7 +143,7 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
 
             if (d->fileOrIdentifier == fileOrIdentifier)
             {
-                if (timesAreDifferent (d->lastFileModTime, getFileModTime (fileOrIdentifier)))
+                if (timesAreDifferent (d->lastFileModTime, getPluginFileModTime (fileOrIdentifier)))
                     needsRescanning = true;
                 else
                     typesFound.add (new PluginDescription (*d));
@@ -217,7 +217,7 @@ public:
     PluginSorter() throw() {}
 
     int compareElements (const PluginDescription* const first,
-                         const PluginDescription* const second) const throw()
+                         const PluginDescription* const second) const
     {
         int diff = 0;
 

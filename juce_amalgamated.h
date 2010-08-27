@@ -8093,7 +8093,7 @@ public:
 
 		@see inMilliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
 	*/
-	const String getDescription (const String& returnValueForZeroTime = "0") const throw();
+	const String getDescription (const String& returnValueForZeroTime = "0") const;
 
 	/** Compares two RelativeTimes. */
 	bool operator== (const RelativeTime& other) const throw();
@@ -8237,7 +8237,7 @@ public:
 									it'll return the long form, e.g. "January"
 		@see getMonth
 	*/
-	const String getMonthName (bool threeLetterVersion) const throw();
+	const String getMonthName (bool threeLetterVersion) const;
 
 	/** Returns the day of the month.
 
@@ -8256,7 +8256,7 @@ public:
 		@param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
 									false, it'll return the full version, e.g. "Tuesday".
 	*/
-	const String getWeekdayName (bool threeLetterVersion) const throw();
+	const String getWeekdayName (bool threeLetterVersion) const;
 
 	/** Returns the number of hours since midnight.
 
@@ -8352,7 +8352,7 @@ public:
 
 		@see toString
 	*/
-	const String formatted (const String& format) const throw();
+	const String formatted (const String& format) const;
 
 	/** Adds a RelativeTime to this time and returns the result. */
 	const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
@@ -8395,7 +8395,7 @@ public:
 									false, it'll return the full version, e.g. "Tuesday".
 	*/
 	static const String getWeekdayName (int dayNumber,
-										bool threeLetterVersion) throw();
+										bool threeLetterVersion);
 
 	/** Returns the name of one of the months.
 
@@ -8404,7 +8404,7 @@ public:
 									it'll return the long form, e.g. "January"
 	*/
 	static const String getMonthName (int monthNumber,
-									  bool threeLetterVersion) throw();
+									  bool threeLetterVersion);
 
 	// Static methods for getting system timers directly..
 
@@ -10068,15 +10068,15 @@ public:
 		@param ignoreCaseOfKeyNames	 if true, the names of properties are compared in a
 											case-insensitive way
 	*/
-	PropertySet (bool ignoreCaseOfKeyNames = false) throw();
+	PropertySet (bool ignoreCaseOfKeyNames = false);
 
 	/** Creates a copy of another PropertySet.
 	*/
-	PropertySet (const PropertySet& other) throw();
+	PropertySet (const PropertySet& other);
 
 	/** Copies another PropertySet over this one.
 	*/
-	PropertySet& operator= (const PropertySet& other) throw();
+	PropertySet& operator= (const PropertySet& other);
 
 	/** Destructor. */
 	virtual ~PropertySet();
@@ -10185,7 +10185,7 @@ public:
 
 		@see restoreFromXml
 	*/
-	XmlElement* createXml (const String& nodeName) const throw();
+	XmlElement* createXml (const String& nodeName) const;
 
 	/** Reloads a set of properties that were previously stored as XML.
 
@@ -10193,7 +10193,7 @@ public:
 
 		@see createXml
 	*/
-	void restoreFromXml (const XmlElement& xml) throw();
+	void restoreFromXml (const XmlElement& xml);
 
 	/** Sets up a second PopertySet that will be used to look up any values that aren't
 		set in this one.
@@ -12108,7 +12108,7 @@ public:
 		It's thread-safe to call this method from any number of threads without
 		needing to worry about locking.
 	*/
-	void triggerAsyncUpdate() throw();
+	void triggerAsyncUpdate();
 
 	/** This will stop any pending updates from happening.
 
@@ -12138,7 +12138,7 @@ private:
 	class AsyncUpdaterInternal  : public MessageListener
 	{
 	public:
-		AsyncUpdaterInternal() throw() {}
+		AsyncUpdaterInternal() {}
 		~AsyncUpdaterInternal() {}
 
 		void handleMessage (const Message&);
@@ -12847,25 +12847,25 @@ class JUCE_API  ChangeListenerList  : public MessageListener
 public:
 
 	/** Creates an empty list. */
-	ChangeListenerList() throw();
+	ChangeListenerList();
 
 	/** Destructor. */
-	~ChangeListenerList() throw();
+	~ChangeListenerList();
 
 	/** Adds a listener to the list.
 
 		(Trying to add a listener that's already on the list will have no effect).
 	*/
-	void addChangeListener (ChangeListener* listener) throw();
+	void addChangeListener (ChangeListener* listener);
 
 	/** Removes a listener from the list.
 
 		If the listener isn't on the list, this won't have any effect.
 	*/
-	void removeChangeListener (ChangeListener* listener) throw();
+	void removeChangeListener (ChangeListener* listener);
 
 	/** Removes all listeners from the list. */
-	void removeAllChangeListeners() throw();
+	void removeAllChangeListeners();
 
 	/** Posts an asynchronous change message to all the listeners.
 
@@ -12884,7 +12884,7 @@ public:
 										and can be any value the application needs
 		@see sendSynchronousChangeMessage
 	*/
-	void sendChangeMessage (void* objectThatHasChanged) throw();
+	void sendChangeMessage (void* objectThatHasChanged);
 
 	/** This will synchronously callback all the ChangeListeners.
 
@@ -12937,16 +12937,16 @@ public:
 
 		(Trying to add a listener that's already on the list will have no effect).
 	*/
-	void addChangeListener (ChangeListener* listener) throw();
+	void addChangeListener (ChangeListener* listener);
 
 	/** Removes a listener from the list.
 
 		If the listener isn't on the list, this won't have any effect.
 	*/
-	void removeChangeListener (ChangeListener* listener) throw();
+	void removeChangeListener (ChangeListener* listener);
 
 	/** Removes all listeners from the list. */
-	void removeAllChangeListeners() throw();
+	void removeAllChangeListeners();
 
 	/** Broadcasts a change message to all the registered listeners.
 
@@ -12956,7 +12956,7 @@ public:
 
 		@see ChangeListenerList::sendActionMessage
 	*/
-	void sendChangeMessage (void* objectThatHasChanged) throw();
+	void sendChangeMessage (void* objectThatHasChanged);
 
 	/** Sends a synchronous change message to all the registered listeners.
 
@@ -39860,14 +39860,14 @@ public:
 
 	/** Looks for a type in the list which comes from this file.
 	*/
-	PluginDescription* getTypeForFile (const String& fileOrIdentifier) const throw();
+	PluginDescription* getTypeForFile (const String& fileOrIdentifier) const;
 
 	/** Looks for a type in the list which matches a plugin type ID.
 
 		The identifierString parameter must have been created by
 		PluginDescription::createIdentifierString().
 	*/
-	PluginDescription* getTypeForIdentifierString (const String& identifierString) const throw();
+	PluginDescription* getTypeForIdentifierString (const String& identifierString) const;
 
 	/** Adds a type manually from its description. */
 	bool addType (const PluginDescription& type);
@@ -39895,7 +39895,7 @@ public:
 	/** Returns true if the specified file is already known about and if it
 		hasn't been modified since our entry was created.
 	*/
-	bool isListingUpToDate (const String& possiblePluginFileOrIdentifier) const throw();
+	bool isListingUpToDate (const String& possiblePluginFileOrIdentifier) const;
 
 	/** Scans and adds a bunch of files that might have been dragged-and-dropped.
 
@@ -42093,25 +42093,25 @@ class JUCE_API  ActionListenerList  : public MessageListener
 public:
 
 	/** Creates an empty list. */
-	ActionListenerList() throw();
+	ActionListenerList();
 
 	/** Destructor. */
-	~ActionListenerList() throw();
+	~ActionListenerList();
 
 	/** Adds a listener to the list.
 
 		(Trying to add a listener that's already on the list will have no effect).
 	*/
-	void addActionListener (ActionListener* listener) throw();
+	void addActionListener (ActionListener* listener);
 
 	/** Removes a listener from the list.
 
 		If the listener isn't on the list, this won't have any effect.
 	*/
-	void removeActionListener (ActionListener* listener) throw();
+	void removeActionListener (ActionListener* listener);
 
 	/** Removes all listeners from the list. */
-	void removeAllActionListeners() throw();
+	void removeAllActionListeners();
 
 	/** Broadcasts a message to all the registered listeners.
 
@@ -42642,7 +42642,7 @@ public:
 								method of the broadcast listeners in the other app.
 		@see registerBroadcastListener, ActionListener
 	*/
-	static void broadcastMessage (const String& messageText) throw();
+	static void broadcastMessage (const String& messageText);
 
 	/** Registers a listener to get told about broadcast messages.
 

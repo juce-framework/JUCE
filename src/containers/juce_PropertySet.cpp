@@ -33,21 +33,21 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PropertySet::PropertySet (const bool ignoreCaseOfKeyNames) throw()
+PropertySet::PropertySet (const bool ignoreCaseOfKeyNames)
     : properties (ignoreCaseOfKeyNames),
       fallbackProperties (0),
       ignoreCaseOfKeys (ignoreCaseOfKeyNames)
 {
 }
 
-PropertySet::PropertySet (const PropertySet& other) throw()
+PropertySet::PropertySet (const PropertySet& other)
     : properties (other.properties),
       fallbackProperties (other.fallbackProperties),
       ignoreCaseOfKeys (other.ignoreCaseOfKeys)
 {
 }
 
-PropertySet& PropertySet::operator= (const PropertySet& other) throw()
+PropertySet& PropertySet::operator= (const PropertySet& other)
 {
     properties = other.properties;
     fallbackProperties = other.fallbackProperties;
@@ -184,7 +184,7 @@ void PropertySet::setFallbackPropertySet (PropertySet* fallbackProperties_) thro
     fallbackProperties = fallbackProperties_;
 }
 
-XmlElement* PropertySet::createXml (const String& nodeName) const throw()
+XmlElement* PropertySet::createXml (const String& nodeName) const
 {
     const ScopedLock sl (lock);
     XmlElement* const xml = new XmlElement (nodeName);
@@ -199,7 +199,7 @@ XmlElement* PropertySet::createXml (const String& nodeName) const throw()
     return xml;
 }
 
-void PropertySet::restoreFromXml (const XmlElement& xml) throw()
+void PropertySet::restoreFromXml (const XmlElement& xml)
 {
     const ScopedLock sl (lock);
     clear();

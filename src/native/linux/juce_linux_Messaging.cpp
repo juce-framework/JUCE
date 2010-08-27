@@ -387,13 +387,12 @@ bool juce_postMessageToSystemQueue (Message* message)
     return true;
 }
 
-void MessageManager::broadcastMessage (const String& value) throw()
+void MessageManager::broadcastMessage (const String& value)
 {
     /* TODO */
 }
 
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func,
-                                                   void* parameter)
+void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func, void* parameter)
 {
     if (LinuxErrorHandling::errorOccurred)
         return 0;

@@ -64,7 +64,7 @@ public:
         It's thread-safe to call this method from any number of threads without
         needing to worry about locking.
     */
-    void triggerAsyncUpdate() throw();
+    void triggerAsyncUpdate();
 
     /** This will stop any pending updates from happening.
 
@@ -96,7 +96,7 @@ private:
     class AsyncUpdaterInternal  : public MessageListener
     {
     public:
-        AsyncUpdaterInternal() throw() {}
+        AsyncUpdaterInternal() {}
         ~AsyncUpdaterInternal() {}
 
         void handleMessage (const Message&);

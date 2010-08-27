@@ -50,15 +50,15 @@ public:
         @param ignoreCaseOfKeyNames         if true, the names of properties are compared in a
                                             case-insensitive way
     */
-    PropertySet (bool ignoreCaseOfKeyNames = false) throw();
+    PropertySet (bool ignoreCaseOfKeyNames = false);
 
     /** Creates a copy of another PropertySet.
     */
-    PropertySet (const PropertySet& other) throw();
+    PropertySet (const PropertySet& other);
 
     /** Copies another PropertySet over this one.
     */
-    PropertySet& operator= (const PropertySet& other) throw();
+    PropertySet& operator= (const PropertySet& other);
 
     /** Destructor. */
     virtual ~PropertySet();
@@ -172,7 +172,7 @@ public:
 
         @see restoreFromXml
     */
-    XmlElement* createXml (const String& nodeName) const throw();
+    XmlElement* createXml (const String& nodeName) const;
 
     /** Reloads a set of properties that were previously stored as XML.
 
@@ -180,7 +180,7 @@ public:
 
         @see createXml
     */
-    void restoreFromXml (const XmlElement& xml) throw();
+    void restoreFromXml (const XmlElement& xml);
 
     //==============================================================================
     /** Sets up a second PopertySet that will be used to look up any values that aren't

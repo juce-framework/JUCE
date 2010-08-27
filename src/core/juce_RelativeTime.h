@@ -146,7 +146,7 @@ public:
 
         @see inMilliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
     */
-    const String getDescription (const String& returnValueForZeroTime = "0") const throw();
+    const String getDescription (const String& returnValueForZeroTime = "0") const;
 
     //==============================================================================
 

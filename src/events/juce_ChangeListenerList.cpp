@@ -31,17 +31,17 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ChangeListenerList::ChangeListenerList() throw()
+ChangeListenerList::ChangeListenerList()
    : lastChangedObject (0),
      messagePending (false)
 {
 }
 
-ChangeListenerList::~ChangeListenerList() throw()
+ChangeListenerList::~ChangeListenerList()
 {
 }
 
-void ChangeListenerList::addChangeListener (ChangeListener* const listener) throw()
+void ChangeListenerList::addChangeListener (ChangeListener* const listener)
 {
     const ScopedLock sl (lock);
 
@@ -51,19 +51,19 @@ void ChangeListenerList::addChangeListener (ChangeListener* const listener) thro
         listeners.add (listener);
 }
 
-void ChangeListenerList::removeChangeListener (ChangeListener* const listener) throw()
+void ChangeListenerList::removeChangeListener (ChangeListener* const listener)
 {
     const ScopedLock sl (lock);
     listeners.removeValue (listener);
 }
 
-void ChangeListenerList::removeAllChangeListeners() throw()
+void ChangeListenerList::removeAllChangeListeners()
 {
     const ScopedLock sl (lock);
     listeners.clear();
 }
 
-void ChangeListenerList::sendChangeMessage (void* const objectThatHasChanged) throw()
+void ChangeListenerList::sendChangeMessage (void* const objectThatHasChanged)
 {
     const ScopedLock sl (lock);
 

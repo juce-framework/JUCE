@@ -52,16 +52,16 @@ public:
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void addChangeListener (ChangeListener* listener) throw();
+    void addChangeListener (ChangeListener* listener);
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void removeChangeListener (ChangeListener* listener) throw();
+    void removeChangeListener (ChangeListener* listener);
 
     /** Removes all listeners from the list. */
-    void removeAllChangeListeners() throw();
+    void removeAllChangeListeners();
 
     //==============================================================================
     /** Broadcasts a change message to all the registered listeners.
@@ -72,7 +72,7 @@ public:
 
         @see ChangeListenerList::sendActionMessage
     */
-    void sendChangeMessage (void* objectThatHasChanged) throw();
+    void sendChangeMessage (void* objectThatHasChanged);
 
     /** Sends a synchronous change message to all the registered listeners.
 

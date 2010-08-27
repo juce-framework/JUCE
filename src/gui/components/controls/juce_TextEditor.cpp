@@ -965,6 +965,12 @@ namespace TextEditorDefs
     const int focusLossMessageId  = 0x10003004;
 
     const int maxActionsPerTransaction = 100;
+
+    static int getCharacterCategory (const juce_wchar character)
+    {
+        return CharacterFunctions::isLetterOrDigit (character)
+                    ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
+    }
 }
 
 //==============================================================================
@@ -2559,12 +2565,6 @@ int TextEditor::indexAtPosition (const float x, const float y)
 }
 
 //==============================================================================
-static int getCharacterCategory (const juce_wchar character)
-{
-    return CharacterFunctions::isLetterOrDigit (character)
-                ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
-}
-
 int TextEditor::findWordBreakAfter (const int position) const
 {
     const String t (getTextInRange (Range<int> (position, position + 512)));
@@ -2574,9 +2574,9 @@ int TextEditor::findWordBreakAfter (const int position) const
     while (i < totalLength && CharacterFunctions::isWhitespace (t[i]))
         ++i;
 
-    const int type = getCharacterCategory (t[i]);
+    const int type = TextEditorDefs::getCharacterCategory (t[i]);
 
-    while (i < totalLength && type == getCharacterCategory (t[i]))
+    while (i < totalLength && type == TextEditorDefs::getCharacterCategory (t[i]))
         ++i;
 
     while (i < totalLength && CharacterFunctions::isWhitespace (t[i]))
@@ -2600,9 +2600,9 @@ int TextEditor::findWordBreakBefore (const int position) const
 
     if (i > 0)
     {
-        const int type = getCharacterCategory (t [i - 1]);
+        const int type = TextEditorDefs::getCharacterCategory (t [i - 1]);
 
-        while (i > 0 && type == getCharacterCategory (t [i - 1]))
+        while (i > 0 && type == TextEditorDefs::getCharacterCategory (t [i - 1]))
             --i;
     }
 

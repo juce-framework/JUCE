@@ -80,7 +80,7 @@ const RelativeTime RelativeTime::weeks (const double numberOfWeeks) throw()
 //==============================================================================
 int64 RelativeTime::inMilliseconds() const throw()
 {
-    return (int64)(seconds * 1000.0);
+    return (int64) (seconds * 1000.0);
 }
 
 double RelativeTime::inMinutes() const throw()
@@ -103,7 +103,7 @@ double RelativeTime::inWeeks() const throw()
     return seconds / (60.0 * 60.0 * 24.0 * 7.0);
 }
 
-const String RelativeTime::getDescription (const String& returnValueForZeroTime) const throw()
+const String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 {
     if (seconds < 0.001 && seconds > -0.001)
         return returnValueForZeroTime;

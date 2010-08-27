@@ -340,7 +340,7 @@ const String Time::toString (const bool includeDate,
     return result.trimEnd();
 }
 
-const String Time::formatted (const String& format) const throw()
+const String Time::formatted (const String& format) const
 {
     String buffer;
     int bufferSize = 128;
@@ -464,17 +464,17 @@ const String Time::getTimeZone() const throw()
     return zone[0].substring (0, 3);
 }
 
-const String Time::getMonthName (const bool threeLetterVersion) const throw()
+const String Time::getMonthName (const bool threeLetterVersion) const
 {
     return getMonthName (getMonth(), threeLetterVersion);
 }
 
-const String Time::getWeekdayName (const bool threeLetterVersion) const throw()
+const String Time::getWeekdayName (const bool threeLetterVersion) const
 {
     return getWeekdayName (getDayOfWeek(), threeLetterVersion);
 }
 
-const String Time::getMonthName (int monthNumber, const bool threeLetterVersion) throw()
+const String Time::getMonthName (int monthNumber, const bool threeLetterVersion)
 {
     const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     const char* const longMonthNames[]  = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
@@ -485,7 +485,7 @@ const String Time::getMonthName (int monthNumber, const bool threeLetterVersion)
                                      : longMonthNames [monthNumber]);
 }
 
-const String Time::getWeekdayName (int day, const bool threeLetterVersion) throw()
+const String Time::getWeekdayName (int day, const bool threeLetterVersion)
 {
     const char* const shortDayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
     const char* const longDayNames[]  = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
