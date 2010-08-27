@@ -30,40 +30,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_AudioThumbnail.h"
 #include "juce_AudioThumbnailCache.h"
 
-const int timeBeforeDeletingReader = 2000;
-
-
-//==============================================================================
-struct AudioThumbnailDataFormat
-{
-    char thumbnailMagic[4];
-    int samplesPerThumbSample;
-    int64 totalSamples;         // source samples
-    int64 numFinishedSamples;   // source samples
-    int numThumbnailSamples;
-    int numChannels;
-    int sampleRate;
-    char future[16];
-    char data[1];
-
-    void swapEndiannessIfNeeded() throw()
-    {
-      #if JUCE_BIG_ENDIAN
-        flip (samplesPerThumbSample);
-        flip (totalSamples);
-        flip (numFinishedSamples);
-        flip (numThumbnailSamples);
-        flip (numChannels);
-        flip (sampleRate);
-      #endif
-    }
-
-private:
-  #if JUCE_BIG_ENDIAN
-    static void flip (int& n)   { n = (int) ByteOrder::swap ((uint32) n); }
-    static void flip (int64& n) { n = (int64) ByteOrder::swap ((uint64) n); }
-  #endif
-};
 
 //==============================================================================
 AudioThumbnail::AudioThumbnail (const int orginalSamplesPerThumbnailSample_,
@@ -71,7 +37,8 @@ AudioThumbnail::AudioThumbnail (const int orginalSamplesPerThumbnailSample_,
                                 AudioThumbnailCache& cacheToUse)
     : formatManagerToUse (formatManagerToUse_),
       cache (cacheToUse),
-      orginalSamplesPerThumbnailSample (orginalSamplesPerThumbnailSample_)
+      orginalSamplesPerThumbnailSample (orginalSamplesPerThumbnailSample_),
+      timeBeforeDeletingReader (2000)
 {
     clear();
 }
@@ -82,6 +49,12 @@ AudioThumbnail::~AudioThumbnail()
 
     const ScopedLock sl (readerLock);
     reader = 0;
+}
+
+AudioThumbnail::DataFormat* AudioThumbnail::getData() const throw()
+{
+    jassert (data.getData() != 0);
+    return static_cast <DataFormat*> (data.getData());
 }
 
 void AudioThumbnail::setSource (InputSource* const newSource)
@@ -168,9 +141,9 @@ void AudioThumbnail::timerCallback()
 
 void AudioThumbnail::clear()
 {
-    data.setSize (sizeof (AudioThumbnailDataFormat) + 3);
+    data.setSize (sizeof (DataFormat) + 3);
 
-    AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
+    DataFormat* const d = getData();
 
     d->thumbnailMagic[0] = 'j';
     d->thumbnailMagic[1] = 'a';
@@ -195,8 +168,8 @@ void AudioThumbnail::loadFrom (InputStream& input)
     data.setSize (0);
     input.readIntoMemoryBlock (data);
 
-    AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
-    d->swapEndiannessIfNeeded();
+    DataFormat* const d = getData();
+    d->flipEndiannessIfBigEndian();
 
     if (! (d->thumbnailMagic[0] == 'j'
              && d->thumbnailMagic[1] == 'a'
@@ -212,15 +185,17 @@ void AudioThumbnail::loadFrom (InputStream& input)
 
 void AudioThumbnail::saveTo (OutputStream& output) const
 {
-    AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
-    d->swapEndiannessIfNeeded();
-    output.write (data.getData(), (int) data.getSize());
-    d->swapEndiannessIfNeeded();
+    const ScopedLock sl (readerLock);
+
+    DataFormat* const d = getData();
+    d->flipEndiannessIfBigEndian();
+    output.write (d, (int) data.getSize());
+    d->flipEndiannessIfBigEndian();
 }
 
 bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& fileReader)
 {
-    AudioThumbnailDataFormat* d = (AudioThumbnailDataFormat*) data.getData();
+    DataFormat* d = getData();
 
     d->totalSamples = fileReader.lengthInSamples;
     d->numChannels = jmin ((uint32) 2, fileReader.numChannels);
@@ -228,17 +203,17 @@ bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& fileReader)
     d->sampleRate = roundToInt (fileReader.sampleRate);
     d->numThumbnailSamples = (int) (d->totalSamples / d->samplesPerThumbSample) + 1;
 
-    data.setSize (sizeof (AudioThumbnailDataFormat) + 3 + d->numThumbnailSamples * d->numChannels * 2);
+    data.setSize (sizeof (DataFormat) + 3 + d->numThumbnailSamples * d->numChannels * 2);
 
-    d = (AudioThumbnailDataFormat*) data.getData();
-    zeromem (&(d->data[0]), d->numThumbnailSamples * d->numChannels * 2);
+    d = getData();
+    zeromem (d->data, d->numThumbnailSamples * d->numChannels * 2);
 
     return d->totalSamples > 0;
 }
 
 bool AudioThumbnail::readNextBlockFromAudioFile (AudioFormatReader& fileReader)
 {
-    AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
+    DataFormat* const d = getData();
 
     if (d->numFinishedSamples < d->totalSamples)
     {
@@ -252,24 +227,20 @@ bool AudioThumbnail::readNextBlockFromAudioFile (AudioFormatReader& fileReader)
     }
 
     cacheNeedsRefilling = true;
-    return (d->numFinishedSamples < d->totalSamples);
+    return d->numFinishedSamples < d->totalSamples;
 }
 
 int AudioThumbnail::getNumChannels() const throw()
 {
-    const AudioThumbnailDataFormat* const d = (const AudioThumbnailDataFormat*) data.getData();
-    jassert (d != 0);
-
-    return d->numChannels;
+    return getData()->numChannels;
 }
 
 double AudioThumbnail::getTotalLength() const throw()
 {
-    const AudioThumbnailDataFormat* const d = (const AudioThumbnailDataFormat*) data.getData();
-    jassert (d != 0);
+    const DataFormat* const d = getData();
 
     if (d->sampleRate > 0)
-        return d->totalSamples / (double)d->sampleRate;
+        return d->totalSamples / (double) d->sampleRate;
     else
         return 0.0;
 }
@@ -278,14 +249,13 @@ void AudioThumbnail::generateSection (AudioFormatReader& fileReader,
                                       int64 startSample,
                                       int numSamples)
 {
-    AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
-    jassert (d != 0);
+    DataFormat* const d = getData();
 
-    int firstDataPos = (int) (startSample / d->samplesPerThumbSample);
-    int lastDataPos = (int) ((startSample + numSamples) / d->samplesPerThumbSample);
+    const int firstDataPos = (int) (startSample / d->samplesPerThumbSample);
+    const int lastDataPos = (int) ((startSample + numSamples) / d->samplesPerThumbSample);
 
-    char* l = getChannelData (0);
-    char* r = getChannelData (1);
+    char* const l = getChannelData (0);
+    char* const r = getChannelData (1);
 
     for (int i = firstDataPos; i < lastDataPos; ++i)
     {
@@ -320,8 +290,7 @@ void AudioThumbnail::generateSection (AudioFormatReader& fileReader,
 
 char* AudioThumbnail::getChannelData (int channel) const
 {
-    AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
-    jassert (d != 0);
+    DataFormat* const d = getData();
 
     if (channel >= 0 && channel < d->numChannels)
         return d->data + (channel * 2 * d->numThumbnailSamples);
@@ -331,9 +300,7 @@ char* AudioThumbnail::getChannelData (int channel) const
 
 bool AudioThumbnail::isFullyLoaded() const throw()
 {
-    const AudioThumbnailDataFormat* const d = (const AudioThumbnailDataFormat*) data.getData();
-    jassert (d != 0);
-
+    const DataFormat* const d = getData();
     return d->numFinishedSamples >= d->totalSamples;
 }
 
@@ -341,8 +308,7 @@ void AudioThumbnail::refillCache (const int numSamples,
                                   double startTime,
                                   const double timePerPixel)
 {
-    const AudioThumbnailDataFormat* const d = (const AudioThumbnailDataFormat*) data.getData();
-    jassert (d != 0);
+    const DataFormat* const d = getData();
 
     if (numSamples <= 0
          || timePerPixel <= 0.0
@@ -515,15 +481,32 @@ void AudioThumbnail::drawChannel (Graphics& g,
             cacheData += numChannelsCached << 1;
 
             if (mn <= mx) // if the wrong way round, signifies that the sample's not yet known
-                g.drawLine ((float) x, jmax (midY - mx * vscale - 0.3f, topY),
-                            (float) x, jmin (midY - mn * vscale + 0.3f, bottomY));
+                g.drawVerticalLine (x, jmax (midY - mx * vscale - 0.3f, topY),
+                                       jmin (midY - mn * vscale + 0.3f, bottomY));
 
-            ++x;
-
-            if (x >= clip.getRight())
+            if (++x >= clip.getRight())
                 break;
         }
     }
+}
+
+//==============================================================================
+void AudioThumbnail::DataFormat::flipEndiannessIfBigEndian() throw()
+{
+  #if JUCE_BIG_ENDIAN
+    struct Flipper
+    {
+        static void flip (int32& n) { n = (int32) ByteOrder::swap ((uint32) n); }
+        static void flip (int64& n) { n = (int64) ByteOrder::swap ((uint64) n); }
+    };
+
+    Flipper::flip (samplesPerThumbSample);
+    Flipper::flip (totalSamples);
+    Flipper::flip (numFinishedSamples);
+    Flipper::flip (numThumbnailSamples);
+    Flipper::flip (numChannels);
+    Flipper::flip (sampleRate);
+  #endif
 }
 
 

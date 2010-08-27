@@ -136,9 +136,27 @@ public:
                       int channelNum,
                       float verticalZoomFactor);
 
-    /** Returns true if the low res preview is fully generated.
-    */
+    /** Returns true if the low res preview is fully generated. */
     bool isFullyLoaded() const throw();
+
+    //==============================================================================
+    /** The binary data format that is stored in the thumbnail file. */
+    struct DataFormat
+    {
+        char   thumbnailMagic[4];       /**< Should be 'jatm'. */
+        int32  samplesPerThumbSample;   /**< Number of source samples per thumbnail sample. */
+        int64  totalSamples;            /**< Total number of source samples. */
+        int64  numFinishedSamples;      /**< Number of valid source samples that have been read into the thumbnail. */
+        int32  numThumbnailSamples;     /**< Number of samples in the thumbnail data. */
+        int32  numChannels;             /**< Number of audio channels. */
+        int32  sampleRate;              /**< Source sample rate. */
+        char   future[16];              /**< Reserved for future use. */
+        char   data[1];                 /**< The raw thumbnail samples, two signed bytes per
+                                             sample (min and max values). Channels are interleaved. */
+
+        /** Flips the endianness of the values in this data structure if the CPU is big-endian. */
+        void flipEndiannessIfBigEndian() throw();
+    };
 
     //==============================================================================
     /** @internal */
@@ -153,24 +171,23 @@ private:
     AudioFormatManager& formatManagerToUse;
     AudioThumbnailCache& cache;
     ScopedPointer <InputSource> source;
-
     CriticalSection readerLock;
     ScopedPointer <AudioFormatReader> reader;
-
     MemoryBlock data, cachedLevels;
     int orginalSamplesPerThumbnailSample;
-
     int numChannelsCached, numSamplesCached;
     double cachedStart, cachedTimePerPixel;
     bool cacheNeedsRefilling;
+    const int timeBeforeDeletingReader;
+
+    friend class AudioThumbnailCache;
 
     void clear();
     AudioFormatReader* createReader() const;
     void generateSection (AudioFormatReader& reader, int64 startSample, int numSamples);
     char* getChannelData (int channel) const;
     void refillCache (int numSamples, double startTime, double timePerPixel);
-
-    friend class AudioThumbnailCache;
+    DataFormat* getData() const throw();
 
     // true if it needs more callbacks from the readNextBlockFromAudioFile() method
     bool initialiseFromAudioFile (AudioFormatReader& reader);
