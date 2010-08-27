@@ -154,6 +154,19 @@ public:
     const Drawable* getDownImage() const throw();
 
     //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the link.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        textColourId             = 0x1004010, /**< The colour to use for the URL text. */
+    };
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:

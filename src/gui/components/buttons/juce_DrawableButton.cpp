@@ -173,7 +173,9 @@ void DrawableButton::paintButton (Graphics& g,
         {
             g.setFont ((float) textH);
 
-            g.setColour (Colours::black.withAlpha (isEnabled() ? 1.0f : 0.4f));
+            g.setColour (getLookAndFeel().findColour (DrawableButton::textColourId)
+                                .withMultipliedAlpha (isEnabled() ? 1.0f : 0.4f));
+
             g.drawFittedText (getButtonText(),
                               2, getHeight() - textH - 1,
                               getWidth() - 4, textH,

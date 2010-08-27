@@ -221,6 +221,8 @@ LookAndFeel::LookAndFeel()
         FileSearchPathListComponent::backgroundColourId,        0xffffffff,
 
         FileChooserDialogBox::titleTextColourId,                0xff000000,
+
+        DrawableButton::textColourId,                           0xff000000,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)

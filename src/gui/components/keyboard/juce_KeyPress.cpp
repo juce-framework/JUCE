@@ -193,9 +193,10 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
         if (key == 0)
         {
             // see if it's a function key..
-            for (int i = 1; i <= 12; ++i)
-                if (desc.containsWholeWordIgnoreCase ("f" + String (i)))
-                    key = F1Key + i - 1;
+            if (! desc.containsChar ('#')) // avoid mistaking hex-codes like "#f1"
+                for (int i = 1; i <= 12; ++i)
+                    if (desc.containsWholeWordIgnoreCase ("f" + String (i)))
+                        key = F1Key + i - 1;
 
             if (key == 0)
             {
