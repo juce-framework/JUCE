@@ -393,8 +393,9 @@ static bool isEventBlockedByModalComps (NSEvent* e)
             }
             else
             {
-                if (NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil],
-                                   [compView bounds]))
+                if (JUCEApplication::isStandaloneApp()
+                        ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
+                        : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
                     return false;
             }
         }
