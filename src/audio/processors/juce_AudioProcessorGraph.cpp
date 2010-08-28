@@ -501,7 +501,7 @@ public:
                      const int totalChans_,
                      const int midiBufferToUse_)
         : node (node_),
-          processor (node_->processor),
+          processor (node_->getProcessor()),
           audioChannelsToUse (audioChannelsToUse_),
           totalChans (jmax (1, totalChans_)),
           midiBufferToUse (midiBufferToUse_)
@@ -583,8 +583,8 @@ private:
                                     Array<void*>& renderingOps,
                                     const int ourRenderingIndex)
     {
-        const int numIns = node->processor->getNumInputChannels();
-        const int numOuts = node->processor->getNumOutputChannels();
+        const int numIns = node->getProcessor()->getNumInputChannels();
+        const int numOuts = node->getProcessor()->getNumOutputChannels();
         const int totalChans = jmax (numIns, numOuts);
 
         Array <int> audioChannelsToUse;
@@ -742,7 +742,7 @@ private:
             // No midi inputs..
             midiBufferToUse = getFreeBuffer (true); // need to pick a buffer even if the processor doesn't use midi
 
-            if (node->processor->acceptsMidi() || node->processor->producesMidi())
+            if (node->getProcessor()->acceptsMidi() || node->getProcessor()->producesMidi())
                 renderingOps.add (new ClearMidiBufferOp (midiBufferToUse));
         }
         else if (midiSourceNodes.size() == 1)
@@ -822,7 +822,7 @@ private:
             }
         }
 
-        if (node->processor->producesMidi())
+        if (node->getProcessor()->producesMidi())
             markBufferAsContaining (midiBufferToUse, node->id,
                                     AudioProcessorGraph::midiChannelIndex);
 
@@ -922,7 +922,7 @@ private:
             }
             else
             {
-                for (int i = 0; i < node->processor->getNumInputChannels(); ++i)
+                for (int i = 0; i < node->getProcessor()->getNumInputChannels(); ++i)
                     if (i != inputChannelOfIndexToIgnore
                          && graph.getConnectionBetween (nodeId, outputChanIndex,
                                                         node->id, i) != 0)

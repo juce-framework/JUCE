@@ -81,9 +81,8 @@ public:
         */
         const uint32 id;
 
-        /** The actual processor object that this node represents.
-        */
-        const ScopedPointer<AudioProcessor> processor;
+        /** The actual processor object that this node represents. */
+        AudioProcessor* getProcessor() const throw()            { return processor; }
 
         /** A set of user-definable properties that are associated with this node.
 
@@ -104,6 +103,7 @@ public:
     private:
         friend class AudioProcessorGraph;
 
+        const ScopedPointer<AudioProcessor> processor;
         bool isPrepared;
 
         Node (uint32 id, AudioProcessor* processor);

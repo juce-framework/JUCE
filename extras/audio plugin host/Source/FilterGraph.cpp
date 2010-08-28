@@ -294,7 +294,7 @@ void FilterGraph::setLastDocumentOpened (const File& file)
 //==============================================================================
 static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) throw()
 {
-    AudioPluginInstance* plugin = dynamic_cast <AudioPluginInstance*> (node->processor);
+    AudioPluginInstance* plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor());
 
     if (plugin == 0)
     {
@@ -318,7 +318,7 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) throw()
     XmlElement* state = new XmlElement ("STATE");
 
     MemoryBlock m;
-    node->processor->getStateInformation (m);
+    node->getProcessor()->getStateInformation (m);
     state->addTextElement (m.toBase64Encoding());
     e->addChildElement (state);
 
@@ -357,7 +357,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
         MemoryBlock m;
         m.fromBase64Encoding (state->getAllSubText());
 
-        node->processor->setStateInformation (m.getData(), (int) m.getSize());
+        node->getProcessor()->setStateInformation (m.getData(), (int) m.getSize());
     }
 
     node->properties.set ("x", xml.getDoubleAttribute (T("x")));
