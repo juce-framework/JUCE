@@ -35,8 +35,6 @@ namespace jpeglibNamespace
   #if JUCE_MINGW
     typedef unsigned char boolean;
   #endif
-  extern "C"
-  {
     #define JPEG_INTERNALS
     #undef FAR
     #include "jpglib/jpeglib.h"
@@ -109,11 +107,10 @@ namespace jpeglibNamespace
     #include "jpglib/jquant2.c"
     #include "jpglib/jutils.c"
     #include "jpglib/transupp.c"
-  }
 #else
-  #define JPEG_INTERNALS
-  #undef FAR
-  #include <jpeglib.h>
+    #define JPEG_INTERNALS
+    #undef FAR
+    #include <jpeglib.h>
 #endif
 }
 
