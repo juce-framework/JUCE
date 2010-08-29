@@ -227,6 +227,24 @@ public:
             keyCode = '\t';
         else if (keyCode == 0x03) // (enter)
             keyCode = '\r';
+        else
+            keyCode = (int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode);
+
+        if (([ev modifierFlags] & NSNumericPadKeyMask) != 0)
+        {
+            const int numPadConversions[] = { '0', KeyPress::numberPad0, '1', KeyPress::numberPad1,
+                                              '2', KeyPress::numberPad2, '3', KeyPress::numberPad3,
+                                              '4', KeyPress::numberPad4, '5', KeyPress::numberPad5,
+                                              '6', KeyPress::numberPad6, '7', KeyPress::numberPad7,
+                                              '8', KeyPress::numberPad8, '9', KeyPress::numberPad9,
+                                              '+', KeyPress::numberPadAdd,  '-', KeyPress::numberPadSubtract,
+                                              '*', KeyPress::numberPadMultiply, '/', KeyPress::numberPadDivide,
+                                              '.', KeyPress::numberPadDecimalPoint, '=', KeyPress::numberPadEquals };
+
+            for (int i = 0; i < numElementsInArray (numPadConversions); i += 2)
+                if (keyCode == numPadConversions [i])
+                    keyCode = numPadConversions [i + 1];
+        }
 
         return keyCode;
     }
@@ -790,11 +808,11 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
         return true;
 
     if (keyCode >= 'A' && keyCode <= 'Z'
-        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toLowerCase ((juce_wchar) keyCode)))
+         && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toLowerCase ((juce_wchar) keyCode)))
         return true;
 
     if (keyCode >= 'a' && keyCode <= 'z'
-        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode)))
+         && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode)))
         return true;
 
     return false;
