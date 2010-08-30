@@ -129,11 +129,13 @@ public:
     /** Evaluates this expression, without using an EvaluationContext.
         Without an EvaluationContext, no symbols can be used, and only basic functions such as sin, cos, tan,
         min, max are available.
+        @throws Expression::EvaluationError
     */
     double evaluate() const;
 
     /** Evaluates this expression, providing a context that should be able to evaluate any symbols
         or functions that it uses.
+        @throws Expression::EvaluationError
     */
     double evaluate (const EvaluationContext& context) const;
 
@@ -143,6 +145,8 @@ public:
         E.g. if the expression is "x + 10" and x is 5, then asking for a target value of 8 will return
         the expression "x + 3". Obviously some expressions can't be reversed in this way, in which
         case they might just be adjusted by adding a constant to them.
+
+        @throws Expression::EvaluationError
     */
     const Expression adjustedToGiveNewResult (double targetValue, const EvaluationContext& context) const;
 
@@ -153,6 +157,8 @@ public:
         If a suitable context is supplied, the search will dereference and recursively check
         all symbols, so that it can be determined whether this expression relies on the given
         symbol at any level in its evaluation.
+
+        @throws Expression::EvaluationError
     */
     bool referencesSymbol (const String& symbol, const EvaluationContext& context) const;
 
@@ -180,6 +186,42 @@ public:
     };
 
     //==============================================================================
+    /** Expression type.
+        @see Expression::getType()
+    */
+    enum Type
+    {
+        constantType,
+        functionType,
+        operatorType,
+        symbolType
+    };
+
+    /** Returns the type of this expression. */
+    Type getType() const throw();
+
+    /** If this expression is a symbol, this returns its name. */
+    const String getSymbol() const;
+
+    /** If this expression is a function, this returns its name. */
+    const String getFunction() const;
+
+    /** If this expression is an operator, this returns its name.
+        E.g. "+", "-", "*", "/", etc.
+    */
+    const String getOperator() const;
+
+    /** Returns the number of inputs to this expression.
+        @see getInput
+    */
+    int getNumInputs() const;
+
+    /** Retrieves one of the inputs to this expression.
+        @see getNumInputs
+    */
+    const Expression getInput (int index) const;
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
@@ -203,6 +245,10 @@ private:
         virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, const Term* inputTerm,
                                                                                  double overallTarget, Term* topLevelTerm) const;
         virtual const ReferenceCountedObjectPtr<Term> negated();
+        virtual Type getType() const throw() = 0;
+        virtual const String getSymbolName() const;
+        virtual const String getFunctionName() const;
+
         juce_UseDebuggingNewOperator
 
     private:

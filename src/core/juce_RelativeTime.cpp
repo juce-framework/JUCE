@@ -183,35 +183,12 @@ RelativeTime& RelativeTime::operator= (const RelativeTime& other) throw()
     return *this;
 }
 
-bool RelativeTime::operator== (const RelativeTime& other) const throw()
-{
-    return seconds == other.seconds;
-}
-
-bool RelativeTime::operator!= (const RelativeTime& other) const throw()
-{
-    return seconds != other.seconds;
-}
-
-bool RelativeTime::operator>  (const RelativeTime& other) const throw()
-{
-    return seconds > other.seconds;
-}
-
-bool RelativeTime::operator<  (const RelativeTime& other) const throw()
-{
-    return seconds < other.seconds;
-}
-
-bool RelativeTime::operator>= (const RelativeTime& other) const throw()
-{
-    return seconds >= other.seconds;
-}
-
-bool RelativeTime::operator<= (const RelativeTime& other) const throw()
-{
-    return seconds <= other.seconds;
-}
+bool RelativeTime::operator== (const RelativeTime& other) const throw()   { return seconds == other.seconds; }
+bool RelativeTime::operator!= (const RelativeTime& other) const throw()   { return seconds != other.seconds; }
+bool RelativeTime::operator>  (const RelativeTime& other) const throw()   { return seconds > other.seconds; }
+bool RelativeTime::operator<  (const RelativeTime& other) const throw()   { return seconds < other.seconds; }
+bool RelativeTime::operator>= (const RelativeTime& other) const throw()   { return seconds >= other.seconds; }
+bool RelativeTime::operator<= (const RelativeTime& other) const throw()   { return seconds <= other.seconds; }
 
 //==============================================================================
 const RelativeTime RelativeTime::operator+ (const RelativeTime& timeToAdd) const throw()

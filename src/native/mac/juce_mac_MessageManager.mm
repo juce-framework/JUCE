@@ -69,6 +69,16 @@ public:
         if (JUCEApplication::getInstance() != 0)
         {
             JUCEApplication::getInstance()->systemRequestedQuit();
+
+            if (MessageManager::getInstance()->hasStopMessageBeenSent())
+            {
+                [NSApp performSelectorOnMainThread: @selector (replyToApplicationShouldTerminate:)
+                                        withObject: [NSNumber numberWithBool: YES]
+                                     waitUntilDone: NO];
+
+                return NSTerminateLater;
+            }
+
             return NSTerminateCancel;
         }
 

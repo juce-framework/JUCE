@@ -44,6 +44,7 @@ public:
         Constant (const double value_, bool isResolutionTarget_)
             : value (value_), isResolutionTarget (isResolutionTarget_) {}
 
+        Type getType() const throw()                            { return constantType; }
         Term* clone() const                                     { return new Constant (value, isResolutionTarget); }
         double evaluate (const EvaluationContext&, int) const   { return value; }
         int getNumInputs() const                                { return 0; }
@@ -95,9 +96,11 @@ public:
             return 0;
         }
 
+        Type getType() const throw()                            { return symbolType; }
         Term* clone() const                                     { return new Symbol (mainSymbol, member); }
         int getNumInputs() const                                { return 0; }
         Term* getInput (int) const                              { return 0; }
+        const String getFunctionName() const                    { return toString(); }
 
         const String toString() const
         {
@@ -145,9 +148,11 @@ public:
             return c.evaluateFunction (functionName, params, parameters.size());
         }
 
-        int getInputIndexFor (const Term* possibleInput) const           { return parameters.indexOf (possibleInput); }
-        int getNumInputs() const                                         { return parameters.size(); }
-        Term* getInput (int i) const                                     { return parameters [i]; }
+        Type getType() const throw()                            { return functionType; }
+        int getInputIndexFor (const Term* possibleInput) const  { return parameters.indexOf (possibleInput); }
+        int getNumInputs() const                                { return parameters.size(); }
+        Term* getInput (int i) const                            { return parameters [i]; }
+        const String getFunctionName() const                    { return functionName; }
 
         bool referencesSymbol (const String& s, const EvaluationContext& c, int recursionDepth) const
         {
@@ -190,11 +195,13 @@ public:
             jassert (input_ != 0);
         }
 
+        Type getType() const throw()                            { return operatorType; }
         int getInputIndexFor (const Term* possibleInput) const  { return possibleInput == input ? 0 : -1; }
         int getNumInputs() const                                { return 1; }
         Term* getInput (int index) const                        { return index == 0 ? static_cast<Term*> (input) : 0; }
         Term* clone() const                                     { return new Negate (input->clone()); }
         double evaluate (const EvaluationContext& c, int recursionDepth) const    { return -input->evaluate (c, recursionDepth); }
+        const String getFunctionName() const                    { return "-"; }
 
         const TermPtr negated()
         {
@@ -242,6 +249,8 @@ public:
             return possibleInput == left ? 0 : (possibleInput == right ? 1 : -1);
         }
 
+        Type getType() const throw()        { return operatorType; }
+
         int getNumInputs() const            { return 2; }
         Term* getInput (int index) const    { return index == 0 ? static_cast<Term*> (left) : (index == 1 ? static_cast<Term*> (right) : 0); }
 
@@ -251,10 +260,7 @@ public:
                 || right->referencesSymbol (s, c, recursionDepth);
         }
 
-    protected:
-        const TermPtr left, right;
-
-        const String createString (const String& op) const
+        const String toString() const
         {
             String s;
 
@@ -264,7 +270,7 @@ public:
             else
                 s = left->toString();
 
-            s << ' ' << op << ' ';
+            s << ' ' << getFunctionName() << ' ';
 
             if (right->getOperatorPrecedence() >= ourPrecendence)
                 s << '(' << right->toString() << ')';
@@ -273,6 +279,9 @@ public:
 
             return s;
         }
+
+    protected:
+        const TermPtr left, right;
 
         const TermPtr createDestinationTerm (const EvaluationContext& context, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
@@ -295,10 +304,10 @@ public:
     public:
         Add (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
 
-        Term* clone() const                 { return new Add (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Add (left->clone(), right->clone()); }
         double evaluate (const EvaluationContext& c, int recursionDepth) const  { return left->evaluate (c, recursionDepth) + right->evaluate (c, recursionDepth); }
-        const String toString() const       { return createString ("+"); }
-        int getOperatorPrecedence() const   { return 2; }
+        int getOperatorPrecedence() const       { return 2; }
+        const String getFunctionName() const    { return "+"; }
 
         const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
@@ -316,10 +325,10 @@ public:
     public:
         Subtract (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
 
-        Term* clone() const                 { return new Subtract (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Subtract (left->clone(), right->clone()); }
         double evaluate (const EvaluationContext& c, int recursionDepth) const  { return left->evaluate (c, recursionDepth) - right->evaluate (c, recursionDepth); }
-        const String toString() const       { return createString ("-"); }
-        int getOperatorPrecedence() const   { return 2; }
+        int getOperatorPrecedence() const       { return 2; }
+        const String getFunctionName() const    { return "-"; }
 
         const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
@@ -340,10 +349,10 @@ public:
     public:
         Multiply (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
 
-        Term* clone() const                 { return new Multiply (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Multiply (left->clone(), right->clone()); }
         double evaluate (const EvaluationContext& c, int recursionDepth) const  { return left->evaluate (c, recursionDepth) * right->evaluate (c, recursionDepth); }
-        const String toString() const       { return createString ("*"); }
-        int getOperatorPrecedence() const   { return 1; }
+        const String getFunctionName() const    { return "*"; }
+        int getOperatorPrecedence() const       { return 1; }
 
         const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
@@ -361,10 +370,10 @@ public:
     public:
         Divide (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
 
-        Term* clone() const                 { return new Divide (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Divide (left->clone(), right->clone()); }
         double evaluate (const EvaluationContext& c, int recursionDepth) const        { return left->evaluate (c, recursionDepth) / right->evaluate (c, recursionDepth); }
-        const String toString() const       { return createString ("/"); }
-        int getOperatorPrecedence() const   { return 1; }
+        const String getFunctionName() const    { return "/"; }
+        int getOperatorPrecedence() const       { return 1; }
 
         const TermPtr createTermToEvaluateInput (const EvaluationContext& c, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
@@ -883,6 +892,36 @@ bool Expression::usesAnySymbols() const
     return Helpers::containsAnySymbols (term);
 }
 
+Expression::Type Expression::getType() const throw()
+{
+    return term->getType();
+}
+
+const String Expression::getSymbol() const
+{
+    return term->getSymbolName();
+}
+
+const String Expression::getFunction() const
+{
+    return term->getFunctionName();
+}
+
+const String Expression::getOperator() const
+{
+    return term->getFunctionName();
+}
+
+int Expression::getNumInputs() const
+{
+    return term->getNumInputs();
+}
+
+const Expression Expression::getInput (int index) const
+{
+    return Expression (term->getInput (index));
+}
+
 //==============================================================================
 int Expression::Term::getOperatorPrecedence() const
 {
@@ -908,6 +947,18 @@ const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::createTermTo
 const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::negated()
 {
     return new Helpers::Negate (this);
+}
+
+const String Expression::Term::getSymbolName() const
+{
+    jassertfalse; // You should only call getSymbol() on an expression that's actually a symbol!
+    return String::empty;
+}
+
+const String Expression::Term::getFunctionName() const
+{
+    jassertfalse; // You shouldn't call this for an expression that's not actually a function!
+    return String::empty;
 }
 
 //==============================================================================
