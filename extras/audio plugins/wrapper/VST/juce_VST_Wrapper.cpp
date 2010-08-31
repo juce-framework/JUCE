@@ -182,7 +182,7 @@ static HWND findMDIParentOf (HWND w)
         zeromem (windowType, sizeof (windowType));
         GetClassName (parent, windowType, 31);
 
-        if (String (windowType).equalsIgnoreCase (T("MDIClient")))
+        if (String (windowType).equalsIgnoreCase ("MDIClient"))
         {
             w = parent;
             break;
@@ -216,7 +216,7 @@ class SharedMessageThread : public Thread
 {
 public:
     SharedMessageThread()
-      : Thread (T("VstMessageThread")),
+      : Thread ("VstMessageThread"),
         initialised (false)
     {
         startThread (7);
@@ -845,7 +845,7 @@ public:
             filter->getProgramName (filter->getCurrentProgram()).copyToCString (name, 24);
     }
 
-    bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text)
+    bool getProgramNameIndexed (VstInt32 /*category*/, VstInt32 index, char* text)
     {
         if (filter != 0 && ((unsigned int) index) < (unsigned int) filter->getNumPrograms())
         {
@@ -1204,8 +1204,8 @@ public:
             {
                 editorSize.left = 0;
                 editorSize.top = 0;
-                editorSize.right = editorComp->getWidth();
-                editorSize.bottom = editorComp->getHeight();
+                editorSize.right = (VstInt16) editorComp->getWidth();
+                editorSize.bottom = (VstInt16) editorComp->getHeight();
 
                 *((ERect**) ptr) = &editorSize;
 
@@ -1261,7 +1261,7 @@ public:
                     zeromem (windowType, sizeof (windowType));
                     GetClassName (parent, windowType, 31);
 
-                    if (String (windowType).equalsIgnoreCase (T("MDIClient")))
+                    if (String (windowType).equalsIgnoreCase ("MDIClient"))
                         break;
 
                     RECT windowPos;
@@ -1334,9 +1334,9 @@ public:
             deleteAllChildren();
         }
 
-        void paint (Graphics& g) {}
+        void paint (Graphics&) {}
 
-        void paintOverChildren (Graphics& g)
+        void paintOverChildren (Graphics&)
         {
             // this causes an async call to masterIdle() to help
             // creaky old DAWs like Nuendo repaint themselves while we're

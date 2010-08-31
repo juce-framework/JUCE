@@ -141,4 +141,7 @@ private:
 #endif
         return UnknownHost;
     }
+
+    PluginHostType (const PluginHostType&);
+    PluginHostType& operator= (const PluginHostType&);
 };

@@ -43,8 +43,8 @@ public:
     const String getParameterName (int index);
     const String getParameterText (int index);
 
-    const String getInputChannelName (const int channelIndex) const;
-    const String getOutputChannelName (const int channelIndex) const;
+    const String getInputChannelName (int channelIndex) const;
+    const String getOutputChannelName (int channelIndex) const;
     bool isInputChannelStereoPair (int index) const;
     bool isOutputChannelStereoPair (int index) const;
 
@@ -52,11 +52,11 @@ public:
     bool producesMidi() const;
 
     //==============================================================================
-    int getNumPrograms()                                        { return 0; }
-    int getCurrentProgram()                                     { return 0; }
-    void setCurrentProgram (int index)                          { }
-    const String getProgramName (int index)                     { return String::empty; }
-    void changeProgramName (int index, const String& newName)   { }
+    int getNumPrograms()                                                { return 0; }
+    int getCurrentProgram()                                             { return 0; }
+    void setCurrentProgram (int /*index*/)                              { }
+    const String getProgramName (int /*index*/)                         { return String::empty; }
+    void changeProgramName (int /*index*/, const String& /*newName*/)   { }
 
     //==============================================================================
     void getStateInformation (MemoryBlock& destData);

@@ -134,7 +134,7 @@ static const String timeToTimecodeString (const double seconds)
 }
 
 // quick-and-dirty function to format a bars/beats string
-static const String ppqToBarsBeatsString (double ppq, double lastBarPPQ, int numerator, int denominator)
+static const String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int numerator, int denominator)
 {
     if (numerator == 0 || denominator == 0)
         return "1|1|0";
