@@ -142,7 +142,7 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int /*timeOutMillisec
 
         bytesRead = 0;
 
-        char* p = (char*) destBuffer;
+        char* p = static_cast<char*> (destBuffer);
 
         while (bytesRead < maxBytesToRead)
         {
@@ -185,7 +185,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
             }
         }
 
-        const char* p = (const char*) sourceBuffer;
+        const char* p = static_cast<const char*> (sourceBuffer);
         bytesWritten = 0;
 
         const uint32 timeOutTime = Time::getMillisecondCounter() + timeOutMilliseconds;

@@ -974,28 +974,20 @@ const MidiMessage MidiMessage::midiMachineControlGoto (int hours,
 }
 
 //==============================================================================
-const String MidiMessage::getMidiNoteName (int note,
-                                           bool useSharps,
-                                           bool includeOctaveNumber,
-                                           int octaveNumForMiddleC) throw()
+const String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctaveNumber, int octaveNumForMiddleC)
 {
-    static const char* const sharpNoteNames[] = { "C", "C#", "D", "D#", "E",
-                                                  "F", "F#", "G", "G#", "A",
-                                                  "A#", "B" };
-
-    static const char* const flatNoteNames[]  = { "C", "Db", "D", "Eb", "E",
-                                                  "F", "Gb", "G", "Ab", "A",
-                                                  "Bb", "B" };
+    static const char* const sharpNoteNames[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    static const char* const flatNoteNames[]  = { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" };
 
     if (((unsigned int) note) < 128)
     {
-        const String s ((useSharps) ? sharpNoteNames [note % 12]
-                                    : flatNoteNames [note % 12]);
+        String s (useSharps ? sharpNoteNames [note % 12]
+                            : flatNoteNames  [note % 12]);
 
         if (includeOctaveNumber)
-            return s + String (note / 12 + (octaveNumForMiddleC - 5));
-        else
-            return s;
+            s << (note / 12 + (octaveNumForMiddleC - 5));
+
+        return s;
     }
 
     return String::empty;
@@ -1007,7 +999,7 @@ const double MidiMessage::getMidiNoteInHertz (int noteNumber) throw()
     return 440.0 * pow (2.0, noteNumber / 12.0);
 }
 
-const String MidiMessage::getGMInstrumentName (int n) throw()
+const String MidiMessage::getGMInstrumentName (const int n)
 {
     const char *names[] =
     {
@@ -1036,11 +1028,10 @@ const String MidiMessage::getGMInstrumentName (int n) throw()
         "Applause", "Gunshot"
     };
 
-    return (((unsigned int) n) < 128) ? names[n]
-                                      : (const char*)0;
+    return (((unsigned int) n) < 128) ? names[n] : (const char*) 0;
 }
 
-const String MidiMessage::getGMInstrumentBankName (int n) throw()
+const String MidiMessage::getGMInstrumentBankName (const int n)
 {
     const char* names[] =
     {
@@ -1050,11 +1041,10 @@ const String MidiMessage::getGMInstrumentBankName (int n) throw()
         "Synth Effects", "Ethnic", "Percussive", "Sound Effects"
     };
 
-    return (((unsigned int) n) <= 15) ? names[n]
-                                      : (const char*)0;
+    return (((unsigned int) n) <= 15) ? names[n] : (const char*) 0;
 }
 
-const String MidiMessage::getRhythmInstrumentName (int n) throw()
+const String MidiMessage::getRhythmInstrumentName (const int n)
 {
     const char* names[] =
     {
@@ -1069,11 +1059,10 @@ const String MidiMessage::getRhythmInstrumentName (int n) throw()
         "Mute Triangle", "Open Triangle"
     };
 
-    return (n >= 35 && n <= 81) ? names [n - 35]
-                                : (const char*)0;
+    return (n >= 35 && n <= 81) ? names [n - 35] : (const char*) 0;
 }
 
-const String MidiMessage::getControllerName (int n) throw()
+const String MidiMessage::getControllerName (const int n)
 {
     const char* names[] =
     {
@@ -1101,8 +1090,7 @@ const String MidiMessage::getControllerName (int n) throw()
         "Poly Operation"
     };
 
-    return (((unsigned int) n) < 128) ? names[n]
-                                      : (const char*)0;
+    return (((unsigned int) n) < 128) ? names[n] : (const char*) 0;
 }
 
 END_JUCE_NAMESPACE

@@ -273,7 +273,7 @@ public:
             }
             else if (bitsPerSample == 24)
             {
-                const char* src = (const char*)tempBuffer;
+                const char* src = tempBuffer;
 
                 if (littleEndian)
                 {

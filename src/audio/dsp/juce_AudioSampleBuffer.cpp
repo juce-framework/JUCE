@@ -585,18 +585,18 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
 
         if (useLeftChan == useRightChan)
         {
-            chans[0] = (int*) getSampleData (0, startSample);
-            chans[1] = (reader->numChannels > 1 && getNumChannels() > 1) ? (int*) getSampleData (1, startSample) : 0;
+            chans[0] = reinterpret_cast<int*> (getSampleData (0, startSample));
+            chans[1] = (reader->numChannels > 1 && getNumChannels() > 1) ? reinterpret_cast<int*> (getSampleData (1, startSample)) : 0;
         }
         else if (useLeftChan || (reader->numChannels == 1))
         {
-            chans[0] = (int*) getSampleData (0, startSample);
+            chans[0] = reinterpret_cast<int*> (getSampleData (0, startSample));
             chans[1] = 0;
         }
         else if (useRightChan)
         {
             chans[0] = 0;
-            chans[1] = (int*) getSampleData (0, startSample);
+            chans[1] = reinterpret_cast<int*> (getSampleData (0, startSample));
         }
 
         chans[2] = 0;
@@ -614,7 +614,7 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
                     const float multiplier = 1.0f / 0x7fffffff;
 
                     for (int i = 0; i < numSamples; ++i)
-                        d[i] = *(int*)(d + i) * multiplier;
+                        d[i] = *reinterpret_cast<int*> (d + i) * multiplier;
                 }
             }
         }
@@ -644,7 +644,7 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
         if (writer->isFloatingPoint())
         {
             for (int i = numChannels; --i >= 0;)
-                chans[i] = (int*) channels[i] + startSample;
+                chans[i] = reinterpret_cast<int*> (channels[i] + startSample);
         }
         else
         {

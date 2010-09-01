@@ -856,7 +856,7 @@ public:
     static const String getMidiNoteName (int noteNumber,
                                          bool useSharps,
                                          bool includeOctaveNumber,
-                                         int octaveNumForMiddleC) throw();
+                                         int octaveNumForMiddleC);
 
     /** Returns the frequency of a midi note number.
 
@@ -869,25 +869,25 @@ public:
         @param midiInstrumentNumber     the program number 0 to 127
         @see getProgramChangeNumber
     */
-    static const String getGMInstrumentName (int midiInstrumentNumber) throw();
+    static const String getGMInstrumentName (int midiInstrumentNumber);
 
     /** Returns the name of a bank of GM instruments.
 
         @param midiBankNumber   the bank, 0 to 15
     */
-    static const String getGMInstrumentBankName (int midiBankNumber) throw();
+    static const String getGMInstrumentBankName (int midiBankNumber);
 
     /** Returns the standard name of a channel 10 percussion sound.
 
         @param midiNoteNumber   the key number, 35 to 81
     */
-    static const String getRhythmInstrumentName (int midiNoteNumber) throw();
+    static const String getRhythmInstrumentName (int midiNoteNumber);
 
     /** Returns the name of a controller type number.
 
         @see getControllerNumber
     */
-    static const String getControllerName (int controllerNumber) throw();
+    static const String getControllerName (int controllerNumber);
 
 
     //==============================================================================

@@ -448,7 +448,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine) t
 
     ++otherLine;
     const size_t lineSizeBytes = (dest[0] * 2 + 1) * sizeof (int);
-    int* temp = (int*) alloca (lineSizeBytes);
+    int* temp = static_cast<int*> (alloca (lineSizeBytes));
     memcpy (temp, dest, lineSizeBytes);
 
     const int* src1 = temp;
@@ -704,7 +704,7 @@ void EdgeTable::clipLineToMask (int x, int y, const uint8* mask, int maskStride,
         return;
     }
 
-    int* tempLine = (int*) alloca ((numPixels * 2 + 4) * sizeof (int));
+    int* tempLine = static_cast<int*> (alloca ((numPixels * 2 + 4) * sizeof (int)));
     int destIndex = 0, lastLevel = 0;
 
     while (--numPixels >= 0)

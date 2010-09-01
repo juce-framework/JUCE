@@ -509,8 +509,8 @@ public:
             else if (bitsPerSample == 32)
             {
                 const unsigned int* src = (const unsigned int*) tempBuffer;
-                unsigned int* l = (unsigned int*) left;
-                unsigned int* r = (unsigned int*) right;
+                unsigned int* l = reinterpret_cast<unsigned int*> (left);
+                unsigned int* r = reinterpret_cast<unsigned int*> (right);
 
                 if (numChannels > 1)
                 {
@@ -547,12 +547,12 @@ public:
                     }
                 }
 
-                left = (int*)l;
-                right = (int*)r;
+                left = reinterpret_cast<int*> (l);
+                right = reinterpret_cast<int*> (r);
             }
             else if (bitsPerSample == 8)
             {
-                const unsigned char* src = (const unsigned char*) tempBuffer;
+                const unsigned char* src = reinterpret_cast<const unsigned char*> (tempBuffer);
 
                 if (numChannels > 1)
                 {

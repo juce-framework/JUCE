@@ -231,7 +231,7 @@ public:
 
                 if (src != 0)
                 {
-                    int* dest = (int*) reservoir.getSampleData(i);
+                    int* dest = reinterpret_cast<int*> (reservoir.getSampleData(i));
 
                     for (int j = 0; j < numSamples; ++j)
                         dest[j] = src[j] << bitsToShift;
@@ -370,10 +370,10 @@ public:
         if (bitsToShift > 0)
         {
             const int numChannelsToWrite = (samplesToWrite[1] == 0) ? 1 : 2;
-            temp.setSize (sizeof (int) * numSamples * numChannelsToWrite);
+            HeapBlock<int> temp (numSamples * numChannelsToWrite);
 
-            buf[0] = (int*) temp.getData();
-            buf[1] = buf[0] + numSamples;
+            buf[0] = temp.getData();
+            buf[1] = temp.getData() + numSamples;
             buf[2] = 0;
 
             for (int i = numChannelsToWrite; --i >= 0;)
@@ -385,7 +385,7 @@ public:
                 }
             }
 
-            samplesToWrite = (const int**) buf;
+            samplesToWrite = const_cast<const int**> (buf);
         }
 
         return FLAC__stream_encoder_process (encoder,
@@ -482,7 +482,6 @@ public:
 
 private:
     FlacNamespace::FLAC__StreamEncoder* encoder;
-    MemoryBlock temp;
 
     FlacWriter (const FlacWriter&);
     FlacWriter& operator= (const FlacWriter&);

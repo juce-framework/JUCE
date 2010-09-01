@@ -106,7 +106,7 @@ public:
                                     error - the reader should just return zeros for these regions
         @see readMaxLevels
     */
-    bool read (int** destSamples,
+    bool read (int* const* destSamples,
                int numDestChannels,
                int64 startSampleInSource,
                int numSamplesToRead,

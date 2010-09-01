@@ -49,7 +49,7 @@ AudioFormatReader::~AudioFormatReader()
     delete input;
 }
 
-bool AudioFormatReader::read (int** destSamples,
+bool AudioFormatReader::read (int* const* destSamples,
                               int numDestChannels,
                               int64 startSampleInSource,
                               int numSamplesToRead,
@@ -75,7 +75,8 @@ bool AudioFormatReader::read (int** destSamples,
     if (numSamplesToRead <= 0)
         return true;
 
-    if (! readSamples (destSamples, jmin ((int) numChannels, numDestChannels), startOffsetInDestBuffer,
+    if (! readSamples (const_cast<int**> (destSamples),
+                       jmin ((int) numChannels, numDestChannels), startOffsetInDestBuffer,
                        startSampleInSource, numSamplesToRead))
         return false;
 
@@ -141,11 +142,11 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
     }
 
     const int bufferSize = (int) jmin (numSamples, (int64) 4096);
-    MemoryBlock tempSpace (bufferSize * sizeof (int) * 2 + 64);
+    HeapBlock<int> tempSpace (bufferSize * 2 + 64);
 
     int* tempBuffer[3];
-    tempBuffer[0] = (int*) tempSpace.getData();
-    tempBuffer[1] = ((int*) tempSpace.getData()) + bufferSize;
+    tempBuffer[0] = tempSpace.getData();
+    tempBuffer[1] = tempSpace.getData() + bufferSize;
     tempBuffer[2] = 0;
 
     if (usesFloatingPointData)
@@ -158,19 +159,19 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            read ((int**) tempBuffer, 2, startSampleInFile, numToDo, false);
+            read (tempBuffer, 2, startSampleInFile, numToDo, false);
 
             numSamples -= numToDo;
             startSampleInFile += numToDo;
 
             float bufmin, bufmax;
-            findAudioBufferMaxMin ((float*) tempBuffer[0], numToDo, bufmax, bufmin);
+            findAudioBufferMaxMin (reinterpret_cast<float*> (tempBuffer[0]), numToDo, bufmax, bufmin);
             lmin = jmin (lmin, bufmin);
             lmax = jmax (lmax, bufmax);
 
             if (numChannels > 1)
             {
-                findAudioBufferMaxMin ((float*) tempBuffer[1], numToDo, bufmax, bufmin);
+                findAudioBufferMaxMin (reinterpret_cast<float*> (tempBuffer[1]), numToDo, bufmax, bufmin);
                 rmin = jmin (rmin, bufmin);
                 rmax = jmax (rmax, bufmax);
             }
@@ -197,7 +198,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            read ((int**) tempBuffer, 2, startSampleInFile, numToDo, false);
+            read (tempBuffer, 2, startSampleInFile, numToDo, false);
 
             numSamples -= numToDo;
             startSampleInFile += numToDo;
@@ -256,11 +257,11 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
         return -1;
 
     const int bufferSize = 4096;
-    MemoryBlock tempSpace (bufferSize * sizeof (int) * 2 + 64);
+    HeapBlock<int> tempSpace (bufferSize * 2 + 64);
 
     int* tempBuffer[3];
-    tempBuffer[0] = (int*) tempSpace.getData();
-    tempBuffer[1] = ((int*) tempSpace.getData()) + bufferSize;
+    tempBuffer[0] = tempSpace.getData();
+    tempBuffer[1] = tempSpace.getData() + bufferSize;
     tempBuffer[2] = 0;
 
     int consecutive = 0;
@@ -284,7 +285,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
         if (bufferStart >= (int) lengthInSamples)
             break;
 
-        read ((int**) tempBuffer, 2, bufferStart, numThisTime, false);
+        read (tempBuffer, 2, bufferStart, numThisTime, false);
 
         int num = numThisTime;
         while (--num >= 0)
@@ -393,7 +394,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     zerostruct (buffers);
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
-        buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
+        buffers[i] = reinterpret_cast<int*> (tempBuffer.getSampleData (i, 0));
 
     if (numSamplesToRead < 0)
         numSamplesToRead = reader.lengthInSamples;
@@ -439,7 +440,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
             }
         }
 
-        if (! write ((const int**) buffers, numToDo))
+        if (! write (const_cast<const int**> (buffers), numToDo))
             return false;
 
         numSamplesToRead -= numToDo;
@@ -458,7 +459,7 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
     zerostruct (buffers);
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
-        buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
+        buffers[i] = reinterpret_cast<int*> (tempBuffer.getSampleData (i, 0));
 
     while (numSamplesToRead > 0)
     {

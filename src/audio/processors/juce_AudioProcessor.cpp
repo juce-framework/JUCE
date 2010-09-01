@@ -266,7 +266,7 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml,
 
     destData.setSize (stringLength + 10);
 
-    char* const d = (char*) destData.getData();
+    char* const d = static_cast<char*> (destData.getData());
     *(uint32*) d = ByteOrder::swapIfBigEndian ((const uint32) magicXmlNumber);
     *(uint32*) (d + 4) = ByteOrder::swapIfBigEndian ((const uint32) stringLength);
 
@@ -279,11 +279,11 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
     if (sizeInBytes > 8
          && ByteOrder::littleEndianInt (data) == magicXmlNumber)
     {
-        const int stringLength = (int) ByteOrder::littleEndianInt (((const char*) data) + 4);
+        const int stringLength = (int) ByteOrder::littleEndianInt (addBytesToPointer (data, 4));
 
         if (stringLength > 0)
         {
-            XmlDocument doc (String::fromUTF8 (((const char*) data) + 8,
+            XmlDocument doc (String::fromUTF8 (static_cast<const char*> (data) + 8,
                                                jmin ((sizeInBytes - 8), stringLength)));
 
             return doc.getDocumentElement();
@@ -294,13 +294,8 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
 }
 
 //==============================================================================
-void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int)
-{
-}
-
-void AudioProcessorListener::audioProcessorParameterChangeGestureEnd (AudioProcessor*, int)
-{
-}
+void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
+void AudioProcessorListener::audioProcessorParameterChangeGestureEnd (AudioProcessor*, int) {}
 
 //==============================================================================
 bool AudioPlayHead::CurrentPositionInfo::operator== (const CurrentPositionInfo& other) const throw()

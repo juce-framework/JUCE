@@ -144,7 +144,7 @@ private:
         {
             if (width >> 5)
             {
-                const int* const intFiller = (const int*) filler;
+                const int* const intFiller = reinterpret_cast<const int*> (filler);
 
                 while (width > 8 && (((pointer_sized_int) dest) & 7) != 0)
                 {
@@ -155,10 +155,11 @@ private:
 
                 while (width > 4)
                 {
-                    ((int*) dest) [0] = intFiller[0];
-                    ((int*) dest) [1] = intFiller[1];
-                    ((int*) dest) [2] = intFiller[2];
-                    dest = (PixelRGB*) (((uint8*) dest) + 12);
+                    int* d = reinterpret_cast<int*> (dest);
+                    *d++ = intFiller[0];
+                    *d++ = intFiller[1];
+                    *d++ = intFiller[2];
+                    dest = reinterpret_cast<PixelRGB*> (d);
                     width -= 4;
                 }
             }

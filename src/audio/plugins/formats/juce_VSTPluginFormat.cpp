@@ -260,7 +260,7 @@ static int getPropertyFromXWindow (Window handle, Atom atom)
 
     XSetErrorHandler (oldErrorHandler);
 
-    return (userCount == 1 && ! xErrorTriggered) ? *(int*) data
+    return (userCount == 1 && ! xErrorTriggered) ? *reinterpret_cast<int*> (data)
                                                  : 0;
 }
 

@@ -2837,10 +2837,9 @@ static HDROP createHDrop (const StringArray& fileNames)
     {
         LPDROPFILES pDropFiles = (LPDROPFILES) GlobalLock (hDrop);
         pDropFiles->pFiles = sizeof (DROPFILES);
-
         pDropFiles->fWide = true;
 
-        WCHAR* fname = (WCHAR*) (((char*) pDropFiles) + sizeof (DROPFILES));
+        WCHAR* fname = reinterpret_cast<WCHAR*> (addBytesToPointer (pDropFiles, sizeof (DROPFILES)));
 
         for (int i = 0; i < fileNames.size(); ++i)
         {

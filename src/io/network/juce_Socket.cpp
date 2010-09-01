@@ -139,9 +139,9 @@ namespace SocketHelpers
             int bytesThisTime;
 
     #if JUCE_WINDOWS
-            bytesThisTime = recv (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
+            bytesThisTime = recv (handle, static_cast<char*> (destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
     #else
-            while ((bytesThisTime = (int) ::read (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead)) < 0
+            while ((bytesThisTime = (int) ::read (handle, addBytesToPointer (destBuffer, bytesRead), maxBytesToRead - bytesRead)) < 0
                      && errno == EINTR
                      && connected)
             {

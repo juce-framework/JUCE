@@ -551,15 +551,14 @@ void MidiOutput::reset()
     midiOutReset (h->handle);
 }
 
-bool MidiOutput::getVolume (float& leftVol,
-                            float& rightVol)
+bool MidiOutput::getVolume (float& leftVol, float& rightVol)
 {
     const MidiOutHandle* const handle = static_cast <const MidiOutHandle*> (internal);
 
     DWORD n;
     if (midiOutGetVolume (handle->handle, &n) == MMSYSERR_NOERROR)
     {
-        const unsigned short* const nn = (const unsigned short*) &n;
+        const unsigned short* const nn = reinterpret_cast<const unsigned short*> (&n);
         rightVol = nn[0] / (float) 0xffff;
         leftVol = nn[1] / (float) 0xffff;
         return true;
@@ -571,13 +570,12 @@ bool MidiOutput::getVolume (float& leftVol,
     }
 }
 
-void MidiOutput::setVolume (float leftVol,
-                            float rightVol)
+void MidiOutput::setVolume (float leftVol, float rightVol)
 {
     const MidiOutHandle* const handle = static_cast <MidiOutHandle*> (internal);
 
     DWORD n;
-    unsigned short* const nn = (unsigned short*) &n;
+    unsigned short* const nn = reinterpret_cast<unsigned short*> (&n);
     nn[0] = (unsigned short) jlimit (0, 0xffff, (int) (rightVol * 0xffff));
     nn[1] = (unsigned short) jlimit (0, 0xffff, (int) (leftVol * 0xffff));
     midiOutSetVolume (handle->handle, n);

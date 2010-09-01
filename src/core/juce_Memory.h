@@ -202,18 +202,24 @@
 
 //==============================================================================
 /** Clears a block of memory. */
-inline void zeromem (void* memory, size_t numBytes)             { memset (memory, 0, numBytes); }
+inline void zeromem (void* memory, size_t numBytes) throw()         { memset (memory, 0, numBytes); }
 
 /** Clears a reference to a local structure. */
 template <typename Type>
-inline void zerostruct (Type& structure)                        { memset (&structure, 0, sizeof (structure)); }
+inline void zerostruct (Type& structure) throw()                    { memset (&structure, 0, sizeof (structure)); }
 
 /** A handy function that calls delete on a pointer if it's non-zero, and then sets
     the pointer to null.
 */
 template <typename Type>
-inline void deleteAndZero (Type& pointer)                       { delete pointer; pointer = 0; }
+inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = 0; }
 
+/** A handy function which adds a number of bytes to any type of pointer and returns the result.
+    This can be useful to avoid casting pointers to a char* and back when you want to move them by
+    a specific number of bytes,
+*/
+template <typename Type>
+inline Type* addBytesToPointer (Type* pointer, int bytes) throw()   { return (Type*) (((char*) pointer) + bytes); }
 
 
 #endif   // __JUCE_MEMORY_JUCEHEADER__

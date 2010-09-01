@@ -462,15 +462,15 @@ public:
 
         if (bytesEmpty >= bytesPerBuffer)
         {
-            LPBYTE lpbuf1 = 0;
-            LPBYTE lpbuf2 = 0;
+            void* lpbuf1 = 0;
+            void* lpbuf2 = 0;
             DWORD dwSize1 = 0;
             DWORD dwSize2 = 0;
 
             HRESULT hr = pOutputBuffer->Lock (writeOffset,
                                               bytesPerBuffer,
-                                              (void**) &lpbuf1, &dwSize1,
-                                              (void**) &lpbuf2, &dwSize2, 0);
+                                              &lpbuf1, &dwSize1,
+                                              &lpbuf2, &dwSize2, 0);
 
             if (hr == MAKE_HRESULT (1, 0x878, 150)) // DSERR_BUFFERLOST
             {
@@ -478,8 +478,8 @@ public:
 
                 hr = pOutputBuffer->Lock (writeOffset,
                                           bytesPerBuffer,
-                                          (void**) &lpbuf1, &dwSize1,
-                                          (void**) &lpbuf2, &dwSize2, 0);
+                                          &lpbuf1, &dwSize1,
+                                          &lpbuf2, &dwSize2, 0);
             }
 
             if (hr == S_OK)
@@ -489,7 +489,7 @@ public:
                     const float gainL = 32767.0f;
                     const float gainR = 32767.0f;
 
-                    int* dest = (int*)lpbuf1;
+                    int* dest = static_cast<int*> (lpbuf1);
                     const float* left = leftBuffer;
                     const float* right = rightBuffer;
                     int samples1 = dwSize1 >> 2;
@@ -509,7 +509,7 @@ public:
                             *dest++ = (r << 16);
                         }
 
-                        dest = (int*)lpbuf2;
+                        dest = static_cast<int*> (lpbuf2);
 
                         while (--samples2 >= 0)
                         {
@@ -539,7 +539,7 @@ public:
                             *dest++ = l;
                         }
 
-                        dest = (int*)lpbuf2;
+                        dest = static_cast<int*> (lpbuf2);
 
                         while (--samples2 >= 0)
                         {
@@ -578,7 +578,7 @@ public:
                             *dest++ = (r << 16) | l;
                         }
 
-                        dest = (int*)lpbuf2;
+                        dest = static_cast<int*> (lpbuf2);
 
                         while (--samples2 >= 0)
                         {

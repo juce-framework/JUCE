@@ -956,17 +956,24 @@ extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
 #endif
 
 /** Clears a block of memory. */
-inline void zeromem (void* memory, size_t numBytes)		 { memset (memory, 0, numBytes); }
+inline void zeromem (void* memory, size_t numBytes) throw()	 { memset (memory, 0, numBytes); }
 
 /** Clears a reference to a local structure. */
 template <typename Type>
-inline void zerostruct (Type& structure)			{ memset (&structure, 0, sizeof (structure)); }
+inline void zerostruct (Type& structure) throw()			{ memset (&structure, 0, sizeof (structure)); }
 
 /** A handy function that calls delete on a pointer if it's non-zero, and then sets
 	the pointer to null.
 */
 template <typename Type>
 inline void deleteAndZero (Type& pointer)			   { delete pointer; pointer = 0; }
+
+/** A handy function which adds a number of bytes to any type of pointer and returns the result.
+	This can be useful to avoid casting pointers to a char* and back when you want to move them by
+	a specific number of bytes,
+*/
+template <typename Type>
+inline Type* addBytesToPointer (Type* pointer, int bytes) throw()   { return (Type*) (((char*) pointer) + bytes); }
 
 #endif   // __JUCE_MEMORY_JUCEHEADER__
 /*** End of inlined file: juce_Memory.h ***/
@@ -29561,7 +29568,7 @@ public:
 									error - the reader should just return zeros for these regions
 		@see readMaxLevels
 	*/
-	bool read (int** destSamples,
+	bool read (int* const* destSamples,
 			   int numDestChannels,
 			   int64 startSampleInSource,
 			   int numSamplesToRead,
@@ -33764,7 +33771,7 @@ public:
 	static const String getMidiNoteName (int noteNumber,
 										 bool useSharps,
 										 bool includeOctaveNumber,
-										 int octaveNumForMiddleC) throw();
+										 int octaveNumForMiddleC);
 
 	/** Returns the frequency of a midi note number.
 
@@ -33777,25 +33784,25 @@ public:
 		@param midiInstrumentNumber	 the program number 0 to 127
 		@see getProgramChangeNumber
 	*/
-	static const String getGMInstrumentName (int midiInstrumentNumber) throw();
+	static const String getGMInstrumentName (int midiInstrumentNumber);
 
 	/** Returns the name of a bank of GM instruments.
 
 		@param midiBankNumber   the bank, 0 to 15
 	*/
-	static const String getGMInstrumentBankName (int midiBankNumber) throw();
+	static const String getGMInstrumentBankName (int midiBankNumber);
 
 	/** Returns the standard name of a channel 10 percussion sound.
 
 		@param midiNoteNumber   the key number, 35 to 81
 	*/
-	static const String getRhythmInstrumentName (int midiNoteNumber) throw();
+	static const String getRhythmInstrumentName (int midiNoteNumber);
 
 	/** Returns the name of a controller type number.
 
 		@see getControllerNumber
 	*/
-	static const String getControllerName (int controllerNumber) throw();
+	static const String getControllerName (int controllerNumber);
 
 	juce_UseDebuggingNewOperator
 
