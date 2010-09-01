@@ -777,6 +777,15 @@ const Image juce_loadWithCoreImage (InputStream& input)
     MemoryBlock data;
     input.readIntoMemoryBlock (data, -1);
 
+#if JUCE_IOS
+    JUCE_AUTORELEASEPOOL
+    UIImage* image = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData() length: data.getSize()]];
+
+    if (image != nil)
+    {
+        CGImageRef loadedImage = image.CGImage;
+
+#else
     CGDataProviderRef provider = CGDataProviderCreateWithData (0, data.getData(), data.getSize(), 0);
     CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider (provider, 0);
     CGDataProviderRelease (provider);
@@ -785,6 +794,7 @@ const Image juce_loadWithCoreImage (InputStream& input)
     {
         CGImageRef loadedImage = CGImageSourceCreateImageAtIndex (imageSource, 0, 0);
         CFRelease (imageSource);
+#endif
 
         if (loadedImage != 0)
         {
@@ -798,7 +808,10 @@ const Image juce_loadWithCoreImage (InputStream& input)
 
             CGContextDrawImage (cgImage->context, CGRectMake (0, 0, image.getWidth(), image.getHeight()), loadedImage);
             CGContextFlush (cgImage->context);
+
+#if ! JUCE_IOS
             CFRelease (loadedImage);
+#endif
 
             return image;
         }

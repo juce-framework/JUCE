@@ -142,6 +142,12 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
                            (uint8) 0x50));
     }
 #endif
+
+    /** If this fails, it's probably be because your CPU floating-point precision mode has
+        been set to low.. This setting is sometimes changed by things like Direct3D, and can
+        mess up a lot of the calculations that the library needs to do.
+    */
+    jassert (roundToInt (10.1f) == 10);
 }
 
 bool ComponentPeer::handleKeyPress (const int keyCode,

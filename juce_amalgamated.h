@@ -61486,8 +61486,21 @@ END_JUCE_NAMESPACE
 #pragma comment(lib, "oleaut32.lib")
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "comsupp.lib")
 #pragma comment(lib, "version.lib")
+
+#ifdef _NATIVE_WCHAR_T_DEFINED
+ #ifdef _DEBUG
+  #pragma comment(lib, "comsuppwd.lib")
+ #else
+  #pragma comment(lib, "comsuppw.lib")
+ #endif
+#else
+ #ifdef _DEBUG
+  #pragma comment(lib, "comsuppd.lib")
+ #else
+  #pragma comment(lib, "comsupp.lib")
+ #endif
+#endif
 
 #if JUCE_OPENGL
  #pragma comment(lib, "OpenGL32.Lib")

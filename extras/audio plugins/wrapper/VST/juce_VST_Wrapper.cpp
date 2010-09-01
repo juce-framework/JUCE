@@ -24,7 +24,7 @@
 */
 
 #ifdef _MSC_VER
-  #pragma warning (disable : 4996)
+  #pragma warning (disable : 4996 4100)
 #endif
 
 #ifdef _WIN32
@@ -1400,8 +1400,8 @@ public:
             // front when our comp is clicked on.
             HWND parent = findMDIParentOf ((HWND) getWindowHandle());
 
-            if (parent != 0)
-                SetWindowPos (parent, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+//            if (parent != 0)
+  //              SetWindowPos (parent, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         }
       #endif
 
