@@ -61,7 +61,7 @@ public:
     struct JUCE_API  InvocationInfo
     {
         //==============================================================================
-        InvocationInfo (const CommandID commandID) throw();
+        InvocationInfo (const CommandID commandID);
 
         //==============================================================================
         /** The UID of the command that should be performed. */

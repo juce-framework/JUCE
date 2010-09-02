@@ -155,13 +155,13 @@ public:
 
         @see registerCommand
     */
-    int getNumCommands() const throw()                                                  { return commands.size(); }
+    int getNumCommands() const throw()                                              { return commands.size(); }
 
     /** Returns the details about one of the registered commands.
 
         The index is between 0 and (getNumCommands() - 1).
     */
-    const ApplicationCommandInfo* getCommandForIndex (int index) const throw()    { return commands [index]; }
+    const ApplicationCommandInfo* getCommandForIndex (int index) const throw()      { return commands [index]; }
 
     /** Returns the details about a given command ID.
 
@@ -194,13 +194,13 @@ public:
 
         @see getCommandsInCategory()
     */
-    const StringArray getCommandCategories() const throw();
+    const StringArray getCommandCategories() const;
 
     /** Returns a list of all the command UIDs in a particular category.
 
         @see getCommandCategories()
     */
-    const Array <CommandID> getCommandsInCategory (const String& categoryName) const throw();
+    const Array <CommandID> getCommandsInCategory (const String& categoryName) const;
 
     //==============================================================================
     /** Returns the manager's internal set of key mappings.
@@ -288,10 +288,10 @@ public:
 
     //==============================================================================
     /** Registers a listener that will be called when various events occur. */
-    void addListener (ApplicationCommandManagerListener* listener) throw();
+    void addListener (ApplicationCommandManagerListener* listener);
 
     /** Deregisters a previously-added listener. */
-    void removeListener (ApplicationCommandManagerListener* listener) throw();
+    void removeListener (ApplicationCommandManagerListener* listener);
 
     //==============================================================================
     /** Looks for a suitable command target based on which Components have the keyboard focus.

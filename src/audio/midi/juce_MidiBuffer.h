@@ -153,7 +153,7 @@ public:
         This is a quick operation, because no memory allocating or copying is done, it
         just swaps the internal state of the two buffers.
     */
-    void swapWith (MidiBuffer& other);
+    void swapWith (MidiBuffer& other) throw();
 
     /** Preallocates some memory for the buffer to use.
         This helps to avoid needing to reallocate space when the buffer has messages

@@ -27966,7 +27966,7 @@ public:
 	struct JUCE_API  InvocationInfo
 	{
 
-		InvocationInfo (const CommandID commandID) throw();
+		InvocationInfo (const CommandID commandID);
 
 		/** The UID of the command that should be performed. */
 		CommandID commandID;
@@ -28971,7 +28971,7 @@ public:
 
 		The index is between 0 and (getNumCommands() - 1).
 	*/
-	const ApplicationCommandInfo* getCommandForIndex (int index) const throw()	{ return commands [index]; }
+	const ApplicationCommandInfo* getCommandForIndex (int index) const throw()	  { return commands [index]; }
 
 	/** Returns the details about a given command ID.
 
@@ -29004,13 +29004,13 @@ public:
 
 		@see getCommandsInCategory()
 	*/
-	const StringArray getCommandCategories() const throw();
+	const StringArray getCommandCategories() const;
 
 	/** Returns a list of all the command UIDs in a particular category.
 
 		@see getCommandCategories()
 	*/
-	const Array <CommandID> getCommandsInCategory (const String& categoryName) const throw();
+	const Array <CommandID> getCommandsInCategory (const String& categoryName) const;
 
 	/** Returns the manager's internal set of key mappings.
 
@@ -29092,10 +29092,10 @@ public:
 												   ApplicationCommandInfo& upToDateInfo);
 
 	/** Registers a listener that will be called when various events occur. */
-	void addListener (ApplicationCommandManagerListener* listener) throw();
+	void addListener (ApplicationCommandManagerListener* listener);
 
 	/** Deregisters a previously-added listener. */
-	void removeListener (ApplicationCommandManagerListener* listener) throw();
+	void removeListener (ApplicationCommandManagerListener* listener);
 
 	/** Looks for a suitable command target based on which Components have the keyboard focus.
 
@@ -34103,7 +34103,7 @@ public:
 		This is a quick operation, because no memory allocating or copying is done, it
 		just swaps the internal state of the two buffers.
 	*/
-	void swapWith (MidiBuffer& other);
+	void swapWith (MidiBuffer& other) throw();
 
 	/** Preallocates some memory for the buffer to use.
 		This helps to avoid needing to reallocate space when the buffer has messages

@@ -170,7 +170,7 @@ bool ApplicationCommandTarget::invokeDirectly (const CommandID commandID, const 
 }
 
 //==============================================================================
-ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID commandID_) throw()
+ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID commandID_)
     : commandID (commandID_),
       commandFlags (0),
       invocationMethod (direct),

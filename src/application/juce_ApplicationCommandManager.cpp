@@ -154,7 +154,7 @@ const String ApplicationCommandManager::getDescriptionOfCommand (const CommandID
                      : String::empty;
 }
 
-const StringArray ApplicationCommandManager::getCommandCategories() const throw()
+const StringArray ApplicationCommandManager::getCommandCategories() const
 {
     StringArray s;
 
@@ -164,7 +164,7 @@ const StringArray ApplicationCommandManager::getCommandCategories() const throw(
     return s;
 }
 
-const Array <CommandID> ApplicationCommandManager::getCommandsInCategory (const String& categoryName) const throw()
+const Array <CommandID> ApplicationCommandManager::getCommandsInCategory (const String& categoryName) const
 {
     Array <CommandID> results;
 
@@ -303,12 +303,12 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 }
 
 //==============================================================================
-void ApplicationCommandManager::addListener (ApplicationCommandManagerListener* const listener) throw()
+void ApplicationCommandManager::addListener (ApplicationCommandManagerListener* const listener)
 {
     listeners.add (listener);
 }
 
-void ApplicationCommandManager::removeListener (ApplicationCommandManagerListener* const listener) throw()
+void ApplicationCommandManager::removeListener (ApplicationCommandManagerListener* const listener)
 {
     listeners.remove (listener);
 }

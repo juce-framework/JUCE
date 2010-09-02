@@ -56,7 +56,7 @@ MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
     return *this;
 }
 
-void MidiBuffer::swapWith (MidiBuffer& other)
+void MidiBuffer::swapWith (MidiBuffer& other) throw()
 {
     data.swapWith (other.data);
     swapVariables <int> (bytesUsed, other.bytesUsed);
