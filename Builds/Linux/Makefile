@@ -342,6 +342,7 @@ OBJECTS := \
   $(OBJDIR)/juce_PropertiesFile_8faca026.o \
   $(OBJDIR)/juce_RecentlyOpenedFilesList_f791257.o \
   $(OBJDIR)/juce_UndoManager_33b197fc.o \
+  $(OBJDIR)/juce_UnitTest_4a02c10d.o \
 
 .PHONY: clean
 
@@ -1871,6 +1872,11 @@ $(OBJDIR)/juce_RecentlyOpenedFilesList_f791257.o: ../../src/utilities/juce_Recen
 $(OBJDIR)/juce_UndoManager_33b197fc.o: ../../src/utilities/juce_UndoManager.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_UndoManager.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_UnitTest_4a02c10d.o: ../../src/utilities/juce_UnitTest.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_UnitTest.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

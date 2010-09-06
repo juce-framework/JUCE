@@ -570,7 +570,8 @@ int File::findChildFiles (Array<File>& results,
                 }
 
                 if (searchRecursively && itemIsDirectory
-                     && fileTypeMatches (whatToLookFor | findDirectories, true, itemIsHidden))
+                     && ((! itemIsHidden) || (whatToLookFor & File::ignoreHiddenFiles) == 0))
+
                 {
                     total += fileFound.findChildFiles (results, whatToLookFor, true, wildCardPattern);
                 }

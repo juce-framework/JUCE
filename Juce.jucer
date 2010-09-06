@@ -1494,6 +1494,10 @@
               file="src/utilities/juce_UndoManager.cpp"/>
         <FILE id="ZMxSjySn" name="juce_UndoManager.h" compile="0" resource="0"
               file="src/utilities/juce_UndoManager.h"/>
+        <FILE id="6QJ8o3k" name="juce_UnitTest.cpp" compile="1" resource="0"
+              file="src/utilities/juce_UnitTest.cpp"/>
+        <FILE id="PQBhHBA" name="juce_UnitTest.h" compile="0" resource="0"
+              file="src/utilities/juce_UnitTest.h"/>
       </GROUP>
       <FILE id="Jp7xh1cg9" name="juce.h" compile="0" resource="0" file="juce.h"/>
       <FILE id="G2j0wJTna" name="juce_Config.h" compile="0" resource="0"

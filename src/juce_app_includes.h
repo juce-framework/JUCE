@@ -758,5 +758,8 @@
 #ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
  #include "utilities/juce_UndoManager.h"
 #endif
+#ifndef __JUCE_UNITTEST_JUCEHEADER__
+ #include "utilities/juce_UnitTest.h"
+#endif
 
 #endif

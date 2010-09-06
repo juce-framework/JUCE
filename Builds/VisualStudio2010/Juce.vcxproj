@@ -425,6 +425,7 @@
     <ClCompile Include="..\..\src\utilities\juce_PropertiesFile.cpp"/>
     <ClCompile Include="..\..\src\utilities\juce_RecentlyOpenedFilesList.cpp"/>
     <ClCompile Include="..\..\src\utilities\juce_UndoManager.cpp"/>
+    <ClCompile Include="..\..\src\utilities\juce_UnitTest.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\application\juce_Application.h"/>
@@ -768,6 +769,7 @@
     <ClInclude Include="..\..\src\utilities\juce_SystemClipboard.h"/>
     <ClInclude Include="..\..\src\utilities\juce_UndoableAction.h"/>
     <ClInclude Include="..\..\src\utilities\juce_UndoManager.h"/>
+    <ClInclude Include="..\..\src\utilities\juce_UnitTest.h"/>
     <ClInclude Include="..\..\juce.h"/>
     <ClInclude Include="..\..\juce_Config.h"/>
   </ItemGroup>

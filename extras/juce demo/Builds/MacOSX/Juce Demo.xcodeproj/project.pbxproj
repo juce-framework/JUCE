@@ -190,7 +190,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_DEBUG=1",
-				"DEBUG=1 "); }; name = Debug; };
+				"DEBUG=1 ",
+				"JUCE_UNIT_TESTS=1"); }; name = Debug; };
 		8EF7C7FFD55219581A5075F3 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
@@ -204,7 +205,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_NDEBUG=1",
-				"NDEBUG=1 "); }; name = Release; };
+				"NDEBUG=1 ",
+				"JUCE_UNIT_TESTS=1"); }; name = Release; };
 		7FA986B99AFC795723E00AB0 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;

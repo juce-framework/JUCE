@@ -1201,6 +1201,9 @@
     <ClCompile Include="..\..\src\utilities\juce_UndoManager.cpp">
       <Filter>Juce\Source\utilities</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\utilities\juce_UnitTest.cpp">
+      <Filter>Juce\Source\utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\application\juce_Application.h">
@@ -2224,6 +2227,9 @@
       <Filter>Juce\Source\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\utilities\juce_UndoManager.h">
+      <Filter>Juce\Source\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utilities\juce_UnitTest.h">
       <Filter>Juce\Source\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\juce.h">

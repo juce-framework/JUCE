@@ -193,36 +193,43 @@ public:
     int compareLexicographically (const String& other) const throw();
 
     /** Tests whether the string begins with another string.
+        If the parameter is an empty string, this will always return true.
         Uses a case-sensitive comparison.
     */
     bool startsWith (const String& text) const throw();
 
     /** Tests whether the string begins with a particular character.
+        If the character is 0, this will always return false.
         Uses a case-sensitive comparison.
     */
     bool startsWithChar (juce_wchar character) const throw();
 
     /** Tests whether the string begins with another string.
+        If the parameter is an empty string, this will always return true.
         Uses a case-insensitive comparison.
     */
     bool startsWithIgnoreCase (const String& text) const throw();
 
     /** Tests whether the string ends with another string.
+        If the parameter is an empty string, this will always return true.
         Uses a case-sensitive comparison.
     */
     bool endsWith (const String& text) const throw();
 
     /** Tests whether the string ends with a particular character.
+        If the character is 0, this will always return false.
         Uses a case-sensitive comparison.
     */
     bool endsWithChar (juce_wchar character) const throw();
 
     /** Tests whether the string ends with another string.
+        If the parameter is an empty string, this will always return true.
         Uses a case-insensitive comparison.
     */
     bool endsWithIgnoreCase (const String& text) const throw();
 
     /** Tests whether the string contains another substring.
+        If the parameter is an empty string, this will always return true.
         Uses a case-sensitive comparison.
     */
     bool contains (const String& text) const throw();

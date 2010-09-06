@@ -92,4 +92,53 @@ int64 MemoryInputStream::getPosition()
     return position;
 }
 
+
+#if JUCE_UNIT_TESTS
+
+#include "../../utilities/juce_UnitTest.h"
+#include "../../core/juce_Random.h"
+#include "juce_MemoryOutputStream.h"
+
+class MemoryStreamTests  : public UnitTest
+{
+public:
+    MemoryStreamTests() : UnitTest ("MemoryInputStream & MemoryOutputStream") {}
+
+    void runTest()
+    {
+        beginTest ("Basics");
+
+        int randomInt = Random::getSystemRandom().nextInt();
+        int64 randomInt64 = Random::getSystemRandom().nextInt64();
+        double randomDouble = Random::getSystemRandom().nextDouble();
+        String randomString;
+        for (int i = 50; --i >= 0;)
+            randomString << (juce_wchar) (Random::getSystemRandom().nextInt() & 0xffff);
+
+        MemoryOutputStream mo;
+        mo.writeInt (randomInt);
+        mo.writeIntBigEndian (randomInt);
+        mo.writeCompressedInt (randomInt);
+        mo.writeString (randomString);
+        mo.writeInt64 (randomInt64);
+        mo.writeInt64BigEndian (randomInt64);
+        mo.writeDouble (randomDouble);
+        mo.writeDoubleBigEndian (randomDouble);
+
+        MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+        expect (mi.readInt() == randomInt);
+        expect (mi.readIntBigEndian() == randomInt);
+        expect (mi.readCompressedInt() == randomInt);
+        expect (mi.readString() == randomString);
+        expect (mi.readInt64() == randomInt64);
+        expect (mi.readInt64BigEndian() == randomInt64);
+        expect (mi.readDouble() == randomDouble);
+        expect (mi.readDoubleBigEndian() == randomDouble);
+    }
+};
+
+static MemoryStreamTests memoryInputStreamUnitTests;
+
+#endif
+
 END_JUCE_NAMESPACE

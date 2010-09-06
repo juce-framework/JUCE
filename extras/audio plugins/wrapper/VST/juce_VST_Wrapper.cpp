@@ -1439,7 +1439,7 @@ private:
     class NonWavelabMMLock
     {
     public:
-        NonWavelabMMLock() : mm (getHostType().isWavelab() ? 0 : new MessageManagerLock())  {}
+        NonWavelabMMLock() : mm (getHostType().isWavelab() || getHostType().isCubaseBridged() ? 0 : new MessageManagerLock())  {}
         ~NonWavelabMMLock() {}
 
     private:
@@ -1448,7 +1448,7 @@ private:
 
     static void checkWhetherWavelabHasChangedThread()
     {
-        if (getHostType().isWavelab())
+        if (getHostType().isWavelab() || getHostType().isCubaseBridged())
             MessageManager::getInstance()->setCurrentThreadAsMessageThread();
     }
 #else

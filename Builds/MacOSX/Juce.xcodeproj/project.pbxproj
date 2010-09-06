@@ -337,6 +337,7 @@
 		0DE731ED3EC994B9227C2741 = { isa = PBXBuildFile; fileRef = 4BE2727CCD2CD7603402C8FE; };
 		A124FE5709D9324B5BAFFE53 = { isa = PBXBuildFile; fileRef = A618FC3255ECE14EC9259E6B; };
 		A84A5CA4654AE87192A6A096 = { isa = PBXBuildFile; fileRef = A59A5DCFCCAAEA79D03C2B27; };
+		55EDB4D9B702B469DB4655C3 = { isa = PBXBuildFile; fileRef = ADE5F12AA5AD969E2C7002B3; };
 		389351359BA78C682E1931A6 = { isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		144F56FCF3DF9EC922765901 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Application.cpp; path = ../../src/application/juce_Application.cpp; sourceTree = SOURCE_ROOT; };
 		F6A490BA93AC3558E9A6FBB0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Application.h; path = ../../src/application/juce_Application.h; sourceTree = SOURCE_ROOT; };
@@ -1021,6 +1022,8 @@
 		EECE464606AE845BFC4B941B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_UndoableAction.h; path = ../../src/utilities/juce_UndoableAction.h; sourceTree = SOURCE_ROOT; };
 		A59A5DCFCCAAEA79D03C2B27 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_UndoManager.cpp; path = ../../src/utilities/juce_UndoManager.cpp; sourceTree = SOURCE_ROOT; };
 		3C9E6597968358B57374502C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_UndoManager.h; path = ../../src/utilities/juce_UndoManager.h; sourceTree = SOURCE_ROOT; };
+		ADE5F12AA5AD969E2C7002B3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_UnitTest.cpp; path = ../../src/utilities/juce_UnitTest.cpp; sourceTree = SOURCE_ROOT; };
+		75700D13513346310CEAC30D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_UnitTest.h; path = ../../src/utilities/juce_UnitTest.h; sourceTree = SOURCE_ROOT; };
 		2FD5C998952BE08F8ED3F262 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce.h; path = ../../juce.h; sourceTree = SOURCE_ROOT; };
 		01778F26212AECCBF2452804 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Config.h; path = ../../juce_Config.h; sourceTree = SOURCE_ROOT; };
 		D443FD24B52106986FC8A531 = { isa = PBXGroup; children = (
@@ -1803,7 +1806,9 @@
 				FA833EFA9E93C7DBE6624676,
 				EECE464606AE845BFC4B941B,
 				A59A5DCFCCAAEA79D03C2B27,
-				3C9E6597968358B57374502C ); name = utilities; sourceTree = "<group>"; };
+				3C9E6597968358B57374502C,
+				ADE5F12AA5AD969E2C7002B3,
+				75700D13513346310CEAC30D ); name = utilities; sourceTree = "<group>"; };
 		9AA3D660772E3D4C64EC7859 = { isa = PBXGroup; children = (
 				D443FD24B52106986FC8A531,
 				F2B0E44A08E127FD31184241,
@@ -2231,7 +2236,8 @@
 				D8B9941A1375579D6CE7C1C4,
 				0DE731ED3EC994B9227C2741,
 				A124FE5709D9324B5BAFFE53,
-				A84A5CA4654AE87192A6A096 ); runOnlyForDeploymentPostprocessing = 0; };
+				A84A5CA4654AE87192A6A096,
+				55EDB4D9B702B469DB4655C3 ); runOnlyForDeploymentPostprocessing = 0; };
 		01555BA382FAED280FF5F58A = { isa = PBXNativeTarget; buildConfigurationList = D14EC3F0DC5861E37D35E15A; buildPhases = (
 				8914D147048B9EE245989ACB ); buildRules = ( ); dependencies = ( ); name = Juce; productName = Juce; productReference = 389351359BA78C682E1931A6; productType = "com.apple.product-type.library.static"; };
 		FCFFEDFC83101B196BFA2AE2 = { isa = PBXProject; buildConfigurationList = 3A1CB6B5ECF4A79CDE35CC66; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = 992526B83B6AA618A4FAECEB; projectDirPath = ""; projectRoot = ""; targets = ( 01555BA382FAED280FF5F58A ); };

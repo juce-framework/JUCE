@@ -967,7 +967,7 @@ private:
 
     void createWindow()
     {
-        DWORD exstyle = WS_EX_ACCEPTFILES;
+        DWORD exstyle = WS_EX_ACCEPTFILES; // | WS_EX_NOACTIVATE;
         DWORD type = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
         if (hasTitleBar())

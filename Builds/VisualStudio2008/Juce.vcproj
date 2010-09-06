@@ -964,6 +964,8 @@
           <File RelativePath="..\..\src\utilities\juce_UndoableAction.h"/>
           <File RelativePath="..\..\src\utilities\juce_UndoManager.cpp"/>
           <File RelativePath="..\..\src\utilities\juce_UndoManager.h"/>
+          <File RelativePath="..\..\src\utilities\juce_UnitTest.cpp"/>
+          <File RelativePath="..\..\src\utilities\juce_UnitTest.h"/>
         </Filter>
         <File RelativePath="..\..\juce.h"/>
         <File RelativePath="..\..\juce_Config.h"/>

@@ -147,6 +147,7 @@
  #include "../src/threads/juce_ThreadPool.cpp"
  #include "../src/threads/juce_TimeSliceThread.cpp"
  #include "../src/utilities/juce_DeletedAtShutdown.cpp"
+ #include "../src/utilities/juce_UnitTest.cpp"
 #endif
 
 #if JUCE_BUILD_MISC

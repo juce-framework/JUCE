@@ -2184,5 +2184,272 @@ void String::Concatenator::append (const String& s)
     }
 }
 
+#if JUCE_UNIT_TESTS
+
+#include "../utilities/juce_UnitTest.h"
+#include "../core/juce_Random.h"
+
+class StringTests  : public UnitTest
+{
+public:
+    StringTests() : UnitTest ("String class") {}
+
+    void runTest()
+    {
+        {
+            beginTest ("Basics");
+
+            expect (String().length() == 0);
+            expect (String() == String::empty);
+            String s1, s2 ("abcd");
+            expect (s1.isEmpty() && ! s1.isNotEmpty());
+            expect (s2.isNotEmpty() && ! s2.isEmpty());
+            expect (s2.length() == 4);
+            s1 = "abcd";
+            expect (s2 == s1 && s1 == s2);
+            expect (s1 == "abcd" && s1 == L"abcd");
+            expect (String ("abcd") == String (L"abcd"));
+            expect (String ("abcdefg", 4) == L"abcd");
+            expect (String ("abcdefg", 4) == String (L"abcdefg", 4));
+            expect (String::charToString ('x') == "x");
+            expect (String::charToString (0) == String::empty);
+            expect (s2 + "e" == "abcde" && s2 + 'e' == "abcde");
+            expect (s2 + L'e' == "abcde" && s2 + L"e" == "abcde");
+            expect (s1.equalsIgnoreCase ("abcD") && s1 < "abce" && s1 > "abbb");
+            expect (s1.startsWith ("ab") && s1.startsWith ("abcd") && ! s1.startsWith ("abcde"));
+            expect (s1.startsWithIgnoreCase ("aB") && s1.endsWithIgnoreCase ("CD"));
+            expect (s1.endsWith ("bcd") && ! s1.endsWith ("aabcd"));
+            expect (s1.indexOf (String::empty) == 0);
+            expect (s1.startsWith (String::empty) && s1.endsWith (String::empty) && s1.contains (String::empty));
+            expect (s1.contains ("cd") && s1.contains ("ab") && s1.contains ("abcd"));
+            expect (s1.containsChar ('a') && ! s1.containsChar (0));
+            expect (String ("abc foo bar").containsWholeWord ("abc") && String ("abc foo bar").containsWholeWord ("abc"));
+        }
+
+        {
+            beginTest ("Operations");
+
+            String s ("012345678");
+            expect (s.hashCode() != 0);
+            expect (s.hashCode64() != 0);
+            expect (s.hashCode() != (s + s).hashCode());
+            expect (s.hashCode64() != (s + s).hashCode64());
+            expect (s.compare (String ("012345678")) == 0);
+            expect (s.compare (String ("012345679")) < 0);
+            expect (s.compare (String ("012345676")) > 0);
+            expect (s.substring (2, 3) == String::charToString (s[2]));
+            expect (s.substring (0, 1) == String::charToString (s[0]));
+            expect (s.getLastCharacter() == s [s.length() - 1]);
+            expect (String::charToString (s.getLastCharacter()) == s.getLastCharacters (1));
+            expect (s.substring (0, 3) == L"012");
+            expect (s.substring (0, 100) == s);
+            expect (s.substring (-1, 100) == s);
+            expect (s.substring (3) == "345678");
+            expect (s.indexOf (L"45") == 4);
+            expect (String ("444445").indexOf ("45") == 4);
+            expect (String ("444445").lastIndexOfChar ('4') == 4);
+            expect (String ("45454545x").lastIndexOf (L"45") == 6);
+            expect (String ("45454545x").lastIndexOfAnyOf ("456") == 7);
+            expect (String ("45454545x").lastIndexOfAnyOf (L"456x") == 8);
+            expect (String ("abABaBaBa").lastIndexOfIgnoreCase ("Ab") == 6);
+            expect (s.indexOfChar (L'4') == 4);
+            expect (s + s == "012345678012345678");
+            expect (s.startsWith (s));
+            expect (s.startsWith (s.substring (0, 4)));
+            expect (s.startsWith (s.dropLastCharacters (4)));
+            expect (s.endsWith (s.substring (5)));
+            expect (s.endsWith (s));
+            expect (s.contains (s.substring (3, 6)));
+            expect (s.contains (s.substring (3)));
+            expect (s.startsWithChar (s[0]));
+            expect (s.endsWithChar (s.getLastCharacter()));
+            expect (s [s.length()] == 0);
+            expect (String ("abcdEFGH").toLowerCase() == String ("abcdefgh"));
+            expect (String ("abcdEFGH").toUpperCase() == String ("ABCDEFGH"));
+
+            String s2 ("123");
+            s2 << ((int) 4) << ((short) 5) << "678" << L"9" << '0';
+            s2 += "xyz";
+            expect (s2 == "1234567890xyz");
+
+            beginTest ("Numeric conversions");
+            expect (String::empty.getIntValue() == 0);
+            expect (String::empty.getDoubleValue() == 0.0);
+            expect (String::empty.getFloatValue() == 0.0f);
+            expect (s.getIntValue() == 12345678);
+            expect (s.getLargeIntValue() == (int64) 12345678);
+            expect (s.getDoubleValue() == 12345678.0);
+            expect (s.getFloatValue() == 12345678.0f);
+            expect (String (-1234).getIntValue() == -1234);
+            expect (String ((int64) -1234).getLargeIntValue() == -1234);
+            expect (String (-1234.56).getDoubleValue() == -1234.56);
+            expect (String (-1234.56f).getFloatValue() == -1234.56f);
+            expect (("xyz" + s).getTrailingIntValue() == s.getIntValue());
+            expect (s.getHexValue32() == 0x12345678);
+            expect (s.getHexValue64() == (int64) 0x12345678);
+            expect (String::toHexString (0x1234abcd).equalsIgnoreCase ("1234abcd"));
+            expect (String::toHexString ((int64) 0x1234abcd).equalsIgnoreCase ("1234abcd"));
+            expect (String::toHexString ((short) 0x12ab).equalsIgnoreCase ("12ab"));
+
+            unsigned char data[] = { 1, 2, 3, 4, 0xa, 0xb, 0xc, 0xd };
+            expect (String::toHexString (data, 8, 0).equalsIgnoreCase ("010203040a0b0c0d"));
+            expect (String::toHexString (data, 8, 1).equalsIgnoreCase ("01 02 03 04 0a 0b 0c 0d"));
+            expect (String::toHexString (data, 8, 2).equalsIgnoreCase ("0102 0304 0a0b 0c0d"));
+
+            beginTest ("Subsections");
+            String s3;
+            s3 = "abcdeFGHIJ";
+            expect (s3.equalsIgnoreCase ("ABCdeFGhiJ"));
+            expect (s3.compareIgnoreCase (L"ABCdeFGhiJ") == 0);
+            expect (s3.containsIgnoreCase (s3.substring (3)));
+            expect (s3.indexOfAnyOf ("xyzf", 2, true) == 5);
+            expect (s3.indexOfAnyOf (L"xyzf", 2, false) == -1);
+            expect (s3.indexOfAnyOf ("xyzF", 2, false) == 5);
+            expect (s3.containsAnyOf (L"zzzFs"));
+            expect (s3.startsWith ("abcd"));
+            expect (s3.startsWithIgnoreCase (L"abCD"));
+            expect (s3.startsWith (String::empty));
+            expect (s3.startsWithChar ('a'));
+            expect (s3.endsWith (String ("HIJ")));
+            expect (s3.endsWithIgnoreCase (L"Hij"));
+            expect (s3.endsWith (String::empty));
+            expect (s3.endsWithChar (L'J'));
+            expect (s3.indexOf ("HIJ") == 7);
+            expect (s3.indexOf (L"HIJK") == -1);
+            expect (s3.indexOfIgnoreCase ("hij") == 7);
+            expect (s3.indexOfIgnoreCase (L"hijk") == -1);
+
+            String s4 (s3);
+            s4.append (String ("xyz123"), 3);
+            expect (s4 == s3 + "xyz");
+
+            expect (String (1234) < String (1235));
+            expect (String (1235) > String (1234));
+            expect (String (1234) >= String (1234));
+            expect (String (1234) <= String (1234));
+            expect (String (1235) >= String (1234));
+            expect (String (1234) <= String (1235));
+
+            String s5 ("word word2 word3");
+            expect (s5.containsWholeWord (String ("word2")));
+            expect (s5.indexOfWholeWord ("word2") == 5);
+            expect (s5.containsWholeWord (L"word"));
+            expect (s5.containsWholeWord ("word3"));
+            expect (s5.containsWholeWord (s5));
+            expect (s5.containsWholeWordIgnoreCase (L"Word2"));
+            expect (s5.indexOfWholeWordIgnoreCase ("Word2") == 5);
+            expect (s5.containsWholeWordIgnoreCase (L"Word"));
+            expect (s5.containsWholeWordIgnoreCase ("Word3"));
+            expect (! s5.containsWholeWordIgnoreCase (L"Wordx"));
+            expect (!s5.containsWholeWordIgnoreCase ("xWord2"));
+            expect (s5.containsNonWhitespaceChars());
+            expect (! String (" \n\r\t").containsNonWhitespaceChars());
+
+            expect (s5.matchesWildcard (L"wor*", false));
+            expect (s5.matchesWildcard ("wOr*", true));
+            expect (s5.matchesWildcard (L"*word3", true));
+            expect (s5.matchesWildcard ("*word?", true));
+            expect (s5.matchesWildcard (L"Word*3", true));
+
+            expect (s5.fromFirstOccurrenceOf (String::empty, true, false) == s5);
+            expect (s5.fromFirstOccurrenceOf ("xword2", true, false) == s5.substring (100));
+            expect (s5.fromFirstOccurrenceOf (L"word2", true, false) == s5.substring (5));
+            expect (s5.fromFirstOccurrenceOf ("Word2", true, true) == s5.substring (5));
+            expect (s5.fromFirstOccurrenceOf ("word2", false, false) == s5.getLastCharacters (6));
+            expect (s5.fromFirstOccurrenceOf (L"Word2", false, true) == s5.getLastCharacters (6));
+
+            expect (s5.fromLastOccurrenceOf (String::empty, true, false) == s5);
+            expect (s5.fromLastOccurrenceOf (L"wordx", true, false) == s5);
+            expect (s5.fromLastOccurrenceOf ("word", true, false) == s5.getLastCharacters (5));
+            expect (s5.fromLastOccurrenceOf (L"worD", true, true) == s5.getLastCharacters (5));
+            expect (s5.fromLastOccurrenceOf ("word", false, false) == s5.getLastCharacters (1));
+            expect (s5.fromLastOccurrenceOf (L"worD", false, true) == s5.getLastCharacters (1));
+
+            expect (s5.upToFirstOccurrenceOf (String::empty, true, false).isEmpty());
+            expect (s5.upToFirstOccurrenceOf ("word4", true, false) == s5);
+            expect (s5.upToFirstOccurrenceOf (L"word2", true, false) == s5.substring (0, 10));
+            expect (s5.upToFirstOccurrenceOf ("Word2", true, true) == s5.substring (0, 10));
+            expect (s5.upToFirstOccurrenceOf (L"word2", false, false) == s5.substring (0, 5));
+            expect (s5.upToFirstOccurrenceOf ("Word2", false, true) == s5.substring (0, 5));
+
+            expect (s5.upToLastOccurrenceOf (String::empty, true, false) == s5);
+            expect (s5.upToLastOccurrenceOf ("zword", true, false) == s5);
+            expect (s5.upToLastOccurrenceOf ("word", true, false) == s5.dropLastCharacters (1));
+            expect (s5.dropLastCharacters(1).upToLastOccurrenceOf ("word", true, false) == s5.dropLastCharacters (1));
+            expect (s5.upToLastOccurrenceOf ("Word", true, true) == s5.dropLastCharacters (1));
+            expect (s5.upToLastOccurrenceOf ("word", false, false) == s5.dropLastCharacters (5));
+            expect (s5.upToLastOccurrenceOf ("Word", false, true) == s5.dropLastCharacters (5));
+
+            expect (s5.replace ("word", L"xyz", false) == String ("xyz xyz2 xyz3"));
+            expect (s5.replace (L"Word", "xyz", true) == "xyz xyz2 xyz3");
+            expect (s5.dropLastCharacters (1).replace ("Word", String ("xyz"), true) == L"xyz xyz2 xyz");
+            expect (s5.replace ("Word", "", true) == " 2 3");
+            expect (s5.replace ("Word2", L"xyz", true) == String ("word xyz word3"));
+            expect (s5.replaceCharacter (L'w', 'x') != s5);
+            expect (s5.replaceCharacter ('w', L'x').replaceCharacter ('x', 'w') == s5);
+            expect (s5.replaceCharacters ("wo", "xy") != s5);
+            expect (s5.replaceCharacters ("wo", "xy").replaceCharacters ("xy", L"wo") == s5);
+            expect (s5.retainCharacters ("1wordxya") == String ("wordwordword"));
+            expect (s5.retainCharacters (String::empty).isEmpty());
+            expect (s5.removeCharacters ("1wordxya") == " 2 3");
+            expect (s5.removeCharacters (String::empty) == s5);
+            expect (s5.initialSectionContainingOnly ("word") == L"word");
+            expect (s5.initialSectionNotContaining (String ("xyz ")) == String ("word"));
+            expect (! s5.isQuotedString());
+            expect (s5.quoted().isQuotedString());
+            expect (! s5.quoted().unquoted().isQuotedString());
+            expect (! String ("x'").isQuotedString());
+            expect (String ("'x").isQuotedString());
+
+            String s6 (" \t xyz  \t\r\n");
+            expect (s6.trim() == String ("xyz"));
+            expect (s6.trim().trim() == "xyz");
+            expect (s5.trim() == s5);
+            expect (s6.trimStart().trimEnd() == s6.trim());
+            expect (s6.trimStart().trimEnd() == s6.trimEnd().trimStart());
+            expect (s6.trimStart().trimStart().trimEnd().trimEnd() == s6.trimEnd().trimStart());
+            expect (s6.trimStart() != s6.trimEnd());
+            expect (("\t\r\n " + s6 + "\t\n \r").trim() == s6.trim());
+            expect (String::repeatedString ("xyz", 3) == L"xyzxyzxyz");
+        }
+
+        {
+            beginTest ("UTF8");
+
+            String s ("word word2 word3");
+
+            {
+                char buffer [100];
+                memset (buffer, 0xff, sizeof (buffer));
+                s.copyToUTF8 (buffer, 100);
+                expect (String::fromUTF8 (buffer, 100) == s);
+
+                juce_wchar bufferUnicode [100];
+                memset (bufferUnicode, 0xff, sizeof (bufferUnicode));
+                s.copyToUnicode (bufferUnicode, 100);
+                expect (String (bufferUnicode, 100) == s);
+            }
+
+            {
+                juce_wchar wideBuffer [50];
+                zerostruct (wideBuffer);
+
+                for (int i = 0; i < numElementsInArray (wideBuffer) - 1; ++i)
+                    wideBuffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (std::numeric_limits<juce_wchar>::max() - 1));
+
+                String wide (wideBuffer);
+                expect (wide == (const juce_wchar*) wideBuffer);
+                expect (wide.length() == numElementsInArray (wideBuffer) - 1);
+                expect (String::fromUTF8 (wide.toUTF8()) == wide);
+                expect (String::fromUTF8 (wide.toUTF8()) == wideBuffer);
+            }
+        }
+    }
+};
+
+static StringTests stringUnitTests;
+
+#endif
+
 
 END_JUCE_NAMESPACE

@@ -51,6 +51,7 @@ public:
         MackieTracktionGeneric,
         SteinbergCubase4,
         SteinbergCubase5,
+        SteinbergCubase5Bridged,
         SteinbergCubaseGeneric,
         SteinbergWavelab5,
         SteinbergWavelab6,
@@ -68,7 +69,12 @@ public:
 
     bool isCubase() const throw()
     {
-        return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubaseGeneric;
+        return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubaseGeneric;
+    }
+
+    bool isCubaseBridged() const throw()
+    {
+        return type == SteinbergCubase5Bridged;
     }
 
     bool isTracktion() const throw()
@@ -125,6 +131,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Tracktion"))  return MackieTracktionGeneric;
         if (hostFilename.containsIgnoreCase ("Cubase4"))    return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase5"))    return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("VSTBridgeApp")) return SteinbergCubase5Bridged;
         if (hostFilename.containsIgnoreCase ("Cubase"))     return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase ("Wavelab 5"))  return SteinbergWavelab5;
         if (hostFilename.containsIgnoreCase ("Wavelab 6" )) return SteinbergWavelab6;

@@ -24,9 +24,9 @@
   </EXPORTFORMATS>
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                   osxSDK="default" osxCompatibility="default"/>
+                   osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"/>
     <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                   osxSDK="default" osxCompatibility="default"/>
+                   osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"/>
   </CONFIGURATIONS>
   <MAINGROUP id="0bU7ypLe" name="Juce Demo">
     <GROUP id="BEJsSEFfF" name="Source">

@@ -50,9 +50,6 @@ FileLogger::FileLogger (const File& logFile_,
         logFile_.create();
     }
 
-    logStream = logFile_.createOutputStream (256);
-    jassert (logStream != 0);
-
     String welcome;
     welcome << "\r\n**********************************************************\r\n"
             << welcomeMessage
@@ -69,14 +66,12 @@ FileLogger::~FileLogger()
 //==============================================================================
 void FileLogger::logMessage (const String& message)
 {
-    if (logStream != 0)
-    {
-        DBG (message);
+    DBG (message);
 
-        const ScopedLock sl (logLock);
-        (*logStream) << message << "\r\n";
-        logStream->flush();
-    }
+    const ScopedLock sl (logLock);
+
+    FileOutputStream out (logFile, 256);
+    out << message << "\r\n";
 }
 
 

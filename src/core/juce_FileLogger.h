@@ -100,7 +100,6 @@ public:
 private:
     File logFile;
     CriticalSection logLock;
-    ScopedPointer <FileOutputStream> logStream;
 
     void trimFileSize (int maxFileSizeBytes) const;
 

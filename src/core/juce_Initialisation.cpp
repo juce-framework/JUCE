@@ -50,125 +50,6 @@ BEGIN_JUCE_NAMESPACE
  extern void juce_CheckForDanglingStreams();  // (in juce_OutputStream.cpp)
 #endif
 
-//==============================================================================
-#if JUCE_DEBUG
-
-namespace SimpleUnitTests
-{
-    template <typename Type>
-    class AtomicTester
-    {
-    public:
-        AtomicTester() {}
-
-        static void testInteger()
-        {
-            Atomic<Type> a, b;
-            a.set ((Type) 10);
-            a += (Type) 15;
-            a.memoryBarrier();
-            a -= (Type) 5;
-            ++a; ++a; --a;
-            a.memoryBarrier();
-
-            testFloat();
-        }
-
-        static void testFloat()
-        {
-            Atomic<Type> a, b;
-            a = (Type) 21;
-            a.memoryBarrier();
-
-            /*  These are some simple test cases to check the atomics - let me know
-                if any of these assertions fail on your system!
-            */
-            jassert (a.get() == (Type) 21);
-            jassert (a.compareAndSetValue ((Type) 100, (Type) 50) == (Type) 21);
-            jassert (a.get() == (Type) 21);
-            jassert (a.compareAndSetValue ((Type) 101, a.get()) == (Type) 21);
-            jassert (a.get() == (Type) 101);
-            jassert (! a.compareAndSetBool ((Type) 300, (Type) 200));
-            jassert (a.get() == (Type) 101);
-            jassert (a.compareAndSetBool ((Type) 200, a.get()));
-            jassert (a.get() == (Type) 200);
-
-            jassert (a.exchange ((Type) 300) == (Type) 200);
-            jassert (a.get() == (Type) 300);
-
-            b = a;
-            jassert (b.get() == a.get());
-        }
-    };
-
-    static void runBasicTests()
-    {
-        // Some simple test code, to keep an eye on things and make sure these functions
-        // work ok on all platforms. Let me know if any of these assertions fail on your system!
-
-        static_jassert (sizeof (pointer_sized_int) == sizeof (void*));
-        static_jassert (sizeof (int8) == 1);
-        static_jassert (sizeof (uint8) == 1);
-        static_jassert (sizeof (int16) == 2);
-        static_jassert (sizeof (uint16) == 2);
-        static_jassert (sizeof (int32) == 4);
-        static_jassert (sizeof (uint32) == 4);
-        static_jassert (sizeof (int64) == 8);
-        static_jassert (sizeof (uint64) == 8);
-
-        char a1[7];
-        jassert (numElementsInArray(a1) == 7);
-        int a2[3];
-        jassert (numElementsInArray(a2) == 3);
-
-        jassert (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
-        jassert (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
-        jassert (ByteOrder::swap ((uint64) literal64bit (0x1122334455667788)) == literal64bit (0x8877665544332211));
-
-        // Some quick stream tests..
-        int randomInt = Random::getSystemRandom().nextInt();
-        int64 randomInt64 = Random::getSystemRandom().nextInt64();
-        double randomDouble = Random::getSystemRandom().nextDouble();
-        String randomString;
-        for (int i = 50; --i >= 0;)
-            randomString << (juce_wchar) (Random::getSystemRandom().nextInt() & 0xffff);
-
-        MemoryOutputStream mo;
-        mo.writeInt (randomInt);
-        mo.writeIntBigEndian (randomInt);
-        mo.writeCompressedInt (randomInt);
-        mo.writeString (randomString);
-        mo.writeInt64 (randomInt64);
-        mo.writeInt64BigEndian (randomInt64);
-        mo.writeDouble (randomDouble);
-        mo.writeDoubleBigEndian (randomDouble);
-
-        MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
-        jassert (mi.readInt() == randomInt);
-        jassert (mi.readIntBigEndian() == randomInt);
-        jassert (mi.readCompressedInt() == randomInt);
-        jassert (mi.readString() == randomString);
-        jassert (mi.readInt64() == randomInt64);
-        jassert (mi.readInt64BigEndian() == randomInt64);
-        jassert (mi.readDouble() == randomDouble);
-        jassert (mi.readDoubleBigEndian() == randomDouble);
-
-        AtomicTester <int>::testInteger();
-        AtomicTester <unsigned int>::testInteger();
-        AtomicTester <int32>::testInteger();
-        AtomicTester <uint32>::testInteger();
-        AtomicTester <long>::testInteger();
-        AtomicTester <void*>::testInteger();
-        AtomicTester <int*>::testInteger();
-        AtomicTester <float>::testFloat();
-      #if ! JUCE_64BIT_ATOMICS_UNAVAILABLE  // 64-bit intrinsics aren't available on some old platforms
-        AtomicTester <int64>::testInteger();
-        AtomicTester <uint64>::testInteger();
-        AtomicTester <double>::testFloat();
-      #endif
-    }
-}
-#endif
 
 //==============================================================================
 static bool juceInitialisedNonGUI = false;
@@ -181,14 +62,22 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 
         JUCE_AUTORELEASEPOOL
 
-      #if JUCE_DEBUG
-        SimpleUnitTests::runBasicTests();
-      #endif
-
         DBG (SystemStats::getJUCEVersion());
         SystemStats::initialiseStats();
         Random::getSystemRandom().setSeedRandomly(); // (mustn't call this before initialiseStats() because it relies on the time being set up)
     }
+
+    // Some basic tests, to keep an eye on things and make sure these types work ok
+    // on all platforms. Let me know if any of these assertions fail on your system!
+    static_jassert (sizeof (pointer_sized_int) == sizeof (void*));
+    static_jassert (sizeof (int8) == 1);
+    static_jassert (sizeof (uint8) == 1);
+    static_jassert (sizeof (int16) == 2);
+    static_jassert (sizeof (uint16) == 2);
+    static_jassert (sizeof (int32) == 4);
+    static_jassert (sizeof (uint32) == 4);
+    static_jassert (sizeof (int64) == 8);
+    static_jassert (sizeof (uint64) == 8);
 }
 
 void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
@@ -266,6 +155,97 @@ void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI()
         shutdownJuce_NonGUI();
     }
 }
+
+#endif
+
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+#include "../utilities/juce_UnitTest.h"
+
+class AtomicTests  : public UnitTest
+{
+public:
+    AtomicTests() : UnitTest ("Atomics") {}
+
+    void runTest()
+    {
+        beginTest ("Misc");
+
+        char a1[7];
+        expect (numElementsInArray(a1) == 7);
+        int a2[3];
+        expect (numElementsInArray(a2) == 3);
+
+        expect (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
+        expect (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
+        expect (ByteOrder::swap ((uint64) literal64bit (0x1122334455667788)) == literal64bit (0x8877665544332211));
+
+        beginTest ("Atomic types");
+        AtomicTester <int>::testInteger (*this);
+        AtomicTester <unsigned int>::testInteger (*this);
+        AtomicTester <int32>::testInteger (*this);
+        AtomicTester <uint32>::testInteger (*this);
+        AtomicTester <long>::testInteger (*this);
+        AtomicTester <void*>::testInteger (*this);
+        AtomicTester <int*>::testInteger (*this);
+        AtomicTester <float>::testFloat (*this);
+      #if ! JUCE_64BIT_ATOMICS_UNAVAILABLE  // 64-bit intrinsics aren't available on some old platforms
+        AtomicTester <int64>::testInteger (*this);
+        AtomicTester <uint64>::testInteger (*this);
+        AtomicTester <double>::testFloat (*this);
+      #endif
+    }
+
+    template <typename Type>
+    class AtomicTester
+    {
+    public:
+        AtomicTester() {}
+
+        static void testInteger (UnitTest& test)
+        {
+            Atomic<Type> a, b;
+            a.set ((Type) 10);
+            a += (Type) 15;
+            a.memoryBarrier();
+            a -= (Type) 5;
+            ++a; ++a; --a;
+            a.memoryBarrier();
+
+            testFloat (test);
+        }
+
+        static void testFloat (UnitTest& test)
+        {
+            Atomic<Type> a, b;
+            a = (Type) 21;
+            a.memoryBarrier();
+
+            /*  These are some simple test cases to check the atomics - let me know
+                if any of these assertions fail on your system!
+            */
+            test.expect (a.get() == (Type) 21);
+            test.expect (a.compareAndSetValue ((Type) 100, (Type) 50) == (Type) 21);
+            test.expect (a.get() == (Type) 21);
+            test.expect (a.compareAndSetValue ((Type) 101, a.get()) == (Type) 21);
+            test.expect (a.get() == (Type) 101);
+            test.expect (! a.compareAndSetBool ((Type) 300, (Type) 200));
+            test.expect (a.get() == (Type) 101);
+            test.expect (a.compareAndSetBool ((Type) 200, a.get()));
+            test.expect (a.get() == (Type) 200);
+
+            test.expect (a.exchange ((Type) 300) == (Type) 200);
+            test.expect (a.get() == (Type) 300);
+
+            b = a;
+            test.expect (b.get() == a.get());
+        }
+    };
+};
+
+static AtomicTests atomicUnitTests;
 
 #endif
 
