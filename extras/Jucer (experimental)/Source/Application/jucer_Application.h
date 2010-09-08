@@ -28,6 +28,7 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
+#include "jucer_JuceUpdater.h"
 #include "../Project/jucer_NewProjectWizard.h"
 
 
@@ -161,7 +162,7 @@ public:
 
         const StringArray getMenuBarNames()
         {
-            const char* const names[] = { "File", "Edit", "View", "Window", 0 };
+            const char* const names[] = { "File", "Edit", "View", "Window", "Update", 0 };
             return StringArray ((const char**) names);
         }
 
@@ -251,6 +252,10 @@ public:
                 menu.addSeparator();
                 menu.addCommandItem (commandManager, CommandIDs::closeAllDocuments);
             }
+            else if (topLevelMenuIndex == 4)  // "Juce" menu
+            {
+                menu.addCommandItem (commandManager, CommandIDs::showJuceVersion);
+            }
 
             return menu;
         }
@@ -287,7 +292,8 @@ public:
                                   CommandIDs::open,
                                   CommandIDs::showPrefs,
                                   CommandIDs::closeAllDocuments,
-                                  CommandIDs::saveAll };
+                                  CommandIDs::saveAll,
+                                  CommandIDs::showJuceVersion };
 
         commands.addArray (ids, numElementsInArray (ids));
     }
@@ -321,6 +327,10 @@ public:
             result.setActive (OpenDocumentManager::getInstance()->anyFilesNeedSaving());
             break;
 
+        case CommandIDs::showJuceVersion:
+            result.setInfo ("Download the latest JUCE version", "Checks online for any Juce updates", CommandCategories::general, 0);
+            break;
+
         default:
             JUCEApplication::getCommandInfo (commandID, result);
             break;
@@ -336,6 +346,7 @@ public:
             case CommandIDs::showPrefs:         showPrefsPanel(); break;
             case CommandIDs::saveAll:           OpenDocumentManager::getInstance()->saveAll(); break;
             case CommandIDs::closeAllDocuments: closeAllDocuments (true); break;
+            case CommandIDs::showJuceVersion:   JuceUpdater::show (mainWindows[0]); break;
             default:                            return JUCEApplication::perform (info);
         }
 

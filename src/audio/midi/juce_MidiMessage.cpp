@@ -494,8 +494,6 @@ const MidiMessage MidiMessage::noteOff (const int channel,
 
 const MidiMessage MidiMessage::allNotesOff (const int channel) throw()
 {
-    jassert (channel > 0 && channel <= 16);
-
     return controllerEvent (channel, 123, 0);
 }
 

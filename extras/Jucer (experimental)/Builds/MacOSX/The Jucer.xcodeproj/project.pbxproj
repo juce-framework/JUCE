@@ -19,6 +19,7 @@
 		2E6836738CE7EB452FDC7E9A = { isa = PBXBuildFile; fileRef = D9FB1A5365FEEB854A0FF7BF; };
 		D6D0659F3F3504012246F13D = { isa = PBXBuildFile; fileRef = AA3CBE4A2AC3E9411426F630; };
 		8BAE4D8EA7F247DA0A4D3A5C = { isa = PBXBuildFile; fileRef = F617CE0630ADB0628A34D6BF; };
+		280FE650B3F02AD9E821EA37 = { isa = PBXBuildFile; fileRef = 832701705EC0EC9484F9D9C2; };
 		9950893AA82F86F1EEE55BED = { isa = PBXBuildFile; fileRef = D77EAC704C96F798B1C69A0D; };
 		C2F198C7058FC1A88A600645 = { isa = PBXBuildFile; fileRef = B06694E3C7EB89E3DDEFCBD0; };
 		A7C05B907BBCB4288FBC6428 = { isa = PBXBuildFile; fileRef = 194F6B951CBC3E8F897FB646; };
@@ -64,6 +65,8 @@
 		F617CE0630ADB0628A34D6BF = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_FilePreviewComponent.cpp; path = ../../Source/Application/jucer_FilePreviewComponent.cpp; sourceTree = SOURCE_ROOT; };
 		330CB15608DEAF19D28C18DD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FilePreviewComponent.h; path = ../../Source/Application/jucer_FilePreviewComponent.h; sourceTree = SOURCE_ROOT; };
 		0CA0CCCEBFA0AC8C577FC915 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Headers.h; path = ../../Source/jucer_Headers.h; sourceTree = SOURCE_ROOT; };
+		832701705EC0EC9484F9D9C2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_JuceUpdater.cpp; path = ../../Source/Application/jucer_JuceUpdater.cpp; sourceTree = SOURCE_ROOT; };
+		AFC2F9A887CDBF7A0051CD09 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_JuceUpdater.h; path = ../../Source/Application/jucer_JuceUpdater.h; sourceTree = SOURCE_ROOT; };
 		D77EAC704C96F798B1C69A0D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Main.cpp; path = ../../Source/Application/jucer_Main.cpp; sourceTree = SOURCE_ROOT; };
 		B06694E3C7EB89E3DDEFCBD0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MainWindow.cpp; path = ../../Source/Application/jucer_MainWindow.cpp; sourceTree = SOURCE_ROOT; };
 		24378294003DC2D038D0534D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_MainWindow.h; path = ../../Source/Application/jucer_MainWindow.h; sourceTree = SOURCE_ROOT; };
@@ -139,6 +142,8 @@
 				F617CE0630ADB0628A34D6BF,
 				330CB15608DEAF19D28C18DD,
 				0CA0CCCEBFA0AC8C577FC915,
+				832701705EC0EC9484F9D9C2,
+				AFC2F9A887CDBF7A0051CD09,
 				D77EAC704C96F798B1C69A0D,
 				B06694E3C7EB89E3DDEFCBD0,
 				24378294003DC2D038D0534D,
@@ -304,6 +309,7 @@
 		5362E03ADF975A126C1F2F7B = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 				D6D0659F3F3504012246F13D,
 				8BAE4D8EA7F247DA0A4D3A5C,
+				280FE650B3F02AD9E821EA37,
 				9950893AA82F86F1EEE55BED,
 				C2F198C7058FC1A88A600645,
 				A7C05B907BBCB4288FBC6428,

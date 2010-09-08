@@ -939,7 +939,6 @@ private:
     bool setFileReadOnlyInternal (bool shouldBeReadOnly) const;
 
     static const String parseAbsolutePath (const String& path);
-    static bool fileTypeMatches (int whatToLookFor, bool isDir, bool isHidden);
 
 };
 

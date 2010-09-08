@@ -532,97 +532,40 @@ const String File::loadFileAsString() const
 }
 
 //==============================================================================
-bool File::fileTypeMatches (const int whatToLookFor, const bool isDir, const bool isHidden)
-{
-    return (whatToLookFor & (isDir ? findDirectories
-                                   : findFiles)) != 0
-             && ((! isHidden) || (whatToLookFor & File::ignoreHiddenFiles) == 0);
-}
-
 int File::findChildFiles (Array<File>& results,
                           const int whatToLookFor,
                           const bool searchRecursively,
                           const String& wildCardPattern) const
 {
-    // you have to specify the type of files you're looking for!
-    jassert ((whatToLookFor & (findFiles | findDirectories)) != 0);
+    DirectoryIterator di (*this, searchRecursively, wildCardPattern, whatToLookFor);
 
     int total = 0;
-
-    if (isDirectory())
+    while (di.next())
     {
-        // find child files or directories in this directory first..
-        String path (addTrailingSeparator (fullPath)), filename;
-        bool itemIsDirectory, itemIsHidden;
-
-        DirectoryIterator::NativeIterator i (path, wildCardPattern);
-
-        while (i.next (filename, &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0))
-        {
-            if (! filename.containsOnly ("."))
-            {
-                const File fileFound (path + filename, 0);
-
-                if (fileTypeMatches (whatToLookFor, itemIsDirectory, itemIsHidden))
-                {
-                    results.add (fileFound);
-                    ++total;
-                }
-
-                if (searchRecursively && itemIsDirectory
-                     && ((! itemIsHidden) || (whatToLookFor & File::ignoreHiddenFiles) == 0))
-
-                {
-                    total += fileFound.findChildFiles (results, whatToLookFor, true, wildCardPattern);
-                }
-            }
-        }
+        results.add (di.getFile());
+        ++total;
     }
 
     return total;
 }
 
-int File::getNumberOfChildFiles (const int whatToLookFor,
-                                 const String& wildCardPattern) const
+int File::getNumberOfChildFiles (const int whatToLookFor, const String& wildCardPattern) const
 {
-    // you have to specify the type of files you're looking for!
-    jassert (whatToLookFor > 0 && whatToLookFor <= 3);
+    DirectoryIterator di (*this, false, "*", whatToLookFor);
 
-    int count = 0;
+    int total = 0;
+    while (di.next())
+        ++total;
 
-    if (isDirectory())
-    {
-        String filename;
-        bool itemIsDirectory, itemIsHidden;
-
-        DirectoryIterator::NativeIterator i (*this, wildCardPattern);
-
-        while (i.next (filename, &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0))
-            if (fileTypeMatches (whatToLookFor, itemIsDirectory, itemIsHidden)
-                  && ! filename.containsOnly ("."))
-                ++count;
-    }
-    else
-    {
-        // trying to search for files inside a non-directory?
-        jassertfalse;
-    }
-
-    return count;
+    return total;
 }
 
 bool File::containsSubDirectories() const
 {
     if (isDirectory())
     {
-        String filename;
-        bool itemIsDirectory;
-
-        DirectoryIterator::NativeIterator i (*this, "*");
-
-        while (i.next (filename, &itemIsDirectory, 0, 0, 0, 0, 0))
-            if (itemIsDirectory)
-                return true;
+        DirectoryIterator di (*this, false, "*", findDirectories);
+        return di.next();
     }
 
     return false;

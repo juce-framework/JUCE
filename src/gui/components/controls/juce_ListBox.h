@@ -175,8 +175,8 @@ public:
         The model pointer passed-in can be null, in which case you can set it later
         with setModel().
     */
-    ListBox (const String& componentName,
-             ListBoxModel* model);
+    ListBox (const String& componentName = String::empty,
+             ListBoxModel* model = 0);
 
     /** Destructor. */
     ~ListBox();

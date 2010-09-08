@@ -11,9 +11,9 @@
 #ifndef __PLUGINCHARACTERISTICS_D4EFFF1A__
 #define __PLUGINCHARACTERISTICS_D4EFFF1A__
 
-#define JucePlugin_Build_VST    1    // (If you change this you'll also need to re-export the projects using the Jucer)
-#define JucePlugin_Build_AU     1    // (If you change this you'll also need to re-export the projects using the Jucer)
-#define JucePlugin_Build_RTAS   0    // (If you change this you'll also need to re-export the projects using the Jucer)
+#define JucePlugin_Build_VST    1  // (If you change this value, you'll also need to re-export the projects using the Jucer)
+#define JucePlugin_Build_AU     1  // (If you change this value, you'll also need to re-export the projects using the Jucer)
+#define JucePlugin_Build_RTAS   0  // (If you change this value, you'll also need to re-export the projects using the Jucer)
 
 #define JucePlugin_Name                 "Juce Demo Plugin"
 #define JucePlugin_Desc                 "Juce Demo Plugin"

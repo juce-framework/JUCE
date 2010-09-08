@@ -789,6 +789,42 @@ public:
         outputNames.clear();
         outputIds.clear();
 
+/*        void** hints = 0;
+        if (snd_device_name_hint (-1, "pcm", &hints) >= 0)
+        {
+            for (void** hint = hints; *hint != 0; ++hint)
+            {
+                const String name (getHint (*hint, "NAME"));
+
+                if (name.isNotEmpty())
+                {
+                    const String ioid (getHint (*hint, "IOID"));
+
+                    String desc (getHint (*hint, "DESC"));
+                    if (desc.isEmpty())
+                        desc = name;
+
+                    desc = desc.replaceCharacters ("\n\r", "  ");
+
+                    DBG ("name: " << name << "\ndesc: " << desc << "\nIO: " << ioid);
+
+                    if (ioid.isEmpty() || ioid == "Input")
+                    {
+                        inputNames.add (desc);
+                        inputIds.add (name);
+                    }
+
+                    if (ioid.isEmpty() || ioid == "Output")
+                    {
+                        outputNames.add (desc);
+                        outputIds.add (name);
+                    }
+                }
+            }
+
+            snd_device_name_free_hint (hints);
+        }
+*/
         snd_ctl_t* handle = 0;
         snd_ctl_card_info_t* info = 0;
         snd_ctl_card_info_alloca (&info);
@@ -924,6 +960,14 @@ private:
 
         return (isInput || isOutput) && rates.size() > 0;
     }
+
+    /*static const String getHint (void* hint, const char* type)
+    {
+        char* const n = snd_device_name_get_hint (hint, type);
+        const String s ((const char*) n);
+        free (n);
+        return s;
+    }*/
 
     ALSAAudioIODeviceType (const ALSAAudioIODeviceType&);
     ALSAAudioIODeviceType& operator= (const ALSAAudioIODeviceType&);

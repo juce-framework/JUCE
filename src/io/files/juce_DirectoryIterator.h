@@ -115,8 +115,6 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    friend class File;
-
     //==============================================================================
     class NativeIterator
     {

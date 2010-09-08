@@ -45,6 +45,10 @@
             resource="0" file="Source/Application/jucer_FilePreviewComponent.h"/>
       <FILE id="qXOJtpg" name="jucer_Headers.h" compile="0" resource="0"
             file="Source/jucer_Headers.h"/>
+      <FILE id="uXkdSAZ" name="jucer_JuceUpdater.cpp" compile="1" resource="0"
+            file="Source/Application/jucer_JuceUpdater.cpp"/>
+      <FILE id="QWUk0cM" name="jucer_JuceUpdater.h" compile="0" resource="0"
+            file="Source/Application/jucer_JuceUpdater.h"/>
       <FILE id="ga7xgxf" name="jucer_Main.cpp" compile="1" resource="0" file="Source/Application/jucer_Main.cpp"/>
       <FILE id="Glk9Bg" name="jucer_MainWindow.cpp" compile="1" resource="0"
             file="Source/Application/jucer_MainWindow.cpp"/>

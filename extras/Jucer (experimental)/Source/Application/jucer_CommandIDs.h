@@ -39,6 +39,7 @@ namespace CommandIDs
     static const int saveProjectAs          = 0x200070;
     static const int openProjectInIDE       = 0x200071;
     static const int showProjectSettings    = 0x200072;
+    static const int showJuceVersion        = 0x200073;
 
     static const int saveAll                = 0x200080;
     static const int undo                   = 0x200090;

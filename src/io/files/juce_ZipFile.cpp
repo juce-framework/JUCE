@@ -374,46 +374,61 @@ int ZipFile::findEndOfZipEntryTable (InputStream* input, int& numEntries)
     return 0;
 }
 
-void ZipFile::uncompressTo (const File& targetDirectory,
+bool ZipFile::uncompressTo (const File& targetDirectory,
                             const bool shouldOverwriteFiles)
 {
     for (int i = 0; i < entries.size(); ++i)
+        if (! uncompressEntry (i, targetDirectory, shouldOverwriteFiles))
+            return false;
+
+    return true;
+}
+
+bool ZipFile::uncompressEntry (const int index,
+                               const File& targetDirectory,
+                               bool shouldOverwriteFiles)
+{
+    const ZipEntryInfo* zei = entries [index];
+
+    if (zei != 0)
     {
-        const ZipEntry& zei = entries.getUnchecked(i)->entry;
+        const File targetFile (targetDirectory.getChildFile (zei->entry.filename));
 
-        const File targetFile (targetDirectory.getChildFile (zei.filename));
-
-        if (zei.filename.endsWithChar ('/'))
+        if (zei->entry.filename.endsWithChar ('/'))
         {
             targetFile.createDirectory(); // (entry is a directory, not a file)
         }
         else
         {
-            ScopedPointer <InputStream> in (createStreamForEntry (i));
+            ScopedPointer<InputStream> in (createStreamForEntry (index));
 
             if (in != 0)
             {
-                if (shouldOverwriteFiles)
-                    targetFile.deleteFile();
+                if (shouldOverwriteFiles && ! targetFile.deleteFile())
+                    return false;
 
-                if ((! targetFile.exists())
-                     && targetFile.getParentDirectory().createDirectory())
+                if ((! targetFile.exists()) && targetFile.getParentDirectory().createDirectory())
                 {
-                    ScopedPointer <FileOutputStream> out (targetFile.createOutputStream());
+                    ScopedPointer<FileOutputStream> out (targetFile.createOutputStream());
 
                     if (out != 0)
                     {
                         out->writeFromInputStream (*in, -1);
                         out = 0;
 
-                        targetFile.setCreationTime (zei.fileTime);
-                        targetFile.setLastModificationTime (zei.fileTime);
-                        targetFile.setLastAccessTime (zei.fileTime);
+                        targetFile.setCreationTime (zei->entry.fileTime);
+                        targetFile.setLastModificationTime (zei->entry.fileTime);
+                        targetFile.setLastAccessTime (zei->entry.fileTime);
+
+                        return true;
                     }
                 }
             }
         }
     }
+
+    return false;
 }
+
 
 END_JUCE_NAMESPACE
