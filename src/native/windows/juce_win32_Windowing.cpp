@@ -390,7 +390,8 @@ public:
 
     //==============================================================================
     Win32ComponentPeer (Component* const component,
-                        const int windowStyleFlags)
+                        const int windowStyleFlags,
+                        HWND parentToAddTo_)
         : ComponentPeer (component, windowStyleFlags),
           dontRepaint (false),
       #if JUCE_DIRECT2D
@@ -403,7 +404,8 @@ public:
           isMouseOver (false),
           hasCreatedCaret (false),
           currentWindowIcon (0),
-          dropTarget (0)
+          dropTarget (0),
+          parentToAddTo (parentToAddTo_)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
 
@@ -860,7 +862,7 @@ public:
     static ModifierKeys modifiersAtLastCallback;
 
 private:
-    HWND hwnd;
+    HWND hwnd, parentToAddTo;
     ScopedPointer<DropShadower> shadower;
     RenderingEngineType currentRenderingEngine;
   #if JUCE_DIRECT2D
@@ -967,7 +969,7 @@ private:
 
     void createWindow()
     {
-        DWORD exstyle = WS_EX_ACCEPTFILES; // | WS_EX_NOACTIVATE;
+        DWORD exstyle = WS_EX_ACCEPTFILES;
         DWORD type = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
         if (hasTitleBar())
@@ -986,6 +988,10 @@ private:
 
             if ((styleFlags & windowIsResizable) != 0)
                 type |= WS_THICKFRAME;
+        }
+        else if (parentToAddTo != 0)
+        {
+            type |= WS_CHILD;
         }
         else
         {
@@ -1010,7 +1016,8 @@ private:
               && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 
-        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
+        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0,
+                               parentToAddTo, 0, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
 
       #if JUCE_DIRECT2D
         updateDirect2DContext();
@@ -2180,9 +2187,9 @@ private:
 ModifierKeys Win32ComponentPeer::currentModifiers;
 ModifierKeys Win32ComponentPeer::modifiersAtLastCallback;
 
-ComponentPeer* Component::createNewPeer (int styleFlags, void* /*nativeWindowToAttachTo*/)
+ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {
-    return new Win32ComponentPeer (this, styleFlags);
+    return new Win32ComponentPeer (this, styleFlags, (HWND) nativeWindowToAttachTo);
 }
 
 juce_ImplementSingleton_SingleThreaded (Win32ComponentPeer::WindowClassHolder);

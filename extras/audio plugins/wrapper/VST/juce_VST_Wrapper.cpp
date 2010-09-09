@@ -1166,14 +1166,8 @@ public:
                 editorComp->setVisible (false);
 
               #if JUCE_WINDOWS
-                editorComp->addToDesktop (0);
+                editorComp->addToDesktop (0, ptr);
                 hostWindow = (HWND) ptr;
-                HWND editorWnd = (HWND) editorComp->getWindowHandle();
-                SetParent (editorWnd, hostWindow);
-
-                DWORD val = GetWindowLong (editorWnd, GWL_STYLE);
-                val = (val & ~WS_POPUP) | WS_CHILD;
-                SetWindowLong (editorWnd, GWL_STYLE, val);
               #elif JUCE_LINUX
                 editorComp->addToDesktop (0);
                 hostWindow = (Window) ptr;
@@ -1448,7 +1442,6 @@ private:
 
     static void checkWhetherWavelabHasChangedThread()
     {
-        if (getHostType().isWavelab() || getHostType().isCubaseBridged())
             MessageManager::getInstance()->setCurrentThreadAsMessageThread();
     }
 #else

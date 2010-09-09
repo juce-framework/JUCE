@@ -222,18 +222,21 @@ public:
                 jassert (editorComp != 0);
             }
 
-            Rect oldRect;
-            GetRect (&oldRect);
+            if (editorComp->getWidth() != 0 && editorComp->getHeight() != 0)
+            {
+                Rect oldRect;
+                GetRect (&oldRect);
 
-            Rect r;
-            r.left = 0;
-            r.top = 0;
-            r.right = editorComp->getWidth();
-            r.bottom = editorComp->getHeight();
-            SetRect (&r);
+                Rect r;
+                r.left = 0;
+                r.top = 0;
+                r.right = editorComp->getWidth();
+                r.bottom = editorComp->getHeight();
+                SetRect (&r);
 
-            if ((oldRect.right != r.right) || (oldRect.bottom != r.bottom))
-                startTimer (50);
+                if ((oldRect.right != r.right) || (oldRect.bottom != r.bottom))
+                    startTimer (50);
+            }
         }
 
         void timerCallback()

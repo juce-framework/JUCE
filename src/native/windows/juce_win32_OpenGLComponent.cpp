@@ -391,7 +391,7 @@ private:
     //==============================================================================
     void createNativeWindow()
     {
-        nativeWindow = new Win32ComponentPeer (component, 0);
+        nativeWindow = new Win32ComponentPeer (component, 0, 0);
         nativeWindow->dontRepaint = true;
         nativeWindow->setVisible (true);
 
