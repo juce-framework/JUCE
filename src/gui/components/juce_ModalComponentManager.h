@@ -138,6 +138,8 @@ private:
     void endModal (Component* component, int returnValue);
     void endModal (Component* component);
 
+    ModalComponentManager (const ModalComponentManager&);
+    ModalComponentManager& operator= (const ModalComponentManager&);
 };
 
 

@@ -25683,6 +25683,8 @@ private:
 	void endModal (Component* component, int returnValue);
 	void endModal (Component* component);
 
+	ModalComponentManager (const ModalComponentManager&);
+	ModalComponentManager& operator= (const ModalComponentManager&);
 };
 
 #endif   // __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
@@ -26210,8 +26212,8 @@ public:
 
 	/** Adds a child component to this one, and also makes the child visible if it isn't.
 
-		Quite a useful function, this is just the same as calling addChildComponent()
-		followed by setVisible (true) on the child. See addChildComponent() for more details.
+		Quite a useful function, this is just the same as calling setVisible (true) on the child
+		and then addChildComponent(). See addChildComponent() for more details.
 	*/
 	void addAndMakeVisible (Component* child, int zOrder = -1);
 
