@@ -100,7 +100,7 @@ public:
         Term* clone() const                                     { return new Symbol (mainSymbol, member); }
         int getNumInputs() const                                { return 0; }
         Term* getInput (int) const                              { return 0; }
-        const String getFunctionName() const                    { return toString(); }
+        const String getSymbolName() const                      { return toString(); }
 
         const String toString() const
         {

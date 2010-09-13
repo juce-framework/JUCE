@@ -238,6 +238,29 @@ namespace CodeHelpers
         return s;
     }
 
+    const String alignFunctionCallParams (const String& call, const StringArray& parameters, const int maxLineLength)
+    {
+        String result, currentLine (call);
+
+        for (int i = 0; i < parameters.size(); ++i)
+        {
+            if (currentLine.length() >= maxLineLength)
+            {
+                result += currentLine.trimEnd() + newLine;
+                currentLine = String::repeatedString (" ", call.length()) + parameters[i];
+            }
+            else
+            {
+                currentLine += parameters[i];
+            }
+
+            if (i < parameters.size() - 1)
+                currentLine << ", ";
+        }
+
+        return result + currentLine.trimEnd() + ")";
+    }
+
     const String colourToCode (const Colour& col)
     {
         const Colour colours[] =
@@ -331,6 +354,14 @@ namespace CodeHelpers
         }
 
         return "(float) (" + expression + ")";
+    }
+
+    const String castToInt (const String& expression)
+    {
+        if (expression.containsOnly ("0123456789."))
+            return String ((int) expression.getFloatValue());
+
+        return "(int) (" + expression + ")";
     }
 
     void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out)

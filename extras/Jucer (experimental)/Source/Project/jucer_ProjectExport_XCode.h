@@ -386,9 +386,7 @@ private:
         StringArray searchPaths (config.getHeaderSearchPaths());
 
         if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
-            searchPaths.add (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)
-                                .rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder)
-                                .toUnixStyle());
+            searchPaths.add (rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toUnixStyle());
 
         if (project.isAudioPlugin())
         {
@@ -433,10 +431,9 @@ private:
                                                           "xplat/AVX/avx2/avx2sdk/utils" };
 
                 RelativePath sdkFolder (getRTASFolder().toString(), RelativePath::projectFolder);
-                sdkFolder = sdkFolder.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
 
                 for (int i = 0; i < numElementsInArray (rtasIncludePaths); ++i)
-                    searchPaths.add (sdkFolder.getChildFile (rtasIncludePaths[i]).toUnixStyle());
+                    searchPaths.add (rebaseFromProjectFolderToBuildTarget (sdkFolder.getChildFile (rtasIncludePaths[i])).toUnixStyle());
             }
         }
 

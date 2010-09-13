@@ -82,7 +82,7 @@ public:
     const Expression operator* (const Expression& other) const;
     /** Returns an expression which is a division operation of two existing expressions. */
     const Expression operator/ (const Expression& other) const;
-    /** Returns an expression which is a negation operation of two existing expressions. */
+    /** Returns an expression which performs a negation operation on an existing expression. */
     const Expression operator-() const;
 
     /** Returns an Expression which is an identifier reference. */

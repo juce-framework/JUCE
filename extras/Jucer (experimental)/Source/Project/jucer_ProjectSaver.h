@@ -483,6 +483,8 @@ private:
 
             if (targetFolder.createDirectory())
             {
+                exporter->juceWrapperFolder = RelativePath (project.getWrapperFolder(), targetFolder, RelativePath::buildTargetFolder);
+
                 if (hasAppConfigFile)
                     exporter->juceWrapperFiles.add (RelativePath (appConfigFile, targetFolder, RelativePath::buildTargetFolder));
 

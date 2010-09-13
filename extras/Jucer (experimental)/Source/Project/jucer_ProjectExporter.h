@@ -90,6 +90,7 @@ public:
     }
 
     Array<RelativePath> juceWrapperFiles;
+    RelativePath juceWrapperFolder;
 
 protected:
     //==============================================================================
@@ -111,6 +112,8 @@ protected:
             name = name + ".a";
         return name;
     }
+
+    const RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
 
 private:
     ProjectExporter (const ProjectExporter&);

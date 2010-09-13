@@ -83,6 +83,16 @@ public:
         if (h < 0) h = -h;
     }
 
+    /** Creates a Rectangle from a set of left, right, top, bottom coordinates.
+        The right and bottom values must be larger than the left and top ones, or the resulting
+        rectangle will have a negative size.
+    */
+    static const Rectangle leftTopRightBottom (const ValueType left, const ValueType top,
+                                               const ValueType right, const ValueType bottom) throw()
+    {
+        return Rectangle (left, top, right - left, bottom - top);
+    }
+
     Rectangle& operator= (const Rectangle& other) throw()
     {
         x = other.x; y = other.y;

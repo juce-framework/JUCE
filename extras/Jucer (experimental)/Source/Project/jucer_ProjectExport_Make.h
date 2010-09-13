@@ -96,6 +96,10 @@ public:
             if (shouldFileBeCompiledByDefault (juceWrapperFiles.getReference(i)))
                 files.add (juceWrapperFiles.getReference(i));
 
+        const Array<RelativePath> vstFiles (getVSTFilesRequired());
+        for (int i = 0; i < vstFiles.size(); i++)
+            files.add (vstFiles.getReference(i));
+
         MemoryOutputStream mo;
         writeMakefile (mo, files);
 
@@ -150,6 +154,12 @@ private:
         StringArray headerPaths (config.getHeaderSearchPaths());
         headerPaths.insert (0, "/usr/include/freetype2");
         headerPaths.insert (0, "/usr/include");
+
+        if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
+            headerPaths.insert (0, rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toUnixStyle());
+
+        if (isVST())
+            headerPaths.insert (0, juceWrapperFolder.toUnixStyle());
 
         for (int i = 0; i < headerPaths.size(); ++i)
             out << " -I " << FileHelpers::unixStylePath (headerPaths[i]).quoted();
@@ -229,6 +239,8 @@ private:
 
         if (project.isLibrary())
             targetName = getLibbedFilename (targetName);
+        else if (isVST())
+            targetName = targetName.upToLastOccurrenceOf (".", false, false) + ".so";
 
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 

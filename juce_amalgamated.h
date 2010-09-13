@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	62
+#define JUCE_BUILDNUMBER	63
 
 /** Current Juce version number.
 
@@ -6619,7 +6619,7 @@ public:
 	const Expression operator* (const Expression& other) const;
 	/** Returns an expression which is a division operation of two existing expressions. */
 	const Expression operator/ (const Expression& other) const;
-	/** Returns an expression which is a negation operation of two existing expressions. */
+	/** Returns an expression which performs a negation operation on an existing expression. */
 	const Expression operator-() const;
 
 	/** Returns an Expression which is an identifier reference. */
@@ -20807,6 +20807,16 @@ public:
 		if (h < 0) h = -h;
 	}
 
+	/** Creates a Rectangle from a set of left, right, top, bottom coordinates.
+		The right and bottom values must be larger than the left and top ones, or the resulting
+		rectangle will have a negative size.
+	*/
+	static const Rectangle leftTopRightBottom (const ValueType left, const ValueType top,
+											   const ValueType right, const ValueType bottom) throw()
+	{
+		return Rectangle (left, top, right - left, bottom - top);
+	}
+
 	Rectangle& operator= (const Rectangle& other) throw()
 	{
 		x = other.x; y = other.y;
@@ -21847,7 +21857,12 @@ public:
 
 		@see addRoundedRectangle, addTriangle
 	*/
-	void addRectangle (const Rectangle<int>& rectangle);
+	template <typename ValueType>
+	void addRectangle (const Rectangle<ValueType>& rectangle)
+	{
+		addRectangle (static_cast <float> (rectangle.getX()), static_cast <float> (rectangle.getY()),
+					  static_cast <float> (rectangle.getWidth()), static_cast <float> (rectangle.getHeight()));
+	}
 
 	/** Adds a rectangle with rounded corners to the path.
 

@@ -165,12 +165,10 @@ protected:
         StringArray searchPaths (config.getHeaderSearchPaths());
 
         if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
-            searchPaths.add (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)
-                                .rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder)
-                                .toWindowsStyle());
+            searchPaths.add (rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toWindowsStyle());
 
         if (project.isAudioPlugin())
-            searchPaths.add (juceWrapperFiles[0].getParentDirectory().toWindowsStyle());
+            searchPaths.add (juceWrapperFolder.toWindowsStyle());
 
         if (isRTAS())
         {
@@ -200,10 +198,9 @@ protected:
                                                       "xplat/AVX/avx2/avx2sdk/inc" };
 
             RelativePath sdkFolder (getRTASFolder().toString(), RelativePath::projectFolder);
-            sdkFolder = sdkFolder.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
 
             for (int i = 0; i < numElementsInArray (rtasIncludePaths); ++i)
-                searchPaths.add (sdkFolder.getChildFile (rtasIncludePaths[i]).toWindowsStyle());
+                searchPaths.add (rebaseFromProjectFolderToBuildTarget (sdkFolder.getChildFile (rtasIncludePaths[i])).toWindowsStyle());
         }
 
         return searchPaths;

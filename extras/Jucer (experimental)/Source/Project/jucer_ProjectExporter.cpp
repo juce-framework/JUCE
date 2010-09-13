@@ -140,8 +140,12 @@ const String ProjectExporter::getIncludePathForFileInJuceFolder (const String& p
 
 const RelativePath ProjectExporter::getJucePathFromTargetFolder() const
 {
-    RelativePath juceFolder (getJuceFolder().toString(), RelativePath::projectFolder);
-    return juceFolder.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
+    return rebaseFromProjectFolderToBuildTarget (RelativePath (getJuceFolder().toString(), RelativePath::projectFolder));
+}
+
+const RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const
+{
+    return path.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
 }
 
 bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const

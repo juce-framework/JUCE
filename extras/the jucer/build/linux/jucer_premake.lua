@@ -60,3 +60,5 @@ package.files = { matchfiles (
     "../../src/model/paintelements/*.cpp"
     )
 }
+
+package.buildoptions = { "-march=native" }

@@ -397,12 +397,6 @@ void Path::addRectangle (const float x, const float y,
     data.elements [numElements++] = closeSubPathMarker;
 }
 
-void Path::addRectangle (const Rectangle<int>& rectangle)
-{
-    addRectangle ((float) rectangle.getX(), (float) rectangle.getY(),
-                  (float) rectangle.getWidth(), (float) rectangle.getHeight());
-}
-
 void Path::addRoundedRectangle (const float x, const float y,
                                 const float w, const float h,
                                 float csx,
@@ -1508,32 +1502,12 @@ void Path::restoreFromString (const String& stringVersion)
 
         switch (marker)
         {
-        case 'm':
-            startNewSubPath (values[0], values[1]);
-            break;
-
-        case 'l':
-            lineTo (values[0], values[1]);
-            break;
-
-        case 'q':
-            quadraticTo (values[0], values[1],
-                         values[2], values[3]);
-            break;
-
-        case 'c':
-            cubicTo (values[0], values[1],
-                     values[2], values[3],
-                     values[4], values[5]);
-            break;
-
-        case 'z':
-            closeSubPath();
-            break;
-
-        default:
-            jassertfalse; // illegal string format?
-            break;
+            case 'm':   startNewSubPath (values[0], values[1]); break;
+            case 'l':   lineTo (values[0], values[1]); break;
+            case 'q':   quadraticTo (values[0], values[1], values[2], values[3]); break;
+            case 'c':   cubicTo (values[0], values[1], values[2], values[3], values[4], values[5]); break;
+            case 'z':   closeSubPath(); break;
+            default:    jassertfalse; break; // illegal string format?
         }
     }
 }

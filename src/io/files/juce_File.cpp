@@ -922,5 +922,139 @@ const File File::createTempFile (const String& fileNameEnding)
         return tempFile;
 }
 
+#if JUCE_UNIT_TESTS
+
+#include "../../utilities/juce_UnitTest.h"
+#include "../../core/juce_Random.h"
+
+class FileTests  : public UnitTest
+{
+public:
+    FileTests() : UnitTest ("Files") {}
+
+    void runTest()
+    {
+        beginTest ("Reading");
+
+        const File home (File::getSpecialLocation (File::userHomeDirectory));
+        const File temp (File::getSpecialLocation (File::tempDirectory));
+
+        expect (! File::nonexistent.exists());
+        expect (home.isDirectory());
+        expect (home.exists());
+        expect (! home.existsAsFile());
+        expect (File::getSpecialLocation (File::userDocumentsDirectory).isDirectory());
+        expect (File::getSpecialLocation (File::userApplicationDataDirectory).isDirectory());
+        expect (File::getSpecialLocation (File::currentExecutableFile).exists());
+        expect (File::getSpecialLocation (File::currentApplicationFile).exists());
+        expect (File::getSpecialLocation (File::invokedExecutableFile).exists());
+        expect (home.getVolumeTotalSize() > 1024 * 1024);
+        expect (home.getBytesFreeOnVolume() > 0);
+        expect (! home.isHidden());
+        expect (home.isOnHardDisk());
+        expect (! home.isOnCDRomDrive());
+        expect (File::getCurrentWorkingDirectory().exists());
+        expect (home.setAsCurrentWorkingDirectory());
+        expect (File::getCurrentWorkingDirectory() == home);
+
+        {
+            Array<File> roots;
+            File::findFileSystemRoots (roots);
+            expect (roots.size() > 0);
+
+            for (int i = 0; i < roots.size(); ++i)
+                expect (roots[i].exists());
+        }
+
+        beginTest ("Writing");
+
+        File demoFolder (temp.getChildFile ("Juce UnitTests Temp Folder"));
+        expect (demoFolder.deleteRecursively());
+        expect (demoFolder.createDirectory());
+        expect (demoFolder.isDirectory());
+        expect (demoFolder.getParentDirectory() == temp);
+        expect (temp.isDirectory());
+
+        {
+            Array<File> files;
+            temp.findChildFiles (files, File::findFilesAndDirectories, false, "*");
+            expect (files.contains (demoFolder));
+        }
+
+        {
+            Array<File> files;
+            temp.findChildFiles (files, File::findDirectories, false, "*");
+            expect (files.contains (demoFolder));
+        }
+
+        File tempFile (demoFolder.getNonexistentChildFile ("test", ".txt", false));
+
+        expect (tempFile.getFileExtension() == ".txt");
+        expect (tempFile.hasFileExtension (".txt"));
+        expect (tempFile.hasFileExtension ("txt"));
+        expect (tempFile.withFileExtension ("xyz").hasFileExtension (".xyz"));
+        expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
+        expect (tempFile.hasWriteAccess());
+
+        {
+            FileOutputStream fo (tempFile);
+            fo.write ("0123456789", 10);
+        }
+
+        expect (tempFile.exists());
+        expect (tempFile.getSize() == 10);
+        expect (std::abs (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds()) < 3000);
+        expect (tempFile.loadFileAsString() == "0123456789");
+        expect (! demoFolder.containsSubDirectories());
+
+        expect (demoFolder.getNumberOfChildFiles (File::findFiles) == 1);
+        expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 1);
+        expect (demoFolder.getNumberOfChildFiles (File::findDirectories) == 0);
+        demoFolder.getNonexistentChildFile ("tempFolder", "", false).createDirectory();
+        expect (demoFolder.getNumberOfChildFiles (File::findDirectories) == 1);
+        expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 2);
+        expect (demoFolder.containsSubDirectories());
+
+        expect (tempFile.hasWriteAccess());
+        tempFile.setReadOnly (true);
+        expect (! tempFile.hasWriteAccess());
+        tempFile.setReadOnly (false);
+        expect (tempFile.hasWriteAccess());
+
+        Time t (Time::getCurrentTime());
+        tempFile.setLastModificationTime (t);
+        Time t2 = tempFile.getLastModificationTime();
+        expect (std::abs (t2.toMilliseconds() - t.toMilliseconds()) <= 1000);
+
+        {
+            MemoryBlock mb;
+            tempFile.loadFileAsData (mb);
+            expect (mb.getSize() == 10);
+            expect (mb[0] == '0');
+        }
+
+        expect (tempFile.appendData ("abcdefghij", 10));
+        expect (tempFile.getSize() == 20);
+        expect (tempFile.replaceWithData ("abcdefghij", 10));
+        expect (tempFile.getSize() == 10);
+
+        File tempFile2 (tempFile.getNonexistentSibling (false));
+        expect (tempFile.copyFileTo (tempFile2));
+        expect (tempFile2.exists());
+        expect (tempFile2.hasIdenticalContentTo (tempFile));
+        expect (tempFile.deleteFile());
+        expect (! tempFile.exists());
+        expect (tempFile2.moveFileTo (tempFile));
+        expect (tempFile.exists());
+        expect (! tempFile2.exists());
+
+        expect (demoFolder.deleteRecursively());
+        expect (! demoFolder.exists());
+    }
+};
+
+static FileTests fileUnitTests;
+
+#endif
 
 END_JUCE_NAMESPACE
