@@ -170,6 +170,8 @@ public:
 
     ~JucePlugInProcess()
     {
+        JUCE_AUTORELEASEPOOL
+
         if (mLoggedIn)
             MIDILogOut();
 
@@ -255,6 +257,7 @@ public:
         {
             if (port != 0)
             {
+                JUCE_AUTORELEASEPOOL
                 updateSize();
 
 #if JUCE_WINDOWS
@@ -302,9 +305,7 @@ public:
         {
             if (editorComp != 0 || wrapper != 0)
             {
-#if JUCE_MAC
-                const ScopedAutoReleasePool pool;
-#endif
+                JUCE_AUTORELEASEPOOL
                 PopupMenu::dismissAllActiveMenus();
 
                 JUCE_NAMESPACE::Component* const modalComponent = JUCE_NAMESPACE::Component::getCurrentlyModalComponent();

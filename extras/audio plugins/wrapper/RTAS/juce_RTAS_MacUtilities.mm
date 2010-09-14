@@ -50,7 +50,7 @@ void initialiseMacRTAS()
 
 void* attachSubWindow (void* hostWindowRef, Component* comp)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: hostWindowRef];
     [hostWindow retain];
@@ -103,7 +103,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
 
 void removeSubWindow (void* nsWindow, Component* comp)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     NSView* pluginView = (NSView*) comp->getWindowHandle();
     NSWindow* hostWindow = (NSWindow*) nsWindow;

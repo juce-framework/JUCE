@@ -147,77 +147,54 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     switch (type)
     {
-    case userHomeDirectory:
-        resultPath = nsStringToJuce (NSHomeDirectory());
-        break;
+        case userHomeDirectory:                 resultPath = nsStringToJuce (NSHomeDirectory()); break;
+        case userDocumentsDirectory:            resultPath = "~/Documents"; break;
+        case userDesktopDirectory:              resultPath = "~/Desktop"; break;
+        case userApplicationDataDirectory:      resultPath = "~/Library"; break;
+        case commonApplicationDataDirectory:    resultPath = "/Library"; break;
+        case globalApplicationsDirectory:       resultPath = "/Applications"; break;
+        case userMusicDirectory:                resultPath = "~/Music"; break;
+        case userMoviesDirectory:               resultPath = "~/Movies"; break;
 
-    case userDocumentsDirectory:
-        resultPath = "~/Documents";
-        break;
+        case tempDirectory:
+        {
+            File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
 
-    case userDesktopDirectory:
-        resultPath = "~/Desktop";
-        break;
+            tmp.createDirectory();
+            return tmp.getFullPathName();
+        }
 
-    case userApplicationDataDirectory:
-        resultPath = "~/Library";
-        break;
+        case invokedExecutableFile:
+            if (juce_Argv0 != 0)
+                return File (String::fromUTF8 (juce_Argv0));
+            // deliberate fall-through...
 
-    case commonApplicationDataDirectory:
-        resultPath = "/Library";
-        break;
+        case currentExecutableFile:
+            return juce_getExecutableFile();
 
-    case globalApplicationsDirectory:
-        resultPath = "/Applications";
-        break;
+        case currentApplicationFile:
+        {
+            const File exe (juce_getExecutableFile());
+            const File parent (exe.getParentDirectory());
 
-    case userMusicDirectory:
-        resultPath = "~/Music";
-        break;
+            return parent.getFullPathName().endsWithIgnoreCase ("Contents/MacOS")
+                    ? parent.getParentDirectory().getParentDirectory()
+                    : exe;
+        }
 
-    case userMoviesDirectory:
-        resultPath = "~/Movies";
-        break;
+        case hostApplicationPath:
+        {
+            unsigned int size = 8192;
+            HeapBlock<char> buffer;
+            buffer.calloc (size + 8);
 
-    case tempDirectory:
-    {
-        File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
+            _NSGetExecutablePath (buffer.getData(), &size);
+            return String::fromUTF8 (buffer, size);
+        }
 
-        tmp.createDirectory();
-        return tmp.getFullPathName();
-    }
-
-    case invokedExecutableFile:
-        if (juce_Argv0 != 0)
-            return File (String::fromUTF8 (juce_Argv0));
-        // deliberate fall-through...
-
-    case currentExecutableFile:
-        return juce_getExecutableFile();
-
-    case currentApplicationFile:
-    {
-        const File exe (juce_getExecutableFile());
-        const File parent (exe.getParentDirectory());
-
-        return parent.getFullPathName().endsWithIgnoreCase ("Contents/MacOS")
-                ? parent.getParentDirectory().getParentDirectory()
-                : exe;
-    }
-
-    case hostApplicationPath:
-    {
-        unsigned int size = 8192;
-        HeapBlock<char> buffer;
-        buffer.calloc (size + 8);
-
-        _NSGetExecutablePath (buffer.getData(), &size);
-        return String::fromUTF8 (buffer, size);
-    }
-
-    default:
-        jassertfalse; // unknown type?
-        break;
+        default:
+            jassertfalse; // unknown type?
+            break;
     }
 
     if (resultPath.isNotEmpty())
@@ -253,7 +230,7 @@ const String File::getVersion() const
 //==============================================================================
 const File File::getLinkedTarget() const
 {
-#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
 
 #else
@@ -471,7 +448,7 @@ OSType PlatformUtilities::getTypeOfFile (const String& filename)
 {
     const ScopedAutoReleasePool pool;
 
-#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (filename) error: nil];
 #else
     NSDictionary* fileDict = [[NSFileManager defaultManager] fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];

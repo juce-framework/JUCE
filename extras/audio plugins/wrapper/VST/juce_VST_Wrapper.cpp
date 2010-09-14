@@ -153,7 +153,7 @@ BEGIN_JUCE_NAMESPACE
   extern void initialiseMac();
   extern void* attachComponentToWindowRef (Component* component, void* windowRef);
   extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
-  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
+  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight, const PluginHostType& host);
   extern void checkWindowVisibility (void* nsWindow, Component* component);
   extern void forwardCurrentKeyEventToHost (Component* component);
  #endif
@@ -323,6 +323,8 @@ public:
 
     ~JuceVSTWrapper()
     {
+        JUCE_AUTORELEASEPOOL
+
         stopTimer();
         deleteEditor (false);
 
@@ -350,6 +352,7 @@ public:
 
     void open()
     {
+        JUCE_AUTORELEASEPOOL
         if (editorComp == 0)
         {
             checkWhetherWavelabHasChangedThread();
@@ -371,6 +374,7 @@ public:
 
     void close()
     {
+        JUCE_AUTORELEASEPOOL
         const NonWavelabMMLock mmLock;
         jassert (! recursionCheck);
 
@@ -1224,7 +1228,7 @@ public:
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
 #if JUCE_MAC
-                setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight);
+                setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight, getHostType());
 #elif JUCE_LINUX
                 Window root;
                 int x, y;
@@ -1442,7 +1446,31 @@ private:
 
     static void checkWhetherWavelabHasChangedThread()
     {
-            MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+        if (getHostType().isWavelab() || getHostType().isCubaseBridged())
+        {
+            static bool messageThreadIsDefinitelyCorrect = false;
+
+            if (! messageThreadIsDefinitelyCorrect)
+            {
+                MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+
+                class MessageThreadCallback  : public CallbackMessage
+                {
+                public:
+                    MessageThreadCallback (bool& triggered_) : triggered (triggered_) {}
+
+                    void messageCallback()
+                    {
+                        triggered = true;
+                    }
+
+                private:
+                    bool& triggered;
+                };
+
+                (new MessageThreadCallback (messageThreadIsDefinitelyCorrect))->post();
+            }
+        }
     }
 #else
     typedef MessageManagerLock NonWavelabMMLock;
@@ -1490,6 +1518,7 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 //==============================================================================
 static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 {
+    JUCE_AUTORELEASEPOOL
     initialiseJuce_GUI();
 
     try

@@ -244,7 +244,7 @@ public:
                 if (PlatformUtilities::getOSXMinorVersionNumber() > 4)
 #endif
                 {
-                    const ScopedAutoReleasePool pool;
+                    JUCE_AUTORELEASEPOOL
 
                     AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) outData;
 
@@ -1155,7 +1155,7 @@ public:
 
     ComponentResult CreateUI (Float32 /*inXOffset*/, Float32 /*inYOffset*/)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         if (juceFilter == 0)
         {
@@ -1220,7 +1220,7 @@ private:
             : parentView (parentHIView),
               recursive (false)
         {
-            const ScopedAutoReleasePool pool;
+            JUCE_AUTORELEASEPOOL
 
             jassert (contentComp != 0);
             addAndMakeVisible (contentComp);
@@ -1278,7 +1278,7 @@ private:
             if (comp != 0)
                 comp->removeComponentListener (this);
 
-            const ScopedAutoReleasePool pool;
+            JUCE_AUTORELEASEPOOL
 
             NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
             [hostWindow removeChildWindow: pluginWindow];

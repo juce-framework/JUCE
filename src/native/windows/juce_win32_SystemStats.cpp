@@ -220,7 +220,7 @@ int SystemStats::getMemorySizeInMegabytes()
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() throw()
 {
-    return (uint32) GetTickCount();
+    return (uint32) timeGetTime();
 }
 
 int64 Time::getHighResolutionTicks() throw()

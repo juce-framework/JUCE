@@ -365,11 +365,14 @@ public:
         ScopedPointer <Project> newProj (NewProjectWizard::runNewProjectWizard (mw));
 
         if (newProj != 0)
+        {
             mw->setProject (newProj.release());
+            mw->setVisible (true);
+        }
         else
+        {
             closeWindow (mw);
-
-        mw->setVisible (true);
+        }
     }
 
     void askUserToOpenFile()

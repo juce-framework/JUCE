@@ -1328,9 +1328,12 @@ public:
             {
                 const XKeyEvent* const keyEvent = (const XKeyEvent*) &event->xkey;
                 updateKeyStates (keyEvent->keycode, false);
+                KeySym sym;
 
-                ScopedXLock xlock;
-                KeySym sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
+                {
+                    ScopedXLock xlock;
+                    sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
+                }
 
                 const ModifierKeys oldMods (currentModifiers);
                 const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);

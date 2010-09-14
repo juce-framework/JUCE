@@ -55,6 +55,7 @@ public:
         SteinbergCubaseGeneric,
         SteinbergWavelab5,
         SteinbergWavelab6,
+        SteinbergWavelab7,
         SteinbergWavelabGeneric,
         MuseReceptorGeneric
     };
@@ -94,7 +95,7 @@ public:
 
     bool isWavelab() const throw()
     {
-        return type == SteinbergWavelabGeneric || type == SteinbergWavelab5 || type == SteinbergWavelab6;
+        return type == SteinbergWavelabGeneric || type == SteinbergWavelab5 || type == SteinbergWavelab6 || type == SteinbergWavelab7;
     }
 
     bool isReceptor() const throw()
@@ -117,6 +118,8 @@ private:
         if (hostFilename.containsIgnoreCase ("Pro Tools"))  return DigidesignProTools;
         if (hostFilename.containsIgnoreCase ("Cubase 4"))   return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase 5"))   return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Wavelab 7" )) return SteinbergWavelab7;
+        if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
         if (hostFilename.contains ("Logic"))                return AppleLogic;
 
 #elif JUCE_WINDOWS
@@ -135,6 +138,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase"))     return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase ("Wavelab 5"))  return SteinbergWavelab5;
         if (hostFilename.containsIgnoreCase ("Wavelab 6" )) return SteinbergWavelab6;
+        if (hostFilename.containsIgnoreCase ("Wavelab 7" )) return SteinbergWavelab7;
         if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("reaper"))     return Reaper;
         if (hostFilename.containsIgnoreCase ("Logic"))      return EmagicLogic;

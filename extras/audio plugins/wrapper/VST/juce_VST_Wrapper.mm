@@ -32,6 +32,7 @@
 #include <Carbon/Carbon.h>
 
 #include "../juce_PluginHeaders.h"
+#include "../juce_PluginHostType.h"
 
 #define ADD_CARBON_BODGE 1   // see note below..
 
@@ -97,7 +98,7 @@ void initialiseMac()
 
 void* attachComponentToWindowRef (Component* comp, void* windowRef)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
     [hostWindow retain];
@@ -184,7 +185,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
 void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 {
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
                                     comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
@@ -221,12 +222,12 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
         MessageManager::getInstance()->runDispatchLoopUntil (1);
 }
 
-void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight)
+void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host)
 {
     NSWindow* hostWindow = (NSWindow*) nsWindow;
     if (hostWindow != 0)
     {
-        ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         // Can't use the cocoa NSWindow resizing code, or it messes up in Live.
         Rect r;
@@ -237,7 +238,6 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
 
         r.left = r.top = 0;
         InvalWindowRect ((WindowRef) [hostWindow windowRef], &r);
-        //[[hostWindow contentView] setNeedsDisplay: YES];
     }
 }
 
