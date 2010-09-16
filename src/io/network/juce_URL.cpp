@@ -514,55 +514,62 @@ const StringPairArray& URL::getMimeTypesOfUploadFiles() const
 const String URL::removeEscapeChars (const String& s)
 {
     String result (s.replaceCharacter ('+', ' '));
-    int nextPercent = 0;
 
-    for (;;)
+    if (! result.containsChar ('%'))
+        return result;
+
+    // We need to operate on the string as raw UTF8 chars, and then recombine them into unicode
+    // after all the replacements have been made, so that multi-byte chars are handled.
+    Array<char> utf8 (result.toUTF8(), result.getNumBytesAsUTF8());
+
+    for (int i = 0; i < utf8.size(); ++i)
     {
-        nextPercent = result.indexOfChar (nextPercent, '%');
-
-        if (nextPercent < 0)
-            break;
-
-        int hexDigit1 = 0, hexDigit2 = 0;
-
-        if ((hexDigit1 = CharacterFunctions::getHexDigitValue (result [nextPercent + 1])) >= 0
-             && (hexDigit2 = CharacterFunctions::getHexDigitValue (result [nextPercent + 2])) >= 0)
+        if (utf8.getUnchecked(i) == '%')
         {
-            const juce_wchar replacementChar = (juce_wchar) ((hexDigit1 << 4) + hexDigit2);
-            result = result.replaceSection (nextPercent, 3, String::charToString (replacementChar));
-        }
+            const int hexDigit1 = CharacterFunctions::getHexDigitValue (utf8 [i + 1]);
+            const int hexDigit2 = CharacterFunctions::getHexDigitValue (utf8 [i + 2]);
 
-        ++nextPercent;
+            if (hexDigit1 >= 0 && hexDigit2 >= 0)
+            {
+                utf8.set (i, (char) ((hexDigit1 << 4) + hexDigit2));
+                utf8.removeRange (i + 1, 2);
+            }
+        }
     }
 
-    return result;
+    return String::fromUTF8 (utf8.getRawDataPointer(), utf8.size());
 }
 
 const String URL::addEscapeChars (const String& s, const bool isParameter)
 {
-    String result;
-    result.preallocateStorage (s.length() + 8);
-    const char* utf8 = s.toUTF8();
-    const char* legalChars = isParameter ? "_-.*!'()"
-                                         : "_-$.*!'(),";
+    const char* const legalChars = isParameter ? "_-.*!'()"
+                                               : ",$_-.*!'()";
 
-    while (*utf8 != 0)
+    Array<char> utf8 (s.toUTF8(), s.getNumBytesAsUTF8());
+
+    for (int i = 0; i < utf8.size(); ++i)
     {
-        const char c = *utf8++;
+        const char c = utf8.getUnchecked(i);
 
-        if (CharacterFunctions::isLetterOrDigit (c)
-             || CharacterFunctions::indexOfChar (legalChars, c, false) >= 0)
+        if (! (CharacterFunctions::isLetterOrDigit (c)
+                 || CharacterFunctions::indexOfChar (legalChars, c, false) >= 0))
         {
-            result << c;
-        }
-        else
-        {
-            const int v = (int) (uint8) c;
-            result << (v < 0x10 ? "%0" : "%") << String::toHexString (v);
+            if (c == ' ')
+            {
+                utf8.set (i, '+');
+            }
+            else
+            {
+                static const char* const hexDigits = "0123456789abcdef";
+
+                utf8.set (i, '%');
+                utf8.insert (++i, hexDigits [((uint8) c) >> 4]);
+                utf8.insert (++i, hexDigits [c & 15]);
+            }
         }
     }
 
-    return result;
+    return String::fromUTF8 (utf8.getRawDataPointer(), utf8.size());
 }
 
 //==============================================================================

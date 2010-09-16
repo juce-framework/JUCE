@@ -1003,7 +1003,7 @@ public:
 
         expect (tempFile.exists());
         expect (tempFile.getSize() == 10);
-        expect (std::abs (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds()) < 3000);
+        expect (std::abs ((int64) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
         expect (tempFile.loadFileAsString() == "0123456789");
         expect (! demoFolder.containsSubDirectories());
 
@@ -1024,7 +1024,7 @@ public:
         Time t (Time::getCurrentTime());
         tempFile.setLastModificationTime (t);
         Time t2 = tempFile.getLastModificationTime();
-        expect (std::abs (t2.toMilliseconds() - t.toMilliseconds()) <= 1000);
+        expect (std::abs ((int64) (t2.toMilliseconds() - t.toMilliseconds())) <= 1000);
 
         {
             MemoryBlock mb;
