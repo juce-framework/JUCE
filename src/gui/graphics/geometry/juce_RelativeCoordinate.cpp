@@ -160,11 +160,7 @@ bool RelativeCoordinate::references (const String& coordName, const Expression::
 {
     try
     {
-        if (context != 0)
-            return term.referencesSymbol (coordName, *context);
-
-        Expression::EvaluationContext defaultContext;
-        return term.referencesSymbol (coordName, defaultContext);
+        return term.referencesSymbol (coordName, context);
     }
     catch (...)
     {}
@@ -182,18 +178,12 @@ const String RelativeCoordinate::toString() const
     return term.toString();
 }
 
-void RelativeCoordinate::renameSymbolIfUsed (const String& oldName, const String& newName,
-                                             const Expression::EvaluationContext* context)
+void RelativeCoordinate::renameSymbolIfUsed (const String& oldName, const String& newName)
 {
     jassert (newName.isNotEmpty() && newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_"));
 
-    if (term.referencesSymbol (oldName, *context))
-    {
-        const double oldValue = resolve (context);
-
+    if (term.referencesSymbol (oldName, 0))
         term = term.withRenamedSymbol (oldName, newName);
-        moveToAbsolute (oldValue, context);
-    }
 }
 
 //==============================================================================
@@ -251,10 +241,10 @@ const String RelativePoint::toString() const
     return x.toString() + ", " + y.toString();
 }
 
-void RelativePoint::renameSymbolIfUsed (const String& oldName, const String& newName, const Expression::EvaluationContext* context)
+void RelativePoint::renameSymbolIfUsed (const String& oldName, const String& newName)
 {
-    x.renameSymbolIfUsed (oldName, newName, context);
-    y.renameSymbolIfUsed (oldName, newName, context);
+    x.renameSymbolIfUsed (oldName, newName);
+    y.renameSymbolIfUsed (oldName, newName);
 }
 
 bool RelativePoint::isDynamic() const
@@ -327,13 +317,12 @@ const String RelativeRectangle::toString() const
     return left.toString() + ", " + top.toString() + ", " + right.toString() + ", " + bottom.toString();
 }
 
-void RelativeRectangle::renameSymbolIfUsed (const String& oldName, const String& newName,
-                                            const Expression::EvaluationContext* context)
+void RelativeRectangle::renameSymbolIfUsed (const String& oldName, const String& newName)
 {
-    left.renameSymbolIfUsed (oldName, newName, context);
-    right.renameSymbolIfUsed (oldName, newName, context);
-    top.renameSymbolIfUsed (oldName, newName, context);
-    bottom.renameSymbolIfUsed (oldName, newName, context);
+    left.renameSymbolIfUsed (oldName, newName);
+    right.renameSymbolIfUsed (oldName, newName);
+    top.renameSymbolIfUsed (oldName, newName);
+    bottom.renameSymbolIfUsed (oldName, newName);
 }
 
 

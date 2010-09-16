@@ -99,7 +99,7 @@ public:
         to trigger an AsyncUpdater or ChangeBroadcaster which you can respond to later on the
         message thread.
 
-        @see audioPluginParameterChangeGestureStart
+        @see audioProcessorParameterChangeGestureBegin
     */
     virtual void audioProcessorParameterChangeGestureEnd (AudioProcessor* processor,
                                                           int parameterIndex);

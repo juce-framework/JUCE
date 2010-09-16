@@ -108,7 +108,7 @@ public:
                                     : mainSymbol + "." + member;
         }
 
-        bool referencesSymbol (const String& s, const EvaluationContext& c, int recursionDepth) const
+        bool referencesSymbol (const String& s, const EvaluationContext* c, int recursionDepth) const
         {
             if (s == mainSymbol)
                 return true;
@@ -118,7 +118,7 @@ public:
 
             try
             {
-                return c.getSymbolValue (mainSymbol, member).term->referencesSymbol (s, c, recursionDepth);
+                return c != 0 && c->getSymbolValue (mainSymbol, member).term->referencesSymbol (s, c, recursionDepth);
             }
             catch (EvaluationError&)
             {
@@ -154,7 +154,7 @@ public:
         Term* getInput (int i) const                            { return parameters [i]; }
         const String getFunctionName() const                    { return functionName; }
 
-        bool referencesSymbol (const String& s, const EvaluationContext& c, int recursionDepth) const
+        bool referencesSymbol (const String& s, const EvaluationContext* c, int recursionDepth) const
         {
             for (int i = 0; i < parameters.size(); ++i)
                 if (parameters.getUnchecked(i)->referencesSymbol (s, c, recursionDepth))
@@ -226,7 +226,7 @@ public:
                 return "-" + input->toString();
         }
 
-        bool referencesSymbol (const String& s, const EvaluationContext& c, int recursionDepth) const
+        bool referencesSymbol (const String& s, const EvaluationContext* c, int recursionDepth) const
         {
             return input->referencesSymbol (s, c, recursionDepth);
         }
@@ -254,7 +254,7 @@ public:
         int getNumInputs() const            { return 2; }
         Term* getInput (int index) const    { return index == 0 ? static_cast<Term*> (left) : (index == 1 ? static_cast<Term*> (right) : 0); }
 
-        bool referencesSymbol (const String& s, const EvaluationContext& c, int recursionDepth) const
+        bool referencesSymbol (const String& s, const EvaluationContext* c, int recursionDepth) const
         {
             return left->referencesSymbol (s, c, recursionDepth)
                 || right->referencesSymbol (s, c, recursionDepth);
@@ -882,7 +882,7 @@ const Expression Expression::withRenamedSymbol (const String& oldSymbol, const S
     return newExpression;
 }
 
-bool Expression::referencesSymbol (const String& symbol, const EvaluationContext& context) const
+bool Expression::referencesSymbol (const String& symbol, const EvaluationContext* context) const
 {
     return term->referencesSymbol (symbol, context, 0);
 }
@@ -928,7 +928,7 @@ int Expression::Term::getOperatorPrecedence() const
     return 0;
 }
 
-bool Expression::Term::referencesSymbol (const String&, const EvaluationContext&, int) const
+bool Expression::Term::referencesSymbol (const String&, const EvaluationContext*, int) const
 {
     return false;
 }

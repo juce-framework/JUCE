@@ -114,7 +114,7 @@ public:
 
         @see setSliderStyle
     */
-    SliderStyle getSliderStyle() const                                      { return style; }
+    SliderStyle getSliderStyle() const throw()                  { return style; }
 
     //==============================================================================
     /** Changes the properties of a rotary slider.
@@ -140,6 +140,9 @@ public:
     */
     void setMouseDragSensitivity (int distanceForFullScaleDrag);
 
+    /** Returns the current sensitivity value set by setMouseDragSensitivity(). */
+    int getMouseDragSensitivity() const throw()                 { return pixelsForFullDragExtent; }
+
     //==============================================================================
     /** Changes the way the the mouse is used when dragging the slider.
 
@@ -154,7 +157,7 @@ public:
     /** Returns true if velocity-based mode is active.
         @see setVelocityBasedMode
     */
-    bool getVelocityBasedMode() const                       { return isVelocityBased; }
+    bool getVelocityBasedMode() const throw()                   { return isVelocityBased; }
 
     /** Changes aspects of the scaling used when in velocity-sensitive mode.
 
@@ -177,22 +180,22 @@ public:
     /** Returns the velocity sensitivity setting.
         @see setVelocityModeParameters
     */
-    double getVelocitySensitivity() const                       { return velocityModeSensitivity; }
+    double getVelocitySensitivity() const throw()               { return velocityModeSensitivity; }
 
     /** Returns the velocity threshold setting.
         @see setVelocityModeParameters
     */
-    int getVelocityThreshold() const                            { return velocityModeThreshold; }
+    int getVelocityThreshold() const throw()                    { return velocityModeThreshold; }
 
     /** Returns the velocity offset setting.
         @see setVelocityModeParameters
     */
-    double getVelocityOffset() const                            { return velocityModeOffset; }
+    double getVelocityOffset() const throw()                    { return velocityModeOffset; }
 
     /** Returns the velocity user key setting.
         @see setVelocityModeParameters
     */
-    bool getVelocityModeIsSwappable() const                     { return userKeyOverridesVelocity; }
+    bool getVelocityModeIsSwappable() const throw()             { return userKeyOverridesVelocity; }
 
     //==============================================================================
     /** Sets up a skew factor to alter the way values are distributed.
@@ -227,7 +230,7 @@ public:
 
         @see setSkewFactor, setSkewFactorFromMidPoint
     */
-    double getSkewFactor() const                                { return skewFactor; }
+    double getSkewFactor() const throw()                        { return skewFactor; }
 
     //==============================================================================
     /** Used by setIncDecButtonsMode().
@@ -285,17 +288,17 @@ public:
     /** Returns the status of the text-box.
         @see setTextBoxStyle
     */
-    const TextEntryBoxPosition getTextBoxPosition() const                   { return textBoxPos; }
+    const TextEntryBoxPosition getTextBoxPosition() const throw()           { return textBoxPos; }
 
     /** Returns the width used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxWidth() const                                             { return textBoxWidth; }
+    int getTextBoxWidth() const throw()                                     { return textBoxWidth; }
 
     /** Returns the height used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxHeight() const                                            { return textBoxHeight; }
+    int getTextBoxHeight() const throw()                                    { return textBoxHeight; }
 
     /** Makes the text-box editable.
 
@@ -403,7 +406,7 @@ public:
         your own Value object.
         @see Value, getMinValue, getMaxValueObject
     */
-    Value& getMinValueObject()                                              { return valueMin; }
+    Value& getMinValueObject() throw()                                      { return valueMin; }
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -445,7 +448,7 @@ public:
         your own Value object.
         @see Value, getMaxValue, getMinValueObject
     */
-    Value& getMaxValueObject()                                              { return valueMax; }
+    Value& getMaxValueObject() throw()                                      { return valueMax; }
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -601,7 +604,7 @@ public:
         This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
         the maximum-value thumb, or -1 if none is currently down.
     */
-    int getThumbBeingDragged() const                { return sliderBeingDragged; }
+    int getThumbBeingDragged() const throw()                { return sliderBeingDragged; }
 
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.

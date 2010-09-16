@@ -1211,8 +1211,7 @@ private:
                             {
                                 if (rects->right <= x + w && rects->bottom <= y + h)
                                 {
-                                    // (need to move this one pixel to the left because of a win32 bug)
-                                    const int cx = jmax (x, (int) rects->left - 1);
+                                    const int cx = jmax (x, (int) rects->left);
                                     contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y, rects->right - cx, rects->bottom - rects->top)
                                                                        .getIntersection (clipBounds));
                                 }

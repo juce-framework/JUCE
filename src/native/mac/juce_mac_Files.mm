@@ -234,7 +234,8 @@ const File File::getLinkedTarget() const
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
 
 #else
-    NSString* dest = [[NSFileManager defaultManager] pathContentOfSymbolicLinkAtPath: juceStringToNS (getFullPathName())];
+    // (the cast here avoids a deprecation warning)
+    NSString* dest = [((id) [NSFileManager defaultManager]) pathContentOfSymbolicLinkAtPath: juceStringToNS (getFullPathName())];
 #endif
 
     if (dest != nil)
@@ -451,7 +452,8 @@ OSType PlatformUtilities::getTypeOfFile (const String& filename)
 #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (filename) error: nil];
 #else
-    NSDictionary* fileDict = [[NSFileManager defaultManager] fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
+    // (the cast here avoids a deprecation warning)
+    NSDictionary* fileDict = [((id) [NSFileManager defaultManager]) fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
 #endif
 
     return [fileDict fileHFSTypeCode];

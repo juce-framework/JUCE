@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	64
+#define JUCE_BUILDNUMBER	65
 
 /** Current Juce version number.
 
@@ -6692,11 +6692,12 @@ public:
 	/** Returns true if this expression makes use of the specified symbol.
 		If a suitable context is supplied, the search will dereference and recursively check
 		all symbols, so that it can be determined whether this expression relies on the given
-		symbol at any level in its evaluation.
+		symbol at any level in its evaluation. If the context parameter is null, this just checks
+		whether the expression contains any direct references to the symbol.
 
 		@throws Expression::EvaluationError
 	*/
-	bool referencesSymbol (const String& symbol, const EvaluationContext& context) const;
+	bool referencesSymbol (const String& symbol, const EvaluationContext* context) const;
 
 	/** Returns true if this expression contains any symbols. */
 	bool usesAnySymbols() const;
@@ -6773,7 +6774,7 @@ private:
 		virtual int getInputIndexFor (const Term* possibleInput) const;
 		virtual const String toString() const = 0;
 		virtual int getOperatorPrecedence() const;
-		virtual bool referencesSymbol (const String& symbol, const EvaluationContext&, int recursionDepth) const;
+		virtual bool referencesSymbol (const String& symbol, const EvaluationContext*, int recursionDepth) const;
 		virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, const Term* inputTerm,
 																				 double overallTarget, Term* topLevelTerm) const;
 		virtual const ReferenceCountedObjectPtr<Term> negated();
@@ -33821,9 +33822,10 @@ public:
 
 	/** Returns the frequency of a midi note number.
 
+		The frequencyOfA parameter is an optional frequency for 'A', normally 440-444Hz for concert pitch.
 		@see getMidiNoteName
 	*/
-	static const double getMidiNoteInHertz (int noteNumber) throw();
+	static const double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) throw();
 
 	/** Returns the standard name of a GM instrument.
 
@@ -38647,7 +38649,7 @@ public:
 		to trigger an AsyncUpdater or ChangeBroadcaster which you can respond to later on the
 		message thread.
 
-		@see audioPluginParameterChangeGestureStart
+		@see audioProcessorParameterChangeGestureBegin
 	*/
 	virtual void audioProcessorParameterChangeGestureEnd (AudioProcessor* processor,
 														  int parameterIndex);
@@ -43219,15 +43221,8 @@ public:
 	*/
 	void moveToAbsolute (double absoluteTargetPosition, const Expression::EvaluationContext* evaluationContext);
 
-	/** Tells the coordinate that an object is changing its name or being deleted.
-
-		If either of this coordinates anchor points match this name, they will be replaced.
-		If the newName string is empty, it indicates that the object is being removed, so if
-		this coordinate was using it, the coordinate is changed to be relative to the origin
-		instead.
-	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName,
-							 const Expression::EvaluationContext* evaluationContext);
+	/** Changes the name of a symbol if it is used as part of the coordinate's expression. */
+	void renameSymbolIfUsed (const String& oldName, const String& newName);
 
 	/** Returns the expression that defines this coordinate. */
 	const Expression& getExpression() const	 { return term; }
@@ -43314,11 +43309,10 @@ public:
 	*/
 	const String toString() const;
 
-	/** Tells the point that an object is changing its name or being deleted.
+	/** Renames a symbol if it is used by any of the coordinates.
 		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
 	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName,
-							 const Expression::EvaluationContext* evaluationContext);
+	void renameSymbolIfUsed (const String& oldName, const String& newName);
 
 	/** Returns true if this point depends on any other coordinates for its position. */
 	bool isDynamic() const;
@@ -43381,11 +43375,10 @@ public:
 	*/
 	const String toString() const;
 
-	/** Tells the rectangle that an object is changing its name or being deleted.
+	/** Renames a symbol if it is used by any of the coordinates.
 		This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
 	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName,
-							 const Expression::EvaluationContext* evaluationContext);
+	void renameSymbolIfUsed (const String& oldName, const String& newName);
 
 	// The actual rectangle coords...
 	RelativeCoordinate left, right, top, bottom;
@@ -46188,7 +46181,7 @@ public:
 
 		@see setSliderStyle
 	*/
-	SliderStyle getSliderStyle() const					  { return style; }
+	SliderStyle getSliderStyle() const throw()		  { return style; }
 
 	/** Changes the properties of a rotary slider.
 
@@ -46213,6 +46206,9 @@ public:
 	*/
 	void setMouseDragSensitivity (int distanceForFullScaleDrag);
 
+	/** Returns the current sensitivity value set by setMouseDragSensitivity(). */
+	int getMouseDragSensitivity() const throw()		 { return pixelsForFullDragExtent; }
+
 	/** Changes the way the the mouse is used when dragging the slider.
 
 		If true, this will turn on velocity-sensitive dragging, so that
@@ -46226,7 +46222,7 @@ public:
 	/** Returns true if velocity-based mode is active.
 		@see setVelocityBasedMode
 	*/
-	bool getVelocityBasedMode() const			   { return isVelocityBased; }
+	bool getVelocityBasedMode() const throw()		   { return isVelocityBased; }
 
 	/** Changes aspects of the scaling used when in velocity-sensitive mode.
 
@@ -46249,22 +46245,22 @@ public:
 	/** Returns the velocity sensitivity setting.
 		@see setVelocityModeParameters
 	*/
-	double getVelocitySensitivity() const			   { return velocityModeSensitivity; }
+	double getVelocitySensitivity() const throw()		   { return velocityModeSensitivity; }
 
 	/** Returns the velocity threshold setting.
 		@see setVelocityModeParameters
 	*/
-	int getVelocityThreshold() const				{ return velocityModeThreshold; }
+	int getVelocityThreshold() const throw()			{ return velocityModeThreshold; }
 
 	/** Returns the velocity offset setting.
 		@see setVelocityModeParameters
 	*/
-	double getVelocityOffset() const				{ return velocityModeOffset; }
+	double getVelocityOffset() const throw()			{ return velocityModeOffset; }
 
 	/** Returns the velocity user key setting.
 		@see setVelocityModeParameters
 	*/
-	bool getVelocityModeIsSwappable() const			 { return userKeyOverridesVelocity; }
+	bool getVelocityModeIsSwappable() const throw()		 { return userKeyOverridesVelocity; }
 
 	/** Sets up a skew factor to alter the way values are distributed.
 
@@ -46298,7 +46294,7 @@ public:
 
 		@see setSkewFactor, setSkewFactorFromMidPoint
 	*/
-	double getSkewFactor() const				{ return skewFactor; }
+	double getSkewFactor() const throw()			{ return skewFactor; }
 
 	/** Used by setIncDecButtonsMode().
 	*/
@@ -46354,17 +46350,17 @@ public:
 	/** Returns the status of the text-box.
 		@see setTextBoxStyle
 	*/
-	const TextEntryBoxPosition getTextBoxPosition() const		   { return textBoxPos; }
+	const TextEntryBoxPosition getTextBoxPosition() const throw()	   { return textBoxPos; }
 
 	/** Returns the width used for the text-box.
 		@see setTextBoxStyle
 	*/
-	int getTextBoxWidth() const						 { return textBoxWidth; }
+	int getTextBoxWidth() const throw()					 { return textBoxWidth; }
 
 	/** Returns the height used for the text-box.
 		@see setTextBoxStyle
 	*/
-	int getTextBoxHeight() const						{ return textBoxHeight; }
+	int getTextBoxHeight() const throw()					{ return textBoxHeight; }
 
 	/** Makes the text-box editable.
 
@@ -46468,7 +46464,7 @@ public:
 		your own Value object.
 		@see Value, getMinValue, getMaxValueObject
 	*/
-	Value& getMinValueObject()						  { return valueMin; }
+	Value& getMinValueObject() throw()					  { return valueMin; }
 
 	/** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -46510,7 +46506,7 @@ public:
 		your own Value object.
 		@see Value, getMaxValue, getMinValueObject
 	*/
-	Value& getMaxValueObject()						  { return valueMax; }
+	Value& getMaxValueObject() throw()					  { return valueMax; }
 
 	/** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -46661,7 +46657,7 @@ public:
 		This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
 		the maximum-value thumb, or -1 if none is currently down.
 	*/
-	int getThumbBeingDragged() const		{ return sliderBeingDragged; }
+	int getThumbBeingDragged() const throw()		{ return sliderBeingDragged; }
 
 	/** Callback to indicate that the user is about to start dragging the slider.
 

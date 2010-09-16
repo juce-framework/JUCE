@@ -100,15 +100,8 @@ public:
     */
     void moveToAbsolute (double absoluteTargetPosition, const Expression::EvaluationContext* evaluationContext);
 
-    /** Tells the coordinate that an object is changing its name or being deleted.
-
-        If either of this coordinates anchor points match this name, they will be replaced.
-        If the newName string is empty, it indicates that the object is being removed, so if
-        this coordinate was using it, the coordinate is changed to be relative to the origin
-        instead.
-    */
-    void renameSymbolIfUsed (const String& oldName, const String& newName,
-                             const Expression::EvaluationContext* evaluationContext);
+    /** Changes the name of a symbol if it is used as part of the coordinate's expression. */
+    void renameSymbolIfUsed (const String& oldName, const String& newName);
 
     /** Returns the expression that defines this coordinate. */
     const Expression& getExpression() const         { return term; }
@@ -200,11 +193,10 @@ public:
     */
     const String toString() const;
 
-    /** Tells the point that an object is changing its name or being deleted.
+    /** Renames a symbol if it is used by any of the coordinates.
         This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
     */
-    void renameSymbolIfUsed (const String& oldName, const String& newName,
-                             const Expression::EvaluationContext* evaluationContext);
+    void renameSymbolIfUsed (const String& oldName, const String& newName);
 
     /** Returns true if this point depends on any other coordinates for its position. */
     bool isDynamic() const;
@@ -270,11 +262,10 @@ public:
     */
     const String toString() const;
 
-    /** Tells the rectangle that an object is changing its name or being deleted.
+    /** Renames a symbol if it is used by any of the coordinates.
         This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
     */
-    void renameSymbolIfUsed (const String& oldName, const String& newName,
-                             const Expression::EvaluationContext* evaluationContext);
+    void renameSymbolIfUsed (const String& oldName, const String& newName);
 
     // The actual rectangle coords...
     RelativeCoordinate left, right, top, bottom;

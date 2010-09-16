@@ -156,11 +156,12 @@ public:
     /** Returns true if this expression makes use of the specified symbol.
         If a suitable context is supplied, the search will dereference and recursively check
         all symbols, so that it can be determined whether this expression relies on the given
-        symbol at any level in its evaluation.
+        symbol at any level in its evaluation. If the context parameter is null, this just checks
+        whether the expression contains any direct references to the symbol.
 
         @throws Expression::EvaluationError
     */
-    bool referencesSymbol (const String& symbol, const EvaluationContext& context) const;
+    bool referencesSymbol (const String& symbol, const EvaluationContext* context) const;
 
     /** Returns true if this expression contains any symbols. */
     bool usesAnySymbols() const;
@@ -241,7 +242,7 @@ private:
         virtual int getInputIndexFor (const Term* possibleInput) const;
         virtual const String toString() const = 0;
         virtual int getOperatorPrecedence() const;
-        virtual bool referencesSymbol (const String& symbol, const EvaluationContext&, int recursionDepth) const;
+        virtual bool referencesSymbol (const String& symbol, const EvaluationContext*, int recursionDepth) const;
         virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, const Term* inputTerm,
                                                                                  double overallTarget, Term* topLevelTerm) const;
         virtual const ReferenceCountedObjectPtr<Term> negated();

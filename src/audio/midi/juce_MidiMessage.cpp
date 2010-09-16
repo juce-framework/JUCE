@@ -991,15 +991,15 @@ const String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includ
     return String::empty;
 }
 
-const double MidiMessage::getMidiNoteInHertz (int noteNumber) throw()
+const double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) throw()
 {
-    noteNumber -= 12 * 6 + 9; // now 0 = A440
-    return 440.0 * pow (2.0, noteNumber / 12.0);
+    noteNumber -= 12 * 6 + 9; // now 0 = A
+    return frequencyOfA * pow (2.0, noteNumber / 12.0);
 }
 
 const String MidiMessage::getGMInstrumentName (const int n)
 {
-    const char *names[] =
+    const char* names[] =
     {
         "Acoustic Grand Piano", "Bright Acoustic Piano", "Electric Grand Piano", "Honky-tonk Piano",
         "Electric Piano 1", "Electric Piano 2", "Harpsichord", "Clavinet", "Celesta", "Glockenspiel",
