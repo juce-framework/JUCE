@@ -52,11 +52,7 @@ END_JUCE_NAMESPACE
 
 - (void) applicationWillTerminate: (UIApplication*) application
 {
-    jassert (JUCEApplication::getInstance() != 0);
-    JUCEApplication::getInstance()->shutdownApp();
-
-    delete JUCEApplication::getInstance();
-    shutdownJuce_GUI();
+    JUCEApplication::appWillTerminateByForce();
 }
 
 @end

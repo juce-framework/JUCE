@@ -273,6 +273,8 @@ public:
     /** @internal */
     int shutdownApp();
     /** @internal */
+    static void appWillTerminateByForce();
+    /** @internal */
     typedef JUCEApplication* (*CreateInstanceFunction)();
     /** @internal */
     static CreateInstanceFunction createInstance;

@@ -70,19 +70,16 @@ public:
         {
             JUCEApplication::getInstance()->systemRequestedQuit();
 
-            if (MessageManager::getInstance()->hasStopMessageBeenSent())
-            {
-                [NSApp performSelectorOnMainThread: @selector (replyToApplicationShouldTerminate:)
-                                        withObject: [NSNumber numberWithBool: YES]
-                                     waitUntilDone: NO];
-
-                return NSTerminateLater;
-            }
-
-            return NSTerminateCancel;
+            if (! MessageManager::getInstance()->hasStopMessageBeenSent())
+                return NSTerminateCancel;
         }
 
         return NSTerminateNow;
+    }
+
+    virtual void willTerminate()
+    {
+        JUCEApplication::appWillTerminateByForce();
     }
 
     virtual BOOL openFile (const NSString* filename)
@@ -197,6 +194,7 @@ using namespace JUCE_NAMESPACE;
 - (BOOL) application: (NSApplication*) theApplication openFile: (NSString*) filename;
 - (void) application: (NSApplication*) sender openFiles: (NSArray*) filenames;
 - (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app;
+- (void) applicationWillTerminate: (NSNotification*) aNotification;
 - (void) applicationDidBecomeActive: (NSNotification*) aNotification;
 - (void) applicationDidResignActive: (NSNotification*) aNotification;
 - (void) applicationWillUnhide: (NSNotification*) aNotification;
@@ -248,6 +246,12 @@ using namespace JUCE_NAMESPACE;
 {
     (void) app;
     return redirector->shouldTerminate();
+}
+
+- (void) applicationWillTerminate: (NSNotification*) aNotification
+{
+    (void) aNotification;
+    redirector->willTerminate();
 }
 
 - (BOOL) application: (NSApplication*) app openFile: (NSString*) filename

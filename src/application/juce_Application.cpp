@@ -28,9 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Application.h"
-#include "../utilities/juce_DeletedAtShutdown.h"
 #include "../events/juce_MessageManager.h"
-#include "../core/juce_Time.h"
 #include "../core/juce_Initialisation.h"
 #include "../threads/juce_Process.h"
 #include "../core/juce_PlatformUtilities.h"
@@ -199,25 +197,43 @@ int JUCEApplication::shutdownApp()
     return getApplicationReturnValue();
 }
 
+// This is called on the Mac and iOS where the OS doesn't allow the stack to unwind on shutdown..
+void JUCEApplication::appWillTerminateByForce()
+{
+    {
+        const ScopedPointer<JUCEApplication> app (JUCEApplication::getInstance());
+
+        if (app != 0)
+            app->shutdownApp();
+    }
+
+    shutdownJuce_GUI();
+}
+
 //==============================================================================
 int JUCEApplication::main (const String& commandLine)
 {
     ScopedJuceInitialiser_GUI libraryInitialiser;
-
     jassert (createInstance != 0);
-    const ScopedPointer<JUCEApplication> app (createInstance());
+    int returnCode = 0;
 
-    if (! app->initialiseApp (commandLine))
-        return 0;
-
-    JUCE_TRY
     {
-        // loop until a quit message is received..
-        MessageManager::getInstance()->runDispatchLoop();
-    }
-    JUCE_CATCH_EXCEPTION
+        const ScopedPointer<JUCEApplication> app (createInstance());
 
-    return app->shutdownApp();
+        if (! app->initialiseApp (commandLine))
+            return 0;
+
+        JUCE_TRY
+        {
+            // loop until a quit message is received..
+            MessageManager::getInstance()->runDispatchLoop();
+        }
+        JUCE_CATCH_EXCEPTION
+
+        returnCode = app->shutdownApp();
+    }
+
+    return returnCode;
 }
 
 #if JUCE_IOS
