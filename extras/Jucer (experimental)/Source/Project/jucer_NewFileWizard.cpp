@@ -49,15 +49,22 @@ public:
 
     void createNewFile (Project::Item parent)
     {
-        File newFile = askUserToChooseNewFile ("SourceCode.cpp", "*.cpp", parent);
+        const File newFile (askUserToChooseNewFile ("SourceCode.cpp", "*.cpp", parent));
 
         if (newFile != File::nonexistent)
+            create (parent, newFile);
+    }
+
+    static bool create (Project::Item parent, const File& newFile)
+    {
+        if (fillInNewCppFileTemplate (newFile, parent, "jucer_NewCppFileTemplate_cpp"))
         {
-            if (fillInNewCppFileTemplate (newFile, parent, "jucer_NewCppFileTemplate_cpp"))
-                parent.addFile (newFile, 0);
-            else
-                showFailedToWriteMessage (newFile);
+            parent.addFile (newFile, 0);
+            return true;
         }
+
+        showFailedToWriteMessage (newFile);
+        return false;
     }
 };
 
@@ -72,18 +79,45 @@ public:
 
     void createNewFile (Project::Item parent)
     {
-        File newFile = askUserToChooseNewFile ("SourceCode.h", "*.h", parent);
+        const File newFile (askUserToChooseNewFile ("SourceCode.h", "*.h", parent));
 
         if (newFile != File::nonexistent)
+            create (parent, newFile);
+    }
+
+    static bool create (Project::Item parent, const File& newFile)
+    {
+        if (fillInNewCppFileTemplate (newFile, parent, "jucer_NewCppFileTemplate_h"))
         {
-            if (fillInNewCppFileTemplate (newFile, parent, "jucer_NewCppFileTemplate_h"))
-                parent.addFile (newFile, 0);
-            else
-                showFailedToWriteMessage (newFile);
+            parent.addFile (newFile, 0);
+            return true;
         }
+
+        showFailedToWriteMessage (newFile);
+        return false;
     }
 };
 
+//==============================================================================
+class NewCppAndHeaderFileWizard  : public NewFileWizard::Type
+{
+public:
+    NewCppAndHeaderFileWizard() {}
+    ~NewCppAndHeaderFileWizard() {}
+
+    const String getName()  { return "CPP & Header File"; }
+
+    void createNewFile (Project::Item parent)
+    {
+        const File newFile (askUserToChooseNewFile ("SourceCode.h", "*.h;*.cpp", parent));
+
+        if (newFile != File::nonexistent)
+        {
+            if (NewHeaderFileWizard::create (parent, newFile.withFileExtension ("h")))
+                NewCppFileWizard::create (parent, newFile.withFileExtension ("cpp"));
+        }
+    }
+};
 
 //==============================================================================
 void NewFileWizard::Type::showFailedToWriteMessage (const File& file)
@@ -113,6 +147,7 @@ NewFileWizard::NewFileWizard()
 {
     registerWizard (new NewCppFileWizard());
     registerWizard (new NewHeaderFileWizard());
+    registerWizard (new NewCppAndHeaderFileWizard());
 }
 
 NewFileWizard::~NewFileWizard()

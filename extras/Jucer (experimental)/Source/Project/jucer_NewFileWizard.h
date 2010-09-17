@@ -56,7 +56,7 @@ public:
         const File askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
                                            const Project::Item& projectGroupToAddTo);
 
-        void showFailedToWriteMessage (const File& file);
+        static void showFailedToWriteMessage (const File& file);
     };
 
     //==============================================================================

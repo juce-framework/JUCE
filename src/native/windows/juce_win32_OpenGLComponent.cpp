@@ -391,22 +391,14 @@ private:
     //==============================================================================
     void createNativeWindow()
     {
-        nativeWindow = new Win32ComponentPeer (component, 0, 0);
+        Win32ComponentPeer* topLevelPeer = dynamic_cast <Win32ComponentPeer*> (component->getTopLevelComponent()->getPeer());
+
+        nativeWindow = new Win32ComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
+                                               topLevelPeer == 0 ? 0 : (HWND) topLevelPeer->getNativeHandle());
         nativeWindow->dontRepaint = true;
         nativeWindow->setVisible (true);
 
-        HWND hwnd = (HWND) nativeWindow->getNativeHandle();
-
-        Win32ComponentPeer* const peer = dynamic_cast <Win32ComponentPeer*> (component->getTopLevelComponent()->getPeer());
-
-        if (peer != 0)
-        {
-            SetParent (hwnd, (HWND) peer->getNativeHandle());
-            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_CHILD, true);
-            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_POPUP, false);
-        }
-
-        dc = GetDC (hwnd);
+        dc = GetDC ((HWND) nativeWindow->getNativeHandle());
     }
 
     bool fillInPixelFormatDetails (const int pixelFormatIndex,

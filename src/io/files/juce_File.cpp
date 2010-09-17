@@ -551,7 +551,7 @@ int File::findChildFiles (Array<File>& results,
 
 int File::getNumberOfChildFiles (const int whatToLookFor, const String& wildCardPattern) const
 {
-    DirectoryIterator di (*this, false, "*", whatToLookFor);
+    DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor);
 
     int total = 0;
     while (di.next())
@@ -1003,7 +1003,7 @@ public:
 
         expect (tempFile.exists());
         expect (tempFile.getSize() == 10);
-        expect (std::abs ((int64) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
+        expect (std::abs ((int) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
         expect (tempFile.loadFileAsString() == "0123456789");
         expect (! demoFolder.containsSubDirectories());
 
@@ -1024,7 +1024,7 @@ public:
         Time t (Time::getCurrentTime());
         tempFile.setLastModificationTime (t);
         Time t2 = tempFile.getLastModificationTime();
-        expect (std::abs ((int64) (t2.toMilliseconds() - t.toMilliseconds())) <= 1000);
+        expect (std::abs ((int) (t2.toMilliseconds() - t.toMilliseconds())) <= 1000);
 
         {
             MemoryBlock mb;
