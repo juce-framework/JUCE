@@ -339,27 +339,28 @@ public:
                    int startIndex = 0,
                    int numElementsToAdd = -1) throw()
     {
-        arrayToAddFrom.lockArray();
-        const ScopedLockType lock (getLock());
+        const ScopedLockType lock1 (arrayToAddFrom.getLock());
 
-        if (startIndex < 0)
         {
-            jassertfalse;
-            startIndex = 0;
+            const ScopedLockType lock2 (getLock());
+
+            if (startIndex < 0)
+            {
+                jassertfalse;
+                startIndex = 0;
+            }
+
+            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+                numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+            if (numElementsToAdd > 0)
+            {
+                data.ensureAllocatedSize (numUsed + numElementsToAdd);
+
+                while (--numElementsToAdd >= 0)
+                    add (arrayToAddFrom.getUnchecked (startIndex++));
+            }
         }
-
-        if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
-            numElementsToAdd = arrayToAddFrom.size() - startIndex;
-
-        if (numElementsToAdd > 0)
-        {
-            data.ensureAllocatedSize (numUsed + numElementsToAdd);
-
-            while (--numElementsToAdd >= 0)
-                add (arrayToAddFrom.getUnchecked (startIndex++));
-        }
-
-        arrayToAddFrom.unlockArray();
     }
 
     /** Inserts a new object into the array assuming that the array is sorted.

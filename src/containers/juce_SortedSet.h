@@ -376,21 +376,24 @@ public:
                  int numElementsToAdd = -1) throw()
     {
         const typename OtherSetType::ScopedLockType lock1 (setToAddFrom.getLock());
-        const ScopedLockType lock2 (getLock());
-        jassert (this != &setToAddFrom);
 
-        if (this != &setToAddFrom)
         {
-            if (startIndex < 0)
+            const ScopedLockType lock2 (getLock());
+            jassert (this != &setToAddFrom);
+
+            if (this != &setToAddFrom)
             {
-                jassertfalse;
-                startIndex = 0;
+                if (startIndex < 0)
+                {
+                    jassertfalse;
+                    startIndex = 0;
+                }
+
+                if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
+                    numElementsToAdd = setToAddFrom.size() - startIndex;
+
+                addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
             }
-
-            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
-                numElementsToAdd = setToAddFrom.size() - startIndex;
-
-            addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
         }
     }
 

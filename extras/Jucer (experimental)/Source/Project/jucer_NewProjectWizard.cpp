@@ -85,10 +85,9 @@ public:
         if (createWindow)
         {
             appHeaders << newLine << CodeHelpers::createIncludeStatement (mainWindowH, mainCppFile);
-            memberInitialisers = "   : mainWindow (0)";
             initCode = "mainWindow = new " + windowClassName + "();";
-            shutdownCode = "deleteAndZero (mainWindow);";
-            privateMembers = windowClassName + "* mainWindow;";
+            shutdownCode = "mainWindow = 0;";
+            privateMembers = "ScopedPointer <" + windowClassName + "> mainWindow;";
 
             String windowH = project.getFileTemplate ("jucer_WindowTemplate_h")
                                 .replace ("INCLUDES", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)

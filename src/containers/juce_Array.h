@@ -570,19 +570,22 @@ public:
                    int numElementsToAdd = -1)
     {
         const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
-        const ScopedLockType lock2 (getLock());
 
-        if (startIndex < 0)
         {
-            jassertfalse;
-            startIndex = 0;
+            const ScopedLockType lock2 (getLock());
+
+            if (startIndex < 0)
+            {
+                jassertfalse;
+                startIndex = 0;
+            }
+
+            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+                numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+            while (--numElementsToAdd >= 0)
+                add (arrayToAddFrom.getUnchecked (startIndex++));
         }
-
-        if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
-            numElementsToAdd = arrayToAddFrom.size() - startIndex;
-
-        while (--numElementsToAdd >= 0)
-            add (arrayToAddFrom.getUnchecked (startIndex++));
     }
 
     /** Inserts a new element into the array, assuming that the array is sorted.

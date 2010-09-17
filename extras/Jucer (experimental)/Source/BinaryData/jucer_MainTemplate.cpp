@@ -18,14 +18,10 @@ public:
     //==============================================================================
     APPCLASSNAME()MEMBERINITIALISERS
     {
-        // Don't do anything in this constructor! It will be called before the
-        // main Juce subsystem has been initialised!
     }
 
     ~APPCLASSNAME()
     {
-        // Don't do anything in this destructor! It will be called after the
-        // main Juce subsystem has been shutdown and is no longer valid!
     }
 
     //==============================================================================

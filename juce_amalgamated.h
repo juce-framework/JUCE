@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	66
+#define JUCE_BUILDNUMBER	67
 
 /** Current Juce version number.
 
@@ -1855,8 +1855,9 @@ public:
 
 		Uses a case-sensitive comparison.
 
-		@returns	true if the all the characters in the string are also found in the
-					string that is passed in.
+		@returns	Returns false if any of the characters in this string do not occur in
+					the parameter string. If this string is empty, the return value will
+					always be true.
 	*/
 	bool containsOnly (const String& charactersItMightContain) const throw();
 
@@ -3996,19 +3997,22 @@ public:
 				   int numElementsToAdd = -1)
 	{
 		const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
-		const ScopedLockType lock2 (getLock());
 
-		if (startIndex < 0)
 		{
-			jassertfalse;
-			startIndex = 0;
+			const ScopedLockType lock2 (getLock());
+
+			if (startIndex < 0)
+			{
+				jassertfalse;
+				startIndex = 0;
+			}
+
+			if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+				numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+			while (--numElementsToAdd >= 0)
+				add (arrayToAddFrom.getUnchecked (startIndex++));
 		}
-
-		if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
-			numElementsToAdd = arrayToAddFrom.size() - startIndex;
-
-		while (--numElementsToAdd >= 0)
-			add (arrayToAddFrom.getUnchecked (startIndex++));
 	}
 
 	/** Inserts a new element into the array, assuming that the array is sorted.
@@ -10847,27 +10851,28 @@ public:
 				   int startIndex = 0,
 				   int numElementsToAdd = -1) throw()
 	{
-		arrayToAddFrom.lockArray();
-		const ScopedLockType lock (getLock());
+		const ScopedLockType lock1 (arrayToAddFrom.getLock());
 
-		if (startIndex < 0)
 		{
-			jassertfalse;
-			startIndex = 0;
+			const ScopedLockType lock2 (getLock());
+
+			if (startIndex < 0)
+			{
+				jassertfalse;
+				startIndex = 0;
+			}
+
+			if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+				numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+			if (numElementsToAdd > 0)
+			{
+				data.ensureAllocatedSize (numUsed + numElementsToAdd);
+
+				while (--numElementsToAdd >= 0)
+					add (arrayToAddFrom.getUnchecked (startIndex++));
+			}
 		}
-
-		if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
-			numElementsToAdd = arrayToAddFrom.size() - startIndex;
-
-		if (numElementsToAdd > 0)
-		{
-			data.ensureAllocatedSize (numUsed + numElementsToAdd);
-
-			while (--numElementsToAdd >= 0)
-				add (arrayToAddFrom.getUnchecked (startIndex++));
-		}
-
-		arrayToAddFrom.unlockArray();
 	}
 
 	/** Inserts a new object into the array assuming that the array is sorted.
@@ -11553,21 +11558,24 @@ public:
 				 int numElementsToAdd = -1) throw()
 	{
 		const typename OtherSetType::ScopedLockType lock1 (setToAddFrom.getLock());
-		const ScopedLockType lock2 (getLock());
-		jassert (this != &setToAddFrom);
 
-		if (this != &setToAddFrom)
 		{
-			if (startIndex < 0)
+			const ScopedLockType lock2 (getLock());
+			jassert (this != &setToAddFrom);
+
+			if (this != &setToAddFrom)
 			{
-				jassertfalse;
-				startIndex = 0;
+				if (startIndex < 0)
+				{
+					jassertfalse;
+					startIndex = 0;
+				}
+
+				if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
+					numElementsToAdd = setToAddFrom.size() - startIndex;
+
+				addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
 			}
-
-			if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
-				numElementsToAdd = setToAddFrom.size() - startIndex;
-
-			addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
 		}
 	}
 

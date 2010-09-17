@@ -291,8 +291,9 @@ public:
 
         Uses a case-sensitive comparison.
 
-        @returns    true if the all the characters in the string are also found in the
-                    string that is passed in.
+        @returns    Returns false if any of the characters in this string do not occur in
+                    the parameter string. If this string is empty, the return value will
+                    always be true.
     */
     bool containsOnly (const String& charactersItMightContain) const throw();
 
