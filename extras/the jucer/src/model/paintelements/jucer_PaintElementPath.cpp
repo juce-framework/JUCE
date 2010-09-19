@@ -484,7 +484,7 @@ bool PaintElementPath::loadFromXml (const XmlElement& xml)
         loadColourAttributes (xml);
         nonZeroWinding = xml.getBoolAttribute (T("nonZeroWinding"), true);
 
-        restorePathFromString (xml.getAllSubText());
+        restorePathFromString (xml.getAllSubText().trim());
 
         return true;
     }

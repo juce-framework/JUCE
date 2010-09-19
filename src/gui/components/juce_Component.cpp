@@ -2034,6 +2034,10 @@ void Component::addMouseListener (MouseListener* const newListener,
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     checkMessageManagerIsLocked
 
+    // If you register a component as a mouselistener for itself, it'll receive all the events
+    // twice - once via the direct callback that all components get anyway, and then again as a listener!
+    jassert ((newListener != this) || wantsEventsForAllNestedChildComponents);
+
     if (mouseListeners_ == 0)
         mouseListeners_ = new Array<MouseListener*>();
 

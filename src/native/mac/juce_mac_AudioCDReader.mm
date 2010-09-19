@@ -33,7 +33,7 @@ namespace CDReaderHelpers
     inline const XmlElement* getElementForKey (const XmlElement& xml, const String& key)
     {
         forEachXmlChildElementWithTagName (xml, child, "key")
-            if (child->getAllSubText() == key)
+            if (child->getAllSubText().trim() == key)
                 return child->getNextElement();
 
         return 0;
@@ -42,7 +42,7 @@ namespace CDReaderHelpers
     static int getIntValueForKey (const XmlElement& xml, const String& key, int defaultValue = -1)
     {
         const XmlElement* const block = getElementForKey (xml, key);
-        return block != 0 ? block->getAllSubText().getIntValue() : defaultValue;
+        return block != 0 ? block->getAllSubText().trim().getIntValue() : defaultValue;
     }
 
     // Get the track offsets for a CD given an XmlElement representing its TOC.Plist.

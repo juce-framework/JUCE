@@ -10030,6 +10030,9 @@ public:
 		"hello" string, you could either call getText on the (unnamed) sub-element, or
 		use getAllSubText() to do this automatically.
 
+		Note that leading and trailing whitespace will be included in the string - to remove
+		if, just call String::trim() on the result.
+
 		@see isTextElement, getAllSubText, getChildElementAllSubText
 	*/
 	const String& getText() const throw();
@@ -10046,8 +10049,11 @@ public:
 		This iterates all the child elements and when it finds text elements,
 		it concatenates their text into a big string which it returns.
 
-		E.g. @code<xyz> hello <x></x> there </xyz>@endcode
-		if you called getAllSubText on the "xyz" element, it'd return "hello there".
+		E.g. @code<xyz>hello <x>there</x> world</xyz>@endcode
+		if you called getAllSubText on the "xyz" element, it'd return "hello there world".
+
+		Note that leading and trailing whitespace will be included in the string - to remove
+		if, just call String::trim() on the result.
 
 		@see isTextElement, getChildElementAllSubText, getText, addTextElement
 	*/

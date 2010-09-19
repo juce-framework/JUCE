@@ -204,10 +204,9 @@ namespace XmlOutputFunctions
             const juce_wchar character = *t++;
 
             if (character == 0)
-            {
                 break;
-            }
-            else if (isLegalXmlChar ((uint32) character))
+
+            if (isLegalXmlChar ((uint32) character))
             {
                 outputStream << (char) character;
             }
@@ -248,8 +247,8 @@ namespace XmlOutputFunctions
     {
         if (numSpaces > 0)
         {
-            const char* const blanks = "                        ";
-            const int blankSize = (int) sizeof (blanks) - 1;
+            const char blanks[] = "                        ";
+            const int blankSize = (int) numElementsInArray (blanks) - 1;
 
             while (numSpaces > blankSize)
             {
@@ -259,6 +258,11 @@ namespace XmlOutputFunctions
 
             out.write (blanks, numSpaces);
         }
+    }
+
+    static void writeNewLine (OutputStream& out)
+    {
+        out.write ("\r\n", 2);
     }
 }
 
@@ -274,108 +278,76 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
         outputStream.writeByte ('<');
         outputStream << tagName;
 
-        const int attIndent = indentationLevel + tagName.length() + 1;
-        int lineLen = 0;
-
-        const XmlAttributeNode* att = attributes;
-        while (att != 0)
         {
-            if (lineLen > lineWrapLength && indentationLevel >= 0)
+            const int attIndent = indentationLevel + tagName.length() + 1;
+            int lineLen = 0;
+
+            const XmlAttributeNode* att = attributes;
+            while (att != 0)
             {
-                outputStream.write ("\r\n", 2);
-                writeSpaces (outputStream, attIndent);
-                lineLen = 0;
+                if (lineLen > lineWrapLength && indentationLevel >= 0)
+                {
+                    writeNewLine (outputStream);
+                    writeSpaces (outputStream, attIndent);
+                    lineLen = 0;
+                }
+
+                const int64 startPos = outputStream.getPosition();
+                outputStream.writeByte (' ');
+                outputStream << att->name;
+                outputStream.write ("=\"", 2);
+                escapeIllegalXmlChars (outputStream, att->value, true);
+                outputStream.writeByte ('"');
+                lineLen += (int) (outputStream.getPosition() - startPos);
+
+                att = att->next;
             }
-
-            const int64 startPos = outputStream.getPosition();
-            outputStream.writeByte (' ');
-            outputStream << att->name;
-            outputStream.write ("=\"", 2);
-            escapeIllegalXmlChars (outputStream, att->value, true);
-            outputStream.writeByte ('"');
-            lineLen += (int) (outputStream.getPosition() - startPos);
-
-            att = att->next;
         }
 
         if (firstChildElement != 0)
         {
+            outputStream.writeByte ('>');
+
             XmlElement* child = firstChildElement;
+            bool lastWasTextNode = false;
 
-            if (child->nextElement == 0 && child->isTextElement())
+            while (child != 0)
             {
-                outputStream.writeByte ('>');
-                escapeIllegalXmlChars (outputStream, child->getText(), false);
-            }
-            else
-            {
-                if (indentationLevel >= 0)
-                    outputStream.write (">\r\n", 3);
+                if (child->isTextElement())
+                {
+                    escapeIllegalXmlChars (outputStream, child->getText(), false);
+                    lastWasTextNode = true;
+                }
                 else
-                    outputStream.writeByte ('>');
-
-                bool lastWasTextNode = false;
-
-                while (child != 0)
                 {
-                    if (child->isTextElement())
-                    {
-                        if ((! lastWasTextNode) && (indentationLevel >= 0))
-                            writeSpaces (outputStream, indentationLevel + 2);
+                    if (indentationLevel >= 0 && ! lastWasTextNode)
+                        writeNewLine (outputStream);
 
-                        escapeIllegalXmlChars (outputStream, child->getText(), false);
-                        lastWasTextNode = true;
-                    }
-                    else
-                    {
-                        if (indentationLevel >= 0)
-                        {
-                            if (lastWasTextNode)
-                                outputStream.write ("\r\n", 2);
-
-                            child->writeElementAsText (outputStream, indentationLevel + 2, lineWrapLength);
-                        }
-                        else
-                        {
-                            child->writeElementAsText (outputStream, indentationLevel, lineWrapLength);
-                        }
-
-                        lastWasTextNode = false;
-                    }
-
-                    child = child->nextElement;
+                    child->writeElementAsText (outputStream,
+                                               lastWasTextNode ? 0 : (indentationLevel + (indentationLevel >= 0 ? 2 : 0)), lineWrapLength);
+                    lastWasTextNode = false;
                 }
 
-                if (indentationLevel >= 0)
-                {
-                    if (lastWasTextNode)
-                        outputStream.write ("\r\n", 2);
+                child = child->nextElement;
+            }
 
-                    writeSpaces (outputStream, indentationLevel);
-                }
+            if (indentationLevel >= 0 && ! lastWasTextNode)
+            {
+                writeNewLine (outputStream);
+                writeSpaces (outputStream, indentationLevel);
             }
 
             outputStream.write ("</", 2);
             outputStream << tagName;
-
-            if (indentationLevel >= 0)
-                outputStream.write (">\r\n", 3);
-            else
-                outputStream.writeByte ('>');
+            outputStream.writeByte ('>');
         }
         else
         {
-            if (indentationLevel >= 0)
-                outputStream.write ("/>\r\n", 4);
-            else
-                outputStream.write ("/>", 2);
+            outputStream.write ("/>", 2);
         }
     }
     else
     {
-        if (indentationLevel >= 0)
-            writeSpaces (outputStream, indentationLevel + 2);
-
         escapeIllegalXmlChars (outputStream, getText(), false);
     }
 }
@@ -399,14 +371,37 @@ void XmlElement::writeToStream (OutputStream& output,
                                 const String& encodingType,
                                 const int lineWrapLength) const
 {
+    using namespace XmlOutputFunctions;
+
     if (includeXmlHeader)
-        output << "<?xml version=\"1.0\" encoding=\"" << encodingType
-               << (allOnOneLine ? "\"?> " : "\"?>\r\n\r\n");
+    {
+        output << "<?xml version=\"1.0\" encoding=\"" << encodingType << "\"?>";
+
+        if (allOnOneLine)
+        {
+            output.writeByte (' ');
+        }
+        else
+        {
+            writeNewLine (output);
+            writeNewLine (output);
+        }
+    }
 
     if (dtdToUse.isNotEmpty())
-        output << dtdToUse << (allOnOneLine ? " " : "\r\n");
+    {
+        output << dtdToUse;
+
+        if (allOnOneLine)
+            output.writeByte (' ');
+        else
+            writeNewLine (output);
+    }
 
     writeElementAsText (output, allOnOneLine ? -1 : 0, lineWrapLength);
+
+    if (! allOnOneLine)
+        writeNewLine (output);
 }
 
 bool XmlElement::writeToFile (const File& file,
@@ -909,9 +904,7 @@ bool XmlElement::isEquivalentTo (const XmlElement* const other,
     if (this != other)
     {
         if (other == 0 || tagName != other->tagName)
-        {
             return false;
-        }
 
         if (ignoreOrderOfAttributes)
         {
@@ -1098,15 +1091,16 @@ void XmlElement::setText (const String& newText)
 
 const String XmlElement::getAllSubText() const
 {
+    if (isTextElement())
+        return getText();
+
     String result;
     String::Concatenator concatenator (result);
     const XmlElement* child = firstChildElement;
 
     while (child != 0)
     {
-        if (child->isTextElement())
-            concatenator.append (child->getText());
-
+        concatenator.append (child->getAllSubText());
         child = child->nextElement;
     }
 

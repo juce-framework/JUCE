@@ -363,7 +363,6 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
             if (c == '>')
             {
                 ++input;
-                skipNextWhiteSpace();
 
                 if (alsoParseSubElements)
                     readChildElements (node);
@@ -428,6 +427,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
 
     for (;;)
     {
+        const juce_wchar* const preWhitespaceInput = input;
         skipNextWhiteSpace();
 
         if (outOfData)
@@ -508,18 +508,9 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 }
             }
         }
-        else
+        else  // must be a character block
         {
-            // read character block..
-            XmlElement* const e = new XmlElement ((int)0);
-
-            if (lastChildNode != 0)
-                lastChildNode->nextElement = e;
-            else
-                parent->addChildElement (e);
-
-            lastChildNode = e;
-
+            input = preWhitespaceInput; // roll back to include the leading whitespace
             String textElementContent;
 
             for (;;)
@@ -600,9 +591,17 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 }
             }
 
-            if (ignoreEmptyTextElements ? textElementContent.containsNonWhitespaceChars()
-                                        : textElementContent.isNotEmpty())
-                e->setText (textElementContent);
+            if ((! ignoreEmptyTextElements) || textElementContent.containsNonWhitespaceChars())
+            {
+                XmlElement* const textElement = XmlElement::createTextElement (textElementContent);
+
+                if (lastChildNode != 0)
+                    lastChildNode->nextElement = textElement;
+                else
+                    parent->addChildElement (textElement);
+
+                lastChildNode = textElement;
+            }
         }
     }
 }
