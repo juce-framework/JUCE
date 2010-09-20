@@ -531,5 +531,113 @@ void AudioDataConverters::deinterleaveSamples (const float* const source,
     }
 }
 
+#if JUCE_UNIT_TESTS
+
+#include "../../utilities/juce_UnitTest.h"
+#include "../../core/juce_Random.h"
+
+/*class AudioConversionTests  : public UnitTest
+{
+public:
+    AudioConversionTests() : UnitTest ("Audio data conversion") {}
+
+    template <class SourceType, class DestType>
+    struct Test5
+    {
+        static void test (UnitTest& unitTest)
+        {
+            const int numSamples = 2048;
+            int32 original [numSamples], converted [numSamples], reversed [numSamples];
+
+            {
+                SourceType d (original);
+
+                for (int i = 0; i < numSamples / 2; ++i)
+                {
+                    d.setAsFloat (Random::getSystemRandom().nextFloat() * 2.0f - 1.0f);
+                    d.advance();
+                    d.setAsInt32 (Random::getSystemRandom().nextInt());
+                    d.advance();
+                }
+            }
+
+            // convert data from the source to dest format..
+            ScopedPointer<AudioData::Converter> conv (new AudioData::ConverterInstance <SourceType, DestType>());
+            conv->copySamples (converted, original, numSamples);
+
+            // ..and back again..
+            conv = new AudioData::ConverterInstance <DestType, SourceType>();
+            zerostruct (reversed);
+            conv->copySamples (reversed, converted, numSamples);
+
+            {
+                int biggestDiff = 0;
+                SourceType d1 (original);
+                SourceType d2 (reversed);
+
+                const int errorMargin = 2 * DestType::get32BitResolution() + SourceType::get32BitResolution();
+
+                for (int i = 0; i < numSamples; ++i)
+                {
+                    biggestDiff = jmax (biggestDiff, std::abs (d1.getAsInt32() - d2.getAsInt32()));
+                    d1.advance();
+                    d2.advance();
+                }
+
+                unitTest.expect (biggestDiff <= errorMargin);
+            }
+        }
+    };
+
+    template <class SourceType, class FormatType>
+    struct Test3
+    {
+        static void test (UnitTest& unitTest)
+        {
+            Test5 <SourceType, AudioData::Pointer <FormatType, AudioData::BigEndian, AudioData::NonInterleaved> >::test (unitTest);
+            Test5 <SourceType, AudioData::Pointer <FormatType, AudioData::LittleEndian, AudioData::NonInterleaved> >::test (unitTest);
+        }
+    };
+
+    template <class SourceType>
+    struct Test2
+    {
+        static void test (UnitTest& unitTest)
+        {
+            Test3 <SourceType, AudioData::Int16>::test (unitTest);
+            Test3 <SourceType, AudioData::Int24>::test (unitTest);
+            Test3 <SourceType, AudioData::Int32>::test (unitTest);
+            Test3 <SourceType, AudioData::Float32>::test (unitTest);
+            Test3 <SourceType, AudioData::Int8>::test (unitTest);
+        }
+    };
+
+    template <class FormatType>
+    struct Test1
+    {
+        static void test (UnitTest& unitTest)
+        {
+            Test2 <AudioData::Pointer <FormatType, AudioData::BigEndian, AudioData::NonInterleaved> >::test (unitTest);
+            Test2 <AudioData::Pointer <FormatType, AudioData::LittleEndian, AudioData::NonInterleaved> >::test (unitTest);
+        }
+    };
+
+    void runTest()
+    {
+        beginTest ("Round-trip conversion");
+
+        Test1 <AudioData::Int8>::test (*this);
+        Test1 <AudioData::Int16>::test (*this);
+        Test1 <AudioData::Int24>::test (*this);
+        Test1 <AudioData::Int32>::test (*this);
+        Test1 <AudioData::Float32>::test (*this);
+    }
+};
+
+static AudioConversionTests audioConversionUnitTests;
+*/
+
+#endif
+
 
 END_JUCE_NAMESPACE

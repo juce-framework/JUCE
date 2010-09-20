@@ -220,15 +220,25 @@ bool File::setAsCurrentWorkingDirectory() const
 }
 
 //==============================================================================
-static bool juce_stat (const String& fileName, struct stat& info)
+#if JUCE_IOS
+ typedef struct stat64  juce_statStruct; // (need to use the 64-bit version to work around a simulator bug)
+#else
+ typedef struct stat    juce_statStruct;
+#endif
+
+static bool juce_stat (const String& fileName, juce_statStruct& info)
 {
     return fileName.isNotEmpty()
+#if JUCE_IOS
+            && (stat64 (fileName.toUTF8(), &info) == 0);
+#else
             && (stat (fileName.toUTF8(), &info) == 0);
+#endif
 }
 
 bool File::isDirectory() const
 {
-    struct stat info;
+    juce_statStruct info;
 
     return fullPath.isEmpty()
             || (juce_stat (fullPath, info) && ((info.st_mode & S_IFDIR) != 0));
@@ -247,7 +257,7 @@ bool File::existsAsFile() const
 
 int64 File::getSize() const
 {
-    struct stat info;
+    juce_statStruct info;
     return juce_stat (fullPath, info) ? info.st_size : 0;
 }
 
@@ -265,9 +275,8 @@ bool File::hasWriteAccess() const
 
 bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
 {
-    struct stat info;
-    const int res = stat (fullPath.toUTF8(), &info);
-    if (res != 0)
+    juce_statStruct info;
+    if (! juce_stat (fullPath, info))
         return false;
 
     info.st_mode &= 0777;   // Just permissions
@@ -287,9 +296,8 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     accessTime = 0;
     creationTime = 0;
 
-    struct stat info;
-    const int res = stat (fullPath.toUTF8(), &info);
-    if (res == 0)
+    juce_statStruct info;
+    if (juce_stat (fullPath, info))
     {
         modificationTime = (int64) info.st_mtime * 1000;
         accessTime = (int64) info.st_atime * 1000;

@@ -309,7 +309,7 @@ public:
 
             if (isDir != 0 || fileSize != 0 || modTime != 0 || creationTime != 0)
             {
-                struct stat info;
+                juce_statStruct info;
                 const bool statOk = juce_stat (path, info);
 
                 if (isDir != 0)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);

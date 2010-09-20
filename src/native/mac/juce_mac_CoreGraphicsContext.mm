@@ -779,7 +779,9 @@ const Image juce_loadWithCoreImage (InputStream& input)
 
 #if JUCE_IOS
     JUCE_AUTORELEASEPOOL
-    UIImage* image = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData() length: data.getSize()]];
+    UIImage* image = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData()
+                                                                  length: data.getSize()
+                                                            freeWhenDone: NO]];
 
     if (image != nil)
     {
