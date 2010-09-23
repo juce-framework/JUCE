@@ -42,6 +42,7 @@ public:
     CarbonViewWrapperComponent()
         : ComponentMovementWatcher (this),
           wrapperWindow (0),
+          carbonWindow (0),
           embeddedView (0),
           recursiveResize (false)
     {
@@ -88,7 +89,7 @@ public:
             if (wrapperWindow == 0)
                 return;
 
-            NSWindow* carbonWindow = [[NSWindow alloc] initWithWindowRef: wrapperWindow];
+            carbonWindow = [[NSWindow alloc] initWithWindowRef: wrapperWindow];
             NSWindow* ownerWindow = [((NSView*) getWindowHandle()) window];
 
             [ownerWindow addChildWindow: carbonWindow
@@ -235,8 +236,7 @@ public:
             recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
     }
 
-    OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/,
-                                 EventRef event)
+    OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/, EventRef event)
     {
         switch (GetEventKind (event))
         {
@@ -247,6 +247,7 @@ public:
             case kEventWindowGetClickActivation:
             {
                 getTopLevelComponent()->toFront (false);
+                [carbonWindow makeKeyAndOrderFront: nil];
 
                 ClickActivationResult howToHandleClick = kActivateAndHandleClick;
 
@@ -261,14 +262,14 @@ public:
         return eventNotHandledErr;
     }
 
-    static pascal OSStatus carbonEventCallback (EventHandlerCallRef nextHandlerRef,
-                                                EventRef event, void* userData)
+    static pascal OSStatus carbonEventCallback (EventHandlerCallRef nextHandlerRef, EventRef event, void* userData)
     {
         return ((CarbonViewWrapperComponent*) userData)->carbonEventHandler (nextHandlerRef, event);
     }
 
 protected:
     WindowRef wrapperWindow;
+    NSWindow* carbonWindow;
     HIViewRef embeddedView;
     bool recursiveResize;
     Time creationTime;

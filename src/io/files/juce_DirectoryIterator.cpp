@@ -41,7 +41,8 @@ DirectoryIterator::DirectoryIterator (const File& directory,
     index (-1),
     totalNumFiles (-1),
     whatToLookFor (whatToLookFor_),
-    isRecursive (isRecursive_)
+    isRecursive (isRecursive_),
+    hasBeenAdvanced (false)
 {
     // you have to specify the type of files you're looking for!
     jassert ((whatToLookFor_ & (File::findFiles | File::findDirectories)) != 0);
@@ -60,6 +61,8 @@ bool DirectoryIterator::next()
 bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResult, int64* const fileSize,
                               Time* const modTime, Time* const creationTime, bool* const isReadOnly)
 {
+    hasBeenAdvanced = true;
+
     if (subIterator != 0)
     {
         if (subIterator->next (isDirResult, isHiddenResult, fileSize, modTime, creationTime, isReadOnly))
@@ -118,8 +121,11 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
 
 const File DirectoryIterator::getFile() const
 {
-    if (subIterator != 0)
+    if (subIterator != 0 && subIterator->hasBeenAdvanced)
         return subIterator->getFile();
+
+    // You need to call DirectoryIterator::next() before asking it for the file that it found!
+    jassert (hasBeenAdvanced);
 
     return currentFile;
 }

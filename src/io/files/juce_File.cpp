@@ -962,13 +962,18 @@ public:
             File::findFileSystemRoots (roots);
             expect (roots.size() > 0);
 
+            int numRootsExisting = 0;
             for (int i = 0; i < roots.size(); ++i)
-                expect (roots[i].exists());
+                if (roots[i].exists())
+                    ++numRootsExisting;
+
+            // (on windows, some of the drives may not contain media, so as long as at least one is ok..)
+            expect (numRootsExisting > 0);
         }
 
         beginTest ("Writing");
 
-        File demoFolder (temp.getChildFile ("Juce UnitTests Temp Folder"));
+        File demoFolder (temp.getChildFile ("Juce UnitTests Temp Folder.folder"));
         expect (demoFolder.deleteRecursively());
         expect (demoFolder.createDirectory());
         expect (demoFolder.isDirectory());
@@ -983,7 +988,7 @@ public:
 
         {
             Array<File> files;
-            temp.findChildFiles (files, File::findDirectories, false, "*");
+            temp.findChildFiles (files, File::findDirectories, true, "*.folder");
             expect (files.contains (demoFolder));
         }
 

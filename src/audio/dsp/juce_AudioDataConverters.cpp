@@ -531,17 +531,18 @@ void AudioDataConverters::deinterleaveSamples (const float* const source,
     }
 }
 
+/*
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"
 #include "../../core/juce_Random.h"
 
-/*class AudioConversionTests  : public UnitTest
+class AudioConversionTests  : public UnitTest
 {
 public:
     AudioConversionTests() : UnitTest ("Audio data conversion") {}
 
-    template <class SourceType, class DestType>
+    template <class F1, class E1, class F2, class E2>
     struct Test5
     {
         static void test (UnitTest& unitTest)
@@ -550,38 +551,48 @@ public:
             int32 original [numSamples], converted [numSamples], reversed [numSamples];
 
             {
-                SourceType d (original);
+                AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> d (original);
+                bool clippingFailed = false;
 
                 for (int i = 0; i < numSamples / 2; ++i)
                 {
-                    d.setAsFloat (Random::getSystemRandom().nextFloat() * 2.0f - 1.0f);
-                    d.advance();
+                    d.setAsFloat (Random::getSystemRandom().nextFloat() * 2.2f - 1.1f);
+
+                    if (! d.isFloatingPoint())
+                        clippingFailed = d.getAsFloat() > 1.0f || d.getAsFloat() < -1.0f || clippingFailed;
+
+                    ++d;
                     d.setAsInt32 (Random::getSystemRandom().nextInt());
-                    d.advance();
+                    ++d;
                 }
+
+                unitTest.expect (! clippingFailed);
             }
 
             // convert data from the source to dest format..
-            ScopedPointer<AudioData::Converter> conv (new AudioData::ConverterInstance <SourceType, DestType>());
-            conv->copySamples (converted, original, numSamples);
+            ScopedPointer<AudioData::Converter> conv (new AudioData::ConverterInstance <AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const>,
+                                                                                        AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::NonConst> >());
+            conv->convertSamples (converted, original, numSamples);
 
             // ..and back again..
-            conv = new AudioData::ConverterInstance <DestType, SourceType>();
+            conv = new AudioData::ConverterInstance <AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::Const>,
+                                                     AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> >();
             zerostruct (reversed);
-            conv->copySamples (reversed, converted, numSamples);
+            conv->convertSamples (reversed, converted, numSamples);
 
             {
                 int biggestDiff = 0;
-                SourceType d1 (original);
-                SourceType d2 (reversed);
+                AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const> d1 (original);
+                AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const> d2 (reversed);
 
-                const int errorMargin = 2 * DestType::get32BitResolution() + SourceType::get32BitResolution();
+                const int errorMargin = 2 * AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const>::get32BitResolution()
+                                            + AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::Const>::get32BitResolution();
 
                 for (int i = 0; i < numSamples; ++i)
                 {
                     biggestDiff = jmax (biggestDiff, std::abs (d1.getAsInt32() - d2.getAsInt32()));
-                    d1.advance();
-                    d2.advance();
+                    ++d1;
+                    ++d2;
                 }
 
                 unitTest.expect (biggestDiff <= errorMargin);
@@ -589,26 +600,26 @@ public:
         }
     };
 
-    template <class SourceType, class FormatType>
+    template <class F1, class E1, class FormatType>
     struct Test3
     {
         static void test (UnitTest& unitTest)
         {
-            Test5 <SourceType, AudioData::Pointer <FormatType, AudioData::BigEndian, AudioData::NonInterleaved> >::test (unitTest);
-            Test5 <SourceType, AudioData::Pointer <FormatType, AudioData::LittleEndian, AudioData::NonInterleaved> >::test (unitTest);
+            Test5 <F1, E1, FormatType, AudioData::BigEndian>::test (unitTest);
+            Test5 <F1, E1, FormatType, AudioData::LittleEndian>::test (unitTest);
         }
     };
 
-    template <class SourceType>
+    template <class FormatType, class Endianness>
     struct Test2
     {
         static void test (UnitTest& unitTest)
         {
-            Test3 <SourceType, AudioData::Int16>::test (unitTest);
-            Test3 <SourceType, AudioData::Int24>::test (unitTest);
-            Test3 <SourceType, AudioData::Int32>::test (unitTest);
-            Test3 <SourceType, AudioData::Float32>::test (unitTest);
-            Test3 <SourceType, AudioData::Int8>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::Int16>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::Int24>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::Int32>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::Float32>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::Int8>::test (unitTest);
         }
     };
 
@@ -617,8 +628,8 @@ public:
     {
         static void test (UnitTest& unitTest)
         {
-            Test2 <AudioData::Pointer <FormatType, AudioData::BigEndian, AudioData::NonInterleaved> >::test (unitTest);
-            Test2 <AudioData::Pointer <FormatType, AudioData::LittleEndian, AudioData::NonInterleaved> >::test (unitTest);
+            Test2 <FormatType, AudioData::BigEndian>::test (unitTest);
+            Test2 <FormatType, AudioData::LittleEndian>::test (unitTest);
         }
     };
 
@@ -635,9 +646,8 @@ public:
 };
 
 static AudioConversionTests audioConversionUnitTests;
-*/
 
 #endif
-
+*/
 
 END_JUCE_NAMESPACE

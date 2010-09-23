@@ -146,6 +146,7 @@ private:
     mutable int totalNumFiles;
     const int whatToLookFor;
     const bool isRecursive;
+    bool hasBeenAdvanced;
     ScopedPointer <DirectoryIterator> subIterator;
     File currentFile;
 

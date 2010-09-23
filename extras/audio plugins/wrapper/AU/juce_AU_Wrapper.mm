@@ -41,6 +41,10 @@
  #define BUILD_AU_CARBON_UI 1
 #endif
 
+#if JUCE_64BIT
+ #undef BUILD_AU_CARBON_UI  // (not possible in a 64-bit build)
+#endif
+
 #if BUILD_AU_CARBON_UI
  #undef Button
  #include "AUCarbonViewBase.h"

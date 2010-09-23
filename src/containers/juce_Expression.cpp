@@ -317,6 +317,10 @@ public:
 
             return new Subtract (newDest, (input == left ? right : left)->clone());
         }
+
+    private:
+        Add (const Add&);
+        Add& operator= (const Add&);
     };
 
     //==============================================================================
@@ -341,6 +345,10 @@ public:
             else
                 return new Subtract (left->clone(), newDest);
         }
+
+    private:
+        Subtract (const Subtract&);
+        Subtract& operator= (const Subtract&);
     };
 
     //==============================================================================
@@ -362,6 +370,10 @@ public:
 
             return new Divide (newDest, (input == left ? right : left)->clone());
         }
+
+    private:
+        Multiply (const Multiply&);
+        Multiply& operator= (const Multiply&);
     };
 
     //==============================================================================
@@ -386,6 +398,10 @@ public:
             else
                 return new Divide (left->clone(), newDest);
         }
+
+    private:
+        Divide (const Divide&);
+        Divide& operator= (const Divide&);
     };
 
     //==============================================================================
