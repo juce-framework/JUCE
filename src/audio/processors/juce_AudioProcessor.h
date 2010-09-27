@@ -529,11 +529,15 @@ public:
     void removeListener (AudioProcessorListener* listenerToRemove);
 
     //==============================================================================
+    /** Tells the processor to use this playhead object.
+        The processor will not take ownership of the object, so the caller must delete it when
+        it is no longer being used.
+    */
+    void setPlayHead (AudioPlayHead* newPlayHead) throw();
+
+    //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor* editor) throw();
-
-    /** Not for public use - this is called to initialise the processor. */
-    void setPlayHead (AudioPlayHead* newPlayHead) throw();
 
     /** Not for public use - this is called to initialise the processor before playing. */
     void setPlayConfigDetails (int numIns, int numOuts,

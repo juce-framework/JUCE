@@ -232,10 +232,11 @@ public:
     Array <double> rates;
     HANDLE clientEvent;
     BigInteger channels;
-    AudioDataConverters::DataFormat dataFormat;
     Array <int> channelMaps;
     UINT32 actualBufferSize;
     int bytesPerSample;
+
+    virtual void updateFormat (bool isFloat) = 0;
 
 private:
     const ComSmartPtr <IAudioClient> createClient()
@@ -311,10 +312,8 @@ private:
             actualNumChannels = format.Format.nChannels;
             const bool isFloat = format.Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format.SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
             bytesPerSample = format.Format.wBitsPerSample / 8;
-            dataFormat = isFloat ? AudioDataConverters::float32LE
-                                 : (bytesPerSample == 4 ? AudioDataConverters::int32LE
-                                                        : ((bytesPerSample == 3 ? AudioDataConverters::int24LE
-                                                                                : AudioDataConverters::int16LE)));
+
+            updateFormat (isFloat);
             return true;
         }
 
@@ -356,6 +355,20 @@ public:
         reservoir.setSize (0);
     }
 
+    void updateFormat (bool isFloat)
+    {
+        typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> NativeType;
+
+        if (isFloat)
+            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+        else if (bytesPerSample == 4)
+            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Int32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+        else if (bytesPerSample == 3)
+            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Int24, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+        else
+            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Int16, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+    }
+
     void copyBuffers (float** destBuffers, int numDestBuffers, int bufferSize, Thread& thread)
     {
         if (numChannels <= 0)
@@ -370,31 +383,7 @@ public:
                 const int samplesToDo = jmin (bufferSize, (int) reservoirSize);
 
                 for (int i = 0; i < numDestBuffers; ++i)
-                {
-                    float* const dest = destBuffers[i] + offset;
-                    const int srcChan = channelMaps.getUnchecked(i);
-
-                    switch (dataFormat)
-                    {
-                    case AudioDataConverters::float32LE:
-                        AudioDataConverters::convertFloat32LEToFloat (((uint8*) reservoir.getData()) + 4 * srcChan, dest, samplesToDo, 4 * actualNumChannels);
-                        break;
-
-                    case AudioDataConverters::int32LE:
-                        AudioDataConverters::convertInt32LEToFloat (((uint8*) reservoir.getData()) + 4 * srcChan, dest, samplesToDo, 4 * actualNumChannels);
-                        break;
-
-                    case AudioDataConverters::int24LE:
-                        AudioDataConverters::convertInt24LEToFloat (((uint8*) reservoir.getData()) + 3 * srcChan, dest, samplesToDo, 3 * actualNumChannels);
-                        break;
-
-                    case AudioDataConverters::int16LE:
-                        AudioDataConverters::convertInt16LEToFloat (((uint8*) reservoir.getData()) + 2 * srcChan, dest, samplesToDo, 2 * actualNumChannels);
-                        break;
-
-                    default: jassertfalse; break;
-                    }
-                }
+                    converter->convertSamples (destBuffers[i], offset, reservoir.getData(), channelMaps.getUnchecked(i), samplesToDo);
 
                 bufferSize -= samplesToDo;
                 offset += samplesToDo;
@@ -424,31 +413,7 @@ public:
                     const int samplesToDo = jmin (bufferSize, (int) numSamplesAvailable);
 
                     for (int i = 0; i < numDestBuffers; ++i)
-                    {
-                        float* const dest = destBuffers[i] + offset;
-                        const int srcChan = channelMaps.getUnchecked(i);
-
-                        switch (dataFormat)
-                        {
-                        case AudioDataConverters::float32LE:
-                            AudioDataConverters::convertFloat32LEToFloat (inputData + 4 * srcChan, dest, samplesToDo, 4 * actualNumChannels);
-                            break;
-
-                        case AudioDataConverters::int32LE:
-                            AudioDataConverters::convertInt32LEToFloat (inputData + 4 * srcChan, dest, samplesToDo, 4 * actualNumChannels);
-                            break;
-
-                        case AudioDataConverters::int24LE:
-                            AudioDataConverters::convertInt24LEToFloat (inputData + 3 * srcChan, dest, samplesToDo, 3 * actualNumChannels);
-                            break;
-
-                        case AudioDataConverters::int16LE:
-                            AudioDataConverters::convertInt16LEToFloat (inputData + 2 * srcChan, dest, samplesToDo, 2 * actualNumChannels);
-                            break;
-
-                        default: jassertfalse; break;
-                        }
-                    }
+                        converter->convertSamples (destBuffers[i], offset, inputData, channelMaps.getUnchecked(i), samplesToDo);
 
                     bufferSize -= samplesToDo;
                     offset += samplesToDo;
@@ -469,6 +434,7 @@ public:
     ComSmartPtr <IAudioCaptureClient> captureClient;
     MemoryBlock reservoir;
     int reservoirSize, reservoirCapacity;
+    ScopedPointer <AudioData::Converter> converter;
 
 private:
     WASAPIInputDevice (const WASAPIInputDevice&);
@@ -501,6 +467,20 @@ public:
         renderClient = 0;
     }
 
+    void updateFormat (bool isFloat)
+    {
+        typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> NativeType;
+
+        if (isFloat)
+            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+        else if (bytesPerSample == 4)
+            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Int32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+        else if (bytesPerSample == 3)
+            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Int24, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+        else
+            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Int16, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+    }
+
     void copyBuffers (const float** const srcBuffers, const int numSrcBuffers, int bufferSize, Thread& thread)
     {
         if (numChannels <= 0)
@@ -530,31 +510,7 @@ public:
             if (OK (renderClient->GetBuffer (samplesToDo, &outputData)))
             {
                 for (int i = 0; i < numSrcBuffers; ++i)
-                {
-                    const float* const source = srcBuffers[i] + offset;
-                    const int destChan = channelMaps.getUnchecked(i);
-
-                    switch (dataFormat)
-                    {
-                    case AudioDataConverters::float32LE:
-                        AudioDataConverters::convertFloatToFloat32LE (source, outputData + 4 * destChan, samplesToDo, 4 * actualNumChannels);
-                        break;
-
-                    case AudioDataConverters::int32LE:
-                        AudioDataConverters::convertFloatToInt32LE (source, outputData + 4 * destChan, samplesToDo, 4 * actualNumChannels);
-                        break;
-
-                    case AudioDataConverters::int24LE:
-                        AudioDataConverters::convertFloatToInt24LE (source, outputData + 3 * destChan, samplesToDo, 3 * actualNumChannels);
-                        break;
-
-                    case AudioDataConverters::int16LE:
-                        AudioDataConverters::convertFloatToInt16LE (source, outputData + 2 * destChan, samplesToDo, 2 * actualNumChannels);
-                        break;
-
-                    default: jassertfalse; break;
-                    }
-                }
+                    converter->convertSamples (outputData, channelMaps.getUnchecked(i), srcBuffers[i], offset, samplesToDo);
 
                 renderClient->ReleaseBuffer (samplesToDo, 0);
 
@@ -565,6 +521,7 @@ public:
     }
 
     ComSmartPtr <IAudioRenderClient> renderClient;
+    ScopedPointer <AudioData::Converter> converter;
 
 private:
     WASAPIOutputDevice (const WASAPIOutputDevice&);

@@ -147,7 +147,7 @@
     reduce code size.
 */
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
-  #define JUCE_USE_CDBURNER 0
+  #define JUCE_USE_CDBURNER 1
 #endif
 
 /** JUCE_USE_CDREADER: Enables the audio CD reader code (Mac and Windows only).
@@ -155,7 +155,7 @@
     reduce code size.
 */
 #ifndef JUCE_USE_CDREADER
-  #define JUCE_USE_CDREADER 0
+  #define JUCE_USE_CDREADER 1
 #endif
 
 //=============================================================================
@@ -244,7 +244,7 @@
     Carbon isn't required for a normal app, but may be needed by specialised classes like
     plugin-hosts, which support older APIs.
 */
-#ifndef JUCE_SUPPORT_CARBON
+#if ! (defined (JUCE_SUPPORT_CARBON) || defined (__LP64__))
   #define JUCE_SUPPORT_CARBON 1
 #endif
 

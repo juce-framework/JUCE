@@ -36,7 +36,9 @@
 */
 #include "JucePluginCharacteristics.h"
 
-#define JUCE_SUPPORT_CARBON 1
+#if ! defined (__LP64__)
+ #define JUCE_SUPPORT_CARBON 1
+#endif
 
 //==============================================================================
 // The following stuff is just to cause a compile error if you've forgotten to

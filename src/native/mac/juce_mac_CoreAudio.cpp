@@ -306,7 +306,6 @@ public:
         size = sizeof (lat);
         pa.mSelector = kAudioDevicePropertyLatency;
         pa.mScope = kAudioDevicePropertyScopeInput;
-        //if (AudioDeviceGetProperty (deviceID, 0, true, kAudioDevicePropertyLatency, &size, &lat) == noErr)
         if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &lat) == noErr)
             inputLatency = (int) lat;
 

@@ -160,6 +160,26 @@ protected:
     /** The output stream for Use by subclasses. */
     OutputStream* output;
 
+    /** Used by AudioFormatWriter subclasses to copy data to different formats. */
+    template <class DestSampleType, class SourceSampleType, class DestEndianness>
+    struct WriteHelper
+    {
+        typedef AudioData::Pointer <DestSampleType, DestEndianness, AudioData::Interleaved, AudioData::NonConst>                DestType;
+        typedef AudioData::Pointer <SourceSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>     SourceType;
+
+        static void write (void* destData, int numDestChannels, const int** source, int numSamples) throw()
+        {
+            for (int i = 0; i < numDestChannels; ++i)
+            {
+                const DestType dest (addBytesToPointer (destData, i * DestType::getBytesPerSample()), numDestChannels);
+                dest.convertSamples (SourceType (*source), numSamples);
+
+                if (source[1] != 0)
+                    ++source;
+            }
+        }
+    };
+
 private:
     String formatName;
 

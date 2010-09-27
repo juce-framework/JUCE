@@ -531,7 +531,7 @@ void AudioDataConverters::deinterleaveSamples (const float* const source,
     }
 }
 
-/*
+
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"
@@ -546,6 +546,12 @@ public:
     struct Test5
     {
         static void test (UnitTest& unitTest)
+        {
+            test (unitTest, false);
+            test (unitTest, true);
+        }
+
+        static void test (UnitTest& unitTest, bool inPlace)
         {
             const int numSamples = 2048;
             int32 original [numSamples], converted [numSamples], reversed [numSamples];
@@ -572,13 +578,15 @@ public:
             // convert data from the source to dest format..
             ScopedPointer<AudioData::Converter> conv (new AudioData::ConverterInstance <AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const>,
                                                                                         AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::NonConst> >());
-            conv->convertSamples (converted, original, numSamples);
+            conv->convertSamples (inPlace ? reversed : converted, original, numSamples);
 
             // ..and back again..
             conv = new AudioData::ConverterInstance <AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::Const>,
                                                      AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> >();
-            zerostruct (reversed);
-            conv->convertSamples (reversed, converted, numSamples);
+            if (! inPlace)
+                zerostruct (reversed);
+
+            conv->convertSamples (reversed, inPlace ? reversed : converted, numSamples);
 
             {
                 int biggestDiff = 0;
@@ -615,11 +623,12 @@ public:
     {
         static void test (UnitTest& unitTest)
         {
+            Test3 <FormatType, Endianness, AudioData::Int8>::test (unitTest);
+            Test3 <FormatType, Endianness, AudioData::UInt8>::test (unitTest);
             Test3 <FormatType, Endianness, AudioData::Int16>::test (unitTest);
             Test3 <FormatType, Endianness, AudioData::Int24>::test (unitTest);
             Test3 <FormatType, Endianness, AudioData::Int32>::test (unitTest);
             Test3 <FormatType, Endianness, AudioData::Float32>::test (unitTest);
-            Test3 <FormatType, Endianness, AudioData::Int8>::test (unitTest);
         }
     };
 
@@ -648,6 +657,6 @@ public:
 static AudioConversionTests audioConversionUnitTests;
 
 #endif
-*/
+
 
 END_JUCE_NAMESPACE

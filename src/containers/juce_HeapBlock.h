@@ -122,6 +122,12 @@ public:
     */
     inline operator void*() const throw()                                   { return static_cast <void*> (data); }
 
+    /** Returns a void pointer to the allocated data.
+        This may be a null pointer if the data hasn't yet been allocated, or if it has been
+        freed by calling the free() method.
+    */
+    inline operator const void*() const throw()                             { return static_cast <const void*> (data); }
+
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.

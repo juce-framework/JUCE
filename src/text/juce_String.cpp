@@ -350,7 +350,7 @@ namespace NumberToStringConverters
 
     static juce_wchar getDecimalPoint()
     {
-#if JUCE_WINDOWS && _MSC_VER < 1400
+#if JUCE_MSVC && _MSC_VER < 1400
         static juce_wchar dp = std::_USE (std::locale(), std::numpunct <wchar_t>).decimal_point();
 #else
         static juce_wchar dp = std::use_facet <std::numpunct <wchar_t> > (std::locale()).decimal_point();
@@ -387,7 +387,7 @@ namespace NumberToStringConverters
         else
         {
 #if JUCE_WINDOWS
-  #if _MSC_VER <= 1400
+  #if JUCE_MSVC && _MSC_VER <= 1400
             len = _snwprintf (buffer, numChars, L"%.9g", n);
   #else
             len = _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n);

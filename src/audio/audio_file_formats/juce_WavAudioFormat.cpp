@@ -38,7 +38,6 @@ BEGIN_JUCE_NAMESPACE
 static const char* const wavFormatName = "WAV file";
 static const char* const wavExtensions[] = { ".wav", ".bwf", 0 };
 
-
 //==============================================================================
 const char* const WavAudioFormat::bwavDescription      = "bwav description";
 const char* const WavAudioFormat::bwavOriginator       = "bwav originator";
@@ -258,17 +257,7 @@ struct ExtensibleWavSubFormat
 //==============================================================================
 class WavAudioFormatReader  : public AudioFormatReader
 {
-    int bytesPerFrame;
-    int64 dataChunkStart, dataLength;
-
-    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
-
-    WavAudioFormatReader (const WavAudioFormatReader&);
-    WavAudioFormatReader& operator= (const WavAudioFormatReader&);
-
 public:
-    int64 bwavChunkStart, bwavSize;
-
     //==============================================================================
     WavAudioFormatReader (InputStream* const in)
         : AudioFormatReader (in, TRANS (wavFormatName)),
@@ -389,6 +378,7 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
+        jassert (destSamples != 0);
         const int64 samplesAvailable = lengthInSamples - startSampleInFile;
 
         if (samplesAvailable < numSamples)
@@ -405,221 +395,135 @@ public:
 
         input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
 
-        const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
-        char tempBuffer [tempBufSize];
-
         while (numSamples > 0)
         {
-            int* left = destSamples[0];
-            if (left != 0)
-                left += startOffsetInDestBuffer;
-
-            int* right = numDestChannels > 1 ? destSamples[1] : 0;
-            if (right != 0)
-                right += startOffsetInDestBuffer;
+            const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
+            char tempBuffer [tempBufSize];
 
             const int numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
             const int bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
             if (bytesRead < numThisTime * bytesPerFrame)
+            {
+                jassert (bytesRead >= 0);
                 zeromem (tempBuffer + bytesRead, numThisTime * bytesPerFrame - bytesRead);
-
-            if (bitsPerSample == 16)
-            {
-                const short* src = reinterpret_cast <const short*> (tempBuffer);
-
-                if (numChannels > 1)
-                {
-                    if (left == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            ++src;
-                            *right++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
-                        }
-                    }
-                    else if (right == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
-                            ++src;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
-                            *right++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = numThisTime; --i >= 0;)
-                    {
-                        *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
-                    }
-                }
             }
-            else if (bitsPerSample == 24)
+
+            switch (bitsPerSample)
             {
-                const char* src = tempBuffer;
-
-                if (numChannels > 1)
-                {
-                    if (left == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            src += 3;
-                            *right++ = ByteOrder::littleEndian24Bit (src) << 8;
-                            src += 3;
-                        }
-                    }
-                    else if (right == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *left++ = ByteOrder::littleEndian24Bit (src) << 8;
-                            src += 6;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < numThisTime; ++i)
-                        {
-                            *left++ = ByteOrder::littleEndian24Bit (src) << 8;
-                            src += 3;
-                            *right++ = ByteOrder::littleEndian24Bit (src) << 8;
-                            src += 3;
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < numThisTime; ++i)
-                    {
-                        *left++ = ByteOrder::littleEndian24Bit (src) << 8;
-                        src += 3;
-                    }
-                }
-            }
-            else if (bitsPerSample == 32)
-            {
-                const unsigned int* src = (const unsigned int*) tempBuffer;
-                unsigned int* l = reinterpret_cast<unsigned int*> (left);
-                unsigned int* r = reinterpret_cast<unsigned int*> (right);
-
-                if (numChannels > 1)
-                {
-                    if (l == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            ++src;
-                            *r++ = ByteOrder::swapIfBigEndian (*src++);
-                        }
-                    }
-                    else if (r == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *l++ = ByteOrder::swapIfBigEndian (*src++);
-                            ++src;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *l++ = ByteOrder::swapIfBigEndian (*src++);
-                            *r++ = ByteOrder::swapIfBigEndian (*src++);
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = numThisTime; --i >= 0;)
-                    {
-                        *l++ = ByteOrder::swapIfBigEndian (*src++);
-                    }
-                }
-
-                left = reinterpret_cast<int*> (l);
-                right = reinterpret_cast<int*> (r);
-            }
-            else if (bitsPerSample == 8)
-            {
-                const unsigned char* src = reinterpret_cast<const unsigned char*> (tempBuffer);
-
-                if (numChannels > 1)
-                {
-                    if (left == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            ++src;
-                            *right++ = ((int) *src++ - 128) << 24;
-                        }
-                    }
-                    else if (right == 0)
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *left++ = ((int) *src++ - 128) << 24;
-                            ++src;
-                        }
-                    }
-                    else
-                    {
-                        for (int i = numThisTime; --i >= 0;)
-                        {
-                            *left++ = ((int) *src++ - 128) << 24;
-                            *right++ = ((int) *src++ - 128) << 24;
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = numThisTime; --i >= 0;)
-                    {
-                        *left++ = ((int)*src++ - 128) << 24;
-                    }
-                }
+                case 8:     ReadHelper<AudioData::Int32, AudioData::UInt8, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
+                case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
+                case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
+                case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime);
+                            else                       ReadHelper<AudioData::Int32, AudioData::Int32, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
+                default:    jassertfalse; break;
             }
 
             startOffsetInDestBuffer += numThisTime;
             numSamples -= numThisTime;
         }
 
-        if (numSamples > 0)
-        {
-            for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != 0)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer,
-                             sizeof (int) * numSamples);
-        }
-
         return true;
     }
 
+    int64 bwavChunkStart, bwavSize;
+
     juce_UseDebuggingNewOperator
+
+private:
+    ScopedPointer<AudioData::Converter> converter;
+    int bytesPerFrame;
+    int64 dataChunkStart, dataLength;
+
+    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+
+    WavAudioFormatReader (const WavAudioFormatReader&);
+    WavAudioFormatReader& operator= (const WavAudioFormatReader&);
 };
 
 //==============================================================================
 class WavAudioFormatWriter  : public AudioFormatWriter
 {
+public:
+    //==============================================================================
+    WavAudioFormatWriter (OutputStream* const out,
+                          const double sampleRate_,
+                          const unsigned int numChannels_,
+                          const int bits,
+                          const StringPairArray& metadataValues)
+        : AudioFormatWriter (out,
+                             TRANS (wavFormatName),
+                             sampleRate_,
+                             numChannels_,
+                             bits),
+          lengthInSamples (0),
+          bytesWritten (0),
+          writeFailed (false)
+    {
+        if (metadataValues.size() > 0)
+        {
+            bwavChunk = BWAVChunk::createFrom (metadataValues);
+            smplChunk = SMPLChunk::createFrom (metadataValues);
+        }
+
+        headerPosition = out->getPosition();
+        writeHeader();
+    }
+
+    ~WavAudioFormatWriter()
+    {
+        writeHeader();
+    }
+
+    //==============================================================================
+    bool write (const int** data, int numSamples)
+    {
+        jassert (data != 0 && *data != 0); // the input must contain at least one channel!
+
+        if (writeFailed)
+            return false;
+
+        const int bytes = numChannels * numSamples * bitsPerSample / 8;
+        tempBlock.ensureSize (bytes, false);
+
+        switch (bitsPerSample)
+        {
+            case 8:     WriteHelper<AudioData::UInt8, AudioData::Int32, AudioData::LittleEndian>::write (tempBlock.getData(), numChannels, data, numSamples); break;
+            case 16:    WriteHelper<AudioData::Int16, AudioData::Int32, AudioData::LittleEndian>::write (tempBlock.getData(), numChannels, data, numSamples); break;
+            case 24:    WriteHelper<AudioData::Int24, AudioData::Int32, AudioData::LittleEndian>::write (tempBlock.getData(), numChannels, data, numSamples); break;
+            case 32:    WriteHelper<AudioData::Int32, AudioData::Int32, AudioData::LittleEndian>::write (tempBlock.getData(), numChannels, data, numSamples); break;
+            default:    jassertfalse; break;
+        }
+
+        if (bytesWritten + bytes >= (uint32) 0xfff00000
+             || ! output->write (tempBlock.getData(), bytes))
+        {
+            // failed to write to disk, so let's try writing the header.
+            // If it's just run out of disk space, then if it does manage
+            // to write the header, we'll still have a useable file..
+            writeHeader();
+            writeFailed = true;
+            return false;
+        }
+        else
+        {
+            bytesWritten += bytes;
+            lengthInSamples += numSamples;
+
+            return true;
+        }
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    ScopedPointer<AudioData::Converter> converter;
     MemoryBlock tempBlock, bwavChunk, smplChunk;
     uint32 lengthInSamples, bytesWritten;
     int64 headerPosition;
     bool writeFailed;
 
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
-
-    WavAudioFormatWriter (const WavAudioFormatWriter&);
-    WavAudioFormatWriter& operator= (const WavAudioFormatWriter&);
 
     void writeHeader()
     {
@@ -666,156 +570,8 @@ class WavAudioFormatWriter  : public AudioFormatWriter
         usesFloatingPointData = (bitsPerSample == 32);
     }
 
-public:
-    //==============================================================================
-    WavAudioFormatWriter (OutputStream* const out,
-                          const double sampleRate_,
-                          const unsigned int numChannels_,
-                          const int bits,
-                          const StringPairArray& metadataValues)
-        : AudioFormatWriter (out,
-                             TRANS (wavFormatName),
-                             sampleRate_,
-                             numChannels_,
-                             bits),
-          lengthInSamples (0),
-          bytesWritten (0),
-          writeFailed (false)
-    {
-        if (metadataValues.size() > 0)
-        {
-            bwavChunk = BWAVChunk::createFrom (metadataValues);
-            smplChunk = SMPLChunk::createFrom (metadataValues);
-        }
-
-        headerPosition = out->getPosition();
-        writeHeader();
-    }
-
-    ~WavAudioFormatWriter()
-    {
-        writeHeader();
-    }
-
-    //==============================================================================
-    bool write (const int** data, int numSamples)
-    {
-        if (writeFailed)
-            return false;
-
-        const int bytes = numChannels * numSamples * bitsPerSample / 8;
-        tempBlock.ensureSize (bytes, false);
-        char* buffer = static_cast <char*> (tempBlock.getData());
-
-        const int* left = data[0];
-        const int* right = data[1];
-        if (right == 0)
-            right = left;
-
-        if (bitsPerSample == 16)
-        {
-            short* b = (short*) buffer;
-
-            if (numChannels > 1)
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    *b++ = (short) ByteOrder::swapIfBigEndian ((unsigned short) (*left++ >> 16));
-                    *b++ = (short) ByteOrder::swapIfBigEndian ((unsigned short) (*right++ >> 16));
-                }
-            }
-            else
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    *b++ = (short) ByteOrder::swapIfBigEndian ((unsigned short) (*left++ >> 16));
-                }
-            }
-        }
-        else if (bitsPerSample == 24)
-        {
-            char* b = buffer;
-
-            if (numChannels > 1)
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    ByteOrder::littleEndian24BitToChars ((*left++) >> 8, b);
-                    b += 3;
-                    ByteOrder::littleEndian24BitToChars ((*right++) >> 8, b);
-                    b += 3;
-                }
-            }
-            else
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    ByteOrder::littleEndian24BitToChars ((*left++) >> 8, b);
-                    b += 3;
-                }
-            }
-        }
-        else if (bitsPerSample == 32)
-        {
-            unsigned int* b = (unsigned int*) buffer;
-
-            if (numChannels > 1)
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    *b++ = ByteOrder::swapIfBigEndian ((unsigned int) *left++);
-                    *b++ = ByteOrder::swapIfBigEndian ((unsigned int) *right++);
-                }
-            }
-            else
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    *b++ = ByteOrder::swapIfBigEndian ((unsigned int) *left++);
-                }
-            }
-        }
-        else if (bitsPerSample == 8)
-        {
-            unsigned char* b = (unsigned char*) buffer;
-
-            if (numChannels > 1)
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    *b++ = (unsigned char) (128 + (*left++ >> 24));
-                    *b++ = (unsigned char) (128 + (*right++ >> 24));
-                }
-            }
-            else
-            {
-                for (int i = numSamples; --i >= 0;)
-                {
-                    *b++ = (unsigned char) (128 + (*left++ >> 24));
-                }
-            }
-        }
-
-        if (bytesWritten + bytes >= (uint32) 0xfff00000
-             || ! output->write (buffer, bytes))
-        {
-            // failed to write to disk, so let's try writing the header.
-            // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a useable file..
-            writeHeader();
-            writeFailed = true;
-            return false;
-        }
-        else
-        {
-            bytesWritten += bytes;
-            lengthInSamples += numSamples;
-
-            return true;
-        }
-    }
-
-    juce_UseDebuggingNewOperator
+    WavAudioFormatWriter (const WavAudioFormatWriter&);
+    WavAudioFormatWriter& operator= (const WavAudioFormatWriter&);
 };
 
 //==============================================================================
@@ -840,15 +596,8 @@ const Array <int> WavAudioFormat::getPossibleBitDepths()
     return Array <int> (depths);
 }
 
-bool WavAudioFormat::canDoStereo()
-{
-    return true;
-}
-
-bool WavAudioFormat::canDoMono()
-{
-    return true;
-}
+bool WavAudioFormat::canDoStereo()  { return true; }
+bool WavAudioFormat::canDoMono()    { return true; }
 
 AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
                                                     const bool deleteStreamIfOpeningFails)

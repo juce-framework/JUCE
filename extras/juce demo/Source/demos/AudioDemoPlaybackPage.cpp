@@ -27,7 +27,8 @@
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 class DemoThumbnailComp  : public Component,
-                           public ChangeListener
+                           public ChangeListener,
+                           public FileDragAndDropTarget
 {
 public:
     DemoThumbnailComp()
@@ -102,6 +103,19 @@ public:
     {
         // this method is called by the thumbnail when it has changed, so we should repaint it..
         repaint();
+    }
+
+    bool isInterestedInFileDrag (const StringArray& files)
+    {
+        return true;
+    }
+
+    void filesDropped (const StringArray& files, int x, int y)
+    {
+        AudioDemoPlaybackPage* demoPage = findParentComponentOfClass ((AudioDemoPlaybackPage*) 0);
+
+        if (demoPage != 0)
+            demoPage->showFile (File (files[0]));
     }
 
     AudioFormatManager formatManager;
@@ -266,6 +280,14 @@ void AudioDemoPlaybackPage::sliderValueChanged (Slider* sliderThatWasMoved)
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
+void AudioDemoPlaybackPage::showFile (const File& file)
+{
+    loadFileIntoTransport (file);
+
+    zoomSlider->setValue (0, false, false);
+    thumbnail->setFile (file);
+}
+
 void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
 {
     // unload the previous file source and delete it..
@@ -292,10 +314,7 @@ void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
 
 void AudioDemoPlaybackPage::selectionChanged()
 {
-    loadFileIntoTransport (fileTreeComp->getSelectedFile());
-
-    zoomSlider->setValue (0, false, false);
-    thumbnail->setFile (fileTreeComp->getSelectedFile());
+    showFile (fileTreeComp->getSelectedFile());
 }
 
 void AudioDemoPlaybackPage::fileClicked (const File&, const MouseEvent&)

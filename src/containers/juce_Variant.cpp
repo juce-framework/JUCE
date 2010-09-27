@@ -63,6 +63,7 @@ public:
 class var::VariantType_Void  : public var::VariantType
 {
 public:
+    VariantType_Void() {}
     static const VariantType_Void* getInstance()             { static const VariantType_Void i; return &i; }
 
     bool isVoid() const throw()     { return true; }
@@ -74,6 +75,7 @@ public:
 class var::VariantType_Int  : public var::VariantType
 {
 public:
+    VariantType_Int() {}
     static const VariantType_Int* getInstance()              { static const VariantType_Int i; return &i; }
 
     int toInt (const ValueUnion& data) const                 { return data.intValue; };
@@ -100,6 +102,7 @@ public:
 class var::VariantType_Double   : public var::VariantType
 {
 public:
+    VariantType_Double() {}
     static const VariantType_Double* getInstance()           { static const VariantType_Double i; return &i; }
 
     int toInt (const ValueUnion& data) const                 { return (int) data.doubleValue; };
@@ -126,6 +129,7 @@ public:
 class var::VariantType_Bool   : public var::VariantType
 {
 public:
+    VariantType_Bool() {}
     static const VariantType_Bool* getInstance()             { static const VariantType_Bool i; return &i; }
 
     int toInt (const ValueUnion& data) const                 { return data.boolValue ? 1 : 0; };
@@ -151,6 +155,7 @@ public:
 class var::VariantType_String   : public var::VariantType
 {
 public:
+    VariantType_String() {}
     static const VariantType_String* getInstance()              { static const VariantType_String i; return &i; }
 
     void cleanUp (ValueUnion& data) const throw()                        { delete data.stringValue; }
@@ -185,6 +190,7 @@ public:
 class var::VariantType_Object   : public var::VariantType
 {
 public:
+    VariantType_Object() {}
     static const VariantType_Object* getInstance()          { static const VariantType_Object i; return &i; }
 
     void cleanUp (ValueUnion& data) const throw()                        { if (data.objectValue != 0) data.objectValue->decReferenceCount(); }
@@ -212,6 +218,7 @@ public:
 class var::VariantType_Method   : public var::VariantType
 {
 public:
+    VariantType_Method() {}
     static const VariantType_Method* getInstance()          { static const VariantType_Method i; return &i; }
 
     const String toString (const ValueUnion&) const         { return "Method"; }

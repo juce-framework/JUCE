@@ -525,7 +525,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    const Image createSnapshotOfSelectedRows (int& x, int& y);
+    virtual const Image createSnapshotOfSelectedRows (int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 

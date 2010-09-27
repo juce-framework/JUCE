@@ -458,7 +458,7 @@ private:
             }
 
             // If we failed to find it "properly", this dodgy fall-back seems to do the trick for most fonts!
-            return jmax (-1, c - 29);
+            return jmax (-1, (int) c - 29);
         }
 
     private:

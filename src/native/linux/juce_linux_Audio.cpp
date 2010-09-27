@@ -82,7 +82,7 @@ static void getDeviceProperties (const String& deviceID,
         if (snd_ctl_pcm_info (handle, info) >= 0)
         {
             snd_pcm_t* pcmHandle;
-            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC | SND_PCM_NONBLOCK ) >= 0)
+            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC | SND_PCM_NONBLOCK) >= 0)
             {
                 getDeviceNumChannels (pcmHandle, &minChansOut, &maxChansOut);
                 getDeviceSampleRates (pcmHandle, rates);
@@ -96,7 +96,7 @@ static void getDeviceProperties (const String& deviceID,
         if (snd_ctl_pcm_info (handle, info) >= 0)
         {
             snd_pcm_t* pcmHandle;
-            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK ) >= 0)
+            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK) >= 0)
             {
                 getDeviceNumChannels (pcmHandle, &minChansIn, &maxChansIn);
 
@@ -115,14 +115,12 @@ static void getDeviceProperties (const String& deviceID,
 class ALSADevice
 {
 public:
-    ALSADevice (const String& deviceID,
-                const bool forInput)
+    ALSADevice (const String& deviceID, bool forInput)
         : handle (0),
           bitDepth (16),
           numChannelsRunning (0),
           latency (0),
-          isInput (forInput),
-          sampleFormat (AudioDataConverters::int16LE)
+          isInput (forInput)
     {
         failed (snd_pcm_open (&handle, deviceID.toUTF8(),
                               forInput ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
@@ -156,22 +154,26 @@ public:
             return false;
         }
 
-        const int formatsToTry[] = { SND_PCM_FORMAT_FLOAT_LE, 32, AudioDataConverters::float32LE,
-                                     SND_PCM_FORMAT_FLOAT_BE, 32, AudioDataConverters::float32BE,
-                                     SND_PCM_FORMAT_S32_LE, 32, AudioDataConverters::int32LE,
-                                     SND_PCM_FORMAT_S32_BE, 32, AudioDataConverters::int32BE,
-                                     SND_PCM_FORMAT_S24_3LE, 24, AudioDataConverters::int24LE,
-                                     SND_PCM_FORMAT_S24_3BE, 24, AudioDataConverters::int24BE,
-                                     SND_PCM_FORMAT_S16_LE, 16, AudioDataConverters::int16LE,
-                                     SND_PCM_FORMAT_S16_BE, 16, AudioDataConverters::int16BE };
+        enum { isFloatBit = 1 << 16, isLittleEndianBit = 1 << 17 };
+
+        const int formatsToTry[] = { SND_PCM_FORMAT_FLOAT_LE,   32 | isFloatBit | isLittleEndianBit,
+                                     SND_PCM_FORMAT_FLOAT_BE,   32 | isFloatBit,
+                                     SND_PCM_FORMAT_S32_LE,     32 | isLittleEndianBit,
+                                     SND_PCM_FORMAT_S32_BE,     32,
+                                     SND_PCM_FORMAT_S24_3LE,    24 | isLittleEndianBit,
+                                     SND_PCM_FORMAT_S24_3BE,    24,
+                                     SND_PCM_FORMAT_S16_LE,     16 | isLittleEndianBit,
+                                     SND_PCM_FORMAT_S16_BE,     16 };
         bitDepth = 0;
 
-        for (int i = 0; i < numElementsInArray (formatsToTry); i += 3)
+        for (int i = 0; i < numElementsInArray (formatsToTry); i += 2)
         {
             if (snd_pcm_hw_params_set_format (handle, hwParams, (_snd_pcm_format) formatsToTry [i]) >= 0)
             {
-                bitDepth = formatsToTry [i + 1];
-                sampleFormat = (AudioDataConverters::DataFormat) formatsToTry [i + 2];
+                bitDepth = formatsToTry [i + 1] & 255;
+                const bool isFloat = (formatsToTry [i + 1] & isFloatBit) != 0;
+                const bool isLittleEndian = (formatsToTry [i + 1] & isLittleEndianBit) != 0;
+                converter = createConverter (isInput, bitDepth, isFloat, isLittleEndian, numChannels);
                 break;
             }
         }
@@ -235,48 +237,44 @@ public:
     }
 
     //==============================================================================
-    bool write (AudioSampleBuffer& outputChannelBuffer, const int numSamples)
+    bool writeToOutputDevice (AudioSampleBuffer& outputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= outputChannelBuffer.getNumChannels());
         float** const data = outputChannelBuffer.getArrayOfChannels();
+        snd_pcm_sframes_t numDone = 0;
 
         if (isInterleaved)
         {
             scratch.ensureSize (sizeof (float) * numSamples * numChannelsRunning, false);
-            float* interleaved = static_cast <float*> (scratch.getData());
 
-            AudioDataConverters::interleaveSamples ((const float**) data, interleaved, numSamples, numChannelsRunning);
-            AudioDataConverters::convertFloatToFormat (sampleFormat, interleaved, interleaved, numSamples * numChannelsRunning);
+            for (int i = 0; i < numChannelsRunning; ++i)
+                converter->convertSamples (scratch.getData(), i, data[i], 0, numSamples);
 
-            snd_pcm_sframes_t num = snd_pcm_writei (handle, interleaved, numSamples);
-
-            if (failed (num) && num != -EPIPE && num != -ESTRPIPE)
-                return false;
+            numDone = snd_pcm_writei (handle, scratch.getData(), numSamples);
         }
         else
         {
             for (int i = 0; i < numChannelsRunning; ++i)
-                if (data[i] != 0)
-                    AudioDataConverters::convertFloatToFormat (sampleFormat, data[i], data[i], numSamples);
+                converter->convertSamples (data[i], data[i], numSamples);
 
-            snd_pcm_sframes_t num = snd_pcm_writen (handle, (void**) data, numSamples);
+            numDone = snd_pcm_writen (handle, (void**) data, numSamples);
+        }
 
-            if (failed (num))
+        if (failed (numDone))
+        {
+            if (numDone == -EPIPE)
             {
-                if (num == -EPIPE)
-                {
-                    if (failed (snd_pcm_prepare (handle)))
-                        return false;
-                }
-                else if (num != -ESTRPIPE)
+                if (failed (snd_pcm_prepare (handle)))
                     return false;
             }
+            else if (numDone != -ESTRPIPE)
+                return false;
         }
 
         return true;
     }
 
-    bool read (AudioSampleBuffer& inputChannelBuffer, const int numSamples)
+    bool readFromInputDevice (AudioSampleBuffer& inputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= inputChannelBuffer.getNumChannels());
         float** const data = inputChannelBuffer.getArrayOfChannels();
@@ -284,9 +282,8 @@ public:
         if (isInterleaved)
         {
             scratch.ensureSize (sizeof (float) * numSamples * numChannelsRunning, false);
-            float* interleaved = static_cast <float*> (scratch.getData());
 
-            snd_pcm_sframes_t num = snd_pcm_readi (handle, interleaved, numSamples);
+            snd_pcm_sframes_t num = snd_pcm_readi (handle, scratch.getData(), numSamples);
 
             if (failed (num))
             {
@@ -299,8 +296,8 @@ public:
                     return false;
             }
 
-            AudioDataConverters::convertFormatToFloat (sampleFormat, interleaved, interleaved, numSamples * numChannelsRunning);
-            AudioDataConverters::deinterleaveSamples (interleaved, data, numSamples, numChannelsRunning);
+            for (int i = 0; i < numChannelsRunning; ++i)
+                converter->convertSamples (data[i], 0, scratch.getData(), i, numSamples);
         }
         else
         {
@@ -310,8 +307,7 @@ public:
                 return false;
 
             for (int i = 0; i < numChannelsRunning; ++i)
-                if (data[i] != 0)
-                    AudioDataConverters::convertFormatToFloat (sampleFormat, data[i], data[i], numSamples);
+                converter->convertSamples (data[i], data[i], numSamples);
         }
 
         return true;
@@ -329,7 +325,48 @@ private:
     const bool isInput;
     bool isInterleaved;
     MemoryBlock scratch;
-    AudioDataConverters::DataFormat sampleFormat;
+    ScopedPointer<AudioData::Converter> converter;
+
+    //==============================================================================
+    template <class SampleType>
+    struct ConverterHelper
+    {
+        static AudioData::Converter* createConverter (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels)
+        {
+            if (forInput)
+            {
+                typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DestType;
+
+                if (isLittleEndian)
+                    return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, DestType> (numInterleavedChannels, 1);
+                else
+                    return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::BigEndian, AudioData::Interleaved, AudioData::Const>, DestType> (numInterleavedChannels, 1);
+            }
+            else
+            {
+                typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceType;
+
+                if (isLittleEndian)
+                    return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, numInterleavedChannels);
+                else
+                    return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, AudioData::Interleaved, AudioData::NonConst> > (1, numInterleavedChannels);
+            }
+        }
+    };
+
+    static AudioData::Converter* createConverter (const bool forInput, const int bitDepth, const bool isFloat, const bool isLittleEndian, const int numInterleavedChannels)
+    {
+        switch (bitDepth)
+        {
+            case 16:    return ConverterHelper <AudioData::Int16>::createConverter (forInput, isLittleEndian,  numInterleavedChannels);
+            case 24:    return ConverterHelper <AudioData::Int24>::createConverter (forInput, isLittleEndian,  numInterleavedChannels);
+            case 32:    return isFloat ? ConverterHelper <AudioData::Float32>::createConverter (forInput, isLittleEndian,  numInterleavedChannels)
+                                       : ConverterHelper <AudioData::Int32>::createConverter (forInput, isLittleEndian,  numInterleavedChannels);
+            default:    jassertfalse; break; // unsupported format!
+        }
+
+        return 0;
+    }
 
     //==============================================================================
     bool failed (const int errorNum)
@@ -522,7 +559,7 @@ public:
         {
             if (inputDevice != 0)
             {
-                if (! inputDevice->read (inputChannelBuffer, bufferSize))
+                if (! inputDevice->readFromInputDevice (inputChannelBuffer, bufferSize))
                 {
                     DBG ("ALSA: read failure");
                     break;
@@ -560,7 +597,7 @@ public:
 
                 failed (snd_pcm_avail_update (outputDevice->handle));
 
-                if (! outputDevice->write (outputChannelBuffer, bufferSize))
+                if (! outputDevice->writeToOutputDevice (outputChannelBuffer, bufferSize))
                 {
                     DBG ("ALSA: write failure");
                     break;

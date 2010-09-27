@@ -43,7 +43,7 @@ DynamicLibraryLoader::~DynamicLibraryLoader()
 
 void* DynamicLibraryLoader::findProcAddress (const String& functionName)
 {
-    return GetProcAddress ((HMODULE) libHandle, functionName.toCString());
+    return (void*) GetProcAddress ((HMODULE) libHandle, functionName.toCString()); // (void* cast is required for mingw)
 }
 
 

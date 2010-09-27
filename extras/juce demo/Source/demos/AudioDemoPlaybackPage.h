@@ -54,6 +54,7 @@ public:
     void selectionChanged();
     void fileClicked (const File& file, const MouseEvent& e);
     void fileDoubleClicked (const File& file);
+    void showFile (const File& file);
     //[/UserMethods]
 
     void paint (Graphics& g);

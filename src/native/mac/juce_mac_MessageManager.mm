@@ -82,7 +82,7 @@ public:
         JUCEApplication::appWillTerminateByForce();
     }
 
-    virtual BOOL openFile (const NSString* filename)
+    virtual BOOL openFile (NSString* filename)
     {
         if (JUCEApplication::getInstance() != 0)
         {
