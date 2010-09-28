@@ -549,7 +549,7 @@ public:
     template <class SampleFormatType> inline void advanceData (SampleFormatType& s) throw()                     { s.skip (numInterleavedChannels); }
     template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) throw()   { s.skip (numInterleavedChannels * numSamples); }
     template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) throw()           { while (--numSamples >= 0) { s.clear(); s.skip (numInterleavedChannels); } }
-    template <class SampleFormatType> inline int getNumBytesBetweenSamples (const SampleFormatType& s) const throw()  { return numInterleavedChannels * s.bytesPerSample; }
+    template <class SampleFormatType> inline int getNumBytesBetweenSamples (const SampleFormatType&) const throw()  { return numInterleavedChannels * SampleFormatType::bytesPerSample; }
     int numInterleavedChannels;
     enum { isInterleavedType = 1 };
 };

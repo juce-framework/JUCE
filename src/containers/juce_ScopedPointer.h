@@ -142,9 +142,6 @@ public:
     /** Returns a reference to the address of the object that this ScopedPointer refers to. */
     inline ObjectType* const* operator&() const throw()                             { return static_cast <ObjectType* const*> (&object); }
 
-    /** Returns a reference to the address of the object that this ScopedPointer refers to. */
-    inline ObjectType** operator&() throw()                                         { return static_cast <ObjectType**> (&object); }
-
     //==============================================================================
     /** Removes the current object from this ScopedPointer without deleting it.
 

@@ -6523,9 +6523,6 @@ public:
 	/** Returns a reference to the address of the object that this ScopedPointer refers to. */
 	inline ObjectType* const* operator&() const throw()				 { return static_cast <ObjectType* const*> (&object); }
 
-	/** Returns a reference to the address of the object that this ScopedPointer refers to. */
-	inline ObjectType** operator&() throw()					 { return static_cast <ObjectType**> (&object); }
-
 	/** Removes the current object from this ScopedPointer without deleting it.
 
 		This will return the current object, and set the ScopedPointer to a null pointer.
@@ -30079,7 +30076,7 @@ public:
 	template <class SampleFormatType> inline void advanceData (SampleFormatType& s) throw()			 { s.skip (numInterleavedChannels); }
 	template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) throw()   { s.skip (numInterleavedChannels * numSamples); }
 	template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) throw()	   { while (--numSamples >= 0) { s.clear(); s.skip (numInterleavedChannels); } }
-	template <class SampleFormatType> inline int getNumBytesBetweenSamples (const SampleFormatType& s) const throw()  { return numInterleavedChannels * s.bytesPerSample; }
+	template <class SampleFormatType> inline int getNumBytesBetweenSamples (const SampleFormatType&) const throw()  { return numInterleavedChannels * SampleFormatType::bytesPerSample; }
 	int numInterleavedChannels;
 	enum { isInterleavedType = 1 };
 };
