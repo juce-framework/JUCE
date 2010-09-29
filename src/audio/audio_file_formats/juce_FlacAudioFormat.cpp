@@ -315,17 +315,16 @@ class FlacWriter  : public AudioFormatWriter
 {
 public:
     //==============================================================================
-    FlacWriter (OutputStream* const out,
-                const double sampleRate_,
-                const int numChannels_,
-                const int bitsPerSample_)
+    FlacWriter (OutputStream* const out, double sampleRate_,
+                int numChannels_, int bitsPerSample_, int qualityOptionIndex)
         : AudioFormatWriter (out, TRANS (flacFormatName),
-                             sampleRate_,
-                             numChannels_,
-                             bitsPerSample_)
+                             sampleRate_, numChannels_, bitsPerSample_)
     {
         using namespace FlacNamespace;
         encoder = FLAC__stream_encoder_new();
+
+        if (qualityOptionIndex > 0)
+            FLAC__stream_encoder_set_compression_level (encoder, jmin (8, qualityOptionIndex));
 
         FLAC__stream_encoder_set_do_mid_side_stereo (encoder, numChannels == 2);
         FLAC__stream_encoder_set_loose_mid_side_stereo (encoder, numChannels == 2);
@@ -510,20 +509,9 @@ const Array <int> FlacAudioFormat::getPossibleBitDepths()
     return Array <int> (depths);
 }
 
-bool FlacAudioFormat::canDoStereo()
-{
-    return true;
-}
-
-bool FlacAudioFormat::canDoMono()
-{
-    return true;
-}
-
-bool FlacAudioFormat::isCompressed()
-{
-    return true;
-}
+bool FlacAudioFormat::canDoStereo()     { return true; }
+bool FlacAudioFormat::canDoMono()       { return true; }
+bool FlacAudioFormat::isCompressed()    { return true; }
 
 AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in,
                                                      const bool deleteStreamIfOpeningFails)
@@ -544,11 +532,11 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
                                                      unsigned int numberOfChannels,
                                                      int bitsPerSample,
                                                      const StringPairArray& /*metadataValues*/,
-                                                     int /*qualityOptionIndex*/)
+                                                     int qualityOptionIndex)
 {
     if (getPossibleBitDepths().contains (bitsPerSample))
     {
-        ScopedPointer<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels, bitsPerSample));
+        ScopedPointer<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels, bitsPerSample, qualityOptionIndex));
 
         if (w->ok)
             return w.release();

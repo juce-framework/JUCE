@@ -283,8 +283,6 @@ public:
         menuCreationTime = lastFocused = lastScroll = Time::getMillisecondCounter();
         setWantsKeyboardFocus (true);
         setMouseClickGrabsKeyboardFocus (false);
-
-        setOpaque (true);
         setAlwaysOnTop (true);
 
         Desktop::getInstance().addGlobalMouseListener (this);
@@ -324,6 +322,7 @@ public:
             ScopedPointer <Window> mw (new Window());
             mw->setLookAndFeel (menu.lookAndFeel);
             mw->setWantsKeyboardFocus (false);
+            mw->setOpaque (mw->getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque() || ! Desktop::canUseSemiTransparentWindows());
             mw->minimumWidth = minimumWidth;
             mw->maximumNumColumns = maximumNumColumns;
             mw->standardItemHeight = standardItemHeight;
@@ -370,6 +369,9 @@ public:
     //==============================================================================
     void paint (Graphics& g)
     {
+        if (isOpaque())
+            g.fillAll (Colours::white);
+
         getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight());
     }
 

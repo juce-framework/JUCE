@@ -1861,6 +1861,7 @@ private:
                     return 0;
 
                 case WM_WINDOWPOSCHANGED:
+                    doMouseEvent (getCurrentMousePos());
                     handleMovedOrResized();
 
                     if (dontRepaint)

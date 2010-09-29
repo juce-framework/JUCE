@@ -33,15 +33,15 @@
 
 //==============================================================================
 /**
-    Holds a list of simple objects, such as ints, doubles, or pointers.
+    Holds a resizable array of primitive or copy-by-value objects.
 
     Examples of arrays are: Array<int>, Array<Rectangle> or Array<MyClass*>
 
-    The array can be used to hold simple, non-polymorphic objects as well as primitive types - to
+    The Array class can be used to hold simple, non-polymorphic objects as well as primitive types - to
     do so, the class must fulfil these requirements:
-    - it must have a copy constructor and operator=
-    - it must be able to be relocated in memory by a memcpy without this causing a problem - so no
-      objects whose functionality relies on pointers or references to themselves can be used.
+    - it must have a copy constructor and assignment operator
+    - it must be able to be relocated in memory by a memcpy without this causing any problems - so
+      objects whose functionality relies on external pointers or references to themselves can be used.
 
     You can of course have an array of pointers to any kind of object, e.g. Array <MyClass*>, but if
     you do this, the array doesn't take any ownership of the objects - see the OwnedArray class or the
