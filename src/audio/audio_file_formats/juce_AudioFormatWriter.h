@@ -29,6 +29,7 @@
 #include "../../io/files/juce_FileOutputStream.h"
 #include "juce_AudioFormatReader.h"
 #include "../audio_sources/juce_AudioSource.h"
+#include "../../threads/juce_TimeSliceThread.h"
 
 
 //==============================================================================
@@ -127,6 +128,13 @@ public:
                                int numSamplesToRead,
                                int samplesPerBlock = 2048);
 
+
+    /** Writes some samples from an AudioSampleBuffer.
+
+    */
+    bool writeFromAudioSampleBuffer (const AudioSampleBuffer& source,
+                                     int startSample, int numSamples);
+
     //==============================================================================
     /** Returns the sample rate being used. */
     double getSampleRate() const throw()        { return sampleRate; }
@@ -140,6 +148,47 @@ public:
     /** Returns true if it's a floating-point format, false if it's fixed-point. */
     bool isFloatingPoint() const throw()        { return usesFloatingPointData; }
 
+    //==============================================================================
+    /**
+        Provides a FIFO for an AudioFormatWriter, allowing you to push incoming
+        data into a buffer which will be flushed to disk by a background thread.
+    */
+    class ThreadedWriter
+    {
+    public:
+        /** Creates a ThreadedWriter for a given writer and a thread.
+
+            The writer object which is passed in here will be owned and deleted by
+            the ThreadedWriter when it is no longer needed.
+
+            To stop the writer and flush the buffer to disk, simply delete this object.
+        */
+        ThreadedWriter (AudioFormatWriter* writer,
+                        TimeSliceThread& backgroundThread,
+                        int numSamplesToBuffer);
+
+        /** Destructor. */
+        ~ThreadedWriter();
+
+        /** Pushes some incoming audio data into the FIFO.
+
+            If there's enough free space in the buffer, this will add the data to it,
+
+            If the FIFO is too full to accept this many samples, the method will return
+            false - then you could either wait until the background thread has had time to
+            consume some of the buffered data and try again, or you can give up
+            and lost this block.
+
+            The data must be an array containing the same number of channels as the
+            AudioFormatWriter object is using. None of these channels can be null.
+        */
+        bool write (const float** data, int numSamples);
+
+    private:
+        class Buffer;
+        friend class ScopedPointer<Buffer>;
+        ScopedPointer<Buffer> buffer;
+    };
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -172,10 +221,16 @@ protected:
             for (int i = 0; i < numDestChannels; ++i)
             {
                 const DestType dest (addBytesToPointer (destData, i * DestType::getBytesPerSample()), numDestChannels);
-                dest.convertSamples (SourceType (*source), numSamples);
 
-                if (source[1] != 0)
+                if (*source != 0)
+                {
+                    dest.convertSamples (SourceType (*source), numSamples);
                     ++source;
+                }
+                else
+                {
+                    dest.clearSamples (numSamples);
+                }
             }
         }
     };

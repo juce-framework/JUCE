@@ -633,45 +633,8 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
                                             const int startSample,
                                             const int numSamples) const
 {
-    jassert (startSample >= 0 && startSample + numSamples <= size && numChannels > 0);
-
-    if (numSamples > 0)
-    {
-        HeapBlock<int> tempBuffer;
-        HeapBlock<int*> chans (numChannels + 1);
-        chans [numChannels] = 0;
-
-        if (writer->isFloatingPoint())
-        {
-            for (int i = numChannels; --i >= 0;)
-                chans[i] = reinterpret_cast<int*> (channels[i] + startSample);
-        }
-        else
-        {
-            tempBuffer.malloc (numSamples * numChannels);
-
-            for (int j = 0; j < numChannels; ++j)
-            {
-                int* const dest = tempBuffer + j * numSamples;
-                const float* const src = channels[j] + startSample;
-                chans[j] = dest;
-
-                for (int i = 0; i < numSamples; ++i)
-                {
-                    const double samp = src[i];
-
-                    if (samp <= -1.0)
-                        dest[i] = std::numeric_limits<int>::min();
-                    else if (samp >= 1.0)
-                        dest[i] = std::numeric_limits<int>::max();
-                    else
-                        dest[i] = roundToInt (std::numeric_limits<int>::max() * samp);
-                }
-            }
-        }
-
-        writer->write ((const int**) chans.getData(), numSamples);
-    }
+    jassert (writer != 0);
+    writer->writeFromAudioSampleBuffer (*this, startSample, numSamples);
 }
 
 END_JUCE_NAMESPACE

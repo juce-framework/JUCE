@@ -26,6 +26,9 @@
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
+#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
+ #include "containers/juce_AbstractFifo.h"
+#endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
  #include "containers/juce_Array.h"
 #endif

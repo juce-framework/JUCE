@@ -126,7 +126,9 @@
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormat.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormatManager.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormatManager.h"/>
+            <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormatReader.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormatReader.h"/>
+            <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormatWriter.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormatWriter.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.h"/>
@@ -345,6 +347,8 @@
           </Filter>
         </Filter>
         <Filter Name="containers">
+          <File RelativePath="..\..\src\containers\juce_AbstractFifo.cpp"/>
+          <File RelativePath="..\..\src\containers\juce_AbstractFifo.h"/>
           <File RelativePath="..\..\src\containers\juce_Array.h"/>
           <File RelativePath="..\..\src\containers\juce_ArrayAllocationBase.h"/>
           <File RelativePath="..\..\src\containers\juce_BigInteger.cpp"/>

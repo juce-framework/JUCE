@@ -27,112 +27,19 @@
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 
+
 //==============================================================================
-/* This is a rough-and-ready circular buffer, used to allow the audio thread to
-   push data quickly into a queue, allowing a background thread to come along and
-   write it to disk later.
+/** A simple class that acts as an AudioIODeviceCallback and writes the
+    incoming audio data to a WAV file.
 */
-class CircularAudioBuffer
-{
-public:
-    CircularAudioBuffer (const int numChannels, const int numSamples)
-        : buffer (numChannels, numSamples)
-    {
-        clear();
-    }
-
-    ~CircularAudioBuffer()
-    {
-    }
-
-    void clear()
-    {
-        buffer.clear();
-
-        const ScopedLock sl (bufferLock);
-        bufferValidStart = bufferValidEnd = 0;
-    }
-
-    void addSamplesToBuffer (const AudioSampleBuffer& sourceBuffer, int numSamples)
-    {
-        const int bufferSize = buffer.getNumSamples();
-
-        bufferLock.enter();
-        int newDataStart = bufferValidEnd;
-        int newDataEnd = newDataStart + numSamples;
-        const int actualNewDataEnd = newDataEnd;
-        bufferValidStart = jmax (bufferValidStart, newDataEnd - bufferSize);
-        bufferLock.exit();
-
-        newDataStart %= bufferSize;
-        newDataEnd %= bufferSize;
-
-        if (newDataEnd < newDataStart)
-        {
-            for (int i = jmin (buffer.getNumChannels(), sourceBuffer.getNumChannels()); --i >= 0;)
-            {
-                buffer.copyFrom (i, newDataStart, sourceBuffer, i, 0, bufferSize - newDataStart);
-                buffer.copyFrom (i, 0, sourceBuffer, i, bufferSize - newDataStart, newDataEnd);
-            }
-        }
-        else
-        {
-            for (int i = jmin (buffer.getNumChannels(), sourceBuffer.getNumChannels()); --i >= 0;)
-                buffer.copyFrom (i, newDataStart, sourceBuffer, i, 0, newDataEnd - newDataStart);
-        }
-
-        const ScopedLock sl (bufferLock);
-        bufferValidEnd = actualNewDataEnd;
-    }
-
-    int readSamplesFromBuffer (AudioSampleBuffer& destBuffer, int numSamples)
-    {
-        const int bufferSize = buffer.getNumSamples();
-
-        bufferLock.enter();
-        int availableDataStart = bufferValidStart;
-        const int numSamplesDone = jmin (numSamples, bufferValidEnd - availableDataStart);
-        int availableDataEnd = availableDataStart + numSamplesDone;
-        bufferValidStart = availableDataEnd;
-        bufferLock.exit();
-
-        availableDataStart %= bufferSize;
-        availableDataEnd %= bufferSize;
-
-        if (availableDataEnd < availableDataStart)
-        {
-            for (int i = jmin (buffer.getNumChannels(), destBuffer.getNumChannels()); --i >= 0;)
-            {
-                destBuffer.copyFrom (i, 0, buffer, i, availableDataStart, bufferSize - availableDataStart);
-                destBuffer.copyFrom (i, bufferSize - availableDataStart, buffer, i, 0, availableDataEnd);
-            }
-        }
-        else
-        {
-            for (int i = jmin (buffer.getNumChannels(), destBuffer.getNumChannels()); --i >= 0;)
-                destBuffer.copyFrom (i, 0, buffer, i, availableDataStart, numSamplesDone);
-        }
-
-        return numSamplesDone;
-    }
-
-private:
-    CriticalSection bufferLock;
-    AudioSampleBuffer buffer;
-    int bufferValidStart, bufferValidEnd;
-};
-
-//==============================================================================
-class AudioRecorder  : public AudioIODeviceCallback,
-                       public Thread
+class AudioRecorder  : public AudioIODeviceCallback
 {
 public:
     AudioRecorder()
-        : Thread ("audio recorder"),
-          circularBuffer (2, 48000),
-          recording (false),
-          sampleRate (0)
+        : backgroundThread ("Audio Recorder Thread"),
+          sampleRate (0), activeWriter (0)
     {
+        backgroundThread.startThread();
     }
 
     ~AudioRecorder()
@@ -147,24 +54,49 @@ public:
 
         if (sampleRate > 0)
         {
-            fileToRecord = file;
-            startThread();
+            // Create an OutputStream to write to our destination file...
+            file.deleteFile();
+            ScopedPointer<FileOutputStream> fileStream (file.createOutputStream());
 
-            circularBuffer.clear();
-            recording = true;
+            if (fileStream != 0)
+            {
+                // Now create a WAV writer object that writes to our output stream...
+                WavAudioFormat wavFormat;
+                AudioFormatWriter* writer = wavFormat.createWriterFor (fileStream, sampleRate, 1, 16, StringPairArray(), 0);
+
+                if (writer != 0)
+                {
+                    fileStream.release(); // (passes responsibility for deleting the stream to the writer object that is now using it)
+
+                    // Now we'll create one of these helper objects which will act as a FIFO buffer, and will
+                    // write the data to disk on our background thread.
+                    threadedWriter = new AudioFormatWriter::ThreadedWriter (writer, backgroundThread, 32768);
+
+                    // And now, swap over our active writer pointer so that the audio callback will start using it..
+                    const ScopedLock sl (writerLock);
+                    activeWriter = threadedWriter;
+                }
+            }
         }
     }
 
     void stop()
     {
-        recording = false;
+        // First, clear this pointer to stop the audio callback from using our writer object..
+        {
+            const ScopedLock sl (writerLock);
+            activeWriter = 0;
+        }
 
-        stopThread (5000);
+        // Now we can delete the writer object. It's done in this order because the deletion could
+        // take a little time while remaining data gets flushed to disk, so it's best to avoid blocking
+        // the audio callback while this happens.
+        threadedWriter = 0;
     }
 
     bool isRecording() const
     {
-        return isThreadRunning() && recording;
+        return activeWriter != 0;
     }
 
     //==============================================================================
@@ -182,11 +114,10 @@ public:
                                 float** outputChannelData, int numOutputChannels,
                                 int numSamples)
     {
-        if (recording)
-        {
-            const AudioSampleBuffer incomingData ((float**) inputChannelData, numInputChannels, numSamples);
-            circularBuffer.addSamplesToBuffer (incomingData, numSamples);
-        }
+        const ScopedLock sl (writerLock);
+
+        if (activeWriter != 0)
+            activeWriter->write (inputChannelData, numSamples);
 
         // We need to clear the output buffers, in case they're full of junk..
         for (int i = 0; i < numOutputChannels; ++i)
@@ -194,44 +125,13 @@ public:
                 zeromem (outputChannelData[i], sizeof (float) * numSamples);
     }
 
-    //==============================================================================
-    void run()
-    {
-        fileToRecord.deleteFile();
-
-        OutputStream* outStream = fileToRecord.createOutputStream();
-        if (outStream == 0)
-            return;
-
-        WavAudioFormat wavFormat;
-        AudioFormatWriter* writer = wavFormat.createWriterFor (outStream, sampleRate, 1, 16, StringPairArray(), 0);
-
-        if (writer == 0)
-        {
-            delete outStream;
-            return;
-        }
-
-        AudioSampleBuffer tempBuffer (2, 8192);
-
-        while (! threadShouldExit())
-        {
-            int numSamplesReady = circularBuffer.readSamplesFromBuffer (tempBuffer, tempBuffer.getNumSamples());
-
-            if (numSamplesReady > 0)
-                tempBuffer.writeToAudioWriter (writer, 0, numSamplesReady);
-
-            Thread::sleep (1);
-        }
-
-        delete writer;
-    }
-
-    File fileToRecord;
+private:
+    TimeSliceThread backgroundThread; // the thread that will write our audio data to disk
+    ScopedPointer<AudioFormatWriter::ThreadedWriter> threadedWriter; // the FIFO used to buffer the incoming data
     double sampleRate;
-    bool recording;
 
-    CircularAudioBuffer circularBuffer;
+    CriticalSection writerLock;
+    AudioFormatWriter::ThreadedWriter* volatile activeWriter;
 };
 
 //[/MiscUserDefs]
@@ -275,10 +175,9 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
 AudioDemoRecordPage::~AudioDemoRecordPage()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-    recorder->stop();
     deviceManager.removeAudioCallback (recorder);
-    delete recorder;
     deviceManager.removeAudioCallback (liveAudioDisplayComp);
+    recorder = 0;
     //[/Destructor_pre]
 
     deleteAndZero (liveAudioDisplayComp);

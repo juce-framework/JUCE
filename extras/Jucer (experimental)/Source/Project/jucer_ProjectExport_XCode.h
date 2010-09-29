@@ -505,7 +505,7 @@ private:
         s.add ("ZERO_LINK = NO");
 
         if (! isRTAS())   // (dwarf seems to be incompatible with the RTAS libs)
-            s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf-with-dsym\"");
+            s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf\"");
 
         s.add ("PRODUCT_NAME = \"" + config.getTargetBinaryName().toString() + "\"");
         return s;

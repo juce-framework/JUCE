@@ -188,7 +188,7 @@ public:
             {
                 switch (bitsPerSample)
                 {
-                    case 8:     ReadHelper<AudioData::Int32, AudioData::Int8, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
+                    case 8:     ReadHelper<AudioData::Int32, AudioData::Int8,  AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
                     case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
                     case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
                     case 32:    ReadHelper<AudioData::Int32, AudioData::Int32, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
@@ -199,7 +199,7 @@ public:
             {
                 switch (bitsPerSample)
                 {
-                    case 8:     ReadHelper<AudioData::Int32, AudioData::Int8, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
+                    case 8:     ReadHelper<AudioData::Int32, AudioData::Int8,  AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
                     case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
                     case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;
                     case 32:    ReadHelper<AudioData::Int32, AudioData::Int32, AudioData::BigEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, numChannels, numThisTime); break;

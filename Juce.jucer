@@ -81,8 +81,12 @@
                 resource="0" file="src/audio/audio_file_formats/juce_AudioFormatManager.cpp"/>
           <FILE id="cz5oBf3fx" name="juce_AudioFormatManager.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioFormatManager.h"/>
+          <FILE id="0TiI3po" name="juce_AudioFormatReader.cpp" compile="1" resource="0"
+                file="src/audio/audio_file_formats/juce_AudioFormatReader.cpp"/>
           <FILE id="x3bpEuQrJ" name="juce_AudioFormatReader.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioFormatReader.h"/>
+          <FILE id="G8yVpHF" name="juce_AudioFormatWriter.cpp" compile="1" resource="0"
+                file="src/audio/audio_file_formats/juce_AudioFormatWriter.cpp"/>
           <FILE id="eCeRZdLR" name="juce_AudioFormatWriter.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioFormatWriter.h"/>
           <FILE id="Fo4wJzEFh" name="juce_AudioSubsectionReader.cpp" compile="1"
@@ -346,6 +350,10 @@
         </GROUP>
       </GROUP>
       <GROUP id="jDNvJtXHE" name="containers">
+        <FILE id="ChnNms" name="juce_AbstractFifo.cpp" compile="1" resource="0"
+              file="src/containers/juce_AbstractFifo.cpp"/>
+        <FILE id="llcRKU5" name="juce_AbstractFifo.h" compile="0" resource="0"
+              file="src/containers/juce_AbstractFifo.h"/>
         <FILE id="MMVvnl2oo" name="juce_Array.h" compile="0" resource="0" file="src/containers/juce_Array.h"/>
         <FILE id="I2LILZNlU" name="juce_ArrayAllocationBase.h" compile="0"
               resource="0" file="src/containers/juce_ArrayAllocationBase.h"/>

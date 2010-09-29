@@ -131,6 +131,8 @@
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioCDReader.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatManager.cpp"/>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatReader.cpp"/>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatWriter.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnail.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.cpp"/>
@@ -175,6 +177,7 @@
     <ClCompile Include="..\..\src\audio\processors\juce_GenericAudioProcessorEditor.cpp"/>
     <ClCompile Include="..\..\src\audio\synthesisers\juce_Sampler.cpp"/>
     <ClCompile Include="..\..\src\audio\synthesisers\juce_Synthesiser.cpp"/>
+    <ClCompile Include="..\..\src\containers\juce_AbstractFifo.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_BigInteger.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_DynamicObject.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_Expression.cpp"/>
@@ -500,6 +503,7 @@
     <ClInclude Include="..\..\src\audio\processors\juce_GenericAudioProcessorEditor.h"/>
     <ClInclude Include="..\..\src\audio\synthesisers\juce_Sampler.h"/>
     <ClInclude Include="..\..\src\audio\synthesisers\juce_Synthesiser.h"/>
+    <ClInclude Include="..\..\src\containers\juce_AbstractFifo.h"/>
     <ClInclude Include="..\..\src\containers\juce_Array.h"/>
     <ClInclude Include="..\..\src\containers\juce_ArrayAllocationBase.h"/>
     <ClInclude Include="..\..\src\containers\juce_BigInteger.h"/>

@@ -48,6 +48,8 @@ OBJECTS := \
   $(OBJDIR)/juce_AudioCDReader_c730f7a6.o \
   $(OBJDIR)/juce_AudioFormat_6605d0f9.o \
   $(OBJDIR)/juce_AudioFormatManager_949148fe.o \
+  $(OBJDIR)/juce_AudioFormatReader_36f0295c.o \
+  $(OBJDIR)/juce_AudioFormatWriter_11461d0c.o \
   $(OBJDIR)/juce_AudioSubsectionReader_65f61a0a.o \
   $(OBJDIR)/juce_AudioThumbnail_cb99b4b4.o \
   $(OBJDIR)/juce_AudioThumbnailCache_89a7c678.o \
@@ -92,6 +94,7 @@ OBJECTS := \
   $(OBJDIR)/juce_GenericAudioProcessorEditor_2e8ec30d.o \
   $(OBJDIR)/juce_Sampler_98f716a4.o \
   $(OBJDIR)/juce_Synthesiser_2bffa1dd.o \
+  $(OBJDIR)/juce_AbstractFifo_dfc0bd23.o \
   $(OBJDIR)/juce_BigInteger_63589133.o \
   $(OBJDIR)/juce_DynamicObject_69d02ab3.o \
   $(OBJDIR)/juce_Expression_1e9a5aad.o \
@@ -404,6 +407,16 @@ $(OBJDIR)/juce_AudioFormatManager_949148fe.o: ../../src/audio/audio_file_formats
 	@echo "Compiling juce_AudioFormatManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_AudioFormatReader_36f0295c.o: ../../src/audio/audio_file_formats/juce_AudioFormatReader.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_AudioFormatReader.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AudioFormatWriter_11461d0c.o: ../../src/audio/audio_file_formats/juce_AudioFormatWriter.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_AudioFormatWriter.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_AudioSubsectionReader_65f61a0a.o: ../../src/audio/audio_file_formats/juce_AudioSubsectionReader.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_AudioSubsectionReader.cpp"
@@ -622,6 +635,11 @@ $(OBJDIR)/juce_Sampler_98f716a4.o: ../../src/audio/synthesisers/juce_Sampler.cpp
 $(OBJDIR)/juce_Synthesiser_2bffa1dd.o: ../../src/audio/synthesisers/juce_Synthesiser.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_Synthesiser.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AbstractFifo_dfc0bd23.o: ../../src/containers/juce_AbstractFifo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_AbstractFifo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BigInteger_63589133.o: ../../src/containers/juce_BigInteger.cpp

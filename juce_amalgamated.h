@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	70
+#define JUCE_BUILDNUMBER	71
 
 /** Current Juce version number.
 
@@ -2761,6 +2761,534 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
+#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
+
+/*** Start of inlined file: juce_AbstractFifo.h ***/
+#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
+#define __JUCE_ABSTRACTFIFO_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Atomic.h ***/
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+#define __JUCE_ATOMIC_JUCEHEADER__
+
+/**
+	Simple class to hold a primitive value and perform atomic operations on it.
+
+	The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
+	There are methods to perform most of the basic atomic operations.
+*/
+template <typename Type>
+class Atomic
+{
+public:
+	/** Creates a new value, initialised to zero. */
+	inline Atomic() throw()
+		: value (0)
+	{
+	}
+
+	/** Creates a new value, with a given initial value. */
+	inline Atomic (const Type initialValue) throw()
+		: value (initialValue)
+	{
+	}
+
+	/** Copies another value (atomically). */
+	inline Atomic (const Atomic& other) throw()
+		: value (other.get())
+	{
+	}
+
+	/** Destructor. */
+	inline ~Atomic() throw()
+	{
+		// This class can only be used for types which are 32 or 64 bits in size.
+		static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
+	}
+
+	/** Atomically reads and returns the current value. */
+	Type get() const throw();
+
+	/** Copies another value onto this one (atomically). */
+	inline Atomic& operator= (const Atomic& other) throw()	  { exchange (other.get()); return *this; }
+
+	/** Copies another value onto this one (atomically). */
+	inline Atomic& operator= (const Type newValue) throw()	  { exchange (newValue); return *this; }
+
+	/** Atomically sets the current value. */
+	void set (Type newValue) throw()				{ exchange (newValue); }
+
+	/** Atomically sets the current value, returning the value that was replaced. */
+	Type exchange (Type value) throw();
+
+	/** Atomically adds a number to this value, returning the new value. */
+	Type operator+= (Type amountToAdd) throw();
+
+	/** Atomically subtracts a number from this value, returning the new value. */
+	Type operator-= (Type amountToSubtract) throw();
+
+	/** Atomically increments this value, returning the new value. */
+	Type operator++() throw();
+
+	/** Atomically decrements this value, returning the new value. */
+	Type operator--() throw();
+
+	/** Atomically compares this value with a target value, and if it is equal, sets
+		this to be equal to a new value.
+
+		This operation is the atomic equivalent of doing this:
+		@code
+		bool compareAndSetBool (Type newValue, Type valueToCompare)
+		{
+			if (get() == valueToCompare)
+			{
+				set (newValue);
+				return true;
+			}
+
+			return false;
+		}
+		@endcode
+
+		@returns true if the comparison was true and the value was replaced; false if
+				 the comparison failed and the value was left unchanged.
+		@see compareAndSetValue
+	*/
+	bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
+
+	/** Atomically compares this value with a target value, and if it is equal, sets
+		this to be equal to a new value.
+
+		This operation is the atomic equivalent of doing this:
+		@code
+		Type compareAndSetValue (Type newValue, Type valueToCompare)
+		{
+			Type oldValue = get();
+			if (oldValue == valueToCompare)
+				set (newValue);
+
+			return oldValue;
+		}
+		@endcode
+
+		@returns the old value before it was changed.
+		@see compareAndSetBool
+	*/
+	Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
+
+	/** Implements a memory read/write barrier. */
+	static void memoryBarrier() throw();
+
+	JUCE_ALIGN(8)
+
+	/** The raw value that this class operates on.
+		This is exposed publically in case you need to manipulate it directly
+		for performance reasons.
+	*/
+	volatile Type value;
+
+private:
+	static inline Type castFrom32Bit (int32 value) throw()	{ return *(Type*) &value; }
+	static inline Type castFrom64Bit (int64 value) throw()	{ return *(Type*) &value; }
+	static inline int32 castTo32Bit (Type value) throw()	  { return *(int32*) &value; }
+	static inline int64 castTo64Bit (Type value) throw()	  { return *(int64*) &value; }
+};
+
+/*
+	The following code is in the header so that the atomics can be inlined where possible...
+*/
+#if (JUCE_IOS && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
+	  || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
+  #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+	#define JUCE_MAC_ATOMICS_VOLATILE
+  #else
+	#define JUCE_MAC_ATOMICS_VOLATILE volatile
+  #endif
+
+  #if JUCE_PPC || JUCE_IOS
+	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
+	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()   { jassertfalse; return *a += b; }
+	template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return ++*a; }
+	template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return --*a; }
+	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) throw()
+		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
+  #endif
+
+#elif JUCE_GCC
+  #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
+
+  #if JUCE_IOS
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
+  #endif
+
+#else
+  #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
+
+  #if JUCE_USE_INTRINSICS || JUCE_64BIT
+	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
+					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
+	#define juce_InterlockedIncrement(a)		_InterlockedIncrement(a)
+	#define juce_InterlockedDecrement(a)		_InterlockedDecrement(a)
+	#define juce_InterlockedExchangeAdd(a, b)	   _InterlockedExchangeAdd(a, b)
+	#define juce_InterlockedCompareExchange(a, b, c)	_InterlockedCompareExchange(a, b, c)
+	#define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
+	#define juce_MemoryBarrier _ReadWriteBarrier
+  #else
+	// (these are defined in juce_win32_Threads.cpp)
+	long juce_InterlockedExchange (volatile long* a, long b) throw();
+	long juce_InterlockedIncrement (volatile long* a) throw();
+	long juce_InterlockedDecrement (volatile long* a) throw();
+	long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
+	long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
+	__int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
+	void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
+  #endif
+
+  #if JUCE_64BIT
+	#pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+	#define juce_InterlockedExchangeAdd64(a, b)	 _InterlockedExchangeAdd64(a, b)
+	#define juce_InterlockedExchange64(a, b)	_InterlockedExchange64(a, b)
+	#define juce_InterlockedIncrement64(a)	  _InterlockedIncrement64(a)
+	#define juce_InterlockedDecrement64(a)	  _InterlockedDecrement64(a)
+  #else
+	// None of these atomics are available in a 32-bit Windows build!!
+	template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
+	template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()	  { jassertfalse; Type old = *a; *a = b; return old; }
+	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
+	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
+  #endif
+#endif
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4311)  // (truncation warning)
+#endif
+
+template <typename Type>
+inline Type Atomic<Type>::get() const throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
+							  : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value));
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
+							  : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
+  #elif JUCE_ATOMICS_GCC
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
+							  : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::exchange (const Type newValue) throw()
+{
+  #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
+	Type currentVal = value;
+	while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
+	return currentVal;
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchange ((volatile long*) &value, (long) castTo32Bit (newValue)))
+							  : castFrom64Bit ((int64) juce_InterlockedExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue)));
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
+							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, amountToAdd);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
+{
+	return operator+= (juce_negate (amountToSubtract));
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator++() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicIncrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
+							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, 1);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator--() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicDecrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
+							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, -1);
+  #endif
+}
+
+template <typename Type>
+inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
+  #elif JUCE_ATOMICS_GCC
+	return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
+							  : __sync_bool_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue));
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	for (;;) // Annoying workaround for OSX only having a bool CAS operation..
+	{
+		if (compareAndSetBool (newValue, valueToCompare))
+			return valueToCompare;
+
+		const Type result = value;
+		if (result != valueToCompare)
+			return result;
+	}
+
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
+							  : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
+  #elif JUCE_ATOMICS_GCC
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
+							  : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
+  #endif
+}
+
+template <typename Type>
+inline void Atomic<Type>::memoryBarrier() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	OSMemoryBarrier();
+  #elif JUCE_ATOMICS_GCC
+	__sync_synchronize();
+  #elif JUCE_ATOMICS_WINDOWS
+	juce_MemoryBarrier();
+  #endif
+}
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
+
+#endif   // __JUCE_ATOMIC_JUCEHEADER__
+/*** End of inlined file: juce_Atomic.h ***/
+
+/**
+	Encapsulates the logic required to implement a lock-free FIFO.
+
+	This class handles the logic needed when building a single-reader, single-writer FIFO.
+
+	It doesn't actually hold any data itself, but your FIFO class can use one of these to manage
+	its position and status when reading or writing to it.
+
+	To use it, you can call prepareToWrite() to determine the position within your own buffer that
+	an incoming block of data should be stored, and prepareToRead() to find out when the next
+	outgoing block should be read from.
+
+	e.g.
+	@code
+	class MyFifo
+	{
+	public:
+		MyFifo()  : abstractFifo (1024)
+		{
+		}
+
+		void addToFifo (const int* someData, int numItems)
+		{
+			int start1, size1, start2, size2;
+			prepareToWrite (numItems, start1, size1, start2, size2);
+
+			if (size1 > 0)
+				copySomeData (myBuffer + start1, someData, size1);
+
+			if (size2 > 0)
+				copySomeData (myBuffer + start2, someData + size1, size2);
+
+			finishedWrite (size1 + size2);
+		}
+
+		void readFromFifo (int* someData, int numItems)
+		{
+			int start1, size1, start2, size2;
+			prepareToRead (numSamples, start1, size1, start2, size2);
+
+			if (size1 > 0)
+				copySomeData (someData, myBuffer + start1, size1);
+
+			if (size2 > 0)
+				copySomeData (someData + size1, myBuffer + start2, size2);
+
+			finishedRead (size1 + size2);
+		}
+
+	private:
+		AbstractFifo abstractFifo;
+		int myBuffer [1024];
+	};
+	@endcode
+*/
+class JUCE_API  AbstractFifo
+{
+public:
+
+	/** Creates a FIFO to manage a buffer with the specified capacity. */
+	AbstractFifo (int capacity) throw();
+
+	/** Destructor */
+	~AbstractFifo();
+
+	/** Returns the total size of the buffer being managed. */
+	int getTotalSize() const throw();
+
+	/** Returns the number of items that can currently be added to the buffer without it overflowing. */
+	int getFreeSpace() const throw();
+
+	/** Returns the number of items that can currently be read from the buffer. */
+	int getNumReady() const throw();
+
+	/** Clears the buffer positions, so that it appears empty. */
+	void reset() throw();
+
+	/** Changes the buffer's total size.
+		Note that this isn't thread-safe, so don't call it if there's any danger that it
+		might overlap with a call to any other method in this class!
+	*/
+	void setTotalSize (int newSize) throw();
+
+	/** Returns the location within the buffer at which an incoming block of data should be written.
+
+		Because the section of data that you want to add to the buffer may overlap the end
+		and wrap around to the start, two blocks within your buffer are returned, and you
+		should copy your data into the first one, with any remaining data spilling over into
+		the second.
+
+		If the number of items you ask for is too large to fit within the buffer's free space, then
+		blockSize1 + blockSize2 may add up to a lower value than numToWrite.
+
+		After calling this method, and writing your data, you must call finishedWrite() to tell the
+		FIFO how much data you actually added.
+
+		e.g.
+		@code
+		void addToFifo (const int* someData, int numItems)
+		{
+			int start1, size1, start2, size2;
+			prepareToWrite (numItems, start1, size1, start2, size2);
+
+			if (size1 > 0)
+				copySomeData (myBuffer + start1, someData, size1);
+
+			if (size2 > 0)
+				copySomeData (myBuffer + start2, someData + size1, size2);
+
+			finishedWrite (size1 + size2);
+		}
+		@endcode
+
+		@param numToWrite	   indicates how many items you'd like to add to the buffer
+		@param startIndex1	  on exit, this will contain the start index in your buffer at which your data should be written
+		@param blockSize1	   on exit, this indicates how many items can be written to the block starting at startIndex1
+		@param startIndex2	  on exit, this will contain the start index in your buffer at which any data that didn't fit into
+								the first block should be written
+		@param blockSize1	   on exit, this indicates how many items can be written to the block starting at startIndex2
+		@see finishedWrite
+	*/
+	void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) throw();
+
+	/** Called after reading from the FIFO, to indicate that this many items have been added.
+		@see prepareToWrite
+	*/
+	void finishedWrite (int numWritten) throw();
+
+	/** Returns the location within the buffer from which the next block of data should be read.
+
+		Because the section of data that you want to read from the buffer may overlap the end
+		and wrap around to the start, two blocks within your buffer are returned, and you
+		should read from both of them.
+
+		If the number of items you ask for is greater than the amount of data available, then
+		blockSize1 + blockSize2 may add up to a lower value than numWanted.
+
+		After calling this method, and reading the data, you must call finishedRead() to tell the
+		FIFO how much data you have consumed.
+
+		e.g.
+		@code
+		void readFromFifo (int* someData, int numItems)
+		{
+			int start1, size1, start2, size2;
+			prepareToRead (numSamples, start1, size1, start2, size2);
+
+			if (size1 > 0)
+				copySomeData (someData, myBuffer + start1, size1);
+
+			if (size2 > 0)
+				copySomeData (someData + size1, myBuffer + start2, size2);
+
+			finishedRead (size1 + size2);
+		}
+		@endcode
+
+		@param numToWrite	   indicates how many items you'd like to add to the buffer
+		@param startIndex1	  on exit, this will contain the start index in your buffer at which your data should be written
+		@param blockSize1	   on exit, this indicates how many items can be written to the block starting at startIndex1
+		@param startIndex2	  on exit, this will contain the start index in your buffer at which any data that didn't fit into
+								the first block should be written
+		@param blockSize1	   on exit, this indicates how many items can be written to the block starting at startIndex2
+		@see finishedRead
+	*/
+	void prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) throw();
+
+	/** Called after reading from the FIFO, to indicate that this many items have now been consumed.
+		@see prepareToRead
+	*/
+	void finishedRead (int numRead) throw();
+
+	juce_UseDebuggingNewOperator
+
+private:
+	int bufferSize;
+	Atomic <int> validStart, validEnd;
+
+	AbstractFifo (const AbstractFifo&);
+	AbstractFifo& operator= (const AbstractFifo&);
+};
+
+#endif   // __JUCE_ABSTRACTFIFO_JUCEHEADER__
+/*** End of inlined file: juce_AbstractFifo.h ***/
+
+
+#endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
 
 /*** Start of inlined file: juce_Array.h ***/
@@ -3471,15 +3999,15 @@ private:
 /*** End of inlined file: juce_CriticalSection.h ***/
 
 /**
-	Holds a list of simple objects, such as ints, doubles, or pointers.
+	Holds a resizable array of primitive or copy-by-value objects.
 
 	Examples of arrays are: Array<int>, Array<Rectangle> or Array<MyClass*>
 
-	The array can be used to hold simple, non-polymorphic objects as well as primitive types - to
+	The Array class can be used to hold simple, non-polymorphic objects as well as primitive types - to
 	do so, the class must fulfil these requirements:
-	- it must have a copy constructor and operator=
-	- it must be able to be relocated in memory by a memcpy without this causing a problem - so no
-	  objects whose functionality relies on pointers or references to themselves can be used.
+	- it must have a copy constructor and assignment operator
+	- it must be able to be relocated in memory by a memcpy without this causing any problems - so
+	  objects whose functionality relies on external pointers or references to themselves can be used.
 
 	You can of course have an array of pointers to any kind of object, e.g. Array <MyClass*>, but if
 	you do this, the array doesn't take any ownership of the objects - see the OwnedArray class or the
@@ -5756,341 +6284,6 @@ private:
 /*** Start of inlined file: juce_ReferenceCountedObject.h ***/
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 #define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_Atomic.h ***/
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-#define __JUCE_ATOMIC_JUCEHEADER__
-
-/**
-	Simple class to hold a primitive value and perform atomic operations on it.
-
-	The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
-	There are methods to perform most of the basic atomic operations.
-*/
-template <typename Type>
-class Atomic
-{
-public:
-	/** Creates a new value, initialised to zero. */
-	inline Atomic() throw()
-		: value (0)
-	{
-	}
-
-	/** Creates a new value, with a given initial value. */
-	inline Atomic (const Type initialValue) throw()
-		: value (initialValue)
-	{
-	}
-
-	/** Copies another value (atomically). */
-	inline Atomic (const Atomic& other) throw()
-		: value (other.get())
-	{
-	}
-
-	/** Destructor. */
-	inline ~Atomic() throw()
-	{
-		// This class can only be used for types which are 32 or 64 bits in size.
-		static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
-	}
-
-	/** Atomically reads and returns the current value. */
-	Type get() const throw();
-
-	/** Copies another value onto this one (atomically). */
-	inline Atomic& operator= (const Atomic& other) throw()	  { exchange (other.get()); return *this; }
-
-	/** Copies another value onto this one (atomically). */
-	inline Atomic& operator= (const Type newValue) throw()	  { exchange (newValue); return *this; }
-
-	/** Atomically sets the current value. */
-	void set (Type newValue) throw()				{ exchange (newValue); }
-
-	/** Atomically sets the current value, returning the value that was replaced. */
-	Type exchange (Type value) throw();
-
-	/** Atomically adds a number to this value, returning the new value. */
-	Type operator+= (Type amountToAdd) throw();
-
-	/** Atomically subtracts a number from this value, returning the new value. */
-	Type operator-= (Type amountToSubtract) throw();
-
-	/** Atomically increments this value, returning the new value. */
-	Type operator++() throw();
-
-	/** Atomically decrements this value, returning the new value. */
-	Type operator--() throw();
-
-	/** Atomically compares this value with a target value, and if it is equal, sets
-		this to be equal to a new value.
-
-		This operation is the atomic equivalent of doing this:
-		@code
-		bool compareAndSetBool (Type newValue, Type valueToCompare)
-		{
-			if (get() == valueToCompare)
-			{
-				set (newValue);
-				return true;
-			}
-
-			return false;
-		}
-		@endcode
-
-		@returns true if the comparison was true and the value was replaced; false if
-				 the comparison failed and the value was left unchanged.
-		@see compareAndSetValue
-	*/
-	bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
-
-	/** Atomically compares this value with a target value, and if it is equal, sets
-		this to be equal to a new value.
-
-		This operation is the atomic equivalent of doing this:
-		@code
-		Type compareAndSetValue (Type newValue, Type valueToCompare)
-		{
-			Type oldValue = get();
-			if (oldValue == valueToCompare)
-				set (newValue);
-
-			return oldValue;
-		}
-		@endcode
-
-		@returns the old value before it was changed.
-		@see compareAndSetBool
-	*/
-	Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
-
-	/** Implements a memory read/write barrier. */
-	static void memoryBarrier() throw();
-
-	JUCE_ALIGN(8)
-
-	/** The raw value that this class operates on.
-		This is exposed publically in case you need to manipulate it directly
-		for performance reasons.
-	*/
-	volatile Type value;
-
-private:
-	static inline Type castFrom32Bit (int32 value) throw()	{ return *(Type*) &value; }
-	static inline Type castFrom64Bit (int64 value) throw()	{ return *(Type*) &value; }
-	static inline int32 castTo32Bit (Type value) throw()	  { return *(int32*) &value; }
-	static inline int64 castTo64Bit (Type value) throw()	  { return *(int64*) &value; }
-};
-
-/*
-	The following code is in the header so that the atomics can be inlined where possible...
-*/
-#if (JUCE_IOS && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
-	  || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
-  #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-	#define JUCE_MAC_ATOMICS_VOLATILE
-  #else
-	#define JUCE_MAC_ATOMICS_VOLATILE volatile
-  #endif
-
-  #if JUCE_PPC || JUCE_IOS
-	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
-	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()   { jassertfalse; return *a += b; }
-	template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return ++*a; }
-	template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return --*a; }
-	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) throw()
-		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
-	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
-  #endif
-
-#elif JUCE_GCC
-  #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
-
-  #if JUCE_IOS
-	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
-  #endif
-
-#else
-  #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
-
-  #if JUCE_USE_INTRINSICS || JUCE_64BIT
-	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
-					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
-	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
-	#define juce_InterlockedIncrement(a)		_InterlockedIncrement(a)
-	#define juce_InterlockedDecrement(a)		_InterlockedDecrement(a)
-	#define juce_InterlockedExchangeAdd(a, b)	   _InterlockedExchangeAdd(a, b)
-	#define juce_InterlockedCompareExchange(a, b, c)	_InterlockedCompareExchange(a, b, c)
-	#define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
-	#define juce_MemoryBarrier _ReadWriteBarrier
-  #else
-	// (these are defined in juce_win32_Threads.cpp)
-	long juce_InterlockedExchange (volatile long* a, long b) throw();
-	long juce_InterlockedIncrement (volatile long* a) throw();
-	long juce_InterlockedDecrement (volatile long* a) throw();
-	long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
-	long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
-	__int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
-	void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
-  #endif
-
-  #if JUCE_64BIT
-	#pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
-	#define juce_InterlockedExchangeAdd64(a, b)	 _InterlockedExchangeAdd64(a, b)
-	#define juce_InterlockedExchange64(a, b)	_InterlockedExchange64(a, b)
-	#define juce_InterlockedIncrement64(a)	  _InterlockedIncrement64(a)
-	#define juce_InterlockedDecrement64(a)	  _InterlockedDecrement64(a)
-  #else
-	// None of these atomics are available in a 32-bit Windows build!!
-	template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
-	template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()	  { jassertfalse; Type old = *a; *a = b; return old; }
-	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
-	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
-	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
-  #endif
-#endif
-
-#if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4311)  // (truncation warning)
-#endif
-
-template <typename Type>
-inline Type Atomic<Type>::get() const throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
-							  : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value));
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
-							  : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
-  #elif JUCE_ATOMICS_GCC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
-							  : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::exchange (const Type newValue) throw()
-{
-  #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
-	Type currentVal = value;
-	while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
-	return currentVal;
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchange ((volatile long*) &value, (long) castTo32Bit (newValue)))
-							  : castFrom64Bit ((int64) juce_InterlockedExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue)));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
-							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
-  #elif JUCE_ATOMICS_GCC
-	return (Type) __sync_add_and_fetch (&value, amountToAdd);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
-{
-	return operator+= (juce_negate (amountToSubtract));
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator++() throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : (Type) OSAtomicIncrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
-							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
-  #elif JUCE_ATOMICS_GCC
-	return (Type) __sync_add_and_fetch (&value, 1);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator--() throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : (Type) OSAtomicDecrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
-							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
-  #elif JUCE_ATOMICS_GCC
-	return (Type) __sync_add_and_fetch (&value, -1);
-  #endif
-}
-
-template <typename Type>
-inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
-  #elif JUCE_ATOMICS_GCC
-	return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
-							  : __sync_bool_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) throw()
-{
-  #if JUCE_ATOMICS_MAC
-	for (;;) // Annoying workaround for OSX only having a bool CAS operation..
-	{
-		if (compareAndSetBool (newValue, valueToCompare))
-			return valueToCompare;
-
-		const Type result = value;
-		if (result != valueToCompare)
-			return result;
-	}
-
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
-							  : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
-  #elif JUCE_ATOMICS_GCC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
-							  : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
-  #endif
-}
-
-template <typename Type>
-inline void Atomic<Type>::memoryBarrier() throw()
-{
-  #if JUCE_ATOMICS_MAC
-	OSMemoryBarrier();
-  #elif JUCE_ATOMICS_GCC
-	__sync_synchronize();
-  #elif JUCE_ATOMICS_WINDOWS
-	juce_MemoryBarrier();
-  #endif
-}
-
-#if JUCE_MSVC
-  #pragma warning (pop)
-#endif
-
-#endif   // __JUCE_ATOMIC_JUCEHEADER__
-/*** End of inlined file: juce_Atomic.h ***/
 
 /**
 	Adds reference-counting to an object.
@@ -31015,6 +31208,12 @@ public:
 							   int numSamplesToRead,
 							   int samplesPerBlock = 2048);
 
+	/** Writes some samples from an AudioSampleBuffer.
+
+	*/
+	bool writeFromAudioSampleBuffer (const AudioSampleBuffer& source,
+									 int startSample, int numSamples);
+
 	/** Returns the sample rate being used. */
 	double getSampleRate() const throw()	{ return sampleRate; }
 
@@ -31026,6 +31225,47 @@ public:
 
 	/** Returns true if it's a floating-point format, false if it's fixed-point. */
 	bool isFloatingPoint() const throw()	{ return usesFloatingPointData; }
+
+	/**
+		Provides a FIFO for an AudioFormatWriter, allowing you to push incoming
+		data into a buffer which will be flushed to disk by a background thread.
+	*/
+	class ThreadedWriter
+	{
+	public:
+		/** Creates a ThreadedWriter for a given writer and a thread.
+
+			The writer object which is passed in here will be owned and deleted by
+			the ThreadedWriter when it is no longer needed.
+
+			To stop the writer and flush the buffer to disk, simply delete this object.
+		*/
+		ThreadedWriter (AudioFormatWriter* writer,
+						TimeSliceThread& backgroundThread,
+						int numSamplesToBuffer);
+
+		/** Destructor. */
+		~ThreadedWriter();
+
+		/** Pushes some incoming audio data into the FIFO.
+
+			If there's enough free space in the buffer, this will add the data to it,
+
+			If the FIFO is too full to accept this many samples, the method will return
+			false - then you could either wait until the background thread has had time to
+			consume some of the buffered data and try again, or you can give up
+			and lost this block.
+
+			The data must be an array containing the same number of channels as the
+			AudioFormatWriter object is using. None of these channels can be null.
+		*/
+		bool write (const float** data, int numSamples);
+
+	private:
+		class Buffer;
+		friend class ScopedPointer<Buffer>;
+		ScopedPointer<Buffer> buffer;
+	};
 
 	juce_UseDebuggingNewOperator
 
@@ -31057,10 +31297,16 @@ protected:
 			for (int i = 0; i < numDestChannels; ++i)
 			{
 				const DestType dest (addBytesToPointer (destData, i * DestType::getBytesPerSample()), numDestChannels);
-				dest.convertSamples (SourceType (*source), numSamples);
 
-				if (source[1] != 0)
+				if (*source != 0)
+				{
+					dest.convertSamples (SourceType (*source), numSamples);
 					++source;
+				}
+				else
+				{
+					dest.clearSamples (numSamples);
+				}
 			}
 		}
 	};

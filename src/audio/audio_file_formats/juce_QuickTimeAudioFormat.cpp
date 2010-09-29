@@ -342,25 +342,11 @@ QuickTimeAudioFormat::~QuickTimeAudioFormat()
 {
 }
 
-const Array <int> QuickTimeAudioFormat::getPossibleSampleRates()
-{
-    return Array<int>();
-}
+const Array <int> QuickTimeAudioFormat::getPossibleSampleRates()    { return Array<int>(); }
+const Array <int> QuickTimeAudioFormat::getPossibleBitDepths()      { return Array<int>(); }
 
-const Array <int> QuickTimeAudioFormat::getPossibleBitDepths()
-{
-    return Array<int>();
-}
-
-bool QuickTimeAudioFormat::canDoStereo()
-{
-    return true;
-}
-
-bool QuickTimeAudioFormat::canDoMono()
-{
-    return true;
-}
+bool QuickTimeAudioFormat::canDoStereo()    { return true; }
+bool QuickTimeAudioFormat::canDoMono()      { return true; }
 
 //==============================================================================
 AudioFormatReader* QuickTimeAudioFormat::createReaderFor (InputStream* sourceStream,

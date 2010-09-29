@@ -411,20 +411,13 @@ const Array <int> OggVorbisAudioFormat::getPossibleSampleRates()
 
 const Array <int> OggVorbisAudioFormat::getPossibleBitDepths()
 {
-    Array <int> depths;
-    depths.add (32);
-    return depths;
+    const int depths[] = { 32, 0 };
+    return Array <int> (depths);
 }
 
-bool OggVorbisAudioFormat::canDoStereo()
-{
-    return true;
-}
-
-bool OggVorbisAudioFormat::canDoMono()
-{
-    return true;
-}
+bool OggVorbisAudioFormat::canDoStereo()    { return true; }
+bool OggVorbisAudioFormat::canDoMono()      { return true; }
+bool OggVorbisAudioFormat::isCompressed()   { return true; }
 
 AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in,
                                                           const bool deleteStreamIfOpeningFails)
@@ -454,11 +447,6 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
                                                 qualityOptionIndex));
 
     return w->ok ? w.release() : 0;
-}
-
-bool OggVorbisAudioFormat::isCompressed()
-{
-    return true;
 }
 
 const StringArray OggVorbisAudioFormat::getQualityOptions()

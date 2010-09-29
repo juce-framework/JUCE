@@ -202,6 +202,12 @@
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatManager.cpp">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatReader.cpp">
+      <Filter>Juce\Source\audio\audio_file_formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioFormatWriter.cpp">
+      <Filter>Juce\Source\audio\audio_file_formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.cpp">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClCompile>
@@ -372,6 +378,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\audio\synthesisers\juce_Synthesiser.cpp">
       <Filter>Juce\Source\audio\synthesisers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\containers\juce_AbstractFifo.cpp">
+      <Filter>Juce\Source\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\containers\juce_BigInteger.cpp">
       <Filter>Juce\Source\containers</Filter>
@@ -1421,6 +1430,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\audio\synthesisers\juce_Synthesiser.h">
       <Filter>Juce\Source\audio\synthesisers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\containers\juce_AbstractFifo.h">
+      <Filter>Juce\Source\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_Array.h">
       <Filter>Juce\Source\containers</Filter>
