@@ -43,7 +43,7 @@ struct TextAtom
     //==============================================================================
     String atomText;
     float width;
-    uint16 numChars;
+    int numChars;
 
     //==============================================================================
     bool isWhitespace() const       { return CharacterFunctions::isWhitespace (atomText[0]); }

@@ -196,7 +196,7 @@ public:
 
         bufferList->mNumberBuffers = 1;
         bufferList->mBuffers[0].mNumberChannels = inputStreamDesc.mChannelsPerFrame;
-        bufferList->mBuffers[0].mDataByteSize = (UInt32) (samplesPerFrame * inputStreamDesc.mBytesPerFrame) + 16;
+        bufferList->mBuffers[0].mDataByteSize =  jmax ((UInt32) 4096, (UInt32) (samplesPerFrame * inputStreamDesc.mBytesPerFrame) + 16);
 
         dataBuffer.malloc (bufferList->mBuffers[0].mDataByteSize);
         bufferList->mBuffers[0].mData = dataBuffer;
@@ -232,13 +232,44 @@ public:
                       int64 startSampleInFile, int numSamples)
     {
         checkThreadIsAttached();
+        bool ok = true;
 
         while (numSamples > 0)
         {
-            if (! loadFrame ((int) startSampleInFile))
-                return false;
+            if (lastSampleRead != startSampleInFile)
+            {
+                TimeRecord time;
+                time.scale = (TimeScale) inputStreamDesc.mSampleRate;
+                time.base = 0;
+                time.value.hi = 0;
+                time.value.lo = (UInt32) startSampleInFile;
 
-            const int numToDo = jmin (numSamples, samplesPerFrame);
+                OSStatus err = MovieAudioExtractionSetProperty (extractor,
+                                                                kQTPropertyClass_MovieAudioExtraction_Movie,
+                                                                kQTMovieAudioExtractionMoviePropertyID_CurrentTime,
+                                                                sizeof (time), &time);
+
+                if (err != noErr)
+                {
+                    ok = false;
+                    break;
+                }
+            }
+
+            int framesToDo = bufferList->mBuffers[0].mDataByteSize / inputStreamDesc.mBytesPerFrame;
+            bufferList->mBuffers[0].mDataByteSize = inputStreamDesc.mBytesPerFrame * framesToDo;
+
+            UInt32 outFlags = 0;
+            UInt32 actualNumFrames = framesToDo;
+            OSStatus err = MovieAudioExtractionFillBuffer (extractor, &actualNumFrames, bufferList, &outFlags);
+            if (err != noErr)
+            {
+                ok = false;
+                break;
+            }
+
+            lastSampleRead = startSampleInFile + actualNumFrames * samplesPerFrame;
+            const int samplesReceived = actualNumFrames * samplesPerFrame;
 
             for (int j = numDestChannels; --j >= 0;)
             {
@@ -246,49 +277,27 @@ public:
                 {
                     const short* const src = ((const short*) bufferList->mBuffers[0].mData) + j;
 
-                    for (int i = 0; i < numToDo; ++i)
+                    for (int i = 0; i < samplesReceived; ++i)
                         destSamples[j][startOffsetInDestBuffer + i] = src [i << 1] << 16;
                 }
             }
 
-            startOffsetInDestBuffer += numToDo;
-            startSampleInFile += numToDo;
-            numSamples -= numToDo;
+            startOffsetInDestBuffer += samplesReceived;
+            startSampleInFile += samplesReceived;
+            numSamples -= samplesReceived;
+
+            if ((outFlags & kQTMovieAudioExtractionComplete) != 0 && numSamples > 0)
+            {
+                for (int j = numDestChannels; --j >= 0;)
+                    if (destSamples[j] != 0)
+                        zeromem (destSamples[j] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+
+                break;
+            }
         }
 
         detachThread();
-        return true;
-    }
-
-    bool loadFrame (const int sampleNum)
-    {
-        if (lastSampleRead != sampleNum)
-        {
-            TimeRecord time;
-            time.scale = (TimeScale) inputStreamDesc.mSampleRate;
-            time.base = 0;
-            time.value.hi = 0;
-            time.value.lo = (UInt32) sampleNum;
-
-            OSStatus err = MovieAudioExtractionSetProperty (extractor,
-                                                            kQTPropertyClass_MovieAudioExtraction_Movie,
-                                                            kQTMovieAudioExtractionMoviePropertyID_CurrentTime,
-                                                            sizeof (time), &time);
-
-            if (err != noErr)
-                return false;
-        }
-
-        bufferList->mBuffers[0].mDataByteSize = inputStreamDesc.mBytesPerFrame * samplesPerFrame;
-
-        UInt32 outFlags = 0;
-        UInt32 actualNumSamples = samplesPerFrame;
-        OSStatus err = MovieAudioExtractionFillBuffer (extractor, &actualNumSamples,
-                                                       bufferList, &outFlags);
-
-        lastSampleRead = sampleNum + samplesPerFrame;
-
-        return err == noErr;
+        return ok;
     }
 
     juce_UseDebuggingNewOperator
@@ -302,7 +311,7 @@ private:
     const int trackNum;
     double trackUnitsPerFrame;
     int samplesPerFrame;
-    int lastSampleRead;
+    int64 lastSampleRead;
     Thread::ThreadID lastThreadId;
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;

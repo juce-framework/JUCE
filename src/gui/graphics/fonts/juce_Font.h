@@ -67,8 +67,7 @@ public:
                             just Font::plain for the normal style.
         @see FontStyleFlags, getDefaultSansSerifFontName
     */
-    Font (float fontHeight,
-          int styleFlags = plain) throw();
+    Font (float fontHeight, int styleFlags = plain);
 
     /** Creates a font with a given typeface and parameters.
 
@@ -79,15 +78,13 @@ public:
                             just Font::plain for the normal style.
         @see FontStyleFlags, getDefaultSansSerifFontName
     */
-    Font (const String& typefaceName,
-          float fontHeight,
-          int styleFlags) throw();
+    Font (const String& typefaceName, float fontHeight, int styleFlags);
 
     /** Creates a copy of another Font object. */
     Font (const Font& other) throw();
 
     /** Creates a font for a typeface. */
-    Font (const Typeface::Ptr& typeface) throw();
+    Font (const Typeface::Ptr& typeface);
 
     /** Creates a basic sans-serif font at a default height.
 
@@ -95,7 +92,7 @@ public:
         on drawing with - this constructor is here to help initialise objects before changing
         the font's settings later.
     */
-    Font() throw();
+    Font();
 
     /** Copies this font from another one. */
     Font& operator= (const Font& other) throw();
@@ -119,7 +116,7 @@ public:
 
         If a suitable font isn't found on the machine, it'll just use a default instead.
     */
-    void setTypefaceName (const String& faceName) throw();
+    void setTypefaceName (const String& faceName);
 
     /** Returns the name of the typeface family that this font uses.
 
@@ -146,7 +143,7 @@ public:
 
         @see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSansSerifFontName() throw();
+    static const String getDefaultSansSerifFontName();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
@@ -156,7 +153,7 @@ public:
 
         @see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSerifFontName() throw();
+    static const String getDefaultSerifFontName();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
@@ -166,7 +163,7 @@ public:
 
         @see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
     */
-    static const String getDefaultMonospacedFontName() throw();
+    static const String getDefaultMonospacedFontName();
 
     /** Returns the typeface names of the default fonts on the current platform. */
     static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed);
@@ -185,13 +182,13 @@ public:
 
         @see getHeight, setHeightWithoutChangingWidth
     */
-    void setHeight (float newHeight) throw();
+    void setHeight (float newHeight);
 
     /** Changes the font's height without changing its width.
 
         This alters the horizontal scale to compensate for the change in height.
     */
-    void setHeightWithoutChangingWidth (float newHeight) throw();
+    void setHeightWithoutChangingWidth (float newHeight);
 
     /** Returns the height of the font above its baseline.
 
@@ -199,7 +196,7 @@ public:
 
         @see getHeight, getDescent
     */
-    float getAscent() const throw();
+    float getAscent() const;
 
     /** Returns the amount that the font descends below its baseline.
 
@@ -207,7 +204,7 @@ public:
 
         @see getAscent, getHeight
     */
-    float getDescent() const throw();
+    float getDescent() const;
 
     //==============================================================================
     /** Returns the font's style flags.
@@ -225,21 +222,25 @@ public:
                             enum, to set the font's properties
         @see FontStyleFlags
     */
-    void setStyleFlags (int newFlags) throw();
+    void setStyleFlags (int newFlags);
 
     //==============================================================================
     /** Makes the font bold or non-bold. */
-    void setBold (bool shouldBeBold) throw();
+    void setBold (bool shouldBeBold);
+    /** Returns a copy of this font with the bold attribute set. */
+    const Font boldened() const;
     /** Returns true if the font is bold. */
     bool isBold() const throw();
 
     /** Makes the font italic or non-italic. */
-    void setItalic (bool shouldBeItalic) throw();
+    void setItalic (bool shouldBeItalic);
+    /** Returns a copy of this font with the italic attribute set. */
+    const Font italicised() const;
     /** Returns true if the font is italic. */
     bool isItalic() const throw();
 
     /** Makes the font underlined or non-underlined. */
-    void setUnderline (bool shouldBeUnderlined) throw();
+    void setUnderline (bool shouldBeUnderlined);
     /** Returns true if the font is underlined. */
     bool isUnderlined() const throw();
 
@@ -249,7 +250,7 @@ public:
         @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
                             narrower, greater than 1.0 will be stretched out.
     */
-    void setHorizontalScale (float scaleFactor) throw();
+    void setHorizontalScale (float scaleFactor);
 
     /** Returns the font's horizontal scale.
 
@@ -267,7 +268,7 @@ public:
                                 normal spacing, positive values spread the letters out,
                                 negative values make them closer together.
     */
-    void setExtraKerningFactor (float extraKerning) throw();
+    void setExtraKerningFactor (float extraKerning);
 
     /** Returns the font's kerning.
 
@@ -285,27 +286,27 @@ public:
     void setSizeAndStyle (float newHeight,
                           int newStyleFlags,
                           float newHorizontalScale,
-                          float newKerningAmount) throw();
+                          float newKerningAmount);
 
     //==============================================================================
     /** Returns the total width of a string as it would be drawn using this font.
 
         For a more accurate floating-point result, use getStringWidthFloat().
     */
-    int getStringWidth (const String& text) const throw();
+    int getStringWidth (const String& text) const;
 
     /** Returns the total width of a string as it would be drawn using this font.
 
         @see getStringWidth
     */
-    float getStringWidthFloat (const String& text) const throw();
+    float getStringWidthFloat (const String& text) const;
 
     /** Returns the series of glyph numbers and their x offsets needed to represent a string.
 
         An extra x offset is added at the end of the run, to indicate where the right hand
         edge of the last character is.
     */
-    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const throw();
+    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const;
 
     //==============================================================================
     /** Returns the typeface used by this font.
@@ -313,7 +314,7 @@ public:
         Note that the object returned may go out of scope if this font is deleted
         or has its style changed.
     */
-    Typeface* getTypeface() const throw();
+    Typeface* getTypeface() const;
 
     /** Creates an array of Font objects to represent all the fonts on the system.
 
@@ -322,7 +323,7 @@ public:
 
         @param results  the array to which new Font objects will be added.
     */
-    static void findFonts (Array<Font>& results) throw();
+    static void findFonts (Array<Font>& results);
 
     /** Returns a list of all the available typeface names.
 
@@ -337,12 +338,12 @@ public:
     /** Returns the name of the typeface to be used for rendering glyphs that aren't found
         in the requested typeface.
     */
-    static const String getFallbackFontName() throw();
+    static const String getFallbackFontName();
 
     /** Sets the (platform-specific) name of the typeface to use to find glyphs that aren't
         available in whatever font you're trying to use.
     */
-    static void setFallbackFontName (const String& name) throw();
+    static void setFallbackFontName (const String& name);
 
     //==============================================================================
     /** Creates a string to describe this font.
@@ -380,7 +381,7 @@ private:
     };
 
     ReferenceCountedObjectPtr <SharedFontInternal> font;
-    void dupeInternalIfShared() throw();
+    void dupeInternalIfShared();
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__

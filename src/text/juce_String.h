@@ -984,7 +984,7 @@ public:
 
         @param destBuffer       the place to copy it to
         @param maxCharsToCopy   the maximum number of characters to copy to the buffer,
-                                not including the tailing zero, so this shouldn't be
+                                NOT including the trailing zero, so this shouldn't be
                                 larger than the size of your destination buffer - 1
     */
     void copyToUnicode (juce_wchar* destBuffer, int maxCharsToCopy) const throw();

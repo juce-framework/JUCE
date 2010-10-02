@@ -137,6 +137,7 @@ public:
 
     static void copyChars (juce_wchar* const dest, const juce_wchar* const src, const size_t numChars) throw()
     {
+        jassert (src != 0 & dest != 0);
         memcpy (dest, src, numChars * sizeof (juce_wchar));
         dest [numChars] = 0;
     }
@@ -2157,7 +2158,10 @@ int String::copyToCString (char* destBuffer, const int maxBufferSizeBytes) const
 //==============================================================================
 void String::copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw()
 {
-    StringHolder::copyChars (destBuffer, text, jmin (maxCharsToCopy, length()));
+    jassert (destBuffer != 0 && maxCharsToCopy >= 0);
+
+    if (destBuffer != 0 && maxCharsToCopy >= 0)
+        StringHolder::copyChars (destBuffer, text, jmin (maxCharsToCopy, length()));
 }
 
 

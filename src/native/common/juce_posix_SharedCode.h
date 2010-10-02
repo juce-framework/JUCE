@@ -220,7 +220,7 @@ bool File::setAsCurrentWorkingDirectory() const
 }
 
 //==============================================================================
-#if JUCE_IOS
+#if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
  typedef struct stat64  juce_statStruct; // (need to use the 64-bit version to work around a simulator bug)
 #else
  typedef struct stat    juce_statStruct;
@@ -229,11 +229,11 @@ bool File::setAsCurrentWorkingDirectory() const
 static bool juce_stat (const String& fileName, juce_statStruct& info)
 {
     return fileName.isNotEmpty()
-#if JUCE_IOS
+      #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
             && (stat64 (fileName.toUTF8(), &info) == 0);
-#else
+      #else
             && (stat (fileName.toUTF8(), &info) == 0);
-#endif
+      #endif
 }
 
 bool File::isDirectory() const

@@ -57,7 +57,7 @@ void AbstractFifo::setTotalSize (int newSize) throw()
 }
 
 //==============================================================================
-void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) throw()
+void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw()
 {
     const int vs = validStart.get();
     const int ve = validEnd.get();
@@ -88,7 +88,7 @@ void AbstractFifo::finishedWrite (int numWritten) throw()
     validEnd += numWritten;
 }
 
-void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) throw()
+void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw()
 {
     const int vs = validStart.get();
     const int ve = validEnd.get();

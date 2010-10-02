@@ -1456,7 +1456,7 @@ private:
         #pragma warning (push)
         #pragma warning (disable: 4244)
 
-        originalWndProc = (void*) GetWindowLongPtr (pluginHWND, GWL_WNDPROC);
+        originalWndProc = (void*) GetWindowLongPtr (pluginHWND, GWLP_WNDPROC);
 
         if (! pluginWantsKeys)
             SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) vstHookWndProc);

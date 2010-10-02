@@ -123,10 +123,11 @@ public:
         the second.
 
         If the number of items you ask for is too large to fit within the buffer's free space, then
-        blockSize1 + blockSize2 may add up to a lower value than numToWrite.
+        blockSize1 + blockSize2 may add up to a lower value than numToWrite. If this happens, you
+        may decide to keep waiting and re-trying the method until there's enough space available.
 
-        After calling this method, and writing your data, you must call finishedWrite() to tell the
-        FIFO how much data you actually added.
+        After calling this method, if you choose to write your data into the blocks returned, you
+        must call finishedWrite() to tell the FIFO how much data you actually added.
 
         e.g.
         @code
@@ -150,10 +151,10 @@ public:
         @param blockSize1       on exit, this indicates how many items can be written to the block starting at startIndex1
         @param startIndex2      on exit, this will contain the start index in your buffer at which any data that didn't fit into
                                 the first block should be written
-        @param blockSize1       on exit, this indicates how many items can be written to the block starting at startIndex2
+        @param blockSize2       on exit, this indicates how many items can be written to the block starting at startIndex2
         @see finishedWrite
     */
-    void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) throw();
+    void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw();
 
     /** Called after reading from the FIFO, to indicate that this many items have been added.
         @see prepareToWrite
@@ -167,10 +168,11 @@ public:
         should read from both of them.
 
         If the number of items you ask for is greater than the amount of data available, then
-        blockSize1 + blockSize2 may add up to a lower value than numWanted.
+        blockSize1 + blockSize2 may add up to a lower value than numWanted. If this happens, you
+        may decide to keep waiting and re-trying the method until there's enough data available.
 
-        After calling this method, and reading the data, you must call finishedRead() to tell the
-        FIFO how much data you have consumed.
+        After calling this method, if you choose to read the data, you must call finishedRead() to
+        tell the FIFO how much data you have consumed.
 
         e.g.
         @code
@@ -189,15 +191,15 @@ public:
         }
         @endcode
 
-        @param numToWrite       indicates how many items you'd like to add to the buffer
+        @param numWanted        indicates how many items you'd like to add to the buffer
         @param startIndex1      on exit, this will contain the start index in your buffer at which your data should be written
         @param blockSize1       on exit, this indicates how many items can be written to the block starting at startIndex1
         @param startIndex2      on exit, this will contain the start index in your buffer at which any data that didn't fit into
                                 the first block should be written
-        @param blockSize1       on exit, this indicates how many items can be written to the block starting at startIndex2
+        @param blockSize2       on exit, this indicates how many items can be written to the block starting at startIndex2
         @see finishedRead
     */
-    void prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) throw();
+    void prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw();
 
     /** Called after reading from the FIFO, to indicate that this many items have now been consumed.
         @see prepareToRead

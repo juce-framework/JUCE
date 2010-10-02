@@ -396,7 +396,7 @@ bool ZipFile::uncompressEntry (const int index,
 
         if (zei->entry.filename.endsWithChar ('/'))
         {
-            targetFile.createDirectory(); // (entry is a directory, not a file)
+            return targetFile.createDirectory(); // (entry is a directory, not a file)
         }
         else
         {

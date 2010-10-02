@@ -29,7 +29,7 @@ class PluginHostType
 {
 public:
     //==============================================================================
-    PluginHostType() throw()  : type (getHostType())
+    PluginHostType()  : type (getHostType())
     {
     }
 
@@ -41,11 +41,12 @@ public:
         AbletonLive7,
         AbletonLive8,
         AbletonLiveGeneric,
+        AdobePremierePro,
         AppleLogic,
-        EmagicLogic,
-        DigidesignProTools,
         CakewalkSonar8,
         CakewalkSonarGeneric,
+        DigidesignProTools,
+        EmagicLogic,
         Reaper,
         MackieTracktion3,
         MackieTracktionGeneric,
@@ -88,14 +89,24 @@ public:
         return type == CakewalkSonar8 || type == CakewalkSonarGeneric;
     }
 
+    bool isWavelab() const throw()
+    {
+        return type == SteinbergWavelab5 || type == SteinbergWavelab6 || type == SteinbergWavelab7 || type == SteinbergWavelabGeneric;
+    }
+
+    bool isWavelabLegacy() const throw()
+    {
+        return type == SteinbergWavelab5 || type == SteinbergWavelab6;
+    }
+
+    bool isPremiere() const throw()
+    {
+        return type == AdobePremierePro;
+    }
+
     bool isLogic() const throw()
     {
         return type == AppleLogic || type == EmagicLogic;
-    }
-
-    bool isWavelab() const throw()
-    {
-        return type == SteinbergWavelabGeneric || type == SteinbergWavelab5 || type == SteinbergWavelab6 || type == SteinbergWavelab7;
     }
 
     bool isReceptor() const throw()
@@ -104,45 +115,54 @@ public:
     }
 
     //==============================================================================
+    static String getHostPath()
+    {
+        return File::getSpecialLocation (File::hostApplicationPath).getFullPathName();
+    }
+
+    //==============================================================================
 private:
     static HostType getHostType()
     {
-        const String hostPath (File::getSpecialLocation (File::hostApplicationPath).getFullPathName());
+        const String hostPath (getHostPath());
         const String hostFilename (File (hostPath).getFileName());
 
 #if JUCE_MAC
-        if (hostPath.containsIgnoreCase ("Live 6."))        return AbletonLive6;
-        if (hostPath.containsIgnoreCase ("Live 7."))        return AbletonLive7;
-        if (hostPath.containsIgnoreCase ("Live 8."))        return AbletonLive8;
-        if (hostFilename.containsIgnoreCase ("Live"))       return AbletonLiveGeneric;
-        if (hostFilename.containsIgnoreCase ("Pro Tools"))  return DigidesignProTools;
-        if (hostFilename.containsIgnoreCase ("Cubase 4"))   return SteinbergCubase4;
-        if (hostFilename.containsIgnoreCase ("Cubase 5"))   return SteinbergCubase5;
-        if (hostFilename.containsIgnoreCase ("Wavelab 7" )) return SteinbergWavelab7;
-        if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
-        if (hostFilename.contains ("Logic"))                return AppleLogic;
+        if (hostPath.containsIgnoreCase     ("Live 6."))        return AbletonLive6;
+        if (hostPath.containsIgnoreCase     ("Live 7."))        return AbletonLive7;
+        if (hostPath.containsIgnoreCase     ("Live 8."))        return AbletonLive8;
+        if (hostFilename.containsIgnoreCase ("Live"))           return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Adobe Premiere")) return AdobePremierePro;
+        if (hostFilename.contains           ("Logic"))          return AppleLogic;
+        if (hostFilename.containsIgnoreCase ("Pro Tools"))      return DigidesignProTools;
+        if (hostFilename.containsIgnoreCase ("Cubase 4"))       return SteinbergCubase4;
+        if (hostFilename.containsIgnoreCase ("Cubase 5"))       return SteinbergCubase5;
+        if (hostPath.containsIgnoreCase     ("Wavelab 7"))      return SteinbergWavelab7;
+        if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
 
 #elif JUCE_WINDOWS
-        if (hostFilename.containsIgnoreCase ("Live 6."))    return AbletonLive6;
-        if (hostFilename.containsIgnoreCase ("Live 7."))    return AbletonLive7;
-        if (hostFilename.containsIgnoreCase ("Live 8."))    return AbletonLive8;
-        if (hostFilename.containsIgnoreCase ("Live "))      return AbletonLiveGeneric;
-        if (hostFilename.containsIgnoreCase ("ProTools"))   return DigidesignProTools;
-        if (hostPath.containsIgnoreCase ("SONAR 8"))        return CakewalkSonar8;
-        if (hostFilename.containsIgnoreCase ("SONAR"))      return CakewalkSonarGeneric;
-        if (hostPath.containsIgnoreCase ("Tracktion 3"))    return MackieTracktion3;
-        if (hostFilename.containsIgnoreCase ("Tracktion"))  return MackieTracktionGeneric;
-        if (hostFilename.containsIgnoreCase ("Cubase4"))    return SteinbergCubase4;
-        if (hostFilename.containsIgnoreCase ("Cubase5"))    return SteinbergCubase5;
-        if (hostFilename.containsIgnoreCase ("VSTBridgeApp")) return SteinbergCubase5Bridged;
-        if (hostFilename.containsIgnoreCase ("Cubase"))     return SteinbergCubaseGeneric;
-        if (hostFilename.containsIgnoreCase ("Wavelab 5"))  return SteinbergWavelab5;
-        if (hostFilename.containsIgnoreCase ("Wavelab 6" )) return SteinbergWavelab6;
-        if (hostFilename.containsIgnoreCase ("Wavelab 7" )) return SteinbergWavelab7;
-        if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
-        if (hostFilename.containsIgnoreCase ("reaper"))     return Reaper;
-        if (hostFilename.containsIgnoreCase ("Logic"))      return EmagicLogic;
-        if (hostFilename.containsIgnoreCase ("rm-host"))    return MuseReceptorGeneric;
+        if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
+        if (hostFilename.containsIgnoreCase ("Live 7."))        return AbletonLive7;
+        if (hostFilename.containsIgnoreCase ("Live 8."))        return AbletonLive8;
+        if (hostFilename.containsIgnoreCase ("Live "))          return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Adobe Premiere")) return AdobePremierePro;
+        if (hostFilename.containsIgnoreCase ("ProTools"))       return DigidesignProTools;
+        if (hostPath.containsIgnoreCase     ("SONAR 8"))        return CakewalkSonar8;
+        if (hostFilename.containsIgnoreCase ("SONAR"))          return CakewalkSonarGeneric;
+        if (hostFilename.containsIgnoreCase ("Logic"))          return EmagicLogic;
+        if (hostPath.containsIgnoreCase     ("Tracktion 3"))    return MackieTracktion3;
+        if (hostFilename.containsIgnoreCase ("Tracktion"))      return MackieTracktionGeneric;
+        if (hostFilename.containsIgnoreCase ("reaper"))         return Reaper;
+        if (hostFilename.containsIgnoreCase ("Cubase4"))        return SteinbergCubase4;
+        if (hostFilename.containsIgnoreCase ("Cubase5"))        return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Cubase"))         return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))   return SteinbergCubase5Bridged;
+        if (hostPath.containsIgnoreCase     ("Wavelab 5"))      return SteinbergWavelab5;
+        if (hostPath.containsIgnoreCase     ("Wavelab 6"))      return SteinbergWavelab6;
+        if (hostPath.containsIgnoreCase     ("Wavelab 7"))      return SteinbergWavelab7;
+        if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
+        if (hostFilename.containsIgnoreCase ("reaper"))         return Reaper;
+        if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
 
 
 #elif JUCE_LINUX
