@@ -2575,7 +2575,8 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
                                       const String& fileTimeDescription,
                                       const bool isDirectory,
                                       const bool isItemSelected,
-                                      const int /*itemIndex*/)
+                                      const int /*itemIndex*/,
+                                      DirectoryContentsDisplayComponent&)
 {
     if (isItemSelected)
         g.fillAll (findColour (DirectoryContentsDisplayComponent::highlightColourId));

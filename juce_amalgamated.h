@@ -1125,7 +1125,7 @@ template <typename Type>
 inline int numElementsInArray (Type& array)
 {
 	(void) array; // (required to avoid a spurious warning in MS compilers)
-	return static_cast<int> (sizeof (array) / sizeof (array[0]));
+	return static_cast<int> (sizeof (array) / sizeof (0[array]));
 }
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
@@ -55025,7 +55025,8 @@ public:
 									 const String& fileTimeDescription,
 									 bool isDirectory,
 									 bool isItemSelected,
-									 int itemIndex);
+									 int itemIndex,
+									 DirectoryContentsDisplayComponent& component);
 
 	virtual Button* createFileBrowserGoUpButton();
 
@@ -55349,6 +55350,9 @@ private:
 							   bool flatOnRight,
 							   bool flatOnTop,
 							   bool flatOnBottom) throw();
+
+	// This has been deprecated - see the new parameter list..
+	virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
 
 	LookAndFeel (const LookAndFeel&);
 	LookAndFeel& operator= (const LookAndFeel&);

@@ -309,7 +309,8 @@ public:
                                      const String& fileTimeDescription,
                                      bool isDirectory,
                                      bool isItemSelected,
-                                     int itemIndex);
+                                     int itemIndex,
+                                     DirectoryContentsDisplayComponent& component);
 
     virtual Button* createFileBrowserGoUpButton();
 
@@ -657,6 +658,9 @@ private:
                                bool flatOnRight,
                                bool flatOnTop,
                                bool flatOnBottom) throw();
+
+    // This has been deprecated - see the new parameter list..
+    virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
 
     LookAndFeel (const LookAndFeel&);
     LookAndFeel& operator= (const LookAndFeel&);

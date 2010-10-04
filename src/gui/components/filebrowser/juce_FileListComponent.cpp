@@ -109,7 +109,7 @@ public:
                                              &icon,
                                              fileSize, modTime,
                                              isDirectory, highlighted,
-                                             index);
+                                             index, owner);
     }
 
     void mouseDown (const MouseEvent& e)

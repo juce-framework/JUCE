@@ -439,6 +439,10 @@ public:
         {
             result = 1;
         }
+        else if (strcmp (text, "openCloseAnyThread" == 0)
+        {
+            result = -1;
+        }
 
         return result;
     }
@@ -591,7 +595,7 @@ public:
                         {
                             if (outputs[j] == chan)
                             {
-                                chan = (float*) juce_malloc (sizeof (float) * blockSize * 2);
+                                chan = new float [blockSize * 2];
                                 tempChannels.set (i, chan);
                                 break;
                             }
@@ -1429,7 +1433,6 @@ private:
     int numInChans, numOutChans;
     HeapBlock <float*> channels;
     Array<float*> tempChannels; // see note in processReplacing()
-    bool hasCreatedTempChannels;
     bool shouldDeleteEditor;
 
     //==============================================================================
@@ -1481,14 +1484,12 @@ private:
     void deleteTempChannels()
     {
         for (int i = tempChannels.size(); --i >= 0;)
-            juce_free (tempChannels.getUnchecked(i));
+            delete[] (tempChannels.getUnchecked(i));
 
         tempChannels.clear();
 
         if (filter != 0)
             tempChannels.insertMultiple (0, 0, filter->getNumInputChannels() + filter->getNumOutputChannels());
-
-        hasCreatedTempChannels = false;
     }
 
     const String getHostName()
@@ -1499,13 +1500,13 @@ private:
         return host;
     }
 
-#if JUCE_MAC
+  #if JUCE_MAC
     void* hostWindow;
-#elif JUCE_LINUX
+  #elif JUCE_LINUX
     Window hostWindow;
-#else
+  #else
     HWND hostWindow;
-#endif
+  #endif
 };
 
 //==============================================================================

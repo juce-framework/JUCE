@@ -137,7 +137,7 @@ public:
 
     static void copyChars (juce_wchar* const dest, const juce_wchar* const src, const size_t numChars) throw()
     {
-        jassert (src != 0 & dest != 0);
+        jassert (src != 0 && dest != 0);
         memcpy (dest, src, numChars * sizeof (juce_wchar));
         dest [numChars] = 0;
     }

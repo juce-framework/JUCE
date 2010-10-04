@@ -176,7 +176,7 @@ template <typename Type>
 inline int numElementsInArray (Type& array)
 {
     (void) array; // (required to avoid a spurious warning in MS compilers)
-    return static_cast<int> (sizeof (array) / sizeof (array[0]));
+    return static_cast<int> (sizeof (array) / sizeof (0[array]));
 }
 
 //==============================================================================

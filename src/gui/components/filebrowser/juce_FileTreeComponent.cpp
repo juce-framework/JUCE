@@ -153,7 +153,7 @@ public:
                                  file.getFileName(),
                                  &icon, fileSize, modTime,
                                  isDirectory, isSelected(),
-                                 indexInContentsList);
+                                 indexInContentsList, owner);
     }
 
     void itemClicked (const MouseEvent& e)
