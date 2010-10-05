@@ -1052,6 +1052,11 @@ private:
 
     void createInternal (const juce_wchar* text, size_t numChars);
     void appendInternal (const juce_wchar* text, int numExtraChars);
+
+    // This private cast operator should prevent strings being accidentally cast
+    // to bools (this is possible because the compiler can add an implicit cast
+    // via a const char*)
+    operator bool() const throw()   { return false; }
 };
 
 //==============================================================================

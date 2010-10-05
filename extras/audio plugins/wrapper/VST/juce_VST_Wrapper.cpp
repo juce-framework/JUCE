@@ -352,34 +352,20 @@ public:
 
     void open()
     {
-        JUCE_AUTORELEASEPOOL
-        if (editorComp == 0)
-        {
-            checkWhetherWavelabHasChangedThread();
-            const MessageManagerLock mmLock;
-
-            AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
-
-            if (ed != 0)
-                cEffect.flags |= effFlagsHasEditor;
-            else
-                cEffect.flags &= ~effFlagsHasEditor;
-
-            filter->editorBeingDeleted (ed);
-            delete ed;
-        }
-
-        startTimer (1000 / 4);
+        // Note: most hosts call this on the UI thread, but wavelab doesn't, so be careful in here.
+        if (filter->hasEditor())
+            cEffect.flags |= effFlagsHasEditor;
+        else
+            cEffect.flags &= ~effFlagsHasEditor;
     }
 
     void close()
     {
-        JUCE_AUTORELEASEPOOL
-        const NonWavelabMMLock mmLock;
-        jassert (! recursionCheck);
-
+        // Note: most hosts call this on the UI thread, but wavelab doesn't, so be careful in here.
         stopTimer();
-        deleteEditor (false);
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            deleteEditor (false);
     }
 
     //==============================================================================
@@ -439,8 +425,10 @@ public:
         {
             result = 1;
         }
-        else if (strcmp (text, "openCloseAnyThread" == 0)
+        else if (strcmp (text, "openCloseAnyThread") == 0)
         {
+            // This tells Wavelab to use the UI thread to invoke open/close,
+            // like all other hosts do.
             result = -1;
         }
 
@@ -770,48 +758,22 @@ public:
 
             switch (ti->smpteFrameRate)
             {
-            case kVstSmpte24fps:
-                rate = AudioPlayHead::fps24;
-                fps = 24.0;
-                break;
+                case kVstSmpte24fps:        rate = AudioPlayHead::fps24;       fps = 24.0;  break;
+                case kVstSmpte25fps:        rate = AudioPlayHead::fps25;       fps = 25.0;  break;
+                case kVstSmpte2997fps:      rate = AudioPlayHead::fps2997;     fps = 29.97; break;
+                case kVstSmpte30fps:        rate = AudioPlayHead::fps30;       fps = 30.0;  break;
+                case kVstSmpte2997dfps:     rate = AudioPlayHead::fps2997drop; fps = 29.97; break;
+                case kVstSmpte30dfps:       rate = AudioPlayHead::fps30drop;   fps = 30.0;  break;
 
-            case kVstSmpte25fps:
-                rate = AudioPlayHead::fps25;
-                fps = 25.0;
-                break;
+                case kVstSmpteFilm16mm:
+                case kVstSmpteFilm35mm:     fps = 24.0; break;
 
-            case kVstSmpte2997fps:
-                rate = AudioPlayHead::fps2997;
-                fps = 29.97;
-                break;
+                case kVstSmpte239fps:       fps = 23.976; break;
+                case kVstSmpte249fps:       fps = 24.976; break;
+                case kVstSmpte599fps:       fps = 59.94; break;
+                case kVstSmpte60fps:        fps = 60; break;
 
-            case kVstSmpte30fps:
-                rate = AudioPlayHead::fps30;
-                fps = 30.0;
-                break;
-
-            case kVstSmpte2997dfps:
-                rate = AudioPlayHead::fps2997drop;
-                fps = 29.97;
-                break;
-
-            case kVstSmpte30dfps:
-                rate = AudioPlayHead::fps30drop;
-                fps = 30.0;
-                break;
-
-            case kVstSmpteFilm16mm:
-            case kVstSmpteFilm35mm:
-                fps = 24.0;
-                break;
-
-            case kVstSmpte239fps:       fps = 23.976; break;
-            case kVstSmpte249fps:       fps = 24.976; break;
-            case kVstSmpte599fps:       fps = 59.94; break;
-            case kVstSmpte60fps:        fps = 60; break;
-
-            default:
-                jassertfalse // unknown frame-rate..
+                default:                    jassertfalse; // unknown frame-rate..
             }
 
             info.frameRate = rate;
@@ -1068,6 +1030,7 @@ public:
         {
             recursionCheck = true;
 
+            JUCE_AUTORELEASEPOOL
             juce_callAnyTimersSynchronously();
 
             for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
@@ -1105,6 +1068,7 @@ public:
 
     void deleteEditor (bool canDeleteLaterIfModal)
     {
+        JUCE_AUTORELEASEPOOL
         PopupMenu::dismissAllActiveMenus();
 
         jassert (! recursionCheck);
@@ -1161,9 +1125,11 @@ public:
         }
         else if (opCode == effEditOpen)
         {
-            checkWhetherWavelabHasChangedThread();
+            checkWhetherMessageThreadIsCorrect();
             const MessageManagerLock mmLock;
             jassert (! recursionCheck);
+
+            startTimer (1000 / 4); // performs misc housekeeping chores
 
             deleteEditor (true);
             createEditorComp();
@@ -1191,14 +1157,14 @@ public:
         }
         else if (opCode == effEditClose)
         {
-            checkWhetherWavelabHasChangedThread();
+            checkWhetherMessageThreadIsCorrect();
             const MessageManagerLock mmLock;
             deleteEditor (true);
             return 0;
         }
         else if (opCode == effEditGetRect)
         {
-            checkWhetherWavelabHasChangedThread();
+            checkWhetherMessageThreadIsCorrect();
             const MessageManagerLock mmLock;
             createEditorComp();
 
@@ -1436,18 +1402,9 @@ private:
     bool shouldDeleteEditor;
 
     //==============================================================================
-#if JUCE_WINDOWS   // Workarounds for Wavelab's happy-go-lucky use of threads.
-    class NonWavelabMMLock
-    {
-    public:
-        NonWavelabMMLock() : mm (getHostType().isWavelab() || getHostType().isCubaseBridged() ? 0 : new MessageManagerLock())  {}
-        ~NonWavelabMMLock() {}
-
-    private:
-        ScopedPointer <MessageManagerLock> mm;
-    };
-
-    static void checkWhetherWavelabHasChangedThread()
+#if JUCE_WINDOWS
+    // Workarounds for Wavelab's happy-go-lucky use of threads.
+    static void checkWhetherMessageThreadIsCorrect()
     {
         if (getHostType().isWavelab() || getHostType().isCubaseBridged())
         {
@@ -1476,8 +1433,7 @@ private:
         }
     }
 #else
-    typedef MessageManagerLock NonWavelabMMLock;
-    static void checkWhetherWavelabHasChangedThread() {}
+    static void checkWhetherMessageThreadIsCorrect() {}
 #endif
 
     //==============================================================================

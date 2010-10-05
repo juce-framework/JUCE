@@ -729,6 +729,7 @@ public:
     void processBlock (AudioSampleBuffer& buffer,
                        MidiBuffer& midiMessages);
 
+    bool hasEditor() const                              { return effect != 0 && (effect->flags & effFlagsHasEditor) != 0; }
     AudioProcessorEditor* createEditor();
 
     const String getInputChannelName (int index) const;
@@ -805,7 +806,6 @@ private:
     const String getVersion() const;
     const String getCategory() const;
 
-    bool hasEditor() const throw()          { return effect != 0 && (effect->flags & effFlagsHasEditor) != 0; }
     void setPower (const bool on);
 
     VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module);

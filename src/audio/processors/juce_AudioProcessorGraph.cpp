@@ -1276,10 +1276,8 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::isOutput() const
     return type == audioOutputNode || type == midiOutputNode;
 }
 
-AudioProcessorEditor* AudioProcessorGraph::AudioGraphIOProcessor::createEditor()
-{
-    return 0;
-}
+bool AudioProcessorGraph::AudioGraphIOProcessor::hasEditor() const                  { return false; }
+AudioProcessorEditor* AudioProcessorGraph::AudioGraphIOProcessor::createEditor()    { return 0; }
 
 int AudioProcessorGraph::AudioGraphIOProcessor::getNumParameters()                  { return 0; }
 const String AudioProcessorGraph::AudioGraphIOProcessor::getParameterName (int)     { return String::empty; }

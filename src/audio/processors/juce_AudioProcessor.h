@@ -318,7 +318,8 @@ public:
         a generic UI that lets the user twiddle the parameters directly.
 
         If you do want to pass back a component, the component should be created and set to
-        the correct size before returning it.
+        the correct size before returning it. If you implement this method, you must
+        also implement the hasEditor() method and make it return true.
 
         Remember not to do anything silly like allowing your filter to keep a pointer to
         the component that gets created - it could be deleted later without any warning, which
@@ -335,8 +336,15 @@ public:
           not open one at all. Your filter mustn't rely on it being there.
         - An editor object may be deleted and a replacement one created again at any time.
         - It's safe to assume that an editor will be deleted before its filter.
+
+        @see hasEditor
     */
     virtual AudioProcessorEditor* createEditor() = 0;
+
+    /** Your filter must override this and return true if it can create an editor component.
+        @see createEditor
+    */
+    virtual bool hasEditor() const = 0;
 
     //==============================================================================
     /** Returns the active editor, if there is one.

@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../gui/components/juce_Desktop.h"
 #include "../../text/juce_LocalisedStrings.h"
 #include "../dsp/juce_AudioSampleBuffer.h"
+#include "../../core/juce_SystemStats.h"
 
 
 //==============================================================================

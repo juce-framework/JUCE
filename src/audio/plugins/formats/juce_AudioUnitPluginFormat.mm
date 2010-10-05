@@ -231,6 +231,7 @@ public:
     void processBlock (AudioSampleBuffer& buffer,
                        MidiBuffer& midiMessages);
 
+    bool hasEditor() const;
     AudioProcessorEditor* createEditor();
 
     const String getInputChannelName (int index) const;
@@ -1087,6 +1088,11 @@ private:
 #endif
 
 //==============================================================================
+bool AudioUnitPluginInstance::hasEditor() const
+{
+    return true;
+}
+
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
     ScopedPointer<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));

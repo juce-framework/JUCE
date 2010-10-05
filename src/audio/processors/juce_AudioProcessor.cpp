@@ -231,6 +231,9 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 
     AudioProcessorEditor* const ed = createEditor();
 
+    // You must make your hasEditor() method return a consistent result!
+    jassert (hasEditor() == (ed != 0));
+
     if (ed != 0)
     {
         // you must give your editor comp a size before returning it..

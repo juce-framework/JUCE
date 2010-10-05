@@ -27,67 +27,74 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_WASAPI
 
+#ifndef WASAPI_ENABLE_LOGGING
+ #define WASAPI_ENABLE_LOGGING 1
+#endif
+
 //==============================================================================
-#if 1
-
-const String getAudioErrorDesc (HRESULT hr)
+namespace WasapiClasses
 {
-    const char* e = 0;
 
-    switch (hr)
+static void logFailure (HRESULT hr)
+{
+    (void) hr;
+
+  #if WASAPI_ENABLE_LOGGING
+    if (FAILED (hr))
     {
-        case E_POINTER:                                 e = "E_POINTER"; break;
-        case E_INVALIDARG:                              e = "E_INVALIDARG"; break;
-        case AUDCLNT_E_NOT_INITIALIZED:                 e = "AUDCLNT_E_NOT_INITIALIZED"; break;
-        case AUDCLNT_E_ALREADY_INITIALIZED:             e = "AUDCLNT_E_ALREADY_INITIALIZED"; break;
-        case AUDCLNT_E_WRONG_ENDPOINT_TYPE:             e = "AUDCLNT_E_WRONG_ENDPOINT_TYPE"; break;
-        case AUDCLNT_E_DEVICE_INVALIDATED:              e = "AUDCLNT_E_DEVICE_INVALIDATED"; break;
-        case AUDCLNT_E_NOT_STOPPED:                     e = "AUDCLNT_E_NOT_STOPPED"; break;
-        case AUDCLNT_E_BUFFER_TOO_LARGE:                e = "AUDCLNT_E_BUFFER_TOO_LARGE"; break;
-        case AUDCLNT_E_OUT_OF_ORDER:                    e = "AUDCLNT_E_OUT_OF_ORDER"; break;
-        case AUDCLNT_E_UNSUPPORTED_FORMAT:              e = "AUDCLNT_E_UNSUPPORTED_FORMAT"; break;
-        case AUDCLNT_E_INVALID_SIZE:                    e = "AUDCLNT_E_INVALID_SIZE"; break;
-        case AUDCLNT_E_DEVICE_IN_USE:                   e = "AUDCLNT_E_DEVICE_IN_USE"; break;
-        case AUDCLNT_E_BUFFER_OPERATION_PENDING:        e = "AUDCLNT_E_BUFFER_OPERATION_PENDING"; break;
-        case AUDCLNT_E_THREAD_NOT_REGISTERED:           e = "AUDCLNT_E_THREAD_NOT_REGISTERED"; break;
-        case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED:      e = "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED"; break;
-        case AUDCLNT_E_ENDPOINT_CREATE_FAILED:          e = "AUDCLNT_E_ENDPOINT_CREATE_FAILED"; break;
-        case AUDCLNT_E_SERVICE_NOT_RUNNING:             e = "AUDCLNT_E_SERVICE_NOT_RUNNING"; break;
-        case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED:        e = "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED"; break;
-        case AUDCLNT_E_EXCLUSIVE_MODE_ONLY:             e = "AUDCLNT_E_EXCLUSIVE_MODE_ONLY"; break;
-        case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL:    e = "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL"; break;
-        case AUDCLNT_E_EVENTHANDLE_NOT_SET:             e = "AUDCLNT_E_EVENTHANDLE_NOT_SET"; break;
-        case AUDCLNT_E_INCORRECT_BUFFER_SIZE:           e = "AUDCLNT_E_INCORRECT_BUFFER_SIZE"; break;
-        case AUDCLNT_E_BUFFER_SIZE_ERROR:               e = "AUDCLNT_E_BUFFER_SIZE_ERROR"; break;
-        case AUDCLNT_S_BUFFER_EMPTY:                    e = "AUDCLNT_S_BUFFER_EMPTY"; break;
-        case AUDCLNT_S_THREAD_ALREADY_REGISTERED:       e = "AUDCLNT_S_THREAD_ALREADY_REGISTERED"; break;
-        default:                                        return String::toHexString ((int) hr);
-    }
+        String e;
+        e << Time::getCurrentTime().toString (true, true, true, true)
+          << " -- WASAPI error: ";
 
-    return e;
+        switch (hr)
+        {
+            case E_POINTER:                                 e << "E_POINTER"; break;
+            case E_INVALIDARG:                              e << "E_INVALIDARG"; break;
+            case AUDCLNT_E_NOT_INITIALIZED:                 e << "AUDCLNT_E_NOT_INITIALIZED"; break;
+            case AUDCLNT_E_ALREADY_INITIALIZED:             e << "AUDCLNT_E_ALREADY_INITIALIZED"; break;
+            case AUDCLNT_E_WRONG_ENDPOINT_TYPE:             e << "AUDCLNT_E_WRONG_ENDPOINT_TYPE"; break;
+            case AUDCLNT_E_DEVICE_INVALIDATED:              e << "AUDCLNT_E_DEVICE_INVALIDATED"; break;
+            case AUDCLNT_E_NOT_STOPPED:                     e << "AUDCLNT_E_NOT_STOPPED"; break;
+            case AUDCLNT_E_BUFFER_TOO_LARGE:                e << "AUDCLNT_E_BUFFER_TOO_LARGE"; break;
+            case AUDCLNT_E_OUT_OF_ORDER:                    e << "AUDCLNT_E_OUT_OF_ORDER"; break;
+            case AUDCLNT_E_UNSUPPORTED_FORMAT:              e << "AUDCLNT_E_UNSUPPORTED_FORMAT"; break;
+            case AUDCLNT_E_INVALID_SIZE:                    e << "AUDCLNT_E_INVALID_SIZE"; break;
+            case AUDCLNT_E_DEVICE_IN_USE:                   e << "AUDCLNT_E_DEVICE_IN_USE"; break;
+            case AUDCLNT_E_BUFFER_OPERATION_PENDING:        e << "AUDCLNT_E_BUFFER_OPERATION_PENDING"; break;
+            case AUDCLNT_E_THREAD_NOT_REGISTERED:           e << "AUDCLNT_E_THREAD_NOT_REGISTERED"; break;
+            case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED:      e << "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED"; break;
+            case AUDCLNT_E_ENDPOINT_CREATE_FAILED:          e << "AUDCLNT_E_ENDPOINT_CREATE_FAILED"; break;
+            case AUDCLNT_E_SERVICE_NOT_RUNNING:             e << "AUDCLNT_E_SERVICE_NOT_RUNNING"; break;
+            case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED:        e << "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED"; break;
+            case AUDCLNT_E_EXCLUSIVE_MODE_ONLY:             e << "AUDCLNT_E_EXCLUSIVE_MODE_ONLY"; break;
+            case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL:    e << "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL"; break;
+            case AUDCLNT_E_EVENTHANDLE_NOT_SET:             e << "AUDCLNT_E_EVENTHANDLE_NOT_SET"; break;
+            case AUDCLNT_E_INCORRECT_BUFFER_SIZE:           e << "AUDCLNT_E_INCORRECT_BUFFER_SIZE"; break;
+            case AUDCLNT_E_BUFFER_SIZE_ERROR:               e << "AUDCLNT_E_BUFFER_SIZE_ERROR"; break;
+            case AUDCLNT_S_BUFFER_EMPTY:                    e << "AUDCLNT_S_BUFFER_EMPTY"; break;
+            case AUDCLNT_S_THREAD_ALREADY_REGISTERED:       e << "AUDCLNT_S_THREAD_ALREADY_REGISTERED"; break;
+            default:                                        e << String::toHexString ((int) hr); break;
+        }
+
+        DBG (e);
+        jassertfalse;
+    }
+  #endif
 }
 
-#define logFailure(hr) { if (FAILED (hr)) { DBG ("WASAPI FAIL! " + getAudioErrorDesc (hr)); jassertfalse; } }
-#define OK(a) wasapi_checkResult(a)
-
-static bool wasapi_checkResult (HRESULT hr)
+static bool check (HRESULT hr)
 {
     logFailure (hr);
     return SUCCEEDED (hr);
 }
 
-#else
- #define logFailure(hr) {}
- #define OK(a) SUCCEEDED(a)
-#endif
-
 //==============================================================================
-static const String wasapi_getDeviceID (IMMDevice* const device)
+static const String getDeviceID (IMMDevice* const device)
 {
     String s;
     WCHAR* deviceId = 0;
 
-    if (OK (device->GetId (&deviceId)))
+    if (check (device->GetId (&deviceId)))
     {
         s = String (deviceId);
         CoTaskMemFree (deviceId);
@@ -96,26 +103,27 @@ static const String wasapi_getDeviceID (IMMDevice* const device)
     return s;
 }
 
-static EDataFlow wasapi_getDataFlow (IMMDevice* const device)
+static EDataFlow getDataFlow (IMMDevice* const device)
 {
     EDataFlow flow = eRender;
     ComSmartPtr <IMMEndpoint> endPoint;
-    if (OK (device->QueryInterface (__uuidof (IMMEndpoint), (void**) &endPoint)))
-        (void) OK (endPoint->GetDataFlow (&flow));
+    if (check (device->QueryInterface (__uuidof (IMMEndpoint), (void**) &endPoint)))
+        (void) check (endPoint->GetDataFlow (&flow));
 
     return flow;
 }
 
-static int wasapi_refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) throw()
+static int refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) throw()
 {
     return roundDoubleToInt (sampleRate * ((double) t) * 0.0000001);
 }
 
-static void wasapi_copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) throw()
+static void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) throw()
 {
     memcpy (&dest, src, src->wFormatTag == WAVE_FORMAT_EXTENSIBLE ? sizeof (WAVEFORMATEXTENSIBLE)
                                                                   : sizeof (WAVEFORMATEX));
 }
+
 
 //==============================================================================
 class WASAPIDeviceBase
@@ -139,21 +147,21 @@ public:
             return;
 
         REFERENCE_TIME defaultPeriod, minPeriod;
-        if (! OK (tempClient->GetDevicePeriod (&defaultPeriod, &minPeriod)))
+        if (! check (tempClient->GetDevicePeriod (&defaultPeriod, &minPeriod)))
             return;
 
         WAVEFORMATEX* mixFormat = 0;
-        if (! OK (tempClient->GetMixFormat (&mixFormat)))
+        if (! check (tempClient->GetMixFormat (&mixFormat)))
             return;
 
         WAVEFORMATEXTENSIBLE format;
-        wasapi_copyWavFormat (format, mixFormat);
+        copyWavFormat (format, mixFormat);
         CoTaskMemFree (mixFormat);
 
         actualNumChannels = numChannels = format.Format.nChannels;
         defaultSampleRate = format.Format.nSamplesPerSec;
-        minBufferSize = wasapi_refTimeToSamples (minPeriod, defaultSampleRate);
-        defaultBufferSize = wasapi_refTimeToSamples (defaultPeriod, defaultSampleRate);
+        minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
+        defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
 
         rates.addUsingDefaultSort (defaultSampleRate);
 
@@ -203,12 +211,12 @@ public:
                     channelMaps.add (i);
 
             REFERENCE_TIME latency;
-            if (OK (client->GetStreamLatency (&latency)))
-                latencySamples = wasapi_refTimeToSamples (latency, sampleRate);
+            if (check (client->GetStreamLatency (&latency)))
+                latencySamples = refTimeToSamples (latency, sampleRate);
 
-            (void) OK (client->GetBufferSize (&actualBufferSize));
+            (void) check (client->GetBufferSize (&actualBufferSize));
 
-            return OK (client->SetEventHandle (clientEvent));
+            return check (client->SetEventHandle (clientEvent));
         }
 
         return false;
@@ -293,7 +301,7 @@ private:
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
         {
-            wasapi_copyWavFormat (format, (WAVEFORMATEX*) nearestFormat);
+            copyWavFormat (format, (WAVEFORMATEX*) nearestFormat);
             hr = S_OK;
         }
 
@@ -301,13 +309,13 @@ private:
 
         REFERENCE_TIME defaultPeriod = 0, minPeriod = 0;
         if (useExclusiveMode)
-            OK (client->GetDevicePeriod (&defaultPeriod, &minPeriod));
+            check (client->GetDevicePeriod (&defaultPeriod, &minPeriod));
 
         GUID session;
         if (hr == S_OK
-             && OK (client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                        AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                        defaultPeriod, defaultPeriod, (WAVEFORMATEX*) &format, &session)))
+             && check (client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
+                                           AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
+                                           defaultPeriod, defaultPeriod, (WAVEFORMATEX*) &format, &session)))
         {
             actualNumChannels = format.Format.nChannels;
             const bool isFloat = format.Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format.SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
@@ -345,7 +353,7 @@ public:
         reservoirCapacity = 16384;
         reservoir.setSize (actualNumChannels * reservoirCapacity * sizeof (float));
         return openClient (newSampleRate, newChannels)
-                && (numChannels == 0 || OK (client->GetService (__uuidof (IAudioCaptureClient), (void**) &captureClient)));
+                && (numChannels == 0 || check (client->GetService (__uuidof (IAudioCaptureClient), (void**) &captureClient)));
     }
 
     void close()
@@ -392,7 +400,7 @@ public:
             else
             {
                 UINT32 packetLength = 0;
-                if (! OK (captureClient->GetNextPacketSize (&packetLength)))
+                if (! check (captureClient->GetNextPacketSize (&packetLength)))
                     break;
 
                 if (packetLength == 0)
@@ -408,7 +416,7 @@ public:
                 UINT32 numSamplesAvailable;
                 DWORD flags;
 
-                if (OK (captureClient->GetBuffer (&inputData, &numSamplesAvailable, &flags, 0, 0)))
+                if (check (captureClient->GetBuffer (&inputData, &numSamplesAvailable, &flags, 0, 0)))
                 {
                     const int samplesToDo = jmin (bufferSize, (int) numSamplesAvailable);
 
@@ -458,7 +466,7 @@ public:
     bool open (const double newSampleRate, const BigInteger& newChannels)
     {
         return openClient (newSampleRate, newChannels)
-                && (numChannels == 0 || OK (client->GetService (__uuidof (IAudioRenderClient), (void**) &renderClient)));
+            && (numChannels == 0 || check (client->GetService (__uuidof (IAudioRenderClient), (void**) &renderClient)));
     }
 
     void close()
@@ -491,7 +499,7 @@ public:
         while (bufferSize > 0)
         {
             UINT32 padding = 0;
-            if (! OK (client->GetCurrentPadding (&padding)))
+            if (! check (client->GetCurrentPadding (&padding)))
                 return;
 
             int samplesToDo = useExclusiveMode ? bufferSize
@@ -507,7 +515,7 @@ public:
             }
 
             uint8* outputData = 0;
-            if (OK (renderClient->GetBuffer (samplesToDo, &outputData)))
+            if (check (renderClient->GetBuffer (samplesToDo, &outputData)))
             {
                 for (int i = 0; i < numSrcBuffers; ++i)
                     converter->convertSamples (outputData, channelMaps.getUnchecked(i), srcBuffers[i], offset, samplesToDo);
@@ -866,28 +874,28 @@ private:
     bool createDevices()
     {
         ComSmartPtr <IMMDeviceEnumerator> enumerator;
-        if (! OK (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
+        if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
             return false;
 
         ComSmartPtr <IMMDeviceCollection> deviceCollection;
-        if (! OK (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, &deviceCollection)))
+        if (! check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, &deviceCollection)))
             return false;
 
         UINT32 numDevices = 0;
-        if (! OK (deviceCollection->GetCount (&numDevices)))
+        if (! check (deviceCollection->GetCount (&numDevices)))
             return false;
 
         for (UINT32 i = 0; i < numDevices; ++i)
         {
             ComSmartPtr <IMMDevice> device;
-            if (! OK (deviceCollection->Item (i, &device)))
+            if (! check (deviceCollection->Item (i, &device)))
                 continue;
 
-            const String deviceId (wasapi_getDeviceID (device));
+            const String deviceId (getDeviceID (device));
             if (deviceId.isEmpty())
                 continue;
 
-            const EDataFlow flow = wasapi_getDataFlow (device);
+            const EDataFlow flow = getDataFlow (device);
 
             if (deviceId == inputDeviceId && flow == eCapture)
                 inputDevice = new WASAPIInputDevice (device, useExclusiveMode);
@@ -930,7 +938,7 @@ public:
         inputDeviceIds.clear();
 
         ComSmartPtr <IMMDeviceEnumerator> enumerator;
-        if (! OK (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
+        if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
             return;
 
         const String defaultRenderer = getDefaultEndpoint (enumerator, false);
@@ -939,20 +947,20 @@ public:
         ComSmartPtr <IMMDeviceCollection> deviceCollection;
         UINT32 numDevices = 0;
 
-        if (! (OK (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, &deviceCollection))
-                && OK (deviceCollection->GetCount (&numDevices))))
+        if (! (check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, &deviceCollection))
+                && check (deviceCollection->GetCount (&numDevices))))
             return;
 
         for (UINT32 i = 0; i < numDevices; ++i)
         {
             ComSmartPtr <IMMDevice> device;
-            if (! OK (deviceCollection->Item (i, &device)))
+            if (! check (deviceCollection->Item (i, &device)))
                 continue;
 
-            const String deviceId (wasapi_getDeviceID (device));
+            const String deviceId (getDeviceID (device));
 
             DWORD state = 0;
-            if (! OK (device->GetState (&state)))
+            if (! check (device->GetState (&state)))
                 continue;
 
             if (state != DEVICE_STATE_ACTIVE)
@@ -962,18 +970,18 @@ public:
 
             {
                 ComSmartPtr <IPropertyStore> properties;
-                if (! OK (device->OpenPropertyStore (STGM_READ, &properties)))
+                if (! check (device->OpenPropertyStore (STGM_READ, &properties)))
                     continue;
 
                 PROPVARIANT value;
                 PropVariantInit (&value);
-                if (OK (properties->GetValue (PKEY_Device_FriendlyName, &value)))
+                if (check (properties->GetValue (PKEY_Device_FriendlyName, &value)))
                     name = value.pwszVal;
 
                 PropVariantClear (&value);
             }
 
-            const EDataFlow flow = wasapi_getDataFlow (device);
+            const EDataFlow flow = getDataFlow (device);
 
             if (flow == eRender)
             {
@@ -1057,11 +1065,11 @@ private:
     {
         String s;
         IMMDevice* dev = 0;
-        if (OK (enumerator->GetDefaultAudioEndpoint (forCapture ? eCapture : eRender,
-                                                     eMultimedia, &dev)))
+        if (check (enumerator->GetDefaultAudioEndpoint (forCapture ? eCapture : eRender,
+                                                        eMultimedia, &dev)))
         {
             WCHAR* deviceId = 0;
-            if (OK (dev->GetId (&deviceId)))
+            if (check (dev->GetId (&deviceId)))
             {
                 s = String (deviceId);
                 CoTaskMemFree (deviceId);
@@ -1078,13 +1086,12 @@ private:
     WASAPIAudioIODeviceType& operator= (const WASAPIAudioIODeviceType&);
 };
 
+}
+
 //==============================================================================
 AudioIODeviceType* juce_createAudioIODeviceType_WASAPI()
 {
-    return new WASAPIAudioIODeviceType();
+    return new WasapiClasses::WASAPIAudioIODeviceType();
 }
-
-#undef logFailure
-#undef OK
 
 #endif

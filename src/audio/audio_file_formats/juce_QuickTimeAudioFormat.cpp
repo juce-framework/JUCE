@@ -43,7 +43,7 @@
  /* If you've got an include error here, you probably need to install the QuickTime SDK and
     add its header directory to your include path.
 
-    Alternatively, if you don't need any QuickTime services, just turn off the JUC_QUICKTIME
+    Alternatively, if you don't need any QuickTime services, just turn off the JUCE_QUICKTIME
     flag in juce_Config.h
  */
  #include <Movies.h>
@@ -70,7 +70,7 @@ BEGIN_JUCE_NAMESPACE
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
 static const char* const quickTimeFormatName = "QuickTime file";
-static const char* const quickTimeExtensions[] = { ".mov", ".mp3", ".mp4", 0 };
+static const char* const quickTimeExtensions[] = { ".mov", ".mp3", ".mp4", ".m4a", 0 };
 
 //==============================================================================
 class QTAudioReader     : public AudioFormatReader

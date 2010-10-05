@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	72
+#define JUCE_BUILDNUMBER	73
 
 /** Current Juce version number.
 
@@ -2594,6 +2594,11 @@ private:
 
 	void createInternal (const juce_wchar* text, size_t numChars);
 	void appendInternal (const juce_wchar* text, int numExtraChars);
+
+	// This private cast operator should prevent strings being accidentally cast
+	// to bools (this is possible because the compiler can add an implicit cast
+	// via a const char*)
+	operator bool() const throw()   { return false; }
 };
 
 /** Concatenates two strings. */
@@ -39875,7 +39880,8 @@ public:
 		a generic UI that lets the user twiddle the parameters directly.
 
 		If you do want to pass back a component, the component should be created and set to
-		the correct size before returning it.
+		the correct size before returning it. If you implement this method, you must
+		also implement the hasEditor() method and make it return true.
 
 		Remember not to do anything silly like allowing your filter to keep a pointer to
 		the component that gets created - it could be deleted later without any warning, which
@@ -39892,8 +39898,15 @@ public:
 		  not open one at all. Your filter mustn't rely on it being there.
 		- An editor object may be deleted and a replacement one created again at any time.
 		- It's safe to assume that an editor will be deleted before its filter.
+
+		@see hasEditor
 	*/
 	virtual AudioProcessorEditor* createEditor() = 0;
+
+	/** Your filter must override this and return true if it can create an editor component.
+		@see createEditor
+	*/
+	virtual bool hasEditor() const = 0;
 
 	/** Returns the active editor, if there is one.
 
@@ -42011,6 +42024,7 @@ public:
 		bool acceptsMidi() const;
 		bool producesMidi() const;
 
+		bool hasEditor() const;
 		AudioProcessorEditor* createEditor();
 
 		int getNumParameters();
@@ -42057,6 +42071,7 @@ public:
 	bool acceptsMidi() const;
 	bool producesMidi() const;
 
+	bool hasEditor() const			  { return false; }
 	AudioProcessorEditor* createEditor()		{ return 0; }
 
 	int getNumParameters()			  { return 0; }

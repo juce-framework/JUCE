@@ -32,10 +32,11 @@ public:
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
 
     //==============================================================================
+    bool hasEditor() const                  { return true; }
     AudioProcessorEditor* createEditor();
 
     //==============================================================================
-    const String getName() const        { return JucePlugin_Name; }
+    const String getName() const            { return JucePlugin_Name; }
 
     int getNumParameters();
     float getParameter (int index);

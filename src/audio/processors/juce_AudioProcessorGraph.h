@@ -335,6 +335,7 @@ public:
         bool acceptsMidi() const;
         bool producesMidi() const;
 
+        bool hasEditor() const;
         AudioProcessorEditor* createEditor();
 
         int getNumParameters();
@@ -382,6 +383,7 @@ public:
     bool acceptsMidi() const;
     bool producesMidi() const;
 
+    bool hasEditor() const                          { return false; }
     AudioProcessorEditor* createEditor()            { return 0; }
 
     int getNumParameters()                          { return 0; }
