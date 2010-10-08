@@ -871,11 +871,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
 #endif
       recursiveToFrontCall (false)
 {
-    NSRect r;
-    r.origin.x = 0;
-    r.origin.y = 0;
-    r.size.width = (float) component->getWidth();
-    r.size.height = (float) component->getHeight();
+    NSRect r = NSMakeRect (0, 0, (float) component->getWidth(),(float) component->getHeight());
 
     view = [[JuceNSView alloc] initWithOwner: this withFrame: r];
     [view setPostsFrameChangedNotifications: YES];
@@ -999,14 +995,8 @@ void NSViewComponentPeer::setSize (int w, int h)
 void NSViewComponentPeer::setBounds (int x, int y, int w, int h, bool isNowFullScreen)
 {
     fullScreen = isNowFullScreen;
-    w = jmax (0, w);
-    h = jmax (0, h);
 
-    NSRect r;
-    r.origin.x = (float) x;
-    r.origin.y = (float) y;
-    r.size.width = (float) w;
-    r.size.height = (float) h;
+    NSRect r = NSMakeRect ((float) x, (float) y, (float) jmax (0, w), (float) jmax (0, h));
 
     if (isSharedWindow)
     {

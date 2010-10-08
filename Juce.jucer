@@ -1253,6 +1253,8 @@
         <FILE id="z5G75xgix" name="juce_win32_NativeCode.cpp" compile="1" resource="0"
               file="src/native/juce_win32_NativeCode.cpp"/>
         <GROUP id="yPi7BU95s" name="common">
+          <FILE id="2wc3bGX" name="juce_MidiDataConcatenator.h" compile="0" resource="0"
+                file="src/native/common/juce_MidiDataConcatenator.h"/>
           <FILE id="n92kYqkP1" name="juce_posix_NamedPipe.cpp" compile="1" resource="0"
                 file="src/native/common/juce_posix_NamedPipe.cpp"/>
           <FILE id="H4ShC0AEe" name="juce_posix_SharedCode.h" compile="0" resource="0"

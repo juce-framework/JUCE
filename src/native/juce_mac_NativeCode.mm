@@ -85,6 +85,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../audio/devices/juce_AudioIODeviceType.h"
 #include "../audio/devices/juce_MidiOutput.h"
 #include "../audio/devices/juce_MidiInput.h"
+#include "common/juce_MidiDataConcatenator.h"
 #undef Point
 
 //==============================================================================

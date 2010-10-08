@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	73
+#define JUCE_BUILDNUMBER	74
 
 /** Current Juce version number.
 
@@ -25726,6 +25726,9 @@ public:
 	/** Returns the sum of the left and right gaps. */
 	int getLeftAndRight() const throw()		 { return left + right; }
 
+	/** Returns true if this border has no thickness along any edge. */
+	bool isEmpty() const throw()			{ return left + right + top + bottom == 0; }
+
 	/** Changes the top gap. */
 	void setTop (int newTopGap) throw();
 
@@ -38573,6 +38576,18 @@ public:
 		See enableInputLevelMeasurement() for more info.
 	*/
 	double getCurrentInputLevel() const;
+
+	/** Returns the a lock that can be used to synchronise access to the audio callback.
+		Obviously while this is locked, you're blocking the audio thread from running, so
+		it must only be used for very brief periods when absolutely necessary.
+	*/
+	CriticalSection& getAudioCallbackLock() throw()	 { return audioCallbackLock; }
+
+	/** Returns the a lock that can be used to synchronise access to the midi callback.
+		Obviously while this is locked, you're blocking the midi system from running, so
+		it must only be used for very brief periods when absolutely necessary.
+	*/
+	CriticalSection& getMidiCallbackLock() throw()	  { return midiCallbackLock; }
 
 	juce_UseDebuggingNewOperator
 

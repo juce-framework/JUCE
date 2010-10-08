@@ -2133,6 +2133,9 @@
     <ClInclude Include="..\..\src\io\streams\juce_SubregionStream.h">
       <Filter>Juce\Source\io\streams</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\native\common\juce_MidiDataConcatenator.h">
+      <Filter>Juce\Source\native\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\native\common\juce_posix_SharedCode.h">
       <Filter>Juce\Source\native\common</Filter>
     </ClInclude>

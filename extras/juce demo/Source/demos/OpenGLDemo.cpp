@@ -99,7 +99,7 @@ public:
               << ", " << pixFormat->accumulationBufferBlueBits
               << ", " << pixFormat->accumulationBufferAlphaBits
               << "), full-scene AA="
-              << pixFormat->fullSceneAntiAliasingNumSamples;
+              << (int) pixFormat->fullSceneAntiAliasingNumSamples;
 
             Logger::outputDebugString (formatDescription);
         }

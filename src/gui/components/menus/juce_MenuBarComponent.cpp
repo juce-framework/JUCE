@@ -235,9 +235,7 @@ void MenuBarComponent::handleCommandMessage (int commandId)
 {
     const Point<int> mousePos (getMouseXYRelative());
     updateItemUnderMouse (mousePos.getX(), mousePos.getY());
-
-    if (! isCurrentlyBlockedByAnotherModalComponent())
-        setOpenItem (-1);
+    setOpenItem (-1);
 
     if (commandId != 0 && model != 0)
         model->menuItemSelected (commandId, topLevelIndexClicked);

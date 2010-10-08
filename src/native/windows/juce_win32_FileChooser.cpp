@@ -29,14 +29,8 @@
 
 
 //==============================================================================
-void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, const bool bitIsSet) throw();
-
 namespace FileChooserHelpers
 {
-    static const void* defaultDirPath = 0;
-    static String returnedString; // need this to get non-existent pathnames from the directory chooser
-    static Component* currentExtraFileWin = 0;
-
     static bool areThereAnyAlwaysOnTopWindows()
     {
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -50,64 +44,67 @@ namespace FileChooserHelpers
         return false;
     }
 
-    static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPARAM /*lpData*/)
+    struct FileChooserCallbackInfo
     {
+        String initialPath;
+        String returnedString; // need this to get non-existent pathnames from the directory chooser
+        ScopedPointer<Component> customComponent;
+    };
+
+    static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPARAM lpData)
+    {
+        FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) lpData;
+
         if (msg == BFFM_INITIALIZED)
-            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) defaultDirPath);
+            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) static_cast <const WCHAR*> (info->initialPath));
         else if (msg == BFFM_VALIDATEFAILEDW)
-            returnedString = (LPCWSTR) lParam;
+            info->returnedString = (LPCWSTR) lParam;
         else if (msg == BFFM_VALIDATEFAILEDA)
-            returnedString = (const char*) lParam;
+            info->returnedString = (const char*) lParam;
 
         return 0;
     }
 
     static UINT_PTR CALLBACK openCallback (HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
     {
-        if (currentExtraFileWin != 0)
+        if (uiMsg == WM_INITDIALOG)
         {
-            if (uiMsg == WM_INITDIALOG)
+            Component* customComp = ((FileChooserCallbackInfo*) (((OPENFILENAMEW*) lParam)->lCustData))->customComponent;
+
+            HWND dialogH = GetParent (hdlg);
+            jassert (dialogH != 0);
+            if (dialogH == 0)
+                dialogH = hdlg;
+
+            RECT r, cr;
+            GetWindowRect (dialogH, &r);
+            GetClientRect (dialogH, &cr);
+
+            SetWindowPos (dialogH, 0,
+                          r.left, r.top,
+                          customComp->getWidth() + jmax (150, (int) (r.right - r.left)),
+                          jmax (150, (int) (r.bottom - r.top)),
+                          SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
+            customComp->setBounds (cr.right, cr.top, customComp->getWidth(), cr.bottom - cr.top);
+            customComp->addToDesktop (0, dialogH);
+        }
+        else if (uiMsg == WM_NOTIFY)
+        {
+            LPOFNOTIFY ofn = (LPOFNOTIFY) lParam;
+
+            if (ofn->hdr.code == CDN_SELCHANGE)
             {
-                HWND dialogH = GetParent (hdlg);
-                jassert (dialogH != 0);
-                if (dialogH == 0)
-                    dialogH = hdlg;
+                FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) ofn->lpOFN->lCustData;
+                FilePreviewComponent* comp = static_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0));
 
-                RECT r, cr;
-                GetWindowRect (dialogH, &r);
-                GetClientRect (dialogH, &cr);
-
-                SetWindowPos (dialogH, 0,
-                              r.left, r.top,
-                              currentExtraFileWin->getWidth() + jmax (150, (int) (r.right - r.left)),
-                              jmax (150, (int) (r.bottom - r.top)),
-                              SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
-
-                currentExtraFileWin->setBounds (cr.right, cr.top, currentExtraFileWin->getWidth(), cr.bottom - cr.top);
-                currentExtraFileWin->getChildComponent(0)->setBounds (0, 0, currentExtraFileWin->getWidth(), currentExtraFileWin->getHeight());
-
-                SetParent ((HWND) currentExtraFileWin->getWindowHandle(), (HWND) dialogH);
-                juce_setWindowStyleBit ((HWND)currentExtraFileWin->getWindowHandle(), GWL_STYLE, WS_CHILD, (dialogH != 0));
-                juce_setWindowStyleBit ((HWND)currentExtraFileWin->getWindowHandle(), GWL_STYLE, WS_POPUP, (dialogH == 0));
-            }
-            else if (uiMsg == WM_NOTIFY)
-            {
-                LPOFNOTIFY ofn = (LPOFNOTIFY) lParam;
-
-                if (ofn->hdr.code == CDN_SELCHANGE)
+                if (comp != 0)
                 {
-                    FilePreviewComponent* comp = (FilePreviewComponent*) currentExtraFileWin->getChildComponent(0);
+                    WCHAR path [MAX_PATH * 2];
+                    zerostruct (path);
+                    CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
 
-                    if (comp != 0)
-                    {
-                        TCHAR path [MAX_PATH * 2];
-                        path[0] = 0;
-                        CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
-
-                        const String fn ((const WCHAR*) path);
-
-                        comp->selectedFileChanged (File (fn));
-                    }
+                    comp->selectedFileChanged (File (path));
                 }
             }
         }
@@ -115,17 +112,15 @@ namespace FileChooserHelpers
         return 0;
     }
 
-    class FPComponentHolder  : public Component
+    class CustomComponentHolder  : public Component
     {
     public:
-        FPComponentHolder()
+        CustomComponentHolder (Component* customComp)
         {
             setVisible (true);
             setOpaque (true);
-        }
-
-        ~FPComponentHolder()
-        {
+            addAndMakeVisible (customComp);
+            setSize (jlimit (20, 800, customComp->getWidth()), customComp->getHeight());
         }
 
         void paint (Graphics& g)
@@ -133,203 +128,157 @@ namespace FileChooserHelpers
             g.fillAll (Colours::lightgrey);
         }
 
+        void resized()
+        {
+            if (getNumChildComponents() > 0)
+                getChildComponent(0)->setBounds (getLocalBounds());
+        }
+
+        juce_UseDebuggingNewOperator
+
     private:
-        FPComponentHolder (const FPComponentHolder&);
-        FPComponentHolder& operator= (const FPComponentHolder&);
+        CustomComponentHolder (const CustomComponentHolder&);
+        CustomComponentHolder& operator= (const CustomComponentHolder&);
     };
 }
 
 //==============================================================================
-void FileChooser::showPlatformDialog (Array<File>& results,
-                                      const String& title,
-                                      const File& currentFileOrDirectory,
-                                      const String& filter,
-                                      bool selectsDirectory,
-                                      bool /*selectsFiles*/,
-                                      bool isSaveDialogue,
-                                      bool warnAboutOverwritingExistingFiles,
-                                      bool selectMultipleFiles,
-                                      FilePreviewComponent* extraInfoComponent)
+void FileChooser::showPlatformDialog (Array<File>& results, const String& title, const File& currentFileOrDirectory,
+                                      const String& filter, bool selectsDirectory, bool /*selectsFiles*/,
+                                      bool isSaveDialogue, bool warnAboutOverwritingExistingFiles,
+                                      bool selectMultipleFiles, FilePreviewComponent* extraInfoComponent)
 {
     using namespace FileChooserHelpers;
-    const int numCharsAvailable = 32768;
-    MemoryBlock filenameSpace ((numCharsAvailable + 1) * sizeof (WCHAR), true);
-    WCHAR* const fname = (WCHAR*) filenameSpace.getData();
-    int fnameIdx = 0;
 
-    JUCE_TRY
+    HeapBlock<WCHAR> files;
+    const int charsAvailableForResult = 32768;
+    files.calloc (charsAvailableForResult + 1);
+    int filenameOffset = 0;
+
+    FileChooserCallbackInfo info;
+
+    // use a modal window as the parent for this dialog box
+    // to block input from other app windows
+    Component parentWindow (String::empty);
+    const Rectangle<int> mainMon (Desktop::getInstance().getMainMonitorArea());
+    parentWindow.setBounds (mainMon.getX() + mainMon.getWidth() / 4,
+                            mainMon.getY() + mainMon.getHeight() / 4,
+                            0, 0);
+    parentWindow.setOpaque (true);
+    parentWindow.setAlwaysOnTop (areThereAnyAlwaysOnTopWindows());
+    parentWindow.addToDesktop (0);
+
+    if (extraInfoComponent == 0)
+        parentWindow.enterModalState();
+
+    if (currentFileOrDirectory.isDirectory())
     {
-        // use a modal window as the parent for this dialog box
-        // to block input from other app windows
-        const Rectangle<int> mainMon (Desktop::getInstance().getMainMonitorArea());
+        info.initialPath = currentFileOrDirectory.getFullPathName();
+    }
+    else
+    {
+        currentFileOrDirectory.getFileName().copyToUnicode (files, charsAvailableForResult);
+        info.initialPath = currentFileOrDirectory.getParentDirectory().getFullPathName();
+    }
 
-        Component w (String::empty);
-        w.setBounds (mainMon.getX() + mainMon.getWidth() / 4,
-                     mainMon.getY() + mainMon.getHeight() / 4,
-                     0, 0);
-        w.setOpaque (true);
-        w.setAlwaysOnTop (areThereAnyAlwaysOnTopWindows());
-        w.addToDesktop (0);
+    if (selectsDirectory)
+    {
+        BROWSEINFO bi;
+        zerostruct (bi);
 
-        if (extraInfoComponent == 0)
-            w.enterModalState();
+        bi.hwndOwner = (HWND) parentWindow.getWindowHandle();
+        bi.pszDisplayName = files;
+        bi.lpszTitle = title;
+        bi.lParam = (LPARAM) &info;
+        bi.lpfn = browseCallbackProc;
+      #ifdef BIF_USENEWUI
+        bi.ulFlags = BIF_USENEWUI | BIF_VALIDATE;
+      #else
+        bi.ulFlags = 0x50;
+      #endif
 
-        String initialDir;
+        LPITEMIDLIST list = SHBrowseForFolder (&bi);
 
-        if (currentFileOrDirectory.isDirectory())
+        if (! SHGetPathFromIDListW (list, files))
         {
-            initialDir = currentFileOrDirectory.getFullPathName();
+            files[0] = 0;
+            info.returnedString = String::empty;
         }
-        else
-        {
-            currentFileOrDirectory.getFileName().copyToUnicode (fname, numCharsAvailable);
 
-            initialDir = currentFileOrDirectory.getParentDirectory().getFullPathName();
-        }
+        LPMALLOC al;
+        if (list != 0 && SUCCEEDED (SHGetMalloc (&al)))
+            al->Free (list);
 
-        if (currentExtraFileWin->isValidComponent())
+        if (info.returnedString.isNotEmpty())
         {
-            jassertfalse;
+            results.add (File (String (files)).getSiblingFile (info.returnedString));
             return;
         }
-
-        if (selectsDirectory)
-        {
-            LPITEMIDLIST list = 0;
-            filenameSpace.fillWith (0);
-
-            {
-                BROWSEINFO bi;
-                zerostruct (bi);
-
-                bi.hwndOwner = (HWND) w.getWindowHandle();
-                bi.pszDisplayName = fname;
-                bi.lpszTitle = title;
-                bi.lpfn = browseCallbackProc;
-#ifdef BIF_USENEWUI
-                bi.ulFlags = BIF_USENEWUI | BIF_VALIDATE;
-#else
-                bi.ulFlags = 0x50;
-#endif
-                defaultDirPath = (const WCHAR*) initialDir;
-
-                list = SHBrowseForFolder (&bi);
-
-                if (! SHGetPathFromIDListW (list, fname))
-                {
-                    fname[0] = 0;
-                    returnedString = String::empty;
-                }
-            }
-
-            LPMALLOC al;
-            if (list != 0 && SUCCEEDED (SHGetMalloc (&al)))
-                al->Free (list);
-
-            defaultDirPath = 0;
-
-            if (returnedString.isNotEmpty())
-            {
-                const String stringFName (fname);
-
-                results.add (File (stringFName).getSiblingFile (returnedString));
-                returnedString = String::empty;
-
-                return;
-            }
-        }
-        else
-        {
-            DWORD flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
-
-            if (warnAboutOverwritingExistingFiles)
-                flags |= OFN_OVERWRITEPROMPT;
-
-            if (selectMultipleFiles)
-                flags |= OFN_ALLOWMULTISELECT;
-
-            if (extraInfoComponent != 0)
-            {
-                flags |= OFN_ENABLEHOOK;
-
-                currentExtraFileWin = new FPComponentHolder();
-                currentExtraFileWin->addAndMakeVisible (extraInfoComponent);
-                currentExtraFileWin->setSize (jlimit (20, 800, extraInfoComponent->getWidth()),
-                                              extraInfoComponent->getHeight());
-                currentExtraFileWin->addToDesktop (0);
-
-                currentExtraFileWin->enterModalState();
-            }
-
-            {
-                WCHAR filters [1024];
-                zeromem (filters, sizeof (filters));
-                filter.copyToUnicode (filters, 1024);
-                filter.copyToUnicode (filters + filter.length() + 1,
-                                      1022 - filter.length());
-
-                OPENFILENAMEW of;
-                zerostruct (of);
-
-#ifdef OPENFILENAME_SIZE_VERSION_400W
-                of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
-#else
-                of.lStructSize = sizeof (of);
-#endif
-                of.hwndOwner = (HWND) w.getWindowHandle();
-                of.lpstrFilter = filters;
-                of.nFilterIndex = 1;
-                of.lpstrFile = fname;
-                of.nMaxFile = numCharsAvailable;
-                of.lpstrInitialDir = initialDir;
-                of.lpstrTitle = title;
-                of.Flags = flags;
-
-                if (extraInfoComponent != 0)
-                    of.lpfnHook = &openCallback;
-
-                if (isSaveDialogue)
-                {
-                    if (! GetSaveFileName (&of))
-                        fname[0] = 0;
-                    else
-                        fnameIdx = of.nFileOffset;
-                }
-                else
-                {
-                    if (! GetOpenFileName (&of))
-                        fname[0] = 0;
-                    else
-                        fnameIdx = of.nFileOffset;
-                }
-            }
-        }
     }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-    catch (...)
+    else
     {
-        fname[0] = 0;
+        DWORD flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
+
+        if (warnAboutOverwritingExistingFiles)
+            flags |= OFN_OVERWRITEPROMPT;
+
+        if (selectMultipleFiles)
+            flags |= OFN_ALLOWMULTISELECT;
+
+        if (extraInfoComponent != 0)
+        {
+            flags |= OFN_ENABLEHOOK;
+
+            info.customComponent = new CustomComponentHolder (extraInfoComponent);
+            info.customComponent->enterModalState();
+        }
+
+        WCHAR filters [1024];
+        zerostruct (filters);
+        filter.copyToUnicode (filters, 1024);
+        filter.copyToUnicode (filters + filter.length() + 1, 1022 - filter.length());
+
+        OPENFILENAMEW of;
+        zerostruct (of);
+
+      #ifdef OPENFILENAME_SIZE_VERSION_400W
+        of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
+      #else
+        of.lStructSize = sizeof (of);
+      #endif
+        of.hwndOwner = (HWND) parentWindow.getWindowHandle();
+        of.lpstrFilter = filters;
+        of.nFilterIndex = 1;
+        of.lpstrFile = files;
+        of.nMaxFile = charsAvailableForResult;
+        of.lpstrInitialDir = info.initialPath;
+        of.lpstrTitle = title;
+        of.Flags = flags;
+        of.lCustData = (LPARAM) &info;
+
+        if (extraInfoComponent != 0)
+            of.lpfnHook = &openCallback;
+
+        if (! (isSaveDialogue ? GetSaveFileName (&of)
+                              : GetOpenFileName (&of)))
+            return;
+
+        filenameOffset = of.nFileOffset;
     }
-#endif
 
-    deleteAndZero (currentExtraFileWin);
-
-    const WCHAR* const files = fname;
-
-    if (selectMultipleFiles && fnameIdx > 0 && files [fnameIdx - 1] == 0)
+    if (selectMultipleFiles && filenameOffset > 0 && files [filenameOffset - 1] == 0)
     {
-        const WCHAR* filename = files + fnameIdx;
+        const WCHAR* filename = files + filenameOffset;
 
         while (*filename != 0)
         {
-            const String filepath (String (files) + "\\" + String (filename));
-            results.add (File (filepath));
+            results.add (File (String (files) + "\\" + String (filename)));
             filename += CharacterFunctions::length (filename) + 1;
         }
     }
     else if (files[0] != 0)
     {
-        results.add (File (files));
+        results.add (File (String (files)));
     }
 }
 

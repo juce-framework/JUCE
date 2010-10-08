@@ -78,11 +78,7 @@ public:
         {
             const Point<int> pos (owner->relativePositionToOtherComponent (topComp, Point<int>()));
 
-            NSRect r;
-            r.origin.x = (float) pos.getX();
-            r.origin.y = (float) pos.getY();
-            r.size.width = (float) owner->getWidth();
-            r.size.height = (float) owner->getHeight();
+            NSRect r = NSMakeRect ((float) pos.getX(), (float) pos.getY(), (float) owner->getWidth(), (float) owner->getHeight());
             r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);
 
             [view setFrame: r];

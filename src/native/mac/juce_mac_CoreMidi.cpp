@@ -214,130 +214,75 @@ namespace CoreMidiHelpers
                 MIDIEndpointDispose (endPoint);
         }
 
+        void send (const MIDIPacketList* const packets)
+        {
+            if (port != 0)
+                MIDISend (port, endPoint, packets);
+            else
+                MIDIReceived (endPoint, packets);
+        }
+
         MIDIPortRef port;
         MIDIEndpointRef endPoint;
     };
 
     //==============================================================================
+    class MidiPortAndCallback;
+    static CriticalSection callbackLock;
+    static Array<MidiPortAndCallback*> activeCallbacks;
+
     class MidiPortAndCallback
     {
     public:
-        MidiInput* input;
-        MidiPortAndEndpoint* portAndEndpoint;
-        MidiInputCallback* callback;
-        MemoryBlock pendingData;
-        int pendingBytes;
-        double pendingDataTime;
-        bool active;
-
-        void processSysex (const uint8*& d, int& size, const double time)
+        MidiPortAndCallback (MidiInputCallback& callback_)
+            : input (0), active (false), callback (callback_), concatenator (2048)
         {
-            if (*d == 0xf0)
+        }
+
+        ~MidiPortAndCallback()
+        {
+            active = false;
+
             {
-                pendingBytes = 0;
-                pendingDataTime = time;
+                const ScopedLock sl (callbackLock);
+                activeCallbacks.removeValue (this);
             }
 
-            pendingData.ensureSize (pendingBytes + size, false);
-            uint8* totalMessage = (uint8*) pendingData.getData();
+            if (portAndEndpoint != 0 && portAndEndpoint->port != 0)
+                CHECK_ERROR (MIDIPortDisconnectSource (portAndEndpoint->port, portAndEndpoint->endPoint));
+        }
 
-            uint8* dest = totalMessage + pendingBytes;
+        void handlePackets (const MIDIPacketList* const pktlist)
+        {
+            const double time = Time::getMillisecondCounterHiRes() * 0.001;
 
-            while (size > 0)
+            const ScopedLock sl (callbackLock);
+            if (activeCallbacks.contains (this) && active)
             {
-                if (pendingBytes > 0 && *d >= 0x80)
+                const MIDIPacket* packet = &pktlist->packet[0];
+
+                for (unsigned int i = 0; i < pktlist->numPackets; ++i)
                 {
-                    if (*d >= 0xfa || *d == 0xf8)
-                    {
-                        callback->handleIncomingMidiMessage (input, MidiMessage (*d, time));
-                        ++d;
-                        --size;
-                    }
-                    else
-                    {
-                        if (*d == 0xf7)
-                        {
-                            *dest++ = *d++;
-                            pendingBytes++;
-                            --size;
-                        }
+                    concatenator.pushMidiData (packet->data, (int) packet->length, time,
+                                               input, callback);
 
-                        break;
-                    }
+                    packet = MIDIPacketNext (packet);
                 }
-                else
-                {
-                    *dest++ = *d++;
-                    pendingBytes++;
-                    --size;
-                }
-            }
-
-            if (totalMessage [pendingBytes - 1] == 0xf7)
-            {
-                callback->handleIncomingMidiMessage (input, MidiMessage (totalMessage, pendingBytes, pendingDataTime));
-                pendingBytes = 0;
-            }
-            else
-            {
-                callback->handlePartialSysexMessage (input, totalMessage, pendingBytes, pendingDataTime);
             }
         }
+
+        MidiInput* input;
+        ScopedPointer<MidiPortAndEndpoint> portAndEndpoint;
+        volatile bool active;
+
+    private:
+        MidiInputCallback& callback;
+        MidiDataConcatenator concatenator;
     };
 
-    static CriticalSection callbackLock;
-    static Array<void*> activeCallbacks;
-
-    static void midiInputProc (const MIDIPacketList* pktlist,
-                               void* readProcRefCon,
-                               void* /*srcConnRefCon*/)
+    static void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)
     {
-        double time = Time::getMillisecondCounterHiRes() * 0.001;
-        const double originalTime = time;
-
-        MidiPortAndCallback* const mpc = (MidiPortAndCallback*) readProcRefCon;
-        const ScopedLock sl (CoreMidiHelpers::callbackLock);
-
-        if (CoreMidiHelpers::activeCallbacks.contains (mpc) && mpc->active)
-        {
-            const MIDIPacket* packet = &pktlist->packet[0];
-
-            for (unsigned int i = 0; i < pktlist->numPackets; ++i)
-            {
-                const uint8* d = (const uint8*) (packet->data);
-                int size = packet->length;
-
-                while (size > 0)
-                {
-                    time = originalTime;
-
-                    if (mpc->pendingBytes > 0 || d[0] == 0xf0)
-                    {
-                        mpc->processSysex (d, size, time);
-                    }
-                    else
-                    {
-                        int used = 0;
-                        const MidiMessage m (d, size, used, 0, time);
-
-                        if (used <= 0)
-                        {
-                            jassertfalse; // malformed midi message
-                            break;
-                        }
-                        else
-                        {
-                            mpc->callback->handleIncomingMidiMessage (mpc->input, m);
-                        }
-
-                        size -= used;
-                        d += used;
-                    }
-                }
-
-                packet = MIDIPacketNext (packet);
-            }
-        }
+        static_cast <MidiPortAndCallback*> (readProcRefCon)->handlePackets (pktlist);
     }
 }
 
@@ -462,10 +407,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
             p = MIDIPacketNext (p);
         }
 
-        if (mpe->port != 0)
-            MIDISend (mpe->port, mpe->endPoint, packets);
-        else
-            MIDIReceived (mpe->endPoint, packets);
+        mpe->send (packets);
     }
     else
     {
@@ -475,10 +417,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         packets.packet[0].length = message.getRawDataSize();
         *(int*) (packets.packet[0].data) = *(const int*) message.getRawData();
 
-        if (mpe->port != 0)
-            MIDISend (mpe->port, mpe->endPoint, &packets);
-        else
-            MIDIReceived (mpe->endPoint, &packets);
+        mpe->send (&packets);
     }
 }
 
@@ -517,8 +456,10 @@ int MidiInput::getDefaultDeviceIndex()
 
 MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 {
+    jassert (callback != 0);
+
     using namespace CoreMidiHelpers;
-    MidiInput* mi = 0;
+    MidiInput* newInput = 0;
 
     if (((unsigned int) index) < (unsigned int) MIDIGetNumberOfSources())
     {
@@ -526,31 +467,26 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 
         if (endPoint != 0)
         {
-            CFStringRef pname;
+            CFStringRef name;
 
-            if (CHECK_ERROR (MIDIObjectGetStringProperty (endPoint, kMIDIPropertyName, &pname)))
+            if (CHECK_ERROR (MIDIObjectGetStringProperty (endPoint, kMIDIPropertyName, &name)))
             {
                 MIDIClientRef client = getGlobalMidiClient();
 
                 if (client != 0)
                 {
                     MIDIPortRef port;
+                    ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
 
-                    ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback());
-                    mpc->active = false;
-
-                    if (CHECK_ERROR (MIDIInputPortCreate (client, pname, midiInputProc, mpc, &port)))
+                    if (CHECK_ERROR (MIDIInputPortCreate (client, name, midiInputProc, mpc, &port)))
                     {
                         if (CHECK_ERROR (MIDIPortConnectSource (port, endPoint, 0)))
                         {
                             mpc->portAndEndpoint = new MidiPortAndEndpoint (port, endPoint);
-                            mpc->callback = callback;
-                            mpc->pendingBytes = 0;
-                            mpc->pendingData.ensureSize (128);
 
-                            mi = new MidiInput (getDevices() [index]);
-                            mpc->input = mi;
-                            mi->internal = mpc;
+                            newInput = new MidiInput (getDevices() [index]);
+                            mpc->input = newInput;
+                            newInput->internal = mpc;
 
                             const ScopedLock sl (callbackLock);
                             activeCallbacks.add (mpc.release());
@@ -563,22 +499,24 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                 }
             }
 
-            CFRelease (pname);
+            CFRelease (name);
         }
     }
 
-    return mi;
+    return newInput;
 }
 
 MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
 {
+    jassert (callback != 0);
+
     using namespace CoreMidiHelpers;
     MidiInput* mi = 0;
     MIDIClientRef client = getGlobalMidiClient();
 
     if (client != 0)
     {
-        ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback());
+        ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
         mpc->active = false;
 
         MIDIEndpointRef endPoint;
@@ -586,9 +524,6 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
         if (CHECK_ERROR (MIDIDestinationCreate (client, name, midiInputProc, mpc, &endPoint)))
         {
             mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);
-            mpc->callback = callback;
-            mpc->pendingBytes = 0;
-            mpc->pendingData.ensureSize (128);
 
             mi = new MidiInput (deviceName);
             mpc->input = mi;
@@ -611,21 +546,7 @@ MidiInput::MidiInput (const String& name_)
 
 MidiInput::~MidiInput()
 {
-    using namespace CoreMidiHelpers;
-
-    MidiPortAndCallback* const mpc = static_cast<MidiPortAndCallback*> (internal);
-    mpc->active = false;
-
-    {
-        const ScopedLock sl (callbackLock);
-        activeCallbacks.removeValue (mpc);
-    }
-
-    if (mpc->portAndEndpoint->port != 0)
-        CHECK_ERROR (MIDIPortDisconnectSource (mpc->portAndEndpoint->port, mpc->portAndEndpoint->endPoint));
-
-    delete mpc->portAndEndpoint;
-    delete mpc;
+    delete static_cast<CoreMidiHelpers::MidiPortAndCallback*> (internal);
 }
 
 void MidiInput::start()

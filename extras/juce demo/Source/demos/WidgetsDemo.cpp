@@ -1347,13 +1347,15 @@ public:
                                         "*",
                                         useNativeVersion);
 
-                        if (fc.browseForFileToOpen())
+                        if (fc.browseForMultipleFilesToOpen())
                         {
-                            File chosenFile = fc.getResult();
+                            String chosen;
+                            for (int i = 0; i < fc.getResults().size(); ++i)
+                                chosen << fc.getResults().getReference(i).getFullPathName() << "\n";
 
                             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
                                                          "File Chooser...",
-                                                         "You picked: " + chosenFile.getFullPathName());
+                                                         "You picked: " + chosen);
                         }
                     }
                     else if (result == 124)
@@ -1366,13 +1368,15 @@ public:
                                         "*.jpg;*.jpeg;*.png;*.gif",
                                         useNativeVersion);
 
-                        if (fc.browseForFileToOpen (&imagePreview))
+                        if (fc.browseForMultipleFilesToOpen (&imagePreview))
                         {
-                            File chosenFile = fc.getResult();
+                            String chosen;
+                            for (int i = 0; i < fc.getResults().size(); ++i)
+                                chosen << fc.getResults().getReference(i).getFullPathName() << "\n";
 
                             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
                                                          "File Chooser...",
-                                                         "You picked: " + chosenFile.getFullPathName());
+                                                         "You picked: " + chosen);
                         }
                     }
                     else if (result == 122)

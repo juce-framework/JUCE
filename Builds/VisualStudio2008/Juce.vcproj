@@ -837,6 +837,7 @@
           <File RelativePath="..\..\src\native\juce_mac_NativeCode.mm"/>
           <File RelativePath="..\..\src\native\juce_win32_NativeCode.cpp"/>
           <Filter Name="common">
+            <File RelativePath="..\..\src\native\common\juce_MidiDataConcatenator.h"/>
             <File RelativePath="..\..\src\native\common\juce_posix_NamedPipe.cpp"/>
             <File RelativePath="..\..\src\native\common\juce_posix_SharedCode.h"/>
           </Filter>

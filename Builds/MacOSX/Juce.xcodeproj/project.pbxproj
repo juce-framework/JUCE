@@ -911,6 +911,7 @@
 		1C4E5F07F277AE37C71EA547 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_linux_NativeCode.cpp; path = ../../src/native/juce_linux_NativeCode.cpp; sourceTree = SOURCE_ROOT; };
 		3BC24CC03A2F940A615FE935 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_mac_NativeCode.mm; path = ../../src/native/juce_mac_NativeCode.mm; sourceTree = SOURCE_ROOT; };
 		9DFCF3F7BB734C8AABD83D8D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_NativeCode.cpp; path = ../../src/native/juce_win32_NativeCode.cpp; sourceTree = SOURCE_ROOT; };
+		213F0A7BF38AF6AB34414A45 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MidiDataConcatenator.h; path = ../../src/native/common/juce_MidiDataConcatenator.h; sourceTree = SOURCE_ROOT; };
 		21B2342B75097AB93CFF7E97 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_posix_NamedPipe.cpp; path = ../../src/native/common/juce_posix_NamedPipe.cpp; sourceTree = SOURCE_ROOT; };
 		2C48BB1A286C6A63174E5798 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_posix_SharedCode.h; path = ../../src/native/common/juce_posix_SharedCode.h; sourceTree = SOURCE_ROOT; };
 		7A51D8B81F390A4CABF25C73 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_linux_Audio.cpp; path = ../../src/native/linux/juce_linux_Audio.cpp; sourceTree = SOURCE_ROOT; };
@@ -1686,6 +1687,7 @@
 				13FBF71BD76A08C8971C6351,
 				177636E4EEEBBB139F934897 ); name = io; sourceTree = "<group>"; };
 		DDB94A7300C3D1F2E9E51C47 = { isa = PBXGroup; children = (
+				213F0A7BF38AF6AB34414A45,
 				21B2342B75097AB93CFF7E97,
 				2C48BB1A286C6A63174E5798 ); name = common; sourceTree = "<group>"; };
 		1004A23965A4DB0FCC441ED3 = { isa = PBXGroup; children = (

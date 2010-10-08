@@ -256,7 +256,7 @@ public:
                 }
             }
 
-            int framesToDo = bufferList->mBuffers[0].mDataByteSize / inputStreamDesc.mBytesPerFrame;
+            int framesToDo = jmin (numSamples, bufferList->mBuffers[0].mDataByteSize / inputStreamDesc.mBytesPerFrame);
             bufferList->mBuffers[0].mDataByteSize = inputStreamDesc.mBytesPerFrame * framesToDo;
 
             UInt32 outFlags = 0;
@@ -268,8 +268,8 @@ public:
                 break;
             }
 
-            lastSampleRead = startSampleInFile + actualNumFrames * samplesPerFrame;
-            const int samplesReceived = actualNumFrames * samplesPerFrame;
+            lastSampleRead = startSampleInFile + actualNumFrames;
+            const int samplesReceived = actualNumFrames;
 
             for (int j = numDestChannels; --j >= 0;)
             {

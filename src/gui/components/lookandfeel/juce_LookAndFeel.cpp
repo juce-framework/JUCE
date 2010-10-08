@@ -1745,9 +1745,25 @@ void LookAndFeel::drawCornerResizer (Graphics& g,
     }
 }
 
-void LookAndFeel::drawResizableFrame (Graphics&, int /*w*/, int /*h*/,
-                                      const BorderSize& /*borders*/)
+void LookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSize& border)
 {
+    if (! border.isEmpty())
+    {
+        const Rectangle<int> fullSize (0, 0, w, h);
+        const Rectangle<int> centreArea (border.subtractedFrom (fullSize));
+
+        g.saveState();
+
+        g.excludeClipRegion (centreArea);
+
+        g.setColour (Colour (0x50000000));
+        g.drawRect (fullSize);
+
+        g.setColour (Colour (0x19000000));
+        g.drawRect (centreArea.expanded (1, 1));
+
+        g.restoreState();
+    }
 }
 
 //==============================================================================
@@ -1757,17 +1773,9 @@ void LookAndFeel::fillResizableWindowBackground (Graphics& g, int /*w*/, int /*h
    g.fillAll (window.getBackgroundColour());
 }
 
-void LookAndFeel::drawResizableWindowBorder (Graphics& g, int w, int h,
-                                             const BorderSize& border, ResizableWindow&)
+void LookAndFeel::drawResizableWindowBorder (Graphics&, int /*w*/, int /*h*/,
+                                             const BorderSize& /*border*/, ResizableWindow&)
 {
-    g.setColour (Colour (0x80000000));
-    g.drawRect (0, 0, w, h);
-
-    g.setColour (Colour (0x19000000));
-    g.drawRect (border.getLeft() - 1,
-                border.getTop() - 1,
-                w + 2 - border.getLeftAndRight(),
-                h + 2 - border.getTopAndBottom());
 }
 
 void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,

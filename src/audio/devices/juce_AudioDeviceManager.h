@@ -429,6 +429,18 @@ public:
     */
     double getCurrentInputLevel() const;
 
+    /** Returns the a lock that can be used to synchronise access to the audio callback.
+        Obviously while this is locked, you're blocking the audio thread from running, so
+        it must only be used for very brief periods when absolutely necessary.
+    */
+    CriticalSection& getAudioCallbackLock() throw()         { return audioCallbackLock; }
+
+    /** Returns the a lock that can be used to synchronise access to the midi callback.
+        Obviously while this is locked, you're blocking the midi system from running, so
+        it must only be used for very brief periods when absolutely necessary.
+    */
+    CriticalSection& getMidiCallbackLock() throw()          { return midiCallbackLock; }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
