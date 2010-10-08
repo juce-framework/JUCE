@@ -136,6 +136,11 @@ void TextLayout::clear()
     totalLines = 0;
 }
 
+bool TextLayout::isEmpty() const
+{
+    return tokens.size() == 0;
+}
+
 void TextLayout::appendText (const String& text, const Font& font)
 {
     const juce_wchar* t = text;

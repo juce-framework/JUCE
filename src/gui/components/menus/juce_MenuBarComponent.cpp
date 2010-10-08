@@ -113,13 +113,12 @@ void MenuBarComponent::paint (Graphics& g)
 void MenuBarComponent::resized()
 {
     xPositions.clear();
-    int x = 2;
+    int x = 0;
     xPositions.add (x);
 
     for (int i = 0; i < menuNames.size(); ++i)
     {
         x += getLookAndFeel().getMenuBarItemWidth (*this, i, menuNames[i]);
-
         xPositions.add (x);
     }
 }
@@ -235,7 +234,9 @@ void MenuBarComponent::handleCommandMessage (int commandId)
 {
     const Point<int> mousePos (getMouseXYRelative());
     updateItemUnderMouse (mousePos.getX(), mousePos.getY());
-    setOpenItem (-1);
+
+    if (currentPopupIndex == topLevelIndexClicked)
+        setOpenItem (-1);
 
     if (commandId != 0 && model != 0)
         model->menuItemSelected (commandId, topLevelIndexClicked);

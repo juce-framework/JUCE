@@ -142,6 +142,9 @@ public:
     */
     const String getTextEditorContents (const String& nameOfTextEditor) const;
 
+    /** Returns a pointer to a textbox that was added with addTextEditor(). */
+    TextEditor* getTextEditor (const String& nameOfTextEditor) const;
+
     //==============================================================================
     /** Adds a drop-down list of choices to the box.
 

@@ -210,6 +210,7 @@ public:
 
         const TermPtr createTermToEvaluateInput (const EvaluationContext& context, const Term* input_, double overallTarget, Term* topLevelTerm) const
         {
+            (void) input_;
             jassert (input_ == input);
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
@@ -987,7 +988,13 @@ Expression::ParseError::ParseError (const String& message)
 Expression::EvaluationError::EvaluationError (const String& message)
     : description (message)
 {
-    DBG ("Expression::EvaluationError: " + message);
+    DBG ("Expression::EvaluationError: " + description);
+}
+
+Expression::EvaluationError::EvaluationError (const String& symbol, const String& member)
+    : description ("Unknown symbol: \"" + symbol + (member.isEmpty() ? "\"" : ("." + member + "\"")))
+{
+    DBG ("Expression::EvaluationError: " + description);
 }
 
 //==============================================================================
@@ -996,7 +1003,7 @@ Expression::EvaluationContext::~EvaluationContext() {}
 
 const Expression Expression::EvaluationContext::getSymbolValue (const String& symbol, const String& member) const
 {
-    throw EvaluationError ("Unknown symbol: \"" + symbol + (member.isEmpty() ? "\"" : ("." + member + "\"")));
+    throw EvaluationError (symbol, member);
 }
 
 double Expression::EvaluationContext::evaluateFunction (const String& functionName, const double* parameters, int numParams) const
@@ -1021,14 +1028,10 @@ double Expression::EvaluationContext::evaluateFunction (const String& functionNa
         }
         else if (numParams == 1)
         {
-            if (functionName == "sin")
-                return sin (parameters[0]);
-            else if (functionName == "cos")
-                return cos (parameters[0]);
-            else if (functionName == "tan")
-                return tan (parameters[0]);
-            else if (functionName == "abs")
-                return std::abs (parameters[0]);
+            if      (functionName == "sin")     return sin (parameters[0]);
+            else if (functionName == "cos")     return cos (parameters[0]);
+            else if (functionName == "tan")     return tan (parameters[0]);
+            else if (functionName == "abs")     return std::abs (parameters[0]);
         }
     }
 

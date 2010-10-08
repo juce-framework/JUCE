@@ -6923,6 +6923,7 @@ public:
 	{
 	public:
 		EvaluationError (const String& message);
+		EvaluationError (const String& symbolName, const String& memberName);
 
 		String description;
 	};
@@ -54408,6 +54409,9 @@ public:
 	void setText (const String& newText,
 				  const Font& fontToUse);
 
+	/** Returns true if the layout has not had any text added yet. */
+	bool isEmpty() const;
+
 	/** Breaks the text up to form a paragraph with the given width.
 
 		@param maximumWidth		 any text wider than this will be split
@@ -54567,6 +54571,9 @@ public:
 		@see addTextEditor
 	*/
 	const String getTextEditorContents (const String& nameOfTextEditor) const;
+
+	/** Returns a pointer to a textbox that was added with addTextEditor(). */
+	TextEditor* getTextEditor (const String& nameOfTextEditor) const;
 
 	/** Adds a drop-down list of choices to the box.
 

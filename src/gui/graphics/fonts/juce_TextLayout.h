@@ -88,6 +88,9 @@ public:
     void setText (const String& newText,
                   const Font& fontToUse);
 
+    /** Returns true if the layout has not had any text added yet. */
+    bool isEmpty() const;
+
     //==============================================================================
     /** Breaks the text up to form a paragraph with the given width.
 

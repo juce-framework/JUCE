@@ -182,6 +182,7 @@ public:
     {
     public:
         EvaluationError (const String& message);
+        EvaluationError (const String& symbolName, const String& memberName);
 
         String description;
     };

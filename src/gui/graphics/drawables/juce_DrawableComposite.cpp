@@ -266,7 +266,7 @@ const Expression DrawableComposite::getSymbolValue (const String& symbol, const 
             return m->position.getExpression();
     }
 
-    return Expression::EvaluationContext::getSymbolValue (symbol, member);
+    throw Expression::EvaluationError (symbol, member);
 }
 
 const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool includeMarkers) const
@@ -526,6 +526,7 @@ bool DrawableComposite::ValueTreeWrapper::containsMarker (bool xAxis, const Valu
 
 const DrawableComposite::Marker DrawableComposite::ValueTreeWrapper::getMarker (bool xAxis, const ValueTree& state) const
 {
+    (void) xAxis;
     jassert (containsMarker (xAxis, state));
 
     return Marker (state [nameProperty], RelativeCoordinate (state [posProperty].toString()));

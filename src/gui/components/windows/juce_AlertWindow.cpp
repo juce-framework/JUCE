@@ -226,13 +226,19 @@ void AlertWindow::addTextEditor (const String& name,
     updateLayout (false);
 }
 
-const String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
+TextEditor* AlertWindow::getTextEditor (const String& nameOfTextEditor) const
 {
     for (int i = textBoxes.size(); --i >= 0;)
-        if (((TextEditor*)textBoxes[i])->getName() == nameOfTextEditor)
-            return ((TextEditor*)textBoxes[i])->getText();
+        if (static_cast <TextEditor*> (textBoxes.getUnchecked(i))->getName() == nameOfTextEditor)
+            return static_cast <TextEditor*> (textBoxes.getUnchecked(i));
 
-    return String::empty;
+    return 0;
+}
+
+const String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
+{
+    TextEditor* const t = getTextEditor (nameOfTextEditor);
+    return t != 0 ? t->getText() : String::empty;
 }
 
 
