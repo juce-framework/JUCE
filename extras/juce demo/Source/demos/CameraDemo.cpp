@@ -37,33 +37,31 @@ class CameraDemo  : public Component,
 public:
     //==============================================================================
     CameraDemo()
+        : cameraSelectorComboBox ("Camera"),
+          snapshotButton ("Take a snapshot"),
+          recordMovieButton ("Record a movie file (to your desktop)..."),
+          recordingMovie (false)
     {
         setName ("Camera");
 
-        cameraDevice = 0;
-        cameraPreviewComp = 0;
-        recordingMovie = false;
-
-        addAndMakeVisible (cameraSelectorComboBox = new ComboBox ("Camera"));
+        addAndMakeVisible (&cameraSelectorComboBox);
         createListOfCameras();
-        cameraSelectorComboBox->setSelectedId (1);
-        cameraSelectorComboBox->addListener (this);
+        cameraSelectorComboBox.setSelectedId (1);
+        cameraSelectorComboBox.addListener (this);
 
-        addAndMakeVisible (snapshotButton = new TextButton ("Take a snapshot"));
-        snapshotButton->addButtonListener (this);
-        snapshotButton->setEnabled (false);
+        addAndMakeVisible (&snapshotButton);
+        snapshotButton.addButtonListener (this);
+        snapshotButton.setEnabled (false);
 
-        addAndMakeVisible (recordMovieButton = new TextButton ("Record a movie file (to your desktop)..."));
-        recordMovieButton->addButtonListener (this);
-        recordMovieButton->setEnabled (false);
+        addAndMakeVisible (&recordMovieButton);
+        recordMovieButton.addButtonListener (this);
+        recordMovieButton.setEnabled (false);
 
-        cameraSelectorComboBox->setSelectedId (2);
+        cameraSelectorComboBox.setSelectedId (2);
     }
 
     ~CameraDemo()
     {
-        deleteAllChildren();
-        delete cameraDevice;
     }
 
     void paint (Graphics& g)
@@ -76,11 +74,11 @@ public:
 
     void resized()
     {
-        cameraSelectorComboBox->setBounds (10, 4, 250, 24);
-        snapshotButton->changeWidthToFitText (24);
-        snapshotButton->setTopLeftPosition (cameraSelectorComboBox->getRight() + 20, 4);
-        recordMovieButton->changeWidthToFitText (24);
-        recordMovieButton->setTopLeftPosition (snapshotButton->getRight() + 20, 4);
+        cameraSelectorComboBox.setBounds (10, 4, 250, 24);
+        snapshotButton.changeWidthToFitText (24);
+        snapshotButton.setTopLeftPosition (cameraSelectorComboBox.getRight() + 20, 4);
+        recordMovieButton.changeWidthToFitText (24);
+        recordMovieButton.setTopLeftPosition (snapshotButton.getRight() + 20, 4);
 
         if (cameraPreviewComp != 0)
             cameraPreviewComp->setBounds (10, 40, getWidth() / 2 - 20, getHeight() - 50);
@@ -89,42 +87,42 @@ public:
     void comboBoxChanged (ComboBox*)
     {
         // This is called when the user chooses a camera from the drop-down list.
-        deleteAndZero (cameraDevice);
-        deleteAndZero (cameraPreviewComp);
+        cameraDevice = 0;
+        cameraPreviewComp = 0;
         recordingMovie = false;
 
-        if (cameraSelectorComboBox->getSelectedId() > 1)
+        if (cameraSelectorComboBox.getSelectedId() > 1)
         {
             // Try to open the user's choice of camera..
-            cameraDevice = CameraDevice::openDevice (cameraSelectorComboBox->getSelectedId() - 2);
+            cameraDevice = CameraDevice::openDevice (cameraSelectorComboBox.getSelectedId() - 2);
 
             // and if it worked, create a preview component for it..
             if (cameraDevice != 0)
                 addAndMakeVisible (cameraPreviewComp = cameraDevice->createViewerComponent());
         }
 
-        snapshotButton->setEnabled (cameraDevice != 0);
-        recordMovieButton->setEnabled (cameraDevice != 0);
+        snapshotButton.setEnabled (cameraDevice != 0);
+        recordMovieButton.setEnabled (cameraDevice != 0);
         resized();
     }
 
     void createListOfCameras()
     {
-        cameraSelectorComboBox->clear();
-        cameraSelectorComboBox->addItem ("No camera", 1);
-        cameraSelectorComboBox->addSeparator();
+        cameraSelectorComboBox.clear();
+        cameraSelectorComboBox.addItem ("No camera", 1);
+        cameraSelectorComboBox.addSeparator();
 
         StringArray cameras = CameraDevice::getAvailableDevices();
 
         for (int i = 0; i < cameras.size(); ++i)
-            cameraSelectorComboBox->addItem (cameras[i], i + 2);
+            cameraSelectorComboBox.addItem (cameras[i], i + 2);
     }
 
     void buttonClicked (Button* b)
     {
         if (cameraDevice != 0)
         {
-            if (b == recordMovieButton)
+            if (b == &recordMovieButton)
             {
                 // The user has clicked the record movie button..
                 if (! recordingMovie)
@@ -137,14 +135,14 @@ public:
                                                           CameraDevice::getFileExtension()));
 
                     cameraDevice->startRecordingToFile (file);
-                    recordMovieButton->setButtonText ("Stop Recording");
+                    recordMovieButton.setButtonText ("Stop Recording");
                 }
                 else
                 {
                     // Already recording, so stop...
                     recordingMovie = false;
                     cameraDevice->stopRecording();
-                    recordMovieButton->setButtonText ("Start recording (to a file on your desktop)");
+                    recordMovieButton.setButtonText ("Start recording (to a file on your desktop)");
                 }
             }
             else
@@ -173,15 +171,14 @@ public:
 
 private:
     //==============================================================================
-    CameraDevice* cameraDevice;
-
-    ComboBox* cameraSelectorComboBox;
-    TextButton* snapshotButton;
-    TextButton* recordMovieButton;
-    Component* cameraPreviewComp;
-    bool recordingMovie;
-
+    ScopedPointer<CameraDevice> cameraDevice;
+    ScopedPointer<Component> cameraPreviewComp;
     Image lastSnapshot;
+
+    ComboBox cameraSelectorComboBox;
+    TextButton snapshotButton;
+    TextButton recordMovieButton;
+    bool recordingMovie;
 };
 
 

@@ -34,39 +34,34 @@ class QuickTimeWindowWithFileBrowser  : public Component,
 {
 public:
     QuickTimeWindowWithFileBrowser()
+        : fileChooser ("movie", File::nonexistent, true, false, false,
+                       "*.*", String::empty, "(choose a video file to play)")
     {
-        addAndMakeVisible (qtComp = new QuickTimeMovieComponent());
+        addAndMakeVisible (&qtComp);
 
-        // and a file-chooser..
-        addAndMakeVisible (fileChooser = new FilenameComponent ("movie",
-                                                                File::nonexistent,
-                                                                true, false, false,
-                                                                "*.*",
-                                                                String::empty,
-                                                                "(choose a video file to play)"));
-        fileChooser->addListener (this);
-        fileChooser->setBrowseButtonText ("browse");
+        addAndMakeVisible (&fileChooser);
+        fileChooser.addListener (this);
+        fileChooser.setBrowseButtonText ("browse");
     }
 
     ~QuickTimeWindowWithFileBrowser()
     {
-        deleteAllChildren();
     }
 
     void resized()
     {
-        qtComp->setBounds (0, 0, getWidth(), getHeight() - 30);
-        fileChooser->setBounds (0, getHeight() - 24, getWidth(), 24);
+        qtComp.setBounds (0, 0, getWidth(), getHeight() - 30);
+        fileChooser.setBounds (0, getHeight() - 24, getWidth(), 24);
     }
 
     void filenameComponentChanged (FilenameComponent*)
     {
         // this is called when the user changes the filename in the file chooser box
-        if (qtComp->loadMovie (fileChooser->getCurrentFile(), true))
+        if (qtComp.loadMovie (fileChooser.getCurrentFile(), true))
         {
             // loaded the file ok, so let's start it playing..
 
-            qtComp->play();
+            qtComp.play();
         }
         else
         {
@@ -77,8 +72,8 @@ public:
     }
 
 private:
-    QuickTimeMovieComponent* qtComp;
-    FilenameComponent* fileChooser;
+    QuickTimeMovieComponent qtComp;
+    FilenameComponent fileChooser;
 };
 
 
@@ -92,25 +87,25 @@ public:
         setName ("QuickTime");
 
         // add a movie component..
-        addAndMakeVisible (qtComp1 = new QuickTimeWindowWithFileBrowser());
-        addAndMakeVisible (qtComp2 = new QuickTimeWindowWithFileBrowser());
+        addAndMakeVisible (&qtComp1);
+        addAndMakeVisible (&qtComp2);
     }
 
     ~QuickTimeDemo()
     {
-        deleteAllChildren();
+        qtComp1.setVisible (false);
+        qtComp2.setVisible (false);
     }
 
     void resized()
     {
-        qtComp1->setBoundsRelative (0.05f, 0.05f, 0.425f, 0.9f);
-        qtComp2->setBoundsRelative (0.525f, 0.05f, 0.425f, 0.9f);
+        qtComp1.setBoundsRelative (0.05f, 0.05f, 0.425f, 0.9f);
+        qtComp2.setBoundsRelative (0.525f, 0.05f, 0.425f, 0.9f);
     }
 
 private:
     //==============================================================================
-    QuickTimeWindowWithFileBrowser* qtComp1;
-    QuickTimeWindowWithFileBrowser* qtComp2;
+    QuickTimeWindowWithFileBrowser qtComp1, qtComp2;
 };
 
 

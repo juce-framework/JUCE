@@ -29,10 +29,8 @@
 //==============================================================================
 class TreeViewDemoItem  : public TreeViewItem
 {
-    XmlElement* xml;
-
 public:
-    TreeViewDemoItem (XmlElement* const xml_)
+    TreeViewDemoItem (XmlElement& xml_)
         : xml (xml_)
     {
     }
@@ -43,41 +41,34 @@ public:
 
     int getItemWidth() const
     {
-        return xml->getIntAttribute ("width", -1);
+        return xml.getIntAttribute ("width", -1);
     }
 
     const String getUniqueName() const
     {
-        if (xml != 0)
-            return xml->getTagName();
-        else
-            return String::empty;
+        return xml.getTagName();
     }
 
     bool mightContainSubItems()
     {
-        return xml != 0
-                && xml->getFirstChildElement() != 0;
+        return xml.getFirstChildElement() != 0;
     }
 
     void paintItem (Graphics& g, int width, int height)
     {
-        if (xml != 0)
-        {
-            // if this item is selected, fill it with a background colour..
-            if (isSelected())
-                g.fillAll (Colours::blue.withAlpha (0.3f));
+        // if this item is selected, fill it with a background colour..
+        if (isSelected())
+            g.fillAll (Colours::blue.withAlpha (0.3f));
 
-            // use a "colour" attribute in the xml tag for this node to set the text colour..
-            g.setColour (Colour (xml->getStringAttribute ("colour", "ff000000").getHexValue32()));
+        // use a "colour" attribute in the xml tag for this node to set the text colour..
+        g.setColour (Colour (xml.getStringAttribute ("colour", "ff000000").getHexValue32()));
 
-            g.setFont (height * 0.7f);
+        g.setFont (height * 0.7f);
 
-            // draw the xml element's tag name..
-            g.drawText (xml->getTagName(),
-                        4, 0, width - 4, height,
-                        Justification::centredLeft, true);
-        }
+        // draw the xml element's tag name..
+        g.drawText (xml.getTagName(),
+                    4, 0, width - 4, height,
+                    Justification::centredLeft, true);
     }
 
     void itemOpennessChanged (bool isNowOpen)
@@ -92,12 +83,10 @@ public:
                 // create and add sub-items to this node of the tree, corresponding to
                 // each sub-element in the XML..
 
-                if (xml != 0)
+                forEachXmlChildElement (xml, child)
                 {
-                    forEachXmlChildElement (*xml, child)
-                    {
-                        addSubItem (new TreeViewDemoItem (child));
-                    }
+                    jassert (child != 0);
+                    addSubItem (new TreeViewDemoItem (*child));
                 }
             }
         }
@@ -113,6 +102,9 @@ public:
     {
         return "TreeView Items";
     }
+
+private:
+    XmlElement& xml;
 };
 
 //==============================================================================
@@ -120,33 +112,23 @@ class TreeViewDemo  : public Component,
                       public DragAndDropContainer,
                       public ButtonListener
 {
-    XmlElement* treeXml;
-
-    TreeViewItem* rootItem;
-    TreeView* treeView;
-
-    FileTreeComponent* fileTreeComp;
-    DirectoryContentsList* directoryList;
-    TimeSliceThread thread;
-
-    TextButton* typeButton;
-
 public:
     //==============================================================================
     TreeViewDemo()
         : treeView (0),
-          rootItem (0),
-          fileTreeComp (0),
-          directoryList (0),
-          thread ("Demo file tree thread")
+          thread ("Demo file tree thread"),
+          typeButton ("Type of treeview...")
     {
         setName ("Tree Views");
 
-        const String treeXmlString (BinaryData::treedemo_xml);
-        XmlDocument parser (treeXmlString);
-        treeXml = parser.getDocumentElement();
+        {
+            const String treeXmlString (BinaryData::treedemo_xml);
+            XmlDocument parser (treeXmlString);
+            treeXml = parser.getDocumentElement();
+            jassert (treeXml != 0);
+        }
 
-        rootItem = new TreeViewDemoItem (treeXml);
+        rootItem = new TreeViewDemoItem (*treeXml);
         rootItem->setOpen (true);
 
         // find the root of the user's home drive, and set that as our root..
@@ -158,21 +140,16 @@ public:
         directoryList->setDirectory (folder, true, true);
         thread.startThread (3);
 
-        addAndMakeVisible (typeButton = new TextButton ("Type of treeview..."));
-        typeButton->addButtonListener (this);
-        typeButton->setAlwaysOnTop (true);
-        typeButton->setTriggeredOnMouseDown (true);
+        addAndMakeVisible (&typeButton);
+        typeButton.addButtonListener (this);
+        typeButton.setAlwaysOnTop (true);
+        typeButton.setTriggeredOnMouseDown (true);
 
         showCustomTreeView();
     }
 
     ~TreeViewDemo()
     {
-        deleteAllChildren();
-
-        delete rootItem;
-        delete treeXml;
-        delete directoryList;
     }
 
     void paint (Graphics& g)
@@ -195,14 +172,14 @@ public:
         else if (fileTreeComp != 0)
             fileTreeComp->setBoundsInset (BorderSize (40, 10, 10, 10));
 
-        typeButton->changeWidthToFitText (22);
-        typeButton->setTopLeftPosition (10, 10);
+        typeButton.changeWidthToFitText (22);
+        typeButton.setTopLeftPosition (10, 10);
     }
 
     void showCustomTreeView()
     {
-        deleteAndZero (treeView);
-        deleteAndZero (fileTreeComp);
+        treeView = 0;
+        fileTreeComp = 0;
 
         addAndMakeVisible (treeView = new TreeView());
         treeView->setRootItem (rootItem);
@@ -213,11 +190,10 @@ public:
 
     void showFileTreeComp()
     {
-        deleteAndZero (treeView);
-        deleteAndZero (fileTreeComp);
+        treeView = 0;
+        fileTreeComp = 0;
 
         addAndMakeVisible (fileTreeComp = new FileTreeComponent (*directoryList));
-
         resized();
     }
 
@@ -234,7 +210,7 @@ public:
                    treeView != 0 ? treeView->areOpenCloseButtonsVisible()
                                  : fileTreeComp->areOpenCloseButtonsVisible());
 
-        const int r = m.showAt (typeButton);
+        const int r = m.showAt (&typeButton);
 
         if (r == 1)
         {
@@ -261,6 +237,18 @@ public:
     }
 
     juce_UseDebuggingNewOperator
+
+private:
+    ScopedPointer <XmlElement> treeXml;
+
+    ScopedPointer <TreeViewItem> rootItem;
+    ScopedPointer <TreeView> treeView;
+
+    ScopedPointer <FileTreeComponent> fileTreeComp;
+    ScopedPointer <DirectoryContentsList> directoryList;
+    TimeSliceThread thread;
+
+    TextButton typeButton;
 };
 
 

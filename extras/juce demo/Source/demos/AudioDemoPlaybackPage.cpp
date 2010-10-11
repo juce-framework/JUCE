@@ -185,7 +185,6 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
 
     deviceManager.addAudioCallback (&audioSourcePlayer);
     audioSourcePlayer.setSource (&transportSource);
-    currentAudioFileSource = 0;
     //[/Constructor]
 }
 
@@ -197,8 +196,6 @@ AudioDemoPlaybackPage::~AudioDemoPlaybackPage()
 
     deviceManager.removeAudioCallback (&audioSourcePlayer);
     fileTreeComp->removeListener (this);
-
-    deleteAndZero (currentAudioFileSource);
     //[/Destructor_pre]
 
     deleteAndZero (zoomLabel);
@@ -293,7 +290,7 @@ void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
     // unload the previous file source and delete it..
     transportSource.stop();
     transportSource.setSource (0);
-    deleteAndZero (currentAudioFileSource);
+    currentAudioFileSource = 0;
 
     // get a format manager and set it up with the basic types (wav and aiff).
     AudioFormatManager formatManager;

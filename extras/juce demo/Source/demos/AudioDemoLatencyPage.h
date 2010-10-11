@@ -61,7 +61,7 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     AudioDeviceManager& deviceManager;
-    LatencyTester* latencyTester;
+    ScopedPointer<LatencyTester> latencyTester;
     //[/UserVariables]
 
     //==============================================================================

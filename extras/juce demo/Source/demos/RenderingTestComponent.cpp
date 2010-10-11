@@ -35,7 +35,6 @@ public:
     {
         setOpaque (true);
         averageTime = 0;
-        svgDrawable = 0;
 
         rgbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoJpeg_jpg, RenderingTestComponent::demoJpeg_jpgSize);
         argbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoPng_png, RenderingTestComponent::demoPng_pngSize);
@@ -68,7 +67,6 @@ public:
 
     ~RenderingTestCanvas()
     {
-        delete svgDrawable;
     }
 
     void paint (Graphics& g)
@@ -150,7 +148,7 @@ private:
     double averageTime;
 
     Image rgbImage, argbImage;
-    DrawableComposite* svgDrawable;
+    ScopedPointer<DrawableComposite> svgDrawable;
     GlyphArrangement glyphs;
     ColourGradient linearGradient, radialGradient;
     float bouncingPointX[10], bouncingPointY[10], bouncingPointDX[10], bouncingPointDY[10];
@@ -327,8 +325,6 @@ private:
 
     void createSVGDrawable()
     {
-        deleteAndZero (svgDrawable);
-
         MemoryInputStream iconsFileStream (BinaryData::icons_zip, BinaryData::icons_zipSize, false);
         ZipFile icons (&iconsFileStream, false);
 

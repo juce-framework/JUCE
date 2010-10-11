@@ -324,7 +324,6 @@ AudioDemoLatencyPage::~AudioDemoLatencyPage()
     deviceManager.removeAudioCallback (liveAudioDisplayComp);
 
     deviceManager.removeAudioCallback (latencyTester);
-    delete latencyTester;
     //[/Destructor_pre]
 
     deleteAndZero (liveAudioDisplayComp);

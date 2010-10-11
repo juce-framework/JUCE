@@ -34,62 +34,67 @@ class InterprocessCommsDemo  : public Component,
 public:
     //==============================================================================
     InterprocessCommsDemo()
+        : sendButton ("send", "Fires off the message"),
+          modeLabel (String::empty, "Mode:"),
+          pipeLabel (String::empty, "Pipe Name:"),
+          numberLabel (String::empty, "Socket Port:"),
+          hostLabel (String::empty, "Socket Host:")
     {
-        server = new DemoInterprocessConnectionServer (*this);
-
         setName ("Interprocess Communication");
 
+        server = new DemoInterprocessConnectionServer (*this);
+
         // create all our UI bits and pieces..
-        addAndMakeVisible (modeSelector = new ComboBox ("mode:"));
-        modeSelector->setBounds (100, 25, 200, 24);
-        (new Label (modeSelector->getName(), modeSelector->getName()))->attachToComponent (modeSelector, true);
+        addAndMakeVisible (&modeSelector);
+        modeSelector.setBounds (100, 25, 200, 24);
+        modeLabel.attachToComponent (&modeSelector, true);
 
-        modeSelector->addItem ("(Disconnected)", 8);
-        modeSelector->addSeparator();
-        modeSelector->addItem ("Named pipe (listening)", 1);
-        modeSelector->addItem ("Named pipe (connect to existing pipe)", 5);
-        modeSelector->addSeparator();
-        modeSelector->addItem ("Socket (listening)", 2);
-        modeSelector->addItem ("Socket (connect to existing socket)", 6);
+        modeSelector.addItem ("(Disconnected)", 8);
+        modeSelector.addSeparator();
+        modeSelector.addItem ("Named pipe (listening)", 1);
+        modeSelector.addItem ("Named pipe (connect to existing pipe)", 5);
+        modeSelector.addSeparator();
+        modeSelector.addItem ("Socket (listening)", 2);
+        modeSelector.addItem ("Socket (connect to existing socket)", 6);
 
-        modeSelector->setSelectedId (8);
-        modeSelector->addListener (this);
+        modeSelector.setSelectedId (8);
+        modeSelector.addListener (this);
 
-        addAndMakeVisible (pipeName = new TextEditor ("pipe name:"));
-        pipeName->setBounds (100, 60, 130, 24);
-        pipeName->setMultiLine (false);
-        pipeName->setText ("juce demo pipe");
-        (new Label (pipeName->getName(), pipeName->getName()))->attachToComponent (pipeName, true);
+        addAndMakeVisible (&pipeName);
+        pipeName.setBounds (100, 60, 130, 24);
+        pipeName.setMultiLine (false);
+        pipeName.setText ("juce demo pipe");
+        pipeLabel.attachToComponent (&pipeName, true);
 
-        addAndMakeVisible (socketNumber = new TextEditor ("socket port:"));
-        socketNumber->setBounds (350, 60, 80, 24);
-        socketNumber->setMultiLine (false);
-        socketNumber->setText ("12345");
-        socketNumber->setInputRestrictions (5, "0123456789");
-        (new Label (socketNumber->getName(), socketNumber->getName()))->attachToComponent (socketNumber, true);
+        addAndMakeVisible (&socketNumber);
+        socketNumber.setBounds (350, 60, 80, 24);
+        socketNumber.setMultiLine (false);
+        socketNumber.setText ("12345");
+        socketNumber.setInputRestrictions (5, "0123456789");
+        numberLabel.attachToComponent (&socketNumber, true);
 
-        addAndMakeVisible (socketHost = new TextEditor ("socket host:"));
-        socketHost->setBounds (530, 60, 130, 24);
-        socketHost->setMultiLine (false);
-        socketHost->setText ("localhost");
-        socketNumber->setInputRestrictions (512);
-        (new Label (socketHost->getName(), socketHost->getName()))->attachToComponent (socketHost, true);
+        addAndMakeVisible (&socketHost);
+        socketHost.setBounds (530, 60, 130, 24);
+        socketHost.setMultiLine (false);
+        socketHost.setText ("localhost");
+        socketNumber.setInputRestrictions (512);
+        hostLabel.attachToComponent (&socketHost, true);
 
-        addChildComponent (sendText = new TextEditor ("sendtext"));
-        sendText->setBounds (30, 120, 200, 24);
-        sendText->setMultiLine (false);
-        sendText->setReadOnly (false);
-        sendText->setText ("testing 1234");
+        addChildComponent (&sendText);
+        sendText.setBounds (30, 120, 200, 24);
+        sendText.setMultiLine (false);
+        sendText.setReadOnly (false);
+        sendText.setText ("testing 1234");
 
-        addChildComponent (sendButton = new TextButton ("send", "Fires off the message"));
-        sendButton->setBounds (240, 120, 200, 24);
-        sendButton->changeWidthToFitText();
-        sendButton->addButtonListener (this);
+        addChildComponent (&sendButton);
+        sendButton.setBounds (240, 120, 200, 24);
+        sendButton.changeWidthToFitText();
+        sendButton.addButtonListener (this);
 
-        addChildComponent (incomingMessages = new TextEditor ("messages"));
-        incomingMessages->setReadOnly (true);
-        incomingMessages->setMultiLine (true);
-        incomingMessages->setBounds (30, 150, 500, 250);
+        addChildComponent (&incomingMessages);
+        incomingMessages.setReadOnly (true);
+        incomingMessages.setMultiLine (true);
+        incomingMessages.setBounds (30, 150, 500, 250);
 
         // call this to set up everything's state correctly.
         comboBoxChanged (0);
@@ -98,18 +103,15 @@ public:
     ~InterprocessCommsDemo()
     {
         close();
-        delete server;
-
-        deleteAllChildren();
     }
 
     void buttonClicked (Button* button)
     {
-        if (button == sendButton)
+        if (button == &sendButton)
         {
             // The send button has been pressed, so write out the contents of the
             // text box to the socket or pipe, depending on which is active.
-            const String text (sendText->getText());
+            const String text (sendText.getText());
             MemoryBlock messageData (text.toUTF8(), text.getNumBytesAsUTF8());
 
             for (int i = activeConnections.size(); --i >= 0;)
@@ -126,7 +128,7 @@ public:
     void comboBoxChanged (ComboBox*)
     {
         // This is called when the user picks a different mode from the drop-down list..
-        const int modeId = modeSelector->getSelectedId();
+        const int modeId = modeSelector.getSelectedId();
 
         close();
 
@@ -145,10 +147,10 @@ public:
         activeConnections.clear();
 
         // Reset the UI stuff to a disabled state.
-        sendText->setVisible (false);
-        sendButton->setVisible (false);
-        incomingMessages->setText (String::empty, false);
-        incomingMessages->setVisible (true);
+        sendText.setVisible (false);
+        sendButton.setVisible (false);
+        incomingMessages.setText (String::empty, false);
+        incomingMessages.setVisible (true);
 
         appendMessage (
             "To demonstrate named pipes, you'll need to run two instances of the JuceDemo application on this machine. On "
@@ -165,11 +167,11 @@ public:
         close();
 
         // Make the appropriate bits of UI visible..
-        sendText->setVisible (true);
-        sendButton->setVisible (true);
+        sendText.setVisible (true);
+        sendButton.setVisible (true);
 
-        incomingMessages->setText (String::empty, false);
-        incomingMessages->setVisible (true);
+        incomingMessages.setText (String::empty, false);
+        incomingMessages.setVisible (true);
 
         // and try to open the socket or pipe...
         bool openedOk = false;
@@ -178,23 +180,21 @@ public:
         {
             // if we're connecting to an existing server, we can just create a connection object
             // directly.
-            DemoInterprocessConnection* newConnection = new DemoInterprocessConnection (*this);
+            ScopedPointer<DemoInterprocessConnection> newConnection (new DemoInterprocessConnection (*this));
 
             if (asSocket)
             {
-                openedOk = newConnection->connectToSocket (socketHost->getText(),
-                                                           socketNumber->getText().getIntValue(),
+                openedOk = newConnection->connectToSocket (socketHost.getText(),
+                                                           socketNumber.getText().getIntValue(),
                                                            1000);
             }
             else
             {
-                openedOk = newConnection->connectToPipe (pipeName->getText());
+                openedOk = newConnection->connectToPipe (pipeName.getText());
             }
 
             if (openedOk)
-                activeConnections.add (newConnection);
-            else
-                delete newConnection;
+                activeConnections.add (newConnection.release());
         }
         else
         {
@@ -202,32 +202,28 @@ public:
             // clients to connect. It'll then create connection objects for us when clients arrive.
             if (asSocket)
             {
-                openedOk = server->beginWaitingForSocket (socketNumber->getText().getIntValue());
+                openedOk = server->beginWaitingForSocket (socketNumber.getText().getIntValue());
 
                 if (openedOk)
                     appendMessage ("Waiting for another app to connect to this socket..");
             }
             else
             {
-                DemoInterprocessConnection* newConnection = new DemoInterprocessConnection (*this);
+                ScopedPointer<DemoInterprocessConnection> newConnection (new DemoInterprocessConnection (*this));
 
-                openedOk = newConnection->createPipe (pipeName->getText());
+                openedOk = newConnection->createPipe (pipeName.getText());
 
                 if (openedOk)
                 {
                     appendMessage ("Waiting for another app to connect to this pipe..");
-                    activeConnections.add (newConnection);
-                }
-                else
-                {
-                    delete newConnection;
+                    activeConnections.add (newConnection.release());
                 }
             }
         }
 
         if (! openedOk)
         {
-            modeSelector->setSelectedId (8);
+            modeSelector.setSelectedId (8);
 
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          "Interprocess Comms Demo",
@@ -237,17 +233,14 @@ public:
 
     void appendMessage (const String& message)
     {
-        incomingMessages->setCaretPosition (INT_MAX);
-        incomingMessages->insertTextAtCaret (message + "\n");
-        incomingMessages->setCaretPosition (INT_MAX);
+        incomingMessages.setCaretPosition (INT_MAX);
+        incomingMessages.insertTextAtCaret (message + "\n");
+        incomingMessages.setCaretPosition (INT_MAX);
     }
 
     //==============================================================================
     class DemoInterprocessConnection  : public InterprocessConnection
     {
-        InterprocessCommsDemo& owner;
-        int ourNumber;
-
     public:
         DemoInterprocessConnection (InterprocessCommsDemo& owner_)
             : InterprocessConnection (true),
@@ -255,10 +248,6 @@ public:
         {
             static int totalConnections = 0;
             ourNumber = ++totalConnections;
-        }
-
-        ~DemoInterprocessConnection()
-        {
         }
 
         void connectionMade()
@@ -275,20 +264,18 @@ public:
         {
             owner.appendMessage ("Connection #" + String (ourNumber) + " - message received: " + message.toString());
         }
+
+    private:
+        InterprocessCommsDemo& owner;
+        int ourNumber;
     };
 
     //==============================================================================
     class DemoInterprocessConnectionServer   : public InterprocessConnectionServer
     {
-        InterprocessCommsDemo& owner;
-
     public:
         DemoInterprocessConnectionServer (InterprocessCommsDemo& owner_)
             : owner (owner_)
-        {
-        }
-
-        ~DemoInterprocessConnectionServer()
         {
         }
 
@@ -299,6 +286,9 @@ public:
             owner.activeConnections.add (newConnection);
             return newConnection;
         }
+
+    private:
+        InterprocessCommsDemo& owner;
     };
 
     OwnedArray <DemoInterprocessConnection, CriticalSection> activeConnections;
@@ -308,16 +298,12 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    ComboBox* modeSelector;
-    TextEditor* sendText;
-    TextButton* sendButton;
-    TextEditor* incomingMessages;
+    ComboBox modeSelector;
+    TextButton sendButton;
+    TextEditor sendText, incomingMessages, pipeName, socketNumber, socketHost;
+    Label modeLabel, pipeLabel, numberLabel, hostLabel;
 
-    TextEditor* pipeName;
-    TextEditor* socketNumber;
-    TextEditor* socketHost;
-
-    DemoInterprocessConnectionServer* server;
+    ScopedPointer<DemoInterprocessConnectionServer> server;
 };
 
 

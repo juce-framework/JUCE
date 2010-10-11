@@ -33,32 +33,29 @@ class CodeEditorDemo   : public Component,
 public:
     //==============================================================================
     CodeEditorDemo()
+        : fileChooser ("File", File::nonexistent, true, false, false,
+                       "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", String::empty,
+                       "Choose a C++ file to open it in the editor")
     {
         setName ("Code Editor");
         setOpaque (true);
 
         // Create the editor..
         addAndMakeVisible (editor = new CodeEditorComponent (codeDocument, &cppTokeniser));
+        editor->loadContent ("\n\n/* Code editor demo! Please be gentle, this component is still an alpha version! */\n\n");
 
         // Create a file chooser control to load files into it..
-        addAndMakeVisible (fileChooser = new FilenameComponent ("File", File::nonexistent, true, false, false,
-                                                                "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", String::empty,
-                                                                "Choose a C++ file to open it in the editor"));
-        fileChooser->addListener (this);
-
-
-        editor->loadContent ("\n\n/* Code editor demo! Please be gentle, this component is still an alpha version! */\n\n");
+        addAndMakeVisible (&fileChooser);
+        fileChooser.addListener (this);
     }
 
     ~CodeEditorDemo()
     {
-        deleteAllChildren();
     }
 
     void filenameComponentChanged (FilenameComponent*)
     {
-        File f (fileChooser->getCurrentFile());
-        editor->loadContent (f.loadFileAsString());
+        editor->loadContent (fileChooser.getCurrentFile().loadFileAsString());
     }
 
     void paint (Graphics& g)
@@ -69,7 +66,7 @@ public:
     void resized()
     {
         editor->setBounds (10, 45, getWidth() - 20, getHeight() - 55);
-        fileChooser->setBounds (10, 10, getWidth() - 20, 25);
+        fileChooser.setBounds (10, 10, getWidth() - 20, 25);
     }
 
     //==============================================================================
@@ -83,9 +80,9 @@ private:
     CPlusPlusCodeTokeniser cppTokeniser;
 
     // the editor component
-    CodeEditorComponent* editor;
+    ScopedPointer<CodeEditorComponent> editor;
 
-    FilenameComponent* fileChooser;
+    FilenameComponent fileChooser;
 };
 
 

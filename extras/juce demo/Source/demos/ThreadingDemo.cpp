@@ -213,49 +213,40 @@ class ThreadingDemo  : public Component,
                        public Timer,
                        public ButtonListener
 {
-    bool isUsingPool;
-    ThreadPool pool;
-    TextButton* controlButton;
-
 public:
     //==============================================================================
     ThreadingDemo()
-        : pool (3)
+        : pool (3),
+          controlButton ("Thread type"),
+          isUsingPool (false)
     {
-        isUsingPool = false;
-
         setName ("Multithreading");
 
         setOpaque (true);
+
+        addAndMakeVisible (&controlButton);
+        controlButton.changeWidthToFitText (20);
+        controlButton.setTopLeftPosition (20, 20);
+        controlButton.setTriggeredOnMouseDown (true);
+        controlButton.setAlwaysOnTop (true);
+        controlButton.addButtonListener (this);
     }
 
     ~ThreadingDemo()
     {
         pool.removeAllJobs (true, 2000);
-
-        deleteAllChildren();
     }
 
-    // this gets called when a component is added or removed from a parent component.
-    void parentHierarchyChanged()
+    void resetAllBalls()
     {
-        // we'll use this as an opportunity to start and stop the threads, so that
-        // we don't leave them going when the component's not actually visible.
         stopTimer();
 
         pool.removeAllJobs (true, 4000);
-        deleteAllChildren();
-
-        addAndMakeVisible (controlButton = new TextButton ("Thread type"));
-        controlButton->changeWidthToFitText (20);
-        controlButton->setTopLeftPosition (20, 20);
-        controlButton->setTriggeredOnMouseDown (true);
-        controlButton->setAlwaysOnTop (true);
-        controlButton->addButtonListener (this);
+        balls.clear();
 
         if (isShowing())
         {
-            while (getNumChildComponents() < 5)
+            while (balls.size() < 5)
                 addABall();
 
             startTimer (2000);
@@ -270,48 +261,39 @@ public:
     void setUsingPool (bool usePool)
     {
         isUsingPool = usePool;
-        parentHierarchyChanged(); // resets everything
+        resetAllBalls();
     }
 
     void addABall()
     {
         if (isUsingPool)
         {
-            DemoThreadPoolJob* newComp = new DemoThreadPoolJob();
-            addAndMakeVisible (newComp);
-            newComp->parentSizeChanged();
+            DemoThreadPoolJob* newBall = new DemoThreadPoolJob();
+            balls.add (newBall);
+            addAndMakeVisible (newBall);
+            newBall->parentSizeChanged();
 
-            pool.addJob (newComp);
+            pool.addJob (newBall);
         }
         else
         {
-            DemoThread* newComp = new DemoThread();
-            addAndMakeVisible (newComp);
-            newComp->parentSizeChanged();
+            DemoThread* newBall = new DemoThread();
+            balls.add (newBall);
+            addAndMakeVisible (newBall);
+            newBall->parentSizeChanged();
         }
     }
 
     void removeABall()
     {
-        if (isUsingPool)
+        if (balls.size() > 0)
         {
-            ThreadPoolJob* jobToRemove = pool.getJob (Random::getSystemRandom().nextInt (pool.getNumJobs()));
+            int indexToRemove = Random::getSystemRandom().nextInt (balls.size());
 
-            if (jobToRemove != 0)
-            {
-                pool.removeJob (jobToRemove, true, 4000);
-                delete jobToRemove;
-            }
-        }
-        else
-        {
-            if (getNumChildComponents() > 1)
-            {
-                Component* ball = getChildComponent (1 + Random::getSystemRandom().nextInt (getNumChildComponents() - 1));
+            if (isUsingPool)
+                pool.removeJob (dynamic_cast <DemoThreadPoolJob*> (balls [indexToRemove]), true, 4000);
 
-                if (dynamic_cast <Button*> (ball) == 0) // don't delete our button!
-                    delete ball;
-            }
+            balls.remove (indexToRemove);
         }
     }
 
@@ -319,27 +301,42 @@ public:
     {
         if (Random::getSystemRandom().nextBool())
         {
-            if (getNumChildComponents() <= 10)
+            if (balls.size() <= 10)
                 addABall();
         }
         else
         {
-            if (getNumChildComponents() > 3)
+            if (balls.size() > 3)
                 removeABall();
         }
     }
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button*)
     {
         PopupMenu m;
         m.addItem (1, "Use one thread per ball", true, ! isUsingPool);
         m.addItem (2, "Use a thread pool", true, isUsingPool);
 
-        const int res = m.showAt (button);
+        const int res = m.showAt (&controlButton);
 
         if (res != 0)
             setUsingPool (res == 2);
     }
+
+    // this gets called when a component is added or removed from a parent component.
+    void parentHierarchyChanged()
+    {
+        // we'll use this as an opportunity to start and stop the threads, so that
+        // we don't leave them going when the component's not actually visible.
+        resetAllBalls();
+    }
+
+private:
+    ThreadPool pool;
+    TextButton controlButton;
+    bool isUsingPool;
+
+    OwnedArray<Component> balls;
 };
 
 

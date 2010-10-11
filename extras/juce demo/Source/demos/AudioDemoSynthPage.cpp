@@ -194,11 +194,10 @@ public:
 
         WavAudioFormat wavFormat;
 
-        AudioFormatReader* audioReader
-            = wavFormat.createReaderFor (new MemoryInputStream (BinaryData::cello_wav,
-                                                                BinaryData::cello_wavSize,
-                                                                false),
-                                         true);
+        ScopedPointer<AudioFormatReader> audioReader (wavFormat.createReaderFor (new MemoryInputStream (BinaryData::cello_wav,
+                                                                                                        BinaryData::cello_wavSize,
+                                                                                                        false),
+                                                                                 true));
 
         BigInteger allNotes;
         allNotes.setRange (0, 128, true);
@@ -211,8 +210,6 @@ public:
                                           0.1,  // release time
                                           10.0  // maximum sample length
                                           ));
-
-        delete audioReader;
     }
 
     void prepareToPlay (int /*samplesPerBlockExpected*/, double sampleRate)
@@ -296,8 +293,6 @@ AudioDemoSynthPage::~AudioDemoSynthPage()
     deviceManager.removeMidiInputCallback (String::empty, &(synthAudioSource->midiCollector));
     deviceManager.removeAudioCallback (&audioSourcePlayer);
     deviceManager.removeAudioCallback (liveAudioDisplayComp);
-
-    delete synthAudioSource;
     //[/Destructor_pre]
 
     deleteAndZero (keyboardComponent);

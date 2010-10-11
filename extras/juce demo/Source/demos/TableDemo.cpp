@@ -36,8 +36,7 @@ class TableDemoComponent    : public Component,
 public:
     //==============================================================================
     TableDemoComponent()
-        : font (14.0f),
-          demoData (0)
+        : font (14.0f)
     {
         // Load some data from an embedded XML file..
         loadData();
@@ -71,9 +70,6 @@ public:
 
     ~TableDemoComponent()
     {
-        deleteAllChildren();
-
-        delete demoData;
     }
 
     //==============================================================================
@@ -201,10 +197,10 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    TableListBox* table;    // the table component itself
+    ScopedPointer<TableListBox> table;    // the table component itself
     Font font;
 
-    XmlElement* demoData;   // This is the XML document loaded from the embedded file "demo table data.xml"
+    ScopedPointer<XmlElement> demoData;   // This is the XML document loaded from the embedded file "demo table data.xml"
     XmlElement* columnList; // A pointer to the sub-node of demoData that contains the list of columns
     XmlElement* dataList;   // A pointer to the sub-node of demoData that contains the list of data rows
     int numRows;            // The number of rows of data we've got
@@ -220,28 +216,27 @@ private:
             : owner (owner_)
         {
             // just put a combo box inside this component
-            addAndMakeVisible (comboBox = new ComboBox (String::empty));
-            comboBox->addItem ("fab", 1);
-            comboBox->addItem ("groovy", 2);
-            comboBox->addItem ("hep", 3);
-            comboBox->addItem ("neat", 4);
-            comboBox->addItem ("wild", 5);
-            comboBox->addItem ("swingin", 6);
-            comboBox->addItem ("mad for it", 7);
+            addAndMakeVisible (&comboBox);
+            comboBox.addItem ("fab", 1);
+            comboBox.addItem ("groovy", 2);
+            comboBox.addItem ("hep", 3);
+            comboBox.addItem ("neat", 4);
+            comboBox.addItem ("wild", 5);
+            comboBox.addItem ("swingin", 6);
+            comboBox.addItem ("mad for it", 7);
 
             // when the combo is changed, we'll get a callback.
-            comboBox->addListener (this);
-            comboBox->setWantsKeyboardFocus (false);
+            comboBox.addListener (this);
+            comboBox.setWantsKeyboardFocus (false);
         }
 
         ~RatingColumnCustomComponent()
         {
-            deleteAllChildren();
         }
 
         void resized()
         {
-            comboBox->setBoundsInset (BorderSize (2));
+            comboBox.setBoundsInset (BorderSize (2));
         }
 
         // Our demo code will call this when we may need to update our contents
@@ -249,17 +244,17 @@ private:
         {
             row = newRow;
             columnId = newColumn;
-            comboBox->setSelectedId (owner.getRating (row), true);
+            comboBox.setSelectedId (owner.getRating (row), true);
         }
 
         void comboBoxChanged (ComboBox* /*comboBoxThatHasChanged*/)
         {
-            owner.setRating (row, comboBox->getSelectedId());
+            owner.setRating (row, comboBox.getSelectedId());
         }
 
     private:
         TableDemoComponent& owner;
-        ComboBox* comboBox;
+        ComboBox comboBox;
         int row, columnId;
     };
 

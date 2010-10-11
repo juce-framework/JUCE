@@ -36,7 +36,7 @@ class DemoBrowserComponent  : public WebBrowserComponent
 {
 public:
     //==============================================================================
-    DemoBrowserComponent (TextEditor* addressTextBox_)
+    DemoBrowserComponent (TextEditor& addressTextBox_)
         : addressTextBox (addressTextBox_)
     {
     }
@@ -45,7 +45,7 @@ public:
     bool pageAboutToLoad (const String& newURL)
     {
         // We'll just update our address box to reflect the new location..
-        addressTextBox->setText (newURL, false);
+        addressTextBox.setText (newURL, false);
 
         // we could return false here to tell the browser not to go ahead with
         // loading the page.
@@ -56,7 +56,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    TextEditor* addressTextBox;
+    TextEditor& addressTextBox;
 
     DemoBrowserComponent (DemoBrowserComponent&);
     DemoBrowserComponent& operator= (const DemoBrowserComponent&);
@@ -71,24 +71,27 @@ class WebBrowserDemo   : public Component,
 public:
     //==============================================================================
     WebBrowserDemo()
+        : goButton ("Go", "Go to URL"),
+          backButton ("<<", "Back"),
+          forwardButton (">>", "Forward")
     {
         setName ("Web Browser");
 
         // Create an address box..
-        addAndMakeVisible (addressTextBox = new TextEditor());
-        addressTextBox->setTextToShowWhenEmpty ("Enter a web address, e.g. http://www.rawmaterialsoftware.com", Colours::grey);
-        addressTextBox->addListener (this);
+        addAndMakeVisible (&addressTextBox);
+        addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. http://www.rawmaterialsoftware.com", Colours::grey);
+        addressTextBox.addListener (this);
 
         // create the actual browser component
         addAndMakeVisible (webView = new DemoBrowserComponent (addressTextBox));
 
         // add some buttons..
-        addAndMakeVisible (goButton = new TextButton ("Go", "Go to URL"));
-        goButton->addButtonListener (this);
-        addAndMakeVisible (backButton = new TextButton ("<<", "Back"));
-        backButton->addButtonListener (this);
-        addAndMakeVisible (forwardButton = new TextButton (">>", "Forward"));
-        forwardButton->addButtonListener (this);
+        addAndMakeVisible (&goButton);
+        goButton.addButtonListener (this);
+        addAndMakeVisible (&backButton);
+        backButton.addButtonListener (this);
+        addAndMakeVisible (&forwardButton);
+        forwardButton.addButtonListener (this);
 
         // send the browser to a start page..
         webView->goToURL ("http://www.google.com");
@@ -96,16 +99,15 @@ public:
 
     ~WebBrowserDemo()
     {
-        deleteAllChildren();
     }
 
     void resized()
     {
         webView->setBounds (10, 45, getWidth() - 20, getHeight() - 55);
-        goButton->setBounds (getWidth() - 45, 10, 35, 25);
-        addressTextBox->setBounds (100, 10, getWidth() - 155, 25);
-        backButton->setBounds (10, 10, 35, 25);
-        forwardButton->setBounds (55, 10, 35, 25);
+        goButton.setBounds (getWidth() - 45, 10, 35, 25);
+        addressTextBox.setBounds (100, 10, getWidth() - 155, 25);
+        backButton.setBounds (10, 10, 35, 25);
+        forwardButton.setBounds (55, 10, 35, 25);
     }
 
     void textEditorTextChanged (TextEditor&)             {}
@@ -114,28 +116,26 @@ public:
 
     void textEditorReturnKeyPressed (TextEditor&)
     {
-        webView->goToURL (addressTextBox->getText());
+        webView->goToURL (addressTextBox.getText());
     }
 
     void buttonClicked (Button* b)
     {
-        if (b == backButton)
+        if (b == &backButton)
             webView->goBack();
-        else if (b == forwardButton)
+        else if (b == &forwardButton)
             webView->goForward();
-        else if (b == goButton)
-            webView->goToURL (addressTextBox->getText());
+        else if (b == &goButton)
+            webView->goToURL (addressTextBox.getText());
     }
 
     juce_UseDebuggingNewOperator
 
 private:
-    DemoBrowserComponent* webView;
+    ScopedPointer<DemoBrowserComponent> webView;
 
-    TextEditor* addressTextBox;
-    TextButton* goButton;
-    TextButton* backButton;
-    TextButton* forwardButton;
+    TextEditor addressTextBox;
+    TextButton goButton, backButton, forwardButton;
 };
 
 

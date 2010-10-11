@@ -55,19 +55,15 @@
 class DemoOpenGLCanvas  : public OpenGLComponent,
                           public Timer
 {
-    float rotation, delta;
-    Image image;
-
 public:
     DemoOpenGLCanvas()
+        : rotation (0.0f),
+          delta (1.0f)
     {
 #if JUCE_IPHONE
         // (On the iPhone, choose a format without a depth buffer)
         setPixelFormat (OpenGLPixelFormat (8, 8, 0, 0));
 #endif
-
-        rotation = 0.0f;
-        delta = 1.0f;
 
         image = Image (Image::RGB, 512, 512, true, Image::SoftwareImage);
         Graphics g (image);
@@ -259,33 +255,35 @@ public:
 
         repaint();
     }
+
+private:
+    float rotation, delta;
+    Image image;
 };
+
 
 //==============================================================================
 class OpenGLDemo  : public Component
 {
-    //==============================================================================
-    DemoOpenGLCanvas* canvas;
-
 public:
     //==============================================================================
     OpenGLDemo()
     {
         setName ("OpenGL");
 
-        canvas = new DemoOpenGLCanvas();
-        addAndMakeVisible (canvas);
-    }
-
-    ~OpenGLDemo()
-    {
-        deleteAllChildren();
+        addAndMakeVisible (&canvas);
     }
 
     void resized()
     {
-        canvas->setBounds (10, 10, getWidth() - 20, getHeight() - 50);
+        canvas.setBounds (10, 10, getWidth() - 20, getHeight() - 50);
     }
+
+private:
+    DemoOpenGLCanvas canvas;
+
+    OpenGLDemo (const OpenGLDemo&);
+    OpenGLDemo& operator= (const OpenGLDemo&);
 };
 
 

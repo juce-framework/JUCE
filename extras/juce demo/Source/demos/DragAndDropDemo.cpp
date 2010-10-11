@@ -211,38 +211,34 @@ private:
 class DragAndDropDemo  : public Component,
                          public DragAndDropContainer
 {
-    //==============================================================================
-    DragAndDropDemoSource* source;
-    DragAndDropDemoTarget* target;
-
 public:
     //==============================================================================
     DragAndDropDemo()
     {
         setName ("Drag-and-Drop");
 
-        source = new DragAndDropDemoSource();
-        addAndMakeVisible (source);
-
-        target = new DragAndDropDemoTarget();
-        addAndMakeVisible (target);
+        addAndMakeVisible (&source);
+        addAndMakeVisible (&target);
     }
 
     ~DragAndDropDemo()
     {
-        deleteAllChildren();
     }
 
     void resized()
     {
-        source->setBounds (10, 10, 250, 150);
-        target->setBounds (getWidth() - 260, getHeight() - 160, 250, 150);
+        source.setBounds (10, 10, 250, 150);
+        target.setBounds (getWidth() - 260, getHeight() - 160, 250, 150);
     }
 
     //==============================================================================
     // (need to put this in to disambiguate the new/delete operators used in the
     // two base classes).
     juce_UseDebuggingNewOperator
+
+private:
+    DragAndDropDemoSource source;
+    DragAndDropDemoTarget target;
 };
 
 

@@ -32,22 +32,14 @@ class FontsAndTextDemo  : public Component,
                           public ButtonListener,
                           public SliderListener
 {
-    Array<Font> fonts;
-    ListBox* listBox;
-    TextEditor* textBox;
-    ToggleButton* boldButton;
-    ToggleButton* italicButton;
-    Slider* sizeSlider;
-    Slider* kerningSlider;
-    Slider* horizontalScaleSlider;
-
-    StretchableLayoutManager verticalLayout;
-
-    StretchableLayoutResizerBar* verticalDividerBar;
-
 public:
     //==============================================================================
     FontsAndTextDemo()
+        : boldButton ("Bold"),
+          italicButton ("Italic"),
+          sizeLabel (String::empty, "Size"),
+          kerningLabel (String::empty, "Kerning"),
+          horizontalScaleLabel (String::empty, "Scale")
     {
         setName ("Fonts");
 
@@ -56,38 +48,38 @@ public:
         addAndMakeVisible (listBox = new ListBox ("fonts", this));
         listBox->setRowHeight (28);
 
-        addAndMakeVisible (textBox = new TextEditor());
+        addAndMakeVisible (&textBox);
 
-        textBox->setColour (TextEditor::backgroundColourId, Colours::white);
-        textBox->setColour (TextEditor::outlineColourId, Colours::black.withAlpha (0.5f));
+        textBox.setColour (TextEditor::backgroundColourId, Colours::white);
+        textBox.setColour (TextEditor::outlineColourId, Colours::black.withAlpha (0.5f));
 
-        textBox->setMultiLine (true, true);
-        textBox->setReturnKeyStartsNewLine (true);
-        textBox->setText ("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789");
+        textBox.setMultiLine (true, true);
+        textBox.setReturnKeyStartsNewLine (true);
+        textBox.setText ("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789");
 
-        addAndMakeVisible (boldButton = new ToggleButton ("bold"));
-        boldButton->addButtonListener (this);
+        addAndMakeVisible (&boldButton);
+        boldButton.addButtonListener (this);
 
-        addAndMakeVisible (italicButton = new ToggleButton ("italic"));
-        italicButton->addButtonListener (this);
+        addAndMakeVisible (&italicButton);
+        italicButton.addButtonListener (this);
 
-        addAndMakeVisible (sizeSlider = new Slider ("Size"));
-        sizeSlider->setRange (3.0, 150.0, 0.1);
-        sizeSlider->setValue (20.0);
-        sizeSlider->addListener (this);
-        (new Label (String::empty, sizeSlider->getName()))->attachToComponent (sizeSlider, true);
+        addAndMakeVisible (&sizeSlider);
+        sizeSlider.setRange (3.0, 150.0, 0.1);
+        sizeSlider.setValue (20.0);
+        sizeSlider.addListener (this);
+        sizeLabel.attachToComponent (&sizeSlider, true);
 
-        addAndMakeVisible (kerningSlider = new Slider ("Kerning"));
-        kerningSlider->setRange (-1.0, 1.0, 0.01);
-        kerningSlider->setValue (0.0);
-        kerningSlider->addListener (this);
-        (new Label (String::empty, kerningSlider->getName()))->attachToComponent (kerningSlider, true);
+        addAndMakeVisible (&kerningSlider);
+        kerningSlider.setRange (-1.0, 1.0, 0.01);
+        kerningSlider.setValue (0.0);
+        kerningSlider.addListener (this);
+        kerningLabel.attachToComponent (&kerningSlider, true);
 
-        addAndMakeVisible (horizontalScaleSlider = new Slider ("Stretch"));
-        horizontalScaleSlider->setRange (0.1, 4.0, 0.01);
-        horizontalScaleSlider->setValue (1.0);
-        horizontalScaleSlider->addListener (this);
-        (new Label (String::empty, horizontalScaleSlider->getName()))->attachToComponent (horizontalScaleSlider, true);
+        addAndMakeVisible (&horizontalScaleSlider);
+        horizontalScaleSlider.setRange (0.1, 4.0, 0.01);
+        horizontalScaleSlider.setValue (1.0);
+        horizontalScaleSlider.addListener (this);
+        horizontalScaleLabel.attachToComponent (&horizontalScaleSlider, true);
 
         listBox->setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.5f));
         listBox->setOutlineThickness (1);
@@ -107,7 +99,6 @@ public:
 
     ~FontsAndTextDemo()
     {
-        deleteAllChildren();
     }
 
     void resized()
@@ -122,13 +113,13 @@ public:
 
         // now lay out the text box and the controls below it..
         int x = verticalLayout.getItemCurrentPosition (2) + 4;
-        textBox->setBounds (x, 0, getWidth() - x, getHeight() - 110);
+        textBox.setBounds (x, 0, getWidth() - x, getHeight() - 110);
         x += 70;
-        sizeSlider->setBounds (x, getHeight() - 106, getWidth() - x, 22);
-        kerningSlider->setBounds (x, getHeight() - 82, getWidth() - x, 22);
-        horizontalScaleSlider->setBounds (x, getHeight() - 58, getWidth() - x, 22);
-        boldButton->setBounds (x, getHeight() - 34, (getWidth() - x) / 2, 22);
-        italicButton->setBounds (x + (getWidth() - x) / 2, getHeight() - 34, (getWidth() - x) / 2, 22);
+        sizeSlider.setBounds (x, getHeight() - 106, getWidth() - x, 22);
+        kerningSlider.setBounds (x, getHeight() - 82, getWidth() - x, 22);
+        horizontalScaleSlider.setBounds (x, getHeight() - 58, getWidth() - x, 22);
+        boldButton.setBounds (x, getHeight() - 34, (getWidth() - x) / 2, 22);
+        italicButton.setBounds (x + (getWidth() - x) / 2, getHeight() - 34, (getWidth() - x) / 2, 22);
     }
 
     // implements the ListBoxModel method
@@ -167,13 +158,13 @@ public:
     {
         Font font (fonts [listBox->getSelectedRow()]);
 
-        font.setHeight ((float) sizeSlider->getValue());
-        font.setBold (boldButton->getToggleState());
-        font.setItalic (italicButton->getToggleState());
-        font.setExtraKerningFactor ((float) kerningSlider->getValue());
-        font.setHorizontalScale ((float) horizontalScaleSlider->getValue());
+        font.setHeight ((float) sizeSlider.getValue());
+        font.setBold (boldButton.getToggleState());
+        font.setItalic (italicButton.getToggleState());
+        font.setExtraKerningFactor ((float) kerningSlider.getValue());
+        font.setHorizontalScale ((float) horizontalScaleSlider.getValue());
 
-        textBox->applyFontToAllText (font);
+        textBox.applyFontToAllText (font);
     }
 
     void selectedRowsChanged (int /*lastRowselected*/)
@@ -191,6 +182,18 @@ public:
         // (this is called when the size slider is moved)
         updatePreviewBoxText();
     }
+
+private:
+    Array<Font> fonts;
+
+    ScopedPointer<ListBox> listBox;
+    TextEditor textBox;
+    ToggleButton boldButton, italicButton;
+    Slider sizeSlider, kerningSlider, horizontalScaleSlider;
+    Label sizeLabel, kerningLabel, horizontalScaleLabel;
+
+    StretchableLayoutManager verticalLayout;
+    ScopedPointer<StretchableLayoutResizerBar> verticalDividerBar;
 };
 
 

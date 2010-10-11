@@ -63,7 +63,7 @@ private:
     AudioDeviceManager& deviceManager;
     MidiKeyboardState keyboardState;
     AudioSourcePlayer audioSourcePlayer;
-    SynthAudioSource* synthAudioSource;
+    ScopedPointer<SynthAudioSource> synthAudioSource;
     //[/UserVariables]
 
     //==============================================================================

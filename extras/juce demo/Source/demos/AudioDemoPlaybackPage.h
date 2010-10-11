@@ -74,7 +74,7 @@ private:
 
     AudioSourcePlayer audioSourcePlayer;
     AudioTransportSource transportSource;
-    AudioFormatReaderSource* currentAudioFileSource;
+    ScopedPointer<AudioFormatReaderSource> currentAudioFileSource;
 
     void loadFileIntoTransport (const File& audioFile);
     //[/UserVariables]
