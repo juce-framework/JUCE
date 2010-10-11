@@ -157,16 +157,26 @@ void ResizableWindow::resized()
 {
     if (resizableBorder != 0)
     {
+      #if JUCE_WINDOWS || JUCE_LINUX
+        // hide the resizable border if the OS already provides one..
+        resizableBorder->setVisible (! (isFullScreen() || isUsingNativeTitleBar()));
+      #else
         resizableBorder->setVisible (! isFullScreen());
-        resizableBorder->setBorderThickness (getBorderThickness());
+      #endif
 
+        resizableBorder->setBorderThickness (getBorderThickness());
         resizableBorder->setSize (getWidth(), getHeight());
         resizableBorder->toBack();
     }
 
     if (resizableCorner != 0)
     {
+      #if JUCE_MAC
+        // hide the resizable border if the OS already provides one..
+        resizableCorner->setVisible (! (isFullScreen() || isUsingNativeTitleBar()));
+      #else
         resizableCorner->setVisible (! isFullScreen());
+      #endif
 
         const int resizerSize = 18;
         resizableCorner->setBounds (getWidth() - resizerSize,
@@ -179,9 +189,9 @@ void ResizableWindow::resized()
 
     updateLastPos();
 
-#if JUCE_DEBUG
+  #if JUCE_DEBUG
     hasBeenResized = true;
-#endif
+  #endif
 }
 
 void ResizableWindow::childBoundsChanged (Component* child)

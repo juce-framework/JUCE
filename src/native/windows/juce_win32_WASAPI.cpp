@@ -253,7 +253,7 @@ private:
 
         if (device != 0)
         {
-            HRESULT hr = device->Activate (__uuidof (IAudioClient), CLSCTX_INPROC_SERVER, 0, (void**) &client);
+            HRESULT hr = device->Activate (__uuidof (IAudioClient), CLSCTX_INPROC_SERVER, 0, (void**) client.resetAndGetPointerAddress());
             logFailure (hr);
         }
 
@@ -353,7 +353,7 @@ public:
         reservoirCapacity = 16384;
         reservoir.setSize (actualNumChannels * reservoirCapacity * sizeof (float));
         return openClient (newSampleRate, newChannels)
-                && (numChannels == 0 || check (client->GetService (__uuidof (IAudioCaptureClient), (void**) &captureClient)));
+                && (numChannels == 0 || check (client->GetService (__uuidof (IAudioCaptureClient), (void**) captureClient.resetAndGetPointerAddress())));
     }
 
     void close()
@@ -466,7 +466,7 @@ public:
     bool open (const double newSampleRate, const BigInteger& newChannels)
     {
         return openClient (newSampleRate, newChannels)
-            && (numChannels == 0 || check (client->GetService (__uuidof (IAudioRenderClient), (void**) &renderClient)));
+            && (numChannels == 0 || check (client->GetService (__uuidof (IAudioRenderClient), (void**) renderClient.resetAndGetPointerAddress())));
     }
 
     void close()
@@ -878,7 +878,7 @@ private:
             return false;
 
         ComSmartPtr <IMMDeviceCollection> deviceCollection;
-        if (! check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, &deviceCollection)))
+        if (! check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, deviceCollection.resetAndGetPointerAddress())))
             return false;
 
         UINT32 numDevices = 0;
@@ -888,7 +888,7 @@ private:
         for (UINT32 i = 0; i < numDevices; ++i)
         {
             ComSmartPtr <IMMDevice> device;
-            if (! check (deviceCollection->Item (i, &device)))
+            if (! check (deviceCollection->Item (i, device.resetAndGetPointerAddress())))
                 continue;
 
             const String deviceId (getDeviceID (device));
@@ -947,14 +947,14 @@ public:
         ComSmartPtr <IMMDeviceCollection> deviceCollection;
         UINT32 numDevices = 0;
 
-        if (! (check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, &deviceCollection))
+        if (! (check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, deviceCollection.resetAndGetPointerAddress()))
                 && check (deviceCollection->GetCount (&numDevices))))
             return;
 
         for (UINT32 i = 0; i < numDevices; ++i)
         {
             ComSmartPtr <IMMDevice> device;
-            if (! check (deviceCollection->Item (i, &device)))
+            if (! check (deviceCollection->Item (i, device.resetAndGetPointerAddress())))
                 continue;
 
             const String deviceId (getDeviceID (device));
@@ -970,7 +970,7 @@ public:
 
             {
                 ComSmartPtr <IPropertyStore> properties;
-                if (! check (device->OpenPropertyStore (STGM_READ, &properties)))
+                if (! check (device->OpenPropertyStore (STGM_READ, properties.resetAndGetPointerAddress())))
                     continue;
 
                 PROPVARIANT value;
