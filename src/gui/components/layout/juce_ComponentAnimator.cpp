@@ -40,12 +40,6 @@ public:
     {
     }
 
-    Component::SafePointer<Component> component;
-    Rectangle<int> destination;
-    int msElapsed, msTotal;
-    double startSpeed, midSpeed, endSpeed, lastProgress;
-    double left, top, right, bottom;
-
     bool useTimeslice (const int elapsed)
     {
         if (component == 0)
@@ -91,6 +85,12 @@ public:
             component->setBounds (destination);
     }
 
+    Component::SafePointer<Component> component;
+    Rectangle<int> destination;
+    int msElapsed, msTotal;
+    double startSpeed, midSpeed, endSpeed, lastProgress;
+    double left, top, right, bottom;
+
 private:
     inline double timeToDistance (const double time) const
     {
@@ -108,8 +108,6 @@ ComponentAnimator::ComponentAnimator()
 
 ComponentAnimator::~ComponentAnimator()
 {
-    cancelAllAnimations (false);
-    jassert (tasks.size() == 0);
 }
 
 //==============================================================================
@@ -167,15 +165,13 @@ void ComponentAnimator::animateComponent (Component* const component,
 
 void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFinalPositions)
 {
-    for (int i = tasks.size(); --i >= 0;)
+    if (tasks.size() > 0)
     {
-        AnimationTask* const at = tasks.getUnchecked(i);
-
         if (moveComponentsToTheirFinalPositions)
-            at->moveToFinalDestination();
+            for (int i = tasks.size(); --i >= 0;)
+                tasks.getUnchecked(i)->moveToFinalDestination();
 
-        delete at;
-        tasks.remove (i);
+        tasks.clear();
         sendChangeMessage (this);
     }
 }
@@ -190,8 +186,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
         if (moveComponentToItsFinalPosition)
             at->moveToFinalDestination();
 
-        tasks.removeValue (at);
-        delete at;
+        tasks.removeObject (at);
         sendChangeMessage (this);
     }
 }
@@ -224,12 +219,9 @@ void ComponentAnimator::timerCallback()
 
     for (int i = tasks.size(); --i >= 0;)
     {
-        AnimationTask* const at = tasks.getUnchecked(i);
-
-        if (! at->useTimeslice (elapsed))
+        if (! tasks.getUnchecked(i)->useTimeslice (elapsed))
         {
             tasks.remove (i);
-            delete at;
             sendChangeMessage (this);
         }
     }

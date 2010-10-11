@@ -65,10 +65,7 @@ public:
                 const MidiMessage m (d, numBytes, used, 0, time);
 
                 if (used <= 0)
-                {
-                    jassertfalse; // malformed midi message
-                    break;
-                }
+                    break; // malformed message..
 
                 callback.handleIncomingMidiMessage (input, m);
                 numBytes -= used;

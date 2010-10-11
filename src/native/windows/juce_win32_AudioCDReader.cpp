@@ -2163,7 +2163,7 @@ public:
     int getIntProperty (const LPOLESTR name, const int defaultReturn) const
     {
         ComSmartPtr<IPropertyStorage> prop;
-        if (FAILED (discRecorder->GetRecorderProperties (&prop)))
+        if (FAILED (discRecorder->GetRecorderProperties (prop.resetAndGetPointerAddress())))
             return defaultReturn;
 
         PROPSPEC iPropSpec;
@@ -2178,7 +2178,7 @@ public:
     bool setIntProperty (const LPOLESTR name, const int value) const
     {
         ComSmartPtr<IPropertyStorage> prop;
-        if (FAILED (discRecorder->GetRecorderProperties (&prop)))
+        if (FAILED (discRecorder->GetRecorderProperties (prop.resetAndGetPointerAddress())))
             return false;
 
         PROPSPEC iPropSpec;

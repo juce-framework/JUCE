@@ -139,9 +139,6 @@ public:
     /** Lets you access methods and properties of the object that this ScopedPointer refers to. */
     inline ObjectType* operator->() const throw()                                   { return object; }
 
-    /** Returns a reference to the address of the object that this ScopedPointer refers to. */
-    inline ObjectType* const* operator&() const throw()                             { return static_cast <ObjectType* const*> (&object); }
-
     //==============================================================================
     /** Removes the current object from this ScopedPointer without deleting it.
 

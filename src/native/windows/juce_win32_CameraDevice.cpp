@@ -55,7 +55,7 @@ public:
         if (FAILED (hr))
             return;
 
-        hr = graphBuilder->QueryInterface (IID_IMediaControl, (void**) &mediaControl);
+        hr = graphBuilder.QueryInterface (IID_IMediaControl, mediaControl);
         if (FAILED (hr))
             return;
 
@@ -63,7 +63,7 @@ public:
             ComSmartPtr <IAMStreamConfig> streamConfig;
 
             hr = captureGraphBuilder->FindInterface (&PIN_CATEGORY_CAPTURE, 0, filter,
-                                                     IID_IAMStreamConfig, (void**) &streamConfig);
+                                                     IID_IAMStreamConfig, (void**) streamConfig.resetAndGetPointerAddress());
 
             if (streamConfig != 0)
             {
@@ -94,7 +94,7 @@ public:
         if (FAILED (hr))
             return;
 
-        hr = sampleGrabberBase->QueryInterface (IID_ISampleGrabber, (void**) &sampleGrabber);
+        hr = sampleGrabberBase.QueryInterface (IID_ISampleGrabber, sampleGrabber);
         if (FAILED (hr))
             return;
 
@@ -106,16 +106,16 @@ public:
         sampleGrabber->SetMediaType (&mt);
 
         callback = new GrabberCallback (*this);
-        sampleGrabber->SetCallback (callback, 1);
+        hr = sampleGrabber->SetCallback (callback, 1);
 
         hr = graphBuilder->AddFilter (sampleGrabberBase, _T("Sample Grabber"));
         if (FAILED (hr))
             return;
 
         ComSmartPtr <IPin> grabberInputPin;
-        if (! (getPin (smartTee, PINDIR_OUTPUT, &smartTeeCaptureOutputPin, "capture")
-                && getPin (smartTee, PINDIR_OUTPUT, &smartTeePreviewOutputPin, "preview")
-                && getPin (sampleGrabberBase, PINDIR_INPUT, &grabberInputPin)))
+        if (! (getPin (smartTee, PINDIR_OUTPUT, smartTeeCaptureOutputPin, "capture")
+                && getPin (smartTee, PINDIR_OUTPUT, smartTeePreviewOutputPin, "preview")
+                && getPin (sampleGrabberBase, PINDIR_INPUT, grabberInputPin)))
             return;
 
         hr = graphBuilder->Connect (smartTeePreviewOutputPin, grabberInputPin);
@@ -186,10 +186,10 @@ public:
             recordNextFrameTime = false;
 
             ComSmartPtr <IPin> pin;
-            if (getPin (filter, PINDIR_OUTPUT, &pin))
+            if (getPin (filter, PINDIR_OUTPUT, pin))
             {
                 ComSmartPtr <IAMPushSource> pushSource;
-                HRESULT hr = pin->QueryInterface (IID_IAMPushSource, (void**) &pushSource);
+                HRESULT hr = pin.QueryInterface (IID_IAMPushSource, pushSource);
 
                 if (pushSource != 0)
                 {
@@ -259,7 +259,7 @@ public:
         if (SUCCEEDED (hr))
         {
             ComSmartPtr <IFileSinkFilter> fileSink;
-            hr = asfWriter->QueryInterface (IID_IFileSinkFilter, (void**) &fileSink);
+            hr = asfWriter.QueryInterface (IID_IFileSinkFilter, fileSink);
 
             if (SUCCEEDED (hr))
             {
@@ -272,10 +272,10 @@ public:
                     if (SUCCEEDED (hr))
                     {
                         ComSmartPtr <IConfigAsfWriter> asfConfig;
-                        hr = asfWriter->QueryInterface (IID_IConfigAsfWriter, (void**) &asfConfig);
+                        hr = asfWriter.QueryInterface (IID_IConfigAsfWriter, asfConfig);
                         asfConfig->SetIndexMode (true);
                         ComSmartPtr <IWMProfileManager> profileManager;
-                        hr = WMCreateProfileManager (&profileManager);
+                        hr = WMCreateProfileManager (profileManager.resetAndGetPointerAddress());
 
                         // This gibberish is the DirectShow profile for a video-only wmv file.
                         String prof ("<profile version=\"589824\" storageformat=\"1\" name=\"Quality\" description=\"Quality type for output.\"><streamconfig "
@@ -291,14 +291,14 @@ public:
                                    .replace ("$HEIGHT", String (height));
 
                         ComSmartPtr <IWMProfile> currentProfile;
-                        hr = profileManager->LoadProfileByData ((const WCHAR*) prof, &currentProfile);
+                        hr = profileManager->LoadProfileByData ((const WCHAR*) prof, currentProfile.resetAndGetPointerAddress());
                         hr = asfConfig->ConfigureFilterUsingProfile (currentProfile);
 
                         if (SUCCEEDED (hr))
                         {
                             ComSmartPtr <IPin> asfWriterInputPin;
 
-                            if (getPin (asfWriter, PINDIR_INPUT, &asfWriterInputPin, "Video Input 01"))
+                            if (getPin (asfWriter, PINDIR_INPUT, asfWriterInputPin, "Video Input 01"))
                             {
                                 hr = graphBuilder->Connect (smartTeeCaptureOutputPin, asfWriterInputPin);
 
@@ -383,7 +383,7 @@ public:
             owner->addChangeListener (this);
             owner->addUser();
             owner->viewerComps.add (this);
-            setSize (owner_->width, owner_->height);
+            setSize (owner->width, owner->height);
         }
 
         ~DShowCaptureViewerComp()
@@ -544,14 +544,14 @@ private:
         return false;
     }
 
-    static bool getPin (IBaseFilter* filter, const PIN_DIRECTION wantedDirection, IPin** result, const char* pinName = 0)
+    static bool getPin (IBaseFilter* filter, const PIN_DIRECTION wantedDirection, ComSmartPtr<IPin>& result, const char* pinName = 0)
     {
         ComSmartPtr <IEnumPins> enumerator;
         ComSmartPtr <IPin> pin;
 
-        filter->EnumPins (&enumerator);
+        filter->EnumPins (enumerator.resetAndGetPointerAddress());
 
-        while (enumerator->Next (1, &pin, 0) == S_OK)
+        while (enumerator->Next (1, pin.resetAndGetPointerAddress(), 0) == S_OK)
         {
             PIN_DIRECTION dir;
             pin->QueryDirection (&dir);
@@ -564,8 +564,7 @@ private:
 
                 if (pinName == 0 || String (pinName).equalsIgnoreCase (String (info.achName)))
                 {
-                    pin->AddRef();
-                    *result = pin;
+                    result = pin;
                     return true;
                 }
             }
@@ -578,20 +577,20 @@ private:
     {
         ComSmartPtr <IPin> in, out;
 
-        return getPin (first, PINDIR_OUTPUT, &out)
-                && getPin (second, PINDIR_INPUT, &in)
+        return getPin (first, PINDIR_OUTPUT, out)
+                && getPin (second, PINDIR_INPUT, in)
                 && SUCCEEDED (graphBuilder->Connect (out, in));
     }
 
     bool addGraphToRot()
     {
         ComSmartPtr <IRunningObjectTable> rot;
-        if (FAILED (GetRunningObjectTable (0, &rot)))
+        if (FAILED (GetRunningObjectTable (0, rot.resetAndGetPointerAddress())))
             return false;
 
         ComSmartPtr <IMoniker> moniker;
         WCHAR buffer[128];
-        HRESULT hr = CreateItemMoniker (_T("!"), buffer, &moniker);
+        HRESULT hr = CreateItemMoniker (_T("!"), buffer, moniker.resetAndGetPointerAddress());
         if (FAILED (hr))
             return false;
 
@@ -603,7 +602,7 @@ private:
     {
         ComSmartPtr <IRunningObjectTable> rot;
 
-        if (SUCCEEDED (GetRunningObjectTable (0, &rot)))
+        if (SUCCEEDED (GetRunningObjectTable (0, rot.resetAndGetPointerAddress())))
             rot->Revoke (graphRegistrationID);
     }
 
@@ -737,22 +736,22 @@ static ComSmartPtr <IBaseFilter> enumerateCameras (StringArray* const names,
     if (SUCCEEDED (hr))
     {
         ComSmartPtr <IEnumMoniker> enumerator;
-        hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, &enumerator, 0);
+        hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, enumerator.resetAndGetPointerAddress(), 0);
 
         if (SUCCEEDED (hr) && enumerator != 0)
         {
-            ComSmartPtr <IBaseFilter> captureFilter;
             ComSmartPtr <IMoniker> moniker;
             ULONG fetched;
 
-            while (enumerator->Next (1, &moniker, &fetched) == S_OK)
+            while (enumerator->Next (1, moniker.resetAndGetPointerAddress(), &fetched) == S_OK)
             {
-                hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) &captureFilter);
+                ComSmartPtr <IBaseFilter> captureFilter;
+                hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
 
                 if (SUCCEEDED (hr))
                 {
                     ComSmartPtr <IPropertyBag> propertyBag;
-                    hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) &propertyBag);
+                    hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
 
                     if (SUCCEEDED (hr))
                     {
@@ -771,17 +770,12 @@ static ComSmartPtr <IBaseFilter> enumerateCameras (StringArray* const names,
                             {
                                 name = var.bstrVal;
                                 result = captureFilter;
-                                captureFilter = 0;
                                 break;
                             }
 
                             ++index;
                         }
-
-                        moniker = 0;
                     }
-
-                    captureFilter = 0;
                 }
             }
         }

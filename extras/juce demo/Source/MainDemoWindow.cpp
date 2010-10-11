@@ -32,47 +32,10 @@ class ContentComp  : public Component,
                      public MenuBarModel,
                      public ApplicationCommandTarget
 {
-    //==============================================================================
-    MainDemoWindow* mainWindow;
-
-    OldSchoolLookAndFeel oldLookAndFeel;
-
-    Component* currentDemo;
-    int currentDemoId;
-
-    TooltipWindow tooltipWindow; // to add tooltips to an application, you
-                                 // just need to create one of these and leave it
-                                 // there to do its work..
-
-    enum CommandIDs
-    {
-        showRendering              = 0x2000,
-        showFontsAndText           = 0x2001,
-        showWidgets                = 0x2002,
-        showThreading              = 0x2003,
-        showTreeView               = 0x2004,
-        showAudio                  = 0x2005,
-        showDragAndDrop            = 0x2006,
-        showOpenGL                 = 0x2007,
-        showQuicktime              = 0x2008,
-        showInterprocessComms      = 0x2009,
-        showTable                  = 0x2010,
-        showCamera                 = 0x2011,
-        showWebBrowser             = 0x2012,
-        showCodeEditor             = 0x2013,
-
-        setDefaultLookAndFeel      = 0x200b,
-        setOldSchoolLookAndFeel    = 0x200c,
-        useNativeTitleBar          = 0x200d,
-        useNativeMenus             = 0x200e,
-        goToKioskMode              = 0x200f
-    };
-
 public:
     //==============================================================================
     ContentComp (MainDemoWindow* mainWindow_)
         : mainWindow (mainWindow_),
-          currentDemo (0),
           currentDemoId (0)
     {
         invokeDirectly (showRendering, true);
@@ -83,8 +46,6 @@ public:
         // (need to do this because the old school look-and-feel object is one of our members,
         // so will be deleted with us, and would leave a dangling pointer if it's selected)
         LookAndFeel::setDefaultLookAndFeel (0);
-
-        deleteAllChildren();
     }
 
     //==============================================================================
@@ -97,9 +58,7 @@ public:
     //==============================================================================
     void showDemo (Component* demoComp)
     {
-        delete currentDemo;
         currentDemo = demoComp;
-
         addAndMakeVisible (currentDemo);
         resized();
     }
@@ -114,7 +73,7 @@ public:
 
     const PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/)
     {
-        ApplicationCommandManager* const commandManager = mainWindow->commandManager;
+        ApplicationCommandManager* commandManager = &(mainWindow->commandManager);
 
         PopupMenu menu;
 
@@ -492,6 +451,41 @@ public:
     }
 
     juce_UseDebuggingNewOperator
+
+private:
+    //==============================================================================
+    MainDemoWindow* mainWindow;
+    OldSchoolLookAndFeel oldLookAndFeel;
+    ScopedPointer<Component> currentDemo;
+    int currentDemoId;
+
+    TooltipWindow tooltipWindow; // to add tooltips to an application, you
+                                 // just need to create one of these and leave it
+                                 // there to do its work..
+
+    enum CommandIDs
+    {
+        showRendering              = 0x2000,
+        showFontsAndText           = 0x2001,
+        showWidgets                = 0x2002,
+        showThreading              = 0x2003,
+        showTreeView               = 0x2004,
+        showAudio                  = 0x2005,
+        showDragAndDrop            = 0x2006,
+        showOpenGL                 = 0x2007,
+        showQuicktime              = 0x2008,
+        showInterprocessComms      = 0x2009,
+        showTable                  = 0x2010,
+        showCamera                 = 0x2011,
+        showWebBrowser             = 0x2012,
+        showCodeEditor             = 0x2013,
+
+        setDefaultLookAndFeel      = 0x200b,
+        setOldSchoolLookAndFeel    = 0x200c,
+        useNativeTitleBar          = 0x200d,
+        useNativeMenus             = 0x200e,
+        goToKioskMode              = 0x200f
+    };
 };
 
 //==============================================================================
@@ -541,19 +535,17 @@ MainDemoWindow::MainDemoWindow()
                       DocumentWindow::allButtons,
                       true)
 {
-    commandManager = new ApplicationCommandManager();
-
     setResizable (true, false); // resizability is a property of ResizableWindow
     setResizeLimits (400, 300, 8192, 8192);
 
     ContentComp* contentComp = new ContentComp (this);
 
-    commandManager->registerAllCommandsForTarget (contentComp);
-    commandManager->registerAllCommandsForTarget (JUCEApplication::getInstance());
+    commandManager.registerAllCommandsForTarget (contentComp);
+    commandManager.registerAllCommandsForTarget (JUCEApplication::getInstance());
 
     // this lets the command manager use keypresses that arrive in our window to send
     // out commands
-    addKeyListener (commandManager->getKeyMappings());
+    addKeyListener (commandManager.getKeyMappings());
 
     // sets the main content component for the window to be this tabbed
     // panel. This will be deleted when the window is deleted.
@@ -565,28 +557,24 @@ MainDemoWindow::MainDemoWindow()
 
     // tells our menu bar model that it should watch this command manager for
     // changes, and send change messages accordingly.
-    contentComp->setApplicationCommandManagerToWatch (commandManager);
+    contentComp->setApplicationCommandManagerToWatch (&commandManager);
 
     setVisible (true);
 
-#if JUCE_WINDOWS || JUCE_LINUX
+  #if JUCE_WINDOWS || JUCE_LINUX
     taskbarIcon = new DemoTaskbarComponent();
-#endif
+  #endif
 }
 
 MainDemoWindow::~MainDemoWindow()
 {
-#if JUCE_WINDOWS || JUCE_LINUX
-    deleteAndZero (taskbarIcon);
-#endif
-
     // because we've set the content comp to be used as our menu bar model, we
     // have to switch this off before deleting the content comp..
     setMenuBar (0);
 
-#if JUCE_MAC  // ..and also the main bar if we're using that on a Mac...
+  #if JUCE_MAC  // ..and also the main bar if we're using that on a Mac...
     MenuBarModel::setMacMainMenu (0);
-#endif
+  #endif
 
     // setting our content component to 0 will delete the current one, and
     // that will in turn delete all its child components. You don't always
@@ -595,8 +583,6 @@ MainDemoWindow::~MainDemoWindow()
     // make sure our content comp has gone away before deleting our command
     // manager.
     setContentComponent (0, true);
-
-    delete commandManager;
 }
 
 void MainDemoWindow::closeButtonPressed()

@@ -40,10 +40,10 @@ public:
     void closeButtonPressed();
 
     // the command manager object used to dispatch command events
-    ApplicationCommandManager* commandManager;
+    ApplicationCommandManager commandManager;
 
 private:
-    Component* taskbarIcon;
+    ScopedPointer<Component> taskbarIcon;
 };
 
 

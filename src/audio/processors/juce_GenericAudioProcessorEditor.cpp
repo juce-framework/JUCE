@@ -38,26 +38,24 @@ class ProcessorParameterPropertyComp   : public PropertyComponent,
                                          public AsyncUpdater
 {
 public:
-    ProcessorParameterPropertyComp (const String& name,
-                                    AudioProcessor* const owner_,
-                                    const int index_)
+    ProcessorParameterPropertyComp (const String& name, AudioProcessor& owner_, int index_)
         : PropertyComponent (name),
           owner (owner_),
-          index (index_)
+          index (index_),
+          slider (owner_, index_)
     {
-        addAndMakeVisible (slider = new ParamSlider (owner_, index_));
-        owner_->addListener (this);
+        addAndMakeVisible (&slider);
+        owner_.addListener (this);
     }
 
     ~ProcessorParameterPropertyComp()
     {
-        owner->removeListener (this);
-        deleteAllChildren();
+        owner.removeListener (this);
     }
 
     void refresh()
     {
-        slider->setValue (owner->getParameter (index), false);
+        slider.setValue (owner.getParameter (index), false);
     }
 
     void audioProcessorChanged (AudioProcessor*)  {}
@@ -77,15 +75,11 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    AudioProcessor* const owner;
-    const int index;
-    Slider* slider;
-
     //==============================================================================
     class ParamSlider  : public Slider
     {
     public:
-        ParamSlider (AudioProcessor* const owner_, const int index_)
+        ParamSlider (AudioProcessor& owner_, const int index_)
             : Slider (String::empty),
               owner (owner_),
               index (index_)
@@ -104,25 +98,29 @@ private:
         {
             const float newVal = (float) getValue();
 
-            if (owner->getParameter (index) != newVal)
-                owner->setParameter (index, newVal);
+            if (owner.getParameter (index) != newVal)
+                owner.setParameter (index, newVal);
         }
 
         const String getTextFromValue (double /*value*/)
         {
-            return owner->getParameterText (index);
+            return owner.getParameterText (index);
         }
 
         //==============================================================================
         juce_UseDebuggingNewOperator
 
     private:
-        AudioProcessor* const owner;
+        AudioProcessor& owner;
         const int index;
 
         ParamSlider (const ParamSlider&);
         ParamSlider& operator= (const ParamSlider&);
     };
+
+    AudioProcessor& owner;
+    const int index;
+    ParamSlider slider;
 
     ProcessorParameterPropertyComp (const ProcessorParameterPropertyComp&);
     ProcessorParameterPropertyComp& operator= (const ProcessorParameterPropertyComp&);
@@ -133,6 +131,7 @@ private:
 GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const owner_)
     : AudioProcessorEditor (owner_)
 {
+    jassert (owner_ != 0);
     setOpaque (true);
 
     addAndMakeVisible (panel = new PropertyPanel());
@@ -148,7 +147,7 @@ GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const 
         if (name.trim().isEmpty())
             name = "Unnamed";
 
-        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, owner_, i);
+        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, *owner_, i);
         params.add (pc);
         totalHeight += pc->getPreferredHeight();
     }

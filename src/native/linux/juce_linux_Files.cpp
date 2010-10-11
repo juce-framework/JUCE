@@ -107,16 +107,16 @@ bool File::isHidden() const
 }
 
 //==============================================================================
-static const File juce_readlink (const char* const utf8, const File& defaultFile)
+static const File juce_readlink (const String& file, const File& defaultFile)
 {
     const int size = 8192;
     HeapBlock<char> buffer;
     buffer.malloc (size + 4);
 
-    const size_t numBytes = readlink (utf8, buffer, size);
+    const size_t numBytes = readlink (file.toUTF8(), buffer, size);
 
     if (numBytes > 0 && numBytes <= size)
-        return File (String::fromUTF8 (buffer, (int) numBytes));
+        return File (file).getSiblingFile (String::fromUTF8 (buffer, (int) numBytes));
 
     return defaultFile;
 }

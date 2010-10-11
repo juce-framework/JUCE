@@ -103,11 +103,11 @@ static const String getDeviceID (IMMDevice* const device)
     return s;
 }
 
-static EDataFlow getDataFlow (IMMDevice* const device)
+static EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 {
     EDataFlow flow = eRender;
     ComSmartPtr <IMMEndpoint> endPoint;
-    if (check (device->QueryInterface (__uuidof (IMMEndpoint), (void**) &endPoint)))
+    if (check (device.QueryInterface (__uuidof (IMMEndpoint), endPoint)))
         (void) check (endPoint->GetDataFlow (&flow));
 
     return flow;

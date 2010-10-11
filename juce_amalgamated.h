@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	74
+#define JUCE_BUILDNUMBER	75
 
 /** Current Juce version number.
 
@@ -2951,7 +2951,7 @@ private:
 	long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
 	long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
 	__int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
-	void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
+	inline void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
   #endif
 
   #if JUCE_64BIT
@@ -3429,18 +3429,6 @@ public:
 	*/
 	template <typename IndexType>
 	inline ElementType* operator+ (IndexType index) const throw()	   { return data + index; }
-
-	/** Returns a reference to the raw data pointer.
-		Beware that the pointer returned here will become invalid as soon as you call
-		any of the allocator methods on this object!
-	*/
-	inline ElementType* const* operator&() const throw()			{ return static_cast <ElementType* const*> (&data); }
-
-	/** Returns a reference to the raw data pointer.
-		Beware that the pointer returned here will become invalid as soon as you call
-		any of the allocator methods on this object!
-	*/
-	inline ElementType** operator&() throw()				{ return static_cast <ElementType**> (&data); }
 
 	/** Compares the pointer with another pointer.
 		This can be handy for checking whether this is a null pointer.
@@ -6719,9 +6707,6 @@ public:
 
 	/** Lets you access methods and properties of the object that this ScopedPointer refers to. */
 	inline ObjectType* operator->() const throw()				   { return object; }
-
-	/** Returns a reference to the address of the object that this ScopedPointer refers to. */
-	inline ObjectType* const* operator&() const throw()				 { return static_cast <ObjectType* const*> (&object); }
 
 	/** Removes the current object from this ScopedPointer without deleting it.
 
@@ -28475,11 +28460,8 @@ public:
 	e.g. @code
 		class MyJUCEApp  : public JUCEApplication
 		{
-			MyApplicationWindow* myMainWindow;
-
 		public:
 			MyJUCEApp()
-				: myMainWindow (0)
 			{
 			}
 
@@ -28496,7 +28478,7 @@ public:
 
 			void shutdown()
 			{
-				delete myMainWindow;
+				myMainWindow = 0;
 			}
 
 			const String getApplicationName()
@@ -28508,6 +28490,9 @@ public:
 			{
 				return "1.0";
 			}
+
+		private:
+			ScopedPointer <MyApplicationWindow> myMainWindow;
 		};
 
 		// this creates wrapper code to actually launch the app properly.
@@ -45606,7 +45591,7 @@ public:
 
 private:
 	class AnimationTask;
-	Array <AnimationTask*> tasks;
+	OwnedArray <AnimationTask> tasks;
 	uint32 lastTime;
 
 	AnimationTask* findTaskFor (Component* component) const;

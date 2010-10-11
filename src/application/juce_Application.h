@@ -46,11 +46,8 @@
     e.g. @code
         class MyJUCEApp  : public JUCEApplication
         {
-            MyApplicationWindow* myMainWindow;
-
         public:
             MyJUCEApp()
-                : myMainWindow (0)
             {
             }
 
@@ -67,7 +64,7 @@
 
             void shutdown()
             {
-                delete myMainWindow;
+                myMainWindow = 0;
             }
 
             const String getApplicationName()
@@ -79,6 +76,9 @@
             {
                 return "1.0";
             }
+
+        private:
+            ScopedPointer <MyApplicationWindow> myMainWindow;
         };
 
         // this creates wrapper code to actually launch the app properly.

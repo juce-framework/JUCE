@@ -128,7 +128,7 @@ public:
 
 private:
     class AnimationTask;
-    Array <AnimationTask*> tasks;
+    OwnedArray <AnimationTask> tasks;
     uint32 lastTime;
 
     AnimationTask* findTaskFor (Component* component) const;

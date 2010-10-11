@@ -246,8 +246,14 @@ bool File::isDirectory() const
 
 bool File::exists() const
 {
+    juce_statStruct info;
+
     return fullPath.isNotEmpty()
-            && access (fullPath.toUTF8(), F_OK) == 0;
+      #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
+            && (lstat64 (fullPath.toUTF8(), &info) == 0);
+      #else
+            && (lstat (fullPath.toUTF8(), &info) == 0);
+      #endif
 }
 
 bool File::existsAsFile() const

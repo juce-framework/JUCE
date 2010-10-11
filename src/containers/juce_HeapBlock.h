@@ -147,18 +147,6 @@ public:
     template <typename IndexType>
     inline ElementType* operator+ (IndexType index) const throw()           { return data + index; }
 
-    /** Returns a reference to the raw data pointer.
-        Beware that the pointer returned here will become invalid as soon as you call
-        any of the allocator methods on this object!
-    */
-    inline ElementType* const* operator&() const throw()                    { return static_cast <ElementType* const*> (&data); }
-
-    /** Returns a reference to the raw data pointer.
-        Beware that the pointer returned here will become invalid as soon as you call
-        any of the allocator methods on this object!
-    */
-    inline ElementType** operator&() throw()                                { return static_cast <ElementType**> (&data); }
-
     //==============================================================================
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.

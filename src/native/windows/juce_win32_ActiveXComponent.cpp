@@ -105,8 +105,11 @@ namespace ActiveXHelpers
 
         HRESULT __stdcall GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
         {
-            *lplpFrame = frame;
-            *lplpDoc = 0;
+            /* Note: if you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
+               If you don't call AddRef then others crash (e.g. QuickTime).. Bit of a catch-22, so letting it leak is probably preferable.
+            */
+            if (lplpFrame != 0) { frame->AddRef(); *lplpFrame = frame; }
+            if (lplpDoc != 0)   *lplpDoc = 0;
             lpFrameInfo->fMDIApp = FALSE;
             lpFrameInfo->hwndFrame = window;
             lpFrameInfo->haccel = 0;
@@ -213,7 +216,7 @@ namespace ActiveXHelpers
 //==============================================================================
 class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
 {
-    ActiveXControlComponent* const owner;
+    ActiveXControlComponent& owner;
     bool wasShowing;
 
 public:
@@ -223,10 +226,10 @@ public:
     IOleObject* control;
 
     //==============================================================================
-    Pimpl (HWND hwnd, ActiveXControlComponent* const owner_)
-        : ComponentMovementWatcher (owner_),
+    Pimpl (HWND hwnd, ActiveXControlComponent& owner_)
+        : ComponentMovementWatcher (&owner_),
           owner (owner_),
-          wasShowing (owner_ != 0 && owner_->isShowing()),
+          wasShowing (owner_.isShowing()),
           controlHWND (0),
           storage (new ActiveXHelpers::JuceIStorage()),
           clientSite (new ActiveXHelpers::JuceIOleClientSite (hwnd)),
@@ -249,24 +252,24 @@ public:
     //==============================================================================
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
-        Component* const topComp = owner->getTopLevelComponent();
+        Component* const topComp = owner.getTopLevelComponent();
 
         if (topComp->getPeer() != 0)
         {
-            const Point<int> pos (owner->relativePositionToOtherComponent (topComp, Point<int>()));
+            const Point<int> pos (owner.relativePositionToOtherComponent (topComp, Point<int>()));
 
-            owner->setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), owner->getWidth(), owner->getHeight()));
+            owner.setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), owner.getWidth(), owner.getHeight()));
         }
     }
 
     void componentPeerChanged()
     {
-        const bool isShowingNow = owner->isShowing();
+        const bool isShowingNow = owner.isShowing();
 
         if (wasShowing != isShowingNow)
         {
             wasShowing = isShowingNow;
-            owner->setControlVisible (isShowingNow);
+            owner.setControlVisible (isShowingNow);
         }
 
         componentMovedOrResized (true, true);
@@ -356,7 +359,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
         const Point<int> pos (relativePositionToOtherComponent (getTopLevelComponent(), Point<int>()));
         HWND hwnd = (HWND) peer->getNativeHandle();
 
-        ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, this));
+        ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));
 
         HRESULT hr;
         if ((hr = OleCreate (*(const IID*) controlIID, IID_IOleObject, 1 /*OLERENDER_DRAW*/, 0,

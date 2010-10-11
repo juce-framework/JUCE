@@ -199,35 +199,54 @@ public:
     ComSmartPtr() throw() : p (0)                               {}
     ComSmartPtr (ComClass* const p_) : p (p_)                   { if (p_ != 0) p_->AddRef(); }
     ComSmartPtr (const ComSmartPtr<ComClass>& p_) : p (p_.p)    { if (p != 0) p->AddRef(); }
-    ~ComSmartPtr()                                              { if (p != 0) p->Release(); }
+    ~ComSmartPtr()                                              { release(); }
 
     operator ComClass*() const throw()     { return p; }
     ComClass& operator*() const throw()    { return *p; }
-    ComClass** operator&() throw()         { return &p; }
     ComClass* operator->() const throw()   { return p; }
 
-    ComClass* operator= (ComClass* const newP)
+    ComSmartPtr& operator= (ComClass* const newP)
     {
         if (newP != 0)  newP->AddRef();
-        if (p != 0)     p->Release();
+        release();
         p = newP;
-        return newP;
+        return *this;
     }
 
-    ComClass* operator= (const ComSmartPtr<ComClass>& newP)  { return operator= (newP.p); }
+    ComSmartPtr& operator= (const ComSmartPtr<ComClass>& newP)  { return operator= (newP.p); }
 
-    HRESULT CoCreateInstance (REFCLSID rclsid, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
+    // Releases and nullifies this pointer and returns its address
+    ComClass** resetAndGetPointerAddress()
     {
-#ifndef __MINGW32__
-        operator= (0);
-        return ::CoCreateInstance (rclsid, 0, dwClsContext, __uuidof (ComClass), (void**) &p);
-#else
-        return S_FALSE;
-#endif
+        release();
+        p = 0;
+        return &p;
+    }
+
+    HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
+    {
+      #ifndef __MINGW32__
+        return ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
+      #else
+        return E_NOTIMPL;
+      #endif
+    }
+
+    template <class OtherComClass>
+    HRESULT QueryInterface (REFCLSID classUUID, ComSmartPtr<OtherComClass>& destObject) const
+    {
+        if (p == 0)
+            return E_POINTER;
+
+        return p->QueryInterface (classUUID, (void**) destObject.resetAndGetPointerAddress());
     }
 
 private:
     ComClass* p;
+
+    void release()  { if (p != 0) p->Release(); }
+
+    ComClass** operator&() throw(); // private to avoid it being used accidentally
 };
 
 //==============================================================================

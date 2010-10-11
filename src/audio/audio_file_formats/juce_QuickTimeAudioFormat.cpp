@@ -256,7 +256,7 @@ public:
                 }
             }
 
-            int framesToDo = jmin (numSamples, bufferList->mBuffers[0].mDataByteSize / inputStreamDesc.mBytesPerFrame);
+            int framesToDo = jmin (numSamples, (int) (bufferList->mBuffers[0].mDataByteSize / inputStreamDesc.mBytesPerFrame));
             bufferList->mBuffers[0].mDataByteSize = inputStreamDesc.mBytesPerFrame * framesToDo;
 
             UInt32 outFlags = 0;

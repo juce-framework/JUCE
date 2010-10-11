@@ -341,7 +341,8 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
             }
         }
 
-        png_write_rows (pngWriteStruct, &rowData, 1);
+        png_bytep rowPtr = rowData;
+        png_write_rows (pngWriteStruct, &rowPtr, 1);
     }
 
     png_write_end (pngWriteStruct, pngInfoStruct);
