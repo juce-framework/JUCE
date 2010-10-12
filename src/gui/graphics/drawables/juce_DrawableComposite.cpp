@@ -232,17 +232,21 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
             // we need to render everything opaquely into a temp buffer, then blend that
             // with the target opacity...
             const Rectangle<int> clipBounds (context.g.getClipBounds());
-            Image tempImage (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true);
 
+            if (! clipBounds.isEmpty())
             {
-                Graphics tempG (tempImage);
-                tempG.setOrigin (-clipBounds.getX(), -clipBounds.getY());
-                Drawable::RenderingContext tempContext (tempG, context.transform, 1.0f);
-                render (tempContext);
-            }
+                Image tempImage (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true);
 
-            context.g.setOpacity (context.opacity);
-            context.g.drawImageAt (tempImage, clipBounds.getX(), clipBounds.getY());
+                {
+                    Graphics tempG (tempImage);
+                    tempG.setOrigin (-clipBounds.getX(), -clipBounds.getY());
+                    Drawable::RenderingContext tempContext (tempG, context.transform, 1.0f);
+                    render (tempContext);
+                }
+
+                context.g.setOpacity (context.opacity);
+                context.g.drawImageAt (tempImage, clipBounds.getX(), clipBounds.getY());
+            }
         }
     }
 }

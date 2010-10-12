@@ -86,6 +86,7 @@ public:
           extractor (0),
           dataHandle (0)
     {
+        JUCE_AUTORELEASEPOOL
         bufferList.calloc (256, 1);
 
 #if JUCE_WINDOWS
@@ -211,6 +212,9 @@ public:
 
     ~QTAudioReader()
     {
+        JUCE_AUTORELEASEPOOL
+        checkThreadIsAttached();
+
         if (dataHandle != 0)
             DisposeHandle (dataHandle);
 
@@ -220,7 +224,6 @@ public:
             extractor = 0;
         }
 
-        checkThreadIsAttached();
         DisposeMovie (movie);
 
 #if JUCE_MAC
@@ -231,6 +234,7 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
+        JUCE_AUTORELEASEPOOL
         checkThreadIsAttached();
         bool ok = true;
 
