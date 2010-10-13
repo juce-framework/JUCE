@@ -88,6 +88,24 @@ BEGIN_JUCE_NAMESPACE
 #include "common/juce_MidiDataConcatenator.h"
 #undef Point
 
+template <class RectType>
+static const Rectangle<int> convertToRectInt (const RectType& r)
+{
+    return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
+}
+
+template <class RectType>
+static const Rectangle<float> convertToRectFloat (const RectType& r)
+{
+    return Rectangle<float> (r.origin.x, r.origin.y, r.size.width, r.size.height);
+}
+
+template <class RectType>
+static CGRect convertToCGRect (const RectType& r)
+{
+    return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
+}
+
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1
 

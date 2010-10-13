@@ -52,14 +52,14 @@ public:
 
         The low 32 bits of the number are initialised with this value.
     */
-    BigInteger (unsigned int value);
+    BigInteger (uint32 value);
 
     /** Creates a BigInteger containing an integer value in its low bits.
 
         The low 32 bits of the number are initialised with the absolute value
         passed in, and its sign is set to reflect the sign of the number.
     */
-    BigInteger (int value);
+    BigInteger (int32 value);
 
     /** Creates a BigInteger containing an integer value in its low bits.
 
@@ -143,7 +143,7 @@ public:
         Copies the given integer onto a range of bits, starting at startBit,
         and using up to numBits of the available bits.
     */
-    void setBitRangeAsInt (int startBit, int numBits, unsigned int valueToSet);
+    void setBitRangeAsInt (int startBit, int numBits, uint32 valueToSet);
 
     /** Shifts a section of bits left or right.
 
@@ -308,12 +308,15 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    HeapBlock <unsigned int> values;
+    HeapBlock <uint32> values;
     int numValues, highestBit;
     bool negative;
 
     void ensureSize (int numVals);
     static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
+
+    static inline int bitToIndex (const int bit) throw()        { return bit >> 5; }
+    static inline uint32 bitToMask (const int bit) throw()      { return 1 << (bit & 31); }
 };
 
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */

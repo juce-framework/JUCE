@@ -45,7 +45,7 @@ public:
     {
       #if JUCE_IPHONE
         theMainWindow.setVisible (true);
-        theMainWindow.setBounds (0, 20, 320, 460);
+        theMainWindow.setFullScreen (true);
       #else
         theMainWindow.centreWithSize (700, 600);
         theMainWindow.setVisible (true);

@@ -41,13 +41,23 @@ BigInteger::BigInteger()
     values.calloc (numValues + 1);
 }
 
-BigInteger::BigInteger (const int value)
+BigInteger::BigInteger (const int32 value)
     : numValues (4),
       highestBit (31),
       negative (value < 0)
 {
     values.calloc (numValues + 1);
     values[0] = abs (value);
+    highestBit = getHighestBit();
+}
+
+BigInteger::BigInteger (const uint32 value)
+    : numValues (4),
+      highestBit (31),
+      negative (false)
+{
+    values.calloc (numValues + 1);
+    values[0] = value;
     highestBit = getHighestBit();
 }
 
@@ -61,28 +71,18 @@ BigInteger::BigInteger (int64 value)
     if (value < 0)
         value = -value;
 
-    values[0] = (unsigned int) value;
-    values[1] = (unsigned int) (value >> 32);
-    highestBit = getHighestBit();
-}
-
-BigInteger::BigInteger (const unsigned int value)
-    : numValues (4),
-      highestBit (31),
-      negative (false)
-{
-    values.calloc (numValues + 1);
-    values[0] = value;
+    values[0] = (uint32) value;
+    values[1] = (uint32) (value >> 32);
     highestBit = getHighestBit();
 }
 
 BigInteger::BigInteger (const BigInteger& other)
-    : numValues (jmax (4, (other.highestBit >> 5) + 1)),
+    : numValues (jmax (4, bitToIndex (other.highestBit) + 1)),
       highestBit (other.getHighestBit()),
       negative (other.negative)
 {
     values.malloc (numValues + 1);
-    memcpy (values, other.values, sizeof (unsigned int) * (numValues + 1));
+    memcpy (values, other.values, sizeof (uint32) * (numValues + 1));
 }
 
 BigInteger::~BigInteger()
@@ -102,10 +102,10 @@ BigInteger& BigInteger::operator= (const BigInteger& other)
     if (this != &other)
     {
         highestBit = other.getHighestBit();
-        numValues = jmax (4, (highestBit >> 5) + 1);
+        numValues = jmax (4, bitToIndex (highestBit) + 1);
         negative = other.negative;
         values.malloc (numValues + 1);
-        memcpy (values, other.values, sizeof (unsigned int) * (numValues + 1));
+        memcpy (values, other.values, sizeof (uint32) * (numValues + 1));
     }
 
     return *this;
@@ -128,7 +128,7 @@ void BigInteger::ensureSize (const int numVals)
 bool BigInteger::operator[] (const int bit) const throw()
 {
     return bit <= highestBit && bit >= 0
-             && ((values [bit >> 5] & (1 << (bit & 31))) != 0);
+             && ((values [bitToIndex (bit)] & bitToMask (bit)) != 0);
 }
 
 int BigInteger::toInteger() const throw()
@@ -141,7 +141,7 @@ const BigInteger BigInteger::getBitRange (int startBit, int numBits) const
 {
     BigInteger r;
     numBits = jmin (numBits, getHighestBit() + 1 - startBit);
-    r.ensureSize (numBits >> 5);
+    r.ensureSize (bitToIndex (numBits));
     r.highestBit = numBits;
 
     int i = 0;
@@ -169,7 +169,7 @@ int BigInteger::getBitRangeAsInt (const int startBit, int numBits) const throw()
     if (numBits <= 0)
         return 0;
 
-    const int pos = startBit >> 5;
+    const int pos = bitToIndex (startBit);
     const int offset = startBit & 31;
     const int endSpace = 32 - numBits;
 
@@ -181,7 +181,7 @@ int BigInteger::getBitRangeAsInt (const int startBit, int numBits) const throw()
     return (int) (n & (((uint32) 0xffffffff) >> endSpace));
 }
 
-void BigInteger::setBitRangeAsInt (const int startBit, int numBits, unsigned int valueToSet)
+void BigInteger::setBitRangeAsInt (const int startBit, int numBits, uint32 valueToSet)
 {
     if (numBits > 32)
     {
@@ -206,7 +206,7 @@ void BigInteger::clear()
     }
     else
     {
-        zeromem (values, sizeof (unsigned int) * (numValues + 1));
+        zeromem (values, sizeof (uint32) * (numValues + 1));
     }
 
     highestBit = -1;
@@ -219,11 +219,11 @@ void BigInteger::setBit (const int bit)
     {
         if (bit > highestBit)
         {
-            ensureSize (bit >> 5);
+            ensureSize (bitToIndex (bit));
             highestBit = bit;
         }
 
-        values [bit >> 5] |= (1 << (bit & 31));
+        values [bitToIndex (bit)] |= bitToMask (bit);
     }
 }
 
@@ -238,7 +238,7 @@ void BigInteger::setBit (const int bit, const bool shouldBeSet)
 void BigInteger::clearBit (const int bit) throw()
 {
     if (bit >= 0 && bit <= highestBit)
-        values [bit >> 5] &= ~(1 << (bit & 31));
+        values [bitToIndex (bit)] &= ~bitToMask (bit);
 }
 
 void BigInteger::setRange (int startBit, int numBits, const bool shouldBeSet)
@@ -285,9 +285,9 @@ int BigInteger::countNumberOfSetBits() const throw()
 {
     int total = 0;
 
-    for (int i = (highestBit >> 5) + 1; --i >= 0;)
+    for (int i = bitToIndex (highestBit) + 1; --i >= 0;)
     {
-        unsigned int n = values[i];
+        uint32 n = values[i];
 
         if (n == 0xffffffff)
         {
@@ -309,7 +309,7 @@ int BigInteger::countNumberOfSetBits() const throw()
 int BigInteger::getHighestBit() const throw()
 {
     for (int i = highestBit + 1; --i >= 0;)
-        if ((values [i >> 5] & (1 << (i & 31))) != 0)
+        if ((values [bitToIndex (i)] & bitToMask (i)) != 0)
             return i;
 
     return -1;
@@ -318,7 +318,7 @@ int BigInteger::getHighestBit() const throw()
 int BigInteger::findNextSetBit (int i) const throw()
 {
     for (; i <= highestBit; ++i)
-        if ((values [i >> 5] & (1 << (i & 31))) != 0)
+        if ((values [bitToIndex (i)] & bitToMask (i)) != 0)
             return i;
 
     return -1;
@@ -327,7 +327,7 @@ int BigInteger::findNextSetBit (int i) const throw()
 int BigInteger::findNextClearBit (int i) const throw()
 {
     for (; i <= highestBit; ++i)
-        if ((values [i >> 5] & (1 << (i & 31))) == 0)
+        if ((values [bitToIndex (i)] & bitToMask (i)) == 0)
             break;
 
     return i;
@@ -362,7 +362,7 @@ BigInteger& BigInteger::operator+= (const BigInteger& other)
 
         ++highestBit;
 
-        const int numInts = (highestBit >> 5) + 1;
+        const int numInts = bitToIndex (highestBit) + 1;
         ensureSize (numInts);
 
         int64 remainder = 0;
@@ -375,7 +375,7 @@ BigInteger& BigInteger::operator+= (const BigInteger& other)
             if (i < other.numValues)
                 remainder += other.values[i];
 
-            values[i] = (unsigned int) remainder;
+            values[i] = (uint32) remainder;
             remainder >>= 32;
         }
 
@@ -410,8 +410,8 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
         return *this;
     }
 
-    const int numInts = (highestBit >> 5) + 1;
-    const int maxOtherInts = (other.highestBit >> 5) + 1;
+    const int numInts = bitToIndex (highestBit) + 1;
+    const int maxOtherInts = bitToIndex (other.highestBit) + 1;
     int64 amountToSubtract = 0;
 
     for (int i = 0; i <= numInts; ++i)
@@ -421,13 +421,13 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
 
         if (values[i] >= amountToSubtract)
         {
-            values[i] = (unsigned int) (values[i] - amountToSubtract);
+            values[i] = (uint32) (values[i] - amountToSubtract);
             amountToSubtract = 0;
         }
         else
         {
             const int64 n = ((int64) values[i] + (((int64) 1) << 32)) - amountToSubtract;
-            values[i] = (unsigned int) n;
+            values[i] = (uint32) n;
             amountToSubtract = 1;
         }
     }
@@ -516,9 +516,9 @@ BigInteger& BigInteger::operator|= (const BigInteger& other)
 
     if (other.highestBit >= 0)
     {
-        ensureSize (other.highestBit >> 5);
+        ensureSize (bitToIndex (other.highestBit));
 
-        int n = (other.highestBit >> 5) + 1;
+        int n = bitToIndex (other.highestBit) + 1;
 
         while (--n >= 0)
             values[n] |= other.values[n];
@@ -559,9 +559,9 @@ BigInteger& BigInteger::operator^= (const BigInteger& other)
 
     if (other.highestBit >= 0)
     {
-        ensureSize (other.highestBit >> 5);
+        ensureSize (bitToIndex (other.highestBit));
 
-        int n = (other.highestBit >> 5) + 1;
+        int n = bitToIndex (other.highestBit) + 1;
 
         while (--n >= 0)
             values[n] ^= other.values[n];
@@ -635,7 +635,7 @@ int BigInteger::compareAbsolute (const BigInteger& other) const throw()
     else if (h1 < h2)
         return -1;
 
-    for (int i = (h1 >> 5) + 1; --i >= 0;)
+    for (int i = bitToIndex (h1) + 1; --i >= 0;)
         if (values[i] != other.values[i])
             return (values[i] > other.values[i]) ? 1 : -1;
 
@@ -688,8 +688,8 @@ void BigInteger::shiftBits (int bits, const int startBit)
             }
             else
             {
-                const int wordsToMove = bits >> 5;
-                int top = 1 + (highestBit >> 5) - wordsToMove;
+                const int wordsToMove = bitToIndex (bits);
+                int top = 1 + bitToIndex (highestBit) - wordsToMove;
                 highestBit -= bits;
 
                 if (wordsToMove > 0)
@@ -721,10 +721,10 @@ void BigInteger::shiftBits (int bits, const int startBit)
         else if (bits > 0)
         {
             // left shift
-            ensureSize (((highestBit + bits) >> 5) + 1);
+            ensureSize (bitToIndex (highestBit + bits) + 1);
 
-            const int wordsToMove = bits >> 5;
-            int top = 1 + (highestBit >> 5);
+            const int wordsToMove = bitToIndex (bits);
+            int top = 1 + bitToIndex (highestBit);
             highestBit += bits;
 
             if (wordsToMove > 0)
@@ -931,7 +931,7 @@ void BigInteger::parseString (const String& text, const int base)
             const juce_wchar c = *t++;
             const int digit = CharacterFunctions::getHexDigitValue (c);
 
-            if (((unsigned int) digit) < (unsigned int) base)
+            if (((uint32) digit) < (uint32) base)
             {
                 operator<<= (bits);
                 operator+= (digit);
@@ -944,7 +944,7 @@ void BigInteger::parseString (const String& text, const int base)
     }
     else if (base == 10)
     {
-        const BigInteger ten ((unsigned int) 10);
+        const BigInteger ten ((uint32) 10);
 
         for (;;)
         {

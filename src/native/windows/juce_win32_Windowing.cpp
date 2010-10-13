@@ -81,6 +81,11 @@ bool Desktop::canUseSemiTransparentWindows() throw()
     return updateLayeredWindow != 0;
 }
 
+Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
+{
+    return upright;
+}
+
 //==============================================================================
 const int extendedKeyModifier               = 0x10000;
 

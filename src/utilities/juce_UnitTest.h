@@ -92,6 +92,16 @@ public:
     static Array<UnitTest*>& getAllTests();
 
     //==============================================================================
+    /** You can optionally implement this method to set up your test.
+        This method will be called before runTest().
+    */
+    virtual void initalise();
+
+    /** You can optionally implement this method to clear up after your test has been run.
+        This method will be called after runTest() has returned.
+    */
+    virtual void shutdown();
+
     /** Implement this method in your subclass to actually run your tests.
 
         The content of your implementation should call beginTest() and expect()
@@ -126,6 +136,25 @@ public:
         If the failure message is specified, it will be written to the log if the test fails.
     */
     void expect (bool testResult, const String& failureMessage = String::empty);
+
+    /** Compares two values, and if they don't match, prints out a message containing the
+        expected and actual result values.
+    */
+    template <class ValueType>
+    void expectEquals (ValueType actual, ValueType expected, String failureMessage = String::empty)
+    {
+        const bool result = (actual == expected);
+
+        if (! result)
+        {
+            if (failureMessage.isNotEmpty())
+                failureMessage << " -- ";
+
+            failureMessage << "Expected value: " << expected << ", Actual value: " << actual;
+        }
+
+        expect (result, failureMessage);
+    }
 
     //==============================================================================
     /** Writes a message to the test log.

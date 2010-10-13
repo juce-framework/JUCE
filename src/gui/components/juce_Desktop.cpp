@@ -37,7 +37,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 Desktop::Desktop()
     : mouseClickCounter (0),
-      kioskModeComponent (0)
+      kioskModeComponent (0),
+      allowedOrientations (allOrientations)
 {
     createMouseInputSources();
     refreshMonitorSizes();
@@ -357,6 +358,23 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
             juce_setKioskComponent (kioskModeComponent, true, allowMenusAndBars);
         }
     }
+}
+
+//==============================================================================
+void Desktop::setOrientationsEnabled (const int newOrientations)
+{
+    // Dodgy set of flags being passed here! Make sure you specify at least one permitted orientation.
+    jassert (newOrientations != 0 && (newOrientations & ~allOrientations) == 0);
+
+    allowedOrientations = newOrientations;
+}
+
+bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const throw()
+{
+    // Make sure you only pass one valid flag in here...
+    jassert (orientation == upright || orientation == upsideDown || orientation == rotatedClockwise || orientation ==  rotatedAntiClockwise);
+
+    return (allowedOrientations & orientation) != 0;
 }
 
 

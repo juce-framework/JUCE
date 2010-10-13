@@ -400,7 +400,7 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
 
                 peer->setFullScreen (shouldBeFullScreen);
 
-                if (! shouldBeFullScreen)
+                if ((! shouldBeFullScreen) && ! lastPos.isEmpty())
                     setBounds (lastPos);
             }
             else

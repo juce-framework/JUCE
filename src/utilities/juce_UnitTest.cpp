@@ -49,11 +49,17 @@ Array<UnitTest*>& UnitTest::getAllTests()
     return tests;
 }
 
+void UnitTest::initalise()  {}
+void UnitTest::shutdown()   {}
+
 void UnitTest::performTest (UnitTestRunner* const runner_)
 {
     jassert (runner_ != 0);
     runner = runner_;
+
+    initalise();
     runTest();
+    shutdown();
 }
 
 void UnitTest::logMessage (const String& message)
@@ -82,6 +88,16 @@ UnitTestRunner::UnitTestRunner()
 
 UnitTestRunner::~UnitTestRunner()
 {
+}
+
+int UnitTestRunner::getNumResults() const throw()
+{
+    return results.size();
+}
+
+const UnitTestRunner::TestResult* UnitTestRunner::getResult (int index) const throw()
+{
+    return results [index];
 }
 
 void UnitTestRunner::resultsUpdated()

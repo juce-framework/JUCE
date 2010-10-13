@@ -177,22 +177,6 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 
-//==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
-{
-    const ScopedAutoReleasePool pool;
-    monitorCoords.clear();
-
-    CGRect r = clipToWorkArea ? [[UIScreen mainScreen] applicationFrame]
-                              : [[UIScreen mainScreen] bounds];
-
-    monitorCoords.add (Rectangle<int> ((int) r.origin.x,
-                                       (int) r.origin.y,
-                                       (int) r.size.width,
-                                       (int) r.size.height));
-}
-
-
 #endif
 
 #endif

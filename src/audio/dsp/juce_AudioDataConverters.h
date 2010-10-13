@@ -262,6 +262,9 @@ public:
         SampleFormat data;
 
         inline void advance() throw()                           { advanceData (data); }
+
+        Pointer operator++ (int); // private to force you to use the more efficient pre-increment!
+        Pointer operator-- (int);
     };
 
     //==============================================================================

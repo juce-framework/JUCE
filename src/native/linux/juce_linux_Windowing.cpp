@@ -1098,15 +1098,15 @@ public:
 
         const int width = image.getWidth();
         const int height = image.getHeight();
-        HeapBlock <char> colour (width * height);
+        HeapBlock <uint32> colour (width * height);
         int index = 0;
 
         for (int y = 0; y < height; ++y)
             for (int x = 0; x < width; ++x)
-                colour[index++] = static_cast<char> (image.getPixelAt (x, y).getARGB());
+                colour[index++] = image.getPixelAt (x, y).getARGB();
 
         XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                       0, colour.getData(),
+                                       0, reinterpret_cast<char*> (colour.getData()),
                                        width, height, 32, 0);
 
         Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
@@ -2902,6 +2902,10 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
     XWarpPointer (display, None, root, 0, 0, 0, 0, newPosition.getX(), newPosition.getY());
 }
 
+Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
+{
+    return upright;
+}
 
 //==============================================================================
 static bool screenSaverAllowed = true;

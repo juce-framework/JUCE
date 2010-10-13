@@ -150,6 +150,9 @@ private:
     static inline Type castFrom64Bit (int64 value) throw()    { return *(Type*) &value; }
     static inline int32 castTo32Bit (Type value) throw()      { return *(int32*) &value; }
     static inline int64 castTo64Bit (Type value) throw()      { return *(int64*) &value; }
+
+    Type operator++ (int); // better to just use pre-increment with atomics..
+    Type operator-- (int);
 };
 
 

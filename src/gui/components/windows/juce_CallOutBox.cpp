@@ -43,11 +43,13 @@ CallOutBox::CallOutBox (Component& contentComponent,
 
     if (parentComponent != 0)
     {
-        updatePosition (parentComponent->getLocalBounds(),
-                        componentToPointTo.getLocalBounds()
-                            + componentToPointTo.relativePositionToOtherComponent (parentComponent, Point<int>()));
+        parentComponent->addChildComponent (this);
 
-        parentComponent->addAndMakeVisible (this);
+        updatePosition (componentToPointTo.getLocalBounds()
+                            + componentToPointTo.relativePositionToOtherComponent (parentComponent, Point<int>()),
+                        parentComponent->getLocalBounds());
+
+        setVisible (true);
     }
     else
     {

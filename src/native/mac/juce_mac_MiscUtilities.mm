@@ -159,6 +159,11 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
     CGAssociateMouseAndMouseCursorPosition (true);
 }
 
+Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
+{
+    return upright;
+}
+
 //==============================================================================
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 class ScreenSaverDefeater   : public Timer,
@@ -246,10 +251,9 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
         NSRect r = clipToWorkArea ? [s visibleFrame]
                                   : [s frame];
 
-        monitorCoords.add (Rectangle<int> ((int) r.origin.x,
-                                           (int) (mainScreenBottom - (r.origin.y + r.size.height)),
-                                           (int) r.size.width,
-                                           (int) r.size.height));
+        r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);
+
+        monitorCoords.add (convertToRectInt (r));
     }
 
     jassert (monitorCoords.size() > 0);

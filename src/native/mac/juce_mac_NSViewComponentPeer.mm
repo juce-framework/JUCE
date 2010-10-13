@@ -1034,7 +1034,7 @@ const Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
         r.origin.y = [[view superview] frame].size.height - r.origin.y - r.size.height;
     }
 
-    return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
+    return Rectangle<int> (convertToRectInt (r));
 }
 
 const Rectangle<int> NSViewComponentPeer::getBounds() const
@@ -1066,11 +1066,8 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
 
         r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
 
-        Rectangle<int> pos ((int) r.origin.x, (int) r.origin.y,
-                            (int) r.size.width, (int) r.size.height);
-
-        Rectangle<int> original ((int) current.origin.x, (int) current.origin.y,
-                                 (int) current.size.width, (int) current.size.height);
+        Rectangle<int> pos (convertToRectInt (r));
+        Rectangle<int> original (convertToRectInt (current));
 
         constrainer->checkBounds (pos, original,
                                   Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),

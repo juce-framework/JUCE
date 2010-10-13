@@ -66,6 +66,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_Thread.h"
 #include "../../io/network/juce_URL.h"
 #include "../../containers/juce_ScopedPointer.h"
+#include "../../core/juce_PlatformUtilities.h"
 
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 

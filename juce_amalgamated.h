@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	75
+#define JUCE_BUILDNUMBER	76
 
 /** Current Juce version number.
 
@@ -2898,6 +2898,9 @@ private:
 	static inline Type castFrom64Bit (int64 value) throw()	{ return *(Type*) &value; }
 	static inline int32 castTo32Bit (Type value) throw()	  { return *(int32*) &value; }
 	static inline int64 castTo64Bit (Type value) throw()	  { return *(int64*) &value; }
+
+	Type operator++ (int); // better to just use pre-increment with atomics..
+	Type operator-- (int);
 };
 
 /*
@@ -4976,14 +4979,14 @@ public:
 
 		The low 32 bits of the number are initialised with this value.
 	*/
-	BigInteger (unsigned int value);
+	BigInteger (uint32 value);
 
 	/** Creates a BigInteger containing an integer value in its low bits.
 
 		The low 32 bits of the number are initialised with the absolute value
 		passed in, and its sign is set to reflect the sign of the number.
 	*/
-	BigInteger (int value);
+	BigInteger (int32 value);
 
 	/** Creates a BigInteger containing an integer value in its low bits.
 
@@ -5064,7 +5067,7 @@ public:
 		Copies the given integer onto a range of bits, starting at startBit,
 		and using up to numBits of the available bits.
 	*/
-	void setBitRangeAsInt (int startBit, int numBits, unsigned int valueToSet);
+	void setBitRangeAsInt (int startBit, int numBits, uint32 valueToSet);
 
 	/** Shifts a section of bits left or right.
 
@@ -5223,12 +5226,15 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	HeapBlock <unsigned int> values;
+	HeapBlock <uint32> values;
 	int numValues, highestBit;
 	bool negative;
 
 	void ensureSize (int numVals);
 	static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
+
+	static inline int bitToIndex (const int bit) throw()	{ return bit >> 5; }
+	static inline uint32 bitToMask (const int bit) throw()	  { return 1 << (bit & 31); }
 };
 
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */
@@ -29038,6 +29044,34 @@ public:
 	*/
 	MouseInputSource* getDraggingMouseSource (int index) const throw();
 
+	/** In a tablet device which can be turned around, this is used to inidicate the orientation. */
+	enum DisplayOrientation
+	{
+		upright		 = 1,  /**< Indicates that the display is the normal way up. */
+		upsideDown		  = 2,  /**< Indicates that the display is upside-down. */
+		rotatedClockwise	= 4,  /**< Indicates that the display is turned 90 degrees clockwise from its upright position. */
+		rotatedAntiClockwise	= 8,  /**< Indicates that the display is turned 90 degrees anti-clockwise from its upright position. */
+
+		allOrientations	 = 1 + 2 + 4 + 8   /**< A combination of all the orientation values */
+	};
+
+	/** In a tablet device which can be turned around, this returns the current orientation. */
+	DisplayOrientation getCurrentOrientation() const;
+
+	/** Sets which orientations the display is allowed to auto-rotate to.
+
+		For devices that support rotating desktops, this lets you specify which of the orientations your app can use.
+
+		The parameter is a bitwise or-ed combination of the values in DisplayOrientation, and must contain at least one
+		set bit.
+	*/
+	void setOrientationsEnabled (int allowedOrientations);
+
+	/** Returns whether the display is allowed to auto-rotate to the given orientation.
+		Each orientation can be enabled using setOrientationEnabled(). By default, all orientations are allowed.
+	*/
+	bool isOrientationEnabled (DisplayOrientation orientation) const throw();
+
 	juce_UseDebuggingNewOperator
 
 	/** Tells this object to refresh its idea of what the screen resolution is.
@@ -29077,6 +29111,8 @@ private:
 
 	Component* kioskModeComponent;
 	Rectangle<int> kioskComponentOriginalBounds;
+
+	int allowedOrientations;
 
 	void timerCallback();
 	void resetTimer();
@@ -29985,6 +30021,9 @@ public:
 		SampleFormat data;
 
 		inline void advance() throw()			   { advanceData (data); }
+
+		Pointer operator++ (int); // private to force you to use the more efficient pre-increment!
+		Pointer operator-- (int);
 	};
 
 	/** A base class for objects that are used to convert between two different sample formats.
@@ -62372,6 +62411,16 @@ public:
 	/** Returns the set of all UnitTest objects that currently exist. */
 	static Array<UnitTest*>& getAllTests();
 
+	/** You can optionally implement this method to set up your test.
+		This method will be called before runTest().
+	*/
+	virtual void initalise();
+
+	/** You can optionally implement this method to clear up after your test has been run.
+		This method will be called after runTest() has returned.
+	*/
+	virtual void shutdown();
+
 	/** Implement this method in your subclass to actually run your tests.
 
 		The content of your implementation should call beginTest() and expect()
@@ -62404,6 +62453,25 @@ public:
 		If the failure message is specified, it will be written to the log if the test fails.
 	*/
 	void expect (bool testResult, const String& failureMessage = String::empty);
+
+	/** Compares two values, and if they don't match, prints out a message containing the
+		expected and actual result values.
+	*/
+	template <class ValueType>
+	void expectEquals (ValueType actual, ValueType expected, String failureMessage = String::empty)
+	{
+		const bool result = (actual == expected);
+
+		if (! result)
+		{
+			if (failureMessage.isNotEmpty())
+				failureMessage << " -- ";
+
+			failureMessage << "Expected value: " << expected << ", Actual value: " << actual;
+		}
+
+		expect (result, failureMessage);
+	}
 
 	/** Writes a message to the test log.
 		This can only be called from within your runTest() method.
