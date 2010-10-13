@@ -174,7 +174,7 @@ static vorbis_info_floor *floor1_unpack (vorbis_info *vi,oggpack_buffer *opb){
   return(NULL);
 }
 
-static int icomp(const void *a,const void *b){
+static int JUCE_CDECL icomp(const void *a,const void *b){
   return(**(int **)a-**(int **)b);
 }
 

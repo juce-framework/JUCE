@@ -38,6 +38,8 @@
   #define log(a) {}
 #endif
 
+#define JUCE_ASIOCALLBACK // should probably use this to define the callback type, but
+                          // the asio header doesn't actually specify a calling convention for the functions..
 
 //==============================================================================
 #if ASIO_DEBUGGING
@@ -1192,7 +1194,7 @@ private:
     }
 
     //==============================================================================
-    void callback (const long index)
+    void JUCE_ASIOCALLBACK callback (const long index)
     {
         if (isStarted)
         {
@@ -1338,7 +1340,7 @@ private:
     }
 
     //==============================================================================
-    static ASIOTime* bufferSwitchTimeInfoCallback0 (ASIOTime*, long index, long)
+    static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback0 (ASIOTime*, long index, long)
     {
         if (currentASIODev[0] != 0)
             currentASIODev[0]->callback (index);
@@ -1346,7 +1348,7 @@ private:
         return 0;
     }
 
-    static ASIOTime* bufferSwitchTimeInfoCallback1 (ASIOTime*, long index, long)
+    static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback1 (ASIOTime*, long index, long)
     {
         if (currentASIODev[1] != 0)
             currentASIODev[1]->callback (index);
@@ -1354,7 +1356,7 @@ private:
         return 0;
     }
 
-    static ASIOTime* bufferSwitchTimeInfoCallback2 (ASIOTime*, long index, long)
+    static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback2 (ASIOTime*, long index, long)
     {
         if (currentASIODev[2] != 0)
             currentASIODev[2]->callback (index);
@@ -1362,41 +1364,41 @@ private:
         return 0;
     }
 
-    static void bufferSwitchCallback0 (long index, long)
+    static void JUCE_ASIOCALLBACK bufferSwitchCallback0 (long index, long)
     {
         if (currentASIODev[0] != 0)
             currentASIODev[0]->callback (index);
     }
 
-    static void bufferSwitchCallback1 (long index, long)
+    static void JUCE_ASIOCALLBACK bufferSwitchCallback1 (long index, long)
     {
         if (currentASIODev[1] != 0)
             currentASIODev[1]->callback (index);
     }
 
-    static void bufferSwitchCallback2 (long index, long)
+    static void JUCE_ASIOCALLBACK bufferSwitchCallback2 (long index, long)
     {
         if (currentASIODev[2] != 0)
             currentASIODev[2]->callback (index);
     }
 
-    static long asioMessagesCallback0 (long selector, long value, void*, double*)
+    static long JUCE_ASIOCALLBACK asioMessagesCallback0 (long selector, long value, void*, double*)
     {
         return asioMessagesCallback (selector, value, 0);
     }
 
-    static long asioMessagesCallback1 (long selector, long value, void*, double*)
+    static long JUCE_ASIOCALLBACK asioMessagesCallback1 (long selector, long value, void*, double*)
     {
         return asioMessagesCallback (selector, value, 1);
     }
 
-    static long asioMessagesCallback2 (long selector, long value, void*, double*)
+    static long JUCE_ASIOCALLBACK asioMessagesCallback2 (long selector, long value, void*, double*)
     {
         return asioMessagesCallback (selector, value, 2);
     }
 
     //==============================================================================
-    static long asioMessagesCallback (long selector, long value, const int deviceIndex)
+    static long JUCE_ASIOCALLBACK asioMessagesCallback (long selector, long value, const int deviceIndex)
     {
         switch (selector)
         {
@@ -1438,7 +1440,7 @@ private:
         return 0;
     }
 
-    static void sampleRateChangedCallback (ASIOSampleRate) throw()
+    static void JUCE_ASIOCALLBACK sampleRateChangedCallback (ASIOSampleRate)
     {
     }
 

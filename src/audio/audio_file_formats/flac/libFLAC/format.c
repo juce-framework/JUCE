@@ -272,7 +272,7 @@ FLAC_API FLAC__bool FLAC__format_seektable_is_legal(const FLAC__StreamMetadata_S
 }
 
 /* used as the sort predicate for qsort() */
-static int seekpoint_compare_(const FLAC__StreamMetadata_SeekPoint *l, const FLAC__StreamMetadata_SeekPoint *r)
+static int JUCE_CDECL seekpoint_compare_(const FLAC__StreamMetadata_SeekPoint *l, const FLAC__StreamMetadata_SeekPoint *r)
 {
 	/* we don't just 'return l->sample_number - r->sample_number' since the result (FLAC__int64) might overflow an 'int' */
 	if(l->sample_number == r->sample_number)
@@ -292,7 +292,7 @@ FLAC_API unsigned FLAC__format_seektable_sort(FLAC__StreamMetadata_SeekTable *se
 	FLAC__ASSERT(0 != seek_table);
 
 	/* sort the seekpoints */
-	qsort(seek_table->points, seek_table->num_points, sizeof(FLAC__StreamMetadata_SeekPoint), (int (*)(const void *, const void *))seekpoint_compare_);
+	qsort(seek_table->points, seek_table->num_points, sizeof(FLAC__StreamMetadata_SeekPoint), (int (JUCE_CDECL *)(const void *, const void *))seekpoint_compare_);
 
 	/* uniquify the seekpoints */
 	first = true;

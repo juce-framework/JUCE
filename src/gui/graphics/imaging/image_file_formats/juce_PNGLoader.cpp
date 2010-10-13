@@ -110,19 +110,19 @@ namespace PNGHelpers
 {
     using namespace pnglibNamespace;
 
-    static void readCallback (png_structp png, png_bytep data, png_size_t length)
+    static void JUCE_CDECL readCallback (png_structp png, png_bytep data, png_size_t length)
     {
         static_cast<InputStream*> (png_get_io_ptr (png))->read (data, (int) length);
     }
 
-    static void writeDataCallback (png_structp png, png_bytep data, png_size_t length)
+    static void JUCE_CDECL writeDataCallback (png_structp png, png_bytep data, png_size_t length)
     {
         static_cast<OutputStream*> (png_get_io_ptr (png))->write (data, (int) length);
     }
 
     struct PNGErrorStruct {};
 
-    static void errorCallback (png_structp, png_const_charp)
+    static void JUCE_CDECL errorCallback (png_structp, png_const_charp)
     {
         throw PNGErrorStruct();
     }

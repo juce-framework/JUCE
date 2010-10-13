@@ -82,6 +82,8 @@ static void logFailure (HRESULT hr)
   #endif
 }
 
+#undef check
+
 static bool check (HRESULT hr)
 {
     logFailure (hr);
