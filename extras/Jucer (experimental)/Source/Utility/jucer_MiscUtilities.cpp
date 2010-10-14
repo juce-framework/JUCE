@@ -180,7 +180,10 @@ void PropertyPanelWithTooltips::resized()
 
 void PropertyPanelWithTooltips::timerCallback()
 {
-    Component* const newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
+    Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
+
+    if (newComp != 0 && newComp->getTopLevelComponent() != getTopLevelComponent())
+        newComp = 0;
 
     if (newComp != lastComp)
     {

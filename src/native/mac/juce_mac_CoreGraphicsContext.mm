@@ -144,9 +144,9 @@ public:
     CoreGraphicsContext (CGContextRef context_, const float flipHeight_)
         : context (context_),
           flipHeight (flipHeight_),
+          lastClipRectIsValid (false),
           state (new SavedState()),
-          numGradientLookupEntries (0),
-          lastClipRectIsValid (false)
+          numGradientLookupEntries (0)
     {
         CGContextRetain (context);
         CGContextSaveGState(context);

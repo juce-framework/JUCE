@@ -261,9 +261,9 @@ public:
     //==============================================================================
     WavAudioFormatReader (InputStream* const in)
         : AudioFormatReader (in, TRANS (wavFormatName)),
-          dataLength (0),
           bwavChunkStart (0),
-          bwavSize (0)
+          bwavSize (0),
+          dataLength (0)
     {
         if (input->readInt() == chunkName ("RIFF"))
         {

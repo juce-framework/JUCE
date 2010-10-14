@@ -41,9 +41,9 @@ class MouseInputSourceInternal   : public AsyncUpdater
 public:
     //==============================================================================
     MouseInputSourceInternal (MouseInputSource& source_, const int index_, const bool isMouseDevice_)
-        : index (index_), isMouseDevice (isMouseDevice_), source (source_), lastPeer (0), lastTime (0),
+        : index (index_), isMouseDevice (isMouseDevice_), source (source_), lastPeer (0),
           isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (0),
-          mouseEventCounter (0)
+          mouseEventCounter (0), lastTime (0)
     {
         zerostruct (mouseDowns);
     }

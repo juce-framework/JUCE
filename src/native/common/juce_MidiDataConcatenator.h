@@ -26,6 +26,7 @@
 #ifndef __JUCE_MIDIDATACONCATENATOR_JUCEHEADER__
 #define __JUCE_MIDIDATACONCATENATOR_JUCEHEADER__
 
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 //==============================================================================
 /**
@@ -141,5 +142,6 @@ private:
     MidiDataConcatenator& operator= (const MidiDataConcatenator&);
 };
 
+#endif
 
 #endif   // __JUCE_MIDIDATACONCATENATOR_JUCEHEADER__

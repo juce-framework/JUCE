@@ -43,12 +43,12 @@ DrawableText::DrawableText()
 }
 
 DrawableText::DrawableText (const DrawableText& other)
-    : text (other.text),
+    : bounds (other.bounds),
+      fontSizeControlPoint (other.fontSizeControlPoint),
       font (other.font),
+      text (other.text),
       colour (other.colour),
-      justification (other.justification),
-      bounds (other.bounds),
-      fontSizeControlPoint (other.fontSizeControlPoint)
+      justification (other.justification)
 {
 }
 
