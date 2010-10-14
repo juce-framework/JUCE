@@ -71,6 +71,10 @@ public:
     */
     void* getView() const;
 
+
+    /** Resizes this component to fit the view that it contains. */
+    void resizeToFitView();
+
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);

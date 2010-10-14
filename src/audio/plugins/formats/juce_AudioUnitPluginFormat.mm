@@ -886,7 +886,8 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
 
 
 //==============================================================================
-class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
+class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor,
+                                      public Timer
 {
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& plugin_, const bool createGenericViewIfNeeded)
@@ -922,6 +923,18 @@ public:
     void resized()
     {
         wrapper.setSize (getWidth(), getHeight());
+    }
+
+    void timerCallback()
+    {
+        wrapper.resizeToFitView();
+        startTimer (jmin (713, getTimerInterval() + 51));
+    }
+
+    void childBoundsChanged (Component* child)
+    {
+        setSize (wrapper.getWidth(), wrapper.getHeight());
+        startTimer (70);
     }
 
 private:
@@ -964,10 +977,9 @@ private:
                 }
 
                 for (int i = (dataSize - sizeof (CFURLRef)) / sizeof (CFStringRef); --i >= 0;)
-                {
                     CFRelease (info->mCocoaAUViewClass[i]);
-                    CFRelease (info->mCocoaAUViewBundleLocation);
-                }
+
+                CFRelease (info->mCocoaAUViewBundleLocation);
             }
         }
 
@@ -977,8 +989,10 @@ private:
         wrapper.setView (pluginView);
 
         if (pluginView != 0)
-            setSize ([pluginView frame].size.width,
-                     [pluginView frame].size.height);
+        {
+            timerCallback();
+            startTimer (70);
+        }
 
         return pluginView != 0;
     }

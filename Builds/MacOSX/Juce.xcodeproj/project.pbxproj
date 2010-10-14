@@ -1895,7 +1895,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "jucedebug"; }; name = Debug; };
 		71190EFA58D0942581B5F1AD = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1910,7 +1910,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "juce"; }; name = Release; };
 		3A1CB6B5ECF4A79CDE35CC66 = { isa = XCConfigurationList; buildConfigurations = (
 				8E935B9E7F2982A06CD7EF99,

@@ -387,6 +387,13 @@
 
 //==============================================================================
 #if JUCE_BUILD_NATIVE
+
+ // Non-public headers that are needed by more than one platform must be included
+ // before the platform-specific sections..
+ BEGIN_JUCE_NAMESPACE
+  #include "../src/native/common/juce_MidiDataConcatenator.h"
+ END_JUCE_NAMESPACE
+
  #if JUCE_WINDOWS
   #include "../src/native/juce_win32_NativeCode.cpp"
  #endif

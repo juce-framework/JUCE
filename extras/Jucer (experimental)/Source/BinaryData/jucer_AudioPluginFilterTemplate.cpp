@@ -145,6 +145,11 @@ void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiM
 }
 
 //==============================================================================
+bool FILTERCLASSNAME::hasEditor() const
+{
+    return true; // (change this to false if you choose to not supply an editor)
+}
+
 AudioProcessorEditor* FILTERCLASSNAME::createEditor()
 {
     return new EDITORCLASSNAME (this);

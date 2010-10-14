@@ -283,7 +283,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "Jucer"; }; name = Debug; };
 		4C681DED23FC5056A83C964C = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -297,7 +297,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "Jucer"; }; name = Release; };
 		045AC698C60073CCF5CC6116 = { isa = XCConfigurationList; buildConfigurations = (
 				69D26A715A354ED1735D8438,

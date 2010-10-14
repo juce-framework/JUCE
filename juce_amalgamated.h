@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	76
+#define JUCE_BUILDNUMBER	77
 
 /** Current Juce version number.
 
@@ -57940,6 +57940,9 @@ public:
 		a requirement of juce.h, so you should just cast the object to an NSView*.
 	*/
 	void* getView() const;
+
+	/** Resizes this component to fit the view that it contains. */
+	void resizeToFitView();
 
 	/** @internal */
 	void paint (Graphics& g);

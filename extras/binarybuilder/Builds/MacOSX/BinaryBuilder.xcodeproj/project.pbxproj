@@ -102,7 +102,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "BinaryBuilder"; }; name = Debug; };
 		B911917EBAEE875AC65A0C2B = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -116,7 +116,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "BinaryBuilder"; }; name = Release; };
 		71143A294DF2ABC013DAD8F4 = { isa = XCConfigurationList; buildConfigurations = (
 				C69BDE02D12775D4A17BFA17,

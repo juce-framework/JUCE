@@ -285,7 +285,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "JuceDemoPlugin"; }; name = Debug; };
 		D9F9CC7EC1952477F7915D84 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -299,7 +299,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "JuceDemoPlugin"; }; name = Release; };
 		91EB753864A948DE4421285E = { isa = XCConfigurationList; buildConfigurations = (
 				F6631902F8DE12E2C2C34B71,

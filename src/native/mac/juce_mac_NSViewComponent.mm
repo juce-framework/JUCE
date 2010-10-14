@@ -91,7 +91,10 @@ public:
 
         if (currentPeer != peer)
         {
-            [view removeFromSuperview];
+            if ([view superview] != nil)
+                [view removeFromSuperview]; // Must be careful not to call this unless it's required - e.g. some Apple AU views
+                                            // override the call and use it as a sign that they're being deleted, which breaks everything..
+
             currentPeer = peer;
 
             if (peer != 0)
@@ -107,6 +110,12 @@ public:
     void componentVisibilityChanged (Component&)
     {
         componentPeerChanged();
+    }
+
+    const Rectangle<int> getViewBounds() const
+    {
+        NSRect r = [view frame];
+        return Rectangle<int> (0, 0, (int) r.size.width, (int) r.size.height);
     }
 
     juce_UseDebuggingNewOperator
@@ -139,6 +148,12 @@ void NSViewComponent::setView (void* view)
 void* NSViewComponent::getView() const
 {
     return info == 0 ? 0 : info->view;
+}
+
+void NSViewComponent::resizeToFitView()
+{
+    if (info != 0)
+        setBounds (info->getViewBounds());
 }
 
 void NSViewComponent::paint (Graphics&)

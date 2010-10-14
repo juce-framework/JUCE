@@ -102,7 +102,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "amalgamator"; }; name = Debug; };
 		322333C2238617224CAE5D89 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -116,7 +116,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "amalgamator"; }; name = Release; };
 		FA25EC7DB69A3A88993F2853 = { isa = XCConfigurationList; buildConfigurations = (
 				4EAD81574ACF05AC27D04B76,

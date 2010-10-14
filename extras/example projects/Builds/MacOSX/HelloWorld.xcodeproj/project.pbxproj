@@ -120,7 +120,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "HelloWorld"; }; name = Debug; };
 		0F295119837F2D1BC9387794 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -134,7 +134,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "HelloWorld"; }; name = Release; };
 		C71BF9C42683418116C8426E = { isa = XCConfigurationList; buildConfigurations = (
 				1C939EADBAB81B95A46A6581,
