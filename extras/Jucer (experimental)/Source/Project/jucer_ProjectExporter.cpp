@@ -176,12 +176,13 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
         }
     }
 
-    props.add (new TextPropertyComponent (getExtraPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
-    props.getLast()->setTooltip ("Extra preprocessor definitions. Use whitespace or commas as a delimiter.");
+    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
+    props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
     props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false));
-    props.getLast()->setTooltip ("Extra command-line flags to be passed to the compiler");
+    props.getLast()->setTooltip ("Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
     props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false));
-    props.getLast()->setTooltip ("Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries");
+    props.getLast()->setTooltip ("Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 }
 
 const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
@@ -199,10 +200,15 @@ const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
     return s;
 }
 
-const StringArray ProjectExporter::parsePreprocessorDefs() const
+const StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const
 {
-    StringArray defines;
-    defines.addTokens (getExtraPreprocessorDefs().toString(), " ,;", String::empty);
-    defines.removeEmptyStrings (true);
-    return defines;
+    StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
+                                                 parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
+    defs.set (getExporterIdentifierMacro(), "1");
+    return defs;
+}
+
+const String ProjectExporter::replacePreprocessorTokens (const Project::BuildConfiguration& config, const String& sourceString) const
+{
+    return replacePreprocessorDefs (getAllPreprocessorDefs (config), sourceString);
 }

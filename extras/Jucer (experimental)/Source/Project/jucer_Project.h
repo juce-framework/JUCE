@@ -56,7 +56,7 @@ public:
 
     //==============================================================================
     bool shouldBeAddedToBinaryResourcesByDefault (const File& file);
-    const File resolveFilename (const String& filename) const;
+    const File resolveFilename (String filename) const;
     const String getRelativePathForFile (const File& file) const;
 
     //==============================================================================
@@ -101,6 +101,9 @@ public:
 
     //==============================================================================
     Value getProjectValue (const Identifier& name) const       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
+
+    Value getProjectPreprocessorDefs() const            { return getProjectValue (Ids::defines); }
+    const StringPairArray getPreprocessorDefs() const;
 
     Value getBigIconImageItemID() const                 { return getProjectValue ("bigIcon"); }
     Value getSmallIconImageItemID() const               { return getProjectValue ("smallIcon"); }
@@ -238,8 +241,8 @@ public:
         Value getTargetBinaryRelativePath() const           { return getValue (Ids::binaryPath); }
         Value getOptimisationLevel() const                  { return getValue (Ids::optimisation); }
         const String getGCCOptimisationFlag() const;
-        Value getPreprocessorDefs() const                   { return getValue (Ids::defines); }
-        const StringArray parsePreprocessorDefs() const;
+        Value getBuildConfigPreprocessorDefs() const        { return getValue (Ids::defines); }
+        const StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
         Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
         const StringArray getHeaderSearchPaths() const;
 

@@ -352,7 +352,8 @@ private:
         addPlistDictionaryKey (dict, "CFBundleVersion",             project.getVersion().toString());
 
         StringArray documentExtensions;
-        documentExtensions.addTokens (getSetting ("documentExtensions").toString(), ",", String::empty);
+        documentExtensions.addTokens (replacePreprocessorDefs (project.getPreprocessorDefs(), getSetting ("documentExtensions").toString()),
+                                      ",", String::empty);
         documentExtensions.trim();
         documentExtensions.removeEmptyStrings (true);
 
@@ -475,7 +476,7 @@ private:
             getLinkerFlagsForStaticLibrary (juceLib, flags, librarySearchPaths);
         }
 
-        flags.add (getExtraLinkerFlags().toString());
+        flags.add (replacePreprocessorTokens (config, getExtraLinkerFlags().toString()));
         flags.removeEmptyStrings (true);
     }
 
@@ -521,8 +522,9 @@ private:
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
 
-        if (getExtraCompilerFlags().toString().isNotEmpty())
-            s.add ("OTHER_CPLUSPLUSFLAGS = " + getExtraCompilerFlags().toString());
+        const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
+        if (extraFlags.isNotEmpty())
+            s.add ("OTHER_CPLUSPLUSFLAGS = " + extraFlags);
 
         if (project.isGUIApplication())
         {
@@ -616,14 +618,12 @@ private:
             }
         }
 
-        StringArray defines;
-
-        defines.add (getExporterIdentifierMacro() + "=1");
+        StringPairArray defines;
 
         if (config.isDebug().getValue())
         {
-            defines.add ("_DEBUG=1");
-            defines.add ("DEBUG=1 ");
+            defines.set ("_DEBUG", "1");
+            defines.set ("DEBUG", "1");
             s.add ("ONLY_ACTIVE_ARCH = YES");
             s.add ("COPY_PHASE_STRIP = NO");
             s.add ("GCC_DYNAMIC_NO_PIC = NO");
@@ -631,8 +631,8 @@ private:
         }
         else
         {
-            defines.add ("_NDEBUG=1");
-            defines.add ("NDEBUG=1 ");
+            defines.set ("_NDEBUG", "1");
+            defines.set ("NDEBUG", "1");
             s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
         }
@@ -640,17 +640,25 @@ private:
         {
             const String objCSuffix (getSetting ("objCExtraSuffix").toString().trim());
             if (objCSuffix.isNotEmpty())
-                defines.add ("JUCE_ObjCExtraSuffix=" + objCSuffix);
+                defines.set ("JUCE_ObjCExtraSuffix", replacePreprocessorTokens (config, objCSuffix));
         }
 
         {
-            defines.addArray (config.parsePreprocessorDefs());
-            defines.addArray (parsePreprocessorDefs());
+            defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
 
-            for (int i = defines.size(); --i >= 0;)
-                defines.set (i, defines[i].quoted());
+            StringArray defsList;
 
-            s.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defines, ",") + ")");
+            for (int i = 0; i < defines.size(); ++i)
+            {
+                String def (defines.getAllKeys()[i]);
+                const String value (defines.getAllValues()[i]);
+                if (value.isNotEmpty())
+                    def << "=" << value;
+
+                defsList.add (def.quoted());
+            }
+
+            s.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defsList, ",") + ")");
         }
 
         return s;

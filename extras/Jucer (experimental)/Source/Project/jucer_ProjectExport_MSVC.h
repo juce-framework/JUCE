@@ -136,28 +136,48 @@ protected:
 
     const String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
     {
-        StringArray defines;
-        defines.add (getExporterIdentifierMacro());
-        defines.add ("WIN32");
-        defines.add ("_WINDOWS");
-        defines.add (config.isDebug().getValue() ? "_DEBUG" : "NDEBUG");
+        StringPairArray defines;
+        defines.set ("WIN32", "");
+        defines.set ("_WINDOWS", "");
+
+        if (config.isDebug().getValue())
+        {
+            defines.set ("DEBUG", "");
+            defines.set ("_DEBUG", "");
+        }
+        else
+        {
+            defines.set ("NDEBUG", "");
+        }
+
         if (project.isCommandLineApp())
-            defines.add ("_CONSOLE");
+            defines.set ("_CONSOLE", "");
 
         if (project.isLibrary())
-            defines.add ("_LIB");
+            defines.set ("_LIB", "");
 
         if (isRTAS())
         {
             RelativePath rtasFolder (getRTASFolder().toString(), RelativePath::unknown);
-            defines.add ("JucePlugin_WinBag_path="
-                            + CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
-                                                                .toWindowsStyle().quoted()));
+            defines.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
+                                                                                .toWindowsStyle().quoted()));
         }
 
-        defines.addArray (config.parsePreprocessorDefs());
-        defines.addArray (parsePreprocessorDefs());
-        return defines.joinIntoString (joinString);
+        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
+
+        StringArray result;
+
+        for (int i = 0; i < defines.size(); ++i)
+        {
+            String def (defines.getAllKeys()[i]);
+            const String value (defines.getAllValues()[i]);
+            if (value.isNotEmpty())
+                def << "=" << value;
+
+            result.add (def);
+        }
+
+        return result.joinIntoString (joinString);
     }
 
     const StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config) const
@@ -692,8 +712,9 @@ protected:
             compiler->setAttribute ("WarningLevel", "4");
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
-            if (getExtraCompilerFlags().toString().isNotEmpty())
-                compiler->setAttribute ("AdditionalOptions", getExtraCompilerFlags().toString().trim());
+            const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
+            if (extraFlags.isNotEmpty())
+                compiler->setAttribute ("AdditionalOptions", extraFlags);
         }
 
         createToolElement (xml, "VCManagedResourceCompilerTool");
@@ -743,7 +764,7 @@ protected:
             }
 
             if (extraLinkerOptions.isNotEmpty())
-                linker->setAttribute ("AdditionalOptions", extraLinkerOptions.trim());
+                linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
         }
         else
         {
@@ -753,7 +774,7 @@ protected:
 
                 String extraLinkerOptions (getExtraLinkerFlags().toString());
                 extraLinkerOptions << " /IMPLIB:" << FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName.upToLastOccurrenceOf (".", false, false) + ".lib");
-                linker->setAttribute ("AdditionalOptions", extraLinkerOptions.trim());
+                linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
 
                 linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
                 linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
@@ -969,7 +990,7 @@ private:
                 << "# ADD CPP /nologo " << (isDebug ? "/MTd" : "/MT") << " /W3 /GR /GX /" << optimisationFlag
                 << " /I " << getHeaderSearchPaths (config).joinIntoString (" /I ")
                 << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c /Zm1024 " << extraDebugFlags
-                << " " << getExtraCompilerFlags().toString().trim() << newLine;
+                << " " << replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim() << newLine;
 
             if (! isDebug)
                 out << "# SUBTRACT CPP /YX" << newLine;
@@ -1000,7 +1021,7 @@ private:
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
                     << (isDLL ? "/dll" : (project.isCommandLineApp() ? "/subsystem:console "
                                                                      : "/subsystem:windows "))
-                    << getExtraLinkerFlags().toString().trim() << newLine;
+                    << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim() << newLine;
             }
         }
 

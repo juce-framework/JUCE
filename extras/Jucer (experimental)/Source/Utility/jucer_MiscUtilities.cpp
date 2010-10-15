@@ -76,6 +76,77 @@ const String createGUID (const String& seed)
 }
 
 //==============================================================================
+static void skipWhitespace (const String& s, int& i)
+{
+    while (CharacterFunctions::isWhitespace (s[i]))
+        ++i;
+}
+
+const StringPairArray parsePreprocessorDefs (const String& s)
+{
+    StringPairArray result;
+    int i = 0;
+
+    while (s[i] != 0)
+    {
+        String token, value;
+        skipWhitespace (s, i);
+
+        while (s[i] != 0 && s[i] != '=' && ! CharacterFunctions::isWhitespace (s[i]))
+            token << s[i++];
+
+        skipWhitespace (s, i);
+
+        if (s[i] == '=')
+        {
+            ++i;
+
+            skipWhitespace (s, i);
+
+            while (s[i] != 0 && ! CharacterFunctions::isWhitespace (s[i]))
+            {
+                if (s[i] == ',')
+                {
+                    ++i;
+                    break;
+                }
+
+                if (s[i] == '\\' && (s[i + 1] == ' ' || s[i + 1] == ','))
+                    ++i;
+
+                value << s[i++];
+            }
+        }
+
+        if (token.isNotEmpty())
+            result.set (token, value);
+    }
+
+    return result;
+}
+
+const StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs)
+{
+    for (int i = 0; i < overridingDefs.size(); ++i)
+        inheritedDefs.set (overridingDefs.getAllKeys()[i], overridingDefs.getAllValues()[i]);
+
+    return inheritedDefs;
+}
+
+const String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString)
+{
+    for (int i = 0; i < definitions.size(); ++i)
+    {
+        const String key (definitions.getAllKeys()[i]);
+        const String value (definitions.getAllValues()[i]);
+
+        sourceString = sourceString.replace ("${" + key + "}", value);
+    }
+
+    return sourceString;
+}
+
+//==============================================================================
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {
     Viewport* const viewport = e.eventComponent->findParentComponentOfClass ((Viewport*) 0);

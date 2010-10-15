@@ -128,25 +128,30 @@ private:
 
     void writeDefineFlags (OutputStream& out, const Project::BuildConfiguration& config)
     {
-        StringArray defines;
-        defines.add (getExporterIdentifierMacro() + "=1");
-        defines.add ("LINUX=1");
+        StringPairArray defines;
+        defines.set ("LINUX", "1");
 
         if (config.isDebug().getValue())
         {
-            defines.add ("DEBUG=1");
-            defines.add ("_DEBUG=1");
+            defines.set ("DEBUG", "1");
+            defines.set ("_DEBUG", "1");
         }
         else
         {
-            defines.add ("NDEBUG=1");
+            defines.set ("NDEBUG", "1");
         }
 
-        defines.addArray (config.parsePreprocessorDefs());
-        defines.addArray (parsePreprocessorDefs());
+        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
 
         for (int i = 0; i < defines.size(); ++i)
-            out << " -D " << defines[i].quoted();
+        {
+            String def (defines.getAllKeys()[i]);
+            const String value (defines.getAllValues()[i]);
+            if (value.isNotEmpty())
+                def << "=" << value;
+
+            out << " -D " << def.quoted();
+        }
     }
 
     void writeHeaderPathFlags (OutputStream& out, const Project::BuildConfiguration& config)
@@ -198,7 +203,7 @@ private:
         for (int i = 0; i < libs.size(); ++i)
             out << " -l" << libs[i];
 
-        out << " " << getExtraLinkerFlags().toString().trim()
+        out << " " << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim()
             << newLine;
     }
 
@@ -225,7 +230,7 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS) " << getExtraCompilerFlags().toString().trim() << newLine;
+        out << "  CXXFLAGS += $(CFLAGS) " << replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim() << newLine;
 
         writeLinkerFlags (out, config);
 

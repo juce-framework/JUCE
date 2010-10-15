@@ -219,7 +219,7 @@ class Unzipper  : public ThreadWithProgressWindow
 public:
     Unzipper (ZipFile& zipFile_, const File& targetDir_)
         : ThreadWithProgressWindow ("Unzipping...", true, true),
-          zipFile (zipFile_), targetDir (targetDir_), worked (true)
+          worked (true), zipFile (zipFile_), targetDir (targetDir_)
     {
     }
 
@@ -389,8 +389,8 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
 
     private:
         JuceUpdater& updater;
-        TextButton applyButton;
         VersionInfo* version;
+        TextButton applyButton;
     };
 
     UpdateListComponent* c = dynamic_cast <UpdateListComponent*> (existingComponentToUpdate);

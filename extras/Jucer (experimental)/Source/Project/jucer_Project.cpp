@@ -226,10 +226,12 @@ void Project::valueTreeParentChanged (ValueTree& tree)
 }
 
 //==============================================================================
-const File Project::resolveFilename (const String& filename) const
+const File Project::resolveFilename (String filename) const
 {
     if (filename.isEmpty())
         return File::nonexistent;
+
+    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
     if (File::isAbsolutePath (filename))
         return File (filename);
@@ -411,6 +413,9 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
                                      "ePlugInCategory_Dither, ePlugInCategory_SoundField");
     }
 
+    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false));
+    props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
     for (int i = props.size(); --i >= 0;)
         props.getUnchecked(i)->setPreferredHeight (22);
 }
@@ -433,6 +438,11 @@ const Image Project::getSmallIcon()
         return ImageCache::getFromFile (icon.getFile());
 
     return Image();
+}
+
+const StringPairArray Project::getPreprocessorDefs() const
+{
+    return parsePreprocessorDefs (getProjectPreprocessorDefs().toString());
 }
 
 //==============================================================================
@@ -954,8 +964,8 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
     props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search path", 16384, false));
     props.getLast()->setTooltip ("Extra header search paths. Use semi-colons to separate multiple paths.");
 
-    props.add (new TextPropertyComponent (getPreprocessorDefs(), "Preprocessor definitions", 32768, false));
-    props.getLast()->setTooltip ("Extra preprocessor definitions. Use whitespace or commas as a delimiter.");
+    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false));
+    props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
     if (getMacSDKVersion().toString().isEmpty())
         getMacSDKVersion() = osxVersionDefault;
@@ -976,12 +986,10 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
         props.getUnchecked(i)->setPreferredHeight (22);
 }
 
-const StringArray Project::BuildConfiguration::parsePreprocessorDefs() const
+const StringPairArray Project::BuildConfiguration::getAllPreprocessorDefs() const
 {
-    StringArray defines;
-    defines.addTokens (getPreprocessorDefs().toString(), " ,;", String::empty);
-    defines.removeEmptyStrings (true);
-    return defines;
+    return mergePreprocessorDefs (project->getPreprocessorDefs(),
+                                  parsePreprocessorDefs (getBuildConfigPreprocessorDefs().toString()));
 }
 
 const StringArray Project::BuildConfiguration::getHeaderSearchPaths() const

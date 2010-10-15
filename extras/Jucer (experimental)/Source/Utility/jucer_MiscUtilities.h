@@ -33,6 +33,10 @@ const String hexString8Digits (int value);
 const String createAlphaNumericUID();
 const String createGUID (const String& seed); // Turns a seed into a windows GUID
 
+const StringPairArray parsePreprocessorDefs (const String& defs);
+const StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);
+const String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
+
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
 
