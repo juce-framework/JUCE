@@ -136,6 +136,14 @@ bool File::isHidden() const
     return juce_isHiddenFile (getFullPathName());
 }
 
+#if JUCE_IOS
+static const String getIOSSystemLocation (NSSearchPathDirectory type)
+{
+    return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
+                            objectAtIndex:0]);
+}
+#endif
+
 //==============================================================================
 const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp
 
@@ -148,21 +156,35 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     switch (type)
     {
         case userHomeDirectory:                 resultPath = nsStringToJuce (NSHomeDirectory()); break;
+
+#if JUCE_IOS
+        case userDocumentsDirectory:            resultPath = getIOSSystemLocation (NSDocumentDirectory); break;
+        case userDesktopDirectory:              resultPath = getIOSSystemLocation (NSDesktopDirectory); break;
+
+        case tempDirectory:
+        {
+            File tmp (getIOSSystemLocation (NSCachesDirectory));
+            tmp = tmp.getChildFile (juce_getExecutableFile().getFileNameWithoutExtension());
+            tmp.createDirectory();
+            return tmp.getFullPathName();
+        }
+
+#else
         case userDocumentsDirectory:            resultPath = "~/Documents"; break;
         case userDesktopDirectory:              resultPath = "~/Desktop"; break;
-        case userApplicationDataDirectory:      resultPath = "~/Library"; break;
-        case commonApplicationDataDirectory:    resultPath = "/Library"; break;
-        case globalApplicationsDirectory:       resultPath = "/Applications"; break;
-        case userMusicDirectory:                resultPath = "~/Music"; break;
-        case userMoviesDirectory:               resultPath = "~/Movies"; break;
 
         case tempDirectory:
         {
             File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
-
             tmp.createDirectory();
             return tmp.getFullPathName();
         }
+#endif
+        case userMusicDirectory:                resultPath = "~/Music"; break;
+        case userMoviesDirectory:               resultPath = "~/Movies"; break;
+        case userApplicationDataDirectory:      resultPath = "~/Library"; break;
+        case commonApplicationDataDirectory:    resultPath = "/Library"; break;
+        case globalApplicationsDirectory:       resultPath = "/Applications"; break;
 
         case invokedExecutableFile:
             if (juce_Argv0 != 0)
@@ -177,9 +199,13 @@ const File File::getSpecialLocation (const SpecialLocationType type)
             const File exe (juce_getExecutableFile());
             const File parent (exe.getParentDirectory());
 
+          #if JUCE_IOS
+            return parent;
+          #else
             return parent.getFullPathName().endsWithIgnoreCase ("Contents/MacOS")
                     ? parent.getParentDirectory().getParentDirectory()
                     : exe;
+          #endif
         }
 
         case hostApplicationPath:

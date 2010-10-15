@@ -62419,7 +62419,7 @@ public:
 	/** You can optionally implement this method to set up your test.
 		This method will be called before runTest().
 	*/
-	virtual void initalise();
+	virtual void initialise();
 
 	/** You can optionally implement this method to clear up after your test has been run.
 		This method will be called after runTest() has returned.

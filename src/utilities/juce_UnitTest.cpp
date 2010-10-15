@@ -49,7 +49,7 @@ Array<UnitTest*>& UnitTest::getAllTests()
     return tests;
 }
 
-void UnitTest::initalise()  {}
+void UnitTest::initialise()  {}
 void UnitTest::shutdown()   {}
 
 void UnitTest::performTest (UnitTestRunner* const runner_)
@@ -57,7 +57,7 @@ void UnitTest::performTest (UnitTestRunner* const runner_)
     jassert (runner_ != 0);
     runner = runner_;
 
-    initalise();
+    initialise();
     runTest();
     shutdown();
 }
