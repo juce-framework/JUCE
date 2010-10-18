@@ -69,22 +69,12 @@ void Drawable::drawAt (Graphics& g, const float x, const float y, const float op
 }
 
 void Drawable::drawWithin (Graphics& g,
-                           const int destX,
-                           const int destY,
-                           const int destW,
-                           const int destH,
+                           const Rectangle<float>& destArea,
                            const RectanglePlacement& placement,
                            const float opacity) const
 {
-    if (destW > 0 && destH > 0)
-    {
-        Rectangle<float> bounds (getBounds());
-
-        draw (g, opacity,
-              placement.getTransformToFit (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                                           (float) destX, (float) destY,
-                                           (float) destW, (float) destH));
-    }
+    if (! destArea.isEmpty())
+        draw (g, opacity, placement.getTransformToFit (getBounds(), destArea));
 }
 
 //==============================================================================

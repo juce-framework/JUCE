@@ -45,7 +45,8 @@ public:
         width (0),
         height (0),
         activeUsers (0),
-        recordNextFrameTime (false)
+        recordNextFrameTime (false),
+        previewMaxFPS (60)
     {
         HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
         if (FAILED (hr))
@@ -176,6 +177,11 @@ public:
             mediaControl->Stop();
     }
 
+    int getPreviewMaxFPS() const
+    {
+        return previewMaxFPS;
+    }
+
     void handleFrame (double /*time*/, BYTE* buffer, long /*bufferSize*/)
     {
         if (recordNextFrameTime)
@@ -246,13 +252,14 @@ public:
         g.drawImage (activeImage, rx, ry, rw, rh, 0, 0, width, height);
     }
 
-    bool createFileCaptureFilter (const File& file)
+    bool createFileCaptureFilter (const File& file, int quality)
     {
         removeFileCaptureFilter();
         file.deleteFile();
         mediaControl->Stop();
         firstRecordedTime = Time();
         recordNextFrameTime = true;
+        previewMaxFPS = 60;
 
         HRESULT hr = asfWriter.CoCreateInstance (CLSID_WMAsfWriter);
 
@@ -278,17 +285,30 @@ public:
                         hr = WMCreateProfileManager (profileManager.resetAndGetPointerAddress());
 
                         // This gibberish is the DirectShow profile for a video-only wmv file.
-                        String prof ("<profile version=\"589824\" storageformat=\"1\" name=\"Quality\" description=\"Quality type for output.\"><streamconfig "
-                            "majortype=\"{73646976-0000-0010-8000-00AA00389B71}\" streamnumber=\"1\" streamname=\"Video Stream\" inputname=\"Video409\" bitrate=\"894960\" "
-                            "bufferwindow=\"0\" reliabletransport=\"1\" decodercomplexity=\"AU\" rfc1766langid=\"en-us\"><videomediaprops maxkeyframespacing=\"50000000\" quality=\"90\"/>"
-                            "<wmmediatype subtype=\"{33564D57-0000-0010-8000-00AA00389B71}\" bfixedsizesamples=\"0\" btemporalcompression=\"1\" lsamplesize=\"0\"> <videoinfoheader "
-                            "dwbitrate=\"894960\" dwbiterrorrate=\"0\" avgtimeperframe=\"100000\"><rcsource left=\"0\" top=\"0\" right=\"$WIDTH\" bottom=\"$HEIGHT\"/> <rctarget "
-                            "left=\"0\" top=\"0\" right=\"$WIDTH\" bottom=\"$HEIGHT\"/> <bitmapinfoheader biwidth=\"$WIDTH\" biheight=\"$HEIGHT\" biplanes=\"1\" bibitcount=\"24\" "
-                            "bicompression=\"WMV3\" bisizeimage=\"0\" bixpelspermeter=\"0\" biypelspermeter=\"0\" biclrused=\"0\" biclrimportant=\"0\"/> "
-                            "</videoinfoheader></wmmediatype></streamconfig></profile>");
+                        String prof ("<profile version=\"589824\" storageformat=\"1\" name=\"Quality\" description=\"Quality type for output.\">"
+                                     "  <streamconfig majortype=\"{73646976-0000-0010-8000-00AA00389B71}\" streamnumber=\"1\""
+                                     "                streamname=\"Video Stream\" inputname=\"Video409\" bitrate=\"894960\""
+                                     "                bufferwindow=\"0\" reliabletransport=\"1\" decodercomplexity=\"AU\" rfc1766langid=\"en-us\">"
+                                     "    <videomediaprops maxkeyframespacing=\"50000000\" quality=\"90\"/>"
+                                     "    <wmmediatype subtype=\"{33564D57-0000-0010-8000-00AA00389B71}\" bfixedsizesamples=\"0\""
+                                     "                 btemporalcompression=\"1\" lsamplesize=\"0\">"
+                                     "      <videoinfoheader dwbitrate=\"894960\" dwbiterrorrate=\"0\" avgtimeperframe=\"$AVGTIMEPERFRAME\">"
+                                     "        <rcsource left=\"0\" top=\"0\" right=\"$WIDTH\" bottom=\"$HEIGHT\"/>"
+                                     "        <rctarget left=\"0\" top=\"0\" right=\"$WIDTH\" bottom=\"$HEIGHT\"/>"
+                                     "        <bitmapinfoheader biwidth=\"$WIDTH\" biheight=\"$HEIGHT\" biplanes=\"1\" bibitcount=\"24\""
+                                     "                          bicompression=\"WMV3\" bisizeimage=\"0\" bixpelspermeter=\"0\" biypelspermeter=\"0\""
+                                     "                          biclrused=\"0\" biclrimportant=\"0\"/>"
+                                     "      </videoinfoheader>"
+                                     "    </wmmediatype>"
+                                     "  </streamconfig>"
+                                     "</profile>");
+
+                        const int fps[] = { 10, 15, 30 };
+                        const int maxFramesPerSecond = fps [quality % numElementsInArray (fps)];
 
                         prof = prof.replace ("$WIDTH", String (width))
-                                   .replace ("$HEIGHT", String (height));
+                                   .replace ("$HEIGHT", String (height))
+                                   .replace ("$AVGTIMEPERFRAME", String (10000000 / maxFramesPerSecond));
 
                         ComSmartPtr <IWMProfile> currentProfile;
                         hr = profileManager->LoadProfileByData ((const WCHAR*) prof, currentProfile.resetAndGetPointerAddress());
@@ -306,6 +326,7 @@ public:
                                      && ok && activeUsers > 0
                                      && SUCCEEDED (mediaControl->Run()))
                                 {
+                                    previewMaxFPS = (quality < 2) ? 15 : 25; // throttle back the preview comps to try to leave the cpu free for encoding
                                     return true;
                                 }
                             }
@@ -335,6 +356,8 @@ public:
 
         if (ok && activeUsers > 0)
             mediaControl->Run();
+
+        previewMaxFPS = 60;
     }
 
     //==============================================================================
@@ -377,7 +400,7 @@ public:
     {
     public:
         DShowCaptureViewerComp (DShowCameraDeviceInteral* const owner_)
-            : owner (owner_)
+            : owner (owner_), maxFPS (15), lastRepaintTime (0)
         {
             setOpaque (true);
             owner->addChangeListener (this);
@@ -414,11 +437,22 @@ public:
 
         void changeListenerCallback (void*)
         {
-            repaint();
+            const int64 now = Time::currentTimeMillis();
+
+            if (now >= lastRepaintTime + (1000 / maxFPS))
+            {
+                lastRepaintTime = now;
+                repaint();
+
+                if (owner != 0)
+                    maxFPS = owner->getPreviewMaxFPS();
+            }
         }
 
     private:
         DShowCameraDeviceInteral* owner;
+        int maxFPS;
+        int64 lastRepaintTime;
     };
 
     //==============================================================================
@@ -449,6 +483,7 @@ private:
     Image activeImage;
 
     bool recordNextFrameTime;
+    int previewMaxFPS;
 
     void getVideoSizes (IAMStreamConfig* const streamConfig)
     {
@@ -681,11 +716,12 @@ const String CameraDevice::getFileExtension()
 
 void CameraDevice::startRecordingToFile (const File& file, int quality)
 {
+    jassert (quality >= 0 && quality <= 2);
     stopRecording();
 
     DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
     d->addUser();
-    isRecording = d->createFileCaptureFilter (file);
+    isRecording = d->createFileCaptureFilter (file, quality);
 }
 
 const Time CameraDevice::getTimeOfFirstRecordedFrame() const

@@ -143,6 +143,68 @@ private:
 
 
 //==============================================================================
+class DrawableComponent    : public Component,
+                             public ValueTree::Listener
+{
+public:
+    DrawableComponent (const ValueTree& drawable_)
+    {
+        setDrawable (drawable_);
+    }
+
+    ~DrawableComponent()
+    {
+    }
+
+    void setDrawable (const ValueTree& newDrawable)
+    {
+        drawable.removeListener (this);
+        drawable = newDrawable;
+        drawable.addListener (this);
+        drawableObject = Drawable::createFromValueTree (drawable, 0); // xxx image provider missing
+        resized();
+        repaint();
+    }
+
+    void paint (Graphics& g)
+    {
+        if (drawableObject != 0)
+            drawableObject->drawAt (g, 0, 0, 1.0f);
+    }
+
+    void resized()
+    {
+        DrawableComposite* dc = dynamic_cast <DrawableComposite*> (static_cast <Drawable*> (drawableObject));
+
+        if (dc != 0)
+        {
+            dc->setMarker (DrawableComposite::contentLeftMarkerName, true, RelativeCoordinate (0));
+            dc->setMarker (DrawableComposite::contentTopMarkerName, false, RelativeCoordinate (0));
+            dc->setMarker (DrawableComposite::contentRightMarkerName, true, RelativeCoordinate (getWidth()));
+            dc->setMarker (DrawableComposite::contentBottomMarkerName, false, RelativeCoordinate (getHeight()));
+        }
+    }
+
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)       { updateGraphics(); }
+    void valueTreeChildrenChanged (ValueTree&)                          { updateGraphics(); }
+    void valueTreeParentChanged (ValueTree&)                            { updateGraphics(); }
+
+private:
+    ValueTree drawable;
+    ScopedPointer<Drawable> drawableObject;
+
+    void updateGraphics()
+    {
+        if (drawableObject != 0)
+        {
+            const Rectangle<float> dirtyArea (drawableObject->refreshFromValueTree (drawable, 0));
+            repaint (dirtyArea.getSmallestIntegerContainer());
+        }
+    }
+};
+
+
+//==============================================================================
 /**
 */
 class RelativeRectangleLayoutManager    : public ComponentListener,

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	77
+#define JUCE_BUILDNUMBER	78
 
 /** Current Juce version number.
 
@@ -1123,18 +1123,19 @@ inline void swapVariables (Type& variable1, Type& variable2)
 	int numElements = numElementsInArray (myArray) // returns 3
 	@endcode
 */
-template <typename Type>
-inline int numElementsInArray (Type& array)
+template <typename Type, int N>
+inline int numElementsInArray (Type (&array)[N])
 {
 	(void) array; // (required to avoid a spurious warning in MS compilers)
-	return static_cast<int> (sizeof (array) / sizeof (0[array]));
+	sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+	return N;
 }
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
 /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
 	versions of these functions of various platforms and compilers. */
-inline double juce_hypot (double a, double b)
+inline double juce_hypot (double a, double b) throw()
 {
   #if JUCE_WINDOWS
 	return _hypot (a, b);
@@ -3665,9 +3666,7 @@ static void sortArray (ElementComparator& comparator,
 			{
 				if (comparator.compareElements (array[i], array [i + 1]) > 0)
 				{
-					const ElementType temp = array [i];
-					array [i] = array[i + 1];
-					array [i + 1] = temp;
+					swapVariables (array[i], array[i + 1]);
 
 					if (i > firstElement)
 						i -= 2;
@@ -3695,19 +3694,14 @@ static void sortArray (ElementComparator& comparator,
 							if (comparator.compareElements (array[k], array [maxIndex]) > 0)
 								maxIndex = k;
 
-						const ElementType temp = array [maxIndex];
-						array [maxIndex] = array[j];
-						array [j] = temp;
-
+						swapVariables (array[j], array[maxIndex]);
 						--j;
 					}
 				}
 				else
 				{
 					const int mid = firstElement + (size >> 1);
-					ElementType temp = array [mid];
-					array [mid] = array [firstElement];
-					array [firstElement] = temp;
+					swapVariables (array[mid], array[firstElement]);
 
 					int i = firstElement;
 					int j = lastElement + 1;
@@ -3725,14 +3719,10 @@ static void sortArray (ElementComparator& comparator,
 						if (j < i)
 							break;
 
-						temp = array[i];
-						array[i] = array[j];
-						array[j] = temp;
+						swapVariables (array[i], array[j]);
 					}
 
-					temp = array [firstElement];
-					array [firstElement] = array[j];
-					array [j] = temp;
+					swapVariables (array[j], array[firstElement]);
 
 					if (j - 1 - firstElement >= lastElement - i)
 					{
@@ -13897,22 +13887,21 @@ public:
 		To improve performance, the compareElements() method can be declared as static or const.
 
 		@param comparator   the comparator to use for comparing elements.
-		@param retainOrderOfEquivalentItems	 if this is true, then items
-							which the comparator says are equivalent will be
-							kept in the order in which they currently appear
-							in the array. This is slower to perform, but may
-							be important in some cases. If it's false, a faster
-							algorithm is used, but equivalent elements may be
-							rearranged.
+		@param undoManager  optional UndoManager for storing the changes
+		@param retainOrderOfEquivalentItems	 if this is true, then items which the comparator says are
+							equivalent will be kept in the order in which they currently appear in the array.
+							This is slower to perform, but may be important in some cases. If it's false, a
+							faster algorithm is used, but equivalent elements may be rearranged.
 	*/
 	template <typename ElementComparator>
-	void sort (ElementComparator& comparator, const bool retainOrderOfEquivalentItems = false)
+	void sort (ElementComparator& comparator, UndoManager* undoManager, bool retainOrderOfEquivalentItems)
 	{
 		if (object != 0)
 		{
+			ReferenceCountedArray <SharedObject> sortedList (object->children);
 			ComparatorAdapter <ElementComparator> adapter (comparator);
-			object->children.sort (adapter, retainOrderOfEquivalentItems);
-			object->sendChildChangeMessage();
+			sortedList.sort (adapter, retainOrderOfEquivalentItems);
+			object->reorderChildren (sortedList, undoManager);
 		}
 	}
 
@@ -13964,6 +13953,7 @@ private:
 		void removeChild (int childIndex, UndoManager*);
 		void removeAllChildren (UndoManager*);
 		void moveChild (int currentIndex, int newIndex, UndoManager*);
+		void reorderChildren (const ReferenceCountedArray <SharedObject>& newOrder, UndoManager*);
 		bool isEquivalentTo (const SharedObject& other) const;
 		XmlElement* createXml() const;
 
@@ -24392,14 +24382,8 @@ public:
 	/** Returns the transform that should be applied to these source co-ordinates to fit them
 		into the destination rectangle using the current flags.
 	*/
-	const AffineTransform getTransformToFit (float sourceX,
-											 float sourceY,
-											 float sourceW,
-											 float sourceH,
-											 float destinationX,
-											 float destinationY,
-											 float destinationW,
-											 float destinationH) const throw();
+	const AffineTransform getTransformToFit (const Rectangle<float>& source,
+											 const Rectangle<float>& destination) const throw();
 
 private:
 
@@ -43224,6 +43208,9 @@ private:
 	just call the post() method to send them, and when they arrive, your
 	messageCallback() method will automatically be invoked.
 
+	Always create an instance of a CallbackMessage on the heap, as it will be
+	deleted automatically after the message has been delivered.
+
 	@see MessageListener, MessageManager, ActionListener, ChangeListener
 */
 class JUCE_API  CallbackMessage   : public Message
@@ -44527,19 +44514,13 @@ public:
 		and can either be made as big as possible, or just reduced to fit.
 
 		@param g			the graphics context to render onto
-		@param destX			top-left of the target rectangle to fit it into
-		@param destY			top-left of the target rectangle to fit it into
-		@param destWidth		size of the target rectangle to fit the image into
-		@param destHeight		   size of the target rectangle to fit the image into
+		@param destArea		 the target rectangle to fit the drawable into
 		@param placement		defines the alignment and rescaling to use to fit
 										this object within the target rectangle.
 		@param opacity		  the opacity to use, in the range 0 to 1.0
 	*/
 	void drawWithin (Graphics& g,
-					 int destX,
-					 int destY,
-					 int destWidth,
-					 int destHeight,
+					 const Rectangle<float>& destArea,
 					 const RectanglePlacement& placement,
 					 float opacity) const;
 

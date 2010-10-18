@@ -172,11 +172,12 @@ inline void swapVariables (Type& variable1, Type& variable2)
     int numElements = numElementsInArray (myArray) // returns 3
     @endcode
 */
-template <typename Type>
-inline int numElementsInArray (Type& array)
+template <typename Type, int N>
+inline int numElementsInArray (Type (&array)[N])
 {
     (void) array; // (required to avoid a spurious warning in MS compilers)
-    return static_cast<int> (sizeof (array) / sizeof (0[array]));
+    sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+    return N;
 }
 
 //==============================================================================
@@ -184,7 +185,7 @@ inline int numElementsInArray (Type& array)
 
 /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
     versions of these functions of various platforms and compilers. */
-inline double juce_hypot (double a, double b)
+inline double juce_hypot (double a, double b) throw()
 {
   #if JUCE_WINDOWS
     return _hypot (a, b);

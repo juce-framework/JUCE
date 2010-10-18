@@ -1110,8 +1110,6 @@ public:
 #endif
 
 //==============================================================================
-const int numGroups = 4;
-
 class WidgetsDemo  : public Component,
                      public ButtonListener
 {

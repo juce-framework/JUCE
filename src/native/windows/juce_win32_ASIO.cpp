@@ -38,8 +38,7 @@
   #define log(a) {}
 #endif
 
-#define JUCE_ASIOCALLBACK // should probably use this to define the callback type, but
-                          // the asio header doesn't actually specify a calling convention for the functions..
+#define JUCE_ASIOCALLBACK __cdecl
 
 //==============================================================================
 #if ASIO_DEBUGGING
@@ -146,40 +145,15 @@ public:
         }
     }
 
-    const StringArray getOutputChannelNames()
-    {
-        return outputChannelNames;
-    }
+    const StringArray getOutputChannelNames()   { return outputChannelNames; }
+    const StringArray getInputChannelNames()    { return inputChannelNames; }
 
-    const StringArray getInputChannelNames()
-    {
-        return inputChannelNames;
-    }
+    int getNumSampleRates()                     { return sampleRates.size(); }
+    double getSampleRate (int index)            { return sampleRates [index]; }
 
-    int getNumSampleRates()
-    {
-        return sampleRates.size();
-    }
-
-    double getSampleRate (int index)
-    {
-        return sampleRates [index];
-    }
-
-    int getNumBufferSizesAvailable()
-    {
-        return bufferSizes.size();
-    }
-
-    int getBufferSizeSamples (int index)
-    {
-        return bufferSizes [index];
-    }
-
-    int getDefaultBufferSize()
-    {
-        return preferredSize;
-    }
+    int getNumBufferSizesAvailable()            { return bufferSizes.size(); }
+    int getBufferSizeSamples (int index)        { return bufferSizes [index]; }
+    int getDefaultBufferSize()                  { return preferredSize; }
 
     const String open (const BigInteger& inputChannels,
                        const BigInteger& outputChannels,
@@ -633,45 +607,18 @@ public:
         }
     }
 
-    bool isOpen()
-    {
-        return isOpen_ || insideControlPanelModalLoop;
-    }
+    bool isOpen()                       { return isOpen_ || insideControlPanelModalLoop; }
+    bool isPlaying()                    { return isASIOOpen && (currentCallback != 0); }
 
-    int getCurrentBufferSizeSamples()
-    {
-        return currentBlockSizeSamples;
-    }
+    int getCurrentBufferSizeSamples()   { return currentBlockSizeSamples; }
+    double getCurrentSampleRate()       { return currentSampleRate; }
+    int getCurrentBitDepth()            { return currentBitDepth; }
 
-    double getCurrentSampleRate()
-    {
-        return currentSampleRate;
-    }
+    const BigInteger getActiveOutputChannels() const    { return currentChansOut; }
+    const BigInteger getActiveInputChannels() const     { return currentChansIn; }
 
-    const BigInteger getActiveOutputChannels() const
-    {
-        return currentChansOut;
-    }
-
-    const BigInteger getActiveInputChannels() const
-    {
-        return currentChansIn;
-    }
-
-    int getCurrentBitDepth()
-    {
-        return currentBitDepth;
-    }
-
-    int getOutputLatencyInSamples()
-    {
-        return outputLatency + currentBlockSizeSamples / 4;
-    }
-
-    int getInputLatencyInSamples()
-    {
-        return inputLatency + currentBlockSizeSamples / 4;
-    }
+    int getOutputLatencyInSamples()     { return outputLatency + currentBlockSizeSamples / 4; }
+    int getInputLatencyInSamples()      { return inputLatency + currentBlockSizeSamples / 4; }
 
     void start (AudioIODeviceCallback* callback)
     {
@@ -697,20 +644,8 @@ public:
             lastCallback->audioDeviceStopped();
     }
 
-    bool isPlaying()
-    {
-        return isASIOOpen && (currentCallback != 0);
-    }
-
-    const String getLastError()
-    {
-        return error;
-    }
-
-    bool hasControlPanel() const
-    {
-        return true;
-    }
+    const String getLastError()     { return error; }
+    bool hasControlPanel() const    { return true; }
 
     bool showControlPanel()
     {
@@ -839,7 +774,6 @@ private:
     bool volatile littleEndian, postOutput, needToReset, isReSync;
     bool volatile insideControlPanelModalLoop;
     bool volatile shouldUsePreferredSize;
-
 
     //==============================================================================
     void removeCurrentDriver()
@@ -1242,7 +1176,6 @@ private:
                 for (i = 0; i < numActiveInputChans; ++i)
                 {
                     float* const dst = inBuffers[i];
-
                     jassert (dst != 0);
 
                     const char* const src = (const char*) (infos[i].buffers[bi]);
@@ -1279,16 +1212,12 @@ private:
                     }
                 }
 
-                currentCallback->audioDeviceIOCallback ((const float**) inBuffers,
-                                                        numActiveInputChans,
-                                                        outBuffers,
-                                                        numActiveOutputChans,
-                                                        samps);
+                currentCallback->audioDeviceIOCallback ((const float**) inBuffers, numActiveInputChans,
+                                                        outBuffers, numActiveOutputChans, samps);
 
                 for (i = 0; i < numActiveOutputChans; ++i)
                 {
                     float* const src = outBuffers[i];
-
                     jassert (src != 0);
 
                     char* const dst = (char*) (infos [numActiveInputChans + i].buffers[bi]);
