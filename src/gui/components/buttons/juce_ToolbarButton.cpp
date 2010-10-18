@@ -69,13 +69,15 @@ void ToolbarButton::paintButtonArea (Graphics& g,
     if (getToggleState() && toggledOnImage != 0)
         d = toggledOnImage;
 
+    const Rectangle<float> area (0.0f, 0.0f, (float) width, (float) height);
+
     if (! isEnabled())
     {
         Image im (Image::ARGB, width, height, true);
 
         {
             Graphics g2 (im);
-            d->drawWithin (g2, 0, 0, width, height, RectanglePlacement::centred, 1.0f);
+            d->drawWithin (g2, area, RectanglePlacement::centred, 1.0f);
         }
 
         im.desaturate();
@@ -83,7 +85,7 @@ void ToolbarButton::paintButtonArea (Graphics& g,
     }
     else
     {
-        d->drawWithin (g, 0, 0, width, height, RectanglePlacement::centred, 1.0f);
+        d->drawWithin (g, area, RectanglePlacement::centred, 1.0f);
     }
 }
 

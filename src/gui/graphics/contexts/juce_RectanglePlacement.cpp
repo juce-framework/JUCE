@@ -87,21 +87,21 @@ void RectanglePlacement::applyTo (double& x, double& y,
     }
 }
 
-const AffineTransform RectanglePlacement::getTransformToFit (float x, float y,
-                                                             float w, float h,
-                                                             const float dx, const float dy,
-                                                             const float dw, const float dh) const throw()
+const AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<float>& source, const Rectangle<float>& destination) const throw()
 {
-    if (w == 0 || h == 0)
+    if (source.isEmpty())
         return AffineTransform::identity;
 
-    const float scaleX = dw / w;
-    const float scaleY = dh / h;
+    float w = source.getWidth();
+    float h = source.getHeight();
+
+    const float scaleX = destination.getWidth() / w;
+    const float scaleY = destination.getHeight() / h;
 
     if ((flags & stretchToFit) != 0)
-        return AffineTransform::translation (-x, -y)
+        return AffineTransform::translation (-source.getX(), -source.getY())
                     .scaled (scaleX, scaleY)
-                    .translated (dx, dy);
+                    .translated (destination.getX(), destination.getY());
 
     float scale = (flags & fillDestination) != 0 ? jmax (scaleX, scaleY)
                                                  : jmin (scaleX, scaleY);
@@ -115,21 +115,20 @@ const AffineTransform RectanglePlacement::getTransformToFit (float x, float y,
     w *= scale;
     h *= scale;
 
-    float newX = dx;
+    float newX = destination.getX();
+    float newY = destination.getY();
 
     if ((flags & xRight) != 0)
-        newX += dw - w;             // right
+        newX += destination.getWidth() - w;             // right
     else if ((flags & xLeft) == 0)
-        newX += (dw - w) / 2.0f;    // centre
-
-    float newY = dy;
+        newX += (destination.getWidth() - w) / 2.0f;    // centre
 
     if ((flags & yBottom) != 0)
-        newY += dh - h;             // bottom
+        newY += destination.getHeight() - h;             // bottom
     else if ((flags & yTop) == 0)
-        newY += (dh - h) / 2.0f;    // centre
+        newY += (destination.getHeight() - h) / 2.0f;    // centre
 
-    return AffineTransform::translation (-x, -y)
+    return AffineTransform::translation (-source.getX(), -source.getY())
                 .scaled (scale, scale)
                 .translated (newX, newY);
 }

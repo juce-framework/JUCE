@@ -87,19 +87,13 @@ public:
         and can either be made as big as possible, or just reduced to fit.
 
         @param g                        the graphics context to render onto
-        @param destX                    top-left of the target rectangle to fit it into
-        @param destY                    top-left of the target rectangle to fit it into
-        @param destWidth                size of the target rectangle to fit the image into
-        @param destHeight               size of the target rectangle to fit the image into
+        @param destArea                 the target rectangle to fit the drawable into
         @param placement                defines the alignment and rescaling to use to fit
                                         this object within the target rectangle.
         @param opacity                  the opacity to use, in the range 0 to 1.0
     */
     void drawWithin (Graphics& g,
-                     int destX,
-                     int destY,
-                     int destWidth,
-                     int destHeight,
+                     const Rectangle<float>& destArea,
                      const RectanglePlacement& placement,
                      float opacity) const;
 

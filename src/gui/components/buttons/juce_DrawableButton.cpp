@@ -207,19 +207,9 @@ void DrawableButton::paintButton (Graphics& g,
     if (imageToDraw != 0)
     {
         if (style == ImageRaw)
-        {
             imageToDraw->draw (g, 1.0f);
-        }
         else
-        {
-            imageToDraw->drawWithin (g,
-                                     imageSpace.getX(),
-                                     imageSpace.getY(),
-                                     imageSpace.getWidth(),
-                                     imageSpace.getHeight(),
-                                     RectanglePlacement::centred,
-                                     1.0f);
-        }
+            imageToDraw->drawWithin (g, imageSpace.toFloat(), RectanglePlacement::centred, 1.0f);
     }
 }
 

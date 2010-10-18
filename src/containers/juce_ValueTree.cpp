@@ -512,6 +512,28 @@ void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoMan
     }
 }
 
+void ValueTree::SharedObject::reorderChildren (const ReferenceCountedArray <SharedObject>& newOrder, UndoManager* undoManager)
+{
+    jassert (newOrder.size() == children.size());
+
+    if (undoManager == 0)
+    {
+        children = newOrder;
+        sendChildChangeMessage();
+    }
+    else
+    {
+        for (int i = 0; i < children.size(); ++i)
+        {
+            if (children.getUnchecked(i) != newOrder.getUnchecked(i))
+            {
+                jassert (children.contains (newOrder.getUnchecked(i)));
+                moveChild (children.indexOf (newOrder.getUnchecked(i)), i, undoManager);
+            }
+        }
+    }
+}
+
 bool ValueTree::SharedObject::isEquivalentTo (const SharedObject& other) const
 {
     if (type != other.type

@@ -114,8 +114,8 @@ public:
                 const RectanglePlacement placement (placementFlags);
 
                 newState.transform
-                    = placement.getTransformToFit (vx, vy, vw, vh,
-                                                   0.0f, 0.0f, newState.width, newState.height)
+                    = placement.getTransformToFit (Rectangle<float> (vx, vy, vw, vh),
+                                                   Rectangle<float> (0.0f, 0.0f, newState.width, newState.height))
                                .followedBy (newState.transform);
             }
         }

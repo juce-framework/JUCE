@@ -27,6 +27,7 @@
 #define __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
 
 #include "../geometry/juce_AffineTransform.h"
+#include "../geometry/juce_Rectangle.h"
 
 
 //==============================================================================
@@ -143,14 +144,8 @@ public:
     /** Returns the transform that should be applied to these source co-ordinates to fit them
         into the destination rectangle using the current flags.
     */
-    const AffineTransform getTransformToFit (float sourceX,
-                                             float sourceY,
-                                             float sourceW,
-                                             float sourceH,
-                                             float destinationX,
-                                             float destinationY,
-                                             float destinationW,
-                                             float destinationH) const throw();
+    const AffineTransform getTransformToFit (const Rectangle<float>& source,
+                                             const Rectangle<float>& destination) const throw();
 
 private:
     //==============================================================================

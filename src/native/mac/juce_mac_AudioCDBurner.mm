@@ -452,17 +452,12 @@ static NSArray* findDiskBurnerDevices()
     NSMutableArray* results = [NSMutableArray array];
     NSArray* devs = [DRDevice devices];
 
-    if (devs != 0)
+    for (int i = 0; i < [devs count]; ++i)
     {
-        int num = [devs count];
-        int i;
-        for (i = 0; i < num; ++i)
-        {
-            NSDictionary* dic = [[devs objectAtIndex: i] info];
-            NSString* name = [dic valueForKey: DRDeviceProductNameKey];
-            if (name != nil)
-                [results addObject: name];
-        }
+        NSDictionary* dic = [[devs objectAtIndex: i] info];
+        NSString* name = [dic valueForKey: DRDeviceProductNameKey];
+        if (name != nil)
+            [results addObject: name];
     }
 
     return results;

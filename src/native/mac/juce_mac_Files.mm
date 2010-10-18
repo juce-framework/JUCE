@@ -140,7 +140,7 @@ bool File::isHidden() const
 static const String getIOSSystemLocation (NSSearchPathDirectory type)
 {
     return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
-                            objectAtIndex:0]);
+                            objectAtIndex: 0]);
 }
 #endif
 

@@ -39,6 +39,9 @@
     just call the post() method to send them, and when they arrive, your
     messageCallback() method will automatically be invoked.
 
+    Always create an instance of a CallbackMessage on the heap, as it will be
+    deleted automatically after the message has been delivered.
+
     @see MessageListener, MessageManager, ActionListener, ChangeListener
 */
 class JUCE_API  CallbackMessage   : public Message

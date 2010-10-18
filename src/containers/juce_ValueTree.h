@@ -423,22 +423,21 @@ public:
         To improve performance, the compareElements() method can be declared as static or const.
 
         @param comparator   the comparator to use for comparing elements.
-        @param retainOrderOfEquivalentItems     if this is true, then items
-                            which the comparator says are equivalent will be
-                            kept in the order in which they currently appear
-                            in the array. This is slower to perform, but may
-                            be important in some cases. If it's false, a faster
-                            algorithm is used, but equivalent elements may be
-                            rearranged.
+        @param undoManager  optional UndoManager for storing the changes
+        @param retainOrderOfEquivalentItems     if this is true, then items which the comparator says are
+                            equivalent will be kept in the order in which they currently appear in the array.
+                            This is slower to perform, but may be important in some cases. If it's false, a
+                            faster algorithm is used, but equivalent elements may be rearranged.
     */
     template <typename ElementComparator>
-    void sort (ElementComparator& comparator, const bool retainOrderOfEquivalentItems = false)
+    void sort (ElementComparator& comparator, UndoManager* undoManager, bool retainOrderOfEquivalentItems)
     {
         if (object != 0)
         {
+            ReferenceCountedArray <SharedObject> sortedList (object->children);
             ComparatorAdapter <ElementComparator> adapter (comparator);
-            object->children.sort (adapter, retainOrderOfEquivalentItems);
-            object->sendChildChangeMessage();
+            sortedList.sort (adapter, retainOrderOfEquivalentItems);
+            object->reorderChildren (sortedList, undoManager);
         }
     }
 
@@ -491,6 +490,7 @@ private:
         void removeChild (int childIndex, UndoManager*);
         void removeAllChildren (UndoManager*);
         void moveChild (int currentIndex, int newIndex, UndoManager*);
+        void reorderChildren (const ReferenceCountedArray <SharedObject>& newOrder, UndoManager*);
         bool isEquivalentTo (const SharedObject& other) const;
         XmlElement* createXml() const;
 

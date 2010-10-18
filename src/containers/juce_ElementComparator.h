@@ -73,9 +73,7 @@ static void sortArray (ElementComparator& comparator,
             {
                 if (comparator.compareElements (array[i], array [i + 1]) > 0)
                 {
-                    const ElementType temp = array [i];
-                    array [i] = array[i + 1];
-                    array [i + 1] = temp;
+                    swapVariables (array[i], array[i + 1]);
 
                     if (i > firstElement)
                         i -= 2;
@@ -103,19 +101,14 @@ static void sortArray (ElementComparator& comparator,
                             if (comparator.compareElements (array[k], array [maxIndex]) > 0)
                                 maxIndex = k;
 
-                        const ElementType temp = array [maxIndex];
-                        array [maxIndex] = array[j];
-                        array [j] = temp;
-
+                        swapVariables (array[j], array[maxIndex]);
                         --j;
                     }
                 }
                 else
                 {
                     const int mid = firstElement + (size >> 1);
-                    ElementType temp = array [mid];
-                    array [mid] = array [firstElement];
-                    array [firstElement] = temp;
+                    swapVariables (array[mid], array[firstElement]);
 
                     int i = firstElement;
                     int j = lastElement + 1;
@@ -133,14 +126,10 @@ static void sortArray (ElementComparator& comparator,
                         if (j < i)
                             break;
 
-                        temp = array[i];
-                        array[i] = array[j];
-                        array[j] = temp;
+                        swapVariables (array[i], array[j]);
                     }
 
-                    temp = array [firstElement];
-                    array [firstElement] = array[j];
-                    array [j] = temp;
+                    swapVariables (array[j], array[firstElement]);
 
                     if (j - 1 - firstElement >= lastElement - i)
                     {

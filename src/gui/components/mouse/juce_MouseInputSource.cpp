@@ -179,7 +179,7 @@ public:
 
             if (current != 0)
             {
-                registerMouseDown (screenPos, time, current);
+                registerMouseDown (screenPos, time, current, buttonState);
                 sendMouseDown (current, screenPos, time);
             }
         }
@@ -328,16 +328,10 @@ public:
 
             for (int i = 1; i < numElementsInArray (mouseDowns); ++i)
             {
-                if (mouseDowns[0].time - mouseDowns[i].time < (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))
-                    && abs (mouseDowns[0].position.getX() - mouseDowns[i].position.getX()) < 8
-                    && abs (mouseDowns[0].position.getY() - mouseDowns[i].position.getY()) < 8)
-                {
+                if (mouseDowns[0].canBePartOfMultipleClickWith (mouseDowns[1], (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))))
                     ++numClicks;
-                }
                 else
-                {
                     break;
-                }
             }
         }
 
@@ -457,13 +451,23 @@ private:
         Point<int> position;
         int64 time;
         Component* component;
+        ModifierKeys buttons;
+
+        bool canBePartOfMultipleClickWith (const RecentMouseDown& other, int maxTimeBetween) const
+        {
+            return time - other.time < maxTimeBetween
+                    && abs (position.getX() - other.position.getX()) < 8
+                    && abs (position.getY() - other.position.getY()) < 8
+                    && buttons == other.buttons;;
+        }
     };
 
     RecentMouseDown mouseDowns[4];
     bool mouseMovedSignificantlySincePressed;
     int64 lastTime;
 
-    void registerMouseDown (const Point<int>& screenPos, const int64 time, Component* const component) throw()
+    void registerMouseDown (const Point<int>& screenPos, const int64 time,
+                            Component* const component, const ModifierKeys& modifiers) throw()
     {
         for (int i = numElementsInArray (mouseDowns); --i > 0;)
             mouseDowns[i] = mouseDowns[i - 1];
@@ -471,6 +475,7 @@ private:
         mouseDowns[0].position = screenPos;
         mouseDowns[0].time = time;
         mouseDowns[0].component = component;
+        mouseDowns[0].buttons = modifiers.withOnlyMouseButtons();
         mouseMovedSignificantlySincePressed = false;
     }
 

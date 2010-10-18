@@ -697,7 +697,7 @@ struct ItemSorter
 void Project::Item::sortAlphabetically()
 {
     ItemSorter sorter;
-    node.sort (sorter);
+    node.sort (sorter, getUndoManager(), true);
 }
 
 bool Project::Item::addFile (const File& file, int insertIndex)
