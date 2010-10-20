@@ -66,7 +66,7 @@ void Process::terminate()
     exit (0);
 }
 
-bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger()
+JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
 {
     static char testResult = 0;
 
@@ -84,7 +84,7 @@ bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger()
     return testResult < 0;
 }
 
-bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
+JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 {
     return juce_isRunningUnderDebugger();
 }

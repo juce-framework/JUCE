@@ -83,6 +83,11 @@ public:
     */
     bool scanNextFile (bool dontRescanIfAlreadyInList);
 
+    /** Skips over the next file without scanning it.
+        Returns false when there are no more files to try.
+    */
+    bool skipNextFile();
+
     /** Returns the description of the plugin that will be scanned during the next
         call to scanNextFile().
 

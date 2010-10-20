@@ -456,15 +456,15 @@ void Path::addEllipse (const float x, const float y,
     const float hw = w * 0.5f;
     const float hw55 = hw * 0.55f;
     const float hh = h * 0.5f;
-    const float hh45 = hh * 0.55f;
+    const float hh55 = hh * 0.55f;
     const float cx = x + hw;
     const float cy = y + hh;
 
     startNewSubPath (cx, cy - hh);
-    cubicTo (cx + hw55, cy - hh, cx + hw, cy - hh45, cx + hw, cy);
-    cubicTo (cx + hw, cy + hh45, cx + hw55, cy + hh, cx, cy + hh);
-    cubicTo (cx - hw55, cy + hh, cx - hw, cy + hh45, cx - hw, cy);
-    cubicTo (cx - hw, cy - hh45, cx - hw55, cy - hh, cx, cy - hh);
+    cubicTo (cx + hw55, cy - hh, cx + hw, cy - hh55, cx + hw, cy);
+    cubicTo (cx + hw, cy + hh55, cx + hw55, cy + hh, cx, cy + hh);
+    cubicTo (cx - hw55, cy + hh, cx - hw, cy + hh55, cx - hw, cy);
+    cubicTo (cx - hw, cy - hh55, cx - hw55, cy - hh, cx, cy - hh);
     closeSubPath();
 }
 

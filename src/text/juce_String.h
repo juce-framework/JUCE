@@ -1061,86 +1061,86 @@ private:
 
 //==============================================================================
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (const char* string1,       const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (const char* string1,       const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (const juce_wchar* string1, const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (const juce_wchar* string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (char string1,              const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (char string1,              const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (juce_wchar string1,        const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (juce_wchar string1,        const String& string2);
 
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const char* string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const char* string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const juce_wchar* string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar* string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, char characterToAppend);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, juce_wchar characterToAppend);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
 
 //==============================================================================
 /** Appends a character at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, char characterToAppend);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
 /** Appends a character at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, juce_wchar characterToAppend);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, juce_wchar characterToAppend);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const char* string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const char* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const juce_wchar* string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const String& string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, short number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, int number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, unsigned int number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, long number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, unsigned long number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, float number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, double number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const char* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const juce_wchar* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const char* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const juce_wchar* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator>  (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator<  (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator>= (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator<= (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw();
 
 //==============================================================================
 /** This streaming override allows you to pass a juce String directly into std output streams.
     This is very handy for writing strings to std::cout, std::cerr, etc.
 */
 template <class charT, class traits>
-std::basic_ostream <charT, traits>& JUCE_PUBLIC_FUNCTION operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+JUCE_API std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
     return stream << stringToWrite.toUTF8();
 }
 
 /** Writes a string to an OutputStream as UTF8. */
-OutputStream& JUCE_PUBLIC_FUNCTION operator<< (OutputStream& stream, const String& text);
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
 
 
 #endif   // __JUCE_STRING_JUCEHEADER__

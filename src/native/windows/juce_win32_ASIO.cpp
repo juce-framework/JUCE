@@ -38,6 +38,11 @@
   #define log(a) {}
 #endif
 
+/* The ASIO SDK *should* declare its callback functions as being __cdecl, but different versions seem
+   to be pretty random about whether or not they do this. If you hit an error using these functions
+   it'll be because you're trying to build using __stdcall, in which case you'd need to either get hold of
+   an ASIO SDK which correctly specifies __cdecl, or add the __cdecl keyword to its functions yourself.
+*/
 #define JUCE_ASIOCALLBACK __cdecl
 
 //==============================================================================

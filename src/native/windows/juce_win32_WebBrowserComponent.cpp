@@ -158,14 +158,14 @@ private:
         }
 
         //==============================================================================
-        HRESULT __stdcall GetTypeInfoCount (UINT __RPC_FAR*)                                            { return E_NOTIMPL; }
-        HRESULT __stdcall GetTypeInfo (UINT, LCID, ITypeInfo __RPC_FAR *__RPC_FAR*)                     { return E_NOTIMPL; }
-        HRESULT __stdcall GetIDsOfNames (REFIID, LPOLESTR __RPC_FAR*, UINT, LCID, DISPID __RPC_FAR*)    { return E_NOTIMPL; }
+        HRESULT __stdcall GetTypeInfoCount (UINT*)                                  { return E_NOTIMPL; }
+        HRESULT __stdcall GetTypeInfo (UINT, LCID, ITypeInfo**)                     { return E_NOTIMPL; }
+        HRESULT __stdcall GetIDsOfNames (REFIID, LPOLESTR*, UINT, LCID, DISPID*)    { return E_NOTIMPL; }
 
         HRESULT __stdcall Invoke (DISPID dispIdMember, REFIID /*riid*/, LCID /*lcid*/,
-                                  WORD /*wFlags*/, DISPPARAMS __RPC_FAR* pDispParams,
-                                  VARIANT __RPC_FAR* /*pVarResult*/, EXCEPINFO __RPC_FAR* /*pExcepInfo*/,
-                                  UINT __RPC_FAR* /*puArgErr*/)
+                                  WORD /*wFlags*/, DISPPARAMS* pDispParams,
+                                  VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/,
+                                  UINT* /*puArgErr*/)
         {
             switch (dispIdMember)
             {

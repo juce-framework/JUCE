@@ -259,7 +259,7 @@ public:
     ComBaseClassHelper()  : refCount (1) {}
     virtual ~ComBaseClassHelper() {}
 
-    HRESULT __stdcall QueryInterface (REFIID refId, void __RPC_FAR* __RPC_FAR* result)
+    HRESULT __stdcall QueryInterface (REFIID refId, void** result)
     {
       #ifndef __MINGW32__
         if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }

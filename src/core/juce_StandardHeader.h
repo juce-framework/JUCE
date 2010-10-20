@@ -147,10 +147,10 @@
 // Now include some basics that are needed by most of the Juce classes...
 BEGIN_JUCE_NAMESPACE
 
-extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
+extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
-  extern void JUCE_API juce_LogAssertion (const char* filename, int lineNum) throw();
+  extern JUCE_API void juce_LogAssertion (const char* filename, int lineNum) throw();
 #endif
 
 #include "juce_Memory.h"

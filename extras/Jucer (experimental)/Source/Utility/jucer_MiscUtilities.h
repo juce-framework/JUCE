@@ -178,10 +178,10 @@ public:
 
         if (dc != 0)
         {
-            dc->setMarker (DrawableComposite::contentLeftMarkerName, true, RelativeCoordinate (0));
-            dc->setMarker (DrawableComposite::contentTopMarkerName, false, RelativeCoordinate (0));
-            dc->setMarker (DrawableComposite::contentRightMarkerName, true, RelativeCoordinate (getWidth()));
-            dc->setMarker (DrawableComposite::contentBottomMarkerName, false, RelativeCoordinate (getHeight()));
+            const RelativeCoordinate origin, right (getWidth()), bottom (getHeight());
+
+            dc->setContentArea (RelativeRectangle (origin, right, origin, bottom));
+            dc->resetBoundingBoxToContentArea();
         }
     }
 

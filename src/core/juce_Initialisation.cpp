@@ -54,7 +54,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 static bool juceInitialisedNonGUI = false;
 
-void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
+JUCE_API void JUCE_CALLTYPE initialiseJuce_NonGUI()
 {
     if (! juceInitialisedNonGUI)
     {
@@ -80,7 +80,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
     static_jassert (sizeof (uint64) == 8);
 }
 
-void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
+JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
 {
     if (juceInitialisedNonGUI)
     {
@@ -108,7 +108,7 @@ void juce_setCurrentThreadName (const String& name);
 
 static bool juceInitialisedGUI = false;
 
-void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
+JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
 {
     if (! juceInitialisedGUI)
     {
@@ -141,7 +141,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
     }
 }
 
-void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI()
+JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
 {
     if (juceInitialisedGUI)
     {

@@ -1833,36 +1833,48 @@ private:
                     return 0;
 
                 //==============================================================================
+                case WM_SIZING:
+                    if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+                    {
+                        RECT* const r = (RECT*) lParam;
+                        Rectangle<int> pos (r->left, r->top, r->right - r->left, r->bottom - r->top);
+
+                        constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
+                                                  Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                                  wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT,
+                                                  wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT,
+                                                  wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
+                                                  wParam == WMSZ_RIGHT || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_BOTTOMRIGHT);
+                        r->left = pos.getX();
+                        r->top = pos.getY();
+                        r->right = pos.getRight();
+                        r->bottom = pos.getBottom();
+                    }
+                    return TRUE;
+
                 case WM_WINDOWPOSCHANGING:
-                    if ((styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+                    if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
                     {
                         WINDOWPOS* const wp = (WINDOWPOS*) lParam;
 
-                        if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE))
+                        if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
+                             && ! Component::isMouseButtonDownAnywhere())
                         {
-                            if (constrainer != 0)
-                            {
-                                const Rectangle<int> current (component->getX() - windowBorder.getLeft(),
-                                                              component->getY() - windowBorder.getTop(),
-                                                              component->getWidth() + windowBorder.getLeftAndRight(),
-                                                              component->getHeight() + windowBorder.getTopAndBottom());
+                            Rectangle<int> pos (wp->x, wp->y, wp->cx, wp->cy);
+                            const Rectangle<int> current (windowBorder.addedTo (component->getBounds()));
 
-                                Rectangle<int> pos (wp->x, wp->y, wp->cx, wp->cy);
-
-                                constrainer->checkBounds (pos, current,
-                                                          Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                                          pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
-                                                          pos.getX() != current.getX() && pos.getRight() == current.getRight(),
-                                                          pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
-                                                          pos.getX() == current.getX() && pos.getRight() != current.getRight());
-                                wp->x = pos.getX();
-                                wp->y = pos.getY();
-                                wp->cx = pos.getWidth();
-                                wp->cy = pos.getHeight();
-                            }
+                            constrainer->checkBounds (pos, current,
+                                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                                      pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
+                                                      pos.getX() != current.getX() && pos.getRight() == current.getRight(),
+                                                      pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
+                                                      pos.getX() == current.getX() && pos.getRight() != current.getRight());
+                            wp->x = pos.getX();
+                            wp->y = pos.getY();
+                            wp->cx = pos.getWidth();
+                            wp->cy = pos.getHeight();
                         }
                     }
-
                     return 0;
 
                 case WM_WINDOWPOSCHANGED:
@@ -2755,12 +2767,12 @@ public:
     {
     }
 
-    virtual ~JuceDataObject()
+    ~JuceDataObject()
     {
         jassert (refCount == 0);
     }
 
-    HRESULT __stdcall GetData (FORMATETC __RPC_FAR* pFormatEtc, STGMEDIUM __RPC_FAR* pMedium)
+    HRESULT __stdcall GetData (FORMATETC* pFormatEtc, STGMEDIUM* pMedium)
     {
         if ((pFormatEtc->tymed & format->tymed) != 0
              && pFormatEtc->cfFormat == format->cfFormat
@@ -2787,7 +2799,7 @@ public:
         return DV_E_FORMATETC;
     }
 
-    HRESULT __stdcall QueryGetData (FORMATETC __RPC_FAR* f)
+    HRESULT __stdcall QueryGetData (FORMATETC* f)
     {
         if (f == 0)
             return E_INVALIDARG;
@@ -2800,13 +2812,13 @@ public:
         return DV_E_FORMATETC;
     }
 
-    HRESULT __stdcall GetCanonicalFormatEtc (FORMATETC __RPC_FAR*, FORMATETC __RPC_FAR* pFormatEtcOut)
+    HRESULT __stdcall GetCanonicalFormatEtc (FORMATETC*, FORMATETC* pFormatEtcOut)
     {
         pFormatEtcOut->ptd = 0;
         return E_NOTIMPL;
     }
 
-    HRESULT __stdcall EnumFormatEtc (DWORD direction, IEnumFORMATETC __RPC_FAR *__RPC_FAR *result)
+    HRESULT __stdcall EnumFormatEtc (DWORD direction, IEnumFORMATETC** result)
     {
         if (result == 0)
             return E_POINTER;
@@ -2821,11 +2833,11 @@ public:
         return E_NOTIMPL;
     }
 
-    HRESULT __stdcall GetDataHere (FORMATETC __RPC_FAR*, STGMEDIUM __RPC_FAR*)                          { return DATA_E_FORMATETC; }
-    HRESULT __stdcall SetData (FORMATETC __RPC_FAR*, STGMEDIUM __RPC_FAR*, BOOL)                        { return E_NOTIMPL; }
-    HRESULT __stdcall DAdvise (FORMATETC __RPC_FAR*, DWORD, IAdviseSink __RPC_FAR*, DWORD __RPC_FAR*)   { return OLE_E_ADVISENOTSUPPORTED; }
-    HRESULT __stdcall DUnadvise (DWORD)                                                                 { return E_NOTIMPL; }
-    HRESULT __stdcall EnumDAdvise (IEnumSTATDATA __RPC_FAR *__RPC_FAR *)                                { return OLE_E_ADVISENOTSUPPORTED; }
+    HRESULT __stdcall GetDataHere (FORMATETC*, STGMEDIUM*)                  { return DATA_E_FORMATETC; }
+    HRESULT __stdcall SetData (FORMATETC*, STGMEDIUM*, BOOL)                { return E_NOTIMPL; }
+    HRESULT __stdcall DAdvise (FORMATETC*, DWORD, IAdviseSink*, DWORD*)     { return OLE_E_ADVISENOTSUPPORTED; }
+    HRESULT __stdcall DUnadvise (DWORD)                                     { return E_NOTIMPL; }
+    HRESULT __stdcall EnumDAdvise (IEnumSTATDATA**)                         { return OLE_E_ADVISENOTSUPPORTED; }
 
 private:
     JuceDropSource* const dropSource;

@@ -142,7 +142,7 @@ namespace ActiveXHelpers
             inplaceSite->Release();
         }
 
-        HRESULT __stdcall QueryInterface (REFIID type, void __RPC_FAR* __RPC_FAR* result)
+        HRESULT __stdcall QueryInterface (REFIID type, void** result)
         {
             if (type == IID_IOleInPlaceSite)
             {

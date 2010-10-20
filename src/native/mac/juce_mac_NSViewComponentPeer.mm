@@ -1069,12 +1069,21 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
         Rectangle<int> pos (convertToRectInt (r));
         Rectangle<int> original (convertToRectInt (current));
 
-        constrainer->checkBounds (pos, original,
-                                  Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                  pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
-                                  pos.getX() != original.getX() && pos.getRight() == original.getRight(),
-                                  pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
-                                  pos.getX() == original.getX() && pos.getRight() != original.getRight());
+        if ([window inLiveResize])
+        {
+            constrainer->checkBounds (pos, original,
+                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                      false, false, true, true);
+        }
+        else
+        {
+            constrainer->checkBounds (pos, original,
+                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                      pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
+                                      pos.getX() != original.getX() && pos.getRight() == original.getRight(),
+                                      pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
+                                      pos.getX() == original.getX() && pos.getRight() != original.getRight());
+        }
 
         r.origin.x = pos.getX();
         r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.size.height - pos.getY();

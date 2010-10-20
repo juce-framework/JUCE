@@ -641,7 +641,7 @@ public:
 
 
 private:
-    friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();
+    friend JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
     static void clearDefaultLookAndFeel() throw(); // called at shutdown
 
     Array <int> colourIds;

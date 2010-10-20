@@ -39,7 +39,7 @@
 
     @see shutdownJuce_GUI(), initialiseJuce_NonGUI()
 */
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
+JUCE_API void JUCE_CALLTYPE  initialiseJuce_GUI();
 
 /** Clears up any static data being used by Juce's GUI classes.
 
@@ -49,7 +49,7 @@ void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
 
     @see initialiseJuce_GUI(), initialiseJuce_NonGUI()
 */
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
+JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
 
 
 //==============================================================================
@@ -63,7 +63,7 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
 
     @see shutdownJuce_NonGUI, initialiseJuce_GUI
 */
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
+JUCE_API void JUCE_CALLTYPE  initialiseJuce_NonGUI();
 
 /** Clears up any static data being used by Juce's non-gui core classes.
 
@@ -73,7 +73,7 @@ void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
 
     @see initialiseJuce_NonGUI, initialiseJuce_GUI
 */
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
+JUCE_API void JUCE_CALLTYPE  shutdownJuce_NonGUI();
 
 
 //==============================================================================
