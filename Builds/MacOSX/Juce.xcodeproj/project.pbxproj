@@ -212,6 +212,8 @@
 		00FE118356919D0BA97AE853 = { isa = PBXBuildFile; fileRef = 85B7BCACB40E02815844F71D; };
 		18D8A96CCD34E41A5E162AD5 = { isa = PBXBuildFile; fileRef = A54BC72C899A2AF82E1E37F8; };
 		CEB8A9B9A37EBBA79A6478D4 = { isa = PBXBuildFile; fileRef = 582DCC2F948F1DEA0D450B0D; };
+		D6D48B2CC53FAE2BD126B0DE = { isa = PBXBuildFile; fileRef = E0694CD7C814AA99E5A84799; };
+		C384A89F786FDE8426F657D5 = { isa = PBXBuildFile; fileRef = 62967D33232C5A86D88084B4; };
 		3D324F656EEF8F1FB2B437AC = { isa = PBXBuildFile; fileRef = C17613C202D8E1C366F21D3C; };
 		645AF66C048A4815F5A8ECDD = { isa = PBXBuildFile; fileRef = 2BFC199D03DEEC329D6A7CB1; };
 		38EFE824E76B3BB99824C265 = { isa = PBXBuildFile; fileRef = 32EA297812F1C88B42099501; };
@@ -820,6 +822,10 @@
 		849E645981CA10B8D5576462 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DrawableImage.h; path = ../../src/gui/graphics/drawables/juce_DrawableImage.h; sourceTree = SOURCE_ROOT; };
 		582DCC2F948F1DEA0D450B0D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DrawablePath.cpp; path = ../../src/gui/graphics/drawables/juce_DrawablePath.cpp; sourceTree = SOURCE_ROOT; };
 		17EBDF689C731DA257B243C9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DrawablePath.h; path = ../../src/gui/graphics/drawables/juce_DrawablePath.h; sourceTree = SOURCE_ROOT; };
+		E0694CD7C814AA99E5A84799 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DrawableRectangle.cpp; path = ../../src/gui/graphics/drawables/juce_DrawableRectangle.cpp; sourceTree = SOURCE_ROOT; };
+		0FA9E378EBD7EE63EF72124F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DrawableRectangle.h; path = ../../src/gui/graphics/drawables/juce_DrawableRectangle.h; sourceTree = SOURCE_ROOT; };
+		62967D33232C5A86D88084B4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DrawableShape.cpp; path = ../../src/gui/graphics/drawables/juce_DrawableShape.cpp; sourceTree = SOURCE_ROOT; };
+		2FBD6F49349E7CC8FC2051EA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DrawableShape.h; path = ../../src/gui/graphics/drawables/juce_DrawableShape.h; sourceTree = SOURCE_ROOT; };
 		C17613C202D8E1C366F21D3C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DrawableText.cpp; path = ../../src/gui/graphics/drawables/juce_DrawableText.cpp; sourceTree = SOURCE_ROOT; };
 		1FA43B2E4244CD74B551DAD6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DrawableText.h; path = ../../src/gui/graphics/drawables/juce_DrawableText.h; sourceTree = SOURCE_ROOT; };
 		2BFC199D03DEEC329D6A7CB1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_SVGParser.cpp; path = ../../src/gui/graphics/drawables/juce_SVGParser.cpp; sourceTree = SOURCE_ROOT; };
@@ -1574,6 +1580,10 @@
 				849E645981CA10B8D5576462,
 				582DCC2F948F1DEA0D450B0D,
 				17EBDF689C731DA257B243C9,
+				E0694CD7C814AA99E5A84799,
+				0FA9E378EBD7EE63EF72124F,
+				62967D33232C5A86D88084B4,
+				2FBD6F49349E7CC8FC2051EA,
 				C17613C202D8E1C366F21D3C,
 				1FA43B2E4244CD74B551DAD6,
 				2BFC199D03DEEC329D6A7CB1 ); name = drawables; sourceTree = "<group>"; };
@@ -2127,6 +2137,8 @@
 				00FE118356919D0BA97AE853,
 				18D8A96CCD34E41A5E162AD5,
 				CEB8A9B9A37EBBA79A6478D4,
+				D6D48B2CC53FAE2BD126B0DE,
+				C384A89F786FDE8426F657D5,
 				3D324F656EEF8F1FB2B437AC,
 				645AF66C048A4815F5A8ECDD,
 				38EFE824E76B3BB99824C265,

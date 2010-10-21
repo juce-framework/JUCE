@@ -1057,6 +1057,14 @@
                   file="src/gui/graphics/drawables/juce_DrawablePath.cpp"/>
             <FILE id="kCwPUxGn" name="juce_DrawablePath.h" compile="0" resource="0"
                   file="src/gui/graphics/drawables/juce_DrawablePath.h"/>
+            <FILE id="dhwj8Vp" name="juce_DrawableRectangle.cpp" compile="1" resource="0"
+                  file="src/gui/graphics/drawables/juce_DrawableRectangle.cpp"/>
+            <FILE id="4NWl38N" name="juce_DrawableRectangle.h" compile="0" resource="0"
+                  file="src/gui/graphics/drawables/juce_DrawableRectangle.h"/>
+            <FILE id="D0V36hB" name="juce_DrawableShape.cpp" compile="1" resource="0"
+                  file="src/gui/graphics/drawables/juce_DrawableShape.cpp"/>
+            <FILE id="pEOXc23" name="juce_DrawableShape.h" compile="0" resource="0"
+                  file="src/gui/graphics/drawables/juce_DrawableShape.h"/>
             <FILE id="V1TBbJfVS" name="juce_DrawableText.cpp" compile="1" resource="0"
                   file="src/gui/graphics/drawables/juce_DrawableText.cpp"/>
             <FILE id="Z7WEXaWaD" name="juce_DrawableText.h" compile="0" resource="0"

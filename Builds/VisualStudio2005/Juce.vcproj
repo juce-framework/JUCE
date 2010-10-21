@@ -723,6 +723,10 @@
               <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableImage.h"/>
               <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawablePath.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawablePath.h"/>
+              <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableRectangle.cpp"/>
+              <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableRectangle.h"/>
+              <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableShape.cpp"/>
+              <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableShape.h"/>
               <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableText.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\drawables\juce_DrawableText.h"/>
               <File RelativePath="..\..\src\gui\graphics\drawables\juce_SVGParser.cpp"/>

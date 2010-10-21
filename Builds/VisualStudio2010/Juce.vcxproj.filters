@@ -826,6 +826,12 @@
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawablePath.cpp">
       <Filter>Juce\Source\gui\graphics\drawables</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableRectangle.cpp">
+      <Filter>Juce\Source\gui\graphics\drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableShape.cpp">
+      <Filter>Juce\Source\gui\graphics\drawables</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableText.cpp">
       <Filter>Juce\Source\gui\graphics\drawables</Filter>
     </ClCompile>
@@ -1996,6 +2002,12 @@
       <Filter>Juce\Source\gui\graphics\drawables</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawablePath.h">
+      <Filter>Juce\Source\gui\graphics\drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableRectangle.h">
+      <Filter>Juce\Source\gui\graphics\drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableShape.h">
       <Filter>Juce\Source\gui\graphics\drawables</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableText.h">

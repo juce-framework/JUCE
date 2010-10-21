@@ -242,19 +242,7 @@ public:
         void setID (const String& newID, UndoManager* undoManager);
         static const Identifier idProperty;
 
-        static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
-                                            RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
-                                            Expression::EvaluationContext* nameFinder,
-                                            ImageProvider* imageProvider);
-
-        static void writeFillType (ValueTree& v, const FillType& fillType,
-                                   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-                                   const RelativePoint* gradientPoint3, ImageProvider* imageProvider,
-                                   UndoManager* undoManager);
-
         ValueTree state;
-        static const Identifier type, gradientPoint1, gradientPoint2, gradientPoint3,
-                                colour, radial, colours, imageId, imageOpacity;
     };
 
     //==============================================================================
@@ -262,9 +250,11 @@ public:
 
 protected:
     friend class DrawableComposite;
+    /** @internal */
     DrawableComposite* parent;
+    /** @internal */
     virtual void invalidatePoints() = 0;
-
+    /** @internal */
     static Drawable* createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider);
 
 private:

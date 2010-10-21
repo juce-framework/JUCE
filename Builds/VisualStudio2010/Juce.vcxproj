@@ -326,6 +326,8 @@
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableComposite.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableImage.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawablePath.cpp"/>
+    <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableRectangle.cpp"/>
+    <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableShape.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_DrawableText.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_SVGParser.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\effects\juce_DropShadowEffect.cpp"/>
@@ -692,6 +694,8 @@
     <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableComposite.h"/>
     <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableImage.h"/>
     <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawablePath.h"/>
+    <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableRectangle.h"/>
+    <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableShape.h"/>
     <ClInclude Include="..\..\src\gui\graphics\drawables\juce_DrawableText.h"/>
     <ClInclude Include="..\..\src\gui\graphics\effects\juce_DropShadowEffect.h"/>
     <ClInclude Include="..\..\src\gui\graphics\effects\juce_GlowEffect.h"/>

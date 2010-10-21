@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	78
+#define JUCE_BUILDNUMBER	79
 
 /** Current Juce version number.
 
@@ -777,10 +777,10 @@
 // Now include some basics that are needed by most of the Juce classes...
 BEGIN_JUCE_NAMESPACE
 
-extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
+extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
-  extern void JUCE_API juce_LogAssertion (const char* filename, int lineNum) throw();
+  extern JUCE_API void juce_LogAssertion (const char* filename, int lineNum) throw();
 #endif
 
 
@@ -2605,83 +2605,83 @@ private:
 };
 
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (const char* string1,	   const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (const char* string1,	   const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (const juce_wchar* string1, const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (const juce_wchar* string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (char string1,		  const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (char string1,		  const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (juce_wchar string1,	const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (juce_wchar string1,	const String& string2);
 
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const char* string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const char* string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const juce_wchar* string2);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar* string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, char characterToAppend);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION operator+  (String string1, juce_wchar characterToAppend);
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
 
 /** Appends a character at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, char characterToAppend);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
 /** Appends a character at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, juce_wchar characterToAppend);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, juce_wchar characterToAppend);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const char* string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const char* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const juce_wchar* string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const String& string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, short number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, int number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, unsigned int number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, long number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, unsigned long number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, float number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, double number);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const char* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const juce_wchar* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const char* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const juce_wchar* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator>  (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator<  (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator>= (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION operator<= (const String& string1, const String& string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw();
 
 /** This streaming override allows you to pass a juce String directly into std output streams.
 	This is very handy for writing strings to std::cout, std::cerr, etc.
 */
 template <class charT, class traits>
-std::basic_ostream <charT, traits>& JUCE_PUBLIC_FUNCTION operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+JUCE_API std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
 	return stream << stringToWrite.toUTF8();
 }
 
 /** Writes a string to an OutputStream as UTF8. */
-OutputStream& JUCE_PUBLIC_FUNCTION operator<< (OutputStream& stream, const String& text);
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -14107,7 +14107,7 @@ private:
 
 	@see shutdownJuce_GUI(), initialiseJuce_NonGUI()
 */
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
+JUCE_API void JUCE_CALLTYPE  initialiseJuce_GUI();
 
 /** Clears up any static data being used by Juce's GUI classes.
 
@@ -14117,7 +14117,7 @@ void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
 
 	@see initialiseJuce_GUI(), initialiseJuce_NonGUI()
 */
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
+JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
 
 /** Initialises the core parts of Juce.
 
@@ -14129,7 +14129,7 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
 
 	@see shutdownJuce_NonGUI, initialiseJuce_GUI
 */
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
+JUCE_API void JUCE_CALLTYPE  initialiseJuce_NonGUI();
 
 /** Clears up any static data being used by Juce's non-gui core classes.
 
@@ -14139,7 +14139,7 @@ void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
 
 	@see initialiseJuce_NonGUI, initialiseJuce_GUI
 */
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
+JUCE_API void JUCE_CALLTYPE  shutdownJuce_NonGUI();
 
 /** A utility object that helps you initialise and shutdown Juce correctly
 	using an RAII pattern.
@@ -41008,6 +41008,11 @@ public:
 	*/
 	bool scanNextFile (bool dontRescanIfAlreadyInList);
 
+	/** Skips over the next file without scanning it.
+		Returns false when there are no more files to try.
+	*/
+	bool skipNextFile();
+
 	/** Returns the description of the plugin that will be scanned during the next
 		call to scanNextFile().
 
@@ -44439,6 +44444,7 @@ class JUCE_API  RelativeParallelogram
 public:
 
 	RelativeParallelogram();
+	RelativeParallelogram (const Rectangle<float>& simpleRectangle);
 	RelativeParallelogram (const RelativePoint& topLeft, const RelativePoint& topRight, const RelativePoint& bottomLeft);
 	RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
 	~RelativeParallelogram();
@@ -44662,28 +44668,18 @@ public:
 		void setID (const String& newID, UndoManager* undoManager);
 		static const Identifier idProperty;
 
-		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
-											RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
-											Expression::EvaluationContext* nameFinder,
-											ImageProvider* imageProvider);
-
-		static void writeFillType (ValueTree& v, const FillType& fillType,
-								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-								   const RelativePoint* gradientPoint3, ImageProvider* imageProvider,
-								   UndoManager* undoManager);
-
 		ValueTree state;
-		static const Identifier type, gradientPoint1, gradientPoint2, gradientPoint3,
-								colour, radial, colours, imageId, imageOpacity;
 	};
 
 	juce_UseDebuggingNewOperator
 
 protected:
 	friend class DrawableComposite;
+	/** @internal */
 	DrawableComposite* parent;
+	/** @internal */
 	virtual void invalidatePoints() = 0;
-
+	/** @internal */
 	static Drawable* createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider);
 
 private:
@@ -55377,7 +55373,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();
+	friend JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
 	static void clearDefaultLookAndFeel() throw(); // called at shutdown
 
 	Array <int> colourIds;
@@ -60271,16 +60267,16 @@ public:
 	*/
 	void bringToFront (int index);
 
-	/** Changes the main content area.
+	/** Returns the main content rectangle.
 		The content area is actually defined by the markers named "left", "right", "top" and
-		"bottom", but this method is a shortcut that sets them all at once.
+		"bottom", but this method is a shortcut that returns them all at once.
 		@see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
 	*/
 	const RelativeRectangle getContentArea() const;
 
-	/** Returns the main content rectangle.
+	/** Changes the main content area.
 		The content area is actually defined by the markers named "left", "right", "top" and
-		"bottom", but this method is a shortcut that returns them all at once.
+		"bottom", but this method is a shortcut that sets them all at once.
 		@see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
 	*/
 	void setContentArea (const RelativeRectangle& newArea);
@@ -60382,11 +60378,10 @@ public:
 		void setMarker (bool xAxis, const Marker& marker, UndoManager* undoManager);
 		void removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager);
 
-		static const Identifier nameProperty, posProperty;
+		static const Identifier nameProperty, posProperty, topLeft, topRight, bottomLeft;
 
 	private:
-		static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTagX,
-								markerGroupTagY, markerTag;
+		static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY, markerTag;
 
 		ValueTree getChildList() const;
 		ValueTree getChildListCreating (UndoManager* undoManager);
@@ -60535,30 +60530,29 @@ private:
 #ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
 #define __JUCE_DRAWABLEPATH_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_DrawableShape.h ***/
+#ifndef __JUCE_DRAWABLESHAPE_JUCEHEADER__
+#define __JUCE_DRAWABLESHAPE_JUCEHEADER__
+
 /**
-	A drawable object which renders a filled or outlined shape.
+	A base class implementing common functionality for Drawable classes which
+	consist of some kind of filled and stroked outline.
 
-	@see Drawable
+	@see DrawablePath, DrawableRectangle
 */
-class JUCE_API  DrawablePath  : public Drawable
+class JUCE_API  DrawableShape   : public Drawable
 {
+protected:
+
+	DrawableShape();
+	DrawableShape (const DrawableShape&);
+
 public:
-
-	/** Creates a DrawablePath. */
-	DrawablePath();
-	DrawablePath (const DrawablePath& other);
-
 	/** Destructor. */
-	~DrawablePath();
-
-	/** Changes the path that will be drawn.
-
-		@see setFillColour, setStrokeType
-	*/
-	void setPath (const Path& newPath);
+	~DrawableShape();
 
 	/** Sets a fill type for the path.
-
 		This colour is used to fill the path - if you don't want the path to be
 		filled (e.g. if you're just drawing an outline), set this to a transparent
 		colour.
@@ -60596,36 +60590,11 @@ public:
 	/** Returns the current outline style. */
 	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
 
-	/** Returns the current path. */
-	const Path& getPath() const;
-
-	/** Returns the current path for the outline. */
-	const Path& getStrokePath() const;
-
 	/** @internal */
-	void render (const Drawable::RenderingContext& context) const;
-	/** @internal */
-	const Rectangle<float> getBounds() const;
-	/** @internal */
-	bool hitTest (float x, float y) const;
-	/** @internal */
-	Drawable* createCopy() const;
-	/** @internal */
-	void invalidatePoints();
-	/** @internal */
-	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
-	/** @internal */
-	const ValueTree createValueTree (ImageProvider* imageProvider) const;
-	/** @internal */
-	static const Identifier valueTreeType;
-	/** @internal */
-	const Identifier getValueTreeType() const	   { return valueTreeType; }
-
-	/** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
-	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	class FillAndStrokeState  : public  ValueTreeWrapperBase
 	{
 	public:
-		ValueTreeWrapper (const ValueTree& state);
+		FillAndStrokeState (const ValueTree& state);
 
 		const FillType getMainFill (Expression::EvaluationContext* nameFinder,
 									ImageProvider* imageProvider) const;
@@ -60643,6 +60612,116 @@ public:
 
 		const PathStrokeType getStrokeType() const;
 		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
+
+		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
+											RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
+											Expression::EvaluationContext* nameFinder,
+											ImageProvider* imageProvider);
+
+		static void writeFillType (ValueTree& v, const FillType& fillType,
+								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+								   const RelativePoint* gradientPoint3, ImageProvider* imageProvider,
+								   UndoManager* undoManager);
+
+		static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
+								gradientPoint1, gradientPoint2, gradientPoint3, radial, imageId, imageOpacity;
+	};
+
+	/** @internal */
+	void invalidatePoints();
+	/** @internal */
+	void render (const Drawable::RenderingContext& context) const;
+	/** @internal */
+	const Rectangle<float> getBounds() const;
+	/** @internal */
+	bool hitTest (float x, float y) const;
+
+protected:
+
+	/** Called when the cached path should be updated. */
+	void pathChanged();
+	/** Called when the cached stroke should be updated. */
+	void strokeChanged();
+
+	/** Implemented by subclasses to regenerate the path. */
+	virtual bool rebuildPath (Path& path) const = 0;
+
+	/** True if there's a stroke with a non-zero thickness and non-transparent colour. */
+	bool isStrokeVisible() const throw();
+
+	/** Updates the details from a FillAndStrokeState object, returning true if something changed. */
+	bool refreshFillTypes (const FillAndStrokeState& newState,
+						   Expression::EvaluationContext* nameFinder,
+						   ImageProvider* imageProvider);
+
+	/** Writes the stroke and fill details to a FillAndStrokeState object. */
+	void writeTo (FillAndStrokeState& state, ImageProvider* imageProvider, UndoManager* undoManager) const;
+
+	/** Returns the current cached path outline. */
+	const Path& getCachedPath() const;
+	/** Returns the current cached stroke outline. */
+	const Path& getCachedStrokePath() const;
+
+	PathStrokeType strokeType;
+	mutable Path cachedPath, cachedStroke;
+
+private:
+	FillType mainFill, strokeFill;
+	mutable bool pathNeedsUpdating, strokeNeedsUpdating;
+
+	static void setBrush (const Drawable::RenderingContext& context, const FillType& type);
+
+	DrawableShape& operator= (const DrawableShape&);
+};
+
+#endif   // __JUCE_DRAWABLESHAPE_JUCEHEADER__
+/*** End of inlined file: juce_DrawableShape.h ***/
+
+/**
+	A drawable object which renders a filled or outlined shape.
+
+	For details on how to change the fill and stroke, see the DrawableShape class.
+
+	@see Drawable, DrawableShape
+*/
+class JUCE_API  DrawablePath  : public DrawableShape
+{
+public:
+
+	/** Creates a DrawablePath. */
+	DrawablePath();
+	DrawablePath (const DrawablePath& other);
+
+	/** Destructor. */
+	~DrawablePath();
+
+	/** Changes the path that will be drawn.
+		@see setFillColour, setStrokeType
+	*/
+	void setPath (const Path& newPath);
+
+	/** Returns the current path. */
+	const Path& getPath() const;
+
+	/** Returns the current path for the outline. */
+	const Path& getStrokePath() const;
+
+	/** @internal */
+	Drawable* createCopy() const;
+	/** @internal */
+	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	/** @internal */
+	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	/** @internal */
+	static const Identifier valueTreeType;
+	/** @internal */
+	const Identifier getValueTreeType() const	   { return valueTreeType; }
+
+	/** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
+	class ValueTreeWrapper   : public FillAndStrokeState
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
 
 		bool usesNonZeroWinding() const;
 		void setUsesNonZeroWinding (bool b, UndoManager* undoManager);
@@ -60687,22 +60766,16 @@ public:
 
 		ValueTree getPathState();
 
-		static const Identifier fill, stroke, path, jointStyle, capStyle, strokeWidth,
-								nonZeroWinding, point1, point2, point3;
+		static const Identifier nonZeroWinding, point1, point2, point3;
 	};
 
 	juce_UseDebuggingNewOperator
 
-private:
-	FillType mainFill, strokeFill;
-	PathStrokeType strokeType;
-	ScopedPointer<RelativePointPath> relativePath;
-	mutable Path path, stroke;
-	mutable bool pathNeedsUpdating, strokeNeedsUpdating;
+protected:
+	bool rebuildPath (Path& path) const;
 
-	void updatePath() const;
-	void updateStroke() const;
-	bool isStrokeVisible() const throw();
+private:
+	ScopedPointer<RelativePointPath> relativePath;
 
 	DrawablePath& operator= (const DrawablePath&);
 };
@@ -60710,6 +60783,91 @@ private:
 #endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
 /*** End of inlined file: juce_DrawablePath.h ***/
 
+
+#endif
+#ifndef __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+
+/*** Start of inlined file: juce_DrawableRectangle.h ***/
+#ifndef __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+#define __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+
+/**
+	A Drawable object which draws a rectangle.
+
+	For details on how to change the fill and stroke, see the DrawableShape class.
+
+	@see Drawable, DrawableShape
+*/
+class JUCE_API  DrawableRectangle  : public DrawableShape
+{
+public:
+
+	DrawableRectangle();
+	DrawableRectangle (const DrawableRectangle& other);
+
+	/** Destructor. */
+	~DrawableRectangle();
+
+	/** Sets the rectangle's bounds. */
+	void setRectangle (const RelativeParallelogram& newBounds);
+
+	/** Returns the rectangle's bounds. */
+	const RelativeParallelogram& getRectangle() const throw()	   { return bounds; }
+
+	/** Returns the corner size to be used. */
+	const RelativePoint getCornerSize() const			   { return cornerSize; }
+
+	/** Sets a new corner size for the rectangle */
+	void setCornerSize (const RelativePoint& newSize);
+
+	/** @internal */
+	Drawable* createCopy() const;
+	/** @internal */
+	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	/** @internal */
+	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	/** @internal */
+	static const Identifier valueTreeType;
+	/** @internal */
+	const Identifier getValueTreeType() const	{ return valueTreeType; }
+
+	/** Internally-used class for wrapping a DrawableRectangle's state into a ValueTree. */
+	class ValueTreeWrapper   : public FillAndStrokeState
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		const RelativeParallelogram getRectangle() const;
+		void setRectangle (const RelativeParallelogram& newBounds, UndoManager* undoManager);
+
+		void setCornerSize (const RelativePoint& cornerSize, UndoManager* undoManager);
+		const RelativePoint getCornerSize() const;
+		Value getCornerSizeValue (UndoManager* undoManager) const;
+
+		static const Identifier topLeft, topRight, bottomLeft, cornerSize;
+	};
+
+	juce_UseDebuggingNewOperator
+
+protected:
+	/** @internal */
+	bool rebuildPath (Path& path) const;
+
+private:
+	RelativeParallelogram bounds;
+	RelativePoint cornerSize;
+
+	const AffineTransform calculateTransform() const;
+
+	DrawableRectangle& operator= (const DrawableRectangle&);
+};
+
+#endif   // __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+/*** End of inlined file: juce_DrawableRectangle.h ***/
+
+
+#endif
+#ifndef __JUCE_DRAWABLESHAPE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__

@@ -438,6 +438,7 @@ class JUCE_API  RelativeParallelogram
 public:
     //==============================================================================
     RelativeParallelogram();
+    RelativeParallelogram (const Rectangle<float>& simpleRectangle);
     RelativeParallelogram (const RelativePoint& topLeft, const RelativePoint& topRight, const RelativePoint& bottomLeft);
     RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
     ~RelativeParallelogram();

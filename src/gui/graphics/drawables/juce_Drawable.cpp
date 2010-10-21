@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Drawable.h"
 #include "juce_DrawableComposite.h"
 #include "juce_DrawablePath.h"
+#include "juce_DrawableRectangle.h"
 #include "juce_DrawableImage.h"
 #include "juce_DrawableText.h"
 #include "../imaging/juce_ImageFileFormat.h"
@@ -139,6 +140,8 @@ Drawable* Drawable::createChildFromValueTree (DrawableComposite* parent, const V
         d = new DrawablePath();
     else if (type == DrawableComposite::valueTreeType)
         d = new DrawableComposite();
+    else if (type == DrawableRectangle::valueTreeType)
+        d = new DrawableRectangle();
     else if (type == DrawableImage::valueTreeType)
         d = new DrawableImage();
     else if (type == DrawableText::valueTreeType)
@@ -156,15 +159,6 @@ Drawable* Drawable::createChildFromValueTree (DrawableComposite* parent, const V
 
 //==============================================================================
 const Identifier Drawable::ValueTreeWrapperBase::idProperty ("id");
-const Identifier Drawable::ValueTreeWrapperBase::type ("type");
-const Identifier Drawable::ValueTreeWrapperBase::gradientPoint1 ("point1");
-const Identifier Drawable::ValueTreeWrapperBase::gradientPoint2 ("point2");
-const Identifier Drawable::ValueTreeWrapperBase::gradientPoint3 ("point3");
-const Identifier Drawable::ValueTreeWrapperBase::colour ("colour");
-const Identifier Drawable::ValueTreeWrapperBase::radial ("radial");
-const Identifier Drawable::ValueTreeWrapperBase::colours ("colours");
-const Identifier Drawable::ValueTreeWrapperBase::imageId ("imageId");
-const Identifier Drawable::ValueTreeWrapperBase::imageOpacity ("imageOpacity");
 
 Drawable::ValueTreeWrapperBase::ValueTreeWrapperBase (const ValueTree& state_)
     : state (state_)
@@ -186,120 +180,6 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* co
         state.removeProperty (idProperty, undoManager);
     else
         state.setProperty (idProperty, newID, undoManager);
-}
-
-const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2, RelativePoint* const gp3,
-                                                             Expression::EvaluationContext* const nameFinder, ImageProvider* imageProvider)
-{
-    const String newType (v[type].toString());
-
-    if (newType == "solid")
-    {
-        const String colourString (v [colour].toString());
-        return FillType (Colour (colourString.isEmpty() ? (uint32) 0xff000000
-                                                        : (uint32) colourString.getHexValue32()));
-    }
-    else if (newType == "gradient")
-    {
-        RelativePoint p1 (v [gradientPoint1]), p2 (v [gradientPoint2]), p3 (v [gradientPoint3]);
-
-        ColourGradient g;
-
-        if (gp1 != 0)  *gp1 = p1;
-        if (gp2 != 0)  *gp2 = p2;
-        if (gp3 != 0)  *gp3 = p3;
-
-        g.point1 = p1.resolve (nameFinder);
-        g.point2 = p2.resolve (nameFinder);
-        g.isRadial = v[radial];
-
-        StringArray colourSteps;
-        colourSteps.addTokens (v[colours].toString(), false);
-
-        for (int i = 0; i < colourSteps.size() / 2; ++i)
-            g.addColour (colourSteps[i * 2].getDoubleValue(),
-                         Colour ((uint32)  colourSteps[i * 2 + 1].getHexValue32()));
-
-        FillType fillType (g);
-
-        if (g.isRadial)
-        {
-            const Point<float> point3 (p3.resolve (nameFinder));
-            const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
-                                             g.point1.getY() + g.point1.getX() - g.point2.getX());
-
-            fillType.transform = AffineTransform::fromTargetPoints (g.point1.getX(), g.point1.getY(), g.point1.getX(), g.point1.getY(),
-                                                                    g.point2.getX(), g.point2.getY(), g.point2.getX(), g.point2.getY(),
-                                                                    point3Source.getX(), point3Source.getY(), point3.getX(), point3.getY());
-        }
-
-        return fillType;
-    }
-    else if (newType == "image")
-    {
-        Image im;
-        if (imageProvider != 0)
-            im = imageProvider->getImageForIdentifier (v[imageId]);
-
-        FillType f (im, AffineTransform::identity);
-        f.setOpacity ((float) v.getProperty (imageOpacity, 1.0f));
-        return f;
-    }
-
-    jassertfalse;
-    return FillType();
-}
-
-static const Point<float> calcThirdGradientPoint (const FillType& fillType)
-{
-    const ColourGradient& g = *fillType.gradient;
-    const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
-                                     g.point1.getY() + g.point1.getX() - g.point2.getX());
-
-    return point3Source.transformedBy (fillType.transform);
-}
-
-void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType& fillType,
-                                                    const RelativePoint* const gp1, const RelativePoint* const gp2, const RelativePoint* gp3,
-                                                    ImageProvider* imageProvider, UndoManager* const undoManager)
-{
-    if (fillType.isColour())
-    {
-        v.setProperty (type, "solid", undoManager);
-        v.setProperty (colour, String::toHexString ((int) fillType.colour.getARGB()), undoManager);
-    }
-    else if (fillType.isGradient())
-    {
-        v.setProperty (type, "gradient", undoManager);
-        v.setProperty (gradientPoint1, gp1 != 0 ? gp1->toString() : fillType.gradient->point1.toString(), undoManager);
-        v.setProperty (gradientPoint2, gp2 != 0 ? gp2->toString() : fillType.gradient->point2.toString(), undoManager);
-        v.setProperty (gradientPoint3, gp3 != 0 ? gp3->toString() : calcThirdGradientPoint (fillType).toString(), undoManager);
-
-        v.setProperty (radial, fillType.gradient->isRadial, undoManager);
-
-        String s;
-        for (int i = 0; i < fillType.gradient->getNumColours(); ++i)
-            s << ' ' << fillType.gradient->getColourPosition (i)
-              << ' ' << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
-
-        v.setProperty (colours, s.trimStart(), undoManager);
-    }
-    else if (fillType.isTiledImage())
-    {
-        v.setProperty (type, "image", undoManager);
-
-        if (imageProvider != 0)
-            v.setProperty (imageId, imageProvider->getIdentifierForImage (fillType.image), undoManager);
-
-        if (fillType.getOpacity() < 1.0f)
-            v.setProperty (imageOpacity, fillType.getOpacity(), undoManager);
-        else
-            v.removeProperty (imageOpacity, undoManager);
-    }
-    else
-    {
-        jassertfalse;
-    }
 }
 
 

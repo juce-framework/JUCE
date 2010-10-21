@@ -106,8 +106,8 @@ void DrawableText::render (const Drawable::RenderingContext& context) const
     const float h = Line<float> (points[0], points[2]).getLength();
 
     const Point<float> fontCoords (bounds.getInternalCoordForPoint (points, fontSizeControlPoint.resolve (parent)));
-    const float fontHeight = jlimit (1.0f, h, fontCoords.getY());
-    const float fontWidth = jlimit (0.01f, w, fontCoords.getX());
+    const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.getY());
+    const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.getX());
 
     Font f (font);
     f.setHeight (fontHeight);

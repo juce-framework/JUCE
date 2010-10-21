@@ -578,6 +578,11 @@ RelativeParallelogram::RelativeParallelogram()
 {
 }
 
+RelativeParallelogram::RelativeParallelogram (const Rectangle<float>& r)
+    : topLeft (r.getTopLeft()), topRight (r.getTopRight()), bottomLeft (r.getBottomLeft())
+{
+}
+
 RelativeParallelogram::RelativeParallelogram (const RelativePoint& topLeft_, const RelativePoint& topRight_, const RelativePoint& bottomLeft_)
     : topLeft (topLeft_), topRight (topRight_), bottomLeft (bottomLeft_)
 {

@@ -385,6 +385,16 @@ public:
 
     bool openFile (const File& file)
     {
+        for (int j = mainWindows.size(); --j >= 0;)
+        {
+            if (mainWindows.getUnchecked(j)->getProject() != 0
+                 && mainWindows.getUnchecked(j)->getProject()->getFile() == file)
+            {
+                mainWindows.getUnchecked(j)->toFront (true);
+                return true;
+            }
+        }
+
         if (file.hasFileExtension (Project::projectFileExtension))
         {
             ScopedPointer <Project> newDoc (new Project (file));

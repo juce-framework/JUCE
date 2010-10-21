@@ -190,13 +190,11 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
     // manager first..
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-    ApplicationCommandTarget* const target = getFirstCommandTarget (info_.commandID);
+    ApplicationCommandInfo commandInfo (0);
+    ApplicationCommandTarget* const target = getTargetForCommand (info_.commandID, commandInfo);
 
     if (target == 0)
         return false;
-
-    ApplicationCommandInfo commandInfo (0);
-    target->getCommandInfo (info_.commandID, commandInfo);
 
     ApplicationCommandTarget::InvocationInfo info (info_);
     info.commandFlags = commandInfo.flags;

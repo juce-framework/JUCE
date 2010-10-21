@@ -243,6 +243,8 @@ OBJECTS := \
   $(OBJDIR)/juce_DrawableComposite_4cd2d2ab.o \
   $(OBJDIR)/juce_DrawableImage_53f04eff.o \
   $(OBJDIR)/juce_DrawablePath_fb538a0b.o \
+  $(OBJDIR)/juce_DrawableRectangle_5f2f5993.o \
+  $(OBJDIR)/juce_DrawableShape_26926245.o \
   $(OBJDIR)/juce_DrawableText_75eda713.o \
   $(OBJDIR)/juce_SVGParser_b79416c5.o \
   $(OBJDIR)/juce_DropShadowEffect_da52d75.o \
@@ -1380,6 +1382,16 @@ $(OBJDIR)/juce_DrawableImage_53f04eff.o: ../../src/gui/graphics/drawables/juce_D
 $(OBJDIR)/juce_DrawablePath_fb538a0b.o: ../../src/gui/graphics/drawables/juce_DrawablePath.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_DrawablePath.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_DrawableRectangle_5f2f5993.o: ../../src/gui/graphics/drawables/juce_DrawableRectangle.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_DrawableRectangle.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_DrawableShape_26926245.o: ../../src/gui/graphics/drawables/juce_DrawableShape.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_DrawableShape.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawableText_75eda713.o: ../../src/gui/graphics/drawables/juce_DrawableText.cpp

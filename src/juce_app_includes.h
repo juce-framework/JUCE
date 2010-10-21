@@ -659,6 +659,12 @@
 #ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
  #include "gui/graphics/drawables/juce_DrawablePath.h"
 #endif
+#ifndef __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_DrawableRectangle.h"
+#endif
+#ifndef __JUCE_DRAWABLESHAPE_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_DrawableShape.h"
+#endif
 #ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
  #include "gui/graphics/drawables/juce_DrawableText.h"
 #endif

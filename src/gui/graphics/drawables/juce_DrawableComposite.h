@@ -119,16 +119,16 @@ public:
     void bringToFront (int index);
 
     //==============================================================================
-    /** Changes the main content area.
+    /** Returns the main content rectangle.
         The content area is actually defined by the markers named "left", "right", "top" and
-        "bottom", but this method is a shortcut that sets them all at once.
+        "bottom", but this method is a shortcut that returns them all at once.
         @see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
     */
     const RelativeRectangle getContentArea() const;
 
-    /** Returns the main content rectangle.
+    /** Changes the main content area.
         The content area is actually defined by the markers named "left", "right", "top" and
-        "bottom", but this method is a shortcut that returns them all at once.
+        "bottom", but this method is a shortcut that sets them all at once.
         @see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
     */
     void setContentArea (const RelativeRectangle& newArea);
@@ -233,11 +233,10 @@ public:
         void setMarker (bool xAxis, const Marker& marker, UndoManager* undoManager);
         void removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager);
 
-        static const Identifier nameProperty, posProperty;
+        static const Identifier nameProperty, posProperty, topLeft, topRight, bottomLeft;
 
     private:
-        static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTagX,
-                                markerGroupTagY, markerTag;
+        static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY, markerTag;
 
         ValueTree getChildList() const;
         ValueTree getChildListCreating (UndoManager* undoManager);
