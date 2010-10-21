@@ -304,6 +304,7 @@ const Image JPEGImageFormat::decodeImage (InputStream& in)
             if (jpeg_start_decompress (&jpegDecompStruct))
             {
                 image = Image (Image::RGB, width, height, false);
+                image.getProperties()->set ("originalImageHadAlpha", false);
                 const bool hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
                 const Image::BitmapData destData (image, true);

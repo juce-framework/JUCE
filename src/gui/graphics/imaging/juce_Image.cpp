@@ -252,15 +252,9 @@ const Image Image::convertedToFormat (PixelFormat newFormat) const
     return newImage;
 }
 
-const var Image::getTag() const
+NamedValueSet* Image::getProperties() const
 {
-    return image == 0 ? var::null : image->userTag;
-}
-
-void Image::setTag (const var& newTag)
-{
-    if (image != 0)
-        image->userTag = newTag;
+    return image == 0 ? 0 : &(image->userData);
 }
 
 //==============================================================================

@@ -800,8 +800,12 @@ const Image juce_loadWithCoreImage (InputStream& input)
 
         if (loadedImage != 0)
         {
-            const bool hasAlphaChan = CGImageGetAlphaInfo (loadedImage) != kCGImageAlphaNone;
-            Image image (hasAlphaChan ? Image::ARGB : Image::RGB,
+            CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo (loadedImage);
+            const bool hasAlphaChan = (alphaInfo != kCGImageAlphaNone
+                                         && alphaInfo != kCGImageAlphaNoneSkipLast
+                                         && alphaInfo != kCGImageAlphaNoneSkipFirst);
+
+            Image image (Image::ARGB, // (CoreImage doesn't work with 24-bit images)
                          (int) CGImageGetWidth (loadedImage), (int) CGImageGetHeight (loadedImage),
                          hasAlphaChan, Image::NativeImage);
 
@@ -815,6 +819,9 @@ const Image juce_loadWithCoreImage (InputStream& input)
             CFRelease (loadedImage);
 #endif
 
+            // Because it's impossible to create a truly 24-bit CG image, this flag allows a user
+            // to find out whether the file they just loaded the image from had an alpha channel or not.
+            image.getProperties()->set ("originalImageHadAlpha", hasAlphaChan);
             return image;
         }
     }

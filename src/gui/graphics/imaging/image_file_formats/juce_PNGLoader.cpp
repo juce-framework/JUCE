@@ -228,6 +228,7 @@ const Image PNGImageFormat::decodeImage (InputStream& in)
         image = Image (hasAlphaChan ? Image::ARGB : Image::RGB,
                        (int) width, (int) height, hasAlphaChan);
 
+        image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
         hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
         const Image::BitmapData destData (image, true);

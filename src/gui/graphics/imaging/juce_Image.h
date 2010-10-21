@@ -29,7 +29,7 @@
 #include "../colour/juce_Colour.h"
 #include "../contexts/juce_Graphics.h"
 #include "../../../containers/juce_Variant.h"
-
+#include "../../../containers/juce_NamedValueSet.h"
 
 //==============================================================================
 /**
@@ -354,21 +354,12 @@ public:
                               float alphaThreshold = 0.5f) const;
 
     //==============================================================================
-    /** Returns a user-specified data item that was set with setTag().
-        setTag() and getTag() allow you to attach an arbitrary identifier value to an
-        image. The value is shared between all Image object that are referring to the
-        same underlying image data object.
-    */
-    const var getTag() const;
+    /** Returns a NamedValueSet that is attached to the image and which can be used for
+        associating custom values with it.
 
-    /** Attaches a user-specified data item to this image, which can be retrieved using getTag().
-        setTag() and getTag() allow you to attach an arbitrary identifier value to an
-        image. The value is shared between all Image object that are referring to the
-        same underlying image data object.
-
-        Note that if this Image is null, this method will fail to store the data.
+        If this is a null image, this will return a null pointer.
     */
-    void setTag (const var& newTag);
+    NamedValueSet* getProperties() const;
 
     //==============================================================================
     /** Creates a context suitable for drawing onto this image.
@@ -415,7 +406,7 @@ public:
         const int width, height;
         int pixelStride, lineStride;
         uint8* imageData;
-        var userTag;
+        NamedValueSet userData;
 
         SharedImage (const SharedImage&);
         SharedImage& operator= (const SharedImage&);

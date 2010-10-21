@@ -104,6 +104,8 @@ public:
             image = Image ((transparent >= 0) ? Image::ARGB : Image::RGB,
                            imageWidth, imageHeight, (transparent >= 0));
 
+            image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
+
             readImage ((buf[8] & 0x40) != 0, transparent);
 
             break;
