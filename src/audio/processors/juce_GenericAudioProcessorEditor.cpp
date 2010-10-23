@@ -35,15 +35,17 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 class ProcessorParameterPropertyComp   : public PropertyComponent,
                                          public AudioProcessorListener,
-                                         public AsyncUpdater
+                                         public Timer
 {
 public:
-    ProcessorParameterPropertyComp (const String& name, AudioProcessor& owner_, int index_)
+    ProcessorParameterPropertyComp (const String& name, AudioProcessor& owner_, const int index_)
         : PropertyComponent (name),
           owner (owner_),
           index (index_),
+          paramHasChanged (false),
           slider (owner_, index_)
     {
+        startTimer (100);
         addAndMakeVisible (&slider);
         owner_.addListener (this);
     }
@@ -55,6 +57,7 @@ public:
 
     void refresh()
     {
+        paramHasChanged = false;
         slider.setValue (owner.getParameter (index), false);
     }
 
@@ -63,12 +66,20 @@ public:
     void audioProcessorParameterChanged (AudioProcessor*, int parameterIndex, float)
     {
         if (parameterIndex == index)
-            triggerAsyncUpdate();
+            paramHasChanged = true;
     }
 
-    void handleAsyncUpdate()
+    void timerCallback()
     {
-        refresh();
+        if (paramHasChanged)
+        {
+            refresh();
+            startTimer (1000 / 50);
+        }
+        else
+        {
+            startTimer (jmin (1000 / 4, getTimerInterval() + 10));
+        }
     }
 
     //==============================================================================
@@ -80,18 +91,13 @@ private:
     {
     public:
         ParamSlider (AudioProcessor& owner_, const int index_)
-            : Slider (String::empty),
-              owner (owner_),
+            : owner (owner_),
               index (index_)
         {
             setRange (0.0, 1.0, 0.0);
             setSliderStyle (Slider::LinearBar);
             setTextBoxIsEditable (false);
             setScrollWheelEnabled (false);
-        }
-
-        ~ParamSlider()
-        {
         }
 
         void valueChanged()
@@ -120,6 +126,7 @@ private:
 
     AudioProcessor& owner;
     const int index;
+    bool volatile paramHasChanged;
     ParamSlider slider;
 
     ProcessorParameterPropertyComp (const ProcessorParameterPropertyComp&);
@@ -134,7 +141,7 @@ GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const 
     jassert (owner_ != 0);
     setOpaque (true);
 
-    addAndMakeVisible (panel = new PropertyPanel());
+    addAndMakeVisible (&panel);
 
     Array <PropertyComponent*> params;
 
@@ -152,14 +159,13 @@ GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const 
         totalHeight += pc->getPreferredHeight();
     }
 
-    panel->addProperties (params);
+    panel.addProperties (params);
 
     setSize (400, jlimit (25, 400, totalHeight));
 }
 
 GenericAudioProcessorEditor::~GenericAudioProcessorEditor()
 {
-    deleteAllChildren();
 }
 
 void GenericAudioProcessorEditor::paint (Graphics& g)
@@ -169,7 +175,7 @@ void GenericAudioProcessorEditor::paint (Graphics& g)
 
 void GenericAudioProcessorEditor::resized()
 {
-    panel->setSize (getWidth(), getHeight());
+    panel.setBounds (getLocalBounds());
 }
 
 

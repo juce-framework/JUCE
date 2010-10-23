@@ -294,7 +294,8 @@ private:
 //==============================================================================
 KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet* const mappingManager,
                                                       const bool showResetToDefaultButton)
-    : mappings (mappingManager)
+    : mappings (mappingManager),
+      resetButton (TRANS ("reset to defaults"))
 {
     jassert (mappingManager != 0); // can't be null!
 
@@ -302,25 +303,22 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet* const 
 
     setLinesDrawnForSubItems (false);
 
-    resetButton = 0;
-
     if (showResetToDefaultButton)
     {
-        addAndMakeVisible (resetButton = new TextButton (TRANS("reset to defaults")));
-        resetButton->addButtonListener (this);
+        addAndMakeVisible (&resetButton);
+        resetButton.addButtonListener (this);
     }
 
-    addAndMakeVisible (tree = new TreeView());
-    tree->setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
-    tree->setRootItemVisible (false);
-    tree->setDefaultOpenness (true);
-    tree->setRootItem (this);
+    addAndMakeVisible (&tree);
+    tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
+    tree.setRootItemVisible (false);
+    tree.setDefaultOpenness (true);
+    tree.setRootItem (this);
 }
 
 KeyMappingEditorComponent::~KeyMappingEditorComponent()
 {
     mappings->removeChangeListener (this);
-    deleteAllChildren();
 }
 
 //==============================================================================
@@ -339,7 +337,7 @@ void KeyMappingEditorComponent::setColours (const Colour& mainBackground,
 {
     setColour (backgroundColourId, mainBackground);
     setColour (textColourId, textColour);
-    tree->setColour (TreeView::backgroundColourId, mainBackground);
+    tree.setColour (TreeView::backgroundColourId, mainBackground);
 }
 
 void KeyMappingEditorComponent::parentHierarchyChanged()
@@ -351,22 +349,22 @@ void KeyMappingEditorComponent::resized()
 {
     int h = getHeight();
 
-    if (resetButton != 0)
+    if (resetButton.isVisible())
     {
         const int buttonHeight = 20;
         h -= buttonHeight + 8;
         int x = getWidth() - 8;
 
-        resetButton->changeWidthToFitText (buttonHeight);
-        resetButton->setTopRightPosition (x, h + 6);
+        resetButton.changeWidthToFitText (buttonHeight);
+        resetButton.setTopRightPosition (x, h + 6);
     }
 
-    tree->setBounds (0, 0, getWidth(), h);
+    tree.setBounds (0, 0, getWidth(), h);
 }
 
 void KeyMappingEditorComponent::buttonClicked (Button* button)
 {
-    if (button == resetButton)
+    if (button == &resetButton)
     {
         if (AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                           TRANS("Reset to defaults"),
@@ -380,7 +378,7 @@ void KeyMappingEditorComponent::buttonClicked (Button* button)
 
 void KeyMappingEditorComponent::changeListenerCallback (void*)
 {
-    ScopedPointer <XmlElement> oldOpenness (tree->getOpennessState (true));
+    ScopedPointer <XmlElement> oldOpenness (tree.getOpennessState (true));
 
     clearSubItems();
 
@@ -400,7 +398,7 @@ void KeyMappingEditorComponent::changeListenerCallback (void*)
     }
 
     if (oldOpenness != 0)
-        tree->restoreOpennessState (*oldOpenness);
+        tree.restoreOpennessState (*oldOpenness);
 }
 
 //==============================================================================

@@ -41,7 +41,7 @@ BubbleMessageComponent::BubbleMessageComponent (int fadeOutLengthMs)
 
 BubbleMessageComponent::~BubbleMessageComponent()
 {
-    fadeOutComponent (fadeOutLength);
+    Desktop::getInstance().getAnimator().fadeOut (this, fadeOutLength);
 }
 
 void BubbleMessageComponent::showAt (int x, int y,
@@ -123,10 +123,11 @@ void BubbleMessageComponent::timerCallback()
     else if (expiryTime != 0 && Time::getMillisecondCounter() > expiryTime)
     {
         stopTimer();
-        fadeOutComponent (fadeOutLength);
 
         if (deleteAfterUse)
             delete this;
+        else
+            Desktop::getInstance().getAnimator().fadeOut (this, fadeOutLength);
     }
 }
 

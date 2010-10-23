@@ -161,31 +161,6 @@ public:
     */
     bool isShowing() const;
 
-    /** Makes a component invisible using a groovy fade-out and animated zoom effect.
-
-        To do this, this function will cunningly:
-            - take a snapshot of the component as it currently looks
-            - call setVisible(false) on the component
-            - replace it with a special component that will continue drawing the
-              snapshot, animating it and gradually making it more transparent
-            - when it's gone, the special component will also be deleted
-
-        As soon as this method returns, the component can be safely removed and deleted
-        leaving the proxy to do the fade-out, so it's even ok to call this in a
-        component's destructor.
-
-        Passing non-zero x and y values will cause the ghostly component image to
-        also whizz off by this distance while fading out. If the scale factor is
-        not 1.0, it will also zoom from the component's current size to this new size.
-
-        One thing to be careful about is that the parent component must be able to cope
-        with this unknown component type being added to it.
-    */
-    void fadeOutComponent (int lengthOfFadeOutInMilliseconds,
-                           int deltaXToMove = 0,
-                           int deltaYToMove = 0,
-                           float scaleFactorAtEnd = 1.0f);
-
     //==============================================================================
     /** Makes this component appear as a window on the desktop.
 
@@ -905,8 +880,12 @@ public:
 
         The graphics context may be left in an undefined state after this method returns,
         so you may need to reset it if you're going to use it again.
+
+        If ignoreAlphaLevel is false, then the component will be drawn with the opacity level
+        specified by getAlpha(); if ignoreAlphaLevel is true, then this will be ignored and
+        an alpha of 1.0 will be used.
     */
-    void paintEntireComponent (Graphics& context);
+    void paintEntireComponent (Graphics& context, bool ignoreAlphaLevel);
 
 
     //==============================================================================
@@ -1218,6 +1197,9 @@ public:
         @see setEnabled, isEnabled
     */
     virtual void enablementChanged();
+
+    void setAlpha (float newAlpha);
+    float getAlpha() const;
 
     //==============================================================================
     /** Changes the mouse cursor shape to use when the mouse is over this component.
@@ -2081,6 +2063,8 @@ private:
         ComponentFlags flags;
     };
 
+    uint8 componentTransparency;
+
     //==============================================================================
     void internalMouseEnter (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
     void internalMouseExit  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
@@ -2097,7 +2081,7 @@ private:
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();
-    void renderComponent (Graphics& context);
+    void renderComponent (Graphics& g);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void repaintParent();
     void sendFakeMouseMove() const;

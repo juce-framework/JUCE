@@ -126,7 +126,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 
     JUCE_TRY
     {
-        component->paintEntireComponent (g);
+        component->paintEntireComponent (g, true);
     }
     JUCE_CATCH_EXCEPTION
 

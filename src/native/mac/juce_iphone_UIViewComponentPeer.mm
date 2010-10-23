@@ -111,6 +111,7 @@ public:
     const Point<int> getScreenPosition() const;
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
+    void setAlpha (float newAlpha);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
@@ -574,6 +575,11 @@ CGRect UIViewComponentPeer::constrainRect (CGRect r)
     }
 
     return r;
+}
+
+void UIViewComponentPeer::setAlpha (float newAlpha)
+{
+    [[view window] setAlpha: (CGFloat) newAlpha];
 }
 
 void UIViewComponentPeer::setMinimised (bool shouldBeMinimised)

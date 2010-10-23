@@ -93,7 +93,7 @@ void DrawableShape::setBrush (const Drawable::RenderingContext& context, const F
 }
 
 bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
-                                      Expression::EvaluationContext* nameFinder,
+                                      Expression::EvaluationContext* /*nameFinder*/,
                                       ImageProvider* imageProvider)
 {
     bool hasChanged = false;

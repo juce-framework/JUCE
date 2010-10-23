@@ -56,6 +56,7 @@ public:
     void setSize (int, int)                         {}
     void setBounds (int, int, int, int, bool)       {}
     void setMinimised (bool)                        {}
+    void setAlpha (float /*newAlpha*/)              {}
     bool isMinimised() const                        { return false; }
     void setFullScreen (bool)                       {}
     bool isFullScreen() const                       { return false; }
@@ -266,12 +267,13 @@ void MagnifierComponent::paint (Graphics& g)
     }
 
     Image temp (Image::ARGB, jmax (w, srcX + srcW), jmax (h, srcY + srcH), false);
-    temp.clear (Rectangle<int> (srcX, srcY, srcW, srcH));
+    const Rectangle<int> area (srcX, srcY, srcW, srcH);
+    temp.clear (area);
 
     {
         Graphics g2 (temp);
-        g2.reduceClipRegion (srcX, srcY, srcW, srcH);
-        holderComp->paintEntireComponent (g2);
+        g2.reduceClipRegion (area);
+        holderComp->paintEntireComponent (g2, false);
     }
 
     g.setImageResamplingQuality (quality);

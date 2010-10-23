@@ -66,7 +66,8 @@ Component::Component()
     bufferedImage_ (0),
     mouseListeners_ (0),
     keyListeners_ (0),
-    componentFlags_ (0)
+    componentFlags_ (0),
+    componentTransparency (0)
 {
 }
 
@@ -80,12 +81,15 @@ Component::Component (const String& name)
     bufferedImage_ (0),
     mouseListeners_ (0),
     keyListeners_ (0),
-    componentFlags_ (0)
+    componentFlags_ (0),
+    componentTransparency (0)
 {
 }
 
 Component::~Component()
 {
+    static_jassert (sizeof (flags) <= sizeof (componentFlags_));
+
     componentListeners.call (&ComponentListener::componentBeingDeleted, *this);
 
     if (parentComponent_ != 0)
@@ -211,117 +215,6 @@ bool Component::isShowing() const
     }
 
     return false;
-}
-
-//==============================================================================
-class FadeOutProxyComponent  : public Component,
-                               public Timer
-{
-public:
-    FadeOutProxyComponent (Component* comp,
-                           const int fadeLengthMs,
-                           const int deltaXToMove,
-                           const int deltaYToMove,
-                           const float scaleFactorAtEnd)
-       : lastTime (0),
-         alpha (1.0f),
-         scale (1.0f)
-    {
-        image = comp->createComponentSnapshot (comp->getLocalBounds());
-        setBounds (comp->getBounds());
-        comp->getParentComponent()->addAndMakeVisible (this);
-        toBehind (comp);
-
-        alphaChangePerMs = -1.0f / (float)fadeLengthMs;
-
-        centreX = comp->getX() + comp->getWidth() * 0.5f;
-        xChangePerMs = deltaXToMove / (float)fadeLengthMs;
-
-        centreY = comp->getY() + comp->getHeight() * 0.5f;
-        yChangePerMs = deltaYToMove / (float)fadeLengthMs;
-
-        scaleChangePerMs = (scaleFactorAtEnd - 1.0f) / (float)fadeLengthMs;
-
-        setInterceptsMouseClicks (false, false);
-
-        // 30 fps is enough for a fade, but we need a higher rate if it's moving as well..
-        startTimer (1000 / ((deltaXToMove == 0 && deltaYToMove == 0) ? 30 : 50));
-    }
-
-    ~FadeOutProxyComponent()
-    {
-    }
-
-    void paint (Graphics& g)
-    {
-        g.setOpacity (alpha);
-
-        g.drawImage (image,
-                     0, 0, getWidth(), getHeight(),
-                     0, 0, image.getWidth(), image.getHeight());
-    }
-
-    void timerCallback()
-    {
-        const uint32 now = Time::getMillisecondCounter();
-
-        if (lastTime == 0)
-            lastTime = now;
-
-        const int msPassed = (now > lastTime) ? now - lastTime : 0;
-        lastTime = now;
-
-        alpha += alphaChangePerMs * msPassed;
-
-        if (alpha > 0)
-        {
-            if (xChangePerMs != 0.0f || yChangePerMs != 0.0f || scaleChangePerMs != 0.0f)
-            {
-                centreX += xChangePerMs * msPassed;
-                centreY += yChangePerMs * msPassed;
-                scale += scaleChangePerMs * msPassed;
-
-                const int w = roundToInt (image.getWidth() * scale);
-                const int h = roundToInt (image.getHeight() * scale);
-
-                setBounds (roundToInt (centreX) - w / 2,
-                           roundToInt (centreY) - h / 2,
-                           w, h);
-            }
-
-            repaint();
-        }
-        else
-        {
-            delete this;
-        }
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    Image image;
-    uint32 lastTime;
-    float alpha, alphaChangePerMs;
-    float centreX, xChangePerMs;
-    float centreY, yChangePerMs;
-    float scale, scaleChangePerMs;
-
-    FadeOutProxyComponent (const FadeOutProxyComponent&);
-    FadeOutProxyComponent& operator= (const FadeOutProxyComponent&);
-};
-
-void Component::fadeOutComponent (const int millisecondsToFade,
-                                  const int deltaXToMove,
-                                  const int deltaYToMove,
-                                  const float scaleFactorAtEnd)
-{
-    //xxx won't work for comps without parents
-    if (isShowing() && millisecondsToFade > 0)
-        new FadeOutProxyComponent (this, millisecondsToFade,
-                                   deltaXToMove, deltaYToMove, scaleFactorAtEnd);
-
-    setVisible (false);
 }
 
 
@@ -1464,6 +1357,33 @@ void Component::setRepaintsOnMouseActivity (const bool shouldRepaint) throw()
 }
 
 //==============================================================================
+void Component::setAlpha (const float newAlpha)
+{
+    const uint8 newIntAlpha = (uint8) (255 - jlimit (0, 255, roundToInt (newAlpha * 255.0)));
+
+    if (componentTransparency != newIntAlpha)
+    {
+        componentTransparency = newIntAlpha;
+
+        if (flags.hasHeavyweightPeerFlag)
+        {
+            ComponentPeer* const peer = getPeer();
+
+            if (peer != 0)
+                peer->setAlpha (newAlpha);
+        }
+        else
+        {
+            repaint();
+        }
+    }
+}
+
+float Component::getAlpha() const
+{
+    return (255 - componentTransparency) / 255.0f;
+}
+
 void Component::repaintParent()
 {
     if (flags.visibleFlag)
@@ -1557,7 +1477,7 @@ void Component::renderComponent (Graphics& g)
                 paint (imG);
             }
 
-            g.setColour (Colours::black);
+            g.setColour (Colours::black.withAlpha (getAlpha()));
             g.drawImageAt (bufferedImage_, 0, 0);
         }
         else
@@ -1576,8 +1496,7 @@ void Component::renderComponent (Graphics& g)
         {
             g.saveState();
 
-            if (g.reduceClipRegion (child->getX(), child->getY(),
-                                    child->getWidth(), child->getHeight()))
+            if (g.reduceClipRegion (child->getBounds()))
             {
                 for (int j = i + 1; j < childComponentList_.size(); ++j)
                 {
@@ -1590,7 +1509,7 @@ void Component::renderComponent (Graphics& g)
                 if (! g.isClipEmpty())
                 {
                     g.setOrigin (child->getX(), child->getY());
-                    child->paintEntireComponent (g);
+                    child->paintEntireComponent (g, false);
                 }
             }
 
@@ -1603,34 +1522,53 @@ void Component::renderComponent (Graphics& g)
     g.restoreState();
 }
 
-void Component::paintEntireComponent (Graphics& g)
+void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
 {
     jassert (! g.isClipEmpty());
 
-#if JUCE_DEBUG
+  #if JUCE_DEBUG
     flags.isInsidePaintCall = true;
-#endif
+  #endif
 
     if (effect_ != 0)
     {
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           getWidth(), getHeight(),
-                           ! flags.opaqueFlag, Image::NativeImage);
+                           getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
         {
             Graphics g2 (effectImage);
             renderComponent (g2);
         }
 
-        effect_->applyEffect (effectImage, g);
+        effect_->applyEffect (effectImage, g, ignoreAlphaLevel ? 1.0f : getAlpha());
     }
     else
     {
-        renderComponent (g);
+        if (componentTransparency > 0 && ! ignoreAlphaLevel)
+        {
+            if (componentTransparency < 255)
+            {
+                Image temp (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                            getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
+
+                {
+                    Graphics tempG (temp);
+                    tempG.reduceClipRegion (g.getClipBounds());
+                    paintEntireComponent (tempG, true);
+                }
+
+                g.setColour (Colours::black.withAlpha (getAlpha()));
+                g.drawImageAt (temp, 0, 0);
+            }
+        }
+        else
+        {
+            renderComponent (g);
+        }
     }
 
-#if JUCE_DEBUG
+  #if JUCE_DEBUG
     flags.isInsidePaintCall = false;
-#endif
+  #endif
 }
 
 //==============================================================================
@@ -1649,7 +1587,7 @@ const Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab
 
     Graphics imageContext (componentImage);
     imageContext.setOrigin (-r.getX(), -r.getY());
-    paintEntireComponent (imageContext);
+    paintEntireComponent (imageContext, true);
 
     return componentImage;
 }

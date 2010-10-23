@@ -148,7 +148,7 @@ public:
                     {
                         // plot the fist pixel of this segment, including any accumulated
                         // levels from smaller segments that haven't been drawn yet
-                        levelAccumulator += (0xff - (x & 0xff)) * level;
+                        levelAccumulator += (0x100 - (x & 0xff)) * level;
                         levelAccumulator >>= 8;
                         x >>= 8;
 

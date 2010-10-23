@@ -53,9 +53,12 @@ public:
                                 its paint() method. The image may or may not have an alpha
                                 channel, depending on whether the component is opaque.
         @param destContext      the graphics context to use to draw the resultant image.
+        @param alpha            the alpha with which to draw the resultant image to the
+                                target context
     */
     virtual void applyEffect (Image& sourceImage,
-                              Graphics& destContext) = 0;
+                              Graphics& destContext,
+                              float alpha) = 0;
 
     /** Destructor. */
     virtual ~ImageEffectFilter() {}

@@ -350,7 +350,6 @@
  #include "../src/gui/graphics/drawables/juce_SVGParser.cpp"
  #include "../src/gui/graphics/effects/juce_DropShadowEffect.cpp"
  #include "../src/gui/graphics/effects/juce_GlowEffect.cpp"
- #include "../src/gui/graphics/effects/juce_ReduceOpacityEffect.cpp"
  #include "../src/gui/graphics/fonts/juce_Font.cpp"
  #include "../src/gui/graphics/fonts/juce_GlyphArrangement.cpp"
  #include "../src/gui/graphics/fonts/juce_TextLayout.cpp"

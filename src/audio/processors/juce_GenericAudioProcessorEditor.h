@@ -56,7 +56,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    PropertyPanel* panel;
+    PropertyPanel panel;
 
     GenericAudioProcessorEditor (const GenericAudioProcessorEditor&);
     GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);

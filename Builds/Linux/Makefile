@@ -249,7 +249,6 @@ OBJECTS := \
   $(OBJDIR)/juce_SVGParser_b79416c5.o \
   $(OBJDIR)/juce_DropShadowEffect_da52d75.o \
   $(OBJDIR)/juce_GlowEffect_c0959893.o \
-  $(OBJDIR)/juce_ReduceOpacityEffect_e8e7a60b.o \
   $(OBJDIR)/juce_Font_fa88db26.o \
   $(OBJDIR)/juce_GlyphArrangement_f0797295.o \
   $(OBJDIR)/juce_TextLayout_d18f700e.o \
@@ -1412,11 +1411,6 @@ $(OBJDIR)/juce_DropShadowEffect_da52d75.o: ../../src/gui/graphics/effects/juce_D
 $(OBJDIR)/juce_GlowEffect_c0959893.o: ../../src/gui/graphics/effects/juce_GlowEffect.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_GlowEffect.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ReduceOpacityEffect_e8e7a60b.o: ../../src/gui/graphics/effects/juce_ReduceOpacityEffect.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_ReduceOpacityEffect.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Font_fa88db26.o: ../../src/gui/graphics/fonts/juce_Font.cpp

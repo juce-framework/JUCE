@@ -737,8 +737,6 @@
               <File RelativePath="..\..\src\gui\graphics\effects\juce_GlowEffect.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\effects\juce_GlowEffect.h"/>
               <File RelativePath="..\..\src\gui\graphics\effects\juce_ImageEffectFilter.h"/>
-              <File RelativePath="..\..\src\gui\graphics\effects\juce_ReduceOpacityEffect.cpp"/>
-              <File RelativePath="..\..\src\gui\graphics\effects\juce_ReduceOpacityEffect.h"/>
             </Filter>
             <Filter Name="fonts">
               <File RelativePath="..\..\src\gui\graphics\fonts\juce_Font.cpp"/>

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	80
+#define JUCE_BUILDNUMBER	81
 
 /** Current Juce version number.
 
@@ -24909,6 +24909,13 @@ public:
 	*/
 	bool reduceClipRegion (int x, int y, int width, int height);
 
+	/** Intersects the current clipping region with another region.
+
+		@returns true if the resulting clipping region is non-zero in size
+		@see setOrigin, clipRegionIntersects
+	*/
+	bool reduceClipRegion (const Rectangle<int>& area);
+
 	/** Intersects the current clipping region with a rectangle list region.
 
 		@returns true if the resulting clipping region is non-zero in size
@@ -25019,9 +25026,12 @@ public:
 								its paint() method. The image may or may not have an alpha
 								channel, depending on whether the component is opaque.
 		@param destContext	  the graphics context to use to draw the resultant image.
+		@param alpha		the alpha with which to draw the resultant image to the
+								target context
 	*/
 	virtual void applyEffect (Image& sourceImage,
-							  Graphics& destContext) = 0;
+							  Graphics& destContext,
+							  float alpha) = 0;
 
 	/** Destructor. */
 	virtual ~ImageEffectFilter() {}
@@ -26010,31 +26020,6 @@ public:
 	*/
 	bool isShowing() const;
 
-	/** Makes a component invisible using a groovy fade-out and animated zoom effect.
-
-		To do this, this function will cunningly:
-			- take a snapshot of the component as it currently looks
-			- call setVisible(false) on the component
-			- replace it with a special component that will continue drawing the
-			  snapshot, animating it and gradually making it more transparent
-			- when it's gone, the special component will also be deleted
-
-		As soon as this method returns, the component can be safely removed and deleted
-		leaving the proxy to do the fade-out, so it's even ok to call this in a
-		component's destructor.
-
-		Passing non-zero x and y values will cause the ghostly component image to
-		also whizz off by this distance while fading out. If the scale factor is
-		not 1.0, it will also zoom from the component's current size to this new size.
-
-		One thing to be careful about is that the parent component must be able to cope
-		with this unknown component type being added to it.
-	*/
-	void fadeOutComponent (int lengthOfFadeOutInMilliseconds,
-						   int deltaXToMove = 0,
-						   int deltaYToMove = 0,
-						   float scaleFactorAtEnd = 1.0f);
-
 	/** Makes this component appear as a window on the desktop.
 
 		Note that before calling this, you should make sure that the component's opacity is
@@ -26742,8 +26727,12 @@ public:
 
 		The graphics context may be left in an undefined state after this method returns,
 		so you may need to reset it if you're going to use it again.
+
+		If ignoreAlphaLevel is false, then the component will be drawn with the opacity level
+		specified by getAlpha(); if ignoreAlphaLevel is true, then this will be ignored and
+		an alpha of 1.0 will be used.
 	*/
-	void paintEntireComponent (Graphics& context);
+	void paintEntireComponent (Graphics& context, bool ignoreAlphaLevel);
 
 	/** Adds an effect filter to alter the component's appearance.
 
@@ -27045,6 +27034,9 @@ public:
 		@see setEnabled, isEnabled
 	*/
 	virtual void enablementChanged();
+
+	void setAlpha (float newAlpha);
+	float getAlpha() const;
 
 	/** Changes the mouse cursor shape to use when the mouse is over this component.
 
@@ -27888,6 +27880,8 @@ private:
 		ComponentFlags flags;
 	};
 
+	uint8 componentTransparency;
+
 	void internalMouseEnter (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
 	void internalMouseExit  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
 	void internalMouseDown  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
@@ -27903,7 +27897,7 @@ private:
 	void internalModifierKeysChanged();
 	void internalChildrenChanged();
 	void internalHierarchyChanged();
-	void renderComponent (Graphics& context);
+	void renderComponent (Graphics& g);
 	void sendMovedResizedMessages (bool wasMoved, bool wasResized);
 	void repaintParent();
 	void sendFakeMouseMove() const;
@@ -28807,6 +28801,139 @@ private:
 #endif   // __JUCE_TIMER_JUCEHEADER__
 /*** End of inlined file: juce_Timer.h ***/
 
+
+/*** Start of inlined file: juce_ComponentAnimator.h ***/
+#ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
+#define __JUCE_COMPONENTANIMATOR_JUCEHEADER__
+
+/**
+	Animates a set of components, moving them to a new position and/or fading their
+	alpha levels.
+
+	To animate a component, create a ComponentAnimator instance or (preferably) use the
+	global animator object provided by Desktop::getAnimator(), and call its animateComponent()
+	method to commence the movement.
+
+	If you're using your own ComponentAnimator instance, you'll need to make sure it isn't
+	deleted before it finishes moving the components, or they'll be abandoned before reaching their
+	destinations.
+
+	It's ok to delete components while they're being animated - the animator will detect this
+	and safely stop using them.
+
+	The class is a ChangeBroadcaster and sends a notification when any components
+	start or finish being animated.
+
+	@see Desktop::getAnimator
+*/
+class JUCE_API  ComponentAnimator  : public ChangeBroadcaster,
+									 private Timer
+{
+public:
+
+	/** Creates a ComponentAnimator. */
+	ComponentAnimator();
+
+	/** Destructor. */
+	~ComponentAnimator();
+
+	/** Starts a component moving from its current position to a specified position.
+
+		If the component is already in the middle of an animation, that will be abandoned,
+		and a new animation will begin, moving the component from its current location.
+
+		The start and end speed parameters let you apply some acceleration to the component's
+		movement.
+
+		@param component		the component to move
+		@param finalBounds	  the destination bounds to which the component should move. To leave the
+									component in the same place, just pass component->getBounds() for this value
+		@param finalAlpha	   the alpha value that the component should have at the end of the animation
+		@param animationDurationMilliseconds	how long the animation should last, in milliseconds
+		@param useProxyComponent	if true, this means the component should be replaced by an internally
+									managed temporary component which is a snapshot of the original component.
+									This avoids the component having to paint itself as it moves, so may
+									be more efficient. This option also allows you to delete the original
+									component immediately after starting the animation, because the animation
+									can proceed without it. If you use a proxy, the original component will be
+									made invisible by this call, and then will become visible again at the end
+									of the animation. It'll also mean that the proxy component will be temporarily
+									added to the component's parent, so avoid it if this might confuse the parent
+									component, or if there's a chance the parent might decide to delete its children.
+		@param startSpeed	   a value to indicate the relative start speed of the animation. If this is 0,
+									the component will start by accelerating from rest; higher values mean that it
+									will have an initial speed greater than zero. If the value if greater than 1, it
+									will decelerate towards the middle of its journey. To move the component at a
+									constant rate for its entire animation, set both the start and end speeds to 1.0
+		@param endSpeed		 a relative speed at which the component should be moving when the animation finishes.
+									If this is 0, the component will decelerate to a standstill at its final position;
+									higher values mean the component will still be moving when it stops. To move the component
+									at a constant rate for its entire animation, set both the start and end speeds to 1.0
+	*/
+	void animateComponent (Component* component,
+						   const Rectangle<int>& finalBounds,
+						   float finalAlpha,
+						   int animationDurationMilliseconds,
+						   bool useProxyComponent,
+						   double startSpeed,
+						   double endSpeed);
+
+	/** Begins a fade-out of this components alpha level.
+		This is a quick way of invoking animateComponent() with a target alpha value of 0.0f, using
+		a proxy. You're safe to delete the component after calling this method, and this won't
+		interfere with the animation's progress.
+	*/
+	void fadeOut (Component* component, int millisecondsToTake);
+
+	/** Begins a fade-in of a component.
+		This is a quick way of invoking animateComponent() with a target alpha value of 1.0f.
+	*/
+	void fadeIn (Component* component, int millisecondsToTake);
+
+	/** Stops a component if it's currently being animated.
+
+		If moveComponentToItsFinalPosition is true, then the component will
+		be immediately moved to its destination position and size. If false, it will be
+		left in whatever location it currently occupies.
+	*/
+	void cancelAnimation (Component* component,
+						  bool moveComponentToItsFinalPosition);
+
+	/** Clears all of the active animations.
+
+		If moveComponentsToTheirFinalPositions is true, all the components will
+		be immediately set to their final positions. If false, they will be
+		left in whatever locations they currently occupy.
+	*/
+	void cancelAllAnimations (bool moveComponentsToTheirFinalPositions);
+
+	/** Returns the destination position for a component.
+
+		If the component is being animated, this will return the target position that
+		was specified when animateComponent() was called.
+
+		If the specified component isn't currently being animated, this method will just
+		return its current position.
+	*/
+	const Rectangle<int> getComponentDestination (Component* component);
+
+	/** Returns true if the specified component is currently being animated. */
+	bool isAnimating (Component* component) const;
+
+	juce_UseDebuggingNewOperator
+
+private:
+	class AnimationTask;
+	OwnedArray <AnimationTask> tasks;
+	uint32 lastTime;
+
+	AnimationTask* findTaskFor (Component* component) const;
+	void timerCallback();
+};
+
+#endif   // __JUCE_COMPONENTANIMATOR_JUCEHEADER__
+/*** End of inlined file: juce_ComponentAnimator.h ***/
+
 class MouseInputSource;
 class MouseInputSourceInternal;
 class MouseListener;
@@ -28987,6 +29114,17 @@ public:
 	*/
 	Component* findComponentAt (const Point<int>& screenPosition) const;
 
+	/** The Desktop object has a ComponentAnimator instance which can be used for performing
+		your animations.
+
+		Having a single shared ComponentAnimator object makes it more efficient when multiple
+		components are being moved around simultaneously. It's also more convenient than having
+		to manage your own instance of one.
+
+		@see ComponentAnimator
+	*/
+	ComponentAnimator& getAnimator() throw()			{ return animator; }
+
 	/** Returns the number of MouseInputSource objects the system has at its disposal.
 		In a traditional single-mouse system, there might be only one object. On a multi-touch
 		system, there could be one input source per potential finger.
@@ -29090,6 +29228,8 @@ private:
 	Rectangle<int> kioskComponentOriginalBounds;
 
 	int allowedOrientations;
+
+	ComponentAnimator animator;
 
 	void timerCallback();
 	void resetTimer();
@@ -42486,7 +42626,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	PropertyPanel* panel;
+	PropertyPanel panel;
 
 	GenericAudioProcessorEditor (const GenericAudioProcessorEditor&);
 	GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
@@ -43967,7 +44107,7 @@ public:
 							  int newShadowOffsetY);
 
 	/** @internal */
-	void applyEffect (Image& sourceImage, Graphics& destContext);
+	void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
 	juce_UseDebuggingNewOperator
 
@@ -44070,12 +44210,8 @@ public:
 	RelativeCoordinate (double absoluteDistanceFromOrigin);
 
 	/** Recreates a coordinate from a string description.
-
 		The string will be parsed by ExpressionParser::parse().
-
 		@param stringVersion	the expression to use
-		@param isHorizontal	 this must be true if this is an X coordinate, or false if it's on the Y axis.
-
 		@see toString
 	*/
 	RelativeCoordinate (const String& stringVersion);
@@ -45501,115 +45637,6 @@ private:
 #endif   // __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
 /*** End of inlined file: juce_DragAndDropContainer.h ***/
 
-
-/*** Start of inlined file: juce_ComponentAnimator.h ***/
-#ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
-#define __JUCE_COMPONENTANIMATOR_JUCEHEADER__
-
-/**
-	Animates a set of components, moving it to a new position.
-
-	To use this, create a ComponentAnimator, and use its animateComponent() method
-	to tell it to move components to destination positions. Any number of
-	components can be animated by one ComponentAnimator object (if you've got a
-	lot of components to move, it's much more efficient to share a single animator
-	than to have many animators running at once).
-
-	You'll need to make sure the animator object isn't deleted before it finishes
-	moving the components.
-
-	The class is a ChangeBroadcaster and sends a notification when any components
-	start or finish being animated.
-*/
-class JUCE_API  ComponentAnimator  : public ChangeBroadcaster,
-									 private Timer
-{
-public:
-
-	/** Creates a ComponentAnimator. */
-	ComponentAnimator();
-
-	/** Destructor. */
-	~ComponentAnimator();
-
-	/** Starts a component moving from its current position to a specified position.
-
-		If the component is already in the middle of an animation, that will be abandoned,
-		and a new animation will begin, moving the component from its current location.
-
-		The start and end speed parameters let you apply some acceleration to the component's
-		movement.
-
-		@param component		the component to move
-		@param finalPosition	the destination position and size to move it to
-		@param millisecondsToSpendMoving	how long, in milliseconds, it should take
-									to arrive at its destination
-		@param startSpeed	   a value to indicate the relative start speed of the
-									animation. If this is 0, the component will start
-									by accelerating from rest; higher values mean that it
-									will have an initial speed greater than zero. If the
-									value if greater than 1, it will decelerate towards the
-									middle of its journey. To move the component at a constant
-									rate for its entire animation, set both the start and
-									end speeds to 1.0
-		@param endSpeed		 a relative speed at which the component should be moving
-									when the animation finishes. If this is 0, the component
-									will decelerate to a standstill at its final position; higher
-									values mean the component will still be moving when it stops.
-									To move the component at a constant rate for its entire
-									animation, set both the start and end speeds to 1.0
-	*/
-	void animateComponent (Component* component,
-						   const Rectangle<int>& finalPosition,
-						   int millisecondsToSpendMoving,
-						   double startSpeed = 1.0,
-						   double endSpeed = 1.0);
-
-	/** Stops a component if it's currently being animated.
-
-		If moveComponentToItsFinalPosition is true, then the component will
-		be immediately moved to its destination position and size. If false, it will be
-		left in whatever location it currently occupies.
-	*/
-	void cancelAnimation (Component* component,
-						  bool moveComponentToItsFinalPosition);
-
-	/** Clears all of the active animations.
-
-		If moveComponentsToTheirFinalPositions is true, all the components will
-		be immediately set to their final positions. If false, they will be
-		left in whatever locations they currently occupy.
-	*/
-	void cancelAllAnimations (bool moveComponentsToTheirFinalPositions);
-
-	/** Returns the destination position for a component.
-
-		If the component is being animated, this will return the target position that
-		was specified when animateComponent() was called.
-
-		If the specified component isn't currently being animated, this method will just
-		return its current position.
-	*/
-	const Rectangle<int> getComponentDestination (Component* component);
-
-	/** Returns true if the specified component is currently being animated.
-	*/
-	bool isAnimating (Component* component) const;
-
-	juce_UseDebuggingNewOperator
-
-private:
-	class AnimationTask;
-	OwnedArray <AnimationTask> tasks;
-	uint32 lastTime;
-
-	AnimationTask* findTaskFor (Component* component) const;
-	void timerCallback();
-};
-
-#endif   // __JUCE_COMPONENTANIMATOR_JUCEHEADER__
-/*** End of inlined file: juce_ComponentAnimator.h ***/
-
 class ToolbarItemComponent;
 class ToolbarItemFactory;
 
@@ -45869,7 +45896,6 @@ private:
 	Button* missingItemsButton;
 	bool vertical, isEditingActive;
 	ToolbarItemStyle toolbarStyle;
-	ComponentAnimator animator;
 	class MissingItemsComponent;
 	friend class MissingItemsComponent;
 	Array <ToolbarItemComponent*> items;
@@ -52521,13 +52547,14 @@ public:
 
 private:
 
-	KeyPressMappingSet* mappings;
-	TreeView* tree;
 	friend class KeyMappingTreeViewItem;
 	friend class KeyCategoryTreeViewItem;
 	friend class KeyMappingItemComponent;
 	friend class KeyMappingChangeButton;
-	TextButton* resetButton;
+
+	KeyPressMappingSet* mappings;
+	TreeView tree;
+	TextButton resetButton;
 
 	void assignNewKey (CommandID commandID, int index);
 
@@ -56770,7 +56797,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Label* textEditor;
+	ScopedPointer<Label> textEditor;
 
 	void createEditor (int maxNumChars, bool isMultiLine);
 
@@ -59117,6 +59144,9 @@ public:
 	*/
 	virtual void performAnyPendingRepaintsNow() = 0;
 
+	/** Changes the window's transparency. */
+	virtual void setAlpha (float newAlpha) = 0;
+
 	void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, int64 time);
 	void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, int64 time, float x, float y);
 
@@ -59719,7 +59749,7 @@ public:
 					{
 						// plot the fist pixel of this segment, including any accumulated
 						// levels from smaller segments that haven't been drawn yet
-						levelAccumulator += (0xff - (x & 0xff)) * level;
+						levelAccumulator += (0x100 - (x & 0xff)) * level;
 						levelAccumulator >>= 8;
 						x >>= 8;
 
@@ -61024,7 +61054,7 @@ public:
 							const Colour& newColour);
 
 	/** @internal */
-	void applyEffect (Image& sourceImage, Graphics& destContext);
+	void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
 	juce_UseDebuggingNewOperator
 
@@ -61039,54 +61069,6 @@ private:
 
 #endif
 #ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
-
-/*** Start of inlined file: juce_ReduceOpacityEffect.h ***/
-#ifndef __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
-#define __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
-
-/**
-	An effect filter that reduces the image's opacity.
-
-	This can be used to make a component (and its child components) more
-	transparent.
-
-	@see Component::setComponentEffect
-*/
-class JUCE_API  ReduceOpacityEffect  : public ImageEffectFilter
-{
-public:
-
-	/** Creates the effect object.
-
-		The opacity of the component to which the effect is applied will be
-		scaled by the given factor (in the range 0 to 1.0f).
-	*/
-	ReduceOpacityEffect (float opacity = 1.0f);
-
-	/** Destructor. */
-	~ReduceOpacityEffect();
-
-	/** Sets how much to scale the component's opacity.
-
-		@param newOpacity   should be between 0 and 1.0f
-	*/
-	void setOpacity (float newOpacity);
-
-	/** @internal */
-	void applyEffect (Image& sourceImage, Graphics& destContext);
-
-	juce_UseDebuggingNewOperator
-
-private:
-	float opacity;
-};
-
-#endif   // __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
-/*** End of inlined file: juce_ReduceOpacityEffect.h ***/
-
 
 #endif
 #ifndef __JUCE_FONT_JUCEHEADER__

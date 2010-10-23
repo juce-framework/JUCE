@@ -218,7 +218,6 @@
 		645AF66C048A4815F5A8ECDD = { isa = PBXBuildFile; fileRef = 2BFC199D03DEEC329D6A7CB1; };
 		38EFE824E76B3BB99824C265 = { isa = PBXBuildFile; fileRef = 32EA297812F1C88B42099501; };
 		E23C5C51305DC7CE30E4DAB7 = { isa = PBXBuildFile; fileRef = CB649686575473223C859482; };
-		89C96A721F3B54CF3F33848C = { isa = PBXBuildFile; fileRef = 7EBBC368FA350F786EF446B7; };
 		B92F53BABB6A9AC8348B001E = { isa = PBXBuildFile; fileRef = 78068AA59A5DCFCCAAEA79D0; };
 		EBC3AA015D24C62FA0307F51 = { isa = PBXBuildFile; fileRef = 61D06B694603F608CDA0703B; };
 		803FFCA3DAC0C004A80143B4 = { isa = PBXBuildFile; fileRef = 91CB423DBC5F3CBEDD9CF2EF; };
@@ -834,8 +833,6 @@
 		CB649686575473223C859482 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GlowEffect.cpp; path = ../../src/gui/graphics/effects/juce_GlowEffect.cpp; sourceTree = SOURCE_ROOT; };
 		FD1FA4ABB4226372235643E4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_GlowEffect.h; path = ../../src/gui/graphics/effects/juce_GlowEffect.h; sourceTree = SOURCE_ROOT; };
 		18DB9BD10F140F132A3279C3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ImageEffectFilter.h; path = ../../src/gui/graphics/effects/juce_ImageEffectFilter.h; sourceTree = SOURCE_ROOT; };
-		7EBBC368FA350F786EF446B7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ReduceOpacityEffect.cpp; path = ../../src/gui/graphics/effects/juce_ReduceOpacityEffect.cpp; sourceTree = SOURCE_ROOT; };
-		8D18743ECC1BF12381811FD6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ReduceOpacityEffect.h; path = ../../src/gui/graphics/effects/juce_ReduceOpacityEffect.h; sourceTree = SOURCE_ROOT; };
 		78068AA59A5DCFCCAAEA79D0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Font.cpp; path = ../../src/gui/graphics/fonts/juce_Font.cpp; sourceTree = SOURCE_ROOT; };
 		0401EA0E883CCAAAC6960A27 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Font.h; path = ../../src/gui/graphics/fonts/juce_Font.h; sourceTree = SOURCE_ROOT; };
 		61D06B694603F608CDA0703B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GlyphArrangement.cpp; path = ../../src/gui/graphics/fonts/juce_GlyphArrangement.cpp; sourceTree = SOURCE_ROOT; };
@@ -1592,9 +1589,7 @@
 				85D4043F9E25047E07496DAC,
 				CB649686575473223C859482,
 				FD1FA4ABB4226372235643E4,
-				18DB9BD10F140F132A3279C3,
-				7EBBC368FA350F786EF446B7,
-				8D18743ECC1BF12381811FD6 ); name = effects; sourceTree = "<group>"; };
+				18DB9BD10F140F132A3279C3 ); name = effects; sourceTree = "<group>"; };
 		58FE42C578BFFD1F8F545B39 = { isa = PBXGroup; children = (
 				78068AA59A5DCFCCAAEA79D0,
 				0401EA0E883CCAAAC6960A27,
@@ -2143,7 +2138,6 @@
 				645AF66C048A4815F5A8ECDD,
 				38EFE824E76B3BB99824C265,
 				E23C5C51305DC7CE30E4DAB7,
-				89C96A721F3B54CF3F33848C,
 				B92F53BABB6A9AC8348B001E,
 				EBC3AA015D24C62FA0307F51,
 				803FFCA3DAC0C004A80143B4,

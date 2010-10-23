@@ -2556,7 +2556,7 @@ void LookAndFeel::drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const 
 
     DropShadowEffect shadow;
     shadow.setShadowProperties (5.0f, 0.4f, 0, 2);
-    shadow.applyEffect (content, g);
+    shadow.applyEffect (content, g, 1.0f);
 }
 
 

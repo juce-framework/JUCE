@@ -117,18 +117,8 @@ void BubbleComponent::setPosition (const int arrowTipX_,
 //==============================================================================
 void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
 {
-    Rectangle<int> availableSpace;
-
-    if (getParentComponent() != 0)
-    {
-        availableSpace.setSize (getParentComponent()->getWidth(),
-                                getParentComponent()->getHeight());
-    }
-    else
-    {
-        availableSpace = getParentMonitorArea();
-    }
-
+    Rectangle<int> availableSpace (getParentComponent() != 0 ? getParentComponent()->getLocalBounds()
+                                                             : getParentMonitorArea());
     int x = 0;
     int y = 0;
     int w = 150;

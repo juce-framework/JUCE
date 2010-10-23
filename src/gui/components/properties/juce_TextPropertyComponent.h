@@ -89,7 +89,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Label* textEditor;
+    ScopedPointer<Label> textEditor;
 
     void createEditor (int maxNumChars, bool isMultiLine);
 

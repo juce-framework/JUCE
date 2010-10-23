@@ -73,8 +73,8 @@ bool DrawableRectangle::rebuildPath (Path& path) const
     const float w = Line<float> (points[0], points[1]).getLength();
     const float h = Line<float> (points[0], points[2]).getLength();
 
-    const float cornerSizeX = cornerSize.x.resolve (parent);
-    const float cornerSizeY = cornerSize.y.resolve (parent);
+    const float cornerSizeX = (float) cornerSize.x.resolve (parent);
+    const float cornerSizeY = (float) cornerSize.y.resolve (parent);
 
     path.clear();
 

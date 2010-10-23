@@ -281,7 +281,6 @@ Toolbar::Toolbar()
 
 Toolbar::~Toolbar()
 {
-    animator.cancelAllAnimations (true);
     deleteAllChildren();
 }
 
@@ -552,11 +551,11 @@ void Toolbar::updateAllItemPositions (const bool animate)
 
                 if (animate)
                 {
-                    animator.animateComponent (tc, newBounds, 200, 3.0, 0.0);
+                    Desktop::getInstance().getAnimator().animateComponent (tc, newBounds, 1.0f, 200, false, 3.0, 0.0);
                 }
                 else
                 {
-                    animator.cancelAnimation (tc, false);
+                    Desktop::getInstance().getAnimator().cancelAnimation (tc, false);
                     tc->setBounds (newBounds);
                 }
 
@@ -644,12 +643,13 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
                 const int dragObjectLeft = vertical ? (y - tc->dragOffsetY) : (x - tc->dragOffsetX);
                 const int dragObjectRight = dragObjectLeft + (vertical ? tc->getHeight() : tc->getWidth());
 
-                const Rectangle<int> current (animator.getComponentDestination (getChildComponent (newIndex)));
+                const Rectangle<int> current (Desktop::getInstance().getAnimator()
+                                                .getComponentDestination (getChildComponent (newIndex)));
                 ToolbarItemComponent* const prev = getNextActiveComponent (newIndex, -1);
 
                 if (prev != 0)
                 {
-                    const Rectangle<int> previousPos (animator.getComponentDestination (prev));
+                    const Rectangle<int> previousPos (Desktop::getInstance().getAnimator().getComponentDestination (prev));
 
                     if (abs (dragObjectLeft - (vertical ? previousPos.getY() : previousPos.getX())
                           < abs (dragObjectRight - (vertical ? current.getBottom() : current.getRight()))))
@@ -661,7 +661,7 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
                 ToolbarItemComponent* const next = getNextActiveComponent (newIndex, 1);
                 if (next != 0)
                 {
-                    const Rectangle<int> nextPos (animator.getComponentDestination (next));
+                    const Rectangle<int> nextPos (Desktop::getInstance().getAnimator().getComponentDestination (next));
 
                     if (abs (dragObjectLeft - (vertical ? current.getY() : current.getX())
                          > abs (dragObjectRight - (vertical ? nextPos.getBottom() : nextPos.getRight()))))

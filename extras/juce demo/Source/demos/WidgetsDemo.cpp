@@ -610,7 +610,9 @@ public:
                                                            Random::getSystemRandom().nextInt (getHeight() / 2),
                                                            60 + Random::getSystemRandom().nextInt (getWidth() / 3),
                                                            16 + Random::getSystemRandom().nextInt (getHeight() / 6)),
+                                           Random::getSystemRandom().nextFloat(),
                                            500 + Random::getSystemRandom().nextInt (2000),
+                                           false,
                                            Random::getSystemRandom().nextDouble(),
                                            Random::getSystemRandom().nextDouble());
             }

@@ -1083,10 +1083,6 @@
                   file="src/gui/graphics/effects/juce_GlowEffect.h"/>
             <FILE id="raUYTlokJ" name="juce_ImageEffectFilter.h" compile="0" resource="0"
                   file="src/gui/graphics/effects/juce_ImageEffectFilter.h"/>
-            <FILE id="TTo5FPVpI" name="juce_ReduceOpacityEffect.cpp" compile="1"
-                  resource="0" file="src/gui/graphics/effects/juce_ReduceOpacityEffect.cpp"/>
-            <FILE id="TyJK1WbMk" name="juce_ReduceOpacityEffect.h" compile="0"
-                  resource="0" file="src/gui/graphics/effects/juce_ReduceOpacityEffect.h"/>
           </GROUP>
           <GROUP id="nw92NleR1" name="fonts">
             <FILE id="2zj67pVi" name="juce_Font.cpp" compile="1" resource="0" file="src/gui/graphics/fonts/juce_Font.cpp"/>

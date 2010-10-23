@@ -59,7 +59,7 @@ void DropShadowEffect::setShadowProperties (const float newRadius,
     opacity = newOpacity;
 }
 
-void DropShadowEffect::applyEffect (Image& image, Graphics& g)
+void DropShadowEffect::applyEffect (Image& image, Graphics& g, float alpha)
 {
     const int w = image.getWidth();
     const int h = image.getHeight();
@@ -101,10 +101,10 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g)
         }
     }
 
-    g.setColour (Colours::black.withAlpha (opacity));
+    g.setColour (Colours::black.withAlpha (opacity * alpha));
     g.drawImageAt (shadowImage, offsetX, offsetY, true);
 
-    g.setOpacity (1.0f);
+    g.setOpacity (alpha);
     g.drawImageAt (image, 0, 0);
 }
 

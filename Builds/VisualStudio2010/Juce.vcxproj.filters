@@ -844,9 +844,6 @@
     <ClCompile Include="..\..\src\gui\graphics\effects\juce_GlowEffect.cpp">
       <Filter>Juce\Source\gui\graphics\effects</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\graphics\effects\juce_ReduceOpacityEffect.cpp">
-      <Filter>Juce\Source\gui\graphics\effects</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\fonts\juce_Font.cpp">
       <Filter>Juce\Source\gui\graphics\fonts</Filter>
     </ClCompile>
@@ -2020,9 +2017,6 @@
       <Filter>Juce\Source\gui\graphics\effects</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\effects\juce_ImageEffectFilter.h">
-      <Filter>Juce\Source\gui\graphics\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\graphics\effects\juce_ReduceOpacityEffect.h">
       <Filter>Juce\Source\gui\graphics\effects</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\fonts\juce_Font.h">

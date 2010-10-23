@@ -63,7 +63,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void applyEffect (Image& sourceImage, Graphics& destContext);
+    void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

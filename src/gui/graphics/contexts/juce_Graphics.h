@@ -563,6 +563,13 @@ public:
     */
     bool reduceClipRegion (int x, int y, int width, int height);
 
+    /** Intersects the current clipping region with another region.
+
+        @returns true if the resulting clipping region is non-zero in size
+        @see setOrigin, clipRegionIntersects
+    */
+    bool reduceClipRegion (const Rectangle<int>& area);
+
     /** Intersects the current clipping region with a rectangle list region.
 
         @returns true if the resulting clipping region is non-zero in size

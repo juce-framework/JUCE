@@ -297,7 +297,6 @@ private:
     Button* missingItemsButton;
     bool vertical, isEditingActive;
     ToolbarItemStyle toolbarStyle;
-    ComponentAnimator animator;
     class MissingItemsComponent;
     friend class MissingItemsComponent;
     Array <ToolbarItemComponent*> items;

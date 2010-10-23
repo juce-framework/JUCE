@@ -158,19 +158,17 @@ public:
 
                 if (dropAccepted || source == 0)
                 {
-                    fadeOutComponent (120);
+                    Desktop::getInstance().getAnimator().fadeOut (this, 120);
                 }
                 else
                 {
-                    const Point<int> target (source->relativePositionToGlobal (Point<int> (source->getWidth() / 2,
-                                                                                           source->getHeight() / 2)));
+                    const Point<int> target (source->relativePositionToGlobal (source->getLocalBounds().getCentre()));
+                    const Point<int> ourCentre (relativePositionToGlobal (getLocalBounds().getCentre()));
 
-                    const Point<int> ourCentre (relativePositionToGlobal (Point<int> (getWidth() / 2,
-                                                                                      getHeight() / 2)));
-
-                    fadeOutComponent (120,
-                                      target.getX() - ourCentre.getX(),
-                                      target.getY() - ourCentre.getY());
+                    Desktop::getInstance().getAnimator().animateComponent (this,
+                                                                           getBounds() + (target - ourCentre),
+                                                                           0.0f, 120,
+                                                                           true, 1.0, 1.0);
                 }
             }
 

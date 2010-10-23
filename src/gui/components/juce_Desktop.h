@@ -33,6 +33,7 @@
 #include "../../events/juce_AsyncUpdater.h"
 #include "../../containers/juce_OwnedArray.h"
 #include "../graphics/geometry/juce_RectangleList.h"
+#include "layout/juce_ComponentAnimator.h"
 class MouseInputSource;
 class MouseInputSourceInternal;
 class MouseListener;
@@ -225,6 +226,16 @@ public:
     */
     Component* findComponentAt (const Point<int>& screenPosition) const;
 
+    /** The Desktop object has a ComponentAnimator instance which can be used for performing
+        your animations.
+
+        Having a single shared ComponentAnimator object makes it more efficient when multiple
+        components are being moved around simultaneously. It's also more convenient than having
+        to manage your own instance of one.
+
+        @see ComponentAnimator
+    */
+    ComponentAnimator& getAnimator() throw()                        { return animator; }
 
     //==============================================================================
     /** Returns the number of MouseInputSource objects the system has at its disposal.
@@ -333,6 +344,8 @@ private:
     Rectangle<int> kioskComponentOriginalBounds;
 
     int allowedOrientations;
+
+    ComponentAnimator animator;
 
     void timerCallback();
     void resetTimer();

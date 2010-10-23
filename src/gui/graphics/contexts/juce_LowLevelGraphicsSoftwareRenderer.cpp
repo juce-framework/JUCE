@@ -1907,9 +1907,8 @@ public:
 
                 ColourGradient g2 (*(fillType.gradient));
                 g2.multiplyOpacity (fillType.getOpacity());
-                g2.point1.addXY (-0.5f, -0.5f);
-                g2.point2.addXY (-0.5f, -0.5f);
-                AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
+                AffineTransform transform (fillType.transform.translated (xOffset - 0.5f, yOffset - 0.5f));
+
                 const bool isIdentity = transform.isOnlyTranslation();
 
                 if (isIdentity)

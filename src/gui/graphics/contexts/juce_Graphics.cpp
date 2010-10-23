@@ -86,10 +86,15 @@ bool Graphics::isVectorDevice() const
     return context->isVectorDevice();
 }
 
-bool Graphics::reduceClipRegion (const int x, const int y, const int w, const int h)
+bool Graphics::reduceClipRegion (const Rectangle<int>& area)
 {
     saveStateIfPending();
-    return context->clipToRectangle (Rectangle<int> (x, y, w, h));
+    return context->clipToRectangle (area);
+}
+
+bool Graphics::reduceClipRegion (const int x, const int y, const int w, const int h)
+{
+    return reduceClipRegion (Rectangle<int> (x, y, w, h));
 }
 
 bool Graphics::reduceClipRegion (const RectangleList& clipRegion)

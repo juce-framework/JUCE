@@ -133,13 +133,14 @@ public:
 
 private:
     //==============================================================================
-    KeyPressMappingSet* mappings;
-    TreeView* tree;
     friend class KeyMappingTreeViewItem;
     friend class KeyCategoryTreeViewItem;
     friend class KeyMappingItemComponent;
     friend class KeyMappingChangeButton;
-    TextButton* resetButton;
+
+    KeyPressMappingSet* mappings;
+    TreeView tree;
+    TextButton resetButton;
 
     void assignNewKey (CommandID commandID, int index);
 

@@ -415,7 +415,7 @@ public:
 
     //==============================================================================
     // hide this and all sub-comps
-    void hide (const PopupMenu::Item* const item)
+    void hide (const PopupMenu::Item* const item, const bool makeInvisible)
     {
         if (isVisible())
         {
@@ -425,7 +425,9 @@ public:
             currentChild = 0;
 
             exitModalState (item != 0 ? item->itemId : 0);
-            setVisible (false);
+
+            if (makeInvisible)
+                setVisible (false);
 
             if (item != 0
                  && item->commandManager != 0
@@ -448,11 +450,11 @@ public:
             {
                 // need a copy of this on the stack as the one passed in will get deleted during this call
                 const PopupMenu::Item mi (*item);
-                hide (&mi);
+                hide (&mi, false);
             }
             else
             {
-                hide (0);
+                hide (0, false);
             }
         }
     }
@@ -501,7 +503,7 @@ public:
                 Component::SafePointer<Window> parentWindow (owner);
                 PopupMenu::ItemComponent* currentChildOfParent = parentWindow->currentChild;
 
-                hide (0);
+                hide (0, true);
 
                 if (parentWindow != 0)
                     parentWindow->setCurrentlyHighlightedChild (currentChildOfParent);
@@ -660,7 +662,7 @@ public:
 
         if (hideOnExit && hasBeenOver && ! isOverAny)
         {
-            hide (0);
+            hide (0, true);
         }
         else
         {
@@ -1191,7 +1193,7 @@ private:
             {
                 if (isOver && (c != 0) && (activeSubMenu != 0))
                 {
-                    activeSubMenu->hide (0);
+                    activeSubMenu->hide (0, true);
                 }
 
                 if (! isOver)
@@ -1504,6 +1506,9 @@ public:
 
             managerOfChosenCommand->invoke (info, true);
         }
+
+        // (this would be the place to fade out the component, if that's what's required)
+        component = 0;
     }
 
     ApplicationCommandManager* managerOfChosenCommand;

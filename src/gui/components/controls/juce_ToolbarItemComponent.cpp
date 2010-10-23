@@ -215,8 +215,8 @@ void ToolbarItemComponent::paintButton (Graphics& g, const bool over, const bool
     if (! contentArea.isEmpty())
     {
         g.saveState();
+        g.reduceClipRegion (contentArea);
         g.setOrigin (contentArea.getX(), contentArea.getY());
-        g.reduceClipRegion (0, 0, contentArea.getWidth(), contentArea.getHeight());
 
         paintButtonArea (g, contentArea.getWidth(), contentArea.getHeight(), over, down);
 

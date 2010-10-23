@@ -49,7 +49,7 @@ void GlowEffect::setGlowProperties (const float newRadius,
     colour = newColour;
 }
 
-void GlowEffect::applyEffect (Image& image, Graphics& g)
+void GlowEffect::applyEffect (Image& image, Graphics& g, float alpha)
 {
     Image temp (image.getFormat(), image.getWidth(), image.getHeight(), true);
 
@@ -60,10 +60,10 @@ void GlowEffect::applyEffect (Image& image, Graphics& g)
 
     blurKernel.applyToImage (temp, image, image.getBounds());
 
-    g.setColour (colour);
+    g.setColour (colour.withMultipliedAlpha (alpha));
     g.drawImageAt (temp, 0, 0, true);
 
-    g.setOpacity (1.0f);
+    g.setOpacity (alpha);
     g.drawImageAt (image, 0, 0, false);
 }
 

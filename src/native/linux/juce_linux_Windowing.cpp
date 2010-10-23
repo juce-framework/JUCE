@@ -820,6 +820,11 @@ public:
         return screenPosition - getScreenPosition();
     }
 
+    void setAlpha (float newAlpha)
+    {
+        //xxx todo!
+    }
+
     void setMinimised (bool shouldBeMinimised)
     {
         if (shouldBeMinimised)

@@ -677,9 +677,6 @@
 #ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
  #include "gui/graphics/effects/juce_ImageEffectFilter.h"
 #endif
-#ifndef __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
- #include "gui/graphics/effects/juce_ReduceOpacityEffect.h"
-#endif
 #ifndef __JUCE_FONT_JUCEHEADER__
  #include "gui/graphics/fonts/juce_Font.h"
 #endif

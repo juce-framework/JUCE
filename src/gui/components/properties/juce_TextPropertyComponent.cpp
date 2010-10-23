@@ -34,10 +34,6 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 class TextPropLabel  : public Label
 {
-    TextPropertyComponent& owner;
-    int maxChars;
-    bool isMultiline;
-
 public:
     TextPropLabel (TextPropertyComponent& owner_,
                    const int maxChars_, const bool isMultiline_)
@@ -52,14 +48,9 @@ public:
         setColour (outlineColourId, findColour (ComboBox::outlineColourId));
     }
 
-    ~TextPropLabel()
-    {
-    }
-
     TextEditor* createEditorComponent()
     {
         TextEditor* const textEditor = Label::createEditorComponent();
-
         textEditor->setInputRestrictions (maxChars);
 
         if (isMultiline)
@@ -75,6 +66,11 @@ public:
     {
         owner.textWasEdited();
     }
+
+private:
+    TextPropertyComponent& owner;
+    int maxChars;
+    bool isMultiline;
 };
 
 //==============================================================================
@@ -99,7 +95,6 @@ TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
 
 TextPropertyComponent::~TextPropertyComponent()
 {
-    deleteAllChildren();
 }
 
 void TextPropertyComponent::setText (const String& newText)

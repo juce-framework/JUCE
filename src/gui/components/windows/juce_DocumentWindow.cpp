@@ -204,8 +204,8 @@ void DocumentWindow::paint (Graphics& g)
     }
 
     const Rectangle<int> titleBarArea (getTitleBarArea());
+    g.reduceClipRegion (titleBarArea);
     g.setOrigin (titleBarArea.getX(), titleBarArea.getY());
-    g.reduceClipRegion (0, 0, titleBarArea.getWidth(), titleBarArea.getHeight());
 
     int titleSpaceX1 = 6;
     int titleSpaceX2 = titleBarArea.getWidth() - 6;

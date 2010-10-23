@@ -231,7 +231,8 @@ public:
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
                        const int x, const int y,
-                       const RectangleList& maskedRegion) throw()
+                       const RectangleList& maskedRegion,
+                       const uint8 updateLayeredWindowAlpha) throw()
     {
         static HDRAWDIB hdd = 0;
         static bool needToCreateDrawDib = true;
@@ -289,7 +290,7 @@ public:
             bf.AlphaFormat = AC_SRC_ALPHA;
             bf.BlendFlags = 0;
             bf.BlendOp = AC_SRC_OVER;
-            bf.SourceConstantAlpha = 0xff;
+            bf.SourceConstantAlpha = updateLayeredWindowAlpha;
 
             if (! maskedRegion.isEmpty())
             {
@@ -410,6 +411,7 @@ public:
           hasCreatedCaret (false),
           currentWindowIcon (0),
           dropTarget (0),
+          updateLayeredWindowAlpha (255),
           parentToAddTo (parentToAddTo_)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
@@ -484,7 +486,7 @@ public:
 
     void repaintNowIfTransparent()
     {
-        if (isTransparent() && lastPaintTime > 0 && Time::getMillisecondCounter() > lastPaintTime + 30)
+        if (isUsingUpdateLayeredWindow() && lastPaintTime > 0 && Time::getMillisecondCounter() > lastPaintTime + 30)
             handlePaintMessage();
     }
 
@@ -569,6 +571,30 @@ public:
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
     {
         return screenPosition - getScreenPosition();
+    }
+
+    void setAlpha (float newAlpha)
+    {
+        const uint8 intAlpha = (uint8) jlimit (0, 255, (int) (newAlpha * 255.0f));
+
+        if (component->isOpaque())
+        {
+            if (newAlpha < 1.0f)
+            {
+                SetWindowLong (hwnd, GWL_EXSTYLE, GetWindowLong (hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+                SetLayeredWindowAttributes (hwnd, RGB (0, 0, 0), intAlpha, LWA_ALPHA);
+            }
+            else
+            {
+                SetWindowLong (hwnd, GWL_EXSTYLE, GetWindowLong (hwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
+                RedrawWindow (hwnd, 0, 0, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
+            }
+        }
+        else
+        {
+            updateLayeredWindowAlpha = intAlpha;
+            component->repaint();
+        }
     }
 
     void setMinimised (bool shouldBeMinimised)
@@ -878,6 +904,7 @@ private:
     HICON currentWindowIcon;
     ScopedPointer<NOTIFYICONDATA> taskBarIcon;
     IDropTarget* dropTarget;
+    uint8 updateLayeredWindowAlpha;
 
     //==============================================================================
     class TemporaryImage    : public Timer
@@ -1044,6 +1071,10 @@ private:
             // Calling this function here is (for some reason) necessary to make Windows
             // correctly enable the menu items that we specify in the wm_initmenu message.
             GetSystemMenu (hwnd, false);
+
+            const float alpha = component->getAlpha();
+            if (alpha < 1.0f)
+                setAlpha (alpha);
         }
         else
         {
@@ -1083,7 +1114,7 @@ private:
 
     void offsetWithinParent (int& x, int& y) const
     {
-        if (isTransparent())
+        if (isUsingUpdateLayeredWindow())
         {
             HWND parentHwnd = GetParent (hwnd);
 
@@ -1097,9 +1128,9 @@ private:
         }
     }
 
-    bool isTransparent() const
+    bool isUsingUpdateLayeredWindow() const
     {
-        return (GetWindowLong (hwnd, GWL_EXSTYLE) & WS_EX_LAYERED) != 0;
+        return ! component->isOpaque();
     }
 
     inline bool hasTitleBar() const throw()         { return (styleFlags & windowHasTitleBar) != 0; }
@@ -1165,7 +1196,7 @@ private:
             int w = paintStruct.rcPaint.right - x;
             int h = paintStruct.rcPaint.bottom - y;
 
-            const bool transparent = isTransparent();
+            const bool transparent = isUsingUpdateLayeredWindow();
 
             if (transparent)
             {
@@ -1256,7 +1287,7 @@ private:
 
                 if (! dontRepaint)
                     static_cast <WindowsBitmapImage*> (offscreenImage.getSharedImage())
-                        ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion);
+                        ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion, updateLayeredWindowAlpha);
             }
 
             DeleteObject (rgn);
@@ -1878,7 +1909,12 @@ private:
                     return 0;
 
                 case WM_WINDOWPOSCHANGED:
-                    doMouseEvent (getCurrentMousePos());
+                    {
+                        const Point<int> pos (getCurrentMousePos());
+                        if (contains (pos, false))
+                            doMouseEvent (pos);
+                    }
+
                     handleMovedOrResized();
 
                     if (dontRepaint)
@@ -2222,13 +2258,13 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
     Win32ComponentPeer::updateKeyModifiers();
 
-    int keyMods = 0;
-    if ((GetKeyState (VK_LBUTTON) & 0x8000) != 0)   keyMods |= ModifierKeys::leftButtonModifier;
-    if ((GetKeyState (VK_RBUTTON) & 0x8000) != 0)   keyMods |= ModifierKeys::rightButtonModifier;
-    if ((GetKeyState (VK_MBUTTON) & 0x8000) != 0)   keyMods |= ModifierKeys::middleButtonModifier;
+    int mouseMods = 0;
+    if ((GetKeyState (VK_LBUTTON) & 0x8000) != 0)   mouseMods |= ModifierKeys::leftButtonModifier;
+    if ((GetKeyState (VK_RBUTTON) & 0x8000) != 0)   mouseMods |= ModifierKeys::rightButtonModifier;
+    if ((GetKeyState (VK_MBUTTON) & 0x8000) != 0)   mouseMods |= ModifierKeys::middleButtonModifier;
 
     Win32ComponentPeer::currentModifiers
-        = Win32ComponentPeer::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+        = Win32ComponentPeer::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
 
     return Win32ComponentPeer::currentModifiers;
 }

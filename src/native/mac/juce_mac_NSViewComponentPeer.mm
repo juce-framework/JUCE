@@ -160,6 +160,7 @@ public:
     const Point<int> getScreenPosition() const;
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
+    void setAlpha (float newAlpha);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
@@ -880,8 +881,6 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
     {
         window = [viewToAttachTo window];
         [viewToAttachTo addSubview: view];
-
-        setVisible (component->isVisible());
     }
     else
     {
@@ -930,6 +929,10 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
         [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
         [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
     }
+
+    const float alpha = component->getAlpha();
+    if (alpha < 1.0f)
+        setAlpha (alpha);
 
     setTitle (component->getName());
 }
@@ -1092,6 +1095,14 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
     }
 
     return r;
+}
+
+void NSViewComponentPeer::setAlpha (float newAlpha)
+{
+    if (! isSharedWindow)
+        [window setAlphaValue: (CGFloat) newAlpha];
+    else
+        [view setAlphaValue: (CGFloat) newAlpha];
 }
 
 void NSViewComponentPeer::setMinimised (bool shouldBeMinimised)

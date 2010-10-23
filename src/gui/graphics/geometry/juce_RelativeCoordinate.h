@@ -56,12 +56,8 @@ public:
     RelativeCoordinate (double absoluteDistanceFromOrigin);
 
     /** Recreates a coordinate from a string description.
-
         The string will be parsed by ExpressionParser::parse().
-
         @param stringVersion    the expression to use
-        @param isHorizontal     this must be true if this is an X coordinate, or false if it's on the Y axis.
-
         @see toString
     */
     RelativeCoordinate (const String& stringVersion);

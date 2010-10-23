@@ -687,6 +687,8 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
         }
     }
 
+    invalidatePoints();
+
     if (redrawAll)
         damage = damage.getUnion (getBounds());
     else if (! damage.isEmpty())

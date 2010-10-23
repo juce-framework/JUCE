@@ -912,8 +912,8 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
             Graphics g (snapshot);
             g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);
-            if (g.reduceClipRegion (0, 0, rowComp->getWidth(), rowComp->getHeight()))
-                rowComp->paintEntireComponent (g);
+            if (g.reduceClipRegion (rowComp->getLocalBounds()))
+                rowComp->paintEntireComponent (g, false);
         }
     }
 

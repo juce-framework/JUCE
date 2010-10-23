@@ -27,6 +27,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
+#include "../windows/juce_ComponentPeer.h"
 #include "juce_ComponentAnimator.h"
 #include "../../../core/juce_Time.h"
 
@@ -40,59 +41,159 @@ public:
     {
     }
 
+    void reset (const Rectangle<int>& finalBounds,
+                float finalAlpha,
+                int millisecondsToSpendMoving,
+                bool useProxyComponent,
+                double startSpeed_, double endSpeed_)
+    {
+        msElapsed = 0;
+        msTotal = jmax (1, millisecondsToSpendMoving);
+        lastProgress = 0;
+        destination = finalBounds;
+        destAlpha = finalAlpha;
+
+        isMoving = (finalBounds != component->getBounds());
+        isChangingAlpha = (finalAlpha != component->getAlpha());
+
+        left = component->getX();
+        top = component->getY();
+        right = component->getRight();
+        bottom = component->getBottom();
+        alpha = component->getAlpha();
+
+        const double invTotalDistance = 4.0 / (startSpeed_ + endSpeed_ + 2.0);
+        startSpeed = jmax (0.0, startSpeed_ * invTotalDistance);
+        midSpeed = invTotalDistance;
+        endSpeed = jmax (0.0, endSpeed_ * invTotalDistance);
+
+        if (useProxyComponent)
+            proxy = new ProxyComponent (*component);
+        else
+            proxy = 0;
+
+        component->setVisible (! useProxyComponent);
+    }
+
     bool useTimeslice (const int elapsed)
     {
-        if (component == 0)
-            return false;
+        Component* const c = proxy != 0 ? static_cast <Component*> (proxy)
+                                        : static_cast <Component*> (component);
 
-        msElapsed += elapsed;
-        double newProgress = msElapsed / (double) msTotal;
-
-        if (newProgress >= 0 && newProgress < 1.0)
+        if (c != 0)
         {
-            newProgress = timeToDistance (newProgress);
-            const double delta = (newProgress - lastProgress) / (1.0 - lastProgress);
-            jassert (newProgress >= lastProgress);
-            lastProgress = newProgress;
+            msElapsed += elapsed;
+            double newProgress = msElapsed / (double) msTotal;
 
-            left += (destination.getX() - left) * delta;
-            top += (destination.getY() - top) * delta;
-            right += (destination.getRight() - right) * delta;
-            bottom += (destination.getBottom() - bottom) * delta;
-
-            if (delta < 1.0)
+            if (newProgress >= 0 && newProgress < 1.0)
             {
-                const Rectangle<int> newBounds (roundToInt (left),
-                                                roundToInt (top),
-                                                roundToInt (right - left),
-                                                roundToInt (bottom - top));
+                newProgress = timeToDistance (newProgress);
+                const double delta = (newProgress - lastProgress) / (1.0 - lastProgress);
+                jassert (newProgress >= lastProgress);
+                lastProgress = newProgress;
 
-                if (newBounds != destination)
+                if (delta < 1.0)
                 {
-                    component->setBounds (newBounds);
-                    return true;
+                    bool stillBusy = false;
+
+                    if (isMoving)
+                    {
+                        left += (destination.getX() - left) * delta;
+                        top += (destination.getY() - top) * delta;
+                        right += (destination.getRight() - right) * delta;
+                        bottom += (destination.getBottom() - bottom) * delta;
+
+                        const Rectangle<int> newBounds (roundToInt (left),
+                                                        roundToInt (top),
+                                                        roundToInt (right - left),
+                                                        roundToInt (bottom - top));
+
+                        if (newBounds != destination)
+                        {
+                            c->setBounds (newBounds);
+                            stillBusy = true;
+                        }
+                    }
+
+                    if (isChangingAlpha)
+                    {
+                        alpha += (destAlpha - alpha) * delta;
+                        c->setAlpha ((float) alpha);
+                        stillBusy = true;
+                    }
+
+                    if (stillBusy)
+                        return true;
                 }
             }
         }
 
-        component->setBounds (destination);
+        moveToFinalDestination();
         return false;
     }
 
     void moveToFinalDestination()
     {
         if (component != 0)
+        {
+            component->setAlpha ((float) destAlpha);
             component->setBounds (destination);
+        }
     }
 
+    //==============================================================================
+    class ProxyComponent  : public Component
+    {
+    public:
+        ProxyComponent (Component& component)
+            : image (component.createComponentSnapshot (component.getLocalBounds()))
+        {
+            setBounds (component.getBounds());
+            setAlpha (component.getAlpha());
+            setInterceptsMouseClicks (false, false);
+
+            Component* const parent = component.getParentComponent();
+
+            if (parent != 0)
+                parent->addAndMakeVisible (this);
+            else if (component.isOnDesktop() && component.getPeer() != 0)
+                addToDesktop (component.getPeer()->getStyleFlags());
+            else
+                jassertfalse; // seem to be trying to animate a component that's not visible..
+
+            setVisible (true);
+            toBehind (&component);
+        }
+
+        void paint (Graphics& g)
+        {
+            g.setOpacity (1.0f);
+            g.drawImage (image, 0, 0, getWidth(), getHeight(),
+                         0, 0, image.getWidth(), image.getHeight());
+        }
+
+        juce_UseDebuggingNewOperator
+
+    private:
+        Image image;
+
+        ProxyComponent (const ProxyComponent&);
+        ProxyComponent& operator= (const ProxyComponent&);
+    };
+
     Component::SafePointer<Component> component;
+    ScopedPointer<Component> proxy;
+
     Rectangle<int> destination;
+    double destAlpha;
+
     int msElapsed, msTotal;
     double startSpeed, midSpeed, endSpeed, lastProgress;
-    double left, top, right, bottom;
+    double left, top, right, bottom, alpha;
+    bool isMoving, isChangingAlpha;
 
 private:
-    inline double timeToDistance (const double time) const
+    double timeToDistance (const double time) const throw()
     {
         return (time < 0.5) ? time * (startSpeed + time * (midSpeed - startSpeed))
                             : 0.5 * (startSpeed + 0.5 * (midSpeed - startSpeed))
@@ -121,11 +222,16 @@ ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* con
 }
 
 void ComponentAnimator::animateComponent (Component* const component,
-                                          const Rectangle<int>& finalPosition,
+                                          const Rectangle<int>& finalBounds,
+                                          const float finalAlpha,
                                           const int millisecondsToSpendMoving,
+                                          const bool useProxyComponent,
                                           const double startSpeed,
                                           const double endSpeed)
 {
+    // the speeds must be 0 or greater!
+    jassert (startSpeed >= 0 && endSpeed >= 0)
+
     if (component != 0)
     {
         AnimationTask* at = findTaskFor (component);
@@ -137,29 +243,35 @@ void ComponentAnimator::animateComponent (Component* const component,
             sendChangeMessage (this);
         }
 
-        at->msElapsed = 0;
-        at->lastProgress = 0;
-        at->msTotal = jmax (1, millisecondsToSpendMoving);
-        at->destination = finalPosition;
-
-        // the speeds must be 0 or greater!
-        jassert (startSpeed >= 0 && endSpeed >= 0)
-
-        const double invTotalDistance = 4.0 / (startSpeed + endSpeed + 2.0);
-        at->startSpeed = jmax (0.0, startSpeed * invTotalDistance);
-        at->midSpeed = invTotalDistance;
-        at->endSpeed = jmax (0.0, endSpeed * invTotalDistance);
-
-        at->left = component->getX();
-        at->top = component->getY();
-        at->right = component->getRight();
-        at->bottom = component->getBottom();
+        at->reset (finalBounds, finalAlpha, millisecondsToSpendMoving,
+                   useProxyComponent, startSpeed, endSpeed);
 
         if (! isTimerRunning())
         {
             lastTime = Time::getMillisecondCounter();
             startTimer (1000 / 50);
         }
+    }
+}
+
+void ComponentAnimator::fadeOut (Component* component, int millisecondsToTake)
+{
+    if (component != 0)
+    {
+        if (component->isShowing() && millisecondsToTake > 0)
+            animateComponent (component, component->getBounds(), 0.0f, millisecondsToTake, true, 1.0, 1.0);
+
+        component->setVisible (false);
+    }
+}
+
+void ComponentAnimator::fadeIn (Component* component, int millisecondsToTake)
+{
+    if (component != 0 && ! (component->isVisible() && component->getAlpha() == 1.0f))
+    {
+        component->setAlpha (0.0f);
+        component->setVisible (true);
+        animateComponent (component, component->getBounds(), 1.0f, millisecondsToTake, false, 1.0, 1.0);
     }
 }
 
@@ -193,14 +305,13 @@ void ComponentAnimator::cancelAnimation (Component* const component,
 
 const Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
 {
+    jassert (component != 0);
     AnimationTask* const at = findTaskFor (component);
 
     if (at != 0)
         return at->destination;
-    else if (component != 0)
-        return component->getBounds();
 
-    return Rectangle<int>();
+    return component->getBounds();
 }
 
 bool ComponentAnimator::isAnimating (Component* component) const

@@ -33,19 +33,24 @@
 
 //==============================================================================
 /**
-    Animates a set of components, moving it to a new position.
+    Animates a set of components, moving them to a new position and/or fading their
+    alpha levels.
 
-    To use this, create a ComponentAnimator, and use its animateComponent() method
-    to tell it to move components to destination positions. Any number of
-    components can be animated by one ComponentAnimator object (if you've got a
-    lot of components to move, it's much more efficient to share a single animator
-    than to have many animators running at once).
+    To animate a component, create a ComponentAnimator instance or (preferably) use the
+    global animator object provided by Desktop::getAnimator(), and call its animateComponent()
+    method to commence the movement.
 
-    You'll need to make sure the animator object isn't deleted before it finishes
-    moving the components.
+    If you're using your own ComponentAnimator instance, you'll need to make sure it isn't
+    deleted before it finishes moving the components, or they'll be abandoned before reaching their
+    destinations.
+
+    It's ok to delete components while they're being animated - the animator will detect this
+    and safely stop using them.
 
     The class is a ChangeBroadcaster and sends a notification when any components
     start or finish being animated.
+
+    @see Desktop::getAnimator
 */
 class JUCE_API  ComponentAnimator  : public ChangeBroadcaster,
                                      private Timer
@@ -68,29 +73,49 @@ public:
         movement.
 
         @param component            the component to move
-        @param finalPosition        the destination position and size to move it to
-        @param millisecondsToSpendMoving    how long, in milliseconds, it should take
-                                    to arrive at its destination
-        @param startSpeed           a value to indicate the relative start speed of the
-                                    animation. If this is 0, the component will start
-                                    by accelerating from rest; higher values mean that it
-                                    will have an initial speed greater than zero. If the
-                                    value if greater than 1, it will decelerate towards the
-                                    middle of its journey. To move the component at a constant
-                                    rate for its entire animation, set both the start and
-                                    end speeds to 1.0
-        @param endSpeed             a relative speed at which the component should be moving
-                                    when the animation finishes. If this is 0, the component
-                                    will decelerate to a standstill at its final position; higher
-                                    values mean the component will still be moving when it stops.
-                                    To move the component at a constant rate for its entire
-                                    animation, set both the start and end speeds to 1.0
+        @param finalBounds          the destination bounds to which the component should move. To leave the
+                                    component in the same place, just pass component->getBounds() for this value
+        @param finalAlpha           the alpha value that the component should have at the end of the animation
+        @param animationDurationMilliseconds    how long the animation should last, in milliseconds
+        @param useProxyComponent    if true, this means the component should be replaced by an internally
+                                    managed temporary component which is a snapshot of the original component.
+                                    This avoids the component having to paint itself as it moves, so may
+                                    be more efficient. This option also allows you to delete the original
+                                    component immediately after starting the animation, because the animation
+                                    can proceed without it. If you use a proxy, the original component will be
+                                    made invisible by this call, and then will become visible again at the end
+                                    of the animation. It'll also mean that the proxy component will be temporarily
+                                    added to the component's parent, so avoid it if this might confuse the parent
+                                    component, or if there's a chance the parent might decide to delete its children.
+        @param startSpeed           a value to indicate the relative start speed of the animation. If this is 0,
+                                    the component will start by accelerating from rest; higher values mean that it
+                                    will have an initial speed greater than zero. If the value if greater than 1, it
+                                    will decelerate towards the middle of its journey. To move the component at a
+                                    constant rate for its entire animation, set both the start and end speeds to 1.0
+        @param endSpeed             a relative speed at which the component should be moving when the animation finishes.
+                                    If this is 0, the component will decelerate to a standstill at its final position;
+                                    higher values mean the component will still be moving when it stops. To move the component
+                                    at a constant rate for its entire animation, set both the start and end speeds to 1.0
     */
     void animateComponent (Component* component,
-                           const Rectangle<int>& finalPosition,
-                           int millisecondsToSpendMoving,
-                           double startSpeed = 1.0,
-                           double endSpeed = 1.0);
+                           const Rectangle<int>& finalBounds,
+                           float finalAlpha,
+                           int animationDurationMilliseconds,
+                           bool useProxyComponent,
+                           double startSpeed,
+                           double endSpeed);
+
+    /** Begins a fade-out of this components alpha level.
+        This is a quick way of invoking animateComponent() with a target alpha value of 0.0f, using
+        a proxy. You're safe to delete the component after calling this method, and this won't
+        interfere with the animation's progress.
+    */
+    void fadeOut (Component* component, int millisecondsToTake);
+
+    /** Begins a fade-in of a component.
+        This is a quick way of invoking animateComponent() with a target alpha value of 1.0f.
+    */
+    void fadeIn (Component* component, int millisecondsToTake);
 
     /** Stops a component if it's currently being animated.
 
@@ -119,8 +144,7 @@ public:
     */
     const Rectangle<int> getComponentDestination (Component* component);
 
-    /** Returns true if the specified component is currently being animated.
-    */
+    /** Returns true if the specified component is currently being animated. */
     bool isAnimating (Component* component) const;
 
     //==============================================================================
