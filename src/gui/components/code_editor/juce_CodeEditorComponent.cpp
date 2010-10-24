@@ -44,10 +44,6 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    ~CaretComponent()
-    {
-    }
-
     void paint (Graphics& g)
     {
         g.fillAll (findColour (CodeEditorComponent::caretColourId));
@@ -296,6 +292,8 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
       columnToTryToMaintain (-1),
       useSpacesForTabs (false),
       xOffset (0),
+      verticalScrollBar (true),
+      horizontalScrollBar (false),
       codeTokeniser (codeTokeniser_)
 {
     caretPos = CodeDocument::Position (&document_, 0, 0);
@@ -311,11 +309,11 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
     setMouseCursor (MouseCursor (MouseCursor::IBeamCursor));
     setWantsKeyboardFocus (true);
 
-    addAndMakeVisible (verticalScrollBar = new ScrollBar (true));
-    verticalScrollBar->setSingleStepSize (1.0);
+    addAndMakeVisible (&verticalScrollBar);
+    verticalScrollBar.setSingleStepSize (1.0);
 
-    addAndMakeVisible (horizontalScrollBar = new ScrollBar (false));
-    horizontalScrollBar->setSingleStepSize (1.0);
+    addAndMakeVisible (&horizontalScrollBar);
+    horizontalScrollBar.setSingleStepSize (1.0);
 
     addAndMakeVisible (caret = new CaretComponent (*this));
 
@@ -325,15 +323,14 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
 
     resetToDefaultColours();
 
-    verticalScrollBar->addListener (this);
-    horizontalScrollBar->addListener (this);
+    verticalScrollBar.addListener (this);
+    horizontalScrollBar.addListener (this);
     document.addListener (this);
 }
 
 CodeEditorComponent::~CodeEditorComponent()
 {
     document.removeListener (this);
-    deleteAllChildren();
 }
 
 void CodeEditorComponent::loadContent (const String& newContent)
@@ -383,8 +380,8 @@ void CodeEditorComponent::resized()
     rebuildLineTokens();
     caret->updatePosition();
 
-    verticalScrollBar->setBounds (getWidth() - scrollbarThickness, 0, scrollbarThickness, getHeight() - scrollbarThickness);
-    horizontalScrollBar->setBounds (gutter, getHeight() - scrollbarThickness, getWidth() - scrollbarThickness - gutter, scrollbarThickness);
+    verticalScrollBar.setBounds (getWidth() - scrollbarThickness, 0, scrollbarThickness, getHeight() - scrollbarThickness);
+    horizontalScrollBar.setBounds (gutter, getHeight() - scrollbarThickness, getWidth() - scrollbarThickness - gutter, scrollbarThickness);
     updateScrollBars();
 }
 
@@ -394,7 +391,7 @@ void CodeEditorComponent::paint (Graphics& g)
 
     g.fillAll (findColour (CodeEditorComponent::backgroundColourId));
 
-    g.reduceClipRegion (gutter, 0, verticalScrollBar->getX() - gutter, horizontalScrollBar->getY());
+    g.reduceClipRegion (gutter, 0, verticalScrollBar.getX() - gutter, horizontalScrollBar.getY());
 
     g.setFont (font);
     const int baselineOffset = (int) font.getAscent();
@@ -468,7 +465,7 @@ void CodeEditorComponent::rebuildLineTokens()
     if (minLineToRepaint <= maxLineToRepaint)
     {
         repaint (gutter, lineHeight * minLineToRepaint - 1,
-                 verticalScrollBar->getX() - gutter,
+                 verticalScrollBar.getX() - gutter,
                  lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
     }
 }
@@ -540,11 +537,11 @@ void CodeEditorComponent::deselectAll()
 
 void CodeEditorComponent::updateScrollBars()
 {
-    verticalScrollBar->setRangeLimits (0, jmax (document.getNumLines(), firstLineOnScreen + linesOnScreen));
-    verticalScrollBar->setCurrentRange (firstLineOnScreen, linesOnScreen);
+    verticalScrollBar.setRangeLimits (0, jmax (document.getNumLines(), firstLineOnScreen + linesOnScreen));
+    verticalScrollBar.setCurrentRange (firstLineOnScreen, linesOnScreen);
 
-    horizontalScrollBar->setRangeLimits (0, jmax ((double) document.getMaximumLineLength(), xOffset + columnsOnScreen));
-    horizontalScrollBar->setCurrentRange (xOffset, columnsOnScreen);
+    horizontalScrollBar.setRangeLimits (0, jmax ((double) document.getMaximumLineLength(), xOffset + columnsOnScreen));
+    horizontalScrollBar.setCurrentRange (xOffset, columnsOnScreen);
 }
 
 void CodeEditorComponent::scrollToLineInternal (int newFirstLineOnScreen)
@@ -1079,11 +1076,11 @@ void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)
 
 void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
 {
-    if ((verticalScrollBar->isVisible() && wheelIncrementY != 0)
-         || (horizontalScrollBar->isVisible() && wheelIncrementX != 0))
+    if ((verticalScrollBar.isVisible() && wheelIncrementY != 0)
+         || (horizontalScrollBar.isVisible() && wheelIncrementX != 0))
     {
-        verticalScrollBar->mouseWheelMove (e, 0, wheelIncrementY);
-        horizontalScrollBar->mouseWheelMove (e, wheelIncrementX, 0);
+        verticalScrollBar.mouseWheelMove (e, 0, wheelIncrementY);
+        horizontalScrollBar.mouseWheelMove (e, wheelIncrementX, 0);
     }
     else
     {
@@ -1093,7 +1090,7 @@ void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, float wheelIncrem
 
 void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
-    if (scrollBarThatHasMoved == verticalScrollBar)
+    if (scrollBarThatHasMoved == &verticalScrollBar)
         scrollToLineInternal ((int) newRangeStart);
     else
         scrollToColumnInternal (newRangeStart);

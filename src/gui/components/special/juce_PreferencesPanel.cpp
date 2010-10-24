@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_PreferencesPanel.h"
-#include "../buttons/juce_DrawableButton.h"
 #include "../windows/juce_DialogWindow.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../graphics/drawables/juce_DrawableImage.h"
@@ -42,8 +41,6 @@ PreferencesPanel::PreferencesPanel()
 
 PreferencesPanel::~PreferencesPanel()
 {
-    currentPage = 0;
-    deleteAllChildren();
 }
 
 //==============================================================================
@@ -52,7 +49,9 @@ void PreferencesPanel::addSettingsPage (const String& title,
                                         const Drawable* overIcon,
                                         const Drawable* downIcon)
 {
-    DrawableButton* button = new DrawableButton (title, DrawableButton::ImageAboveTextLabel);
+    DrawableButton* const button = new DrawableButton (title, DrawableButton::ImageAboveTextLabel);
+    buttons.add (button);
+
     button->setImages (icon, overIcon, downIcon);
     button->setRadioGroupId (1);
     button->addButtonListener (this);
@@ -66,9 +65,7 @@ void PreferencesPanel::addSettingsPage (const String& title,
         setCurrentPage (title);
 }
 
-void PreferencesPanel::addSettingsPage (const String& title,
-                                        const void* imageData,
-                                        const int imageDataSize)
+void PreferencesPanel::addSettingsPage (const String& title, const void* imageData, const int imageDataSize)
 {
     DrawableImage icon, iconOver, iconDown;
     icon.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
@@ -83,64 +80,20 @@ void PreferencesPanel::addSettingsPage (const String& title,
 }
 
 //==============================================================================
-class PrefsDialogWindow  : public DialogWindow
-{
-public:
-    PrefsDialogWindow (const String& dialogtitle,
-                       const Colour& backgroundColour)
-        : DialogWindow (dialogtitle, backgroundColour, true)
-    {
-    }
-
-    ~PrefsDialogWindow()
-    {
-    }
-
-    void closeButtonPressed()
-    {
-        exitModalState (0);
-    }
-
-private:
-    PrefsDialogWindow (const PrefsDialogWindow&);
-    PrefsDialogWindow& operator= (const PrefsDialogWindow&);
-};
-
-//==============================================================================
-void PreferencesPanel::showInDialogBox (const String& dialogtitle,
-                                        int dialogWidth,
-                                        int dialogHeight,
-                                        const Colour& backgroundColour)
+void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, const Colour& backgroundColour)
 {
     setSize (dialogWidth, dialogHeight);
-
-    PrefsDialogWindow dw (dialogtitle, backgroundColour);
-
-    dw.setContentComponent (this, true, true);
-    dw.centreAroundComponent (0, dw.getWidth(), dw.getHeight());
-    dw.runModalLoop();
-    dw.setContentComponent (0, false, false);
+    DialogWindow::showModalDialog (dialogTitle, this, 0, backgroundColour, false);
 }
 
 //==============================================================================
 void PreferencesPanel::resized()
 {
-    int x = 0;
+    for (int i = 0; i < buttons.size(); ++i)
+        buttons.getUnchecked(i)->setBounds (i * buttonSize, 0, buttonSize, buttonSize);
 
-    for (int i = 0; i < getNumChildComponents(); ++i)
-    {
-        Component* c = getChildComponent (i);
-
-        if (dynamic_cast <DrawableButton*> (c) == 0)
-        {
-            c->setBounds (0, buttonSize + 5, getWidth(), getHeight() - buttonSize - 5);
-        }
-        else
-        {
-            c->setBounds (x, 0, buttonSize, buttonSize);
-            x += buttonSize;
-        }
-    }
+    if (currentPage != 0)
+        currentPage->setBounds (getLocalBounds().withTop (buttonSize + 5));
 }
 
 void PreferencesPanel::paint (Graphics& g)
@@ -165,13 +118,11 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
             resized();
         }
 
-        for (int i = 0; i < getNumChildComponents(); ++i)
+        for (int i = 0; i < buttons.size(); ++i)
         {
-            DrawableButton* db = dynamic_cast <DrawableButton*> (getChildComponent (i));
-
-            if (db != 0 && db->getName() == pageName)
+            if (buttons.getUnchecked(i)->getName() == pageName)
             {
-                db->setToggleState (true, false);
+                buttons.getUnchecked(i)->setToggleState (true, false);
                 break;
             }
         }
@@ -180,13 +131,11 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
 
 void PreferencesPanel::buttonClicked (Button*)
 {
-    for (int i = 0; i < getNumChildComponents(); ++i)
+    for (int i = 0; i < buttons.size(); ++i)
     {
-        DrawableButton* db = dynamic_cast <DrawableButton*> (getChildComponent (i));
-
-        if (db != 0 && db->getToggleState())
+        if (buttons.getUnchecked(i)->getToggleState())
         {
-            setCurrentPage (db->getName());
+            setCurrentPage (buttons.getUnchecked(i)->getName());
             break;
         }
     }

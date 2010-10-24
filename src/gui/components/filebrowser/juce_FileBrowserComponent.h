@@ -219,11 +219,12 @@ private:
     Array<File> chosenFiles;
     ListenerList <FileBrowserListener> listeners;
 
-    DirectoryContentsDisplayComponent* fileListComponent;
+    ScopedPointer<DirectoryContentsDisplayComponent> fileListComponent;
     FilePreviewComponent* previewComp;
-    ComboBox* currentPathBox;
-    TextEditor* filenameBox;
-    Button* goUpButton;
+    ComboBox currentPathBox;
+    TextEditor filenameBox;
+    Label fileLabel;
+    ScopedPointer<Button> goUpButton;
 
     TimeSliceThread thread;
 

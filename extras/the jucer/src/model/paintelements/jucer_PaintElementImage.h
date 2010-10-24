@@ -76,7 +76,7 @@ public:
 
         if (image != 0)
         {
-            image->drawWithin (g, r.getX(), r.getY(), r.getWidth(), r.getHeight(),
+            image->drawWithin (g, r.toFloat(),
                                mode == stretched ? RectanglePlacement::stretchToFit
                                                  : (mode == proportionalReducingOnly ? (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
                                                                                      : RectanglePlacement::centred),

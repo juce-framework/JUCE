@@ -1065,39 +1065,17 @@ public:
 
         switch (buttonId)
         {
-        case menuButton:
-            desc = "menu button (short)";
-            break;
-        case playButton:
-            desc = "play button";
-            break;
-        case plusButton:
-            desc = "plus button";
-            break;
-        case minusButton:
-            desc = "minus button";
-            break;
-        case rightButton:
-            desc = "right button (short)";
-            break;
-        case leftButton:
-            desc = "left button (short)";
-            break;
-        case rightButton_Long:
-            desc = "right button (long)";
-            break;
-        case leftButton_Long:
-            desc = "left button (long)";
-            break;
-        case menuButton_Long:
-            desc = "menu button (long)";
-            break;
-        case playButtonSleepMode:
-            desc = "play (sleep mode)";
-            break;
-        case switched:
-            desc = "remote switched";
-            break;
+            case menuButton:            desc = "menu button (short)";   break;
+            case playButton:            desc = "play button";           break;
+            case plusButton:            desc = "plus button";           break;
+            case minusButton:           desc = "minus button";          break;
+            case rightButton:           desc = "right button (short)";  break;
+            case leftButton:            desc = "left button (short)";   break;
+            case rightButton_Long:      desc = "right button (long)";   break;
+            case leftButton_Long:       desc = "left button (long)";    break;
+            case menuButton_Long:       desc = "menu button (long)";    break;
+            case playButtonSleepMode:   desc = "play (sleep mode)";     break;
+            case switched:              desc = "remote switched";       break;
         }
 
         if (isDown)

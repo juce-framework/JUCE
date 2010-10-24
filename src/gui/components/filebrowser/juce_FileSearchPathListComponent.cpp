@@ -36,25 +36,31 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 FileSearchPathListComponent::FileSearchPathListComponent()
+    : addButton ("+"),
+      removeButton ("-"),
+      changeButton (TRANS ("change...")),
+      upButton (String::empty, DrawableButton::ImageOnButtonBackground),
+      downButton (String::empty, DrawableButton::ImageOnButtonBackground)
 {
-    addAndMakeVisible (listBox = new ListBox (String::empty, this));
-    listBox->setColour (ListBox::backgroundColourId, Colours::black.withAlpha (0.02f));
-    listBox->setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.1f));
-    listBox->setOutlineThickness (1);
+    listBox.setModel (this);
+    addAndMakeVisible (&listBox);
+    listBox.setColour (ListBox::backgroundColourId, Colours::black.withAlpha (0.02f));
+    listBox.setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.1f));
+    listBox.setOutlineThickness (1);
 
-    addAndMakeVisible (addButton = new TextButton ("+"));
-    addButton->addButtonListener (this);
-    addButton->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
+    addAndMakeVisible (&addButton);
+    addButton.addButtonListener (this);
+    addButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
 
-    addAndMakeVisible (removeButton = new TextButton ("-"));
-    removeButton->addButtonListener (this);
-    removeButton->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
+    addAndMakeVisible (&removeButton);
+    removeButton.addButtonListener (this);
+    removeButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
 
-    addAndMakeVisible (changeButton = new TextButton (TRANS("change...")));
-    changeButton->addButtonListener (this);
+    addAndMakeVisible (&changeButton);
+    changeButton.addButtonListener (this);
 
-    addAndMakeVisible (upButton = new DrawableButton (String::empty, DrawableButton::ImageOnButtonBackground));
-    upButton->addButtonListener (this);
+    addAndMakeVisible (&upButton);
+    upButton.addButtonListener (this);
 
     {
         Path arrowPath;
@@ -63,11 +69,11 @@ FileSearchPathListComponent::FileSearchPathListComponent()
         arrowImage.setFill (Colours::black.withAlpha (0.4f));
         arrowImage.setPath (arrowPath);
 
-        upButton->setImages (&arrowImage);
+        upButton.setImages (&arrowImage);
     }
 
-    addAndMakeVisible (downButton = new DrawableButton (String::empty, DrawableButton::ImageOnButtonBackground));
-    downButton->addButtonListener (this);
+    addAndMakeVisible (&downButton);
+    downButton.addButtonListener (this);
 
     {
         Path arrowPath;
@@ -76,7 +82,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
         arrowImage.setFill (Colours::black.withAlpha (0.4f));
         arrowImage.setPath (arrowPath);
 
-        downButton->setImages (&arrowImage);
+        downButton.setImages (&arrowImage);
     }
 
     updateButtons();
@@ -84,23 +90,22 @@ FileSearchPathListComponent::FileSearchPathListComponent()
 
 FileSearchPathListComponent::~FileSearchPathListComponent()
 {
-    deleteAllChildren();
 }
 
 void FileSearchPathListComponent::updateButtons()
 {
-    const bool anythingSelected = listBox->getNumSelectedRows() > 0;
+    const bool anythingSelected = listBox.getNumSelectedRows() > 0;
 
-    removeButton->setEnabled (anythingSelected);
-    changeButton->setEnabled (anythingSelected);
-    upButton->setEnabled (anythingSelected);
-    downButton->setEnabled (anythingSelected);
+    removeButton.setEnabled (anythingSelected);
+    changeButton.setEnabled (anythingSelected);
+    upButton.setEnabled (anythingSelected);
+    downButton.setEnabled (anythingSelected);
 }
 
 void FileSearchPathListComponent::changed()
 {
-    listBox->updateContent();
-    listBox->repaint();
+    listBox.updateContent();
+    listBox.repaint();
     updateButtons();
 }
 
@@ -180,18 +185,18 @@ void FileSearchPathListComponent::resized()
 {
     const int buttonH = 22;
     const int buttonY = getHeight() - buttonH - 4;
-    listBox->setBounds (2, 2, getWidth() - 4, buttonY - 5);
+    listBox.setBounds (2, 2, getWidth() - 4, buttonY - 5);
 
-    addButton->setBounds (2, buttonY, buttonH, buttonH);
-    removeButton->setBounds (addButton->getRight(), buttonY, buttonH, buttonH);
+    addButton.setBounds (2, buttonY, buttonH, buttonH);
+    removeButton.setBounds (addButton.getRight(), buttonY, buttonH, buttonH);
 
-    changeButton->changeWidthToFitText (buttonH);
-    downButton->setSize (buttonH * 2, buttonH);
-    upButton->setSize (buttonH * 2, buttonH);
+    changeButton.changeWidthToFitText (buttonH);
+    downButton.setSize (buttonH * 2, buttonH);
+    upButton.setSize (buttonH * 2, buttonH);
 
-    downButton->setTopRightPosition (getWidth() - 2, buttonY);
-    upButton->setTopRightPosition (downButton->getX() - 4, buttonY);
-    changeButton->setTopRightPosition (upButton->getX() - 8, buttonY);
+    downButton.setTopRightPosition (getWidth() - 2, buttonY);
+    upButton.setTopRightPosition (downButton.getX() - 4, buttonY);
+    changeButton.setTopRightPosition (upButton.getX() - 8, buttonY);
 }
 
 bool FileSearchPathListComponent::isInterestedInFileDrag (const StringArray&)
@@ -207,7 +212,7 @@ void FileSearchPathListComponent::filesDropped (const StringArray& filenames, in
 
         if (f.isDirectory())
         {
-            const int row = listBox->getRowContainingPosition (0, mouseY - listBox->getY());
+            const int row = listBox.getRowContainingPosition (0, mouseY - listBox.getY());
             path.add (f, row);
             changed();
         }
@@ -216,13 +221,13 @@ void FileSearchPathListComponent::filesDropped (const StringArray& filenames, in
 
 void FileSearchPathListComponent::buttonClicked (Button* button)
 {
-    const int currentRow = listBox->getSelectedRow();
+    const int currentRow = listBox.getSelectedRow();
 
-    if (button == removeButton)
+    if (button == &removeButton)
     {
         deleteKeyPressed (currentRow);
     }
-    else if (button == addButton)
+    else if (button == &addButton)
     {
         File start (defaultBrowseTarget);
 
@@ -239,28 +244,28 @@ void FileSearchPathListComponent::buttonClicked (Button* button)
             path.add (chooser.getResult(), currentRow);
         }
     }
-    else if (button == changeButton)
+    else if (button == &changeButton)
     {
         returnKeyPressed (currentRow);
     }
-    else if (button == upButton)
+    else if (button == &upButton)
     {
         if (currentRow > 0 && currentRow < path.getNumPaths())
         {
             const File f (path[currentRow]);
             path.remove (currentRow);
             path.add (f, currentRow - 1);
-            listBox->selectRow (currentRow - 1);
+            listBox.selectRow (currentRow - 1);
         }
     }
-    else if (button == downButton)
+    else if (button == &downButton)
     {
         if (currentRow >= 0 && currentRow < path.getNumPaths() - 1)
         {
             const File f (path[currentRow]);
             path.remove (currentRow);
             path.add (f, currentRow + 1);
-            listBox->selectRow (currentRow + 1);
+            listBox.selectRow (currentRow + 1);
         }
     }
 

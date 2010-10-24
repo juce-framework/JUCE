@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	81
+#define JUCE_BUILDNUMBER	82
 
 /** Current Juce version number.
 
@@ -21128,6 +21128,7 @@ public:
 
 	/** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
 		If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+		@see withLeft
 	*/
 	void setLeft (const ValueType newLeft) throw()
 	{
@@ -21135,8 +21136,15 @@ public:
 		x = newLeft;
 	}
 
+	/** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
+		If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
+		@see setLeft
+	*/
+	const Rectangle withLeft (const ValueType newLeft) const throw()	{ return Rectangle (newLeft, y, jmax (ValueType(), x + w - newLeft), h); }
+
 	/** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
 		If the y is moved to be below the current bottom edge, the height will be set to zero.
+		@see withTop
 	*/
 	void setTop (const ValueType newTop) throw()
 	{
@@ -21144,9 +21152,15 @@ public:
 		y = newTop;
 	}
 
+	/** Returns a new rectangle with a different y position, but the same bottom edge as this one.
+		If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
+		@see setTop
+	*/
+	const Rectangle withTop (const ValueType newTop) const throw()	  { return Rectangle (x, newTop, w, jmax (ValueType(), y + h - newTop)); }
+
 	/** Adjusts the width so that the right-hand edge of the rectangle has this new value.
 		If the new right is below the current X value, the X will be pushed down to match it.
-		@see getRight
+		@see getRight, withRight
 	*/
 	void setRight (const ValueType newRight) throw()
 	{
@@ -21154,15 +21168,27 @@ public:
 		w = newRight - x;
 	}
 
+	/** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
+		If the new right edge is below the current left-hand edge, the width will be set to zero.
+		@see setRight
+	*/
+	const Rectangle withRight (const ValueType newRight) const throw()	  { return Rectangle (jmin (x, newRight), y, jmax (ValueType(), newRight - x), h); }
+
 	/** Adjusts the height so that the bottom edge of the rectangle has this new value.
 		If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
-		@see getBottom
+		@see getBottom, withBottom
 	*/
 	void setBottom (const ValueType newBottom) throw()
 	{
 		y = jmin (y, newBottom);
 		h = newBottom - y;
 	}
+
+	/** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
+		If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
+		@see setBottom
+	*/
+	const Rectangle withBottom (const ValueType newBottom) const throw()	{ return Rectangle (x, jmin (y, newBottom), w, jmax (ValueType(), newBottom - y)); }
 
 	/** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
 	void translate (const ValueType deltaX,
@@ -41867,8 +41893,8 @@ public:
 private:
 	KnownPluginList& list;
 	File deadMansPedalFile;
-	ListBox* listBox;
-	TextButton* optionsButton;
+	ListBox listBox;
+	TextButton optionsButton;
 	PropertiesFile* propertiesToUse;
 	int typeToScan;
 
@@ -46797,10 +46823,11 @@ private:
 
 	CodeDocument::Position caretPos;
 	CodeDocument::Position selectionStart, selectionEnd;
+
 	class CaretComponent;
-	CaretComponent* caret;
-	ScrollBar* verticalScrollBar;
-	ScrollBar* horizontalScrollBar;
+	friend class ScopedPointer <CaretComponent>;
+	ScopedPointer<CaretComponent> caret;
+	ScrollBar verticalScrollBar, horizontalScrollBar;
 
 	enum DragType
 	{
@@ -48628,7 +48655,7 @@ public:
 private:
 	ToolbarItemFactory& factory;
 	Toolbar* toolbar;
-	Viewport* viewport;
+	Viewport viewport;
 
 	friend class Toolbar;
 	void replaceComponent (ToolbarItemComponent* comp);
@@ -50045,11 +50072,12 @@ private:
 	Array<File> chosenFiles;
 	ListenerList <FileBrowserListener> listeners;
 
-	DirectoryContentsDisplayComponent* fileListComponent;
+	ScopedPointer<DirectoryContentsDisplayComponent> fileListComponent;
 	FilePreviewComponent* previewComp;
-	ComboBox* currentPathBox;
-	TextEditor* filenameBox;
-	Button* goUpButton;
+	ComboBox currentPathBox;
+	TextEditor filenameBox;
+	Label fileLabel;
+	ScopedPointer<Button> goUpButton;
 
 	TimeSliceThread thread;
 
@@ -51944,9 +51972,7 @@ class JUCE_API  FileSearchPathListComponent  : public Component,
 {
 public:
 
-	/** Creates an empty FileSearchPathListComponent.
-
-	*/
+	/** Creates an empty FileSearchPathListComponent. */
 	FileSearchPathListComponent();
 
 	/** Destructor. */
@@ -52007,12 +52033,9 @@ private:
 	FileSearchPath path;
 	File defaultBrowseTarget;
 
-	ListBox* listBox;
-	Button* addButton;
-	Button* removeButton;
-	TextButton* changeButton;
-	DrawableButton* upButton;
-	DrawableButton* downButton;
+	ListBox listBox;
+	TextButton addButton, removeButton, changeButton;
+	DrawableButton upButton, downButton;
 
 	void changed();
 	void updateButtons();
@@ -57860,8 +57883,7 @@ private:
 
 	int rangeStart, rangeEnd, firstKey;
 	bool canScroll, mouseDragging, useMousePositionForVelocity;
-	Button* scrollDown;
-	Button* scrollUp;
+	ScopedPointer<Button> scrollDown, scrollUp;
 
 	Array <KeyPress> keyPresses;
 	Array <int> keyPressNotes;
@@ -58368,7 +58390,7 @@ public:
 		given size and title, and will run it modally, returning when the user
 		closes the dialog box.
 	*/
-	void showInDialogBox (const String& dialogtitle,
+	void showInDialogBox (const String& dialogTitle,
 						  int dialogWidth,
 						  int dialogHeight,
 						  const Colour& backgroundColour = Colours::white);
@@ -58399,6 +58421,7 @@ private:
 
 	String currentPageName;
 	ScopedPointer <Component> currentPage;
+	OwnedArray<DrawableButton> buttons;
 	int buttonSize;
 
 	PreferencesPanel (const PreferencesPanel&);
@@ -62506,12 +62529,12 @@ class UnitTestRunner;
 
 	@see UnitTestRunner
 */
-class UnitTest
+class JUCE_API  UnitTest
 {
 public:
 
 	/** Creates a test with the given name. */
-	UnitTest (const String& name);
+	explicit UnitTest (const String& name);
 
 	/** Destructor. */
 	virtual ~UnitTest();
@@ -62615,7 +62638,7 @@ private:
 
 	@see UnitTest
 */
-class UnitTestRunner
+class JUCE_API  UnitTestRunner
 {
 public:
 

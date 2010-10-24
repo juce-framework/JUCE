@@ -791,63 +791,59 @@ private:
                          const int optionFlags)
           : factory (factory_),
             toolbar (toolbar_),
-            styleBox (0),
-            defaultButton (0)
+            palette (factory_, toolbar_),
+            instructions (String::empty, TRANS ("You can drag the items above and drop them onto a toolbar to add them.\n\n"
+                                                "Items on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")),
+            defaultButton (TRANS ("Restore to default set of items"))
         {
-            addAndMakeVisible (palette = new ToolbarItemPalette (factory, toolbar));
+            addAndMakeVisible (&palette);
 
             if ((optionFlags & (Toolbar::allowIconsOnlyChoice
                                  | Toolbar::allowIconsWithTextChoice
                                  | Toolbar::allowTextOnlyChoice)) != 0)
             {
-                addAndMakeVisible (styleBox = new ComboBox (String::empty));
-                styleBox->setEditableText (false);
+                addAndMakeVisible (&styleBox);
+                styleBox.setEditableText (false);
 
-                if ((optionFlags & Toolbar::allowIconsOnlyChoice) != 0)
-                    styleBox->addItem (TRANS("Show icons only"), 1);
-                if ((optionFlags & Toolbar::allowIconsWithTextChoice) != 0)
-                    styleBox->addItem (TRANS("Show icons and descriptions"), 2);
-                if ((optionFlags & Toolbar::allowTextOnlyChoice) != 0)
-                    styleBox->addItem (TRANS("Show descriptions only"), 3);
+                if ((optionFlags & Toolbar::allowIconsOnlyChoice) != 0)     styleBox.addItem (TRANS("Show icons only"), 1);
+                if ((optionFlags & Toolbar::allowIconsWithTextChoice) != 0) styleBox.addItem (TRANS("Show icons and descriptions"), 2);
+                if ((optionFlags & Toolbar::allowTextOnlyChoice) != 0)      styleBox.addItem (TRANS("Show descriptions only"), 3);
 
-                if (toolbar_->getStyle() == Toolbar::iconsOnly)
-                    styleBox->setSelectedId (1);
-                else if (toolbar_->getStyle() == Toolbar::iconsWithText)
-                    styleBox->setSelectedId (2);
-                else if (toolbar_->getStyle() == Toolbar::textOnly)
-                    styleBox->setSelectedId (3);
+                int selectedStyle = 0;
+                switch (toolbar_->getStyle())
+                {
+                    case Toolbar::iconsOnly:        selectedStyle = 1; break;
+                    case Toolbar::iconsWithText:    selectedStyle = 2; break;
+                    case Toolbar::textOnly:         selectedStyle = 3; break;
+                }
 
-                styleBox->addListener (this);
+                styleBox.setSelectedId (selectedStyle);
+
+                styleBox.addListener (this);
             }
 
             if ((optionFlags & Toolbar::showResetToDefaultsButton) != 0)
             {
-                addAndMakeVisible (defaultButton = new TextButton (TRANS ("Restore to default set of items")));
-                defaultButton->addButtonListener (this);
+                addAndMakeVisible (&defaultButton);
+                defaultButton.addButtonListener (this);
             }
 
-            addAndMakeVisible (instructions = new Label (String::empty,
-                TRANS ("You can drag the items above and drop them onto a toolbar to add them.\n\nItems on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")));
-            instructions->setFont (Font (13.0f));
+            addAndMakeVisible (&instructions);
+            instructions.setFont (Font (13.0f));
 
             setSize (500, 300);
         }
 
-        ~CustomiserPanel()
-        {
-            deleteAllChildren();
-        }
-
         void comboBoxChanged (ComboBox*)
         {
-            if (styleBox->getSelectedId() == 1)
-                toolbar->setStyle (Toolbar::iconsOnly);
-            else if (styleBox->getSelectedId() == 2)
-                toolbar->setStyle (Toolbar::iconsWithText);
-            else if (styleBox->getSelectedId() == 3)
-                toolbar->setStyle (Toolbar::textOnly);
+            switch (styleBox.getSelectedId())
+            {
+                case 1:   toolbar->setStyle (Toolbar::iconsOnly); break;
+                case 2:   toolbar->setStyle (Toolbar::iconsWithText); break;
+                case 3:   toolbar->setStyle (Toolbar::textOnly); break;
+            }
 
-            palette->resized(); // to make it update the styles
+            palette.resized(); // to make it update the styles
         }
 
         void buttonClicked (Button*)
@@ -865,33 +861,28 @@ private:
                 background = dw->getBackgroundColour();
 
             g.setColour (background.contrasting().withAlpha (0.3f));
-            g.fillRect (palette->getX(), palette->getBottom() - 1, palette->getWidth(), 1);
+            g.fillRect (palette.getX(), palette.getBottom() - 1, palette.getWidth(), 1);
         }
 
         void resized()
         {
-            palette->setBounds (0, 0, getWidth(), getHeight() - 120);
+            palette.setBounds (0, 0, getWidth(), getHeight() - 120);
+            styleBox.setBounds (10, getHeight() - 110, 200, 22);
 
-            if (styleBox != 0)
-                styleBox->setBounds (10, getHeight() - 110, 200, 22);
+            defaultButton.changeWidthToFitText (22);
+            defaultButton.setTopLeftPosition (240, getHeight() - 110);
 
-            if (defaultButton != 0)
-            {
-                defaultButton->changeWidthToFitText (22);
-                defaultButton->setTopLeftPosition (240, getHeight() - 110);
-            }
-
-            instructions->setBounds (10, getHeight() - 80, getWidth() - 20, 80);
+            instructions.setBounds (10, getHeight() - 80, getWidth() - 20, 80);
         }
 
     private:
         ToolbarItemFactory& factory;
         Toolbar* const toolbar;
 
-        Label* instructions;
-        ToolbarItemPalette* palette;
-        ComboBox* styleBox;
-        TextButton* defaultButton;
+        ToolbarItemPalette palette;
+        Label instructions;
+        ComboBox styleBox;
+        TextButton defaultButton;
     };
 };
 

@@ -45,6 +45,8 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
      fileFilter (fileFilter_),
      flags (flags_),
      previewComp (previewComp_),
+     currentPathBox ("path"),
+     fileLabel ("f", TRANS ("file:")),
      thread ("Juce FileBrowser")
 {
     // You need to specify one or other of the open/save flags..
@@ -76,29 +78,29 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     if ((flags & useTreeView) != 0)
     {
         FileTreeComponent* const tree = new FileTreeComponent (*fileList);
+        fileListComponent = tree;
 
         if ((flags & canSelectMultipleItems) != 0)
             tree->setMultiSelectEnabled (true);
 
         addAndMakeVisible (tree);
-        fileListComponent = tree;
     }
     else
     {
         FileListComponent* const list = new FileListComponent (*fileList);
+        fileListComponent = list;
         list->setOutlineThickness (1);
 
         if ((flags & canSelectMultipleItems) != 0)
             list->setMultipleSelectionEnabled (true);
 
         addAndMakeVisible (list);
-        fileListComponent = list;
     }
 
     fileListComponent->addListener (this);
 
-    addAndMakeVisible (currentPathBox = new ComboBox ("path"));
-    currentPathBox->setEditableText (true);
+    addAndMakeVisible (&currentPathBox);
+    currentPathBox.setEditableText (true);
 
     StringArray rootNames, rootPaths;
     const BigInteger separators (getRoots (rootNames, rootPaths));
@@ -106,28 +108,25 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     for (int i = 0; i < rootNames.size(); ++i)
     {
         if (separators [i])
-            currentPathBox->addSeparator();
+            currentPathBox.addSeparator();
 
-        currentPathBox->addItem (rootNames[i], i + 1);
+        currentPathBox.addItem (rootNames[i], i + 1);
     }
 
-    currentPathBox->addSeparator();
-    currentPathBox->addListener (this);
+    currentPathBox.addSeparator();
+    currentPathBox.addListener (this);
 
-    addAndMakeVisible (filenameBox = new TextEditor());
-    filenameBox->setMultiLine (false);
-    filenameBox->setSelectAllWhenFocused (true);
-    filenameBox->setText (filename, false);
+    addAndMakeVisible (&filenameBox);
+    filenameBox.setMultiLine (false);
+    filenameBox.setSelectAllWhenFocused (true);
+    filenameBox.setText (filename, false);
+    filenameBox.addListener (this);
+    filenameBox.setReadOnly ((flags & (filenameBoxIsReadOnly | canSelectMultipleItems)) != 0);
 
-    filenameBox->addListener (this);
-    filenameBox->setReadOnly ((flags & (filenameBoxIsReadOnly | canSelectMultipleItems)) != 0);
-
-    Label* label = new Label ("f", TRANS("file:"));
-    addAndMakeVisible (label);
-    label->attachToComponent (filenameBox, true);
+    addAndMakeVisible (&fileLabel);
+    fileLabel.attachToComponent (&filenameBox, true);
 
     addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
-
     goUpButton->addButtonListener (this);
     goUpButton->setTooltip (TRANS ("go up to parent directory"));
 
@@ -141,10 +140,6 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
 FileBrowserComponent::~FileBrowserComponent()
 {
-    if (previewComp != 0)
-        removeChildComponent (previewComp);
-
-    deleteAllChildren();
     fileList = 0;
     thread.stopThread (10000);
 }
@@ -176,11 +171,11 @@ int FileBrowserComponent::getNumSelectedFiles() const throw()
 
 const File FileBrowserComponent::getSelectedFile (int index) const throw()
 {
-    if ((flags & canSelectDirectories) != 0 && filenameBox->getText().isEmpty())
+    if ((flags & canSelectDirectories) != 0 && filenameBox.getText().isEmpty())
         return currentRoot;
 
-    if (! filenameBox->isReadOnly())
-        return currentRoot.getChildFile (filenameBox->getText());
+    if (! filenameBox.isReadOnly())
+        return currentRoot.getChildFile (filenameBox.getText());
 
     return chosenFiles[index];
 }
@@ -206,8 +201,7 @@ void FileBrowserComponent::deselectAllFiles()
 //==============================================================================
 bool FileBrowserComponent::isFileSuitable (const File& file) const
 {
-    return (flags & canSelectFiles) != 0 ? (fileFilter == 0 || fileFilter->isFileSuitable (file))
-                                         : false;
+    return (flags & canSelectFiles) != 0 && (fileFilter == 0 || fileFilter->isFileSuitable (file));
 }
 
 bool FileBrowserComponent::isDirectorySuitable (const File&) const
@@ -221,7 +215,7 @@ bool FileBrowserComponent::isFileOrDirSuitable (const File& f) const
         return (flags & canSelectDirectories) != 0 && (fileFilter == 0 || fileFilter->isDirectorySuitable (f));
 
     return (flags & canSelectFiles) != 0 && f.exists()
-             && (fileFilter == 0 || fileFilter->isFileSuitable (f));
+            && (fileFilter == 0 || fileFilter->isFileSuitable (f));
 }
 
 //==============================================================================
@@ -248,9 +242,9 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
         {
             bool alreadyListed = false;
 
-            for (int i = currentPathBox->getNumItems(); --i >= 0;)
+            for (int i = currentPathBox.getNumItems(); --i >= 0;)
             {
-                if (currentPathBox->getItemText (i).equalsIgnoreCase (path))
+                if (currentPathBox.getItemText (i).equalsIgnoreCase (path))
                 {
                     alreadyListed = true;
                     break;
@@ -258,7 +252,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
             }
 
             if (! alreadyListed)
-                currentPathBox->addItem (path, currentPathBox->getNumItems() + 2);
+                currentPathBox.addItem (path, currentPathBox.getNumItems() + 2);
         }
     }
 
@@ -269,7 +263,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
     if (currentRootName.isEmpty())
         currentRootName = File::separatorString;
 
-    currentPathBox->setText (currentRootName, true);
+    currentPathBox.setText (currentRootName, true);
 
     goUpButton->setEnabled (currentRoot.getParentDirectory().isDirectory()
                              && currentRoot.getParentDirectory() != currentRoot);
@@ -299,9 +293,8 @@ FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const throw()
 void FileBrowserComponent::resized()
 {
     getLookAndFeel()
-        .layoutFileBrowserComponent (*this, fileListComponent,
-                                     previewComp, currentPathBox,
-                                     filenameBox, goUpButton);
+        .layoutFileBrowserComponent (*this, fileListComponent, previewComp,
+                                     &currentPathBox, &filenameBox, goUpButton);
 }
 
 //==============================================================================
@@ -341,7 +334,7 @@ void FileBrowserComponent::selectionChanged()
     }
 
     if (newFilenames.size() > 0)
-        filenameBox->setText (newFilenames.joinIntoString (", "), false);
+        filenameBox.setText (newFilenames.joinIntoString (", "), false);
 
     sendListenerChangeMessage();
 }
@@ -359,7 +352,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
         setRoot (f);
 
         if ((flags & canSelectDirectories) != 0)
-            filenameBox->setText (String::empty);
+            filenameBox.setText (String::empty);
     }
     else
     {
@@ -393,22 +386,22 @@ void FileBrowserComponent::textEditorTextChanged (TextEditor&)
 
 void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
 {
-    if (filenameBox->getText().containsChar (File::separator))
+    if (filenameBox.getText().containsChar (File::separator))
     {
-        const File f (currentRoot.getChildFile (filenameBox->getText()));
+        const File f (currentRoot.getChildFile (filenameBox.getText()));
 
         if (f.isDirectory())
         {
             setRoot (f);
             chosenFiles.clear();
-            filenameBox->setText (String::empty);
+            filenameBox.setText (String::empty);
         }
         else
         {
             setRoot (f.getParentDirectory());
             chosenFiles.clear();
             chosenFiles.add (f);
-            filenameBox->setText (f.getFileName());
+            filenameBox.setText (f.getFileName());
         }
     }
     else
@@ -436,11 +429,11 @@ void FileBrowserComponent::buttonClicked (Button*)
 
 void FileBrowserComponent::comboBoxChanged (ComboBox*)
 {
-    const String newText (currentPathBox->getText().trim().unquoted());
+    const String newText (currentPathBox.getText().trim().unquoted());
 
     if (newText.isNotEmpty())
     {
-        const int index = currentPathBox->getSelectedId() - 1;
+        const int index = currentPathBox.getSelectedId() - 1;
 
         StringArray rootNames, rootPaths;
         getRoots (rootNames, rootPaths);
@@ -493,7 +486,7 @@ const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringA
             if (volume.isEmpty())
                 volume = TRANS("Hard Drive");
 
-            name << " [" << drive.getVolumeLabel() << ']';
+            name << " [" << volume << ']';
         }
         else if (drive.isOnCDRomDrive())
         {

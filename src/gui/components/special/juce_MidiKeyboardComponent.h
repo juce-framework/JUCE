@@ -396,8 +396,7 @@ private:
 
     int rangeStart, rangeEnd, firstKey;
     bool canScroll, mouseDragging, useMousePositionForVelocity;
-    Button* scrollDown;
-    Button* scrollUp;
+    ScopedPointer<Button> scrollDown, scrollUp;
 
     Array <KeyPress> keyPresses;
     Array <int> keyPressNotes;

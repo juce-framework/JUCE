@@ -62,7 +62,7 @@ public:
 
         if (file_.inputSource != 0)
         {
-            inputStream = file.inputSource->createInputStream();
+            inputStream = streamToDelete = file.inputSource->createInputStream();
         }
         else
         {
@@ -89,9 +89,6 @@ public:
         if (inputStream != 0 && inputStream == file.inputStream)
             file.numOpenStreams--;
 #endif
-
-        if (inputStream != file.inputStream)
-            delete inputStream;
     }
 
     int64 getTotalLength()
@@ -151,6 +148,7 @@ private:
     int64 pos;
     int headerSize;
     InputStream* inputStream;
+    ScopedPointer<InputStream> streamToDelete;
 
     ZipInputStream (const ZipInputStream&);
     ZipInputStream& operator= (const ZipInputStream&);
@@ -195,11 +193,11 @@ ZipFile::~ZipFile()
 #if JUCE_DEBUG
     entries.clear();
 
-    // If you hit this assertion, it means you've created a stream to read
-    // one of the items in the zipfile, but you've forgotten to delete that
-    // stream object before deleting the file.. Streams can't be kept open
-    // after the file is deleted because they need to share the input
-    // stream that the file uses to read itself.
+    /* If you hit this assertion, it means you've created a stream to read one of the items in the
+       zipfile, but you've forgotten to delete that stream object before deleting the file..
+       Streams can't be kept open after the file is deleted because they need to share the input
+       stream that the file uses to read itself.
+    */
     jassert (numOpenStreams == 0);
 #endif
 }

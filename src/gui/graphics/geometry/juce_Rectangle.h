@@ -203,6 +203,7 @@ public:
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+        @see withLeft
     */
     void setLeft (const ValueType newLeft) throw()
     {
@@ -210,8 +211,15 @@ public:
         x = newLeft;
     }
 
+    /** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
+        If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
+        @see setLeft
+    */
+    const Rectangle withLeft (const ValueType newLeft) const throw()        { return Rectangle (newLeft, y, jmax (ValueType(), x + w - newLeft), h); }
+
     /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
         If the y is moved to be below the current bottom edge, the height will be set to zero.
+        @see withTop
     */
     void setTop (const ValueType newTop) throw()
     {
@@ -219,9 +227,15 @@ public:
         y = newTop;
     }
 
+    /** Returns a new rectangle with a different y position, but the same bottom edge as this one.
+        If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
+        @see setTop
+    */
+    const Rectangle withTop (const ValueType newTop) const throw()          { return Rectangle (x, newTop, w, jmax (ValueType(), y + h - newTop)); }
+
     /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
         If the new right is below the current X value, the X will be pushed down to match it.
-        @see getRight
+        @see getRight, withRight
     */
     void setRight (const ValueType newRight) throw()
     {
@@ -229,15 +243,27 @@ public:
         w = newRight - x;
     }
 
+    /** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
+        If the new right edge is below the current left-hand edge, the width will be set to zero.
+        @see setRight
+    */
+    const Rectangle withRight (const ValueType newRight) const throw()      { return Rectangle (jmin (x, newRight), y, jmax (ValueType(), newRight - x), h); }
+
     /** Adjusts the height so that the bottom edge of the rectangle has this new value.
         If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
-        @see getBottom
+        @see getBottom, withBottom
     */
     void setBottom (const ValueType newBottom) throw()
     {
         y = jmin (y, newBottom);
         h = newBottom - y;
     }
+
+    /** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
+        If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
+        @see setBottom
+    */
+    const Rectangle withBottom (const ValueType newBottom) const throw()    { return Rectangle (x, jmin (y, newBottom), w, jmax (ValueType(), newBottom - y)); }
 
     //==============================================================================
     /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */

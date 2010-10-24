@@ -68,7 +68,7 @@ public:
 private:
     ToolbarItemFactory& factory;
     Toolbar* toolbar;
-    Viewport* viewport;
+    Viewport viewport;
 
     friend class Toolbar;
     void replaceComponent (ToolbarItemComponent* comp);

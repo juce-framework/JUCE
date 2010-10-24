@@ -86,8 +86,8 @@ public:
 private:
     KnownPluginList& list;
     File deadMansPedalFile;
-    ListBox* listBox;
-    TextButton* optionsButton;
+    ListBox listBox;
+    TextButton optionsButton;
     PropertiesFile* propertiesToUse;
     int typeToScan;
 

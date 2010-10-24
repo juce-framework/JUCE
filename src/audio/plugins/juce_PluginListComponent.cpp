@@ -43,13 +43,15 @@ PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
                                           PropertiesFile* const propertiesToUse_)
     : list (listToEdit),
       deadMansPedalFile (deadMansPedalFile_),
+      optionsButton ("Options..."),
       propertiesToUse (propertiesToUse_)
 {
-    addAndMakeVisible (listBox = new ListBox (String::empty, this));
+    listBox.setModel (this);
+    addAndMakeVisible (&listBox);
 
-    addAndMakeVisible (optionsButton = new TextButton ("Options..."));
-    optionsButton->addButtonListener (this);
-    optionsButton->setTriggeredOnMouseDown (true);
+    addAndMakeVisible (&optionsButton);
+    optionsButton.addButtonListener (this);
+    optionsButton.setTriggeredOnMouseDown (true);
 
     setSize (400, 600);
     list.addChangeListener (this);
@@ -59,20 +61,19 @@ PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
 PluginListComponent::~PluginListComponent()
 {
     list.removeChangeListener (this);
-    deleteAllChildren();
 }
 
 void PluginListComponent::resized()
 {
-    listBox->setBounds (0, 0, getWidth(), getHeight() - 30);
-    optionsButton->changeWidthToFitText (24);
-    optionsButton->setTopLeftPosition (8, getHeight() - 28);
+    listBox.setBounds (0, 0, getWidth(), getHeight() - 30);
+    optionsButton.changeWidthToFitText (24);
+    optionsButton.setTopLeftPosition (8, getHeight() - 28);
 }
 
 void PluginListComponent::changeListenerCallback (void*)
 {
-    listBox->updateContent();
-    listBox->repaint();
+    listBox.updateContent();
+    listBox.repaint();
 }
 
 int PluginListComponent::getNumRows()
@@ -130,14 +131,14 @@ void PluginListComponent::deleteKeyPressed (int lastRowSelected)
     list.removeType (lastRowSelected);
 }
 
-void PluginListComponent::buttonClicked (Button* b)
+void PluginListComponent::buttonClicked (Button* button)
 {
-    if (optionsButton == b)
+    if (button == &optionsButton)
     {
         PopupMenu menu;
         menu.addItem (1, TRANS("Clear list"));
-        menu.addItem (5, TRANS("Remove selected plugin from list"), listBox->getNumSelectedRows() > 0);
-        menu.addItem (6, TRANS("Show folder containing selected plugin"), listBox->getNumSelectedRows() > 0);
+        menu.addItem (5, TRANS("Remove selected plugin from list"), listBox.getNumSelectedRows() > 0);
+        menu.addItem (6, TRANS("Show folder containing selected plugin"), listBox.getNumSelectedRows() > 0);
         menu.addItem (7, TRANS("Remove any plugins whose files no longer exist"));
         menu.addSeparator();
         menu.addItem (2, TRANS("Sort alphabetically"));
@@ -153,7 +154,7 @@ void PluginListComponent::buttonClicked (Button* b)
                 menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plugins...");
         }
 
-        const int r = menu.showAt (optionsButton);
+        const int r = menu.showAt (&optionsButton);
 
         if (r == 1)
         {
@@ -173,7 +174,7 @@ void PluginListComponent::buttonClicked (Button* b)
         }
         else if (r == 5)
         {
-            const SparseSet <int> selected (listBox->getSelectedRows());
+            const SparseSet <int> selected (listBox.getSelectedRows());
 
             for (int i = list.getNumTypes(); --i >= 0;)
                 if (selected.contains (i))
@@ -181,7 +182,7 @@ void PluginListComponent::buttonClicked (Button* b)
         }
         else if (r == 6)
         {
-            const PluginDescription* const desc = list.getType (listBox->getSelectedRow());
+            const PluginDescription* const desc = list.getType (listBox.getSelectedRow());
 
             if (desc != 0)
             {

@@ -38,13 +38,12 @@ BEGIN_JUCE_NAMESPACE
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../../../text/juce_LocalisedStrings.h"
 
-const int maxKeys = 3;
 
 //==============================================================================
 class KeyMappingChangeButton  : public Button
 {
 public:
-    KeyMappingChangeButton (KeyMappingEditorComponent* const owner_,
+    KeyMappingChangeButton (KeyMappingEditorComponent& owner_,
                             const CommandID commandID_,
                             const String& keyName,
                             const int keyNum_)
@@ -56,14 +55,8 @@ public:
         setWantsKeyboardFocus (false);
         setTriggeredOnMouseDown (keyNum >= 0);
 
-        if (keyNum_ < 0)
-            setTooltip (TRANS("adds a new key-mapping"));
-        else
-            setTooltip (TRANS("click to change this key-mapping"));
-    }
-
-    ~KeyMappingChangeButton()
-    {
+        setTooltip (keyNum_ < 0 ? TRANS("adds a new key-mapping")
+                                : TRANS("click to change this key-mapping"));
     }
 
     void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/)
@@ -86,17 +79,17 @@ public:
 
             if (res == 1)
             {
-                owner->assignNewKey (commandID, keyNum);
+                owner.assignNewKey (commandID, keyNum);
             }
             else if (res == 2)
             {
-                owner->getMappings()->removeKeyPress (commandID, keyNum);
+                owner.getMappings()->removeKeyPress (commandID, keyNum);
             }
         }
         else
         {
             // + button pressed..
-            owner->assignNewKey (commandID, -1);
+            owner.assignNewKey (commandID, -1);
         }
     }
 
@@ -116,7 +109,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    KeyMappingEditorComponent* const owner;
+    KeyMappingEditorComponent& owner;
     const CommandID commandID;
     const int keyNum;
 
@@ -128,32 +121,30 @@ private:
 class KeyMappingItemComponent  : public Component
 {
 public:
-    KeyMappingItemComponent (KeyMappingEditorComponent* const owner_,
-                             const CommandID commandID_)
-        : owner (owner_),
-          commandID (commandID_)
+    KeyMappingItemComponent (KeyMappingEditorComponent& owner_, const CommandID commandID_)
+        : owner (owner_), commandID (commandID_)
     {
         setInterceptsMouseClicks (false, true);
 
-        const bool isReadOnly = owner_->isCommandReadOnly (commandID);
+        const bool isReadOnly = owner.isCommandReadOnly (commandID);
 
-        const Array <KeyPress> keyPresses (owner_->getMappings()->getKeyPressesAssignedToCommand (commandID));
+        const Array <KeyPress> keyPresses (owner.getMappings()->getKeyPressesAssignedToCommand (commandID));
 
-        for (int i = 0; i < jmin (maxKeys, keyPresses.size()); ++i)
+        for (int i = 0; i < jmin ((int) maxNumAssignments, keyPresses.size()); ++i)
         {
             KeyMappingChangeButton* const kb
-                = new KeyMappingChangeButton (owner_, commandID,
-                                              owner_->getDescriptionForKeyPress (keyPresses.getReference (i)), i);
+                = new KeyMappingChangeButton (owner, commandID,
+                                              owner.getDescriptionForKeyPress (keyPresses.getReference (i)), i);
 
             kb->setEnabled (! isReadOnly);
             addAndMakeVisible (kb);
         }
 
         KeyMappingChangeButton* const kb
-            = new KeyMappingChangeButton (owner_, commandID, String::empty, -1);
+            = new KeyMappingChangeButton (owner, commandID, String::empty, -1);
 
         addChildComponent (kb);
-        kb->setVisible (keyPresses.size() < maxKeys && ! isReadOnly);
+        kb->setVisible (keyPresses.size() < (int) maxNumAssignments && ! isReadOnly);
     }
 
     ~KeyMappingItemComponent()
@@ -166,7 +157,7 @@ public:
         g.setFont (getHeight() * 0.7f);
         g.setColour (findColour (KeyMappingEditorComponent::textColourId));
 
-        g.drawFittedText (owner->getMappings()->getCommandManager()->getNameOfCommand (commandID),
+        g.drawFittedText (owner.getMappings()->getCommandManager()->getNameOfCommand (commandID),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
                           Justification::centredLeft, true);
     }
@@ -185,10 +176,12 @@ public:
         }
     }
 
+    enum { maxNumAssignments = 3 };
+
     juce_UseDebuggingNewOperator
 
 private:
-    KeyMappingEditorComponent* const owner;
+    KeyMappingEditorComponent& owner;
     const CommandID commandID;
 
     KeyMappingItemComponent (const KeyMappingItemComponent&);
@@ -199,14 +192,8 @@ private:
 class KeyMappingTreeViewItem  : public TreeViewItem
 {
 public:
-    KeyMappingTreeViewItem (KeyMappingEditorComponent* const owner_,
-                            const CommandID commandID_)
-        : owner (owner_),
-          commandID (commandID_)
-    {
-    }
-
-    ~KeyMappingTreeViewItem()
+    KeyMappingTreeViewItem (KeyMappingEditorComponent& owner_, const CommandID commandID_)
+        : owner (owner_), commandID (commandID_)
     {
     }
 
@@ -222,7 +209,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    KeyMappingEditorComponent* const owner;
+    KeyMappingEditorComponent& owner;
     const CommandID commandID;
 
     KeyMappingTreeViewItem (const KeyMappingTreeViewItem&);
@@ -234,14 +221,8 @@ private:
 class KeyCategoryTreeViewItem  : public TreeViewItem
 {
 public:
-    KeyCategoryTreeViewItem (KeyMappingEditorComponent* const owner_,
-                             const String& name)
-        : owner (owner_),
-          categoryName (name)
-    {
-    }
-
-    ~KeyCategoryTreeViewItem()
+    KeyCategoryTreeViewItem (KeyMappingEditorComponent& owner_, const String& name)
+        : owner (owner_), categoryName (name)
     {
     }
 
@@ -252,7 +233,7 @@ public:
     void paintItem (Graphics& g, int width, int height)
     {
         g.setFont (height * 0.6f, Font::bold);
-        g.setColour (owner->findColour (KeyMappingEditorComponent::textColourId));
+        g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (categoryName,
                     2, 0, width - 2, height,
@@ -265,11 +246,11 @@ public:
         {
             if (getNumSubItems() == 0)
             {
-                Array <CommandID> commands (owner->getMappings()->getCommandManager()->getCommandsInCategory (categoryName));
+                Array <CommandID> commands (owner.getMappings()->getCommandManager()->getCommandsInCategory (categoryName));
 
                 for (int i = 0; i < commands.size(); ++i)
                 {
-                    if (owner->shouldCommandBeIncluded (commands[i]))
+                    if (owner.shouldCommandBeIncluded (commands[i]))
                         addSubItem (new KeyMappingTreeViewItem (owner, commands[i]));
                 }
             }
@@ -283,7 +264,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    KeyMappingEditorComponent* owner;
+    KeyMappingEditorComponent& owner;
     String categoryName;
 
     KeyCategoryTreeViewItem (const KeyCategoryTreeViewItem&);
@@ -394,7 +375,7 @@ void KeyMappingEditorComponent::changeListenerCallback (void*)
                 ++count;
 
         if (count > 0)
-            addSubItem (new KeyCategoryTreeViewItem (this, categories[i]));
+            addSubItem (new KeyCategoryTreeViewItem (*this, categories[i]));
     }
 
     if (oldOpenness != 0)
@@ -405,7 +386,7 @@ void KeyMappingEditorComponent::changeListenerCallback (void*)
 class KeyEntryWindow  : public AlertWindow
 {
 public:
-    KeyEntryWindow (KeyMappingEditorComponent* const owner_)
+    KeyEntryWindow (KeyMappingEditorComponent& owner_)
         : AlertWindow (TRANS("New key-mapping"),
                        TRANS("Please press a key combination now..."),
                        AlertWindow::NoIcon),
@@ -429,15 +410,15 @@ public:
     bool keyPressed (const KeyPress& key)
     {
         lastPress = key;
-        String message (TRANS("Key: ") + owner->getDescriptionForKeyPress (key));
+        String message (TRANS("Key: ") + owner.getDescriptionForKeyPress (key));
 
-        const CommandID previousCommand = owner->getMappings()->findCommandForKeyPress (key);
+        const CommandID previousCommand = owner.getMappings()->findCommandForKeyPress (key);
 
         if (previousCommand != 0)
         {
             message << "\n\n"
                     << TRANS("(Currently assigned to \"")
-                    << owner->getMappings()->getCommandManager()->getNameOfCommand (previousCommand)
+                    << owner.getMappings()->getCommandManager()->getNameOfCommand (previousCommand)
                     << "\")";
         }
 
@@ -456,7 +437,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    KeyMappingEditorComponent* owner;
+    KeyMappingEditorComponent& owner;
 
     KeyEntryWindow (const KeyEntryWindow&);
     KeyEntryWindow& operator= (const KeyEntryWindow&);
@@ -465,7 +446,7 @@ private:
 
 void KeyMappingEditorComponent::assignNewKey (const CommandID commandID, const int index)
 {
-    KeyEntryWindow entryWindow (this);
+    KeyEntryWindow entryWindow (*this);
 
     if (entryWindow.runModalLoop() != 0)
     {

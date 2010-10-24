@@ -38,6 +38,7 @@ ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& factory_,
       toolbar (toolbar_)
 {
     Component* const itemHolder = new Component();
+    viewport.setViewedComponent (itemHolder);
 
     Array <int> allIds;
     factory_.getAllToolbarItemIds (allIds);
@@ -54,27 +55,24 @@ ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& factory_,
         }
     }
 
-    viewport = new Viewport();
-    viewport->setViewedComponent (itemHolder);
-    addAndMakeVisible (viewport);
+    addAndMakeVisible (&viewport);
 }
 
 ToolbarItemPalette::~ToolbarItemPalette()
 {
-    viewport->getViewedComponent()->deleteAllChildren();
-    deleteAllChildren();
+    viewport.getViewedComponent()->deleteAllChildren();
 }
 
 
 //==============================================================================
 void ToolbarItemPalette::resized()
 {
-    viewport->setBoundsInset (BorderSize (1));
+    viewport.setBoundsInset (BorderSize (1));
 
-    Component* const itemHolder = viewport->getViewedComponent();
+    Component* const itemHolder = viewport.getViewedComponent();
 
     const int indent = 8;
-    const int preferredWidth = viewport->getWidth() - viewport->getScrollBarThickness() - indent;
+    const int preferredWidth = viewport.getWidth() - viewport.getScrollBarThickness() - indent;
     const int height = toolbar->getThickness();
     int x = indent;
     int y = indent;
@@ -120,7 +118,7 @@ void ToolbarItemPalette::replaceComponent (ToolbarItemComponent* const comp)
         tc->setBounds (comp->getBounds());
         tc->setStyle (toolbar->getStyle());
         tc->setEditingMode (comp->getEditingMode());
-        viewport->getViewedComponent()->addAndMakeVisible (tc, getIndexOfChildComponent (comp));
+        viewport.getViewedComponent()->addAndMakeVisible (tc, getIndexOfChildComponent (comp));
     }
 }
 

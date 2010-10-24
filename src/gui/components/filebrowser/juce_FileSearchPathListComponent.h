@@ -48,9 +48,7 @@ class JUCE_API  FileSearchPathListComponent  : public Component,
 {
 public:
     //==============================================================================
-    /** Creates an empty FileSearchPathListComponent.
-
-    */
+    /** Creates an empty FileSearchPathListComponent. */
     FileSearchPathListComponent();
 
     /** Destructor. */
@@ -114,12 +112,9 @@ private:
     FileSearchPath path;
     File defaultBrowseTarget;
 
-    ListBox* listBox;
-    Button* addButton;
-    Button* removeButton;
-    TextButton* changeButton;
-    DrawableButton* upButton;
-    DrawableButton* downButton;
+    ListBox listBox;
+    TextButton addButton, removeButton, changeButton;
+    DrawableButton upButton, downButton;
 
     void changed();
     void updateButtons();
@@ -127,7 +122,6 @@ private:
     FileSearchPathListComponent (const FileSearchPathListComponent&);
     FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
 };
-
 
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__

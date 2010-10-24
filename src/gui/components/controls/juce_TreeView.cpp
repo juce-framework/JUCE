@@ -49,7 +49,6 @@ public:
 
     ~TreeViewContentComponent()
     {
-        deleteAllChildren();
     }
 
     void mouseDown (const MouseEvent& e)
@@ -204,7 +203,10 @@ public:
         const int visibleTop = -getY();
         const int visibleBottom = visibleTop + getParentHeight();
 
-        BigInteger itemsToKeep;
+        {
+            for (int i = items.size(); --i >= 0;)
+                items.getUnchecked(i)->shouldKeep = false;
+        }
 
         {
             TreeViewItem* item = owner.rootItem;
@@ -216,24 +218,21 @@ public:
 
                 if (y >= visibleTop)
                 {
-                    const int index = rowComponentIds.indexOf (item->uid);
+                    RowItem* const ri = findItem (item->uid);
 
-                    if (index < 0)
+                    if (ri != 0)
+                    {
+                        ri->shouldKeep = true;
+                    }
+                    else
                     {
                         Component* const comp = item->createItemComponent();
 
                         if (comp != 0)
                         {
+                            items.add (new RowItem (item, comp, item->uid));
                             addAndMakeVisible (comp);
-                            itemsToKeep.setBit (rowComponentItems.size());
-                            rowComponentItems.add (item);
-                            rowComponentIds.add (item->uid);
-                            rowComponents.add (comp);
                         }
-                    }
-                    else
-                    {
-                        itemsToKeep.setBit (index);
                     }
                 }
 
@@ -241,41 +240,34 @@ public:
             }
         }
 
-        for (int i = rowComponentItems.size(); --i >= 0;)
+        for (int i = items.size(); --i >= 0;)
         {
-            Component* const comp = rowComponents.getUnchecked(i);
+            RowItem* const ri = items.getUnchecked(i);
             bool keep = false;
 
-            if (isParentOf (comp))
+            if (isParentOf (ri->component))
             {
-                if (itemsToKeep[i])
+                if (ri->shouldKeep)
                 {
-                    const TreeViewItem* const item = rowComponentItems.getUnchecked(i);
-
-                    Rectangle<int> pos (item->getItemPosition (false));
-                    pos.setSize (pos.getWidth(), item->itemHeight);
+                    Rectangle<int> pos (ri->item->getItemPosition (false));
+                    pos.setSize (pos.getWidth(), ri->item->itemHeight);
 
                     if (pos.getBottom() >= visibleTop && pos.getY() < visibleBottom)
                     {
                         keep = true;
-                        comp->setBounds (pos);
+                        ri->component->setBounds (pos);
                     }
                 }
 
-                if ((! keep) && isMouseDraggingInChildCompOf (comp))
+                if ((! keep) && isMouseDraggingInChildCompOf (ri->component))
                 {
                     keep = true;
-                    comp->setSize (0, 0);
+                    ri->component->setSize (0, 0);
                 }
             }
 
             if (! keep)
-            {
-                delete comp;
-                rowComponents.remove (i);
-                rowComponentIds.remove (i);
-                rowComponentItems.remove (i);
-            }
+                items.remove (i);
         }
     }
 
@@ -341,9 +333,27 @@ public:
 
 private:
     TreeView& owner;
-    Array <TreeViewItem*> rowComponentItems;
-    Array <int> rowComponentIds;
-    Array <Component*> rowComponents;
+
+    struct RowItem
+    {
+        RowItem (TreeViewItem* const item_, Component* const component_, const int itemUID)
+            : component (component_), item (item_), uid (itemUID), shouldKeep (true)
+        {
+        }
+
+        ~RowItem()
+        {
+            component.deleteAndZero();
+        }
+
+        Component::SafePointer<Component> component;
+        TreeViewItem* item;
+        int uid;
+        bool shouldKeep;
+    };
+
+    OwnedArray <RowItem> items;
+
     TreeViewItem* buttonUnderMouse;
     bool isDragging, needSelectionOnMouseUp;
 
@@ -377,13 +387,25 @@ private:
         }
     }
 
-    bool containsItem (TreeViewItem* const item) const
+    bool containsItem (TreeViewItem* const item) const throw()
     {
-        for (int i = rowComponentItems.size(); --i >= 0;)
-            if (rowComponentItems.getUnchecked(i) == item)
+        for (int i = items.size(); --i >= 0;)
+            if (items.getUnchecked(i)->item == item)
                 return true;
 
         return false;
+    }
+
+    RowItem* findItem (const int uid) const throw()
+    {
+        for (int i = items.size(); --i >= 0;)
+        {
+            RowItem* const ri = items.getUnchecked(i);
+            if (ri->uid == uid)
+                return ri;
+        }
+
+        return 0;
     }
 
     static bool isMouseDraggingInChildCompOf (Component* const comp)
@@ -856,8 +878,6 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    ~InsertPointHighlight() {}
-
     void setTargetPosition (TreeViewItem* const item, int insertIndex, const int x, const int y, const int width) throw()
     {
         lastItem = item;
@@ -895,8 +915,6 @@ public:
         setAlwaysOnTop (true);
         setInterceptsMouseClicks (false, false);
     }
-
-    ~TargetGroupHighlight() {}
 
     void setTargetPosition (TreeViewItem* const item) throw()
     {
@@ -1217,7 +1235,6 @@ void TreeViewItem::setOpen (const bool shouldBeOpen)
     {
         openness = shouldBeOpen ? opennessOpen
                                 : opennessClosed;
-
         treeHasChanged();
 
         itemOpennessChanged (isOpen());
@@ -1530,21 +1547,19 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 bool TreeViewItem::isLastOfSiblings() const throw()
 {
     return parentItem == 0
-        || parentItem->subItems.getLast() == this;
+            || parentItem->subItems.getLast() == this;
 }
 
 int TreeViewItem::getIndexInParent() const throw()
 {
-    if (parentItem == 0)
-        return 0;
-
-    return parentItem->subItems.indexOf (this);
+    return parentItem == 0 ? 0
+                           : parentItem->subItems.indexOf (this);
 }
 
 TreeViewItem* TreeViewItem::getTopLevelItem() throw()
 {
-    return (parentItem == 0) ? this
-                             : parentItem->getTopLevelItem();
+    return parentItem == 0 ? this
+                           : parentItem->getTopLevelItem();
 }
 
 int TreeViewItem::getNumRows() const throw()
@@ -1618,10 +1633,7 @@ TreeViewItem* TreeViewItem::findItemRecursively (int targetY) throw()
 
 int TreeViewItem::countSelectedItemsRecursively() const throw()
 {
-    int total = 0;
-
-    if (isSelected())
-        ++total;
+    int total = isSelected() ? 1 : 0;
 
     for (int i = subItems.size(); --i >= 0;)
         total += subItems.getUnchecked(i)->countSelectedItemsRecursively();

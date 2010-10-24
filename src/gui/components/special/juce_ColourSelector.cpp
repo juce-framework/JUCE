@@ -44,10 +44,6 @@ public:
         setRange (0.0, 255.0, 1.0);
     }
 
-    ~ColourComponentSlider()
-    {
-    }
-
     const String getTextFromValue (double value)
     {
         return String::toHexString ((int) value).toUpperCase().paddedLeft ('0', 2);
@@ -72,10 +68,6 @@ public:
         setInterceptsMouseClicks (false, false);
     }
 
-    ~ColourSpaceMarker()
-    {
-    }
-
     void paint (Graphics& g)
     {
         g.setColour (Colour::greyLevel (0.1f));
@@ -93,7 +85,7 @@ private:
 class ColourSelector::ColourSpaceView  : public Component
 {
 public:
-    ColourSpaceView (ColourSelector* owner_,
+    ColourSpaceView (ColourSelector& owner_,
                      float& h_, float& s_, float& v_,
                      const int edgeSize)
         : owner (owner_),
@@ -103,10 +95,6 @@ public:
     {
         addAndMakeVisible (&marker);
         setMouseCursor (MouseCursor::CrosshairCursor);
-    }
-
-    ~ColourSpaceView()
-    {
     }
 
     void paint (Graphics& g)
@@ -147,7 +135,7 @@ public:
         const float sat = (e.x - edge) / (float) (getWidth() - edge * 2);
         const float val = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
 
-        owner->setSV (sat, val);
+        owner.setSV (sat, val);
     }
 
     void updateIfNeeded()
@@ -169,7 +157,7 @@ public:
     }
 
 private:
-    ColourSelector* const owner;
+    ColourSelector& owner;
     float& h;
     float& s;
     float& v;
@@ -196,10 +184,6 @@ public:
     HueSelectorMarker()
     {
         setInterceptsMouseClicks (false, false);
-    }
-
-    ~HueSelectorMarker()
-    {
     }
 
     void paint (Graphics& g)
@@ -229,7 +213,7 @@ private:
 class ColourSelector::HueSelectorComp  : public Component
 {
 public:
-    HueSelectorComp (ColourSelector* owner_,
+    HueSelectorComp (ColourSelector& owner_,
                      float& h_, float& s_, float& v_,
                      const int edgeSize)
         : owner (owner_),
@@ -238,10 +222,6 @@ public:
           edge (edgeSize)
     {
         addAndMakeVisible (&marker);
-    }
-
-    ~HueSelectorComp()
-    {
     }
 
     void paint (Graphics& g)
@@ -272,7 +252,7 @@ public:
     {
         const float hue = (e.y - edge) / (float) (getHeight() - edge * 2);
 
-        owner->setHue (hue);
+        owner.setHue (hue);
     }
 
     void updateIfNeeded()
@@ -281,7 +261,7 @@ public:
     }
 
 private:
-    ColourSelector* const owner;
+    ColourSelector& owner;
     float& h;
     float& s;
     float& v;
@@ -297,19 +277,14 @@ private:
 class ColourSelector::SwatchComponent   : public Component
 {
 public:
-    SwatchComponent (ColourSelector* owner_, int index_)
-        : owner (owner_),
-          index (index_)
-    {
-    }
-
-    ~SwatchComponent()
+    SwatchComponent (ColourSelector& owner_, int index_)
+        : owner (owner_), index (index_)
     {
     }
 
     void paint (Graphics& g)
     {
-        const Colour colour (owner->getSwatchColour (index));
+        const Colour colour (owner.getSwatchColour (index));
 
         g.fillCheckerBoard (getLocalBounds(), 6, 6,
                             Colour (0xffdddddd).overlaidWith (colour),
@@ -327,20 +302,20 @@ public:
 
         if (r == 1)
         {
-            owner->setCurrentColour (owner->getSwatchColour (index));
+            owner.setCurrentColour (owner.getSwatchColour (index));
         }
         else if (r == 2)
         {
-            if (owner->getSwatchColour (index) != owner->getCurrentColour())
+            if (owner.getSwatchColour (index) != owner.getCurrentColour())
             {
-                owner->setSwatchColour (index, owner->getCurrentColour());
+                owner.setSwatchColour (index, owner.getCurrentColour());
                 repaint();
             }
         }
     }
 
 private:
-    ColourSelector* const owner;
+    ColourSelector& owner;
     const int index;
 
     SwatchComponent (const SwatchComponent&);
@@ -381,8 +356,8 @@ ColourSelector::ColourSelector (const int flags_,
 
     if ((flags & showColourspace) != 0)
     {
-        addAndMakeVisible (colourSpace = new ColourSpaceView (this, h, s, v, gapAroundColourSpaceComponent));
-        addAndMakeVisible (hueSelector = new HueSelectorComp (this, h, s, v, gapAroundColourSpaceComponent));
+        addAndMakeVisible (colourSpace = new ColourSpaceView (*this, h, s, v, gapAroundColourSpaceComponent));
+        addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h, s, v, gapAroundColourSpaceComponent));
     }
 
     update();
@@ -561,7 +536,7 @@ void ColourSelector::resized()
 
             for (int i = 0; i < numSwatches; ++i)
             {
-                SwatchComponent* const sc = new SwatchComponent (this, i);
+                SwatchComponent* const sc = new SwatchComponent (*this, i);
                 swatchComponents.add (sc);
                 addAndMakeVisible (sc);
             }

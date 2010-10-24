@@ -271,10 +271,11 @@ private:
 
     CodeDocument::Position caretPos;
     CodeDocument::Position selectionStart, selectionEnd;
+
     class CaretComponent;
-    CaretComponent* caret;
-    ScrollBar* verticalScrollBar;
-    ScrollBar* horizontalScrollBar;
+    friend class ScopedPointer <CaretComponent>;
+    ScopedPointer<CaretComponent> caret;
+    ScrollBar verticalScrollBar, horizontalScrollBar;
 
     enum DragType
     {

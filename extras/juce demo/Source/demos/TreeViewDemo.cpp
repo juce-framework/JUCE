@@ -150,6 +150,8 @@ public:
 
     ~TreeViewDemo()
     {
+        fileTreeComp = 0;
+        directoryList = 0; // (need to make sure this is deleted before the TimeSliceThread)
     }
 
     void paint (Graphics& g)

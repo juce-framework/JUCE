@@ -272,16 +272,12 @@ public:
     {
     }
 
-    ~TableListBoxHeader()
-    {
-    }
-
     void addMenuItems (PopupMenu& menu, int columnIdClicked)
     {
         if (owner.isAutoSizeMenuOptionShown())
         {
-            menu.addItem (0xf836743, TRANS("Auto-size this column"), columnIdClicked != 0);
-            menu.addItem (0xf836744, TRANS("Auto-size all columns"), owner.getHeader()->getNumColumns (true) > 0);
+            menu.addItem (autoSizeColumnId, TRANS("Auto-size this column"), columnIdClicked != 0);
+            menu.addItem (autoSizeAllId, TRANS("Auto-size all columns"), owner.getHeader()->getNumColumns (true) > 0);
             menu.addSeparator();
         }
 
@@ -290,11 +286,11 @@ public:
 
     void reactToMenuItem (int menuReturnId, int columnIdClicked)
     {
-        if (menuReturnId == 0xf836743)
+        if (menuReturnId == autoSizeColumnId)
         {
             owner.autoSizeColumn (columnIdClicked);
         }
-        else if (menuReturnId == 0xf836744)
+        else if (menuReturnId == autoSizeAllId)
         {
             owner.autoSizeAllColumns();
         }
@@ -308,6 +304,8 @@ public:
 
 private:
     TableListBox& owner;
+
+    enum { autoSizeColumnId = 0xf836743, autoSizeAllId = 0xf836744 };
 
     TableListBoxHeader (const TableListBoxHeader&);
     TableListBoxHeader& operator= (const TableListBoxHeader&);

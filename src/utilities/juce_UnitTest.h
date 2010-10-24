@@ -69,12 +69,12 @@ class UnitTestRunner;
 
     @see UnitTestRunner
 */
-class UnitTest
+class JUCE_API  UnitTest
 {
 public:
     //==============================================================================
     /** Creates a test with the given name. */
-    UnitTest (const String& name);
+    explicit UnitTest (const String& name);
 
     /** Destructor. */
     virtual ~UnitTest();
@@ -184,7 +184,7 @@ private:
 
     @see UnitTest
 */
-class UnitTestRunner
+class JUCE_API  UnitTestRunner
 {
 public:
     //==============================================================================
