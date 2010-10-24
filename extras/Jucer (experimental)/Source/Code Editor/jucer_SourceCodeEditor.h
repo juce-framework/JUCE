@@ -52,7 +52,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    CodeEditorComponent* editor;
+    CodeEditorComponent editor;
 };
 
 

@@ -57,7 +57,7 @@ public:
 
 private:
     Project::Item item;
-    ListBox* list;
+    ListBox list;
 
     //==============================================================================
     GroupInformationComponent (const GroupInformationComponent&);

@@ -41,7 +41,7 @@ public:
 
     void rebuildProperties()
     {
-        getPanel()->clear();
+        getPanel().clear();
         Array <PropertyComponent*> props;
 
         if (tabIndex == 0)
@@ -90,7 +90,7 @@ public:
                 props.getUnchecked(i)->setPreferredHeight (22);
         }
 
-        getPanel()->addProperties (props);
+        getPanel().addProperties (props);
     }
 
     void visibilityChanged()

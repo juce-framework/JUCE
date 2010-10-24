@@ -31,9 +31,10 @@
 SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
                                     CodeDocument& codeDocument,
                                     CodeTokeniser* const codeTokeniser)
-    : DocumentEditorComponent (document_)
+    : DocumentEditorComponent (document_),
+      editor (codeDocument, codeTokeniser)
 {
-    addAndMakeVisible (editor = new CodeEditorComponent (codeDocument, codeTokeniser));
+    addAndMakeVisible (&editor);
 
 #if JUCE_MAC
     Font font (10.6f);
@@ -42,17 +43,16 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
     Font font (10.0f);
     font.setTypefaceName (Font::getDefaultMonospacedFontName());
 #endif
-    editor->setFont (font);
+    editor.setFont (font);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
 {
-    deleteAllChildren();
 }
 
 void SourceCodeEditor::resized()
 {
-    editor->setBounds (0, 0, getWidth(), getHeight());
+    editor.setBounds (0, 0, getWidth(), getHeight());
 }
 
 bool SourceCodeEditor::isTextFile (const File& file)

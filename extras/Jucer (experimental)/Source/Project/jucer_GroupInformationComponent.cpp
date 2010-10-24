@@ -30,21 +30,21 @@
 GroupInformationComponent::GroupInformationComponent (const Project::Item& item_)
     : item (item_)
 {
-    addAndMakeVisible (list = new ListBox (String::empty, this));
-    list->updateContent();
-    list->setRowHeight (20);
+    list.setModel (this);
+    addAndMakeVisible (&list);
+    list.updateContent();
+    list.setRowHeight (20);
     item.getNode().addListener (this);
 }
 
 GroupInformationComponent::~GroupInformationComponent()
 {
     item.getNode().removeListener (this);
-    deleteAllChildren();
 }
 
 void GroupInformationComponent::resized()
 {
-    list->setSize (getWidth(), getHeight());
+    list.setSize (getWidth(), getHeight());
 }
 
 int GroupInformationComponent::getNumRows()
@@ -59,17 +59,17 @@ void GroupInformationComponent::paintListBoxItem (int rowNumber, Graphics& g, in
 //==============================================================================
 void GroupInformationComponent::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)
 {
-    list->updateContent();
+    list.updateContent();
 }
 
 void GroupInformationComponent::valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)
 {
-    list->updateContent();
+    list.updateContent();
 }
 
 void GroupInformationComponent::valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)
 {
-    list->updateContent();
+    list.updateContent();
 }
 
 //==============================================================================
@@ -77,21 +77,18 @@ class FileOptionComponent  : public Component
 {
 public:
     FileOptionComponent (const Project::Item& item_)
-        : item (item_), compileButton (0), resourceButton (0)
+        : item (item_),
+          compileButton ("Compile"),
+          resourceButton ("Add to Binary Resources")
     {
         if (item.isFile())
         {
-            addAndMakeVisible (compileButton = new ToggleButton ("Compile"));
-            compileButton->getToggleStateValue().referTo (item.getShouldCompileValue());
+            addAndMakeVisible (&compileButton);
+            compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
 
-            addAndMakeVisible (resourceButton = new ToggleButton ("Add to Binary Resources"));
-            resourceButton->getToggleStateValue().referTo (item.getShouldAddToResourceValue());
+            addAndMakeVisible (&resourceButton);
+            resourceButton.getToggleStateValue().referTo (item.getShouldAddToResourceValue());
         }
-    }
-
-    ~FileOptionComponent()
-    {
-        deleteAllChildren();
     }
 
     void paint (Graphics& g)
@@ -104,8 +101,8 @@ public:
         g.setColour (Colours::black);
         g.setFont (getHeight() * 0.6f);
 
-        const int x2 = compileButton == 0 ? getWidth() - 4
-                                          : compileButton->getX() - 4;
+        const int x2 = compileButton.isVisible() ? compileButton.getX() - 4
+                                                 : getWidth() - 4;
 
         g.drawText (item.getName().toString(), x, 0, x2 - x, getHeight(), Justification::centredLeft, true);
 
@@ -115,20 +112,16 @@ public:
 
     void resized()
     {
-        if (resourceButton != 0)
-        {
-            int w = 180;
-            resourceButton->setBounds (getWidth() - w, 1, w, getHeight() - 2);
-            w = 100;
-            compileButton->setBounds (resourceButton->getX() - w, 1, w, getHeight() - 2);
-        }
+        int w = 180;
+        resourceButton.setBounds (getWidth() - w, 1, w, getHeight() - 2);
+        w = 100;
+        compileButton.setBounds (resourceButton.getX() - w, 1, w, getHeight() - 2);
     }
 
     Project::Item item;
 
 private:
-    ToggleButton* compileButton;
-    ToggleButton* resourceButton;
+    ToggleButton compileButton, resourceButton;
 };
 
 Component* GroupInformationComponent::refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)

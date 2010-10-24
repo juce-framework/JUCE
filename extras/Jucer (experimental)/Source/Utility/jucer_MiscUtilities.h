@@ -54,14 +54,14 @@ public:
     PropertyPanelWithTooltips();
     ~PropertyPanelWithTooltips();
 
-    PropertyPanel* getPanel() const        { return panel; }
+    PropertyPanel& getPanel() throw()        { return panel; }
 
     void paint (Graphics& g);
     void resized();
     void timerCallback();
 
 private:
-    PropertyPanel* panel;
+    PropertyPanel panel;
     TextLayout layout;
     Component* lastComp;
     String lastTip;

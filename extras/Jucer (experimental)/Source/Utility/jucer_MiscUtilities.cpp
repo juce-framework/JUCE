@@ -219,13 +219,12 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 PropertyPanelWithTooltips::PropertyPanelWithTooltips()
     : lastComp (0)
 {
-    addAndMakeVisible (panel = new PropertyPanel());
+    addAndMakeVisible (&panel);
     startTimer (150);
 }
 
 PropertyPanelWithTooltips::~PropertyPanelWithTooltips()
 {
-    deleteAllChildren();
 }
 
 void PropertyPanelWithTooltips::paint (Graphics& g)
@@ -239,14 +238,14 @@ void PropertyPanelWithTooltips::paint (Graphics& g)
     if (tl.getNumLines() > 3)
         tl.layout (getWidth() - 10, Justification::left, false); // too big, so just squash it in..
 
-    tl.drawWithin (g, 5, panel->getBottom() + 2, getWidth() - 10,
-                   getHeight() - panel->getBottom() - 4,
+    tl.drawWithin (g, 5, panel.getBottom() + 2, getWidth() - 10,
+                   getHeight() - panel.getBottom() - 4,
                    Justification::centredLeft);
 }
 
 void PropertyPanelWithTooltips::resized()
 {
-    panel->setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
+    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
 }
 
 void PropertyPanelWithTooltips::timerCallback()
@@ -265,7 +264,7 @@ void PropertyPanelWithTooltips::timerCallback()
         if (newTip != lastTip)
         {
             lastTip = newTip;
-            repaint (0, panel->getBottom(), getWidth(), getHeight());
+            repaint (0, panel.getBottom(), getWidth(), getHeight());
         }
     }
 }
