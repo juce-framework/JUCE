@@ -1075,7 +1075,8 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_6
         if ([window inLiveResize])
       #else
-        if ([window performSelector: @selector (inLiveResize)])
+        if ([window respondsToSelector: @selector (inLiveResize)]
+             && [window performSelector: @selector (inLiveResize)])
       #endif
         {
             constrainer->checkBounds (pos, original,

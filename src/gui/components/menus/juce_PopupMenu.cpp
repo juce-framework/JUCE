@@ -1546,13 +1546,13 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
     if (callback->component == 0)
         return 0;
 
-    callbackDeleter.release();
-
     callback->component->enterModalState (false, userCallbackDeleter.release());
     callback->component->toFront (false);  // need to do this after making it modal, or it could
                                            // be stuck behind other comps that are already modal..
 
     ModalComponentManager::getInstance()->attachCallback (callback->component, callback);
+
+    callbackDeleter.release();
 
     if (userCallback != 0)
         return 0;

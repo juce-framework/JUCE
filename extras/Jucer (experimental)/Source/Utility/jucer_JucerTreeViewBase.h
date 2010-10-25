@@ -42,10 +42,10 @@ public:
     //==============================================================================
     int getItemWidth() const                                { return -1; }
     int getItemHeight() const                               { return 20; }
-    Component* createItemComponent()                        { return 0; }
 
     void paintItem (Graphics& g, int width, int height);
     void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
+    Component* createItemComponent();
 
     //==============================================================================
     virtual const String getRenamingName() const = 0;
@@ -53,6 +53,7 @@ public:
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual const Image getIcon() const = 0;
+    virtual void createLeftEdgeComponents (Array<Component*>& components) = 0;
 
     virtual void showRenameBox();
 
@@ -64,6 +65,7 @@ public:
 
     //==============================================================================
 private:
+    int numLeftHandComps;
     const Font getFont() const;
     int getTextX() const;
 };
