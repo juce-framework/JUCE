@@ -28,46 +28,30 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian)
+void MACAddress::findAllAddresses (Array<MACAddress>& result)
 {
-    #ifndef IFT_ETHER
-     #define IFT_ETHER 6
-    #endif
-
     ifaddrs* addrs = 0;
-    int numResults = 0;
 
     if (getifaddrs (&addrs) == 0)
     {
-        const ifaddrs* cursor = addrs;
-
-        while (cursor != 0 && numResults < maxNum)
+        for (const ifaddrs* cursor = addrs; cursor != 0; cursor = cursor->ifa_next)
         {
             sockaddr_storage* sto = (sockaddr_storage*) cursor->ifa_addr;
             if (sto->ss_family == AF_LINK)
             {
                 const sockaddr_dl* const sadd = (const sockaddr_dl*) cursor->ifa_addr;
 
+                #ifndef IFT_ETHER
+                 #define IFT_ETHER 6
+                #endif
+
                 if (sadd->sdl_type == IFT_ETHER)
-                {
-                    const uint8* const addr = ((const uint8*) sadd->sdl_data) + sadd->sdl_nlen;
-
-                    uint64 a = 0;
-                    for (int i = 6; --i >= 0;)
-                        a = (a << 8) | addr [littleEndian ? i : (5 - i)];
-
-                    *addresses++ = (int64) a;
-                    ++numResults;
-                }
+                    result.addIfNotAlreadyThere (MACAddress (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen));
             }
-
-            cursor = cursor->ifa_next;
         }
 
         freeifaddrs (addrs);
     }
-
-    return numResults;
 }
 
 //==============================================================================

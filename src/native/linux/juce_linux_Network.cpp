@@ -29,10 +29,8 @@
 
 
 //==============================================================================
-int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian)
+void MACAddress::findAllAddresses (Array<MACAddress>& result)
 {
-    int numResults = 0;
-
     const int s = socket (AF_INET, SOCK_DGRAM, 0);
     if (s != -1)
     {
@@ -49,22 +47,14 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
 
             if (ioctl (s, SIOCGIFFLAGS, &ifr) == 0
                  && (ifr.ifr_flags & IFF_LOOPBACK) == 0
-                 && ioctl (s, SIOCGIFHWADDR, &ifr) == 0
-                 && numResults < maxNum)
+                 && ioctl (s, SIOCGIFHWADDR, &ifr) == 0)
             {
-                int64 a = 0;
-                for (int j = 6; --j >= 0;)
-                    a = (a << 8) | (uint8) ifr.ifr_hwaddr.sa_data [littleEndian ? j : (5 - j)];
-
-                *addresses++ = a;
-                ++numResults;
+                result.addIfNotAlreadyThere (MACAddress ((const uint8*) ifr.ifr_hwaddr.sa_data));
             }
         }
 
         close (s);
     }
-
-    return numResults;
 }
 
 
@@ -173,11 +163,8 @@ public:
             return false;
         }
 
-        const MemoryBlock requestHeader (createRequestHeader (hostName, hostPort,
-                                                              proxyName, proxyPort,
-                                                              hostPath, url,
-                                                              headers, postData,
-                                                              isPost));
+        const MemoryBlock requestHeader (createRequestHeader (hostName, hostPort, proxyName, proxyPort,
+                                                              hostPath, url, headers, postData, isPost));
         size_t totalHeaderSent = 0;
 
         while (totalHeaderSent < requestHeader.getSize())
@@ -190,10 +177,8 @@ public:
 
             const int numToSend = jmin (1024, (int) (requestHeader.getSize() - totalHeaderSent));
 
-            if (send (socketHandle,
-                      ((const char*) requestHeader.getData()) + totalHeaderSent,
-                      numToSend, 0)
-                != numToSend)
+            if (send (socketHandle, ((const char*) requestHeader.getData()) + totalHeaderSent, numToSend, 0)
+                  != numToSend)
             {
                 closeSocket();
                 return false;
@@ -212,8 +197,6 @@ public:
 
         if (responseHeader.isNotEmpty())
         {
-            //DBG (responseHeader);
-
             headerLines.clear();
             headerLines.addLines (responseHeader);
 

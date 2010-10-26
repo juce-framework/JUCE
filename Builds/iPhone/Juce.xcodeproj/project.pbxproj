@@ -245,6 +245,7 @@
 		BBCA4C01CEF1EDA75625D6DC = { isa = PBXBuildFile; fileRef = D9B3C04F8EB4228DD59002E7; };
 		136FB9588C834E6F4A1EEBFB = { isa = PBXBuildFile; fileRef = 17C3AF03FF7AE88AE0C73311; };
 		274415D1C0AE9BF56FAAE791 = { isa = PBXBuildFile; fileRef = 4035C867821E9B5887AA25FB; };
+		CBAD975785BD26A0DA9417B6 = { isa = PBXBuildFile; fileRef = EFA58F646B69B227AEF14140; };
 		2A8F78D412AC7EC0C2998A1A = { isa = PBXBuildFile; fileRef = 06B06C420341B005DFF951D2; };
 		2DD969525DEF4AD408E9BB59 = { isa = PBXBuildFile; fileRef = AD7A1C2C82EE714EBDD52EFC; };
 		059B694C912BE81023D5240D = { isa = PBXBuildFile; fileRef = D4211E697F43821CDBCE4F24; };
@@ -888,6 +889,8 @@
 		75D6F1C676E178DEA8B86849 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_TemporaryFile.h; path = ../../src/io/files/juce_TemporaryFile.h; sourceTree = SOURCE_ROOT; };
 		4035C867821E9B5887AA25FB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ZipFile.cpp; path = ../../src/io/files/juce_ZipFile.cpp; sourceTree = SOURCE_ROOT; };
 		4D005659935C7DE99C2C01E2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ZipFile.h; path = ../../src/io/files/juce_ZipFile.h; sourceTree = SOURCE_ROOT; };
+		EFA58F646B69B227AEF14140 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MACAddress.cpp; path = ../../src/io/network/juce_MACAddress.cpp; sourceTree = SOURCE_ROOT; };
+		7241B187AA9B0217838B6052 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MACAddress.h; path = ../../src/io/network/juce_MACAddress.h; sourceTree = SOURCE_ROOT; };
 		06B06C420341B005DFF951D2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Socket.cpp; path = ../../src/io/network/juce_Socket.cpp; sourceTree = SOURCE_ROOT; };
 		286206E754AC14DEAF88FD43 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Socket.h; path = ../../src/io/network/juce_Socket.h; sourceTree = SOURCE_ROOT; };
 		AD7A1C2C82EE714EBDD52EFC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_URL.cpp; path = ../../src/io/network/juce_URL.cpp; sourceTree = SOURCE_ROOT; };
@@ -1663,6 +1666,8 @@
 				4035C867821E9B5887AA25FB,
 				4D005659935C7DE99C2C01E2 ); name = files; sourceTree = "<group>"; };
 		13FBF71BD76A08C8971C6351 = { isa = PBXGroup; children = (
+				EFA58F646B69B227AEF14140,
+				7241B187AA9B0217838B6052,
 				06B06C420341B005DFF951D2,
 				286206E754AC14DEAF88FD43,
 				AD7A1C2C82EE714EBDD52EFC,
@@ -2165,6 +2170,7 @@
 				BBCA4C01CEF1EDA75625D6DC,
 				136FB9588C834E6F4A1EEBFB,
 				274415D1C0AE9BF56FAAE791,
+				CBAD975785BD26A0DA9417B6,
 				2A8F78D412AC7EC0C2998A1A,
 				2DD969525DEF4AD408E9BB59,
 				059B694C912BE81023D5240D,

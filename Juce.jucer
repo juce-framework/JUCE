@@ -1201,6 +1201,10 @@
                 file="src/io/files/juce_ZipFile.h"/>
         </GROUP>
         <GROUP id="bOzVjzYUR" name="network">
+          <FILE id="vyRckg9" name="juce_MACAddress.cpp" compile="1" resource="0"
+                file="src/io/network/juce_MACAddress.cpp"/>
+          <FILE id="WzxXWpV" name="juce_MACAddress.h" compile="0" resource="0"
+                file="src/io/network/juce_MACAddress.h"/>
           <FILE id="HAyAhTsrK" name="juce_Socket.cpp" compile="1" resource="0"
                 file="src/io/network/juce_Socket.cpp"/>
           <FILE id="HBCQxvfwV" name="juce_Socket.h" compile="0" resource="0"

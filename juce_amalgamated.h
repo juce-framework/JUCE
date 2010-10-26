@@ -15112,20 +15112,19 @@ public:
 	static const String getCpuVendor();
 
 	/** Checks whether Intel MMX instructions are available. */
-	static bool hasMMX() throw()	{ return cpuFlags.hasMMX; }
+	static bool hasMMX() throw()		{ return cpuFlags.hasMMX; }
 
 	/** Checks whether Intel SSE instructions are available. */
-	static bool hasSSE() throw()	{ return cpuFlags.hasSSE; }
+	static bool hasSSE() throw()		{ return cpuFlags.hasSSE; }
 
 	/** Checks whether Intel SSE2 instructions are available. */
-	static bool hasSSE2() throw()	   { return cpuFlags.hasSSE2; }
+	static bool hasSSE2() throw()		   { return cpuFlags.hasSSE2; }
 
 	/** Checks whether AMD 3DNOW instructions are available. */
-	static bool has3DNow() throw()	  { return cpuFlags.has3DNow; }
+	static bool has3DNow() throw()		  { return cpuFlags.has3DNow; }
 
-	/** Returns the number of CPUs.
-	*/
-	static int getNumCpus() throw()	 { return cpuFlags.numCpus; }
+	/** Returns the number of CPUs. */
+	static int getNumCpus() throw()		 { return cpuFlags.numCpus; }
 
 	/** Finds out how much RAM is in the machine.
 
@@ -15139,34 +15138,6 @@ public:
 		This is only used by programmers with beards.
 	*/
 	static int getPageSize();
-
-	/** Returns a list of MAC addresses found on this machine.
-
-		@param  addresses   an array into which the MAC addresses should be copied
-		@param  maxNum	  the number of elements in this array
-		@param littleEndian the endianness of the numbers to return. If this is true,
-							the least-significant byte of each number is the first byte
-							of the mac address. If false, the least significant byte is
-							the last number. Note that the default values of this parameter
-							are different on Mac/PC to avoid breaking old software that was
-							written before this parameter was added (when the two systems
-							defaulted to using different endiannesses). In newer
-							software you probably want to specify an explicit value
-							for this.
-		@returns		the number of MAC addresses that were found
-	*/
-	static int getMACAddresses (int64* addresses, int maxNum,
-#if JUCE_MAC
-								bool littleEndian = true);
-#else
-								bool littleEndian = false);
-#endif
-
-	/** Returns a list of MAC addresses found on this machine.
-
-		@returns		an array of strings containing the MAC addresses that were found
-	*/
-	static const StringArray getMACAddressStrings();
 
 	// not-for-public-use platform-specific method gets called at startup to initialise things.
 	static void initialiseStats();
@@ -16416,6 +16387,71 @@ private:
 
 #endif   // __JUCE_ZIPFILE_JUCEHEADER__
 /*** End of inlined file: juce_ZipFile.h ***/
+
+
+#endif
+#ifndef __JUCE_MACADDRESS_JUCEHEADER__
+
+/*** Start of inlined file: juce_MACAddress.h ***/
+#ifndef __JUCE_MACADDRESS_JUCEHEADER__
+#define __JUCE_MACADDRESS_JUCEHEADER__
+
+/**
+	A wrapper for a streaming (TCP) socket.
+
+	This allows low-level use of sockets; for an easier-to-use messaging layer on top of
+	sockets, you could also try the InterprocessConnection class.
+
+	@see DatagramSocket, InterprocessConnection, InterprocessConnectionServer
+*/
+class JUCE_API  MACAddress
+{
+public:
+
+	/** Populates a list of the MAC addresses of all the available network cards. */
+	static void findAllAddresses (Array<MACAddress>& results);
+
+	/** Creates a null address (00-00-00-00-00-00). */
+	MACAddress();
+
+	/** Creates a copy of another address. */
+	MACAddress (const MACAddress& other);
+
+	/** Creates a copy of another address. */
+	MACAddress& operator= (const MACAddress& other);
+
+	/** Creates an address from 6 bytes. */
+	explicit MACAddress (const uint8 bytes[6]);
+
+	/** Returns a pointer to the 6 bytes that make up this address. */
+	const uint8* getBytes() const throw()	 { return asBytes; }
+
+	/** Returns a dash-separated string in the form "11-22-33-44-55-66" */
+	const String toString() const;
+
+	/** Returns the address in the lower 6 bytes of an int64.
+
+		This uses a little-endian arrangement, with the first byte of the address being
+		stored in the least-significant byte of the result value.
+	*/
+	int64 toInt64() const throw();
+
+	/** Returns true if this address is null (00-00-00-00-00-00). */
+	bool isNull() const throw();
+
+	bool operator== (const MACAddress& other) const throw();
+	bool operator!= (const MACAddress& other) const throw();
+
+private:
+	union
+	{
+		uint64 asInt64;
+		uint8 asBytes[6];
+	};
+};
+
+#endif   // __JUCE_MACADDRESS_JUCEHEADER__
+/*** End of inlined file: juce_MACAddress.h ***/
 
 
 #endif

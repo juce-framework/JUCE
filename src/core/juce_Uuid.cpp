@@ -30,7 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Uuid.h"
 #include "juce_Random.h"
 #include "juce_Time.h"
-#include "juce_SystemStats.h"
+#include "../io/network/juce_MACAddress.h"
 #include "../containers/juce_MemoryBlock.h"
 
 
@@ -46,7 +46,12 @@ Uuid::Uuid()
     if (! hasCheckedMacAddresses)
     {
         hasCheckedMacAddresses = true;
-        SystemStats::getMACAddresses (macAddresses, 2);
+
+        Array<MACAddress> result;
+        MACAddress::findAllAddresses (result);
+
+        for (int i = 0; i < numElementsInArray (macAddresses); ++i)
+            macAddresses[i] = result[i].toInt64();
     }
 
     value.asInt64[0] = macAddresses[0];

@@ -182,6 +182,9 @@
 #ifndef __JUCE_ZIPFILE_JUCEHEADER__
  #include "io/files/juce_ZipFile.h"
 #endif
+#ifndef __JUCE_MACADDRESS_JUCEHEADER__
+ #include "io/network/juce_MACAddress.h"
+#endif
 #ifndef __JUCE_SOCKET_JUCEHEADER__
  #include "io/network/juce_Socket.h"
 #endif

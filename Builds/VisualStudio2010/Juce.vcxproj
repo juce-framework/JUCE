@@ -359,6 +359,7 @@
     <ClCompile Include="..\..\src\io\files\juce_NamedPipe.cpp"/>
     <ClCompile Include="..\..\src\io\files\juce_TemporaryFile.cpp"/>
     <ClCompile Include="..\..\src\io\files\juce_ZipFile.cpp"/>
+    <ClCompile Include="..\..\src\io\network\juce_MACAddress.cpp"/>
     <ClCompile Include="..\..\src\io\network\juce_Socket.cpp"/>
     <ClCompile Include="..\..\src\io\network\juce_URL.cpp"/>
     <ClCompile Include="..\..\src\io\streams\juce_BufferedInputStream.cpp"/>
@@ -727,6 +728,7 @@
     <ClInclude Include="..\..\src\io\files\juce_NamedPipe.h"/>
     <ClInclude Include="..\..\src\io\files\juce_TemporaryFile.h"/>
     <ClInclude Include="..\..\src\io\files\juce_ZipFile.h"/>
+    <ClInclude Include="..\..\src\io\network\juce_MACAddress.h"/>
     <ClInclude Include="..\..\src\io\network\juce_Socket.h"/>
     <ClInclude Include="..\..\src\io\network\juce_URL.h"/>
     <ClInclude Include="..\..\src\io\streams\juce_BufferedInputStream.h"/>

@@ -276,6 +276,7 @@ OBJECTS := \
   $(OBJDIR)/juce_NamedPipe_b3a205e0.o \
   $(OBJDIR)/juce_TemporaryFile_935f3fc6.o \
   $(OBJDIR)/juce_ZipFile_16fbb396.o \
+  $(OBJDIR)/juce_MACAddress_b81987ed.o \
   $(OBJDIR)/juce_Socket_cf39c63b.o \
   $(OBJDIR)/juce_URL_d6b7cff1.o \
   $(OBJDIR)/juce_BufferedInputStream_c71b2b68.o \
@@ -1546,6 +1547,11 @@ $(OBJDIR)/juce_TemporaryFile_935f3fc6.o: ../../src/io/files/juce_TemporaryFile.c
 $(OBJDIR)/juce_ZipFile_16fbb396.o: ../../src/io/files/juce_ZipFile.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ZipFile.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MACAddress_b81987ed.o: ../../src/io/network/juce_MACAddress.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_MACAddress.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Socket_cf39c63b.o: ../../src/io/network/juce_Socket.cpp

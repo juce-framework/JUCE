@@ -50,6 +50,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/files/juce_NamedPipe.h"
 #include "../io/files/juce_DirectoryIterator.h"
 #include "../io/network/juce_URL.h"
+#include "../io/network/juce_MACAddress.h"
 #include "../io/streams/juce_MemoryInputStream.h"
 #include "../io/streams/juce_BufferedInputStream.h"
 #include "../core/juce_PlatformUtilities.h"

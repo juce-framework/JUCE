@@ -325,121 +325,91 @@ void juce_closeInternetFile (void* handle)
 }
 
 //==============================================================================
-static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum, const bool littleEndian) throw()
+namespace MACAddressHelpers
 {
-    int numFound = 0;
-
-    DynamicLibraryLoader dll ("iphlpapi.dll");
-    DynamicLibraryImport (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
-
-    if (getAdaptersInfo != 0)
+    void getViaGetAdaptersInfo (Array<MACAddress>& result)
     {
-        ULONG len = sizeof (IP_ADAPTER_INFO);
-        MemoryBlock mb;
-        PIP_ADAPTER_INFO adapterInfo = (PIP_ADAPTER_INFO) mb.getData();
+        DynamicLibraryLoader dll ("iphlpapi.dll");
+        DynamicLibraryImport (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
 
-        if (getAdaptersInfo (adapterInfo, &len) == ERROR_BUFFER_OVERFLOW)
+        if (getAdaptersInfo != 0)
         {
-            mb.setSize (len);
-            adapterInfo = (PIP_ADAPTER_INFO) mb.getData();
-        }
+            ULONG len = sizeof (IP_ADAPTER_INFO);
+            MemoryBlock mb;
+            PIP_ADAPTER_INFO adapterInfo = (PIP_ADAPTER_INFO) mb.getData();
 
-        if (getAdaptersInfo (adapterInfo, &len) == NO_ERROR)
-        {
-            PIP_ADAPTER_INFO adapter = adapterInfo;
-
-            while (adapter != 0)
+            if (getAdaptersInfo (adapterInfo, &len) == ERROR_BUFFER_OVERFLOW)
             {
-                int64 mac = 0;
-                for (unsigned int i = 0; i < adapter->AddressLength; ++i)
-                    mac = (mac << 8) | adapter->Address[i];
-
-                if (littleEndian)
-                    mac = (int64) ByteOrder::swap ((uint64) mac);
-
-                if (numFound < maxNum && mac != 0)
-                    addresses [numFound++] = mac;
-
-                adapter = adapter->Next;
+                mb.setSize (len);
+                adapterInfo = (PIP_ADAPTER_INFO) mb.getData();
             }
-        }
-    }
 
-    return numFound;
-}
-
-static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool littleEndian) throw()
-{
-    int numFound = 0;
-
-    DynamicLibraryLoader dll ("netapi32.dll");
-    DynamicLibraryImport (Netbios, NetbiosCall, UCHAR, dll, (PNCB))
-
-    if (NetbiosCall != 0)
-    {
-        NCB ncb;
-        zerostruct (ncb);
-
-        struct ASTAT
-        {
-            ADAPTER_STATUS adapt;
-            NAME_BUFFER    NameBuff [30];
-        };
-
-        ASTAT astat;
-        zeromem (&astat, sizeof (astat));  // (can't use zerostruct here in VC6)
-
-        LANA_ENUM enums;
-        zerostruct (enums);
-
-        ncb.ncb_command = NCBENUM;
-        ncb.ncb_buffer = (unsigned char*) &enums;
-        ncb.ncb_length = sizeof (LANA_ENUM);
-        NetbiosCall (&ncb);
-
-        for (int i = 0; i < enums.length; ++i)
-        {
-            zerostruct (ncb);
-            ncb.ncb_command = NCBRESET;
-            ncb.ncb_lana_num = enums.lana[i];
-
-            if (NetbiosCall (&ncb) == 0)
+            if (getAdaptersInfo (adapterInfo, &len) == NO_ERROR)
             {
-                zerostruct (ncb);
-                memcpy (ncb.ncb_callname, "*                   ", NCBNAMSZ);
-                ncb.ncb_command = NCBASTAT;
-                ncb.ncb_lana_num = enums.lana[i];
-
-                ncb.ncb_buffer = (unsigned char*) &astat;
-                ncb.ncb_length = sizeof (ASTAT);
-
-                if (NetbiosCall (&ncb) == 0)
+                for (PIP_ADAPTER_INFO adapter = adapterInfo; adapter != 0; adapter = adapter->Next)
                 {
-                    if (astat.adapt.adapter_type == 0xfe)
-                    {
-                        uint64 mac = 0;
-                        for (int i = 6; --i >= 0;)
-                            mac = (mac << 8) | astat.adapt.adapter_address [littleEndian ? i : (5 - i)];
-
-                        if (numFound < maxNum && mac != 0)
-                            addresses [numFound++] = mac;
-                    }
+                    if (adapter->AddressLength >= 6)
+                        result.addIfNotAlreadyThere (MACAddress (adapter->Address));
                 }
             }
         }
     }
 
-    return numFound;
+    void getViaNetBios (Array<MACAddress>& result)
+    {
+        DynamicLibraryLoader dll ("netapi32.dll");
+        DynamicLibraryImport (Netbios, NetbiosCall, UCHAR, dll, (PNCB))
+
+        if (NetbiosCall != 0)
+        {
+            NCB ncb;
+            zerostruct (ncb);
+
+            struct ASTAT
+            {
+                ADAPTER_STATUS adapt;
+                NAME_BUFFER    NameBuff [30];
+            };
+
+            ASTAT astat;
+            zeromem (&astat, sizeof (astat));  // (can't use zerostruct here in VC6)
+
+            LANA_ENUM enums;
+            zerostruct (enums);
+
+            ncb.ncb_command = NCBENUM;
+            ncb.ncb_buffer = (unsigned char*) &enums;
+            ncb.ncb_length = sizeof (LANA_ENUM);
+            NetbiosCall (&ncb);
+
+            for (int i = 0; i < enums.length; ++i)
+            {
+                zerostruct (ncb);
+                ncb.ncb_command = NCBRESET;
+                ncb.ncb_lana_num = enums.lana[i];
+
+                if (NetbiosCall (&ncb) == 0)
+                {
+                    zerostruct (ncb);
+                    memcpy (ncb.ncb_callname, "*                   ", NCBNAMSZ);
+                    ncb.ncb_command = NCBASTAT;
+                    ncb.ncb_lana_num = enums.lana[i];
+
+                    ncb.ncb_buffer = (unsigned char*) &astat;
+                    ncb.ncb_length = sizeof (ASTAT);
+
+                    if (NetbiosCall (&ncb) == 0 && astat.adapt.adapter_type == 0xfe)
+                        result.addIfNotAlreadyThere (MACAddress (astat.adapt.adapter_address));
+                }
+            }
+        }
+    }
 }
 
-int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian)
+void MACAddress::findAllAddresses (Array<MACAddress>& result)
 {
-    int numFound = getMACAddressViaGetAdaptersInfo (addresses, maxNum, littleEndian);
-
-    if (numFound == 0)
-        numFound = getMACAddressesViaNetBios (addresses, maxNum, littleEndian);
-
-    return numFound;
+    MACAddressHelpers::getViaGetAdaptersInfo (result);
+    MACAddressHelpers::getViaNetBios (result);
 }
 
 //==============================================================================

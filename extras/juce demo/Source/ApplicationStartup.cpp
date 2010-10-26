@@ -120,7 +120,7 @@ private:
           << "\nCPU has SSE2: " << (SystemStats::hasSSE2() ? "yes" : "no")
           << "\nCPU has 3DNOW: " << (SystemStats::has3DNow() ? "yes" : "no")
           << "\nMemory size: " << SystemStats::getMemorySizeInMegabytes() << "MB"
-          << "\nFound network card MAC addresses: " << SystemStats::getMACAddressStrings().joinIntoString (", ")
+          << "\nFound network card MAC addresses: " << getMacAddressList()
           << "\nCurrent executable file: " << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
           << "\nCurrent application file: " << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
           << "\nCurrent working directory: " << File::getCurrentWorkingDirectory().getFullPathName()
@@ -132,6 +132,18 @@ private:
           << "\n\n";
 
         return systemInfo;
+    }
+
+    static const String getMacAddressList()
+    {
+        Array <MACAddress> macAddresses;
+        MACAddress::findAllAddresses (macAddresses);
+
+        StringArray addressStrings;
+        for (int i = 0; i < macAddresses.size(); ++i)
+            addressStrings.add (macAddresses[i].toString());
+
+        return addressStrings.joinIntoString (", ");
     }
 };
 

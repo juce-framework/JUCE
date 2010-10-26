@@ -127,6 +127,7 @@
  #include "../src/io/files/juce_TemporaryFile.cpp"
  #include "../src/io/network/juce_Socket.cpp"
  #include "../src/io/network/juce_URL.cpp"
+ #include "../src/io/network/juce_MACAddress.cpp"
  #include "../src/io/streams/juce_BufferedInputStream.cpp"
  #include "../src/io/streams/juce_FileInputSource.cpp"
  #include "../src/io/streams/juce_MemoryInputStream.cpp"

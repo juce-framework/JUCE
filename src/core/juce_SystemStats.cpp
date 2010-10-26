@@ -43,26 +43,6 @@ const String SystemStats::getJUCEVersion()
               + "." + String (JUCE_BUILDNUMBER);
 }
 
-const StringArray SystemStats::getMACAddressStrings()
-{
-    int64 macAddresses [16];
-    const int numAddresses = getMACAddresses (macAddresses, numElementsInArray (macAddresses), false);
-
-    StringArray s;
-
-    for (int i = 0; i < numAddresses; ++i)
-    {
-        s.add (String::toHexString (0xff & (int) (macAddresses [i] >> 40)).paddedLeft ('0', 2)
-                + "-" + String::toHexString (0xff & (int) (macAddresses [i] >> 32)).paddedLeft ('0', 2)
-                + "-" + String::toHexString (0xff & (int) (macAddresses [i] >> 24)).paddedLeft ('0', 2)
-                + "-" + String::toHexString (0xff & (int) (macAddresses [i] >> 16)).paddedLeft ('0', 2)
-                + "-" + String::toHexString (0xff & (int) (macAddresses [i] >> 8)).paddedLeft ('0', 2)
-                + "-" + String::toHexString (0xff & (int) (macAddresses [i] >> 0)).paddedLeft ('0', 2));
-    }
-
-    return s;
-}
-
 //==============================================================================
 #ifdef JUCE_DLL
 

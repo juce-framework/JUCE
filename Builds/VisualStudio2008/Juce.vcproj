@@ -807,6 +807,8 @@
             <File RelativePath="..\..\src\io\files\juce_ZipFile.h"/>
           </Filter>
           <Filter Name="network">
+            <File RelativePath="..\..\src\io\network\juce_MACAddress.cpp"/>
+            <File RelativePath="..\..\src\io\network\juce_MACAddress.h"/>
             <File RelativePath="..\..\src\io\network\juce_Socket.cpp"/>
             <File RelativePath="..\..\src\io\network\juce_Socket.h"/>
             <File RelativePath="..\..\src\io\network\juce_URL.cpp"/>

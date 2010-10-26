@@ -117,20 +117,19 @@ public:
     static const String getCpuVendor();
 
     /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX() throw()        { return cpuFlags.hasMMX; }
+    static bool hasMMX() throw()                { return cpuFlags.hasMMX; }
 
     /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE() throw()        { return cpuFlags.hasSSE; }
+    static bool hasSSE() throw()                { return cpuFlags.hasSSE; }
 
     /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2() throw()       { return cpuFlags.hasSSE2; }
+    static bool hasSSE2() throw()               { return cpuFlags.hasSSE2; }
 
     /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow() throw()      { return cpuFlags.has3DNow; }
+    static bool has3DNow() throw()              { return cpuFlags.has3DNow; }
 
-    /** Returns the number of CPUs.
-    */
-    static int getNumCpus() throw()     { return cpuFlags.numCpus; }
+    /** Returns the number of CPUs. */
+    static int getNumCpus() throw()             { return cpuFlags.numCpus; }
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
@@ -145,36 +144,6 @@ public:
         This is only used by programmers with beards.
     */
     static int getPageSize();
-
-    //==============================================================================
-    /** Returns a list of MAC addresses found on this machine.
-
-        @param  addresses   an array into which the MAC addresses should be copied
-        @param  maxNum      the number of elements in this array
-        @param littleEndian the endianness of the numbers to return. If this is true,
-                            the least-significant byte of each number is the first byte
-                            of the mac address. If false, the least significant byte is
-                            the last number. Note that the default values of this parameter
-                            are different on Mac/PC to avoid breaking old software that was
-                            written before this parameter was added (when the two systems
-                            defaulted to using different endiannesses). In newer
-                            software you probably want to specify an explicit value
-                            for this.
-        @returns            the number of MAC addresses that were found
-    */
-    static int getMACAddresses (int64* addresses, int maxNum,
-#if JUCE_MAC
-                                bool littleEndian = true);
-#else
-                                bool littleEndian = false);
-#endif
-
-    /** Returns a list of MAC addresses found on this machine.
-
-        @returns            an array of strings containing the MAC addresses that were found
-    */
-    static const StringArray getMACAddressStrings();
-
 
     //==============================================================================
     // not-for-public-use platform-specific method gets called at startup to initialise things.

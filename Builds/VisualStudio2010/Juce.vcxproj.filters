@@ -925,6 +925,9 @@
     <ClCompile Include="..\..\src\io\files\juce_ZipFile.cpp">
       <Filter>Juce\Source\io\files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\io\network\juce_MACAddress.cpp">
+      <Filter>Juce\Source\io\network</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\io\network\juce_Socket.cpp">
       <Filter>Juce\Source\io\network</Filter>
     </ClCompile>
@@ -2102,6 +2105,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\io\files\juce_ZipFile.h">
       <Filter>Juce\Source\io\files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\io\network\juce_MACAddress.h">
+      <Filter>Juce\Source\io\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\io\network\juce_Socket.h">
       <Filter>Juce\Source\io\network</Filter>
