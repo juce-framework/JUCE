@@ -94,9 +94,9 @@ public:
     void paint (Graphics& g)
     {
         int x = getHeight() + 6;
-        g.drawImageWithin (item.getIcon(), 2, 2, x - 4, getHeight() - 4,
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                           false);
+
+        item.getIcon()->drawWithin (g, Rectangle<float> (2, 2, x - 4, getHeight() - 4),
+                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
 
         g.setColour (Colours::black);
         g.setFont (getHeight() * 0.6f);

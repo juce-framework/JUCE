@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	82
+#define JUCE_BUILDNUMBER	83
 
 /** Current Juce version number.
 
@@ -6220,13 +6220,9 @@ public:
 	*/
 	const var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
-	/** Returns a pointer to the object holding a named value, or
-		null if there is no value with this name. */
-	var* getItem (const Identifier& name) const;
-
 	/** Changes or adds a named value.
-		@returns true if a value was changed or added; false if the
-				 value was already set the the value passed-in.
+		@returns	true if a value was changed or added; false if the
+					value was already set the the value passed-in.
 	*/
 	bool set (const Identifier& name, const var& newValue);
 
@@ -6253,6 +6249,14 @@ public:
 
 	/** Removes all values. */
 	void clear();
+
+	/** Returns a pointer to the var that holds a named value, or null if there is
+		no value with this name.
+
+		Do not use this method unless you really need access to the internal var object
+		for some reason - for normal reading and writing always prefer operator[]() and set().
+	*/
+	var* getVarPointer (const Identifier& name) const;
 
 	juce_UseDebuggingNewOperator
 
@@ -16403,7 +16407,7 @@ private:
 #endif
 
 	void init();
-	int findEndOfZipEntryTable (InputStream* in, int& numEntries);
+	int findEndOfZipEntryTable (InputStream& input, int& numEntries);
 	static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
 	ZipFile (const ZipFile&);
@@ -16976,6 +16980,14 @@ public:
 						 int bufferSize,
 						 bool deleteSourceWhenDestroyed);
 
+	/** Creates a BufferedInputStream from an input source.
+
+		@param sourceStream	 the source stream to read from - the source stream  must not
+								be deleted until this object has been destroyed.
+		@param bufferSize	   the size of reservoir to use to buffer the source
+	*/
+	BufferedInputStream (InputStream& sourceStream, int bufferSize);
+
 	/** Destructor.
 
 		This may also delete the source stream, if that option was chosen when the
@@ -17051,8 +17063,6 @@ private:
 #ifndef __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 
-class GZIPCompressorHelper;
-
 /**
 	A stream which uses zlib to compress the data written into it.
 
@@ -17094,6 +17104,8 @@ private:
 	OutputStream* const destStream;
 	ScopedPointer <OutputStream> streamToDelete;
 	HeapBlock <uint8> buffer;
+	class GZIPCompressorHelper;
+	friend class ScopedPointer <GZIPCompressorHelper>;
 	ScopedPointer <GZIPCompressorHelper> helper;
 	bool doNextBlock();
 
@@ -17111,8 +17123,6 @@ private:
 /*** Start of inlined file: juce_GZIPDecompressorInputStream.h ***/
 #ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 #define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
-
-class GZIPDecompressHelper;
 
 /**
 	This stream will decompress a source-stream using zlib.
@@ -17143,6 +17153,13 @@ public:
 								 bool noWrap = false,
 								 int64 uncompressedStreamLength = -1);
 
+	/** Creates a decompressor stream.
+
+		@param sourceStream	 the stream to read from - the source stream must not be
+								deleted until this object has been destroyed
+	*/
+	GZIPDecompressorInputStream (InputStream& sourceStream);
+
 	/** Destructor. */
 	~GZIPDecompressorInputStream();
 
@@ -17163,6 +17180,9 @@ private:
 	int activeBufferSize;
 	int64 originalSourcePos, currentPos;
 	HeapBlock <uint8> buffer;
+
+	class GZIPDecompressHelper;
+	friend class ScopedPointer <GZIPDecompressHelper>;
 	ScopedPointer <GZIPDecompressHelper> helper;
 
 	GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);
@@ -54871,6 +54891,7 @@ class DirectoryContentsDisplayComponent;
 class FilePreviewComponent;
 class ImageButton;
 class CallOutBox;
+class Drawable;
 
 /**
 	LookAndFeel objects define the appearance of all the JUCE widgets, and subclasses
@@ -55091,9 +55112,10 @@ public:
 	virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
 	virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
 
-	// these return an image from the ImageCache, so use ImageCache::release() to free it
-	virtual const Image getDefaultFolderImage();
-	virtual const Image getDefaultDocumentFileImage();
+	// These return a pointer to an internally cached drawable - make sure you don't keep
+	// a copy of this pointer anywhere, as it may become invalid in the future.
+	virtual const Drawable* getDefaultFolderImage();
+	virtual const Drawable* getDefaultDocumentFileImage();
 
 	virtual void createFileChooserHeaderText (const String& title,
 											  const String& instructions,
@@ -55423,6 +55445,8 @@ private:
 	// default typeface names
 	String defaultSans, defaultSerif, defaultFixed;
 
+	ScopedPointer<Drawable> folderImage, documentImage;
+
 	void drawShinyButtonShape (Graphics& g,
 							   float x, float y, float w, float h, float maxCornerSize,
 							   const Colour& baseColour,
@@ -55434,6 +55458,8 @@ private:
 
 	// This has been deprecated - see the new parameter list..
 	virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
+
+	static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
 
 	LookAndFeel (const LookAndFeel&);
 	LookAndFeel& operator= (const LookAndFeel&);

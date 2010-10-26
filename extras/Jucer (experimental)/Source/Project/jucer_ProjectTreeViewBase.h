@@ -64,8 +64,6 @@ public:
 
     virtual void addFiles (const StringArray& files, int insertIndex);
     virtual void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
-
-    virtual void showPopupMenu() = 0;
     virtual void showMultiSelectionPopupMenu();
 
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
@@ -82,7 +80,6 @@ public:
     void itemOpennessChanged (bool isNowOpen);
     void refreshSubItems();
     bool canBeSelected() const                  { return true; }
-    void itemClicked (const MouseEvent& e);
     void itemDoubleClicked (const MouseEvent& e);
     void itemSelectionChanged (bool isNowSelected);
     const String getTooltip();
@@ -104,7 +101,7 @@ protected:
     //==============================================================================
     virtual void addSubItems();
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
-    const Image getIcon() const         { return item.getIcon(); }
+    const Drawable* getIcon() const         { return item.getIcon(); }
 
     //==============================================================================
     void triggerAsyncRename (const Project::Item& itemToRename);

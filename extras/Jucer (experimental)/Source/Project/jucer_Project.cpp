@@ -745,12 +745,16 @@ bool Project::Item::addFile (const File& file, int insertIndex)
     return true;
 }
 
-const Image Project::Item::getIcon() const
+const Drawable* Project::Item::getIcon() const
 {
     if (isFile())
         return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage();
     else if (isMainGroup())
-        return ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
+    {
+        static DrawableImage im;
+        im.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
+        return &im;
+    }
     else
         return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage();
 }

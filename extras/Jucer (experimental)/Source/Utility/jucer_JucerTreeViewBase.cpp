@@ -54,13 +54,13 @@ void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 
     const int x = getTextX();
 
-    g.setColour (isMissing() ? Colours::red : Colours::black);
+    g.setColour (Colours::black);
 
-    g.drawImageWithin (getIcon(), 0, 2, height + 6, height - 4,
-                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                       false);
+    getIcon()->drawWithin (g, Rectangle<float> (0.0f, 2.0f, height + 6.0f, height - 4.0f),
+                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
 
     g.setFont (getFont());
+    g.setColour (isMissing() ? Colours::red : Colours::black);
     g.drawFittedText (getDisplayName(), x, 0, width - x, height, Justification::centredLeft, 1, 0.8f);
 }
 
@@ -131,4 +131,23 @@ void JucerTreeViewBase::showRenameBox()
 
     if (ed.runModalLoop() != 0)
         setName (ed.getText());
+}
+
+void JucerTreeViewBase::itemClicked (const MouseEvent& e)
+{
+    if (e.mods.isPopupMenu())
+    {
+        if (getOwnerView()->getNumSelectedItems() > 1)
+            showMultiSelectionPopupMenu();
+        else
+            showPopupMenu();
+    }
+}
+
+void JucerTreeViewBase::showPopupMenu()
+{
+}
+
+void JucerTreeViewBase::showMultiSelectionPopupMenu()
+{
 }

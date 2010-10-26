@@ -203,7 +203,7 @@ public:
 
         Item getParent() const;
 
-        const Image getIcon() const;
+        const Drawable* getIcon() const;
 
     private:
         //==============================================================================

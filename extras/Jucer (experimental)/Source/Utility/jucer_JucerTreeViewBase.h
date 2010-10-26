@@ -46,14 +46,18 @@ public:
     void paintItem (Graphics& g, int width, int height);
     void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
     Component* createItemComponent();
+    void itemClicked (const MouseEvent& e);
 
     //==============================================================================
     virtual const String getRenamingName() const = 0;
     virtual const String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
-    virtual const Image getIcon() const = 0;
+    virtual const Drawable* getIcon() const = 0;
     virtual void createLeftEdgeComponents (Array<Component*>& components) = 0;
+
+    virtual void showPopupMenu();
+    virtual void showMultiSelectionPopupMenu();
 
     virtual void showRenameBox();
 

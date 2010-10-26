@@ -742,8 +742,12 @@ private:
 
                 if (gradient.isRadial)
                 {
-                    gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), gradientWidth),
-                                           dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), gradientHeight));
+                    if (userSpace)
+                        gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), gradientWidth),
+                                               dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), gradientHeight));
+                    else
+                        gradient.point1.setXY (dx + gradientWidth * getCoordLength (fillXml->getStringAttribute ("cx", "50%"), 1.0f),
+                                               dy + gradientHeight * getCoordLength (fillXml->getStringAttribute ("cy", "50%"), 1.0f));
 
                     const float radius = getCoordLength (fillXml->getStringAttribute ("r", "50%"), gradientWidth);
                     gradient.point2 = gradient.point1 + Point<float> (radius, 0.0f);
@@ -752,11 +756,22 @@ private:
                 }
                 else
                 {
-                    gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), gradientWidth),
-                                           dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), gradientHeight));
+                    if (userSpace)
+                    {
+                        gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), gradientWidth),
+                                               dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), gradientHeight));
 
-                    gradient.point2.setXY (dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), gradientWidth),
-                                           dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), gradientHeight));
+                        gradient.point2.setXY (dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), gradientWidth),
+                                               dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), gradientHeight));
+                    }
+                    else
+                    {
+                        gradient.point1.setXY (dx + gradientWidth * getCoordLength (fillXml->getStringAttribute ("x1", "0%"), 1.0f),
+                                               dy + gradientHeight * getCoordLength (fillXml->getStringAttribute ("y1", "0%"), 1.0f));
+
+                        gradient.point2.setXY (dx + gradientWidth * getCoordLength (fillXml->getStringAttribute ("x2", "100%"), 1.0f),
+                                               dy + gradientHeight * getCoordLength (fillXml->getStringAttribute ("y2", "0%"), 1.0f));
+                    }
 
                     if (gradient.point1 == gradient.point2)
                         return Colour (gradient.getColour (gradient.getNumColours() - 1));

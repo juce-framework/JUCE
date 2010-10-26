@@ -433,19 +433,8 @@ void ProjectTreeViewBase::showMultiSelectionPopupMenu()
 
     switch (m.show())
     {
-    case 6:     deleteAllSelectedItems(); break;
-    default:    break;
-    }
-}
-
-void ProjectTreeViewBase::itemClicked (const MouseEvent& e)
-{
-    if (e.mods.isPopupMenu())
-    {
-        if (getOwnerView()->getNumSelectedItems() > 1)
-            showMultiSelectionPopupMenu();
-        else
-            showPopupMenu();
+        case 6:     deleteAllSelectedItems(); break;
+        default:    break;
     }
 }
 
