@@ -350,13 +350,16 @@ const FillType DrawableShape::FillAndStrokeState::readFillType (const ValueTree&
     return FillType();
 }
 
-static const Point<float> calcThirdGradientPoint (const FillType& fillType)
+namespace DrawableShapeHelpers
 {
-    const ColourGradient& g = *fillType.gradient;
-    const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
-                                     g.point1.getY() + g.point1.getX() - g.point2.getX());
+    const Point<float> calcThirdGradientPoint (const FillType& fillType)
+    {
+        const ColourGradient& g = *fillType.gradient;
+        const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
+                                         g.point1.getY() + g.point1.getX() - g.point2.getX());
 
-    return point3Source.transformedBy (fillType.transform);
+        return point3Source.transformedBy (fillType.transform);
+    }
 }
 
 void DrawableShape::FillAndStrokeState::writeFillType (ValueTree& v, const FillType& fillType,
@@ -373,7 +376,7 @@ void DrawableShape::FillAndStrokeState::writeFillType (ValueTree& v, const FillT
         v.setProperty (type, "gradient", undoManager);
         v.setProperty (gradientPoint1, gp1 != 0 ? gp1->toString() : fillType.gradient->point1.toString(), undoManager);
         v.setProperty (gradientPoint2, gp2 != 0 ? gp2->toString() : fillType.gradient->point2.toString(), undoManager);
-        v.setProperty (gradientPoint3, gp3 != 0 ? gp3->toString() : calcThirdGradientPoint (fillType).toString(), undoManager);
+        v.setProperty (gradientPoint3, gp3 != 0 ? gp3->toString() : DrawableShapeHelpers::calcThirdGradientPoint (fillType).toString(), undoManager);
 
         v.setProperty (radial, fillType.gradient->isRadial, undoManager);
 

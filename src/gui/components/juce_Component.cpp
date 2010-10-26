@@ -1655,17 +1655,20 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-static const Identifier getColourPropertyId (const int colourId)
+namespace ComponentHelpers
 {
-    String s;
-    s.preallocateStorage (18);
-    s << "jcclr_" << String::toHexString (colourId);
-    return s;
+    const Identifier getColourPropertyId (const int colourId)
+    {
+        String s;
+        s.preallocateStorage (18);
+        s << "jcclr_" << String::toHexString (colourId);
+        return s;
+    }
 }
 
 const Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
-    var* v = properties.getItem (getColourPropertyId (colourId));
+    var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId));
 
     if (v != 0)
         return Colour ((int) *v);
@@ -1678,18 +1681,18 @@ const Colour Component::findColour (const int colourId, const bool inheritFromPa
 
 bool Component::isColourSpecified (const int colourId) const
 {
-    return properties.contains (getColourPropertyId (colourId));
+    return properties.contains (ComponentHelpers::getColourPropertyId (colourId));
 }
 
 void Component::removeColour (const int colourId)
 {
-    if (properties.remove (getColourPropertyId (colourId)))
+    if (properties.remove (ComponentHelpers::getColourPropertyId (colourId)))
         colourChanged();
 }
 
 void Component::setColour (const int colourId, const Colour& colour)
 {
-    if (properties.set (getColourPropertyId (colourId), (int) colour.getARGB()))
+    if (properties.set (ComponentHelpers::getColourPropertyId (colourId), (int) colour.getARGB()))
         colourChanged();
 }
 

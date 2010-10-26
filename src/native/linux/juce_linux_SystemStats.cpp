@@ -56,26 +56,50 @@ bool SystemStats::isOperatingSystem64Bit()
 }
 
 //==============================================================================
-static const String juce_getCpuInfo (const char* const key)
+namespace LinuxStatsHelpers
 {
-    StringArray lines;
-    lines.addLines (File ("/proc/cpuinfo").loadFileAsString());
+    const String getCpuInfo (const char* const key)
+    {
+        StringArray lines;
+        lines.addLines (File ("/proc/cpuinfo").loadFileAsString());
 
-    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
-        if (lines[i].startsWithIgnoreCase (key))
-            return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
+        for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+            if (lines[i].startsWithIgnoreCase (key))
+                return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
-    return String::empty;
+        return String::empty;
+    }
+
+    bool getTimeSinceStartup (timeval* const t) throw()
+    {
+        if (gettimeofday (t, 0) != 0)
+            return false;
+
+        static unsigned int calibrate = 0;
+        static bool calibrated = false;
+
+        if (! calibrated)
+        {
+            calibrated = true;
+
+            struct sysinfo sysi;
+            if (sysinfo (&sysi) == 0)
+                calibrate = t->tv_sec - sysi.uptime;  // Safe to assume system was not brought up earlier than 1970!
+        }
+
+        t->tv_sec -= calibrate;
+        return true;
+    }
 }
 
 const String SystemStats::getCpuVendor()
 {
-    return juce_getCpuInfo ("vendor_id");
+    return LinuxStatsHelpers::getCpuInfo ("vendor_id");
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
 {
-    return roundToInt (juce_getCpuInfo ("cpu MHz").getFloatValue());
+    return roundToInt (LinuxStatsHelpers::getCpuInfo ("cpu MHz").getFloatValue());
 }
 
 int SystemStats::getMemorySizeInMegabytes()
@@ -116,13 +140,13 @@ const String SystemStats::getFullUserName()
 //==============================================================================
 void SystemStats::initialiseStats()
 {
-    const String flags (juce_getCpuInfo ("flags"));
+    const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
     cpuFlags.hasMMX = flags.contains ("mmx");
     cpuFlags.hasSSE = flags.contains ("sse");
     cpuFlags.hasSSE2 = flags.contains ("sse2");
     cpuFlags.has3DNow = flags.contains ("3dnow");
 
-    cpuFlags.numCpus = juce_getCpuInfo ("processor").getIntValue() + 1;
+    cpuFlags.numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }
 
 void PlatformUtilities::fpuReset()
@@ -130,31 +154,10 @@ void PlatformUtilities::fpuReset()
 }
 
 //==============================================================================
-static bool juce_getTimeSinceStartup (timeval* const t) throw()
-{
-    if (gettimeofday (t, 0) != 0)
-        return false;
-
-    static unsigned int calibrate = 0;
-    static bool calibrated = false;
-
-    if (! calibrated)
-    {
-        calibrated = true;
-
-        struct sysinfo sysi;
-        if (sysinfo (&sysi) == 0)
-            calibrate = t->tv_sec - sysi.uptime;  // Safe to assume system was not brought up earlier than 1970!
-    }
-
-    t->tv_sec -= calibrate;
-    return true;
-}
-
 uint32 juce_millisecondsSinceStartup() throw()
 {
     timeval t;
-    if (juce_getTimeSinceStartup (&t))
+    if (LinuxStatsHelpers::getTimeSinceStartup (&t))
         return (uint32) (t.tv_sec * 1000 + (t.tv_usec / 1000));
 
     return 0;
@@ -163,7 +166,7 @@ uint32 juce_millisecondsSinceStartup() throw()
 int64 Time::getHighResolutionTicks() throw()
 {
     timeval t;
-    if (juce_getTimeSinceStartup (&t))
+    if (LinuxStatsHelpers::getTimeSinceStartup (&t))
         return ((int64) t.tv_sec * (int64) 1000000) + (int64) t.tv_usec;
 
     return 0;

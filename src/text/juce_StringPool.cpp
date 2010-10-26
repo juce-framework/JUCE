@@ -34,46 +34,49 @@ BEGIN_JUCE_NAMESPACE
 StringPool::StringPool() throw()    {}
 StringPool::~StringPool()           {}
 
-template <class StringType>
-static const juce_wchar* getPooledStringFromArray (Array<String>& strings, StringType newString)
+namespace StringPoolHelpers
 {
-    int start = 0;
-    int end = strings.size();
-
-    for (;;)
+    template <class StringType>
+    const juce_wchar* getPooledStringFromArray (Array<String>& strings, StringType newString)
     {
-        if (start >= end)
+        int start = 0;
+        int end = strings.size();
+
+        for (;;)
         {
-            jassert (start <= end);
-            strings.insert (start, newString);
-            return strings.getReference (start);
-        }
-        else
-        {
-            const String& startString = strings.getReference (start);
-
-            if (startString == newString)
-                return startString;
-
-            const int halfway = (start + end) >> 1;
-
-            if (halfway == start)
+            if (start >= end)
             {
-                if (startString.compare (newString) < 0)
-                    ++start;
-
+                jassert (start <= end);
                 strings.insert (start, newString);
                 return strings.getReference (start);
             }
-
-            const int comp = strings.getReference (halfway).compare (newString);
-
-            if (comp == 0)
-                return strings.getReference (halfway);
-            else if (comp < 0)
-                start = halfway;
             else
-                end = halfway;
+            {
+                const String& startString = strings.getReference (start);
+
+                if (startString == newString)
+                    return startString;
+
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    if (startString.compare (newString) < 0)
+                        ++start;
+
+                    strings.insert (start, newString);
+                    return strings.getReference (start);
+                }
+
+                const int comp = strings.getReference (halfway).compare (newString);
+
+                if (comp == 0)
+                    return strings.getReference (halfway);
+                else if (comp < 0)
+                    start = halfway;
+                else
+                    end = halfway;
+            }
         }
     }
 }
@@ -83,7 +86,7 @@ const juce_wchar* StringPool::getPooledString (const String& s)
     if (s.isEmpty())
         return String::empty;
 
-    return getPooledStringFromArray (strings, s);
+    return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
 const juce_wchar* StringPool::getPooledString (const char* const s)
@@ -91,7 +94,7 @@ const juce_wchar* StringPool::getPooledString (const char* const s)
     if (s == 0 || *s == 0)
         return String::empty;
 
-    return getPooledStringFromArray (strings, s);
+    return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
 const juce_wchar* StringPool::getPooledString (const juce_wchar* const s)
@@ -99,7 +102,7 @@ const juce_wchar* StringPool::getPooledString (const juce_wchar* const s)
     if (s == 0 || *s == 0)
         return String::empty;
 
-    return getPooledStringFromArray (strings, s);
+    return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
 int StringPool::size() const throw()

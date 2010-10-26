@@ -51,31 +51,37 @@ const String LocalisedStrings::translate (const String& text) const
     return translations.getValue (text, text);
 }
 
-static int findCloseQuote (const String& text, int startPos)
+namespace
 {
-    juce_wchar lastChar = 0;
+    CriticalSection currentMappingsLock;
+    LocalisedStrings* currentMappings = 0;
 
-    for (;;)
+    int findCloseQuote (const String& text, int startPos)
     {
-        const juce_wchar c = text [startPos];
+        juce_wchar lastChar = 0;
 
-        if (c == 0 || (c == '"' && lastChar != '\\'))
-            break;
+        for (;;)
+        {
+            const juce_wchar c = text [startPos];
 
-        lastChar = c;
-        ++startPos;
+            if (c == 0 || (c == '"' && lastChar != '\\'))
+                break;
+
+            lastChar = c;
+            ++startPos;
+        }
+
+        return startPos;
     }
 
-    return startPos;
-}
-
-static const String unescapeString (const String& s)
-{
-    return s.replace ("\\\"", "\"")
-            .replace ("\\\'", "\'")
-            .replace ("\\t", "\t")
-            .replace ("\\r", "\r")
-            .replace ("\\n", "\n");
+    const String unescapeString (const String& s)
+    {
+        return s.replace ("\\\"", "\"")
+                .replace ("\\\'", "\'")
+                .replace ("\\t", "\t")
+                .replace ("\\r", "\r")
+                .replace ("\\n", "\n");
+    }
 }
 
 void LocalisedStrings::loadFromText (const String& fileContents)
@@ -123,9 +129,6 @@ void LocalisedStrings::setIgnoresCase (const bool shouldIgnoreCase)
 }
 
 //==============================================================================
-static CriticalSection currentMappingsLock;
-static LocalisedStrings* currentMappings = 0;
-
 void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations)
 {
     const ScopedLock sl (currentMappingsLock);

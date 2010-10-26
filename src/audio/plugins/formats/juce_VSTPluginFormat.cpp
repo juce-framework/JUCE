@@ -172,40 +172,43 @@ struct fxProgramSet
     char chunk[8];          // variable
 };
 
-static long vst_swap (const long x) throw()
+namespace
 {
-  #ifdef JUCE_LITTLE_ENDIAN
-    return (long) ByteOrder::swap ((uint32) x);
-  #else
-    return x;
-  #endif
-}
+    long vst_swap (const long x) throw()
+    {
+      #ifdef JUCE_LITTLE_ENDIAN
+        return (long) ByteOrder::swap ((uint32) x);
+      #else
+        return x;
+      #endif
+    }
 
-static float vst_swapFloat (const float x) throw()
-{
-  #ifdef JUCE_LITTLE_ENDIAN
-    union { uint32 asInt; float asFloat; } n;
-    n.asFloat = x;
-    n.asInt = ByteOrder::swap (n.asInt);
-    return n.asFloat;
-  #else
-    return x;
-  #endif
-}
+    float vst_swapFloat (const float x) throw()
+    {
+      #ifdef JUCE_LITTLE_ENDIAN
+        union { uint32 asInt; float asFloat; } n;
+        n.asFloat = x;
+        n.asInt = ByteOrder::swap (n.asInt);
+        return n.asFloat;
+      #else
+        return x;
+      #endif
+    }
 
-static double getVSTHostTimeNanoseconds()
-{
-  #if JUCE_WINDOWS
-    return timeGetTime() * 1000000.0;
-  #elif JUCE_LINUX
-    timeval micro;
-    gettimeofday (&micro, 0);
-    return micro.tv_usec * 1000.0;
-  #elif JUCE_MAC
-    UnsignedWide micro;
-    Microseconds (&micro);
-    return micro.lo * 1000.0;
-  #endif
+    double getVSTHostTimeNanoseconds()
+    {
+      #if JUCE_WINDOWS
+        return timeGetTime() * 1000000.0;
+      #elif JUCE_LINUX
+        timeval micro;
+        gettimeofday (&micro, 0);
+        return micro.tv_usec * 1000.0;
+      #elif JUCE_MAC
+        UnsignedWide micro;
+        Microseconds (&micro);
+        return micro.lo * 1000.0;
+      #endif
+    }
 }
 
 //==============================================================================
@@ -253,94 +256,97 @@ typedef void (*EventProcPtr) (XEvent* ev);
 
 static bool xErrorTriggered;
 
-static int temporaryErrorHandler (Display*, XErrorEvent*)
+namespace
 {
-    xErrorTriggered = true;
-    return 0;
-}
-
-static int getPropertyFromXWindow (Window handle, Atom atom)
-{
-    XErrorHandler oldErrorHandler = XSetErrorHandler (temporaryErrorHandler);
-    xErrorTriggered = false;
-
-    int userSize;
-    unsigned long bytes, userCount;
-    unsigned char* data;
-    Atom userType;
-
-    XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
-                        &userType,  &userSize, &userCount, &bytes, &data);
-
-    XSetErrorHandler (oldErrorHandler);
-
-    return (userCount == 1 && ! xErrorTriggered) ? *reinterpret_cast<int*> (data)
-                                                 : 0;
-}
-
-static Window getChildWindow (Window windowToCheck)
-{
-    Window rootWindow, parentWindow;
-    Window* childWindows;
-    unsigned int numChildren;
-
-    XQueryTree (display,
-                windowToCheck,
-                &rootWindow,
-                &parentWindow,
-                &childWindows,
-                &numChildren);
-
-    if (numChildren > 0)
-        return childWindows [0];
-
-    return 0;
-}
-
-static void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) throw()
-{
-    if (e.mods.isLeftButtonDown())
+    int temporaryErrorHandler (Display*, XErrorEvent*)
     {
-        ev.xbutton.button = Button1;
-        ev.xbutton.state |= Button1Mask;
+        xErrorTriggered = true;
+        return 0;
     }
-    else if (e.mods.isRightButtonDown())
-    {
-        ev.xbutton.button = Button3;
-        ev.xbutton.state |= Button3Mask;
-    }
-    else if (e.mods.isMiddleButtonDown())
-    {
-        ev.xbutton.button = Button2;
-        ev.xbutton.state |= Button2Mask;
-    }
-}
 
-static void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) throw()
-{
-    if (e.mods.isLeftButtonDown())          ev.xmotion.state |= Button1Mask;
-    else if (e.mods.isRightButtonDown())    ev.xmotion.state |= Button3Mask;
-    else if (e.mods.isMiddleButtonDown())   ev.xmotion.state |= Button2Mask;
-}
-
-static void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) throw()
-{
-    if (e.mods.isLeftButtonDown())          ev.xcrossing.state |= Button1Mask;
-    else if (e.mods.isRightButtonDown())    ev.xcrossing.state |= Button3Mask;
-    else if (e.mods.isMiddleButtonDown())   ev.xcrossing.state |= Button2Mask;
-}
-
-static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) throw()
-{
-    if (increment < 0)
+    int getPropertyFromXWindow (Window handle, Atom atom)
     {
-        ev.xbutton.button = Button5;
-        ev.xbutton.state |= Button5Mask;
+        XErrorHandler oldErrorHandler = XSetErrorHandler (temporaryErrorHandler);
+        xErrorTriggered = false;
+
+        int userSize;
+        unsigned long bytes, userCount;
+        unsigned char* data;
+        Atom userType;
+
+        XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+                            &userType,  &userSize, &userCount, &bytes, &data);
+
+        XSetErrorHandler (oldErrorHandler);
+
+        return (userCount == 1 && ! xErrorTriggered) ? *reinterpret_cast<int*> (data)
+                                                     : 0;
     }
-    else if (increment > 0)
+
+    Window getChildWindow (Window windowToCheck)
     {
-        ev.xbutton.button = Button4;
-        ev.xbutton.state |= Button4Mask;
+        Window rootWindow, parentWindow;
+        Window* childWindows;
+        unsigned int numChildren;
+
+        XQueryTree (display,
+                    windowToCheck,
+                    &rootWindow,
+                    &parentWindow,
+                    &childWindows,
+                    &numChildren);
+
+        if (numChildren > 0)
+            return childWindows [0];
+
+        return 0;
+    }
+
+    void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) throw()
+    {
+        if (e.mods.isLeftButtonDown())
+        {
+            ev.xbutton.button = Button1;
+            ev.xbutton.state |= Button1Mask;
+        }
+        else if (e.mods.isRightButtonDown())
+        {
+            ev.xbutton.button = Button3;
+            ev.xbutton.state |= Button3Mask;
+        }
+        else if (e.mods.isMiddleButtonDown())
+        {
+            ev.xbutton.button = Button2;
+            ev.xbutton.state |= Button2Mask;
+        }
+    }
+
+    void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) throw()
+    {
+        if (e.mods.isLeftButtonDown())          ev.xmotion.state |= Button1Mask;
+        else if (e.mods.isRightButtonDown())    ev.xmotion.state |= Button3Mask;
+        else if (e.mods.isMiddleButtonDown())   ev.xmotion.state |= Button2Mask;
+    }
+
+    void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) throw()
+    {
+        if (e.mods.isLeftButtonDown())          ev.xcrossing.state |= Button1Mask;
+        else if (e.mods.isRightButtonDown())    ev.xcrossing.state |= Button3Mask;
+        else if (e.mods.isMiddleButtonDown())   ev.xcrossing.state |= Button2Mask;
+    }
+
+    void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) throw()
+    {
+        if (increment < 0)
+        {
+            ev.xbutton.button = Button5;
+            ev.xbutton.state |= Button5Mask;
+        }
+        else if (increment > 0)
+        {
+            ev.xbutton.button = Button4;
+            ev.xbutton.state |= Button4Mask;
+        }
     }
 }
 
@@ -2184,66 +2190,67 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
 }
 
 //==============================================================================
-// handles non plugin-specific callbacks..
-
-static const int defaultVSTSampleRateValue = 16384;
-static const int defaultVSTBlockSizeValue = 512;
-
-
-static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void *ptr, float opt)
+namespace
 {
-    (void) index;
-    (void) value;
-    (void) opt;
+    static const int defaultVSTSampleRateValue = 16384;
+    static const int defaultVSTBlockSizeValue = 512;
 
-    switch (opcode)
+    // handles non plugin-specific callbacks..
+    VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void *ptr, float opt)
     {
-        case audioMasterCanDo:
+        (void) index;
+        (void) value;
+        (void) opt;
+
+        switch (opcode)
         {
-            static const char* canDos[] = { "supplyIdle",
-                                            "sendVstEvents",
-                                            "sendVstMidiEvent",
-                                            "sendVstTimeInfo",
-                                            "receiveVstEvents",
-                                            "receiveVstMidiEvent",
-                                            "supportShell",
-                                            "shellCategory" };
+            case audioMasterCanDo:
+            {
+                static const char* canDos[] = { "supplyIdle",
+                                                "sendVstEvents",
+                                                "sendVstMidiEvent",
+                                                "sendVstTimeInfo",
+                                                "receiveVstEvents",
+                                                "receiveVstMidiEvent",
+                                                "supportShell",
+                                                "shellCategory" };
 
-            for (int i = 0; i < numElementsInArray (canDos); ++i)
-                if (strcmp (canDos[i], (const char*) ptr) == 0)
-                    return 1;
+                for (int i = 0; i < numElementsInArray (canDos); ++i)
+                    if (strcmp (canDos[i], (const char*) ptr) == 0)
+                        return 1;
 
-            return 0;
+                return 0;
+            }
+
+            case audioMasterVersion:                        return 0x2400;
+            case audioMasterCurrentId:                      return shellUIDToCreate;
+            case audioMasterGetNumAutomatableParameters:    return 0;
+            case audioMasterGetAutomationState:             return 1;
+            case audioMasterGetVendorVersion:               return 0x0101;
+
+            case audioMasterGetVendorString:
+            case audioMasterGetProductString:
+            {
+                String hostName ("Juce VST Host");
+
+                if (JUCEApplication::getInstance() != 0)
+                    hostName = JUCEApplication::getInstance()->getApplicationName();
+
+                hostName.copyToCString ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
+                break;
+            }
+
+            case audioMasterGetSampleRate:          return (VstIntPtr) defaultVSTSampleRateValue;
+            case audioMasterGetBlockSize:           return (VstIntPtr) defaultVSTBlockSizeValue;
+            case audioMasterSetOutputSampleRate:    return 0;
+
+            default:
+                DBG ("*** Unhandled VST Callback: " + String ((int) opcode));
+                break;
         }
 
-        case audioMasterVersion:                        return 0x2400;
-        case audioMasterCurrentId:                      return shellUIDToCreate;
-        case audioMasterGetNumAutomatableParameters:    return 0;
-        case audioMasterGetAutomationState:             return 1;
-        case audioMasterGetVendorVersion:               return 0x0101;
-
-        case audioMasterGetVendorString:
-        case audioMasterGetProductString:
-        {
-            String hostName ("Juce VST Host");
-
-            if (JUCEApplication::getInstance() != 0)
-                hostName = JUCEApplication::getInstance()->getApplicationName();
-
-            hostName.copyToCString ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
-            break;
-        }
-
-        case audioMasterGetSampleRate:          return (VstIntPtr) defaultVSTSampleRateValue;
-        case audioMasterGetBlockSize:           return (VstIntPtr) defaultVSTBlockSizeValue;
-        case audioMasterSetOutputSampleRate:    return 0;
-
-        default:
-            DBG ("*** Unhandled VST Callback: " + String ((int) opcode));
-            break;
+        return 0;
     }
-
-    return 0;
 }
 
 // handles callbacks for a specific plugin

@@ -114,18 +114,21 @@ void removeSubWindow (void* nsWindow, Component* comp)
     [hostWindow release];
 }
 
-static bool isJuceWindow (WindowRef w)
+namespace
 {
-    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+    bool isJuceWindow (WindowRef w)
     {
-        ComponentPeer* peer = ComponentPeer::getPeer(i);
-        NSView* view = (NSView*) peer->getNativeHandle();
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        {
+            ComponentPeer* peer = ComponentPeer::getPeer(i);
+            NSView* view = (NSView*) peer->getNativeHandle();
 
-        if ([[view window] windowRef] == w)
-            return true;
+            if ([[view window] windowRef] == w)
+                return true;
+        }
+
+        return false;
     }
-
-    return false;
 }
 
 void forwardCurrentKeyEventToHostWindow()

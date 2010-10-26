@@ -604,10 +604,13 @@ bool CodeDocument::hasChangedSinceSavePoint() const throw()
 }
 
 //==============================================================================
-static int getCodeCharacterCategory (const juce_wchar character) throw()
+namespace CodeDocumentHelpers
 {
-    return (CharacterFunctions::isLetterOrDigit (character) || character == '_')
-                ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
+    int getCharacterType (const juce_wchar character) throw()
+    {
+        return (CharacterFunctions::isLetterOrDigit (character) || character == '_')
+                    ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
+    }
 }
 
 const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& position) const throw()
@@ -627,9 +630,9 @@ const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& p
 
     if (i == 0)
     {
-        const int type = getCodeCharacterCategory (p.getCharacter());
+        const int type = CodeDocumentHelpers::getCharacterType (p.getCharacter());
 
-        while (i < maxDistance && type == getCodeCharacterCategory (p.getCharacter()))
+        while (i < maxDistance && type == CodeDocumentHelpers::getCharacterType (p.getCharacter()))
         {
             ++i;
             p.moveBy (1);
@@ -676,9 +679,9 @@ const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& 
 
     if (i < maxDistance && ! stoppedAtLineStart)
     {
-        const int type = getCodeCharacterCategory (p.movedBy (-1).getCharacter());
+        const int type = CodeDocumentHelpers::getCharacterType (p.movedBy (-1).getCharacter());
 
-        while (i < maxDistance && type == getCodeCharacterCategory (p.movedBy (-1).getCharacter()))
+        while (i < maxDistance && type == CodeDocumentHelpers::getCharacterType (p.movedBy (-1).getCharacter()))
         {
             p.moveBy (-1);
             ++i;

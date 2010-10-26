@@ -140,6 +140,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
 FileBrowserComponent::~FileBrowserComponent()
 {
+    fileListComponent = 0;
     fileList = 0;
     thread.stopThread (10000);
 }

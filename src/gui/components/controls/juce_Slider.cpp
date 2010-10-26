@@ -1191,11 +1191,14 @@ void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
     }
 }
 
-static double smallestAngleBetween (double a1, double a2)
+namespace SliderHelpers
 {
-    return jmin (std::abs (a1 - a2),
-                 std::abs (a1 + double_Pi * 2.0 - a2),
-                 std::abs (a2 + double_Pi * 2.0 - a1));
+    double smallestAngleBetween (double a1, double a2) throw()
+    {
+        return jmin (std::abs (a1 - a2),
+                     std::abs (a1 + double_Pi * 2.0 - a2),
+                     std::abs (a2 + double_Pi * 2.0 - a1));
+    }
 }
 
 void Slider::mouseDrag (const MouseEvent& e)
@@ -1237,7 +1240,8 @@ void Slider::mouseDrag (const MouseEvent& e)
 
                     if (angle > rotaryEnd)
                     {
-                        if (smallestAngleBetween (angle, rotaryStart) <= smallestAngleBetween (angle, rotaryEnd))
+                        if (SliderHelpers::smallestAngleBetween (angle, rotaryStart)
+                             <= SliderHelpers::smallestAngleBetween (angle, rotaryEnd))
                             angle = rotaryStart;
                         else
                             angle = rotaryEnd;

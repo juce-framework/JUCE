@@ -28,7 +28,6 @@
 
 #include "juce_InputStream.h"
 #include "../../containers/juce_ScopedPointer.h"
-class GZIPDecompressHelper;
 
 
 //==============================================================================
@@ -61,6 +60,13 @@ public:
                                  bool noWrap = false,
                                  int64 uncompressedStreamLength = -1);
 
+    /** Creates a decompressor stream.
+
+        @param sourceStream     the stream to read from - the source stream must not be
+                                deleted until this object has been destroyed
+    */
+    GZIPDecompressorInputStream (InputStream& sourceStream);
+
     /** Destructor. */
     ~GZIPDecompressorInputStream();
 
@@ -84,6 +90,9 @@ private:
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
     HeapBlock <uint8> buffer;
+
+    class GZIPDecompressHelper;
+    friend class ScopedPointer <GZIPDecompressHelper>;
     ScopedPointer <GZIPDecompressHelper> helper;
 
     GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);

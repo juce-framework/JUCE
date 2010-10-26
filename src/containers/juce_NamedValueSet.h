@@ -69,13 +69,9 @@ public:
     */
     const var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
-    /** Returns a pointer to the object holding a named value, or
-        null if there is no value with this name. */
-    var* getItem (const Identifier& name) const;
-
     /** Changes or adds a named value.
-        @returns true if a value was changed or added; false if the
-                 value was already set the the value passed-in.
+        @returns    true if a value was changed or added; false if the
+                    value was already set the the value passed-in.
     */
     bool set (const Identifier& name, const var& newValue);
 
@@ -102,6 +98,15 @@ public:
 
     /** Removes all values. */
     void clear();
+
+    //==============================================================================
+    /** Returns a pointer to the var that holds a named value, or null if there is
+        no value with this name.
+
+        Do not use this method unless you really need access to the internal var object
+        for some reason - for normal reading and writing always prefer operator[]() and set().
+    */
+    var* getVarPointer (const Identifier& name) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

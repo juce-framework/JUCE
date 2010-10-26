@@ -29,44 +29,45 @@
 
 
 //==============================================================================
-static HKEY findKeyForPath (String name,
-                            const bool createForWriting,
-                            String& valueName)
+namespace
 {
-    HKEY rootKey = 0;
-
-    if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))
-        rootKey = HKEY_CURRENT_USER;
-    else if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\"))
-        rootKey = HKEY_LOCAL_MACHINE;
-    else if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))
-        rootKey = HKEY_CLASSES_ROOT;
-
-    if (rootKey != 0)
+    HKEY findKeyForPath (String name, const bool createForWriting, String& valueName)
     {
-        name = name.substring (name.indexOfChar ('\\') + 1);
+        HKEY rootKey = 0;
 
-        const int lastSlash = name.lastIndexOfChar ('\\');
-        valueName = name.substring (lastSlash + 1);
-        name = name.substring (0, lastSlash);
+        if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))
+            rootKey = HKEY_CURRENT_USER;
+        else if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\"))
+            rootKey = HKEY_LOCAL_MACHINE;
+        else if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))
+            rootKey = HKEY_CLASSES_ROOT;
 
-        HKEY key;
-        DWORD result;
-
-        if (createForWriting)
+        if (rootKey != 0)
         {
-            if (RegCreateKeyEx (rootKey, name, 0, 0, REG_OPTION_NON_VOLATILE,
-                                (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
-                return key;
+            name = name.substring (name.indexOfChar ('\\') + 1);
+
+            const int lastSlash = name.lastIndexOfChar ('\\');
+            valueName = name.substring (lastSlash + 1);
+            name = name.substring (0, lastSlash);
+
+            HKEY key;
+            DWORD result;
+
+            if (createForWriting)
+            {
+                if (RegCreateKeyEx (rootKey, name, 0, 0, REG_OPTION_NON_VOLATILE,
+                                    (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
+                    return key;
+            }
+            else
+            {
+                if (RegOpenKeyEx (rootKey, name, 0, KEY_READ, &key) == ERROR_SUCCESS)
+                    return key;
+            }
         }
-        else
-        {
-            if (RegOpenKeyEx (rootKey, name, 0, KEY_READ, &key) == ERROR_SUCCESS)
-                return key;
-        }
+
+        return 0;
     }
-
-    return 0;
 }
 
 const String PlatformUtilities::getRegistryValue (const String& regValuePath,

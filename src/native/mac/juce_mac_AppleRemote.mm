@@ -40,50 +40,59 @@ AppleRemoteDevice::~AppleRemoteDevice()
     stop();
 }
 
-static io_object_t getAppleRemoteDevice()
+namespace
 {
-    CFMutableDictionaryRef dict = IOServiceMatching ("AppleIRController");
-
-    io_iterator_t iter = 0;
-    io_object_t iod = 0;
-
-    if (IOServiceGetMatchingServices (kIOMasterPortDefault, dict, &iter) == kIOReturnSuccess
-         && iter != 0)
+    io_object_t getAppleRemoteDevice()
     {
-        iod = IOIteratorNext (iter);
-    }
+        CFMutableDictionaryRef dict = IOServiceMatching ("AppleIRController");
 
-    IOObjectRelease (iter);
-    return iod;
-}
+        io_iterator_t iter = 0;
+        io_object_t iod = 0;
 
-static bool createAppleRemoteInterface (io_object_t iod, void** device)
-{
-    jassert (*device == 0);
-    io_name_t classname;
-
-    if (IOObjectGetClass (iod, classname) == kIOReturnSuccess)
-    {
-        IOCFPlugInInterface** cfPlugInInterface = 0;
-        SInt32 score = 0;
-
-        if (IOCreatePlugInInterfaceForService (iod,
-                                               kIOHIDDeviceUserClientTypeID,
-                                               kIOCFPlugInInterfaceID,
-                                               &cfPlugInInterface,
-                                               &score) == kIOReturnSuccess)
+        if (IOServiceGetMatchingServices (kIOMasterPortDefault, dict, &iter) == kIOReturnSuccess
+             && iter != 0)
         {
-            HRESULT hr = (*cfPlugInInterface)->QueryInterface (cfPlugInInterface,
-                                                               CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID),
-                                                               device);
-
-            (void) hr;
-
-            (*cfPlugInInterface)->Release (cfPlugInInterface);
+            iod = IOIteratorNext (iter);
         }
+
+        IOObjectRelease (iter);
+        return iod;
     }
 
-    return *device != 0;
+    bool createAppleRemoteInterface (io_object_t iod, void** device)
+    {
+        jassert (*device == 0);
+        io_name_t classname;
+
+        if (IOObjectGetClass (iod, classname) == kIOReturnSuccess)
+        {
+            IOCFPlugInInterface** cfPlugInInterface = 0;
+            SInt32 score = 0;
+
+            if (IOCreatePlugInInterfaceForService (iod,
+                                                   kIOHIDDeviceUserClientTypeID,
+                                                   kIOCFPlugInInterfaceID,
+                                                   &cfPlugInInterface,
+                                                   &score) == kIOReturnSuccess)
+            {
+                HRESULT hr = (*cfPlugInInterface)->QueryInterface (cfPlugInInterface,
+                                                                   CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID),
+                                                                   device);
+
+                (void) hr;
+
+                (*cfPlugInInterface)->Release (cfPlugInInterface);
+            }
+        }
+
+        return *device != 0;
+    }
+
+    void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*)
+    {
+        if (result == kIOReturnSuccess)
+            ((AppleRemoteDevice*) target)->handleCallbackInternal();
+    }
 }
 
 bool AppleRemoteDevice::start (const bool inExclusiveMode)
@@ -130,12 +139,6 @@ void AppleRemoteDevice::stop()
 bool AppleRemoteDevice::isActive() const
 {
     return queue != 0;
-}
-
-static void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*)
-{
-    if (result == kIOReturnSuccess)
-        ((AppleRemoteDevice*) target)->handleCallbackInternal();
 }
 
 bool AppleRemoteDevice::open (const bool openInExclusiveMode)

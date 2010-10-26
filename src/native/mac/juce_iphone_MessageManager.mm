@@ -107,36 +107,40 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 }
 
 //==============================================================================
-static CFRunLoopRef runLoop = 0;
-static CFRunLoopSourceRef runLoopSource = 0;
-static OwnedArray <Message, CriticalSection>* pendingMessages = 0;
-static JuceCustomMessageHandler* juceCustomMessageHandler = 0;
-
-static void runLoopSourceCallback (void*)
+namespace iOSMessageLoopHelpers
 {
-    if (pendingMessages != 0)
+    static CFRunLoopRef runLoop = 0;
+    static CFRunLoopSourceRef runLoopSource = 0;
+    static OwnedArray <Message, CriticalSection>* pendingMessages = 0;
+    static JuceCustomMessageHandler* juceCustomMessageHandler = 0;
+
+    void runLoopSourceCallback (void*)
     {
-        int numDispatched = 0;
-
-        do
+        if (pendingMessages != 0)
         {
-            Message* const nextMessage = pendingMessages->removeAndReturn (0);
+            int numDispatched = 0;
 
-            if (nextMessage == 0)
-                return;
+            do
+            {
+                Message* const nextMessage = pendingMessages->removeAndReturn (0);
 
-            const ScopedAutoReleasePool pool;
-            MessageManager::getInstance()->deliverMessage (nextMessage);
+                if (nextMessage == 0)
+                    return;
 
-        } while (++numDispatched <= 4);
+                const ScopedAutoReleasePool pool;
+                MessageManager::getInstance()->deliverMessage (nextMessage);
 
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
+            } while (++numDispatched <= 4);
+
+            CFRunLoopSourceSignal (runLoopSource);
+            CFRunLoopWakeUp (runLoop);
+        }
     }
 }
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
+    using namespace iOSMessageLoopHelpers;
     pendingMessages = new OwnedArray <Message, CriticalSection>();
 
     runLoop = CFRunLoopGetCurrent();
@@ -152,6 +156,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
 void MessageManager::doPlatformSpecificShutdown()
 {
+    using namespace iOSMessageLoopHelpers;
     CFRunLoopSourceInvalidate (runLoopSource);
     CFRelease (runLoopSource);
     runLoopSource = 0;
@@ -167,6 +172,8 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool juce_postMessageToSystemQueue (Message* message)
 {
+    using namespace iOSMessageLoopHelpers;
+
     if (pendingMessages != 0)
     {
         pendingMessages->add (message);
@@ -183,6 +190,8 @@ void MessageManager::broadcastMessage (const String& value)
 
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)
 {
+    using namespace iOSMessageLoopHelpers;
+
     if (isThisTheMessageThread())
     {
         return (*callback) (data);

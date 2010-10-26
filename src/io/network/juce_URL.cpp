@@ -97,27 +97,41 @@ URL::~URL()
 {
 }
 
-static const String getMangledParameters (const StringPairArray& parameters)
+namespace URLHelpers
 {
-    String p;
-
-    for (int i = 0; i < parameters.size(); ++i)
+    const String getMangledParameters (const StringPairArray& parameters)
     {
-        if (i > 0)
-            p << '&';
+        String p;
 
-        p << URL::addEscapeChars (parameters.getAllKeys() [i], true)
-          << '='
-          << URL::addEscapeChars (parameters.getAllValues() [i], true);
+        for (int i = 0; i < parameters.size(); ++i)
+        {
+            if (i > 0)
+                p << '&';
+
+            p << URL::addEscapeChars (parameters.getAllKeys() [i], true)
+              << '='
+              << URL::addEscapeChars (parameters.getAllValues() [i], true);
+        }
+
+        return p;
     }
 
-    return p;
+    int findStartOfDomain (const String& url)
+    {
+        int i = 0;
+
+        while (CharacterFunctions::isLetterOrDigit (url[i])
+               || CharacterFunctions::indexOfChar (L"+-.", url[i], false) >= 0)
+            ++i;
+
+        return url[i] == ':' ? i + 1 : 0;
+    }
 }
 
 const String URL::toString (const bool includeGetParameters) const
 {
     if (includeGetParameters && parameters.size() > 0)
-        return url + "?" + getMangledParameters (parameters);
+        return url + "?" + URLHelpers::getMangledParameters (parameters);
     else
         return url;
 }
@@ -128,20 +142,9 @@ bool URL::isWellFormed() const
     return url.isNotEmpty();
 }
 
-static int findStartOfDomain (const String& url)
-{
-    int i = 0;
-
-    while (CharacterFunctions::isLetterOrDigit (url[i])
-           || CharacterFunctions::indexOfChar (L"+-.", url[i], false) >= 0)
-        ++i;
-
-    return url[i] == ':' ? i + 1 : 0;
-}
-
 const String URL::getDomain() const
 {
-    int start = findStartOfDomain (url);
+    int start = URLHelpers::findStartOfDomain (url);
     while (url[start] == '/')
         ++start;
 
@@ -156,7 +159,7 @@ const String URL::getDomain() const
 
 const String URL::getSubPath() const
 {
-    int start = findStartOfDomain (url);
+    int start = URLHelpers::findStartOfDomain (url);
     while (url[start] == '/')
         ++start;
 
@@ -168,12 +171,12 @@ const String URL::getSubPath() const
 
 const String URL::getScheme() const
 {
-    return url.substring (0, findStartOfDomain (url) - 1);
+    return url.substring (0, URLHelpers::findStartOfDomain (url) - 1);
 }
 
 const URL URL::withNewSubPath (const String& newPath) const
 {
-    int start = findStartOfDomain (url);
+    int start = URLHelpers::findStartOfDomain (url);
     while (url[start] == '/')
         ++start;
 
@@ -406,7 +409,7 @@ private:
         }
         else
         {
-            data << getMangledParameters (url.getParameters())
+            data << URLHelpers::getMangledParameters (url.getParameters())
                  << url.getPostData();
 
             data.flush();

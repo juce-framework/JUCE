@@ -95,11 +95,11 @@ const var& NamedValueSet::operator[] (const Identifier& name) const
 
 const var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
 {
-    const var* v = getItem (name);
+    const var* v = getVarPointer (name);
     return v != 0 ? *v : defaultReturnValue;
 }
 
-var* NamedValueSet::getItem (const Identifier& name) const
+var* NamedValueSet::getVarPointer (const Identifier& name) const
 {
     for (int i = values.size(); --i >= 0;)
     {
@@ -134,7 +134,7 @@ bool NamedValueSet::set (const Identifier& name, const var& newValue)
 
 bool NamedValueSet::contains (const Identifier& name) const
 {
-    return getItem (name) != 0;
+    return getVarPointer (name) != 0;
 }
 
 bool NamedValueSet::remove (const Identifier& name)

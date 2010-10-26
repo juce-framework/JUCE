@@ -659,7 +659,7 @@ static bool usingScsi = false;
 static bool initialised = false;
 
 
-static bool InitialiseCDRipper()
+bool InitialiseCDRipper()
 {
     if (! initialised)
     {
@@ -695,7 +695,7 @@ static bool InitialiseCDRipper()
     return true;
 }
 
-static void DeinitialiseCDRipper()
+void DeinitialiseCDRipper()
 {
     if (winAspiLib != 0)
     {
@@ -709,7 +709,7 @@ static void DeinitialiseCDRipper()
 }
 
 //==============================================================================
-static HANDLE CreateSCSIDeviceHandle (char driveLetter)
+HANDLE CreateSCSIDeviceHandle (char driveLetter)
 {
     TCHAR devicePath[] = { '\\', '\\', '.', '\\', driveLetter, ':', 0, 0 };
 
@@ -733,10 +733,8 @@ static HANDLE CreateSCSIDeviceHandle (char driveLetter)
     return h;
 }
 
-static DWORD performScsiPassThroughCommand (const LPSRB_ExecSCSICmd srb,
-                                            const char driveLetter,
-                                            HANDLE& deviceHandle,
-                                            const bool retryOnFailure = true)
+DWORD performScsiPassThroughCommand (const LPSRB_ExecSCSICmd srb, const char driveLetter,
+                                     HANDLE& deviceHandle, const bool retryOnFailure = true)
 {
     SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER s;
     zerostruct (s);
@@ -1363,7 +1361,7 @@ bool CDDeviceHandle::testController (const int type,
 
 
 //==============================================================================
-static void GetAspiDeviceInfo (CDDeviceInfo* dev, BYTE ha, BYTE tgt, BYTE lun)
+void GetAspiDeviceInfo (CDDeviceInfo* dev, BYTE ha, BYTE tgt, BYTE lun)
 {
     HANDLE event = CreateEvent (0, TRUE, FALSE, 0);
 
@@ -1403,8 +1401,7 @@ static void GetAspiDeviceInfo (CDDeviceInfo* dev, BYTE ha, BYTE tgt, BYTE lun)
     }
 }
 
-static int FindCDDevices (CDDeviceInfo* const list,
-                          int maxItems)
+int FindCDDevices (CDDeviceInfo* const list, int maxItems)
 {
     int count = 0;
 
@@ -1590,7 +1587,7 @@ struct CDDeviceWrapper
 };
 
 //==============================================================================
-static int getAddressOf (const TOCTRACK* const t)
+int getAddressOf (const TOCTRACK* const t)
 {
     return (((DWORD)t->addr[0]) << 24) + (((DWORD)t->addr[1]) << 16) +
            (((DWORD)t->addr[2]) << 8) + ((DWORD)t->addr[3]);
@@ -1599,7 +1596,7 @@ static int getAddressOf (const TOCTRACK* const t)
 static const int samplesPerFrame = 44100 / 75;
 static const int bytesPerFrame = samplesPerFrame * 4;
 
-static CDDeviceHandle* openHandle (const CDDeviceInfo* const device)
+CDDeviceHandle* openHandle (const CDDeviceInfo* const device)
 {
     SRB_GDEVBlock s;
     zerostruct (s);
@@ -2015,61 +2012,64 @@ void AudioCDReader::ejectDisk()
 #if JUCE_USE_CDBURNER
 
 //==============================================================================
-static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
+namespace CDBurnerHelpers
 {
-    CoInitialize (0);
-
-    IDiscMaster* dm;
-    IDiscRecorder* result = 0;
-
-    if (SUCCEEDED (CoCreateInstance (CLSID_MSDiscMasterObj, 0,
-                                     CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER,
-                                     IID_IDiscMaster,
-                                     (void**) &dm)))
+    IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
     {
-        if (SUCCEEDED (dm->Open()))
+        CoInitialize (0);
+
+        IDiscMaster* dm;
+        IDiscRecorder* result = 0;
+
+        if (SUCCEEDED (CoCreateInstance (CLSID_MSDiscMasterObj, 0,
+                                         CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER,
+                                         IID_IDiscMaster,
+                                         (void**) &dm)))
         {
-            IEnumDiscRecorders* drEnum = 0;
-
-            if (SUCCEEDED (dm->EnumDiscRecorders (&drEnum)))
+            if (SUCCEEDED (dm->Open()))
             {
-                IDiscRecorder* dr = 0;
-                DWORD dummy;
-                int index = 0;
+                IEnumDiscRecorders* drEnum = 0;
 
-                while (drEnum->Next (1, &dr, &dummy) == S_OK)
+                if (SUCCEEDED (dm->EnumDiscRecorders (&drEnum)))
                 {
-                    if (indexToOpen == index)
-                    {
-                        result = dr;
-                        break;
-                    }
-                    else if (list != 0)
-                    {
-                        BSTR path;
+                    IDiscRecorder* dr = 0;
+                    DWORD dummy;
+                    int index = 0;
 
-                        if (SUCCEEDED (dr->GetPath (&path)))
-                            list->add ((const WCHAR*) path);
+                    while (drEnum->Next (1, &dr, &dummy) == S_OK)
+                    {
+                        if (indexToOpen == index)
+                        {
+                            result = dr;
+                            break;
+                        }
+                        else if (list != 0)
+                        {
+                            BSTR path;
+
+                            if (SUCCEEDED (dr->GetPath (&path)))
+                                list->add ((const WCHAR*) path);
+                        }
+
+                        ++index;
+                        dr->Release();
                     }
 
-                    ++index;
-                    dr->Release();
+                    drEnum->Release();
                 }
 
-                drEnum->Release();
+                if (master == 0)
+                    dm->Close();
             }
 
-            if (master == 0)
-                dm->Close();
+            if (master != 0)
+                *master = dm;
+            else
+                dm->Release();
         }
 
-        if (master != 0)
-            *master = dm;
-        else
-            dm->Release();
+        return result;
     }
-
-    return result;
 }
 
 //==============================================================================
@@ -2219,7 +2219,7 @@ public:
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
 {
     IDiscMaster* discMaster = 0;
-    IDiscRecorder* discRecorder = enumCDBurners (0, deviceIndex, &discMaster);
+    IDiscRecorder* discRecorder = CDBurnerHelpers::enumCDBurners (0, deviceIndex, &discMaster);
 
     if (discRecorder != 0)
         pimpl = new Pimpl (*this, discMaster, discRecorder);
@@ -2234,7 +2234,7 @@ AudioCDBurner::~AudioCDBurner()
 const StringArray AudioCDBurner::findAvailableDevices()
 {
     StringArray devs;
-    enumCDBurners (&devs, -1, 0);
+    CDBurnerHelpers::enumCDBurners (&devs, -1, 0);
     return devs;
 }
 

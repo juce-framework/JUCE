@@ -100,39 +100,42 @@ namespace KeyboardFocusHelpers
     }
 }
 
-static Component* getIncrementedComponent (Component* const current, const int delta)
+namespace KeyboardFocusHelpers
 {
-    Component* focusContainer = current->getParentComponent();
-
-    if (focusContainer != 0)
+    Component* getIncrementedComponent (Component* const current, const int delta)
     {
-        while (focusContainer->getParentComponent() != 0 && ! focusContainer->isFocusContainer())
-            focusContainer = focusContainer->getParentComponent();
+        Component* focusContainer = current->getParentComponent();
 
         if (focusContainer != 0)
         {
-            Array <Component*> comps;
-            KeyboardFocusHelpers::findAllFocusableComponents (focusContainer, comps);
+            while (focusContainer->getParentComponent() != 0 && ! focusContainer->isFocusContainer())
+                focusContainer = focusContainer->getParentComponent();
 
-            if (comps.size() > 0)
+            if (focusContainer != 0)
             {
-                const int index = comps.indexOf (current);
-                return comps [(index + comps.size() + delta) % comps.size()];
+                Array <Component*> comps;
+                KeyboardFocusHelpers::findAllFocusableComponents (focusContainer, comps);
+
+                if (comps.size() > 0)
+                {
+                    const int index = comps.indexOf (current);
+                    return comps [(index + comps.size() + delta) % comps.size()];
+                }
             }
         }
-    }
 
-    return 0;
+        return 0;
+    }
 }
 
 Component* KeyboardFocusTraverser::getNextComponent (Component* current)
 {
-    return getIncrementedComponent (current, 1);
+    return KeyboardFocusHelpers::getIncrementedComponent (current, 1);
 }
 
 Component* KeyboardFocusTraverser::getPreviousComponent (Component* current)
 {
-    return getIncrementedComponent (current, -1);
+    return KeyboardFocusHelpers::getIncrementedComponent (current, -1);
 }
 
 Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentComponent)

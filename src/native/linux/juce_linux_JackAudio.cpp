@@ -84,19 +84,22 @@ JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, 
 #endif
 
 #if JACK_LOGGING_ENABLED
-static void jack_Log (const String& s)
+namespace
 {
-    std::cerr << s << std::endl;
-}
+    void jack_Log (const String& s)
+    {
+        std::cerr << s << std::endl;
+    }
 
-static void dumpJackErrorMessage (const jack_status_t status)
-{
-    if (status & JackServerFailed || status & JackServerError)  jack_Log ("Unable to connect to JACK server");
-    if (status & JackVersionError)      jack_Log ("Client's protocol version does not match");
-    if (status & JackInvalidOption)     jack_Log ("The operation contained an invalid or unsupported option");
-    if (status & JackNameNotUnique)     jack_Log ("The desired client name was not unique");
-    if (status & JackNoSuchClient)      jack_Log ("Requested client does not exist");
-    if (status & JackInitFailure)       jack_Log ("Unable to initialize client");
+    void dumpJackErrorMessage (const jack_status_t status)
+    {
+        if (status & JackServerFailed || status & JackServerError)  jack_Log ("Unable to connect to JACK server");
+        if (status & JackVersionError)      jack_Log ("Client's protocol version does not match");
+        if (status & JackInvalidOption)     jack_Log ("The operation contained an invalid or unsupported option");
+        if (status & JackNameNotUnique)     jack_Log ("The desired client name was not unique");
+        if (status & JackNoSuchClient)      jack_Log ("Requested client does not exist");
+        if (status & JackInitFailure)       jack_Log ("Unable to initialize client");
+    }
 }
 #else
   #define dumpJackErrorMessage(a) {}

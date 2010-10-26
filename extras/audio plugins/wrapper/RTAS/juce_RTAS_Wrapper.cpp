@@ -131,21 +131,8 @@ static const int bypassControlIndex = 1;
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
-
-//==============================================================================
-static float longToFloat (const long n) throw()
-{
-    return (float) ((((double) n) + (double) 0x80000000) / (double) 0xffffffff);
-}
-
-static long floatToLong (const float n) throw()
-{
-    return roundToInt (jlimit (-(double) 0x80000000,
-                               (double) 0x7fffffff,
-                               n * (double) 0xffffffff - (double) 0x80000000));
-}
-
 static int numInstances = 0;
+
 
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
@@ -835,6 +822,17 @@ private:
     HeapBlock <float*> channels;
     bool prepared;
     double sampleRate;
+
+    static float longToFloat (const long n) throw()
+    {
+        return (float) ((((double) n) + (double) 0x80000000) / (double) 0xffffffff);
+    }
+
+    static long floatToLong (const float n) throw()
+    {
+        return roundToInt (jlimit (-(double) 0x80000000, (double) 0x7fffffff,
+                                   n * (double) 0xffffffff - (double) 0x80000000));
+    }
 
     void bypassBuffers (float** const inputs, float** const outputs, const long numSamples) const
     {

@@ -220,20 +220,37 @@ bool File::setAsCurrentWorkingDirectory() const
 }
 
 //==============================================================================
-#if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
- typedef struct stat64  juce_statStruct; // (need to use the 64-bit version to work around a simulator bug)
-#else
- typedef struct stat    juce_statStruct;
-#endif
-
-static bool juce_stat (const String& fileName, juce_statStruct& info)
+namespace
 {
-    return fileName.isNotEmpty()
-      #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
-            && (stat64 (fileName.toUTF8(), &info) == 0);
-      #else
-            && (stat (fileName.toUTF8(), &info) == 0);
-      #endif
+  #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
+   typedef struct stat64  juce_statStruct; // (need to use the 64-bit version to work around a simulator bug)
+  #else
+   typedef struct stat    juce_statStruct;
+  #endif
+
+    bool juce_stat (const String& fileName, juce_statStruct& info)
+    {
+        return fileName.isNotEmpty()
+          #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
+                && (stat64 (fileName.toUTF8(), &info) == 0);
+          #else
+                && (stat (fileName.toUTF8(), &info) == 0);
+          #endif
+    }
+
+    // if this file doesn't exist, find a parent of it that does..
+    bool juce_doStatFS (File f, struct statfs& result)
+    {
+        for (int i = 5; --i >= 0;)
+        {
+            if (f.exists())
+                break;
+
+            f = f.getParentDirectory();
+        }
+
+        return statfs (f.getFullPathName().toUTF8(), &result) == 0;
+    }
 }
 
 bool File::isDirectory() const
@@ -445,20 +462,6 @@ const File juce_getExecutableFile()
 }
 
 //==============================================================================
-// if this file doesn't exist, find a parent of it that does..
-static bool juce_doStatFS (File f, struct statfs& result)
-{
-    for (int i = 5; --i >= 0;)
-    {
-        if (f.exists())
-            break;
-
-        f = f.getParentDirectory();
-    }
-
-    return statfs (f.getFullPathName().toUTF8(), &result) == 0;
-}
-
 int64 File::getBytesFreeOnVolume() const
 {
     struct statfs buf;

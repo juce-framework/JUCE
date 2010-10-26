@@ -45,7 +45,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
 // included publicly.
-class GZIPCompressorHelper
+class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
     GZIPCompressorHelper (const int compressionLevel, const bool nowrap)
@@ -118,6 +118,8 @@ public:
         return 0;
     }
 
+    enum { gzipCompBufferSize = 32768 };
+
 private:
     zlibNamespace::z_stream stream;
     const uint8* data;
@@ -130,15 +132,13 @@ public:
 
 
 //==============================================================================
-const int gzipCompBufferSize = 32768;
-
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
                                                         int compressionLevel,
                                                         const bool deleteDestStream,
                                                         const bool noWrap)
   : destStream (destStream_),
     streamToDelete (deleteDestStream ? destStream_ : 0),
-    buffer (gzipCompBufferSize)
+    buffer ((size_t) GZIPCompressorHelper::gzipCompBufferSize)
 {
     if (compressionLevel < 1 || compressionLevel > 9)
         compressionLevel = -1;
@@ -183,7 +183,7 @@ bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 
 bool GZIPCompressorOutputStream::doNextBlock()
 {
-    const int len = helper->doNextBlock (buffer, gzipCompBufferSize);
+    const int len = helper->doNextBlock (buffer, (int) GZIPCompressorHelper::gzipCompBufferSize);
 
     if (len > 0)
         return destStream->write (buffer, len);

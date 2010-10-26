@@ -280,7 +280,7 @@ void ZipFile::init()
     if (in != 0)
     {
         int numEntries = 0;
-        int pos = findEndOfZipEntryTable (in, numEntries);
+        int pos = findEndOfZipEntryTable (*in, numEntries);
 
         if (pos >= 0 && pos < in->getTotalLength())
         {
@@ -336,9 +336,9 @@ void ZipFile::init()
     }
 }
 
-int ZipFile::findEndOfZipEntryTable (InputStream* input, int& numEntries)
+int ZipFile::findEndOfZipEntryTable (InputStream& input, int& numEntries)
 {
-    BufferedInputStream in (input, 8192, false);
+    BufferedInputStream in (input, 8192);
 
     in.setPosition (in.getTotalLength());
     int64 pos = in.getPosition();

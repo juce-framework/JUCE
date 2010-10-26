@@ -93,17 +93,20 @@ void KnownPluginList::removeType (const int index)
     sendChangeMessage (this);
 }
 
-static const Time getPluginFileModTime (const String& fileOrIdentifier)
+namespace
 {
-    if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
-        return File (fileOrIdentifier).getLastModificationTime();
+    const Time getPluginFileModTime (const String& fileOrIdentifier)
+    {
+        if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
+            return File (fileOrIdentifier).getLastModificationTime();
 
-    return Time (0);
-}
+        return Time (0);
+    }
 
-static bool timesAreDifferent (const Time& t1, const Time& t2) throw()
-{
-    return t1 != t2 || t1 == Time (0);
+    bool timesAreDifferent (const Time& t1, const Time& t2) throw()
+    {
+        return t1 != t2 || t1 == Time (0);
+    }
 }
 
 bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const

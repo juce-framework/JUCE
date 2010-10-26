@@ -34,15 +34,18 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-template <typename Type>
-static bool areCoordsSensibleNumbers (Type x, Type y, Type w, Type h)
+namespace
 {
-    const int maxVal = 0x3fffffff;
+    template <typename Type>
+    bool areCoordsSensibleNumbers (Type x, Type y, Type w, Type h)
+    {
+        const int maxVal = 0x3fffffff;
 
-    return (int) x >= -maxVal && (int) x <= maxVal
-        && (int) y >= -maxVal && (int) y <= maxVal
-        && (int) w >= -maxVal && (int) w <= maxVal
-        && (int) h >= -maxVal && (int) h <= maxVal;
+        return (int) x >= -maxVal && (int) x <= maxVal
+            && (int) y >= -maxVal && (int) y <= maxVal
+            && (int) w >= -maxVal && (int) w <= maxVal
+            && (int) h >= -maxVal && (int) h <= maxVal;
+    }
 }
 
 //==============================================================================

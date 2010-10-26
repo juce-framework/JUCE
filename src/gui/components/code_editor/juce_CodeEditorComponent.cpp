@@ -778,22 +778,25 @@ void CodeEditorComponent::goToStartOfDocument (const bool selecting)
     moveCaretTo (CodeDocument::Position (&document, 0, 0), selecting);
 }
 
-static int findFirstNonWhitespaceChar (const String& line) throw()
+namespace CodeEditorHelpers
 {
-    const int len = line.length();
+    int findFirstNonWhitespaceChar (const String& line) throw()
+    {
+        const int len = line.length();
 
-    for (int i = 0; i < len; ++i)
-        if (! CharacterFunctions::isWhitespace (line [i]))
-            return i;
+        for (int i = 0; i < len; ++i)
+            if (! CharacterFunctions::isWhitespace (line [i]))
+                return i;
 
-    return 0;
+        return 0;
+    }
 }
 
 void CodeEditorComponent::goToStartOfLine (const bool selecting)
 {
     newTransaction();
 
-    int index = findFirstNonWhitespaceChar (caretPos.getLineText());
+    int index = CodeEditorHelpers::findFirstNonWhitespaceChar (caretPos.getLineText());
 
     if (index >= caretPos.getIndexInLine() && caretPos.getIndexInLine() > 0)
         index = 0;

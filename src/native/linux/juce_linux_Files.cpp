@@ -27,10 +27,13 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-static const short U_ISOFS_SUPER_MAGIC = 0x9660;   // linux/iso_fs.h
-static const short U_MSDOS_SUPER_MAGIC = 0x4d44;   // linux/msdos_fs.h
-static const short U_NFS_SUPER_MAGIC = 0x6969;     // linux/nfs_fs.h
-static const short U_SMB_SUPER_MAGIC = 0x517B;     // linux/smb_fs.h
+enum
+{
+    U_ISOFS_SUPER_MAGIC = 0x9660,   // linux/iso_fs.h
+    U_MSDOS_SUPER_MAGIC = 0x4d44,   // linux/msdos_fs.h
+    U_NFS_SUPER_MAGIC = 0x6969,     // linux/nfs_fs.h
+    U_SMB_SUPER_MAGIC = 0x517B      // linux/smb_fs.h
+};
 
 //==============================================================================
 bool File::copyInternal (const File& dest) const
@@ -66,7 +69,7 @@ bool File::isOnCDRomDrive() const
     struct statfs buf;
 
     return statfs (getFullPathName().toUTF8(), &buf) == 0
-             && buf.f_type == U_ISOFS_SUPER_MAGIC;
+             && buf.f_type == (short) U_ISOFS_SUPER_MAGIC;
 }
 
 bool File::isOnHardDisk() const
@@ -107,18 +110,21 @@ bool File::isHidden() const
 }
 
 //==============================================================================
-static const File juce_readlink (const String& file, const File& defaultFile)
+namespace
 {
-    const int size = 8192;
-    HeapBlock<char> buffer;
-    buffer.malloc (size + 4);
+    const File juce_readlink (const String& file, const File& defaultFile)
+    {
+        const int size = 8192;
+        HeapBlock<char> buffer;
+        buffer.malloc (size + 4);
 
-    const size_t numBytes = readlink (file.toUTF8(), buffer, size);
+        const size_t numBytes = readlink (file.toUTF8(), buffer, size);
 
-    if (numBytes > 0 && numBytes <= size)
-        return File (file).getSiblingFile (String::fromUTF8 (buffer, (int) numBytes));
+        if (numBytes > 0 && numBytes <= size)
+            return File (file).getSiblingFile (String::fromUTF8 (buffer, (int) numBytes));
 
-    return defaultFile;
+        return defaultFile;
+    }
 }
 
 const File File::getLinkedTarget() const

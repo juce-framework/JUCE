@@ -53,6 +53,14 @@ public:
                          int bufferSize,
                          bool deleteSourceWhenDestroyed);
 
+    /** Creates a BufferedInputStream from an input source.
+
+        @param sourceStream     the source stream to read from - the source stream  must not
+                                be deleted until this object has been destroyed.
+        @param bufferSize       the size of reservoir to use to buffer the source
+    */
+    BufferedInputStream (InputStream& sourceStream, int bufferSize);
+
     /** Destructor.
 
         This may also delete the source stream, if that option was chosen when the

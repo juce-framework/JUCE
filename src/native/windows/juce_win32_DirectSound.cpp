@@ -137,89 +137,92 @@ DECLARE_INTERFACE_(IDirectSoundCaptureBuffer, IUnknown)
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
 
-static const String getDSErrorMessage (HRESULT hr)
+namespace
 {
-    const char* result = 0;
-
-    switch (hr)
+    const String getDSErrorMessage (HRESULT hr)
     {
-        case MAKE_HRESULT(1, 0x878, 10):    result = "Device already allocated"; break;
-        case MAKE_HRESULT(1, 0x878, 30):    result = "Control unavailable"; break;
-        case E_INVALIDARG:                  result = "Invalid parameter"; break;
-        case MAKE_HRESULT(1, 0x878, 50):    result = "Invalid call"; break;
-        case E_FAIL:                        result = "Generic error"; break;
-        case MAKE_HRESULT(1, 0x878, 70):    result = "Priority level error"; break;
-        case E_OUTOFMEMORY:                 result = "Out of memory"; break;
-        case MAKE_HRESULT(1, 0x878, 100):   result = "Bad format"; break;
-        case E_NOTIMPL:                     result = "Unsupported function"; break;
-        case MAKE_HRESULT(1, 0x878, 120):   result = "No driver"; break;
-        case MAKE_HRESULT(1, 0x878, 130):   result = "Already initialised"; break;
-        case CLASS_E_NOAGGREGATION:         result = "No aggregation"; break;
-        case MAKE_HRESULT(1, 0x878, 150):   result = "Buffer lost"; break;
-        case MAKE_HRESULT(1, 0x878, 160):   result = "Another app has priority"; break;
-        case MAKE_HRESULT(1, 0x878, 170):   result = "Uninitialised"; break;
-        case E_NOINTERFACE:                 result = "No interface"; break;
-        case S_OK:                          result = "No error"; break;
-        default:                            return "Unknown error: " + String ((int) hr);
+        const char* result = 0;
+
+        switch (hr)
+        {
+            case MAKE_HRESULT(1, 0x878, 10):    result = "Device already allocated"; break;
+            case MAKE_HRESULT(1, 0x878, 30):    result = "Control unavailable"; break;
+            case E_INVALIDARG:                  result = "Invalid parameter"; break;
+            case MAKE_HRESULT(1, 0x878, 50):    result = "Invalid call"; break;
+            case E_FAIL:                        result = "Generic error"; break;
+            case MAKE_HRESULT(1, 0x878, 70):    result = "Priority level error"; break;
+            case E_OUTOFMEMORY:                 result = "Out of memory"; break;
+            case MAKE_HRESULT(1, 0x878, 100):   result = "Bad format"; break;
+            case E_NOTIMPL:                     result = "Unsupported function"; break;
+            case MAKE_HRESULT(1, 0x878, 120):   result = "No driver"; break;
+            case MAKE_HRESULT(1, 0x878, 130):   result = "Already initialised"; break;
+            case CLASS_E_NOAGGREGATION:         result = "No aggregation"; break;
+            case MAKE_HRESULT(1, 0x878, 150):   result = "Buffer lost"; break;
+            case MAKE_HRESULT(1, 0x878, 160):   result = "Another app has priority"; break;
+            case MAKE_HRESULT(1, 0x878, 170):   result = "Uninitialised"; break;
+            case E_NOINTERFACE:                 result = "No interface"; break;
+            case S_OK:                          result = "No error"; break;
+            default:                            return "Unknown error: " + String ((int) hr);
+        }
+
+        return result;
     }
 
-    return result;
-}
+    //==============================================================================
+    #define DS_DEBUGGING 1
 
-//==============================================================================
-#define DS_DEBUGGING 1
+    #ifdef DS_DEBUGGING
+        #define CATCH JUCE_CATCH_EXCEPTION
+        #undef log
+        #define log(a) Logger::writeToLog(a);
+        #undef logError
+        #define logError(a) logDSError(a, __LINE__);
 
-#ifdef DS_DEBUGGING
-    #define CATCH JUCE_CATCH_EXCEPTION
-    #undef log
-    #define log(a) Logger::writeToLog(a);
-    #undef logError
-    #define logError(a) logDSError(a, __LINE__);
-
-    static void logDSError (HRESULT hr, int lineNum)
-    {
-        if (hr != S_OK)
+        static void logDSError (HRESULT hr, int lineNum)
         {
-            String error ("DS error at line ");
-            error << lineNum << " - " << getDSErrorMessage (hr);
-            log (error);
+            if (hr != S_OK)
+            {
+                String error ("DS error at line ");
+                error << lineNum << " - " << getDSErrorMessage (hr);
+                log (error);
+            }
+        }
+    #else
+        #define CATCH JUCE_CATCH_ALL
+        #define log(a)
+        #define logError(a)
+    #endif
+
+    //==============================================================================
+    #define DSOUND_FUNCTION(functionName, params) \
+        typedef HRESULT (WINAPI *type##functionName) params; \
+        static type##functionName ds##functionName = 0;
+
+    #define DSOUND_FUNCTION_LOAD(functionName) \
+        ds##functionName = (type##functionName) GetProcAddress (h, #functionName);  \
+        jassert (ds##functionName != 0);
+
+    typedef BOOL (CALLBACK *LPDSENUMCALLBACKW) (LPGUID, LPCWSTR, LPCWSTR, LPVOID);
+    typedef BOOL (CALLBACK *LPDSENUMCALLBACKA) (LPGUID, LPCSTR, LPCSTR, LPVOID);
+
+    DSOUND_FUNCTION (DirectSoundCreate, (const GUID*, IDirectSound**, LPUNKNOWN))
+    DSOUND_FUNCTION (DirectSoundCaptureCreate, (const GUID*, IDirectSoundCapture**, LPUNKNOWN))
+    DSOUND_FUNCTION (DirectSoundEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
+    DSOUND_FUNCTION (DirectSoundCaptureEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
+
+    void initialiseDSoundFunctions()
+    {
+        if (dsDirectSoundCreate == 0)
+        {
+            HMODULE h = LoadLibraryA ("dsound.dll");
+
+            DSOUND_FUNCTION_LOAD (DirectSoundCreate)
+            DSOUND_FUNCTION_LOAD (DirectSoundCaptureCreate)
+            DSOUND_FUNCTION_LOAD (DirectSoundEnumerateW)
+            DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
         }
     }
-#else
-    #define CATCH JUCE_CATCH_ALL
-    #define log(a)
-    #define logError(a)
-#endif
 
-
-//==============================================================================
-#define DSOUND_FUNCTION(functionName, params) \
-    typedef HRESULT (WINAPI *type##functionName) params; \
-    static type##functionName ds##functionName = 0;
-
-#define DSOUND_FUNCTION_LOAD(functionName) \
-    ds##functionName = (type##functionName) GetProcAddress (h, #functionName);  \
-    jassert (ds##functionName != 0);
-
-typedef BOOL (CALLBACK *LPDSENUMCALLBACKW) (LPGUID, LPCWSTR, LPCWSTR, LPVOID);
-typedef BOOL (CALLBACK *LPDSENUMCALLBACKA) (LPGUID, LPCSTR, LPCSTR, LPVOID);
-
-DSOUND_FUNCTION (DirectSoundCreate, (const GUID*, IDirectSound**, LPUNKNOWN))
-DSOUND_FUNCTION (DirectSoundCaptureCreate, (const GUID*, IDirectSoundCapture**, LPUNKNOWN))
-DSOUND_FUNCTION (DirectSoundEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
-DSOUND_FUNCTION (DirectSoundCaptureEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
-
-static void initialiseDSoundFunctions()
-{
-    if (dsDirectSoundCreate == 0)
-    {
-        HMODULE h = LoadLibraryA ("dsound.dll");
-
-        DSOUND_FUNCTION_LOAD (DirectSoundCreate)
-        DSOUND_FUNCTION_LOAD (DirectSoundCaptureCreate)
-        DSOUND_FUNCTION_LOAD (DirectSoundEnumerateW)
-        DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
-    }
 }
 
 //==============================================================================

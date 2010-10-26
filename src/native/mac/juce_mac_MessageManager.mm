@@ -346,88 +346,91 @@ void MessageManager::stopDispatchLoop()
     [NSEvent startPeriodicEventsAfterDelay: 0 withPeriod: 0.1];
 }
 
-static bool isEventBlockedByModalComps (NSEvent* e)
+namespace
 {
-    if (Component::getNumCurrentlyModalComponents() == 0)
-        return false;
-
-    NSWindow* const w = [e window];
-    if (w == 0 || [w worksWhenModal])
-        return false;
-
-    bool isKey = false, isInputAttempt = false;
-
-    switch ([e type])
+    bool isEventBlockedByModalComps (NSEvent* e)
     {
-        case NSKeyDown:
-        case NSKeyUp:
-            isKey = isInputAttempt = true;
-            break;
-
-        case NSLeftMouseDown:
-        case NSRightMouseDown:
-        case NSOtherMouseDown:
-            isInputAttempt = true;
-            break;
-
-        case NSLeftMouseDragged:
-        case NSRightMouseDragged:
-        case NSLeftMouseUp:
-        case NSRightMouseUp:
-        case NSOtherMouseUp:
-        case NSOtherMouseDragged:
-            if (Desktop::getInstance().getDraggingMouseSource(0) != 0)
-                return false;
-            break;
-
-        case NSMouseMoved:
-        case NSMouseEntered:
-        case NSMouseExited:
-        case NSCursorUpdate:
-        case NSScrollWheel:
-        case NSTabletPoint:
-        case NSTabletProximity:
-            break;
-
-        default:
+        if (Component::getNumCurrentlyModalComponents() == 0)
             return false;
-    }
 
-    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-    {
-        ComponentPeer* const peer = ComponentPeer::getPeer (i);
-        NSView* const compView = (NSView*) peer->getNativeHandle();
+        NSWindow* const w = [e window];
+        if (w == 0 || [w worksWhenModal])
+            return false;
 
-        if ([compView window] == w)
+        bool isKey = false, isInputAttempt = false;
+
+        switch ([e type])
         {
-            if (isKey)
-            {
-                if (compView == [w firstResponder])
-                    return false;
-            }
-            else
-            {
-                NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
+            case NSKeyDown:
+            case NSKeyUp:
+                isKey = isInputAttempt = true;
+                break;
 
-                if ((nsViewPeer == 0 || ! nsViewPeer->isSharedWindow)
-                        ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
-                        : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
+            case NSLeftMouseDown:
+            case NSRightMouseDown:
+            case NSOtherMouseDown:
+                isInputAttempt = true;
+                break;
+
+            case NSLeftMouseDragged:
+            case NSRightMouseDragged:
+            case NSLeftMouseUp:
+            case NSRightMouseUp:
+            case NSOtherMouseUp:
+            case NSOtherMouseDragged:
+                if (Desktop::getInstance().getDraggingMouseSource(0) != 0)
                     return false;
+                break;
+
+            case NSMouseMoved:
+            case NSMouseEntered:
+            case NSMouseExited:
+            case NSCursorUpdate:
+            case NSScrollWheel:
+            case NSTabletPoint:
+            case NSTabletProximity:
+                break;
+
+            default:
+                return false;
+        }
+
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        {
+            ComponentPeer* const peer = ComponentPeer::getPeer (i);
+            NSView* const compView = (NSView*) peer->getNativeHandle();
+
+            if ([compView window] == w)
+            {
+                if (isKey)
+                {
+                    if (compView == [w firstResponder])
+                        return false;
+                }
+                else
+                {
+                    NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
+
+                    if ((nsViewPeer == 0 || ! nsViewPeer->isSharedWindow)
+                            ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
+                            : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
+                        return false;
+                }
             }
         }
+
+        if (isInputAttempt)
+        {
+            if (! [NSApp isActive])
+                [NSApp activateIgnoringOtherApps: YES];
+
+            Component* const modal = Component::getCurrentlyModalComponent (0);
+            if (modal != 0)
+                modal->inputAttemptWhenModal();
+        }
+
+        return true;
     }
-
-    if (isInputAttempt)
-    {
-        if (! [NSApp isActive])
-            [NSApp activateIgnoringOtherApps: YES];
-
-        Component* const modal = Component::getCurrentlyModalComponent (0);
-        if (modal != 0)
-            modal->inputAttemptWhenModal();
-    }
-
-    return true;
 }
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)

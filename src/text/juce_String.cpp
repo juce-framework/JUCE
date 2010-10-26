@@ -1029,46 +1029,49 @@ bool String::containsWholeWordIgnoreCase (const String& wordToLookFor) const thr
 }
 
 //==============================================================================
-static int indexOfMatch (const juce_wchar* const wildcard,
-                         const juce_wchar* const test,
-                         const bool ignoreCase) throw()
+namespace WildCardHelpers
 {
-    int start = 0;
-
-    while (test [start] != 0)
+    int indexOfMatch (const juce_wchar* const wildcard,
+                      const juce_wchar* const test,
+                      const bool ignoreCase) throw()
     {
-        int i = 0;
+        int start = 0;
 
-        for (;;)
+        while (test [start] != 0)
         {
-            const juce_wchar wc = wildcard [i];
-            const juce_wchar c = test [i + start];
+            int i = 0;
 
-            if (wc == c
-                 || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (c))
-                 || (wc == '?' && c != 0))
+            for (;;)
             {
-                if (wc == 0)
-                    return start;
+                const juce_wchar wc = wildcard [i];
+                const juce_wchar c = test [i + start];
 
-                ++i;
-            }
-            else
-            {
-                if (wc == '*' && (wildcard [i + 1] == 0
-                                   || indexOfMatch (wildcard + i + 1, test + start + i, ignoreCase) >= 0))
+                if (wc == c
+                     || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (c))
+                     || (wc == '?' && c != 0))
                 {
-                    return start;
-                }
+                    if (wc == 0)
+                        return start;
 
-                break;
+                    ++i;
+                }
+                else
+                {
+                    if (wc == '*' && (wildcard [i + 1] == 0
+                                       || indexOfMatch (wildcard + i + 1, test + start + i, ignoreCase) >= 0))
+                    {
+                        return start;
+                    }
+
+                    break;
+                }
             }
+
+            ++start;
         }
 
-        ++start;
+        return -1;
     }
-
-    return -1;
 }
 
 bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) const throw()
@@ -1092,7 +1095,7 @@ bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) con
         else
         {
             return wc == '*' && (wildcard [i + 1] == 0
-                                  || indexOfMatch (wildcard.text + i + 1, text + i, ignoreCase) >= 0);
+                                  || WildCardHelpers::indexOfMatch (wildcard.text + i + 1, text + i, ignoreCase) >= 0);
         }
     }
 }

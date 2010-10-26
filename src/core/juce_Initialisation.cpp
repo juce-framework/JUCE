@@ -126,11 +126,12 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
         // turn RTTI off..
         try
         {
-            TextButton tb (String::empty);
-            Component* c = &tb;
+            MemoryOutputStream mo;
+            OutputStream* o = &mo;
 
             // Got an exception here? Then TURN ON RTTI in your compiler settings!!
-            c = dynamic_cast <Button*> (c);
+            o = dynamic_cast <MemoryOutputStream*> (o);
+            jassert (o != 0);
         }
         catch (...)
         {

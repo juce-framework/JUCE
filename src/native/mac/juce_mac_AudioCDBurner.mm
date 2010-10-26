@@ -447,20 +447,23 @@ AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
     return b.release();
 }
 
-static NSArray* findDiskBurnerDevices()
+namespace
 {
-    NSMutableArray* results = [NSMutableArray array];
-    NSArray* devs = [DRDevice devices];
-
-    for (int i = 0; i < [devs count]; ++i)
+    NSArray* findDiskBurnerDevices()
     {
-        NSDictionary* dic = [[devs objectAtIndex: i] info];
-        NSString* name = [dic valueForKey: DRDeviceProductNameKey];
-        if (name != nil)
-            [results addObject: name];
-    }
+        NSMutableArray* results = [NSMutableArray array];
+        NSArray* devs = [DRDevice devices];
 
-    return results;
+        for (int i = 0; i < [devs count]; ++i)
+        {
+            NSDictionary* dic = [[devs objectAtIndex: i] info];
+            NSString* name = [dic valueForKey: DRDeviceProductNameKey];
+            if (name != nil)
+                [results addObject: name];
+        }
+
+        return results;
+    }
 }
 
 const StringArray AudioCDBurner::findAvailableDevices()

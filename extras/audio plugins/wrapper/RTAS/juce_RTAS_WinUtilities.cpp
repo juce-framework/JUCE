@@ -85,46 +85,49 @@ void JUCE_CALLTYPE resizeHostWindow (void* hostWindow,
 
 #if ! JucePlugin_EditorRequiresKeyboardFocus
 
-static HWND findMDIParentOf (HWND w)
+namespace
 {
-    const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
-
-    while (w != 0)
+    HWND findMDIParentOf (HWND w)
     {
-        HWND parent = GetParent (w);
+        const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
-        if (parent == 0)
-            break;
-
-        TCHAR windowType [32];
-        zeromem (windowType, sizeof (windowType));
-        GetClassName (parent, windowType, 31);
-
-        if (String (windowType).equalsIgnoreCase ("MDIClient"))
+        while (w != 0)
         {
+            HWND parent = GetParent (w);
+
+            if (parent == 0)
+                break;
+
+            TCHAR windowType [32];
+            zeromem (windowType, sizeof (windowType));
+            GetClassName (parent, windowType, 31);
+
+            if (String (windowType).equalsIgnoreCase ("MDIClient"))
+            {
+                w = parent;
+                break;
+            }
+
+            RECT windowPos;
+            GetWindowRect (w, &windowPos);
+
+            RECT parentPos;
+            GetWindowRect (parent, &parentPos);
+
+            int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
+            int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
+
+            if (dw > 100 || dh > 100)
+                break;
+
             w = parent;
-            break;
+
+            if (dw == 2 * frameThickness)
+                break;
         }
 
-        RECT windowPos;
-        GetWindowRect (w, &windowPos);
-
-        RECT parentPos;
-        GetWindowRect (parent, &parentPos);
-
-        int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
-        int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
-
-        if (dw > 100 || dh > 100)
-            break;
-
-        w = parent;
-
-        if (dw == 2 * frameThickness)
-            break;
+        return w;
     }
-
-    return w;
 }
 
 void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow)

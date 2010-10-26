@@ -187,7 +187,7 @@ private:
 #endif
 
     void init();
-    int findEndOfZipEntryTable (InputStream* in, int& numEntries);
+    int findEndOfZipEntryTable (InputStream& input, int& numEntries);
     static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
     ZipFile (const ZipFile&);

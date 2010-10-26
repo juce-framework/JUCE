@@ -510,54 +510,57 @@ const StringArray Font::findAllTypefaceNames()
     return s;
 }
 
-static const String pickBestFont (const StringArray& names,
-                                  const char* const choicesString)
+namespace
 {
-    StringArray choices;
-    choices.addTokens (String (choicesString), ",", String::empty);
-    choices.trim();
-    choices.removeEmptyStrings();
+    const String pickBestFont (const StringArray& names,
+                               const char* const choicesString)
+    {
+        StringArray choices;
+        choices.addTokens (String (choicesString), ",", String::empty);
+        choices.trim();
+        choices.removeEmptyStrings();
 
-    int i, j;
-    for (j = 0; j < choices.size(); ++j)
-        if (names.contains (choices[j], true))
-            return choices[j];
+        int i, j;
+        for (j = 0; j < choices.size(); ++j)
+            if (names.contains (choices[j], true))
+                return choices[j];
 
-    for (j = 0; j < choices.size(); ++j)
-        for (i = 0; i < names.size(); i++)
-            if (names[i].startsWithIgnoreCase (choices[j]))
-                return names[i];
+        for (j = 0; j < choices.size(); ++j)
+            for (i = 0; i < names.size(); i++)
+                if (names[i].startsWithIgnoreCase (choices[j]))
+                    return names[i];
 
-    for (j = 0; j < choices.size(); ++j)
-        for (i = 0; i < names.size(); i++)
-            if (names[i].containsIgnoreCase (choices[j]))
-                return names[i];
+        for (j = 0; j < choices.size(); ++j)
+            for (i = 0; i < names.size(); i++)
+                if (names[i].containsIgnoreCase (choices[j]))
+                    return names[i];
 
-    return names[0];
-}
+        return names[0];
+    }
 
-static const String linux_getDefaultSansSerifFontName()
-{
-    StringArray allFonts;
-    FreeTypeInterface::getInstance()->getSansSerifNames (allFonts);
+    const String linux_getDefaultSansSerifFontName()
+    {
+        StringArray allFonts;
+        FreeTypeInterface::getInstance()->getSansSerifNames (allFonts);
 
-    return pickBestFont (allFonts, "Verdana, Bitstream Vera Sans, Luxi Sans, Sans");
-}
+        return pickBestFont (allFonts, "Verdana, Bitstream Vera Sans, Luxi Sans, Sans");
+    }
 
-static const String linux_getDefaultSerifFontName()
-{
-    StringArray allFonts;
-    FreeTypeInterface::getInstance()->getSerifNames (allFonts);
+    const String linux_getDefaultSerifFontName()
+    {
+        StringArray allFonts;
+        FreeTypeInterface::getInstance()->getSerifNames (allFonts);
 
-    return pickBestFont (allFonts, "Bitstream Vera Serif, Times, Nimbus Roman, Serif");
-}
+        return pickBestFont (allFonts, "Bitstream Vera Serif, Times, Nimbus Roman, Serif");
+    }
 
-static const String linux_getDefaultMonospacedFontName()
-{
-    StringArray allFonts;
-    FreeTypeInterface::getInstance()->getMonospacedNames (allFonts);
+    const String linux_getDefaultMonospacedFontName()
+    {
+        StringArray allFonts;
+        FreeTypeInterface::getInstance()->getMonospacedNames (allFonts);
 
-    return pickBestFont (allFonts, "Bitstream Vera Sans Mono, Courier, Sans Mono, Mono");
+        return pickBestFont (allFonts, "Bitstream Vera Sans Mono, Courier, Sans Mono, Mono");
+    }
 }
 
 void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)

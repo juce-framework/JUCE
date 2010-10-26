@@ -35,7 +35,7 @@
 namespace WasapiClasses
 {
 
-static void logFailure (HRESULT hr)
+void logFailure (HRESULT hr)
 {
     (void) hr;
 
@@ -84,14 +84,14 @@ static void logFailure (HRESULT hr)
 
 #undef check
 
-static bool check (HRESULT hr)
+bool check (HRESULT hr)
 {
     logFailure (hr);
     return SUCCEEDED (hr);
 }
 
 //==============================================================================
-static const String getDeviceID (IMMDevice* const device)
+const String getDeviceID (IMMDevice* const device)
 {
     String s;
     WCHAR* deviceId = 0;
@@ -105,7 +105,7 @@ static const String getDeviceID (IMMDevice* const device)
     return s;
 }
 
-static EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
+EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 {
     EDataFlow flow = eRender;
     ComSmartPtr <IMMEndpoint> endPoint;
@@ -115,17 +115,16 @@ static EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
     return flow;
 }
 
-static int refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) throw()
+int refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) throw()
 {
     return roundDoubleToInt (sampleRate * ((double) t) * 0.0000001);
 }
 
-static void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) throw()
+void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) throw()
 {
     memcpy (&dest, src, src->wFormatTag == WAVE_FORMAT_EXTENSIBLE ? sizeof (WAVEFORMATEXTENSIBLE)
                                                                   : sizeof (WAVEFORMATEX));
 }
-
 
 //==============================================================================
 class WASAPIDeviceBase
@@ -393,7 +392,7 @@ public:
                 const int samplesToDo = jmin (bufferSize, (int) reservoirSize);
 
                 for (int i = 0; i < numDestBuffers; ++i)
-                    converter->convertSamples (destBuffers[i], offset, reservoir.getData(), channelMaps.getUnchecked(i), samplesToDo);
+                    converter->convertSamples (destBuffers[i] + offset, 0, reservoir.getData(), channelMaps.getUnchecked(i), samplesToDo);
 
                 bufferSize -= samplesToDo;
                 offset += samplesToDo;
@@ -423,7 +422,7 @@ public:
                     const int samplesToDo = jmin (bufferSize, (int) numSamplesAvailable);
 
                     for (int i = 0; i < numDestBuffers; ++i)
-                        converter->convertSamples (destBuffers[i], offset, inputData, channelMaps.getUnchecked(i), samplesToDo);
+                        converter->convertSamples (destBuffers[i] + offset, 0, inputData, channelMaps.getUnchecked(i), samplesToDo);
 
                     bufferSize -= samplesToDo;
                     offset += samplesToDo;
@@ -520,7 +519,7 @@ public:
             if (check (renderClient->GetBuffer (samplesToDo, &outputData)))
             {
                 for (int i = 0; i < numSrcBuffers; ++i)
-                    converter->convertSamples (outputData, channelMaps.getUnchecked(i), srcBuffers[i], offset, samplesToDo);
+                    converter->convertSamples (outputData, channelMaps.getUnchecked(i), srcBuffers[i] + offset, 0, samplesToDo);
 
                 renderClient->ReleaseBuffer (samplesToDo, 0);
 

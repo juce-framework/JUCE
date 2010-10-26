@@ -57,20 +57,55 @@ void File::findFileSystemRoots (Array<File>& destArray)
 
 
 //==============================================================================
-static bool isFileOnDriveType (const File& f, const char* const* types)
+namespace
 {
-    struct statfs buf;
-
-    if (juce_doStatFS (f, buf))
+    bool isFileOnDriveType (const File& f, const char* const* types)
     {
-        const String type (buf.f_fstypename);
+        struct statfs buf;
 
-        while (*types != 0)
-            if (type.equalsIgnoreCase (*types++))
-                return true;
+        if (juce_doStatFS (f, buf))
+        {
+            const String type (buf.f_fstypename);
+
+            while (*types != 0)
+                if (type.equalsIgnoreCase (*types++))
+                    return true;
+        }
+
+        return false;
     }
 
-    return false;
+    bool juce_isHiddenFile (const String& path)
+    {
+      #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+        const ScopedAutoReleasePool pool;
+        NSNumber* hidden = nil;
+        NSError* err = nil;
+
+        return [[NSURL fileURLWithPath: juceStringToNS (path)]
+                    getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
+                && [hidden boolValue];
+      #else
+        #if JUCE_IOS
+        return File (path).getFileName().startsWithChar ('.');
+        #else
+        FSRef ref;
+        LSItemInfoRecord info;
+
+        return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
+                 && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
+                 && (info.flags & kLSItemInfoIsInvisible) != 0;
+        #endif
+      #endif
+    }
+
+#if JUCE_IOS
+    const String getIOSSystemLocation (NSSearchPathDirectory type)
+    {
+        return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
+                                objectAtIndex: 0]);
+    }
+#endif
 }
 
 bool File::isOnCDRomDrive() const
@@ -107,42 +142,10 @@ bool File::isOnRemovableDrive() const
 #endif
 }
 
-static bool juce_isHiddenFile (const String& path)
-{
-#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-    const ScopedAutoReleasePool pool;
-    NSNumber* hidden = nil;
-    NSError* err = nil;
-
-    return [[NSURL fileURLWithPath: juceStringToNS (path)]
-                getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
-            && [hidden boolValue];
-#else
-  #if JUCE_IOS
-    return File (path).getFileName().startsWithChar ('.');
-  #else
-    FSRef ref;
-    LSItemInfoRecord info;
-
-    return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
-             && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
-             && (info.flags & kLSItemInfoIsInvisible) != 0;
-  #endif
-#endif
-}
-
 bool File::isHidden() const
 {
     return juce_isHiddenFile (getFullPathName());
 }
-
-#if JUCE_IOS
-static const String getIOSSystemLocation (NSSearchPathDirectory type)
-{
-    return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
-                            objectAtIndex: 0]);
-}
-#endif
 
 //==============================================================================
 const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp

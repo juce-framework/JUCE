@@ -759,65 +759,68 @@ void CameraDevice::removeListener (Listener* listenerToRemove)
 
 
 //==============================================================================
-static ComSmartPtr <IBaseFilter> enumerateCameras (StringArray* const names,
-                                                   const int deviceIndexToOpen,
-                                                   String& name)
+namespace
 {
-    int index = 0;
-    ComSmartPtr <IBaseFilter> result;
-
-    ComSmartPtr <ICreateDevEnum> pDevEnum;
-    HRESULT hr = pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum);
-
-    if (SUCCEEDED (hr))
+    ComSmartPtr <IBaseFilter> enumerateCameras (StringArray* const names,
+                                                const int deviceIndexToOpen,
+                                                String& name)
     {
-        ComSmartPtr <IEnumMoniker> enumerator;
-        hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, enumerator.resetAndGetPointerAddress(), 0);
+        int index = 0;
+        ComSmartPtr <IBaseFilter> result;
 
-        if (SUCCEEDED (hr) && enumerator != 0)
+        ComSmartPtr <ICreateDevEnum> pDevEnum;
+        HRESULT hr = pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum);
+
+        if (SUCCEEDED (hr))
         {
-            ComSmartPtr <IMoniker> moniker;
-            ULONG fetched;
+            ComSmartPtr <IEnumMoniker> enumerator;
+            hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, enumerator.resetAndGetPointerAddress(), 0);
 
-            while (enumerator->Next (1, moniker.resetAndGetPointerAddress(), &fetched) == S_OK)
+            if (SUCCEEDED (hr) && enumerator != 0)
             {
-                ComSmartPtr <IBaseFilter> captureFilter;
-                hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
+                ComSmartPtr <IMoniker> moniker;
+                ULONG fetched;
 
-                if (SUCCEEDED (hr))
+                while (enumerator->Next (1, moniker.resetAndGetPointerAddress(), &fetched) == S_OK)
                 {
-                    ComSmartPtr <IPropertyBag> propertyBag;
-                    hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
+                    ComSmartPtr <IBaseFilter> captureFilter;
+                    hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
 
                     if (SUCCEEDED (hr))
                     {
-                        VARIANT var;
-                        var.vt = VT_BSTR;
-
-                        hr = propertyBag->Read (_T("FriendlyName"), &var, 0);
-                        propertyBag = 0;
+                        ComSmartPtr <IPropertyBag> propertyBag;
+                        hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
 
                         if (SUCCEEDED (hr))
                         {
-                            if (names != 0)
-                                names->add (var.bstrVal);
+                            VARIANT var;
+                            var.vt = VT_BSTR;
 
-                            if (index == deviceIndexToOpen)
+                            hr = propertyBag->Read (_T("FriendlyName"), &var, 0);
+                            propertyBag = 0;
+
+                            if (SUCCEEDED (hr))
                             {
-                                name = var.bstrVal;
-                                result = captureFilter;
-                                break;
-                            }
+                                if (names != 0)
+                                    names->add (var.bstrVal);
 
-                            ++index;
+                                if (index == deviceIndexToOpen)
+                                {
+                                    name = var.bstrVal;
+                                    result = captureFilter;
+                                    break;
+                                }
+
+                                ++index;
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    return result;
+        return result;
+    }
 }
 
 const StringArray CameraDevice::getAvailableDevices()

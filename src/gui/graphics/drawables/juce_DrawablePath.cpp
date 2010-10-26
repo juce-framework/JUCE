@@ -279,28 +279,32 @@ void DrawablePath::ValueTreeWrapper::Element::convertToPathBreak (UndoManager* u
     }
 }
 
-static const Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
+namespace DrawablePathHelpers
 {
-    const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
-                       mid2 (points[1] + (points[2] - points[1]) * proportion),
-                       mid3 (points[2] + (points[3] - points[2]) * proportion);
+    const Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
+    {
+        const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
+                           mid2 (points[1] + (points[2] - points[1]) * proportion),
+                           mid3 (points[2] + (points[3] - points[2]) * proportion);
 
-    const Point<float> newCp1 (mid1 + (mid2 - mid1) * proportion),
-                       newCp2 (mid2 + (mid3 - mid2) * proportion);
+        const Point<float> newCp1 (mid1 + (mid2 - mid1) * proportion),
+                           newCp2 (mid2 + (mid3 - mid2) * proportion);
 
-    return newCp1 + (newCp2 - newCp1) * proportion;
-}
+        return newCp1 + (newCp2 - newCp1) * proportion;
+    }
 
-static const Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
-{
-    const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
-                       mid2 (points[1] + (points[2] - points[1]) * proportion);
+    const Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
+    {
+        const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
+                           mid2 (points[1] + (points[2] - points[1]) * proportion);
 
-    return mid1 + (mid2 - mid1) * proportion;
+        return mid1 + (mid2 - mid1) * proportion;
+    }
 }
 
 float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const
 {
+    using namespace DrawablePathHelpers;
     const Identifier i (state.getType());
     float bestProp = 0;
 

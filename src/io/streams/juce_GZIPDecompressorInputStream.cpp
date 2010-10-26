@@ -74,7 +74,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
 // included publicly.
-class GZIPDecompressHelper
+class GZIPDecompressorInputStream::GZIPDecompressHelper
 {
 public:
     GZIPDecompressHelper (const bool noWrap)
@@ -146,6 +146,8 @@ public:
 
     bool finished, needsDictionary, error, streamIsValid;
 
+    enum { gzipDecompBufferSize = 32768 };
+
 private:
     zlibNamespace::z_stream stream;
     uint8* data;
@@ -156,8 +158,6 @@ private:
 };
 
 //==============================================================================
-const int gzipDecompBufferSize = 32768;
-
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sourceStream_,
                                                           const bool deleteSourceWhenDestroyed,
                                                           const bool noWrap_,
@@ -170,8 +170,21 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sou
     activeBufferSize (0),
     originalSourcePos (sourceStream_->getPosition()),
     currentPos (0),
-    buffer (gzipDecompBufferSize),
+    buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
     helper (new GZIPDecompressHelper (noWrap_))
+{
+}
+
+GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& sourceStream_)
+  : sourceStream (&sourceStream_),
+    uncompressedStreamLength (-1),
+    noWrap (false),
+    isEof (false),
+    activeBufferSize (0),
+    originalSourcePos (sourceStream_.getPosition()),
+    currentPos (0),
+    buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
+    helper (new GZIPDecompressHelper (false))
 {
 }
 
@@ -210,7 +223,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 
                     if (helper->needsInput())
                     {
-                        activeBufferSize = sourceStream->read (buffer, gzipDecompBufferSize);
+                        activeBufferSize = sourceStream->read (buffer, (int) GZIPDecompressHelper::gzipDecompBufferSize);
 
                         if (activeBufferSize > 0)
                         {

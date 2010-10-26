@@ -28,26 +28,28 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-static const String nsStringToJuce (NSString* s)
+namespace
 {
-    return String::fromUTF8 ([s UTF8String]);
-}
+    const String nsStringToJuce (NSString* s)
+    {
+        return String::fromUTF8 ([s UTF8String]);
+    }
 
-static NSString* juceStringToNS (const String& s)
-{
-    return [NSString stringWithUTF8String: s.toUTF8()];
-}
+    NSString* juceStringToNS (const String& s)
+    {
+        return [NSString stringWithUTF8String: s.toUTF8()];
+    }
 
+    //==============================================================================
+    const String convertUTF16ToString (const UniChar* utf16)
+    {
+        String s;
 
-//==============================================================================
-static const String convertUTF16ToString (const UniChar* utf16)
-{
-    String s;
+        while (*utf16 != 0)
+            s += (juce_wchar) *utf16++;
 
-    while (*utf16 != 0)
-        s += (juce_wchar) *utf16++;
-
-    return s;
+        return s;
+    }
 }
 
 const String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)

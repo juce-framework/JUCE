@@ -108,8 +108,8 @@ CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
 {
     clear();
 
-    GZIPDecompressorInputStream gzin (&serialisedTypefaceStream, false);
-    BufferedInputStream in (&gzin, 32768, false);
+    GZIPDecompressorInputStream gzin (serialisedTypefaceStream);
+    BufferedInputStream in (gzin, 32768);
 
     name = in.readString();
     isBold = in.readBool();

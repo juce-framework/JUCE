@@ -29,85 +29,88 @@
 
 
 //==============================================================================
-static void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
+namespace
 {
-    const int ratesToTry[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
-
-    snd_pcm_hw_params_t* hwParams;
-    snd_pcm_hw_params_alloca (&hwParams);
-
-    for (int i = 0; ratesToTry[i] != 0; ++i)
+    void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
     {
-        if (snd_pcm_hw_params_any (handle, hwParams) >= 0
-             && snd_pcm_hw_params_test_rate (handle, hwParams, ratesToTry[i], 0) == 0)
+        const int ratesToTry[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
+
+        snd_pcm_hw_params_t* hwParams;
+        snd_pcm_hw_params_alloca (&hwParams);
+
+        for (int i = 0; ratesToTry[i] != 0; ++i)
         {
-            rates.addIfNotAlreadyThere (ratesToTry[i]);
-        }
-    }
-}
-
-static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned int* maxChans)
-{
-    snd_pcm_hw_params_t *params;
-    snd_pcm_hw_params_alloca (&params);
-
-    if (snd_pcm_hw_params_any (handle, params) >= 0)
-    {
-        snd_pcm_hw_params_get_channels_min (params, minChans);
-        snd_pcm_hw_params_get_channels_max (params, maxChans);
-    }
-}
-
-static void getDeviceProperties (const String& deviceID,
-                                 unsigned int& minChansOut,
-                                 unsigned int& maxChansOut,
-                                 unsigned int& minChansIn,
-                                 unsigned int& maxChansIn,
-                                 Array <int>& rates)
-{
-    if (deviceID.isEmpty())
-        return;
-
-    snd_ctl_t* handle;
-
-    if (snd_ctl_open (&handle, deviceID.upToLastOccurrenceOf (",", false, false).toUTF8(), SND_CTL_NONBLOCK) >= 0)
-    {
-        snd_pcm_info_t* info;
-        snd_pcm_info_alloca (&info);
-
-        snd_pcm_info_set_stream (info, SND_PCM_STREAM_PLAYBACK);
-        snd_pcm_info_set_device (info, deviceID.fromLastOccurrenceOf (",", false, false).getIntValue());
-        snd_pcm_info_set_subdevice (info, 0);
-
-        if (snd_ctl_pcm_info (handle, info) >= 0)
-        {
-            snd_pcm_t* pcmHandle;
-            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC | SND_PCM_NONBLOCK) >= 0)
+            if (snd_pcm_hw_params_any (handle, hwParams) >= 0
+                 && snd_pcm_hw_params_test_rate (handle, hwParams, ratesToTry[i], 0) == 0)
             {
-                getDeviceNumChannels (pcmHandle, &minChansOut, &maxChansOut);
-                getDeviceSampleRates (pcmHandle, rates);
-
-                snd_pcm_close (pcmHandle);
+                rates.addIfNotAlreadyThere (ratesToTry[i]);
             }
         }
+    }
 
-        snd_pcm_info_set_stream (info, SND_PCM_STREAM_CAPTURE);
+    void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, unsigned int* maxChans)
+    {
+        snd_pcm_hw_params_t *params;
+        snd_pcm_hw_params_alloca (&params);
 
-        if (snd_ctl_pcm_info (handle, info) >= 0)
+        if (snd_pcm_hw_params_any (handle, params) >= 0)
         {
-            snd_pcm_t* pcmHandle;
-            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK) >= 0)
-            {
-                getDeviceNumChannels (pcmHandle, &minChansIn, &maxChansIn);
+            snd_pcm_hw_params_get_channels_min (params, minChans);
+            snd_pcm_hw_params_get_channels_max (params, maxChans);
+        }
+    }
 
-                if (rates.size() == 0)
+    void getDeviceProperties (const String& deviceID,
+                              unsigned int& minChansOut,
+                              unsigned int& maxChansOut,
+                              unsigned int& minChansIn,
+                              unsigned int& maxChansIn,
+                              Array <int>& rates)
+    {
+        if (deviceID.isEmpty())
+            return;
+
+        snd_ctl_t* handle;
+
+        if (snd_ctl_open (&handle, deviceID.upToLastOccurrenceOf (",", false, false).toUTF8(), SND_CTL_NONBLOCK) >= 0)
+        {
+            snd_pcm_info_t* info;
+            snd_pcm_info_alloca (&info);
+
+            snd_pcm_info_set_stream (info, SND_PCM_STREAM_PLAYBACK);
+            snd_pcm_info_set_device (info, deviceID.fromLastOccurrenceOf (",", false, false).getIntValue());
+            snd_pcm_info_set_subdevice (info, 0);
+
+            if (snd_ctl_pcm_info (handle, info) >= 0)
+            {
+                snd_pcm_t* pcmHandle;
+                if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC | SND_PCM_NONBLOCK) >= 0)
+                {
+                    getDeviceNumChannels (pcmHandle, &minChansOut, &maxChansOut);
                     getDeviceSampleRates (pcmHandle, rates);
 
-                snd_pcm_close (pcmHandle);
+                    snd_pcm_close (pcmHandle);
+                }
             }
-        }
 
-        snd_ctl_close (handle);
+            snd_pcm_info_set_stream (info, SND_PCM_STREAM_CAPTURE);
+
+            if (snd_ctl_pcm_info (handle, info) >= 0)
+            {
+                snd_pcm_t* pcmHandle;
+                if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK) >= 0)
+                {
+                    getDeviceNumChannels (pcmHandle, &minChansIn, &maxChansIn);
+
+                    if (rates.size() == 0)
+                        getDeviceSampleRates (pcmHandle, rates);
+
+                    snd_pcm_close (pcmHandle);
+                }
+            }
+
+            snd_ctl_close (handle);
+        }
     }
 }
 

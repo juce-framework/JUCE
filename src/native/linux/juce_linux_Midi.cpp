@@ -29,124 +29,127 @@
 #if JUCE_ALSA
 
 //==============================================================================
-static snd_seq_t* iterateMidiDevices (const bool forInput,
-                                      StringArray& deviceNamesFound,
-                                      const int deviceIndexToOpen)
+namespace
 {
-    snd_seq_t* returnedHandle = 0;
-    snd_seq_t* seqHandle;
-
-    if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
-                                                      : SND_SEQ_OPEN_OUTPUT, 0) == 0)
+    snd_seq_t* iterateMidiDevices (const bool forInput,
+                                   StringArray& deviceNamesFound,
+                                   const int deviceIndexToOpen)
     {
-        snd_seq_system_info_t* systemInfo;
-        snd_seq_client_info_t* clientInfo;
+        snd_seq_t* returnedHandle = 0;
+        snd_seq_t* seqHandle;
 
-        if (snd_seq_system_info_malloc (&systemInfo) == 0)
+        if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
+                                                          : SND_SEQ_OPEN_OUTPUT, 0) == 0)
         {
-            if (snd_seq_system_info (seqHandle, systemInfo) == 0
-                 && snd_seq_client_info_malloc (&clientInfo) == 0)
+            snd_seq_system_info_t* systemInfo;
+            snd_seq_client_info_t* clientInfo;
+
+            if (snd_seq_system_info_malloc (&systemInfo) == 0)
             {
-                int numClients = snd_seq_system_info_get_cur_clients (systemInfo);
-
-                while (--numClients >= 0 && returnedHandle == 0)
+                if (snd_seq_system_info (seqHandle, systemInfo) == 0
+                     && snd_seq_client_info_malloc (&clientInfo) == 0)
                 {
-                    if (snd_seq_query_next_client (seqHandle, clientInfo) == 0)
+                    int numClients = snd_seq_system_info_get_cur_clients (systemInfo);
+
+                    while (--numClients >= 0 && returnedHandle == 0)
                     {
-                        snd_seq_port_info_t* portInfo;
-                        if (snd_seq_port_info_malloc (&portInfo) == 0)
+                        if (snd_seq_query_next_client (seqHandle, clientInfo) == 0)
                         {
-                            int numPorts = snd_seq_client_info_get_num_ports (clientInfo);
-                            const int client = snd_seq_client_info_get_client (clientInfo);
-
-                            snd_seq_port_info_set_client (portInfo, client);
-                            snd_seq_port_info_set_port (portInfo, -1);
-
-                            while (--numPorts >= 0)
+                            snd_seq_port_info_t* portInfo;
+                            if (snd_seq_port_info_malloc (&portInfo) == 0)
                             {
-                                if (snd_seq_query_next_port (seqHandle, portInfo) == 0
-                                     && (snd_seq_port_info_get_capability (portInfo)
-                                           & (forInput ? SND_SEQ_PORT_CAP_READ
-                                                       : SND_SEQ_PORT_CAP_WRITE)) != 0)
+                                int numPorts = snd_seq_client_info_get_num_ports (clientInfo);
+                                const int client = snd_seq_client_info_get_client (clientInfo);
+
+                                snd_seq_port_info_set_client (portInfo, client);
+                                snd_seq_port_info_set_port (portInfo, -1);
+
+                                while (--numPorts >= 0)
                                 {
-                                    deviceNamesFound.add (snd_seq_client_info_get_name (clientInfo));
-
-                                    if (deviceNamesFound.size() == deviceIndexToOpen + 1)
+                                    if (snd_seq_query_next_port (seqHandle, portInfo) == 0
+                                         && (snd_seq_port_info_get_capability (portInfo)
+                                               & (forInput ? SND_SEQ_PORT_CAP_READ
+                                                           : SND_SEQ_PORT_CAP_WRITE)) != 0)
                                     {
-                                        const int sourcePort = snd_seq_port_info_get_port (portInfo);
-                                        const int sourceClient = snd_seq_client_info_get_client (clientInfo);
+                                        deviceNamesFound.add (snd_seq_client_info_get_name (clientInfo));
 
-                                        if (sourcePort != -1)
+                                        if (deviceNamesFound.size() == deviceIndexToOpen + 1)
                                         {
-                                            snd_seq_set_client_name (seqHandle,
-                                                                     forInput ? "Juce Midi Input"
-                                                                              : "Juce Midi Output");
+                                            const int sourcePort = snd_seq_port_info_get_port (portInfo);
+                                            const int sourceClient = snd_seq_client_info_get_client (clientInfo);
 
-                                            const int portId
-                                                = snd_seq_create_simple_port (seqHandle,
-                                                                              forInput ? "Juce Midi In Port"
-                                                                                       : "Juce Midi Out Port",
-                                                                              forInput ? (SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE)
-                                                                                       : (SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ),
-                                                                              SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+                                            if (sourcePort != -1)
+                                            {
+                                                snd_seq_set_client_name (seqHandle,
+                                                                         forInput ? "Juce Midi Input"
+                                                                                  : "Juce Midi Output");
 
-                                            snd_seq_connect_from (seqHandle, portId, sourceClient, sourcePort);
+                                                const int portId
+                                                    = snd_seq_create_simple_port (seqHandle,
+                                                                                  forInput ? "Juce Midi In Port"
+                                                                                           : "Juce Midi Out Port",
+                                                                                  forInput ? (SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE)
+                                                                                           : (SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ),
+                                                                                  SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
-                                            returnedHandle = seqHandle;
+                                                snd_seq_connect_from (seqHandle, portId, sourceClient, sourcePort);
+
+                                                returnedHandle = seqHandle;
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            snd_seq_port_info_free (portInfo);
+                                snd_seq_port_info_free (portInfo);
+                            }
                         }
                     }
+
+                    snd_seq_client_info_free (clientInfo);
                 }
 
-                snd_seq_client_info_free (clientInfo);
+                snd_seq_system_info_free (systemInfo);
             }
 
-            snd_seq_system_info_free (systemInfo);
+            if (returnedHandle == 0)
+                snd_seq_close (seqHandle);
         }
 
-        if (returnedHandle == 0)
-            snd_seq_close (seqHandle);
+        deviceNamesFound.appendNumbersToDuplicates (true, true);
+
+        return returnedHandle;
     }
 
-    deviceNamesFound.appendNumbersToDuplicates (true, true);
-
-    return returnedHandle;
-}
-
-static snd_seq_t* createMidiDevice (const bool forInput,
-                                    const String& deviceNameToOpen)
-{
-    snd_seq_t* seqHandle = 0;
-
-    if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
-                                                      : SND_SEQ_OPEN_OUTPUT, 0) == 0)
+    snd_seq_t* createMidiDevice (const bool forInput, const String& deviceNameToOpen)
     {
-        snd_seq_set_client_name (seqHandle,
-                                 (deviceNameToOpen + (forInput ? " Input" : " Output")).toCString());
+        snd_seq_t* seqHandle = 0;
 
-        const int portId
-            = snd_seq_create_simple_port (seqHandle,
-                                          forInput ? "in"
-                                                   : "out",
-                                          forInput ? (SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE)
-                                                   : (SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ),
-                                          forInput ? SND_SEQ_PORT_TYPE_APPLICATION
-                                                   : SND_SEQ_PORT_TYPE_MIDI_GENERIC);
-
-        if (portId < 0)
+        if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
+                                                          : SND_SEQ_OPEN_OUTPUT, 0) == 0)
         {
-            snd_seq_close (seqHandle);
-            seqHandle = 0;
-        }
-    }
+            snd_seq_set_client_name (seqHandle,
+                                     (deviceNameToOpen + (forInput ? " Input" : " Output")).toCString());
 
-    return seqHandle;
+            const int portId
+                = snd_seq_create_simple_port (seqHandle,
+                                              forInput ? "in"
+                                                       : "out",
+                                              forInput ? (SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE)
+                                                       : (SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ),
+                                              forInput ? SND_SEQ_PORT_TYPE_APPLICATION
+                                                       : SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+
+            if (portId < 0)
+            {
+                snd_seq_close (seqHandle);
+                seqHandle = 0;
+            }
+        }
+
+        return seqHandle;
+    }
 }
+
 
 //==============================================================================
 class MidiOutputDevice

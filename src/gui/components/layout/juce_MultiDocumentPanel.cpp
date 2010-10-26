@@ -128,9 +128,12 @@ MultiDocumentPanel::~MultiDocumentPanel()
 }
 
 //==============================================================================
-static bool shouldDeleteComp (Component* const c)
+namespace MultiDocHelpers
 {
-    return c->getProperties() ["mdiDocumentDelete_"];
+    bool shouldDeleteComp (Component* const c)
+    {
+        return c->getProperties() ["mdiDocumentDelete_"];
+    }
 }
 
 bool MultiDocumentPanel::closeAllDocuments (const bool checkItsOkToCloseFirst)
@@ -250,7 +253,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
 
         component->removeComponentListener (this);
 
-        const bool shouldDelete = shouldDeleteComp (component);
+        const bool shouldDelete = MultiDocHelpers::shouldDeleteComp (component);
         component->getProperties().remove ("mdiDocumentDelete_");
         component->getProperties().remove ("mdiDocumentBkg_");
 
@@ -437,7 +440,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
 
             addDocument (c,
                          Colour ((int) c->getProperties().getWithDefault ("mdiDocumentBkg_", (int) Colours::white.getARGB())),
-                         shouldDeleteComp (c));
+                         MultiDocHelpers::shouldDeleteComp (c));
         }
     }
 }

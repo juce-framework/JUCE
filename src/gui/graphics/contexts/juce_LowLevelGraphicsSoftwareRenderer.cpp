@@ -414,11 +414,14 @@ private:
 };
 
 //==============================================================================
-static forcedinline int safeModulo (int n, const int divisor) throw()
+namespace
 {
-    jassert (divisor > 0);
-    n %= divisor;
-    return (n < 0) ? (n + divisor) : n;
+    forcedinline int safeModulo (int n, const int divisor) throw()
+    {
+        jassert (divisor > 0);
+        n %= divisor;
+        return (n < 0) ? (n + divisor) : n;
+    }
 }
 
 //==============================================================================

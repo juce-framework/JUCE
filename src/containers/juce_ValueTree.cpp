@@ -321,7 +321,7 @@ void ValueTree::SharedObject::setProperty (const Identifier& name, const var& ne
     }
     else
     {
-        var* const existingValue = properties.getItem (name);
+        var* const existingValue = properties.getVarPointer (name);
 
         if (existingValue != 0)
         {

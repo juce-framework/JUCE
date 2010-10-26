@@ -32,6 +32,7 @@
 //==============================================================================
 // #define ASIO_DEBUGGING 1
 
+#undef log
 #if ASIO_DEBUGGING
   #define log(a) { Logger::writeToLog (a); DBG (a) }
 #else
@@ -46,24 +47,29 @@
 #define JUCE_ASIOCALLBACK __cdecl
 
 //==============================================================================
-#if ASIO_DEBUGGING
-static void logError (const String& context, long error)
+namespace ASIODebugging
 {
-    String err ("unknown error");
+  #if ASIO_DEBUGGING
+    static void log (const String& context, long error)
+    {
+        String err ("unknown error");
 
-    if (error == ASE_NotPresent)            err = "Not Present";
-    else if (error == ASE_HWMalfunction)    err = "Hardware Malfunction";
-    else if (error == ASE_InvalidParameter) err = "Invalid Parameter";
-    else if (error == ASE_InvalidMode)      err = "Invalid Mode";
-    else if (error == ASE_SPNotAdvancing)   err = "Sample position not advancing";
-    else if (error == ASE_NoClock)          err = "No Clock";
-    else if (error == ASE_NoMemory)         err = "Out of memory";
+        if (error == ASE_NotPresent)            err = "Not Present";
+        else if (error == ASE_HWMalfunction)    err = "Hardware Malfunction";
+        else if (error == ASE_InvalidParameter) err = "Invalid Parameter";
+        else if (error == ASE_InvalidMode)      err = "Invalid Mode";
+        else if (error == ASE_SPNotAdvancing)   err = "Sample position not advancing";
+        else if (error == ASE_NoClock)          err = "No Clock";
+        else if (error == ASE_NoMemory)         err = "Out of memory";
 
-    log ("!!error: " + context + " - " + err);
+        log ("!!error: " + context + " - " + err);
+    }
+
+    #define logError(a, b) ASIODebugging::log ((a), (b))
+  #else
+    #define logError(a, b) {}
+  #endif
 }
-#else
-  #define logError(a, b) {}
-#endif
 
 //==============================================================================
 class ASIOAudioIODevice;
@@ -1874,6 +1880,7 @@ AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name,
     return new ASIOAudioIODevice (name, *(CLSID*) guid, freeSlot, optionalDllForDirectLoading);
 }
 
+#undef logError
 #undef log
 
 #endif

@@ -401,21 +401,24 @@ const Rectangle<int>& ComponentPeer::getNonFullScreenBounds() const throw()
 }
 
 //==============================================================================
-static FileDragAndDropTarget* findDragAndDropTarget (Component* c,
-                                                     const StringArray& files,
-                                                     FileDragAndDropTarget* const lastOne)
+namespace ComponentPeerHelpers
 {
-    while (c != 0)
+    FileDragAndDropTarget* findDragAndDropTarget (Component* c,
+                                                  const StringArray& files,
+                                                  FileDragAndDropTarget* const lastOne)
     {
-        FileDragAndDropTarget* const t = dynamic_cast <FileDragAndDropTarget*> (c);
+        while (c != 0)
+        {
+            FileDragAndDropTarget* const t = dynamic_cast <FileDragAndDropTarget*> (c);
 
-        if (t != 0 && (t == lastOne || t->isInterestedInFileDrag (files)))
-            return t;
+            if (t != 0 && (t == lastOne || t->isInterestedInFileDrag (files)))
+                return t;
 
-        c = c->getParentComponent();
+            c = c->getParentComponent();
+        }
+
+        return 0;
     }
-
-    return 0;
 }
 
 void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<int>& position)
@@ -432,7 +435,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
     if (compUnderMouse != lastDragAndDropCompUnderMouse)
     {
         lastDragAndDropCompUnderMouse = compUnderMouse;
-        newTarget = findDragAndDropTarget (compUnderMouse, files, lastTarget);
+        newTarget = ComponentPeerHelpers::findDragAndDropTarget (compUnderMouse, files, lastTarget);
 
         if (newTarget != lastTarget)
         {

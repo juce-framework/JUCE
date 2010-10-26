@@ -72,20 +72,20 @@ namespace SocketHelpers
 {
     typedef int (__stdcall juce_CloseWin32SocketLibCall) (void);
     static juce_CloseWin32SocketLibCall* juce_CloseWin32SocketLib = 0;
-}
 
-static void initWin32Sockets()
-{
-    static CriticalSection lock;
-    const ScopedLock sl (lock);
-
-    if (SocketHelpers::juce_CloseWin32SocketLib == 0)
+    void initWin32Sockets()
     {
-        WSADATA wsaData;
-        const WORD wVersionRequested = MAKEWORD (1, 1);
-        WSAStartup (wVersionRequested, &wsaData);
+        static CriticalSection lock;
+        const ScopedLock sl (lock);
 
-        SocketHelpers::juce_CloseWin32SocketLib = &WSACleanup;
+        if (SocketHelpers::juce_CloseWin32SocketLib == 0)
+        {
+            WSADATA wsaData;
+            const WORD wVersionRequested = MAKEWORD (1, 1);
+            WSAStartup (wVersionRequested, &wsaData);
+
+            SocketHelpers::juce_CloseWin32SocketLib = &WSACleanup;
+        }
     }
 }
 
@@ -320,7 +320,7 @@ StreamingSocket::StreamingSocket()
       isListener (false)
 {
 #if JUCE_WINDOWS
-    initWin32Sockets();
+    SocketHelpers::initWin32Sockets();
 #endif
 }
 
@@ -334,7 +334,7 @@ StreamingSocket::StreamingSocket (const String& hostName_,
       isListener (false)
 {
 #if JUCE_WINDOWS
-    initWin32Sockets();
+    SocketHelpers::initWin32Sockets();
 #endif
 
     SocketHelpers::resetSocketOptions (handle_, false, false);
@@ -518,7 +518,7 @@ DatagramSocket::DatagramSocket (const int localPortNumber, const bool allowBroad
       serverAddress (0)
 {
 #if JUCE_WINDOWS
-    initWin32Sockets();
+    SocketHelpers::initWin32Sockets();
 #endif
 
     handle = (int) socket (AF_INET, SOCK_DGRAM, 0);
@@ -535,7 +535,7 @@ DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_,
       serverAddress (0)
 {
 #if JUCE_WINDOWS
-    initWin32Sockets();
+    SocketHelpers::initWin32Sockets();
 #endif
 
     SocketHelpers::resetSocketOptions (handle_, true, allowBroadcast);

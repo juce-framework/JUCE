@@ -614,18 +614,21 @@ bool UIViewComponentPeer::isFullScreen() const
     return fullScreen;
 }
 
-static Desktop::DisplayOrientation convertToJuceOrientation (UIInterfaceOrientation interfaceOrientation)
+namespace
 {
-    switch (interfaceOrientation)
+    Desktop::DisplayOrientation convertToJuceOrientation (UIInterfaceOrientation interfaceOrientation)
     {
-        case UIInterfaceOrientationPortrait:            return Desktop::upright;
-        case UIInterfaceOrientationPortraitUpsideDown:  return Desktop::upsideDown;
-        case UIInterfaceOrientationLandscapeLeft:       return Desktop::rotatedClockwise;
-        case UIInterfaceOrientationLandscapeRight:      return Desktop::rotatedAntiClockwise;
-        default:                                        jassertfalse; // unknown orientation!
-    }
+        switch (interfaceOrientation)
+        {
+            case UIInterfaceOrientationPortrait:            return Desktop::upright;
+            case UIInterfaceOrientationPortraitUpsideDown:  return Desktop::upsideDown;
+            case UIInterfaceOrientationLandscapeLeft:       return Desktop::rotatedClockwise;
+            case UIInterfaceOrientationLandscapeRight:      return Desktop::rotatedAntiClockwise;
+            default:                                        jassertfalse; // unknown orientation!
+        }
 
-    return Desktop::upright;
+        return Desktop::upright;
+    }
 }
 
 BOOL UIViewComponentPeer::shouldRotate (UIInterfaceOrientation interfaceOrientation)

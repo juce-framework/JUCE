@@ -58,7 +58,6 @@ static HPALETTE palette = 0;
 static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
 
-static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY);
 #define WM_TRAYNOTIFY WM_USER + 100
 
 using ::abs;
@@ -345,6 +344,101 @@ private:
     WindowsBitmapImage& operator= (const WindowsBitmapImage&);
 };
 
+namespace IconConverters
+{
+    const Image createImageFromHBITMAP (HBITMAP bitmap)
+    {
+        Image im;
+
+        if (bitmap != 0)
+        {
+            BITMAP bm;
+
+            if (GetObject (bitmap, sizeof (BITMAP), &bm)
+                 && bm.bmWidth > 0 && bm.bmHeight > 0)
+            {
+                HDC tempDC = GetDC (0);
+                HDC dc = CreateCompatibleDC (tempDC);
+                ReleaseDC (0, tempDC);
+
+                SelectObject (dc, bitmap);
+
+                im = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
+                Image::BitmapData imageData (im, true);
+
+                for (int y = bm.bmHeight; --y >= 0;)
+                {
+                    for (int x = bm.bmWidth; --x >= 0;)
+                    {
+                        COLORREF col = GetPixel (dc, x, y);
+
+                        imageData.setPixelColour (x, y, Colour ((uint8) GetRValue (col),
+                                                                (uint8) GetGValue (col),
+                                                                (uint8) GetBValue (col)));
+                    }
+                }
+
+                DeleteDC (dc);
+            }
+        }
+
+        return im;
+    }
+
+    const Image createImageFromHICON (HICON icon)
+    {
+        ICONINFO info;
+
+        if (GetIconInfo (icon, &info))
+        {
+            Image mask (createImageFromHBITMAP (info.hbmMask));
+            Image image (createImageFromHBITMAP (info.hbmColor));
+
+            if (mask.isValid() && image.isValid())
+            {
+                for (int y = image.getHeight(); --y >= 0;)
+                {
+                    for (int x = image.getWidth(); --x >= 0;)
+                    {
+                        const float brightness = mask.getPixelAt (x, y).getBrightness();
+
+                        if (brightness > 0.0f)
+                            image.multiplyAlphaAt (x, y, 1.0f - brightness);
+                    }
+                }
+
+                return image;
+            }
+        }
+
+        return Image::null;
+    }
+
+    HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
+    {
+        WindowsBitmapImage* nativeBitmap = new WindowsBitmapImage (Image::ARGB, image.getWidth(), image.getHeight(), true);
+        Image bitmap (nativeBitmap);
+
+        {
+            Graphics g (bitmap);
+            g.drawImageAt (image, 0, 0);
+        }
+
+        HBITMAP mask = CreateBitmap (image.getWidth(), image.getHeight(), 1, 1, 0);
+
+        ICONINFO info;
+        info.fIcon = isIcon;
+        info.xHotspot = hotspotX;
+        info.yHotspot = hotspotY;
+        info.hbmMask = mask;
+        info.hbmColor = nativeBitmap->hBitmap;
+
+        HICON hi = CreateIconIndirect (&info);
+        DeleteObject (mask);
+        return hi;
+    }
+}
+
 //==============================================================================
 long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
 
@@ -374,14 +468,6 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
             k = translatedValues [i + 1];
 
     return (GetKeyState (k) & 0x8000) != 0;
-}
-
-static void* callFunctionIfNotLocked (MessageCallbackFunction* callback, void* userData)
-{
-    if (MessageManager::getInstance()->currentThreadHasLockedMessageManager())
-        return callback (userData);
-    else
-        return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
 }
 
 //==============================================================================
@@ -794,7 +880,7 @@ public:
     {
         if (image.isValid())
         {
-            HICON hicon = createHICONFromImage (image, TRUE, 0, 0);
+            HICON hicon = IconConverters::createHICONFromImage (image, TRUE, 0, 0);
 
             if (taskBarIcon == 0)
             {
@@ -1138,7 +1224,7 @@ private:
 
     void setIcon (const Image& newIcon)
     {
-        HICON hicon = createHICONFromImage (newIcon, TRUE, 0, 0);
+        HICON hicon = IconConverters::createHICONFromImage (newIcon, TRUE, 0, 0);
 
         if (hicon != 0)
         {
@@ -1772,6 +1858,14 @@ public:
     }
 
 private:
+    static void* callFunctionIfNotLocked (MessageCallbackFunction* callback, void* userData)
+    {
+        if (MessageManager::getInstance()->currentThreadHasLockedMessageManager())
+            return callback (userData);
+        else
+            return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
+    }
+
     static const Point<int> getPointFromLParam (LPARAM lParam) throw()
     {
         return Point<int> (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
@@ -2480,98 +2574,6 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 }
 
 //==============================================================================
-static const Image createImageFromHBITMAP (HBITMAP bitmap)
-{
-    Image im;
-
-    if (bitmap != 0)
-    {
-        BITMAP bm;
-
-        if (GetObject (bitmap, sizeof (BITMAP), &bm)
-             && bm.bmWidth > 0 && bm.bmHeight > 0)
-        {
-            HDC tempDC = GetDC (0);
-            HDC dc = CreateCompatibleDC (tempDC);
-            ReleaseDC (0, tempDC);
-
-            SelectObject (dc, bitmap);
-
-            im = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
-            Image::BitmapData imageData (im, true);
-
-            for (int y = bm.bmHeight; --y >= 0;)
-            {
-                for (int x = bm.bmWidth; --x >= 0;)
-                {
-                    COLORREF col = GetPixel (dc, x, y);
-
-                    imageData.setPixelColour (x, y, Colour ((uint8) GetRValue (col),
-                                                            (uint8) GetGValue (col),
-                                                            (uint8) GetBValue (col)));
-                }
-            }
-
-            DeleteDC (dc);
-        }
-    }
-
-    return im;
-}
-
-static const Image createImageFromHICON (HICON icon)
-{
-    ICONINFO info;
-
-    if (GetIconInfo (icon, &info))
-    {
-        Image mask (createImageFromHBITMAP (info.hbmMask));
-        Image image (createImageFromHBITMAP (info.hbmColor));
-
-        if (mask.isValid() && image.isValid())
-        {
-            for (int y = image.getHeight(); --y >= 0;)
-            {
-                for (int x = image.getWidth(); --x >= 0;)
-                {
-                    const float brightness = mask.getPixelAt (x, y).getBrightness();
-
-                    if (brightness > 0.0f)
-                        image.multiplyAlphaAt (x, y, 1.0f - brightness);
-                }
-            }
-
-            return image;
-        }
-    }
-
-    return Image::null;
-}
-
-static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
-{
-    WindowsBitmapImage* nativeBitmap = new WindowsBitmapImage (Image::ARGB, image.getWidth(), image.getHeight(), true);
-    Image bitmap (nativeBitmap);
-
-    {
-        Graphics g (bitmap);
-        g.drawImageAt (image, 0, 0);
-    }
-
-    HBITMAP mask = CreateBitmap (image.getWidth(), image.getHeight(), 1, 1, 0);
-
-    ICONINFO info;
-    info.fIcon = isIcon;
-    info.xHotspot = hotspotX;
-    info.yHotspot = hotspotY;
-    info.hbmMask = mask;
-    info.hbmColor = nativeBitmap->hBitmap;
-
-    HICON hi = CreateIconIndirect (&info);
-    DeleteObject (mask);
-    return hi;
-}
-
 const Image juce_createIconForFile (const File& file)
 {
     Image image;
@@ -2585,7 +2587,7 @@ const Image juce_createIconForFile (const File& file)
 
     if (icon != 0)
     {
-        image = createImageFromHICON (icon);
+        image = IconConverters::createImageFromHICON (icon);
         DestroyIcon (icon);
     }
 
@@ -2608,7 +2610,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
         hotspotY = (hotspotY * maxH) / image.getHeight();
     }
 
-    return createHICONFromImage (im, FALSE, hotspotX, hotspotY);
+    return IconConverters::createHICONFromImage (im, FALSE, hotspotX, hotspotY);
 }
 
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)

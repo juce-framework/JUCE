@@ -29,23 +29,45 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_BufferedInputStream.h"
 
+namespace
+{
+    int calcBufferStreamBufferSize (int requestedSize, InputStream* const source) throw()
+    {
+        // You need to supply a real stream when creating a BufferedInputStream
+        jassert (source != 0);
+
+        requestedSize = jmax (256, requestedSize);
+
+        const int64 sourceSize = source->getTotalLength();
+        if (sourceSize >= 0 && sourceSize < requestedSize)
+            requestedSize = jmax (32, (int) sourceSize);
+
+        return requestedSize;
+    }
+}
 
 //==============================================================================
-BufferedInputStream::BufferedInputStream (InputStream* const source_,
-                                          const int bufferSize_,
+BufferedInputStream::BufferedInputStream (InputStream* const sourceStream, const int bufferSize_,
                                           const bool deleteSourceWhenDestroyed)
-   : source (source_),
-     sourceToDelete (deleteSourceWhenDestroyed ? source_ : 0),
-     bufferSize (jmax (256, bufferSize_)),
-     position (source_->getPosition()),
+   : source (sourceStream),
+     sourceToDelete (deleteSourceWhenDestroyed ? sourceStream : 0),
+     bufferSize (calcBufferStreamBufferSize (bufferSize_, sourceStream)),
+     position (sourceStream->getPosition()),
      lastReadPos (0),
+     bufferStart (position),
      bufferOverlap (128)
 {
-    const int sourceSize = (int) source_->getTotalLength();
-    if (sourceSize >= 0)
-        bufferSize = jmin (jmax (32, sourceSize), bufferSize);
+    buffer.malloc (bufferSize);
+}
 
-    bufferStart = position;
+BufferedInputStream::BufferedInputStream (InputStream& sourceStream, const int bufferSize_)
+   : source (&sourceStream),
+     bufferSize (calcBufferStreamBufferSize (bufferSize_, &sourceStream)),
+     position (sourceStream.getPosition()),
+     lastReadPos (0),
+     bufferStart (position),
+     bufferOverlap (128)
+{
     buffer.malloc (bufferSize);
 }
 

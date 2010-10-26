@@ -167,46 +167,49 @@ END_JUCE_NAMESPACE
 //==============================================================================
 #if JUCE_WINDOWS
 
-static HWND findMDIParentOf (HWND w)
+namespace
 {
-    const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
-
-    while (w != 0)
+    HWND findMDIParentOf (HWND w)
     {
-        HWND parent = GetParent (w);
+        const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
-        if (parent == 0)
-            break;
-
-        TCHAR windowType [32];
-        zeromem (windowType, sizeof (windowType));
-        GetClassName (parent, windowType, 31);
-
-        if (String (windowType).equalsIgnoreCase ("MDIClient"))
+        while (w != 0)
         {
+            HWND parent = GetParent (w);
+
+            if (parent == 0)
+                break;
+
+            TCHAR windowType [32];
+            zeromem (windowType, sizeof (windowType));
+            GetClassName (parent, windowType, 31);
+
+            if (String (windowType).equalsIgnoreCase ("MDIClient"))
+            {
+                w = parent;
+                break;
+            }
+
+            RECT windowPos;
+            GetWindowRect (w, &windowPos);
+
+            RECT parentPos;
+            GetWindowRect (parent, &parentPos);
+
+            const int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
+            const int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
+
+            if (dw > 100 || dh > 100)
+                break;
+
             w = parent;
-            break;
+
+            if (dw == 2 * frameThickness)
+                break;
         }
 
-        RECT windowPos;
-        GetWindowRect (w, &windowPos);
-
-        RECT parentPos;
-        GetWindowRect (parent, &parentPos);
-
-        const int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
-        const int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
-
-        if (dw > 100 || dh > 100)
-            break;
-
-        w = parent;
-
-        if (dw == 2 * frameThickness)
-            break;
+        return w;
     }
-
-    return w;
 }
 
 //==============================================================================
@@ -1473,30 +1476,32 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 
 //==============================================================================
-static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
+namespace
 {
-    JUCE_AUTORELEASEPOOL
-    initialiseJuce_GUI();
-
-    try
+    AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
     {
-        if (audioMaster (0, audioMasterVersion, 0, 0, 0, 0) != 0)
-        {
-            AudioProcessor* const filter = createPluginFilter();
+        JUCE_AUTORELEASEPOOL
+        initialiseJuce_GUI();
 
-            if (filter != 0)
+        try
+        {
+            if (audioMaster (0, audioMasterVersion, 0, 0, 0, 0) != 0)
             {
-                JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
-                return wrapper->getAeffect();
+                AudioProcessor* const filter = createPluginFilter();
+
+                if (filter != 0)
+                {
+                    JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
+                    return wrapper->getAeffect();
+                }
             }
         }
+        catch (...)
+        {}
+
+        return 0;
     }
-    catch (...)
-    {}
-
-    return 0;
 }
-
 
 //==============================================================================
 // Mac startup code..
