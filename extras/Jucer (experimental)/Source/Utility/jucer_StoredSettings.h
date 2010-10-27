@@ -69,7 +69,9 @@ public:
     };
 
 
+    //==============================================================================
     const Image getFallbackImage();
+    const Drawable* getImageFileIcon();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -78,6 +80,7 @@ private:
     ScopedPointer<PropertiesFile> props;
     StringArray fontNames;
 
+    ScopedPointer<Drawable> imageFileIcon;
     Image fallbackImage;
 };
 

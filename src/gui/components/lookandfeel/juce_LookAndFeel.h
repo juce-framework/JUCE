@@ -637,6 +637,8 @@ public:
                                   bool flatOnLeft, bool flatOnRight,
                                   bool flatOnTop, bool flatOnBottom) throw();
 
+    static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -665,8 +667,6 @@ private:
 
     // This has been deprecated - see the new parameter list..
     virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
-
-    static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
 
     LookAndFeel (const LookAndFeel&);
     LookAndFeel& operator= (const LookAndFeel&);

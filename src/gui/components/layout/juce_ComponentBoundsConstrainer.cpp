@@ -203,36 +203,76 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
                                               const bool isStretchingBottom,
                                               const bool isStretchingRight)
 {
-    int x = bounds.getX();
-    int y = bounds.getY();
-    int w = bounds.getWidth();
-    int h = bounds.getHeight();
-
     // constrain the size if it's being stretched..
     if (isStretchingLeft)
-    {
-        x = jlimit (old.getRight() - maxW, old.getRight() - minW, x);
-        w = old.getRight() - x;
-    }
+        bounds.setLeft (jlimit (old.getRight() - maxW, old.getRight() - minW, bounds.getX()));
 
     if (isStretchingRight)
-    {
-        w = jlimit (minW, maxW, w);
-    }
+        bounds.setWidth (jlimit (minW, maxW, bounds.getWidth()));
 
     if (isStretchingTop)
-    {
-        y = jlimit (old.getBottom() - maxH, old.getBottom() - minH, y);
-        h = old.getBottom() - y;
-    }
+        bounds.setTop (jlimit (old.getBottom() - maxH, old.getBottom() - minH, bounds.getY()));
 
     if (isStretchingBottom)
+        bounds.setHeight (jlimit (minH, maxH, bounds.getHeight()));
+
+    if (bounds.isEmpty())
+        return;
+
+    if (minOffTop > 0)
     {
-        h = jlimit (minH, maxH, h);
+        const int limit = limits.getY() + jmin (minOffLeft - bounds.getWidth(), 0);
+
+        if (bounds.getY() < limit)
+        {
+            if (isStretchingTop)
+                bounds.setTop (limits.getY());
+            else
+                bounds.setY (limit);
+        }
+    }
+
+    if (minOffLeft > 0)
+    {
+        const int limit = limits.getX() + jmin (minOffLeft - bounds.getWidth(), 0);
+
+        if (bounds.getX() < limit)
+        {
+            if (isStretchingLeft)
+                bounds.setLeft (limits.getX());
+            else
+                bounds.setX (limit);
+        }
+    }
+
+    if (minOffBottom > 0)
+    {
+        const int limit = limits.getBottom() - jmin (minOffBottom, bounds.getHeight());
+
+        if (bounds.getY() > limit)
+        {
+            if (isStretchingBottom)
+                bounds.setBottom (limits.getBottom());
+            else
+                bounds.setY (limit);
+        }
+    }
+
+    if (minOffRight > 0)
+    {
+        const int limit = limits.getRight() - jmin (minOffRight, bounds.getWidth());
+
+        if (bounds.getX() > limit)
+        {
+            if (isStretchingRight)
+                bounds.setRight (limits.getRight());
+            else
+                bounds.setX (limit);
+        }
     }
 
     // constrain the aspect ratio if one has been specified..
-    if (aspectRatio > 0.0 && w > 0 && h > 0)
+    if (aspectRatio > 0.0)
     {
         bool adjustWidth;
 
@@ -247,108 +287,51 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
         else
         {
             const double oldRatio = (old.getHeight() > 0) ? std::abs (old.getWidth() / (double) old.getHeight()) : 0.0;
-            const double newRatio = std::abs (w / (double) h);
+            const double newRatio = std::abs (bounds.getWidth() / (double) bounds.getHeight());
 
             adjustWidth = (oldRatio > newRatio);
         }
 
         if (adjustWidth)
         {
-            w = roundToInt (h * aspectRatio);
+            bounds.setWidth (roundToInt (bounds.getHeight() * aspectRatio));
 
-            if (w > maxW || w < minW)
+            if (bounds.getWidth() > maxW || bounds.getWidth() < minW)
             {
-                w = jlimit (minW, maxW, w);
-                h = roundToInt (w / aspectRatio);
+                bounds.setWidth (jlimit (minW, maxW, bounds.getWidth()));
+                bounds.setHeight (roundToInt (bounds.getWidth() / aspectRatio));
             }
         }
         else
         {
-            h = roundToInt (w / aspectRatio);
+            bounds.setHeight (roundToInt (bounds.getWidth() / aspectRatio));
 
-            if (h > maxH || h < minH)
+            if (bounds.getHeight() > maxH || bounds.getHeight() < minH)
             {
-                h = jlimit (minH, maxH, h);
-                w = roundToInt (h * aspectRatio);
+                bounds.setHeight (jlimit (minH, maxH, bounds.getHeight()));
+                bounds.setWidth (roundToInt (bounds.getHeight() * aspectRatio));
             }
         }
 
         if ((isStretchingTop || isStretchingBottom) && ! (isStretchingLeft || isStretchingRight))
         {
-            x = old.getX() + (old.getWidth() - w) / 2;
+            bounds.setX (old.getX() + (old.getWidth() - bounds.getWidth()) / 2);
         }
         else if ((isStretchingLeft || isStretchingRight) && ! (isStretchingTop || isStretchingBottom))
         {
-            y = old.getY() + (old.getHeight() - h) / 2;
+            bounds.setY (old.getY() + (old.getHeight() - bounds.getHeight()) / 2);
         }
         else
         {
             if (isStretchingLeft)
-                x = old.getRight() - w;
+                bounds.setX (old.getRight() - bounds.getWidth());
 
             if (isStretchingTop)
-                y = old.getBottom() - h;
+                bounds.setY (old.getBottom() - bounds.getHeight());
         }
     }
 
-    // ...and constrain the position if limits have been set for that.
-    if (minOffTop > 0 || minOffLeft > 0 || minOffBottom > 0 || minOffRight > 0)
-    {
-        if (minOffTop > 0)
-        {
-            const int limit = limits.getY() + jmin (minOffTop - h, 0);
-
-            if (y < limit)
-            {
-                if (isStretchingTop)
-                    h -= (limit - y);
-
-                y = limit;
-            }
-        }
-
-        if (minOffLeft > 0)
-        {
-            const int limit = limits.getX() + jmin (minOffLeft - w, 0);
-
-            if (x < limit)
-            {
-                if (isStretchingLeft)
-                    w -= (limit - x);
-
-                x = limit;
-            }
-        }
-
-        if (minOffBottom > 0)
-        {
-            const int limit = limits.getBottom() - jmin (minOffBottom, h);
-
-            if (y > limit)
-            {
-                if (isStretchingBottom)
-                    h += (limit - y);
-                else
-                    y = limit;
-            }
-        }
-
-        if (minOffRight > 0)
-        {
-            const int limit = limits.getRight() - jmin (minOffRight, w);
-
-            if (x > limit)
-            {
-                if (isStretchingRight)
-                    w += (limit - x);
-                else
-                    x = limit;
-            }
-        }
-    }
-
-    jassert (w >= 0 && h >= 0);
-    bounds = Rectangle<int> (x, y, w, h);
+    jassert (! bounds.isEmpty());
 }
 
 

@@ -173,6 +173,7 @@ public:
         bool isFile() const;
         bool isGroup() const;
         bool isMainGroup() const;
+        bool isImageFile() const;
 
         const String getID() const;
         Item findItemWithID (const String& targetId) const; // (recursive search)

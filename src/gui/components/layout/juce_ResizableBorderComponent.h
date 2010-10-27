@@ -138,14 +138,27 @@ public:
         /** Resizes this rectangle by the given amount, moving just the edges that this zone
             applies to.
         */
-        const Rectangle<int> resizeRectangleBy (Rectangle<int> original,
-                                                const Point<int>& distance) const throw();
+        template <typename ValueType>
+        const Rectangle<ValueType> resizeRectangleBy (Rectangle<ValueType> original,
+                                                      const Point<ValueType>& distance) const throw()
+        {
+            if (isDraggingWholeObject())
+                return original + distance;
 
-        /** Resizes this rectangle by the given amount, moving just the edges that this zone
-            applies to.
-        */
-        const Rectangle<float> resizeRectangleBy (Rectangle<float> original,
-                                                  const Point<float>& distance) const throw();
+            if (isDraggingLeftEdge())
+                original.setLeft (jmin (original.getRight(), original.getX() + distance.getX()));
+
+            if (isDraggingRightEdge())
+                original.setWidth (jmax (ValueType(), original.getWidth() + distance.getX()));
+
+            if (isDraggingTopEdge())
+                original.setTop (jmin (original.getBottom(), original.getY() + distance.getY()));
+
+            if (isDraggingBottomEdge())
+                original.setHeight (jmax (ValueType(), original.getHeight() + distance.getY()));
+
+            return original;
+        }
 
         /** Returns the raw flags for this zone. */
         int getZoneFlags() const throw()                { return zone; }

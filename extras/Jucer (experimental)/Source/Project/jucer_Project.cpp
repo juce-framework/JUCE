@@ -471,10 +471,9 @@ Project::Item Project::createNewItem (const File& file)
 
 static void findImages (const Project::Item& item, OwnedArray<Project::Item>& found)
 {
-    if (item.isFile())
+    if (item.isImageFile())
     {
-        if (item.getFile().hasFileExtension ("png;jpg;jpeg;gif"))
-            found.add (new Project::Item (item));
+        found.add (new Project::Item (item));
     }
     else if (item.isGroup())
     {
@@ -506,9 +505,10 @@ Project::Item::~Item()
 const String Project::Item::getID() const               { return node [Ids::id_]; }
 const String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
-bool Project::Item::isFile() const         { return node.hasType (Tags::file); }
-bool Project::Item::isGroup() const        { return node.hasType (Tags::group) || isMainGroup(); }
-bool Project::Item::isMainGroup() const    { return node.hasType (Tags::projectMainGroup); }
+bool Project::Item::isFile() const          { return node.hasType (Tags::file); }
+bool Project::Item::isGroup() const         { return node.hasType (Tags::group) || isMainGroup(); }
+bool Project::Item::isMainGroup() const     { return node.hasType (Tags::projectMainGroup); }
+bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFileExtension ("png;jpg;jpeg;gif;drawable"); }
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
@@ -748,7 +748,12 @@ bool Project::Item::addFile (const File& file, int insertIndex)
 const Drawable* Project::Item::getIcon() const
 {
     if (isFile())
+    {
+        if (isImageFile())
+            return StoredSettings::getInstance()->getImageFileIcon();
+
         return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage();
+    }
     else if (isMainGroup())
     {
         static DrawableImage im;
