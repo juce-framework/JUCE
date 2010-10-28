@@ -283,11 +283,14 @@ namespace LinuxErrorHandling
 
     static void removeXErrorHandlers()
     {
-        XSetIOErrorHandler (oldIOErrorHandler);
-        oldIOErrorHandler = 0;
+        if (JUCEApplication::isStandaloneApp())
+        {
+            XSetIOErrorHandler (oldIOErrorHandler);
+            oldIOErrorHandler = 0;
 
-        XSetErrorHandler (oldErrorHandler);
-        oldErrorHandler = 0;
+            XSetErrorHandler (oldErrorHandler);
+            oldErrorHandler = 0;
+        }
     }
 
     //==============================================================================
@@ -312,27 +315,27 @@ namespace LinuxErrorHandling
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    // Initialise xlib for multiple thread support
-    static bool initThreadCalled = false;
-
-    if (! initThreadCalled)
+    if (JUCEApplication::isStandaloneApp())
     {
-        if (! XInitThreads())
+        // Initialise xlib for multiple thread support
+        static bool initThreadCalled = false;
+
+        if (! initThreadCalled)
         {
-            // This is fatal!  Print error and closedown
-            Logger::outputDebugString ("Failed to initialise xlib thread support.");
-
-            if (JUCEApplication::isStandaloneApp())
+            if (! XInitThreads())
+            {
+                // This is fatal!  Print error and closedown
+                Logger::outputDebugString ("Failed to initialise xlib thread support.");
                 Process::terminate();
+                return;
+            }
 
-            return;
+            initThreadCalled = true;
         }
 
-        initThreadCalled = true;
+        LinuxErrorHandling::installXErrorHandlers();
+        LinuxErrorHandling::installKeyboardBreakHandler();
     }
-
-    LinuxErrorHandling::installXErrorHandlers();
-    LinuxErrorHandling::installKeyboardBreakHandler();
 
     // Create the internal message queue
     InternalMessageQueue::getInstance();

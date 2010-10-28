@@ -512,6 +512,12 @@ public:
                 if (! isBrowserContentView (parentView))
                     parentView = currentParentView;
             }
+            else if (currentParentView != 0 && ! target.isEmpty())
+            {
+                // Firefox can send lots of spurious resize messages when updating its pages, so this is a
+                // bodge to avoid flickering caused by repeatedly removing and re-adding the view..
+                parentView = currentParentView;
+            }
 
             log ("parent: " + nsStringToJuce ([parentView description]));
         }

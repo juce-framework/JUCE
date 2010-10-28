@@ -221,7 +221,7 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
 
     if (minOffTop > 0)
     {
-        const int limit = limits.getY() + jmin (minOffLeft - bounds.getWidth(), 0);
+        const int limit = limits.getY() + jmin (minOffTop - bounds.getHeight(), 0);
 
         if (bounds.getY() < limit)
         {

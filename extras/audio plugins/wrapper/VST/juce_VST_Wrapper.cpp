@@ -328,27 +328,32 @@ public:
     {
         JUCE_AUTORELEASEPOOL
 
-        stopTimer();
-        deleteEditor (false);
+        {
+      #if JUCE_LINUX
+            MessageManagerLock mmLock;
+      #endif
+            stopTimer();
+            deleteEditor (false);
 
-        hasShutdown = true;
+            hasShutdown = true;
 
-        delete filter;
-        filter = 0;
+            delete filter;
+            filter = 0;
 
-        jassert (editorComp == 0);
+            jassert (editorComp == 0);
 
-        channels.free();
-        deleteTempChannels();
+            channels.free();
+            deleteTempChannels();
 
-        jassert (activePlugins.contains (this));
-        activePlugins.removeValue (this);
+            jassert (activePlugins.contains (this));
+            activePlugins.removeValue (this);
+        }
 
         if (activePlugins.size() == 0)
         {
-#if JUCE_LINUX
+      #if JUCE_LINUX
             SharedMessageThread::deleteInstance();
-#endif
+      #endif
             shutdownJuce_GUI();
         }
     }
@@ -1195,25 +1200,14 @@ public:
     {
         if (editorComp != 0)
         {
-#if ! JUCE_LINUX // linux hosts shouldn't be trusted!
             if (! (canHostDo (const_cast <char*> ("sizeWindow")) && sizeWindow (newWidth, newHeight)))
-#endif
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
 #if JUCE_MAC
                 setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight, getHostType());
 #elif JUCE_LINUX
-                Window root;
-                int x, y;
-                unsigned int width, height, border, depth;
-
-                XGetGeometry (display, hostWindow, &root,
-                              &x, &y, &width, &height, &border, &depth);
-
-                newWidth += (width + border) - editorComp->getWidth();
-                newHeight += (height + border) - editorComp->getHeight();
-
-                XResizeWindow (display, hostWindow, newWidth, newHeight);
+                // (Currently, all linux hosts support sizeWindow, so this should never need to happen)
+                editorComp->setSize (newWidth, newHeight);
 #else
                 int dw = 0;
                 int dh = 0;
@@ -1347,11 +1341,16 @@ public:
             const int ch = child->getHeight();
 
             wrapper.resizeHostWindow (cw, ch);
-            setSize (cw, ch);
 
-            #if JUCE_MAC
+          #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
+            setSize (cw, ch);
+          #else
+            XResizeWindow (display, (Window) getWindowHandle(), cw, ch);
+          #endif
+
+          #if JUCE_MAC
             wrapper.resizeHostWindow (cw, ch);  // (doing this a second time seems to be necessary in tracktion)
-            #endif
+          #endif
         }
 
         void handleAsyncUpdate()
@@ -1487,6 +1486,10 @@ namespace
         {
             if (audioMaster (0, audioMasterVersion, 0, 0, 0, 0) != 0)
             {
+              #if JUCE_LINUX
+                MessageManagerLock mmLock;
+              #endif
+
                 AudioProcessor* const filter = createPluginFilter();
 
                 if (filter != 0)
@@ -1507,74 +1510,66 @@ namespace
 // Mac startup code..
 #if JUCE_MAC
 
-extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
-{
-    initialiseMac();
-    return pluginEntryPoint (audioMaster);
-}
+    extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+    {
+        initialiseMac();
+        return pluginEntryPoint (audioMaster);
+    }
 
-extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster)
-{
-    initialiseMac();
-    return pluginEntryPoint (audioMaster);
-}
+    extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster)
+    {
+        initialiseMac();
+        return pluginEntryPoint (audioMaster);
+    }
 
 //==============================================================================
 // Linux startup code..
 #elif JUCE_LINUX
 
-extern "C" AEffect* VSTPluginMain (audioMasterCallback audioMaster)
-{
-    SharedMessageThread::getInstance();
+    extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+    {
+        SharedMessageThread::getInstance();
+        return pluginEntryPoint (audioMaster);
+    }
 
-    return pluginEntryPoint (audioMaster);
-}
+    extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
 
-extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
+    extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster)
+    {
+        return VSTPluginMain (audioMaster);
+    }
 
-extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster)
-{
-    return VSTPluginMain (audioMaster);
-}
-
-__attribute__((constructor)) void myPluginInit()
-{
-    // don't put initialiseJuce_GUI here... it will crash !
-}
-
-__attribute__((destructor)) void myPluginFini()
-{
-    // don't put shutdownJuce_GUI here... it will crash !
-}
+    // don't put initialiseJuce_GUI or shutdownJuce_GUI in these... it will crash!
+    __attribute__((constructor)) void myPluginInit() {}
+    __attribute__((destructor))  void myPluginFini() {}
 
 //==============================================================================
 // Win32 startup code..
 #else
 
-extern "C" __declspec (dllexport) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
-{
-    return pluginEntryPoint (audioMaster);
-}
+    extern "C" __declspec (dllexport) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+    {
+        return pluginEntryPoint (audioMaster);
+    }
 
-#ifndef _WIN64 // (can't compile this on win64, but it's not needed anyway with VST2.4)
-extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
-{
-    return (void*) pluginEntryPoint (audioMaster);
-}
-#endif
+  #ifndef _WIN64 // (can't compile this on win64, but it's not needed anyway with VST2.4)
+    extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
+    {
+        return (void*) pluginEntryPoint (audioMaster);
+    }
+  #endif
 
-#if JucePlugin_Build_RTAS
-BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID)
-#else
-extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD dwReason, LPVOID)
-#endif
-{
-    if (dwReason == DLL_PROCESS_ATTACH)
-        PlatformUtilities::setCurrentModuleInstanceHandle (instance);
+  #if JucePlugin_Build_RTAS
+    BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID)
+  #else
+    extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD dwReason, LPVOID)
+  #endif
+    {
+        if (dwReason == DLL_PROCESS_ATTACH)
+            PlatformUtilities::setCurrentModuleInstanceHandle (instance);
 
-    return TRUE;
-}
-
+        return TRUE;
+    }
 #endif
 
 #endif
