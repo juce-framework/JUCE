@@ -1898,14 +1898,6 @@ public:
     */
     void* getWindowHandle() const;
 
-    /** When created, each component is given a number to uniquely identify it.
-
-        The number is incremented each time a new component is created, so it's a more
-        unique way of identifying a component than using its memory location (which
-        may be reused after the component is deleted, of course).
-    */
-    uint32 getComponentUID() const throw()                { return componentUID; }
-
     //==============================================================================
     /** Holds a pointer to some type of Component, which automatically becomes null if
         the component is deleted.
@@ -2019,16 +2011,18 @@ private:
     //==============================================================================
     String componentName_;
     Component* parentComponent_;
-    uint32 componentUID;
     Rectangle<int> bounds_;
-    int numDeepMouseListeners;
     Array <Component*> childComponentList_;
     LookAndFeel* lookAndFeel_;
     MouseCursor cursor_;
     ImageEffectFilter* effect_;
     Image bufferedImage_;
-    Array <MouseListener*>* mouseListeners_;
-    Array <KeyListener*>* keyListeners_;
+
+    class MouseListenerList;
+    friend class MouseListenerList;
+    friend class ScopedPointer <MouseListenerList>;
+    ScopedPointer <MouseListenerList> mouseListeners_;
+    ScopedPointer <Array <KeyListener*> > keyListeners_;
     ListenerList <ComponentListener> componentListeners;
     NamedValueSet properties;
 

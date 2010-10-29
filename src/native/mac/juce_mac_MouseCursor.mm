@@ -118,7 +118,12 @@ void MouseCursor::showInAllWindows() const
 
 void MouseCursor::showInWindow (ComponentPeer*) const
 {
-    [((NSCursor*) getHandle()) set];
+    NSCursor* c = (NSCursor*) getHandle();
+
+    if (c == 0)
+        c = [NSCursor arrowCursor];
+
+    [c set];
 }
 
 #else

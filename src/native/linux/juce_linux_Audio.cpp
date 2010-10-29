@@ -123,7 +123,8 @@ public:
           bitDepth (16),
           numChannelsRunning (0),
           latency (0),
-          isInput (forInput)
+          isInput (forInput),
+          isInterleaved (true)
     {
         failed (snd_pcm_open (&handle, deviceID.toUTF8(),
                               forInput ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
@@ -285,6 +286,7 @@ public:
         if (isInterleaved)
         {
             scratch.ensureSize (sizeof (float) * numSamples * numChannelsRunning, false);
+            scratch.fillWith (0); // (not clearing this data causes warnings in valgrind)
 
             snd_pcm_sframes_t num = snd_pcm_readi (handle, scratch.getData(), numSamples);
 

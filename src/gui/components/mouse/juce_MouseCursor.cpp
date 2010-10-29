@@ -125,15 +125,13 @@ private:
 
 //==============================================================================
 MouseCursor::MouseCursor()
-    : cursorHandle (SharedCursorHandle::createStandard (NormalCursor))
+    : cursorHandle (0)
 {
-    jassert (cursorHandle != 0);
 }
 
 MouseCursor::MouseCursor (const StandardCursorType type)
-    : cursorHandle (SharedCursorHandle::createStandard (type))
+    : cursorHandle (type != MouseCursor::NormalCursor ? SharedCursorHandle::createStandard (type) : 0)
 {
-    jassert (cursorHandle != 0);
 }
 
 MouseCursor::MouseCursor (const Image& image, const int hotSpotX, const int hotSpotY)
@@ -142,19 +140,24 @@ MouseCursor::MouseCursor (const Image& image, const int hotSpotX, const int hotS
 }
 
 MouseCursor::MouseCursor (const MouseCursor& other)
-    : cursorHandle (other.cursorHandle->retain())
+    : cursorHandle (other.cursorHandle == 0 ? 0 : other.cursorHandle->retain())
 {
 }
 
 MouseCursor::~MouseCursor()
 {
-    cursorHandle->release();
+    if (cursorHandle != 0)
+        cursorHandle->release();
 }
 
 MouseCursor& MouseCursor::operator= (const MouseCursor& other)
 {
-    other.cursorHandle->retain();
-    cursorHandle->release();
+    if (other.cursorHandle != 0)
+        other.cursorHandle->retain();
+
+    if (cursorHandle != 0)
+        cursorHandle->release();
+
     cursorHandle = other.cursorHandle;
     return *this;
 }
@@ -171,7 +174,7 @@ bool MouseCursor::operator!= (const MouseCursor& other) const throw()
 
 void* MouseCursor::getHandle() const throw()
 {
-    return cursorHandle->getHandle();
+    return cursorHandle != 0 ? cursorHandle->getHandle() : 0;
 }
 
 void MouseCursor::showWaitCursor()

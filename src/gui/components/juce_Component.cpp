@@ -52,20 +52,161 @@ enum ComponentMessageNumbers
     exitModalStateMessage  = 0x7fff0002
 };
 
-static uint32 nextComponentUID = 0;
 Component* Component::currentlyFocusedComponent = 0;
 
 
 //==============================================================================
+class Component::MouseListenerList
+{
+public:
+    MouseListenerList()
+        : numDeepMouseListeners (0)
+    {
+    }
+
+    ~MouseListenerList()
+    {
+    }
+
+    void addListener (MouseListener* const newListener, const bool wantsEventsForAllNestedChildComponents)
+    {
+        if (! listeners.contains (newListener))
+        {
+            if (wantsEventsForAllNestedChildComponents)
+            {
+                listeners.insert (0, newListener);
+                ++numDeepMouseListeners;
+            }
+            else
+            {
+                listeners.add (newListener);
+            }
+        }
+    }
+
+    void removeListener (MouseListener* const listenerToRemove)
+    {
+        const int index = listeners.indexOf (listenerToRemove);
+
+        if (index >= 0)
+        {
+            if (index < numDeepMouseListeners)
+                --numDeepMouseListeners;
+
+            listeners.remove (index);
+        }
+    }
+
+    static void sendMouseEvent (Component* comp, BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (const MouseEvent&), const MouseEvent& e)
+    {
+        if (checker.shouldBailOut())
+            return;
+
+        {
+            MouseListenerList* const list = comp->mouseListeners_;
+
+            if (list != 0)
+            {
+                for (int i = list->listeners.size(); --i >= 0;)
+                {
+                    (list->listeners.getUnchecked(i)->*eventMethod) (e);
+
+                    if (checker.shouldBailOut())
+                        return;
+
+                    i = jmin (i, list->listeners.size());
+                }
+            }
+        }
+
+        Component* p = comp->parentComponent_;
+
+        while (p != 0)
+        {
+            MouseListenerList* const list = p->mouseListeners_;
+
+            if (list != 0 && list->numDeepMouseListeners > 0)
+            {
+                BailOutChecker checker2 (comp, p);
+
+                for (int i = list->numDeepMouseListeners; --i >= 0;)
+                {
+                    (list->listeners.getUnchecked(i)->*eventMethod) (e);
+
+                    if (checker2.shouldBailOut())
+                        return;
+
+                    i = jmin (i, list->numDeepMouseListeners);
+                }
+            }
+
+            p = p->parentComponent_;
+        }
+    }
+
+    static void sendWheelEvent (Component* comp, BailOutChecker& checker, const MouseEvent& e,
+                                const float wheelIncrementX, const float wheelIncrementY)
+    {
+        if (checker.shouldBailOut())
+            return;
+
+        {
+            MouseListenerList* const list = comp->mouseListeners_;
+
+            if (list != 0)
+            {
+                for (int i = list->listeners.size(); --i >= 0;)
+                {
+                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+
+                    if (checker.shouldBailOut())
+                        return;
+
+                    i = jmin (i, list->listeners.size());
+                }
+            }
+        }
+
+        Component* p = comp->parentComponent_;
+
+        while (p != 0)
+        {
+            MouseListenerList* const list = p->mouseListeners_;
+
+            if (list != 0 && list->numDeepMouseListeners > 0)
+            {
+                BailOutChecker checker2 (comp, p);
+
+                for (int i = list->numDeepMouseListeners; --i >= 0;)
+                {
+                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+
+                    if (checker2.shouldBailOut())
+                        return;
+
+                    i = jmin (i, list->numDeepMouseListeners);
+                }
+            }
+
+            p = p->parentComponent_;
+        }
+    }
+
+private:
+    Array <MouseListener*> listeners;
+    int numDeepMouseListeners;
+
+    MouseListenerList (const MouseListenerList&);
+    MouseListenerList& operator= (const MouseListenerList&);
+};
+
+//==============================================================================
 Component::Component()
   : parentComponent_ (0),
-    componentUID (++nextComponentUID),
-    numDeepMouseListeners (0),
     lookAndFeel_ (0),
     effect_ (0),
     bufferedImage_ (0),
-    mouseListeners_ (0),
-    keyListeners_ (0),
     componentFlags_ (0),
     componentTransparency (0)
 {
@@ -74,13 +215,9 @@ Component::Component()
 Component::Component (const String& name)
   : componentName_ (name),
     parentComponent_ (0),
-    componentUID (++nextComponentUID),
-    numDeepMouseListeners (0),
     lookAndFeel_ (0),
     effect_ (0),
     bufferedImage_ (0),
-    mouseListeners_ (0),
-    keyListeners_ (0),
     componentFlags_ (0),
     componentTransparency (0)
 {
@@ -107,9 +244,6 @@ Component::~Component()
 
     for (int i = childComponentList_.size(); --i >= 0;)
         childComponentList_.getUnchecked(i)->parentComponent_ = 0;
-
-    delete mouseListeners_;
-    delete keyListeners_;
 }
 
 //==============================================================================
@@ -1980,20 +2114,9 @@ void Component::addMouseListener (MouseListener* const newListener,
     jassert ((newListener != this) || wantsEventsForAllNestedChildComponents);
 
     if (mouseListeners_ == 0)
-        mouseListeners_ = new Array<MouseListener*>();
+        mouseListeners_ = new MouseListenerList();
 
-    if (! mouseListeners_->contains (newListener))
-    {
-        if (wantsEventsForAllNestedChildComponents)
-        {
-            mouseListeners_->insert (0, newListener);
-            ++numDeepMouseListeners;
-        }
-        else
-        {
-            mouseListeners_->add (newListener);
-        }
-    }
+    mouseListeners_->addListener (newListener, wantsEventsForAllNestedChildComponents);
 }
 
 void Component::removeMouseListener (MouseListener* const listenerToRemove)
@@ -2003,17 +2126,7 @@ void Component::removeMouseListener (MouseListener* const listenerToRemove)
     checkMessageManagerIsLocked
 
     if (mouseListeners_ != 0)
-    {
-        const int index = mouseListeners_->indexOf (listenerToRemove);
-
-        if (index >= 0)
-        {
-            if (index < numDeepMouseListeners)
-                --numDeepMouseListeners;
-
-            mouseListeners_->remove (index);
-        }
-    }
+        mouseListeners_->removeListener (listenerToRemove);
 }
 
 //==============================================================================
@@ -2038,9 +2151,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
             repaint();
 
         const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             this, this, time, relativePos,
-                             time, 0, false);
-
+                             this, this, time, relativePos, time, 0, false);
         mouseEnter (me);
 
         if (checker.shouldBailOut())
@@ -2049,43 +2160,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
         Desktop::getInstance().resetTimer();
         Desktop::getInstance().mouseListeners.callChecked (checker, &MouseListener::mouseEnter, me);
 
-        if (checker.shouldBailOut())
-            return;
-
-        if (mouseListeners_ != 0)
-        {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                mouseListeners_->getUnchecked(i)->mouseEnter (me);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, mouseListeners_->size());
-            }
-        }
-
-        Component* p = parentComponent_;
-
-        while (p != 0)
-        {
-            if (p->numDeepMouseListeners > 0)
-            {
-                BailOutChecker checker2 (this, p);
-
-                for (int i = p->numDeepMouseListeners; --i >= 0;)
-                {
-                    p->mouseListeners_->getUnchecked(i)->mouseEnter (me);
-
-                    if (checker2.shouldBailOut())
-                        return;
-
-                    i = jmin (i, p->numDeepMouseListeners);
-                }
-            }
-
-            p = p->parentComponent_;
-        }
+        MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseEnter, me);
     }
 }
 
@@ -2111,8 +2186,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
             repaint();
 
         const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             this, this, time, relativePos,
-                             time, 0, false);
+                             this, this, time, relativePos, time, 0, false);
         mouseExit (me);
 
         if (checker.shouldBailOut())
@@ -2121,43 +2195,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
         Desktop::getInstance().resetTimer();
         Desktop::getInstance().mouseListeners.callChecked (checker, &MouseListener::mouseExit, me);
 
-        if (checker.shouldBailOut())
-            return;
-
-        if (mouseListeners_ != 0)
-        {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseExit (me);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, mouseListeners_->size());
-            }
-        }
-
-        Component* p = parentComponent_;
-
-        while (p != 0)
-        {
-            if (p->numDeepMouseListeners > 0)
-            {
-                BailOutChecker checker2 (this, p);
-
-                for (int i = p->numDeepMouseListeners; --i >= 0;)
-                {
-                    p->mouseListeners_->getUnchecked (i)->mouseExit (me);
-
-                    if (checker2.shouldBailOut())
-                        return;
-
-                    i = jmin (i, p->numDeepMouseListeners);
-                }
-            }
-
-            p = p->parentComponent_;
-        }
+        MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseExit, me);
     }
 }
 
@@ -2288,43 +2326,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
     desktop.resetTimer();
     desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDown, me);
 
-    if (checker.shouldBailOut())
-        return;
-
-    if (mouseListeners_ != 0)
-    {
-        for (int i = mouseListeners_->size(); --i >= 0;)
-        {
-            ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseDown (me);
-
-            if (checker.shouldBailOut())
-                return;
-
-            i = jmin (i, mouseListeners_->size());
-        }
-    }
-
-    Component* p = parentComponent_;
-
-    while (p != 0)
-    {
-        if (p->numDeepMouseListeners > 0)
-        {
-            BailOutChecker checker2 (this, p);
-
-            for (int i = p->numDeepMouseListeners; --i >= 0;)
-            {
-                p->mouseListeners_->getUnchecked (i)->mouseDown (me);
-
-                if (checker2.shouldBailOut())
-                    return;
-
-                i = jmin (i, p->numDeepMouseListeners);
-            }
-        }
-
-        p = p->parentComponent_;
-    }
+    MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseDown, me);
 }
 
 //==============================================================================
@@ -2356,95 +2358,21 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
         desktop.resetTimer();
         desktop.mouseListeners.callChecked (checker, &MouseListener::mouseUp, me);
 
+        MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseUp, me);
+
         if (checker.shouldBailOut())
             return;
-
-        if (mouseListeners_ != 0)
-        {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseUp (me);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, mouseListeners_->size());
-            }
-        }
-
-        {
-            Component* p = parentComponent_;
-
-            while (p != 0)
-            {
-                if (p->numDeepMouseListeners > 0)
-                {
-                    BailOutChecker checker2 (this, p);
-
-                    for (int i = p->numDeepMouseListeners; --i >= 0;)
-                    {
-                        p->mouseListeners_->getUnchecked (i)->mouseUp (me);
-
-                        if (checker2.shouldBailOut())
-                            return;
-
-                        i = jmin (i, p->numDeepMouseListeners);
-                    }
-                }
-
-                p = p->parentComponent_;
-            }
-        }
 
         // check for double-click
         if (me.getNumberOfClicks() >= 2)
         {
-            const int numListeners = (mouseListeners_ != 0) ? mouseListeners_->size() : 0;
-
             mouseDoubleClick (me);
 
             if (checker.shouldBailOut())
                 return;
 
             desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDoubleClick, me);
-
-            if (checker.shouldBailOut())
-                return;
-
-            for (int i = numListeners; --i >= 0;)
-            {
-                if (checker.shouldBailOut())
-                    return;
-
-                MouseListener* const ml = (MouseListener*)((*mouseListeners_)[i]);
-                if (ml != 0)
-                    ml->mouseDoubleClick (me);
-            }
-
-            if (checker.shouldBailOut())
-                return;
-
-            Component* p = parentComponent_;
-
-            while (p != 0)
-            {
-                if (p->numDeepMouseListeners > 0)
-                {
-                    BailOutChecker checker2 (this, p);
-
-                    for (int i = p->numDeepMouseListeners; --i >= 0;)
-                    {
-                        p->mouseListeners_->getUnchecked (i)->mouseDoubleClick (me);
-
-                        if (checker2.shouldBailOut())
-                            return;
-
-                        i = jmin (i, p->numDeepMouseListeners);
-                    }
-                }
-
-                p = p->parentComponent_;
-            }
+            MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseDoubleClick, me);
         }
     }
 }
@@ -2474,43 +2402,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
         desktop.resetTimer();
         desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);
 
-        if (checker.shouldBailOut())
-            return;
-
-        if (mouseListeners_ != 0)
-        {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseDrag (me);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, mouseListeners_->size());
-            }
-        }
-
-        Component* p = parentComponent_;
-
-        while (p != 0)
-        {
-            if (p->numDeepMouseListeners > 0)
-            {
-                BailOutChecker checker2 (this, p);
-
-                for (int i = p->numDeepMouseListeners; --i >= 0;)
-                {
-                    p->mouseListeners_->getUnchecked (i)->mouseDrag (me);
-
-                    if (checker2.shouldBailOut())
-                        return;
-
-                    i = jmin (i, p->numDeepMouseListeners);
-                }
-            }
-
-            p = p->parentComponent_;
-        }
+        MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseDrag, me);
     }
 }
 
@@ -2540,43 +2432,7 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
         desktop.resetTimer();
         desktop.mouseListeners.callChecked (checker, &MouseListener::mouseMove, me);
 
-        if (checker.shouldBailOut())
-            return;
-
-        if (mouseListeners_ != 0)
-        {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseMove (me);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, mouseListeners_->size());
-            }
-        }
-
-        Component* p = parentComponent_;
-
-        while (p != 0)
-        {
-            if (p->numDeepMouseListeners > 0)
-            {
-                BailOutChecker checker2 (this, p);
-
-                for (int i = p->numDeepMouseListeners; --i >= 0;)
-                {
-                    p->mouseListeners_->getUnchecked (i)->mouseMove (me);
-
-                    if (checker2.shouldBailOut())
-                        return;
-
-                    i = jmin (i, p->numDeepMouseListeners);
-                }
-            }
-
-            p = p->parentComponent_;
-        }
+        MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseMove, me);
     }
 }
 
@@ -2606,43 +2462,7 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
 
         desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheelIncrementX, wheelIncrementY);
 
-        if (checker.shouldBailOut())
-            return;
-
-        if (mouseListeners_ != 0)
-        {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
-
-                if (checker.shouldBailOut())
-                    return;
-
-                i = jmin (i, mouseListeners_->size());
-            }
-        }
-
-        Component* p = parentComponent_;
-
-        while (p != 0)
-        {
-            if (p->numDeepMouseListeners > 0)
-            {
-                BailOutChecker checker2 (this, p);
-
-                for (int i = p->numDeepMouseListeners; --i >= 0;)
-                {
-                    p->mouseListeners_->getUnchecked (i)->mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
-
-                    if (checker2.shouldBailOut())
-                        return;
-
-                    i = jmin (i, p->numDeepMouseListeners);
-                }
-            }
-
-            p = p->parentComponent_;
-        }
+        MouseListenerList::sendWheelEvent (this, checker, me, wheelIncrementX, wheelIncrementY);
     }
 }
 

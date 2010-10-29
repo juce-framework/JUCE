@@ -557,7 +557,7 @@ PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDime
     {
         Component* const c = components.getUnchecked(i);
 
-        if (c->getComponentUID() != comp->getComponentUID())
+        if (c != comp)
         {
             m.addItem (menuIdBase + i + 1,
                        T("Relative to ") + getComponentMemberVariableName (c)

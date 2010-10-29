@@ -2681,7 +2681,12 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
 //==============================================================================
 void MouseCursor::showInWindow (ComponentPeer*) const
 {
-    SetCursor ((HCURSOR) getHandle());
+    HCURSOR c = (HCURSOR) getHandle();
+
+    if (c == 0)
+        c = LoadCursor (0, IDC_ARROW);
+
+    SetCursor (c);
 }
 
 void MouseCursor::showInAllWindows() const
