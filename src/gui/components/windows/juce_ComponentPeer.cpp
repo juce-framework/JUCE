@@ -301,7 +301,6 @@ void ComponentPeer::setConstrainer (ComponentBoundsConstrainer* const newConstra
 
 void ComponentPeer::handleMovedOrResized()
 {
-    jassert (component->isValidComponent());
     updateCurrentModifiers();
 
     const bool nowMinimised = isMinimised();

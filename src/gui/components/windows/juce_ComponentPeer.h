@@ -372,6 +372,7 @@ private:
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
     friend class Component;
+    friend class Desktop;
     static ComponentPeer* getPeerFor (const Component* component) throw();
 
     void setLastDragDropTarget (Component* comp);

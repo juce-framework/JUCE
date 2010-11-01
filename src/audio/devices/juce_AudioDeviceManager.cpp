@@ -443,6 +443,7 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
     currentSetup = newSetup;
 
     currentSetup.sampleRate = chooseBestSampleRate (newSetup.sampleRate);
+    currentSetup.bufferSize = chooseBestBufferSize (newSetup.bufferSize);
 
     error = currentAudioDevice->open (inputChannels,
                                       outputChannels,
@@ -480,40 +481,36 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
     jassert (currentAudioDevice != 0);
 
     if (rate > 0)
-    {
-        bool ok = false;
-
         for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
-        {
-            const double sr = currentAudioDevice->getSampleRate (i);
+            if (currentAudioDevice->getSampleRate (i) == rate)
+                return rate;
 
-            if (sr == rate)
-                ok = true;
-        }
+    double lowestAbove44 = 0.0;
 
-        if (! ok)
-            rate = 0;
+    for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
+    {
+        const double sr = currentAudioDevice->getSampleRate (i);
+
+        if (sr >= 44100.0 && (lowestAbove44 == 0 || sr < lowestAbove44))
+            lowestAbove44 = sr;
     }
 
-    if (rate == 0)
-    {
-        double lowestAbove44 = 0.0;
+    if (lowestAbove44 > 0.0)
+        return lowestAbove44;
 
-        for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
-        {
-            const double sr = currentAudioDevice->getSampleRate (i);
+    return currentAudioDevice->getSampleRate (0);
+}
 
-            if (sr >= 44100.0 && (lowestAbove44 == 0 || sr < lowestAbove44))
-                lowestAbove44 = sr;
-        }
+int AudioDeviceManager::chooseBestBufferSize (int bufferSize) const
+{
+    jassert (currentAudioDevice != 0);
 
-        if (lowestAbove44 == 0.0)
-            rate = currentAudioDevice->getSampleRate (0);
-        else
-            rate = lowestAbove44;
-    }
+    if (bufferSize > 0)
+        for (int i = currentAudioDevice->getNumBufferSizesAvailable(); --i >= 0;)
+            if (currentAudioDevice->getBufferSizeSamples(i) == bufferSize)
+                return bufferSize;
 
-    return rate;
+    return currentAudioDevice->getDefaultBufferSize();
 }
 
 void AudioDeviceManager::stopDevice()

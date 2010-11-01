@@ -51,7 +51,7 @@ public:
     CallbackMessage() throw();
 
     /** Destructor. */
-    ~CallbackMessage() throw();
+    ~CallbackMessage();
 
     //==============================================================================
     /** Called when the message is delivered.

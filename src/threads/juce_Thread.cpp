@@ -102,6 +102,15 @@ Thread::Thread (const String& threadName)
 
 Thread::~Thread()
 {
+    /* If your thread class's destructor has been called without first stopping the thread, that
+       means that this partially destructed object is still performing some work - and that's not
+       unlikely to be a safe approach to take!
+
+       To avoid this type of nastiness, always make sure you call stopThread() before or during
+       your subclass's destructor.
+    */
+    jassert (! isThreadRunning());
+
     stopThread (100);
 }
 

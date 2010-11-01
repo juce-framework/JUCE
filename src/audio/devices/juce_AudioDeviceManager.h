@@ -517,6 +517,7 @@ private:
     void scanDevicesIfNeeded();
     void deleteCurrentDevice();
     double chooseBestSampleRate (double preferred) const;
+    int chooseBestBufferSize (int preferred) const;
     void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);

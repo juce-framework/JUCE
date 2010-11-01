@@ -38,12 +38,9 @@ ApplicationCommandManager* commandManager = 0;
 //==============================================================================
 class PluginHostApp  : public JUCEApplication
 {
-    MainHostWindow* mainWindow;
-
 public:
     //==============================================================================
     PluginHostApp()
-        : mainWindow (0)
     {
     }
 
@@ -55,8 +52,8 @@ public:
     {
         // initialise our settings file..
         ApplicationProperties::getInstance()
-            ->setStorageParameters (T("Juce Audio Plugin Host"),
-                                    T("settings"), String::empty, 1000,
+            ->setStorageParameters ("Juce Audio Plugin Host",
+                                    "settings", String::empty, 1000,
                                     PropertiesFile::storeAsXML);
 
         commandManager = new ApplicationCommandManager();
@@ -75,35 +72,26 @@ public:
 
     void shutdown()
     {
-        deleteAndZero (mainWindow);
-
+        mainWindow = 0;
         ApplicationProperties::getInstance()->closeFiles();
 
         deleteAndZero (commandManager);
     }
 
-    const String getApplicationName()
-    {
-        return T("Juce Plug-In Host");
-    }
-
-    const String getApplicationVersion()
-    {
-        return ProjectInfo::versionString;
-    }
-
     void systemRequestedQuit()
     {
-        if (mainWindow->isValidComponent())
+        if (mainWindow != 0)
             mainWindow->tryToQuitApplication();
         else
             JUCEApplication::quit();
     }
 
-    bool moreThanOneInstanceAllowed()
-    {
-        return true;
-    }
+    const String getApplicationName()       { return "Juce Plug-In Host"; }
+    const String getApplicationVersion()    { return ProjectInfo::versionString; }
+    bool moreThanOneInstanceAllowed()       { return true; }
+
+private:
+    ScopedPointer <MainHostWindow> mainWindow;
 };
 
 

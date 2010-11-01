@@ -36,7 +36,6 @@
 #include "../graphics/imaging/juce_Image.h"
 #include "../graphics/geometry/juce_RectangleList.h"
 #include "../graphics/geometry/juce_BorderSize.h"
-#include "../../events/juce_MessageListener.h"
 #include "../../events/juce_ListenerList.h"
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_Array.h"
@@ -54,8 +53,7 @@ class ComponentPeer;
     The base class for all JUCE user-interface objects.
 
 */
-class JUCE_API  Component  : public MouseListener,
-                             public MessageListener
+class JUCE_API  Component  : public MouseListener
 {
 public:
     //==============================================================================
@@ -108,19 +106,6 @@ public:
         @see getName
     */
     virtual void setName (const String& newName);
-
-    //==============================================================================
-    /** Checks whether this Component object has been deleted.
-
-        This will check whether this object is still a valid component, or whether
-        it's been deleted.
-
-        It's safe to call this on null or dangling pointers, but note that there is a
-        small risk if another new (but different) component has been created at the
-        same memory address which this one occupied, this methods can return a
-        false positive.
-    */
-    bool isValidComponent() const;
 
     //==============================================================================
     /** Makes the component visible or invisible.
@@ -2112,16 +2097,8 @@ private:
 protected:
     /** @internal */
     virtual void internalRepaint (int x, int y, int w, int h);
-
+    /** @internal */
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
-
-    /** Overridden from the MessageListener parent class.
-
-        You can override this if you really need to, but be sure to pass your unwanted messages up
-        to this base class implementation, as the Component class needs to send itself messages
-        to work properly.
-    */
-    void handleMessage (const Message&);
 };
 
 

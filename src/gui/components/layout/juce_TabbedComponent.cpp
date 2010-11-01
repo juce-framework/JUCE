@@ -77,8 +77,7 @@ private:
 
 
 TabbedComponent::TabbedComponent (const TabbedButtonBar::Orientation orientation)
-    : panelComponent (0),
-      tabDepth (30),
+    : tabDepth (30),
       outlineThickness (1),
       edgeIndent (0)
 {
@@ -133,13 +132,10 @@ void TabbedComponent::clearTabs()
 
     for (int i = contentComponents.size(); --i >= 0;)
     {
-        Component* const c = contentComponents.getUnchecked(i);
-
-        // be careful not to delete these components until they've been removed from the tab component
-        jassert (c == 0 || c->isValidComponent());
+        Component::SafePointer<Component>& c = contentComponents.getReference (i);
 
         if (c != 0 && (bool) c->getProperties() [deleteComponentId])
-            delete c;
+            c.deleteAndZero();
     }
 
     contentComponents.clear();
@@ -166,19 +162,16 @@ void TabbedComponent::setTabName (const int tabIndex, const String& newName)
 
 void TabbedComponent::removeTab (const int tabIndex)
 {
-    Component* const c = contentComponents [tabIndex];
-
-    if (c != 0 && (bool) c->getProperties() [deleteComponentId])
+    if (tabIndex >= 0 && tabIndex < contentComponents.size())
     {
-        if (c == panelComponent)
-            panelComponent = 0;
+        Component::SafePointer<Component>& c = contentComponents.getReference (tabIndex);
 
-        delete c;
+        if (c != 0 && (bool) c->getProperties() [deleteComponentId])
+            c.deleteAndZero();
+
+        contentComponents.remove (tabIndex);
+        tabs->removeTab (tabIndex);
     }
-
-    contentComponents.remove (tabIndex);
-
-    tabs->removeTab (tabIndex);
 }
 
 int TabbedComponent::getNumTabs() const
@@ -304,15 +297,15 @@ void TabbedComponent::resized()
     const Rectangle<int> bounds (indents.subtractedFrom (getLocalBounds()));
 
     for (int i = contentComponents.size(); --i >= 0;)
-        if (contentComponents.getUnchecked (i) != 0)
-            contentComponents.getUnchecked (i)->setBounds (bounds);
+        if (contentComponents.getReference (i) != 0)
+            contentComponents.getReference (i)->setBounds (bounds);
 }
 
 void TabbedComponent::lookAndFeelChanged()
 {
     for (int i = contentComponents.size(); --i >= 0;)
-        if (contentComponents.getUnchecked (i) != 0)
-            contentComponents.getUnchecked (i)->lookAndFeelChanged();
+        if (contentComponents.getReference (i) != 0)
+            contentComponents.getReference (i)->lookAndFeelChanged();
 }
 
 void TabbedComponent::changeCallback (const int newCurrentTabIndex,

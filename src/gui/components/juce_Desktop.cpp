@@ -157,10 +157,14 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
     for (int i = desktopComponents.size(); --i >= 0;)
     {
         Component* const c = desktopComponents.getUnchecked(i);
-        const Point<int> relative (c->globalPositionToRelative (screenPosition));
 
-        if (c->contains (relative.getX(), relative.getY()))
-            return c->getComponentAt (relative.getX(), relative.getY());
+        if (c->isVisible())
+        {
+            const Point<int> relative (c->globalPositionToRelative (screenPosition));
+
+            if (c->contains (relative.getX(), relative.getY()))
+                return c->getComponentAt (relative.getX(), relative.getY());
+        }
     }
 
     return 0;
@@ -332,12 +336,10 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
 {
     if (kioskModeComponent != componentToUse)
     {
-        // agh! Don't delete a component without first stopping it being the kiosk comp
-        jassert (kioskModeComponent == 0 || kioskModeComponent->isValidComponent());
-        // agh! Don't remove a component from the desktop if it's the kiosk comp!
-        jassert (kioskModeComponent == 0 || kioskModeComponent->isOnDesktop());
+        // agh! Don't delete or remove a component from the desktop while it's still the kiosk component!
+        jassert (kioskModeComponent == 0 || ComponentPeer::getPeerFor (kioskModeComponent) != 0);
 
-        if (kioskModeComponent->isValidComponent())
+        if (kioskModeComponent != 0)
         {
             juce_setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
 
@@ -348,10 +350,8 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
 
         if (kioskModeComponent != 0)
         {
-            jassert (kioskModeComponent->isValidComponent());
-
             // Only components that are already on the desktop can be put into kiosk mode!
-            jassert (kioskModeComponent->isOnDesktop());
+            jassert (ComponentPeer::getPeerFor (kioskModeComponent) != 0);
 
             kioskComponentOriginalBounds = kioskModeComponent->getBounds();
 

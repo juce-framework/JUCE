@@ -293,12 +293,8 @@ public:
     ~Window()
     {
         getActiveWindows().removeValue (this);
-
         Desktop::getInstance().removeGlobalMouseListener (this);
-
-        jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent());
         activeSubMenu = 0;
-
         deleteAllChildren();
     }
 
@@ -419,8 +415,6 @@ public:
     {
         if (isVisible())
         {
-            jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent());
-
             activeSubMenu = 0;
             currentChild = 0;
 
@@ -521,8 +515,6 @@ public:
 
             if (showSubMenuFor (currentChild))
             {
-                jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent());
-
                 if (activeSubMenu != 0 && activeSubMenu->isVisible())
                     activeSubMenu->selectNextItem (1);
             }
@@ -611,7 +603,7 @@ public:
 
         if (now > timeEnteredCurrentChildComp + 100
              && reallyContains (localMousePos.getX(), localMousePos.getY(), true)
-             && currentChild->isValidComponent()
+             && currentChild != 0
              && (! disableMouseMoves)
              && ! (activeSubMenu != 0 && activeSubMenu->isVisible()))
         {
@@ -769,8 +761,6 @@ private:
 
     bool isOverChildren() const
     {
-        jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent());
-
         return isVisible()
                 && (isOver || (activeSubMenu != 0 && activeSubMenu->isOverChildren()));
     }
@@ -1084,7 +1074,7 @@ private:
 
     void setCurrentlyHighlightedChild (PopupMenu::ItemComponent* const child)
     {
-        if (currentChild->isValidComponent())
+        if (currentChild != 0)
             currentChild->setHighlighted (false);
 
         currentChild = child;
@@ -1098,10 +1088,9 @@ private:
 
     bool showSubMenuFor (PopupMenu::ItemComponent* const childComp)
     {
-        jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent());
         activeSubMenu = 0;
 
-        if (childComp->isValidComponent() && childComp->itemInfo.hasActiveSubMenu())
+        if (childComp != 0 && childComp->itemInfo.hasActiveSubMenu())
         {
             activeSubMenu = Window::create (*(childComp->itemInfo.subMenu),
                                             dismissOnMouseUp,
@@ -1143,8 +1132,6 @@ private:
             return;
 
         bool isMovingTowardsMenu = false;
-
-        jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent())
 
         if (isOver && (activeSubMenu != 0) && globalMousePos != lastMouse)
         {
@@ -1206,7 +1193,7 @@ private:
 
     void triggerCurrentlyHighlightedItem()
     {
-        if (currentChild->isValidComponent()
+        if (currentChild != 0
              && currentChild->itemInfo.canBeTriggered()
              && (currentChild->itemInfo.customComp == 0
                   || currentChild->itemInfo.customComp->isTriggeredAutomatically))

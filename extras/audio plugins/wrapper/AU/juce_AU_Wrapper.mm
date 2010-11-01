@@ -1062,7 +1062,7 @@ public:
 
 - (void) deleteEditor
 {
-    if (editorComp != 0 && editorComp->isValidComponent())
+    if (editorComp != 0)
     {
         if (editorComp->getChildComponent(0) != 0)
             if (activePlugins.contains ((void*) au)) // plugin may have been deleted before the UI

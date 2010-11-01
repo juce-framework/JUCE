@@ -50,7 +50,7 @@ Message::Message (const int intParameter1_,
 {
 }
 
-Message::~Message() throw()
+Message::~Message()
 {
 }
 

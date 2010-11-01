@@ -46,12 +46,6 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 #define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-enum ComponentMessageNumbers
-{
-    customCommandMessage   = 0x7fff0001,
-    exitModalStateMessage  = 0x7fff0002
-};
-
 Component* Component::currentlyFocusedComponent = 0;
 
 
@@ -353,11 +347,6 @@ bool Component::isShowing() const
 
 
 //==============================================================================
-bool Component::isValidComponent() const
-{
-    return (this != 0) && isValidMessageListener();
-}
-
 void* Component::getWindowHandle() const
 {
     const ComponentPeer* const peer = getPeer();
@@ -1264,12 +1253,6 @@ Component* Component::getTopLevelComponent() const throw()
 
 bool Component::isParentOf (const Component* possibleChild) const throw()
 {
-    if (! possibleChild->isValidComponent())
-    {
-        jassert (possibleChild == 0);
-        return false;
-    }
-
     while (possibleChild != 0)
     {
         possibleChild = possibleChild->parentComponent_;
@@ -1392,7 +1375,27 @@ void Component::exitModalState (const int returnValue)
         }
         else
         {
-            postMessage (new Message (exitModalStateMessage, returnValue, 0, 0));
+            class ExitModalStateMessage   : public CallbackMessage
+            {
+            public:
+                ExitModalStateMessage (Component* const target_, const int result_)
+                    : target (target_), result (result_)   {}
+
+                void messageCallback()
+                {
+                    if (target != 0)
+                        target->exitModalState (result);
+                }
+
+            private:
+                Component::SafePointer<Component> target;
+                const int result;
+
+                ExitModalStateMessage (ExitModalStateMessage&);
+                ExitModalStateMessage& operator= (const ExitModalStateMessage&);
+            };
+
+            (new ExitModalStateMessage (this, returnValue))->post();
         }
     }
 }
@@ -1770,22 +1773,21 @@ void Component::sendLookAndFeelChange()
 {
     repaint();
 
-    lookAndFeelChanged();
-
-    // (it's not a great idea to do anything that would delete this component
-    //  during the lookAndFeelChanged() callback)
-    jassert (isValidComponent());
-
     SafePointer<Component> safePointer (this);
 
-    for (int i = childComponentList_.size(); --i >= 0;)
+    lookAndFeelChanged();
+
+    if (safePointer != 0)
     {
-        childComponentList_.getUnchecked (i)->sendLookAndFeelChange();
+        for (int i = childComponentList_.size(); --i >= 0;)
+        {
+            childComponentList_.getUnchecked (i)->sendLookAndFeelChange();
 
-        if (safePointer == 0)
-            return;
+            if (safePointer == 0)
+                return;
 
-        i = jmin (i, childComponentList_.size());
+            i = jmin (i, childComponentList_.size());
+        }
     }
 }
 
@@ -2033,13 +2035,11 @@ void Component::parentSizeChanged()
 
 void Component::addComponentListener (ComponentListener* const newListener)
 {
-    jassert (isValidComponent());
     componentListeners.add (newListener);
 }
 
 void Component::removeComponentListener (ComponentListener* const listenerToRemove)
 {
-    jassert (isValidComponent());
     componentListeners.remove (listenerToRemove);
 }
 
@@ -2078,22 +2078,29 @@ void Component::paintOverChildren (Graphics&)
 }
 
 //==============================================================================
-void Component::handleMessage (const Message& message)
-{
-    if (message.intParameter1 == exitModalStateMessage)
-    {
-        exitModalState (message.intParameter2);
-    }
-    else if (message.intParameter1 == customCommandMessage)
-    {
-        handleCommandMessage (message.intParameter2);
-    }
-}
-
-//==============================================================================
 void Component::postCommandMessage (const int commandId)
 {
-    postMessage (new Message (customCommandMessage, commandId, 0, 0));
+    class CustomCommandMessage   : public CallbackMessage
+    {
+    public:
+        CustomCommandMessage (Component* const target_, const int commandId_)
+            : target (target_), commandId (commandId_) {}
+
+        void messageCallback()
+        {
+            if (target != 0)
+                target->exitModalState (commandId);
+        }
+
+    private:
+        Component::SafePointer<Component> target;
+        const int commandId;
+
+        CustomCommandMessage (CustomCommandMessage&);
+        CustomCommandMessage& operator= (const CustomCommandMessage&);
+    };
+
+    (new CustomCommandMessage (this, commandId))->post();
 }
 
 void Component::handleCommandMessage (int)
@@ -2477,9 +2484,6 @@ void Component::broughtToFront()
 
 void Component::internalBroughtToFront()
 {
-    if (! isValidComponent())
-        return;
-
     if (flags.hasHeavyweightPeerFlag)
         Desktop::getInstance().componentBroughtToFront (this);
 

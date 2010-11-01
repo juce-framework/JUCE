@@ -45,7 +45,7 @@ ComponentDragger::~ComponentDragger()
 void ComponentDragger::startDraggingComponent (Component* const componentToDrag,
                                                ComponentBoundsConstrainer* const constrainer_)
 {
-    jassert (componentToDrag->isValidComponent());
+    jassert (componentToDrag != 0);
 
     if (componentToDrag != 0)
     {
@@ -56,7 +56,7 @@ void ComponentDragger::startDraggingComponent (Component* const componentToDrag,
 
 void ComponentDragger::dragComponent (Component* const componentToDrag, const MouseEvent& e)
 {
-    jassert (componentToDrag->isValidComponent());
+    jassert (componentToDrag != 0);
     jassert (e.mods.isAnyMouseButtonDown()); // (the event has to be a drag event..)
 
     if (componentToDrag != 0)

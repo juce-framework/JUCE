@@ -177,7 +177,7 @@ class Toolbar::MissingItemsComponent  : public PopupMenuCustomComponent
 public:
     MissingItemsComponent (Toolbar& owner_, const int height_)
         : PopupMenuCustomComponent (true),
-          owner (owner_),
+          owner (&owner_),
           height (height_)
     {
         for (int i = owner_.items.size(); --i >= 0;)
@@ -196,23 +196,23 @@ public:
 
     ~MissingItemsComponent()
     {
-        // deleting the toolbar while its menu it open??
-        jassert (owner.isValidComponent());
-
-        for (int i = 0; i < getNumChildComponents(); ++i)
+        if (owner != 0)
         {
-            ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i));
-
-            if (tc != 0)
+            for (int i = 0; i < getNumChildComponents(); ++i)
             {
-                tc->setVisible (false);
-                const int index = oldIndexes.remove (i);
-                owner.addChildComponent (tc, index);
-                --i;
-            }
-        }
+                ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i));
 
-        owner.resized();
+                if (tc != 0)
+                {
+                    tc->setVisible (false);
+                    const int index = oldIndexes.remove (i);
+                    owner->addChildComponent (tc, index);
+                    --i;
+                }
+            }
+
+            owner->resized();
+        }
     }
 
     void layout (const int preferredWidth)
@@ -258,7 +258,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Toolbar& owner;
+    Component::SafePointer<Toolbar> owner;
     const int height;
     Array <int> oldIndexes;
 
@@ -890,10 +890,17 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
 {
     setEditingActive (true);
 
+   #if JUCE_DEBUG
+    Component::SafePointer<Component> checker (this);
+   #endif
+
     ToolbarCustomisationDialog dw (factory, this, optionFlags);
     dw.runModalLoop();
 
-    jassert (isValidComponent()); // ? deleting the toolbar while it's being edited?
+   #if JUCE_DEBUG
+    jassert (checker != 0); // Don't delete the toolbar while it's being customised!
+   #endif
+
     setEditingActive (false);
 }
 

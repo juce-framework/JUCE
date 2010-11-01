@@ -165,7 +165,6 @@ ToolbarItemComponent::ToolbarItemComponent (const int itemId_,
 
 ToolbarItemComponent::~ToolbarItemComponent()
 {
-    jassert (overlayComp == 0 || overlayComp->isValidComponent());
     overlayComp = 0;
 }
 
@@ -253,7 +252,6 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
 
         if (mode == normalMode)
         {
-            jassert (overlayComp == 0 || overlayComp->isValidComponent());
             overlayComp = 0;
         }
         else if (overlayComp == 0)

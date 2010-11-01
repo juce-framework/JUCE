@@ -59,7 +59,7 @@ public:
              void* pointerParameter) throw();
 
     /** Destructor. */
-    virtual ~Message() throw();
+    virtual ~Message();
 
     //==============================================================================
     // These values can be used for carrying simple data that the application needs to

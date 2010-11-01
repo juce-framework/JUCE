@@ -184,17 +184,26 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
         if (byte == 0xf0)
         {
             const uint8* d = src;
+            bool haveReadAllLengthBytes = false;
 
             while (d < src + sz)
             {
-                if (*d >= 0x80) // stop if we hit a status byte, and don't include it in this message
+                if (*d >= 0x80)
                 {
-                    if (*d == 0xf7)   // include an 0xf7 if we hit one
-                        ++d;
+                    if (*d == 0xf7)
+                    {
+                        ++d;  // include the trailing 0xf7 when we hit it
+                        break;
+                    }
 
-                    break;
+                    if (haveReadAllLengthBytes) // if we see a 0x80 bit set after the initial data length
+                        break;                  // bytes, assume it's the end of the sysex
+
+                    ++d;
+                    continue;
                 }
 
+                haveReadAllLengthBytes = true;
                 ++d;
             }
 
@@ -290,7 +299,7 @@ void MidiMessage::setChannel (const int channel) throw()
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
 
     if ((data[0] & 0xf0) != (uint8) 0xf0)
-        data[0] = (uint8) ((data[0] & (uint8)0xf0)
+        data[0] = (uint8) ((data[0] & (uint8) 0xf0)
                             | (uint8)(channel - 1));
 }
 

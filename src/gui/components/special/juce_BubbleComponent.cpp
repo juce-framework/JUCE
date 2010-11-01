@@ -96,7 +96,7 @@ void BubbleComponent::setAllowedPlacement (const int newPlacement)
 
 void BubbleComponent::setPosition (Component* componentToPointTo)
 {
-    jassert (componentToPointTo->isValidComponent());
+    jassert (componentToPointTo != 0);
 
     Point<int> pos;
 

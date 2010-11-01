@@ -228,8 +228,8 @@ protected:
 
 private:
     //==============================================================================
-    Array <Component*> contentComponents;
-    Component* panelComponent;
+    Array <Component::SafePointer<Component> > contentComponents;
+    Component::SafePointer<Component> panelComponent;
     int tabDepth;
     int outlineThickness, edgeIndent;
     static const Identifier deleteComponentId;

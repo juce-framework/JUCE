@@ -87,7 +87,7 @@ void MessageManager::postMessageToQueue (Message* const message)
 
 //==============================================================================
 CallbackMessage::CallbackMessage() throw()  {}
-CallbackMessage::~CallbackMessage() throw()  {}
+CallbackMessage::~CallbackMessage()         {}
 
 void CallbackMessage::post()
 {

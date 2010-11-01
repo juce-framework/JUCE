@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	84
+#define JUCE_BUILDNUMBER	85
 
 /** Current Juce version number.
 
@@ -12256,7 +12256,7 @@ public:
 			 void* pointerParameter) throw();
 
 	/** Destructor. */
-	virtual ~Message() throw();
+	virtual ~Message();
 
 	// These values can be used for carrying simple data that the application needs to
 	// pass around. For more complex messages, just create a subclass.
@@ -25998,8 +25998,7 @@ class ComponentPeer;
 	The base class for all JUCE user-interface objects.
 
 */
-class JUCE_API  Component  : public MouseListener,
-							 public MessageListener
+class JUCE_API  Component  : public MouseListener
 {
 public:
 
@@ -26051,18 +26050,6 @@ public:
 		@see getName
 	*/
 	virtual void setName (const String& newName);
-
-	/** Checks whether this Component object has been deleted.
-
-		This will check whether this object is still a valid component, or whether
-		it's been deleted.
-
-		It's safe to call this on null or dangling pointers, but note that there is a
-		small risk if another new (but different) component has been created at the
-		same memory address which this one occupied, this methods can return a
-		false positive.
-	*/
-	bool isValidComponent() const;
 
 	/** Makes the component visible or invisible.
 
@@ -28009,16 +27996,8 @@ private:
 protected:
 	/** @internal */
 	virtual void internalRepaint (int x, int y, int w, int h);
-
+	/** @internal */
 	virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
-
-	/** Overridden from the MessageListener parent class.
-
-		You can override this if you really need to, but be sure to pass your unwanted messages up
-		to this base class implementation, as the Component class needs to send itself messages
-		to work properly.
-	*/
-	void handleMessage (const Message&);
 };
 
 #endif   // __JUCE_COMPONENT_JUCEHEADER__
@@ -38881,6 +38860,7 @@ private:
 	void scanDevicesIfNeeded();
 	void deleteCurrentDevice();
 	double chooseBestSampleRate (double preferred) const;
+	int chooseBestBufferSize (int preferred) const;
 	void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
 
 	AudioIODeviceType* findType (const String& inputName, const String& outputName);
@@ -43432,7 +43412,7 @@ public:
 	CallbackMessage() throw();
 
 	/** Destructor. */
-	~CallbackMessage() throw();
+	~CallbackMessage();
 
 	/** Called when the message is delivered.
 
@@ -53273,8 +53253,8 @@ protected:
 
 private:
 
-	Array <Component*> contentComponents;
-	Component* panelComponent;
+	Array <Component::SafePointer<Component> > contentComponents;
+	Component::SafePointer<Component> panelComponent;
 	int tabDepth;
 	int outlineThickness, edgeIndent;
 	static const Identifier deleteComponentId;
@@ -59311,6 +59291,7 @@ private:
 	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
 	friend class Component;
+	friend class Desktop;
 	static ComponentPeer* getPeerFor (const Component* component) throw();
 
 	void setLastDragDropTarget (Component* comp);
