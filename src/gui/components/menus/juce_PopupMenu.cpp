@@ -261,7 +261,6 @@ public:
     Window()
        : Component ("menu"),
          owner (0),
-         currentChild (0),
          activeSubMenu (0),
          managerOfChosenCommand (0),
          minimumWidth (0),
@@ -731,7 +730,7 @@ public:
 
 private:
     Window* owner;
-    PopupMenu::ItemComponent* currentChild;
+    Component::SafePointer<PopupMenu::ItemComponent> currentChild;
     ScopedPointer <Window> activeSubMenu;
     ApplicationCommandManager** managerOfChosenCommand;
     Component::SafePointer<Component> componentAttachedTo;

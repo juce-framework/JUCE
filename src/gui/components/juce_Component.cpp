@@ -195,6 +195,32 @@ private:
     MouseListenerList& operator= (const MouseListenerList&);
 };
 
+
+#if JUCE_DEBUG
+namespace
+{
+    class ComponentLeakDetector
+    {
+    public:
+        ComponentLeakDetector() : componentCount (0) {}
+
+        ~ComponentLeakDetector()
+        {
+            /* If you hit this assertion, then you've leaked some Components.
+
+               In most cases this will be due to bad coding practices like using the manually deleting
+               objects rather than using ScopedPointers or embedded member objects to manage their lifetimes.
+            */
+            jassert (componentCount <= 0);
+        }
+
+        int componentCount;
+    };
+
+    ComponentLeakDetector leakDetector;
+}
+#endif
+
 //==============================================================================
 Component::Component()
   : parentComponent_ (0),
@@ -204,6 +230,9 @@ Component::Component()
     componentFlags_ (0),
     componentTransparency (0)
 {
+   #if JUCE_DEBUG
+    leakDetector.componentCount++;
+   #endif
 }
 
 Component::Component (const String& name)
@@ -215,6 +244,9 @@ Component::Component (const String& name)
     componentFlags_ (0),
     componentTransparency (0)
 {
+   #if JUCE_DEBUG
+    leakDetector.componentCount++;
+   #endif
 }
 
 Component::~Component()
@@ -238,6 +270,18 @@ Component::~Component()
 
     for (int i = childComponentList_.size(); --i >= 0;)
         childComponentList_.getUnchecked(i)->parentComponent_ = 0;
+
+   #if JUCE_DEBUG
+    leakDetector.componentCount--;
+
+    /* If you hit this assertion, then you've somehow managed to delete more components than
+       you have created.
+
+       In most cases this will be due to bad coding practices like manually deleting your objects
+       rather than using ScopedPointers or embedded member objects to manage their lifetimes.
+    */
+    jassert (leakDetector.componentCount >= 0);
+   #endif
 }
 
 //==============================================================================
@@ -2089,7 +2133,7 @@ void Component::postCommandMessage (const int commandId)
         void messageCallback()
         {
             if (target != 0)
-                target->exitModalState (commandId);
+                target->handleCommandMessage (commandId);
         }
 
     private:

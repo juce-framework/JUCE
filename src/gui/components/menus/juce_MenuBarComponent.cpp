@@ -181,8 +181,6 @@ public:
     {
     }
 
-    ~AsyncCallback()  {}
-
     void modalStateFinished (int returnValue)
     {
         if (bar != 0)
