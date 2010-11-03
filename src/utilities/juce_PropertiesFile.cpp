@@ -198,8 +198,7 @@ bool PropertiesFile::save()
             e->setAttribute (PropertyFileConstants::nameAttribute, getAllProperties().getAllKeys() [i]);
 
             // if the value seems to contain xml, store it as such..
-            XmlDocument xmlContent (getAllProperties().getAllValues() [i]);
-            XmlElement* const childElement = xmlContent.getDocumentElement();
+            XmlElement* const childElement = XmlDocument::parse (getAllProperties().getAllValues() [i]);
 
             if (childElement != 0)
                 e->addChildElement (childElement);

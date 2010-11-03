@@ -155,8 +155,7 @@ void Project::setMissingDefaultValues()
 //==============================================================================
 const String Project::loadDocument (const File& file)
 {
-    XmlDocument doc (file);
-    ScopedPointer <XmlElement> xml (doc.getDocumentElement());
+    ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
 
     if (xml == 0 || ! xml->hasTagName (Tags::projectRoot.toString()))
         return "Not a valid Jucer project!";

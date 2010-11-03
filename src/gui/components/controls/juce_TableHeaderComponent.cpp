@@ -460,9 +460,7 @@ const String TableHeaderComponent::toString() const
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
 {
-    XmlDocument doc (storedVersion);
-    ScopedPointer <XmlElement> storedXml (doc.getDocumentElement());
-
+    ScopedPointer <XmlElement> storedXml (XmlDocument::parse (storedVersion));
     int index = 0;
 
     if (storedXml != 0 && storedXml->hasTagName ("TABLELAYOUT"))

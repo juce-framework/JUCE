@@ -127,9 +127,7 @@ bool PropertySet::getBoolValue (const String& keyName,
 
 XmlElement* PropertySet::getXmlValue (const String& keyName) const
 {
-    XmlDocument doc (getValue (keyName));
-
-    return doc.getDocumentElement();
+    return XmlDocument::parse (getValue (keyName));
 }
 
 void PropertySet::setValue (const String& keyName, const var& v)

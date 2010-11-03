@@ -108,8 +108,7 @@ public:
 
         if (fontDirs.size() == 0)
         {
-            XmlDocument fontsConfig (File ("/etc/fonts/fonts.conf"));
-            const ScopedPointer<XmlElement> fontsInfo (fontsConfig.getDocumentElement());
+            const ScopedPointer<XmlElement> fontsInfo (XmlDocument::parse (File ("/etc/fonts/fonts.conf")));
 
             if (fontsInfo != 0)
             {

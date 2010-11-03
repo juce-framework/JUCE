@@ -47,6 +47,16 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_, const Strin
       value (value_),
       next (0)
 {
+  #if JUCE_DEBUG
+    // this checks whether the attribute name string contains any illegals characters..
+    for (const juce_wchar* t = name; *t != 0; ++t)
+        jassert (CharacterFunctions::isLetterOrDigit (*t) || *t == '_' || *t == '-' || *t == ':');
+  #endif
+}
+
+inline bool XmlElement::XmlAttributeNode::hasName (const String& nameToMatch) const throw()
+{
+    return name.equalsIgnoreCase (nameToMatch);
 }
 
 //==============================================================================
@@ -220,21 +230,13 @@ namespace XmlOutputFunctions
                 case '<':   outputStream << "&lt;"; break;
 
                 case '\n':
-                    if (changeNewLines)
-                        outputStream << "&#10;";
-                    else
-                        outputStream << (char) character;
-
-                    break;
-
                 case '\r':
-                    if (changeNewLines)
-                        outputStream << "&#13;";
-                    else
+                    if (! changeNewLines)
+                    {
                         outputStream << (char) character;
-
-                    break;
-
+                        break;
+                    }
+                    // Note: deliberate fall-through here!
                 default:
                     outputStream << "&#" << ((int) (unsigned int) character) << ';';
                     break;
@@ -282,8 +284,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
             const int attIndent = indentationLevel + tagName.length() + 1;
             int lineLen = 0;
 
-            const XmlAttributeNode* att = attributes;
-            while (att != 0)
+            for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
             {
                 if (lineLen > lineWrapLength && indentationLevel >= 0)
                 {
@@ -299,8 +300,6 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                 escapeIllegalXmlChars (outputStream, att->value, true);
                 outputStream.writeByte ('"');
                 lineLen += (int) (outputStream.getPosition() - startPos);
-
-                att = att->next;
             }
         }
 
@@ -460,29 +459,23 @@ XmlElement* XmlElement::getNextElementWithTagName (const String& requiredTagName
 //==============================================================================
 int XmlElement::getNumAttributes() const throw()
 {
-    const XmlAttributeNode* att = attributes;
     int count = 0;
 
-    while (att != 0)
-    {
-        att = att->next;
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
         ++count;
-    }
 
     return count;
 }
 
 const String& XmlElement::getAttributeName (const int index) const throw()
 {
-    const XmlAttributeNode* att = attributes;
     int count = 0;
 
-    while (att != 0)
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
     {
         if (count == index)
             return att->name;
 
-        att = att->next;
         ++count;
     }
 
@@ -491,15 +484,13 @@ const String& XmlElement::getAttributeName (const int index) const throw()
 
 const String& XmlElement::getAttributeValue (const int index) const throw()
 {
-    const XmlAttributeNode* att = attributes;
     int count = 0;
 
-    while (att != 0)
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
     {
         if (count == index)
             return att->value;
 
-        att = att->next;
         ++count;
     }
 
@@ -508,15 +499,9 @@ const String& XmlElement::getAttributeValue (const int index) const throw()
 
 bool XmlElement::hasAttribute (const String& attributeName) const throw()
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
-    {
-        if (att->name.equalsIgnoreCase (attributeName))
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
+        if (att->hasName (attributeName))
             return true;
-
-        att = att->next;
-    }
 
     return false;
 }
@@ -524,71 +509,45 @@ bool XmlElement::hasAttribute (const String& attributeName) const throw()
 //==============================================================================
 const String& XmlElement::getStringAttribute (const String& attributeName) const throw()
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
-    {
-        if (att->name.equalsIgnoreCase (attributeName))
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
+        if (att->hasName (attributeName))
             return att->value;
-
-        att = att->next;
-    }
 
     return String::empty;
 }
 
 const String XmlElement::getStringAttribute (const String& attributeName, const String& defaultReturnValue) const
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
-    {
-        if (att->name.equalsIgnoreCase (attributeName))
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
+        if (att->hasName (attributeName))
             return att->value;
-
-        att = att->next;
-    }
 
     return defaultReturnValue;
 }
 
 int XmlElement::getIntAttribute (const String& attributeName, const int defaultReturnValue) const
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
-    {
-        if (att->name.equalsIgnoreCase (attributeName))
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
+        if (att->hasName (attributeName))
             return att->value.getIntValue();
-
-        att = att->next;
-    }
 
     return defaultReturnValue;
 }
 
 double XmlElement::getDoubleAttribute (const String& attributeName, const double defaultReturnValue) const
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
-    {
-        if (att->name.equalsIgnoreCase (attributeName))
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
+        if (att->hasName (attributeName))
             return att->value.getDoubleValue();
-
-        att = att->next;
-    }
 
     return defaultReturnValue;
 }
 
 bool XmlElement::getBoolAttribute (const String& attributeName, const bool defaultReturnValue) const
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
     {
-        if (att->name.equalsIgnoreCase (attributeName))
+        if (att->hasName (attributeName))
         {
             juce_wchar firstChar = att->value[0];
 
@@ -601,8 +560,6 @@ bool XmlElement::getBoolAttribute (const String& attributeName, const bool defau
                 || firstChar == 'T'
                 || firstChar == 'Y';
         }
-
-        att = att->next;
     }
 
     return defaultReturnValue;
@@ -612,20 +569,10 @@ bool XmlElement::compareAttribute (const String& attributeName,
                                    const String& stringToCompareAgainst,
                                    const bool ignoreCase) const throw()
 {
-    const XmlAttributeNode* att = attributes;
-
-    while (att != 0)
-    {
-        if (att->name.equalsIgnoreCase (attributeName))
-        {
-            if (ignoreCase)
-                return att->value.equalsIgnoreCase (stringToCompareAgainst);
-            else
-                return att->value == stringToCompareAgainst;
-        }
-
-        att = att->next;
-    }
+    for (const XmlAttributeNode* att = attributes; att != 0; att = att->next)
+        if (att->hasName (attributeName))
+            return ignoreCase ? att->value.equalsIgnoreCase (stringToCompareAgainst)
+                              : att->value == stringToCompareAgainst;
 
     return false;
 }
@@ -633,19 +580,6 @@ bool XmlElement::compareAttribute (const String& attributeName,
 //==============================================================================
 void XmlElement::setAttribute (const String& attributeName, const String& value)
 {
-#if JUCE_DEBUG
-    // check the identifier being passed in is legal..
-    const juce_wchar* t = attributeName;
-    while (*t != 0)
-    {
-        jassert (CharacterFunctions::isLetterOrDigit (*t)
-                  || *t == '_'
-                  || *t == '-'
-                  || *t == ':');
-        ++t;
-    }
-#endif
-
     if (attributes == 0)
     {
         attributes = new XmlAttributeNode (attributeName, value);
@@ -656,7 +590,7 @@ void XmlElement::setAttribute (const String& attributeName, const String& value)
 
         for (;;)
         {
-            if (att->name.equalsIgnoreCase (attributeName))
+            if (att->hasName (attributeName))
             {
                 att->value = value;
                 break;
@@ -684,12 +618,11 @@ void XmlElement::setAttribute (const String& attributeName, const double number)
 
 void XmlElement::removeAttribute (const String& attributeName) throw()
 {
-    XmlAttributeNode* att = attributes;
     XmlAttributeNode* lastAtt = 0;
 
-    while (att != 0)
+    for (XmlAttributeNode* att = attributes; att != 0; att = att->next)
     {
-        if (att->name.equalsIgnoreCase (attributeName))
+        if (att->hasName (attributeName))
         {
             if (lastAtt == 0)
                 attributes = att->next;
@@ -701,7 +634,6 @@ void XmlElement::removeAttribute (const String& attributeName) throw()
         }
 
         lastAtt = att;
-        att = att->next;
     }
 }
 

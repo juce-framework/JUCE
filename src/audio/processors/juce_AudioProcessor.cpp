@@ -285,12 +285,8 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
         const int stringLength = (int) ByteOrder::littleEndianInt (addBytesToPointer (data, 4));
 
         if (stringLength > 0)
-        {
-            XmlDocument doc (String::fromUTF8 (static_cast<const char*> (data) + 8,
-                                               jmin ((sizeInBytes - 8), stringLength)));
-
-            return doc.getDocumentElement();
-        }
+            return XmlDocument::parse (String::fromUTF8 (static_cast<const char*> (data) + 8,
+                                                         jmin ((sizeInBytes - 8), stringLength)));
     }
 
     return 0;

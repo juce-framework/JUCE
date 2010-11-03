@@ -40,13 +40,25 @@ XmlDocument::XmlDocument (const String& documentText)
 }
 
 XmlDocument::XmlDocument (const File& file)
-    : ignoreEmptyTextElements (true)
+    : ignoreEmptyTextElements (true),
+      inputSource (new FileInputSource (file))
 {
-    inputSource = new FileInputSource (file);
 }
 
 XmlDocument::~XmlDocument()
 {
+}
+
+XmlElement* XmlDocument::parse (const File& file)
+{
+    XmlDocument doc (file);
+    return doc.getDocumentElement();
+}
+
+XmlElement* XmlDocument::parse (const String& xmlData)
+{
+    XmlDocument doc (xmlData);
+    return doc.getDocumentElement();
 }
 
 void XmlDocument::setInputSource (InputSource* const newSource) throw()
@@ -59,16 +71,36 @@ void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw
     ignoreEmptyTextElements = shouldBeIgnored;
 }
 
-bool XmlDocument::isXmlIdentifierCharSlow (const juce_wchar c) throw()
+namespace XmlIdentifierChars
 {
-    return CharacterFunctions::isLetterOrDigit (c)
-            || c == '_' || c == '-' || c == ':' || c == '.';
-}
+    bool isIdentifierCharSlow (const juce_wchar c) throw()
+    {
+        return CharacterFunctions::isLetterOrDigit (c)
+                 || c == '_' || c == '-' || c == ':' || c == '.';
+    }
 
-inline bool XmlDocument::isXmlIdentifierChar (const juce_wchar c) const throw()
-{
-    return (c > 0 && c <= 127) ? identifierLookupTable [(int) c]
-                               : isXmlIdentifierCharSlow (c);
+    bool isIdentifierChar (const juce_wchar c) throw()
+    {
+        static const uint32 legalChars[] = { 0, 0x7ff6000, 0x87fffffe, 0x7fffffe, 0 };
+
+        return (c < numElementsInArray (legalChars) * 32) ? ((legalChars [c >> 5] & (1 << (c & 31))) != 0)
+                                                          : isIdentifierCharSlow (c);
+    }
+
+    /*static void generateIdentifierCharConstants()
+    {
+        uint32 n[8];
+        zerostruct (n);
+        for (int i = 0; i < 256; ++i)
+            if (isIdentifierCharSlow (i))
+                n[i >> 5] |= (1 << (i & 31));
+
+        String s;
+        for (int i = 0; i < 8; ++i)
+            s << "0x" << String::toHexString ((int) n[i]) << ", ";
+
+        DBG (s);
+    }*/
 }
 
 XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
@@ -95,9 +127,6 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
     errorOccurred = false;
     outOfData = false;
     needToLoadDTD = true;
-
-    for (int i = 0; i < 128; ++i)
-        identifierLookupTable[i] = isXmlIdentifierCharSlow ((juce_wchar) i);
 
     if (textToParse.isEmpty())
     {
@@ -150,14 +179,10 @@ const String XmlDocument::getFileContents (const String& filename) const
 juce_wchar XmlDocument::readNextChar() throw()
 {
     if (*input != 0)
-    {
         return *input++;
-    }
-    else
-    {
-        outOfData = true;
-        return 0;
-    }
+
+    outOfData = true;
+    return 0;
 }
 
 int XmlDocument::findNextTokenLength() throw()
@@ -165,7 +190,7 @@ int XmlDocument::findNextTokenLength() throw()
     int len = 0;
     juce_wchar c = *input;
 
-    while (isXmlIdentifierChar (c))
+    while (XmlIdentifierChars::isIdentifierChar (c))
         c = input [++len];
 
     return len;
@@ -371,7 +396,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
             }
 
             // get an attribute..
-            if (isXmlIdentifierChar (c))
+            if (XmlIdentifierChars::isIdentifierChar (c))
             {
                 const int attNameLen = findNextTokenLength();
 
@@ -711,20 +736,11 @@ void XmlDocument::readEntity (String& result)
 
 const String XmlDocument::expandEntity (const String& ent)
 {
-    if (ent.equalsIgnoreCase ("amp"))
-        return String::charToString ('&');
-
-    if (ent.equalsIgnoreCase ("quot"))
-        return String::charToString ('"');
-
-    if (ent.equalsIgnoreCase ("apos"))
-        return String::charToString ('\'');
-
-    if (ent.equalsIgnoreCase ("lt"))
-        return String::charToString ('<');
-
-    if (ent.equalsIgnoreCase ("gt"))
-        return String::charToString ('>');
+    if (ent.equalsIgnoreCase ("amp"))   return String::charToString ('&');
+    if (ent.equalsIgnoreCase ("quot"))  return String::charToString ('"');
+    if (ent.equalsIgnoreCase ("apos"))  return String::charToString ('\'');
+    if (ent.equalsIgnoreCase ("lt"))    return String::charToString ('<');
+    if (ent.equalsIgnoreCase ("gt"))    return String::charToString ('>');
 
     if (ent[0] == '#')
     {

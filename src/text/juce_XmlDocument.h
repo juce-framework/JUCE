@@ -57,6 +57,16 @@
 
     @endcode
 
+    Or you can use the static helper methods for quick parsing..
+
+    @code
+    XmlElement* xml = XmlDocument::parse (myXmlFile);
+
+    if (xml != 0 && xml->hasTagName ("foobar"))
+    {
+        ...etc
+    @endcode
+
     @see XmlElement
 */
 class JUCE_API  XmlDocument
@@ -64,27 +74,27 @@ class JUCE_API  XmlDocument
 public:
     //==============================================================================
     /** Creates an XmlDocument from the xml text.
-
-        The text doesn't actually get parsed until the getDocumentElement() method is
-        called.
+        The text doesn't actually get parsed until the getDocumentElement() method is called.
     */
     XmlDocument (const String& documentText);
 
     /** Creates an XmlDocument from a file.
-
-        The text doesn't actually get parsed until the getDocumentElement() method is
-        called.
+        The text doesn't actually get parsed until the getDocumentElement() method is called.
     */
     XmlDocument (const File& file);
 
     /** Destructor. */
     ~XmlDocument();
 
+    //==============================================================================
     /** Creates an XmlElement object to represent the main document node.
 
         This method will do the actual parsing of the text, and if there's a
         parse error, it may returns 0 (and you can find out the error using
         the getLastParseError() method).
+
+        See also the parse() methods, which provide a shorthand way to quickly
+        parse a file or string.
 
         @param onlyReadOuterDocumentElement     if true, the parser will only read the
                                                 first section of the file, and will only
@@ -127,6 +137,20 @@ public:
     void setEmptyTextElementsIgnored (bool shouldBeIgnored) throw();
 
     //==============================================================================
+    /** A handy static method that parses a file.
+        This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
+        @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
+    */
+    static XmlElement* parse (const File& file);
+
+    /** A handy static method that parses some XML data.
+        This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
+        @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
+    */
+    static XmlElement* parse (const String& xmlData);
+
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
@@ -134,7 +158,6 @@ private:
     const juce_wchar* input;
     bool outOfData, errorOccurred;
 
-    bool identifierLookupTable [128];
     String lastError, dtdText;
     StringArray tokenisedDTD;
     bool needToLoadDTD, ignoreEmptyTextElements;
@@ -149,8 +172,6 @@ private:
     int findNextTokenLength() throw();
     void readQuotedString (String& result);
     void readEntity (String& result);
-    static bool isXmlIdentifierCharSlow (juce_wchar c) throw();
-    bool isXmlIdentifierChar (juce_wchar c) const throw();
 
     const String getFileContents (const String& filename) const;
     const String expandEntity (const String& entity);

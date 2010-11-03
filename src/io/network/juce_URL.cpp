@@ -466,8 +466,7 @@ const String URL::readEntireTextStream (const bool usePostCommand) const
 
 XmlElement* URL::readEntireXmlStream (const bool usePostCommand) const
 {
-    XmlDocument doc (readEntireTextStream (usePostCommand));
-    return doc.getDocumentElement();
+    return XmlDocument::parse (readEntireTextStream (usePostCommand));
 }
 
 //==============================================================================

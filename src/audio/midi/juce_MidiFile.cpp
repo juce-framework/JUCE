@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace MidiFileHelpers
 {
-    static void writeVariableLengthInt (OutputStream& out, unsigned int v)
+    void writeVariableLengthInt (OutputStream& out, unsigned int v)
     {
         unsigned int buffer = v & 0x7F;
 
@@ -55,7 +55,7 @@ namespace MidiFileHelpers
         }
     }
 
-    static bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) throw()
+    bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) throw()
     {
         unsigned int ch = (int) ByteOrder::bigEndianInt (data);
         data += 4;
@@ -97,9 +97,9 @@ namespace MidiFileHelpers
         return true;
     }
 
-    static double convertTicksToSeconds (const double time,
-                                         const MidiMessageSequence& tempoEvents,
-                                         const int timeFormat)
+    double convertTicksToSeconds (const double time,
+                                  const MidiMessageSequence& tempoEvents,
+                                  const int timeFormat)
     {
         if (timeFormat > 0)
         {
@@ -184,7 +184,6 @@ namespace MidiFileHelpers
             }
         }
     };
-
 }
 
 //==============================================================================
@@ -409,8 +408,7 @@ bool MidiFile::writeTo (OutputStream& out)
     return true;
 }
 
-void MidiFile::writeTrack (OutputStream& mainOut,
-                           const int trackNum)
+void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 {
     MemoryOutputStream out;
 

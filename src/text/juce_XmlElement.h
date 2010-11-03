@@ -704,6 +704,8 @@ private:
         String name, value;
         XmlAttributeNode* next;
 
+        bool hasName (const String& name) const throw();
+
     private:
         XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
