@@ -281,36 +281,62 @@ void BigInteger::negate() throw()
     negative = (! negative) && ! isZero();
 }
 
+#if JUCE_USE_INTRINSICS
+ #pragma intrinsic (_BitScanReverse)
+#endif
+
+namespace BitFunctions
+{
+    inline int countBitsInInt32 (uint32 n) throw()
+    {
+        n -= ((n >> 1) & 0x55555555);
+        n =  (((n >> 2) & 0x33333333) + (n & 0x33333333));
+        n =  (((n >> 4) + n) & 0x0f0f0f0f);
+        n += (n >> 8);
+        n += (n >> 16);
+        return n & 0x3f;
+    }
+
+    inline int highestBitInInt (uint32 n) throw()
+    {
+        jassert (n != 0); // (the built-in functions may not work for n = 0)
+
+      #if JUCE_GCC
+        return 31 - __builtin_clz (n);
+      #elif JUCE_USE_INTRINSICS
+        unsigned long highest;
+        _BitScanReverse (&highest, n);
+        return (int) highest;
+      #else
+        n |= (n >> 1);
+        n |= (n >> 2);
+        n |= (n >> 4);
+        n |= (n >> 8);
+        n |= (n >> 16);
+        return countBitsInInt32 (n >> 1);
+      #endif
+    }
+}
+
 int BigInteger::countNumberOfSetBits() const throw()
 {
     int total = 0;
 
     for (int i = bitToIndex (highestBit) + 1; --i >= 0;)
-    {
-        uint32 n = values[i];
-
-        if (n == 0xffffffff)
-        {
-            total += 32;
-        }
-        else
-        {
-            while (n != 0)
-            {
-                total += (n & 1);
-                n >>= 1;
-            }
-        }
-    }
+        total += BitFunctions::countBitsInInt32 (values[i]);
 
     return total;
 }
 
 int BigInteger::getHighestBit() const throw()
 {
-    for (int i = highestBit + 1; --i >= 0;)
-        if ((values [bitToIndex (i)] & bitToMask (i)) != 0)
-            return i;
+    for (int i = bitToIndex (highestBit + 1); i >= 0; --i)
+    {
+        const uint32 n = values[i];
+
+        if (n != 0)
+            return BitFunctions::highestBitInInt (n) + (i << 5);
+    }
 
     return -1;
 }

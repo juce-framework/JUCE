@@ -42,10 +42,8 @@ RectanglePlacement& RectanglePlacement::operator= (const RectanglePlacement& oth
     return *this;
 }
 
-void RectanglePlacement::applyTo (double& x, double& y,
-                                  double& w, double& h,
-                                  const double dx, const double dy,
-                                  const double dw, const double dh) const throw()
+void RectanglePlacement::applyTo (double& x, double& y, double& w, double& h,
+                                  const double dx, const double dy, const double dw, const double dh) const throw()
 {
     if (w == 0 || h == 0)
         return;
@@ -92,44 +90,38 @@ const AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<flo
     if (source.isEmpty())
         return AffineTransform::identity;
 
-    float w = source.getWidth();
-    float h = source.getHeight();
-
-    const float scaleX = destination.getWidth() / w;
-    const float scaleY = destination.getHeight() / h;
-
-    if ((flags & stretchToFit) != 0)
-        return AffineTransform::translation (-source.getX(), -source.getY())
-                    .scaled (scaleX, scaleY)
-                    .translated (destination.getX(), destination.getY());
-
-    float scale = (flags & fillDestination) != 0 ? jmax (scaleX, scaleY)
-                                                 : jmin (scaleX, scaleY);
-
-    if ((flags & onlyReduceInSize) != 0)
-        scale = jmin (scale, 1.0f);
-
-    if ((flags & onlyIncreaseInSize) != 0)
-        scale = jmax (scale, 1.0f);
-
-    w *= scale;
-    h *= scale;
-
     float newX = destination.getX();
     float newY = destination.getY();
 
-    if ((flags & xRight) != 0)
-        newX += destination.getWidth() - w;             // right
-    else if ((flags & xLeft) == 0)
-        newX += (destination.getWidth() - w) / 2.0f;    // centre
+    float scaleX = destination.getWidth() / source.getWidth();
+    float scaleY = destination.getHeight() / source.getHeight();
 
-    if ((flags & yBottom) != 0)
-        newY += destination.getHeight() - h;             // bottom
-    else if ((flags & yTop) == 0)
-        newY += (destination.getHeight() - h) / 2.0f;    // centre
+    if ((flags & stretchToFit) == 0)
+    {
+        scaleX = (flags & fillDestination) != 0 ? jmax (scaleX, scaleY)
+                                                : jmin (scaleX, scaleY);
+
+        if ((flags & onlyReduceInSize) != 0)
+            scaleX = jmin (scaleX, 1.0f);
+
+        if ((flags & onlyIncreaseInSize) != 0)
+            scaleX = jmax (scaleX, 1.0f);
+
+        scaleY = scaleX;
+
+        if ((flags & xRight) != 0)
+            newX += destination.getWidth() - source.getWidth() * scaleX;             // right
+        else if ((flags & xLeft) == 0)
+            newX += (destination.getWidth() - source.getWidth() * scaleX) / 2.0f;    // centre
+
+        if ((flags & yBottom) != 0)
+            newY += destination.getHeight() - source.getHeight() * scaleX;             // bottom
+        else if ((flags & yTop) == 0)
+            newY += (destination.getHeight() - source.getHeight() * scaleX) / 2.0f;    // centre
+    }
 
     return AffineTransform::translation (-source.getX(), -source.getY())
-                .scaled (scale, scale)
+                .scaled (scaleX, scaleY)
                 .translated (newX, newY);
 }
 

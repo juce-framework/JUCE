@@ -42,19 +42,19 @@ CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser()
 //==============================================================================
 namespace CppTokeniser
 {
-    static bool isIdentifierStart (const juce_wchar c) throw()
+    bool isIdentifierStart (const juce_wchar c) throw()
     {
         return CharacterFunctions::isLetter (c)
                 || c == '_' || c == '@';
     }
 
-    static bool isIdentifierBody (const juce_wchar c) throw()
+    bool isIdentifierBody (const juce_wchar c) throw()
     {
         return CharacterFunctions::isLetterOrDigit (c)
                 || c == '_' || c == '@';
     }
 
-    static bool isReservedKeyword (const juce_wchar* const token, const int tokenLength) throw()
+    bool isReservedKeyword (const juce_wchar* const token, const int tokenLength) throw()
     {
         static const juce_wchar* const keywords2Char[] =
             { JUCE_T("if"), JUCE_T("do"), JUCE_T("or"), JUCE_T("id"), 0 };
@@ -112,7 +112,7 @@ namespace CppTokeniser
         return false;
     }
 
-    static int parseIdentifier (CodeDocument::Iterator& source) throw()
+    int parseIdentifier (CodeDocument::Iterator& source) throw()
     {
         int tokenLength = 0;
         juce_wchar possibleIdentifier [19];
@@ -138,7 +138,7 @@ namespace CppTokeniser
         return CPlusPlusCodeTokeniser::tokenType_identifier;
     }
 
-    static bool skipNumberSuffix (CodeDocument::Iterator& source)
+    bool skipNumberSuffix (CodeDocument::Iterator& source)
     {
         const juce_wchar c = source.peekNextChar();
         if (c == 'l' || c == 'L' || c == 'u' || c == 'U')
@@ -150,14 +150,14 @@ namespace CppTokeniser
         return true;
     }
 
-    static bool isHexDigit (const juce_wchar c) throw()
+    bool isHexDigit (const juce_wchar c) throw()
     {
         return (c >= '0' && c <= '9')
                 || (c >= 'a' && c <= 'f')
                 || (c >= 'A' && c <= 'F');
     }
 
-    static bool parseHexLiteral (CodeDocument::Iterator& source) throw()
+    bool parseHexLiteral (CodeDocument::Iterator& source) throw()
     {
         if (source.nextChar() != '0')
             return false;
@@ -179,12 +179,12 @@ namespace CppTokeniser
         return skipNumberSuffix (source);
     }
 
-    static bool isOctalDigit (const juce_wchar c) throw()
+    bool isOctalDigit (const juce_wchar c) throw()
     {
         return c >= '0' && c <= '7';
     }
 
-    static bool parseOctalLiteral (CodeDocument::Iterator& source) throw()
+    bool parseOctalLiteral (CodeDocument::Iterator& source) throw()
     {
         if (source.nextChar() != '0')
             return false;
@@ -198,12 +198,12 @@ namespace CppTokeniser
         return skipNumberSuffix (source);
     }
 
-    static bool isDecimalDigit (const juce_wchar c) throw()
+    bool isDecimalDigit (const juce_wchar c) throw()
     {
         return c >= '0' && c <= '9';
     }
 
-    static bool parseDecimalLiteral (CodeDocument::Iterator& source) throw()
+    bool parseDecimalLiteral (CodeDocument::Iterator& source) throw()
     {
         int numChars = 0;
         while (isDecimalDigit (source.peekNextChar()))
@@ -218,7 +218,7 @@ namespace CppTokeniser
         return skipNumberSuffix (source);
     }
 
-    static bool parseFloatLiteral (CodeDocument::Iterator& source) throw()
+    bool parseFloatLiteral (CodeDocument::Iterator& source) throw()
     {
         int numDigits = 0;
 
@@ -275,7 +275,7 @@ namespace CppTokeniser
         return true;
     }
 
-    static int parseNumber (CodeDocument::Iterator& source)
+    int parseNumber (CodeDocument::Iterator& source)
     {
         const CodeDocument::Iterator original (source);
 
@@ -303,7 +303,7 @@ namespace CppTokeniser
         return CPlusPlusCodeTokeniser::tokenType_error;
     }
 
-    static void skipQuotedString (CodeDocument::Iterator& source) throw()
+    void skipQuotedString (CodeDocument::Iterator& source) throw()
     {
         const juce_wchar quote = source.nextChar();
 
@@ -319,7 +319,7 @@ namespace CppTokeniser
         }
     }
 
-    static void skipComment (CodeDocument::Iterator& source) throw()
+    void skipComment (CodeDocument::Iterator& source) throw()
     {
         bool lastWasStar = false;
 

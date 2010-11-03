@@ -104,7 +104,7 @@ namespace KeyPressHelpers
         int code;
     };
 
-    static const KeyNameAndCode translations[] =
+    const KeyNameAndCode translations[] =
     {
         { "spacebar",       KeyPress::spaceKey },
         { "return",         KeyPress::returnKey },
@@ -127,7 +127,7 @@ namespace KeyPressHelpers
         { "rewind",         KeyPress::rewindKey }
     };
 
-    static const String numberPadPrefix()      { return "numpad "; }
+    const String numberPadPrefix()      { return "numpad "; }
 }
 
 //==============================================================================

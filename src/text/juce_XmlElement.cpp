@@ -153,7 +153,7 @@ XmlElement::~XmlElement() throw()
 //==============================================================================
 namespace XmlOutputFunctions
 {
-    /*static bool isLegalXmlCharSlow (const juce_wchar character) throw()
+    /*bool isLegalXmlCharSlow (const juce_wchar character) throw()
     {
         if ((character >= 'a' && character <= 'z')
              || (character >= 'A' && character <= 'Z')
@@ -172,7 +172,7 @@ namespace XmlOutputFunctions
         return false;
     }
 
-    static void generateLegalCharConstants()
+    void generateLegalCharConstants()
     {
         uint8 n[32];
         zerostruct (n);
@@ -187,7 +187,7 @@ namespace XmlOutputFunctions
         DBG (s);
     }*/
 
-    static bool isLegalXmlChar (const uint32 c) throw()
+    bool isLegalXmlChar (const uint32 c) throw()
     {
         static const unsigned char legalChars[] = { 0, 0, 0, 0, 187, 255, 255, 175, 255, 255, 255, 191, 254, 255, 255, 127 };
 
@@ -195,7 +195,7 @@ namespace XmlOutputFunctions
                  && (legalChars [c >> 3] & (1 << (c & 7))) != 0;
     }
 
-    static void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
+    void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
     {
         const juce_wchar* t = text;
 
@@ -243,7 +243,7 @@ namespace XmlOutputFunctions
         }
     }
 
-    static void writeSpaces (OutputStream& out, int numSpaces)
+    void writeSpaces (OutputStream& out, int numSpaces)
     {
         if (numSpaces > 0)
         {
@@ -260,7 +260,7 @@ namespace XmlOutputFunctions
         }
     }
 
-    static void writeNewLine (OutputStream& out)
+    void writeNewLine (OutputStream& out)
     {
         out.write ("\r\n", 2);
     }

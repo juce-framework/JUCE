@@ -1433,10 +1433,7 @@ void Component::exitModalState (const int returnValue)
 
             private:
                 Component::SafePointer<Component> target;
-                const int result;
-
-                ExitModalStateMessage (ExitModalStateMessage&);
-                ExitModalStateMessage& operator= (const ExitModalStateMessage&);
+                int result;
             };
 
             (new ExitModalStateMessage (this, returnValue))->post();
@@ -1620,11 +1617,8 @@ void Component::internalRepaint (int x, int y, int w, int h)
         {
             if (parentComponent_ != 0)
             {
-                x += getX();
-                y += getY();
-
                 if (parentComponent_->flags.visibleFlag)
-                    parentComponent_->internalRepaint (x, y, w, h);
+                    parentComponent_->internalRepaint (x + getX(), y + getY(), w, h);
             }
             else if (flags.hasHeavyweightPeerFlag)
             {
@@ -2138,10 +2132,7 @@ void Component::postCommandMessage (const int commandId)
 
     private:
         Component::SafePointer<Component> target;
-        const int commandId;
-
-        CustomCommandMessage (CustomCommandMessage&);
-        CustomCommandMessage& operator= (const CustomCommandMessage&);
+        int commandId;
     };
 
     (new CustomCommandMessage (this, commandId))->post();

@@ -33,13 +33,13 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace ColourHelpers
 {
-    static uint8 floatAlphaToInt (const float alpha) throw()
+    uint8 floatAlphaToInt (const float alpha) throw()
     {
         return (uint8) jlimit (0, 0xff, roundToInt (alpha * 255.0f));
     }
 
-    static void convertHSBtoRGB (float h, float s, float v,
-                                 uint8& r, uint8& g, uint8& b) throw()
+    void convertHSBtoRGB (float h, float s, float v,
+                          uint8& r, uint8& g, uint8& b) throw()
     {
         v = jlimit (0.0f, 1.0f, v);
         v *= 255.0f;

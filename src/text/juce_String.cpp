@@ -282,7 +282,7 @@ const String String::charToString (const juce_wchar character)
 namespace NumberToStringConverters
 {
     // pass in a pointer to the END of a buffer..
-    static juce_wchar* int64ToString (juce_wchar* t, const int64 n) throw()
+    juce_wchar* int64ToString (juce_wchar* t, const int64 n) throw()
     {
         *--t = 0;
         int64 v = (n >= 0) ? n : -n;
@@ -300,7 +300,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    static juce_wchar* uint64ToString (juce_wchar* t, int64 v) throw()
+    juce_wchar* uint64ToString (juce_wchar* t, int64 v) throw()
     {
         *--t = 0;
 
@@ -314,7 +314,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    static juce_wchar* intToString (juce_wchar* t, const int n) throw()
+    juce_wchar* intToString (juce_wchar* t, const int n) throw()
     {
         if (n == (int) 0x80000000) // (would cause an overflow)
             return int64ToString (t, n);
@@ -335,7 +335,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    static juce_wchar* uintToString (juce_wchar* t, unsigned int v) throw()
+    juce_wchar* uintToString (juce_wchar* t, unsigned int v) throw()
     {
         *--t = 0;
 
@@ -349,7 +349,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    static juce_wchar getDecimalPoint()
+    juce_wchar getDecimalPoint()
     {
 #if JUCE_MSVC && _MSC_VER < 1400
         static juce_wchar dp = std::_USE (std::locale(), std::numpunct <wchar_t>).decimal_point();
@@ -359,7 +359,7 @@ namespace NumberToStringConverters
         return dp;
     }
 
-    static juce_wchar* doubleToString (juce_wchar* buffer, int numChars, double n, int numDecPlaces, size_t& len) throw()
+    juce_wchar* doubleToString (juce_wchar* buffer, int numChars, double n, int numDecPlaces, size_t& len) throw()
     {
         if (numDecPlaces > 0 && n > -1.0e20 && n < 1.0e20)
         {
@@ -388,7 +388,7 @@ namespace NumberToStringConverters
         else
         {
 #if JUCE_WINDOWS
-  #if JUCE_MSVC && _MSC_VER <= 1400
+  #if (JUCE_MSVC && _MSC_VER <= 1400) || JUCE_MINGW
             len = _snwprintf (buffer, numChars, L"%.9g", n);
   #else
             len = _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n);

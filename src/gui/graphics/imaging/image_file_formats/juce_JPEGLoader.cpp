@@ -139,16 +139,16 @@ namespace JPEGHelpers
 
     struct JPEGDecodingFailure {};
 
-    static void fatalErrorHandler (j_common_ptr)
+    void fatalErrorHandler (j_common_ptr)
     {
         throw JPEGDecodingFailure();
     }
 
-    static void silentErrorCallback1 (j_common_ptr)         {}
-    static void silentErrorCallback2 (j_common_ptr, int)    {}
-    static void silentErrorCallback3 (j_common_ptr, char*)  {}
+    void silentErrorCallback1 (j_common_ptr)         {}
+    void silentErrorCallback2 (j_common_ptr, int)    {}
+    void silentErrorCallback3 (j_common_ptr, char*)  {}
 
-    static void setupSilentErrorHandler (struct jpeg_error_mgr& err)
+    void setupSilentErrorHandler (struct jpeg_error_mgr& err)
     {
         zerostruct (err);
 
@@ -161,11 +161,11 @@ namespace JPEGHelpers
 
 
     //==============================================================================
-    static void dummyCallback1 (j_decompress_ptr)
+    void dummyCallback1 (j_decompress_ptr)
     {
     }
 
-    static void jpegSkip (j_decompress_ptr decompStruct, long num)
+    void jpegSkip (j_decompress_ptr decompStruct, long num)
     {
         decompStruct->src->next_input_byte += num;
 
@@ -173,13 +173,13 @@ namespace JPEGHelpers
         decompStruct->src->bytes_in_buffer -= num;
     }
 
-    static boolean jpegFill (j_decompress_ptr)
+    boolean jpegFill (j_decompress_ptr)
     {
         return 0;
     }
 
     //==============================================================================
-    static const int jpegBufferSize = 512;
+    const int jpegBufferSize = 512;
 
     struct JuceJpegDest  : public jpeg_destination_mgr
     {
@@ -187,11 +187,11 @@ namespace JPEGHelpers
         char* buffer;
     };
 
-    static void jpegWriteInit (j_compress_ptr)
+    void jpegWriteInit (j_compress_ptr)
     {
     }
 
-    static void jpegWriteTerminate (j_compress_ptr cinfo)
+    void jpegWriteTerminate (j_compress_ptr cinfo)
     {
         JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 
@@ -199,7 +199,7 @@ namespace JPEGHelpers
         dest->output->write (dest->buffer, (int) numToWrite);
     }
 
-    static boolean jpegWriteFlush (j_compress_ptr cinfo)
+    boolean jpegWriteFlush (j_compress_ptr cinfo)
     {
         JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 

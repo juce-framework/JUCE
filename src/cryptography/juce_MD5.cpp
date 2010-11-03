@@ -128,38 +128,38 @@ MD5::~MD5()
 //==============================================================================
 namespace MD5Functions
 {
-    static void encode (void* const output, const void* const input, const int numBytes) throw()
+    void encode (void* const output, const void* const input, const int numBytes) throw()
     {
         for (int i = 0; i < (numBytes >> 2); ++i)
             static_cast<uint32*> (output)[i] = ByteOrder::swapIfBigEndian (static_cast<const uint32*> (input) [i]);
     }
 
-    static inline uint32 F (const uint32 x, const uint32 y, const uint32 z) throw()   { return (x & y) | (~x & z); }
-    static inline uint32 G (const uint32 x, const uint32 y, const uint32 z) throw()   { return (x & z) | (y & ~z); }
-    static inline uint32 H (const uint32 x, const uint32 y, const uint32 z) throw()   { return x ^ y ^ z; }
-    static inline uint32 I (const uint32 x, const uint32 y, const uint32 z) throw()   { return y ^ (x | ~z); }
+    inline uint32 rotateLeft (const uint32 x, const uint32 n) throw()           { return (x << n) | (x >> (32 - n)); }
 
-    static inline uint32 rotateLeft (const uint32 x, const uint32 n) throw()  { return (x << n) | (x >> (32 - n)); }
+    inline uint32 F (const uint32 x, const uint32 y, const uint32 z) throw()    { return (x & y) | (~x & z); }
+    inline uint32 G (const uint32 x, const uint32 y, const uint32 z) throw()    { return (x & z) | (y & ~z); }
+    inline uint32 H (const uint32 x, const uint32 y, const uint32 z) throw()    { return x ^ y ^ z; }
+    inline uint32 I (const uint32 x, const uint32 y, const uint32 z) throw()    { return y ^ (x | ~z); }
 
-    static void FF (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    void FF (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
     {
         a += F (b, c, d) + x + ac;
         a = rotateLeft (a, s) + b;
     }
 
-    static void GG (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    void GG (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
     {
         a += G (b, c, d) + x + ac;
         a = rotateLeft (a, s) + b;
     }
 
-    static void HH (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    void HH (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
     {
         a += H (b, c, d) + x + ac;
         a = rotateLeft (a, s) + b;
     }
 
-    static void II (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    void II (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
     {
         a += I (b, c, d) + x + ac;
         a = rotateLeft (a, s) + b;

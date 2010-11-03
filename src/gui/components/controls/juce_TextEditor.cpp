@@ -966,7 +966,7 @@ namespace TextEditorDefs
 
     const int maxActionsPerTransaction = 100;
 
-    static int getCharacterCategory (const juce_wchar character)
+    int getCharacterCategory (const juce_wchar character)
     {
         return CharacterFunctions::isLetterOrDigit (character)
                     ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);

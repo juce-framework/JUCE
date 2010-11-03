@@ -364,32 +364,27 @@ public:
             return false;
 
         int* buf[3];
+        HeapBlock<int> temp;
         const int bitsToShift = 32 - bitsPerSample;
 
         if (bitsToShift > 0)
         {
             const int numChannelsToWrite = (samplesToWrite[1] == 0) ? 1 : 2;
-            HeapBlock<int> temp (numSamples * numChannelsToWrite);
+            temp.malloc (numSamples * numChannelsToWrite);
 
             buf[0] = temp.getData();
             buf[1] = temp.getData() + numSamples;
             buf[2] = 0;
 
             for (int i = numChannelsToWrite; --i >= 0;)
-            {
                 if (samplesToWrite[i] != 0)
-                {
                     for (int j = 0; j < numSamples; ++j)
                         buf [i][j] = (samplesToWrite [i][j] >> bitsToShift);
-                }
-            }
 
             samplesToWrite = const_cast<const int**> (buf);
         }
 
-        return FLAC__stream_encoder_process (encoder,
-                                             (const FLAC__int32**) samplesToWrite,
-                                             numSamples) != 0;
+        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, numSamples) != 0;
     }
 
     bool writeData (const void* const data, const int size) const

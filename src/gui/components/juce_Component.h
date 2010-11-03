@@ -2071,10 +2071,8 @@ private:
     static void* runModalLoopCallback (void*);
     static void bringModalComponentToFront();
     void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
-                                  const Rectangle<int>& clipRect,
-                                  const Component* const compToAvoid) const;
-    void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-                              int deltaX, int deltaY) const;
+                                  const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
+    void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;
 
     // how much of the component is not off the edges of its parents
     const Rectangle<int> getUnclippedArea() const;

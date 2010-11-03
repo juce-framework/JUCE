@@ -41,9 +41,9 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace PathHelpers
 {
-    static const float ellipseAngularIncrement = 0.05f;
+    const float ellipseAngularIncrement = 0.05f;
 
-    static const String nextToken (const juce_wchar*& t)
+    const String nextToken (const juce_wchar*& t)
     {
         while (CharacterFunctions::isWhitespace (*t))
             ++t;

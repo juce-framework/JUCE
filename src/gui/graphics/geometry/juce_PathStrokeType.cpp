@@ -75,13 +75,13 @@ bool PathStrokeType::operator!= (const PathStrokeType& other) const throw()
 //==============================================================================
 namespace PathStrokeHelpers
 {
-    static bool lineIntersection (const float x1, const float y1,
-                                  const float x2, const float y2,
-                                  const float x3, const float y3,
-                                  const float x4, const float y4,
-                                  float& intersectionX,
-                                  float& intersectionY,
-                                  float& distanceBeyondLine1EndSquared) throw()
+    bool lineIntersection (const float x1, const float y1,
+                           const float x2, const float y2,
+                           const float x3, const float y3,
+                           const float x4, const float y4,
+                           float& intersectionX,
+                           float& intersectionY,
+                           float& distanceBeyondLine1EndSquared) throw()
     {
         if (x2 != x3 || y2 != y3)
         {
@@ -192,14 +192,14 @@ namespace PathStrokeHelpers
         return true;
     }
 
-    static void addEdgeAndJoint (Path& destPath,
-                                 const PathStrokeType::JointStyle style,
-                                 const float maxMiterExtensionSquared, const float width,
-                                 const float x1, const float y1,
-                                 const float x2, const float y2,
-                                 const float x3, const float y3,
-                                 const float x4, const float y4,
-                                 const float midX, const float midY)
+    void addEdgeAndJoint (Path& destPath,
+                          const PathStrokeType::JointStyle style,
+                          const float maxMiterExtensionSquared, const float width,
+                          const float x1, const float y1,
+                          const float x2, const float y2,
+                          const float x3, const float y3,
+                          const float x4, const float y4,
+                          const float midX, const float midY)
     {
         if (style == PathStrokeType::beveled
             || (x3 == x4 && y3 == y4)
@@ -287,11 +287,11 @@ namespace PathStrokeHelpers
         }
     }
 
-    static void addLineEnd (Path& destPath,
-                            const PathStrokeType::EndCapStyle style,
-                            const float x1, const float y1,
-                            const float x2, const float y2,
-                            const float width)
+    void addLineEnd (Path& destPath,
+                     const PathStrokeType::EndCapStyle style,
+                     const float x1, const float y1,
+                     const float x2, const float y2,
+                     const float width)
     {
         if (style == PathStrokeType::butt)
         {
@@ -352,12 +352,12 @@ namespace PathStrokeHelpers
         float endWidth, endLength;
     };
 
-    static void addArrowhead (Path& destPath,
-                              const float x1, const float y1,
-                              const float x2, const float y2,
-                              const float tipX, const float tipY,
-                              const float width,
-                              const float arrowheadWidth)
+    void addArrowhead (Path& destPath,
+                       const float x1, const float y1,
+                       const float x2, const float y2,
+                       const float tipX, const float tipY,
+                       const float width,
+                       const float arrowheadWidth)
     {
         Line<float> line (x1, y1, x2, y2);
         destPath.lineTo (line.getPointAlongLine (-(arrowheadWidth / 2.0f - width), 0));
@@ -373,7 +373,7 @@ namespace PathStrokeHelpers
         float rx1, ry1, rx2, ry2;  // the right-hand stroke
     };
 
-    static void shortenSubPath (Array<LineSection>& subPath, float amountAtStart, float amountAtEnd)
+    void shortenSubPath (Array<LineSection>& subPath, float amountAtStart, float amountAtEnd)
     {
         while (amountAtEnd > 0 && subPath.size() > 0)
         {
@@ -432,10 +432,10 @@ namespace PathStrokeHelpers
         }
     }
 
-    static void addSubPath (Path& destPath, Array<LineSection>& subPath,
-                            const bool isClosed, const float width, const float maxMiterExtensionSquared,
-                            const PathStrokeType::JointStyle jointStyle, const PathStrokeType::EndCapStyle endStyle,
-                            const Arrowhead* const arrowhead)
+    void addSubPath (Path& destPath, Array<LineSection>& subPath,
+                     const bool isClosed, const float width, const float maxMiterExtensionSquared,
+                     const PathStrokeType::JointStyle jointStyle, const PathStrokeType::EndCapStyle endStyle,
+                     const Arrowhead* const arrowhead)
     {
         jassert (subPath.size() > 0);
 
@@ -545,11 +545,11 @@ namespace PathStrokeHelpers
         destPath.closeSubPath();
     }
 
-    static void createStroke (const float thickness, const PathStrokeType::JointStyle jointStyle,
-                              const PathStrokeType::EndCapStyle endStyle,
-                              Path& destPath, const Path& source,
-                              const AffineTransform& transform,
-                              const float extraAccuracy, const Arrowhead* const arrowhead)
+    void createStroke (const float thickness, const PathStrokeType::JointStyle jointStyle,
+                       const PathStrokeType::EndCapStyle endStyle,
+                       Path& destPath, const Path& source,
+                       const AffineTransform& transform,
+                       const float extraAccuracy, const Arrowhead* const arrowhead)
     {
         if (thickness <= 0)
         {

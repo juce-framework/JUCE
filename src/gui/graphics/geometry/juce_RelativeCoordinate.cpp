@@ -35,7 +35,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace RelativeCoordinateHelpers
 {
-    static void skipComma (const juce_wchar* const s, int& i)
+    void skipComma (const juce_wchar* const s, int& i)
     {
         while (CharacterFunctions::isWhitespace (s[i]))
             ++i;

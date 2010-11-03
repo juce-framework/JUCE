@@ -100,7 +100,7 @@ void juce_shutdownWin32Sockets()
 //==============================================================================
 namespace SocketHelpers
 {
-    static bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) throw()
+    bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) throw()
     {
         const int sndBufSize = 65536;
         const int rcvBufSize = 65536;
@@ -113,7 +113,7 @@ namespace SocketHelpers
                                : (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (one)) == 0));
     }
 
-    static bool bindSocketToPort (const int handle, const int port) throw()
+    bool bindSocketToPort (const int handle, const int port) throw()
     {
         if (handle <= 0 || port <= 0)
             return false;
@@ -127,10 +127,10 @@ namespace SocketHelpers
         return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
     }
 
-    static int readSocket (const int handle,
-                           void* const destBuffer, const int maxBytesToRead,
-                           bool volatile& connected,
-                           const bool blockUntilSpecifiedAmountHasArrived) throw()
+    int readSocket (const int handle,
+                    void* const destBuffer, const int maxBytesToRead,
+                    bool volatile& connected,
+                    const bool blockUntilSpecifiedAmountHasArrived) throw()
     {
         int bytesRead = 0;
 
@@ -165,8 +165,7 @@ namespace SocketHelpers
         return bytesRead;
     }
 
-    static int waitForReadiness (const int handle, const bool forReading,
-                                 const int timeoutMsecs) throw()
+    int waitForReadiness (const int handle, const bool forReading, const int timeoutMsecs) throw()
     {
         struct timeval timeout;
         struct timeval* timeoutp;
@@ -223,7 +222,7 @@ namespace SocketHelpers
         return 0;
     }
 
-    static bool setSocketBlockingState (const int handle, const bool shouldBlock) throw()
+    bool setSocketBlockingState (const int handle, const bool shouldBlock) throw()
     {
     #if JUCE_WINDOWS
         u_long nonBlocking = shouldBlock ? 0 : 1;
@@ -248,12 +247,12 @@ namespace SocketHelpers
         return true;
     }
 
-    static bool connectSocket (int volatile& handle,
-                               const bool isDatagram,
-                               void** serverAddress,
-                               const String& hostName,
-                               const int portNumber,
-                               const int timeOutMillisecs) throw()
+    bool connectSocket (int volatile& handle,
+                        const bool isDatagram,
+                        void** serverAddress,
+                        const String& hostName,
+                        const int portNumber,
+                        const int timeOutMillisecs) throw()
     {
         struct hostent* const hostEnt = gethostbyname (hostName.toUTF8());
 
