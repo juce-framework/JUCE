@@ -799,7 +799,7 @@ void juce_HandleProcessFocusChange()
         {
             currentlyFocusedPeer->handleFocusGain();
 
-            ComponentPeer::bringModalComponentToFront();
+            ModalComponentManager::getInstance()->bringModalComponentsToFront();
         }
         else
         {

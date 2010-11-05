@@ -228,7 +228,7 @@ protected:
 
 private:
     //==============================================================================
-    Array <Component::SafePointer<Component> > contentComponents;
+    OwnedArray <Component::SafePointer<Component> > contentComponents;
     Component::SafePointer<Component> panelComponent;
     int tabDepth;
     int outlineThickness, edgeIndent;

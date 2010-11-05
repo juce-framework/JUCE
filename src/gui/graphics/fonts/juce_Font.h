@@ -166,7 +166,7 @@ public:
     static const String getDefaultMonospacedFontName();
 
     /** Returns the typeface names of the default fonts on the current platform. */
-    static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed);
+    static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback);
 
     //==============================================================================
     /** Returns the total height of this font.

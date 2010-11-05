@@ -777,9 +777,7 @@ int Component::getScreenY() const
 
 const Point<int> Component::getScreenPosition() const
 {
-    return (parentComponent_ != 0) ? parentComponent_->getScreenPosition() + getPosition()
-                                   : (flags.hasHeavyweightPeerFlag ? getPeer()->getScreenPosition()
-                                                                   : getPosition());
+    return relativePositionToGlobal (Point<int>());
 }
 
 const Rectangle<int> Component::getScreenBounds() const
@@ -789,20 +787,7 @@ const Rectangle<int> Component::getScreenBounds() const
 
 const Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
 {
-    const Component* c = this;
-    Point<int> p (relativePosition);
-
-    do
-    {
-        if (c->flags.hasHeavyweightPeerFlag)
-            return c->getPeer()->relativePositionToGlobal (p);
-
-        p += c->getPosition();
-        c = c->parentComponent_;
-    }
-    while (c != 0);
-
-    return p;
+    return relativePositionToOtherComponent (0, relativePosition);
 }
 
 const Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
@@ -823,29 +808,26 @@ const Point<int> Component::globalPositionToRelative (const Point<int>& screenPo
 const Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
 {
     Point<int> p (positionRelativeToThis);
+    const Component* c = this;
+
+    do
+    {
+        if (c == targetComponent)
+            return p;
+
+        if (c->flags.hasHeavyweightPeerFlag)
+        {
+            p = c->getPeer()->relativePositionToGlobal (p);
+            break;
+        }
+
+        p += c->getPosition();
+        c = c->parentComponent_;
+    }
+    while (c != 0);
 
     if (targetComponent != 0)
-    {
-        const Component* c = this;
-
-        do
-        {
-            if (c == targetComponent)
-                return p;
-
-            if (c->flags.hasHeavyweightPeerFlag)
-            {
-                p = c->getPeer()->relativePositionToGlobal (p);
-                break;
-            }
-
-            p += c->getPosition();
-            c = c->parentComponent_;
-        }
-        while (c != 0);
-
         p = targetComponent->globalPositionToRelative (p);
-    }
 
     return p;
 }
@@ -1365,9 +1347,12 @@ void Component::internalHierarchyChanged()
 }
 
 //==============================================================================
-void* Component::runModalLoopCallback (void* userData)
+namespace ComponentHelpers
 {
-    return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+    void* runModalLoopCallback (void* userData)
+    {
+        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+    }
 }
 
 int Component::runModalLoop()
@@ -1376,7 +1361,7 @@ int Component::runModalLoop()
     {
         // use a callback so this can be called from non-gui threads
         return (int) (pointer_sized_int) MessageManager::getInstance()
-                                           ->callFunctionOnMessageThread (&runModalLoopCallback, this);
+                                           ->callFunctionOnMessageThread (&ComponentHelpers::runModalLoopCallback, this);
     }
 
     if (! isCurrentlyModal())
@@ -1415,7 +1400,7 @@ void Component::exitModalState (const int returnValue)
             ModalComponentManager::getInstance()->endModal (this, returnValue);
             flags.currentlyModalFlag = false;
 
-            bringModalComponentToFront();
+            ModalComponentManager::getInstance()->bringModalComponentsToFront();
         }
         else
         {
@@ -1465,34 +1450,6 @@ int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() throw()
 Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) throw()
 {
     return ModalComponentManager::getInstance()->getModalComponent (index);
-}
-
-void Component::bringModalComponentToFront()
-{
-    ComponentPeer* lastOne = 0;
-
-    for (int i = 0; i < getNumCurrentlyModalComponents(); ++i)
-    {
-        Component* const c = getCurrentlyModalComponent (i);
-
-        if (c == 0)
-            break;
-
-        ComponentPeer* peer = c->getPeer();
-
-        if (peer != 0 && peer != lastOne)
-        {
-            if (lastOne == 0)
-            {
-                peer->toFront (true);
-                peer->grabFocus();
-            }
-            else
-                peer->toBehind (lastOne);
-
-            lastOne = peer;
-        }
-    }
 }
 
 //==============================================================================
@@ -2084,7 +2041,7 @@ void Component::removeComponentListener (ComponentListener* const listenerToRemo
 //==============================================================================
 void Component::inputAttemptWhenModal()
 {
-    bringModalComponentToFront();
+    ModalComponentManager::getInstance()->bringModalComponentsToFront();
     getLookAndFeel().playAlertSound();
 }
 
@@ -2538,7 +2495,7 @@ void Component::internalBroughtToFront()
     Component* const cm = getCurrentlyModalComponent();
 
     if (cm != 0 && cm->getTopLevelComponent() != getTopLevelComponent())
-        bringModalComponentToFront();
+        ModalComponentManager::getInstance()->bringModalComponentsToFront();
 }
 
 void Component::focusGained (FocusChangeType)

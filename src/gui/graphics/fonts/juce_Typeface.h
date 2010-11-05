@@ -111,8 +111,11 @@ public:
 
 protected:
     String name;
+    bool isFallbackFont;
 
     explicit Typeface (const String& name) throw();
+
+    static const Ptr getFallbackTypeface();
 
 private:
     Typeface (const Typeface&);

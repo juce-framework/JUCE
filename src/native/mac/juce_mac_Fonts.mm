@@ -508,7 +508,7 @@ const StringArray Font::findAllTypefaceNames()
     return names;
 }
 
-void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback)
 {
 #if JUCE_IOS
     defaultSans  = "Helvetica";
@@ -519,6 +519,8 @@ void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSeri
     defaultSerif = "Times New Roman";
     defaultFixed = "Monaco";
 #endif
+
+    defaultFallback = "Arial Unicode MS";
 }
 
 #endif

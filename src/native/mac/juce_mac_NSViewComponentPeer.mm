@@ -1291,7 +1291,7 @@ void juce_HandleProcessFocusChange()
         {
             NSViewComponentPeer::currentlyFocusedPeer->handleFocusGain();
 
-            ComponentPeer::bringModalComponentToFront();
+            ModalComponentManager::getInstance()->bringModalComponentsToFront();
         }
         else
         {

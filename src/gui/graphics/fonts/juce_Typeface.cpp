@@ -36,12 +36,20 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 Typeface::Typeface (const String& name_) throw()
-    : name (name_)
+    : name (name_), isFallbackFont (false)
 {
 }
 
 Typeface::~Typeface()
 {
+}
+
+const Typeface::Ptr Typeface::getFallbackTypeface()
+{
+    const Font fallbackFont (Font::getFallbackFontName(), 10, 0);
+    Typeface* t = fallbackFont.getTypeface();
+    t->isFallbackFont = true;
+    return t;
 }
 
 //==============================================================================
@@ -220,7 +228,9 @@ CustomTypeface::GlyphInfo* CustomTypeface::findGlyphSubstituting (const juce_wch
             Typeface* const fallbackTypeface = fallbackFont.getTypeface();
             if (fallbackTypeface != 0 && fallbackTypeface != this)
             {
-                //xxx
+                Path path;
+                fallbackTypeface->getOutlineForGlyph (character, path);
+                addGlyph (character, path, fallbackTypeface->getStringWidth (String::charToString (character)));
             }
 
             if (glyph == 0)
@@ -334,6 +344,14 @@ float CustomTypeface::getStringWidth (const String& text)
     {
         const GlyphInfo* const glyph = findGlyphSubstituting (*t++);
 
+        if (glyph == 0 && ! isFallbackFont)
+        {
+            const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
+
+            if (fallbackTypeface != 0)
+                x += fallbackTypeface->getStringWidth (String::charToString (*t));
+        }
+
         if (glyph != 0)
             x += glyph->getHorizontalSpacing (*t);
     }
@@ -350,7 +368,26 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultG
     while (*t != 0)
     {
         const juce_wchar c = *t++;
-        const GlyphInfo* const glyph = findGlyphSubstituting (c);
+        const GlyphInfo* const glyph = findGlyph (c, true);
+
+        if (glyph == 0 && ! isFallbackFont)
+        {
+            const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
+
+            if (fallbackTypeface != 0)
+            {
+                Array <int> subGlyphs;
+                Array <float> subOffsets;
+                fallbackTypeface->getGlyphPositions (String::charToString (c), subGlyphs, subOffsets);
+
+                if (subGlyphs.size() > 0)
+                {
+                    resultGlyphs.add (subGlyphs.getFirst());
+                    x += subOffsets[1];
+                    xOffsets.add (x);
+                }
+            }
+        }
 
         if (glyph != 0)
         {
@@ -363,7 +400,16 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultG
 
 bool CustomTypeface::getOutlineForGlyph (int glyphNumber, Path& path)
 {
-    const GlyphInfo* const glyph = findGlyphSubstituting ((juce_wchar) glyphNumber);
+    const GlyphInfo* const glyph = findGlyph ((juce_wchar) glyphNumber, true);
+
+    if (glyph == 0 && ! isFallbackFont)
+    {
+        const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
+
+        if (fallbackTypeface != 0)
+            fallbackTypeface->getOutlineForGlyph (glyphNumber, path);
+    }
+
     if (glyph != 0)
     {
         path = glyph->path;

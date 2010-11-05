@@ -104,7 +104,7 @@ const StringArray Font::findAllTypefaceNames()
 
 extern bool juce_IsRunningInWine();
 
-void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback)
 {
     if (juce_IsRunningInWine())
     {
@@ -115,9 +115,10 @@ void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSeri
     }
     else
     {
-        defaultSans  = "Verdana";
-        defaultSerif = "Times";
-        defaultFixed = "Lucida Console";
+        defaultSans     = "Verdana";
+        defaultSerif    = "Times";
+        defaultFixed    = "Lucida Console";
+        defaultFallback = "Tahoma";  // (contains plenty of unicode characters)
     }
 }
 
@@ -274,6 +275,10 @@ public:
 
         GLYPHMETRICS gm;
 
+        // if this is the fallback font, skip checking for the glyph's existence. This is because
+        // with fonts like Tahoma, GetGlyphIndices can say that a glyph doesn't exist, but it still
+        // gets correctly created later on.
+        if (! isFallbackFont)
         {
             const WCHAR charToTest[] = { (WCHAR) character, 0 };
             WORD index = 0;

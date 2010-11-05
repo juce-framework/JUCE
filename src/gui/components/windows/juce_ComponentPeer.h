@@ -344,8 +344,6 @@ public:
     */
     static bool isValidPeer (const ComponentPeer* peer) throw();
 
-    //==============================================================================
-    static void bringModalComponentToFront();
 
     //==============================================================================
     virtual const StringArray getAvailableRenderingEngines();

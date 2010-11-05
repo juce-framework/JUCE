@@ -333,20 +333,19 @@ public:
     const Rectangle<int> getScreenBounds() const;
 
     /** Converts a position relative to this component's top-left into a screen co-ordinate.
-
         @see globalPositionToRelative, relativePositionToOtherComponent
     */
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
     /** Converts a screen co-ordinate into a position relative to this component's top-left.
-
         @see relativePositionToGlobal, relativePositionToOtherComponent
     */
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
 
     /** Converts a position relative to this component's top-left into a position
         relative to another component's top-left.
-
+        If the targetComponent parameter is null, the coordinate is converted to global screen
+        coordinates.
         @see relativePositionToGlobal, globalPositionToRelative
     */
     const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
@@ -1213,7 +1212,8 @@ public:
         if you want to force the system to check that the cursor being displayed is
         up-to-date (even if the mouse is just sitting there), call this method.
 
-        This isn't needed if you're only using setMouseCursor().
+        (If you're changing the cursor using setMouseCursor(), you don't need to bother
+        calling this).
     */
     void updateMouseCursor() const;
 
@@ -2068,8 +2068,6 @@ private:
     void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
     static void giveAwayFocus();
     void sendEnablementChangeMessage();
-    static void* runModalLoopCallback (void*);
-    static void bringModalComponentToFront();
     void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
                                   const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
     void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;

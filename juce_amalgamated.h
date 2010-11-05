@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	86
+#define JUCE_BUILDNUMBER	87
 
 /** Current Juce version number.
 
@@ -1394,41 +1394,41 @@ private:
 
 inline uint16 ByteOrder::swap (uint16 n)
 {
-#if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
+  #if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
 	return static_cast <uint16> (_byteswap_ushort (n));
-#else
+  #else
 	return static_cast <uint16> ((n << 8) | (n >> 8));
-#endif
+  #endif
 }
 
 inline uint32 ByteOrder::swap (uint32 n)
 {
-#if JUCE_MAC || JUCE_IOS
+  #if JUCE_MAC || JUCE_IOS
 	return OSSwapInt32 (n);
-#elif JUCE_GCC
+  #elif JUCE_GCC
 	asm("bswap %%eax" : "=a"(n) : "a"(n));
 	return n;
-#elif JUCE_USE_INTRINSICS
+  #elif JUCE_USE_INTRINSICS
 	return _byteswap_ulong (n);
-#else
+  #else
 	__asm {
 		mov eax, n
 		bswap eax
 		mov n, eax
 	}
 	return n;
-#endif
+  #endif
 }
 
 inline uint64 ByteOrder::swap (uint64 value)
 {
-#if JUCE_MAC || JUCE_IOS
+  #if JUCE_MAC || JUCE_IOS
 	return OSSwapInt64 (value);
-#elif JUCE_USE_INTRINSICS
+  #elif JUCE_USE_INTRINSICS
 	return _byteswap_uint64 (value);
-#else
+  #else
 	return (((int64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
-#endif
+  #endif
 }
 
 #if JUCE_LITTLE_ENDIAN
@@ -10294,6 +10294,8 @@ private:
 		String name, value;
 		XmlAttributeNode* next;
 
+		bool hasName (const String& name) const throw();
+
 	private:
 		XmlAttributeNode& operator= (const XmlAttributeNode&);
 	};
@@ -17680,6 +17682,16 @@ private:
 
 	@endcode
 
+	Or you can use the static helper methods for quick parsing..
+
+	@code
+	XmlElement* xml = XmlDocument::parse (myXmlFile);
+
+	if (xml != 0 && xml->hasTagName ("foobar"))
+	{
+		...etc
+	@endcode
+
 	@see XmlElement
 */
 class JUCE_API  XmlDocument
@@ -17687,16 +17699,12 @@ class JUCE_API  XmlDocument
 public:
 
 	/** Creates an XmlDocument from the xml text.
-
-		The text doesn't actually get parsed until the getDocumentElement() method is
-		called.
+		The text doesn't actually get parsed until the getDocumentElement() method is called.
 	*/
 	XmlDocument (const String& documentText);
 
 	/** Creates an XmlDocument from a file.
-
-		The text doesn't actually get parsed until the getDocumentElement() method is
-		called.
+		The text doesn't actually get parsed until the getDocumentElement() method is called.
 	*/
 	XmlDocument (const File& file);
 
@@ -17708,6 +17716,9 @@ public:
 		This method will do the actual parsing of the text, and if there's a
 		parse error, it may returns 0 (and you can find out the error using
 		the getLastParseError() method).
+
+		See also the parse() methods, which provide a shorthand way to quickly
+		parse a file or string.
 
 		@param onlyReadOuterDocumentElement	 if true, the parser will only read the
 												first section of the file, and will only
@@ -17749,6 +17760,18 @@ public:
 	*/
 	void setEmptyTextElementsIgnored (bool shouldBeIgnored) throw();
 
+	/** A handy static method that parses a file.
+		This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
+		@returns	a new XmlElement which the caller will need to delete, or null if there was an error.
+	*/
+	static XmlElement* parse (const File& file);
+
+	/** A handy static method that parses some XML data.
+		This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
+		@returns	a new XmlElement which the caller will need to delete, or null if there was an error.
+	*/
+	static XmlElement* parse (const String& xmlData);
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -17756,7 +17779,6 @@ private:
 	const juce_wchar* input;
 	bool outOfData, errorOccurred;
 
-	bool identifierLookupTable [128];
 	String lastError, dtdText;
 	StringArray tokenisedDTD;
 	bool needToLoadDTD, ignoreEmptyTextElements;
@@ -17771,8 +17793,6 @@ private:
 	int findNextTokenLength() throw();
 	void readQuotedString (String& result);
 	void readEntity (String& result);
-	static bool isXmlIdentifierCharSlow (juce_wchar c) throw();
-	bool isXmlIdentifierChar (juce_wchar c) const throw();
 
 	const String getFileContents (const String& filename) const;
 	const String expandEntity (const String& entity);
@@ -22624,8 +22644,11 @@ public:
 
 protected:
 	String name;
+	bool isFallbackFont;
 
 	explicit Typeface (const String& name) throw();
+
+	static const Ptr getFallbackTypeface();
 
 private:
 	Typeface (const Typeface&);
@@ -22873,7 +22896,7 @@ public:
 	static const String getDefaultMonospacedFontName();
 
 	/** Returns the typeface names of the default fonts on the current platform. */
-	static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed);
+	static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback);
 
 	/** Returns the total height of this font.
 
@@ -25951,6 +25974,9 @@ public:
 	*/
 	void attachCallback (Component* component, Callback* callback);
 
+	/** Brings any modal components to the front. */
+	void bringModalComponentsToFront();
+
 	/** Runs the event loop until the currently topmost modal component is dismissed, and
 		returns the exit code for that component.
 	*/
@@ -26272,20 +26298,19 @@ public:
 	const Rectangle<int> getScreenBounds() const;
 
 	/** Converts a position relative to this component's top-left into a screen co-ordinate.
-
 		@see globalPositionToRelative, relativePositionToOtherComponent
 	*/
 	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
 	/** Converts a screen co-ordinate into a position relative to this component's top-left.
-
 		@see relativePositionToGlobal, relativePositionToOtherComponent
 	*/
 	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
 
 	/** Converts a position relative to this component's top-left into a position
 		relative to another component's top-left.
-
+		If the targetComponent parameter is null, the coordinate is converted to global screen
+		coordinates.
 		@see relativePositionToGlobal, globalPositionToRelative
 	*/
 	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
@@ -27133,7 +27158,8 @@ public:
 		if you want to force the system to check that the cursor being displayed is
 		up-to-date (even if the mouse is just sitting there), call this method.
 
-		This isn't needed if you're only using setMouseCursor().
+		(If you're changing the cursor using setMouseCursor(), you don't need to bother
+		calling this).
 	*/
 	void updateMouseCursor() const;
 
@@ -27968,8 +27994,6 @@ private:
 	void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
 	static void giveAwayFocus();
 	void sendEnablementChangeMessage();
-	static void* runModalLoopCallback (void*);
-	static void bringModalComponentToFront();
 	void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
 								  const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
 	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;
@@ -53251,7 +53275,7 @@ protected:
 
 private:
 
-	Array <Component::SafePointer<Component> > contentComponents;
+	OwnedArray <Component::SafePointer<Component> > contentComponents;
 	Component::SafePointer<Component> panelComponent;
 	int tabDepth;
 	int outlineThickness, edgeIndent;
@@ -59263,8 +59287,6 @@ public:
 		@see getNumPeers
 	*/
 	static bool isValidPeer (const ComponentPeer* peer) throw();
-
-	static void bringModalComponentToFront();
 
 	virtual const StringArray getAvailableRenderingEngines();
 	virtual int getCurrentRenderingEngine() throw();

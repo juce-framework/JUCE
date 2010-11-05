@@ -38,14 +38,13 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace FontValues
 {
-    static float limitFontHeight (const float height) throw()
+    float limitFontHeight (const float height) throw()
     {
         return jlimit (0.1f, 10000.0f, height);
     }
 
-    static const float defaultFontHeight = 14.0f;
-
-    static String fallbackFont;
+    const float defaultFontHeight = 14.0f;
+    String fallbackFont;
 }
 
 //==============================================================================

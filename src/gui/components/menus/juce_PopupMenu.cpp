@@ -246,10 +246,10 @@ private:
 //==============================================================================
 namespace PopupMenuSettings
 {
-    static const int scrollZone = 24;
-    static const int borderSize = 2;
-    static const int timerInterval = 50;
-    static const int dismissCommandId = 0x6287345f;
+    const int scrollZone = 24;
+    const int borderSize = 2;
+    const int timerInterval = 50;
+    const int dismissCommandId = 0x6287345f;
 }
 
 //==============================================================================
@@ -390,9 +390,8 @@ public:
     bool isScrollZoneActive (bool bottomOne) const
     {
         return isScrolling()
-                && (bottomOne
-                        ? childYOffset < contentHeight - windowPos.getHeight()
-                        : childYOffset > 0);
+                && (bottomOne ? childYOffset < contentHeight - windowPos.getHeight()
+                              : childYOffset > 0);
     }
 
     //==============================================================================
@@ -453,25 +452,10 @@ public:
     }
 
     //==============================================================================
-    void mouseMove (const MouseEvent&)
-    {
-        timerCallback();
-    }
-
-    void mouseDown (const MouseEvent&)
-    {
-        timerCallback();
-    }
-
-    void mouseDrag (const MouseEvent&)
-    {
-        timerCallback();
-    }
-
-    void mouseUp (const MouseEvent&)
-    {
-        timerCallback();
-    }
+    void mouseMove (const MouseEvent&)    { timerCallback(); }
+    void mouseDown (const MouseEvent&)    { timerCallback(); }
+    void mouseDrag (const MouseEvent&)    { timerCallback(); }
+    void mouseUp   (const MouseEvent&)    { timerCallback(); }
 
     void mouseWheelMove (const MouseEvent&, float /*amountX*/, float amountY)
     {
@@ -1151,12 +1135,9 @@ private:
             }
 
             Path areaTowardsSubMenu;
-            areaTowardsSubMenu.addTriangle ((float) lastMouse.getX(),
-                                            (float) lastMouse.getY(),
-                                            subX,
-                                            (float) activeSubMenu->getScreenY(),
-                                            subX,
-                                            (float) (activeSubMenu->getScreenY() + activeSubMenu->getHeight()));
+            areaTowardsSubMenu.addTriangle ((float) lastMouse.getX(), (float) lastMouse.getY(),
+                                            subX, (float) activeSubMenu->getScreenY(),
+                                            subX, (float) (activeSubMenu->getScreenY() + activeSubMenu->getHeight()));
 
             isMovingTowardsMenu = areaTowardsSubMenu.contains ((float) globalMousePos.getX(), (float) globalMousePos.getY());
         }
@@ -1288,11 +1269,8 @@ void PopupMenu::addSeparatorIfPending()
     }
 }
 
-void PopupMenu::addItem (const int itemResultId,
-                         const String& itemText,
-                         const bool isActive,
-                         const bool isTicked,
-                         const Image& iconToUse)
+void PopupMenu::addItem (const int itemResultId, const String& itemText,
+                         const bool isActive, const bool isTicked, const Image& iconToUse)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1366,12 +1344,10 @@ void PopupMenu::addCustomItem (const int itemResultId,
 class NormalComponentWrapper : public PopupMenuCustomComponent
 {
 public:
-    NormalComponentWrapper (Component* const comp,
-                            const int w, const int h,
+    NormalComponentWrapper (Component* const comp, const int w, const int h,
                             const bool triggerMenuItemAutomaticallyWhenClicked)
         : PopupMenuCustomComponent (triggerMenuItemAutomaticallyWhenClicked),
-          width (w),
-          height (h)
+          width (w), height (h)
     {
         addAndMakeVisible (comp);
     }
@@ -1405,8 +1381,7 @@ void PopupMenu::addCustomItem (const int itemResultId,
                                const bool triggerMenuItemAutomaticallyWhenClicked)
 {
     addCustomItem (itemResultId,
-                   new NormalComponentWrapper (customComponent,
-                                               idealWidth, idealHeight,
+                   new NormalComponentWrapper (customComponent, idealWidth, idealHeight,
                                                triggerMenuItemAutomaticallyWhenClicked));
 }
 
@@ -1480,8 +1455,6 @@ public:
         : managerOfChosenCommand (0)
     {
     }
-
-    ~PopupMenuCompletionCallback()  {}
 
     void modalStateFinished (int result)
     {
@@ -1558,8 +1531,7 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
 }
 
 int PopupMenu::show (const int itemIdThatMustBeVisible,
-                     const int minimumWidth,
-                     const int maximumNumColumns,
+                     const int minimumWidth, const int maximumNumColumns,
                      const int standardItemHeight,
                      ModalComponentManager::Callback* callback)
 {
@@ -1567,31 +1539,24 @@ int PopupMenu::show (const int itemIdThatMustBeVisible,
 
     return showAt (mousePos.getX(), mousePos.getY(),
                    itemIdThatMustBeVisible,
-                   minimumWidth,
-                   maximumNumColumns,
-                   standardItemHeight,
-                   callback);
+                   minimumWidth, maximumNumColumns,
+                   standardItemHeight, callback);
 }
 
-int PopupMenu::showAt (const int screenX,
-                       const int screenY,
+int PopupMenu::showAt (const int screenX, const int screenY,
                        const int itemIdThatMustBeVisible,
-                       const int minimumWidth,
-                       const int maximumNumColumns,
+                       const int minimumWidth, const int maximumNumColumns,
                        const int standardItemHeight,
                        ModalComponentManager::Callback* callback)
 {
     return showMenu (Rectangle<int> (screenX, screenY, 1, 1),
-                     itemIdThatMustBeVisible,
-                     minimumWidth, maximumNumColumns,
-                     standardItemHeight,
-                     false, 0, callback);
+                     itemIdThatMustBeVisible, minimumWidth, maximumNumColumns,
+                     standardItemHeight, false, 0, callback);
 }
 
 int PopupMenu::showAt (Component* componentToAttachTo,
                        const int itemIdThatMustBeVisible,
-                       const int minimumWidth,
-                       const int maximumNumColumns,
+                       const int minimumWidth, const int maximumNumColumns,
                        const int standardItemHeight,
                        ModalComponentManager::Callback* callback)
 {
@@ -1607,10 +1572,8 @@ int PopupMenu::showAt (Component* componentToAttachTo,
     else
     {
         return show (itemIdThatMustBeVisible,
-                     minimumWidth,
-                     maximumNumColumns,
-                     standardItemHeight,
-                     callback);
+                     minimumWidth, maximumNumColumns,
+                     standardItemHeight, callback);
     }
 }
 

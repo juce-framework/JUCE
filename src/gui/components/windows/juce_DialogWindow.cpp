@@ -72,10 +72,6 @@ public:
             setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
     }
 
-    ~TempDialogWindow()
-    {
-    }
-
     void closeButtonPressed()
     {
         setVisible (false);
@@ -84,7 +80,6 @@ public:
 private:
     TempDialogWindow (const TempDialogWindow&);
     TempDialogWindow& operator= (const TempDialogWindow&);
-
 };
 
 int DialogWindow::showModalDialog (const String& dialogTitle,

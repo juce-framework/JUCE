@@ -107,41 +107,41 @@ private:
 
 inline uint16 ByteOrder::swap (uint16 n)
 {
-#if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
+  #if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
     return static_cast <uint16> (_byteswap_ushort (n));
-#else
+  #else
     return static_cast <uint16> ((n << 8) | (n >> 8));
-#endif
+  #endif
 }
 
 inline uint32 ByteOrder::swap (uint32 n)
 {
-#if JUCE_MAC || JUCE_IOS
+  #if JUCE_MAC || JUCE_IOS
     return OSSwapInt32 (n);
-#elif JUCE_GCC
+  #elif JUCE_GCC
     asm("bswap %%eax" : "=a"(n) : "a"(n));
     return n;
-#elif JUCE_USE_INTRINSICS
+  #elif JUCE_USE_INTRINSICS
     return _byteswap_ulong (n);
-#else
+  #else
     __asm {
         mov eax, n
         bswap eax
         mov n, eax
     }
     return n;
-#endif
+  #endif
 }
 
 inline uint64 ByteOrder::swap (uint64 value)
 {
-#if JUCE_MAC || JUCE_IOS
+  #if JUCE_MAC || JUCE_IOS
     return OSSwapInt64 (value);
-#elif JUCE_USE_INTRINSICS
+  #elif JUCE_USE_INTRINSICS
     return _byteswap_uint64 (value);
-#else
+  #else
     return (((int64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
-#endif
+  #endif
 }
 
 #if JUCE_LITTLE_ENDIAN

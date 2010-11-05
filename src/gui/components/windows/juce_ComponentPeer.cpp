@@ -353,7 +353,7 @@ void ComponentPeer::handleFocusGain()
         if (! component->isCurrentlyBlockedByAnotherModalComponent())
             component->grabKeyboardFocus();
         else
-            Component::bringModalComponentToFront();
+            ModalComponentManager::getInstance()->bringModalComponentsToFront();
     }
 }
 
@@ -507,14 +507,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
 void ComponentPeer::handleUserClosingWindow()
 {
     updateCurrentModifiers();
-
     component->userTriedToCloseWindow();
-}
-
-//==============================================================================
-void ComponentPeer::bringModalComponentToFront()
-{
-    Component::bringModalComponentToFront();
 }
 
 //==============================================================================

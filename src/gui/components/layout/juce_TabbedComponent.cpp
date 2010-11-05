@@ -132,7 +132,7 @@ void TabbedComponent::clearTabs()
 
     for (int i = contentComponents.size(); --i >= 0;)
     {
-        Component::SafePointer<Component>& c = contentComponents.getReference (i);
+        Component::SafePointer<Component>& c = *contentComponents.getUnchecked (i);
 
         if (c != 0 && (bool) c->getProperties() [deleteComponentId])
             c.deleteAndZero();
@@ -147,7 +147,7 @@ void TabbedComponent::addTab (const String& tabName,
                               const bool deleteComponentWhenNotNeeded,
                               const int insertIndex)
 {
-    contentComponents.insert (insertIndex, contentComponent);
+    contentComponents.insert (insertIndex, new Component::SafePointer<Component> (contentComponent));
 
     if (contentComponent != 0)
         contentComponent->getProperties().set (deleteComponentId, deleteComponentWhenNotNeeded);
@@ -162,12 +162,12 @@ void TabbedComponent::setTabName (const int tabIndex, const String& newName)
 
 void TabbedComponent::removeTab (const int tabIndex)
 {
-    if (tabIndex >= 0 && tabIndex < contentComponents.size())
-    {
-        Component::SafePointer<Component>& c = contentComponents.getReference (tabIndex);
+    Component::SafePointer<Component>* c = contentComponents [tabIndex];
 
-        if (c != 0 && (bool) c->getProperties() [deleteComponentId])
-            c.deleteAndZero();
+    if (c != 0)
+    {
+        if ((bool) ((*c)->getProperties() [deleteComponentId]))
+            c->deleteAndZero();
 
         contentComponents.remove (tabIndex);
         tabs->removeTab (tabIndex);
@@ -186,7 +186,8 @@ const StringArray TabbedComponent::getTabNames() const
 
 Component* TabbedComponent::getTabContentComponent (const int tabIndex) const throw()
 {
-    return contentComponents [tabIndex];
+    Component::SafePointer<Component>* const c = contentComponents [tabIndex];
+    return c != 0 ? *c : 0;
 }
 
 const Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const throw()
@@ -297,15 +298,15 @@ void TabbedComponent::resized()
     const Rectangle<int> bounds (indents.subtractedFrom (getLocalBounds()));
 
     for (int i = contentComponents.size(); --i >= 0;)
-        if (contentComponents.getReference (i) != 0)
-            contentComponents.getReference (i)->setBounds (bounds);
+        if (*contentComponents.getUnchecked (i) != 0)
+            (*contentComponents.getUnchecked (i))->setBounds (bounds);
 }
 
 void TabbedComponent::lookAndFeelChanged()
 {
     for (int i = contentComponents.size(); --i >= 0;)
-        if (contentComponents.getReference (i) != 0)
-            contentComponents.getReference (i)->lookAndFeelChanged();
+        if (*contentComponents.getUnchecked (i) != 0)
+            (*contentComponents.getUnchecked (i))->lookAndFeelChanged();
 }
 
 void TabbedComponent::changeCallback (const int newCurrentTabIndex,
@@ -320,7 +321,7 @@ void TabbedComponent::changeCallback (const int newCurrentTabIndex,
 
     if (getCurrentTabIndex() >= 0)
     {
-        panelComponent = contentComponents [getCurrentTabIndex()];
+        panelComponent = getTabContentComponent (getCurrentTabIndex());
 
         if (panelComponent != 0)
         {

@@ -296,14 +296,15 @@ LookAndFeel::LookAndFeel()
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
         setColour (standardColours [i], Colour (standardColours [i + 1]));
 
-    static String defaultSansName, defaultSerifName, defaultFixedName;
+    static String defaultSansName, defaultSerifName, defaultFixedName, defaultFallback;
 
     if (defaultSansName.isEmpty())
-        Font::getPlatformDefaultFontNames (defaultSansName, defaultSerifName, defaultFixedName);
+        Font::getPlatformDefaultFontNames (defaultSansName, defaultSerifName, defaultFixedName, defaultFallback);
 
     defaultSans = defaultSansName;
     defaultSerif = defaultSerifName;
     defaultFixed = defaultFixedName;
+    Font::setFallbackFontName (defaultFallback);
 }
 
 LookAndFeel::~LookAndFeel()

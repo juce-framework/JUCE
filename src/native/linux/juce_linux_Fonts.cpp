@@ -562,7 +562,7 @@ namespace
     }
 }
 
-void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& /*defaultFallback*/)
 {
     defaultSans = linux_getDefaultSansSerifFontName();
     defaultSerif = linux_getDefaultSerifFontName();
