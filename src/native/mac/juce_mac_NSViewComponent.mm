@@ -76,7 +76,7 @@ public:
 
         if (topComp->getPeer() != 0)
         {
-            const Point<int> pos (owner->relativePositionToOtherComponent (topComp, Point<int>()));
+            const Point<int> pos (topComp->getLocalPoint (owner, Point<int>()));
 
             NSRect r = NSMakeRect ((float) pos.getX(), (float) pos.getY(), (float) owner->getWidth(), (float) owner->getHeight());
             r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);

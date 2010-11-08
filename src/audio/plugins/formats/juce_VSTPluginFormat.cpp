@@ -1198,7 +1198,7 @@ public:
 
         if (topComp->getPeer() != 0)
         {
-            const Point<int> pos (relativePositionToOtherComponent (topComp, Point<int>()));
+            const Point<int> pos (topComp->getLocalPoint (this, Point<int>()));
 
             recursiveResize = true;
 

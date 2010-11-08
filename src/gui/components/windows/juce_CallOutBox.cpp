@@ -45,8 +45,7 @@ CallOutBox::CallOutBox (Component& contentComponent,
     {
         parentComponent->addChildComponent (this);
 
-        updatePosition (componentToPointTo.getLocalBounds()
-                            + componentToPointTo.relativePositionToOtherComponent (parentComponent, Point<int>()),
+        updatePosition (parentComponent->getLocalArea (&componentToPointTo, componentToPointTo.getLocalBounds()),
                         parentComponent->getLocalBounds());
 
         setVisible (true);

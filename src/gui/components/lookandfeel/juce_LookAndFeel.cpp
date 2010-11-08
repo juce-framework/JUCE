@@ -155,6 +155,9 @@ namespace LookAndFeelHelpers
 
         return tl;
     }
+
+    LookAndFeel* defaultLF = 0;
+    LookAndFeel* currentDefaultLF = 0;
 }
 
 //==============================================================================
@@ -309,6 +312,8 @@ LookAndFeel::LookAndFeel()
 
 LookAndFeel::~LookAndFeel()
 {
+    if (this == LookAndFeelHelpers::currentDefaultLF)
+        setDefaultLookAndFeel (0);
 }
 
 //==============================================================================
@@ -344,21 +349,20 @@ bool LookAndFeel::isColourSpecified (const int colourId) const throw()
 }
 
 //==============================================================================
-static LookAndFeel* defaultLF = 0;
-static LookAndFeel* currentDefaultLF = 0;
-
 LookAndFeel& LookAndFeel::getDefaultLookAndFeel() throw()
 {
     // if this happens, your app hasn't initialised itself properly.. if you're
     // trying to hack your own main() function, have a look at
     // JUCEApplication::initialiseForGUI()
-    jassert (currentDefaultLF != 0);
+    jassert (LookAndFeelHelpers::currentDefaultLF != 0);
 
-    return *currentDefaultLF;
+    return *LookAndFeelHelpers::currentDefaultLF;
 }
 
 void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) throw()
 {
+    using namespace LookAndFeelHelpers;
+
     if (newDefaultLookAndFeel == 0)
     {
         if (defaultLF == 0)
@@ -367,7 +371,7 @@ void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) thr
         newDefaultLookAndFeel = defaultLF;
     }
 
-    currentDefaultLF = newDefaultLookAndFeel;
+    LookAndFeelHelpers::currentDefaultLF = newDefaultLookAndFeel;
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {
@@ -380,6 +384,8 @@ void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) thr
 
 void LookAndFeel::clearDefaultLookAndFeel() throw()
 {
+    using namespace LookAndFeelHelpers;
+
     if (currentDefaultLF == defaultLF)
         currentDefaultLF = 0;
 

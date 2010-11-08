@@ -101,9 +101,9 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
     Point<int> pos;
 
     if (getParentComponent() != 0)
-        pos = componentToPointTo->relativePositionToOtherComponent (getParentComponent(), pos);
+        pos = getParentComponent()->getLocalPoint (componentToPointTo, pos);
     else
-        pos = componentToPointTo->relativePositionToGlobal (pos);
+        pos = componentToPointTo->localPointToGlobal (pos);
 
     setPosition (Rectangle<int> (pos.getX(), pos.getY(), componentToPointTo->getWidth(), componentToPointTo->getHeight()));
 }

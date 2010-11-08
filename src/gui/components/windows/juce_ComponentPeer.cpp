@@ -399,6 +399,16 @@ const Rectangle<int>& ComponentPeer::getNonFullScreenBounds() const throw()
     return lastNonFullscreenBounds;
 }
 
+const Rectangle<int> ComponentPeer::localToGlobal (const Rectangle<int>& relativePosition)
+{
+    return relativePosition.withPosition (localToGlobal (relativePosition.getPosition()));
+}
+
+const Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPosition)
+{
+    return screenPosition.withPosition (globalToLocal (screenPosition.getPosition()));
+}
+
 //==============================================================================
 namespace ComponentPeerHelpers
 {
@@ -446,7 +456,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
             if (newTarget != 0)
             {
                 dragAndDropTargetComponent = dynamic_cast <Component*> (newTarget);
-                const Point<int> pos (component->relativePositionToOtherComponent (dragAndDropTargetComponent, position));
+                const Point<int> pos (dragAndDropTargetComponent->getLocalPoint (component, position));
                 newTarget->fileDragEnter (files, pos.getX(), pos.getY());
             }
         }
@@ -459,7 +469,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
     if (newTarget != 0)
     {
         Component* const targetComp = dynamic_cast <Component*> (newTarget);
-        const Point<int> pos (component->relativePositionToOtherComponent (targetComp, position));
+        const Point<int> pos (targetComp->getLocalPoint (component, position));
 
         newTarget->fileDragMove (files, pos.getX(), pos.getY());
     }
@@ -497,7 +507,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
                     return;
             }
 
-            const Point<int> pos (component->relativePositionToOtherComponent (targetComp, position));
+            const Point<int> pos (targetComp->getLocalPoint (component, position));
             target->filesDropped (files, pos.getX(), pos.getY());
         }
     }

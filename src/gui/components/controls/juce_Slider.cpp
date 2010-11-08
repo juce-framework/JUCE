@@ -1172,8 +1172,8 @@ void Slider::restoreMouseIfHidden()
         {
             const int pixelPos = (int) getLinearSliderPos (pos);
 
-            mousePos = relativePositionToGlobal (Point<int> (isHorizontal() ? pixelPos : (getWidth() / 2),
-                                                             isVertical()   ? pixelPos : (getHeight() / 2)));
+            mousePos = localPointToGlobal (Point<int> (isHorizontal() ? pixelPos : (getWidth() / 2),
+                                                       isVertical()   ? pixelPos : (getHeight() / 2)));
         }
 
         Desktop::setMousePosition (mousePos);

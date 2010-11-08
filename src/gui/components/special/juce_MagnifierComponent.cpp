@@ -96,16 +96,16 @@ public:
         return magnifierComp->getScreenPosition();
     }
 
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
+    const Point<int> localToGlobal (const Point<int>& relativePosition)
     {
         const double zoom = magnifierComp->getScaleFactor();
-        return magnifierComp->relativePositionToGlobal (Point<int> (roundToInt (relativePosition.getX() * zoom),
-                                                                    roundToInt (relativePosition.getY() * zoom)));
+        return magnifierComp->localPointToGlobal (Point<int> (roundToInt (relativePosition.getX() * zoom),
+                                                              roundToInt (relativePosition.getY() * zoom)));
     }
 
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
+    const Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        const Point<int> p (magnifierComp->globalPositionToRelative (screenPosition));
+        const Point<int> p (magnifierComp->getLocalPoint (0, screenPosition));
         const double zoom = magnifierComp->getScaleFactor();
 
         return Point<int> (roundToInt (p.getX() / zoom),

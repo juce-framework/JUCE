@@ -50,7 +50,7 @@ void ComponentDragger::startDraggingComponent (Component* const componentToDrag,
     if (componentToDrag != 0)
     {
         constrainer = constrainer_;
-        originalPos = componentToDrag->relativePositionToGlobal (Point<int>());
+        originalPos = componentToDrag->localPointToGlobal (Point<int>());
     }
 }
 
@@ -65,7 +65,7 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
 
         const Component* const parentComp = componentToDrag->getParentComponent();
         if (parentComp != 0)
-            bounds.setPosition (parentComp->globalPositionToRelative (originalPos));
+            bounds.setPosition (parentComp->getLocalPoint (0, originalPos));
 
         bounds.setPosition (bounds.getPosition() + e.getOffsetFromDragStart());
 

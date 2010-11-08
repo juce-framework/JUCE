@@ -110,7 +110,7 @@ public:
         }
         else
         {
-            const Point<int> relPos (hit->globalPositionToRelative (screenPos));
+            const Point<int> relPos (hit->getLocalPoint (0, screenPos));
             hit = hit->getComponentAt (relPos.getX(), relPos.getY());
         }
 
@@ -124,7 +124,7 @@ public:
 
             if (ddt != 0 && ddt->isInterestedInDragSource (dragDescLocal, source))
             {
-                relativePos = hit->globalPositionToRelative (screenPos);
+                relativePos = hit->getLocalPoint (0, screenPos);
                 return ddt;
             }
 
@@ -162,8 +162,8 @@ public:
                 }
                 else
                 {
-                    const Point<int> target (source->relativePositionToGlobal (source->getLocalBounds().getCentre()));
-                    const Point<int> ourCentre (relativePositionToGlobal (getLocalBounds().getCentre()));
+                    const Point<int> target (source->localPointToGlobal (source->getLocalBounds().getCentre()));
+                    const Point<int> ourCentre (localPointToGlobal (getLocalBounds().getCentre()));
 
                     Desktop::getInstance().getAnimator().animateComponent (this,
                                                                            getBounds() + (target - ourCentre),
@@ -199,7 +199,7 @@ public:
         Point<int> newPos (screenPos + imageOffset);
 
         if (getParentComponent() != 0)
-            newPos = getParentComponent()->globalPositionToRelative (newPos);
+            newPos = getParentComponent()->getLocalPoint (0, newPos);
 
         //if (newX != getX() || newY != getY())
         {
@@ -347,7 +347,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             const int lo = 150;
             const int hi = 400;
 
-            Point<int> relPos (sourceComponent->globalPositionToRelative (lastMouseDown));
+            Point<int> relPos (sourceComponent->getLocalPoint (0, lastMouseDown));
             Point<int> clipped (dragImage.getBounds().getConstrainedPoint (relPos));
 
             for (int y = dragImage.getHeight(); --y >= 0;)

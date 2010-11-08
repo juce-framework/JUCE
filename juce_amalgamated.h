@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	87
+#define JUCE_BUILDNUMBER	88
 
 /** Current Juce version number.
 
@@ -6468,18 +6468,6 @@ public:
 		return referencedObject;
 	}
 
-	/** Returns true if this pointer refers to the given object. */
-	inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
-	{
-		return referencedObject == object;
-	}
-
-	/** Returns true if this pointer doesn't refer to the given object. */
-	inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
-	{
-		return referencedObject != object;
-	}
-
 	// the -> operator is called on the referenced object
 	inline ReferenceCountedObjectClass* operator->() const throw()
 	{
@@ -6498,6 +6486,48 @@ private:
 
 	ReferenceCountedObjectClass* referencedObject;
 };
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectClass* const object2) throw()
+{
+	return object1.getObject() == object2;
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+	return object1.getObject() == object2.getObject();
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator== (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+	return object1 == object2.getObject();
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectClass* object2) throw()
+{
+	return object1.getObject() != object2;
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+	return object1.getObject() != object2.getObject();
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+	return object1 != object2.getObject();
+}
 
 #endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 /*** End of inlined file: juce_ReferenceCountedObject.h ***/
@@ -12545,7 +12575,7 @@ public:
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) ())
 	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
 			(iter.getListener()->*callbackFunction) ();
 	}
 
@@ -12553,7 +12583,7 @@ public:
 	template <LL_TEMPLATE(1)>
 	void call (void (ListenerClass::*callbackFunction) (P1), LL_PARAM(1))
 	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1);
 	}
 
@@ -12564,7 +12594,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1),
 					  LL_PARAM(1))
 	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
 			(iter.getListener()->*callbackFunction) (param1);
 	}
 
@@ -12573,7 +12603,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2),
 			   LL_PARAM(1), LL_PARAM(2))
 	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
@@ -12584,7 +12614,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2),
 					  LL_PARAM(1), LL_PARAM(2))
 	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
 			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
@@ -12593,7 +12623,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
 			   LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
 	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
@@ -12604,7 +12634,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3),
 					  LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
 	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
@@ -12613,7 +12643,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
 			   LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
 	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
@@ -12624,7 +12654,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
 					  LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
 	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
@@ -12633,7 +12663,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
 			   LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
 	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
 	}
 
@@ -12644,7 +12674,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
 					  LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
 	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
 	}
 
@@ -12663,15 +12693,15 @@ public:
 	{
 	public:
 
-		Iterator (const ListType& list_, const BailOutCheckerType& bailOutChecker_)
-			: list (list_), bailOutChecker (bailOutChecker_), index (list_.size())
+		Iterator (const ListType& list_)
+			: list (list_), index (list_.size())
 		{}
 
 		~Iterator() {}
 
 		bool next()
 		{
-			if (index <= 0 || bailOutChecker.shouldBailOut())
+			if (index <= 0)
 				return false;
 
 			const int listSize = list.size();
@@ -12683,6 +12713,11 @@ public:
 			return index >= 0;
 		}
 
+		bool next (const BailOutCheckerType& bailOutChecker)
+		{
+			return (! bailOutChecker.shouldBailOut()) && next();
+		}
+
 		typename ListType::ListenerType* getListener() const throw()
 		{
 			return list.getListeners().getUnchecked (index);
@@ -12690,7 +12725,6 @@ public:
 
 	private:
 		const ListType& list;
-		const BailOutCheckerType& bailOutChecker;
 		int index;
 
 		Iterator (const Iterator&);
@@ -26044,7 +26078,7 @@ public:
 
 	/** Destructor.
 
-		Note that when a component is deleted, any child components it contain are NOT
+		Note that when a component is deleted, any child components it contains are NOT
 		automatically deleted. It's your responsibilty to manage their lifespan - you
 		may want to use helper methods like deleteAllChildren(), or less haphazard
 		approaches like using ScopedPointers or normal object aggregation to manage them.
@@ -26278,12 +26312,12 @@ public:
 						 bool includeSiblings) const;
 
 	/** Returns this component's x co-ordinate relative the the screen's top-left origin.
-		@see getX, relativePositionToGlobal
+		@see getX, localPointToGlobal
 	*/
 	int getScreenX() const;
 
 	/** Returns this component's y co-ordinate relative the the screen's top-left origin.
-		@see getY, relativePositionToGlobal
+		@see getY, localPointToGlobal
 	*/
 	int getScreenY() const;
 
@@ -26297,24 +26331,33 @@ public:
 	*/
 	const Rectangle<int> getScreenBounds() const;
 
-	/** Converts a position relative to this component's top-left into a screen co-ordinate.
-		@see globalPositionToRelative, relativePositionToOtherComponent
-	*/
-	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
+	/** Converts a point to be relative to this component's coordinate space.
 
-	/** Converts a screen co-ordinate into a position relative to this component's top-left.
-		@see relativePositionToGlobal, relativePositionToOtherComponent
+		This takes a point relative to a different component, and returns its position relative to this
+		component. If the sourceComponent parameter is null, the source point is assumed to be a global
+		screen coordinate.
 	*/
-	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
+	const Point<int> getLocalPoint (const Component* sourceComponent,
+									const Point<int>& pointRelativeToSourceComponent) const;
 
-	/** Converts a position relative to this component's top-left into a position
-		relative to another component's top-left.
-		If the targetComponent parameter is null, the coordinate is converted to global screen
-		coordinates.
-		@see relativePositionToGlobal, globalPositionToRelative
+	/** Converts a rectangle to be relative to this component's coordinate space.
+
+		This takes a rectangle that is relative to a different component, and returns its position relative
+		to this component. If the sourceComponent parameter is null, the source rectangle is assumed to be
+		a screen coordinate.
 	*/
-	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
-													   const Point<int>& positionRelativeToThis) const;
+	const Rectangle<int> getLocalArea (const Component* sourceComponent,
+									   const Rectangle<int>& areaRelativeToSourceComponent) const;
+
+	/** Converts a point relative to this component's top-left into a screen coordinate.
+		@see getLocalPoint, localAreaToGlobal
+	*/
+	const Point<int> localPointToGlobal (const Point<int>& localPoint) const;
+
+	/** Converts a rectangle from this component's coordinate space to a screen coordinate.
+		@see getLocalPoint, localPointToGlobal
+	*/
+	const Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
 
 	/** Moves the component to a new position.
 
@@ -27910,6 +27953,21 @@ public:
 		BailOutChecker& operator= (const BailOutChecker&);
 	};
 
+   #ifndef DOXYGEN
+	/** @internal
+		This method is deprecated - use localPointToGlobal instead. */
+	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
+
+	/** @internal
+		This method is deprecated - use getLocalPoint instead. */
+	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
+
+	/** @internal
+		This method is deprecated - use getLocalPoint instead. */
+	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
+													   const Point<int>& positionRelativeToThis) const;
+   #endif
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -27952,7 +28010,7 @@ private:
 		bool bufferToImageFlag	  : 1;
 		bool bringToFrontOnClickFlag	: 1;
 		bool repaintOnMouseActivityFlag : 1;
-		bool draggingFlag		   : 1;
+		bool mouseDownFlag		  : 1;
 		bool mouseOverFlag		  : 1;
 		bool mouseInsideFlag		: 1;
 		bool currentlyModalFlag	 : 1;
@@ -40361,8 +40419,7 @@ protected:
 		This might return 0 if the data's unsuitable or corrupted. Otherwise it will return
 		an XmlElement object that the caller must delete when no longer needed.
 	*/
-	static XmlElement* getXmlFromBinary (const void* data,
-										 int sizeInBytes);
+	static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
 
 	/** @internal */
 	AudioPlayHead* playHead;
@@ -59103,10 +59160,16 @@ public:
 	virtual const Point<int> getScreenPosition() const = 0;
 
 	/** Converts a position relative to the top-left of this component to screen co-ordinates. */
-	virtual const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) = 0;
+	virtual const Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
+
+	/** Converts a rectangle relative to the top-left of this component to screen co-ordinates. */
+	virtual const Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
 
 	/** Converts a screen co-ordinate to a position relative to the top-left of this component. */
-	virtual const Point<int> globalPositionToRelative (const Point<int>& screenPosition) = 0;
+	virtual const Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
+
+	/** Converts a screen area to a position relative to the top-left of this component. */
+	virtual const Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
 
 	/** Minimises the window. */
 	virtual void setMinimised (bool shouldBeMinimised) = 0;

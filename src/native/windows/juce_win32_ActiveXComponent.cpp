@@ -256,8 +256,7 @@ public:
 
         if (topComp->getPeer() != 0)
         {
-            const Point<int> pos (owner.relativePositionToOtherComponent (topComp, Point<int>()));
-
+            const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
             owner.setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), owner.getWidth(), owner.getHeight()));
         }
     }
@@ -356,7 +355,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
     if (dynamic_cast <Win32ComponentPeer*> (peer) != 0)
     {
-        const Point<int> pos (relativePositionToOtherComponent (getTopLevelComponent(), Point<int>()));
+        const Point<int> pos (getTopLevelComponent()->getLocalPoint (this, Point<int>()));
         HWND hwnd = (HWND) peer->getNativeHandle();
 
         ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));

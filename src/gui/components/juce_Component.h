@@ -73,7 +73,7 @@ public:
 
     /** Destructor.
 
-        Note that when a component is deleted, any child components it contain are NOT
+        Note that when a component is deleted, any child components it contains are NOT
         automatically deleted. It's your responsibilty to manage their lifespan - you
         may want to use helper methods like deleteAllChildren(), or less haphazard
         approaches like using ScopedPointers or normal object aggregation to manage them.
@@ -313,12 +313,12 @@ public:
 
     //==============================================================================
     /** Returns this component's x co-ordinate relative the the screen's top-left origin.
-        @see getX, relativePositionToGlobal
+        @see getX, localPointToGlobal
     */
     int getScreenX() const;
 
     /** Returns this component's y co-ordinate relative the the screen's top-left origin.
-        @see getY, relativePositionToGlobal
+        @see getY, localPointToGlobal
     */
     int getScreenY() const;
 
@@ -332,24 +332,33 @@ public:
     */
     const Rectangle<int> getScreenBounds() const;
 
-    /** Converts a position relative to this component's top-left into a screen co-ordinate.
-        @see globalPositionToRelative, relativePositionToOtherComponent
-    */
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
+    /** Converts a point to be relative to this component's coordinate space.
 
-    /** Converts a screen co-ordinate into a position relative to this component's top-left.
-        @see relativePositionToGlobal, relativePositionToOtherComponent
+        This takes a point relative to a different component, and returns its position relative to this
+        component. If the sourceComponent parameter is null, the source point is assumed to be a global
+        screen coordinate.
     */
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
+    const Point<int> getLocalPoint (const Component* sourceComponent,
+                                    const Point<int>& pointRelativeToSourceComponent) const;
 
-    /** Converts a position relative to this component's top-left into a position
-        relative to another component's top-left.
-        If the targetComponent parameter is null, the coordinate is converted to global screen
-        coordinates.
-        @see relativePositionToGlobal, globalPositionToRelative
+    /** Converts a rectangle to be relative to this component's coordinate space.
+
+        This takes a rectangle that is relative to a different component, and returns its position relative
+        to this component. If the sourceComponent parameter is null, the source rectangle is assumed to be
+        a screen coordinate.
     */
-    const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
-                                                       const Point<int>& positionRelativeToThis) const;
+    const Rectangle<int> getLocalArea (const Component* sourceComponent,
+                                       const Rectangle<int>& areaRelativeToSourceComponent) const;
+
+    /** Converts a point relative to this component's top-left into a screen coordinate.
+        @see getLocalPoint, localAreaToGlobal
+    */
+    const Point<int> localPointToGlobal (const Point<int>& localPoint) const;
+
+    /** Converts a rectangle from this component's coordinate space to a screen coordinate.
+        @see getLocalPoint, localPointToGlobal
+    */
+    const Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
 
     //==============================================================================
     /** Moves the component to a new position.
@@ -1982,6 +1991,22 @@ public:
     };
 
     //==============================================================================
+   #ifndef DOXYGEN
+    /** @internal
+        This method is deprecated - use localPointToGlobal instead. */
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
+
+    /** @internal
+        This method is deprecated - use getLocalPoint instead. */
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
+
+    /** @internal
+        This method is deprecated - use getLocalPoint instead. */
+    const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
+                                                       const Point<int>& positionRelativeToThis) const;
+   #endif
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
@@ -2025,7 +2050,7 @@ private:
         bool bufferToImageFlag          : 1;
         bool bringToFrontOnClickFlag    : 1;
         bool repaintOnMouseActivityFlag : 1;
-        bool draggingFlag               : 1;
+        bool mouseDownFlag              : 1;
         bool mouseOverFlag              : 1;
         bool mouseInsideFlag            : 1;
         bool currentlyModalFlag         : 1;

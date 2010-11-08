@@ -625,7 +625,7 @@ TreeViewItem* TreeView::getItemAt (int y) const throw()
 {
     TreeViewContentComponent* const tc = static_cast <TreeViewContentComponent*> (viewport->getViewedComponent());
     Rectangle<int> pos;
-    return tc->findItemAt (relativePositionToOtherComponent (tc, Point<int> (0, y)).getY(), pos);
+    return tc->findItemAt (tc->getLocalPoint (this, Point<int> (0, y)).getY(), pos);
 }
 
 TreeViewItem* TreeView::findItemFromIdentifierString (const String& identifierString) const

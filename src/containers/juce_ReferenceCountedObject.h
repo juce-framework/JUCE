@@ -220,18 +220,6 @@ public:
         return referencedObject;
     }
 
-    /** Returns true if this pointer refers to the given object. */
-    inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
-    {
-        return referencedObject == object;
-    }
-
-    /** Returns true if this pointer doesn't refer to the given object. */
-    inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
-    {
-        return referencedObject != object;
-    }
-
     // the -> operator is called on the referenced object
     inline ReferenceCountedObjectClass* operator->() const throw()
     {
@@ -250,6 +238,49 @@ private:
     //==============================================================================
     ReferenceCountedObjectClass* referencedObject;
 };
+
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectClass* const object2) throw()
+{
+    return object1.getObject() == object2;
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+    return object1.getObject() == object2.getObject();
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator== (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+    return object1 == object2.getObject();
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectClass* object2) throw()
+{
+    return object1.getObject() != object2;
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+    return object1.getObject() != object2.getObject();
+}
+
+/** Compares two ReferenceCountedObjectPointers. */
+template <class ReferenceCountedObjectClass>
+bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+{
+    return object1 != object2.getObject();
+}
 
 
 #endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__

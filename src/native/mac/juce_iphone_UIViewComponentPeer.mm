@@ -109,8 +109,8 @@ public:
     const Rectangle<int> getBounds() const;
     const Rectangle<int> getBounds (const bool global) const;
     const Point<int> getScreenPosition() const;
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
+    const Point<int> localToGlobal (const Point<int>& relativePosition);
+    const Point<int> globalToLocal (const Point<int>& screenPosition);
     void setAlpha (float newAlpha);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
@@ -539,12 +539,12 @@ const Point<int> UIViewComponentPeer::getScreenPosition() const
     return getBounds (true).getPosition();
 }
 
-const Point<int> UIViewComponentPeer::relativePositionToGlobal (const Point<int>& relativePosition)
+const Point<int> UIViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
 {
     return relativePosition + getScreenPosition();
 }
 
-const Point<int> UIViewComponentPeer::globalPositionToRelative (const Point<int>& screenPosition)
+const Point<int> UIViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
 {
     return screenPosition - getScreenPosition();
 }
@@ -863,7 +863,7 @@ void UIViewComponentPeer::globalFocusChanged (Component*)
     {
         Component* comp = dynamic_cast<Component*> (target);
 
-        Point<int> pos (comp->relativePositionToOtherComponent (component, Point<int>()));
+        Point<int> pos (component->getLocalPoint (comp, Point<int>()));
         view->hiddenTextView.frame = CGRectMake (pos.getX(), pos.getY(), 0, 0);
 
         updateHiddenTextContent (target);

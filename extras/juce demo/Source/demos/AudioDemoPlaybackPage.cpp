@@ -105,12 +105,12 @@ public:
         repaint();
     }
 
-    bool isInterestedInFileDrag (const StringArray& files)
+    bool isInterestedInFileDrag (const StringArray& /*files*/)
     {
         return true;
     }
 
-    void filesDropped (const StringArray& files, int x, int y)
+    void filesDropped (const StringArray& files, int /*x*/, int /*y*/)
     {
         AudioDemoPlaybackPage* demoPage = findParentComponentOfClass ((AudioDemoPlaybackPage*) 0);
 

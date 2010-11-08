@@ -878,7 +878,7 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
         if (rowComp != 0 && isRowSelected (firstRow + i))
         {
-            const Point<int> pos (rowComp->relativePositionToOtherComponent (this, Point<int>()));
+            const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
             const Rectangle<int> rowRect (pos.getX(), pos.getY(), rowComp->getWidth(), rowComp->getHeight());
             imageArea = imageArea.getUnion (rowRect);
         }
@@ -895,7 +895,7 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
         if (rowComp != 0 && isRowSelected (firstRow + i))
         {
-            const Point<int> pos (rowComp->relativePositionToOtherComponent (this, Point<int>()));
+            const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
 
             Graphics g (snapshot);
             g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);

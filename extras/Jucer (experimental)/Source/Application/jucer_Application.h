@@ -33,7 +33,7 @@
 
 
 //==============================================================================
-class JucerApplication : public JUCEApplication
+class JucerApplication   : public JUCEApplication
 {
 public:
     //==============================================================================
@@ -76,18 +76,18 @@ public:
                 openFile (projects.getReference(i));
         }
 
-#if JUCE_MAC
+      #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel);
-#endif
+      #endif
 
         main->setVisible (true);
     }
 
     void shutdown()
     {
-#if JUCE_MAC
+      #if JUCE_MAC
         MenuBarModel::setMacMainMenu (0);
-#endif
+      #endif
         menuModel = 0;
 
         StoredSettings::deleteInstance();
@@ -116,10 +116,10 @@ public:
         jassert (mainWindows.contains (w));
         mainWindows.removeObject (w);
 
-#if ! JUCE_MAC
+      #if ! JUCE_MAC
         if (mainWindows.size() == 0)
             systemRequestedQuit();
-#endif
+      #endif
 
         updateRecentProjectList();
     }
@@ -137,11 +137,11 @@ public:
 
     bool moreThanOneInstanceAllowed()
     {
-#ifndef JUCE_LINUX
+      #ifndef JUCE_LINUX
         return false;
-#else
+      #else
         return true; //xxx should be false but doesn't work on linux..
-#endif
+      #endif
     }
 
     void anotherInstanceStarted (const String& commandLine)

@@ -152,10 +152,16 @@ public:
     virtual const Point<int> getScreenPosition() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen co-ordinates. */
-    virtual const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) = 0;
+    virtual const Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
+
+    /** Converts a rectangle relative to the top-left of this component to screen co-ordinates. */
+    virtual const Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
 
     /** Converts a screen co-ordinate to a position relative to the top-left of this component. */
-    virtual const Point<int> globalPositionToRelative (const Point<int>& screenPosition) = 0;
+    virtual const Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
+
+    /** Converts a screen area to a position relative to the top-left of this component. */
+    virtual const Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
 
     /** Minimises the window. */
     virtual void setMinimised (bool shouldBeMinimised) = 0;

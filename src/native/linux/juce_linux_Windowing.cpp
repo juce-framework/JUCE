@@ -810,12 +810,12 @@ public:
     const Rectangle<int> getBounds() const      { return Rectangle<int> (wx, wy, ww, wh); }
     const Point<int> getScreenPosition() const  { return Point<int> (wx, wy); }
 
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
+    const Point<int> localToGlobal (const Point<int>& relativePosition)
     {
         return relativePosition + getScreenPosition();
     }
 
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
+    const Point<int> globalToLocal (const Point<int>& screenPosition)
     {
         return screenPosition - getScreenPosition();
     }

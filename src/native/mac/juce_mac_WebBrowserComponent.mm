@@ -153,6 +153,14 @@ public:
         [webView reload: nil];
     }
 
+    void mouseMove (const MouseEvent&)
+    {
+        // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
+        // them work is to push them via this non-public method..
+        if ([webView respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
+            [webView performSelector: @selector (_updateMouseoverWithFakeEvent)];
+    }
+
 private:
     WebView* webView;
     DownloadClickDetector* clickListener;

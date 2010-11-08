@@ -573,8 +573,7 @@ protected:
         This might return 0 if the data's unsuitable or corrupted. Otherwise it will return
         an XmlElement object that the caller must delete when no longer needed.
     */
-    static XmlElement* getXmlFromBinary (const void* data,
-                                         int sizeInBytes);
+    static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
 
     /** @internal */
     AudioPlayHead* playHead;

@@ -69,9 +69,9 @@ const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent
         return *this;
     }
 
-    return MouseEvent (source, eventComponent->relativePositionToOtherComponent (otherComponent, getPosition()),
+    return MouseEvent (source, otherComponent->getLocalPoint (eventComponent, getPosition()),
                        mods, otherComponent, originalComponent, eventTime,
-                       eventComponent->relativePositionToOtherComponent (otherComponent, mouseDownPos),
+                       otherComponent->getLocalPoint (eventComponent, mouseDownPos),
                        mouseDownTime, numberOfClicks, wasMovedSinceMouseDown);
 }
 
@@ -149,7 +149,7 @@ int MouseEvent::getScreenY() const
 
 const Point<int> MouseEvent::getScreenPosition() const
 {
-    return eventComponent->relativePositionToGlobal (Point<int> (x, y));
+    return eventComponent->localPointToGlobal (Point<int> (x, y));
 }
 
 int MouseEvent::getMouseDownScreenX() const
@@ -164,7 +164,7 @@ int MouseEvent::getMouseDownScreenY() const
 
 const Point<int> MouseEvent::getMouseDownScreenPosition() const
 {
-    return eventComponent->relativePositionToGlobal (mouseDownPos);
+    return eventComponent->localPointToGlobal (mouseDownPos);
 }
 
 //==============================================================================

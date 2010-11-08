@@ -87,7 +87,7 @@ void TooltipWindow::showFor (const String& tip)
     Point<int> mousePos (Desktop::getMousePosition());
 
     if (getParentComponent() != 0)
-        mousePos = getParentComponent()->globalPositionToRelative (mousePos);
+        mousePos = getParentComponent()->getLocalPoint (0, mousePos);
 
     int x, y, w, h;
     getLookAndFeel().getTooltipSize (tip, w, h);

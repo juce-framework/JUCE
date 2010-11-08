@@ -649,12 +649,12 @@ public:
                            r.top + windowBorder.getTop());
     }
 
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
+    const Point<int> localToGlobal (const Point<int>& relativePosition)
     {
         return relativePosition + getScreenPosition();
     }
 
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
+    const Point<int> globalToLocal (const Point<int>& screenPosition)
     {
         return screenPosition - getScreenPosition();
     }
@@ -1745,7 +1745,7 @@ private:
         HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            owner->handleFileDragMove (files, owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
+            owner->handleFileDragMove (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -1758,7 +1758,7 @@ private:
 
         HRESULT __stdcall DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
-            owner->handleFileDragMove (files, owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
+            owner->handleFileDragMove (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -1766,7 +1766,7 @@ private:
         HRESULT __stdcall Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            owner->handleFileDragDrop (files, owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
+            owner->handleFileDragDrop (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }

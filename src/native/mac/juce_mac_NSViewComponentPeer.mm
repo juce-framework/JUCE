@@ -158,8 +158,8 @@ public:
     const Rectangle<int> getBounds (const bool global) const;
     const Rectangle<int> getBounds() const;
     const Point<int> getScreenPosition() const;
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
+    const Point<int> localToGlobal (const Point<int>& relativePosition);
+    const Point<int> globalToLocal (const Point<int>& screenPosition);
     void setAlpha (float newAlpha);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
@@ -1050,12 +1050,12 @@ const Point<int> NSViewComponentPeer::getScreenPosition() const
     return getBounds (true).getPosition();
 }
 
-const Point<int> NSViewComponentPeer::relativePositionToGlobal (const Point<int>& relativePosition)
+const Point<int> NSViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
 {
     return relativePosition + getScreenPosition();
 }
 
-const Point<int> NSViewComponentPeer::globalPositionToRelative (const Point<int>& screenPosition)
+const Point<int> NSViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
 {
     return screenPosition - getScreenPosition();
 }

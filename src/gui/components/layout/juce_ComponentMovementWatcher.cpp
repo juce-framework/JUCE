@@ -88,7 +88,7 @@ void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMove
 
     if (wasMoved)
     {
-        const Point<int> pos (component->relativePositionToOtherComponent (component->getTopLevelComponent(), Point<int>()));
+        const Point<int> pos (component->getTopLevelComponent()->getLocalPoint (component, Point<int>()));
 
         wasMoved = lastBounds.getPosition() != pos;
         lastBounds.setPosition (pos);

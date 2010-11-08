@@ -291,21 +291,19 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
     }
     else
     {
-        Point<int> p (c->relativePositionToGlobal (Point<int> ((c->getWidth() - width) / 2,
-                                                               (c->getHeight() - height) / 2)));
-
+        Point<int> targetCentre (c->localPointToGlobal (c->getLocalBounds().getCentre()));
         Rectangle<int> parentArea (c->getParentMonitorArea());
 
         if (getParentComponent() != 0)
         {
-            p = getParentComponent()->globalPositionToRelative (p);
-            parentArea.setBounds (0, 0, getParentWidth(), getParentHeight());
+            targetCentre = getParentComponent()->getLocalPoint (0, targetCentre);
+            parentArea = getParentComponent()->getLocalBounds();
         }
 
         parentArea.reduce (12, 12);
 
-        setBounds (jlimit (parentArea.getX(), jmax (parentArea.getX(), parentArea.getRight() - width), p.getX()),
-                   jlimit (parentArea.getY(), jmax (parentArea.getY(), parentArea.getBottom() - height), p.getY()),
+        setBounds (jlimit (parentArea.getX(), jmax (parentArea.getX(), parentArea.getRight() - width), targetCentre.getX() - width / 2),
+                   jlimit (parentArea.getY(), jmax (parentArea.getY(), parentArea.getBottom() - height), targetCentre.getY() - height / 2),
                    width, height);
     }
 }

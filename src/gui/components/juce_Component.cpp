@@ -259,8 +259,7 @@ Component::~Component()
     {
         parentComponent_->removeChildComponent (this);
     }
-    else if ((currentlyFocusedComponent == this)
-              || isParentOf (currentlyFocusedComponent))
+    else if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
     {
         giveAwayFocus();
     }
@@ -434,7 +433,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                  jmax (1, getHeight()));
 #endif
 
-        const Point<int> topLeft (relativePositionToGlobal (Point<int> (0, 0)));
+        const Point<int> topLeft (getScreenPosition());
 
         bool wasFullscreen = false;
         bool wasMinimised = false;
@@ -777,7 +776,7 @@ int Component::getScreenY() const
 
 const Point<int> Component::getScreenPosition() const
 {
-    return relativePositionToGlobal (Point<int>());
+    return localPointToGlobal (Point<int>());
 }
 
 const Rectangle<int> Component::getScreenBounds() const
@@ -785,52 +784,118 @@ const Rectangle<int> Component::getScreenBounds() const
     return bounds_.withPosition (getScreenPosition());
 }
 
+namespace CoordinateHelpers
+{
+    const Point<int> convertFromParentSpace (const Component* comp, const Point<int>& pointInParentSpace)
+    {
+        return pointInParentSpace - comp->getPosition();
+    }
+
+    const Rectangle<int> convertFromParentSpace (const Component* comp, const Rectangle<int>& areaInParentSpace)
+    {
+        return areaInParentSpace - comp->getPosition();
+    }
+
+    const Point<int> convertToParentSpace (const Component* comp, const Point<int>& pointInLocalSpace)
+    {
+        return pointInLocalSpace + comp->getPosition();
+    }
+
+    const Rectangle<int> convertToParentSpace (const Component* comp, const Rectangle<int>& areaInLocalSpace)
+    {
+        return areaInLocalSpace + comp->getPosition();
+    }
+
+    template <typename Type>
+    const Type convertFromDistantParentSpace (const Component* parent, const Component* target, Type coordInParent)
+    {
+        const Component* const directParent = target->getParentComponent();
+        jassert (directParent != 0);
+
+        if (directParent == parent)
+            return convertFromParentSpace (target, coordInParent);
+
+        return convertFromParentSpace (target, convertFromDistantParentSpace (parent, directParent, coordInParent));
+    }
+
+    template <typename Type>
+    const Type convertCoordinate (const Component* target, const Component* source, Type p)
+    {
+        while (source != 0)
+        {
+            if (source == target)
+                return p;
+
+            if (source->isParentOf (target))
+                return convertFromDistantParentSpace (source, target, p);
+
+            if (source->isOnDesktop())
+            {
+                p = source->getPeer()->localToGlobal (p);
+                source = 0;
+            }
+            else
+            {
+                p = convertToParentSpace (source, p);
+                source = source->getParentComponent();
+            }
+        }
+
+        jassert (source == 0);
+        if (target == 0)
+            return p;
+
+        const Component* const topLevelComp = target->getTopLevelComponent();
+
+        if (topLevelComp->isOnDesktop())
+            p = topLevelComp->getPeer()->globalToLocal (p);
+        else
+            p = convertFromParentSpace (topLevelComp, p);
+
+        if (topLevelComp == target)
+            return p;
+
+        return convertFromDistantParentSpace (topLevelComp, target, p);
+    }
+}
+
+const Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const
+{
+    return CoordinateHelpers::convertCoordinate (this, source, point);
+}
+
+const Rectangle<int> Component::getLocalArea (const Component* source, const Rectangle<int>& area) const
+{
+    return CoordinateHelpers::convertCoordinate (this, source, area);
+}
+
+const Point<int> Component::localPointToGlobal (const Point<int>& point) const
+{
+    return CoordinateHelpers::convertCoordinate (0, this, point);
+}
+
+const Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
+{
+    return CoordinateHelpers::convertCoordinate (0, this, area);
+}
+
+/* Deprecated methods... */
 const Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
 {
-    return relativePositionToOtherComponent (0, relativePosition);
+    return localPointToGlobal (relativePosition);
 }
 
 const Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
 {
-    if (flags.hasHeavyweightPeerFlag)
-    {
-        return getPeer()->globalPositionToRelative (screenPosition);
-    }
-    else
-    {
-        if (parentComponent_ != 0)
-            return parentComponent_->globalPositionToRelative (screenPosition) - getPosition();
-
-        return screenPosition - getPosition();
-    }
+    return getLocalPoint (0, screenPosition);
 }
 
 const Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
 {
-    Point<int> p (positionRelativeToThis);
-    const Component* c = this;
-
-    do
-    {
-        if (c == targetComponent)
-            return p;
-
-        if (c->flags.hasHeavyweightPeerFlag)
-        {
-            p = c->getPeer()->relativePositionToGlobal (p);
-            break;
-        }
-
-        p += c->getPosition();
-        c = c->parentComponent_;
-    }
-    while (c != 0);
-
-    if (targetComponent != 0)
-        p = targetComponent->globalPositionToRelative (p);
-
-    return p;
+    return targetComponent == 0 ? localPointToGlobal (positionRelativeToThis)
+                                : targetComponent->getLocalPoint (this, positionRelativeToThis);
 }
+
 
 //==============================================================================
 void Component::setBounds (const int x, const int y, int w, int h)
@@ -1922,7 +1987,7 @@ void Component::getVisibleArea (RectangleList& result, const bool includeSibling
         {
             const Component* const c = getTopLevelComponent();
 
-            c->subtractObscuredRegions (result, c->relativePositionToOtherComponent (this, Point<int>()),
+            c->subtractObscuredRegions (result, getLocalPoint (c, Point<int>()),
                                         c->getLocalBounds(), this);
         }
 
@@ -2142,7 +2207,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
     {
         flags.mouseInsideFlag = true;
         flags.mouseOverFlag = true;
-        flags.draggingFlag = false;
+        flags.mouseDownFlag = false;
 
         BailOutChecker checker (this);
 
@@ -2167,7 +2232,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
 {
     BailOutChecker checker (this);
 
-    if (flags.draggingFlag)
+    if (flags.mouseDownFlag)
     {
         internalMouseUp (source, relativePos, time, source.getCurrentModifiers().getRawFlags());
 
@@ -2179,7 +2244,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
     {
         flags.mouseInsideFlag = false;
         flags.mouseOverFlag = false;
-        flags.draggingFlag = false;
+        flags.mouseDownFlag = false;
 
         if (flags.repaintOnMouseActivityFlag)
             repaint();
@@ -2308,7 +2373,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
             return;
     }
 
-    flags.draggingFlag = true;
+    flags.mouseDownFlag = true;
     flags.mouseOverFlag = true;
 
     if (flags.repaintOnMouseActivityFlag)
@@ -2331,11 +2396,11 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
 //==============================================================================
 void Component::internalMouseUp (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers)
 {
-    if (flags.draggingFlag)
+    if (flags.mouseDownFlag)
     {
         Desktop& desktop = Desktop::getInstance();
 
-        flags.draggingFlag = false;
+        flags.mouseDownFlag = false;
 
         BailOutChecker checker (this);
 
@@ -2344,7 +2409,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
         const MouseEvent me (source, relativePos,
                              oldModifiers, this, this, time,
-                             globalPositionToRelative (source.getLastMouseDownPosition()),
+                             getLocalPoint (0, source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
                              source.hasMouseMovedSignificantlySincePressed());
@@ -2378,7 +2443,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
 void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
-    if (flags.draggingFlag)
+    if (flags.mouseDownFlag)
     {
         Desktop& desktop = Desktop::getInstance();
 
@@ -2388,7 +2453,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
         const MouseEvent me (source, relativePos,
                              source.getCurrentModifiers(), this, this, time,
-                             globalPositionToRelative (source.getLastMouseDownPosition()),
+                             getLocalPoint (0, source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
                              source.hasMouseMovedSignificantlySincePressed());
@@ -2411,8 +2476,7 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
     BailOutChecker checker (this);
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                         this, this, time, relativePos,
-                         time, 0, false);
+                         this, this, time, relativePos, time, 0, false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2825,12 +2889,12 @@ bool Component::isMouseOver() const throw()
 
 bool Component::isMouseButtonDown() const throw()
 {
-    return flags.draggingFlag;
+    return flags.mouseDownFlag;
 }
 
 bool Component::isMouseOverOrDragging() const throw()
 {
-    return flags.mouseOverFlag || flags.draggingFlag;
+    return flags.mouseOverFlag || flags.mouseDownFlag;
 }
 
 bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
@@ -2840,14 +2904,14 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
 
 const Point<int> Component::getMouseXYRelative() const
 {
-    return globalPositionToRelative (Desktop::getMousePosition());
+    return getLocalPoint (0, Desktop::getMousePosition());
 }
 
 //==============================================================================
 const Rectangle<int> Component::getParentMonitorArea() const
 {
     return Desktop::getInstance()
-            .getMonitorAreaContaining (relativePositionToGlobal (getLocalBounds().getCentre()));
+            .getMonitorAreaContaining (localPointToGlobal (getLocalBounds().getCentre()));
 }
 
 //==============================================================================

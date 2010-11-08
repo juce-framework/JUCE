@@ -149,7 +149,7 @@ public:
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) ())
     {
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) ();
     }
 
@@ -158,7 +158,7 @@ public:
     template <LL_TEMPLATE(1)>
     void call (void (ListenerClass::*callbackFunction) (P1), LL_PARAM(1))
     {
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
             (iter.getListener()->*callbackFunction) (param1);
     }
 
@@ -169,7 +169,7 @@ public:
                       void (ListenerClass::*callbackFunction) (P1),
                       LL_PARAM(1))
     {
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1);
     }
 
@@ -179,7 +179,7 @@ public:
     void call (void (ListenerClass::*callbackFunction) (P1, P2),
                LL_PARAM(1), LL_PARAM(2))
     {
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2);
     }
 
@@ -190,7 +190,7 @@ public:
                       void (ListenerClass::*callbackFunction) (P1, P2),
                       LL_PARAM(1), LL_PARAM(2))
     {
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2);
     }
 
@@ -200,7 +200,7 @@ public:
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
                LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
     {
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3);
     }
 
@@ -211,7 +211,7 @@ public:
                       void (ListenerClass::*callbackFunction) (P1, P2, P3),
                       LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
     {
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2, param3);
     }
 
@@ -221,7 +221,7 @@ public:
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
                LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
     {
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
     }
 
@@ -232,7 +232,7 @@ public:
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
                       LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
     {
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
     }
 
@@ -242,7 +242,7 @@ public:
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
                LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
     {
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
     }
 
@@ -253,7 +253,7 @@ public:
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
                       LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
     {
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
     }
 
@@ -275,8 +275,8 @@ public:
     {
     public:
         //==============================================================================
-        Iterator (const ListType& list_, const BailOutCheckerType& bailOutChecker_)
-            : list (list_), bailOutChecker (bailOutChecker_), index (list_.size())
+        Iterator (const ListType& list_)
+            : list (list_), index (list_.size())
         {}
 
         ~Iterator() {}
@@ -284,7 +284,7 @@ public:
         //==============================================================================
         bool next()
         {
-            if (index <= 0 || bailOutChecker.shouldBailOut())
+            if (index <= 0)
                 return false;
 
             const int listSize = list.size();
@@ -296,6 +296,11 @@ public:
             return index >= 0;
         }
 
+        bool next (const BailOutCheckerType& bailOutChecker)
+        {
+            return (! bailOutChecker.shouldBailOut()) && next();
+        }
+
         typename ListType::ListenerType* getListener() const throw()
         {
             return list.getListeners().getUnchecked (index);
@@ -304,7 +309,6 @@ public:
         //==============================================================================
     private:
         const ListType& list;
-        const BailOutCheckerType& bailOutChecker;
         int index;
 
         Iterator (const Iterator&);
