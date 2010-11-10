@@ -176,6 +176,7 @@ private:
 //==============================================================================
 TabbedButtonBar::TabbedButtonBar (const Orientation orientation_)
     : orientation (orientation_),
+      minimumScale (0.7),
       currentTabIndex (-1)
 {
     setInterceptsMouseClicks (false, true);
@@ -203,6 +204,12 @@ void TabbedButtonBar::setOrientation (const Orientation newOrientation)
 TabBarButton* TabbedButtonBar::createTabButton (const String& name, const int index)
 {
     return new TabBarButton (name, this, index);
+}
+
+void TabbedButtonBar::setMinimumTabScaleFactor (double newMinimumScale)
+{
+    minimumScale = newMinimumScale;
+    resized();
 }
 
 //==============================================================================
@@ -363,7 +370,6 @@ void TabbedButtonBar::lookAndFeelChanged()
 
 void TabbedButtonBar::resized()
 {
-    const double minimumScale = 0.7;
     int depth = getWidth();
     int length = getHeight();
 

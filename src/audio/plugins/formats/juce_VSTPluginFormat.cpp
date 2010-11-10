@@ -722,6 +722,7 @@ public:
         desc.isInstrument = (effect != 0 && (effect->flags & effFlagsIsSynth) != 0);
     }
 
+    void* getPlatformSpecificData()         { return effect; }
     const String getName() const            { return name; }
     int getUID() const;
     bool acceptsMidi() const                { return wantsMidiMessages; }

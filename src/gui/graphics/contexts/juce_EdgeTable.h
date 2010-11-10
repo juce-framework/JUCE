@@ -154,7 +154,7 @@ public:
 
                         if (levelAccumulator > 0)
                         {
-                            if (levelAccumulator >> 8)
+                            if (levelAccumulator >= 255)
                                 iterationCallback.handleEdgeTablePixelFull (x);
                             else
                                 iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
@@ -184,7 +184,7 @@ public:
                     x >>= 8;
                     jassert (x >= bounds.getX() && x < bounds.getRight());
 
-                    if (levelAccumulator >> 8)
+                    if (levelAccumulator >= 255)
                         iterationCallback.handleEdgeTablePixelFull (x);
                     else
                         iterationCallback.handleEdgeTablePixel (x, levelAccumulator);

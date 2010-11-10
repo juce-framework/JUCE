@@ -41,7 +41,7 @@ StretchableLayoutResizerBar::StretchableLayoutResizerBar (StretchableLayoutManag
 {
     setRepaintsOnMouseActivity (true);
     setMouseCursor (MouseCursor (isVertical_ ? MouseCursor::LeftRightResizeCursor
-                                                : MouseCursor::UpDownResizeCursor));
+                                             : MouseCursor::UpDownResizeCursor));
 }
 
 StretchableLayoutResizerBar::~StretchableLayoutResizerBar()
@@ -68,9 +68,12 @@ void StretchableLayoutResizerBar::mouseDrag (const MouseEvent& e)
     const int desiredPos = mouseDownPos + (isVertical ? e.getDistanceFromDragStartX()
                                                       : e.getDistanceFromDragStartY());
 
-    layout->setItemPosition (itemIndex, desiredPos);
 
-    hasBeenMoved();
+    if (layout->getItemCurrentPosition (itemIndex) != desiredPos)
+    {
+        layout->setItemPosition (itemIndex, desiredPos);
+        hasBeenMoved();
+    }
 }
 
 void StretchableLayoutResizerBar::hasBeenMoved()

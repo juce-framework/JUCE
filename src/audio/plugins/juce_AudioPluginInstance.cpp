@@ -41,5 +41,9 @@ AudioPluginInstance::~AudioPluginInstance()
 {
 }
 
+void* AudioPluginInstance::getPlatformSpecificData()
+{
+    return 0;
+}
 
 END_JUCE_NAMESPACE

@@ -575,22 +575,18 @@ public:
                                            const AffineTransform& transform,
                                            const int extraAlpha_,
                                            const bool betterQuality_)
-        : interpolator (transform),
+        : interpolator (transform,
+                        betterQuality_ ? 0.5f : 0.0f,
+                        betterQuality_ ? -128 : 0),
           destData (destData_),
           srcData (srcData_),
           extraAlpha (extraAlpha_ + 1),
           betterQuality (betterQuality_),
-          pixelOffset (betterQuality_ ? 0.5f : 0.0f),
-          pixelOffsetInt (betterQuality_ ? -128 : 0),
           maxX (srcData_.width - 1),
           maxY (srcData_.height - 1),
           scratchSize (2048)
     {
         scratchBuffer.malloc (scratchSize);
-    }
-
-    ~TransformedImageFillEdgeTableRenderer()
-    {
     }
 
     forcedinline void setEdgeTableYPos (const int newY) throw()
@@ -599,15 +595,12 @@ public:
         linePixels = (DestPixelType*) destData.getLinePointer (newY);
     }
 
-    forcedinline void handleEdgeTablePixel (const int x, int alphaLevel) throw()
+    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) throw()
     {
-        alphaLevel *= extraAlpha;
-        alphaLevel >>= 8;
-
         SrcPixelType p;
         generate (&p, x, 1);
 
-        linePixels[x].blend (p, alphaLevel);
+        linePixels[x].blend (p, (alphaLevel * extraAlpha) >> 8);
     }
 
     forcedinline void handleEdgeTablePixelFull (const int x) throw()
@@ -663,7 +656,7 @@ public:
         }
 
         y = y_;
-        generate (scratchBuffer, x, width);
+        generate (static_cast <SrcPixelType*> (scratchBuffer), x, width);
 
         et.clipLineToMask (x, y_,
                            reinterpret_cast<uint8*> (scratchBuffer.getData()) + SrcPixelType::indexA,
@@ -672,16 +665,15 @@ public:
 
 private:
     //==============================================================================
-    void generate (PixelARGB* dest, const int x, int numPixels) throw()
+    template <class PixelType>
+    void generate (PixelType* dest, const int x, int numPixels) throw()
     {
-        this->interpolator.setStartOfLine (x + pixelOffset, y + pixelOffset, numPixels);
+        this->interpolator.setStartOfLine ((float) x, (float) y, numPixels);
 
         do
         {
             int hiResX, hiResY;
             this->interpolator.next (hiResX, hiResY);
-            hiResX += pixelOffsetInt;
-            hiResY += pixelOffsetInt;
 
             int loResX = hiResX >> 8;
             int loResY = hiResY >> 8;
@@ -692,212 +684,279 @@ private:
                 loResY = safeModulo (loResY, srcData.height);
             }
 
-            if (betterQuality
-                 && ((unsigned int) loResX) < (unsigned int) maxX
-                 && ((unsigned int) loResY) < (unsigned int) maxY)
+            if (betterQuality)
             {
-                uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
-                hiResX &= 255;
-                hiResY &= 255;
-
-                const uint8* src = this->srcData.getPixelPointer (loResX, loResY);
-
-                uint32 weight = (256 - hiResX) * (256 - hiResY);
-                c[0] += weight * src[0];
-                c[1] += weight * src[1];
-                c[2] += weight * src[2];
-                c[3] += weight * src[3];
-
-                weight = hiResX * (256 - hiResY);
-                c[0] += weight * src[4];
-                c[1] += weight * src[5];
-                c[2] += weight * src[6];
-                c[3] += weight * src[7];
-
-                src += this->srcData.lineStride;
-
-                weight = (256 - hiResX) * hiResY;
-                c[0] += weight * src[0];
-                c[1] += weight * src[1];
-                c[2] += weight * src[2];
-                c[3] += weight * src[3];
-
-                weight = hiResX * hiResY;
-                c[0] += weight * src[4];
-                c[1] += weight * src[5];
-                c[2] += weight * src[6];
-                c[3] += weight * src[7];
-
-                dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
-                               (uint8) (c[PixelARGB::indexR] >> 16),
-                               (uint8) (c[PixelARGB::indexG] >> 16),
-                               (uint8) (c[PixelARGB::indexB] >> 16));
-            }
-            else
-            {
-                if (! repeatPattern)
+                if (((unsigned int) loResX) < (unsigned int) maxX)
                 {
-                    // Beyond the edges, just repeat the edge pixels and leave the anti-aliasing to be handled by the edgetable
-                    if (loResX < 0)     loResX = 0;
-                    if (loResY < 0)     loResY = 0;
-                    if (loResX > maxX)  loResX = maxX;
-                    if (loResY > maxY)  loResY = maxY;
+                    if (((unsigned int) loResY) < (unsigned int) maxY)
+                    {
+                        // In the centre of the image..
+                        render4PixelAverage (dest, this->srcData.getPixelPointer (loResX, loResY),
+                                             hiResX & 255, hiResY & 255);
+                        ++dest;
+                        continue;
+                    }
+                    else
+                    {
+                        // At a top or bottom edge..
+                        if (! repeatPattern)
+                        {
+                            if (loResY < 0)
+                                render2PixelAverageX (dest, this->srcData.getPixelPointer (loResX, 0), hiResX & 255, hiResY & 255);
+                            else
+                                render2PixelAverageX (dest, this->srcData.getPixelPointer (loResX, maxY), hiResX & 255, 255 - (hiResY & 255));
+
+                            ++dest;
+                            continue;
+                        }
+                    }
                 }
-
-                dest->set (*(const PixelARGB*) this->srcData.getPixelPointer (loResX, loResY));
-            }
-
-            ++dest;
-
-        } while (--numPixels > 0);
-    }
-
-    void generate (PixelRGB* dest, const int x, int numPixels) throw()
-    {
-        this->interpolator.setStartOfLine (x + pixelOffset, y + pixelOffset, numPixels);
-
-        do
-        {
-            int hiResX, hiResY;
-            this->interpolator.next (hiResX, hiResY);
-            hiResX += pixelOffsetInt;
-            hiResY += pixelOffsetInt;
-            int loResX = hiResX >> 8;
-            int loResY = hiResY >> 8;
-
-            if (repeatPattern)
-            {
-                loResX = safeModulo (loResX, srcData.width);
-                loResY = safeModulo (loResY, srcData.height);
-            }
-
-            if (betterQuality
-                 && ((unsigned int) loResX) < (unsigned int) maxX
-                 && ((unsigned int) loResY) < (unsigned int) maxY)
-            {
-                uint32 c[3] = { 256 * 128, 256 * 128, 256 * 128 };
-                hiResX &= 255;
-                hiResY &= 255;
-
-                const uint8* src = this->srcData.getPixelPointer (loResX, loResY);
-
-                unsigned int weight = (256 - hiResX) * (256 - hiResY);
-                c[0] += weight * src[0];
-                c[1] += weight * src[1];
-                c[2] += weight * src[2];
-
-                weight = hiResX * (256 - hiResY);
-                c[0] += weight * src[3];
-                c[1] += weight * src[4];
-                c[2] += weight * src[5];
-
-                src += this->srcData.lineStride;
-
-                weight = (256 - hiResX) * hiResY;
-                c[0] += weight * src[0];
-                c[1] += weight * src[1];
-                c[2] += weight * src[2];
-
-                weight = hiResX * hiResY;
-                c[0] += weight * src[3];
-                c[1] += weight * src[4];
-                c[2] += weight * src[5];
-
-                dest->setARGB ((uint8) 255,
-                               (uint8) (c[PixelRGB::indexR] >> 16),
-                               (uint8) (c[PixelRGB::indexG] >> 16),
-                               (uint8) (c[PixelRGB::indexB] >> 16));
-            }
-            else
-            {
-                if (! repeatPattern)
+                else
                 {
-                    // Beyond the edges, just repeat the edge pixels and leave the anti-aliasing to be handled by the edgetable
-                    if (loResX < 0)     loResX = 0;
-                    if (loResY < 0)     loResY = 0;
-                    if (loResX > maxX)  loResX = maxX;
-                    if (loResY > maxY)  loResY = maxY;
+                    if (((unsigned int) loResY) < (unsigned int) maxY)
+                    {
+                        // At a left or right hand edge..
+                        if (! repeatPattern)
+                        {
+                            if (loResX < 0)
+                                render2PixelAverageY (dest, this->srcData.getPixelPointer (0, loResY), hiResY & 255, hiResX & 255);
+                            else
+                                render2PixelAverageY (dest, this->srcData.getPixelPointer (maxX, loResY), hiResY & 255, 255 - (hiResX & 255));
+
+                            ++dest;
+                            continue;
+                        }
+                    }
                 }
-
-                dest->set (*(const PixelRGB*) this->srcData.getPixelPointer (loResX, loResY));
             }
 
-            ++dest;
-
-        } while (--numPixels > 0);
-    }
-
-    void generate (PixelAlpha* dest, const int x, int numPixels) throw()
-    {
-        this->interpolator.setStartOfLine (x + pixelOffset, y + pixelOffset, numPixels);
-
-        do
-        {
-            int hiResX, hiResY;
-            this->interpolator.next (hiResX, hiResY);
-            hiResX += pixelOffsetInt;
-            hiResY += pixelOffsetInt;
-            int loResX = hiResX >> 8;
-            int loResY = hiResY >> 8;
-
-            if (repeatPattern)
+            if (! repeatPattern)
             {
-                loResX = safeModulo (loResX, srcData.width);
-                loResY = safeModulo (loResY, srcData.height);
+                if (loResX < 0)     loResX = 0;
+                if (loResY < 0)     loResY = 0;
+                if (loResX > maxX)  loResX = maxX;
+                if (loResY > maxY)  loResY = maxY;
             }
 
-            if (betterQuality
-                 && ((unsigned int) loResX) < (unsigned int) maxX
-                 && ((unsigned int) loResY) < (unsigned int) maxY)
-            {
-                hiResX &= 255;
-                hiResY &= 255;
-
-                const uint8* src = this->srcData.getPixelPointer (loResX, loResY);
-                uint32 c = 256 * 128;
-                c += src[0] * ((256 - hiResX) * (256 - hiResY));
-                c += src[1] * (hiResX * (256 - hiResY));
-                src += this->srcData.lineStride;
-                c += src[0] * ((256 - hiResX) * hiResY);
-                c += src[1] * (hiResX * hiResY);
-
-                *((uint8*) dest) = (uint8) c;
-            }
-            else
-            {
-                if (! repeatPattern)
-                {
-                    // Beyond the edges, just repeat the edge pixels and leave the anti-aliasing to be handled by the edgetable
-                    if (loResX < 0)     loResX = 0;
-                    if (loResY < 0)     loResY = 0;
-                    if (loResX > maxX)  loResX = maxX;
-                    if (loResY > maxY)  loResY = maxY;
-                }
-
-                *((uint8*) dest) = *(this->srcData.getPixelPointer (loResX, loResY));
-            }
-
+            dest->set (*(const PixelType*) this->srcData.getPixelPointer (loResX, loResY));
             ++dest;
 
         } while (--numPixels > 0);
     }
 
     //==============================================================================
+    void render4PixelAverage (PixelARGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) throw()
+    {
+        uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+
+        uint32 weight = (256 - subPixelX) * (256 - subPixelY);
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        weight = subPixelX * (256 - subPixelY);
+        c[0] += weight * src[4];
+        c[1] += weight * src[5];
+        c[2] += weight * src[6];
+        c[3] += weight * src[7];
+
+        src += this->srcData.lineStride;
+
+        weight = (256 - subPixelX) * subPixelY;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        weight = subPixelX * subPixelY;
+        c[0] += weight * src[4];
+        c[1] += weight * src[5];
+        c[2] += weight * src[6];
+        c[3] += weight * src[7];
+
+        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
+                       (uint8) (c[PixelARGB::indexR] >> 16),
+                       (uint8) (c[PixelARGB::indexG] >> 16),
+                       (uint8) (c[PixelARGB::indexB] >> 16));
+    }
+
+    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const int subPixelX, const int alpha) throw()
+    {
+        uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+
+        uint32 weight = (256 - subPixelX) * alpha;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        weight = subPixelX * alpha;
+        c[0] += weight * src[4];
+        c[1] += weight * src[5];
+        c[2] += weight * src[6];
+        c[3] += weight * src[7];
+
+        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
+                       (uint8) (c[PixelARGB::indexR] >> 16),
+                       (uint8) (c[PixelARGB::indexG] >> 16),
+                       (uint8) (c[PixelARGB::indexB] >> 16));
+    }
+
+    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const int subPixelY, const int alpha) throw()
+    {
+        uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+
+        uint32 weight = (256 - subPixelY) * alpha;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        src += this->srcData.lineStride;
+
+        weight = subPixelY * alpha;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
+                       (uint8) (c[PixelARGB::indexR] >> 16),
+                       (uint8) (c[PixelARGB::indexG] >> 16),
+                       (uint8) (c[PixelARGB::indexB] >> 16));
+    }
+
+    //==============================================================================
+    void render4PixelAverage (PixelRGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) throw()
+    {
+        uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+
+        uint32 weight = (256 - subPixelX) * (256 - subPixelY);
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        weight = subPixelX * (256 - subPixelY);
+        c[0] += weight * src[4];
+        c[1] += weight * src[5];
+        c[2] += weight * src[6];
+        c[3] += weight * src[7];
+
+        src += this->srcData.lineStride;
+
+        weight = (256 - subPixelX) * subPixelY;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+        c[3] += weight * src[3];
+
+        weight = subPixelX * subPixelY;
+        c[0] += weight * src[4];
+        c[1] += weight * src[5];
+        c[2] += weight * src[6];
+        c[3] += weight * src[7];
+
+        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
+                       (uint8) (c[PixelARGB::indexR] >> 16),
+                       (uint8) (c[PixelARGB::indexG] >> 16),
+                       (uint8) (c[PixelARGB::indexB] >> 16));
+    }
+
+    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const int subPixelX, const int alpha) throw()
+    {
+        uint32 c[3] = { 256 * 128, 256 * 128, 256 * 128 };
+
+        uint32 weight = (256 - subPixelX) * alpha;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+
+        weight = subPixelX * alpha;
+        c[0] += weight * src[3];
+        c[1] += weight * src[4];
+        c[2] += weight * src[5];
+
+        dest->setARGB ((uint8) 255,
+                       (uint8) (c[PixelRGB::indexR] >> 16),
+                       (uint8) (c[PixelRGB::indexG] >> 16),
+                       (uint8) (c[PixelRGB::indexB] >> 16));
+    }
+
+    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const int subPixelY, const int alpha) throw()
+    {
+        uint32 c[3] = { 256 * 128, 256 * 128, 256 * 128 };
+
+        uint32 weight = (256 - subPixelY) * alpha;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+
+        src += this->srcData.lineStride;
+
+        weight = subPixelY * alpha;
+        c[0] += weight * src[0];
+        c[1] += weight * src[1];
+        c[2] += weight * src[2];
+
+        dest->setARGB ((uint8) 255,
+                       (uint8) (c[PixelRGB::indexR] >> 16),
+                       (uint8) (c[PixelRGB::indexG] >> 16),
+                       (uint8) (c[PixelRGB::indexB] >> 16));
+    }
+
+    //==============================================================================
+    void render4PixelAverage (PixelAlpha* const dest, const uint8* src, const int subPixelX, const int subPixelY) throw()
+    {
+        uint32 c = 256 * 128;
+        c += src[0] * ((256 - subPixelX) * (256 - subPixelY));
+        c += src[1] * (subPixelX * (256 - subPixelY));
+        src += this->srcData.lineStride;
+        c += src[0] * ((256 - subPixelX) * subPixelY);
+        c += src[1] * (subPixelX * subPixelY);
+
+        *((uint8*) dest) = (uint8) (c >> 16);
+    }
+
+    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const int subPixelX, const int alpha) throw()
+    {
+        uint32 c = 256 * 128;
+        c += src[0] * (256 - subPixelX) * alpha;
+        c += src[1] * subPixelX * alpha;
+        *((uint8*) dest) = (uint8) (c >> 16);
+    }
+
+    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const int subPixelY, const int alpha) throw()
+    {
+        uint32 c = 256 * 128;
+        c += src[0] * (256 - subPixelY) * alpha;
+        src += this->srcData.lineStride;
+        c += src[0] * subPixelY * alpha;
+        *((uint8*) dest) = (uint8) (c >> 16);
+    }
+
+    //==============================================================================
     class TransformedImageSpanInterpolator
     {
     public:
-        TransformedImageSpanInterpolator (const AffineTransform& transform) throw()
-            : inverseTransform (transform.inverted())
+        TransformedImageSpanInterpolator (const AffineTransform& transform, const float pixelOffset_, const int pixelOffsetInt_) throw()
+            : inverseTransform (transform.inverted()),
+              pixelOffset (pixelOffset_), pixelOffsetInt (pixelOffsetInt_)
         {}
 
         void setStartOfLine (float x, float y, const int numPixels) throw()
         {
+            jassert (numPixels > 0);
+
+            x += pixelOffset;
+            y += pixelOffset;
             float x1 = x, y1 = y;
             x += numPixels;
             inverseTransform.transformPoints (x1, y1, x, y);
 
-            xBresenham.set ((int) (x1 * 256.0f), (int) (x * 256.0f), numPixels);
-            yBresenham.set ((int) (y1 * 256.0f), (int) (y * 256.0f), numPixels);
+            xBresenham.set ((int) (x1 * 256.0f), (int) (x * 256.0f), numPixels, pixelOffsetInt);
+            yBresenham.set ((int) (y1 * 256.0f), (int) (y * 256.0f), numPixels, pixelOffsetInt);
         }
 
         void next (int& x, int& y) throw()
@@ -914,12 +973,12 @@ private:
         public:
             BresenhamInterpolator() throw() {}
 
-            void set (const int n1, const int n2, const int numSteps_) throw()
+            void set (const int n1, const int n2, const int numSteps_, const int pixelOffsetInt) throw()
             {
-                numSteps = jmax (1, numSteps_);
+                numSteps = numSteps_;
                 step = (n2 - n1) / numSteps;
                 remainder = modulo = (n2 - n1) % numSteps;
-                n = n1;
+                n = n1 + pixelOffsetInt;
 
                 if (modulo <= 0)
                 {
@@ -951,6 +1010,8 @@ private:
 
         const AffineTransform inverseTransform;
         BresenhamInterpolator xBresenham, yBresenham;
+        const float pixelOffset;
+        const int pixelOffsetInt;
 
         TransformedImageSpanInterpolator (const TransformedImageSpanInterpolator&);
         TransformedImageSpanInterpolator& operator= (const TransformedImageSpanInterpolator&);
@@ -962,8 +1023,7 @@ private:
     const Image::BitmapData& srcData;
     const int extraAlpha;
     const bool betterQuality;
-    const float pixelOffset;
-    const int pixelOffsetInt, maxX, maxY;
+    const int maxX, maxY;
     int y;
     DestPixelType* linePixels;
     HeapBlock <SrcPixelType> scratchBuffer;

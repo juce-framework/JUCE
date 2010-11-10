@@ -221,6 +221,7 @@ public:
         desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
     }
 
+    void* getPlatformSpecificData()             { return audioUnit; }
     const String getName() const                { return pluginName; }
     bool acceptsMidi() const                    { return wantsMidiMessages; }
     bool producesMidi() const                   { return false; }

@@ -146,6 +146,11 @@ public:
     */
     Orientation getOrientation() const throw()                      { return orientation; }
 
+    /** Changes the minimum scale factor to which the tabs can be compressed when trying to
+        fit a lot of tabs on-screen.
+    */
+    void setMinimumTabScaleFactor (double newMinimumScale);
+
     //==============================================================================
     /** Deletes all the tabs from the bar.
 
@@ -281,6 +286,7 @@ private:
 
     StringArray tabs;
     Array <Colour> tabColours;
+    double minimumScale;
     int currentTabIndex;
     Component* behindFrontTab;
     ScopedPointer<Button> extraTabsButton;

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	88
+#define JUCE_BUILDNUMBER	89
 
 /** Current Juce version number.
 
@@ -40576,6 +40576,13 @@ public:
 	*/
 	virtual void fillInPluginDescription (PluginDescription& description) const = 0;
 
+	/** Returns a pointer to some kind of platform-specific data about the plugin.
+
+		E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
+		cast to an AudioUnit handle.
+	*/
+	virtual void* getPlatformSpecificData();
+
 	juce_UseDebuggingNewOperator
 
 protected:
@@ -52999,6 +53006,11 @@ public:
 	*/
 	Orientation getOrientation() const throw()			  { return orientation; }
 
+	/** Changes the minimum scale factor to which the tabs can be compressed when trying to
+		fit a lot of tabs on-screen.
+	*/
+	void setMinimumTabScaleFactor (double newMinimumScale);
+
 	/** Deletes all the tabs from the bar.
 
 		@see addTab
@@ -53130,6 +53142,7 @@ private:
 
 	StringArray tabs;
 	Array <Colour> tabColours;
+	double minimumScale;
 	int currentTabIndex;
 	Component* behindFrontTab;
 	ScopedPointer<Button> extraTabsButton;
@@ -59911,7 +59924,7 @@ public:
 
 						if (levelAccumulator > 0)
 						{
-							if (levelAccumulator >> 8)
+							if (levelAccumulator >= 255)
 								iterationCallback.handleEdgeTablePixelFull (x);
 							else
 								iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
@@ -59941,7 +59954,7 @@ public:
 					x >>= 8;
 					jassert (x >= bounds.getX() && x < bounds.getRight());
 
-					if (levelAccumulator >> 8)
+					if (levelAccumulator >= 255)
 						iterationCallback.handleEdgeTablePixelFull (x);
 					else
 						iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
