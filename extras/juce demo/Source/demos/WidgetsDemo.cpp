@@ -1286,7 +1286,6 @@ public:
                                                      "Progress window",
                                                      "You pressed cancel!");
                     }
-
                 }
                 else if (result == 120)
                 {
