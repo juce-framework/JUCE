@@ -294,12 +294,12 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Button* missingItemsButton;
+    ScopedPointer<Button> missingItemsButton;
     bool vertical, isEditingActive;
     ToolbarItemStyle toolbarStyle;
     class MissingItemsComponent;
     friend class MissingItemsComponent;
-    Array <ToolbarItemComponent*> items;
+    OwnedArray <ToolbarItemComponent> items;
 
     friend class ItemDragAndDropOverlayComponent;
     static const char* const toolbarDragDescriptor;

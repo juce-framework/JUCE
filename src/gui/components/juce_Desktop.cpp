@@ -162,8 +162,8 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
         {
             const Point<int> relative (c->getLocalPoint (0, screenPosition));
 
-            if (c->contains (relative.getX(), relative.getY()))
-                return c->getComponentAt (relative.getX(), relative.getY());
+            if (c->contains (relative))
+                return c->getComponentAt (relative);
         }
     }
 

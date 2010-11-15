@@ -180,6 +180,16 @@ public:
             lastClipRect.translate (-x, -y);
     }
 
+    void addTransform (const AffineTransform& transform)
+    {
+        applyTransform (AffineTransform::scale (1.0f, -1.0f)
+                                        .translated (0, flipHeight)
+                                        .followedBy (transform)
+                                        .translated (0, -flipHeight)
+                                        .scaled (1.0f, -1.0f));
+        lastClipRectIsValid = false;
+    }
+
     bool clipToRectangle (const Rectangle<int>& r)
     {
         CGContextClipToRect (context, CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()));

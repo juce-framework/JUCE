@@ -36,22 +36,13 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static const char* const tableColumnPropertyTag = "_tableColumnID";
-
 class TableListRowComp   : public Component,
                            public TooltipClient
 {
 public:
     TableListRowComp (TableListBox& owner_)
-        : owner (owner_),
-          row (-1),
-          isSelected (false)
+        : owner (owner_), row (-1), isSelected (false)
     {
-    }
-
-    ~TableListRowComp()
-    {
-        deleteAllChildren();
     }
 
     void paint (Graphics& g)
@@ -60,27 +51,22 @@ public:
 
         if (model != 0)
         {
-            const TableHeaderComponent* const header = owner.getHeader();
-
             model->paintRowBackground (g, row, getWidth(), getHeight(), isSelected);
 
-            const int numColumns = header->getNumColumns (true);
+            const TableHeaderComponent& header = owner.getHeader();
+            const int numColumns = header.getNumColumns (true);
 
             for (int i = 0; i < numColumns; ++i)
             {
-                if (! columnsWithComponents [i])
+                if (columnComponents[i] == 0)
                 {
-                    const int columnId = header->getColumnIdOfIndex (i, true);
-                    Rectangle<int> columnRect (header->getColumnPosition (i));
-                    columnRect.setSize (columnRect.getWidth(), getHeight());
+                    const int columnId = header.getColumnIdOfIndex (i, true);
+                    const Rectangle<int> columnRect (header.getColumnPosition(i).withHeight (getHeight()));
 
                     g.saveState();
-
                     g.reduceClipRegion (columnRect);
                     g.setOrigin (columnRect.getX(), 0);
-
                     model->paintCell (g, row, columnId, columnRect.getWidth(), columnRect.getHeight(), isSelected);
-
                     g.restoreState();
                 }
             }
@@ -89,79 +75,66 @@ public:
 
     void update (const int newRow, const bool isNowSelected)
     {
+        jassert (newRow >= 0);
+
         if (newRow != row || isNowSelected != isSelected)
         {
             row = newRow;
             isSelected = isNowSelected;
             repaint();
-            deleteAllChildren();
         }
 
-        if (row < owner.getNumRows())
+        TableListBoxModel* const model = owner.getModel();
+
+        if (model != 0 && row < owner.getNumRows())
         {
-            jassert (row >= 0);
+            const Identifier columnProperty ("_tableColumnId");
+            const int numColumns = owner.getHeader().getNumColumns (true);
 
-            const Identifier tagPropertyName ("_tableLastUseNum");
-            const int newTag = Random::getSystemRandom().nextInt();
-
-            const TableHeaderComponent* const header = owner.getHeader();
-            const int numColumns = header->getNumColumns (true);
-
-            columnsWithComponents.clear();
-
-            if (owner.getModel() != 0)
+            for (int i = 0; i < numColumns; ++i)
             {
-                for (int i = 0; i < numColumns; ++i)
+                const int columnId = owner.getHeader().getColumnIdOfIndex (i, true);
+                Component* comp = columnComponents[i];
+
+                if (comp != 0 && columnId != (int) comp->getProperties() [columnProperty])
                 {
-                    const int columnId = header->getColumnIdOfIndex (i, true);
+                    columnComponents.set (i, 0);
+                    comp = 0;
+                }
 
-                    Component* const newComp
-                        = owner.getModel()->refreshComponentForCell (row, columnId, isSelected,
-                                                                     findChildComponentForColumn (columnId));
+                comp = model->refreshComponentForCell (row, columnId, isSelected, comp);
+                columnComponents.set (i, comp);
 
-                    if (newComp != 0)
-                    {
-                        addAndMakeVisible (newComp);
-                        newComp->getProperties().set (tagPropertyName, newTag);
-                        newComp->getProperties().set (tableColumnPropertyTag, columnId);
+                if (comp != 0)
+                {
+                    comp->getProperties().set (columnProperty, columnId);
 
-                        const Rectangle<int> columnRect (header->getColumnPosition (i));
-                        newComp->setBounds (columnRect.getX(), 0, columnRect.getWidth(), getHeight());
-
-                        columnsWithComponents.setBit (i);
-                    }
+                    addAndMakeVisible (comp);
+                    resizeCustomComp (i);
                 }
             }
 
-            for (int i = getNumChildComponents(); --i >= 0;)
-            {
-                Component* const c = getChildComponent (i);
-
-                if ((int) c->getProperties() [tagPropertyName] != newTag)
-                    delete c;
-            }
+            columnComponents.removeRange (numColumns, columnComponents.size());
         }
         else
         {
-            columnsWithComponents.clear();
-            deleteAllChildren();
+            columnComponents.clear();
         }
     }
 
     void resized()
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = getChildComponent (i);
+        for (int i = columnComponents.size(); --i >= 0;)
+            resizeCustomComp (i);
+    }
 
-            const int columnId = c->getProperties() [tableColumnPropertyTag];
+    void resizeCustomComp (const int index)
+    {
+        Component* const c = columnComponents.getUnchecked (index);
 
-            if (columnId != 0)
-            {
-                const Rectangle<int> columnRect (owner.getHeader()->getColumnPosition (owner.getHeader()->getIndexOfColumnId (columnId, true)));
-                c->setBounds (columnRect.getX(), 0, columnRect.getWidth(), getHeight());
-            }
-        }
+        if (c != 0)
+            c->setBounds (owner.getHeader().getColumnPosition (index)
+                            .withY (0).withHeight (getHeight()));
     }
 
     void mouseDown (const MouseEvent& e)
@@ -175,7 +148,7 @@ public:
             {
                 owner.selectRowsBasedOnModifierKeys (row, e.mods);
 
-                const int columnId = owner.getHeader()->getColumnIdAtX (e.x);
+                const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
                 if (columnId != 0 && owner.getModel() != 0)
                     owner.getModel()->cellClicked (row, columnId, e);
@@ -212,7 +185,7 @@ public:
         {
             owner.selectRowsBasedOnModifierKeys (row, e.mods);
 
-            const int columnId = owner.getHeader()->getColumnIdAtX (e.x);
+            const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
             if (columnId != 0 && owner.getModel() != 0)
                 owner.getModel()->cellClicked (row, columnId, e);
@@ -221,7 +194,7 @@ public:
 
     void mouseDoubleClick (const MouseEvent& e)
     {
-        const int columnId = owner.getHeader()->getColumnIdAtX (e.x);
+        const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
         if (columnId != 0 && owner.getModel() != 0)
             owner.getModel()->cellDoubleClicked (row, columnId, e);
@@ -229,7 +202,7 @@ public:
 
     const String getTooltip()
     {
-        const int columnId = owner.getHeader()->getColumnIdAtX (getMouseXYRelative().getX());
+        const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
         if (columnId != 0 && owner.getModel() != 0)
             return owner.getModel()->getCellTooltip (row, columnId);
@@ -239,24 +212,16 @@ public:
 
     Component* findChildComponentForColumn (const int columnId) const
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = getChildComponent (i);
-
-            if ((int) c->getProperties() [tableColumnPropertyTag] == columnId)
-                return c;
-        }
-
-        return 0;
+        return columnComponents [owner.getHeader().getIndexOfColumnId (columnId, true)];
     }
 
     juce_UseDebuggingNewOperator
 
 private:
     TableListBox& owner;
+    OwnedArray<Component> columnComponents;
     int row;
     bool isSelected, isDragging, selectRowOnMouseUp;
-    BigInteger columnsWithComponents;
 
     TableListRowComp (const TableListRowComp&);
     TableListRowComp& operator= (const TableListRowComp&);
@@ -277,7 +242,7 @@ public:
         if (owner.isAutoSizeMenuOptionShown())
         {
             menu.addItem (autoSizeColumnId, TRANS("Auto-size this column"), columnIdClicked != 0);
-            menu.addItem (autoSizeAllId, TRANS("Auto-size all columns"), owner.getHeader()->getNumColumns (true) > 0);
+            menu.addItem (autoSizeAllId, TRANS("Auto-size all columns"), owner.getHeader().getNumColumns (true) > 0);
             menu.addSeparator();
         }
 
@@ -286,17 +251,11 @@ public:
 
     void reactToMenuItem (int menuReturnId, int columnIdClicked)
     {
-        if (menuReturnId == autoSizeColumnId)
+        switch (menuReturnId)
         {
-            owner.autoSizeColumn (columnIdClicked);
-        }
-        else if (menuReturnId == autoSizeAllId)
-        {
-            owner.autoSizeAllColumns();
-        }
-        else
-        {
-            TableHeaderComponent::reactToMenuItem (menuReturnId, columnIdClicked);
+            case autoSizeColumnId:      owner.autoSizeColumn (columnIdClicked); break;
+            case autoSizeAllId:         owner.autoSizeAllColumns(); break;
+            default:                    TableHeaderComponent::reactToMenuItem (menuReturnId, columnIdClicked); break;
         }
     }
 
@@ -375,8 +334,7 @@ bool TableListBox::isAutoSizeMenuOptionShown() const
     return autoSizeOptionsShown;
 }
 
-const Rectangle<int> TableListBox::getCellPosition (const int columnId,
-                                                    const int rowNumber,
+const Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowNumber,
                                                     const bool relativeToComponentTopLeft) const
 {
     Rectangle<int> headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
@@ -384,10 +342,9 @@ const Rectangle<int> TableListBox::getCellPosition (const int columnId,
     if (relativeToComponentTopLeft)
         headerCell.translate (header->getX(), 0);
 
-    const Rectangle<int> row (getRowPosition (rowNumber, relativeToComponentTopLeft));
-
-    return Rectangle<int> (headerCell.getX(), row.getY(),
-                           headerCell.getWidth(), row.getHeight());
+    return getRowPosition (rowNumber, relativeToComponentTopLeft)
+            .withX (headerCell.getX())
+            .withWidth (headerCell.getWidth());
 }
 
 Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
@@ -514,52 +471,18 @@ void TableListBox::updateColumnComponents() const
 }
 
 //==============================================================================
-void TableListBoxModel::cellClicked (int, int, const MouseEvent&)
-{
-}
+void TableListBoxModel::cellClicked (int, int, const MouseEvent&)       {}
+void TableListBoxModel::cellDoubleClicked (int, int, const MouseEvent&) {}
+void TableListBoxModel::backgroundClicked()                             {}
+void TableListBoxModel::sortOrderChanged (int, const bool)              {}
+int TableListBoxModel::getColumnAutoSizeWidth (int)                     { return 0; }
+void TableListBoxModel::selectedRowsChanged (int)                       {}
+void TableListBoxModel::deleteKeyPressed (int)                          {}
+void TableListBoxModel::returnKeyPressed (int)                          {}
+void TableListBoxModel::listWasScrolled()                               {}
 
-void TableListBoxModel::cellDoubleClicked (int, int, const MouseEvent&)
-{
-}
-
-void TableListBoxModel::backgroundClicked()
-{
-}
-
-void TableListBoxModel::sortOrderChanged (int, const bool)
-{
-}
-
-int TableListBoxModel::getColumnAutoSizeWidth (int)
-{
-    return 0;
-}
-
-void TableListBoxModel::selectedRowsChanged (int)
-{
-}
-
-void TableListBoxModel::deleteKeyPressed (int)
-{
-}
-
-void TableListBoxModel::returnKeyPressed (int)
-{
-}
-
-void TableListBoxModel::listWasScrolled()
-{
-}
-
-const String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)
-{
-    return String::empty;
-}
-
-const String TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)
-{
-    return String::empty;
-}
+const String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
+const String TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)        { return String::empty; }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {

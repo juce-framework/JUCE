@@ -49,6 +49,7 @@ public:
     //==============================================================================
     bool isVectorDevice() const;
     void setOrigin (int x, int y);
+    void addTransform (const AffineTransform& transform);
 
     bool clipToRectangle (const Rectangle<int>& r);
     bool clipToRectangleList (const RectangleList& clipRegion);

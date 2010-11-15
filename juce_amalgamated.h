@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	89
+#define JUCE_BUILDNUMBER	90
 
 /** Current Juce version number.
 
@@ -26721,15 +26721,14 @@ public:
 
 		Never override this method! Use hitTest to create custom hit regions.
 
-		@param x	the x co-ordinate to test, relative to this component's left hand edge.
-		@param y	the y co-ordinate to test, relative to this component's top edge.
+		@param point	the x co-ordinate to test, relative to this component's top-left.
 		@returns	true if the point is within the component's hit-test area, but only if
 					that part of the component isn't clipped by its parent component. Note
 					that this won't take into account any overlapping sibling components
 					which might be in the way - for that, see reallyContains()
 		@see hitTest, reallyContains, getComponentAt
 	*/
-	virtual bool contains (int x, int y);
+	bool contains (const Point<int>& point);
 
 	/** Returns true if a given point lies in this component, taking any overlapping
 		siblings into account.
@@ -27914,6 +27913,9 @@ public:
 		/** If the component is valid, this deletes it and sets this pointer to null. */
 		void deleteAndZero()				{ delete comp; jassert (comp == 0); }
 
+		bool operator== (ComponentType* component) const throw()	{ return comp == component; }
+		bool operator!= (ComponentType* component) const throw()	{ return comp != component; }
+
 		juce_UseDebuggingNewOperator
 
 	private:
@@ -28056,8 +28058,6 @@ private:
 								  const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
 	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;
 
-	// how much of the component is not off the edges of its parents
-	const Rectangle<int> getUnclippedArea() const;
 	void sendVisibilityChangeMessage();
 	const Rectangle<int> getParentOrMainMonitorBounds() const;
 
@@ -28067,9 +28067,14 @@ private:
 	// implement its methods instead of this Component method).
 	virtual void filesDropped (const StringArray&, int, int) {}
 
-	// components aren't allowed to have copy constructors, as this would mess up parent
-	// hierarchies. You might need to give your subclasses a private dummy constructor like
-	// this one to avoid compiler warnings.
+	// This is included here to cause an error if you use or overload it - it has been deprecated in
+	// favour of contains (const Point<int>&)
+	void contains (int, int);
+
+	/* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
+	   You might need to give your subclasses a private dummy constructor like this one to avoid
+	   compiler warnings.
+	*/
 	Component (const Component&);
 	Component& operator= (const Component&);
 
@@ -36739,6 +36744,7 @@ private:
 	ScrollBar horizontalScrollBar;
 
 	void updateVisibleArea();
+	void deleteContentComp();
 
 	Viewport (const Viewport&);
 	Viewport& operator= (const Viewport&);
@@ -37105,6 +37111,7 @@ private:
 	friend class PopupMenuCustomComponent;
 	friend class MenuBarComponent;
 	friend class OwnedArray <Item>;
+	friend class OwnedArray <ItemComponent>;
 	friend class ScopedPointer <Window>;
 
 	OwnedArray <Item> items;
@@ -46035,12 +46042,12 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Button* missingItemsButton;
+	ScopedPointer<Button> missingItemsButton;
 	bool vertical, isEditingActive;
 	ToolbarItemStyle toolbarStyle;
 	class MissingItemsComponent;
 	friend class MissingItemsComponent;
-	Array <ToolbarItemComponent*> items;
+	OwnedArray <ToolbarItemComponent> items;
 
 	friend class ItemDragAndDropOverlayComponent;
 	static const char* const toolbarDragDescriptor;
@@ -48514,8 +48521,8 @@ public:
 		The model pointer passed-in can be null, in which case you can set it later
 		with setModel().
 	*/
-	TableListBox (const String& componentName,
-				  TableListBoxModel* model);
+	TableListBox (const String& componentName = String::empty,
+				  TableListBoxModel* model = 0);
 
 	/** Destructor. */
 	~TableListBox();
@@ -48528,7 +48535,7 @@ public:
 	TableListBoxModel* getModel() const				 { return model; }
 
 	/** Returns the header component being used in this table. */
-	TableHeaderComponent* getHeader() const			 { return header; }
+	TableHeaderComponent& getHeader() const			 { return *header; }
 
 	/** Changes the height of the table header component.
 		@see getHeaderHeight
@@ -52609,23 +52616,18 @@ private:
 
 	@see KeyPressMappingSet
 */
-class JUCE_API  KeyMappingEditorComponent  : public Component,
-											 public TreeViewItem,
-											 public ChangeListener,
-											 private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+class JUCE_API  KeyMappingEditorComponent  : public Component
 {
 public:
 
 	/** Creates a KeyMappingEditorComponent.
 
-		@param mappingSet   this is the set of mappings to display and
-							edit. Make sure the mappings object is not
-							deleted before this component!
-		@param showResetToDefaultButton	 if true, then at the bottom of the
-							list, the component will include a 'reset to
-							defaults' button.
+		@param mappingSet   this is the set of mappings to display and edit. Make sure the
+							mappings object is not deleted before this component!
+		@param showResetToDefaultButton	 if true, then at the bottom of the list, the
+											component will include a 'reset to defaults' button.
 	*/
-	KeyMappingEditorComponent (KeyPressMappingSet* mappingSet,
+	KeyMappingEditorComponent (KeyPressMappingSet& mappingSet,
 							   bool showResetToDefaultButton);
 
 	/** Destructor. */
@@ -52639,9 +52641,8 @@ public:
 	void setColours (const Colour& mainBackground,
 					 const Colour& textColour);
 
-	/** Returns the KeyPressMappingSet that this component is acting upon.
-	*/
-	KeyPressMappingSet* getMappings() const throw()		 { return mappings; }
+	/** Returns the KeyPressMappingSet that this component is acting upon. */
+	KeyPressMappingSet& getMappings() const throw()		 { return mappings; }
 
 	/** Can be overridden if some commands need to be excluded from the list.
 
@@ -52686,29 +52687,24 @@ public:
 	void parentHierarchyChanged();
 	/** @internal */
 	void resized();
-	/** @internal */
-	void changeListenerCallback (void*);
-	/** @internal */
-	bool mightContainSubItems();
-	/** @internal */
-	const String getUniqueName() const;
-	/** @internal */
-	void buttonClicked (Button* button);
 
 	juce_UseDebuggingNewOperator
 
 private:
 
-	friend class KeyMappingTreeViewItem;
-	friend class KeyCategoryTreeViewItem;
-	friend class KeyMappingItemComponent;
-	friend class KeyMappingChangeButton;
-
-	KeyPressMappingSet* mappings;
+	KeyPressMappingSet& mappings;
 	TreeView tree;
 	TextButton resetButton;
 
-	void assignNewKey (CommandID commandID, int index);
+	class TopLevelItem;
+	class ChangeKeyButton;
+	class MappingItem;
+	class CategoryItem;
+	class ItemComponent;
+	friend class TopLevelItem;
+	friend class OwnedArray <ChangeKeyButton>;
+	friend class ScopedPointer<TopLevelItem>;
+	ScopedPointer<TopLevelItem> treeItem;
 
 	KeyMappingEditorComponent (const KeyMappingEditorComponent&);
 	KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
@@ -60143,6 +60139,7 @@ public:
 		of (0, 0).
 	*/
 	virtual void setOrigin (int x, int y) = 0;
+	virtual void addTransform (const AffineTransform& transform) = 0;
 
 	virtual bool clipToRectangle (const Rectangle<int>& r) = 0;
 	virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
@@ -60204,6 +60201,7 @@ public:
 
 	bool isVectorDevice() const;
 	void setOrigin (int x, int y);
+	void addTransform (const AffineTransform& transform);
 
 	bool clipToRectangle (const Rectangle<int>& r);
 	bool clipToRectangleList (const RectangleList& clipRegion);
@@ -60301,6 +60299,7 @@ public:
 	bool isVectorDevice() const;
 
 	void setOrigin (int x, int y);
+	void addTransform (const AffineTransform& transform);
 
 	bool clipToRectangle (const Rectangle<int>& r);
 	bool clipToRectangleList (const RectangleList& clipRegion);

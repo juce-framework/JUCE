@@ -394,6 +394,7 @@ private:
     friend class PopupMenuCustomComponent;
     friend class MenuBarComponent;
     friend class OwnedArray <Item>;
+    friend class OwnedArray <ItemComponent>;
     friend class ScopedPointer <Window>;
 
     OwnedArray <Item> items;

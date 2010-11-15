@@ -946,31 +946,19 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        int x = position.getX();
-        int y = position.getY();
-
-        if (((unsigned int) x) >= (unsigned int) ww
-             || ((unsigned int) y) >= (unsigned int) wh)
+        if (((unsigned int) position.getX()) >= (unsigned int) ww
+             || ((unsigned int) position.getY()) >= (unsigned int) wh)
             return false;
 
-        bool inFront = false;
-
-        for (int i = 0; i < Desktop::getInstance().getNumComponents(); ++i)
+        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
         {
             Component* const c = Desktop::getInstance().getComponent (i);
 
-            if (inFront)
-            {
-                if (c->contains (x + wx - c->getScreenX(),
-                                 y + wy - c->getScreenY()))
-                {
-                    return false;
-                }
-            }
-            else if (c == getComponent())
-            {
-                inFront = true;
-            }
+            if (c == getComponent())
+                break;
+
+            if (c->contains (position + Point<int> (wx, wy) - c->getScreenPosition()))
+                return false;
         }
 
         if (trueIfInAChildWindow)
@@ -988,7 +976,7 @@ public:
             return false;
         }
 
-        if (! XTranslateCoordinates (display, windowH, windowH, x, y, &wx, &wy, &child))
+        if (! XTranslateCoordinates (display, windowH, windowH, position.getX(), position.getY(), &wx, &wy, &child))
             return false;
 
         return child == None;

@@ -58,7 +58,7 @@ Viewport::Viewport (const String& componentName)
 
 Viewport::~Viewport()
 {
-    contentHolder.deleteAllChildren();
+    deleteContentComp();
 }
 
 //==============================================================================
@@ -67,15 +67,19 @@ void Viewport::visibleAreaChanged (int, int, int, int)
 }
 
 //==============================================================================
+void Viewport::deleteContentComp()
+{
+    // This sets the content comp to a null pointer before deleting the old one, in case
+    // anything tries to use the old one while it's in mid-deletion..
+    ScopedPointer<Component> oldCompDeleter (contentComp);
+    contentComp = 0;
+}
+
 void Viewport::setViewedComponent (Component* const newViewedComponent)
 {
     if (contentComp.getComponent() != newViewedComponent)
     {
-        {
-            ScopedPointer<Component> oldCompDeleter (contentComp);
-            contentComp = 0;
-        }
-
+        deleteContentComp();
         contentComp = newViewedComponent;
 
         if (contentComp != 0)
@@ -89,15 +93,8 @@ void Viewport::setViewedComponent (Component* const newViewedComponent)
     }
 }
 
-int Viewport::getMaximumVisibleWidth() const
-{
-    return contentHolder.getWidth();
-}
-
-int Viewport::getMaximumVisibleHeight() const
-{
-    return contentHolder.getHeight();
-}
+int Viewport::getMaximumVisibleWidth() const    { return contentHolder.getWidth(); }
+int Viewport::getMaximumVisibleHeight() const   { return contentHolder.getHeight(); }
 
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
 {

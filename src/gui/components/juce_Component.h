@@ -728,15 +728,14 @@ public:
 
         Never override this method! Use hitTest to create custom hit regions.
 
-        @param x    the x co-ordinate to test, relative to this component's left hand edge.
-        @param y    the y co-ordinate to test, relative to this component's top edge.
+        @param point    the x co-ordinate to test, relative to this component's top-left.
         @returns    true if the point is within the component's hit-test area, but only if
                     that part of the component isn't clipped by its parent component. Note
                     that this won't take into account any overlapping sibling components
                     which might be in the way - for that, see reallyContains()
         @see hitTest, reallyContains, getComponentAt
     */
-    virtual bool contains (int x, int y);
+    bool contains (const Point<int>& point);
 
     /** Returns true if a given point lies in this component, taking any overlapping
         siblings into account.
@@ -1949,6 +1948,9 @@ public:
         /** If the component is valid, this deletes it and sets this pointer to null. */
         void deleteAndZero()                                { delete comp; jassert (comp == 0); }
 
+        bool operator== (ComponentType* component) const throw()    { return comp == component; }
+        bool operator!= (ComponentType* component) const throw()    { return comp != component; }
+
         //==============================================================================
         juce_UseDebuggingNewOperator
 
@@ -2097,8 +2099,6 @@ private:
                                   const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
     void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;
 
-    // how much of the component is not off the edges of its parents
-    const Rectangle<int> getUnclippedArea() const;
     void sendVisibilityChangeMessage();
     const Rectangle<int> getParentOrMainMonitorBounds() const;
 
@@ -2109,9 +2109,14 @@ private:
     // implement its methods instead of this Component method).
     virtual void filesDropped (const StringArray&, int, int) {}
 
-    // components aren't allowed to have copy constructors, as this would mess up parent
-    // hierarchies. You might need to give your subclasses a private dummy constructor like
-    // this one to avoid compiler warnings.
+    // This is included here to cause an error if you use or overload it - it has been deprecated in
+    // favour of contains (const Point<int>&)
+    void contains (int, int);
+
+    /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
+       You might need to give your subclasses a private dummy constructor like this one to avoid
+       compiler warnings.
+    */
     Component (const Component&);
     Component& operator= (const Component&);
 

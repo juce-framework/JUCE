@@ -208,8 +208,8 @@ public:
         The model pointer passed-in can be null, in which case you can set it later
         with setModel().
     */
-    TableListBox (const String& componentName,
-                  TableListBoxModel* model);
+    TableListBox (const String& componentName = String::empty,
+                  TableListBoxModel* model = 0);
 
     /** Destructor. */
     ~TableListBox();
@@ -224,7 +224,7 @@ public:
 
     //==============================================================================
     /** Returns the header component being used in this table. */
-    TableHeaderComponent* getHeader() const                         { return header; }
+    TableHeaderComponent& getHeader() const                         { return *header; }
 
     /** Changes the height of the table header component.
         @see getHeaderHeight

@@ -119,6 +119,12 @@ public:
         currentState->origin.addXY (x, y);
     }
 
+    void addTransform (const AffineTransform& transform)
+    {
+        //xxx todo
+        jassertfalse;
+    }
+
     bool clipToRectangle (const Rectangle<int>& r)
     {
         currentState->clipToRectangle (r);

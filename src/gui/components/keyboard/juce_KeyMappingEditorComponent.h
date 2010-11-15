@@ -38,23 +38,18 @@
 
     @see KeyPressMappingSet
 */
-class JUCE_API  KeyMappingEditorComponent  : public Component,
-                                             public TreeViewItem,
-                                             public ChangeListener,
-                                             private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+class JUCE_API  KeyMappingEditorComponent  : public Component
 {
 public:
     //==============================================================================
     /** Creates a KeyMappingEditorComponent.
 
-        @param mappingSet   this is the set of mappings to display and
-                            edit. Make sure the mappings object is not
-                            deleted before this component!
-        @param showResetToDefaultButton     if true, then at the bottom of the
-                            list, the component will include a 'reset to
-                            defaults' button.
+        @param mappingSet   this is the set of mappings to display and edit. Make sure the
+                            mappings object is not deleted before this component!
+        @param showResetToDefaultButton     if true, then at the bottom of the list, the
+                                            component will include a 'reset to defaults' button.
     */
-    KeyMappingEditorComponent (KeyPressMappingSet* mappingSet,
+    KeyMappingEditorComponent (KeyPressMappingSet& mappingSet,
                                bool showResetToDefaultButton);
 
     /** Destructor. */
@@ -69,9 +64,8 @@ public:
     void setColours (const Colour& mainBackground,
                      const Colour& textColour);
 
-    /** Returns the KeyPressMappingSet that this component is acting upon.
-    */
-    KeyPressMappingSet* getMappings() const throw()                 { return mappings; }
+    /** Returns the KeyPressMappingSet that this component is acting upon. */
+    KeyPressMappingSet& getMappings() const throw()                 { return mappings; }
 
 
     //==============================================================================
@@ -120,29 +114,24 @@ public:
     void parentHierarchyChanged();
     /** @internal */
     void resized();
-    /** @internal */
-    void changeListenerCallback (void*);
-    /** @internal */
-    bool mightContainSubItems();
-    /** @internal */
-    const String getUniqueName() const;
-    /** @internal */
-    void buttonClicked (Button* button);
 
     juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
-    friend class KeyMappingTreeViewItem;
-    friend class KeyCategoryTreeViewItem;
-    friend class KeyMappingItemComponent;
-    friend class KeyMappingChangeButton;
-
-    KeyPressMappingSet* mappings;
+    KeyPressMappingSet& mappings;
     TreeView tree;
     TextButton resetButton;
 
-    void assignNewKey (CommandID commandID, int index);
+    class TopLevelItem;
+    class ChangeKeyButton;
+    class MappingItem;
+    class CategoryItem;
+    class ItemComponent;
+    friend class TopLevelItem;
+    friend class OwnedArray <ChangeKeyButton>;
+    friend class ScopedPointer<TopLevelItem>;
+    ScopedPointer<TopLevelItem> treeItem;
 
     KeyMappingEditorComponent (const KeyMappingEditorComponent&);
     KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);

@@ -66,6 +66,7 @@ public:
         of (0, 0).
     */
     virtual void setOrigin (int x, int y) = 0;
+    virtual void addTransform (const AffineTransform& transform) = 0;
 
     virtual bool clipToRectangle (const Rectangle<int>& r) = 0;
     virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;

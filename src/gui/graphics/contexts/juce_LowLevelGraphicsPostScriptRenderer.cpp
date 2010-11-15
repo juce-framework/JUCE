@@ -112,6 +112,12 @@ void LowLevelGraphicsPostScriptRenderer::setOrigin (int x, int y)
     }
 }
 
+void LowLevelGraphicsPostScriptRenderer::addTransform (const AffineTransform& /*transform*/)
+{
+    //xxx
+    jassertfalse;
+}
+
 bool LowLevelGraphicsPostScriptRenderer::clipToRectangle (const Rectangle<int>& r)
 {
     needToClip = true;

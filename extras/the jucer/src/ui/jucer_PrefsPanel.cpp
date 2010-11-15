@@ -142,7 +142,7 @@ public:
         }
         else if (pageName == keysPage)
         {
-            return new KeyMappingEditorComponent (commandManager->getKeyMappings(), true);
+            return new KeyMappingEditorComponent (*commandManager->getKeyMappings(), true);
         }
         else if (pageName == aboutPage)
         {

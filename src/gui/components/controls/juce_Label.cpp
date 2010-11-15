@@ -332,7 +332,7 @@ void Label::mouseUp (const MouseEvent& e)
 {
     if (editSingleClick
          && e.mouseWasClicked()
-         && contains (e.x, e.y)
+         && contains (e.getPosition())
          && ! e.mods.isPopupMenu())
     {
         showEditor();

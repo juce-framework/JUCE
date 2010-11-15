@@ -281,7 +281,7 @@ Toolbar::Toolbar()
 
 Toolbar::~Toolbar()
 {
-    deleteAllChildren();
+    items.clear();
 }
 
 void Toolbar::setVertical (const bool shouldBeVertical)
@@ -295,13 +295,7 @@ void Toolbar::setVertical (const bool shouldBeVertical)
 
 void Toolbar::clear()
 {
-    for (int i = items.size(); --i >= 0;)
-    {
-        ToolbarItemComponent* const tc = items.getUnchecked(i);
-        items.remove (i);
-        delete tc;
-    }
-
+    items.clear();
     resized();
 }
 
@@ -365,14 +359,8 @@ void Toolbar::addDefaultItems (ToolbarItemFactory& factoryToUse)
 
 void Toolbar::removeToolbarItem (const int itemIndex)
 {
-    ToolbarItemComponent* const tc = getItemComponent (itemIndex);
-
-    if (tc != 0)
-    {
-        items.removeValue (tc);
-        delete tc;
-        resized();
-    }
+    items.remove (itemIndex);
+    resized();
 }
 
 int Toolbar::getNumItems() const throw()
@@ -672,7 +660,7 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
 
                 if (newIndex != currentIndex)
                 {
-                    items.removeValue (tc);
+                    items.removeObject (tc, false);
                     removeChildComponent (tc);
                     addChildComponent (tc, newIndex);
                     items.insert (newIndex, tc);
@@ -695,7 +683,7 @@ void Toolbar::itemDragExit (const String&, Component* sourceComponent)
     {
         if (isParentOf (tc))
         {
-            items.removeValue (tc);
+            items.removeObject (tc, false);
             removeChildComponent (tc);
             updateAllItemPositions (true);
         }

@@ -40,13 +40,10 @@ ComboBox::ComboBox (const String& name)
       isButtonDown (false),
       separatorPending (false),
       menuActive (false),
-      label (0)
+      noChoicesMessage (TRANS("(no choices)"))
 {
-    noChoicesMessage = TRANS("(no choices)");
     setRepaintsOnMouseActivity (true);
-
     lookAndFeelChanged();
-
     currentId.addListener (this);
 }
 
@@ -58,7 +55,6 @@ ComboBox::~ComboBox()
         PopupMenu::dismissAllActiveMenus();
 
     label = 0;
-    deleteAllChildren();
 }
 
 //==============================================================================
@@ -429,30 +425,33 @@ void ComboBox::lookAndFeelChanged()
 {
     repaint();
 
-    Label* const newLabel = getLookAndFeel().createComboBoxTextBox (*this);
-
-    if (label != 0)
     {
-        newLabel->setEditable (label->isEditable());
-        newLabel->setJustificationType (label->getJustificationType());
-        newLabel->setTooltip (label->getTooltip());
-        newLabel->setText (label->getText(), false);
+        ScopedPointer <Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
+        jassert (newLabel != 0);
+
+        if (label != 0)
+        {
+            newLabel->setEditable (label->isEditable());
+            newLabel->setJustificationType (label->getJustificationType());
+            newLabel->setTooltip (label->getTooltip());
+            newLabel->setText (label->getText(), false);
+        }
+
+        label = newLabel;
     }
 
-    label = newLabel;
+    addAndMakeVisible (label);
 
-    addAndMakeVisible (newLabel);
+    label->addListener (this);
+    label->addMouseListener (this, false);
 
-    newLabel->addListener (this);
-    newLabel->addMouseListener (this, false);
+    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
+    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
 
-    newLabel->setColour (Label::backgroundColourId, Colours::transparentBlack);
-    newLabel->setColour (Label::textColourId, findColour (ComboBox::textColourId));
-
-    newLabel->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
-    newLabel->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    newLabel->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
-    newLabel->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
+    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
+    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
+    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
 
     resized();
 }
@@ -465,27 +464,23 @@ void ComboBox::colourChanged()
 //==============================================================================
 bool ComboBox::keyPressed (const KeyPress& key)
 {
-    bool used = false;
-
-    if (key.isKeyCode (KeyPress::upKey)
-        || key.isKeyCode (KeyPress::leftKey))
+    if (key.isKeyCode (KeyPress::upKey) || key.isKeyCode (KeyPress::leftKey))
     {
         setSelectedItemIndex (jmax (0, getSelectedItemIndex() - 1));
-        used = true;
+        return true;
     }
-    else if (key.isKeyCode (KeyPress::downKey)
-              || key.isKeyCode (KeyPress::rightKey))
+    else if (key.isKeyCode (KeyPress::downKey) || key.isKeyCode (KeyPress::rightKey))
     {
         setSelectedItemIndex (jmin (getSelectedItemIndex() + 1, getNumItems() - 1));
-        used = true;
+        return true;
     }
     else if (key.isKeyCode (KeyPress::returnKey))
     {
         showPopup();
-        used = true;
+        return true;
     }
 
-    return used;
+    return false;
 }
 
 bool ComboBox::keyStateChanged (const bool isKeyDown)
@@ -499,17 +494,9 @@ bool ComboBox::keyStateChanged (const bool isKeyDown)
 }
 
 //==============================================================================
-void ComboBox::focusGained (FocusChangeType)
-{
-    repaint();
-}
+void ComboBox::focusGained (FocusChangeType)    { repaint(); }
+void ComboBox::focusLost (FocusChangeType)      { repaint(); }
 
-void ComboBox::focusLost (FocusChangeType)
-{
-    repaint();
-}
-
-//==============================================================================
 void ComboBox::labelTextChanged (Label*)
 {
     triggerAsyncUpdate();
@@ -582,11 +569,8 @@ void ComboBox::mouseDown (const MouseEvent& e)
 
     isButtonDown = isEnabled();
 
-    if (isButtonDown
-         && (e.eventComponent == this || ! label->isEditable()))
-    {
+    if (isButtonDown && (e.eventComponent == this || ! label->isEditable()))
         showPopup();
-    }
 }
 
 void ComboBox::mouseDrag (const MouseEvent& e)

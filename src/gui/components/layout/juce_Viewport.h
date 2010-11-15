@@ -264,6 +264,7 @@ private:
     ScrollBar horizontalScrollBar;
 
     void updateVisibleArea();
+    void deleteContentComp();
 
     Viewport (const Viewport&);
     Viewport& operator= (const Viewport&);

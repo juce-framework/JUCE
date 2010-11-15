@@ -42,30 +42,31 @@ public:
         loadData();
 
         // Create our table component and add it to this component..
-        addAndMakeVisible (table = new TableListBox ("demo table", this));
+        addAndMakeVisible (&table);
+        table.setModel (this);
 
         // give it a border
-        table->setColour (ListBox::outlineColourId, Colours::grey);
-        table->setOutlineThickness (1);
+        table.setColour (ListBox::outlineColourId, Colours::grey);
+        table.setOutlineThickness (1);
 
         // Add some columns to the table header, based on the column list in our database..
         forEachXmlChildElement (*columnList, columnXml)
         {
-            table->getHeader()->addColumn (columnXml->getStringAttribute ("name"),
-                                           columnXml->getIntAttribute ("columnId"),
-                                           columnXml->getIntAttribute ("width"),
-                                           50, 400,
-                                           TableHeaderComponent::defaultFlags);
+            table.getHeader().addColumn (columnXml->getStringAttribute ("name"),
+                                         columnXml->getIntAttribute ("columnId"),
+                                         columnXml->getIntAttribute ("width"),
+                                         50, 400,
+                                         TableHeaderComponent::defaultFlags);
         }
 
         // we could now change some initial settings..
-        table->getHeader()->setSortColumnId (1, true); // sort forwards by the ID column
-        table->getHeader()->setColumnVisible (7, false); // hide the "length" column until the user shows it
+        table.getHeader().setSortColumnId (1, true); // sort forwards by the ID column
+        table.getHeader().setColumnVisible (7, false); // hide the "length" column until the user shows it
 
         // un-comment this line to have a go of stretch-to-fit mode
-        // table->getHeader()->setStretchToFitActive (true);
+        // table.getHeader().setStretchToFitActive (true);
 
-        table->setMultipleSelectionEnabled (true);
+        table.setMultipleSelectionEnabled (true);
     }
 
     ~TableDemoComponent()
@@ -119,7 +120,7 @@ public:
             DemoDataSorter sorter (getAttributeNameForColumnId (newSortColumnId), isForwards);
             dataList->sortChildElements (sorter);
 
-            table->updateContent();
+            table.updateContent();
         }
     }
 
@@ -190,14 +191,14 @@ public:
     void resized()
     {
         // position our table with a gap around its edge
-        table->setBoundsInset (BorderSize (8));
+        table.setBoundsInset (BorderSize (8));
     }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    ScopedPointer<TableListBox> table;    // the table component itself
+    TableListBox table;     // the table component itself
     Font font;
 
     ScopedPointer<XmlElement> demoData;   // This is the XML document loaded from the embedded file "demo table data.xml"

@@ -95,11 +95,11 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& document_)
     delButton->setEnabled (false);
 
     addAndMakeVisible (listBox = new TableListBox (String::empty, this));
-    listBox->getHeader()->addColumn (T("name"), 1, 150, 80, 400);
-    listBox->getHeader()->addColumn (T("original file"), 2, 350, 80, 800);
-    listBox->getHeader()->addColumn (T("size"), 3, 100, 40, 150);
-    listBox->getHeader()->addColumn (T("reload"), 4, 100, 100, 100, TableHeaderComponent::notResizableOrSortable);
-    listBox->getHeader()->setStretchToFitActive (true);
+    listBox->getHeader().addColumn (T("name"), 1, 150, 80, 400);
+    listBox->getHeader().addColumn (T("original file"), 2, 350, 80, 800);
+    listBox->getHeader().addColumn (T("size"), 3, 100, 40, 150);
+    listBox->getHeader().addColumn (T("reload"), 4, 100, 100, 100, TableHeaderComponent::notResizableOrSortable);
+    listBox->getHeader().setStretchToFitActive (true);
 
     listBox->setColour (ListBox::outlineColourId, Colours::darkgrey);
     listBox->setOutlineThickness (1);

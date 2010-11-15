@@ -33,51 +33,28 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class PropertyPanel::PropertyHolderComponent  : public Component
-{
-public:
-    PropertyHolderComponent()
-    {
-    }
-
-    ~PropertyHolderComponent()
-    {
-        deleteAllChildren();
-    }
-
-    void paint (Graphics&)
-    {
-    }
-
-    void updateLayout (int width);
-    void refreshAll() const;
-
-private:
-    PropertyHolderComponent (const PropertyHolderComponent&);
-    PropertyHolderComponent& operator= (const PropertyHolderComponent&);
-};
-
-//==============================================================================
 class PropertySectionComponent  : public Component
 {
 public:
     PropertySectionComponent (const String& sectionTitle,
                               const Array <PropertyComponent*>& newProperties,
-                              const bool open)
+                              const bool sectionIsOpen_)
         : Component (sectionTitle),
           titleHeight (sectionTitle.isNotEmpty() ? 22 : 0),
-          isOpen_ (open)
+          sectionIsOpen (sectionIsOpen_)
     {
-        for (int i = newProperties.size(); --i >= 0;)
+        propertyComps.addArray (newProperties);
+
+        for (int i = propertyComps.size(); --i >= 0;)
         {
-            addAndMakeVisible (newProperties.getUnchecked(i));
-            newProperties.getUnchecked(i)->refresh();
+            addAndMakeVisible (propertyComps.getUnchecked(i));
+            propertyComps.getUnchecked(i)->refresh();
         }
     }
 
     ~PropertySectionComponent()
     {
-        deleteAllChildren();
+        propertyComps.clear();
     }
 
     void paint (Graphics& g)
@@ -90,16 +67,11 @@ public:
     {
         int y = titleHeight;
 
-        for (int i = getNumChildComponents(); --i >= 0;)
+        for (int i = 0; i < propertyComps.size(); ++i)
         {
-            PropertyComponent* const pec = dynamic_cast <PropertyComponent*> (getChildComponent (i));
-
-            if (pec != 0)
-            {
-                const int prefH = pec->getPreferredHeight();
-                pec->setBounds (1, y, getWidth() - 2, prefH);
-                y += prefH;
-            }
+            PropertyComponent* const pec = propertyComps.getUnchecked (i);
+            pec->setBounds (1, y, getWidth() - 2, pec->getPreferredHeight());
+            y = pec->getBottom();
         }
     }
 
@@ -109,13 +81,8 @@ public:
 
         if (isOpen())
         {
-            for (int i = 0; i < getNumChildComponents(); ++i)
-            {
-                PropertyComponent* pec = dynamic_cast <PropertyComponent*> (getChildComponent (i));
-
-                if (pec != 0)
-                    y += pec->getPreferredHeight();
-            }
+            for (int i = propertyComps.size(); --i >= 0;)
+                y += propertyComps.getUnchecked(i)->getPreferredHeight();
         }
 
         return y;
@@ -123,19 +90,13 @@ public:
 
     void setOpen (const bool open)
     {
-        if (isOpen_ != open)
+        if (sectionIsOpen != open)
         {
-            isOpen_ = open;
+            sectionIsOpen = open;
 
-            for (int i = 0; i < getNumChildComponents(); ++i)
-            {
-                PropertyComponent* pec = dynamic_cast <PropertyComponent*> (getChildComponent (i));
+            for (int i = propertyComps.size(); --i >= 0;)
+                propertyComps.getUnchecked(i)->setVisible (open);
 
-                if (pec != 0)
-                    pec->setVisible (open);
-            }
-
-            // (unable to use the syntax findParentComponentOfClass <DragAndDropContainer> () because of a VC6 compiler bug)
             PropertyPanel* const pp = findParentComponentOfClass ((PropertyPanel*) 0);
 
             if (pp != 0)
@@ -145,22 +106,13 @@ public:
 
     bool isOpen() const
     {
-        return isOpen_;
+        return sectionIsOpen;
     }
 
     void refreshAll() const
     {
-        for (int i = 0; i < getNumChildComponents(); ++i)
-        {
-            PropertyComponent* pec = dynamic_cast <PropertyComponent*> (getChildComponent (i));
-
-            if (pec != 0)
-                pec->refresh();
-        }
-    }
-
-    void mouseDown (const MouseEvent&)
-    {
+        for (int i = propertyComps.size(); --i >= 0;)
+            propertyComps.getUnchecked (i)->refresh();
     }
 
     void mouseUp (const MouseEvent& e)
@@ -181,45 +133,65 @@ public:
     }
 
 private:
+    OwnedArray <PropertyComponent> propertyComps;
     int titleHeight;
-    bool isOpen_;
+    bool sectionIsOpen;
 
     PropertySectionComponent (const PropertySectionComponent&);
     PropertySectionComponent& operator= (const PropertySectionComponent&);
 };
 
-void PropertyPanel::PropertyHolderComponent::updateLayout (const int width)
+//==============================================================================
+class PropertyPanel::PropertyHolderComponent  : public Component
 {
-    int y = 0;
+public:
+    PropertyHolderComponent() {}
 
-    for (int i = getNumChildComponents(); --i >= 0;)
+    void paint (Graphics&) {}
+
+    void updateLayout (int width)
     {
-        PropertySectionComponent* const section
-            = dynamic_cast <PropertySectionComponent*> (getChildComponent (i));
+        int y = 0;
 
-        if (section != 0)
+        for (int i = 0; i < sections.size(); ++i)
         {
-            const int prefH = section->getPreferredHeight();
-            section->setBounds (0, y, width, prefH);
-            y += prefH;
+            PropertySectionComponent* const section = sections.getUnchecked(i);
+
+            section->setBounds (0, y, width, section->getPreferredHeight());
+            y = section->getBottom();
         }
+
+        setSize (width, y);
+        repaint();
     }
 
-    setSize (width, y);
-    repaint();
-}
-
-void PropertyPanel::PropertyHolderComponent::refreshAll() const
-{
-    for (int i = getNumChildComponents(); --i >= 0;)
+    void refreshAll() const
     {
-        PropertySectionComponent* const section
-            = dynamic_cast <PropertySectionComponent*> (getChildComponent (i));
-
-        if (section != 0)
-            section->refreshAll();
+        for (int i = 0; i < sections.size(); ++i)
+            sections.getUnchecked(i)->refreshAll();
     }
-}
+
+    void clear()
+    {
+        sections.clear();
+    }
+
+    void addSection (PropertySectionComponent* newSection)
+    {
+        sections.add (newSection);
+        addAndMakeVisible (newSection, 0);
+    }
+
+    int getNumSections() const throw()                              { return sections.size(); }
+    PropertySectionComponent* getSection (const int index) const    { return sections [index]; }
+
+private:
+    OwnedArray<PropertySectionComponent> sections;
+
+    PropertyHolderComponent (const PropertyHolderComponent&);
+    PropertyHolderComponent& operator= (const PropertyHolderComponent&);
+};
+
 
 //==============================================================================
 PropertyPanel::PropertyPanel()
@@ -239,7 +211,7 @@ PropertyPanel::~PropertyPanel()
 //==============================================================================
 void PropertyPanel::paint (Graphics& g)
 {
-    if (propertyHolderComponent->getNumChildComponents() == 0)
+    if (propertyHolderComponent->getNumSections() == 0)
     {
         g.setColour (Colours::black.withAlpha (0.5f));
         g.setFont (14.0f);
@@ -257,21 +229,19 @@ void PropertyPanel::resized()
 //==============================================================================
 void PropertyPanel::clear()
 {
-    if (propertyHolderComponent->getNumChildComponents() > 0)
+    if (propertyHolderComponent->getNumSections() > 0)
     {
-        propertyHolderComponent->deleteAllChildren();
+        propertyHolderComponent->clear();
         repaint();
     }
 }
 
 void PropertyPanel::addProperties (const Array <PropertyComponent*>& newProperties)
 {
-    if (propertyHolderComponent->getNumChildComponents() == 0)
+    if (propertyHolderComponent->getNumSections() == 0)
         repaint();
 
-    propertyHolderComponent->addAndMakeVisible (new PropertySectionComponent (String::empty,
-                                                                              newProperties,
-                                                                              true), 0);
+    propertyHolderComponent->addSection (new PropertySectionComponent (String::empty, newProperties, true));
     updatePropHolderLayout();
 }
 
@@ -281,13 +251,10 @@ void PropertyPanel::addSection (const String& sectionTitle,
 {
     jassert (sectionTitle.isNotEmpty());
 
-    if (propertyHolderComponent->getNumChildComponents() == 0)
+    if (propertyHolderComponent->getNumSections() == 0)
         repaint();
 
-    propertyHolderComponent->addAndMakeVisible (new PropertySectionComponent (sectionTitle,
-                                                                              newProperties,
-                                                                              shouldBeOpen), 0);
-
+    propertyHolderComponent->addSection (new PropertySectionComponent (sectionTitle, newProperties, shouldBeOpen));
     updatePropHolderLayout();
 }
 
@@ -314,11 +281,11 @@ const StringArray PropertyPanel::getSectionNames() const
 {
     StringArray s;
 
-    for (int i = 0; i < propertyHolderComponent->getNumChildComponents(); ++i)
+    for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = dynamic_cast <PropertySectionComponent*> (propertyHolderComponent->getChildComponent (i));
+        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
 
-        if (section != 0 && section->getName().isNotEmpty())
+        if (section->getName().isNotEmpty())
             s.add (section->getName());
     }
 
@@ -329,11 +296,11 @@ bool PropertyPanel::isSectionOpen (const int sectionIndex) const
 {
     int index = 0;
 
-    for (int i = 0; i < propertyHolderComponent->getNumChildComponents(); ++i)
+    for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = dynamic_cast <PropertySectionComponent*> (propertyHolderComponent->getChildComponent (i));
+        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
 
-        if (section != 0 && section->getName().isNotEmpty())
+        if (section->getName().isNotEmpty())
         {
             if (index == sectionIndex)
                 return section->isOpen();
@@ -349,11 +316,11 @@ void PropertyPanel::setSectionOpen (const int sectionIndex, const bool shouldBeO
 {
     int index = 0;
 
-    for (int i = 0; i < propertyHolderComponent->getNumChildComponents(); ++i)
+    for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = dynamic_cast <PropertySectionComponent*> (propertyHolderComponent->getChildComponent (i));
+        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
 
-        if (section != 0 && section->getName().isNotEmpty())
+        if (section->getName().isNotEmpty())
         {
             if (index == sectionIndex)
             {
@@ -370,11 +337,11 @@ void PropertyPanel::setSectionEnabled (const int sectionIndex, const bool should
 {
     int index = 0;
 
-    for (int i = 0; i < propertyHolderComponent->getNumChildComponents(); ++i)
+    for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = dynamic_cast <PropertySectionComponent*> (propertyHolderComponent->getChildComponent (i));
+        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
 
-        if (section != 0 && section->getName().isNotEmpty())
+        if (section->getName().isNotEmpty())
         {
             if (index == sectionIndex)
             {

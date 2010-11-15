@@ -85,7 +85,7 @@ public:
             const Point<int> relativePos (comp->getLocalPoint (0, screenPos));
 
             // (the contains() call is needed to test for overlapping desktop windows)
-            if (comp->contains (relativePos.getX(), relativePos.getY()))
+            if (comp->contains (relativePos))
                 return comp->getComponentAt (relativePos);
         }
 
