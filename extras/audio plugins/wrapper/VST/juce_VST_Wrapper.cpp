@@ -1278,8 +1278,8 @@ public:
                                public AsyncUpdater
     {
     public:
-        EditorCompWrapper (JuceVSTWrapper& wrapper_, AudioProcessorEditor* editor)
-            : wrapper (wrapper_)
+        EditorCompWrapper (JuceVSTWrapper& wrapper_, AudioProcessorEditor* editor_)
+            : wrapper (wrapper_), editor (editor_)
         {
             setOpaque (true);
             editor->setOpaque (true);
@@ -1296,7 +1296,8 @@ public:
 
         ~EditorCompWrapper()
         {
-            deleteAllChildren();
+            jassert (isParentOf (editor)); // you mustn't remove your editor from its parent!
+            editor = 0;
         }
 
         void paint (Graphics&) {}
@@ -1322,15 +1323,13 @@ public:
 
         AudioProcessorEditor* getEditorComp() const
         {
-            return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
+            return editor;
         }
 
         void resized()
         {
-            Component* const c = getChildComponent (0);
-
-            if (c != 0)
-                c->setBounds (0, 0, getWidth(), getHeight());
+            if (editor != 0)
+                editor->setBounds (getLocalBounds());
         }
 
         void childBoundsChanged (Component* child)
@@ -1380,6 +1379,7 @@ public:
 
     private:
         JuceVSTWrapper& wrapper;
+        ScopedPointer<AudioProcessorEditor> editor;
     };
 
     //==============================================================================

@@ -41,30 +41,42 @@ ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& factory_,
     viewport.setViewedComponent (itemHolder);
 
     Array <int> allIds;
-    factory_.getAllToolbarItemIds (allIds);
+    factory.getAllToolbarItemIds (allIds);
 
     for (int i = 0; i < allIds.size(); ++i)
-    {
-        ToolbarItemComponent* const tc = Toolbar::createItem (factory_, allIds.getUnchecked (i));
-
-        jassert (tc != 0);
-        if (tc != 0)
-        {
-            itemHolder->addAndMakeVisible (tc);
-            tc->setEditingMode (ToolbarItemComponent::editableOnPalette);
-        }
-    }
+        addComponent (allIds.getUnchecked (i), -1);
 
     addAndMakeVisible (&viewport);
 }
 
 ToolbarItemPalette::~ToolbarItemPalette()
 {
-    viewport.getViewedComponent()->deleteAllChildren();
 }
 
-
 //==============================================================================
+void ToolbarItemPalette::addComponent (const int itemId, const int index)
+{
+    ToolbarItemComponent* const tc = Toolbar::createItem (factory, itemId);
+    jassert (tc != 0);
+
+    if (tc != 0)
+    {
+        items.insert (index, tc);
+        viewport.getViewedComponent()->addAndMakeVisible (tc, index);
+        tc->setEditingMode (ToolbarItemComponent::editableOnPalette);
+    }
+}
+
+void ToolbarItemPalette::replaceComponent (ToolbarItemComponent* const comp)
+{
+    const int index = items.indexOf (comp);
+    jassert (index >= 0);
+    items.removeObject (comp, false);
+
+    addComponent (comp->getItemId(), index);
+    resized();
+}
+
 void ToolbarItemPalette::resized()
 {
     viewport.setBoundsInset (BorderSize (1));
@@ -78,48 +90,30 @@ void ToolbarItemPalette::resized()
     int y = indent;
     int maxX = 0;
 
-    for (int i = 0; i < itemHolder->getNumChildComponents(); ++i)
+    for (int i = 0; i < items.size(); ++i)
     {
-        ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (itemHolder->getChildComponent (i));
+        ToolbarItemComponent* const tc = items.getUnchecked(i);
 
-        if (tc != 0)
+        tc->setStyle (toolbar->getStyle());
+
+        int preferredSize = 1, minSize = 1, maxSize = 1;
+
+        if (tc->getToolbarItemSizes (height, false, preferredSize, minSize, maxSize))
         {
-            tc->setStyle (toolbar->getStyle());
-
-            int preferredSize = 1, minSize = 1, maxSize = 1;
-
-            if (tc->getToolbarItemSizes (height, false, preferredSize, minSize, maxSize))
+            if (x + preferredSize > preferredWidth && x > indent)
             {
-                if (x + preferredSize > preferredWidth && x > indent)
-                {
-                    x = indent;
-                    y += height;
-                }
-
-                tc->setBounds (x, y, preferredSize, height);
-
-                x += preferredSize + 8;
-                maxX = jmax (maxX, x);
+                x = indent;
+                y += height;
             }
+
+            tc->setBounds (x, y, preferredSize, height);
+
+            x += preferredSize + 8;
+            maxX = jmax (maxX, x);
         }
     }
 
     itemHolder->setSize (maxX, y + height + 8);
-}
-
-void ToolbarItemPalette::replaceComponent (ToolbarItemComponent* const comp)
-{
-    ToolbarItemComponent* const tc = Toolbar::createItem (factory, comp->getItemId());
-
-    jassert (tc != 0);
-
-    if (tc != 0)
-    {
-        tc->setBounds (comp->getBounds());
-        tc->setStyle (toolbar->getStyle());
-        tc->setEditingMode (comp->getEditingMode());
-        viewport.getViewedComponent()->addAndMakeVisible (tc, getIndexOfChildComponent (comp));
-    }
 }
 
 

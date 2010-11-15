@@ -35,7 +35,7 @@ BEGIN_JUCE_NAMESPACE
 class TabCompButtonBar  : public TabbedButtonBar
 {
 public:
-    TabCompButtonBar (TabbedComponent* const owner_,
+    TabCompButtonBar (TabbedComponent& owner_,
                       const TabbedButtonBar::Orientation orientation_)
         : TabbedButtonBar (orientation_),
           owner (owner_)
@@ -48,28 +48,28 @@ public:
 
     void currentTabChanged (int newCurrentTabIndex, const String& newTabName)
     {
-        owner->changeCallback (newCurrentTabIndex, newTabName);
+        owner.changeCallback (newCurrentTabIndex, newTabName);
     }
 
     void popupMenuClickOnTab (int tabIndex, const String& tabName)
     {
-        owner->popupMenuClickOnTab (tabIndex, tabName);
+        owner.popupMenuClickOnTab (tabIndex, tabName);
     }
 
     const Colour getTabBackgroundColour (const int tabIndex)
     {
-        return owner->tabs->getTabBackgroundColour (tabIndex);
+        return owner.tabs->getTabBackgroundColour (tabIndex);
     }
 
     TabBarButton* createTabButton (const String& tabName, int tabIndex)
     {
-        return owner->createTabButton (tabName, tabIndex);
+        return owner.createTabButton (tabName, tabIndex);
     }
 
     juce_UseDebuggingNewOperator
 
 private:
-    TabbedComponent* const owner;
+    TabbedComponent& owner;
 
     TabCompButtonBar (const TabCompButtonBar&);
     TabCompButtonBar& operator= (const TabCompButtonBar&);
@@ -81,13 +81,13 @@ TabbedComponent::TabbedComponent (const TabbedButtonBar::Orientation orientation
       outlineThickness (1),
       edgeIndent (0)
 {
-    addAndMakeVisible (tabs = new TabCompButtonBar (this, orientation));
+    addAndMakeVisible (tabs = new TabCompButtonBar (*this, orientation));
 }
 
 TabbedComponent::~TabbedComponent()
 {
     clearTabs();
-    delete tabs;
+    tabs = 0;
 }
 
 //==============================================================================
@@ -111,9 +111,9 @@ void TabbedComponent::setTabBarDepth (const int newDepth)
     }
 }
 
-TabBarButton* TabbedComponent::createTabButton (const String& tabName, const int tabIndex)
+TabBarButton* TabbedComponent::createTabButton (const String& tabName, const int /*tabIndex*/)
 {
-    return new TabBarButton (tabName, tabs, tabIndex);
+    return new TabBarButton (tabName, *tabs);
 }
 
 //==============================================================================
@@ -213,7 +213,7 @@ int TabbedComponent::getCurrentTabIndex() const
     return tabs->getCurrentTabIndex();
 }
 
-const String& TabbedComponent::getCurrentTabName() const
+const String TabbedComponent::getCurrentTabName() const
 {
     return tabs->getCurrentTabName();
 }

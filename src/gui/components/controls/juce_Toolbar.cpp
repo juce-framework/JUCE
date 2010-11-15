@@ -582,7 +582,7 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
 
     if (tc != 0)
     {
-        if (getNumItems() == 0)
+        if (! items.contains (tc))
         {
             if (tc->getEditingMode() == ToolbarItemComponent::editableOnPalette)
             {
@@ -598,79 +598,52 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
 
             items.add (tc);
             addChildComponent (tc);
-            updateAllItemPositions (false);
+            updateAllItemPositions (true);
         }
-        else
+
+        for (int i = getNumItems(); --i >= 0;)
         {
-            for (int i = getNumItems(); --i >= 0;)
+            const int currentIndex = items.indexOf (tc);
+            int newIndex = currentIndex;
+
+            const int dragObjectLeft = vertical ? (y - tc->dragOffsetY) : (x - tc->dragOffsetX);
+            const int dragObjectRight = dragObjectLeft + (vertical ? tc->getHeight() : tc->getWidth());
+
+            const Rectangle<int> current (Desktop::getInstance().getAnimator()
+                                            .getComponentDestination (getChildComponent (newIndex)));
+            ToolbarItemComponent* const prev = getNextActiveComponent (newIndex, -1);
+
+            if (prev != 0)
             {
-                int currentIndex = getIndexOfChildComponent (tc);
+                const Rectangle<int> previousPos (Desktop::getInstance().getAnimator().getComponentDestination (prev));
 
-                if (currentIndex < 0)
+                if (abs (dragObjectLeft - (vertical ? previousPos.getY() : previousPos.getX())
+                      < abs (dragObjectRight - (vertical ? current.getBottom() : current.getRight()))))
                 {
-                    if (tc->getEditingMode() == ToolbarItemComponent::editableOnPalette)
-                    {
-                        ToolbarItemPalette* const palette = tc->findParentComponentOfClass ((ToolbarItemPalette*) 0);
-
-                        if (palette != 0)
-                            palette->replaceComponent (tc);
-                    }
-                    else
-                    {
-                        jassert (tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar);
-                    }
-
-                    items.add (tc);
-                    addChildComponent (tc);
-                    currentIndex = getIndexOfChildComponent (tc);
-                    updateAllItemPositions (true);
-                }
-
-                int newIndex = currentIndex;
-
-                const int dragObjectLeft = vertical ? (y - tc->dragOffsetY) : (x - tc->dragOffsetX);
-                const int dragObjectRight = dragObjectLeft + (vertical ? tc->getHeight() : tc->getWidth());
-
-                const Rectangle<int> current (Desktop::getInstance().getAnimator()
-                                                .getComponentDestination (getChildComponent (newIndex)));
-                ToolbarItemComponent* const prev = getNextActiveComponent (newIndex, -1);
-
-                if (prev != 0)
-                {
-                    const Rectangle<int> previousPos (Desktop::getInstance().getAnimator().getComponentDestination (prev));
-
-                    if (abs (dragObjectLeft - (vertical ? previousPos.getY() : previousPos.getX())
-                          < abs (dragObjectRight - (vertical ? current.getBottom() : current.getRight()))))
-                    {
-                        newIndex = getIndexOfChildComponent (prev);
-                    }
-                }
-
-                ToolbarItemComponent* const next = getNextActiveComponent (newIndex, 1);
-                if (next != 0)
-                {
-                    const Rectangle<int> nextPos (Desktop::getInstance().getAnimator().getComponentDestination (next));
-
-                    if (abs (dragObjectLeft - (vertical ? current.getY() : current.getX())
-                         > abs (dragObjectRight - (vertical ? nextPos.getBottom() : nextPos.getRight()))))
-                    {
-                        newIndex = getIndexOfChildComponent (next) + 1;
-                    }
-                }
-
-                if (newIndex != currentIndex)
-                {
-                    items.removeObject (tc, false);
-                    removeChildComponent (tc);
-                    addChildComponent (tc, newIndex);
-                    items.insert (newIndex, tc);
-                    updateAllItemPositions (true);
-                }
-                else
-                {
-                    break;
+                    newIndex = getIndexOfChildComponent (prev);
                 }
             }
+
+            ToolbarItemComponent* const next = getNextActiveComponent (newIndex, 1);
+            if (next != 0)
+            {
+                const Rectangle<int> nextPos (Desktop::getInstance().getAnimator().getComponentDestination (next));
+
+                if (abs (dragObjectLeft - (vertical ? current.getY() : current.getX())
+                     > abs (dragObjectRight - (vertical ? nextPos.getBottom() : nextPos.getRight()))))
+                {
+                    newIndex = getIndexOfChildComponent (next) + 1;
+                }
+            }
+
+            if (newIndex == currentIndex)
+                break;
+
+            items.removeObject (tc, false);
+            removeChildComponent (tc);
+            addChildComponent (tc, newIndex);
+            items.insert (newIndex, tc);
+            updateAllItemPositions (true);
         }
     }
 }
@@ -679,30 +652,27 @@ void Toolbar::itemDragExit (const String&, Component* sourceComponent)
 {
     ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (sourceComponent);
 
-    if (tc != 0)
+    if (tc != 0 && isParentOf (tc))
     {
-        if (isParentOf (tc))
-        {
-            items.removeObject (tc, false);
-            removeChildComponent (tc);
-            updateAllItemPositions (true);
-        }
+        items.removeObject (tc, false);
+        removeChildComponent (tc);
+        updateAllItemPositions (true);
     }
 }
 
-void Toolbar::itemDropped (const String&, Component*, int, int)
+void Toolbar::itemDropped (const String&, Component* sourceComponent, int, int)
 {
+    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (sourceComponent);
+
+    if (tc != 0)
+        tc->setState (Button::buttonNormal);
 }
 
 
 //==============================================================================
 void Toolbar::mouseDown (const MouseEvent& e)
 {
-    if (e.mods.isPopupMenu())
-    {
-    }
 }
-
 
 //==============================================================================
 class ToolbarCustomisationDialog   : public DialogWindow

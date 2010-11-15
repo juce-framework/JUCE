@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	90
+#define JUCE_BUILDNUMBER	91
 
 /** Current Juce version number.
 
@@ -47917,9 +47917,8 @@ private:
 	bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
 	bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
 	bool scrollWheelEnabled : 1, snapsToMousePos : 1;
-	Label* valueBox;
-	Button* incButton;
-	Button* decButton;
+	ScopedPointer<Label> valueBox;
+	ScopedPointer<Button> incButton, decButton;
 	ScopedPointer <Component> popupDisplay;
 	Component* parentForPopupDisplay;
 
@@ -48779,9 +48778,11 @@ private:
 	ToolbarItemFactory& factory;
 	Toolbar* toolbar;
 	Viewport viewport;
+	OwnedArray <ToolbarItemComponent> items;
 
 	friend class Toolbar;
 	void replaceComponent (ToolbarItemComponent* comp);
+	void addComponent (int itemId, int index);
 
 	ToolbarItemPalette (const ToolbarItemPalette&);
 	ToolbarItemPalette& operator= (const ToolbarItemPalette&);
@@ -52909,9 +52910,7 @@ class JUCE_API  TabBarButton  : public Button
 public:
 
 	/** Creates the tab button. */
-	TabBarButton (const String& name,
-				  TabbedButtonBar* ownerBar,
-				  int tabIndex);
+	TabBarButton (const String& name, TabbedButtonBar& ownerBar);
 
 	/** Destructor. */
 	~TabBarButton();
@@ -52932,8 +52931,8 @@ public:
 
 protected:
 	friend class TabbedButtonBar;
-	TabbedButtonBar* const owner;
-	int tabIndex, overlapPixels;
+	TabbedButtonBar& owner;
+	int overlapPixels;
 	DropShadowEffect shadow;
 
 	/** Returns an area of the component that's safe to draw in.
@@ -52941,7 +52940,10 @@ protected:
 		This deals with the orientation of the tabs, which affects which side is
 		touching the tabbed box's content component.
 	*/
-	void getActiveArea (int& x, int& y, int& w, int& h);
+	const Rectangle<int> getActiveArea();
+
+	/** Returns this tab's index in its tab bar. */
+	int getIndex() const;
 
 private:
 	TabBarButton (const TabBarButton&);
@@ -52962,8 +52964,7 @@ private:
 	@see TabbedComponent
 */
 class JUCE_API  TabbedButtonBar  : public Component,
-								   public ChangeBroadcaster,
-								   public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
+								   public ChangeBroadcaster
 {
 public:
 
@@ -53056,7 +53057,7 @@ public:
 
 		This could be an empty string if none are selected.
 	*/
-	const String& getCurrentTabName() const throw()			 { return tabs [currentTabIndex]; }
+	const String getCurrentTabName() const;
 
 	/** Returns the index of the currently selected tab.
 
@@ -53071,6 +53072,9 @@ public:
 		out of range.
 	*/
 	TabBarButton* getTabButton (int index) const;
+
+	/** Returns the index of a TabBarButton if it belongs to this bar. */
+	int indexOfTabButton (const TabBarButton* button) const;
 
 	/** Callback method to indicate the selected tab has been changed.
 
@@ -53118,8 +53122,6 @@ public:
 	/** @internal */
 	void resized();
 	/** @internal */
-	void buttonClicked (Button* button);
-	/** @internal */
 	void lookAndFeelChanged();
 
 	juce_UseDebuggingNewOperator
@@ -53136,12 +53138,25 @@ protected:
 private:
 	Orientation orientation;
 
-	StringArray tabs;
-	Array <Colour> tabColours;
+	struct TabInfo
+	{
+		ScopedPointer<TabBarButton> component;
+		String name;
+		Colour colour;
+	};
+
+	OwnedArray <TabInfo> tabs;
+
 	double minimumScale;
 	int currentTabIndex;
-	Component* behindFrontTab;
+
+	class BehindFrontTabComp;
+	friend class BehindFrontTabComp;
+	friend class ScopedPointer<BehindFrontTabComp>;
+	ScopedPointer<BehindFrontTabComp> behindFrontTab;
 	ScopedPointer<Button> extraTabsButton;
+
+	void showExtraItemsMenu();
 
 	TabbedButtonBar (const TabbedButtonBar&);
 	TabbedButtonBar& operator= (const TabbedButtonBar&);
@@ -53279,7 +53294,7 @@ public:
 
 		@see addTab, TabbedButtonBar::getCurrentTabName()
 	*/
-	const String& getCurrentTabName() const;
+	const String getCurrentTabName() const;
 
 	/** Returns the current component that's filling the panel.
 
@@ -53330,7 +53345,7 @@ public:
 
 protected:
 
-	TabbedButtonBar* tabs;
+	ScopedPointer<TabbedButtonBar> tabs;
 
 	/** This creates one of the tab buttons.
 
@@ -54960,8 +54975,13 @@ private:
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
 	Rectangle<int> textArea;
-	Array<void*> buttons, textBoxes, comboBoxes;
-	Array<void*> progressBars, customComps, textBlocks, allComps;
+	OwnedArray<TextButton> buttons;
+	OwnedArray<TextEditor> textBoxes;
+	OwnedArray<ComboBox> comboBoxes;
+	OwnedArray<ProgressBar> progressBars;
+	Array<Component*> customComps;
+	OwnedArray<Component> textBlocks;
+	Array<Component*> allComps;
 	StringArray textboxNames, comboBoxNames;
 	Font font;
 	Component* associatedComponent;
@@ -57526,13 +57546,15 @@ private:
 	class HueSelectorComp;
 	class SwatchComponent;
 	friend class ColourSpaceView;
+	friend class ScopedPointer<ColourSpaceView>;
 	friend class HueSelectorComp;
+	friend class ScopedPointer<HueSelectorComp>;
 
 	Colour colour;
 	float h, s, v;
-	Slider* sliders[4];
-	ColourSpaceView* colourSpace;
-	HueSelectorComp* hueSelector;
+	ScopedPointer<Slider> sliders[4];
+	ScopedPointer<ColourSpaceView> colourSpace;
+	ScopedPointer<HueSelectorComp> hueSelector;
 	OwnedArray <SwatchComponent> swatchComponents;
 	const int flags;
 	int edgeGap;

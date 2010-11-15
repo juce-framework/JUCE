@@ -69,9 +69,11 @@ private:
     ToolbarItemFactory& factory;
     Toolbar* toolbar;
     Viewport viewport;
+    OwnedArray <ToolbarItemComponent> items;
 
     friend class Toolbar;
     void replaceComponent (ToolbarItemComponent* comp);
+    void addComponent (int itemId, int index);
 
     ToolbarItemPalette (const ToolbarItemPalette&);
     ToolbarItemPalette& operator= (const ToolbarItemPalette&);

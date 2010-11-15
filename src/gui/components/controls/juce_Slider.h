@@ -821,9 +821,8 @@ private:
     bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
     bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
     bool scrollWheelEnabled : 1, snapsToMousePos : 1;
-    Label* valueBox;
-    Button* incButton;
-    Button* decButton;
+    ScopedPointer<Label> valueBox;
+    ScopedPointer<Button> incButton, decButton;
     ScopedPointer <Component> popupDisplay;
     Component* parentForPopupDisplay;
 

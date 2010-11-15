@@ -250,9 +250,7 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        const float hue = (e.y - edge) / (float) (getHeight() - edge * 2);
-
-        owner.setHue (hue);
+        owner.setHue ((e.y - edge) / (float) (getHeight() - edge * 2));
     }
 
     void updateIfNeeded()
@@ -327,8 +325,6 @@ ColourSelector::ColourSelector (const int flags_,
                                 const int edgeGap_,
                                 const int gapAroundColourSpaceComponent)
     : colour (Colours::white),
-      colourSpace (0),
-      hueSelector (0),
       flags (flags_),
       edgeGap (edgeGap_)
 {
@@ -349,10 +345,6 @@ ColourSelector::ColourSelector (const int flags_,
         for (int i = 4; --i >= 0;)
             sliders[i]->addListener (this);
     }
-    else
-    {
-        zeromem (sliders, sizeof (sliders));
-    }
 
     if ((flags & showColourspace) != 0)
     {
@@ -367,7 +359,6 @@ ColourSelector::~ColourSelector()
 {
     dispatchPendingMessages();
     swatchComponents.clear();
-    deleteAllChildren();
 }
 
 //==============================================================================

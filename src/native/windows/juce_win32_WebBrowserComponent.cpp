@@ -147,13 +147,9 @@ private:
                           public ComponentMovementWatcher
     {
     public:
-        EventHandler (WebBrowserComponent* owner_)
+        EventHandler (WebBrowserComponent* const owner_)
             : ComponentMovementWatcher (owner_),
               owner (owner_)
-        {
-        }
-
-        ~EventHandler()
         {
         }
 
@@ -162,10 +158,8 @@ private:
         HRESULT __stdcall GetTypeInfo (UINT, LCID, ITypeInfo**)                     { return E_NOTIMPL; }
         HRESULT __stdcall GetIDsOfNames (REFIID, LPOLESTR*, UINT, LCID, DISPID*)    { return E_NOTIMPL; }
 
-        HRESULT __stdcall Invoke (DISPID dispIdMember, REFIID /*riid*/, LCID /*lcid*/,
-                                  WORD /*wFlags*/, DISPPARAMS* pDispParams,
-                                  VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/,
-                                  UINT* /*puArgErr*/)
+        HRESULT __stdcall Invoke (DISPID dispIdMember, REFIID /*riid*/, LCID /*lcid*/, WORD /*wFlags*/, DISPPARAMS* pDispParams,
+                                  VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/, UINT* /*puArgErr*/)
         {
             switch (dispIdMember)
             {
@@ -212,7 +206,6 @@ private:
         EventHandler& operator= (const EventHandler&);
     };
 };
-
 
 
 //==============================================================================

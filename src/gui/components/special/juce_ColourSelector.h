@@ -140,13 +140,15 @@ private:
     class HueSelectorComp;
     class SwatchComponent;
     friend class ColourSpaceView;
+    friend class ScopedPointer<ColourSpaceView>;
     friend class HueSelectorComp;
+    friend class ScopedPointer<HueSelectorComp>;
 
     Colour colour;
     float h, s, v;
-    Slider* sliders[4];
-    ColourSpaceView* colourSpace;
-    HueSelectorComp* hueSelector;
+    ScopedPointer<Slider> sliders[4];
+    ScopedPointer<ColourSpaceView> colourSpace;
+    ScopedPointer<HueSelectorComp> hueSelector;
     OwnedArray <SwatchComponent> swatchComponents;
     const int flags;
     int edgeGap;

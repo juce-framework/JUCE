@@ -126,9 +126,6 @@ Slider::Slider (const String& name)
     menuShown (false),
     scrollWheelEnabled (true),
     snapsToMousePos (true),
-    valueBox (0),
-    incButton (0),
-    decButton (0),
     popupDisplay (0),
     parentForPopupDisplay (0)
 {
@@ -149,7 +146,6 @@ Slider::~Slider()
     valueMin.removeListener (this);
     valueMax.removeListener (this);
     popupDisplay = 0;
-    deleteAllChildren();
 }
 
 
@@ -335,16 +331,14 @@ void Slider::colourChanged()
 
 void Slider::lookAndFeelChanged()
 {
-    const String previousTextBoxContent (valueBox != 0 ? valueBox->getText()
-                                                       : getTextFromValue (currentValue.getValue()));
-
-    deleteAllChildren();
-    valueBox = 0;
-
     LookAndFeel& lf = getLookAndFeel();
 
     if (textBoxPos != NoTextBox)
     {
+        const String previousTextBoxContent (valueBox != 0 ? valueBox->getText()
+                                                           : getTextFromValue (currentValue.getValue()));
+
+        valueBox = 0;
         addAndMakeVisible (valueBox = getLookAndFeel().createSliderTextBox (*this));
 
         valueBox->setWantsKeyboardFocus (false);
@@ -383,6 +377,11 @@ void Slider::lookAndFeelChanged()
 
         incButton->setTooltip (getTooltip());
         decButton->setTooltip (getTooltip());
+    }
+    else
+    {
+        incButton = 0;
+        decButton = 0;
     }
 
     setComponentEffect (lf.getSliderEffect());

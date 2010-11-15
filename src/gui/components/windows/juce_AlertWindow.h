@@ -28,7 +28,10 @@
 
 #include "juce_TopLevelWindow.h"
 #include "../../graphics/fonts/juce_TextLayout.h"
+#include "../buttons/juce_TextButton.h"
 #include "../controls/juce_ComboBox.h"
+#include "../controls/juce_TextEditor.h"
+#include "../controls/juce_ProgressBar.h"
 #include "../mouse/juce_ComponentDragger.h"
 
 
@@ -365,8 +368,13 @@ private:
     ComponentBoundsConstrainer constrainer;
     ComponentDragger dragger;
     Rectangle<int> textArea;
-    Array<void*> buttons, textBoxes, comboBoxes;
-    Array<void*> progressBars, customComps, textBlocks, allComps;
+    OwnedArray<TextButton> buttons;
+    OwnedArray<TextEditor> textBoxes;
+    OwnedArray<ComboBox> comboBoxes;
+    OwnedArray<ProgressBar> progressBars;
+    Array<Component*> customComps;
+    OwnedArray<Component> textBlocks;
+    Array<Component*> allComps;
     StringArray textboxNames, comboBoxNames;
     Font font;
     Component* associatedComponent;

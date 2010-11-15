@@ -162,7 +162,7 @@ public:
 
         @see addTab, TabbedButtonBar::getCurrentTabName()
     */
-    const String& getCurrentTabName() const;
+    const String getCurrentTabName() const;
 
     /** Returns the current component that's filling the panel.
 
@@ -216,7 +216,7 @@ public:
 
 protected:
     //==============================================================================
-    TabbedButtonBar* tabs;
+    ScopedPointer<TabbedButtonBar> tabs;
 
     //==============================================================================
     /** This creates one of the tab buttons.
