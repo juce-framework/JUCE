@@ -35,13 +35,20 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ResizableBorderComponent::Zone::Zone (int zoneFlags) throw()
+ResizableBorderComponent::Zone::Zone (const int zoneFlags) throw()
     : zone (zoneFlags)
+{}
+
+ResizableBorderComponent::Zone::Zone (const ResizableBorderComponent::Zone& other) throw()
+    : zone (other.zone)
+{}
+
+ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const ResizableBorderComponent::Zone& other) throw()
 {
+    zone = other.zone;
+    return *this;
 }
 
-ResizableBorderComponent::Zone::Zone (const ResizableBorderComponent::Zone& other) throw() : zone (other.zone)    {}
-ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const ResizableBorderComponent::Zone& other) throw()                   { zone = other.zone; return *this; }
 bool ResizableBorderComponent::Zone::operator== (const ResizableBorderComponent::Zone& other) const throw()       { return zone == other.zone; }
 bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent::Zone& other) const throw()       { return zone != other.zone; }
 
@@ -55,15 +62,15 @@ const ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositio
          && ! border.subtractedFrom (totalSize).contains (position))
     {
         const int minW = jmax (totalSize.getWidth() / 10, jmin (10, totalSize.getWidth() / 3));
-        if (position.getX() < jmax (border.getLeft(), minW))
+        if (position.getX() < jmax (border.getLeft(), minW) && border.getLeft() > 0)
             z |= left;
-        else if (position.getX() >= totalSize.getWidth() - jmax (border.getRight(), minW))
+        else if (position.getX() >= totalSize.getWidth() - jmax (border.getRight(), minW) && border.getRight() > 0)
             z |= right;
 
         const int minH = jmax (totalSize.getHeight() / 10, jmin (10, totalSize.getHeight() / 3));
-        if (position.getY() < jmax (border.getTop(), minH))
+        if (position.getY() < jmax (border.getTop(), minH) && border.getTop() > 0)
             z |= top;
-        else if (position.getY() >= totalSize.getHeight() - jmax (border.getBottom(), minH))
+        else if (position.getY() >= totalSize.getHeight() - jmax (border.getBottom(), minH) && border.getBottom() > 0)
             z |= bottom;
     }
 

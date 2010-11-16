@@ -1654,36 +1654,46 @@ void Component::internalRepaint (int x, int y, int w, int h)
 }
 
 //==============================================================================
-void Component::renderComponent (Graphics& g)
+void Component::paintComponent (Graphics& g)
+{
+    if (flags.bufferToImageFlag)
+    {
+        if (bufferedImage_.isNull())
+        {
+            bufferedImage_ = Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                    getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
+
+            Graphics imG (bufferedImage_);
+            paint (imG);
+        }
+
+        g.setColour (Colours::black.withAlpha (getAlpha()));
+        g.drawImageAt (bufferedImage_, 0, 0);
+    }
+    else
+    {
+        paint (g);
+    }
+}
+
+void Component::paintComponentAndChildren (Graphics& g)
 {
     const Rectangle<int> clipBounds (g.getClipBounds());
 
-    g.saveState();
-    clipObscuredRegions (g, clipBounds, 0, 0);
-
-    if (! g.isClipEmpty())
+    if (flags.dontClipGraphicsFlag)
     {
-        if (flags.bufferToImageFlag)
-        {
-            if (bufferedImage_.isNull())
-            {
-                bufferedImage_ = Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                        getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
-
-                Graphics imG (bufferedImage_);
-                paint (imG);
-            }
-
-            g.setColour (Colours::black.withAlpha (getAlpha()));
-            g.drawImageAt (bufferedImage_, 0, 0);
-        }
-        else
-        {
-            paint (g);
-        }
+        paintComponent (g);
     }
+    else
+    {
+        g.saveState();
+        clipObscuredRegions (g, clipBounds, 0, 0);
 
-    g.restoreState();
+        if (! g.isClipEmpty())
+            paintComponent (g);
+
+        g.restoreState();
+    }
 
     for (int i = 0; i < childComponentList_.size(); ++i)
     {
@@ -1693,20 +1703,33 @@ void Component::renderComponent (Graphics& g)
         {
             g.saveState();
 
-            if (g.reduceClipRegion (child->getBounds()))
+            if (child->flags.dontClipGraphicsFlag)
             {
-                for (int j = i + 1; j < childComponentList_.size(); ++j)
+                g.setOrigin (child->getX(), child->getY());
+                child->paintEntireComponent (g, false);
+            }
+            else
+            {
+                if (g.reduceClipRegion (child->getBounds()))
                 {
-                    const Component* const sibling = childComponentList_.getUnchecked (j);
+                    bool nothingClipped = true;
 
-                    if (sibling->flags.opaqueFlag && sibling->isVisible())
-                        g.excludeClipRegion (sibling->getBounds());
-                }
+                    for (int j = i + 1; j < childComponentList_.size(); ++j)
+                    {
+                        const Component* const sibling = childComponentList_.getUnchecked (j);
 
-                if (! g.isClipEmpty())
-                {
-                    g.setOrigin (child->getX(), child->getY());
-                    child->paintEntireComponent (g, false);
+                        if (sibling->flags.opaqueFlag && sibling->isVisible())
+                        {
+                            nothingClipped = false;
+                            g.excludeClipRegion (sibling->getBounds());
+                        }
+                    }
+
+                    if (nothingClipped || ! g.isClipEmpty())
+                    {
+                        g.setOrigin (child->getX(), child->getY());
+                        child->paintEntireComponent (g, false);
+                    }
                 }
             }
 
@@ -1719,7 +1742,7 @@ void Component::renderComponent (Graphics& g)
     g.restoreState();
 }
 
-void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
+void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 {
     jassert (! g.isClipEmpty());
 
@@ -1733,39 +1756,41 @@ void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
                            getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
         {
             Graphics g2 (effectImage);
-            renderComponent (g2);
+            paintComponentAndChildren (g2);
         }
 
         effect_->applyEffect (effectImage, g, ignoreAlphaLevel ? 1.0f : getAlpha());
     }
+    else if (componentTransparency > 0 && ! ignoreAlphaLevel)
+    {
+        if (componentTransparency < 255)
+        {
+            Image temp (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                        getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
+
+            {
+                Graphics tempG (temp);
+                tempG.reduceClipRegion (g.getClipBounds());
+                paintEntireComponent (tempG, true);
+            }
+
+            g.setColour (Colours::black.withAlpha (getAlpha()));
+            g.drawImageAt (temp, 0, 0);
+        }
+    }
     else
     {
-        if (componentTransparency > 0 && ! ignoreAlphaLevel)
-        {
-            if (componentTransparency < 255)
-            {
-                Image temp (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                            getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
-
-                {
-                    Graphics tempG (temp);
-                    tempG.reduceClipRegion (g.getClipBounds());
-                    paintEntireComponent (tempG, true);
-                }
-
-                g.setColour (Colours::black.withAlpha (getAlpha()));
-                g.drawImageAt (temp, 0, 0);
-            }
-        }
-        else
-        {
-            renderComponent (g);
-        }
+        paintComponentAndChildren (g);
     }
 
   #if JUCE_DEBUG
     flags.isInsidePaintCall = false;
   #endif
+}
+
+void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) throw()
+{
+    flags.dontClipGraphicsFlag = shouldPaintWithoutClipping;
 }
 
 //==============================================================================

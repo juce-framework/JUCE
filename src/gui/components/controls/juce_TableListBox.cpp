@@ -103,7 +103,7 @@ public:
                 }
 
                 comp = model->refreshComponentForCell (row, columnId, isSelected, comp);
-                columnComponents.set (i, comp);
+                columnComponents.set (i, comp, false);
 
                 if (comp != 0)
                 {
