@@ -118,10 +118,10 @@ bool DrawableComposite::Marker::operator!= (const DrawableComposite::Marker& oth
 }
 
 //==============================================================================
-const char* const DrawableComposite::contentLeftMarkerName ("left");
-const char* const DrawableComposite::contentRightMarkerName ("right");
-const char* const DrawableComposite::contentTopMarkerName ("top");
-const char* const DrawableComposite::contentBottomMarkerName ("bottom");
+const char* const DrawableComposite::contentLeftMarkerName = "left";
+const char* const DrawableComposite::contentRightMarkerName = "right";
+const char* const DrawableComposite::contentTopMarkerName = "top";
+const char* const DrawableComposite::contentBottomMarkerName = "bottom";
 
 const RelativeRectangle DrawableComposite::getContentArea() const
 {
@@ -560,7 +560,7 @@ void DrawableComposite::ValueTreeWrapper::removeMarker (bool xAxis, const ValueT
          && state [nameProperty].toString() != contentRightMarkerName
          && state [nameProperty].toString() != contentTopMarkerName
          && state [nameProperty].toString() != contentBottomMarkerName)
-        return getMarkerList (xAxis).removeChild (state, undoManager);
+        getMarkerList (xAxis).removeChild (state, undoManager);
 }
 
 //==============================================================================

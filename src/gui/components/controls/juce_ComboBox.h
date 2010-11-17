@@ -30,6 +30,9 @@
 #include "../../../text/juce_StringArray.h"
 #include "../../../containers/juce_Value.h"
 
+#if JUCE_VC6
+ #define Listener SliderListener
+#endif
 
 //==============================================================================
 /**
@@ -49,7 +52,7 @@
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,
                             public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
-                            public Value::Listener,
+                            public ValueListener,
                             private AsyncUpdater
 {
 public:
@@ -403,5 +406,8 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
 typedef ComboBox::Listener ComboBoxListener;
 
+#if JUCE_VC6
+ #undef Listener
+#endif
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__

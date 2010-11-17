@@ -79,7 +79,7 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    SharedImage* clone()
+    Image::SharedImage* clone()
     {
         SoftwareSharedImage* s = new SoftwareSharedImage (format, width, height, false);
         memcpy (s->imageData, imageData, lineStride * height);
@@ -123,7 +123,7 @@ public:
         return g;
     }
 
-    SharedImage* clone()
+    Image::SharedImage* clone()
     {
         return new SubsectionSharedImage (image->clone(), area);
     }

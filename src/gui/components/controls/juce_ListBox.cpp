@@ -852,7 +852,7 @@ void ListBox::setOutlineThickness (const int outlineThickness_)
 
 void ListBox::setHeaderComponent (Component* const newHeaderComponent)
 {
-    if (newHeaderComponent != headerComponent)
+    if (headerComponent != newHeaderComponent)
     {
         headerComponent = newHeaderComponent;
 

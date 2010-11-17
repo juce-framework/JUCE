@@ -218,7 +218,7 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    SharedImage* clone()
+    Image::SharedImage* clone()
     {
         WindowsBitmapImage* im = new WindowsBitmapImage (format, width, height, false);
 

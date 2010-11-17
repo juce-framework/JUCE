@@ -79,7 +79,7 @@ typedef unsigned int                uint32;
   typedef int64                     pointer_sized_int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
   typedef uint64                    pointer_sized_uint;
-#elif _MSC_VER >= 1300
+#elif JUCE_MSVC && ! JUCE_VC6
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
   typedef _W64 int                  pointer_sized_int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
@@ -163,22 +163,26 @@ inline void swapVariables (Type& variable1, Type& variable2)
     variable2 = tempVal;
 }
 
-/** Handy function for getting the number of elements in a simple const C array.
+#if JUCE_VC6
+    #define numElementsInArray(X) (sizeof((X)) / sizeof(0[X]))
+#else
+    /** Handy function for getting the number of elements in a simple const C array.
 
-    E.g.
-    @code
-    static int myArray[] = { 1, 2, 3 };
+        E.g.
+        @code
+        static int myArray[] = { 1, 2, 3 };
 
-    int numElements = numElementsInArray (myArray) // returns 3
-    @endcode
-*/
-template <typename Type, int N>
-inline int numElementsInArray (Type (&array)[N])
-{
-    (void) array; // (required to avoid a spurious warning in MS compilers)
-    sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
-    return N;
-}
+        int numElements = numElementsInArray (myArray) // returns 3
+        @endcode
+    */
+    template <typename Type, int N>
+    inline int numElementsInArray (Type (&array)[N])
+    {
+        (void) array; // (required to avoid a spurious warning in MS compilers)
+        sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+        return N;
+    }
+#endif
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
@@ -327,9 +331,9 @@ inline int roundFloatToInt (const float value) throw()
 */
 namespace TypeHelpers
 {
-#if defined (_MSC_VER) && _MSC_VER <= 1400
+  #if JUCE_VC8_OR_EARLIER
     #define PARAMETER_TYPE(a) a
-#else
+  #else
     /** The ParameterType struct is used to find the best type to use when passing some kind
         of object as a parameter.
 
@@ -344,7 +348,7 @@ namespace TypeHelpers
     */
     template <typename Type> struct ParameterType                   { typedef const Type& type; };
 
-#if ! DOXYGEN
+  #if ! DOXYGEN
     template <typename Type> struct ParameterType <Type&>           { typedef Type& type; };
     template <typename Type> struct ParameterType <Type*>           { typedef Type* type; };
     template <>              struct ParameterType <char>            { typedef char type; };
@@ -360,13 +364,13 @@ namespace TypeHelpers
     template <>              struct ParameterType <bool>            { typedef bool type; };
     template <>              struct ParameterType <float>           { typedef float type; };
     template <>              struct ParameterType <double>          { typedef double type; };
-#endif
+  #endif
 
     /** A helpful macro to simplify the use of the ParameterType template.
         @see ParameterType
     */
     #define PARAMETER_TYPE(a)    typename TypeHelpers::ParameterType<a>::type
-#endif
+  #endif
 }
 
 

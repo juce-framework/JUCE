@@ -37,6 +37,11 @@ class Expression::Helpers
 public:
     typedef ReferenceCountedObjectPtr<Term> TermPtr;
 
+    // This helper function is needed to work around VC6 scoping bugs
+    static const TermPtr& getTermFor (const Expression& exp) throw()       { return exp.term; }
+
+    friend class Expression::Term; // (also only needed as a VC6 workaround)
+
     //==============================================================================
     class Constant  : public Term
     {
@@ -88,7 +93,7 @@ public:
 
             try
             {
-                return c.getSymbolValue (mainSymbol, member).term->evaluate (c, recursionDepth);
+                return getTermFor (c.getSymbolValue (mainSymbol, member))->evaluate (c, recursionDepth);
             }
             catch (...)
             {}
@@ -118,7 +123,7 @@ public:
 
             try
             {
-                return c != 0 && c->getSymbolValue (mainSymbol, member).term->referencesSymbol (s, c, recursionDepth);
+                return c != 0 && getTermFor (c->getSymbolValue (mainSymbol, member))->referencesSymbol (s, c, recursionDepth);
             }
             catch (EvaluationError&)
             {

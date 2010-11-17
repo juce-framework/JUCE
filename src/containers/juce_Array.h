@@ -60,7 +60,7 @@ template <typename ElementType,
 class Array
 {
 private:
-  #if defined (_MSC_VER) && _MSC_VER <= 1400
+  #if JUCE_VC8_OR_EARLIER
     typedef const ElementType& ParameterType;
   #else
     typedef PARAMETER_TYPE (ElementType) ParameterType;

@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSource,
-                                                        public Value::Listener
+                                                        public ValueListener
 {
 public:
     RemapperValueSource (const Value& sourceValue_, const Array<var>& mappings_)

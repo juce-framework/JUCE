@@ -28,6 +28,9 @@
 
 #include "juce_TextEditor.h"
 
+#if JUCE_VC6
+ #define Listener ButtonListener
+#endif
 
 //==============================================================================
 /**
@@ -36,9 +39,9 @@
 */
 class JUCE_API  Label  : public Component,
                          public SettableTooltipClient,
-                         protected TextEditor::Listener,
+                         protected TextEditorListener,
                          private ComponentListener,
-                         private Value::Listener
+                         private ValueListener
 {
 public:
     //==============================================================================
@@ -335,5 +338,8 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
 typedef Label::Listener LabelListener;
 
+#if JUCE_VC6
+ #undef Listener
+#endif
 
 #endif   // __JUCE_LABEL_JUCEHEADER__

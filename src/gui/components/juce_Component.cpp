@@ -251,7 +251,9 @@ Component::Component (const String& name)
 
 Component::~Component()
 {
+  #if ! JUCE_VC6  // (access to private union not allowed in VC6)
     static_jassert (sizeof (flags) <= sizeof (componentFlags_));
+  #endif
 
     componentListeners.call (&ComponentListener::componentBeingDeleted, *this);
 

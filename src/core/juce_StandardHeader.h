@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      52
-#define JUCE_BUILDNUMBER        91
+#define JUCE_BUILDNUMBER        92
 
 /** Current Juce version number.
 
@@ -65,8 +65,20 @@
 
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
 #if JUCE_MSVC
-  #if (defined(_MSC_VER) && (_MSC_VER <= 1200))
+  #if JUCE_VC6
     #pragma warning (disable: 4284 4786)  // (spurious VC6 warnings)
+
+    namespace std   // VC6 doesn't have sqrt/sin/cos/tan/abs in std, so declare them here:
+    {
+        template <typename Type> Type abs (Type a)              { if (a < 0) return -a; return a; }
+        template <typename Type> Type tan (Type a)              { return static_cast<Type> (::tan (static_cast<double> (a))); }
+        template <typename Type> Type sin (Type a)              { return static_cast<Type> (::sin (static_cast<double> (a))); }
+        template <typename Type> Type cos (Type a)              { return static_cast<Type> (::cos (static_cast<double> (a))); }
+        template <typename Type> Type sqrt (Type a)             { return static_cast<Type> (::sqrt (static_cast<double> (a))); }
+        template <typename Type> Type floor (Type a)            { return static_cast<Type> (::floor (static_cast<double> (a))); }
+        template <typename Type> Type ceil (Type a)             { return static_cast<Type> (::ceil (static_cast<double> (a))); }
+        template <typename Type> Type atan2 (Type a, Type b)    { return static_cast<Type> (::atan2 (static_cast<double> (a), static_cast<double> (b))); }
+    }
   #endif
 
   #pragma warning (push)

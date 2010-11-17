@@ -176,12 +176,12 @@ void Slider::sendDragEnd()
     listeners.callChecked (checker, &SliderListener::sliderDragEnded, this);
 }
 
-void Slider::addListener (Listener* const listener)
+void Slider::addListener (SliderListener* const listener)
 {
     listeners.add (listener);
 }
 
-void Slider::removeListener (Listener* const listener)
+void Slider::removeListener (SliderListener* const listener)
 {
     listeners.remove (listener);
 }

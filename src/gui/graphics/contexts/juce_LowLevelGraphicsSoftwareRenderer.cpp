@@ -414,7 +414,7 @@ private:
 };
 
 //==============================================================================
-namespace
+namespace RenderingHelpers
 {
     forcedinline int safeModulo (int n, const int divisor) throw()
     {
@@ -436,8 +436,8 @@ public:
         : destData (destData_),
           srcData (srcData_),
           extraAlpha (extraAlpha_ + 1),
-          xOffset (repeatPattern ? safeModulo (x, srcData_.width) - srcData_.width : x),
-          yOffset (repeatPattern ? safeModulo (y, srcData_.height) - srcData_.height : y)
+          xOffset (repeatPattern ? RenderingHelpers::safeModulo (x, srcData_.width) - srcData_.width : x),
+          yOffset (repeatPattern ? RenderingHelpers::safeModulo (y, srcData_.height) - srcData_.height : y)
     {
     }
 
@@ -680,8 +680,8 @@ private:
 
             if (repeatPattern)
             {
-                loResX = safeModulo (loResX, srcData.width);
-                loResY = safeModulo (loResY, srcData.height);
+                loResX = RenderingHelpers::safeModulo (loResX, srcData.width);
+                loResY = RenderingHelpers::safeModulo (loResY, srcData.height);
             }
 
             if (betterQuality)

@@ -233,5 +233,7 @@ private:
 /** Writes a Value to an OutputStream as a UTF8 string. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value);
 
+/** This typedef is just for compatibility with old code - newer code should use the Value::Listener class directly. */
+typedef Value::Listener ValueListener;
 
 #endif   // __JUCE_VALUE_JUCEHEADER__

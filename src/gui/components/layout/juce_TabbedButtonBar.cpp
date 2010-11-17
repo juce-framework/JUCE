@@ -147,7 +147,7 @@ public:
         repaint();
     }
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button*)
     {
         owner.showExtraItemsMenu();
     }

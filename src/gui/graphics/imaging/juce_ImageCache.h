@@ -116,6 +116,7 @@ public:
 private:
     //==============================================================================
     class Pimpl;
+    friend class Pimpl;
 
     ImageCache();
     ImageCache (const ImageCache&);

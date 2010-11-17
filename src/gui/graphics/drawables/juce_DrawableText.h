@@ -107,7 +107,7 @@ public:
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
-    class ValueTreeWrapper   : public ValueTreeWrapperBase
+    class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
     {
     public:
         ValueTreeWrapper (const ValueTree& state);

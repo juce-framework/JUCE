@@ -351,11 +351,11 @@ namespace NumberToStringConverters
 
     juce_wchar getDecimalPoint()
     {
-#if JUCE_MSVC && _MSC_VER < 1400
+      #if JUCE_VC7_OR_EARLIER
         static juce_wchar dp = std::_USE (std::locale(), std::numpunct <wchar_t>).decimal_point();
-#else
+      #else
         static juce_wchar dp = std::use_facet <std::numpunct <wchar_t> > (std::locale()).decimal_point();
-#endif
+      #endif
         return dp;
     }
 
@@ -387,15 +387,15 @@ namespace NumberToStringConverters
         }
         else
         {
-#if JUCE_WINDOWS
-  #if (JUCE_MSVC && _MSC_VER <= 1400) || JUCE_MINGW
+        #if JUCE_WINDOWS
+          #if JUCE_VC8_OR_EARLIER || JUCE_MINGW
             len = _snwprintf (buffer, numChars, L"%.9g", n);
-  #else
+          #else
             len = _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n);
-  #endif
-#else
+          #endif
+        #else
             len = swprintf (buffer, numChars, L"%.9g", n);
-#endif
+        #endif
             return buffer;
         }
     }

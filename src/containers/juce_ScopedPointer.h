@@ -178,7 +178,7 @@ private:
     This can be handy for checking whether this is a null pointer.
 */
 template <class ObjectType>
-inline bool operator== (const ScopedPointer<ObjectType>& pointer1, const ObjectType* const pointer2) throw()
+bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
 {
     return static_cast <ObjectType*> (pointer1) == pointer2;
 }
@@ -187,7 +187,7 @@ inline bool operator== (const ScopedPointer<ObjectType>& pointer1, const ObjectT
     This can be handy for checking whether this is a null pointer.
 */
 template <class ObjectType>
-inline bool operator!= (const ScopedPointer<ObjectType>& pointer1, const ObjectType* const pointer2) throw()
+bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
 {
     return static_cast <ObjectType*> (pointer1) != pointer2;
 }

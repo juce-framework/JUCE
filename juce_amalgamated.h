@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	91
+#define JUCE_BUILDNUMBER	92
 
 /** Current Juce version number.
 
@@ -208,7 +208,19 @@
 #elif defined (_MSC_VER)
   #define JUCE_MSVC 1
 
-  #if _MSC_VER >= 1400
+  #if _MSC_VER < 1500
+	#define JUCE_VC8_OR_EARLIER 1
+
+	#if _MSC_VER < 1400
+	  #define JUCE_VC7_OR_EARLIER 1
+
+	  #if _MSC_VER < 1300
+		#define JUCE_VC6 1
+	  #endif
+	#endif
+  #endif
+
+  #if ! JUCE_VC7_OR_EARLIER
 	#define JUCE_USE_INTRINSICS 1
   #endif
 #else
@@ -698,8 +710,20 @@
 
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
 #if JUCE_MSVC
-  #if (defined(_MSC_VER) && (_MSC_VER <= 1200))
+  #if JUCE_VC6
 	#pragma warning (disable: 4284 4786)  // (spurious VC6 warnings)
+
+	namespace std   // VC6 doesn't have sqrt/sin/cos/tan/abs in std, so declare them here:
+	{
+		template <typename Type> Type abs (Type a)		  { if (a < 0) return -a; return a; }
+		template <typename Type> Type tan (Type a)		  { return static_cast<Type> (::tan (static_cast<double> (a))); }
+		template <typename Type> Type sin (Type a)		  { return static_cast<Type> (::sin (static_cast<double> (a))); }
+		template <typename Type> Type cos (Type a)		  { return static_cast<Type> (::cos (static_cast<double> (a))); }
+		template <typename Type> Type sqrt (Type a)		 { return static_cast<Type> (::sqrt (static_cast<double> (a))); }
+		template <typename Type> Type floor (Type a)		{ return static_cast<Type> (::floor (static_cast<double> (a))); }
+		template <typename Type> Type ceil (Type a)		 { return static_cast<Type> (::ceil (static_cast<double> (a))); }
+		template <typename Type> Type atan2 (Type a, Type b)	{ return static_cast<Type> (::atan2 (static_cast<double> (a), static_cast<double> (b))); }
+	}
   #endif
 
   #pragma warning (push)
@@ -1035,7 +1059,7 @@ typedef unsigned int		uint32;
   typedef int64			 pointer_sized_int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
   typedef uint64			pointer_sized_uint;
-#elif _MSC_VER >= 1300
+#elif JUCE_MSVC && ! JUCE_VC6
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
   typedef _W64 int		  pointer_sized_int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
@@ -1114,22 +1138,26 @@ inline void swapVariables (Type& variable1, Type& variable2)
 	variable2 = tempVal;
 }
 
-/** Handy function for getting the number of elements in a simple const C array.
+#if JUCE_VC6
+	#define numElementsInArray(X) (sizeof((X)) / sizeof(0[X]))
+#else
+	/** Handy function for getting the number of elements in a simple const C array.
 
-	E.g.
-	@code
-	static int myArray[] = { 1, 2, 3 };
+		E.g.
+		@code
+		static int myArray[] = { 1, 2, 3 };
 
-	int numElements = numElementsInArray (myArray) // returns 3
-	@endcode
-*/
-template <typename Type, int N>
-inline int numElementsInArray (Type (&array)[N])
-{
-	(void) array; // (required to avoid a spurious warning in MS compilers)
-	sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
-	return N;
-}
+		int numElements = numElementsInArray (myArray) // returns 3
+		@endcode
+	*/
+	template <typename Type, int N>
+	inline int numElementsInArray (Type (&array)[N])
+	{
+		(void) array; // (required to avoid a spurious warning in MS compilers)
+		sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+		return N;
+	}
+#endif
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
@@ -1271,9 +1299,9 @@ inline int roundFloatToInt (const float value) throw()
 */
 namespace TypeHelpers
 {
-#if defined (_MSC_VER) && _MSC_VER <= 1400
+  #if JUCE_VC8_OR_EARLIER
 	#define PARAMETER_TYPE(a) a
-#else
+  #else
 	/** The ParameterType struct is used to find the best type to use when passing some kind
 		of object as a parameter.
 
@@ -1288,7 +1316,7 @@ namespace TypeHelpers
 	*/
 	template <typename Type> struct ParameterType		   { typedef const Type& type; };
 
-#if ! DOXYGEN
+  #if ! DOXYGEN
 	template <typename Type> struct ParameterType <Type&>	   { typedef Type& type; };
 	template <typename Type> struct ParameterType <Type*>	   { typedef Type* type; };
 	template <>		  struct ParameterType <char>		{ typedef char type; };
@@ -1304,13 +1332,13 @@ namespace TypeHelpers
 	template <>		  struct ParameterType <bool>		{ typedef bool type; };
 	template <>		  struct ParameterType <float>	   { typedef float type; };
 	template <>		  struct ParameterType <double>	  { typedef double type; };
-#endif
+  #endif
 
 	/** A helpful macro to simplify the use of the ParameterType template.
 		@see ParameterType
 	*/
 	#define PARAMETER_TYPE(a)	typename TypeHelpers::ParameterType<a>::type
-#endif
+  #endif
 }
 
 #endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
@@ -4016,7 +4044,7 @@ template <typename ElementType,
 class Array
 {
 private:
-  #if defined (_MSC_VER) && _MSC_VER <= 1400
+  #if JUCE_VC8_OR_EARLIER
 	typedef const ElementType& ParameterType;
   #else
 	typedef PARAMETER_TYPE (ElementType) ParameterType;
@@ -6776,7 +6804,7 @@ private:
 	This can be handy for checking whether this is a null pointer.
 */
 template <class ObjectType>
-inline bool operator== (const ScopedPointer<ObjectType>& pointer1, const ObjectType* const pointer2) throw()
+bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
 {
 	return static_cast <ObjectType*> (pointer1) == pointer2;
 }
@@ -6785,7 +6813,7 @@ inline bool operator== (const ScopedPointer<ObjectType>& pointer1, const ObjectT
 	This can be handy for checking whether this is a null pointer.
 */
 template <class ObjectType>
-inline bool operator!= (const ScopedPointer<ObjectType>& pointer1, const ObjectType* const pointer2) throw()
+bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
 {
 	return static_cast <ObjectType*> (pointer1) != pointer2;
 }
@@ -12500,7 +12528,7 @@ template <class ListenerClass,
 class ListenerList
 {
 	// Horrible macros required to support VC6/7..
-	#if defined (_MSC_VER) && _MSC_VER <= 1400
+	#if JUCE_VC8_OR_EARLIER
 	  #define LL_TEMPLATE(a)   typename P##a, typename Q##a
 	  #define LL_PARAM(a)	  Q##a& param##a
 	#else
@@ -12939,6 +12967,9 @@ private:
 
 /** Writes a Value to an OutputStream as a UTF8 string. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value);
+
+/** This typedef is just for compatibility with old code - newer code should use the Value::Listener class directly. */
+typedef Value::Listener ValueListener;
 
 #endif   // __JUCE_VALUE_JUCEHEADER__
 /*** End of inlined file: juce_Value.h ***/
@@ -25546,7 +25577,7 @@ public:
 
 	protected:
 		friend class Image;
-		friend class Image::BitmapData;
+		friend class BitmapData;
 		const PixelFormat format;
 		const int width, height;
 		int pixelStride, lineStride;
@@ -25565,6 +25596,9 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
+	friend class SharedImage;
+	friend class BitmapData;
+
 	ReferenceCountedObjectPtr<SharedImage> image;
 };
 
@@ -30099,6 +30133,240 @@ public:
 	class NonConst; /**< Used as a template parameter for AudioData::Pointer. Indicates that the pointer can be used for non-const data. */
 	class Const;	/**< Used as a template parameter for AudioData::Pointer. Indicates that the samples can only be used for const data.. */
 
+  #ifndef DOXYGEN
+
+	class BigEndian
+	{
+	public:
+		template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) throw()			  { return s.getAsFloatBE(); }
+		template <class SampleFormatType> static inline void setAsFloat (SampleFormatType& s, float newValue) throw()	   { s.setAsFloatBE (newValue); }
+		template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) throw()			  { return s.getAsInt32BE(); }
+		template <class SampleFormatType> static inline void setAsInt32 (SampleFormatType& s, int32 newValue) throw()	   { s.setAsInt32BE (newValue); }
+		template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) throw()	{ dest.copyFromBE (source); }
+		enum { isBigEndian = 1 };
+	};
+
+	class LittleEndian
+	{
+	public:
+		template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) throw()			  { return s.getAsFloatLE(); }
+		template <class SampleFormatType> static inline void setAsFloat (SampleFormatType& s, float newValue) throw()	   { s.setAsFloatLE (newValue); }
+		template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) throw()			  { return s.getAsInt32LE(); }
+		template <class SampleFormatType> static inline void setAsInt32 (SampleFormatType& s, int32 newValue) throw()	   { s.setAsInt32LE (newValue); }
+		template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) throw()	{ dest.copyFromLE (source); }
+		enum { isBigEndian = 0 };
+	};
+
+	#if JUCE_BIG_ENDIAN
+	 class NativeEndian   : public BigEndian  {};
+	#else
+	 class NativeEndian   : public LittleEndian  {};
+	#endif
+
+	class Int8
+	{
+	public:
+		inline Int8 (void* data_) throw()   : data (static_cast <int8*> (data_))  {}
+
+		inline void advance() throw()			   { ++data; }
+		inline void skip (int numSamples) throw()		   { data += numSamples; }
+		inline float getAsFloatLE() const throw()		   { return (float) (*data * (1.0 / (1.0 + maxValue))); }
+		inline float getAsFloatBE() const throw()		   { return getAsFloatLE(); }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = (int8) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue))); }
+		inline void setAsFloatBE (float newValue) throw()	   { setAsFloatLE (newValue); }
+		inline int32 getAsInt32LE() const throw()		   { return (int) (*data << 24); }
+		inline int32 getAsInt32BE() const throw()		   { return getAsInt32LE(); }
+		inline void setAsInt32LE (int newValue) throw()	 { *data = (int8) (newValue >> 24); }
+		inline void setAsInt32BE (int newValue) throw()	 { setAsInt32LE (newValue); }
+		inline void clear() throw()				 { *data = 0; }
+		inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
+		template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
+		template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
+		inline void copyFromSameType (Int8& source) throw()	 { *data = *source.data; }
+
+		int8* data;
+		enum { bytesPerSample = 1, maxValue = 0x7f, resolution = (1 << 24), isFloat = 0 };
+	};
+
+	class UInt8
+	{
+	public:
+		inline UInt8 (void* data_) throw()   : data (static_cast <uint8*> (data_))  {}
+
+		inline void advance() throw()			   { ++data; }
+		inline void skip (int numSamples) throw()		   { data += numSamples; }
+		inline float getAsFloatLE() const throw()		   { return (float) ((*data - 128) * (1.0 / (1.0 + maxValue))); }
+		inline float getAsFloatBE() const throw()		   { return getAsFloatLE(); }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = (uint8) jlimit (0, 255, 128 + roundToInt (newValue * (1.0 + maxValue))); }
+		inline void setAsFloatBE (float newValue) throw()	   { setAsFloatLE (newValue); }
+		inline int32 getAsInt32LE() const throw()		   { return (int) ((*data - 128) << 24); }
+		inline int32 getAsInt32BE() const throw()		   { return getAsInt32LE(); }
+		inline void setAsInt32LE (int newValue) throw()	 { *data = (uint8) (128 + (newValue >> 24)); }
+		inline void setAsInt32BE (int newValue) throw()	 { setAsInt32LE (newValue); }
+		inline void clear() throw()				 { *data = 128; }
+		inline void clearMultiple (int num) throw()		 { memset (data, 128, num) ;}
+		template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
+		template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
+		inline void copyFromSameType (UInt8& source) throw()	{ *data = *source.data; }
+
+		uint8* data;
+		enum { bytesPerSample = 1, maxValue = 0x7f, resolution = (1 << 24), isFloat = 0 };
+	};
+
+	class Int16
+	{
+	public:
+		inline Int16 (void* data_) throw()   : data (static_cast <uint16*> (data_))  {}
+
+		inline void advance() throw()			   { ++data; }
+		inline void skip (int numSamples) throw()		   { data += numSamples; }
+		inline float getAsFloatLE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int16) ByteOrder::swapIfBigEndian (*data)); }
+		inline float getAsFloatBE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int16) ByteOrder::swapIfLittleEndian (*data)); }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint16) jlimit ((int16) -maxValue, (int16) maxValue, (int16) roundToInt (newValue * (1.0 + maxValue)))); }
+		inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint16) jlimit ((int16) -maxValue, (int16) maxValue, (int16) roundToInt (newValue * (1.0 + maxValue)))); }
+		inline int32 getAsInt32LE() const throw()		   { return (int32) (ByteOrder::swapIfBigEndian ((uint16) *data) << 16); }
+		inline int32 getAsInt32BE() const throw()		   { return (int32) (ByteOrder::swapIfLittleEndian ((uint16) *data) << 16); }
+		inline void setAsInt32LE (int32 newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint16) (newValue >> 16)); }
+		inline void setAsInt32BE (int32 newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint16) (newValue >> 16)); }
+		inline void clear() throw()				 { *data = 0; }
+		inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
+		template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
+		template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
+		inline void copyFromSameType (Int16& source) throw()	{ *data = *source.data; }
+
+		uint16* data;
+		enum { bytesPerSample = 2, maxValue = 0x7fff, resolution = (1 << 16), isFloat = 0 };
+	};
+
+	class Int24
+	{
+	public:
+		inline Int24 (void* data_) throw()   : data (static_cast <char*> (data_))  {}
+
+		inline void advance() throw()			   { data += 3; }
+		inline void skip (int numSamples) throw()		   { data += 3 * numSamples; }
+		inline float getAsFloatLE() const throw()		   { return (float) (ByteOrder::littleEndian24Bit (data) * (1.0 / (1.0 + maxValue))); }
+		inline float getAsFloatBE() const throw()		   { return (float) (ByteOrder::bigEndian24Bit (data) * (1.0 / (1.0 + maxValue))); }
+		inline void setAsFloatLE (float newValue) throw()	   { ByteOrder::littleEndian24BitToChars (jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue))), data); }
+		inline void setAsFloatBE (float newValue) throw()	   { ByteOrder::bigEndian24BitToChars (jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue))), data); }
+		inline int32 getAsInt32LE() const throw()		   { return (int32) ByteOrder::littleEndian24Bit (data) << 8; }
+		inline int32 getAsInt32BE() const throw()		   { return (int32) ByteOrder::bigEndian24Bit (data) << 8; }
+		inline void setAsInt32LE (int32 newValue) throw()	   { ByteOrder::littleEndian24BitToChars (newValue >> 8, data); }
+		inline void setAsInt32BE (int32 newValue) throw()	   { ByteOrder::bigEndian24BitToChars (newValue >> 8, data); }
+		inline void clear() throw()				 { data[0] = 0; data[1] = 0; data[2] = 0; }
+		inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
+		template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
+		template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
+		inline void copyFromSameType (Int24& source) throw()	{ data[0] = source.data[0]; data[1] = source.data[1]; data[2] = source.data[2]; }
+
+		char* data;
+		enum { bytesPerSample = 3, maxValue = 0x7fffff, resolution = (1 << 8), isFloat = 0 };
+	};
+
+	class Int32
+	{
+	public:
+		inline Int32 (void* data_) throw()   : data (static_cast <uint32*> (data_))  {}
+
+		inline void advance() throw()			   { ++data; }
+		inline void skip (int numSamples) throw()		   { data += numSamples; }
+		inline float getAsFloatLE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfBigEndian (*data)); }
+		inline float getAsFloatBE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfLittleEndian (*data)); }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
+		inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
+		inline int32 getAsInt32LE() const throw()		   { return (int32) ByteOrder::swapIfBigEndian (*data); }
+		inline int32 getAsInt32BE() const throw()		   { return (int32) ByteOrder::swapIfLittleEndian (*data); }
+		inline void setAsInt32LE (int32 newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) newValue); }
+		inline void setAsInt32BE (int32 newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) newValue); }
+		inline void clear() throw()				 { *data = 0; }
+		inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
+		template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
+		template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
+		inline void copyFromSameType (Int32& source) throw()	{ *data = *source.data; }
+
+		uint32* data;
+		enum { bytesPerSample = 4, maxValue = 0x7fffffff, resolution = 1, isFloat = 0 };
+	};
+
+	class Float32
+	{
+	public:
+		inline Float32 (void* data_) throw()  : data (static_cast <float*> (data_))  {}
+
+		inline void advance() throw()			   { ++data; }
+		inline void skip (int numSamples) throw()		   { data += numSamples; }
+	   #if JUCE_BIG_ENDIAN
+		inline float getAsFloatBE() const throw()		   { return *data; }
+		inline void setAsFloatBE (float newValue) throw()	   { *data = newValue; }
+		inline float getAsFloatLE() const throw()		   { union { uint32 asInt; float asFloat; } n; n.asInt = ByteOrder::swap (*(uint32*) data); return n.asFloat; }
+		inline void setAsFloatLE (float newValue) throw()	   { union { uint32 asInt; float asFloat; } n; n.asFloat = newValue; *(uint32*) data = ByteOrder::swap (n.asInt); }
+	   #else
+		inline float getAsFloatLE() const throw()		   { return *data; }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = newValue; }
+		inline float getAsFloatBE() const throw()		   { union { uint32 asInt; float asFloat; } n; n.asInt = ByteOrder::swap (*(uint32*) data); return n.asFloat; }
+		inline void setAsFloatBE (float newValue) throw()	   { union { uint32 asInt; float asFloat; } n; n.asFloat = newValue; *(uint32*) data = ByteOrder::swap (n.asInt); }
+	   #endif
+		inline int32 getAsInt32LE() const throw()		   { return (int32) roundToInt (jlimit (-1.0f, 1.0f, getAsFloatLE()) * (1.0 + maxValue)); }
+		inline int32 getAsInt32BE() const throw()		   { return (int32) roundToInt (jlimit (-1.0f, 1.0f, getAsFloatBE()) * (1.0 + maxValue)); }
+		inline void setAsInt32LE (int32 newValue) throw()	   { setAsFloatLE ((float) (newValue * (1.0 / (1.0 + maxValue)))); }
+		inline void setAsInt32BE (int32 newValue) throw()	   { setAsFloatBE ((float) (newValue * (1.0 / (1.0 + maxValue)))); }
+		inline void clear() throw()				 { *data = 0; }
+		inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
+		template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsFloatLE (source.getAsFloat()); }
+		template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsFloatBE (source.getAsFloat()); }
+		inline void copyFromSameType (Float32& source) throw()  { *data = *source.data; }
+
+		float* data;
+		enum { bytesPerSample = 4, maxValue = 0x7fffffff, resolution = (1 << 8), isFloat = 1 };
+	};
+
+	class NonInterleaved
+	{
+	public:
+		inline NonInterleaved() throw() {}
+		inline NonInterleaved (const NonInterleaved&) throw() {}
+		inline NonInterleaved (const int) throw() {}
+		inline void copyFrom (const NonInterleaved&) throw() {}
+		template <class SampleFormatType> inline void advanceData (SampleFormatType& s) throw()			 { s.advance(); }
+		template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) throw()   { s.skip (numSamples); }
+		template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) throw()	   { s.clearMultiple (numSamples); }
+		template <class SampleFormatType> inline static int getNumBytesBetweenSamples (const SampleFormatType&) throw() { return SampleFormatType::bytesPerSample; }
+
+		enum { isInterleavedType = 0, numInterleavedChannels = 1 };
+	};
+
+	class Interleaved
+	{
+	public:
+		inline Interleaved() throw() : numInterleavedChannels (1) {}
+		inline Interleaved (const Interleaved& other) throw() : numInterleavedChannels (other.numInterleavedChannels) {}
+		inline Interleaved (const int numInterleavedChannels_) throw() : numInterleavedChannels (numInterleavedChannels_) {}
+		inline void copyFrom (const Interleaved& other) throw()  { numInterleavedChannels = other.numInterleavedChannels; }
+		template <class SampleFormatType> inline void advanceData (SampleFormatType& s) throw()			 { s.skip (numInterleavedChannels); }
+		template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) throw()   { s.skip (numInterleavedChannels * numSamples); }
+		template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) throw()	   { while (--numSamples >= 0) { s.clear(); s.skip (numInterleavedChannels); } }
+		template <class SampleFormatType> inline int getNumBytesBetweenSamples (const SampleFormatType&) const throw()  { return numInterleavedChannels * SampleFormatType::bytesPerSample; }
+		int numInterleavedChannels;
+		enum { isInterleavedType = 1 };
+	};
+
+	class NonConst
+	{
+	public:
+		typedef void VoidType;
+		static inline void* toVoidPtr (VoidType* v) throw() { return v; }
+		enum { isConst = 0 };
+	};
+
+	class Const
+	{
+	public:
+		typedef const void VoidType;
+		static inline void* toVoidPtr (VoidType* v) throw() { return const_cast<void*> (v); }
+		enum { isConst = 1 };
+	};
+  #endif
+
 	/**
 		A pointer to a block of audio data with a particular encoding.
 
@@ -30127,7 +30395,7 @@ public:
 			  typename Endianness,
 			  typename InterleavingType,
 			  typename Constness>
-	class Pointer   : private InterleavingType
+	class Pointer
 	{
 	public:
 
@@ -30147,22 +30415,22 @@ public:
 			For non-interleaved data, use the other constructor.
 		*/
 		Pointer (typename Constness::VoidType* sourceData, int numInterleavedChannels) throw()
-			: InterleavingType (numInterleavedChannels),
-			  data (Constness::toVoidPtr (sourceData))
+			: data (Constness::toVoidPtr (sourceData)),
+			  interleaving (numInterleavedChannels)
 		{
 		}
 
 		/** Creates a copy of another pointer. */
 		Pointer (const Pointer& other) throw()
-			: InterleavingType (other),
-			  data (other.data)
+			: data (other.data),
+			  interleaving (other.interleaving)
 		{
 		}
 
 		Pointer& operator= (const Pointer& other) throw()
 		{
 			data = other.data;
-			InterleavingType::copyFrom (other);
+			interleaving.copyFrom (other.interleaving);
 			return *this;
 		}
 
@@ -30206,10 +30474,10 @@ public:
 		inline Pointer& operator++() throw()			{ advance(); return *this; }
 
 		/** Moves the pointer back to the previous sample. */
-		inline Pointer& operator--() throw()			{ advanceDataBy (data, -1); return *this; }
+		inline Pointer& operator--() throw()			{ interleaving.advanceDataBy (data, -1); return *this; }
 
 		/** Adds a number of samples to the pointer's position. */
-		Pointer& operator+= (int samplesToJump) throw()	 { advanceDataBy (data, samplesToJump); return *this; }
+		Pointer& operator+= (int samplesToJump) throw()	 { interleaving.advanceDataBy (data, samplesToJump); return *this; }
 
 		/** Writes a stream of samples into this pointer from another pointer.
 			This will copy the specified number of samples, converting between formats appropriately.
@@ -30260,7 +30528,7 @@ public:
 		void clearSamples (int numSamples) const throw()
 		{
 			Pointer dest (*this);
-			dest.clear (dest.data, numSamples);
+			dest.interleaving.clear (dest.data, numSamples);
 		}
 
 		/** Returns true if the pointer is using a floating-point format. */
@@ -30276,7 +30544,7 @@ public:
 		int getNumInterleavedChannels() const throw()	   { return (int) this->numInterleavedChannels; }
 
 		/** Returns the number of bytes between the start address of each sample. */
-		int getNumBytesBetweenSamples() const throw()	   { return InterleavingType::getNumBytesBetweenSamples (data); }
+		int getNumBytesBetweenSamples() const throw()	   { return interleaving.getNumBytesBetweenSamples (data); }
 
 		/** Returns the accuracy of this format when represented as a 32-bit integer.
 			This is the smallest number above 0 that can be represented in the sample format, converted to
@@ -30291,8 +30559,10 @@ public:
 	private:
 
 		SampleFormat data;
+		InterleavingType interleaving;  // annoyingly, making the interleaving type a superclass to take
+										// advantage of EBCO causes an internal compiler error in VC6..
 
-		inline void advance() throw()			   { advanceData (data); }
+		inline void advance() throw()			   { interleaving.advanceData (data); }
 
 		Pointer operator++ (int); // private to force you to use the more efficient pre-increment!
 		Pointer operator-- (int);
@@ -30364,241 +30634,6 @@ public:
 		const int sourceChannels, destChannels;
 	};
 };
-
-#ifndef DOXYGEN
-
-class AudioData::BigEndian
-{
-public:
-	template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) throw()			  { return s.getAsFloatBE(); }
-	template <class SampleFormatType> static inline void setAsFloat (SampleFormatType& s, float newValue) throw()	   { s.setAsFloatBE (newValue); }
-	template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) throw()			  { return s.getAsInt32BE(); }
-	template <class SampleFormatType> static inline void setAsInt32 (SampleFormatType& s, int32 newValue) throw()	   { s.setAsInt32BE (newValue); }
-	template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) throw()	{ dest.copyFromBE (source); }
-	enum { isBigEndian = 1 };
-};
-
-class AudioData::LittleEndian
-{
-public:
-	template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) throw()			  { return s.getAsFloatLE(); }
-	template <class SampleFormatType> static inline void setAsFloat (SampleFormatType& s, float newValue) throw()	   { s.setAsFloatLE (newValue); }
-	template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) throw()			  { return s.getAsInt32LE(); }
-	template <class SampleFormatType> static inline void setAsInt32 (SampleFormatType& s, int32 newValue) throw()	   { s.setAsInt32LE (newValue); }
-	template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) throw()	{ dest.copyFromLE (source); }
-	enum { isBigEndian = 0 };
-};
-
-#if JUCE_BIG_ENDIAN
- class AudioData::NativeEndian   : public AudioData::BigEndian  {};
-#else
- class AudioData::NativeEndian   : public AudioData::LittleEndian  {};
-#endif
-
-class AudioData::Int8
-{
-public:
-	inline Int8 (void* data_) throw()   : data (static_cast <int8*> (data_))  {}
-
-	inline void advance() throw()			   { ++data; }
-	inline void skip (int numSamples) throw()		   { data += numSamples; }
-	inline float getAsFloatLE() const throw()		   { return (float) (*data * (1.0 / (1.0 + maxValue))); }
-	inline float getAsFloatBE() const throw()		   { return getAsFloatLE(); }
-	inline void setAsFloatLE (float newValue) throw()	   { *data = (int8) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue))); }
-	inline void setAsFloatBE (float newValue) throw()	   { setAsFloatLE (newValue); }
-	inline int32 getAsInt32LE() const throw()		   { return (int) (*data << 24); }
-	inline int32 getAsInt32BE() const throw()		   { return getAsInt32LE(); }
-	inline void setAsInt32LE (int newValue) throw()	 { *data = (int8) (newValue >> 24); }
-	inline void setAsInt32BE (int newValue) throw()	 { setAsInt32LE (newValue); }
-	inline void clear() throw()				 { *data = 0; }
-	inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
-	template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
-	template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
-	inline void copyFromSameType (Int8& source) throw()	 { *data = *source.data; }
-
-	int8* data;
-	enum { bytesPerSample = 1, maxValue = 0x7f, resolution = (1 << 24), isFloat = 0 };
-};
-
-class AudioData::UInt8
-{
-public:
-	inline UInt8 (void* data_) throw()   : data (static_cast <uint8*> (data_))  {}
-
-	inline void advance() throw()			   { ++data; }
-	inline void skip (int numSamples) throw()		   { data += numSamples; }
-	inline float getAsFloatLE() const throw()		   { return (float) ((*data - 128) * (1.0 / (1.0 + maxValue))); }
-	inline float getAsFloatBE() const throw()		   { return getAsFloatLE(); }
-	inline void setAsFloatLE (float newValue) throw()	   { *data = (uint8) jlimit (0, 255, 128 + roundToInt (newValue * (1.0 + maxValue))); }
-	inline void setAsFloatBE (float newValue) throw()	   { setAsFloatLE (newValue); }
-	inline int32 getAsInt32LE() const throw()		   { return (int) ((*data - 128) << 24); }
-	inline int32 getAsInt32BE() const throw()		   { return getAsInt32LE(); }
-	inline void setAsInt32LE (int newValue) throw()	 { *data = (uint8) (128 + (newValue >> 24)); }
-	inline void setAsInt32BE (int newValue) throw()	 { setAsInt32LE (newValue); }
-	inline void clear() throw()				 { *data = 128; }
-	inline void clearMultiple (int num) throw()		 { memset (data, 128, num) ;}
-	template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
-	template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
-	inline void copyFromSameType (UInt8& source) throw()	{ *data = *source.data; }
-
-	uint8* data;
-	enum { bytesPerSample = 1, maxValue = 0x7f, resolution = (1 << 24), isFloat = 0 };
-};
-
-class AudioData::Int16
-{
-public:
-	inline Int16 (void* data_) throw()   : data (static_cast <uint16*> (data_))  {}
-
-	inline void advance() throw()			   { ++data; }
-	inline void skip (int numSamples) throw()		   { data += numSamples; }
-	inline float getAsFloatLE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int16) ByteOrder::swapIfBigEndian (*data)); }
-	inline float getAsFloatBE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int16) ByteOrder::swapIfLittleEndian (*data)); }
-	inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint16) jlimit ((int16) -maxValue, (int16) maxValue, (int16) roundToInt (newValue * (1.0 + maxValue)))); }
-	inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint16) jlimit ((int16) -maxValue, (int16) maxValue, (int16) roundToInt (newValue * (1.0 + maxValue)))); }
-	inline int32 getAsInt32LE() const throw()		   { return (int32) (ByteOrder::swapIfBigEndian ((uint16) *data) << 16); }
-	inline int32 getAsInt32BE() const throw()		   { return (int32) (ByteOrder::swapIfLittleEndian ((uint16) *data) << 16); }
-	inline void setAsInt32LE (int32 newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint16) (newValue >> 16)); }
-	inline void setAsInt32BE (int32 newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint16) (newValue >> 16)); }
-	inline void clear() throw()				 { *data = 0; }
-	inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
-	template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
-	template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
-	inline void copyFromSameType (Int16& source) throw()	{ *data = *source.data; }
-
-	uint16* data;
-	enum { bytesPerSample = 2, maxValue = 0x7fff, resolution = (1 << 16), isFloat = 0 };
-};
-
-class AudioData::Int24
-{
-public:
-	inline Int24 (void* data_) throw()   : data (static_cast <char*> (data_))  {}
-
-	inline void advance() throw()			   { data += 3; }
-	inline void skip (int numSamples) throw()		   { data += 3 * numSamples; }
-	inline float getAsFloatLE() const throw()		   { return (float) (ByteOrder::littleEndian24Bit (data) * (1.0 / (1.0 + maxValue))); }
-	inline float getAsFloatBE() const throw()		   { return (float) (ByteOrder::bigEndian24Bit (data) * (1.0 / (1.0 + maxValue))); }
-	inline void setAsFloatLE (float newValue) throw()	   { ByteOrder::littleEndian24BitToChars (jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue))), data); }
-	inline void setAsFloatBE (float newValue) throw()	   { ByteOrder::bigEndian24BitToChars (jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue))), data); }
-	inline int32 getAsInt32LE() const throw()		   { return (int32) ByteOrder::littleEndian24Bit (data) << 8; }
-	inline int32 getAsInt32BE() const throw()		   { return (int32) ByteOrder::bigEndian24Bit (data) << 8; }
-	inline void setAsInt32LE (int32 newValue) throw()	   { ByteOrder::littleEndian24BitToChars (newValue >> 8, data); }
-	inline void setAsInt32BE (int32 newValue) throw()	   { ByteOrder::bigEndian24BitToChars (newValue >> 8, data); }
-	inline void clear() throw()				 { data[0] = 0; data[1] = 0; data[2] = 0; }
-	inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
-	template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
-	template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
-	inline void copyFromSameType (Int24& source) throw()	{ data[0] = source.data[0]; data[1] = source.data[1]; data[2] = source.data[2]; }
-
-	char* data;
-	enum { bytesPerSample = 3, maxValue = 0x7fffff, resolution = (1 << 8), isFloat = 0 };
-};
-
-class AudioData::Int32
-{
-public:
-	inline Int32 (void* data_) throw()   : data (static_cast <uint32*> (data_))  {}
-
-	inline void advance() throw()			   { ++data; }
-	inline void skip (int numSamples) throw()		   { data += numSamples; }
-	inline float getAsFloatLE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfBigEndian (*data)); }
-	inline float getAsFloatBE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfLittleEndian (*data)); }
-	inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
-	inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
-	inline int32 getAsInt32LE() const throw()		   { return (int32) ByteOrder::swapIfBigEndian (*data); }
-	inline int32 getAsInt32BE() const throw()		   { return (int32) ByteOrder::swapIfLittleEndian (*data); }
-	inline void setAsInt32LE (int32 newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) newValue); }
-	inline void setAsInt32BE (int32 newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) newValue); }
-	inline void clear() throw()				 { *data = 0; }
-	inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
-	template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsInt32LE (source.getAsInt32()); }
-	template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsInt32BE (source.getAsInt32()); }
-	inline void copyFromSameType (Int32& source) throw()	{ *data = *source.data; }
-
-	uint32* data;
-	enum { bytesPerSample = 4, maxValue = 0x7fffffff, resolution = 1, isFloat = 0 };
-};
-
-class AudioData::Float32
-{
-public:
-	inline Float32 (void* data_) throw()  : data (static_cast <float*> (data_))  {}
-
-	inline void advance() throw()			   { ++data; }
-	inline void skip (int numSamples) throw()		   { data += numSamples; }
-   #if JUCE_BIG_ENDIAN
-	inline float getAsFloatBE() const throw()		   { return *data; }
-	inline void setAsFloatBE (float newValue) throw()	   { *data = newValue; }
-	inline float getAsFloatLE() const throw()		   { union { uint32 asInt; float asFloat; } n; n.asInt = ByteOrder::swap (*(uint32*) data); return n.asFloat; }
-	inline void setAsFloatLE (float newValue) throw()	   { union { uint32 asInt; float asFloat; } n; n.asFloat = newValue; *(uint32*) data = ByteOrder::swap (n.asInt); }
-   #else
-	inline float getAsFloatLE() const throw()		   { return *data; }
-	inline void setAsFloatLE (float newValue) throw()	   { *data = newValue; }
-	inline float getAsFloatBE() const throw()		   { union { uint32 asInt; float asFloat; } n; n.asInt = ByteOrder::swap (*(uint32*) data); return n.asFloat; }
-	inline void setAsFloatBE (float newValue) throw()	   { union { uint32 asInt; float asFloat; } n; n.asFloat = newValue; *(uint32*) data = ByteOrder::swap (n.asInt); }
-   #endif
-	inline int32 getAsInt32LE() const throw()		   { return (int32) roundToInt (jlimit (-1.0f, 1.0f, getAsFloatLE()) * (1.0 + maxValue)); }
-	inline int32 getAsInt32BE() const throw()		   { return (int32) roundToInt (jlimit (-1.0f, 1.0f, getAsFloatBE()) * (1.0 + maxValue)); }
-	inline void setAsInt32LE (int32 newValue) throw()	   { setAsFloatLE ((float) (newValue * (1.0 / (1.0 + maxValue)))); }
-	inline void setAsInt32BE (int32 newValue) throw()	   { setAsFloatBE ((float) (newValue * (1.0 / (1.0 + maxValue)))); }
-	inline void clear() throw()				 { *data = 0; }
-	inline void clearMultiple (int num) throw()		 { zeromem (data, num * bytesPerSample) ;}
-	template <class SourceType> inline void copyFromLE (SourceType& source) throw()	 { setAsFloatLE (source.getAsFloat()); }
-	template <class SourceType> inline void copyFromBE (SourceType& source) throw()	 { setAsFloatBE (source.getAsFloat()); }
-	inline void copyFromSameType (Float32& source) throw()  { *data = *source.data; }
-
-	float* data;
-	enum { bytesPerSample = 4, maxValue = 0x7fffffff, resolution = (1 << 8), isFloat = 1 };
-};
-
-class AudioData::NonInterleaved
-{
-public:
-	inline NonInterleaved() throw() {}
-	inline NonInterleaved (const NonInterleaved&) throw() {}
-	inline NonInterleaved (const int) throw() {}
-	inline void copyFrom (const NonInterleaved&) throw() {}
-	template <class SampleFormatType> inline void advanceData (SampleFormatType& s) throw()			 { s.advance(); }
-	template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) throw()   { s.skip (numSamples); }
-	template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) throw()	   { s.clearMultiple (numSamples); }
-	template <class SampleFormatType> inline static int getNumBytesBetweenSamples (const SampleFormatType&) throw() { return SampleFormatType::bytesPerSample; }
-
-	enum { isInterleavedType = 0, numInterleavedChannels = 1 };
-};
-
-class AudioData::Interleaved
-{
-public:
-	inline Interleaved() throw() : numInterleavedChannels (1) {}
-	inline Interleaved (const Interleaved& other) throw() : numInterleavedChannels (other.numInterleavedChannels) {}
-	inline Interleaved (const int numInterleavedChannels_) throw() : numInterleavedChannels (numInterleavedChannels_) {}
-	inline void copyFrom (const Interleaved& other) throw()  { numInterleavedChannels = other.numInterleavedChannels; }
-	template <class SampleFormatType> inline void advanceData (SampleFormatType& s) throw()			 { s.skip (numInterleavedChannels); }
-	template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) throw()   { s.skip (numInterleavedChannels * numSamples); }
-	template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) throw()	   { while (--numSamples >= 0) { s.clear(); s.skip (numInterleavedChannels); } }
-	template <class SampleFormatType> inline int getNumBytesBetweenSamples (const SampleFormatType&) const throw()  { return numInterleavedChannels * SampleFormatType::bytesPerSample; }
-	int numInterleavedChannels;
-	enum { isInterleavedType = 1 };
-};
-
-class AudioData::NonConst
-{
-public:
-	typedef void VoidType;
-	static inline void* toVoidPtr (VoidType* v) throw() { return v; }
-	enum { isConst = 0 };
-};
-
-class AudioData::Const
-{
-public:
-	typedef const void VoidType;
-	static inline void* toVoidPtr (VoidType* v) throw() { return const_cast<void*> (v); }
-	enum { isConst = 1 };
-};
-
-#endif
 
 /**
 	A set of routines to convert buffers of 32-bit floating point data to and from
@@ -31569,8 +31604,10 @@ public:
 		*/
 		bool write (const float** data, int numSamples);
 
+		/** @internal */
+		class Buffer; // (only public for VC6 compatibility)
+
 	private:
-		class Buffer;
 		friend class ScopedPointer<Buffer>;
 		ScopedPointer<Buffer> buffer;
 	};
@@ -31621,6 +31658,7 @@ protected:
 
 private:
 	String formatName;
+	friend class ThreadedWriter;
 
 	AudioFormatWriter (const AudioFormatWriter&);
 	AudioFormatWriter& operator= (const AudioFormatWriter&);
@@ -32076,8 +32114,11 @@ public:
 	*/
 	void ejectDisk();
 
-	static const int framesPerSecond = 75;
-	static const int samplesPerFrame = 44100 / framesPerSecond;
+	enum
+	{
+		framesPerSecond = 75,
+		samplesPerFrame = 44100 / framesPerSecond
+	};
 
 	juce_UseDebuggingNewOperator
 
@@ -35776,6 +35817,10 @@ private:
 #endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
 /*** End of inlined file: juce_TooltipWindow.h ***/
 
+#if JUCE_VC6
+ #define Listener ButtonListener
+#endif
+
 /**
 	A base class for buttons.
 
@@ -35788,7 +35833,7 @@ private:
 class JUCE_API  Button  : public Component,
 						  public SettableTooltipClient,
 						  public ApplicationCommandManagerListener,
-						  public Value::Listener,
+						  public ValueListener,
 						  private KeyListener
 {
 protected:
@@ -35911,7 +35956,7 @@ public:
 
 		@see Button::addButtonListener, Button::removeButtonListener
 	*/
-	class JUCE_API  Listener
+	class Listener
 	{
 	public:
 		/** Destructor. */
@@ -36229,6 +36274,10 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use Button::Listener instead. */
 typedef Button::Listener ButtonListener;
+
+#if JUCE_VC6
+ #undef Listener
+#endif
 
 #endif   // __JUCE_BUTTON_JUCEHEADER__
 /*** End of inlined file: juce_Button.h ***/
@@ -37833,15 +37882,19 @@ typedef TextEditor::Listener TextEditorListener;
 #endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
 /*** End of inlined file: juce_TextEditor.h ***/
 
+#if JUCE_VC6
+ #define Listener ButtonListener
+#endif
+
 /**
 	A component that displays a text string, and can optionally become a text
 	editor when clicked.
 */
 class JUCE_API  Label  : public Component,
 						 public SettableTooltipClient,
-						 protected TextEditor::Listener,
+						 protected TextEditorListener,
 						 private ComponentListener,
-						 private Value::Listener
+						 private ValueListener
 {
 public:
 
@@ -38130,8 +38183,16 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
 typedef Label::Listener LabelListener;
 
+#if JUCE_VC6
+ #undef Listener
+#endif
+
 #endif   // __JUCE_LABEL_JUCEHEADER__
 /*** End of inlined file: juce_Label.h ***/
+
+#if JUCE_VC6
+ #define Listener SliderListener
+#endif
 
 /**
 	A component that lets the user choose from a drop-down list of choices.
@@ -38150,7 +38211,7 @@ typedef Label::Listener LabelListener;
 class JUCE_API  ComboBox  : public Component,
 							public SettableTooltipClient,
 							public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
-							public Value::Listener,
+							public ValueListener,
 							private AsyncUpdater
 {
 public:
@@ -38490,6 +38551,10 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
 typedef ComboBox::Listener ComboBoxListener;
+
+#if JUCE_VC6
+ #undef Listener
+#endif
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__
 /*** End of inlined file: juce_ComboBox.h ***/
@@ -47168,6 +47233,10 @@ private:
 #ifndef __JUCE_SLIDER_JUCEHEADER__
 #define __JUCE_SLIDER_JUCEHEADER__
 
+#if JUCE_VC6
+ #define Listener LabelListener
+#endif
+
 /**
 	A slider control for changing a value.
 
@@ -47193,7 +47262,7 @@ class JUCE_API  Slider  : public Component,
 						  public AsyncUpdater,
 						  public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
 						  public LabelListener,
-						  public Value::Listener
+						  public ValueListener
 {
 public:
 
@@ -47951,6 +48020,10 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
+
+#if JUCE_VC6
+ #undef Listener
+#endif
 
 #endif   // __JUCE_SLIDER_JUCEHEADER__
 /*** End of inlined file: juce_Slider.h ***/
@@ -60576,7 +60649,7 @@ public:
 	const Expression getSymbolValue (const String& symbol, const String& member) const;
 
 	/** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
-	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
 	{
 	public:
 		ValueTreeWrapper (const ValueTree& state);
@@ -60709,7 +60782,7 @@ public:
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawableImage's state into a ValueTree. */
-	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
 	{
 	public:
 		ValueTreeWrapper (const ValueTree& state);
@@ -60817,7 +60890,7 @@ public:
 	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
 
 	/** @internal */
-	class FillAndStrokeState  : public  ValueTreeWrapperBase
+	class FillAndStrokeState  : public  Drawable::ValueTreeWrapperBase
 	{
 	public:
 		FillAndStrokeState (const ValueTree& state);
@@ -60944,7 +61017,7 @@ public:
 	const Identifier getValueTreeType() const	   { return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
-	class ValueTreeWrapper   : public FillAndStrokeState
+	class ValueTreeWrapper   : public DrawableShape::FillAndStrokeState
 	{
 	public:
 		ValueTreeWrapper (const ValueTree& state);
@@ -61058,7 +61131,7 @@ public:
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawableRectangle's state into a ValueTree. */
-	class ValueTreeWrapper   : public FillAndStrokeState
+	class ValueTreeWrapper   : public DrawableShape::FillAndStrokeState
 	{
 	public:
 		ValueTreeWrapper (const ValueTree& state);
@@ -61174,7 +61247,7 @@ public:
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
-	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
 	{
 	public:
 		ValueTreeWrapper (const ValueTree& state);
@@ -61948,6 +62021,7 @@ public:
 private:
 
 	class Pimpl;
+	friend class Pimpl;
 
 	ImageCache();
 	ImageCache (const ImageCache&);

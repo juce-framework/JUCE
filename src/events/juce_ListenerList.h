@@ -72,7 +72,7 @@ template <class ListenerClass,
 class ListenerList
 {
     // Horrible macros required to support VC6/7..
-    #if defined (_MSC_VER) && _MSC_VER <= 1400
+    #if JUCE_VC8_OR_EARLIER
       #define LL_TEMPLATE(a)   typename P##a, typename Q##a
       #define LL_PARAM(a)      Q##a& param##a
     #else

@@ -401,7 +401,7 @@ public:
 
     protected:
         friend class Image;
-        friend class Image::BitmapData;
+        friend class BitmapData;
         const PixelFormat format;
         const int width, height;
         int pixelStride, lineStride;
@@ -421,6 +421,9 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
+    friend class SharedImage;
+    friend class BitmapData;
+
     ReferenceCountedObjectPtr<SharedImage> image;
 };
 

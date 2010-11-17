@@ -153,8 +153,11 @@ public:
     void ejectDisk();
 
     //==============================================================================
-    static const int framesPerSecond = 75;
-    static const int samplesPerFrame = 44100 / framesPerSecond;
+    enum
+    {
+        framesPerSecond = 75,
+        samplesPerFrame = 44100 / framesPerSecond
+    };
 
     //==============================================================================
     juce_UseDebuggingNewOperator

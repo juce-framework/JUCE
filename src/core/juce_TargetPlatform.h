@@ -160,7 +160,19 @@
 #elif defined (_MSC_VER)
   #define JUCE_MSVC 1
 
-  #if _MSC_VER >= 1400
+  #if _MSC_VER < 1500
+    #define JUCE_VC8_OR_EARLIER 1
+
+    #if _MSC_VER < 1400
+      #define JUCE_VC7_OR_EARLIER 1
+
+      #if _MSC_VER < 1300
+        #define JUCE_VC6 1
+      #endif
+    #endif
+  #endif
+
+  #if ! JUCE_VC7_OR_EARLIER
     #define JUCE_USE_INTRINSICS 1
   #endif
 #else

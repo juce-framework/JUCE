@@ -74,7 +74,7 @@ public:
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableRectangle's state into a ValueTree. */
-    class ValueTreeWrapper   : public FillAndStrokeState
+    class ValueTreeWrapper   : public DrawableShape::FillAndStrokeState
     {
     public:
         ValueTreeWrapper (const ValueTree& state);

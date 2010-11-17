@@ -870,7 +870,7 @@ public:
 //==============================================================================
 class TextEditor::TextHolderComponent  : public Component,
                                          public Timer,
-                                         public Value::Listener
+                                         public ValueListener
 {
 public:
     TextHolderComponent (TextEditor& owner_)
@@ -1280,12 +1280,12 @@ void TextEditor::escapePressed()
     postCommandMessage (TextEditorDefs::escapeKeyMessageId);
 }
 
-void TextEditor::addListener (Listener* const newListener)
+void TextEditor::addListener (TextEditorListener* const newListener)
 {
     listeners.add (newListener);
 }
 
-void TextEditor::removeListener (Listener* const listenerToRemove)
+void TextEditor::removeListener (TextEditorListener* const listenerToRemove)
 {
     listeners.remove (listenerToRemove);
 }
@@ -2213,19 +2213,19 @@ void TextEditor::handleCommandMessage (const int commandId)
     switch (commandId)
     {
     case TextEditorDefs::textChangeMessageId:
-        listeners.callChecked (checker, &TextEditor::Listener::textEditorTextChanged, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditorListener::textEditorTextChanged, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::returnKeyMessageId:
-        listeners.callChecked (checker, &TextEditor::Listener::textEditorReturnKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditorListener::textEditorReturnKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::escapeKeyMessageId:
-        listeners.callChecked (checker, &TextEditor::Listener::textEditorEscapeKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditorListener::textEditorEscapeKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::focusLossMessageId:
-        listeners.callChecked (checker, &TextEditor::Listener::textEditorFocusLost, (TextEditor&) *this);
+        listeners.callChecked (checker, &TextEditorListener::textEditorFocusLost, (TextEditor&) *this);
         break;
 
     default:

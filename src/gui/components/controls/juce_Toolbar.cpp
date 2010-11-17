@@ -670,7 +670,7 @@ void Toolbar::itemDropped (const String&, Component* sourceComponent, int, int)
 
 
 //==============================================================================
-void Toolbar::mouseDown (const MouseEvent& e)
+void Toolbar::mouseDown (const MouseEvent&)
 {
 }
 

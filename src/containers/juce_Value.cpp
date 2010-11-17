@@ -192,7 +192,7 @@ bool Value::operator!= (const Value& other) const
 }
 
 //==============================================================================
-void Value::addListener (Listener* const listener)
+void Value::addListener (ValueListener* const listener)
 {
     if (listener != 0)
     {
@@ -203,7 +203,7 @@ void Value::addListener (Listener* const listener)
     }
 }
 
-void Value::removeListener (Listener* const listener)
+void Value::removeListener (ValueListener* const listener)
 {
     listeners.remove (listener);
 
@@ -214,7 +214,7 @@ void Value::removeListener (Listener* const listener)
 void Value::callListeners()
 {
     Value v (*this); // (create a copy in case this gets deleted by a callback)
-    listeners.call (&Value::Listener::valueChanged, v);
+    listeners.call (&ValueListener::valueChanged, v);
 }
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value)

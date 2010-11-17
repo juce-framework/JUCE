@@ -599,12 +599,12 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 }
 
 //==============================================================================
-void ComboBox::addListener (Listener* const listener)
+void ComboBox::addListener (ComboBoxListener* const listener)
 {
     listeners.add (listener);
 }
 
-void ComboBox::removeListener (Listener* const listener)
+void ComboBox::removeListener (ComboBoxListener* const listener)
 {
     listeners.remove (listener);
 }

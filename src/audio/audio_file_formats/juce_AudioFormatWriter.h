@@ -184,8 +184,10 @@ public:
         */
         bool write (const float** data, int numSamples);
 
+        /** @internal */
+        class Buffer; // (only public for VC6 compatibility)
+
     private:
-        class Buffer;
         friend class ScopedPointer<Buffer>;
         ScopedPointer<Buffer> buffer;
     };
@@ -237,6 +239,7 @@ protected:
 
 private:
     String formatName;
+    friend class ThreadedWriter;
 
     AudioFormatWriter (const AudioFormatWriter&);
     AudioFormatWriter& operator= (const AudioFormatWriter&);

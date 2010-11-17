@@ -31,6 +31,9 @@
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../../../containers/juce_Value.h"
 
+#if JUCE_VC6
+ #define Listener LabelListener
+#endif
 
 //==============================================================================
 /**
@@ -58,7 +61,7 @@ class JUCE_API  Slider  : public Component,
                           public AsyncUpdater,
                           public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
                           public LabelListener,
-                          public Value::Listener
+                          public ValueListener
 {
 public:
     //==============================================================================
@@ -841,5 +844,8 @@ private:
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
 
+#if JUCE_VC6
+ #undef Listener
+#endif
 
 #endif   // __JUCE_SLIDER_JUCEHEADER__

@@ -403,12 +403,12 @@ KeyboardFocusTraverser* Label::createFocusTraverser()
 }
 
 //==============================================================================
-void Label::addListener (Listener* const listener)
+void Label::addListener (LabelListener* const listener)
 {
     listeners.add (listener);
 }
 
-void Label::removeListener (Listener* const listener)
+void Label::removeListener (LabelListener* const listener)
 {
     listeners.remove (listener);
 }

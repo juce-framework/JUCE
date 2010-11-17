@@ -90,7 +90,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    class FillAndStrokeState  : public  ValueTreeWrapperBase
+    class FillAndStrokeState  : public  Drawable::ValueTreeWrapperBase
     {
     public:
         FillAndStrokeState (const ValueTree& state);
