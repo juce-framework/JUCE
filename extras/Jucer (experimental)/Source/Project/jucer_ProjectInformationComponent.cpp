@@ -3,25 +3,22 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  10 May 2010 7:13:27pm
-
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created for JUCE version: JUCE v1.52.92
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  JUCE and the Jucer are copyright 2004-10 by Raw Material Software ltd.
 
   ==============================================================================
 */
 
-//[Headers] You can add your own extra header files here...
+//[CppHeaders] You can add your own extra header files here...
 #include "jucer_ProjectExporter.h"
-//[/Headers]
+//[/CppHeaders]
 
 #include "jucer_ProjectInformationComponent.h"
 
@@ -103,54 +100,49 @@ private:
     Project& project;
     int tabIndex;
 };
-
 //[/MiscUserDefs]
 
 //==============================================================================
 ProjectInformationComponent::ProjectInformationComponent (Project& project_)
     : project (project_),
-      configTabBox (0),
-      editConfigsButton (0),
-      openProjectButton (0),
-      editExportersButton (0)
+      configTabBox (TabbedButtonBar::TabsAtTop)
 {
-    addAndMakeVisible (configTabBox = new TabbedComponent (TabbedButtonBar::TabsAtTop));
-    configTabBox->setTabBarDepth (30);
-    configTabBox->setCurrentTabIndex (-1);
-
-    addAndMakeVisible (editConfigsButton = new TextButton (String::empty));
-    editConfigsButton->setButtonText (T("Add/Remove Configurations..."));
-    editConfigsButton->addButtonListener (this);
-
-    addAndMakeVisible (openProjectButton = new TextButton (String::empty));
-    openProjectButton->setButtonText (T("Open Project in "));
-    openProjectButton->addButtonListener (this);
-
-    addAndMakeVisible (editExportersButton = new TextButton (String::empty));
-    editExportersButton->setButtonText (T("Add/Remove Exporters..."));
-    editExportersButton->addButtonListener (this);
-
+    addAndMakeVisible (&configTabBox);
+    addAndMakeVisible (&editConfigsButton);
+    editConfigsButton.setButtonText ("Add/Remove Configurations...");
+    editConfigsButton.addButtonListener (this);
+    addAndMakeVisible (&openProjectButton);
+    openProjectButton.setButtonText ("Open Project in ");
+    openProjectButton.addButtonListener (this);
+    addAndMakeVisible (&editExportersButton);
+    editExportersButton.setButtonText ("Add/Remove Exporters...");
+    editExportersButton.addButtonListener (this);
+    addAndMakeVisible (&saveAndOpenButton);
+    saveAndOpenButton.setButtonText ("Save And Open in");
+    saveAndOpenButton.addButtonListener (this);
 
     //[UserPreSize]
     rebuildConfigTabs();
 
 #if JUCE_MAC || JUCE_WINDOWS
-    openProjectButton->setCommandToTrigger (commandManager, CommandIDs::openProjectInIDE, true);
-    openProjectButton->setButtonText (commandManager->getNameOfCommand (CommandIDs::openProjectInIDE));
+    openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
+    openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
+    
+    saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
+    saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
 #else
-    openProjectButton->setVisible (false);
+    openProjectButton.setVisible (false);
+    saveAndOpenButton.setVisible (false);
 #endif
-
     //[/UserPreSize]
 
-    setOpaque (true);
-    setSize (600, 400);
+    setSize (859, 479);
 
     //[Constructor] You can add your own custom stuff here..
-    configTabBox->setOutline (1);
-    configTabBox->setColour (TabbedComponent::outlineColourId, Colours::black.withAlpha (0.3f));
+    configTabBox.setOutline (1);
+    configTabBox.setColour (TabbedComponent::outlineColourId, Colours::black.withAlpha (0.3f));
 
-    editConfigsButton->setTriggeredOnMouseDown (true);
+    editConfigsButton.setTriggeredOnMouseDown (true);
 
     project.addChangeListener (this);
     //[/Constructor]
@@ -162,37 +154,31 @@ ProjectInformationComponent::~ProjectInformationComponent()
     project.removeChangeListener (this);
     //[/Destructor_pre]
 
-    deleteAndZero (configTabBox);
-    deleteAndZero (editConfigsButton);
-    deleteAndZero (openProjectButton);
-    deleteAndZero (editExportersButton);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]
 }
 
 //==============================================================================
-void ProjectInformationComponent::paint (Graphics& g)
-{
-    //[UserPrePaint] Add your own custom painting code here..
-    g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize),
-                         0, 0, 1.0f);
-    g.fillAll();
-    drawRecessedShadows (g, getWidth(), getHeight(), 14);
-    //[/UserPrePaint]
-
-    //[UserPaint] Add your own custom painting code here..
-    //[/UserPaint]
-}
-
 void ProjectInformationComponent::resized()
 {
-    configTabBox->setBounds (8, 0, getWidth() - 16, getHeight() - 36);
-    editConfigsButton->setBounds (8, getHeight() - 30, 192, 22);
-    openProjectButton->setBounds (384, getHeight() - 30, 208, 22);
-    editExportersButton->setBounds (208, getHeight() - 30, 160, 22);
-    //[UserResized] Add your own custom resize handling here..
-    //[/UserResized]
+    //[Userresized_Pre]
+    //[/Userresized_Pre]
+
+    configTabBox.setBounds (Rectangle<int>::leftTopRightBottom (8, 0, (int) ((8.0 + getWidth()) - 16.0),
+                                                                (int) ((0.0 + getHeight()) - 36.0)));
+    editConfigsButton.setBounds (Rectangle<int>::leftTopRightBottom (8, (int) (getHeight() - 30.0), (int) (8.0 + 192.0),
+                                                                     (int) (getHeight() - 30.0 + 22.0)));
+    openProjectButton.setBounds (Rectangle<int>::leftTopRightBottom (608, (int) (getHeight() - 30.0), (int) (608.0 + 208.0),
+                                                                     (int) (getHeight() - 30.0 + 22.0)));
+    editExportersButton.setBounds (Rectangle<int>::leftTopRightBottom (208, (int) (getHeight() - 30.0),
+                                                                       (int) (208.0 + 160.0), (int) (getHeight() - 30.0 + 22.0)));
+    saveAndOpenButton.setBounds (Rectangle<int>::leftTopRightBottom (391, (int) (getHeight() - 30.0), (int) (391.0 + 208.0),
+                                                                     (int) (getHeight() - 30.0 + 22.0)));
+
+    //[Userresized_Post]
+    //[/Userresized_Post]
 }
 
 void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
@@ -200,26 +186,41 @@ void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == editConfigsButton)
+    if (buttonThatWasClicked == &editConfigsButton)
     {
-        //[UserButtonCode_editConfigsButton] -- add your button handler code here..
+        //[UserButtonCode_b6625dfcdb1f4755] -- add your button handler code here..
         showConfigMenu();
-        //[/UserButtonCode_editConfigsButton]
+        //[/UserButtonCode_b6625dfcdb1f4755]
     }
-    else if (buttonThatWasClicked == openProjectButton)
+    else if (buttonThatWasClicked == &openProjectButton)
     {
-        //[UserButtonCode_openProjectButton] -- add your button handler code here..
-        //[/UserButtonCode_openProjectButton]
+        //[UserButtonCode_a550a652e2666ee7] -- add your button handler code here..
+        //[/UserButtonCode_a550a652e2666ee7]
     }
-    else if (buttonThatWasClicked == editExportersButton)
+    else if (buttonThatWasClicked == &editExportersButton)
     {
-        //[UserButtonCode_editExportersButton] -- add your button handler code here..
+        //[UserButtonCode_c1f6e5f9811b307e] -- add your button handler code here..
         showExporterMenu();
-        //[/UserButtonCode_editExportersButton]
+        //[/UserButtonCode_c1f6e5f9811b307e]
+    }
+    else if (buttonThatWasClicked == &saveAndOpenButton)
+    {
+        //[UserButtonCode_dRGMyYx] -- add your button handler code here..
+        //[/UserButtonCode_dRGMyYx]
     }
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
+}
+
+void ProjectInformationComponent::paint (Graphics& g)
+{
+    //[UserPaint] Add your own custom painting code here..
+    g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize),
+                         0, 0, 1.0f);
+    g.fillAll();
+    drawRecessedShadows (g, getWidth(), getHeight(), 14);
+    //[/UserPaint]
 }
 
 
@@ -227,21 +228,21 @@ void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 void ProjectInformationComponent::rebuildConfigTabs()
 {
-    configTabBox->clearTabs();
+    configTabBox.clearTabs();
 
     int index = 0;
     PropertiesWithHelpComponent* panel = new PropertiesWithHelpComponent (project, index++);
-    configTabBox->addTab ("Project Settings", Colours::lightslategrey, panel, true, -1);
+    configTabBox.addTab ("Project Settings", Colours::lightslategrey, panel, true, -1);
 
     panel = new PropertiesWithHelpComponent (project, index++);
-    configTabBox->addTab ("Juce Flags", Colours::lightblue, panel, true, -1);
+    configTabBox.addTab ("Juce Flags", Colours::lightblue, panel, true, -1);
 
     int i;
     for (i = 0; i < project.getNumConfigurations(); ++i)
     {
         panel = new PropertiesWithHelpComponent (project, index++);
         Project::BuildConfiguration config (project.getConfiguration (i));
-        configTabBox->addTab (config.getName().toString(), Colour::greyLevel (0.65f), panel, true, -1);
+        configTabBox.addTab (config.getName().toString(), Colour::greyLevel (0.65f), panel, true, -1);
     }
 
     for (i = 0; i < project.getNumExporters(); ++i)
@@ -251,7 +252,7 @@ void ProjectInformationComponent::rebuildConfigTabs()
         if (exp != 0)
         {
             panel = new PropertiesWithHelpComponent (project, index++);
-            configTabBox->addTab (exp->getName(), Colours::lightsteelblue, panel, true, -1);
+            configTabBox.addTab (exp->getName(), Colours::lightsteelblue, panel, true, -1);
         }
     }
 
@@ -260,7 +261,7 @@ void ProjectInformationComponent::rebuildConfigTabs()
 
 void ProjectInformationComponent::updateConfigTabs()
 {
-    if (configTabBox->getNumTabs() != project.getNumConfigurations() + project.getNumExporters() + 2
+    if (configTabBox.getNumTabs() != project.getNumConfigurations() + project.getNumExporters() + 2
          || lastProjectType != project.getProjectType().getValue())
     {
         rebuildConfigTabs();
@@ -270,7 +271,7 @@ void ProjectInformationComponent::updateConfigTabs()
         for (int i = 0; i < project.getNumConfigurations(); ++i)
         {
             Project::BuildConfiguration config (project.getConfiguration (i));
-            configTabBox->setTabName (i + 2, config.getName().toString());
+            configTabBox.setTabName (i + 2, config.getName().toString());
         }
     }
 }
@@ -292,7 +293,7 @@ void ProjectInformationComponent::showConfigMenu()
     m.addSubMenu ("Add a copy of an existing configuration", createCopyMenu);
     m.addSubMenu ("Remove configuration", removeMenu);
 
-    const int r = m.showAt (editConfigsButton);
+    const int r = m.showAt (&editConfigsButton);
 
     if (r >= 20000)
     {
@@ -332,7 +333,7 @@ void ProjectInformationComponent::showExporterMenu()
     m.addSubMenu ("Create new export target", createMenu);
     m.addSubMenu ("Remove export target", removeMenu);
 
-    const int r = m.showAt (editExportersButton);
+    const int r = m.showAt (&editExportersButton);
 
     if (r >= 20000)
         project.deleteExporter (r - 20000);
@@ -344,38 +345,47 @@ void ProjectInformationComponent::changeListenerCallback (void*)
 {
     updateConfigTabs();
 }
-
 //[/MiscUserCode]
 
 
+
+//==============================================================================
+//=======================  Jucer Information Section  ==========================
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  This section stores the Jucer's metadata - edit it at your own risk!
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+JUCER_COMPONENT_METADATA_START
 
-BEGIN_JUCER_METADATA
+<COMPONENT id="tO9EG1a" className="ProjectInformationComponent" width="859"
+           height="479" background="f6f9ff" parentClasses="public Component, public ChangeListener"
+           constructorParams="Project&amp; project_" memberInitialisers="project (project_)">
+  <COMPONENTS>
+    <TABBEDCOMPONENT id="962c1575c4142253" memberName="configTabBox" focusOrder="0"
+                     position="8, 0, configTabBox.left + parent.right - 16, configTabBox.top + parent.bottom - 36"/>
+    <TEXTBUTTON id="b6625dfcdb1f4755" memberName="editConfigsButton" focusOrder="0"
+                text="Add/Remove Configurations..." createCallback="1" radioGroup="0"
+                connectedLeft="0" connectedRight="0" connectedTop="0" connectedBottom="0"
+                backgroundColour="" textColour="" backgroundColourOn="" textColourOn=""
+                position="8, parent.bottom - 30, editConfigsButton.left + 192, editConfigsButton.top + 22"/>
+    <TEXTBUTTON id="a550a652e2666ee7" memberName="openProjectButton" focusOrder="0"
+                text="Open Project in " createCallback="1" radioGroup="0" connectedLeft="0"
+                connectedRight="0" connectedTop="0" connectedBottom="0" backgroundColour=""
+                textColour="" backgroundColourOn="" textColourOn="" position="608, parent.bottom - 30, openProjectButton.left + 208, openProjectButton.top + 22"/>
+    <TEXTBUTTON id="c1f6e5f9811b307e" memberName="editExportersButton" focusOrder="0"
+                text="Add/Remove Exporters..." createCallback="1" radioGroup="0"
+                connectedLeft="0" connectedRight="0" connectedTop="0" connectedBottom="0"
+                backgroundColour="" textColour="" backgroundColourOn="" textColourOn=""
+                position="208, parent.bottom - 30, editExportersButton.left + 160, editExportersButton.top + 22"/>
+    <TEXTBUTTON id="dRGMyYx" name="" memberName="saveAndOpenButton" position="391, parent.bottom - 30, saveAndOpenButton.left + 208, saveAndOpenButton.top + 22"
+                text="Save And Open in" createCallback="1" radioGroup="0" connectedLeft="0"
+                connectedRight="0" connectedTop="0" connectedBottom="0"/>
+  </COMPONENTS>
+  <MARKERS_X/>
+  <MARKERS_Y/>
+  <METHODS/>
+</COMPONENT>
 
-<JUCER_COMPONENT documentType="Component" className="ProjectInformationComponent"
-                 componentName="" parentClasses="public Component, public ChangeListener"
-                 constructorParams="Project&amp; project_" variableInitialisers="project (project_)"
-                 snapPixels="8" snapActive="1" snapShown="0" overlayOpacity="0.330000013"
-                 fixedSize="0" initialWidth="600" initialHeight="400">
-  <BACKGROUND backgroundColour="f6f9ff"/>
-  <TABBEDCOMPONENT name="" id="962c1575c4142253" memberName="configTabBox" virtualName=""
-                   explicitFocusOrder="0" pos="8 0 16M 36M" orientation="top" tabBarDepth="30"
-                   initialTab="-1"/>
-  <TEXTBUTTON name="" id="b6625dfcdb1f4755" memberName="editConfigsButton"
-              virtualName="" explicitFocusOrder="0" pos="8 30R 192 22" buttonText="Add/Remove Configurations..."
-              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
-  <TEXTBUTTON name="" id="a550a652e2666ee7" memberName="openProjectButton"
-              virtualName="" explicitFocusOrder="0" pos="384 30R 208 22" buttonText="Open Project in "
-              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
-  <TEXTBUTTON name="" id="c1f6e5f9811b307e" memberName="editExportersButton"
-              virtualName="" explicitFocusOrder="0" pos="208 30R 160 22" buttonText="Add/Remove Exporters..."
-              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
-</JUCER_COMPONENT>
-
-END_JUCER_METADATA
+JUCER_COMPONENT_METADATA_END
 */
 #endif

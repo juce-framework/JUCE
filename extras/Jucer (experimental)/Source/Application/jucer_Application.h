@@ -189,7 +189,8 @@ public:
                 menu.addCommandItem (commandManager, CommandIDs::saveProject);
                 menu.addCommandItem (commandManager, CommandIDs::saveProjectAs);
                 menu.addSeparator();
-                menu.addCommandItem (commandManager, CommandIDs::openProjectInIDE);
+                menu.addCommandItem (commandManager, CommandIDs::openInIDE);
+                menu.addCommandItem (commandManager, CommandIDs::saveAndOpenInIDE);
 
                 #if ! JUCE_MAC
                   menu.addSeparator();

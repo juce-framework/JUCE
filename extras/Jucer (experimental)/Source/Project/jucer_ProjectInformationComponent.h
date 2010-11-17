@@ -3,28 +3,24 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  10 May 2010 7:13:27pm
-
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created for JUCE version: JUCE v1.52.92
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  JUCE and the Jucer are copyright 2004-10 by Raw Material Software ltd.
 
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_PROJECTINFORMATIONCOMPONENT_JUCERPROJECTINFORMATIONCOMPONENT_40825900__
-#define __JUCER_HEADER_PROJECTINFORMATIONCOMPONENT_JUCERPROJECTINFORMATIONCOMPONENT_40825900__
+#ifndef __JUCER_PROJECTINFORMATIONCOMPONENT_H_2F89B0AC__
+#define __JUCER_PROJECTINFORMATIONCOMPONENT_H_2F89B0AC__
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../jucer_Headers.h"
-#include "../Project/jucer_Project.h"
+#include "jucer_ProjectExporter.h"
 //[/Headers]
 
 
@@ -32,14 +28,12 @@
 //==============================================================================
 /**
                                                                     //[Comments]
-    An auto-generated component, created by the Jucer.
-
-    Describe your class and how it works here!
+    Holds the tabs containing all the project info.
                                                                     //[/Comments]
 */
 class ProjectInformationComponent  : public Component,
                                      public ChangeListener,
-                                     public ButtonListener
+                                     public Button::Listener
 {
 public:
     //==============================================================================
@@ -52,9 +46,9 @@ public:
     void rebuildConfigTabs();
     //[/UserMethods]
 
-    void paint (Graphics& g);
     void resized();
     void buttonClicked (Button* buttonThatWasClicked);
+    void paint (Graphics& g);
 
 
     //==============================================================================
@@ -71,16 +65,17 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    TabbedComponent* configTabBox;
-    TextButton* editConfigsButton;
-    TextButton* openProjectButton;
-    TextButton* editExportersButton;
+    TabbedComponent configTabBox;
+    TextButton editConfigsButton;
+    TextButton openProjectButton;
+    TextButton editExportersButton;
+    TextButton saveAndOpenButton;
 
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     ProjectInformationComponent (const ProjectInformationComponent&);
-    const ProjectInformationComponent& operator= (const ProjectInformationComponent&);
+    ProjectInformationComponent& operator= (const ProjectInformationComponent&);
 };
 
 
-#endif   // __JUCER_HEADER_PROJECTINFORMATIONCOMPONENT_JUCERPROJECTINFORMATIONCOMPONENT_40825900__
+#endif   // __JUCER_PROJECTINFORMATIONCOMPONENT_H_2F89B0AC__

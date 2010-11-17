@@ -190,7 +190,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
     const CommandID ids[] = { CommandIDs::saveProject,
                               CommandIDs::saveProjectAs,
                               CommandIDs::closeProject,
-                              CommandIDs::openProjectInIDE,
+                              CommandIDs::openInIDE,
+                              CommandIDs::saveAndOpenInIDE,
                               CommandIDs::showProjectSettings,
                               StandardApplicationCommandIDs::del};
 
@@ -225,7 +226,20 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
-    case CommandIDs::openProjectInIDE:
+    case CommandIDs::openInIDE:
+       #if JUCE_MAC
+        result.setInfo ("Open in XCode...",
+       #elif JUCE_WINDOWS
+        result.setInfo ("Open in Visual Studio...",
+       #else
+        result.setInfo ("Open as a Makefile...",
+       #endif
+                        "Launches the project in an external IDE",
+                        CommandCategories::general, 0);
+        result.setActive (project != 0);
+        break;
+
+    case CommandIDs::saveAndOpenInIDE:
        #if JUCE_MAC
         result.setInfo ("Save Project and Open in XCode...",
        #elif JUCE_WINDOWS
@@ -290,7 +304,15 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
         break;
 
-    case CommandIDs::openProjectInIDE:
+    case CommandIDs::openInIDE:
+        if (project != 0)
+        {
+            ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
+            exporter->launchProject();
+        }
+        break;
+
+    case CommandIDs::saveAndOpenInIDE:
         if (project != 0 && project->save (true, true) == FileBasedDocument::savedOk)
         {
             ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
