@@ -240,7 +240,7 @@ void ComponentAnimator::animateComponent (Component* const component,
         {
             at = new AnimationTask (component);
             tasks.add (at);
-            sendChangeMessage (this);
+            sendChangeMessage();
         }
 
         at->reset (finalBounds, finalAlpha, millisecondsToSpendMoving,
@@ -284,7 +284,7 @@ void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFin
                 tasks.getUnchecked(i)->moveToFinalDestination();
 
         tasks.clear();
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
@@ -299,7 +299,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
             at->moveToFinalDestination();
 
         tasks.removeObject (at);
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
@@ -333,7 +333,7 @@ void ComponentAnimator::timerCallback()
         if (! tasks.getUnchecked(i)->useTimeslice (elapsed))
         {
             tasks.remove (i);
-            sendChangeMessage (this);
+            sendChangeMessage();
         }
     }
 

@@ -26,20 +26,21 @@
 #ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
 #define __JUCE_CHANGELISTENER_JUCEHEADER__
 
+class ChangeBroadcaster;
 
 //==============================================================================
 /**
-    Receives callbacks about changes to some kind of object.
+    Receives change event callbacks that are sent out by a ChangeBroadcaster.
 
-    Many objects use a ChangeListenerList to keep a set of listeners which they
-    will inform when something changes. A subclass of ChangeListener
-    is used to receive these callbacks.
+    A ChangeBroadcaster keeps a set of listeners to which it broadcasts a message when
+    the ChangeBroadcaster::sendChangeMessage() method is called. A subclass of
+    ChangeListener is used to receive these callbacks.
 
     Note that the major difference between an ActionListener and a ChangeListener
     is that for a ChangeListener, multiple changes will be coalesced into fewer
     callbacks, but ActionListeners perform one callback for every event posted.
 
-    @see ChangeListenerList, ChangeBroadcaster, ActionListener
+    @see ChangeBroadcaster, ActionListener
 */
 class JUCE_API  ChangeListener
 {
@@ -47,12 +48,17 @@ public:
     /** Destructor. */
     virtual ~ChangeListener()  {}
 
-    /** Overridden by your subclass to receive the callback.
-
-        @param objectThatHasChanged the value that was passed to the
-                                    ChangeListenerList::sendChangeMessage() method
+    /** Your subclass should implement this method to receive the callback.
+        @param source the ChangeBroadcaster that triggered the callback.
     */
-    virtual void changeListenerCallback (void* objectThatHasChanged) = 0;
+    virtual void changeListenerCallback (ChangeBroadcaster* source) = 0;
+
+
+    //==============================================================================
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This method's signature has changed to take a ChangeBroadcaster parameter - please update your code!
+    private: virtual int changeListenerCallback (void*) { return 0; }
+   #endif
 };
 
 

@@ -418,7 +418,7 @@ public:
         resized();
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice();
 
@@ -1059,7 +1059,7 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
     }
 }
 
-void AudioDeviceSelectorComponent::changeListenerCallback (void*)
+void AudioDeviceSelectorComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     if (deviceTypeDropDown != 0)
     {

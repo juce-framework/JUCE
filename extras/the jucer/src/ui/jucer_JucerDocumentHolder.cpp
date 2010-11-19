@@ -112,7 +112,7 @@ public:
         listBox->repaint();
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }
@@ -173,7 +173,7 @@ public:
         panel2->setBounds (panel1->getRight() + 20, panel1->getY(), pw, panel1->getHeight());
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         panel1->refreshAll();
         panel2->refreshAll();
@@ -505,7 +505,7 @@ void JucerDocumentHolder::resized()
         tabbedComponent->setBounds (0, 0, getWidth(), getHeight());
 }
 
-void JucerDocumentHolder::changeListenerCallback (void*)
+void JucerDocumentHolder::changeListenerCallback (ChangeBroadcaster*)
 {
     setName (document->getClassName());
     updateTabs();

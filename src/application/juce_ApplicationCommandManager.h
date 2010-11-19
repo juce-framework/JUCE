@@ -327,9 +327,11 @@ private:
     void handleAsyncUpdate();
     void globalFocusChanged (Component*);
 
-    // xxx this is just here to cause a compile error in old code that hasn't been changed to use the new
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This is just here to cause a compile error in old code that hasn't been changed to use the new
     // version of this method.
     virtual short getFirstCommandTarget() { return 0; }
+   #endif
 
     ApplicationCommandManager (const ApplicationCommandManager&);
     ApplicationCommandManager& operator= (const ApplicationCommandManager&);

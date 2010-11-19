@@ -508,7 +508,7 @@ public:
 
         void resetToDefault() {}
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }

@@ -108,7 +108,7 @@ public:
         return 0;
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }
@@ -211,7 +211,7 @@ public:
         jassertfalse // option shouldn't be visible
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }
@@ -297,7 +297,7 @@ public:
     void setState (bool newState)           { owner->enableStroke (newState, true); }
     bool getState() const                   { return owner->isStrokeEnabled(); }
 
-    void changeListenerCallback (void*)     { refresh(); }
+    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
 private:
     ColouredElement* const owner;
@@ -332,7 +332,7 @@ public:
 
     double getValue() const                 { return owner->getStrokeType().stroke.getStrokeThickness(); }
 
-    void changeListenerCallback (void*)     { refresh(); }
+    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
 private:
     ColouredElement* const owner;
@@ -391,7 +391,7 @@ public:
         return 0;
     }
 
-    void changeListenerCallback (void*)     { refresh(); }
+    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
 private:
     ColouredElement* const owner;
@@ -450,7 +450,7 @@ public:
         return 0;
     }
 
-    void changeListenerCallback (void*)     { refresh(); }
+    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
 private:
     ColouredElement* const owner;
@@ -594,7 +594,7 @@ public:
             return element->getFillType().imageOpacity;
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }

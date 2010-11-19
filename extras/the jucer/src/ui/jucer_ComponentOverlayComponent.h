@@ -57,7 +57,7 @@ public:
 
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
 
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
 
     void resizeStart();
     void resizeEnd();

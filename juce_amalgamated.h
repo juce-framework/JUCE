@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	92
+#define JUCE_BUILDNUMBER	93
 
 /** Current Juce version number.
 
@@ -797,6 +797,13 @@
 
 /** This macro is added to all juce public function declarations. */
 #define JUCE_PUBLIC_FUNCTION	JUCE_API JUCE_CALLTYPE
+
+/** This turns on some non-essential bits of code that should prevent old code from compiling
+	in cases where method signatures have changed, etc.
+*/
+#if (! defined (JUCE_CATCH_DEPRECATED_CODE_MISUSE)) && JUCE_DEBUG && ! DOXYGEN
+ #define JUCE_CATCH_DEPRECATED_CODE_MISUSE 1
+#endif
 
 // Now include some basics that are needed by most of the Juce classes...
 BEGIN_JUCE_NAMESPACE
@@ -12585,6 +12592,12 @@ public:
 		return listeners.size() == 0;
 	}
 
+	/** Clears the list. */
+	void clear()
+	{
+		listeners.clear();
+	}
+
 	/** Returns true if the specified listener has been added to the list. */
 	bool contains (ListenerClass* const listener) const throw()
 	{
@@ -12993,27 +13006,24 @@ typedef Value::Listener ValueListener;
 #define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
 
 
-/*** Start of inlined file: juce_ChangeListenerList.h ***/
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-#define __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-
-
 /*** Start of inlined file: juce_ChangeListener.h ***/
 #ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
 #define __JUCE_CHANGELISTENER_JUCEHEADER__
 
-/**
-	Receives callbacks about changes to some kind of object.
+class ChangeBroadcaster;
 
-	Many objects use a ChangeListenerList to keep a set of listeners which they
-	will inform when something changes. A subclass of ChangeListener
-	is used to receive these callbacks.
+/**
+	Receives change event callbacks that are sent out by a ChangeBroadcaster.
+
+	A ChangeBroadcaster keeps a set of listeners to which it broadcasts a message when
+	the ChangeBroadcaster::sendChangeMessage() method is called. A subclass of
+	ChangeListener is used to receive these callbacks.
 
 	Note that the major difference between an ActionListener and a ChangeListener
 	is that for a ChangeListener, multiple changes will be coalesced into fewer
 	callbacks, but ActionListeners perform one callback for every event posted.
 
-	@see ChangeListenerList, ChangeBroadcaster, ActionListener
+	@see ChangeBroadcaster, ActionListener
 */
 class JUCE_API  ChangeListener
 {
@@ -13021,238 +13031,24 @@ public:
 	/** Destructor. */
 	virtual ~ChangeListener()  {}
 
-	/** Overridden by your subclass to receive the callback.
-
-		@param objectThatHasChanged the value that was passed to the
-									ChangeListenerList::sendChangeMessage() method
+	/** Your subclass should implement this method to receive the callback.
+		@param source the ChangeBroadcaster that triggered the callback.
 	*/
-	virtual void changeListenerCallback (void* objectThatHasChanged) = 0;
+	virtual void changeListenerCallback (ChangeBroadcaster* source) = 0;
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// This method's signature has changed to take a ChangeBroadcaster parameter - please update your code!
+	private: virtual int changeListenerCallback (void*) { return 0; }
+   #endif
 };
 
 #endif   // __JUCE_CHANGELISTENER_JUCEHEADER__
 /*** End of inlined file: juce_ChangeListener.h ***/
 
-
-/*** Start of inlined file: juce_ScopedLock.h ***/
-#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
-#define __JUCE_SCOPEDLOCK_JUCEHEADER__
-
 /**
-	Automatically locks and unlocks a CriticalSection object.
+	Holds a list of ChangeListeners, and sends messages to them when instructed.
 
-	Use one of these as a local variable to control access to a CriticalSection.
-
-	e.g. @code
-
-	CriticalSection myCriticalSection;
-
-	for (;;)
-	{
-		const ScopedLock myScopedLock (myCriticalSection);
-		// myCriticalSection is now locked
-
-		...do some stuff...
-
-		// myCriticalSection gets unlocked here.
-	}
-	@endcode
-
-	@see CriticalSection, ScopedUnlock
-*/
-class JUCE_API  ScopedLock
-{
-public:
-
-	/** Creates a ScopedLock.
-
-		As soon as it is created, this will lock the CriticalSection, and
-		when the ScopedLock object is deleted, the CriticalSection will
-		be unlocked.
-
-		Make sure this object is created and deleted by the same thread,
-		otherwise there are no guarantees what will happen! Best just to use it
-		as a local stack object, rather than creating one with the new() operator.
-	*/
-	inline explicit ScopedLock (const CriticalSection& lock) throw()	: lock_ (lock) { lock.enter(); }
-
-	/** Destructor.
-
-		The CriticalSection will be unlocked when the destructor is called.
-
-		Make sure this object is created and deleted by the same thread,
-		otherwise there are no guarantees what will happen!
-	*/
-	inline ~ScopedLock() throw()					{ lock_.exit(); }
-
-private:
-
-	const CriticalSection& lock_;
-
-	ScopedLock (const ScopedLock&);
-	ScopedLock& operator= (const ScopedLock&);
-};
-
-/**
-	Automatically unlocks and re-locks a CriticalSection object.
-
-	This is the reverse of a ScopedLock object - instead of locking the critical
-	section for the lifetime of this object, it unlocks it.
-
-	Make sure you don't try to unlock critical sections that aren't actually locked!
-
-	e.g. @code
-
-	CriticalSection myCriticalSection;
-
-	for (;;)
-	{
-		const ScopedLock myScopedLock (myCriticalSection);
-		// myCriticalSection is now locked
-
-		... do some stuff with it locked ..
-
-		while (xyz)
-		{
-			... do some stuff with it locked ..
-
-			const ScopedUnlock unlocker (myCriticalSection);
-
-			// myCriticalSection is now unlocked for the remainder of this block,
-			// and re-locked at the end.
-
-			...do some stuff with it unlocked ...
-		}
-
-		// myCriticalSection gets unlocked here.
-	}
-	@endcode
-
-	@see CriticalSection, ScopedLock
-*/
-class ScopedUnlock
-{
-public:
-
-	/** Creates a ScopedUnlock.
-
-		As soon as it is created, this will unlock the CriticalSection, and
-		when the ScopedLock object is deleted, the CriticalSection will
-		be re-locked.
-
-		Make sure this object is created and deleted by the same thread,
-		otherwise there are no guarantees what will happen! Best just to use it
-		as a local stack object, rather than creating one with the new() operator.
-	*/
-	inline explicit ScopedUnlock (const CriticalSection& lock) throw()	: lock_ (lock) { lock.exit(); }
-
-	/** Destructor.
-
-		The CriticalSection will be unlocked when the destructor is called.
-
-		Make sure this object is created and deleted by the same thread,
-		otherwise there are no guarantees what will happen!
-	*/
-	inline ~ScopedUnlock() throw()					{ lock_.enter(); }
-
-private:
-
-	const CriticalSection& lock_;
-
-	ScopedUnlock (const ScopedLock&);
-	ScopedUnlock& operator= (const ScopedUnlock&);
-};
-
-#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
-/*** End of inlined file: juce_ScopedLock.h ***/
-
-/**
-	A set of ChangeListeners.
-
-	Listeners can be added and removed from the list, and change messages can be
-	broadcast to all the listeners.
-
-	@see ChangeListener, ChangeBroadcaster
-*/
-class JUCE_API  ChangeListenerList  : public MessageListener
-{
-public:
-
-	/** Creates an empty list. */
-	ChangeListenerList();
-
-	/** Destructor. */
-	~ChangeListenerList();
-
-	/** Adds a listener to the list.
-
-		(Trying to add a listener that's already on the list will have no effect).
-	*/
-	void addChangeListener (ChangeListener* listener);
-
-	/** Removes a listener from the list.
-
-		If the listener isn't on the list, this won't have any effect.
-	*/
-	void removeChangeListener (ChangeListener* listener);
-
-	/** Removes all listeners from the list. */
-	void removeAllChangeListeners();
-
-	/** Posts an asynchronous change message to all the listeners.
-
-		If a message has already been sent and hasn't yet been delivered, this
-		method won't send another - in this way it coalesces multiple frequent
-		changes into fewer actual callbacks to the ChangeListeners. Contrast this
-		with the ActionListener, which posts a new event for every call to its
-		sendActionMessage() method.
-
-		Only listeners which are on the list when the change event is delivered
-		will receive the event - and this may include listeners that weren't on
-		the list when the change message was sent.
-
-		@param objectThatHasChanged	 this pointer is passed to the
-										ChangeListener::changeListenerCallback() method,
-										and can be any value the application needs
-		@see sendSynchronousChangeMessage
-	*/
-	void sendChangeMessage (void* objectThatHasChanged);
-
-	/** This will synchronously callback all the ChangeListeners.
-
-		Use this if you need to synchronously force a call to all the
-		listeners' ChangeListener::changeListenerCallback() methods.
-	*/
-	void sendSynchronousChangeMessage (void* objectThatHasChanged);
-
-	/** If a change message has been sent but not yet dispatched, this will
-		use sendSynchronousChangeMessage() to make the callback immediately.
-	*/
-	void dispatchPendingMessages();
-
-	/** @internal */
-	void handleMessage (const Message&);
-
-	juce_UseDebuggingNewOperator
-
-private:
-	SortedSet <void*> listeners;
-	CriticalSection lock;
-	void* lastChangedObject;
-	bool messagePending;
-
-	ChangeListenerList (const ChangeListenerList&);
-	ChangeListenerList& operator= (const ChangeListenerList&);
-};
-
-#endif   // __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-/*** End of inlined file: juce_ChangeListenerList.h ***/
-
-/** Manages a list of ChangeListeners, and can send them messages.
-
-	To quickly add methods to your class that can add/remove change
-	listeners and broadcast to them, you can derive from this.
-
-	@see ChangeListenerList, ChangeListener
+	@see ChangeListener
 */
 class JUCE_API  ChangeBroadcaster
 {
@@ -13264,14 +13060,12 @@ public:
 	/** Destructor. */
 	virtual ~ChangeBroadcaster();
 
-	/** Adds a listener to the list.
-
-		(Trying to add a listener that's already on the list will have no effect).
+	/** Registers a listener to receive change callbacks from this broadcaster.
+		Trying to add a listener that's already on the list will have no effect.
 	*/
 	void addChangeListener (ChangeListener* listener);
 
-	/** Removes a listener from the list.
-
+	/** Unregisters a listener from the list.
 		If the listener isn't on the list, this won't have any effect.
 	*/
 	void removeChangeListener (ChangeListener* listener);
@@ -13279,30 +13073,39 @@ public:
 	/** Removes all listeners from the list. */
 	void removeAllChangeListeners();
 
-	/** Broadcasts a change message to all the registered listeners.
+	/** Causes an asynchronous change message to be sent to all the registered listeners.
 
-		The message will be delivered asynchronously by the event thread, so this
-		method will not directly call any of the listeners. For a synchronous
-		message, use sendSynchronousChangeMessage().
-
-		@see ChangeListenerList::sendActionMessage
+		The message will be delivered asynchronously by the main message thread, so this
+		method will return immediately. To call the listeners synchronously use
+		sendSynchronousChangeMessage().
 	*/
-	void sendChangeMessage (void* objectThatHasChanged);
+	void sendChangeMessage();
 
 	/** Sends a synchronous change message to all the registered listeners.
 
-		@see ChangeListenerList::sendSynchronousChangeMessage
-	*/
-	void sendSynchronousChangeMessage (void* objectThatHasChanged);
+		This will immediately call all the listeners that are registered. For thread-safety
+		reasons, you must only call this method on the main message thread.
 
-	/** If a change message has been sent but not yet dispatched, this will
-		use sendSynchronousChangeMessage() to make the callback immediately.
+		@see dispatchPendingMessages
+	*/
+	void sendSynchronousChangeMessage();
+
+	/** If a change message has been sent but not yet dispatched, this will call
+		sendSynchronousChangeMessage() to make the callback immediately.
+
+		For thread-safety reasons, you must only call this method on the main message thread.
 	*/
 	void dispatchPendingMessages();
 
 private:
 
-	ChangeListenerList changeListenerList;
+	class ChangeBroadcasterMessage;
+	friend class ChangeBroadcasterMessage;
+
+	Atomic<ChangeBroadcasterMessage*> pendingMessage;
+	ListenerList <ChangeListener> changeListeners;
+
+	void invalidatePendingMessage();
 
 	ChangeBroadcaster (const ChangeBroadcaster&);
 	ChangeBroadcaster& operator= (const ChangeBroadcaster&);
@@ -14832,6 +14635,139 @@ private:
 /*** Start of inlined file: juce_Singleton.h ***/
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
 #define __JUCE_SINGLETON_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_ScopedLock.h ***/
+#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDLOCK_JUCEHEADER__
+
+/**
+	Automatically locks and unlocks a CriticalSection object.
+
+	Use one of these as a local variable to control access to a CriticalSection.
+
+	e.g. @code
+
+	CriticalSection myCriticalSection;
+
+	for (;;)
+	{
+		const ScopedLock myScopedLock (myCriticalSection);
+		// myCriticalSection is now locked
+
+		...do some stuff...
+
+		// myCriticalSection gets unlocked here.
+	}
+	@endcode
+
+	@see CriticalSection, ScopedUnlock
+*/
+class JUCE_API  ScopedLock
+{
+public:
+
+	/** Creates a ScopedLock.
+
+		As soon as it is created, this will lock the CriticalSection, and
+		when the ScopedLock object is deleted, the CriticalSection will
+		be unlocked.
+
+		Make sure this object is created and deleted by the same thread,
+		otherwise there are no guarantees what will happen! Best just to use it
+		as a local stack object, rather than creating one with the new() operator.
+	*/
+	inline explicit ScopedLock (const CriticalSection& lock) throw()	: lock_ (lock) { lock.enter(); }
+
+	/** Destructor.
+
+		The CriticalSection will be unlocked when the destructor is called.
+
+		Make sure this object is created and deleted by the same thread,
+		otherwise there are no guarantees what will happen!
+	*/
+	inline ~ScopedLock() throw()					{ lock_.exit(); }
+
+private:
+
+	const CriticalSection& lock_;
+
+	ScopedLock (const ScopedLock&);
+	ScopedLock& operator= (const ScopedLock&);
+};
+
+/**
+	Automatically unlocks and re-locks a CriticalSection object.
+
+	This is the reverse of a ScopedLock object - instead of locking the critical
+	section for the lifetime of this object, it unlocks it.
+
+	Make sure you don't try to unlock critical sections that aren't actually locked!
+
+	e.g. @code
+
+	CriticalSection myCriticalSection;
+
+	for (;;)
+	{
+		const ScopedLock myScopedLock (myCriticalSection);
+		// myCriticalSection is now locked
+
+		... do some stuff with it locked ..
+
+		while (xyz)
+		{
+			... do some stuff with it locked ..
+
+			const ScopedUnlock unlocker (myCriticalSection);
+
+			// myCriticalSection is now unlocked for the remainder of this block,
+			// and re-locked at the end.
+
+			...do some stuff with it unlocked ...
+		}
+
+		// myCriticalSection gets unlocked here.
+	}
+	@endcode
+
+	@see CriticalSection, ScopedLock
+*/
+class ScopedUnlock
+{
+public:
+
+	/** Creates a ScopedUnlock.
+
+		As soon as it is created, this will unlock the CriticalSection, and
+		when the ScopedLock object is deleted, the CriticalSection will
+		be re-locked.
+
+		Make sure this object is created and deleted by the same thread,
+		otherwise there are no guarantees what will happen! Best just to use it
+		as a local stack object, rather than creating one with the new() operator.
+	*/
+	inline explicit ScopedUnlock (const CriticalSection& lock) throw()	: lock_ (lock) { lock.exit(); }
+
+	/** Destructor.
+
+		The CriticalSection will be unlocked when the destructor is called.
+
+		Make sure this object is created and deleted by the same thread,
+		otherwise there are no guarantees what will happen!
+	*/
+	inline ~ScopedUnlock() throw()					{ lock_.enter(); }
+
+private:
+
+	const CriticalSection& lock_;
+
+	ScopedUnlock (const ScopedLock&);
+	ScopedUnlock& operator= (const ScopedUnlock&);
+};
+
+#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
+/*** End of inlined file: juce_ScopedLock.h ***/
 
 /**
 	Macro to declare member variables and methods for a singleton class.
@@ -25137,9 +25073,19 @@ public:
 		So if you call setOrigin (100, 100), then the position that was previously
 		referred to as (100, 100) will subsequently be considered to be (0, 0).
 
-		@see reduceClipRegion
+		@see reduceClipRegion, addTransform
 	*/
 	void setOrigin (int newOriginX, int newOriginY);
+
+	/** Adds a transformation which will be performed on all the graphics operations that
+		the context subsequently performs.
+
+		After calling this, all the coordinates that are passed into the context will be
+		transformed by this matrix.
+
+		@see setOrigin
+	*/
+	void addTransform (const AffineTransform& transform);
 
 	/** Resets the current colour, brush, and font to default settings. */
 	void resetToDefaultState();
@@ -28003,16 +27949,13 @@ public:
 	};
 
    #ifndef DOXYGEN
-	/** @internal
-		This method is deprecated - use localPointToGlobal instead. */
+	/** This method is deprecated - use localPointToGlobal instead. */
 	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
-	/** @internal
-		This method is deprecated - use getLocalPoint instead. */
+	/** This method is deprecated - use getLocalPoint instead. */
 	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
 
-	/** @internal
-		This method is deprecated - use getLocalPoint instead. */
+	/** This method is deprecated - use getLocalPoint instead. */
 	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
 													   const Point<int>& positionRelativeToThis) const;
    #endif
@@ -28103,13 +28046,19 @@ private:
 	void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
 	static void giveAwayFocus();
 	void sendEnablementChangeMessage();
-	void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
-								  const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
-	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;
-
 	void sendVisibilityChangeMessage();
-	const Rectangle<int> getParentOrMainMonitorBounds() const;
 
+	class ComponentHelpers;
+	friend class ComponentHelpers;
+
+	/* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
+	   You might need to give your subclasses a private dummy constructor like this one to avoid
+	   compiler warnings.
+	*/
+	Component (const Component&);
+	Component& operator= (const Component&);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
 	// This is included here just to cause a compile error if your code is still handling
 	// drag-and-drop with this method. If so, just update it to use the new FileDragAndDropTarget
 	// class, which is easy (just make your class inherit from FileDragAndDropTarget, and
@@ -28119,15 +28068,10 @@ private:
 	// This is included here to cause an error if you use or overload it - it has been deprecated in
 	// favour of contains (const Point<int>&)
 	void contains (int, int);
-
-	/* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
-	   You might need to give your subclasses a private dummy constructor like this one to avoid
-	   compiler warnings.
-	*/
-	Component (const Component&);
-	Component& operator= (const Component&);
+   #endif
 
 protected:
+
 	/** @internal */
 	virtual void internalRepaint (int x, int y, int w, int h);
 	/** @internal */
@@ -29727,9 +29671,11 @@ private:
 	void handleAsyncUpdate();
 	void globalFocusChanged (Component*);
 
-	// xxx this is just here to cause a compile error in old code that hasn't been changed to use the new
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// This is just here to cause a compile error in old code that hasn't been changed to use the new
 	// version of this method.
 	virtual short getFirstCommandTarget() { return 0; }
+   #endif
 
 	ApplicationCommandManager (const ApplicationCommandManager&);
 	ApplicationCommandManager& operator= (const ApplicationCommandManager&);
@@ -42087,7 +42033,7 @@ public:
 	/** @internal */
 	void buttonClicked (Button* b);
 	/** @internal */
-	void changeListenerCallback (void*);
+	void changeListenerCallback (ChangeBroadcaster*);
 	/** @internal */
 	void timerCallback();
 
@@ -43292,8 +43238,10 @@ protected:
 					 int midiNoteNumber,
 					 float velocity);
 
-	/** xxx Temporary method here to cause a compiler error - note the new parameters for this method. */
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// Temporary method here to cause a compiler error - note the new parameters for this method.
 	int findFreeVoice (const bool) const { return 0; }
+   #endif
 
 private:
 	double sampleRate;
@@ -43622,9 +43570,6 @@ private:
 
 #endif
 #ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
@@ -51954,7 +51899,7 @@ public:
 	void scrollToTop();
 
 	/** @internal */
-	void changeListenerCallback (void*);
+	void changeListenerCallback (ChangeBroadcaster*);
 	/** @internal */
 	int getNumRows();
 	/** @internal */
@@ -56186,9 +56131,9 @@ public:
 	void changed (const bool synchronous = false)
 	{
 		if (synchronous)
-			sendSynchronousChangeMessage (this);
+			sendSynchronousChangeMessage();
 		else
-			sendChangeMessage (this);
+			sendChangeMessage();
 	}
 
 	juce_UseDebuggingNewOperator
@@ -56981,8 +56926,6 @@ public:
 	/** @internal */
 	void refresh();
 	/** @internal */
-	void changeListenerCallback (void*);
-	/** @internal */
 	void sliderValueChanged (Slider*);
 
 	juce_UseDebuggingNewOperator
@@ -57249,7 +57192,7 @@ public:
 	/** @internal */
 	void buttonClicked (Button*);
 	/** @internal */
-	void changeListenerCallback (void*);
+	void changeListenerCallback (ChangeBroadcaster*);
 	/** @internal */
 	void childBoundsChanged (Component*);
 
@@ -57659,10 +57602,11 @@ private:
 	ColourSelector (const ColourSelector&);
 	ColourSelector& operator= (const ColourSelector&);
 
-	// this constructor is here temporarily to prevent old code compiling, because the parameters
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// This constructor is here temporarily to prevent old code compiling, because the parameters
 	// have changed - if you get an error here, update your code to use the new constructor instead..
-	// (xxx - note to self: remember to remove this at some point in the future)
 	ColourSelector (bool);
+   #endif
 };
 
 #endif   // __JUCE_COLOURSELECTOR_JUCEHEADER__

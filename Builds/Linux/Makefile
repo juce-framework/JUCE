@@ -122,7 +122,6 @@ OBJECTS := \
   $(OBJDIR)/juce_ActionListenerList_9e099ae4.o \
   $(OBJDIR)/juce_AsyncUpdater_a7e1cb89.o \
   $(OBJDIR)/juce_ChangeBroadcaster_3eb8fecc.o \
-  $(OBJDIR)/juce_ChangeListenerList_c2dafc5e.o \
   $(OBJDIR)/juce_InterprocessConnection_13086b6d.o \
   $(OBJDIR)/juce_InterprocessConnectionServer_a4d7b350.o \
   $(OBJDIR)/juce_Message_ac79f635.o \
@@ -777,11 +776,6 @@ $(OBJDIR)/juce_AsyncUpdater_a7e1cb89.o: ../../src/events/juce_AsyncUpdater.cpp
 $(OBJDIR)/juce_ChangeBroadcaster_3eb8fecc.o: ../../src/events/juce_ChangeBroadcaster.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ChangeBroadcaster.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ChangeListenerList_c2dafc5e.o: ../../src/events/juce_ChangeListenerList.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_ChangeListenerList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_InterprocessConnection_13086b6d.o: ../../src/events/juce_InterprocessConnection.cpp

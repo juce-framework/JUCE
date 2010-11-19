@@ -229,7 +229,7 @@ private:
 
         double getValue() const                 { return owner->getCornerSize(); }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         PaintElementRoundedRectangle* const owner;

@@ -26,16 +26,16 @@
 #ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
 #define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
 
-#include "juce_ChangeListenerList.h"
+#include "juce_ChangeListener.h"
+#include "juce_ListenerList.h"
+#include "../core/juce_Atomic.h"
 
 
 //==============================================================================
-/** Manages a list of ChangeListeners, and can send them messages.
+/**
+    Holds a list of ChangeListeners, and sends messages to them when instructed.
 
-    To quickly add methods to your class that can add/remove change
-    listeners and broadcast to them, you can derive from this.
-
-    @see ChangeListenerList, ChangeListener
+    @see ChangeListener
 */
 class JUCE_API  ChangeBroadcaster
 {
@@ -48,14 +48,12 @@ public:
     virtual ~ChangeBroadcaster();
 
     //==============================================================================
-    /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
+    /** Registers a listener to receive change callbacks from this broadcaster.
+        Trying to add a listener that's already on the list will have no effect.
     */
     void addChangeListener (ChangeListener* listener);
 
-    /** Removes a listener from the list.
-
+    /** Unregisters a listener from the list.
         If the listener isn't on the list, this won't have any effect.
     */
     void removeChangeListener (ChangeListener* listener);
@@ -64,31 +62,39 @@ public:
     void removeAllChangeListeners();
 
     //==============================================================================
-    /** Broadcasts a change message to all the registered listeners.
+    /** Causes an asynchronous change message to be sent to all the registered listeners.
 
-        The message will be delivered asynchronously by the event thread, so this
-        method will not directly call any of the listeners. For a synchronous
-        message, use sendSynchronousChangeMessage().
-
-        @see ChangeListenerList::sendActionMessage
+        The message will be delivered asynchronously by the main message thread, so this
+        method will return immediately. To call the listeners synchronously use
+        sendSynchronousChangeMessage().
     */
-    void sendChangeMessage (void* objectThatHasChanged);
+    void sendChangeMessage();
 
     /** Sends a synchronous change message to all the registered listeners.
 
-        @see ChangeListenerList::sendSynchronousChangeMessage
-    */
-    void sendSynchronousChangeMessage (void* objectThatHasChanged);
+        This will immediately call all the listeners that are registered. For thread-safety
+        reasons, you must only call this method on the main message thread.
 
-    /** If a change message has been sent but not yet dispatched, this will
-        use sendSynchronousChangeMessage() to make the callback immediately.
+        @see dispatchPendingMessages
+    */
+    void sendSynchronousChangeMessage();
+
+    /** If a change message has been sent but not yet dispatched, this will call
+        sendSynchronousChangeMessage() to make the callback immediately.
+
+        For thread-safety reasons, you must only call this method on the main message thread.
     */
     void dispatchPendingMessages();
 
-
 private:
     //==============================================================================
-    ChangeListenerList changeListenerList;
+    class ChangeBroadcasterMessage;
+    friend class ChangeBroadcasterMessage;
+
+    Atomic<ChangeBroadcasterMessage*> pendingMessage;
+    ListenerList <ChangeListener> changeListeners;
+
+    void invalidatePendingMessage();
 
     ChangeBroadcaster (const ChangeBroadcaster&);
     ChangeBroadcaster& operator= (const ChangeBroadcaster&);

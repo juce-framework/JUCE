@@ -63,7 +63,7 @@ ComponentOverlayComponent::~ComponentOverlayComponent()
     delete border;
 }
 
-void ComponentOverlayComponent::changeListenerCallback (void*)
+void ComponentOverlayComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     const bool nowSelected = layout.getSelectedSet().isSelected (target);
 

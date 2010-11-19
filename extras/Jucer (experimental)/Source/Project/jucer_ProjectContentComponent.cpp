@@ -109,7 +109,7 @@ void ProjectContentComponent::setProject (Project* newProject)
     }
 }
 
-void ProjectContentComponent::changeListenerCallback (void*)
+void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateMissingFileStatuses();
 }

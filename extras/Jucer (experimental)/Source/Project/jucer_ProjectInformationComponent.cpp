@@ -127,7 +127,7 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
 #if JUCE_MAC || JUCE_WINDOWS
     openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
     openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
-    
+
     saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
     saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
 #else
@@ -341,7 +341,7 @@ void ProjectInformationComponent::showExporterMenu()
         project.addNewExporter (r - 10000);
 }
 
-void ProjectInformationComponent::changeListenerCallback (void*)
+void ProjectInformationComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateConfigTabs();
 }

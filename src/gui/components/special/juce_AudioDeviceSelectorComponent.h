@@ -86,7 +86,7 @@ public:
     /** @internal */
     void buttonClicked (Button*);
     /** @internal */
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     /** @internal */
     void childBoundsChanged (Component*);
 

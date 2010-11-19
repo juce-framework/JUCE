@@ -455,7 +455,7 @@ private:
             return element->getOpacity();
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }
@@ -494,7 +494,7 @@ private:
             return (int) element->getStretchMode();
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }

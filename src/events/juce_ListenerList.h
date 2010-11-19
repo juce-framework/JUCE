@@ -130,6 +130,12 @@ public:
         return listeners.size() == 0;
     }
 
+    /** Clears the list. */
+    void clear()
+    {
+        listeners.clear();
+    }
+
     /** Returns true if the specified listener has been added to the list. */
     bool contains (ListenerClass* const listener) const throw()
     {

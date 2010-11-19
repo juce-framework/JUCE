@@ -99,7 +99,7 @@ public:
         }
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         // this method is called by the thumbnail when it has changed, so we should repaint it..
         repaint();

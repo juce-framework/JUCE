@@ -52,7 +52,7 @@ public:
 
 
     //==============================================================================
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         updatePosition();
     }

@@ -235,7 +235,7 @@ public:
 
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
 
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
 
     //==============================================================================
     static int compareElements (FilterInGraph* const first, FilterInGraph* const second) throw();

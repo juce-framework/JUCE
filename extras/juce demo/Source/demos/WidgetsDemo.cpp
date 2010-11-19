@@ -271,14 +271,11 @@ public:
         callOut.runModalLoop();
     }
 
-    void changeListenerCallback (void* source)
+    void changeListenerCallback (ChangeBroadcaster* source)
     {
-        ColourSelector* cs = static_cast <ColourSelector*> (source);
+        ColourSelector* cs = dynamic_cast <ColourSelector*> (source);
 
-        if (cs->getName() == "text")
-            setColour (TextButton::textColourOffId, cs->getCurrentColour());
-        else
-            setColour (TextButton::buttonColourId, cs->getCurrentColour());
+        setColour (TextButton::buttonColourId, cs->getCurrentColour());
     }
 };
 

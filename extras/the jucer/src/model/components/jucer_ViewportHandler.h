@@ -400,7 +400,7 @@ private:
             return component->getScrollBarThickness();
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }
@@ -533,7 +533,7 @@ private:
             return document.getFile().getSiblingFile (filename);
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }

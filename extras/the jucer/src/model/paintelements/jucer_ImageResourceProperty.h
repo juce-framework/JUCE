@@ -114,7 +114,7 @@ public:
         return choices.indexOf (getResource());
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }

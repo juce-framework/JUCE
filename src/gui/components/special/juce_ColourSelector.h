@@ -165,10 +165,11 @@ private:
     ColourSelector (const ColourSelector&);
     ColourSelector& operator= (const ColourSelector&);
 
-    // this constructor is here temporarily to prevent old code compiling, because the parameters
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This constructor is here temporarily to prevent old code compiling, because the parameters
     // have changed - if you get an error here, update your code to use the new constructor instead..
-    // (xxx - note to self: remember to remove this at some point in the future)
     ColourSelector (bool);
+   #endif
 };
 
 

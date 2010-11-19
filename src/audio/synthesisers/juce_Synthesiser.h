@@ -468,8 +468,10 @@ protected:
                      int midiNoteNumber,
                      float velocity);
 
-    /** xxx Temporary method here to cause a compiler error - note the new parameters for this method. */
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // Temporary method here to cause a compiler error - note the new parameters for this method.
     int findFreeVoice (const bool) const { return 0; }
+   #endif
 
 private:
     double sampleRate;

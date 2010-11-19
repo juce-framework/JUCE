@@ -52,7 +52,7 @@ public:
         document.removeChangeListener (this);
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }

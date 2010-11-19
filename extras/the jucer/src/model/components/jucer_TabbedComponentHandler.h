@@ -601,7 +601,7 @@ private:
             return component->getTabBarDepth();
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }
@@ -868,7 +868,7 @@ private:
             jassertfalse // shouldn't get called
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         TabbedComponent* component;
@@ -1002,7 +1002,7 @@ private:
             return document.getFile().getSiblingFile (getTabJucerFile (component, tabIndex));
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         TabbedComponent* const component;

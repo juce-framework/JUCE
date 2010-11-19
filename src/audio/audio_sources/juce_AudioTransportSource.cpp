@@ -135,7 +135,7 @@ void AudioTransportSource::start()
             inputStreamEOF = false;
         }
 
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
@@ -152,7 +152,7 @@ void AudioTransportSource::stop()
         while (--n >= 0 && ! stopped)
             Thread::sleep (2);
 
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
@@ -272,7 +272,7 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         {
             playing = false;
             inputStreamEOF = true;
-            sendChangeMessage (this);
+            sendChangeMessage();
         }
 
         stopped = ! playing;

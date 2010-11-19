@@ -70,7 +70,7 @@ void FileListComponent::scrollToTop()
 }
 
 //==============================================================================
-void FileListComponent::changeListenerCallback (void*)
+void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateContent();
 

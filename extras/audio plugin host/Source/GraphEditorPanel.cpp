@@ -811,7 +811,7 @@ void GraphEditorPanel::resized()
     updateComponents();
 }
 
-void GraphEditorPanel::changeListenerCallback (void*)
+void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 {
     updateComponents();
 }

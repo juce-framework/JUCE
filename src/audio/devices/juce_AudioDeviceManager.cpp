@@ -339,7 +339,7 @@ void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
 
             setAudioDeviceSetup (s, treatAsChosenDevice);
 
-            sendChangeMessage (this);
+            sendChangeMessage();
             break;
         }
     }
@@ -363,7 +363,7 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
         return String::empty;
 
     if (! (newSetup == currentSetup))
-        sendChangeMessage (this);
+        sendChangeMessage();
 
     stopDevice();
 
@@ -729,14 +729,14 @@ void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device
             callbacks.getUnchecked(i)->audioDeviceAboutToStart (device);
     }
 
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 void AudioDeviceManager::audioDeviceStoppedInt()
 {
     cpuUsageMs = 0;
     timeToCpuScale = 0;
-    sendChangeMessage (this);
+    sendChangeMessage();
 
     const ScopedLock sl (audioCallbackLock);
     for (int i = callbacks.size(); --i >= 0;)
@@ -777,7 +777,7 @@ void AudioDeviceManager::setMidiInputEnabled (const String& name,
         }
 
         updateXml();
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
@@ -887,7 +887,7 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
         }
 
         updateXml();
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 

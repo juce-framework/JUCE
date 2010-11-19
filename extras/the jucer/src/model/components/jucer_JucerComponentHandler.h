@@ -192,7 +192,7 @@ private:
             return component->findFile();
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             refresh();
         }

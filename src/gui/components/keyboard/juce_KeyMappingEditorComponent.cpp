@@ -364,7 +364,7 @@ public:
     bool mightContainSubItems()             { return true; }
     const String getUniqueName() const      { return "keys"; }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         const ScopedPointer <XmlElement> oldOpenness (owner.tree.getOpennessState (true));
 

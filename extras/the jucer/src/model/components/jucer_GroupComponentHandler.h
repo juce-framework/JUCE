@@ -201,7 +201,7 @@ private:
             return group->getTextLabelPosition();
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         GroupComponent* const group;

@@ -60,7 +60,7 @@ public:
 
     //==============================================================================
     void closeButtonPressed();
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
 
     bool isInterestedInFileDrag (const StringArray& files);
     void fileDragEnter (const StringArray& files, int, int);

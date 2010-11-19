@@ -621,9 +621,19 @@ public:
         So if you call setOrigin (100, 100), then the position that was previously
         referred to as (100, 100) will subsequently be considered to be (0, 0).
 
-        @see reduceClipRegion
+        @see reduceClipRegion, addTransform
     */
     void setOrigin (int newOriginX, int newOriginY);
+
+    /** Adds a transformation which will be performed on all the graphics operations that
+        the context subsequently performs.
+
+        After calling this, all the coordinates that are passed into the context will be
+        transformed by this matrix.
+
+        @see setOrigin
+    */
+    void addTransform (const AffineTransform& transform);
 
     /** Resets the current colour, brush, and font to default settings. */
     void resetToDefaultState();

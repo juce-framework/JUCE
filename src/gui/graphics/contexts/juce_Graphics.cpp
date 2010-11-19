@@ -165,6 +165,11 @@ void Graphics::setOrigin (const int newOriginX, const int newOriginY)
     context->setOrigin (newOriginX, newOriginY);
 }
 
+void Graphics::addTransform (const AffineTransform& transform)
+{
+    context->addTransform (transform);
+}
+
 bool Graphics::clipRegionIntersects (const Rectangle<int>& area) const
 {
     return context->clipRegionIntersects (area);

@@ -45,7 +45,7 @@ void KnownPluginList::clear()
     if (types.size() > 0)
     {
         types.clear();
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
@@ -83,14 +83,14 @@ bool KnownPluginList::addType (const PluginDescription& type)
     }
 
     types.add (new PluginDescription (type));
-    sendChangeMessage (this);
+    sendChangeMessage();
     return true;
 }
 
 void KnownPluginList::removeType (const int index)
 {
     types.remove (index);
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 namespace
@@ -249,7 +249,7 @@ void KnownPluginList::sort (const SortMethod method)
         sorter.method = method;
         types.sort (sorter, true);
 
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 

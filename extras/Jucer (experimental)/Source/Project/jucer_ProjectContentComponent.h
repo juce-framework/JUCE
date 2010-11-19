@@ -55,7 +55,7 @@ public:
 
     void updateMissingFileStatuses();
 
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     void hasBeenMoved();
 
     //==============================================================================

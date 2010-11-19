@@ -430,8 +430,6 @@
           <File RelativePath="..\..\src\events\juce_ChangeBroadcaster.cpp"/>
           <File RelativePath="..\..\src\events\juce_ChangeBroadcaster.h"/>
           <File RelativePath="..\..\src\events\juce_ChangeListener.h"/>
-          <File RelativePath="..\..\src\events\juce_ChangeListenerList.cpp"/>
-          <File RelativePath="..\..\src\events\juce_ChangeListenerList.h"/>
           <File RelativePath="..\..\src\events\juce_InterprocessConnection.cpp"/>
           <File RelativePath="..\..\src\events\juce_InterprocessConnection.h"/>
           <File RelativePath="..\..\src\events\juce_InterprocessConnectionServer.cpp"/>

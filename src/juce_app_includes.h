@@ -245,9 +245,6 @@
 #ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
  #include "events/juce_ChangeListener.h"
 #endif
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
- #include "events/juce_ChangeListenerList.h"
-#endif
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
  #include "events/juce_InterprocessConnection.h"
 #endif

@@ -3097,8 +3097,8 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
     }
 
     {
-        const float leftIndent = flatOnLeft ? 0.0f : cs * 0.4f;
-        const float rightIndent = flatOnRight ? 0.0f : cs * 0.4f;
+        const float leftIndent = flatOnTop || flatOnLeft ? 0.0f : cs * 0.4f;
+        const float rightIndent = flatOnTop || flatOnRight ? 0.0f : cs * 0.4f;
 
         Path highlight;
         LookAndFeelHelpers::createRoundedPath (highlight,

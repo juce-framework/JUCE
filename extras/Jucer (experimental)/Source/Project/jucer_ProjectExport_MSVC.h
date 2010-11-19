@@ -699,7 +699,7 @@ protected:
                 compiler->setAttribute ("StringPooling", "true");
             }
 
-            compiler->setAttribute ("AdditionalIncludeDirectories", getHeaderSearchPaths (config).joinIntoString (";"));
+            compiler->setAttribute ("AdditionalIncludeDirectories", replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (";")));
             compiler->setAttribute ("PreprocessorDefinitions", getPreprocessorDefs (config, ";"));
             compiler->setAttribute ("RuntimeLibrary", isRTAS() ? (isDebug ? 3 : 2) // MT DLL
                                                                : (isDebug ? 1 : 0)); // MT static
@@ -988,7 +988,7 @@ private:
                 << "# ADD BASE CPP /nologo /W3 /GX /" << optimisationFlag << " /D " << defines
                 << " /YX /FD /c " << extraDebugFlags << " /Zm1024" << newLine
                 << "# ADD CPP /nologo " << (isDebug ? "/MTd" : "/MT") << " /W3 /GR /GX /" << optimisationFlag
-                << " /I " << getHeaderSearchPaths (config).joinIntoString (" /I ")
+                << " /I " << replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" /I "))
                 << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c /Zm1024 " << extraDebugFlags
                 << " " << replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim() << newLine;
 

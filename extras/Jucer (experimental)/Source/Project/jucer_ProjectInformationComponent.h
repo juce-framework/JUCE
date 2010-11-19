@@ -42,7 +42,7 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     void rebuildConfigTabs();
     //[/UserMethods]
 

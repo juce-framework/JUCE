@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      52
-#define JUCE_BUILDNUMBER        92
+#define JUCE_BUILDNUMBER        93
 
 /** Current Juce version number.
 
@@ -154,6 +154,12 @@
 /** This macro is added to all juce public function declarations. */
 #define JUCE_PUBLIC_FUNCTION        JUCE_API JUCE_CALLTYPE
 
+/** This turns on some non-essential bits of code that should prevent old code from compiling
+    in cases where method signatures have changed, etc.
+*/
+#if (! defined (JUCE_CATCH_DEPRECATED_CODE_MISUSE)) && JUCE_DEBUG && ! DOXYGEN
+ #define JUCE_CATCH_DEPRECATED_CODE_MISUSE 1
+#endif
 
 //==============================================================================
 // Now include some basics that are needed by most of the Juce classes...

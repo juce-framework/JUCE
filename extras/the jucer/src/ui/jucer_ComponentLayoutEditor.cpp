@@ -146,7 +146,7 @@ void ComponentLayoutEditor::visibilityChanged()
     }
 }
 
-void ComponentLayoutEditor::changeListenerCallback (void*)
+void ComponentLayoutEditor::changeListenerCallback (ChangeBroadcaster*)
 {
     refreshAllComponents();
 }

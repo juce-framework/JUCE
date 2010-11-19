@@ -120,7 +120,7 @@ public:
     void setIndex (int newIndex)            { owner->setNonZeroWinding (newIndex == 0, true); }
     int getIndex() const                    { return owner->isNonZeroWinding() ? 0 : 1; }
 
-    void changeListenerCallback (void*)     { refresh(); }
+    void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
 private:
     PaintElementPath* const owner;
@@ -1276,7 +1276,7 @@ public:
         return 0;
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }
@@ -1345,7 +1345,7 @@ public:
         owner->getDocument()->removeChangeListener (this);
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }
@@ -1671,7 +1671,7 @@ void PathPointComponent::mouseUp (const MouseEvent& e)
                                                           mouseDownSelectStatus);
 }
 
-void PathPointComponent::changeListenerCallback (void* source)
+void PathPointComponent::changeListenerCallback (ChangeBroadcaster* source)
 {
     ElementSiblingComponent::changeListenerCallback (source);
 

@@ -507,10 +507,6 @@
               file="src/events/juce_ChangeBroadcaster.h"/>
         <FILE id="NAVM1VUrE" name="juce_ChangeListener.h" compile="0" resource="0"
               file="src/events/juce_ChangeListener.h"/>
-        <FILE id="i5XTQIbi" name="juce_ChangeListenerList.cpp" compile="1"
-              resource="0" file="src/events/juce_ChangeListenerList.cpp"/>
-        <FILE id="8NN9Zgr8a" name="juce_ChangeListenerList.h" compile="0" resource="0"
-              file="src/events/juce_ChangeListenerList.h"/>
         <FILE id="RxIz7qEOV" name="juce_InterprocessConnection.cpp" compile="1"
               resource="0" file="src/events/juce_InterprocessConnection.cpp"/>
         <FILE id="qOQS6siYg" name="juce_InterprocessConnection.h" compile="0"

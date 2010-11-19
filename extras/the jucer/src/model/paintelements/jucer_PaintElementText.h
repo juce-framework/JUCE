@@ -387,7 +387,7 @@ private:
         void setText (const String& newText)    { element->setText (newText, true); }
         const String getText() const            { return element->getText(); }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         PaintElementText* const element;
@@ -413,7 +413,7 @@ private:
         void setTypefaceName (const String& newFontName)    { element->setTypefaceName (newFontName, true); }
         const String getTypefaceName() const                { return element->getTypefaceName(); }
 
-        void changeListenerCallback (void*)                 { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)                 { refresh(); }
 
     private:
         PaintElementText* const element;
@@ -463,7 +463,7 @@ private:
             return 0;
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         PaintElementText* const element;
@@ -501,7 +501,7 @@ private:
             return element->getFont().getHeight();
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         PaintElementText* const element;
@@ -534,7 +534,7 @@ private:
             return element->getJustification();
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         PaintElementText* const element;

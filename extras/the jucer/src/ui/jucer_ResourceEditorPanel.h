@@ -45,7 +45,7 @@ public:
 
     void resized();
     void visibilityChanged();
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     void buttonClicked (Button*);
 
     int getNumRows();

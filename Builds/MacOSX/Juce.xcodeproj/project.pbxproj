@@ -91,7 +91,6 @@
 		5BE4BAA99FDC6F1B3177096F = { isa = PBXBuildFile; fileRef = 5A46476E16BA4F9DA95E9E6A; };
 		55737E2F1817DE642AA7DA05 = { isa = PBXBuildFile; fileRef = 1617348BBF5D103619D76911; };
 		6D2C50B0A69855A7F8C062E7 = { isa = PBXBuildFile; fileRef = B80F8CD026033ACCCE11A1A4; };
-		769227C780221EE89081BDFF = { isa = PBXBuildFile; fileRef = F978BD0E708FA56FD1EAE238; };
 		70EE7A1273945B62B013DB43 = { isa = PBXBuildFile; fileRef = AE68ECB6E063BD8D4984C0B3; };
 		9DF800566462E24A14246EAE = { isa = PBXBuildFile; fileRef = 843A7B398E9411F0AF28D65D; };
 		89F0DA39878F8A41E60B8C67 = { isa = PBXBuildFile; fileRef = 9CF077D3ED7B7B56F351AAF6; };
@@ -563,8 +562,6 @@
 		B80F8CD026033ACCCE11A1A4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ChangeBroadcaster.cpp; path = ../../src/events/juce_ChangeBroadcaster.cpp; sourceTree = SOURCE_ROOT; };
 		5F454A6B5A82ECE2396C5716 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ChangeBroadcaster.h; path = ../../src/events/juce_ChangeBroadcaster.h; sourceTree = SOURCE_ROOT; };
 		B2D08C8EEE3E22026533D2EA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ChangeListener.h; path = ../../src/events/juce_ChangeListener.h; sourceTree = SOURCE_ROOT; };
-		F978BD0E708FA56FD1EAE238 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ChangeListenerList.cpp; path = ../../src/events/juce_ChangeListenerList.cpp; sourceTree = SOURCE_ROOT; };
-		4D15D2E39EAC0DDFCFC2FCE6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ChangeListenerList.h; path = ../../src/events/juce_ChangeListenerList.h; sourceTree = SOURCE_ROOT; };
 		AE68ECB6E063BD8D4984C0B3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_InterprocessConnection.cpp; path = ../../src/events/juce_InterprocessConnection.cpp; sourceTree = SOURCE_ROOT; };
 		4B935D7360C9F166C80A158D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_InterprocessConnection.h; path = ../../src/events/juce_InterprocessConnection.h; sourceTree = SOURCE_ROOT; };
 		843A7B398E9411F0AF28D65D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_InterprocessConnectionServer.cpp; path = ../../src/events/juce_InterprocessConnectionServer.cpp; sourceTree = SOURCE_ROOT; };
@@ -1293,8 +1290,6 @@
 				B80F8CD026033ACCCE11A1A4,
 				5F454A6B5A82ECE2396C5716,
 				B2D08C8EEE3E22026533D2EA,
-				F978BD0E708FA56FD1EAE238,
-				4D15D2E39EAC0DDFCFC2FCE6,
 				AE68ECB6E063BD8D4984C0B3,
 				4B935D7360C9F166C80A158D,
 				843A7B398E9411F0AF28D65D,
@@ -2016,7 +2011,6 @@
 				5BE4BAA99FDC6F1B3177096F,
 				55737E2F1817DE642AA7DA05,
 				6D2C50B0A69855A7F8C062E7,
-				769227C780221EE89081BDFF,
 				70EE7A1273945B62B013DB43,
 				9DF800566462E24A14246EAE,
 				89F0DA39878F8A41E60B8C67,

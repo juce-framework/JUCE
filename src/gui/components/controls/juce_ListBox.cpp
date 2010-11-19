@@ -381,6 +381,7 @@ void ListBox::setModel (ListBoxModel* const newModel)
     if (model != newModel)
     {
         model = newModel;
+        repaint();
         updateContent();
     }
 }

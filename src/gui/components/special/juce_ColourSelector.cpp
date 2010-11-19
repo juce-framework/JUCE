@@ -430,7 +430,7 @@ void ColourSelector::update()
     if ((flags & showColourAtTop) != 0)
         repaint (previewArea);
 
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 //==============================================================================

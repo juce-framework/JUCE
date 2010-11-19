@@ -226,7 +226,7 @@ public:
         if (listeners.size() > 0)
             callListeners (loadingImage);
 
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 
     void drawCurrentImage (Graphics& g, int x, int y, int w, int h)
@@ -441,7 +441,7 @@ public:
                 g.fillAll (Colours::black);
         }
 
-        void changeListenerCallback (void*)
+        void changeListenerCallback (ChangeBroadcaster*)
         {
             const int64 now = Time::currentTimeMillis();
 

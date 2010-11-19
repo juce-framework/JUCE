@@ -400,7 +400,7 @@ private:
             return label->getJustificationType();
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         Label* const label;
@@ -466,7 +466,7 @@ private:
             return label->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont);
         }
 
-        void changeListenerCallback (void*)                     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)                     { refresh(); }
 
     private:
         Label* const label;
@@ -535,7 +535,7 @@ private:
             return label->getFont().getHeight();
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         Label* const label;
@@ -621,7 +621,7 @@ private:
             return 0;
         }
 
-        void changeListenerCallback (void*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
     private:
         Label* const label;

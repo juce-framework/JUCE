@@ -86,7 +86,7 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
                 {
                     mappings.getUnchecked(i)->keypresses.insert (insertIndex, newKeyPress);
 
-                    sendChangeMessage (this);
+                    sendChangeMessage();
                     return;
                 }
             }
@@ -101,7 +101,7 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
                 cm->wantsKeyUpDownCallbacks = (ci->flags & ApplicationCommandInfo::wantsKeyUpDownCallbacks) != 0;
 
                 mappings.add (cm);
-                sendChangeMessage (this);
+                sendChangeMessage();
             }
         }
     }
@@ -122,7 +122,7 @@ void KeyPressMappingSet::resetToDefaultMappings()
         }
     }
 
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID)
@@ -142,7 +142,7 @@ void KeyPressMappingSet::clearAllKeyPresses()
 {
     if (mappings.size() > 0)
     {
-        sendChangeMessage (this);
+        sendChangeMessage();
         mappings.clear();
     }
 }
@@ -154,7 +154,7 @@ void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID)
         if (mappings.getUnchecked(i)->commandID == commandID)
         {
             mappings.remove (i);
-            sendChangeMessage (this);
+            sendChangeMessage();
         }
     }
 }
@@ -172,7 +172,7 @@ void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress)
                 if (keypress == cm->keypresses [j])
                 {
                     cm->keypresses.remove (j);
-                    sendChangeMessage (this);
+                    sendChangeMessage();
                 }
             }
         }
@@ -186,7 +186,7 @@ void KeyPressMappingSet::removeKeyPress (const CommandID commandID, const int ke
         if (mappings.getUnchecked(i)->commandID == commandID)
         {
             mappings.getUnchecked(i)->keypresses.remove (keyPressIndex);
-            sendChangeMessage (this);
+            sendChangeMessage();
             break;
         }
     }

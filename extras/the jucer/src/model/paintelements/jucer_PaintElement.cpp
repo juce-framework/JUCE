@@ -422,7 +422,7 @@ void PaintElement::getCurrentAbsoluteBoundsDouble (double& x, double& y, double&
     position.getRectangleDouble (x, y, w, h, area, getDocument()->getComponentLayout());
 }
 
-void PaintElement::changeListenerCallback (void*)
+void PaintElement::changeListenerCallback (ChangeBroadcaster*)
 {
     const bool nowSelected = owner != 0 && owner->getSelectedElements().isSelected (this);
 
@@ -449,7 +449,7 @@ void PaintElement::createSiblingComponents()
 void PaintElement::siblingComponentsChanged()
 {
     siblingComponents.clear();
-    selfChangeListenerList.sendChangeMessage (0);
+    selfChangeListenerList.sendChangeMessage();
 }
 
 void PaintElement::updateSiblingComps()

@@ -245,7 +245,7 @@ void ResourceEditorPanel::visibilityChanged()
         listBox->updateContent();
 }
 
-void ResourceEditorPanel::changeListenerCallback (void*)
+void ResourceEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 {
     if (isVisible())
         listBox->updateContent();

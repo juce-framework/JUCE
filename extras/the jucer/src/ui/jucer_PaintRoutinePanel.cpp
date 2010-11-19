@@ -48,7 +48,7 @@ public:
         document.removeChangeListener (this);
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         refresh();
     }
@@ -99,7 +99,7 @@ public:
         propsPanel->setBounds (4, 4, getWidth() - 8, getHeight() - 8);
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         updateList();
     }

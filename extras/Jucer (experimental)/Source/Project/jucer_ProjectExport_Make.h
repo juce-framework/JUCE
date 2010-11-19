@@ -167,7 +167,7 @@ private:
             headerPaths.insert (0, juceWrapperFolder.toUnixStyle());
 
         for (int i = 0; i < headerPaths.size(); ++i)
-            out << " -I " << FileHelpers::unixStylePath (headerPaths[i]).quoted();
+            out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, headerPaths[i])).quoted();
     }
 
     void writeCppFlags (OutputStream& out, const Project::BuildConfiguration& config)

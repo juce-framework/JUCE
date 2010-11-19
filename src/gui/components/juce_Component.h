@@ -2006,16 +2006,13 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    /** @internal
-        This method is deprecated - use localPointToGlobal instead. */
+    /** This method is deprecated - use localPointToGlobal instead. */
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
-    /** @internal
-        This method is deprecated - use getLocalPoint instead. */
+    /** This method is deprecated - use getLocalPoint instead. */
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
 
-    /** @internal
-        This method is deprecated - use getLocalPoint instead. */
+    /** This method is deprecated - use getLocalPoint instead. */
     const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
                                                        const Point<int>& positionRelativeToThis) const;
    #endif
@@ -2109,14 +2106,20 @@ private:
     void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
     static void giveAwayFocus();
     void sendEnablementChangeMessage();
-    void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
-                                  const Rectangle<int>& clipRect, const Component* const compToAvoid) const;
-    void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect, int deltaX, int deltaY) const;
-
     void sendVisibilityChangeMessage();
-    const Rectangle<int> getParentOrMainMonitorBounds() const;
+
+    class ComponentHelpers;
+    friend class ComponentHelpers;
+
+    /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
+       You might need to give your subclasses a private dummy constructor like this one to avoid
+       compiler warnings.
+    */
+    Component (const Component&);
+    Component& operator= (const Component&);
 
     //==============================================================================
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This is included here just to cause a compile error if your code is still handling
     // drag-and-drop with this method. If so, just update it to use the new FileDragAndDropTarget
     // class, which is easy (just make your class inherit from FileDragAndDropTarget, and
@@ -2126,15 +2129,10 @@ private:
     // This is included here to cause an error if you use or overload it - it has been deprecated in
     // favour of contains (const Point<int>&)
     void contains (int, int);
-
-    /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
-       You might need to give your subclasses a private dummy constructor like this one to avoid
-       compiler warnings.
-    */
-    Component (const Component&);
-    Component& operator= (const Component&);
+   #endif
 
 protected:
+    //==============================================================================
     /** @internal */
     virtual void internalRepaint (int x, int y, int w, int h);
     /** @internal */

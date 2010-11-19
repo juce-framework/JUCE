@@ -122,7 +122,7 @@ public:
         newList->addChangeListener (this);
     }
 
-    void changeListenerCallback (void*)
+    void changeListenerCallback (ChangeBroadcaster*)
     {
         clearSubItems();
 

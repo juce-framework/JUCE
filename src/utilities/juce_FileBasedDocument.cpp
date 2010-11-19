@@ -57,14 +57,14 @@ void FileBasedDocument::setChangedFlag (const bool hasChanged)
     if (changedSinceSave != hasChanged)
     {
         changedSinceSave = hasChanged;
-        sendChangeMessage (this);
+        sendChangeMessage();
     }
 }
 
 void FileBasedDocument::changed()
 {
     changedSinceSave = true;
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 //==============================================================================

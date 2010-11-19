@@ -62,7 +62,7 @@ public:
     //==============================================================================
     void paint (Graphics& g);
     void resized();
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget();

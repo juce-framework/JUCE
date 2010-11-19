@@ -2201,7 +2201,7 @@ public:
         if (state != lastState)
         {
             lastState = state;
-            owner.sendChangeMessage (&owner);
+            owner.sendChangeMessage();
         }
     }
 

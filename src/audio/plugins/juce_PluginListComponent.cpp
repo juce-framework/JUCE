@@ -70,7 +70,7 @@ void PluginListComponent::resized()
     optionsButton.setTopLeftPosition (8, getHeight() - 28);
 }
 
-void PluginListComponent::changeListenerCallback (void*)
+void PluginListComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     listBox.updateContent();
     listBox.repaint();

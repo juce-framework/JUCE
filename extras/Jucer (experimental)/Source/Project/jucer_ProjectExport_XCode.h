@@ -518,7 +518,7 @@ private:
         StringArray s;
         s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
         s.add ("PREBINDING = NO");
-        s.add ("HEADER_SEARCH_PATHS = \"" + getHeaderSearchPaths (config).joinIntoString (" ") + " $(inherited)\"");
+        s.add ("HEADER_SEARCH_PATHS = \"" + replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" ")) + " $(inherited)\"");
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
 

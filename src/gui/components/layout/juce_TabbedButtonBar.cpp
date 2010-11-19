@@ -307,7 +307,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
         resized();
 
         if (sendChangeMessage_)
-            sendChangeMessage (this);
+            sendChangeMessage();
 
         currentTabChanged (newIndex, getCurrentTabName());
     }

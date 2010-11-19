@@ -55,7 +55,7 @@ void UndoManager::clearUndoHistory()
     transactionNames.clear();
     totalUnitsStored = 0;
     nextIndex = 0;
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 int UndoManager::getNumberOfUnitsTakenUpByStoredCommands() const
@@ -146,7 +146,7 @@ bool UndoManager::perform (UndoableAction* const command_, const String& actionN
                 --nextIndex;
             }
 
-            sendChangeMessage (this);
+            sendChangeMessage();
 
             return true;
         }
@@ -216,7 +216,7 @@ bool UndoManager::undo()
 
     beginNewTransaction();
 
-    sendChangeMessage (this);
+    sendChangeMessage();
     return true;
 }
 
@@ -249,7 +249,7 @@ bool UndoManager::redo()
 
     beginNewTransaction();
 
-    sendChangeMessage (this);
+    sendChangeMessage();
     return true;
 }
 

@@ -885,6 +885,7 @@ public:
             if (taskBarIcon == 0)
             {
                 taskBarIcon = new NOTIFYICONDATA();
+                zeromem (taskBarIcon, sizeof (NOTIFYICONDATA));
                 taskBarIcon->cbSize = sizeof (NOTIFYICONDATA);
                 taskBarIcon->hWnd = (HWND) hwnd;
                 taskBarIcon->uID = (int) (pointer_sized_int) hwnd;
@@ -905,8 +906,6 @@ public:
 
                 DestroyIcon (oldIcon);
             }
-
-            DestroyIcon (hicon);
         }
         else if (taskBarIcon != 0)
         {
@@ -927,6 +926,56 @@ public:
         }
     }
 
+    void handleTaskBarEvent (const LPARAM lParam, const WPARAM wParam)
+    {
+        if (component->isCurrentlyBlockedByAnotherModalComponent())
+        {
+            if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN
+                 || lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
+            {
+                Component* const current = Component::getCurrentlyModalComponent();
+
+                if (current != 0)
+                    current->inputAttemptWhenModal();
+            }
+        }
+        else
+        {
+            ModifierKeys eventMods (ModifierKeys::getCurrentModifiersRealtime());
+
+            if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
+                eventMods = eventMods.withFlags (ModifierKeys::leftButtonModifier);
+            else if (lParam == WM_RBUTTONDOWN || lParam == WM_RBUTTONDBLCLK)
+                eventMods = eventMods.withFlags (ModifierKeys::rightButtonModifier);
+            else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
+                eventMods = eventMods.withoutMouseButtons();
+
+            const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
+                                Point<int>(), eventMods, component, component, getMouseEventTime(),
+                                Point<int>(), getMouseEventTime(), 1, false);
+
+            if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
+            {
+                SetFocus (hwnd);
+                SetForegroundWindow (hwnd);
+                component->mouseDown (e);
+            }
+            else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
+            {
+                component->mouseUp (e);
+            }
+            else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
+            {
+                component->mouseDoubleClick (e);
+            }
+            else if (lParam == WM_MOUSEMOVE)
+            {
+                component->mouseMove (e);
+            }
+        }
+    }
+
+    //==============================================================================
     bool isInside (HWND h) const
     {
         return GetAncestor (hwnd, GA_ROOT) == h;
@@ -1700,21 +1749,11 @@ private:
 
         switch (GET_APPCOMMAND_LPARAM (lParam))
         {
-        case APPCOMMAND_MEDIA_PLAY_PAUSE:
-            key = KeyPress::playKey;
-            break;
-
-        case APPCOMMAND_MEDIA_STOP:
-            key = KeyPress::stopKey;
-            break;
-
-        case APPCOMMAND_MEDIA_NEXTTRACK:
-            key = KeyPress::fastForwardKey;
-            break;
-
-        case APPCOMMAND_MEDIA_PREVIOUSTRACK:
-            key = KeyPress::rewindKey;
-            break;
+            case APPCOMMAND_MEDIA_PLAY_PAUSE:       key = KeyPress::playKey; break;
+            case APPCOMMAND_MEDIA_STOP:             key = KeyPress::stopKey; break;
+            case APPCOMMAND_MEDIA_NEXTTRACK:        key = KeyPress::fastForwardKey; break;
+            case APPCOMMAND_MEDIA_PREVIOUSTRACK:    key = KeyPress::rewindKey; break;
+            default: break;
         }
 
         if (key != 0)
@@ -1729,6 +1768,83 @@ private:
         }
 
         return false;
+    }
+
+    LRESULT handleSizeConstraining (RECT* const r, const WPARAM wParam)
+    {
+        if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+        {
+            Rectangle<int> pos (r->left, r->top, r->right - r->left, r->bottom - r->top);
+
+            constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
+                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                      wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT,
+                                      wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT,
+                                      wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
+                                      wParam == WMSZ_RIGHT || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_BOTTOMRIGHT);
+            r->left = pos.getX();
+            r->top = pos.getY();
+            r->right = pos.getRight();
+            r->bottom = pos.getBottom();
+        }
+
+        return TRUE;
+    }
+
+    LRESULT handlePositionChanging (WINDOWPOS* const wp)
+    {
+        if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+        {
+            if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
+                 && ! Component::isMouseButtonDownAnywhere())
+            {
+                Rectangle<int> pos (wp->x, wp->y, wp->cx, wp->cy);
+                const Rectangle<int> current (windowBorder.addedTo (component->getBounds()));
+
+                constrainer->checkBounds (pos, current,
+                                          Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                          pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
+                                          pos.getX() != current.getX() && pos.getRight() == current.getRight(),
+                                          pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
+                                          pos.getX() == current.getX() && pos.getRight() != current.getRight());
+                wp->x = pos.getX();
+                wp->y = pos.getY();
+                wp->cx = pos.getWidth();
+                wp->cy = pos.getHeight();
+            }
+        }
+
+        return 0;
+    }
+
+    void handleAppActivation (const WPARAM wParam)
+    {
+        modifiersAtLastCallback = -1;
+        updateKeyModifiers();
+
+        if (isMinimised())
+        {
+            component->repaint();
+            handleMovedOrResized();
+
+            if (! ComponentPeer::isValidPeer (this))
+                return;
+        }
+
+        if (LOWORD (wParam) == WA_CLICKACTIVE && component->isCurrentlyBlockedByAnotherModalComponent())
+        {
+            Component* const underMouse = component->getComponentAt (component->getMouseXYRelative());
+
+            if (underMouse != 0 && underMouse->isCurrentlyBlockedByAnotherModalComponent())
+                Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+        }
+        else
+        {
+            handleBroughtToFront();
+
+            if (component->isCurrentlyBlockedByAnotherModalComponent())
+                Component::getCurrentlyModalComponent()->toFront (true);
+        }
     }
 
     //==============================================================================
@@ -1891,11 +2007,10 @@ private:
                 case WM_NCHITTEST:
                     if ((styleFlags & windowIgnoresMouseClicks) != 0)
                         return HTTRANSPARENT;
+                    else if (! hasTitleBar())
+                        return HTCLIENT;
 
-                    if (hasTitleBar())
-                        break;
-
-                    return HTCLIENT;
+                    break;
 
                 //==============================================================================
                 case WM_PAINT:
@@ -1959,48 +2074,10 @@ private:
 
                 //==============================================================================
                 case WM_SIZING:
-                    if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
-                    {
-                        RECT* const r = (RECT*) lParam;
-                        Rectangle<int> pos (r->left, r->top, r->right - r->left, r->bottom - r->top);
-
-                        constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
-                                                  Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                                  wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT,
-                                                  wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT,
-                                                  wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
-                                                  wParam == WMSZ_RIGHT || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_BOTTOMRIGHT);
-                        r->left = pos.getX();
-                        r->top = pos.getY();
-                        r->right = pos.getRight();
-                        r->bottom = pos.getBottom();
-                    }
-                    return TRUE;
+                    return handleSizeConstraining ((RECT*) lParam, wParam);
 
                 case WM_WINDOWPOSCHANGING:
-                    if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
-                    {
-                        WINDOWPOS* const wp = (WINDOWPOS*) lParam;
-
-                        if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
-                             && ! Component::isMouseButtonDownAnywhere())
-                        {
-                            Rectangle<int> pos (wp->x, wp->y, wp->cx, wp->cy);
-                            const Rectangle<int> current (windowBorder.addedTo (component->getBounds()));
-
-                            constrainer->checkBounds (pos, current,
-                                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                                      pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
-                                                      pos.getX() != current.getX() && pos.getRight() == current.getRight(),
-                                                      pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
-                                                      pos.getX() == current.getX() && pos.getRight() != current.getRight());
-                            wp->x = pos.getX();
-                            wp->y = pos.getY();
-                            wp->cx = pos.getWidth();
-                            wp->cy = pos.getHeight();
-                        }
-                    }
-                    return 0;
+                    return handlePositionChanging ((WINDOWPOS*) lParam);
 
                 case WM_WINDOWPOSCHANGED:
                     {
@@ -2074,35 +2151,7 @@ private:
                 case WM_ACTIVATE:
                     if (LOWORD (wParam) == WA_ACTIVE || LOWORD (wParam) == WA_CLICKACTIVE)
                     {
-                        modifiersAtLastCallback = -1;
-                        updateKeyModifiers();
-
-                        if (isMinimised())
-                        {
-                            component->repaint();
-                            handleMovedOrResized();
-
-                            if (! ComponentPeer::isValidPeer (this))
-                                return 0;
-                        }
-
-                        if (LOWORD (wParam) == WA_CLICKACTIVE
-                             && component->isCurrentlyBlockedByAnotherModalComponent())
-                        {
-                            const Point<int> mousePos (component->getMouseXYRelative());
-                            Component* const underMouse = component->getComponentAt (mousePos.getX(), mousePos.getY());
-
-                            if (underMouse != 0 && underMouse->isCurrentlyBlockedByAnotherModalComponent())
-                                Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
-
-                            return 0;
-                        }
-
-                        handleBroughtToFront();
-
-                        if (component->isCurrentlyBlockedByAnotherModalComponent())
-                            Component::getCurrentlyModalComponent()->toFront (true);
-
+                        handleAppActivation (wParam);
                         return 0;
                     }
 
@@ -2142,57 +2191,10 @@ private:
                     }
                     return TRUE;
 
-                //==============================================================================
                 case WM_TRAYNOTIFY:
-                    if (component->isCurrentlyBlockedByAnotherModalComponent())
-                    {
-                        if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN
-                             || lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
-                        {
-                            Component* const current = Component::getCurrentlyModalComponent();
-
-                            if (current != 0)
-                                current->inputAttemptWhenModal();
-                        }
-                    }
-                    else
-                    {
-                        ModifierKeys eventMods (ModifierKeys::getCurrentModifiersRealtime());
-
-                        if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
-                            eventMods = eventMods.withFlags (ModifierKeys::leftButtonModifier);
-                        else if (lParam == WM_RBUTTONDOWN || lParam == WM_RBUTTONDBLCLK)
-                            eventMods = eventMods.withFlags (ModifierKeys::rightButtonModifier);
-                        else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
-                            eventMods = eventMods.withoutMouseButtons();
-
-                        const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
-                                            Point<int>(), eventMods, component, component, getMouseEventTime(),
-                                            Point<int>(), getMouseEventTime(), 1, false);
-
-                        if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
-                        {
-                            SetFocus (hwnd);
-                            SetForegroundWindow (hwnd);
-                            component->mouseDown (e);
-                        }
-                        else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
-                        {
-                            component->mouseUp (e);
-                        }
-                        else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
-                        {
-                            component->mouseDoubleClick (e);
-                        }
-                        else if (lParam == WM_MOUSEMOVE)
-                        {
-                            component->mouseMove (e);
-                        }
-                    }
-
+                    handleTaskBarEvent (lParam, wParam);
                     break;
 
-                //==============================================================================
                 case WM_SYNCPAINT:
                     return 0;
 
@@ -2238,10 +2240,8 @@ private:
                         break;
 
                     case SC_KEYMENU:
-                        // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very
-                        // obscure situations that can arise if a modal loop is started from an alt-key
-                        // keypress).
-
+                        // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very obscure
+                        // situations that can arise if a modal loop is started from an alt-key keypress).
                         if (hasTitleBar() && h == GetCapture())
                             ReleaseCapture();
 
@@ -2305,6 +2305,17 @@ private:
                     return DLGC_WANTALLKEYS;
 
                 default:
+                    if (taskBarIcon != 0)
+                    {
+                        static const DWORD taskbarCreatedMessage = RegisterWindowMessage (TEXT("TaskbarCreated"));
+
+                        if (message == taskbarCreatedMessage)
+                        {
+                            taskBarIcon->uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+                            Shell_NotifyIcon (NIM_ADD, taskBarIcon);
+                        }
+                    }
+
                     break;
             }
         }

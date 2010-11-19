@@ -151,7 +151,7 @@ void MidiKeyboardComponent::setLowestVisibleKey (int noteNumber)
     if (noteNumber != firstKey)
     {
         firstKey = noteNumber;
-        sendChangeMessage (this);
+        sendChangeMessage();
         resized();
     }
 }
@@ -598,7 +598,7 @@ void MidiKeyboardComponent::resized()
             if (kx2 - kx1 <= w)
             {
                 firstKey = rangeStart;
-                sendChangeMessage (this);
+                sendChangeMessage();
                 repaint();
             }
         }
@@ -641,7 +641,7 @@ void MidiKeyboardComponent::resized()
             if (lastStartKey >= 0 && firstKey > lastStartKey)
             {
                 firstKey = jlimit (rangeStart, rangeEnd, lastStartKey);
-                sendChangeMessage (this);
+                sendChangeMessage();
             }
 
             int newOffset = 0;

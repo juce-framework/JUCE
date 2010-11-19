@@ -463,9 +463,6 @@
     <ClCompile Include="..\..\src\events\juce_ChangeBroadcaster.cpp">
       <Filter>Juce\Source\events</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\events\juce_ChangeListenerList.cpp">
-      <Filter>Juce\Source\events</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\events\juce_InterprocessConnection.cpp">
       <Filter>Juce\Source\events</Filter>
     </ClCompile>
@@ -1588,9 +1585,6 @@
       <Filter>Juce\Source\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_ChangeListener.h">
-      <Filter>Juce\Source\events</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\events\juce_ChangeListenerList.h">
       <Filter>Juce\Source\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_InterprocessConnection.h">

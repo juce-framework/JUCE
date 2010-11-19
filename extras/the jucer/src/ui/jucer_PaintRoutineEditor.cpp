@@ -213,7 +213,7 @@ void PaintRoutineEditor::refreshAllElements()
     }
 }
 
-void PaintRoutineEditor::changeListenerCallback (void* source)
+void PaintRoutineEditor::changeListenerCallback (ChangeBroadcaster* source)
 {
     refreshAllElements();
 }

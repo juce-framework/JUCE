@@ -85,7 +85,7 @@ public:
         m.showAt (this);
     }
 
-    void changeListenerCallback (void* source)
+    void changeListenerCallback (ChangeBroadcaster* source)
     {
         const ColourSelector* const cs = (const ColourSelector*) source;
 

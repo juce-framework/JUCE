@@ -90,7 +90,7 @@ public:
     void mouseDown (const MouseEvent& e);
     void mouseDrag (const MouseEvent& e);
     void mouseUp (const MouseEvent& e);
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     void parentHierarchyChanged();
 
     int borderThickness;
@@ -130,7 +130,7 @@ private:
     String typeName;
     bool selected, dragging, mouseDownSelectStatus;
     double originalAspectRatio;
-    ChangeListenerList selfChangeListenerList;
+    ChangeBroadcaster selfChangeListenerList;
 };
 
 

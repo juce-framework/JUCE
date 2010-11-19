@@ -205,7 +205,6 @@
     <ClCompile Include="..\..\src\events\juce_ActionListenerList.cpp"/>
     <ClCompile Include="..\..\src\events\juce_AsyncUpdater.cpp"/>
     <ClCompile Include="..\..\src\events\juce_ChangeBroadcaster.cpp"/>
-    <ClCompile Include="..\..\src\events\juce_ChangeListenerList.cpp"/>
     <ClCompile Include="..\..\src\events\juce_InterprocessConnection.cpp"/>
     <ClCompile Include="..\..\src\events\juce_InterprocessConnectionServer.cpp"/>
     <ClCompile Include="..\..\src\events\juce_Message.cpp"/>
@@ -556,7 +555,6 @@
     <ClInclude Include="..\..\src\events\juce_CallbackMessage.h"/>
     <ClInclude Include="..\..\src\events\juce_ChangeBroadcaster.h"/>
     <ClInclude Include="..\..\src\events\juce_ChangeListener.h"/>
-    <ClInclude Include="..\..\src\events\juce_ChangeListenerList.h"/>
     <ClInclude Include="..\..\src\events\juce_InterprocessConnection.h"/>
     <ClInclude Include="..\..\src\events\juce_InterprocessConnectionServer.h"/>
     <ClInclude Include="..\..\src\events\juce_ListenerList.h"/>

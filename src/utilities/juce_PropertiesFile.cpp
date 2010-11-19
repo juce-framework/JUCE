@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../containers/juce_ScopedPointer.h"
 #include "../core/juce_SystemStats.h"
 #include "../threads/juce_InterProcessLock.h"
+#include "../threads/juce_ScopedLock.h"
 #include "../text/juce_XmlDocument.h"
 
 
@@ -275,7 +276,7 @@ void PropertiesFile::timerCallback()
 
 void PropertiesFile::propertyChanged()
 {
-    sendChangeMessage (this);
+    sendChangeMessage();
 
     needsWriting = true;
 

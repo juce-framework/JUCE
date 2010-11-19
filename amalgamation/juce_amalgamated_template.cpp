@@ -217,7 +217,6 @@
  #include "../src/events/juce_ActionListenerList.cpp"
  #include "../src/events/juce_AsyncUpdater.cpp"
  #include "../src/events/juce_ChangeBroadcaster.cpp"
- #include "../src/events/juce_ChangeListenerList.cpp"
  #include "../src/events/juce_InterprocessConnection.cpp"
  #include "../src/events/juce_InterprocessConnectionServer.cpp"
  #include "../src/events/juce_Message.cpp"

@@ -78,7 +78,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     /** @internal */
     int getNumRows();
     /** @internal */

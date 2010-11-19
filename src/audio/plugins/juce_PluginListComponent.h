@@ -76,7 +76,7 @@ public:
     /** @internal */
     void buttonClicked (Button* b);
     /** @internal */
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
     /** @internal */
     void timerCallback();
 

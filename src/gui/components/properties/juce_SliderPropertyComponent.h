@@ -90,8 +90,6 @@ public:
     /** @internal */
     void refresh();
     /** @internal */
-    void changeListenerCallback (void*);
-    /** @internal */
     void sliderValueChanged (Slider*);
 
     juce_UseDebuggingNewOperator

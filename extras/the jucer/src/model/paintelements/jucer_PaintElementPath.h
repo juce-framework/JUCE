@@ -183,7 +183,7 @@ public:
     void mouseDrag (const MouseEvent& e);
     void mouseUp (const MouseEvent& e);
 
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

@@ -222,6 +222,181 @@ namespace
 #endif
 
 //==============================================================================
+class Component::ComponentHelpers
+{
+public:
+    //==============================================================================
+    static void* runModalLoopCallback (void* userData)
+    {
+        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+    }
+
+    static const Identifier getColourPropertyId (const int colourId)
+    {
+        String s;
+        s.preallocateStorage (18);
+        s << "jcclr_" << String::toHexString (colourId);
+        return s;
+    }
+
+    //==============================================================================
+    static inline bool hitTest (Component& comp, const Point<int>& localPoint)
+    {
+        return ((unsigned int) localPoint.getX()) < (unsigned int) comp.getWidth()
+                 && ((unsigned int) localPoint.getY()) < (unsigned int) comp.getHeight()
+                 && comp.hitTest (localPoint.getX(), localPoint.getY());
+    }
+
+    static const Point<int> convertFromParentSpace (const Component& comp, const Point<int>& pointInParentSpace)
+    {
+        return pointInParentSpace - comp.getPosition();
+    }
+
+    static const Rectangle<int> convertFromParentSpace (const Component& comp, const Rectangle<int>& areaInParentSpace)
+    {
+        return areaInParentSpace - comp.getPosition();
+    }
+
+    static const Point<int> convertToParentSpace (const Component& comp, const Point<int>& pointInLocalSpace)
+    {
+        return pointInLocalSpace + comp.getPosition();
+    }
+
+    static const Rectangle<int> convertToParentSpace (const Component& comp, const Rectangle<int>& areaInLocalSpace)
+    {
+        return areaInLocalSpace + comp.getPosition();
+    }
+
+    template <typename Type>
+    static const Type convertFromDistantParentSpace (const Component* parent, const Component& target, Type coordInParent)
+    {
+        const Component* const directParent = target.getParentComponent();
+        jassert (directParent != 0);
+
+        if (directParent == parent)
+            return convertFromParentSpace (target, coordInParent);
+
+        return convertFromParentSpace (target, convertFromDistantParentSpace (parent, *directParent, coordInParent));
+    }
+
+    template <typename Type>
+    static const Type convertCoordinate (const Component* target, const Component* source, Type p)
+    {
+        while (source != 0)
+        {
+            if (source == target)
+                return p;
+
+            if (source->isParentOf (target))
+                return convertFromDistantParentSpace (source, *target, p);
+
+            if (source->isOnDesktop())
+            {
+                p = source->getPeer()->localToGlobal (p);
+                source = 0;
+            }
+            else
+            {
+                p = convertToParentSpace (*source, p);
+                source = source->getParentComponent();
+            }
+        }
+
+        jassert (source == 0);
+        if (target == 0)
+            return p;
+
+        const Component* const topLevelComp = target->getTopLevelComponent();
+
+        if (topLevelComp->isOnDesktop())
+            p = topLevelComp->getPeer()->globalToLocal (p);
+        else
+            p = convertFromParentSpace (*topLevelComp, p);
+
+        if (topLevelComp == target)
+            return p;
+
+        return convertFromDistantParentSpace (topLevelComp, *target, p);
+    }
+
+    static const Rectangle<int> getUnclippedArea (const Component& comp)
+    {
+        Rectangle<int> r (comp.getLocalBounds());
+
+        Component* const p = comp.getParentComponent();
+
+        if (p != 0)
+            r = r.getIntersection (convertFromParentSpace (comp, getUnclippedArea (*p)));
+
+        return r;
+    }
+
+    static void clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int>& clipRect, const Point<int>& delta)
+    {
+        for (int i = comp.childComponentList_.size(); --i >= 0;)
+        {
+            const Component& child = *comp.childComponentList_.getUnchecked(i);
+
+//xxx            if (child.isVisible() && ! child.isTransformed())
+            if (child.isVisible())
+            {
+                const Rectangle<int> newClip (clipRect.getIntersection (child.bounds_));
+
+                if (! newClip.isEmpty())
+                {
+                    if (child.isOpaque())
+                    {
+                        g.excludeClipRegion (newClip + delta);
+                    }
+                    else
+                    {
+                        const Point<int> childPos (child.getPosition());
+                        clipObscuredRegions (child, g, newClip - childPos, childPos + delta);
+                    }
+                }
+            }
+        }
+    }
+
+    static void subtractObscuredRegions (const Component& comp, RectangleList& result,
+                                         const Point<int>& delta,
+                                         const Rectangle<int>& clipRect,
+                                         const Component* const compToAvoid)
+    {
+        for (int i = comp.childComponentList_.size(); --i >= 0;)
+        {
+            const Component* const c = comp.childComponentList_.getUnchecked(i);
+
+            if (c != compToAvoid && c->isVisible())
+            {
+                if (c->isOpaque())
+                {
+                    Rectangle<int> childBounds (c->bounds_.getIntersection (clipRect));
+                    childBounds.translate (delta.getX(), delta.getY());
+
+                    result.subtract (childBounds);
+                }
+                else
+                {
+                    Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
+                    newClip.translate (-c->getX(), -c->getY());
+
+                    subtractObscuredRegions (*c, result, c->getPosition() + delta,
+                                             newClip, compToAvoid);
+                }
+            }
+        }
+    }
+
+    static const Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
+    {
+        return comp.getParentComponent() != 0 ? comp.getParentComponent()->getLocalBounds()
+                                              : Desktop::getInstance().getMainMonitorArea();
+    }
+};
+
+
+//==============================================================================
 Component::Component()
   : parentComponent_ (0),
     lookAndFeel_ (0),
@@ -766,138 +941,30 @@ int Component::getParentHeight() const throw()
                                    : getParentMonitorArea().getHeight();
 }
 
-int Component::getScreenX() const
-{
-    return getScreenPosition().getX();
-}
+int Component::getScreenX() const   { return getScreenPosition().getX(); }
+int Component::getScreenY() const   { return getScreenPosition().getY(); }
 
-int Component::getScreenY() const
-{
-    return getScreenPosition().getY();
-}
-
-const Point<int> Component::getScreenPosition() const
-{
-    return localPointToGlobal (Point<int>());
-}
-
-const Rectangle<int> Component::getScreenBounds() const
-{
-    return bounds_.withPosition (getScreenPosition());
-}
-
-namespace CoordinateHelpers
-{
-    inline bool hitTest (Component& comp, const Point<int>& localPoint)
-    {
-        return ((unsigned int) localPoint.getX()) < (unsigned int) comp.getWidth()
-                 && ((unsigned int) localPoint.getY()) < (unsigned int) comp.getHeight()
-                 && comp.hitTest (localPoint.getX(), localPoint.getY());
-    }
-
-    const Point<int> convertFromParentSpace (const Component& comp, const Point<int>& pointInParentSpace)
-    {
-        return pointInParentSpace - comp.getPosition();
-    }
-
-    const Rectangle<int> convertFromParentSpace (const Component& comp, const Rectangle<int>& areaInParentSpace)
-    {
-        return areaInParentSpace - comp.getPosition();
-    }
-
-    const Point<int> convertToParentSpace (const Component& comp, const Point<int>& pointInLocalSpace)
-    {
-        return pointInLocalSpace + comp.getPosition();
-    }
-
-    const Rectangle<int> convertToParentSpace (const Component& comp, const Rectangle<int>& areaInLocalSpace)
-    {
-        return areaInLocalSpace + comp.getPosition();
-    }
-
-    template <typename Type>
-    const Type convertFromDistantParentSpace (const Component* parent, const Component& target, Type coordInParent)
-    {
-        const Component* const directParent = target.getParentComponent();
-        jassert (directParent != 0);
-
-        if (directParent == parent)
-            return convertFromParentSpace (target, coordInParent);
-
-        return convertFromParentSpace (target, convertFromDistantParentSpace (parent, *directParent, coordInParent));
-    }
-
-    template <typename Type>
-    const Type convertCoordinate (const Component* target, const Component* source, Type p)
-    {
-        while (source != 0)
-        {
-            if (source == target)
-                return p;
-
-            if (source->isParentOf (target))
-                return convertFromDistantParentSpace (source, *target, p);
-
-            if (source->isOnDesktop())
-            {
-                p = source->getPeer()->localToGlobal (p);
-                source = 0;
-            }
-            else
-            {
-                p = convertToParentSpace (*source, p);
-                source = source->getParentComponent();
-            }
-        }
-
-        jassert (source == 0);
-        if (target == 0)
-            return p;
-
-        const Component* const topLevelComp = target->getTopLevelComponent();
-
-        if (topLevelComp->isOnDesktop())
-            p = topLevelComp->getPeer()->globalToLocal (p);
-        else
-            p = convertFromParentSpace (*topLevelComp, p);
-
-        if (topLevelComp == target)
-            return p;
-
-        return convertFromDistantParentSpace (topLevelComp, *target, p);
-    }
-
-    const Rectangle<int> getUnclippedArea (const Component& comp)
-    {
-        Rectangle<int> r (comp.getLocalBounds());
-
-        Component* const p = comp.getParentComponent();
-
-        if (p != 0)
-            r = r.getIntersection (convertFromParentSpace (comp, getUnclippedArea (*p)));
-
-        return r;
-    }
-}
+const Point<int> Component::getScreenPosition() const       { return localPointToGlobal (Point<int>()); }
+const Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal (getLocalBounds()); }
 
 const Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const
 {
-    return CoordinateHelpers::convertCoordinate (this, source, point);
+    return ComponentHelpers::convertCoordinate (this, source, point);
 }
 
 const Rectangle<int> Component::getLocalArea (const Component* source, const Rectangle<int>& area) const
 {
-    return CoordinateHelpers::convertCoordinate (this, source, area);
+    return ComponentHelpers::convertCoordinate (this, source, area);
 }
 
 const Point<int> Component::localPointToGlobal (const Point<int>& point) const
 {
-    return CoordinateHelpers::convertCoordinate (0, this, point);
+    return ComponentHelpers::convertCoordinate (0, this, point);
 }
 
 const Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
 {
-    return CoordinateHelpers::convertCoordinate (0, this, area);
+    return ComponentHelpers::convertCoordinate (0, this, area);
 }
 
 /* Deprecated methods... */
@@ -1053,7 +1120,7 @@ void Component::setCentreRelative (const float x, const float y)
 
 void Component::centreWithSize (const int width, const int height)
 {
-    const Rectangle<int> parentArea (getParentOrMainMonitorBounds());
+    const Rectangle<int> parentArea (ComponentHelpers::getParentOrMainMonitorBounds (*this));
 
     setBounds (parentArea.getCentreX() - width / 2,
                parentArea.getCentreY() - height / 2,
@@ -1062,7 +1129,7 @@ void Component::centreWithSize (const int width, const int height)
 
 void Component::setBoundsInset (const BorderSize& borders)
 {
-    setBounds (borders.subtractedFrom (getParentOrMainMonitorBounds()));
+    setBounds (borders.subtractedFrom (ComponentHelpers::getParentOrMainMonitorBounds (*this)));
 }
 
 void Component::setBoundsToFit (int x, int y, int width, int height,
@@ -1124,7 +1191,7 @@ bool Component::hitTest (int x, int y)
             Component& child = *getChildComponent (i);
 
             if (child.isVisible()
-                 && CoordinateHelpers::hitTest (child, CoordinateHelpers::convertFromParentSpace (child, Point<int> (x, y))))
+                 && ComponentHelpers::hitTest (child, ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y))))
                 return true;
         }
     }
@@ -1148,11 +1215,11 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
 
 bool Component::contains (const Point<int>& point)
 {
-    if (CoordinateHelpers::hitTest (*this, point))
+    if (ComponentHelpers::hitTest (*this, point))
     {
         if (parentComponent_ != 0)
         {
-            return parentComponent_->contains (CoordinateHelpers::convertToParentSpace (*this, point));
+            return parentComponent_->contains (ComponentHelpers::convertToParentSpace (*this, point));
         }
         else if (flags.hasHeavyweightPeerFlag)
         {
@@ -1181,12 +1248,12 @@ bool Component::reallyContains (const int x, const int y, const bool returnTrueI
 
 Component* Component::getComponentAt (const Point<int>& position)
 {
-    if (flags.visibleFlag && CoordinateHelpers::hitTest (*this, position))
+    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position))
     {
         for (int i = childComponentList_.size(); --i >= 0;)
         {
             Component* child = childComponentList_.getUnchecked(i);
-            child = child->getComponentAt (CoordinateHelpers::convertFromParentSpace (*child, position));
+            child = child->getComponentAt (ComponentHelpers::convertFromParentSpace (*child, position));
 
             if (child != 0)
                 return child;
@@ -1414,14 +1481,6 @@ void Component::internalHierarchyChanged()
 }
 
 //==============================================================================
-namespace ComponentHelpers
-{
-    void* runModalLoopCallback (void* userData)
-    {
-        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
-    }
-}
-
 int Component::runModalLoop()
 {
     if (! MessageManager::getInstance()->isThisTheMessageThread())
@@ -1689,7 +1748,7 @@ void Component::paintComponentAndChildren (Graphics& g)
     else
     {
         g.saveState();
-        clipObscuredRegions (g, clipBounds, 0, 0);
+        ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, Point<int>());
 
         if (! g.isClipEmpty())
             paintComponent (g);
@@ -1878,17 +1937,6 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-namespace ComponentHelpers
-{
-    const Identifier getColourPropertyId (const int colourId)
-    {
-        String s;
-        s.preallocateStorage (18);
-        s << "jcclr_" << String::toHexString (colourId);
-        return s;
-    }
-}
-
 const Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
     var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId));
@@ -1946,44 +1994,10 @@ const Rectangle<int> Component::getLocalBounds() const throw()
     return Rectangle<int> (getWidth(), getHeight());
 }
 
-const Rectangle<int> Component::getParentOrMainMonitorBounds() const
-{
-    return parentComponent_ != 0 ? parentComponent_->getLocalBounds()
-                                 : Desktop::getInstance().getMainMonitorArea();
-}
-
-void Component::clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-                                     const int deltaX, const int deltaY) const
-{
-    for (int i = childComponentList_.size(); --i >= 0;)
-    {
-        const Component* const c = childComponentList_.getUnchecked(i);
-
-        if (c->isVisible())
-        {
-            const Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
-
-            if (! newClip.isEmpty())
-            {
-                if (c->isOpaque())
-                {
-                    g.excludeClipRegion (newClip.translated (deltaX, deltaY));
-                }
-                else
-                {
-                    c->clipObscuredRegions (g, newClip.translated (-c->getX(), -c->getY()),
-                                            c->getX() + deltaX,
-                                            c->getY() + deltaY);
-                }
-            }
-        }
-    }
-}
-
 void Component::getVisibleArea (RectangleList& result, const bool includeSiblings) const
 {
     result.clear();
-    const Rectangle<int> unclipped (CoordinateHelpers::getUnclippedArea (*this));
+    const Rectangle<int> unclipped (ComponentHelpers::getUnclippedArea (*this));
 
     if (! unclipped.isEmpty())
     {
@@ -1993,42 +2007,12 @@ void Component::getVisibleArea (RectangleList& result, const bool includeSibling
         {
             const Component* const c = getTopLevelComponent();
 
-            c->subtractObscuredRegions (result, getLocalPoint (c, Point<int>()),
-                                        c->getLocalBounds(), this);
+            ComponentHelpers::subtractObscuredRegions (*c, result, getLocalPoint (c, Point<int>()),
+                                                       c->getLocalBounds(), this);
         }
 
-        subtractObscuredRegions (result, Point<int>(), unclipped, 0);
+        ComponentHelpers::subtractObscuredRegions (*this, result, Point<int>(), unclipped, 0);
         result.consolidate();
-    }
-}
-
-void Component::subtractObscuredRegions (RectangleList& result,
-                                         const Point<int>& delta,
-                                         const Rectangle<int>& clipRect,
-                                         const Component* const compToAvoid) const
-{
-    for (int i = childComponentList_.size(); --i >= 0;)
-    {
-        const Component* const c = childComponentList_.getUnchecked(i);
-
-        if (c != compToAvoid && c->isVisible())
-        {
-            if (c->isOpaque())
-            {
-                Rectangle<int> childBounds (c->bounds_.getIntersection (clipRect));
-                childBounds.translate (delta.getX(), delta.getY());
-
-                result.subtract (childBounds);
-            }
-            else
-            {
-                Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
-                newClip.translate (-c->getX(), -c->getY());
-
-                c->subtractObscuredRegions (result, c->getPosition() + delta,
-                                            newClip, compToAvoid);
-            }
-        }
     }
 }
 

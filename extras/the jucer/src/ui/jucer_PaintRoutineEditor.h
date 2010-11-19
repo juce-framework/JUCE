@@ -51,7 +51,7 @@ public:
     void paint (Graphics& g);
     void paintOverChildren (Graphics& g);
     void resized();
-    void changeListenerCallback (void*);
+    void changeListenerCallback (ChangeBroadcaster*);
 
     void mouseDown (const MouseEvent& e);
     void mouseDrag (const MouseEvent& e);

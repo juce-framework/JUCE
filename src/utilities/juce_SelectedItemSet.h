@@ -306,9 +306,9 @@ public:
     void changed (const bool synchronous = false)
     {
         if (synchronous)
-            sendSynchronousChangeMessage (this);
+            sendSynchronousChangeMessage();
         else
-            sendChangeMessage (this);
+            sendChangeMessage();
     }
 
     //==============================================================================

@@ -81,7 +81,7 @@ void AudioThumbnail::setSource (InputSource* const newSource)
         }
     }
 
-    sendChangeMessage (this);
+    sendChangeMessage();
 }
 
 bool AudioThumbnail::useTimeSlice()
@@ -105,7 +105,7 @@ bool AudioThumbnail::useTimeSlice()
         readNextBlockFromAudioFile (*reader);
         stopTimer();
 
-        sendChangeMessage (this);
+        sendChangeMessage();
 
         const bool justFinished = isFullyLoaded();
 
