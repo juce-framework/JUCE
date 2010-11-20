@@ -424,8 +424,6 @@
           <File RelativePath="..\..\src\events\juce_ActionBroadcaster.cpp"/>
           <File RelativePath="..\..\src\events\juce_ActionBroadcaster.h"/>
           <File RelativePath="..\..\src\events\juce_ActionListener.h"/>
-          <File RelativePath="..\..\src\events\juce_ActionListenerList.cpp"/>
-          <File RelativePath="..\..\src\events\juce_ActionListenerList.h"/>
           <File RelativePath="..\..\src\events\juce_AsyncUpdater.cpp"/>
           <File RelativePath="..\..\src\events\juce_AsyncUpdater.h"/>
           <File RelativePath="..\..\src\events\juce_CallbackMessage.h"/>

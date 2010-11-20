@@ -214,7 +214,6 @@
  #include "../src/audio/synthesisers/juce_Sampler.cpp"
  #include "../src/audio/synthesisers/juce_Synthesiser.cpp"
  #include "../src/events/juce_ActionBroadcaster.cpp"
- #include "../src/events/juce_ActionListenerList.cpp"
  #include "../src/events/juce_AsyncUpdater.cpp"
  #include "../src/events/juce_ChangeBroadcaster.cpp"
  #include "../src/events/juce_InterprocessConnection.cpp"

@@ -32,41 +32,24 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class ChangeBroadcaster::ChangeBroadcasterMessage  : public CallbackMessage
-{
-public:
-    ChangeBroadcasterMessage (ChangeBroadcaster* const owner_)
-        : owner (owner_)
-    {
-    }
-
-    void messageCallback()
-    {
-        if (owner != 0 && owner->pendingMessage.value == this)
-            owner->sendSynchronousChangeMessage();
-    }
-
-    ChangeBroadcaster* owner;
-};
-
-//==============================================================================
 ChangeBroadcaster::ChangeBroadcaster() throw()
 {
     // are you trying to create this object before or after juce has been intialised??
     jassert (MessageManager::instance != 0);
+
+    callback.owner = this;
 }
 
 ChangeBroadcaster::~ChangeBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
     jassert (MessageManager::instance != 0);
-
-    invalidatePendingMessage();
 }
 
 void ChangeBroadcaster::addChangeListener (ChangeListener* const listener)
 {
-    // Listeners can only be safely added when the event thread is locked...
+    // Listeners can only be safely added when the event thread is locked
+    // You can  use a MessageManagerLock if you need to call this from another thread.
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
     changeListeners.add (listener);
@@ -74,7 +57,8 @@ void ChangeBroadcaster::addChangeListener (ChangeListener* const listener)
 
 void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener)
 {
-    // Listeners can only be safely added when the event thread is locked...
+    // Listeners can only be safely added when the event thread is locked
+    // You can  use a MessageManagerLock if you need to call this from another thread.
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
     changeListeners.remove (listener);
@@ -82,28 +66,17 @@ void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener)
 
 void ChangeBroadcaster::removeAllChangeListeners()
 {
-    // Listeners can only be safely added when the event thread is locked...
+    // Listeners can only be safely added when the event thread is locked
+    // You can  use a MessageManagerLock if you need to call this from another thread.
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
     changeListeners.clear();
 }
 
-void ChangeBroadcaster::invalidatePendingMessage()
-{
-    ChangeBroadcasterMessage* const oldMessage = pendingMessage.exchange (0);
-    if (oldMessage != 0)
-        oldMessage->owner = 0;
-}
-
 void ChangeBroadcaster::sendChangeMessage()
 {
-    if (pendingMessage.value == 0 && changeListeners.size() > 0)
-    {
-        ScopedPointer<ChangeBroadcasterMessage> pending (new ChangeBroadcasterMessage (this));
-
-        if (pendingMessage.compareAndSetBool (pending, 0))
-            pending.release()->post();
-    }
+    if (changeListeners.size() > 0)
+        callback.triggerAsyncUpdate();
 }
 
 void ChangeBroadcaster::sendSynchronousChangeMessage()
@@ -111,14 +84,30 @@ void ChangeBroadcaster::sendSynchronousChangeMessage()
     // This can only be called by the event thread.
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-    invalidatePendingMessage();
-    changeListeners.call (&ChangeListener::changeListenerCallback, this);
+    callback.cancelPendingUpdate();
+    callListeners();
 }
 
 void ChangeBroadcaster::dispatchPendingMessages()
 {
-    if (pendingMessage.get() != 0)
-        sendSynchronousChangeMessage();
+    callback.handleUpdateNowIfNeeded();
+}
+
+void ChangeBroadcaster::callListeners()
+{
+    changeListeners.call (&ChangeListener::changeListenerCallback, this);
+}
+
+//==============================================================================
+ChangeBroadcaster::ChangeBroadcasterCallback::ChangeBroadcasterCallback()
+    : owner (0)
+{
+}
+
+void ChangeBroadcaster::ChangeBroadcasterCallback::handleAsyncUpdate()
+{
+    jassert (owner != 0);
+    owner->callListeners();
 }
 
 

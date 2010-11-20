@@ -28,7 +28,7 @@
 
 #include "juce_ChangeListener.h"
 #include "juce_ListenerList.h"
-#include "../core/juce_Atomic.h"
+#include "juce_AsyncUpdater.h"
 
 
 //==============================================================================
@@ -88,13 +88,20 @@ public:
 
 private:
     //==============================================================================
-    class ChangeBroadcasterMessage;
-    friend class ChangeBroadcasterMessage;
+    class ChangeBroadcasterCallback  : public AsyncUpdater
+    {
+    public:
+        ChangeBroadcasterCallback();
+        void handleAsyncUpdate();
 
-    Atomic<ChangeBroadcasterMessage*> pendingMessage;
+        ChangeBroadcaster* owner;
+    };
+
+    friend class ChangeBroadcasterCallback;
+    ChangeBroadcasterCallback callback;
     ListenerList <ChangeListener> changeListeners;
 
-    void invalidatePendingMessage();
+    void callListeners();
 
     ChangeBroadcaster (const ChangeBroadcaster&);
     ChangeBroadcaster& operator= (const ChangeBroadcaster&);

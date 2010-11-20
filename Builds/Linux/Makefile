@@ -119,7 +119,6 @@ OBJECTS := \
   $(OBJDIR)/juce_Primes_32e6603.o \
   $(OBJDIR)/juce_RSAKey_b60982ae.o \
   $(OBJDIR)/juce_ActionBroadcaster_7f997786.o \
-  $(OBJDIR)/juce_ActionListenerList_9e099ae4.o \
   $(OBJDIR)/juce_AsyncUpdater_a7e1cb89.o \
   $(OBJDIR)/juce_ChangeBroadcaster_3eb8fecc.o \
   $(OBJDIR)/juce_InterprocessConnection_13086b6d.o \
@@ -761,11 +760,6 @@ $(OBJDIR)/juce_RSAKey_b60982ae.o: ../../src/cryptography/juce_RSAKey.cpp
 $(OBJDIR)/juce_ActionBroadcaster_7f997786.o: ../../src/events/juce_ActionBroadcaster.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ActionBroadcaster.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ActionListenerList_9e099ae4.o: ../../src/events/juce_ActionListenerList.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_ActionListenerList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AsyncUpdater_a7e1cb89.o: ../../src/events/juce_AsyncUpdater.cpp

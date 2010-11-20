@@ -388,7 +388,7 @@ namespace NumberToStringConverters
         else
         {
         #if JUCE_WINDOWS
-          #if JUCE_VC8_OR_EARLIER || JUCE_MINGW
+          #if JUCE_VC7_OR_EARLIER || JUCE_MINGW
             len = _snwprintf (buffer, numChars, L"%.9g", n);
           #else
             len = _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n);

@@ -28,45 +28,73 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_AsyncUpdater.h"
+#include "juce_CallbackMessage.h"
+#include "../containers/juce_ScopedPointer.h"
+#include "juce_MessageManager.h"
 
 
 //==============================================================================
-AsyncUpdater::AsyncUpdater() throw()
-   : asyncMessagePending (false)
+class AsyncUpdater::AsyncUpdaterMessage  : public CallbackMessage
 {
-    internalAsyncHandler.owner = this;
+public:
+    AsyncUpdaterMessage (AsyncUpdater& owner_)
+        : owner (owner_)
+    {
+    }
+
+    void messageCallback()
+    {
+        if (owner.pendingMessage.compareAndSetBool (0, this))
+            owner.handleAsyncUpdate();
+    }
+
+    AsyncUpdater& owner;
+};
+
+//==============================================================================
+AsyncUpdater::AsyncUpdater() throw()
+{
 }
 
 AsyncUpdater::~AsyncUpdater()
 {
+    // You're deleting this object with a background thread while there's an update
+    // pending on the main event thread - that's pretty dodgy threading, as the callback could
+    // happen after this destructor has finished. You should either use a MessageManagerLock while
+    // deleting this object, or find some other way to avoid such a race condition.
+    jassert (/*(! isUpdatePending()) ||*/ MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+    pendingMessage = 0;
 }
 
 void AsyncUpdater::triggerAsyncUpdate()
 {
-    if (! asyncMessagePending)
+    if (pendingMessage.value == 0)
     {
-        asyncMessagePending = true;
-        internalAsyncHandler.postMessage (new Message());
+        ScopedPointer<AsyncUpdaterMessage> pending (new AsyncUpdaterMessage (*this));
+
+        if (pendingMessage.compareAndSetBool (pending, 0))
+            pending.release()->post();
     }
 }
 
 void AsyncUpdater::cancelPendingUpdate() throw()
 {
-    asyncMessagePending = false;
+    pendingMessage = 0;
 }
 
 void AsyncUpdater::handleUpdateNowIfNeeded()
 {
-    if (asyncMessagePending)
-    {
-        asyncMessagePending = false;
+    // This can only be called by the event thread.
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+    if (pendingMessage.exchange (0) != 0)
         handleAsyncUpdate();
-    }
 }
 
-void AsyncUpdater::AsyncUpdaterInternal::handleMessage (const Message&)
+bool AsyncUpdater::isUpdatePending() const throw()
 {
-    owner->handleUpdateNowIfNeeded();
+    return pendingMessage.value != 0;
 }
 
 

@@ -491,10 +491,6 @@
               file="src/events/juce_ActionBroadcaster.h"/>
         <FILE id="Ux4rL61r9" name="juce_ActionListener.h" compile="0" resource="0"
               file="src/events/juce_ActionListener.h"/>
-        <FILE id="F703c1Yid" name="juce_ActionListenerList.cpp" compile="1"
-              resource="0" file="src/events/juce_ActionListenerList.cpp"/>
-        <FILE id="OTsKfiFYq" name="juce_ActionListenerList.h" compile="0" resource="0"
-              file="src/events/juce_ActionListenerList.h"/>
         <FILE id="LgjeCwe5N" name="juce_AsyncUpdater.cpp" compile="1" resource="0"
               file="src/events/juce_AsyncUpdater.cpp"/>
         <FILE id="TABmiJS44" name="juce_AsyncUpdater.h" compile="0" resource="0"

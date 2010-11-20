@@ -454,9 +454,6 @@
     <ClCompile Include="..\..\src\events\juce_ActionBroadcaster.cpp">
       <Filter>Juce\Source\events</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\events\juce_ActionListenerList.cpp">
-      <Filter>Juce\Source\events</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\events\juce_AsyncUpdater.cpp">
       <Filter>Juce\Source\events</Filter>
     </ClCompile>
@@ -1570,9 +1567,6 @@
       <Filter>Juce\Source\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_ActionListener.h">
-      <Filter>Juce\Source\events</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\events\juce_ActionListenerList.h">
       <Filter>Juce\Source\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_AsyncUpdater.h">

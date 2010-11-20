@@ -29,7 +29,6 @@
 #include "../juce_Component.h"
 #include "../mouse/juce_MouseCursor.h"
 #include "../keyboard/juce_TextInputTarget.h"
-#include "../../../events/juce_MessageListener.h"
 #include "../../../text/juce_StringArray.h"
 #include "../../graphics/geometry/juce_RectangleList.h"
 

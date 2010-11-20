@@ -26,7 +26,9 @@
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 #define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
-#include "juce_ActionListenerList.h"
+#include "juce_ActionListener.h"
+#include "juce_MessageListener.h"
+#include "../containers/juce_SortedSet.h"
 
 
 //==============================================================================
@@ -35,27 +37,25 @@
     To quickly add methods to your class that can add/remove action
     listeners and broadcast to them, you can derive from this.
 
-    @see ActionListenerList, ActionListener
+    @see ActionListener, ChangeListener
 */
 class JUCE_API  ActionBroadcaster
 {
 public:
     //==============================================================================
     /** Creates an ActionBroadcaster. */
-    ActionBroadcaster() throw();
+    ActionBroadcaster();
 
     /** Destructor. */
     virtual ~ActionBroadcaster();
 
     //==============================================================================
     /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
+        Trying to add a listener that's already on the list will have no effect.
     */
     void addActionListener (ActionListener* listener);
 
     /** Removes a listener from the list.
-
         If the listener isn't on the list, this won't have any effect.
     */
     void removeActionListener (ActionListener* listener);
@@ -65,15 +65,26 @@ public:
 
     //==============================================================================
     /** Broadcasts a message to all the registered listeners.
-
-        @see ActionListenerList::sendActionMessage
+        @see ActionListener::actionListenerCallback
     */
     void sendActionMessage (const String& message) const;
 
 
 private:
     //==============================================================================
-    ActionListenerList actionListenerList;
+    class CallbackReceiver  : public MessageListener
+    {
+    public:
+        CallbackReceiver();
+        void handleMessage (const Message&);
+
+        ActionBroadcaster* owner;
+    };
+
+    friend class CallbackReceiver;
+    CallbackReceiver callback;
+    SortedSet <ActionListener*> actionListeners;
+    CriticalSection actionListenerLock;
 
     ActionBroadcaster (const ActionBroadcaster&);
     ActionBroadcaster& operator= (const ActionBroadcaster&);

@@ -31,7 +31,7 @@
 #include "../containers/juce_ScopedPointer.h"
 #include "../threads/juce_Thread.h"
 #include "../threads/juce_ThreadPool.h"
-#include "juce_ActionListenerList.h"
+#include "juce_ActionBroadcaster.h"
 #include "juce_CallbackMessage.h"
 class Component;
 class MessageManagerLock;
@@ -175,7 +175,7 @@ private:
     static MessageManager* instance;
 
     SortedSet <const MessageListener*> messageListeners;
-    ScopedPointer <ActionListenerList> broadcastListeners;
+    ScopedPointer <ActionBroadcaster> broadcaster;
 
     friend class JUCEApplication;
     bool quitMessagePosted, quitMessageReceived;
@@ -184,7 +184,6 @@ private:
     static void* exitModalLoopCallback (void*);
 
     void postMessageToQueue (Message* message);
-    void postCallbackMessage (Message* message);
 
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
@@ -315,7 +314,6 @@ private:
     MessageManagerLock (const MessageManagerLock&);
     MessageManagerLock& operator= (const MessageManagerLock&);
 };
-
 
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__

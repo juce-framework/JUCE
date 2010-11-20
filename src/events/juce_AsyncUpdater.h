@@ -26,7 +26,7 @@
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
-#include "juce_MessageListener.h"
+#include "../core/juce_Atomic.h"
 
 
 //==============================================================================
@@ -79,8 +79,14 @@ public:
         Use this as a kind of "flush" operation - if an update is pending, the
         handleAsyncUpdate() method will be called immediately; if no update is
         pending, then nothing will be done.
+
+        Because this may invoke the callback, this method must only be called on
+        the main event thread.
     */
     void handleUpdateNowIfNeeded();
+
+    /** Returns true if there's an update callback in the pipeline. */
+    bool isUpdatePending() const throw();
 
     //==============================================================================
     /** Called back to do whatever your class needs to do.
@@ -93,23 +99,10 @@ public:
 
 private:
     //==============================================================================
-    class AsyncUpdaterInternal  : public MessageListener
-    {
-    public:
-        AsyncUpdaterInternal() {}
-        ~AsyncUpdaterInternal() {}
+    class AsyncUpdaterMessage;
+    friend class AsyncUpdaterMessage;
 
-        void handleMessage (const Message&);
-
-        AsyncUpdater* owner;
-
-    private:
-        AsyncUpdaterInternal (const AsyncUpdaterInternal&);
-        AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
-    };
-
-    AsyncUpdaterInternal internalAsyncHandler;
-    bool asyncMessagePending;
+    Atomic<AsyncUpdaterMessage*> pendingMessage;
 };
 
 

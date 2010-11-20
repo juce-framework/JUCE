@@ -36,7 +36,7 @@
     Used by various classes, e.g. buttons when they are pressed, to tell listeners
     about something that's happened.
 
-    @see ActionListenerList, ActionBroadcaster, ChangeListener
+    @see ActionBroadcaster, ChangeListener
 */
 class JUCE_API  ActionListener
 {
@@ -47,7 +47,7 @@ public:
     /** Overridden by your subclass to receive the callback.
 
         @param message  the string that was specified when the event was triggered
-                        by a call to ActionListenerList::sendActionMessage()
+                        by a call to ActionBroadcaster::sendActionMessage()
     */
     virtual void actionListenerCallback (const String& message) = 0;
 };

@@ -88,7 +88,6 @@
 		12E3CC31875A202D6B30F778 = { isa = PBXBuildFile; fileRef = E9E692847C14AD33CD5FB40B; };
 		CF51988743ED2CD823DFE0B5 = { isa = PBXBuildFile; fileRef = 7AE9331938549244E27A5D0E; };
 		659D9CD58B6914EB420E6AEC = { isa = PBXBuildFile; fileRef = 31D985CB8646B78460E9D5A7; };
-		5BE4BAA99FDC6F1B3177096F = { isa = PBXBuildFile; fileRef = 5A46476E16BA4F9DA95E9E6A; };
 		55737E2F1817DE642AA7DA05 = { isa = PBXBuildFile; fileRef = 1617348BBF5D103619D76911; };
 		6D2C50B0A69855A7F8C062E7 = { isa = PBXBuildFile; fileRef = B80F8CD026033ACCCE11A1A4; };
 		70EE7A1273945B62B013DB43 = { isa = PBXBuildFile; fileRef = AE68ECB6E063BD8D4984C0B3; };
@@ -554,8 +553,6 @@
 		31D985CB8646B78460E9D5A7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ActionBroadcaster.cpp; path = ../../src/events/juce_ActionBroadcaster.cpp; sourceTree = SOURCE_ROOT; };
 		09F7685D1EFF472ECB1F5EF1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ActionBroadcaster.h; path = ../../src/events/juce_ActionBroadcaster.h; sourceTree = SOURCE_ROOT; };
 		4EF8BD4BF46C4BCB39F96609 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ActionListener.h; path = ../../src/events/juce_ActionListener.h; sourceTree = SOURCE_ROOT; };
-		5A46476E16BA4F9DA95E9E6A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ActionListenerList.cpp; path = ../../src/events/juce_ActionListenerList.cpp; sourceTree = SOURCE_ROOT; };
-		8269D9DFAD7923EE13E7EEC7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ActionListenerList.h; path = ../../src/events/juce_ActionListenerList.h; sourceTree = SOURCE_ROOT; };
 		1617348BBF5D103619D76911 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AsyncUpdater.cpp; path = ../../src/events/juce_AsyncUpdater.cpp; sourceTree = SOURCE_ROOT; };
 		44DB44953945417F76199479 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AsyncUpdater.h; path = ../../src/events/juce_AsyncUpdater.h; sourceTree = SOURCE_ROOT; };
 		D04B6E43A037F985434B2F5A = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CallbackMessage.h; path = ../../src/events/juce_CallbackMessage.h; sourceTree = SOURCE_ROOT; };
@@ -1282,8 +1279,6 @@
 				31D985CB8646B78460E9D5A7,
 				09F7685D1EFF472ECB1F5EF1,
 				4EF8BD4BF46C4BCB39F96609,
-				5A46476E16BA4F9DA95E9E6A,
-				8269D9DFAD7923EE13E7EEC7,
 				1617348BBF5D103619D76911,
 				44DB44953945417F76199479,
 				D04B6E43A037F985434B2F5A,
@@ -2008,7 +2003,6 @@
 				12E3CC31875A202D6B30F778,
 				CF51988743ED2CD823DFE0B5,
 				659D9CD58B6914EB420E6AEC,
-				5BE4BAA99FDC6F1B3177096F,
 				55737E2F1817DE642AA7DA05,
 				6D2C50B0A69855A7F8C062E7,
 				70EE7A1273945B62B013DB43,

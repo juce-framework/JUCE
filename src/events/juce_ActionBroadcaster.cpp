@@ -29,13 +29,45 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ActionBroadcaster.h"
 #include "juce_MessageManager.h"
+#include "../threads/juce_ScopedLock.h"
 
 
 //==============================================================================
-ActionBroadcaster::ActionBroadcaster() throw()
+// special message of our own with a string in it
+class ActionMessage  : public Message
+{
+public:
+    const String message;
+
+    ActionMessage (const String& messageText, ActionListener* const listener_) throw()
+        : message (messageText)
+    {
+        pointerParameter = listener_;
+    }
+
+private:
+    ActionMessage (const ActionMessage&);
+    ActionMessage& operator= (const ActionMessage&);
+};
+
+ActionBroadcaster::CallbackReceiver::CallbackReceiver() {}
+
+void ActionBroadcaster::CallbackReceiver::handleMessage (const Message& message)
+{
+    const ActionMessage& am = static_cast <const ActionMessage&> (message);
+    ActionListener* const target = static_cast <ActionListener*> (am.pointerParameter);
+
+    if (owner->actionListeners.contains (target))
+        target->actionListenerCallback (am.message);
+}
+
+//==============================================================================
+ActionBroadcaster::ActionBroadcaster()
 {
     // are you trying to create this object before or after juce has been intialised??
     jassert (MessageManager::instance != 0);
+
+    callback.owner = this;
 }
 
 ActionBroadcaster::~ActionBroadcaster()
@@ -46,25 +78,31 @@ ActionBroadcaster::~ActionBroadcaster()
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)
 {
-    actionListenerList.addActionListener (listener);
+    const ScopedLock sl (actionListenerLock);
+
+    if (listener != 0)
+        actionListeners.add (listener);
 }
 
 void ActionBroadcaster::removeActionListener (ActionListener* const listener)
 {
-    jassert (actionListenerList.isValidMessageListener());
-
-    if (actionListenerList.isValidMessageListener())
-        actionListenerList.removeActionListener (listener);
+    const ScopedLock sl (actionListenerLock);
+    actionListeners.removeValue (listener);
 }
 
 void ActionBroadcaster::removeAllActionListeners()
 {
-    actionListenerList.removeAllActionListeners();
+    const ScopedLock sl (actionListenerLock);
+    actionListeners.clear();
 }
 
 void ActionBroadcaster::sendActionMessage (const String& message) const
 {
-    actionListenerList.sendActionMessage (message);
+    const ScopedLock sl (actionListenerLock);
+
+    for (int i = actionListeners.size(); --i >= 0;)
+        callback.postMessage (new ActionMessage (message, actionListeners.getUnchecked(i)));
 }
+
 
 END_JUCE_NAMESPACE

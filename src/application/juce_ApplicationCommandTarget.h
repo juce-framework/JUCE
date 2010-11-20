@@ -28,6 +28,7 @@
 
 #include "../gui/components/juce_Component.h"
 #include "juce_ApplicationCommandInfo.h"
+#include "../events/juce_MessageListener.h"
 
 
 //==============================================================================

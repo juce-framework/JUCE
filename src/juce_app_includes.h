@@ -230,9 +230,6 @@
 #ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
  #include "events/juce_ActionListener.h"
 #endif
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
- #include "events/juce_ActionListenerList.h"
-#endif
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
  #include "events/juce_AsyncUpdater.h"
 #endif

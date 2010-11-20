@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	93
+#define JUCE_BUILDNUMBER	94
 
 /** Current Juce version number.
 
@@ -12281,131 +12281,6 @@ private:
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
-
-/*** Start of inlined file: juce_MessageListener.h ***/
-#ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
-#define __JUCE_MESSAGELISTENER_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_Message.h ***/
-#ifndef __JUCE_MESSAGE_JUCEHEADER__
-#define __JUCE_MESSAGE_JUCEHEADER__
-
-class MessageListener;
-class MessageManager;
-
-/** The base class for objects that can be delivered to a MessageListener.
-
-	The simplest Message object contains a few integer and pointer parameters
-	that the user can set, and this is enough for a lot of purposes. For passing more
-	complex data, subclasses of Message can also be used.
-
-	@see MessageListener, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  Message
-{
-public:
-
-	/** Creates an uninitialised message.
-
-		The class's variables will also be left uninitialised.
-	*/
-	Message() throw();
-
-	/** Creates a message object, filling in the member variables.
-
-		The corresponding public member variables will be set from the parameters
-		passed in.
-	*/
-	Message (int intParameter1,
-			 int intParameter2,
-			 int intParameter3,
-			 void* pointerParameter) throw();
-
-	/** Destructor. */
-	virtual ~Message();
-
-	// These values can be used for carrying simple data that the application needs to
-	// pass around. For more complex messages, just create a subclass.
-
-	int intParameter1;	  /**< user-defined integer value. */
-	int intParameter2;	  /**< user-defined integer value. */
-	int intParameter3;	  /**< user-defined integer value. */
-	void* pointerParameter;	 /**< user-defined pointer value. */
-
-	juce_UseDebuggingNewOperator
-
-private:
-	friend class MessageListener;
-	friend class MessageManager;
-	MessageListener* messageRecipient;
-
-	Message (const Message&);
-	Message& operator= (const Message&);
-};
-
-#endif   // __JUCE_MESSAGE_JUCEHEADER__
-/*** End of inlined file: juce_Message.h ***/
-
-/**
-	MessageListener subclasses can post and receive Message objects.
-
-	@see Message, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  MessageListener
-{
-protected:
-
-	/** Creates a MessageListener. */
-	MessageListener() throw();
-
-public:
-
-	/** Destructor.
-
-		When a MessageListener is deleted, it removes itself from a global list
-		of registered listeners, so that the isValidMessageListener() method
-		will no longer return true.
-	*/
-	virtual ~MessageListener();
-
-	/** This is the callback method that receives incoming messages.
-
-		This is called by the MessageManager from its dispatch loop.
-
-		@see postMessage
-	*/
-	virtual void handleMessage (const Message& message) = 0;
-
-	/** Sends a message to the message queue, for asynchronous delivery to this listener
-		later on.
-
-		This method can be called safely by any thread.
-
-		@param message	  the message object to send - this will be deleted
-							automatically by the message queue, so don't keep any
-							references to it after calling this method.
-		@see handleMessage
-	*/
-	void postMessage (Message* message) const throw();
-
-	/** Checks whether this MessageListener has been deleted.
-
-		Although not foolproof, this method is safe to call on dangling or null
-		pointers. A list of active MessageListeners is kept internally, so this
-		checks whether the object is on this list or not.
-
-		Note that it's possible to get a false-positive here, if an object is
-		deleted and another is subsequently created that happens to be at the
-		exact same memory location, but I can't think of a good way of avoiding
-		this.
-	*/
-	bool isValidMessageListener() const throw();
-};
-
-#endif   // __JUCE_MESSAGELISTENER_JUCEHEADER__
-/*** End of inlined file: juce_MessageListener.h ***/
-
 /**
 	Has a callback method that is triggered asynchronously.
 
@@ -12454,8 +12329,14 @@ public:
 		Use this as a kind of "flush" operation - if an update is pending, the
 		handleAsyncUpdate() method will be called immediately; if no update is
 		pending, then nothing will be done.
+
+		Because this may invoke the callback, this method must only be called on
+		the main event thread.
 	*/
 	void handleUpdateNowIfNeeded();
+
+	/** Returns true if there's an update callback in the pipeline. */
+	bool isUpdatePending() const throw();
 
 	/** Called back to do whatever your class needs to do.
 
@@ -12466,23 +12347,10 @@ public:
 
 private:
 
-	class AsyncUpdaterInternal  : public MessageListener
-	{
-	public:
-		AsyncUpdaterInternal() {}
-		~AsyncUpdaterInternal() {}
+	class AsyncUpdaterMessage;
+	friend class AsyncUpdaterMessage;
 
-		void handleMessage (const Message&);
-
-		AsyncUpdater* owner;
-
-	private:
-		AsyncUpdaterInternal (const AsyncUpdaterInternal&);
-		AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
-	};
-
-	AsyncUpdaterInternal internalAsyncHandler;
-	bool asyncMessagePending;
+	Atomic<AsyncUpdaterMessage*> pendingMessage;
 };
 
 #endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
@@ -13099,13 +12967,20 @@ public:
 
 private:
 
-	class ChangeBroadcasterMessage;
-	friend class ChangeBroadcasterMessage;
+	class ChangeBroadcasterCallback  : public AsyncUpdater
+	{
+	public:
+		ChangeBroadcasterCallback();
+		void handleAsyncUpdate();
 
-	Atomic<ChangeBroadcasterMessage*> pendingMessage;
+		ChangeBroadcaster* owner;
+	};
+
+	friend class ChangeBroadcasterCallback;
+	ChangeBroadcasterCallback callback;
 	ListenerList <ChangeListener> changeListeners;
 
-	void invalidatePendingMessage();
+	void callListeners();
 
 	ChangeBroadcaster (const ChangeBroadcaster&);
 	ChangeBroadcaster& operator= (const ChangeBroadcaster&);
@@ -28302,6 +28177,131 @@ struct JUCE_API  ApplicationCommandInfo
 #endif   // __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
 /*** End of inlined file: juce_ApplicationCommandInfo.h ***/
 
+
+/*** Start of inlined file: juce_MessageListener.h ***/
+#ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
+#define __JUCE_MESSAGELISTENER_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Message.h ***/
+#ifndef __JUCE_MESSAGE_JUCEHEADER__
+#define __JUCE_MESSAGE_JUCEHEADER__
+
+class MessageListener;
+class MessageManager;
+
+/** The base class for objects that can be delivered to a MessageListener.
+
+	The simplest Message object contains a few integer and pointer parameters
+	that the user can set, and this is enough for a lot of purposes. For passing more
+	complex data, subclasses of Message can also be used.
+
+	@see MessageListener, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  Message
+{
+public:
+
+	/** Creates an uninitialised message.
+
+		The class's variables will also be left uninitialised.
+	*/
+	Message() throw();
+
+	/** Creates a message object, filling in the member variables.
+
+		The corresponding public member variables will be set from the parameters
+		passed in.
+	*/
+	Message (int intParameter1,
+			 int intParameter2,
+			 int intParameter3,
+			 void* pointerParameter) throw();
+
+	/** Destructor. */
+	virtual ~Message();
+
+	// These values can be used for carrying simple data that the application needs to
+	// pass around. For more complex messages, just create a subclass.
+
+	int intParameter1;	  /**< user-defined integer value. */
+	int intParameter2;	  /**< user-defined integer value. */
+	int intParameter3;	  /**< user-defined integer value. */
+	void* pointerParameter;	 /**< user-defined pointer value. */
+
+	juce_UseDebuggingNewOperator
+
+private:
+	friend class MessageListener;
+	friend class MessageManager;
+	MessageListener* messageRecipient;
+
+	Message (const Message&);
+	Message& operator= (const Message&);
+};
+
+#endif   // __JUCE_MESSAGE_JUCEHEADER__
+/*** End of inlined file: juce_Message.h ***/
+
+/**
+	MessageListener subclasses can post and receive Message objects.
+
+	@see Message, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  MessageListener
+{
+protected:
+
+	/** Creates a MessageListener. */
+	MessageListener() throw();
+
+public:
+
+	/** Destructor.
+
+		When a MessageListener is deleted, it removes itself from a global list
+		of registered listeners, so that the isValidMessageListener() method
+		will no longer return true.
+	*/
+	virtual ~MessageListener();
+
+	/** This is the callback method that receives incoming messages.
+
+		This is called by the MessageManager from its dispatch loop.
+
+		@see postMessage
+	*/
+	virtual void handleMessage (const Message& message) = 0;
+
+	/** Sends a message to the message queue, for asynchronous delivery to this listener
+		later on.
+
+		This method can be called safely by any thread.
+
+		@param message	  the message object to send - this will be deleted
+							automatically by the message queue, so don't keep any
+							references to it after calling this method.
+		@see handleMessage
+	*/
+	void postMessage (Message* message) const throw();
+
+	/** Checks whether this MessageListener has been deleted.
+
+		Although not foolproof, this method is safe to call on dangling or null
+		pointers. A list of active MessageListeners is kept internally, so this
+		checks whether the object is on this list or not.
+
+		Note that it's possible to get a false-positive here, if an object is
+		deleted and another is subsequently created that happens to be at the
+		exact same memory location, but I can't think of a good way of avoiding
+		this.
+	*/
+	bool isValidMessageListener() const throw();
+};
+
+#endif   // __JUCE_MESSAGELISTENER_JUCEHEADER__
+/*** End of inlined file: juce_MessageListener.h ***/
+
 /**
 	A command target publishes a list of command IDs that it can perform.
 
@@ -28537,7 +28537,7 @@ private:
 	Used by various classes, e.g. buttons when they are pressed, to tell listeners
 	about something that's happened.
 
-	@see ActionListenerList, ActionBroadcaster, ChangeListener
+	@see ActionBroadcaster, ChangeListener
 */
 class JUCE_API  ActionListener
 {
@@ -28548,7 +28548,7 @@ public:
 	/** Overridden by your subclass to receive the callback.
 
 		@param message  the string that was specified when the event was triggered
-						by a call to ActionListenerList::sendActionMessage()
+						by a call to ActionBroadcaster::sendActionMessage()
 	*/
 	virtual void actionListenerCallback (const String& message) = 0;
 };
@@ -43380,96 +43380,29 @@ private:
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 #define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
-
-/*** Start of inlined file: juce_ActionListenerList.h ***/
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-#define __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-
-/**
-	A set of ActionListeners.
-
-	Listeners can be added and removed from the list, and messages can be
-	broadcast to all the listeners.
-
-	@see ActionListener, ActionBroadcaster
-*/
-class JUCE_API  ActionListenerList  : public MessageListener
-{
-public:
-
-	/** Creates an empty list. */
-	ActionListenerList();
-
-	/** Destructor. */
-	~ActionListenerList();
-
-	/** Adds a listener to the list.
-
-		(Trying to add a listener that's already on the list will have no effect).
-	*/
-	void addActionListener (ActionListener* listener);
-
-	/** Removes a listener from the list.
-
-		If the listener isn't on the list, this won't have any effect.
-	*/
-	void removeActionListener (ActionListener* listener);
-
-	/** Removes all listeners from the list. */
-	void removeAllActionListeners();
-
-	/** Broadcasts a message to all the registered listeners.
-
-		This sends the message asynchronously.
-
-		If a listener is on the list when this method is called but is removed from
-		the list before the message arrives, it won't receive the message. Similarly
-		listeners that are added to the list after the message is sent but before it
-		arrives won't get the message either.
-	*/
-	void sendActionMessage (const String& message) const;
-
-	/** @internal */
-	void handleMessage (const Message&);
-
-	juce_UseDebuggingNewOperator
-
-private:
-	SortedSet <void*> actionListeners_;
-	CriticalSection actionListenerLock_;
-
-	ActionListenerList (const ActionListenerList&);
-	ActionListenerList& operator= (const ActionListenerList&);
-};
-
-#endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-/*** End of inlined file: juce_ActionListenerList.h ***/
-
 /** Manages a list of ActionListeners, and can send them messages.
 
 	To quickly add methods to your class that can add/remove action
 	listeners and broadcast to them, you can derive from this.
 
-	@see ActionListenerList, ActionListener
+	@see ActionListener, ChangeListener
 */
 class JUCE_API  ActionBroadcaster
 {
 public:
 
 	/** Creates an ActionBroadcaster. */
-	ActionBroadcaster() throw();
+	ActionBroadcaster();
 
 	/** Destructor. */
 	virtual ~ActionBroadcaster();
 
 	/** Adds a listener to the list.
-
-		(Trying to add a listener that's already on the list will have no effect).
+		Trying to add a listener that's already on the list will have no effect.
 	*/
 	void addActionListener (ActionListener* listener);
 
 	/** Removes a listener from the list.
-
 		If the listener isn't on the list, this won't have any effect.
 	*/
 	void removeActionListener (ActionListener* listener);
@@ -43478,14 +43411,25 @@ public:
 	void removeAllActionListeners();
 
 	/** Broadcasts a message to all the registered listeners.
-
-		@see ActionListenerList::sendActionMessage
+		@see ActionListener::actionListenerCallback
 	*/
 	void sendActionMessage (const String& message) const;
 
 private:
 
-	ActionListenerList actionListenerList;
+	class CallbackReceiver  : public MessageListener
+	{
+	public:
+		CallbackReceiver();
+		void handleMessage (const Message&);
+
+		ActionBroadcaster* owner;
+	};
+
+	friend class CallbackReceiver;
+	CallbackReceiver callback;
+	SortedSet <ActionListener*> actionListeners;
+	CriticalSection actionListenerLock;
 
 	ActionBroadcaster (const ActionBroadcaster&);
 	ActionBroadcaster& operator= (const ActionBroadcaster&);
@@ -43497,9 +43441,6 @@ private:
 
 #endif
 #ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
@@ -43980,7 +43921,7 @@ private:
 	static MessageManager* instance;
 
 	SortedSet <const MessageListener*> messageListeners;
-	ScopedPointer <ActionListenerList> broadcastListeners;
+	ScopedPointer <ActionBroadcaster> broadcaster;
 
 	friend class JUCEApplication;
 	bool quitMessagePosted, quitMessageReceived;
@@ -43989,7 +43930,6 @@ private:
 	static void* exitModalLoopCallback (void*);
 
 	void postMessageToQueue (Message* message);
-	void postCallbackMessage (Message* message);
 
 	static void doPlatformSpecificInitialisation();
 	static void doPlatformSpecificShutdown();
