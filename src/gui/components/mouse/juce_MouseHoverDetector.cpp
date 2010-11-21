@@ -76,7 +76,7 @@ void MouseHoverDetector::hoverTimerCallback()
     {
         const Point<int> pos (source->getMouseXYRelative());
 
-        if (source->reallyContains (pos.getX(), pos.getY(), false))
+        if (source->reallyContains (pos, false))
         {
             hasJustHovered = true;
             mouseHovered (pos.getX(), pos.getY());

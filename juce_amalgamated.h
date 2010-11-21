@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	94
+#define JUCE_BUILDNUMBER	95
 
 /** Current Juce version number.
 
@@ -26113,15 +26113,21 @@ public:
 	*/
 	bool isAlwaysOnTop() const throw();
 
-	/** Returns the x co-ordinate of the component's left edge.
+	/** Returns the x coordinate of the component's left edge.
 		This is a distance in pixels from the left edge of the component's parent.
-		@see getScreenX
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to its bounding box.
 	*/
 	inline int getX() const throw()			 { return bounds_.getX(); }
 
-	/** Returns the y co-ordinate of the top of this component.
+	/** Returns the y coordinate of the top of this component.
 		This is a distance in pixels from the top edge of the component's parent.
-		@see getScreenY
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to its bounding box.
 	*/
 	inline int getY() const throw()			 { return bounds_.getY(); }
 
@@ -26131,26 +26137,38 @@ public:
 	/** Returns the component's height in pixels. */
 	inline int getHeight() const throw()			{ return bounds_.getHeight(); }
 
-	/** Returns the x co-ordinate of the component's right-hand edge.
+	/** Returns the x coordinate of the component's right-hand edge.
 		This is a distance in pixels from the left edge of the component's parent.
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to its bounding box.
 	*/
 	int getRight() const throw()				{ return bounds_.getRight(); }
 
 	/** Returns the component's top-left position as a Point. */
 	const Point<int> getPosition() const throw()		{ return bounds_.getPosition(); }
 
-	/** Returns the y co-ordinate of the bottom edge of this component.
+	/** Returns the y coordinate of the bottom edge of this component.
 		This is a distance in pixels from the top edge of the component's parent.
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to its bounding box.
 	*/
 	int getBottom() const throw()			   { return bounds_.getBottom(); }
 
 	/** Returns this component's bounding box.
 		The rectangle returned is relative to the top-left of the component's parent.
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to its bounding box.
 	*/
 	const Rectangle<int>& getBounds() const throw()	 { return bounds_; }
 
 	/** Returns the component's bounds, relative to its own origin.
-		This is like getBounds(), but returns the rectangle in local co-ordinates, In practice, it'll
+		This is like getBounds(), but returns the rectangle in local coordinates, In practice, it'll
 		return a rectangle with position (0, 0), and the same size as this component.
 	*/
 	const Rectangle<int> getLocalBounds() const throw();
@@ -26166,12 +26184,12 @@ public:
 	void getVisibleArea (RectangleList& result,
 						 bool includeSiblings) const;
 
-	/** Returns this component's x co-ordinate relative the the screen's top-left origin.
+	/** Returns this component's x coordinate relative the the screen's top-left origin.
 		@see getX, localPointToGlobal
 	*/
 	int getScreenX() const;
 
-	/** Returns this component's y co-ordinate relative the the screen's top-left origin.
+	/** Returns this component's y coordinate relative the the screen's top-left origin.
 		@see getY, localPointToGlobal
 	*/
 	int getScreenY() const;
@@ -26200,6 +26218,10 @@ public:
 		This takes a rectangle that is relative to a different component, and returns its position relative
 		to this component. If the sourceComponent parameter is null, the source rectangle is assumed to be
 		a screen coordinate.
+
+		If you've used setTransform() to apply one or more transforms to components, then the source rectangle
+		may not actually be rectanglular when converted to the target space, so in that situation this will return
+		the smallest rectangle that fully contains the transformed area.
 	*/
 	const Rectangle<int> getLocalArea (const Component* sourceComponent,
 									   const Rectangle<int>& areaRelativeToSourceComponent) const;
@@ -26210,6 +26232,10 @@ public:
 	const Point<int> localPointToGlobal (const Point<int>& localPoint) const;
 
 	/** Converts a rectangle from this component's coordinate space to a screen coordinate.
+
+		If you've used setTransform() to apply one or more transforms to components, then the source rectangle
+		may not actually be rectanglular when converted to the target space, so in that situation this will return
+		the smallest rectangle that fully contains the transformed area.
 		@see getLocalPoint, localPointToGlobal
 	*/
 	const Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
@@ -26221,6 +26247,10 @@ public:
 
 		If the component actually moves, this method will make a synchronous call to moved().
 
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to whatever bounds you set for it.
+
 		@see setBounds, ComponentListener::componentMovedOrResized
 	*/
 	void setTopLeftPosition (int x, int y);
@@ -26231,28 +26261,50 @@ public:
 		The position is relative to the top-left of the component's parent.
 
 		If the component actually moves, this method will make a synchronous call to moved().
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to whatever bounds you set for it.
 	*/
 	void setTopRightPosition (int x, int y);
 
 	/** Changes the size of the component.
 
 		A synchronous call to resized() will be occur if the size actually changes.
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to whatever bounds you set for it.
 	*/
 	void setSize (int newWidth, int newHeight);
 
 	/** Changes the component's position and size.
 
-		The co-ordinates are relative to the top-left of the component's parent, or relative
+		The coordinates are relative to the top-left of the component's parent, or relative
 		to the origin of the screen is the component is on the desktop.
 
 		If this method changes the component's top-left position, it will make a synchronous
 		call to moved(). If it changes the size, it will also make a call to resized().
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to whatever bounds you set for it.
 
 		@see setTopLeftPosition, setSize, ComponentListener::componentMovedOrResized
 	*/
 	void setBounds (int x, int y, int width, int height);
 
 	/** Changes the component's position and size.
+
+		The coordinates are relative to the top-left of the component's parent, or relative
+		to the origin of the screen is the component is on the desktop.
+
+		If this method changes the component's top-left position, it will make a synchronous
+		call to moved(). If it changes the size, it will also make a call to resized().
+
+		Note that if you've used setTransform() to apply a transform, then the component's
+		bounds will no longer be a direct reflection of the position at which it appears within
+		its parent, as the transform will be applied to whatever bounds you set for it.
 
 		@see setBounds
 	*/
@@ -26264,6 +26316,8 @@ public:
 		setBoundsRelative (0.2f, 0.2f, 0.5f, 0.5f) would give it half the
 		width and height of the parent, with its top-left position 20% of
 		the way across and down the parent.
+
+		@see setBounds
 	*/
 	void setBoundsRelative (float proportionalX, float proportionalY,
 							float proportionalWidth, float proportionalHeight);
@@ -26272,6 +26326,8 @@ public:
 
 		This will position the component within its parent, leaving the specified number of
 		pixels around each edge.
+
+		@see setBounds
 	*/
 	void setBoundsInset (const BorderSize& borders);
 
@@ -26286,6 +26342,8 @@ public:
 
 		It will then be positioned within the rectangle according to the justification flags
 		specified.
+
+		@see setBounds
 	*/
 	void setBoundsToFit (int x, int y, int width, int height,
 						 const Justification& justification,
@@ -26295,6 +26353,8 @@ public:
 
 		Leaves the component's size unchanged, but sets the position of its centre
 		relative to its parent's top-left.
+
+		@see setBounds
 	*/
 	void setCentrePosition (int x, int y);
 
@@ -26313,6 +26373,37 @@ public:
 		parent component), then it'll be centred within the main monitor area.
 	*/
 	void centreWithSize (int width, int height);
+
+	/** Sets a transform matrix to be applied to this component.
+
+		If you set a transform for a component, the component's position will be warped by it, relative to
+		the component's parent's top-left origin. This means that the values you pass into setBounds() will no
+		longer reflect the actual area within the parent that the component covers, as the bounds will be
+		transformed and the component will probably end up actually appearing somewhere else within its parent.
+
+		When using transforms you need to be extremely careful when converting coordinates between the
+		coordinate spaces of different components or the screen - you should always use getLocalPoint(),
+		getLocalArea(), etc to do this, and never just manually add a component's position to a point in order to
+		convert it between different components (but I'm sure you would never have done that anyway...).
+
+		Currently, transforms are not supported for desktop windows, so the transform will be ignored if you
+		put a component on the desktop.
+
+		To remove a component's transform, simply pass AffineTransform::identity as the parameter to this method.
+	*/
+	void setTransform (const AffineTransform& transform);
+
+	/** Returns the transform that is currently being applied to this component.
+		For more details about transforms, see setTransform().
+		@see setTransform
+	*/
+	const AffineTransform getTransform() const;
+
+	/** Returns true if a non-identity transform is being applied to this component.
+		For more details about transforms, see setTransform().
+		@see setTransform
+	*/
+	bool isTransformed() const throw();
 
 	/** Returns a proportion of the component's width.
 
@@ -26340,7 +26431,7 @@ public:
 	*/
 	int getParentHeight() const throw();
 
-	/** Returns the screen co-ordinates of the monitor that contains this component.
+	/** Returns the screen coordinates of the monitor that contains this component.
 
 		If there's only one monitor, this will return its size - if there are multiple
 		monitors, it will return the area of the monitor that contains the component's
@@ -26509,7 +26600,7 @@ public:
 		Overriding this method allows you to create components which only intercept
 		mouse-clicks within a user-defined area.
 
-		This is called to find out whether a particular x, y co-ordinate is
+		This is called to find out whether a particular x, y coordinate is
 		considered to be inside the component or not, and is used by methods such
 		as contains() and getComponentAt() to work out which component
 		the mouse is clicked on.
@@ -26531,10 +26622,10 @@ public:
 		Note that for components on the desktop, this method will be ignored, because it's
 		not always possible to implement this behaviour on all platforms.
 
-		@param x	the x co-ordinate to test, relative to the left hand edge of this
+		@param x	the x coordinate to test, relative to the left hand edge of this
 					component. This value is guaranteed to be greater than or equal to
 					zero, and less than the component's width
-		@param y	the y co-ordinate to test, relative to the top edge of this
+		@param y	the y coordinate to test, relative to the top edge of this
 					component. This value is guaranteed to be greater than or equal to
 					zero, and less than the component's height
 		@returns	true if the click is considered to be inside the component
@@ -26576,32 +26667,29 @@ public:
 
 		Never override this method! Use hitTest to create custom hit regions.
 
-		@param point	the x co-ordinate to test, relative to this component's top-left.
+		@param localPoint	the coordinate to test, relative to this component's top-left.
 		@returns	true if the point is within the component's hit-test area, but only if
 					that part of the component isn't clipped by its parent component. Note
 					that this won't take into account any overlapping sibling components
 					which might be in the way - for that, see reallyContains()
 		@see hitTest, reallyContains, getComponentAt
 	*/
-	bool contains (const Point<int>& point);
+	bool contains (const Point<int>& localPoint);
 
 	/** Returns true if a given point lies in this component, taking any overlapping
 		siblings into account.
 
-		@param x	the x co-ordinate to test, relative to this component's left hand edge.
-		@param y	the y co-ordinate to test, relative to this component's top edge.
-		@param returnTrueIfWithinAChild	 if the point actually lies within a child of this
-											component, this determines the value that will
-											be returned.
-
+		@param localPoint	the coordinate to test, relative to this component's top-left.
+		@param returnTrueIfWithinAChild	 if the point actually lies within a child of this component,
+											this determines whether that is counted as a hit.
 		@see contains, getComponentAt
 	*/
-	bool reallyContains (int x, int y, bool returnTrueIfWithinAChild);
+	bool reallyContains (const Point<int>& localPoint, bool returnTrueIfWithinAChild);
 
 	/** Returns the component at a certain point within this one.
 
-		@param x	the x co-ordinate to test, relative to this component's left hand edge.
-		@param y	the y co-ordinate to test, relative to this component's top edge.
+		@param x	the x coordinate to test, relative to this component's left edge.
+		@param y	the y coordinate to test, relative to this component's top edge.
 		@returns	the component that is at this position - which may be 0, this component,
 					or one of its children. Note that overlapping siblings that might actually
 					be in the way are not taken into account by this method - to account for these,
@@ -26612,7 +26700,7 @@ public:
 
 	/** Returns the component at a certain point within this one.
 
-		@param position  the co-ordinates to test, relative to this component's top-left.
+		@param position  the coordinate to test, relative to this component's top-left.
 		@returns	the component that is at this position - which may be 0, this component,
 					or one of its children. Note that overlapping siblings that might actually
 					be in the way are not taken into account by this method - to account for these,
@@ -27442,8 +27530,7 @@ public:
 	static bool JUCE_CALLTYPE isMouseButtonDownAnywhere() throw();
 
 	/** Returns the mouse's current position, relative to this component.
-
-		The co-ordinates are relative to the component's top-left corner.
+		The return value is relative to the component's top-left corner.
 	*/
 	const Point<int> getMouseXYRelative() const;
 
@@ -27849,6 +27936,7 @@ private:
 	String componentName_;
 	Component* parentComponent_;
 	Rectangle<int> bounds_;
+	ScopedPointer <AffineTransform> affineTransform_;
 	Array <Component*> childComponentList_;
 	LookAndFeel* lookAndFeel_;
 	MouseCursor cursor_;
@@ -27914,6 +28002,7 @@ private:
 	void internalHierarchyChanged();
 	void paintComponentAndChildren (Graphics& g);
 	void paintComponent (Graphics& g);
+	void paintTransformedChild (Graphics& g);
 	void sendMovedResizedMessages (bool wasMoved, bool wasResized);
 	void repaintParent();
 	void sendFakeMouseMove() const;
@@ -36206,7 +36295,8 @@ private:
 	void repeatTimerCallback();
 	RepeatTimer& getRepeatTimer();
 
-	ButtonState updateState (const MouseEvent*);
+	ButtonState updateState();
+	ButtonState updateState (bool isOver, bool isDown);
 	bool isShortcutPressed() const;
 	void turnOffOtherButtonsInGroup (bool sendChangeNotification);
 

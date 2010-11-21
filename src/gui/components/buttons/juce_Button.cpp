@@ -227,34 +227,29 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
 //==============================================================================
 void Button::enablementChanged()
 {
-    updateState (0);
+    updateState();
     repaint();
 }
 
-Button::ButtonState Button::updateState (const MouseEvent* const e)
+Button::ButtonState Button::updateState()
 {
-    ButtonState state = buttonNormal;
+    return updateState (reallyContains (getMouseXYRelative(), true), isMouseButtonDown());
+}
+
+Button::ButtonState Button::updateState (const bool over, const bool down)
+{
+    ButtonState newState = buttonNormal;
 
     if (isEnabled() && isVisible() && ! isCurrentlyBlockedByAnotherModalComponent())
     {
-        Point<int> mousePos;
-
-        if (e == 0)
-            mousePos = getMouseXYRelative();
-        else
-            mousePos = e->getEventRelativeTo (this).getPosition();
-
-        const bool over = reallyContains (mousePos.getX(), mousePos.getY(), true);
-        const bool down = isMouseButtonDown();
-
         if ((down && (over || (triggerOnMouseDown && buttonState == buttonDown))) || isKeyDown)
-            state = buttonDown;
+            newState = buttonDown;
         else if (over)
-            state = buttonOver;
+            newState = buttonOver;
     }
 
-    setState (state);
-    return state;
+    setState (newState);
+    return newState;
 }
 
 void Button::setState (const ButtonState newState)
@@ -403,19 +398,19 @@ void Button::paint (Graphics& g)
 }
 
 //==============================================================================
-void Button::mouseEnter (const MouseEvent& e)
+void Button::mouseEnter (const MouseEvent&)
 {
-    updateState (&e);
+    updateState (true, false);
 }
 
-void Button::mouseExit (const MouseEvent& e)
+void Button::mouseExit (const MouseEvent&)
 {
-    updateState (&e);
+    updateState (false, false);
 }
 
 void Button::mouseDown (const MouseEvent& e)
 {
-    updateState (&e);
+    updateState (true, true);
 
     if (isDown())
     {
@@ -430,7 +425,7 @@ void Button::mouseDown (const MouseEvent& e)
 void Button::mouseUp (const MouseEvent& e)
 {
     const bool wasDown = isDown();
-    updateState (&e);
+    updateState (isMouseOver(), false);
 
     if (wasDown && isOver() && ! triggerOnMouseDown)
         internalClickCallback (e.mods);
@@ -439,7 +434,7 @@ void Button::mouseUp (const MouseEvent& e)
 void Button::mouseDrag (const MouseEvent& e)
 {
     const ButtonState oldState = buttonState;
-    updateState (&e);
+    updateState (isMouseOver(), true);
 
     if (autoRepeatDelay >= 0 && buttonState != oldState && isDown())
         getRepeatTimer().startTimer (autoRepeatSpeed);
@@ -447,13 +442,13 @@ void Button::mouseDrag (const MouseEvent& e)
 
 void Button::focusGained (FocusChangeType)
 {
-    updateState (0);
+    updateState();
     repaint();
 }
 
 void Button::focusLost (FocusChangeType)
 {
-    updateState (0);
+    updateState();
     repaint();
 }
 
@@ -467,7 +462,7 @@ void Button::setVisible (bool shouldBeVisible)
         if (! shouldBeVisible)
             needsToRelease = false;
 
-        updateState (0);
+        updateState();
     }
     else
     {
@@ -597,7 +592,7 @@ bool Button::keyStateChanged (const bool, Component*)
     if (autoRepeatDelay >= 0 && (isKeyDown && ! wasDown))
         getRepeatTimer().startTimer (autoRepeatDelay);
 
-    updateState (0);
+    updateState();
 
     if (isEnabled() && wasDown && ! isKeyDown)
     {
@@ -642,10 +637,10 @@ void Button::repeatTimerCallback()
     if (needsRepainting)
     {
         getRepeatTimer().stopTimer();
-        updateState (0);
+        updateState();
         needsRepainting = false;
     }
-    else if (autoRepeatSpeed > 0 && (isKeyDown || (updateState (0) == buttonDown)))
+    else if (autoRepeatSpeed > 0 && (isKeyDown || (updateState() == buttonDown)))
     {
         int repeatSpeed = autoRepeatSpeed;
 

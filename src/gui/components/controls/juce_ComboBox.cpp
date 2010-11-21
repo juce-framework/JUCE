@@ -590,7 +590,7 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 
         const MouseEvent e (e2.getEventRelativeTo (this));
 
-        if (reallyContains (e.x, e.y, true)
+        if (reallyContains (e.getPosition(), true)
              && (e2.eventComponent == this || ! label->isEditable()))
         {
             showPopup();

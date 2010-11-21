@@ -44,7 +44,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+#define CHECK_MESSAGE_MANAGER_IS_LOCKED     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 Component* Component::currentlyFocusedComponent = 0;
 
@@ -249,22 +249,34 @@ public:
 
     static const Point<int> convertFromParentSpace (const Component& comp, const Point<int>& pointInParentSpace)
     {
-        return pointInParentSpace - comp.getPosition();
+        if (comp.affineTransform_ == 0)
+            return pointInParentSpace - comp.getPosition();
+
+        return pointInParentSpace.toFloat().transformedBy (comp.affineTransform_->inverted()).toInt() - comp.getPosition();
     }
 
     static const Rectangle<int> convertFromParentSpace (const Component& comp, const Rectangle<int>& areaInParentSpace)
     {
-        return areaInParentSpace - comp.getPosition();
+        if (comp.affineTransform_ == 0)
+            return areaInParentSpace - comp.getPosition();
+
+        return areaInParentSpace.toFloat().transformed (comp.affineTransform_->inverted()).getSmallestIntegerContainer() - comp.getPosition();
     }
 
     static const Point<int> convertToParentSpace (const Component& comp, const Point<int>& pointInLocalSpace)
     {
-        return pointInLocalSpace + comp.getPosition();
+        if (comp.affineTransform_ == 0)
+            return pointInLocalSpace + comp.getPosition();
+
+        return (pointInLocalSpace + comp.getPosition()).toFloat().transformedBy (*comp.affineTransform_).toInt();
     }
 
     static const Rectangle<int> convertToParentSpace (const Component& comp, const Rectangle<int>& areaInLocalSpace)
     {
-        return areaInLocalSpace + comp.getPosition();
+        if (comp.affineTransform_ == 0)
+            return areaInLocalSpace + comp.getPosition();
+
+        return (areaInLocalSpace + comp.getPosition()).toFloat().transformed (*comp.affineTransform_).getSmallestIntegerContainer();
     }
 
     template <typename Type>
@@ -337,8 +349,7 @@ public:
         {
             const Component& child = *comp.childComponentList_.getUnchecked(i);
 
-//xxx            if (child.isVisible() && ! child.isTransformed())
-            if (child.isVisible())
+            if (child.isVisible() && ! child.isTransformed())
             {
                 const Rectangle<int> newClip (clipRect.getIntersection (child.bounds_));
 
@@ -465,7 +476,7 @@ void Component::setName (const String& name)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (componentName_ != name)
     {
@@ -491,7 +502,7 @@ void Component::setVisible (bool shouldBeVisible)
     {
         // if component methods are being called from threads other than the message
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-        checkMessageManagerIsLocked
+        CHECK_MESSAGE_MANAGER_IS_LOCKED
 
         SafePointer<Component> safePointer (this);
 
@@ -582,7 +593,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (isOpaque())
         styleWanted &= ~ComponentPeer::windowIsSemiTransparent;
@@ -670,7 +681,7 @@ void Component::removeFromDesktop()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -748,7 +759,7 @@ void Component::toFront (const bool setAsForeground)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -990,7 +1001,7 @@ void Component::setBounds (const int x, const int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (w < 0) w = 0;
     if (h < 0) h = 0;
@@ -1179,6 +1190,42 @@ void Component::setBoundsToFit (int x, int y, int width, int height,
 }
 
 //==============================================================================
+bool Component::isTransformed() const throw()
+{
+    return affineTransform_ != 0;
+}
+
+void Component::setTransform (const AffineTransform& newTransform)
+{
+    if (newTransform.isIdentity())
+    {
+        if (affineTransform_ != 0)
+        {
+            repaint();
+            affineTransform_ = 0;
+            repaint();
+        }
+    }
+    else if (affineTransform_ == 0)
+    {
+        repaint();
+        affineTransform_ = new AffineTransform (newTransform);
+        repaint();
+    }
+    else if (*affineTransform_ != newTransform)
+    {
+        repaint();
+        *affineTransform_ = newTransform;
+        repaint();
+    }
+}
+
+const AffineTransform Component::getTransform() const
+{
+    return affineTransform_ != 0 ? *affineTransform_ : AffineTransform::identity;
+}
+
+//==============================================================================
 bool Component::hitTest (int x, int y)
 {
     if (! flags.ignoresMouseClicksFlag)
@@ -1233,15 +1280,13 @@ bool Component::contains (const Point<int>& point)
     return false;
 }
 
-bool Component::reallyContains (const int x, const int y, const bool returnTrueIfWithinAChild)
+bool Component::reallyContains (const Point<int>& point, const bool returnTrueIfWithinAChild)
 {
-    const Point<int> p (x, y);
-
-    if (! contains (p))
+    if (! contains (point))
         return false;
 
     Component* const top = getTopLevelComponent();
-    const Component* const compAtPosition = top->getComponentAt (top->getLocalPoint (this, p));
+    const Component* const compAtPosition = top->getComponentAt (top->getLocalPoint (this, point));
 
     return (compAtPosition == this) || (returnTrueIfWithinAChild && isParentOf (compAtPosition));
 }
@@ -1275,7 +1320,7 @@ void Component::addChildComponent (Component* const child, int zOrder)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (child != 0 && child->parentComponent_ != this)
     {
@@ -1328,7 +1373,7 @@ Component* Component::removeChildComponent (const int index)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     Component* const child = childComponentList_ [index];
 
@@ -1500,7 +1545,7 @@ void Component::enterModalState (const bool takeKeyboardFocus_, ModalComponentMa
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     // Check for an attempt to make a component modal when it already is!
     // This can cause nasty problems..
@@ -1674,7 +1719,7 @@ void Component::internalRepaint (int x, int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (x < 0)
     {
@@ -1701,7 +1746,17 @@ void Component::internalRepaint (int x, int y, int w, int h)
             if (parentComponent_ != 0)
             {
                 if (parentComponent_->flags.visibleFlag)
-                    parentComponent_->internalRepaint (x + getX(), y + getY(), w, h);
+                {
+                    if (affineTransform_ == 0)
+                    {
+                        parentComponent_->internalRepaint (x + getX(), y + getY(), w, h);
+                    }
+                    else
+                    {
+                        const Rectangle<int> r (ComponentHelpers::convertToParentSpace (*this, Rectangle<int> (x, y, w, h)));
+                        parentComponent_->internalRepaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());
+                    }
+                }
             }
             else if (flags.hasHeavyweightPeerFlag)
             {
@@ -1737,6 +1792,15 @@ void Component::paintComponent (Graphics& g)
     }
 }
 
+void Component::paintTransformedChild (Graphics& g)
+{
+    if (affineTransform_ != 0)
+        g.addTransform (*affineTransform_);
+
+    g.setOrigin (getX(), getY());
+    paintEntireComponent (g, false);
+}
+
 void Component::paintComponentAndChildren (Graphics& g)
 {
     const Rectangle<int> clipBounds (g.getClipBounds());
@@ -1766,8 +1830,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 
             if (child->flags.dontClipGraphicsFlag)
             {
-                g.setOrigin (child->getX(), child->getY());
-                child->paintEntireComponent (g, false);
+                child->paintTransformedChild (g);
             }
             else
             {
@@ -1787,10 +1850,7 @@ void Component::paintComponentAndChildren (Graphics& g)
                     }
 
                     if (nothingClipped || ! g.isClipEmpty())
-                    {
-                        g.setOrigin (child->getX(), child->getY());
-                        child->paintEntireComponent (g, false);
-                    }
+                        child->paintTransformedChild (g);
                 }
             }
 
@@ -2161,7 +2221,7 @@ void Component::addMouseListener (MouseListener* const newListener,
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     // If you register a component as a mouselistener for itself, it'll receive all the events
     // twice - once via the direct callback that all components get anyway, and then again as a listener!
@@ -2177,7 +2237,7 @@ void Component::removeMouseListener (MouseListener* const listenerToRemove)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (mouseListeners_ != 0)
         mouseListeners_->removeListener (listenerToRemove);
@@ -2437,7 +2497,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
     {
         Desktop& desktop = Desktop::getInstance();
 
-        flags.mouseOverFlag = reallyContains (relativePos.getX(), relativePos.getY(), false);
+        flags.mouseOverFlag = reallyContains (relativePos, false);
 
         BailOutChecker checker (this);
 
@@ -2807,7 +2867,7 @@ void Component::grabKeyboardFocus()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     grabFocusInternal (focusChangedDirectly);
 }
@@ -2816,7 +2876,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    checkMessageManagerIsLocked
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
 
     if (parentComponent_ != 0)
     {
@@ -2872,20 +2932,9 @@ void Component::giveAwayFocus()
 }
 
 //==============================================================================
-bool Component::isMouseOver() const throw()
-{
-    return flags.mouseOverFlag;
-}
-
-bool Component::isMouseButtonDown() const throw()
-{
-    return flags.mouseDownFlag;
-}
-
-bool Component::isMouseOverOrDragging() const throw()
-{
-    return flags.mouseOverFlag || flags.mouseDownFlag;
-}
+bool Component::isMouseOver() const throw()             { return flags.mouseOverFlag; }
+bool Component::isMouseButtonDown() const throw()       { return flags.mouseDownFlag; }
+bool Component::isMouseOverOrDragging() const throw()   { return flags.mouseOverFlag || flags.mouseDownFlag; }
 
 bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
 {
@@ -2900,8 +2949,7 @@ const Point<int> Component::getMouseXYRelative() const
 //==============================================================================
 const Rectangle<int> Component::getParentMonitorArea() const
 {
-    return Desktop::getInstance()
-            .getMonitorAreaContaining (localPointToGlobal (getLocalBounds().getCentre()));
+    return Desktop::getInstance().getMonitorAreaContaining (getScreenBounds().getCentre());
 }
 
 //==============================================================================

@@ -244,7 +244,7 @@ const uint8 MidiKeyboardComponent::blackNotes[] = { 1, 3, 6, 8, 10 };
 
 int MidiKeyboardComponent::xyToNote (const Point<int>& pos, float& mousePositionVelocity)
 {
-    if (! reallyContains (pos.getX(), pos.getY(), false))
+    if (! reallyContains (pos, false))
         return -1;
 
     Point<int> p (pos);

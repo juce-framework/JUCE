@@ -352,6 +352,10 @@ void Slider::lookAndFeelChanged()
 
         valueBox->setTooltip (getTooltip());
     }
+    else
+    {
+        valueBox = 0;
+    }
 
     if (style == IncDecButtons)
     {

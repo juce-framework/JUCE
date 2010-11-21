@@ -1088,7 +1088,8 @@ public:
 
 //==============================================================================
 class WidgetsDemo  : public Component,
-                     public ButtonListener
+                     public ButtonListener,
+                     public SliderListener
 {
 public:
     //==============================================================================
@@ -1111,9 +1112,17 @@ public:
         //==============================================================================
         addAndMakeVisible (&enableButton);
         enableButton.setBounds (230, 10, 180, 24);
-        enableButton.setTooltip ("toggle button");
+        enableButton.setTooltip ("Enables/disables all the components");
         enableButton.setToggleState (true, false);
         enableButton.addButtonListener (this);
+
+        addAndMakeVisible (&transformSlider);
+        transformSlider.setSliderStyle (Slider::LinearBar);
+        transformSlider.setTextValueSuffix (" degrees rotation");
+        transformSlider.setRange (-180.0, 180.0, 0.1);
+        transformSlider.setBounds (440, 10, 180, 24);
+        transformSlider.setTooltip ("Applies a transform to the components");
+        transformSlider.addListener (this);
     }
 
     ~WidgetsDemo()
@@ -1397,9 +1406,17 @@ public:
         }
     }
 
+    void sliderValueChanged (Slider*)
+    {
+        // When you move the roation slider, we'll apply a rotaion transform to the whole tabs component..
+        tabs.setTransform (AffineTransform::rotation ((float) (transformSlider.getValue() / (180.0 / double_Pi)),
+                                                      getWidth() * 0.5f, getHeight() * 0.5f));
+    }
+
 private:
     TextButton menuButton;
     ToggleButton enableButton;
+    Slider transformSlider;
     DemoTabbedComponent tabs;
 };
 

@@ -127,7 +127,7 @@ int MenuBarComponent::getItemAt (const int x, const int y)
 {
     for (int i = 0; i < xPositions.size(); ++i)
         if (x >= xPositions[i] && x < xPositions[i + 1])
-            return reallyContains (x, y, true) ? i : -1;
+            return reallyContains (Point<int> (x, y), true) ? i : -1;
 
     return -1;
 }

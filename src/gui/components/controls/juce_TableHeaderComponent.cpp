@@ -909,7 +909,7 @@ int TableHeaderComponent::getResizeDraggerAt (const int mouseX) const
 
 void TableHeaderComponent::updateColumnUnderMouse (int x, int y)
 {
-    const int newCol = (reallyContains (x, y, true) && getResizeDraggerAt (x) == 0)
+    const int newCol = (reallyContains (Point<int> (x, y), true) && getResizeDraggerAt (x) == 0)
                             ? getColumnIdAtX (x) : 0;
 
     if (newCol != columnIdUnderMouse)

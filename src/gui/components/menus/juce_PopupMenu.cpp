@@ -522,7 +522,7 @@ public:
                 // comp that we're attached to.
                 const Point<int> mousePos (componentAttachedTo->getMouseXYRelative());
 
-                if (componentAttachedTo->reallyContains (mousePos.getX(), mousePos.getY(), true))
+                if (componentAttachedTo->reallyContains (mousePos, true))
                 {
                     postCommandMessage (PopupMenuSettings::dismissCommandId); // dismiss asynchrounously
                     return;
@@ -567,7 +567,7 @@ public:
         const uint32 now = Time::getMillisecondCounter();
 
         if (now > timeEnteredCurrentChildComp + 100
-             && reallyContains (localMousePos.getX(), localMousePos.getY(), true)
+             && reallyContains (localMousePos, true)
              && currentChild != 0
              && (! disableMouseMoves)
              && ! (activeSubMenu != 0 && activeSubMenu->isVisible()))
@@ -659,7 +659,7 @@ public:
             else if (wasDown && now > menuCreationTime + 250
                        && ! (isDown || overScrollArea))
             {
-                isOver = reallyContains (localMousePos.getX(), localMousePos.getY(), true);
+                isOver = reallyContains (localMousePos, true);
 
                 if (isOver)
                 {
@@ -734,7 +734,7 @@ private:
     void updateMouseOverStatus (const Point<int>& globalMousePos)
     {
         const Point<int> relPos (getLocalPoint (0, globalMousePos));
-        isOver = reallyContains (relPos.getX(), relPos.getY(), true);
+        isOver = reallyContains (relPos, true);
 
         if (activeSubMenu != 0)
             activeSubMenu->updateMouseOverStatus (globalMousePos);
@@ -1081,7 +1081,7 @@ private:
 
     void highlightItemUnderMouse (const Point<int>& globalMousePos, const Point<int>& localMousePos)
     {
-        isOver = reallyContains (localMousePos.getX(), localMousePos.getY(), true);
+        isOver = reallyContains (localMousePos, true);
 
         if (isOver)
             hasBeenOver = true;

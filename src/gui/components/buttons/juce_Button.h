@@ -495,7 +495,8 @@ private:
     void repeatTimerCallback();
     RepeatTimer& getRepeatTimer();
 
-    ButtonState updateState (const MouseEvent*);
+    ButtonState updateState();
+    ButtonState updateState (bool isOver, bool isDown);
     bool isShortcutPressed() const;
     void turnOffOtherButtonsInGroup (bool sendChangeNotification);
 
