@@ -2188,7 +2188,7 @@ private:
     void internalHierarchyChanged();
     void paintComponentAndChildren (Graphics& g);
     void paintComponent (Graphics& g);
-    void paintTransformedChild (Graphics& g);
+    void paintWithinParentContext (Graphics& g);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void repaintParent();
     void sendFakeMouseMove() const;

@@ -19566,15 +19566,24 @@ public:
 										   float pivotY) throw();
 
 	/** Returns a transform which is the same as this one followed by a re-scaling.
-
 		The scaling is centred around the origin (0, 0).
 	*/
 	const AffineTransform scaled (float factorX,
 								  float factorY) const throw();
 
+	/** Returns a transform which is the same as this one followed by a re-scaling.
+		The scaling is centred around the origin provided.
+	*/
+	const AffineTransform scaled (float factorX, float factorY,
+								  float pivotX, float pivotY) const throw();
+
 	/** Returns a new transform which is a re-scale about the origin. */
 	static const AffineTransform scale (float factorX,
 										float factorY) throw();
+
+	/** Returns a new transform which is a re-scale centred around the point provided. */
+	static const AffineTransform scale (float factorX, float factorY,
+										float pivotX, float pivotY) throw();
 
 	/** Returns a transform which is the same as this one followed by a shear.
 
@@ -28002,7 +28011,7 @@ private:
 	void internalHierarchyChanged();
 	void paintComponentAndChildren (Graphics& g);
 	void paintComponent (Graphics& g);
-	void paintTransformedChild (Graphics& g);
+	void paintWithinParentContext (Graphics& g);
 	void sendMovedResizedMessages (bool wasMoved, bool wasResized);
 	void repaintParent();
 	void sendFakeMouseMove() const;

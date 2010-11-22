@@ -167,6 +167,7 @@ void Graphics::setOrigin (const int newOriginX, const int newOriginY)
 
 void Graphics::addTransform (const AffineTransform& transform)
 {
+    saveStateIfPending();
     context->addTransform (transform);
 }
 

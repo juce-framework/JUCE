@@ -197,6 +197,21 @@ const AffineTransform AffineTransform::scale (const float factorX,
                             0, factorY, 0);
 }
 
+const AffineTransform AffineTransform::scaled (const float factorX, const float factorY,
+                                               const float pivotX, const float pivotY) const throw()
+{
+    return translated (-pivotX, -pivotY)
+            .scaled (factorX, factorY)
+            .translated (pivotX, pivotY);
+}
+
+const AffineTransform AffineTransform::scale (const float factorX, const float factorY,
+                                              const float pivotX, const float pivotY) throw()
+{
+    return AffineTransform (factorX, 0, pivotX * (1.0f - factorX),
+                            0, factorY, pivotY * (1.0f - factorY));
+}
+
 const AffineTransform AffineTransform::sheared (const float shearX,
                                                 const float shearY) const throw()
 {

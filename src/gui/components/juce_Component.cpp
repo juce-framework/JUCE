@@ -1792,11 +1792,8 @@ void Component::paintComponent (Graphics& g)
     }
 }
 
-void Component::paintTransformedChild (Graphics& g)
+void Component::paintWithinParentContext (Graphics& g)
 {
-    if (affineTransform_ != 0)
-        g.addTransform (*affineTransform_);
-
     g.setOrigin (getX(), getY());
     paintEntireComponent (g, false);
 }
@@ -1822,39 +1819,52 @@ void Component::paintComponentAndChildren (Graphics& g)
 
     for (int i = 0; i < childComponentList_.size(); ++i)
     {
-        Component* const child = childComponentList_.getUnchecked (i);
+        Component& child = *childComponentList_.getUnchecked (i);
 
-        if (child->isVisible() && clipBounds.intersects (child->getBounds()))
+        if (child.isVisible())
         {
-            g.saveState();
+            if (child.affineTransform_ != 0)
+            {
+                g.saveState();
+                g.addTransform (*child.affineTransform_);
 
-            if (child->flags.dontClipGraphicsFlag)
-            {
-                child->paintTransformedChild (g);
+                if (child.flags.dontClipGraphicsFlag || g.reduceClipRegion (child.getBounds()))
+                    child.paintWithinParentContext (g);
+
+                g.restoreState();
             }
-            else
+            else if (clipBounds.intersects (child.getBounds()))
             {
-                if (g.reduceClipRegion (child->getBounds()))
+                g.saveState();
+
+                if (child.flags.dontClipGraphicsFlag)
                 {
-                    bool nothingClipped = true;
-
-                    for (int j = i + 1; j < childComponentList_.size(); ++j)
-                    {
-                        const Component* const sibling = childComponentList_.getUnchecked (j);
-
-                        if (sibling->flags.opaqueFlag && sibling->isVisible())
-                        {
-                            nothingClipped = false;
-                            g.excludeClipRegion (sibling->getBounds());
-                        }
-                    }
-
-                    if (nothingClipped || ! g.isClipEmpty())
-                        child->paintTransformedChild (g);
+                    child.paintWithinParentContext (g);
                 }
-            }
+                else
+                {
+                    if (g.reduceClipRegion (child.getBounds()))
+                    {
+                        bool nothingClipped = true;
 
-            g.restoreState();
+                        for (int j = i + 1; j < childComponentList_.size(); ++j)
+                        {
+                            const Component& sibling = *childComponentList_.getUnchecked (j);
+
+                            if (sibling.flags.opaqueFlag && sibling.isVisible() && sibling.affineTransform_ == 0)
+                            {
+                                nothingClipped = false;
+                                g.excludeClipRegion (sibling.getBounds());
+                            }
+                        }
+
+                        if (nothingClipped || ! g.isClipEmpty())
+                            child.paintWithinParentContext (g);
+                    }
+                }
+
+                g.restoreState();
+            }
         }
     }
 
