@@ -1836,7 +1836,7 @@ void Component::paintComponentAndChildren (Graphics& g)
                 g.saveState();
                 g.addTransform (*child.affineTransform_);
 
-                if (child.flags.dontClipGraphicsFlag || g.reduceClipRegion (child.getBounds()))
+                if ((child.flags.dontClipGraphicsFlag && ! g.isClipEmpty()) || g.reduceClipRegion (child.getBounds()))
                     child.paintWithinParentContext (g);
 
                 g.restoreState();
@@ -1904,17 +1904,9 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
     {
         if (componentTransparency < 255)
         {
-            Image temp (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                        getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
-
-            {
-                Graphics tempG (temp);
-                tempG.reduceClipRegion (g.getClipBounds());
-                paintEntireComponent (tempG, true);
-            }
-
-            g.setColour (Colours::black.withAlpha (getAlpha()));
-            g.drawImageAt (temp, 0, 0);
+            g.beginTransparencyLayer (getAlpha());
+            paintComponentAndChildren (g);
+            g.endTransparencyLayer();
         }
     }
     else

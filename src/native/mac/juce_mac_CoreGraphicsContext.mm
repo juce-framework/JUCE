@@ -325,6 +325,19 @@ public:
         }
     }
 
+    void beginTransparencyLayer (float opacity)
+    {
+        saveState();
+        CGContextSetAlpha (context, opacity);
+        CGContextBeginTransparencyLayer (context, 0);
+    }
+
+    void endTransparencyLayer()
+    {
+        CGContextEndTransparencyLayer (context);
+        restoreState();
+    }
+
     //==============================================================================
     void setFill (const FillType& fillType)
     {

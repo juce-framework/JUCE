@@ -176,6 +176,17 @@ bool Graphics::clipRegionIntersects (const Rectangle<int>& area) const
     return context->clipRegionIntersects (area);
 }
 
+void Graphics::beginTransparencyLayer (float layerOpacity)
+{
+    saveStateIfPending();
+    context->beginTransparencyLayer (layerOpacity);
+}
+
+void Graphics::endTransparencyLayer()
+{
+    context->endTransparencyLayer();
+}
+
 //==============================================================================
 void Graphics::setColour (const Colour& newColour)
 {

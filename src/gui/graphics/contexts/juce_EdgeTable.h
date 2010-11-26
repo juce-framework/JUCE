@@ -79,10 +79,10 @@ public:
     ~EdgeTable();
 
     //==============================================================================
-    void clipToRectangle (const Rectangle<int>& r) throw();
-    void excludeRectangle (const Rectangle<int>& r) throw();
+    void clipToRectangle (const Rectangle<int>& r);
+    void excludeRectangle (const Rectangle<int>& r);
     void clipToEdgeTable (const EdgeTable& other);
-    void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw();
+    void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels);
     bool isEmpty() throw();
     const Rectangle<int>& getMaximumBounds() const throw()       { return bounds; }
     void translate (float dx, int dy) throw();
@@ -92,7 +92,7 @@ public:
         This will shrink the table down to use as little memory as possible - useful for
         read-only tables that get stored and re-used for rendering.
     */
-    void optimiseTable() throw();
+    void optimiseTable();
 
 
     //==============================================================================
@@ -203,9 +203,9 @@ private:
     int maxEdgesPerLine, lineStrideElements;
     bool needToCheckEmptinesss;
 
-    void addEdgePoint (int x, int y, int winding) throw();
-    void remapTableForNumEdges (int newNumEdgesPerLine) throw();
-    void intersectWithEdgeTableLine (int y, const int* otherLine) throw();
+    void addEdgePoint (int x, int y, int winding);
+    void remapTableForNumEdges (int newNumEdgesPerLine);
+    void intersectWithEdgeTableLine (int y, const int* otherLine);
     void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
     void sanitiseLevels (bool useNonZeroWinding) throw();
     static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();

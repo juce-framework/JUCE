@@ -60,6 +60,9 @@ public:
     void saveState();
     void restoreState();
 
+    void beginTransparencyLayer (float opacity);
+    void endTransparencyLayer();
+
     bool clipRegionIntersects (const Rectangle<int>& r);
     const Rectangle<int> getClipBounds() const;
     bool isClipEmpty() const;

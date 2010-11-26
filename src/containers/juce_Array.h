@@ -779,7 +779,7 @@ public:
         if (howManyToRemove > numUsed)
             howManyToRemove = numUsed;
 
-        for (int i = 0; i < howManyToRemove; ++i)
+        for (int i = 1; i <= howManyToRemove; ++i)
             data.elements [numUsed - i].~ElementType();
 
         numUsed -= howManyToRemove;

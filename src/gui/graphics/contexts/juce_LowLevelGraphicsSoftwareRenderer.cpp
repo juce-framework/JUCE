@@ -1045,6 +1045,7 @@ public:
     virtual const Ptr clipToPath (const Path& p, const AffineTransform& transform) = 0;
     virtual const Ptr clipToEdgeTable (const EdgeTable& et) = 0;
     virtual const Ptr clipToImageAlpha (const Image& image, const AffineTransform& t, const bool betterQuality) = 0;
+    virtual const Ptr translated (const Point<int>& delta) = 0;
 
     virtual bool clipRegionIntersects (const Rectangle<int>& r) const = 0;
     virtual const Rectangle<int> getClipBounds() const = 0;
@@ -1327,6 +1328,12 @@ public:
         return edgeTable.isEmpty() ? 0 : this;
     }
 
+    const Ptr translated (const Point<int>& delta)
+    {
+        edgeTable.translate ((float) delta.getX(), delta.getY());
+        return edgeTable.isEmpty() ? 0 : this;
+    }
+
     bool clipRegionIntersects (const Rectangle<int>& r) const
     {
         return edgeTable.getMaximumBounds().intersects (r);
@@ -1477,6 +1484,12 @@ public:
     const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
         return Ptr (new ClipRegion_EdgeTable (clip))->clipToImageAlpha (image, transform, betterQuality);
+    }
+
+    const Ptr translated (const Point<int>& delta)
+    {
+        clip.offsetAll (delta.getX(), delta.getY());
+        return clip.isEmpty() ? 0 : this;
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -1788,21 +1801,25 @@ private:
 class LowLevelGraphicsSoftwareRenderer::SavedState
 {
 public:
-    SavedState (const Rectangle<int>& clip_, const int xOffset_, const int yOffset_)
-        : clip (new SoftwareRendererClasses::ClipRegion_RectangleList (clip_)),
-          xOffset (xOffset_), yOffset (yOffset_), isOnlyTranslated (true), interpolationQuality (Graphics::mediumResamplingQuality)
+    SavedState (const Image& image_, const Rectangle<int>& clip_, const int xOffset_, const int yOffset_)
+        : image (image_), clip (new SoftwareRendererClasses::ClipRegion_RectangleList (clip_)),
+          xOffset (xOffset_), yOffset (yOffset_), compositionAlpha (1.0f),
+          isOnlyTranslated (true), interpolationQuality (Graphics::mediumResamplingQuality)
     {
     }
 
-    SavedState (const RectangleList& clip_, const int xOffset_, const int yOffset_)
-        : clip (new SoftwareRendererClasses::ClipRegion_RectangleList (clip_)),
-          xOffset (xOffset_), yOffset (yOffset_), isOnlyTranslated (true), interpolationQuality (Graphics::mediumResamplingQuality)
+    SavedState (const Image& image_, const RectangleList& clip_, const int xOffset_, const int yOffset_)
+        : image (image_), clip (new SoftwareRendererClasses::ClipRegion_RectangleList (clip_)),
+          xOffset (xOffset_), yOffset (yOffset_), compositionAlpha (1.0f),
+          isOnlyTranslated (true), interpolationQuality (Graphics::mediumResamplingQuality)
     {
     }
 
     SavedState (const SavedState& other)
-        : clip (other.clip), complexTransform (other.complexTransform), xOffset (other.xOffset), yOffset (other.yOffset),
-          isOnlyTranslated (other.isOnlyTranslated), font (other.font), fillType (other.fillType), interpolationQuality (other.interpolationQuality)
+        : image (other.image), clip (other.clip), complexTransform (other.complexTransform),
+          xOffset (other.xOffset), yOffset (other.yOffset), compositionAlpha (other.compositionAlpha),
+          isOnlyTranslated (other.isOnlyTranslated), font (other.font), fillType (other.fillType),
+          interpolationQuality (other.interpolationQuality)
     {
     }
 
@@ -1937,6 +1954,11 @@ public:
         return false;
     }
 
+    const Rectangle<int> getUntransformedClipBounds() const
+    {
+        return clip != 0 ? clip->getClipBounds() : Rectangle<int>();
+    }
+
     const Rectangle<int> getClipBounds() const
     {
         if (clip != 0)
@@ -1950,8 +1972,41 @@ public:
         return Rectangle<int>();
     }
 
+    SavedState* beginTransparencyLayer (float opacity)
+    {
+        const Rectangle<int> clip (getUntransformedClipBounds());
+
+        SavedState* s = new SavedState (*this);
+        s->image = Image (Image::ARGB, clip.getWidth(), clip.getHeight(), true);
+        s->compositionAlpha = opacity;
+
+        if (s->isOnlyTranslated)
+        {
+            s->xOffset -= clip.getX();
+            s->yOffset -= clip.getY();
+        }
+        else
+        {
+            s->complexTransform = s->complexTransform.followedBy (AffineTransform::translation ((float) -clip.getX(), (float) -clip.getY()));
+        }
+
+        s->cloneClipIfMultiplyReferenced();
+        s->clip = s->clip->translated (-clip.getPosition());
+        return s;
+    }
+
+    void endTransparencyLayer (SavedState& layerState)
+    {
+        const Rectangle<int> clip (getUntransformedClipBounds());
+
+        const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
+        g->setOpacity (layerState.compositionAlpha);
+        g->drawImage (layerState.image, AffineTransform::translation ((float) clip.getX(),
+                                                                      (float) clip.getY()), false);
+    }
+
     //==============================================================================
-    void fillRect (Image& image, const Rectangle<int>& r, const bool replaceContents)
+    void fillRect (const Rectangle<int>& r, const bool replaceContents)
     {
         if (clip != 0)
         {
@@ -1968,19 +2023,19 @@ public:
                     const Rectangle<int> clipped (totalClip.getIntersection (r.translated (xOffset, yOffset)));
 
                     if (! clipped.isEmpty())
-                        fillShape (image, new SoftwareRendererClasses::ClipRegion_RectangleList (clipped), false);
+                        fillShape (new SoftwareRendererClasses::ClipRegion_RectangleList (clipped), false);
                 }
             }
             else
             {
                 Path p;
                 p.addRectangle (r);
-                fillPath (image, p, AffineTransform::identity);
+                fillPath (p, AffineTransform::identity);
             }
         }
     }
 
-    void fillRect (Image& image, const Rectangle<float>& r)
+    void fillRect (const Rectangle<float>& r)
     {
         if (clip != 0)
         {
@@ -1997,25 +2052,25 @@ public:
                     const Rectangle<float> clipped (totalClip.getIntersection (r.translated ((float) xOffset, (float) yOffset)));
 
                     if (! clipped.isEmpty())
-                        fillShape (image, new SoftwareRendererClasses::ClipRegion_EdgeTable (clipped), false);
+                        fillShape (new SoftwareRendererClasses::ClipRegion_EdgeTable (clipped), false);
                 }
             }
             else
             {
                 Path p;
                 p.addRectangle (r);
-                fillPath (image, p, AffineTransform::identity);
+                fillPath (p, AffineTransform::identity);
             }
         }
     }
 
-    void fillPath (Image& image, const Path& path, const AffineTransform& transform)
+    void fillPath (const Path& path, const AffineTransform& transform)
     {
         if (clip != 0)
-            fillShape (image, new SoftwareRendererClasses::ClipRegion_EdgeTable (clip->getClipBounds(), path, getTransformWith (transform)), false);
+            fillShape (new SoftwareRendererClasses::ClipRegion_EdgeTable (clip->getClipBounds(), path, getTransformWith (transform)), false);
     }
 
-    void fillEdgeTable (Image& image, const EdgeTable& edgeTable, const float x, const int y)
+    void fillEdgeTable (const EdgeTable& edgeTable, const float x, const int y)
     {
         jassert (isOnlyTranslated);
 
@@ -2024,11 +2079,11 @@ public:
             SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (edgeTable);
             SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);
             edgeTableClip->edgeTable.translate (x + xOffset, y + yOffset);
-            fillShape (image, shapeToFill, false);
+            fillShape (shapeToFill, false);
         }
     }
 
-    void fillShape (Image& image, SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill, const bool replaceContents)
+    void fillShape (SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill, const bool replaceContents)
     {
         jassert (clip != 0);
 
@@ -2060,7 +2115,7 @@ public:
             }
             else if (fillType.isTiledImage())
             {
-                renderImage (image, fillType.image, fillType.transform, shapeToFill);
+                renderImage (fillType.image, fillType.transform, shapeToFill);
             }
             else
             {
@@ -2070,11 +2125,11 @@ public:
     }
 
     //==============================================================================
-    void renderImage (Image& destImage, const Image& sourceImage, const AffineTransform& t, const SoftwareRendererClasses::ClipRegionBase* const tiledFillClipRegion)
+    void renderImage (const Image& sourceImage, const AffineTransform& t, const SoftwareRendererClasses::ClipRegionBase* const tiledFillClipRegion)
     {
         const AffineTransform transform (getTransformWith (t));
 
-        const Image::BitmapData destData (destImage, true);
+        const Image::BitmapData destData (image, true);
         const Image::BitmapData srcData (sourceImage, false);
         const int alpha = fillType.colour.getAlpha();
         const bool betterQuality = (interpolationQuality != Graphics::lowResamplingQuality);
@@ -2096,7 +2151,7 @@ public:
                 }
                 else
                 {
-                    SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (Rectangle<int> (tx, ty, sourceImage.getWidth(), sourceImage.getHeight()).getIntersection (destImage.getBounds())));
+                    SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (Rectangle<int> (tx, ty, sourceImage.getWidth(), sourceImage.getHeight()).getIntersection (image.getBounds())));
                     c = clip->applyClipTo (c);
 
                     if (c != 0)
@@ -2128,11 +2183,13 @@ public:
     }
 
     //==============================================================================
+    Image image;
     SoftwareRendererClasses::ClipRegionBase::Ptr clip;
 
 private:
     AffineTransform complexTransform;
     int xOffset, yOffset;
+    float compositionAlpha;
 
 public:
     bool isOnlyTranslated;
@@ -2170,16 +2227,16 @@ private:
 
 //==============================================================================
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image_)
-    : image (image_)
+    : image (image_),
+      currentState (new SavedState (image_, image_.getBounds(), 0, 0))
 {
-    currentState = new SavedState (image_.getBounds(), 0, 0);
 }
 
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image_, const int xOffset, const int yOffset,
                                                                     const RectangleList& initialClip)
-    : image (image_)
+    : image (image_),
+      currentState (new SavedState (image_, initialClip, xOffset, yOffset))
 {
-    currentState = new SavedState (initialClip, xOffset, yOffset);
 }
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
@@ -2263,6 +2320,19 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
     }
 }
 
+void LowLevelGraphicsSoftwareRenderer::beginTransparencyLayer (float opacity)
+{
+    saveState();
+    currentState = currentState->beginTransparencyLayer (opacity);
+}
+
+void LowLevelGraphicsSoftwareRenderer::endTransparencyLayer()
+{
+    const ScopedPointer<SavedState> layer (currentState);
+    restoreState();
+    currentState->endTransparencyLayer (*layer);
+}
+
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::setFill (const FillType& fillType)
 {
@@ -2282,18 +2352,17 @@ void LowLevelGraphicsSoftwareRenderer::setInterpolationQuality (Graphics::Resamp
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::fillRect (const Rectangle<int>& r, const bool replaceExistingContents)
 {
-    currentState->fillRect (image, r, replaceExistingContents);
+    currentState->fillRect (r, replaceExistingContents);
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineTransform& transform)
 {
-    currentState->fillPath (image, path, transform);
+    currentState->fillPath (path, transform);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
-    currentState->renderImage (image, sourceImage, transform,
-                               fillEntireClipAsTiles ? currentState->clip : 0);
+    currentState->renderImage (sourceImage, transform, fillEntireClipAsTiles ? currentState->clip : 0);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawLine (const Line <float>& line)
@@ -2306,13 +2375,13 @@ void LowLevelGraphicsSoftwareRenderer::drawLine (const Line <float>& line)
 void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, float top, float bottom)
 {
     if (bottom > top)
-        currentState->fillRect (image, Rectangle<float> ((float) x, top, 1.0f, bottom - top));
+        currentState->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top));
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, float left, float right)
 {
     if (right > left)
-        currentState->fillRect (image, Rectangle<float> (left, (float) y, right - left, 1.0f));
+        currentState->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f));
 }
 
 //==============================================================================
@@ -2322,10 +2391,10 @@ public:
     CachedGlyph() : glyph (0), lastAccessCount (0) {}
     ~CachedGlyph()  {}
 
-    void draw (SavedState& state, Image& image, const float x, const float y) const
+    void draw (SavedState& state, const float x, const float y) const
     {
         if (edgeTable != 0)
-            state.fillEdgeTable (image, *edgeTable, x, roundToInt (y));
+            state.fillEdgeTable (*edgeTable, x, roundToInt (y));
     }
 
     void generate (const Font& newFont, const int glyphNumber)
@@ -2383,7 +2452,7 @@ public:
     juce_DeclareSingleton_SingleThreaded_Minimal (GlyphCache);
 
     //==============================================================================
-    void drawGlyph (SavedState& state, Image& image, const Font& font, const int glyphNumber, float x, float y)
+    void drawGlyph (SavedState& state, const Font& font, const int glyphNumber, float x, float y)
     {
         ++accessCounter;
         int oldestCounter = std::numeric_limits<int>::max();
@@ -2397,7 +2466,7 @@ public:
             {
                 ++hits;
                 glyph->lastAccessCount = accessCounter;
-                glyph->draw (state, image, x, y);
+                glyph->draw (state, x, y);
                 return;
             }
 
@@ -2423,7 +2492,7 @@ public:
         jassert (oldest != 0);
         oldest->lastAccessCount = accessCounter;
         oldest->generate (font, glyphNumber);
-        oldest->draw (state, image, x, y);
+        oldest->draw (state, x, y);
     }
 
     //==============================================================================
@@ -2457,7 +2526,7 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
 
     if (transform.isOnlyTranslation() && currentState->isOnlyTranslated)
     {
-        GlyphCache::getInstance()->drawGlyph (*currentState, image, f, glyphNumber,
+        GlyphCache::getInstance()->drawGlyph (*currentState, f, glyphNumber,
                                               transform.getTranslationX(),
                                               transform.getTranslationY());
     }

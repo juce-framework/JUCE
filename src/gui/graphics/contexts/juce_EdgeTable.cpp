@@ -329,7 +329,7 @@ void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) throw()
     }
 }
 
-void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine) throw()
+void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine)
 {
     if (newNumEdgesPerLine != maxEdgesPerLine)
     {
@@ -347,7 +347,7 @@ void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine) throw()
     }
 }
 
-void EdgeTable::optimiseTable() throw()
+void EdgeTable::optimiseTable()
 {
     int maxLineElements = 0;
 
@@ -357,7 +357,7 @@ void EdgeTable::optimiseTable() throw()
     remapTableForNumEdges (maxLineElements);
 }
 
-void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw()
+void EdgeTable::addEdgePoint (const int x, const int y, const int winding)
 {
     jassert (y >= 0 && y < bounds.getHeight());
 
@@ -421,7 +421,7 @@ void EdgeTable::translate (float dx, const int dy) throw()
     }
 }
 
-void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine) throw()
+void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
 {
     jassert (y >= 0 && y < bounds.getHeight());
 
@@ -588,7 +588,7 @@ void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2)
 
 
 //==============================================================================
-void EdgeTable::clipToRectangle (const Rectangle<int>& r) throw()
+void EdgeTable::clipToRectangle (const Rectangle<int>& r)
 {
     const Rectangle<int> clipped (r.getIntersection (bounds));
 
@@ -630,7 +630,7 @@ void EdgeTable::clipToRectangle (const Rectangle<int>& r) throw()
     }
 }
 
-void EdgeTable::excludeRectangle (const Rectangle<int>& r) throw()
+void EdgeTable::excludeRectangle (const Rectangle<int>& r)
 {
     const Rectangle<int> clipped (r.getIntersection (bounds));
 
@@ -689,7 +689,7 @@ void EdgeTable::clipToEdgeTable (const EdgeTable& other)
     }
 }
 
-void EdgeTable::clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw()
+void EdgeTable::clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels)
 {
     y -= bounds.getY();
 

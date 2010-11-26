@@ -182,6 +182,16 @@ public:
         currentState = states.getLast();
     }
 
+    void beginTransparencyLayer (float opacity)
+    {
+        jassertfalse; //xxx todo
+    }
+
+    void endTransparencyLayer()
+    {
+        jassertfalse; //xxx todo
+    }
+
     void setFill (const FillType& fillType)
     {
         currentState->setFill (fillType);

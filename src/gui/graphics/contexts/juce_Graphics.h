@@ -613,6 +613,23 @@ public:
     */
     void restoreState();
 
+    /** Begins rendering to an off-screen bitmap which will later be flattened onto the current
+        context with the given opacity.
+
+        The context uses an internal stack of temporary image layers to do this. When you've
+        finished drawing to the layer, call endTransparencyLayer() to complete the operation and
+        composite the finished layer. Every call to beginTransparencyLayer() MUST be matched
+        by a corresponding call to endTransparencyLayer()!
+
+        This call also saves the current state, and endTransparencyLayer() restores it.
+    */
+    void beginTransparencyLayer (float layerOpacity);
+
+    /** Completes a drawing operation to a temporary semi-transparent buffer.
+        See beginTransparencyLayer() for more details.
+    */
+    void endTransparencyLayer();
+
     /** Moves the position of the context's origin.
 
         This changes the position that the context considers to be (0, 0) to

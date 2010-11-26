@@ -216,19 +216,22 @@ void DrawableComposite::childrenChanged()
     updateBoundsToFitChildren();
 }
 
+struct RentrancyCheckSetter
+{
+    RentrancyCheckSetter (bool& b_) : b (b_)     { b_ = true; }
+    ~RentrancyCheckSetter()                      { b = false; }
+
+private:
+    bool& b;
+
+    RentrancyCheckSetter (const RentrancyCheckSetter&);
+    RentrancyCheckSetter& operator= (const RentrancyCheckSetter&);
+};
+
 void DrawableComposite::updateBoundsToFitChildren()
 {
     if (! updateBoundsReentrant)
     {
-        struct RentrancyCheckSetter
-        {
-            RentrancyCheckSetter (bool& b_) : b (b_)     { b_ = true; }
-            ~RentrancyCheckSetter()                      { b = false; }
-
-        private:
-            bool& b;
-        };
-
         const RentrancyCheckSetter checkSetter (updateBoundsReentrant);
 
         Rectangle<int> childArea;

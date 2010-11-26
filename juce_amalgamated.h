@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	95
+#define JUCE_BUILDNUMBER	97
 
 /** Current Juce version number.
 
@@ -4764,7 +4764,7 @@ public:
 		if (howManyToRemove > numUsed)
 			howManyToRemove = numUsed;
 
-		for (int i = 0; i < howManyToRemove; ++i)
+		for (int i = 1; i <= howManyToRemove; ++i)
 			data.elements [numUsed - i].~ElementType();
 
 		numUsed -= howManyToRemove;
@@ -19586,11 +19586,12 @@ public:
 										float pivotX, float pivotY) throw();
 
 	/** Returns a transform which is the same as this one followed by a shear.
-
 		The shear is centred around the origin (0, 0).
 	*/
-	const AffineTransform sheared (float shearX,
-								   float shearY) const throw();
+	const AffineTransform sheared (float shearX, float shearY) const throw();
+
+	/** Returns a shear transform, centred around the origin (0, 0). */
+	static const AffineTransform shear (float shearX, float shearY) throw();
 
 	/** Returns a matrix which is the inverse operation of this one.
 
@@ -19648,11 +19649,6 @@ public:
 	float mat10, mat11, mat12;
 
 	juce_UseDebuggingNewOperator
-
-private:
-
-	const AffineTransform followedBy (float mat00, float mat01, float mat02,
-									  float mat10, float mat11, float mat12) const throw();
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
@@ -24949,6 +24945,23 @@ public:
 	*/
 	void restoreState();
 
+	/** Begins rendering to an off-screen bitmap which will later be flattened onto the current
+		context with the given opacity.
+
+		The context uses an internal stack of temporary image layers to do this. When you've
+		finished drawing to the layer, call endTransparencyLayer() to complete the operation and
+		composite the finished layer. Every call to beginTransparencyLayer() MUST be matched
+		by a corresponding call to endTransparencyLayer()!
+
+		This call also saves the current state, and endTransparencyLayer() restores it.
+	*/
+	void beginTransparencyLayer (float layerOpacity);
+
+	/** Completes a drawing operation to a temporary semi-transparent buffer.
+		See beginTransparencyLayer() for more details.
+	*/
+	void endTransparencyLayer();
+
 	/** Moves the position of the context's origin.
 
 		This changes the position that the context considers to be (0, 0) to
@@ -26182,6 +26195,15 @@ public:
 	*/
 	const Rectangle<int> getLocalBounds() const throw();
 
+	/** Returns the area of this component's parent which this component covers.
+
+		The returned area is relative to the parent's coordinate space.
+		If the component has an affine transform specified, then the resulting area will be
+		the smallest rectangle that fully covers the component's transformed bounding box.
+		If this component has no parent, the return value will simply be the same as getBounds().
+	*/
+	const Rectangle<int> getBoundsInParent() const throw();
+
 	/** Returns the region of this component that's not obscured by other, opaque components.
 
 		The RectangleList that is returned represents the area of this component
@@ -27136,7 +27158,18 @@ public:
 	*/
 	virtual void enablementChanged();
 
+	/** Changes the transparency of this component.
+		When painted, the entire component and all its children will be rendered
+		with this as the overall opacity level, where 0 is completely invisible, and
+		1.0 is fully opaque (i.e. normal).
+
+		@see getAlpha
+	*/
 	void setAlpha (float newAlpha);
+
+	/** Returns the component's current transparancy level.
+		See setAlpha() for more details.
+	*/
 	float getAlpha() const;
 
 	/** Changes the mouse cursor shape to use when the mouse is over this component.
@@ -37094,14 +37127,15 @@ public:
 		This is the same as show(), but uses a specific location (in global screen
 		co-ordinates) rather than the current mouse position.
 
-		Note that the co-ordinates don't specify the top-left of the menu - they
-		indicate a point of interest, and the menu will position itself nearby to
-		this point, trying to keep it fully on-screen.
+		The screenAreaToAttachTo parameter indicates a screen area to which the menu
+		will be adjacent. Depending on where this is, the menu will decide which edge to
+		attach itself to, in order to fit itself fully on-screen. If you just want to
+		trigger a menu at a specific point, you can pass in a rectangle of size (0, 0)
+		with the position that you want.
 
 		@see show()
 	*/
-	int showAt (int screenX,
-				int screenY,
+	int showAt (const Rectangle<int>& screenAreaToAttachTo,
 				int itemIdThatMustBeVisible = 0,
 				int minimumWidth = 0,
 				int maximumNumColumns = 0,
@@ -37229,14 +37263,9 @@ private:
 
 	void addSeparatorIfPending();
 
-	int showMenu (const Rectangle<int>& target,
-				  int itemIdThatMustBeVisible,
-				  int minimumWidth,
-				  int maximumNumColumns,
-				  int standardItemHeight,
-				  bool alignToRectangle,
-				  Component* componentAttachedTo,
-				  ModalComponentManager::Callback* callback);
+	int showMenu (const Rectangle<int>& target, int itemIdThatMustBeVisible,
+				  int minimumWidth, int maximumNumColumns, int standardItemHeight,
+				  Component* componentAttachedTo, ModalComponentManager::Callback* callback);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
@@ -40604,6 +40633,12 @@ public:
 
 	/** The name of the plugin. */
 	String name;
+
+	/** A more descriptive name for the plugin.
+		This may be the same as the 'name' field, but some plugins may provide an
+		alternative name.
+	*/
+	String descriptiveName;
 
 	/** The plugin format, e.g. "VST", "AudioUnit", etc.
 	*/
@@ -44814,7 +44849,7 @@ class DrawableComposite;
 
 	@see DrawableComposite, DrawableImage, DrawablePath, DrawableText
 */
-class JUCE_API  Drawable
+class JUCE_API  Drawable  : public Component
 {
 protected:
 
@@ -44835,6 +44870,11 @@ public:
 	virtual Drawable* createCopy() const = 0;
 
 	/** Renders this Drawable object.
+
+		Note that the preferred way to render a drawable in future is by using it
+		as a component and adding it to a parent, so you might want to consider that
+		before using this method.
+
 		@see drawWithin
 	*/
 	void draw (Graphics& g, float opacity,
@@ -44848,16 +44888,22 @@ public:
 		@code
 		draw (g, AffineTransform::translation (x, y)).
 		@endcode
+
+		Note that the preferred way to render a drawable in future is by using it
+		as a component and adding it to a parent, so you might want to consider that
+		before using this method.
 	*/
-	void drawAt (Graphics& g,
-				 float x, float y,
-				 float opacity) const;
+	void drawAt (Graphics& g, float x, float y, float opacity) const;
 
 	/** Renders the Drawable within a rectangle, scaling it to fit neatly inside without
 		changing its aspect-ratio.
 
 		The object can placed arbitrarily within the rectangle based on a Justification type,
 		and can either be made as big as possible, or just reduced to fit.
+
+		Note that the preferred way to render a drawable in future is by using it
+		as a component and adding it to a parent, so you might want to consider that
+		before using this method.
 
 		@param g			the graphics context to render onto
 		@param destArea		 the target rectangle to fit the drawable into
@@ -44870,49 +44916,18 @@ public:
 					 const RectanglePlacement& placement,
 					 float opacity) const;
 
-	/** Holds the information needed when telling a drawable to render itself.
-		@see Drawable::draw
+	/** Resets any transformations on this drawable, and positions its origin within
+		its parent component.
 	*/
-	class RenderingContext
-	{
-	public:
-		RenderingContext (Graphics& g, const AffineTransform& transform, float opacity) throw();
+	void setOriginWithOriginalSize (const Point<float>& originWithinParent);
 
-		Graphics& g;
-		AffineTransform transform;
-		float opacity;
-
-	private:
-		RenderingContext& operator= (const RenderingContext&);
-	};
-
-	/** Renders this Drawable object.
-		@see draw
+	/** Sets a transform for this drawable that will position it within the specified
+		area of its parent component.
 	*/
-	virtual void render (const RenderingContext& context) const = 0;
-
-	/** Returns the smallest rectangle that can contain this Drawable object.
-
-		Co-ordinates are relative to the object's own origin.
-	*/
-	virtual const Rectangle<float> getBounds() const = 0;
-
-	/** Returns true if the given point is somewhere inside this Drawable.
-
-		Co-ordinates are relative to the object's own origin.
-	*/
-	virtual bool hitTest (float x, float y) const = 0;
-
-	/** Returns the name given to this drawable.
-		@see setName
-	*/
-	const String& getName() const throw()		   { return name; }
-
-	/** Assigns a name to this drawable. */
-	void setName (const String& newName) throw()	{ name = newName; }
+	void setTransformToFit (const Rectangle<float>& areaInParent, const RectanglePlacement& placement);
 
 	/** Returns the DrawableComposite that contains this object, if there is one. */
-	DrawableComposite* getParent() const throw()	{ return parent; }
+	DrawableComposite* getParent() const;
 
 	/** Tries to turn some kind of image file into a drawable.
 
@@ -44982,7 +44997,7 @@ public:
 	/** Tries to refresh a Drawable from the same ValueTree that was used to create it.
 		@returns the damage rectangle that will need repainting due to any changes that were made.
 	*/
-	virtual const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider) = 0;
+	virtual void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider) = 0;
 
 	/** Creates a ValueTree to represent this Drawable.
 		The VarTree that is returned can be turned back into a Drawable with
@@ -44994,6 +45009,12 @@ public:
 
 	/** Returns the tag ID that is used for a ValueTree that stores this type of drawable.  */
 	virtual const Identifier getValueTreeType() const = 0;
+
+	/** Returns the area that this drawble covers.
+		The result is expressed in this drawable's own coordinate space, and does not take
+		into account any transforms that may be applied to the component.
+	*/
+	virtual const Rectangle<float> getDrawableBounds() const = 0;
 
 	/** Internal class used to manage ValueTrees that represent Drawables. */
 	class ValueTreeWrapperBase
@@ -45015,15 +45036,23 @@ public:
 
 protected:
 	friend class DrawableComposite;
-	/** @internal */
-	DrawableComposite* parent;
-	/** @internal */
-	virtual void invalidatePoints() = 0;
+	friend class DrawableShape;
+
 	/** @internal */
 	static Drawable* createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider);
+	/** @internal */
+	void transformContextToCorrectOrigin (Graphics& g);
+	/** @internal */
+	void markerHasMoved();
+	/** @internal */
+	void parentHierarchyChanged();
+	/** @internal */
+	void setBoundsToEnclose (const Rectangle<float>& area);
+
+	Point<int> originRelativeToComponent;
 
 private:
-	String name;
+	void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
 
 	Drawable (const Drawable&);
 	Drawable& operator= (const Drawable&);
@@ -45143,10 +45172,10 @@ public:
 	void setEdgeIndent (int numPixelsIndent);
 
 	/** Returns the image that the button is currently displaying. */
-	const Drawable* getCurrentImage() const throw();
-	const Drawable* getNormalImage() const throw();
-	const Drawable* getOverImage() const throw();
-	const Drawable* getDownImage() const throw();
+	Drawable* getCurrentImage() const throw();
+	Drawable* getNormalImage() const throw();
+	Drawable* getOverImage() const throw();
+	Drawable* getDownImage() const throw();
 
 	/** A set of colour IDs to use to change the colour of various aspects of the link.
 
@@ -45167,16 +45196,20 @@ protected:
 	void paintButton (Graphics& g,
 					  bool isMouseOverButton,
 					  bool isButtonDown);
+	/** @internal */
+	void buttonStateChanged();
+	/** @internal */
+	void resized();
 
 private:
 
 	ButtonStyle style;
 	ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage;
 	ScopedPointer <Drawable> normalImageOn, overImageOn, downImageOn, disabledImageOn;
+	Drawable* currentImage;
 	Colour backgroundOff, backgroundOn;
 	int edgeIndent;
 
-	void deleteImages();
 	DrawableButton (const DrawableButton&);
 	DrawableButton& operator= (const DrawableButton&);
 };
@@ -46347,11 +46380,20 @@ public:
 	void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown);
 	/** @internal */
 	void contentAreaChanged (const Rectangle<int>& newBounds);
+	/** @internal */
+	void buttonStateChanged();
+	/** @internal */
+	void resized();
+	/** @internal */
+	void enablementChanged();
 
 	juce_UseDebuggingNewOperator
 
 private:
-	ScopedPointer <Drawable> normalImage, toggledOnImage;
+	ScopedPointer<Drawable> normalImage, toggledOnImage;
+	Drawable* currentImage;
+
+	void updateDrawable();
 
 	ToolbarButton (const ToolbarButton&);
 	ToolbarButton& operator= (const ToolbarButton&);
@@ -59940,10 +59982,10 @@ public:
 	/** Destructor. */
 	~EdgeTable();
 
-	void clipToRectangle (const Rectangle<int>& r) throw();
-	void excludeRectangle (const Rectangle<int>& r) throw();
+	void clipToRectangle (const Rectangle<int>& r);
+	void excludeRectangle (const Rectangle<int>& r);
 	void clipToEdgeTable (const EdgeTable& other);
-	void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw();
+	void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels);
 	bool isEmpty() throw();
 	const Rectangle<int>& getMaximumBounds() const throw()	   { return bounds; }
 	void translate (float dx, int dy) throw();
@@ -59953,7 +59995,7 @@ public:
 		This will shrink the table down to use as little memory as possible - useful for
 		read-only tables that get stored and re-used for rendering.
 	*/
-	void optimiseTable() throw();
+	void optimiseTable();
 
 	/** Iterates the lines in the table, for rendering.
 
@@ -60061,9 +60103,9 @@ private:
 	int maxEdgesPerLine, lineStrideElements;
 	bool needToCheckEmptinesss;
 
-	void addEdgePoint (int x, int y, int winding) throw();
-	void remapTableForNumEdges (int newNumEdgesPerLine) throw();
-	void intersectWithEdgeTableLine (int y, const int* otherLine) throw();
+	void addEdgePoint (int x, int y, int winding);
+	void remapTableForNumEdges (int newNumEdgesPerLine);
+	void intersectWithEdgeTableLine (int y, const int* otherLine);
 	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
 	void sanitiseLevels (bool useNonZeroWinding) throw();
 	static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
@@ -60247,6 +60289,9 @@ public:
 	virtual void saveState() = 0;
 	virtual void restoreState() = 0;
 
+	virtual void beginTransparencyLayer (float opacity) = 0;
+	virtual void endTransparencyLayer() = 0;
+
 	virtual void setFill (const FillType& fillType) = 0;
 	virtual void setOpacity (float newOpacity) = 0;
 	virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
@@ -60304,6 +60349,9 @@ public:
 
 	void saveState();
 	void restoreState();
+
+	void beginTransparencyLayer (float opacity);
+	void endTransparencyLayer();
 
 	bool clipRegionIntersects (const Rectangle<int>& r);
 	const Rectangle<int> getClipBounds() const;
@@ -60406,6 +60454,9 @@ public:
 
 	void saveState();
 	void restoreState();
+
+	void beginTransparencyLayer (float opacity);
+	void endTransparencyLayer();
 
 	void setFill (const FillType& fillType);
 	void setOpacity (float opacity);
@@ -60524,7 +60575,7 @@ public:
 
 		@see getDrawable
 	*/
-	int getNumDrawables() const throw()					 { return drawables.size(); }
+	int getNumDrawables() const throw();
 
 	/** Returns one of the drawables that are contained in this one.
 
@@ -60536,7 +60587,7 @@ public:
 
 		@see getNumDrawables
 	*/
-	Drawable* getDrawable (int index) const throw()				 { return drawables [index]; }
+	Drawable* getDrawable (int index) const;
 
 	/** Looks for a child drawable with the specified name. */
 	Drawable* getDrawableWithName (const String& name) const throw();
@@ -60548,20 +60599,6 @@ public:
 		@see insertDrawable, getNumDrawables
 	*/
 	void bringToFront (int index);
-
-	/** Returns the main content rectangle.
-		The content area is actually defined by the markers named "left", "right", "top" and
-		"bottom", but this method is a shortcut that returns them all at once.
-		@see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
-	*/
-	const RelativeRectangle getContentArea() const;
-
-	/** Changes the main content area.
-		The content area is actually defined by the markers named "left", "right", "top" and
-		"bottom", but this method is a shortcut that sets them all at once.
-		@see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
-	*/
-	void setContentArea (const RelativeRectangle& newArea);
 
 	/** Sets the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
 		@see setContentArea
@@ -60577,6 +60614,20 @@ public:
 		be drawn at their untransformed positions.
 	*/
 	void resetBoundingBoxToContentArea();
+
+	/** Returns the main content rectangle.
+		The content area is actually defined by the markers named "left", "right", "top" and
+		"bottom", but this method is a shortcut that returns them all at once.
+		@see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
+	*/
+	const RelativeRectangle getContentArea() const;
+
+	/** Changes the main content area.
+		The content area is actually defined by the markers named "left", "right", "top" and
+		"bottom", but this method is a shortcut that sets them all at once.
+		@see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
+	*/
+	void setContentArea (const RelativeRectangle& newArea);
 
 	/** Resets the content area and the bounding transform to fit around the area occupied
 		by the child components (ignoring any markers).
@@ -60611,17 +60662,9 @@ public:
 	static const char* const contentBottomMarkerName;
 
 	/** @internal */
-	void render (const Drawable::RenderingContext& context) const;
-	/** @internal */
-	const Rectangle<float> getBounds() const;
-	/** @internal */
-	bool hitTest (float x, float y) const;
-	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void invalidatePoints();
-	/** @internal */
-	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
 	/** @internal */
@@ -60630,6 +60673,16 @@ public:
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 	/** @internal */
 	const Expression getSymbolValue (const String& symbol, const String& member) const;
+	/** @internal */
+	const Rectangle<float> getDrawableBounds() const;
+	/** @internal */
+	void markerHasMoved();
+	/** @internal */
+	void childBoundsChanged (Component*);
+	/** @internal */
+	void childrenChanged();
+	/** @internal */
+	void parentHierarchyChanged();
 
 	/** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
 	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
@@ -60674,12 +60727,12 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	OwnedArray <Drawable> drawables;
 	RelativeParallelogram bounds;
 	OwnedArray <Marker> markersX, markersY;
+	bool updateBoundsReentrant;
 
-	const Rectangle<float> getUntransformedBounds (bool includeMarkers) const;
-	const AffineTransform calculateTransform() const;
+	void refreshTransformFromBounds();
+	void updateBoundsToFitChildren();
 
 	DrawableComposite& operator= (const DrawableComposite&);
 };
@@ -60746,17 +60799,15 @@ public:
 	const RelativeParallelogram& getBoundingBox() const throw()	 { return bounds; }
 
 	/** @internal */
-	void render (const Drawable::RenderingContext& context) const;
+	void paint (Graphics& g);
 	/** @internal */
-	const Rectangle<float> getBounds() const;
-	/** @internal */
-	bool hitTest (float x, float y) const;
+	bool hitTest (int x, int y) const;
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void invalidatePoints();
+	const Rectangle<float> getDrawableBounds() const;
 	/** @internal */
-	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
 	/** @internal */
@@ -60796,7 +60847,7 @@ private:
 	Colour overlayColour;
 	RelativeParallelogram bounds;
 
-	const AffineTransform calculateTransform() const;
+	void refreshTransformFromBounds();
 
 	DrawableImage& operator= (const DrawableImage&);
 };
@@ -60910,13 +60961,11 @@ public:
 	};
 
 	/** @internal */
-	void invalidatePoints();
+	const Rectangle<float> getDrawableBounds() const;
 	/** @internal */
-	void render (const Drawable::RenderingContext& context) const;
+	void paint (Graphics& g);
 	/** @internal */
-	const Rectangle<float> getBounds() const;
-	/** @internal */
-	bool hitTest (float x, float y) const;
+	bool hitTest (int x, int y) const;
 
 protected:
 
@@ -60939,19 +60988,11 @@ protected:
 	/** Writes the stroke and fill details to a FillAndStrokeState object. */
 	void writeTo (FillAndStrokeState& state, ImageProvider* imageProvider, UndoManager* undoManager) const;
 
-	/** Returns the current cached path outline. */
-	const Path& getCachedPath() const;
-	/** Returns the current cached stroke outline. */
-	const Path& getCachedStrokePath() const;
-
 	PathStrokeType strokeType;
-	mutable Path cachedPath, cachedStroke;
+	Path path, strokePath;
 
 private:
 	FillType mainFill, strokeFill;
-	mutable bool pathNeedsUpdating, strokeNeedsUpdating;
-
-	static void setBrush (const Drawable::RenderingContext& context, const FillType& type);
 
 	DrawableShape& operator= (const DrawableShape&);
 };
@@ -60991,7 +61032,7 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
 	/** @internal */
@@ -61105,7 +61146,7 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
 	/** @internal */
@@ -61211,23 +61252,19 @@ public:
 	void setFontSizeControlPoint (const RelativePoint& newPoint);
 
 	/** @internal */
-	void render (const Drawable::RenderingContext& context) const;
-	/** @internal */
-	const Rectangle<float> getBounds() const;
-	/** @internal */
-	bool hitTest (float x, float y) const;
+	void paint (Graphics& g);
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void invalidatePoints();
-	/** @internal */
-	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
 	/** @internal */
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
+	/** @internal */
+	const Rectangle<float> getDrawableBounds() const;
 
 	/** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
 	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
@@ -61267,6 +61304,8 @@ private:
 	String text;
 	Colour colour;
 	Justification justification;
+
+	void refreshBounds();
 
 	DrawableText& operator= (const DrawableText&);
 };

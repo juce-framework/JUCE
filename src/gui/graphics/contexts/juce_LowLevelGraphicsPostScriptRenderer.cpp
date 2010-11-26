@@ -192,6 +192,14 @@ void LowLevelGraphicsPostScriptRenderer::restoreState()
         stateStack.removeLast();
 }
 
+void LowLevelGraphicsPostScriptRenderer::beginTransparencyLayer (float)
+{
+}
+
+void LowLevelGraphicsPostScriptRenderer::endTransparencyLayer()
+{
+}
+
 //==============================================================================
 void LowLevelGraphicsPostScriptRenderer::writeClip()
 {

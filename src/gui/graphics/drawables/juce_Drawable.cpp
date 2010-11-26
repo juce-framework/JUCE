@@ -61,8 +61,8 @@ void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& 
     g.saveState();
     const float oldOpacity = getAlpha();
     setAlpha (opacity);
-    g.addTransform (AffineTransform::translation (-originRelativeToComponent.getX(),
-                                                  -originRelativeToComponent.getY())
+    g.addTransform (AffineTransform::translation ((float) -originRelativeToComponent.getX(),
+                                                  (float) -originRelativeToComponent.getY())
                         .followedBy (getTransform())
                         .followedBy (transform));
 

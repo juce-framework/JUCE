@@ -151,8 +151,8 @@ const Rectangle<float> DrawableShape::getDrawableBounds() const
 
 bool DrawableShape::hitTest (int x, int y) const
 {
-    const float globalX = x - originRelativeToComponent.getX();
-    const float globalY = y - originRelativeToComponent.getY();
+    const float globalX = (float) (x - originRelativeToComponent.getX());
+    const float globalY = (float) (y - originRelativeToComponent.getY());
 
     return path.contains (globalX, globalY)
             || (isStrokeVisible() && strokePath.contains (globalX, globalY));

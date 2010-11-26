@@ -431,7 +431,7 @@ void Button::mouseUp (const MouseEvent& e)
         internalClickCallback (e.mods);
 }
 
-void Button::mouseDrag (const MouseEvent& e)
+void Button::mouseDrag (const MouseEvent&)
 {
     const ButtonState oldState = buttonState;
     updateState (isMouseOver(), true);

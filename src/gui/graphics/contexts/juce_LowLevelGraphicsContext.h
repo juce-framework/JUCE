@@ -81,6 +81,9 @@ public:
     virtual void saveState() = 0;
     virtual void restoreState() = 0;
 
+    virtual void beginTransparencyLayer (float opacity) = 0;
+    virtual void endTransparencyLayer() = 0;
+
     //==============================================================================
     virtual void setFill (const FillType& fillType) = 0;
     virtual void setOpacity (float newOpacity) = 0;

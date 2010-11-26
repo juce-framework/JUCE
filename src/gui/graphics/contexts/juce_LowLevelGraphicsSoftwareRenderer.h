@@ -64,6 +64,9 @@ public:
     void saveState();
     void restoreState();
 
+    void beginTransparencyLayer (float opacity);
+    void endTransparencyLayer();
+
     //==============================================================================
     void setFill (const FillType& fillType);
     void setOpacity (float opacity);
