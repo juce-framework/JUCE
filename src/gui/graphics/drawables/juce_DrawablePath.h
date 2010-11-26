@@ -64,7 +64,7 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+    void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
     const ValueTree createValueTree (ImageProvider* imageProvider) const;
     /** @internal */

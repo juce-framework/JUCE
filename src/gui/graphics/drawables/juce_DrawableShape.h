@@ -127,13 +127,11 @@ public:
     };
 
     /** @internal */
-    void invalidatePoints();
+    const Rectangle<float> getDrawableBounds() const;
     /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
+    void paint (Graphics& g);
     /** @internal */
-    const Rectangle<float> getBounds() const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
+    bool hitTest (int x, int y) const;
 
 protected:
     //==============================================================================
@@ -156,20 +154,13 @@ protected:
     /** Writes the stroke and fill details to a FillAndStrokeState object. */
     void writeTo (FillAndStrokeState& state, ImageProvider* imageProvider, UndoManager* undoManager) const;
 
-    /** Returns the current cached path outline. */
-    const Path& getCachedPath() const;
-    /** Returns the current cached stroke outline. */
-    const Path& getCachedStrokePath() const;
 
     //==============================================================================
     PathStrokeType strokeType;
-    mutable Path cachedPath, cachedStroke;
+    Path path, strokePath;
 
 private:
     FillType mainFill, strokeFill;
-    mutable bool pathNeedsUpdating, strokeNeedsUpdating;
-
-    static void setBrush (const Drawable::RenderingContext& context, const FillType& type);
 
     DrawableShape& operator= (const DrawableShape&);
 };

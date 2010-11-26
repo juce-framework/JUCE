@@ -162,27 +162,22 @@ public:
         drawable = newDrawable;
         drawable.addListener (this);
         drawableObject = Drawable::createFromValueTree (drawable, 0); // xxx image provider missing
+        addAndMakeVisible (drawableObject);
         resized();
         repaint();
     }
 
-    void paint (Graphics& g)
-    {
-        if (drawableObject != 0)
-            drawableObject->drawAt (g, 0, 0, 1.0f);
-    }
-
     void resized()
     {
-        DrawableComposite* dc = dynamic_cast <DrawableComposite*> (static_cast <Drawable*> (drawableObject));
+/*        DrawableComposite* dc = dynamic_cast <DrawableComposite*> (static_cast <Drawable*> (drawableObject));
 
         if (dc != 0)
         {
             const RelativeCoordinate origin, right (getWidth()), bottom (getHeight());
 
             dc->setContentArea (RelativeRectangle (origin, right, origin, bottom));
-            dc->resetBoundingBoxToContentArea();
-        }
+            //dc->resetBoundingBoxToContentArea();
+        }*/
     }
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&)       { updateGraphics(); }
@@ -196,10 +191,7 @@ private:
     void updateGraphics()
     {
         if (drawableObject != 0)
-        {
-            const Rectangle<float> dirtyArea (drawableObject->refreshFromValueTree (drawable, 0));
-            repaint (dirtyArea.getSmallestIntegerContainer());
-        }
+            drawableObject->refreshFromValueTree (drawable, 0);
     }
 };
 

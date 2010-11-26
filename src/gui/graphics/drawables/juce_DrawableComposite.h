@@ -93,7 +93,7 @@ public:
 
         @see getDrawable
     */
-    int getNumDrawables() const throw()                                         { return drawables.size(); }
+    int getNumDrawables() const throw();
 
     /** Returns one of the drawables that are contained in this one.
 
@@ -105,7 +105,7 @@ public:
 
         @see getNumDrawables
     */
-    Drawable* getDrawable (int index) const throw()                             { return drawables [index]; }
+    Drawable* getDrawable (int index) const;
 
     /** Looks for a child drawable with the specified name. */
     Drawable* getDrawableWithName (const String& name) const throw();
@@ -119,20 +119,6 @@ public:
     void bringToFront (int index);
 
     //==============================================================================
-    /** Returns the main content rectangle.
-        The content area is actually defined by the markers named "left", "right", "top" and
-        "bottom", but this method is a shortcut that returns them all at once.
-        @see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
-    */
-    const RelativeRectangle getContentArea() const;
-
-    /** Changes the main content area.
-        The content area is actually defined by the markers named "left", "right", "top" and
-        "bottom", but this method is a shortcut that sets them all at once.
-        @see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
-    */
-    void setContentArea (const RelativeRectangle& newArea);
-
     /** Sets the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
         @see setContentArea
     */
@@ -147,6 +133,20 @@ public:
         be drawn at their untransformed positions.
     */
     void resetBoundingBoxToContentArea();
+
+    /** Returns the main content rectangle.
+        The content area is actually defined by the markers named "left", "right", "top" and
+        "bottom", but this method is a shortcut that returns them all at once.
+        @see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
+    */
+    const RelativeRectangle getContentArea() const;
+
+    /** Changes the main content area.
+        The content area is actually defined by the markers named "left", "right", "top" and
+        "bottom", but this method is a shortcut that sets them all at once.
+        @see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
+    */
+    void setContentArea (const RelativeRectangle& newArea);
 
     /** Resets the content area and the bounding transform to fit around the area occupied
         by the child components (ignoring any markers).
@@ -183,17 +183,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
-    /** @internal */
-    const Rectangle<float> getBounds() const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
-    /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    void invalidatePoints();
-    /** @internal */
-    const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+    void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
     const ValueTree createValueTree (ImageProvider* imageProvider) const;
     /** @internal */
@@ -202,6 +194,16 @@ public:
     const Identifier getValueTreeType() const    { return valueTreeType; }
     /** @internal */
     const Expression getSymbolValue (const String& symbol, const String& member) const;
+    /** @internal */
+    const Rectangle<float> getDrawableBounds() const;
+    /** @internal */
+    void markerHasMoved();
+    /** @internal */
+    void childBoundsChanged (Component*);
+    /** @internal */
+    void childrenChanged();
+    /** @internal */
+    void parentHierarchyChanged();
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
@@ -248,12 +250,12 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    OwnedArray <Drawable> drawables;
     RelativeParallelogram bounds;
     OwnedArray <Marker> markersX, markersY;
+    bool updateBoundsReentrant;
 
-    const Rectangle<float> getUntransformedBounds (bool includeMarkers) const;
-    const AffineTransform calculateTransform() const;
+    void refreshTransformFromBounds();
+    void updateBoundsToFitChildren();
 
     DrawableComposite& operator= (const DrawableComposite&);
 };

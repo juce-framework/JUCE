@@ -59,12 +59,16 @@ void DrawableImage::setImage (const Image& imageToUse)
 {
     image = imageToUse;
 
+    setBounds (imageToUse.getBounds());
+
     if (image.isValid())
     {
         bounds.topLeft = RelativePoint (Point<float> (0.0f, 0.0f));
         bounds.topRight = RelativePoint (Point<float> ((float) image.getWidth(), 0.0f));
         bounds.bottomLeft = RelativePoint (Point<float> (0.0f, (float) image.getHeight()));
     }
+
+    refreshTransformFromBounds();
 }
 
 void DrawableImage::setOpacity (const float newOpacity)
@@ -80,77 +84,62 @@ void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
 void DrawableImage::setBoundingBox (const RelativeParallelogram& newBounds)
 {
     bounds = newBounds;
+    refreshTransformFromBounds();
 }
 
 //==============================================================================
-const AffineTransform DrawableImage::calculateTransform() const
+void DrawableImage::refreshTransformFromBounds()
 {
-    if (image.isNull())
-        return AffineTransform::identity;
+    if (! image.isNull())
+    {
+        Point<float> resolved[3];
+        bounds.resolveThreePoints (resolved, getParent());
 
-    Point<float> resolved[3];
-    bounds.resolveThreePoints (resolved, parent);
+        const Point<float> tr (resolved[0] + (resolved[1] - resolved[0]) / (float) image.getWidth());
+        const Point<float> bl (resolved[0] + (resolved[2] - resolved[0]) / (float) image.getHeight());
 
-    const Point<float> tr (resolved[0] + (resolved[1] - resolved[0]) / (float) image.getWidth());
-    const Point<float> bl (resolved[0] + (resolved[2] - resolved[0]) / (float) image.getHeight());
+        AffineTransform t (AffineTransform::fromTargetPoints (resolved[0].getX(), resolved[0].getY(),
+                                                              tr.getX(), tr.getY(),
+                                                              bl.getX(), bl.getY()));
 
-    return AffineTransform::fromTargetPoints (resolved[0].getX(), resolved[0].getY(),
-                                              tr.getX(), tr.getY(),
-                                              bl.getX(), bl.getY());
+        if (! t.isSingularity())
+            setTransform (t);
+    }
 }
 
-void DrawableImage::render (const Drawable::RenderingContext& context) const
+//==============================================================================
+void DrawableImage::paint (Graphics& g)
 {
     if (image.isValid())
     {
-        const AffineTransform t (calculateTransform().followedBy (context.transform));
-
         if (opacity > 0.0f && ! overlayColour.isOpaque())
         {
-            context.g.setOpacity (context.opacity * opacity);
-            context.g.drawImageTransformed (image, t, false);
+            g.setOpacity (opacity);
+            g.drawImageAt (image, 0, 0, false);
         }
 
         if (! overlayColour.isTransparent())
         {
-            context.g.setColour (overlayColour.withMultipliedAlpha (context.opacity));
-            context.g.drawImageTransformed (image, t, true);
+            g.setColour (overlayColour.withMultipliedAlpha (opacity));
+            g.drawImageAt (image, 0, 0, true);
         }
     }
 }
 
-const Rectangle<float> DrawableImage::getBounds() const
+const Rectangle<float> DrawableImage::getDrawableBounds() const
 {
-    if (image.isNull())
-        return Rectangle<float>();
-
-    return bounds.getBounds (parent);
+    return image.getBounds().toFloat();
 }
 
-bool DrawableImage::hitTest (float x, float y) const
+bool DrawableImage::hitTest (int x, int y) const
 {
-    if (image.isNull())
-        return false;
-
-    calculateTransform().inverted().transformPoint (x, y);
-
-    const int ix = roundToInt (x);
-    const int iy = roundToInt (y);
-
-    return ix >= 0
-            && iy >= 0
-            && ix < image.getWidth()
-            && iy < image.getHeight()
-            && image.getPixelAt (ix, iy).getAlpha() >= 127;
+    return (! image.isNull())
+            && image.getPixelAt (x, y).getAlpha() >= 127;
 }
 
 Drawable* DrawableImage::createCopy() const
 {
     return new DrawableImage (*this);
-}
-
-void DrawableImage::invalidatePoints()
-{
 }
 
 //==============================================================================
@@ -237,7 +226,7 @@ void DrawableImage::ValueTreeWrapper::setBoundingBox (const RelativeParallelogra
 
 
 //==============================================================================
-const Rectangle<float> DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
     const ValueTreeWrapper controller (tree);
     setName (controller.getID());
@@ -255,19 +244,14 @@ const Rectangle<float> DrawableImage::refreshFromValueTree (const ValueTree& tre
 
     const RelativeParallelogram newBounds (controller.getBoundingBox());
 
-    if (newOpacity != opacity || overlayColour != newOverlayColour || image != newImage || bounds != newBounds)
+    if (newOpacity != opacity || overlayColour != newOverlayColour || image != newImage)
     {
-        const Rectangle<float> damage (getBounds());
-
+        repaint();
         opacity = newOpacity;
         overlayColour = newOverlayColour;
         bounds = newBounds;
-        image = newImage;
-
-        return damage.getUnion (getBounds());
+        setImage (newImage);
     }
-
-    return Rectangle<float>();
 }
 
 const ValueTree DrawableImage::createValueTree (ImageProvider* imageProvider) const

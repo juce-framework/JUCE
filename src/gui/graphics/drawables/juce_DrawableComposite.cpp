@@ -36,7 +36,8 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 DrawableComposite::DrawableComposite()
-    : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f))
+    : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f)),
+      updateBoundsReentrant (false)
 {
     setContentArea (RelativeRectangle (RelativeCoordinate (0.0),
                                        RelativeCoordinate (100.0),
@@ -48,8 +49,8 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
 {
     bounds = other.bounds;
 
-    for (int i = 0; i < other.drawables.size(); ++i)
-        drawables.add (other.drawables.getUnchecked(i)->createCopy());
+    for (int i = 0; i < other.getNumDrawables(); ++i)
+        insertDrawable (other.getDrawable(i)->createCopy());
 
     markersX.addCopiesOf (other.markersX);
     markersY.addCopiesOf (other.markersY);
@@ -57,18 +58,24 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
 
 DrawableComposite::~DrawableComposite()
 {
+    deleteAllChildren();
 }
 
 //==============================================================================
+int DrawableComposite::getNumDrawables() const throw()
+{
+    return getNumChildComponents();
+}
+
+Drawable* DrawableComposite::getDrawable (int index) const
+{
+    return dynamic_cast <Drawable*> (getChildComponent (index));
+}
+
 void DrawableComposite::insertDrawable (Drawable* drawable, const int index)
 {
     if (drawable != 0)
-    {
-        jassert (! drawables.contains (drawable)); // trying to add a drawable that's already in here!
-        jassert (drawable->parent == 0); // A drawable can only live inside one parent at a time!
-        drawables.insert (index, drawable);
-        drawable->parent = this;
-    }
+        addAndMakeVisible (drawable, index);
 }
 
 void DrawableComposite::insertDrawable (const Drawable& drawable, const int index)
@@ -78,50 +85,60 @@ void DrawableComposite::insertDrawable (const Drawable& drawable, const int inde
 
 void DrawableComposite::removeDrawable (const int index, const bool deleteDrawable)
 {
-    drawables.remove (index, deleteDrawable);
+    Drawable* const d = getDrawable (index);
+
+    if (deleteDrawable)
+        delete d;
+    else
+        removeChildComponent (d);
 }
 
 Drawable* DrawableComposite::getDrawableWithName (const String& name) const throw()
 {
-    for (int i = drawables.size(); --i >= 0;)
-        if (drawables.getUnchecked(i)->getName() == name)
-            return drawables.getUnchecked(i);
+    for (int i = getNumChildComponents(); --i >= 0;)
+        if (getChildComponent(i)->getName() == name)
+            return getDrawable (i);
 
     return 0;
 }
 
 void DrawableComposite::bringToFront (const int index)
 {
-    if (index >= 0 && index < drawables.size() - 1)
-        drawables.move (index, -1);
+    Drawable* d = getDrawable (index);
+    if (d != 0)
+        d->toFront (false);
 }
 
-void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBoundingBox)
+const Rectangle<float> DrawableComposite::getDrawableBounds() const
 {
-    bounds = newBoundingBox;
+    Rectangle<float> r;
+
+    for (int i = getNumDrawables(); --i >= 0;)
+    {
+        Drawable* const d = getDrawable(i);
+
+        if (d != 0)
+        {
+            if (d->isTransformed())
+                r = r.getUnion (d->getDrawableBounds().transformed (d->getTransform()));
+            else
+                r = r.getUnion (d->getDrawableBounds());
+        }
+    }
+
+    return r;
 }
 
-//==============================================================================
-DrawableComposite::Marker::Marker (const DrawableComposite::Marker& other)
-    : name (other.name), position (other.position)
+void DrawableComposite::markerHasMoved()
 {
-}
+    for (int i = getNumDrawables(); --i >= 0;)
+    {
+        Drawable* const d = getDrawable(i);
 
-DrawableComposite::Marker::Marker (const String& name_, const RelativeCoordinate& position_)
-    : name (name_), position (position_)
-{
+        if (d != 0)
+            d->markerHasMoved();
+    }
 }
-
-bool DrawableComposite::Marker::operator!= (const DrawableComposite::Marker& other) const throw()
-{
-    return name != other.name || position != other.position;
-}
-
-//==============================================================================
-const char* const DrawableComposite::contentLeftMarkerName = "left";
-const char* const DrawableComposite::contentRightMarkerName = "right";
-const char* const DrawableComposite::contentTopMarkerName = "top";
-const char* const DrawableComposite::contentBottomMarkerName = "bottom";
 
 const RelativeRectangle DrawableComposite::getContentArea() const
 {
@@ -138,6 +155,13 @@ void DrawableComposite::setContentArea (const RelativeRectangle& newArea)
     setMarker (contentRightMarkerName, true, newArea.right);
     setMarker (contentTopMarkerName, false, newArea.top);
     setMarker (contentBottomMarkerName, false, newArea.bottom);
+    refreshTransformFromBounds();
+}
+
+void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBoundingBox)
+{
+    bounds = newBoundingBox;
+    refreshTransformFromBounds();
 }
 
 void DrawableComposite::resetBoundingBoxToContentArea()
@@ -151,13 +175,109 @@ void DrawableComposite::resetBoundingBoxToContentArea()
 
 void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
 {
-    const Rectangle<float> bounds (getUntransformedBounds (false));
+    const Rectangle<float> activeArea (getDrawableBounds());
 
-    setContentArea (RelativeRectangle (RelativeCoordinate (bounds.getX()),
-                                       RelativeCoordinate (bounds.getRight()),
-                                       RelativeCoordinate (bounds.getY()),
-                                       RelativeCoordinate (bounds.getBottom())));
+    setContentArea (RelativeRectangle (RelativeCoordinate (activeArea.getX()),
+                                       RelativeCoordinate (activeArea.getRight()),
+                                       RelativeCoordinate (activeArea.getY()),
+                                       RelativeCoordinate (activeArea.getBottom())));
     resetBoundingBoxToContentArea();
+}
+
+void DrawableComposite::refreshTransformFromBounds()
+{
+    Point<float> resolved[3];
+    bounds.resolveThreePoints (resolved, getParent());
+
+    const Rectangle<float> content (getContentArea().resolve (getParent()));
+
+    AffineTransform t (AffineTransform::fromTargetPoints (content.getX(), content.getY(), resolved[0].getX(), resolved[0].getY(),
+                                                          content.getRight(), content.getY(), resolved[1].getX(), resolved[1].getY(),
+                                                          content.getX(), content.getBottom(), resolved[2].getX(), resolved[2].getY()));
+
+    if (! t.isSingularity())
+        setTransform (t);
+}
+
+void DrawableComposite::parentHierarchyChanged()
+{
+    DrawableComposite* parent = getParent();
+    if (parent != 0)
+        originRelativeToComponent = parent->originRelativeToComponent - getPosition();
+}
+
+void DrawableComposite::childBoundsChanged (Component*)
+{
+    updateBoundsToFitChildren();
+}
+
+void DrawableComposite::childrenChanged()
+{
+    updateBoundsToFitChildren();
+}
+
+void DrawableComposite::updateBoundsToFitChildren()
+{
+    if (! updateBoundsReentrant)
+    {
+        struct RentrancyCheckSetter
+        {
+            RentrancyCheckSetter (bool& b_) : b (b_)     { b_ = true; }
+            ~RentrancyCheckSetter()                      { b = false; }
+
+        private:
+            bool& b;
+        };
+
+        const RentrancyCheckSetter checkSetter (updateBoundsReentrant);
+
+        Rectangle<int> childArea;
+
+        for (int i = getNumChildComponents(); --i >= 0;)
+            childArea = childArea.getUnion (getChildComponent(i)->getBoundsInParent());
+
+        const Point<int> delta (childArea.getPosition());
+        childArea += getPosition();
+
+        if (childArea != getBounds())
+        {
+            if (! delta.isOrigin())
+            {
+                originRelativeToComponent -= delta;
+
+                for (int i = getNumChildComponents(); --i >= 0;)
+                {
+                    Component* const c = getChildComponent(i);
+
+                    if (c != 0)
+                        c->setBounds (c->getBounds() - delta);
+                }
+            }
+
+            setBounds (childArea);
+        }
+    }
+}
+
+//==============================================================================
+const char* const DrawableComposite::contentLeftMarkerName = "left";
+const char* const DrawableComposite::contentRightMarkerName = "right";
+const char* const DrawableComposite::contentTopMarkerName = "top";
+const char* const DrawableComposite::contentBottomMarkerName = "bottom";
+
+DrawableComposite::Marker::Marker (const DrawableComposite::Marker& other)
+    : name (other.name), position (other.position)
+{
+}
+
+DrawableComposite::Marker::Marker (const String& name_, const RelativeCoordinate& position_)
+    : name (name_), position (position_)
+{
+}
+
+bool DrawableComposite::Marker::operator!= (const DrawableComposite::Marker& other) const throw()
+{
+    return name != other.name || position != other.position;
 }
 
 int DrawableComposite::getNumMarkers (const bool xAxis) const throw()
@@ -182,7 +302,7 @@ void DrawableComposite::setMarker (const String& name, const bool xAxis, const R
             if (m->position != position)
             {
                 m->position = position;
-                invalidatePoints();
+                markerHasMoved();
             }
 
             return;
@@ -190,7 +310,7 @@ void DrawableComposite::setMarker (const String& name, const bool xAxis, const R
     }
 
     (xAxis ? markersX : markersY).add (new Marker (name, position));
-    invalidatePoints();
+    markerHasMoved();
 }
 
 void DrawableComposite::removeMarker (const bool xAxis, const int index)
@@ -202,55 +322,6 @@ void DrawableComposite::removeMarker (const bool xAxis, const int index)
 }
 
 //==============================================================================
-const AffineTransform DrawableComposite::calculateTransform() const
-{
-    Point<float> resolved[3];
-    bounds.resolveThreePoints (resolved, parent);
-
-    const Rectangle<float> content (getContentArea().resolve (parent));
-
-    return AffineTransform::fromTargetPoints (content.getX(), content.getY(), resolved[0].getX(), resolved[0].getY(),
-                                              content.getRight(), content.getY(), resolved[1].getX(), resolved[1].getY(),
-                                              content.getX(), content.getBottom(), resolved[2].getX(), resolved[2].getY());
-}
-
-void DrawableComposite::render (const Drawable::RenderingContext& context) const
-{
-    if (drawables.size() > 0 && context.opacity > 0)
-    {
-        if (context.opacity >= 1.0f || drawables.size() == 1)
-        {
-            Drawable::RenderingContext contextCopy (context);
-            contextCopy.transform = calculateTransform().followedBy (context.transform);
-
-            for (int i = 0; i < drawables.size(); ++i)
-                drawables.getUnchecked(i)->render (contextCopy);
-        }
-        else
-        {
-            // To correctly render a whole composite layer with an overall transparency,
-            // we need to render everything opaquely into a temp buffer, then blend that
-            // with the target opacity...
-            const Rectangle<int> clipBounds (context.g.getClipBounds());
-
-            if (! clipBounds.isEmpty())
-            {
-                Image tempImage (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true);
-
-                {
-                    Graphics tempG (tempImage);
-                    tempG.setOrigin (-clipBounds.getX(), -clipBounds.getY());
-                    Drawable::RenderingContext tempContext (tempG, context.transform, 1.0f);
-                    render (tempContext);
-                }
-
-                context.g.setOpacity (context.opacity);
-                context.g.drawImageAt (tempImage, clipBounds.getX(), clipBounds.getY());
-            }
-        }
-    }
-}
-
 const Expression DrawableComposite::getSymbolValue (const String& symbol, const String& member) const
 {
     jassert (member.isEmpty()) // the only symbols available in a Drawable are markers.
@@ -273,97 +344,9 @@ const Expression DrawableComposite::getSymbolValue (const String& symbol, const 
     throw Expression::EvaluationError (symbol, member);
 }
 
-const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool includeMarkers) const
-{
-    Rectangle<float> bounds;
-
-    int i;
-    for (i = 0; i < drawables.size(); ++i)
-        bounds = bounds.getUnion (drawables.getUnchecked(i)->getBounds());
-
-    if (includeMarkers)
-    {
-        if (markersX.size() > 0)
-        {
-            float minX = std::numeric_limits<float>::max();
-            float maxX = std::numeric_limits<float>::min();
-
-            for (i = markersX.size(); --i >= 0;)
-            {
-                const Marker* m = markersX.getUnchecked(i);
-                const float pos = (float) m->position.resolve (this);
-                minX = jmin (minX, pos);
-                maxX = jmax (maxX, pos);
-            }
-
-            if (minX <= maxX)
-            {
-                if (bounds.getHeight() > 0)
-                {
-                    minX = jmin (minX, bounds.getX());
-                    maxX = jmax (maxX, bounds.getRight());
-                }
-
-                bounds.setLeft (minX);
-                bounds.setWidth (maxX - minX);
-            }
-        }
-
-        if (markersY.size() > 0)
-        {
-            float minY = std::numeric_limits<float>::max();
-            float maxY = std::numeric_limits<float>::min();
-
-            for (i = markersY.size(); --i >= 0;)
-            {
-                const Marker* m = markersY.getUnchecked(i);
-                const float pos = (float) m->position.resolve (this);
-                minY = jmin (minY, pos);
-                maxY = jmax (maxY, pos);
-            }
-
-            if (minY <= maxY)
-            {
-                if (bounds.getHeight() > 0)
-                {
-                    minY = jmin (minY, bounds.getY());
-                    maxY = jmax (maxY, bounds.getBottom());
-                }
-
-                bounds.setTop (minY);
-                bounds.setHeight (maxY - minY);
-            }
-        }
-    }
-
-    return bounds;
-}
-
-const Rectangle<float> DrawableComposite::getBounds() const
-{
-    return getUntransformedBounds (true).transformed (calculateTransform());
-}
-
-bool DrawableComposite::hitTest (float x, float y) const
-{
-    calculateTransform().inverted().transformPoint (x, y);
-
-    for (int i = 0; i < drawables.size(); ++i)
-        if (drawables.getUnchecked(i)->hitTest (x, y))
-            return true;
-
-    return false;
-}
-
 Drawable* DrawableComposite::createCopy() const
 {
     return new DrawableComposite (*this);
-}
-
-void DrawableComposite::invalidatePoints()
-{
-    for (int i = 0; i < drawables.size(); ++i)
-        drawables.getUnchecked(i)->invalidatePoints();
 }
 
 //==============================================================================
@@ -564,21 +547,14 @@ void DrawableComposite::ValueTreeWrapper::removeMarker (bool xAxis, const ValueT
 }
 
 //==============================================================================
-const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawableComposite::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
     const ValueTreeWrapper wrapper (tree);
     setName (wrapper.getID());
 
-    Rectangle<float> damage;
-    bool redrawAll = false;
-
     const RelativeParallelogram newBounds (wrapper.getBoundingBox());
     if (bounds != newBounds)
-    {
-        redrawAll = true;
-        damage = getBounds();
         bounds = newBounds;
-    }
 
     const int numMarkersX = wrapper.getNumMarkers (true);
     const int numMarkersY = wrapper.getNumMarkers (false);
@@ -586,12 +562,6 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
     // Remove deleted markers...
     if (markersX.size() > numMarkersX || markersY.size() > numMarkersY)
     {
-        if (! redrawAll)
-        {
-            redrawAll = true;
-            damage = getBounds();
-        }
-
         markersX.removeRange (jmax (2, numMarkersX), markersX.size());
         markersY.removeRange (jmax (2, numMarkersY), markersY.size());
     }
@@ -603,19 +573,10 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
         const Marker newMarker (wrapper.getMarker (true, wrapper.getMarkerState (true, i)));
         Marker* m = markersX[i];
 
-        if (m == 0 || newMarker != *m)
-        {
-            if (! redrawAll)
-            {
-                redrawAll = true;
-                damage = getBounds();
-            }
-
-            if (m == 0)
-                markersX.add (new Marker (newMarker));
-            else
-                *m = newMarker;
-        }
+        if (m == 0)
+            markersX.add (new Marker (newMarker));
+        else if (newMarker != *m)
+            *m = newMarker;
     }
 
     for (i = 0; i < numMarkersY; ++i)
@@ -623,78 +584,43 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
         const Marker newMarker (wrapper.getMarker (false, wrapper.getMarkerState (false, i)));
         Marker* m = markersY[i];
 
-        if (m == 0 || newMarker != *m)
-        {
-            if (! redrawAll)
-            {
-                redrawAll = true;
-                damage = getBounds();
-            }
-
-            if (m == 0)
-                markersY.add (new Marker (newMarker));
-            else
-                *m = newMarker;
-        }
+        if (m == 0)
+            markersY.add (new Marker (newMarker));
+        else if (newMarker != *m)
+            *m = newMarker;
     }
 
     // Remove deleted drawables..
-    for (i = drawables.size(); --i >= wrapper.getNumDrawables();)
-    {
-        Drawable* const d = drawables.getUnchecked(i);
-
-        if (! redrawAll)
-            damage = damage.getUnion (d->getBounds());
-
-        d->parent = 0;
-        drawables.remove (i);
-    }
+    for (i = getNumDrawables(); --i >= wrapper.getNumDrawables();)
+        delete getDrawable(i);
 
     // Update drawables and add new ones..
     for (i = 0; i < wrapper.getNumDrawables(); ++i)
     {
         const ValueTree newDrawable (wrapper.getDrawableState (i));
-        Drawable* d = drawables[i];
+        Drawable* d = getDrawable(i);
 
         if (d != 0)
         {
             if (newDrawable.hasType (d->getValueTreeType()))
             {
-                const Rectangle<float> area (d->refreshFromValueTree (newDrawable, imageProvider));
-
-                if (! redrawAll)
-                    damage = damage.getUnion (area);
+                d->refreshFromValueTree (newDrawable, imageProvider);
             }
             else
             {
-                if (! redrawAll)
-                    damage = damage.getUnion (d->getBounds());
-
-                d = createChildFromValueTree (this, newDrawable, imageProvider);
-                drawables.set (i, d);
-
-                if (! redrawAll)
-                    damage = damage.getUnion (d->getBounds());
+                delete d;
+                d = 0;
             }
         }
-        else
+
+        if (d == 0)
         {
             d = createChildFromValueTree (this, newDrawable, imageProvider);
-            drawables.set (i, d);
-
-            if (! redrawAll)
-                damage = damage.getUnion (d->getBounds());
+            addAndMakeVisible (d, i);
         }
     }
 
-    invalidatePoints();
-
-    if (redrawAll)
-        damage = damage.getUnion (getBounds());
-    else if (! damage.isEmpty())
-        damage = damage.transformed (calculateTransform());
-
-    return damage;
+    refreshTransformFromBounds();
 }
 
 const ValueTree DrawableComposite::createValueTree (ImageProvider* imageProvider) const
@@ -706,8 +632,8 @@ const ValueTree DrawableComposite::createValueTree (ImageProvider* imageProvider
     v.setBoundingBox (bounds, 0);
 
     int i;
-    for (i = 0; i < drawables.size(); ++i)
-        v.addDrawable (drawables.getUnchecked(i)->createValueTree (imageProvider), -1, 0);
+    for (i = 0; i < getNumDrawables(); ++i)
+        v.addDrawable (getDrawable(i)->createValueTree (imageProvider), -1, 0);
 
     for (i = 0; i < markersX.size(); ++i)
         v.setMarker (true, *markersX.getUnchecked(i), 0);

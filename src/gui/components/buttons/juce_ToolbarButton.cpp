@@ -34,13 +34,12 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ToolbarButton::ToolbarButton (const int itemId_,
-                              const String& buttonText,
-                              Drawable* const normalImage_,
-                              Drawable* const toggledOnImage_)
+ToolbarButton::ToolbarButton (const int itemId_, const String& buttonText,
+                              Drawable* const normalImage_, Drawable* const toggledOnImage_)
    : ToolbarItemComponent (itemId_, buttonText, true),
      normalImage (normalImage_),
-     toggledOnImage (toggledOnImage_)
+     toggledOnImage (toggledOnImage_),
+     currentImage (0)
 {
     jassert (normalImage_ != 0);
 }
@@ -50,47 +49,61 @@ ToolbarButton::~ToolbarButton()
 }
 
 //==============================================================================
-bool ToolbarButton::getToolbarItemSizes (int toolbarDepth,
-                                         bool /*isToolbarVertical*/,
-                                         int& preferredSize,
-                                         int& minSize, int& maxSize)
+bool ToolbarButton::getToolbarItemSizes (int toolbarDepth, bool /*isToolbarVertical*/, int& preferredSize, int& minSize, int& maxSize)
 {
     preferredSize = minSize = maxSize = toolbarDepth;
     return true;
 }
 
-void ToolbarButton::paintButtonArea (Graphics& g,
-                                     int width, int height,
-                                     bool /*isMouseOver*/,
-                                     bool /*isMouseDown*/)
+void ToolbarButton::paintButtonArea (Graphics&, int /*width*/, int /*height*/, bool /*isMouseOver*/, bool /*isMouseDown*/)
+{
+}
+
+void ToolbarButton::contentAreaChanged (const Rectangle<int>&)
+{
+    buttonStateChanged();
+}
+
+void ToolbarButton::updateDrawable()
+{
+    if (currentImage != 0)
+    {
+        currentImage->setTransformToFit (getContentArea().toFloat(), RectanglePlacement::centred);
+        currentImage->setAlpha (isEnabled() ? 1.0f : 0.5f);
+    }
+}
+
+void ToolbarButton::resized()
+{
+    ToolbarItemComponent::resized();
+    updateDrawable();
+}
+
+void ToolbarButton::enablementChanged()
+{
+    ToolbarItemComponent::enablementChanged();
+    updateDrawable();
+}
+
+void ToolbarButton::buttonStateChanged()
 {
     Drawable* d = normalImage;
 
     if (getToggleState() && toggledOnImage != 0)
         d = toggledOnImage;
 
-    const Rectangle<float> area (0.0f, 0.0f, (float) width, (float) height);
-
-    if (! isEnabled())
+    if (d != currentImage)
     {
-        Image im (Image::ARGB, width, height, true);
+        removeChildComponent (currentImage);
+        currentImage = d;
 
+        if (d != 0)
         {
-            Graphics g2 (im);
-            d->drawWithin (g2, area, RectanglePlacement::centred, 1.0f);
+            enablementChanged();
+            addAndMakeVisible (d);
+            updateDrawable();
         }
-
-        im.desaturate();
-        g.drawImageAt (im, 0, 0);
     }
-    else
-    {
-        d->drawWithin (g, area, RectanglePlacement::centred, 1.0f);
-    }
-}
-
-void ToolbarButton::contentAreaChanged (const Rectangle<int>&)
-{
 }
 
 

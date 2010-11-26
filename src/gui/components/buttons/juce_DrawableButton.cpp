@@ -36,6 +36,7 @@ DrawableButton::DrawableButton (const String& name,
                                 const DrawableButton::ButtonStyle buttonStyle)
     : Button (name),
       style (buttonStyle),
+      currentImage (0),
       edgeIndent (3)
 {
     if (buttonStyle == ImageOnButtonBackground)
@@ -52,14 +53,9 @@ DrawableButton::DrawableButton (const String& name,
 
 DrawableButton::~DrawableButton()
 {
-    deleteImages();
 }
 
 //==============================================================================
-void DrawableButton::deleteImages()
-{
-}
-
 void DrawableButton::setImages (const Drawable* normal,
                                 const Drawable* over,
                                 const Drawable* down,
@@ -69,36 +65,18 @@ void DrawableButton::setImages (const Drawable* normal,
                                 const Drawable* downOn,
                                 const Drawable* disabledOn)
 {
-    deleteImages();
-
     jassert (normal != 0); // you really need to give it at least a normal image..
 
-    if (normal != 0)
-        normalImage = normal->createCopy();
+    if (normal != 0)        normalImage = normal->createCopy();
+    if (over != 0)          overImage = over->createCopy();
+    if (down != 0)          downImage = down->createCopy();
+    if (disabled != 0)      disabledImage = disabled->createCopy();
+    if (normalOn != 0)      normalImageOn = normalOn->createCopy();
+    if (overOn != 0)        overImageOn = overOn->createCopy();
+    if (downOn != 0)        downImageOn = downOn->createCopy();
+    if (disabledOn != 0)    disabledImageOn = disabledOn->createCopy();
 
-    if (over != 0)
-        overImage = over->createCopy();
-
-    if (down != 0)
-        downImage = down->createCopy();
-
-    if (disabled != 0)
-        disabledImage = disabled->createCopy();
-
-
-    if (normalOn != 0)
-        normalImageOn = normalOn->createCopy();
-
-    if (overOn != 0)
-        overImageOn = overOn->createCopy();
-
-    if (downOn != 0)
-        downImageOn = downOn->createCopy();
-
-    if (disabledOn != 0)
-        disabledImageOn = disabledOn->createCopy();
-
-    repaint();
+    buttonStateChanged();
 }
 
 //==============================================================================
@@ -107,7 +85,7 @@ void DrawableButton::setButtonStyle (const DrawableButton::ButtonStyle newStyle)
     if (style != newStyle)
     {
         style = newStyle;
-        repaint();
+        buttonStateChanged();
     }
 }
 
@@ -134,21 +112,88 @@ void DrawableButton::setEdgeIndent (const int numPixelsIndent)
 {
     edgeIndent = numPixelsIndent;
     repaint();
+    resized();
+}
+
+void DrawableButton::resized()
+{
+    Button::resized();
+
+    if (style == ImageRaw)
+    {
+        currentImage->setOriginWithOriginalSize (Point<float>());
+    }
+    else if (currentImage != 0)
+    {
+        Rectangle<int> imageSpace;
+
+        if (style == ImageOnButtonBackground)
+        {
+            imageSpace = getLocalBounds().reduced (getWidth() / 4, getHeight() / 4);
+        }
+        else
+        {
+            const int textH = (style == ImageAboveTextLabel)
+                                ? jmin (16, proportionOfHeight (0.25f))
+                                : 0;
+
+            const int indentX = jmin (edgeIndent, proportionOfWidth (0.3f));
+            const int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
+
+            imageSpace.setBounds (indentX, indentY,
+                                  getWidth() - indentX * 2,
+                                  getHeight() - indentY * 2 - textH);
+        }
+
+        currentImage->setTransformToFit (imageSpace.toFloat(), RectanglePlacement::centred);
+    }
+}
+
+void DrawableButton::buttonStateChanged()
+{
+    repaint();
+
+    Drawable* imageToDraw = 0;
+    float opacity = 1.0f;
+
+    if (isEnabled())
+    {
+        imageToDraw = getCurrentImage();
+    }
+    else
+    {
+        imageToDraw = getToggleState() ? disabledImageOn
+                                       : disabledImage;
+
+        if (imageToDraw == 0)
+        {
+            opacity = 0.4f;
+            imageToDraw = getNormalImage();
+        }
+    }
+
+    if (imageToDraw != currentImage)
+    {
+        removeChildComponent (currentImage);
+        currentImage = imageToDraw;
+
+        if (currentImage != 0)
+        {
+            addAndMakeVisible (currentImage);
+            DrawableButton::resized();
+        }
+    }
+
+    if (currentImage != 0)
+        currentImage->setAlpha (opacity);
 }
 
 void DrawableButton::paintButton (Graphics& g,
                                   bool isMouseOverButton,
                                   bool isButtonDown)
 {
-    Rectangle<int> imageSpace;
-
     if (style == ImageOnButtonBackground)
     {
-        const int insetX = getWidth() / 4;
-        const int insetY = getHeight() / 4;
-
-        imageSpace.setBounds (insetX, insetY, getWidth() - insetX * 2, getHeight() - insetY * 2);
-
         getLookAndFeel().drawButtonBackground (g, *this,
                                                getBackgroundColour(),
                                                isMouseOverButton,
@@ -161,13 +206,6 @@ void DrawableButton::paintButton (Graphics& g,
         const int textH = (style == ImageAboveTextLabel)
                             ? jmin (16, proportionOfHeight (0.25f))
                             : 0;
-
-        const int indentX = jmin (edgeIndent, proportionOfWidth (0.3f));
-        const int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
-
-        imageSpace.setBounds (indentX, indentY,
-                              getWidth() - indentX * 2,
-                              getHeight() - indentY * 2 - textH);
 
         if (textH > 0)
         {
@@ -182,39 +220,10 @@ void DrawableButton::paintButton (Graphics& g,
                               Justification::centred, 1);
         }
     }
-
-    g.setImageResamplingQuality (Graphics::mediumResamplingQuality);
-    g.setOpacity (1.0f);
-
-    const Drawable* imageToDraw = 0;
-
-    if (isEnabled())
-    {
-        imageToDraw = getCurrentImage();
-    }
-    else
-    {
-        imageToDraw = getToggleState() ? disabledImageOn
-                                       : disabledImage;
-
-        if (imageToDraw == 0)
-        {
-            g.setOpacity (0.4f);
-            imageToDraw = getNormalImage();
-        }
-    }
-
-    if (imageToDraw != 0)
-    {
-        if (style == ImageRaw)
-            imageToDraw->draw (g, 1.0f);
-        else
-            imageToDraw->drawWithin (g, imageSpace.toFloat(), RectanglePlacement::centred, 1.0f);
-    }
 }
 
 //==============================================================================
-const Drawable* DrawableButton::getCurrentImage() const throw()
+Drawable* DrawableButton::getCurrentImage() const throw()
 {
     if (isDown())
         return getDownImage();
@@ -225,15 +234,15 @@ const Drawable* DrawableButton::getCurrentImage() const throw()
     return getNormalImage();
 }
 
-const Drawable* DrawableButton::getNormalImage() const throw()
+Drawable* DrawableButton::getNormalImage() const throw()
 {
     return (getToggleState() && normalImageOn != 0) ? normalImageOn
                                                     : normalImage;
 }
 
-const Drawable* DrawableButton::getOverImage() const throw()
+Drawable* DrawableButton::getOverImage() const throw()
 {
-    const Drawable* d = normalImage;
+    Drawable* d = normalImage;
 
     if (getToggleState())
     {
@@ -253,9 +262,9 @@ const Drawable* DrawableButton::getOverImage() const throw()
     return d;
 }
 
-const Drawable* DrawableButton::getDownImage() const throw()
+Drawable* DrawableButton::getDownImage() const throw()
 {
-    const Drawable* d = normalImage;
+    Drawable* d = normalImage;
 
     if (getToggleState())
     {

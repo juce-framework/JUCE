@@ -540,7 +540,7 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
 
     if (d != 0)
     {
-        Rectangle<float> bounds (d->getBounds());
+        Rectangle<float> bounds (d->getDrawableBounds());
         delete d;
 
         PaintElement* newElement

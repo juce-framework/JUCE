@@ -57,14 +57,22 @@ DrawableText::~DrawableText()
 }
 
 //==============================================================================
+void DrawableText::refreshBounds()
+{
+    setBoundsToEnclose (getDrawableBounds());
+    repaint();
+}
+
 void DrawableText::setText (const String& newText)
 {
     text = newText;
+    refreshBounds();
 }
 
 void DrawableText::setColour (const Colour& newColour)
 {
     colour = newColour;
+    repaint();
 }
 
 void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
@@ -74,38 +82,45 @@ void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
     if (applySizeAndScale)
     {
         Point<float> corners[3];
-        bounds.resolveThreePoints (corners, parent);
+        bounds.resolveThreePoints (corners, getParent());
 
         setFontSizeControlPoint (RelativePoint (RelativeParallelogram::getPointForInternalCoord (corners,
                                     Point<float> (font.getHorizontalScale() * font.getHeight(), font.getHeight()))));
     }
+
+    refreshBounds();
 }
 
 void DrawableText::setJustification (const Justification& newJustification)
 {
     justification = newJustification;
+    repaint();
 }
 
 void DrawableText::setBoundingBox (const RelativeParallelogram& newBounds)
 {
     bounds = newBounds;
+    refreshBounds();
 }
 
 void DrawableText::setFontSizeControlPoint (const RelativePoint& newPoint)
 {
     fontSizeControlPoint = newPoint;
+    refreshBounds();
 }
 
 //==============================================================================
-void DrawableText::render (const Drawable::RenderingContext& context) const
+void DrawableText::paint (Graphics& g)
 {
+    transformContextToCorrectOrigin (g);
+
     Point<float> points[3];
-    bounds.resolveThreePoints (points, parent);
+    bounds.resolveThreePoints (points, getParent());
 
     const float w = Line<float> (points[0], points[1]).getLength();
     const float h = Line<float> (points[0], points[2]).getLength();
 
-    const Point<float> fontCoords (bounds.getInternalCoordForPoint (points, fontSizeControlPoint.resolve (parent)));
+    const Point<float> fontCoords (bounds.getInternalCoordForPoint (points, fontSizeControlPoint.resolve (getParent())));
     const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.getY());
     const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.getX());
 
@@ -113,36 +128,23 @@ void DrawableText::render (const Drawable::RenderingContext& context) const
     f.setHeight (fontHeight);
     f.setHorizontalScale (fontWidth / fontHeight);
 
-    context.g.setColour (colour.withMultipliedAlpha (context.opacity));
+    g.setColour (colour);
 
     GlyphArrangement ga;
     ga.addFittedText (f, text, 0, 0, w, h, justification, 0x100000);
-    ga.draw (context.g,
-             AffineTransform::fromTargetPoints (0, 0, points[0].getX(), points[0].getY(),
-                                                w, 0, points[1].getX(), points[1].getY(),
-                                                0, h, points[2].getX(), points[2].getY())
-                .followedBy (context.transform));
+    ga.draw (g, AffineTransform::fromTargetPoints (0, 0, points[0].getX(), points[0].getY(),
+                                                   w, 0, points[1].getX(), points[1].getY(),
+                                                   0, h, points[2].getX(), points[2].getY()));
 }
 
-const Rectangle<float> DrawableText::getBounds() const
+const Rectangle<float> DrawableText::getDrawableBounds() const
 {
-    return bounds.getBounds (parent);
-}
-
-bool DrawableText::hitTest (float x, float y) const
-{
-    Path p;
-    bounds.getPath (p, parent);
-    return p.contains (x, y);
+    return bounds.getBounds (getParent());
 }
 
 Drawable* DrawableText::createCopy() const
 {
     return new DrawableText (*this);
-}
-
-void DrawableText::invalidatePoints()
-{
 }
 
 //==============================================================================
@@ -237,7 +239,7 @@ void DrawableText::ValueTreeWrapper::setFontSizeControlPoint (const RelativePoin
 }
 
 //==============================================================================
-const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
+void DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
 {
     ValueTreeWrapper v (tree);
     setName (v.getID());
@@ -252,20 +254,14 @@ const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree
     if (text != newText || font != newFont || justification != newJustification
          || colour != newColour || bounds != newBounds || newFontPoint != fontSizeControlPoint)
     {
-        const Rectangle<float> damage (getBounds());
-
+        repaint();
         setBoundingBox (newBounds);
         setFontSizeControlPoint (newFontPoint);
         setColour (newColour);
         setFont (newFont, false);
         setJustification (newJustification);
         setText (newText);
-
-        return damage.getUnion (getBounds());
-
     }
-
-    return Rectangle<float>();
 }
 
 const ValueTree DrawableText::createValueTree (ImageProvider*) const

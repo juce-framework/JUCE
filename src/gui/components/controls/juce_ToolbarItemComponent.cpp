@@ -44,7 +44,6 @@ ToolbarItemFactory::~ToolbarItemFactory()
 {
 }
 
-
 //==============================================================================
 class ItemDragAndDropOverlayComponent    : public Component
 {
@@ -55,10 +54,6 @@ public:
         setAlwaysOnTop (true);
         setRepaintsOnMouseActivity (true);
         setMouseCursor (MouseCursor::DraggingHandCursor);
-    }
-
-    ~ItemDragAndDropOverlayComponent()
-    {
     }
 
     void paint (Graphics& g)

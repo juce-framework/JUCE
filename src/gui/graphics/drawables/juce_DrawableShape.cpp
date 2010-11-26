@@ -35,18 +35,14 @@ BEGIN_JUCE_NAMESPACE
 DrawableShape::DrawableShape()
     : strokeType (0.0f),
       mainFill (Colours::black),
-      strokeFill (Colours::black),
-      pathNeedsUpdating (true),
-      strokeNeedsUpdating (true)
+      strokeFill (Colours::black)
 {
 }
 
 DrawableShape::DrawableShape (const DrawableShape& other)
     : strokeType (other.strokeType),
       mainFill (other.mainFill),
-      strokeFill (other.strokeFill),
-      pathNeedsUpdating (true),
-      strokeNeedsUpdating (true)
+      strokeFill (other.strokeFill)
 {
 }
 
@@ -67,7 +63,7 @@ void DrawableShape::setStrokeFill (const FillType& newFill)
 void DrawableShape::setStrokeType (const PathStrokeType& newStrokeType)
 {
     strokeType = newStrokeType;
-    strokeNeedsUpdating = true;
+    strokeChanged();
 }
 
 void DrawableShape::setStrokeThickness (const float newThickness)
@@ -80,18 +76,6 @@ bool DrawableShape::isStrokeVisible() const throw()
     return strokeType.getStrokeThickness() > 0.0f && ! strokeFill.isInvisible();
 }
 
-void DrawableShape::setBrush (const Drawable::RenderingContext& context, const FillType& type)
-{
-    FillType f (type);
-    if (f.isGradient())
-        f.gradient->multiplyOpacity (context.opacity);
-    else
-        f.setOpacity (f.getOpacity() * context.opacity);
-
-    f.transform = f.transform.followedBy (context.transform);
-    context.g.setFillType (f);
-}
-
 bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
                                       Expression::EvaluationContext* /*nameFinder*/,
                                       ImageProvider* imageProvider)
@@ -99,7 +83,7 @@ bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
     bool hasChanged = false;
 
     {
-        const FillType f (newState.getMainFill (parent, imageProvider));
+        const FillType f (newState.getMainFill (getParent(), imageProvider));
 
         if (mainFill != f)
         {
@@ -109,7 +93,7 @@ bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
     }
 
     {
-        const FillType f (newState.getStrokeFill (parent, imageProvider));
+        const FillType f (newState.getStrokeFill (getParent(), imageProvider));
 
         if (strokeFill != f)
         {
@@ -129,73 +113,50 @@ void DrawableShape::writeTo (FillAndStrokeState& state, ImageProvider* imageProv
 }
 
 //==============================================================================
-void DrawableShape::render (const Drawable::RenderingContext& context) const
+void DrawableShape::paint (Graphics& g)
 {
-    setBrush (context, mainFill);
-    context.g.fillPath (getCachedPath(), context.transform);
+    transformContextToCorrectOrigin (g);
+
+    g.setFillType (mainFill);
+    g.fillPath (path);
 
     if (isStrokeVisible())
     {
-        setBrush (context, strokeFill);
-        context.g.fillPath (getCachedStrokePath(), context.transform);
+        g.setFillType (strokeFill);
+        g.fillPath (strokePath);
     }
 }
 
 void DrawableShape::pathChanged()
 {
-    pathNeedsUpdating = true;
+    strokeChanged();
 }
 
 void DrawableShape::strokeChanged()
 {
-    strokeNeedsUpdating = true;
+    strokePath.clear();
+    strokeType.createStrokedPath (strokePath, path, AffineTransform::identity, 4.0f);
+
+    setBoundsToEnclose (getDrawableBounds());
+    repaint();
 }
 
-void DrawableShape::invalidatePoints()
-{
-    pathNeedsUpdating = true;
-    strokeNeedsUpdating = true;
-}
-
-const Path& DrawableShape::getCachedPath() const
-{
-    if (pathNeedsUpdating)
-    {
-        pathNeedsUpdating = false;
-
-        if (rebuildPath (cachedPath))
-            strokeNeedsUpdating = true;
-    }
-
-    return cachedPath;
-}
-
-const Path& DrawableShape::getCachedStrokePath() const
-{
-    if (strokeNeedsUpdating)
-    {
-        cachedStroke.clear();
-        strokeType.createStrokedPath (cachedStroke, getCachedPath(), AffineTransform::identity, 4.0f);
-        strokeNeedsUpdating = false; // (must be called after getCachedPath)
-    }
-
-    return cachedStroke;
-}
-
-const Rectangle<float> DrawableShape::getBounds() const
+const Rectangle<float> DrawableShape::getDrawableBounds() const
 {
     if (isStrokeVisible())
-        return getCachedStrokePath().getBounds();
+        return strokePath.getBounds();
     else
-        return getCachedPath().getBounds();
+        return path.getBounds();
 }
 
-bool DrawableShape::hitTest (float x, float y) const
+bool DrawableShape::hitTest (int x, int y) const
 {
-    return getCachedPath().contains (x, y)
-            || (isStrokeVisible() && getCachedStrokePath().contains (x, y));
-}
+    const float globalX = x - originRelativeToComponent.getX();
+    const float globalY = y - originRelativeToComponent.getY();
 
+    return path.contains (globalX, globalY)
+            || (isStrokeVisible() && strokePath.contains (globalX, globalY));
+}
 
 //==============================================================================
 const Identifier DrawableShape::FillAndStrokeState::type ("type");

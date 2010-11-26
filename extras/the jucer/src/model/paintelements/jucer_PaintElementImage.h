@@ -310,7 +310,7 @@ public:
             const Rectangle<int> parentArea (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
             Rectangle<int> r (getCurrentBounds (parentArea));
-            Rectangle<float> bounds (image->getBounds());
+            Rectangle<float> bounds (image->getDrawableBounds());
 
             r.setSize ((int) (bounds.getWidth() + 0.999f), (int) (bounds.getHeight() + 0.999f));
 

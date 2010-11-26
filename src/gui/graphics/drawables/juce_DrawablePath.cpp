@@ -42,7 +42,7 @@ DrawablePath::DrawablePath (const DrawablePath& other)
     if (other.relativePath != 0)
         relativePath = new RelativePointPath (*other.relativePath);
     else
-        cachedPath = other.cachedPath;
+        setPath (other.path);
 }
 
 DrawablePath::~DrawablePath()
@@ -57,18 +57,18 @@ Drawable* DrawablePath::createCopy() const
 //==============================================================================
 void DrawablePath::setPath (const Path& newPath)
 {
-    cachedPath = newPath;
-    strokeChanged();
+    path = newPath;
+    pathChanged();
 }
 
 const Path& DrawablePath::getPath() const
 {
-    return getCachedPath();
+    return path;
 }
 
 const Path& DrawablePath::getStrokePath() const
 {
-    return getCachedStrokePath();
+    return strokePath;
 }
 
 bool DrawablePath::rebuildPath (Path& path) const
@@ -76,7 +76,7 @@ bool DrawablePath::rebuildPath (Path& path) const
     if (relativePath != 0)
     {
         path.clear();
-        relativePath->createPath (path, parent);
+        relativePath->createPath (path, getParent());
         return true;
     }
 
@@ -440,38 +440,31 @@ void DrawablePath::ValueTreeWrapper::Element::removePoint (UndoManager* undoMana
 }
 
 //==============================================================================
-const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    Rectangle<float> damageRect;
     ValueTreeWrapper v (tree);
     setName (v.getID());
 
-    bool needsRedraw = refreshFillTypes (v, parent, imageProvider);
+    if (refreshFillTypes (v, getParent(), imageProvider))
+        repaint();
 
     ScopedPointer<RelativePointPath> newRelativePath (new RelativePointPath (tree));
 
     Path newPath;
-    newRelativePath->createPath (newPath, parent);
+    newRelativePath->createPath (newPath, getParent());
 
     if (! newRelativePath->containsAnyDynamicPoints())
         newRelativePath = 0;
 
     const PathStrokeType newStroke (v.getStrokeType());
-    if (strokeType != newStroke || cachedPath != newPath)
+    if (strokeType != newStroke || path != newPath)
     {
-        damageRect = getBounds();
-        cachedPath.swapWithPath (newPath);
-        strokeChanged();
+        path.swapWithPath (newPath);
         strokeType = newStroke;
-        needsRedraw = true;
+        pathChanged();
     }
 
     relativePath = newRelativePath;
-
-    if (needsRedraw)
-        damageRect = damageRect.getUnion (getBounds());
-
-    return damageRect;
 }
 
 const ValueTree DrawablePath::createValueTree (ImageProvider* imageProvider) const
@@ -488,7 +481,7 @@ const ValueTree DrawablePath::createValueTree (ImageProvider* imageProvider) con
     }
     else
     {
-        RelativePointPath rp (getCachedPath());
+        RelativePointPath rp (path);
         rp.writeTo (tree, 0);
     }
 

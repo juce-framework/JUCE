@@ -148,10 +148,10 @@ public:
 
     //==============================================================================
     /** Returns the image that the button is currently displaying. */
-    const Drawable* getCurrentImage() const throw();
-    const Drawable* getNormalImage() const throw();
-    const Drawable* getOverImage() const throw();
-    const Drawable* getDownImage() const throw();
+    Drawable* getCurrentImage() const throw();
+    Drawable* getNormalImage() const throw();
+    Drawable* getOverImage() const throw();
+    Drawable* getDownImage() const throw();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the link.
@@ -174,16 +174,20 @@ protected:
     void paintButton (Graphics& g,
                       bool isMouseOverButton,
                       bool isButtonDown);
+    /** @internal */
+    void buttonStateChanged();
+    /** @internal */
+    void resized();
 
 private:
     //==============================================================================
     ButtonStyle style;
     ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage;
     ScopedPointer <Drawable> normalImageOn, overImageOn, downImageOn, disabledImageOn;
+    Drawable* currentImage;
     Colour backgroundOff, backgroundOn;
     int edgeIndent;
 
-    void deleteImages();
     DrawableButton (const DrawableButton&);
     DrawableButton& operator= (const DrawableButton&);
 };

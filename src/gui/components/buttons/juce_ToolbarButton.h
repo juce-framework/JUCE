@@ -77,11 +77,20 @@ public:
     void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown);
     /** @internal */
     void contentAreaChanged (const Rectangle<int>& newBounds);
+    /** @internal */
+    void buttonStateChanged();
+    /** @internal */
+    void resized();
+    /** @internal */
+    void enablementChanged();
 
     juce_UseDebuggingNewOperator
 
 private:
-    ScopedPointer <Drawable> normalImage, toggledOnImage;
+    ScopedPointer<Drawable> normalImage, toggledOnImage;
+    Drawable* currentImage;
+
+    void updateDrawable();
 
     ToolbarButton (const ToolbarButton&);
     ToolbarButton& operator= (const ToolbarButton&);

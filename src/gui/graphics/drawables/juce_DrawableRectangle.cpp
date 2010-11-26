@@ -68,13 +68,13 @@ void DrawableRectangle::setCornerSize (const RelativePoint& newSize)
 bool DrawableRectangle::rebuildPath (Path& path) const
 {
     Point<float> points[3];
-    bounds.resolveThreePoints (points, parent);
+    bounds.resolveThreePoints (points, getParent());
 
     const float w = Line<float> (points[0], points[1]).getLength();
     const float h = Line<float> (points[0], points[2]).getLength();
 
-    const float cornerSizeX = (float) cornerSize.x.resolve (parent);
-    const float cornerSizeY = (float) cornerSize.y.resolve (parent);
+    const float cornerSizeX = (float) cornerSize.x.resolve (getParent());
+    const float cornerSizeY = (float) cornerSize.y.resolve (getParent());
 
     path.clear();
 
@@ -92,7 +92,7 @@ bool DrawableRectangle::rebuildPath (Path& path) const
 const AffineTransform DrawableRectangle::calculateTransform() const
 {
     Point<float> resolved[3];
-    bounds.resolveThreePoints (resolved, parent);
+    bounds.resolveThreePoints (resolved, getParent());
 
     return AffineTransform::fromTargetPoints (resolved[0].getX(), resolved[0].getY(),
                                               resolved[1].getX(), resolved[1].getY(),
@@ -143,13 +143,13 @@ Value DrawableRectangle::ValueTreeWrapper::getCornerSizeValue (UndoManager* undo
 }
 
 //==============================================================================
-const Rectangle<float> DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    Rectangle<float> damageRect;
     ValueTreeWrapper v (tree);
     setName (v.getID());
 
-    bool needsRedraw = refreshFillTypes (v, parent, imageProvider);
+    if (refreshFillTypes (v, getParent(), imageProvider))
+        repaint();
 
     RelativeParallelogram newBounds (v.getRectangle());
 
@@ -158,19 +158,12 @@ const Rectangle<float> DrawableRectangle::refreshFromValueTree (const ValueTree&
 
     if (strokeType != newStroke || newBounds != bounds || newCornerSize != cornerSize)
     {
-        damageRect = getBounds();
+        repaint();
         bounds = newBounds;
         strokeType = newStroke;
         cornerSize = newCornerSize;
         pathChanged();
-        strokeChanged();
-        needsRedraw = true;
     }
-
-    if (needsRedraw)
-        damageRect = damageRect.getUnion (getBounds());
-
-    return damageRect;
 }
 
 const ValueTree DrawableRectangle::createValueTree (ImageProvider* imageProvider) const

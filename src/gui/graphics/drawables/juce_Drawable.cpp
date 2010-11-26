@@ -40,42 +40,90 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Drawable::RenderingContext::RenderingContext (Graphics& g_,
-                                              const AffineTransform& transform_,
-                                              const float opacity_) throw()
-    : g (g_),
-      transform (transform_),
-      opacity (opacity_)
-{
-}
-
-//==============================================================================
 Drawable::Drawable()
-    : parent (0)
 {
+    setInterceptsMouseClicks (false, false);
+    setPaintingIsUnclipped (true);
 }
 
 Drawable::~Drawable()
 {
 }
 
-void Drawable::draw (Graphics& g, const float opacity, const AffineTransform& transform) const
+//==============================================================================
+void Drawable::draw (Graphics& g, float opacity, const AffineTransform& transform) const
 {
-    render (RenderingContext (g, transform, opacity));
+    const_cast <Drawable*> (this)->nonConstDraw (g, opacity, transform);
 }
 
-void Drawable::drawAt (Graphics& g, const float x, const float y, const float opacity) const
+void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform)
+{
+    g.saveState();
+    const float oldOpacity = getAlpha();
+    setAlpha (opacity);
+    g.addTransform (AffineTransform::translation (-originRelativeToComponent.getX(),
+                                                  -originRelativeToComponent.getY())
+                        .followedBy (getTransform())
+                        .followedBy (transform));
+
+    paintEntireComponent (g, false);
+    setAlpha (oldOpacity);
+    g.restoreState();
+}
+
+void Drawable::drawAt (Graphics& g, float x, float y, float opacity) const
 {
     draw (g, opacity, AffineTransform::translation (x, y));
 }
 
-void Drawable::drawWithin (Graphics& g,
-                           const Rectangle<float>& destArea,
-                           const RectanglePlacement& placement,
-                           const float opacity) const
+void Drawable::drawWithin (Graphics& g, const Rectangle<float>& destArea, const RectanglePlacement& placement, float opacity) const
 {
-    if (! destArea.isEmpty())
-        draw (g, opacity, placement.getTransformToFit (getBounds(), destArea));
+    draw (g, opacity, placement.getTransformToFit (getDrawableBounds(), destArea));
+}
+
+//==============================================================================
+DrawableComposite* Drawable::getParent() const
+{
+    return dynamic_cast <DrawableComposite*> (getParentComponent());
+}
+
+void Drawable::transformContextToCorrectOrigin (Graphics& g)
+{
+    g.setOrigin (originRelativeToComponent.getX(),
+                 originRelativeToComponent.getY());
+}
+
+void Drawable::markerHasMoved()
+{
+}
+
+void Drawable::parentHierarchyChanged()
+{
+    setBoundsToEnclose (getDrawableBounds());
+}
+
+void Drawable::setBoundsToEnclose (const Rectangle<float>& area)
+{
+    Drawable* const parent = getParent();
+    Point<int> parentOrigin;
+    if (parent != 0)
+        parentOrigin = parent->originRelativeToComponent;
+
+    const Rectangle<int> newBounds (area.getSmallestIntegerContainer() + parentOrigin);
+    originRelativeToComponent = parentOrigin - newBounds.getPosition();
+    setBounds (newBounds);
+}
+
+//==============================================================================
+void Drawable::setOriginWithOriginalSize (const Point<float>& originWithinParent)
+{
+    setTransform (AffineTransform::translation (originWithinParent.getX(), originWithinParent.getY()));
+}
+
+void Drawable::setTransformToFit (const Rectangle<float>& area, const RectanglePlacement& placement)
+{
+    if (! area.isEmpty())
+        setTransform (placement.getTransformToFit (getDrawableBounds(), area));
 }
 
 //==============================================================================
@@ -136,20 +184,17 @@ Drawable* Drawable::createChildFromValueTree (DrawableComposite* parent, const V
     const Identifier type (tree.getType());
 
     Drawable* d = 0;
-    if (type == DrawablePath::valueTreeType)
-        d = new DrawablePath();
-    else if (type == DrawableComposite::valueTreeType)
-        d = new DrawableComposite();
-    else if (type == DrawableRectangle::valueTreeType)
-        d = new DrawableRectangle();
-    else if (type == DrawableImage::valueTreeType)
-        d = new DrawableImage();
-    else if (type == DrawableText::valueTreeType)
-        d = new DrawableText();
+    if (type == DrawablePath::valueTreeType)            d = new DrawablePath();
+    else if (type == DrawableComposite::valueTreeType)  d = new DrawableComposite();
+    else if (type == DrawableRectangle::valueTreeType)  d = new DrawableRectangle();
+    else if (type == DrawableImage::valueTreeType)      d = new DrawableImage();
+    else if (type == DrawableText::valueTreeType)       d = new DrawableText();
 
     if (d != 0)
     {
-        d->parent = parent;
+        if (parent != 0)
+            parent->insertDrawable (d);
+
         d->refreshFromValueTree (tree, imageProvider);
     }
 

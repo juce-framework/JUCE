@@ -84,17 +84,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
+    void paint (Graphics& g);
     /** @internal */
-    const Rectangle<float> getBounds() const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
+    bool hitTest (int x, int y) const;
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    void invalidatePoints();
+    const Rectangle<float> getDrawableBounds() const;
     /** @internal */
-    const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+    void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
     const ValueTree createValueTree (ImageProvider* imageProvider) const;
     /** @internal */
@@ -136,7 +134,7 @@ private:
     Colour overlayColour;
     RelativeParallelogram bounds;
 
-    const AffineTransform calculateTransform() const;
+    void refreshTransformFromBounds();
 
     DrawableImage& operator= (const DrawableImage&);
 };
