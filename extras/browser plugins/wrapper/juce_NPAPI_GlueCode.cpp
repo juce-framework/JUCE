@@ -263,8 +263,7 @@ class BrowserPluginHolderComponent    : public Component
 public:
     //==============================================================================
     BrowserPluginHolderComponent (NPP npp_)
-        : npp (npp_),
-          child (0)
+        : npp (npp_)
     {
         log ("BrowserPluginHolderComponent created");
 #if JUCE_WINDOWS
@@ -284,7 +283,7 @@ public:
     {
         log ("BrowserPluginHolderComponent deleted");
         setWindow (0);
-        deleteAndZero (child);
+        child = 0;
     }
 
     //==============================================================================
@@ -297,7 +296,7 @@ public:
     void resized()
     {
         if (child != 0)
-            child->setBounds (0, 0, getWidth(), getHeight());
+            child->setBounds (getLocalBounds());
     }
 
     const var getObject()
@@ -307,7 +306,7 @@ public:
 
     //==============================================================================
     NPP npp;
-    BrowserPluginComponent* child;
+    ScopedPointer<BrowserPluginComponent> child;
 
 private:
 
@@ -354,9 +353,9 @@ private:
 
         case WM_WINDOWPOSCHANGING:
         case WM_WINDOWPOSCHANGED:
-            if ((((WINDOWPOS*) lParam)->flags & SWP_NOSIZE) == 0)
+            //if ((((WINDOWPOS*) lParam)->flags & SWP_NOSIZE) == 0)
             {
-                BrowserPluginHolderComponent* const comp = (BrowserPluginHolderComponent*) GetWindowLongPtr (hWnd, GWL_USERDATA);
+                BrowserPluginHolderComponent* const comp = (BrowserPluginHolderComponent*) GetWindowLongPtr (hWnd, GWLP_USERDATA);
                 comp->resizeToParentWindow();
             }
             break;
@@ -388,18 +387,12 @@ public:
 
             if (parentHWND != 0)
             {
-                addToDesktop (0);
-
-                HWND ourHWND = (HWND) getWindowHandle();
-                SetParent (ourHWND, parentHWND);
-
-                DWORD val = GetWindowLongPtr (ourHWND, GWL_STYLE);
-                val = (val & ~WS_POPUP) | WS_CHILD;
-                SetWindowLongPtr (ourHWND, GWL_STYLE, val);
-
+                addToDesktop (0, parentHWND);
                 setVisible (true);
 
                 oldWinProc = SubclassWindow (parentHWND, (WNDPROC) interceptingWinProc);
+
+                jassert (GetWindowLongPtr (parentHWND, GWLP_USERDATA) == 0);
                 SetWindowLongPtr (parentHWND, GWLP_USERDATA, (LONG_PTR) this);
 
                 resizeToParentWindow (window->width, window->height);
@@ -1043,28 +1036,16 @@ NPError NPP_GetValue (NPP npp, NPPVariable variable, void* value)
 
     switch (variable)
     {
-    case NPPVpluginNameString:
-        *((const char**) value) = JuceBrowserPlugin_Name;
-        break;
-    case NPPVpluginDescriptionString:
-        *((const char**) value) = JuceBrowserPlugin_Desc;
-        break;
-    case NPPVpluginScriptableNPObject:
-        *((NPObject**) value) = p->getScriptableObject();
-        break;
-
-    default:
-        return NPERR_GENERIC_ERROR;
+        case NPPVpluginNameString:          *((const char**) value) = JuceBrowserPlugin_Name; break;
+        case NPPVpluginDescriptionString:   *((const char**) value) = JuceBrowserPlugin_Desc; break;
+        case NPPVpluginScriptableNPObject:  *((NPObject**) value) = p->getScriptableObject(); break;
+        default:                            return NPERR_GENERIC_ERROR;
     }
 
     return NPERR_NO_ERROR;
 }
 
-NPError NPP_NewStream (NPP npp,
-                       NPMIMEType type,
-                       NPStream* stream,
-                       NPBool seekable,
-                       ::uint16* stype)
+NPError NPP_NewStream (NPP npp, NPMIMEType type, NPStream* stream, NPBool seekable, ::uint16* stype)
 {
     if (npp == 0)
         return NPERR_INVALID_INSTANCE_ERROR;
