@@ -208,6 +208,23 @@ void XmlDocument::skipHeader()
         if (input == 0)
             return;
 
+       #if JUCE_DEBUG
+        const String header (found, input - found);
+        const String encoding (header.fromFirstOccurrenceOf ("encoding", false, true)
+                                     .fromFirstOccurrenceOf ("=", false, false)
+                                     .fromFirstOccurrenceOf ("\"", false, false)
+                                     .upToFirstOccurrenceOf ("\"", false, false).trim());
+
+        /* If you load an XML document with a non-UTF encoding type, it may have been
+           loaded wrongly.. Since all the files are read via the normal juce file streams,
+           they're treated as UTF-8, so by the time it gets to the parser, the encoding will
+           have been lost. Best plan is to stick to utf-8 or if you have specific files to
+           read, use your own code to convert them to a unicode String, and pass that to the
+           XML parser.
+        */
+        jassert (encoding.isEmpty() || encoding.startsWithIgnoreCase ("utf-"));
+       #endif
+
         input += 2;
     }
 

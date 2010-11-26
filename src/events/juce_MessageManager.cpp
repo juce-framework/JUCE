@@ -60,10 +60,7 @@ MessageManager::~MessageManager() throw()
 
     doPlatformSpecificShutdown();
 
-    /* If you hit this assertion, then you've probably leaked some kind of MessageListener object.
-       This could also be caused by leaking AsyncUpdaters, ChangeBroadcasters, and various other types
-       of event class.
-    */
+    // If you hit this assertion, then you've probably leaked some kind of MessageListener object..
     jassert (messageListeners.size() == 0);
 
     jassert (instance == this);

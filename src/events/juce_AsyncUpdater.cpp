@@ -62,7 +62,7 @@ AsyncUpdater::~AsyncUpdater()
     // pending on the main event thread - that's pretty dodgy threading, as the callback could
     // happen after this destructor has finished. You should either use a MessageManagerLock while
     // deleting this object, or find some other way to avoid such a race condition.
-    jassert (/*(! isUpdatePending()) ||*/ MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+    jassert ((! isUpdatePending()) || MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
     pendingMessage = 0;
 }

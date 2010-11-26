@@ -76,6 +76,12 @@ ResizableWindow::ResizableWindow (const String& name,
 
 ResizableWindow::~ResizableWindow()
 {
+    // Don't delete or remove the resizer components yourself! They're managed by the
+    // ResizableWindow, and you should leave them alone! You may have deleted them
+    // accidentally by careless use of deleteAllChildren()..?
+    jassert (resizableCorner == 0 || getIndexOfChildComponent (resizableCorner) >= 0);
+    jassert (resizableBorder == 0 || getIndexOfChildComponent (resizableBorder) >= 0);
+
     resizableCorner = 0;
     resizableBorder = 0;
     contentComponent.deleteAndZero();

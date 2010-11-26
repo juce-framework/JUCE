@@ -337,8 +337,7 @@ private:
 
             if (svgDrawable != 0)
             {
-                // to make our icon the right size, we'll put it inside a DrawableComposite, and
-                // set its bounding box to the size and position that we want.
+                // to make our icon the right size, we'll set its bounding box to the size and position that we want.
                 svgDrawable->setBoundingBox (RelativeParallelogram (Point<float> (-100, -100),
                                                                     Point<float> (100, -100),
                                                                     Point<float> (-100, 100)));

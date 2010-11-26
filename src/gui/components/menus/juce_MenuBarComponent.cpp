@@ -215,8 +215,8 @@ void MenuBarComponent::showMenu (int index)
 
             const Rectangle<int> itemPos (xPositions [index], 0, xPositions [index + 1] - xPositions [index], getHeight());
 
-            m.showMenu (itemPos + getScreenPosition(),
-                        0, itemPos.getWidth(), 0, 0, true, this,
+            m.showMenu (localAreaToGlobal (itemPos),
+                        0, itemPos.getWidth(), 0, 0, this,
                         new AsyncCallback (this, index));
         }
     }

@@ -32,37 +32,21 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 AffineTransform::AffineTransform() throw()
-    : mat00 (1.0f),
-      mat01 (0),
-      mat02 (0),
-      mat10 (0),
-      mat11 (1.0f),
-      mat12 (0)
+    : mat00 (1.0f), mat01 (0), mat02 (0),
+      mat10 (0), mat11 (1.0f), mat12 (0)
 {
 }
 
 AffineTransform::AffineTransform (const AffineTransform& other) throw()
-  : mat00 (other.mat00),
-    mat01 (other.mat01),
-    mat02 (other.mat02),
-    mat10 (other.mat10),
-    mat11 (other.mat11),
-    mat12 (other.mat12)
+  : mat00 (other.mat00), mat01 (other.mat01), mat02 (other.mat02),
+    mat10 (other.mat10), mat11 (other.mat11), mat12 (other.mat12)
 {
 }
 
-AffineTransform::AffineTransform (const float mat00_,
-                                  const float mat01_,
-                                  const float mat02_,
-                                  const float mat10_,
-                                  const float mat11_,
-                                  const float mat12_) throw()
- :  mat00 (mat00_),
-    mat01 (mat01_),
-    mat02 (mat02_),
-    mat10 (mat10_),
-    mat11 (mat11_),
-    mat12 (mat12_)
+AffineTransform::AffineTransform (const float mat00_, const float mat01_, const float mat02_,
+                                  const float mat10_, const float mat11_, const float mat12_) throw()
+ :  mat00 (mat00_), mat01 (mat01_), mat02 (mat02_),
+    mat10 (mat10_), mat11 (mat11_), mat12 (mat12_)
 {
 }
 
@@ -117,31 +101,13 @@ const AffineTransform AffineTransform::followedBy (const AffineTransform& other)
                             other.mat10 * mat02 + other.mat11 * mat12 + other.mat12);
 }
 
-const AffineTransform AffineTransform::followedBy (const float omat00,
-                                                   const float omat01,
-                                                   const float omat02,
-                                                   const float omat10,
-                                                   const float omat11,
-                                                   const float omat12) const throw()
-{
-    return AffineTransform (omat00 * mat00 + omat01 * mat10,
-                            omat00 * mat01 + omat01 * mat11,
-                            omat00 * mat02 + omat01 * mat12 + omat02,
-                            omat10 * mat00 + omat11 * mat10,
-                            omat10 * mat01 + omat11 * mat11,
-                            omat10 * mat02 + omat11 * mat12 + omat12);
-}
-
-//==============================================================================
-const AffineTransform AffineTransform::translated (const float dx,
-                                                   const float dy) const throw()
+const AffineTransform AffineTransform::translated (const float dx, const float dy) const throw()
 {
     return AffineTransform (mat00, mat01, mat02 + dx,
                             mat10, mat11, mat12 + dy);
 }
 
-const AffineTransform AffineTransform::translation (const float dx,
-                                                    const float dy) throw()
+const AffineTransform AffineTransform::translation (const float dx, const float dy) throw()
 {
     return AffineTransform (1.0f, 0, dx,
                             0, 1.0f, dy);
@@ -152,8 +118,12 @@ const AffineTransform AffineTransform::rotated (const float rad) const throw()
     const float cosRad = std::cos (rad);
     const float sinRad = std::sin (rad);
 
-    return followedBy (cosRad, -sinRad, 0,
-                       sinRad, cosRad, 0);
+    return AffineTransform (cosRad * mat00 + -sinRad * mat10,
+                            cosRad * mat01 + -sinRad * mat11,
+                            cosRad * mat02 + -sinRad * mat12,
+                            sinRad * mat00 + cosRad * mat10,
+                            sinRad * mat01 + cosRad * mat11,
+                            sinRad * mat02 + cosRad * mat12);
 }
 
 const AffineTransform AffineTransform::rotation (const float rad) throw()
@@ -165,33 +135,27 @@ const AffineTransform AffineTransform::rotation (const float rad) throw()
                             sinRad, cosRad, 0);
 }
 
-const AffineTransform AffineTransform::rotated (const float angle,
-                                                const float pivotX,
-                                                const float pivotY) const throw()
+const AffineTransform AffineTransform::rotation (const float rad, const float pivotX, const float pivotY) throw()
 {
-    return translated (-pivotX, -pivotY)
-            .rotated (angle)
-            .translated (pivotX, pivotY);
+    const float cosRad = std::cos (rad);
+    const float sinRad = std::sin (rad);
+
+    return AffineTransform (cosRad, -sinRad, -cosRad * pivotX + sinRad * pivotY + pivotX,
+                            sinRad, cosRad, -sinRad * pivotX + -cosRad * pivotY + pivotY);
 }
 
-const AffineTransform AffineTransform::rotation (const float angle,
-                                                 const float pivotX,
-                                                 const float pivotY) throw()
+const AffineTransform AffineTransform::rotated (const float angle, const float pivotX, const float pivotY) const throw()
 {
-    return translation (-pivotX, -pivotY)
-            .rotated (angle)
-            .translated (pivotX, pivotY);
+    return followedBy (rotation (angle, pivotX, pivotY));
 }
 
-const AffineTransform AffineTransform::scaled (const float factorX,
-                                               const float factorY) const throw()
+const AffineTransform AffineTransform::scaled (const float factorX, const float factorY) const throw()
 {
     return AffineTransform (factorX * mat00, factorX * mat01, factorX * mat02,
                             factorY * mat10, factorY * mat11, factorY * mat12);
 }
 
-const AffineTransform AffineTransform::scale (const float factorX,
-                                              const float factorY) throw()
+const AffineTransform AffineTransform::scale (const float factorX, const float factorY) throw()
 {
     return AffineTransform (factorX, 0, 0,
                             0, factorY, 0);
@@ -200,9 +164,8 @@ const AffineTransform AffineTransform::scale (const float factorX,
 const AffineTransform AffineTransform::scaled (const float factorX, const float factorY,
                                                const float pivotX, const float pivotY) const throw()
 {
-    return translated (-pivotX, -pivotY)
-            .scaled (factorX, factorY)
-            .translated (pivotX, pivotY);
+    return AffineTransform (factorX * mat00, factorX * mat01, factorX * mat02 + pivotX * (1.0f - factorX),
+                            factorY * mat10, factorY * mat11, factorY * mat12 + pivotY * (1.0f - factorY));
 }
 
 const AffineTransform AffineTransform::scale (const float factorX, const float factorY,
@@ -212,11 +175,20 @@ const AffineTransform AffineTransform::scale (const float factorX, const float f
                             0, factorY, pivotY * (1.0f - factorY));
 }
 
-const AffineTransform AffineTransform::sheared (const float shearX,
-                                                const float shearY) const throw()
+const AffineTransform AffineTransform::shear (float shearX, float shearY) throw()
 {
-    return followedBy (1.0f, shearX, 0,
-                       shearY, 1.0f, 0);
+    return AffineTransform (1.0f, shearX, 0,
+                            shearY, 1.0f, 0);
+}
+
+const AffineTransform AffineTransform::sheared (const float shearX, const float shearY) const throw()
+{
+    return AffineTransform (mat00 + shearX * mat10,
+                            mat01 + shearX * mat11,
+                            mat02 + shearX * mat12,
+                            shearY * mat00 + mat10,
+                            shearY * mat01 + mat11,
+                            shearY * mat02 + mat12);
 }
 
 const AffineTransform AffineTransform::inverted() const throw()

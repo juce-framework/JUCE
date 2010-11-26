@@ -1408,7 +1408,7 @@ public:
 
     void sliderValueChanged (Slider*)
     {
-        // When you move the roation slider, we'll apply a rotaion transform to the whole tabs component..
+        // When you move the rotation slider, we'll apply a rotaion transform to the whole tabs component..
         tabs.setTransform (AffineTransform::rotation ((float) (transformSlider.getValue() / (180.0 / double_Pi)),
                                                       getWidth() * 0.5f, getHeight() * 0.5f));
     }

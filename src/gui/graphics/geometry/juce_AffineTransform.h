@@ -178,11 +178,12 @@ public:
                                         float pivotX, float pivotY) throw();
 
     /** Returns a transform which is the same as this one followed by a shear.
-
         The shear is centred around the origin (0, 0).
     */
-    const AffineTransform sheared (float shearX,
-                                   float shearY) const throw();
+    const AffineTransform sheared (float shearX, float shearY) const throw();
+
+    /** Returns a shear transform, centred around the origin (0, 0). */
+    static const AffineTransform shear (float shearX, float shearY) throw();
 
     /** Returns a matrix which is the inverse operation of this one.
 
@@ -244,11 +245,6 @@ public:
 
     //==============================================================================
     juce_UseDebuggingNewOperator
-
-private:
-    //==============================================================================
-    const AffineTransform followedBy (float mat00, float mat01, float mat02,
-                                      float mat10, float mat11, float mat12) const throw();
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__

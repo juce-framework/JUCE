@@ -1197,6 +1197,10 @@ bool Component::isTransformed() const throw()
 
 void Component::setTransform (const AffineTransform& newTransform)
 {
+    // If you pass in a transform with no inverse, the component will have no dimensions,
+    // and there will be all sorts of maths errors when converting coordinates.
+    jassert (! newTransform.isSingularity());
+
     if (newTransform.isIdentity())
     {
         if (affineTransform_ != 0)
@@ -1204,6 +1208,8 @@ void Component::setTransform (const AffineTransform& newTransform)
             repaint();
             affineTransform_ = 0;
             repaint();
+
+            sendMovedResizedMessages (false, false);
         }
     }
     else if (affineTransform_ == 0)
@@ -1211,12 +1217,14 @@ void Component::setTransform (const AffineTransform& newTransform)
         repaint();
         affineTransform_ = new AffineTransform (newTransform);
         repaint();
+        sendMovedResizedMessages (false, false);
     }
     else if (*affineTransform_ != newTransform)
     {
         repaint();
         *affineTransform_ = newTransform;
         repaint();
+        sendMovedResizedMessages (false, false);
     }
 }
 
@@ -2062,6 +2070,12 @@ void Component::colourChanged()
 const Rectangle<int> Component::getLocalBounds() const throw()
 {
     return Rectangle<int> (getWidth(), getHeight());
+}
+
+const Rectangle<int> Component::getBoundsInParent() const throw()
+{
+    return affineTransform_ == 0 ? bounds_
+                                 : bounds_.toFloat().transformed (*affineTransform_).getSmallestIntegerContainer();
 }
 
 void Component::getVisibleArea (RectangleList& result, const bool includeSiblings) const

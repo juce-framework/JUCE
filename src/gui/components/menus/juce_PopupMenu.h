@@ -260,14 +260,15 @@ public:
         This is the same as show(), but uses a specific location (in global screen
         co-ordinates) rather than the current mouse position.
 
-        Note that the co-ordinates don't specify the top-left of the menu - they
-        indicate a point of interest, and the menu will position itself nearby to
-        this point, trying to keep it fully on-screen.
+        The screenAreaToAttachTo parameter indicates a screen area to which the menu
+        will be adjacent. Depending on where this is, the menu will decide which edge to
+        attach itself to, in order to fit itself fully on-screen. If you just want to
+        trigger a menu at a specific point, you can pass in a rectangle of size (0, 0)
+        with the position that you want.
 
         @see show()
     */
-    int showAt (int screenX,
-                int screenY,
+    int showAt (const Rectangle<int>& screenAreaToAttachTo,
                 int itemIdThatMustBeVisible = 0,
                 int minimumWidth = 0,
                 int maximumNumColumns = 0,
@@ -403,14 +404,9 @@ private:
 
     void addSeparatorIfPending();
 
-    int showMenu (const Rectangle<int>& target,
-                  int itemIdThatMustBeVisible,
-                  int minimumWidth,
-                  int maximumNumColumns,
-                  int standardItemHeight,
-                  bool alignToRectangle,
-                  Component* componentAttachedTo,
-                  ModalComponentManager::Callback* callback);
+    int showMenu (const Rectangle<int>& target, int itemIdThatMustBeVisible,
+                  int minimumWidth, int maximumNumColumns, int standardItemHeight,
+                  Component* componentAttachedTo, ModalComponentManager::Callback* callback);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__

@@ -1467,7 +1467,6 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
                          const int minimumWidth,
                          const int maximumNumColumns,
                          const int standardItemHeight,
-                         const bool alignToRectangle,
                          Component* const componentAttachedTo,
                          ModalComponentManager::Callback* userCallback)
 {
@@ -1482,7 +1481,7 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
 
     callback->component = Window::create (*this, ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
                                           0, target, minimumWidth, maximumNumColumns > 0 ? maximumNumColumns : 7,
-                                          standardItemHeight, alignToRectangle, itemIdThatMustBeVisible,
+                                          standardItemHeight, ! target.isEmpty(), itemIdThatMustBeVisible,
                                           &callback->managerOfChosenCommand, componentAttachedTo);
 
     if (callback->component == 0)
@@ -1518,23 +1517,20 @@ int PopupMenu::show (const int itemIdThatMustBeVisible,
                      const int standardItemHeight,
                      ModalComponentManager::Callback* callback)
 {
-    const Point<int> mousePos (Desktop::getMousePosition());
-
-    return showAt (mousePos.getX(), mousePos.getY(),
-                   itemIdThatMustBeVisible,
-                   minimumWidth, maximumNumColumns,
-                   standardItemHeight, callback);
+    return showMenu (Rectangle<int>().withPosition (Desktop::getMousePosition()),
+                     itemIdThatMustBeVisible, minimumWidth, maximumNumColumns,
+                     standardItemHeight, 0, callback);
 }
 
-int PopupMenu::showAt (const int screenX, const int screenY,
+int PopupMenu::showAt (const Rectangle<int>& screenAreaToAttachTo,
                        const int itemIdThatMustBeVisible,
                        const int minimumWidth, const int maximumNumColumns,
                        const int standardItemHeight,
                        ModalComponentManager::Callback* callback)
 {
-    return showMenu (Rectangle<int> (screenX, screenY, 1, 1),
+    return showMenu (screenAreaToAttachTo,
                      itemIdThatMustBeVisible, minimumWidth, maximumNumColumns,
-                     standardItemHeight, false, 0, callback);
+                     standardItemHeight, 0, callback);
 }
 
 int PopupMenu::showAt (Component* componentToAttachTo,
@@ -1546,16 +1542,12 @@ int PopupMenu::showAt (Component* componentToAttachTo,
     if (componentToAttachTo != 0)
     {
         return showMenu (componentToAttachTo->getScreenBounds(),
-                         itemIdThatMustBeVisible,
-                         minimumWidth,
-                         maximumNumColumns,
-                         standardItemHeight,
-                         true, componentToAttachTo, callback);
+                         itemIdThatMustBeVisible, minimumWidth, maximumNumColumns,
+                         standardItemHeight, componentToAttachTo, callback);
     }
     else
     {
-        return show (itemIdThatMustBeVisible,
-                     minimumWidth, maximumNumColumns,
+        return show (itemIdThatMustBeVisible, minimumWidth, maximumNumColumns,
                      standardItemHeight, callback);
     }
 }

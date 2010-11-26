@@ -318,6 +318,15 @@ public:
     */
     const Rectangle<int> getLocalBounds() const throw();
 
+    /** Returns the area of this component's parent which this component covers.
+
+        The returned area is relative to the parent's coordinate space.
+        If the component has an affine transform specified, then the resulting area will be
+        the smallest rectangle that fully covers the component's transformed bounding box.
+        If this component has no parent, the return value will simply be the same as getBounds().
+    */
+    const Rectangle<int> getBoundsInParent() const throw();
+
     /** Returns the region of this component that's not obscured by other, opaque components.
 
         The RectangleList that is returned represents the area of this component
@@ -1291,7 +1300,18 @@ public:
     */
     virtual void enablementChanged();
 
+    /** Changes the transparency of this component.
+        When painted, the entire component and all its children will be rendered
+        with this as the overall opacity level, where 0 is completely invisible, and
+        1.0 is fully opaque (i.e. normal).
+
+        @see getAlpha
+    */
     void setAlpha (float newAlpha);
+
+    /** Returns the component's current transparancy level.
+        See setAlpha() for more details.
+    */
     float getAlpha() const;
 
     //==============================================================================

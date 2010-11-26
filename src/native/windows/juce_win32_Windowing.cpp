@@ -2630,6 +2630,11 @@ void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStan
         DestroyCursor ((HCURSOR) cursorHandle);
 }
 
+enum
+{
+    hiddenMouseCursorHandle = 32500 // (arbitrary non-zero value to mark this type of cursor)
+};
+
 void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType type)
 {
     LPCTSTR cursorName = IDC_ARROW;
@@ -2637,7 +2642,7 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
     switch (type)
     {
         case NormalCursor:                  break;
-        case NoCursor:                      return 0;
+        case NoCursor:                      return (void*) hiddenMouseCursorHandle;
         case WaitCursor:                    cursorName = IDC_WAIT; break;
         case IBeamCursor:                   cursorName = IDC_IBEAM; break;
         case PointingHandCursor:            cursorName = MAKEINTRESOURCE(32649); break;
@@ -2696,6 +2701,8 @@ void MouseCursor::showInWindow (ComponentPeer*) const
 
     if (c == 0)
         c = LoadCursor (0, IDC_ARROW);
+    else if (c == (HCURSOR) hiddenMouseCursorHandle)
+        c = 0;
 
     SetCursor (c);
 }
