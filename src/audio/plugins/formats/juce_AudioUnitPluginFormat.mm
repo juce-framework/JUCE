@@ -70,7 +70,7 @@ namespace AudioUnitFormatHelpers
 {
     static int insideCallback = 0;
 
-    static const String osTypeToString (OSType type)
+    const String osTypeToString (OSType type)
     {
         char s[4];
         s[0] = (char) (((uint32) type) >> 24);
@@ -80,7 +80,7 @@ namespace AudioUnitFormatHelpers
         return String (s, 4);
     }
 
-    static OSType stringToOSType (const String& s1)
+    OSType stringToOSType (const String& s1)
     {
         const String s (s1 + "    ");
 
@@ -92,7 +92,7 @@ namespace AudioUnitFormatHelpers
 
     static const char* auIdentifierPrefix = "AudioUnit:";
 
-    static const String createAUPluginIdentifier (const ComponentDescription& desc)
+    const String createAUPluginIdentifier (const ComponentDescription& desc)
     {
         jassert (osTypeToString ('abcd') == "abcd"); // agh, must have got the endianness wrong..
         jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
@@ -116,7 +116,7 @@ namespace AudioUnitFormatHelpers
         return s;
     }
 
-    static void getAUDetails (ComponentRecord* comp, String& name, String& manufacturer)
+    void getAUDetails (ComponentRecord* comp, String& name, String& manufacturer)
     {
         Handle componentNameHandle = NewHandle (sizeof (void*));
         Handle componentInfoHandle = NewHandle (sizeof (void*));
@@ -153,8 +153,8 @@ namespace AudioUnitFormatHelpers
         }
     }
 
-    static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, ComponentDescription& desc,
-                                                String& name, String& version, String& manufacturer)
+    bool getComponentDescFromIdentifier (const String& fileOrIdentifier, ComponentDescription& desc,
+                                         String& name, String& version, String& manufacturer)
     {
         zerostruct (desc);
 
@@ -207,6 +207,7 @@ public:
     void fillInPluginDescription (PluginDescription& desc) const
     {
         desc.name = pluginName;
+        desc.descriptiveName = pluginName;
         desc.fileOrIdentifier = AudioUnitFormatHelpers::createAUPluginIdentifier (componentDesc);
         desc.uid = ((int) componentDesc.componentType)
                     ^ ((int) componentDesc.componentSubType)
@@ -1178,21 +1179,12 @@ const String AudioUnitPluginInstance::getCategory() const
 
     switch (componentDesc.componentType)
     {
-    case kAudioUnitType_Effect:
-    case kAudioUnitType_MusicEffect:
-        result = "Effect";
-        break;
-    case kAudioUnitType_MusicDevice:
-        result = "Synth";
-        break;
-    case kAudioUnitType_Generator:
-        result = "Generator";
-        break;
-    case kAudioUnitType_Panner:
-        result = "Panner";
-        break;
-    default:
-        break;
+        case kAudioUnitType_Effect:
+        case kAudioUnitType_MusicEffect:    result = "Effect"; break;
+        case kAudioUnitType_MusicDevice:    result = "Synth"; break;
+        case kAudioUnitType_Generator:      result = "Generator"; break;
+        case kAudioUnitType_Panner:         result = "Panner"; break;
+        default: break;
     }
 
     return result;

@@ -953,8 +953,7 @@ class EditorCompHolder : public Component,
                          public ComponentListener
 {
 public:
-    EditorCompHolder (AudioProcessorEditor* const editor_)
-        : editor (editor_)
+    EditorCompHolder (AudioProcessorEditor* const editor)
     {
         setSize (editor->getWidth(), editor->getHeight());
         addAndMakeVisible (editor);
@@ -969,13 +968,15 @@ public:
 
     ~EditorCompHolder()
     {
-        jassert (isParentOf (editor)); // you mustn't remove your editor from its parent!
-        editor = 0;
+        deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
+                             // have been transferred to another parent which takes over ownership.
     }
 
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
     {
-        if (wasResized)
+        Component* editor = getChildComponent(0);
+
+        if (editor != 0 && wasResized)
         {
             const int w = jmax (32, editor->getWidth());
             const int h = jmax (32, editor->getHeight());
@@ -992,9 +993,6 @@ public:
             [view setNeedsDisplay: YES];
         }
     }
-
-private:
-    ScopedPointer<Component> editor;
 };
 
 //==============================================================================

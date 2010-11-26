@@ -54,6 +54,12 @@ public:
     /** The name of the plugin. */
     String name;
 
+    /** A more descriptive name for the plugin.
+        This may be the same as the 'name' field, but some plugins may provide an
+        alternative name.
+    */
+    String descriptiveName;
+
     /** The plugin format, e.g. "VST", "AudioUnit", etc.
     */
     String pluginFormatName;

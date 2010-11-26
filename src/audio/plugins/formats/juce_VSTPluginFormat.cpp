@@ -703,6 +703,18 @@ public:
     void fillInPluginDescription (PluginDescription& desc) const
     {
         desc.name = name;
+
+        {
+            char buffer [512];
+            zerostruct (buffer);
+            dispatch (effGetEffectName, 0, 0, buffer, 0);
+
+            desc.descriptiveName = String (buffer).trim();
+
+            if (desc.descriptiveName.isEmpty())
+                desc.descriptiveName = name;
+        }
+
         desc.fileOrIdentifier = module->file.getFullPathName();
         desc.uid = getUID();
         desc.lastFileModTime = module->file.getLastModificationTime();
@@ -920,20 +932,6 @@ void VSTPluginInstance::initialise()
     initialised = true;
 
     dispatch (effIdentify, 0, 0, 0, 0);
-
-    // this code would ask the plugin for its name, but so few plugins
-    // actually bother implementing this correctly, that it's better to
-    // just ignore it and use the file name instead.
-/*    {
-        char buffer [256];
-        zerostruct (buffer);
-        dispatch (effGetEffectName, 0, 0, buffer, 0);
-
-        name = String (buffer).trim();
-        if (name.isEmpty())
-            name = module->pluginName;
-    }
-*/
 
     if (getSampleRate() > 0)
         dispatch (effSetSampleRate, 0, 0, 0, (float) getSampleRate());
@@ -2800,6 +2798,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
                 {
                     desc.uid = uid;
                     desc.name = shellEffectName;
+                    desc.descriptiveName = shellEffectName;
 
                     bool alreadyThere = false;
 
