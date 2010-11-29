@@ -65,8 +65,7 @@ private:
     MidiKeyboardComponent& owner;
     const int delta;
 
-    MidiKeyboardUpDownButton (const MidiKeyboardUpDownButton&);
-    MidiKeyboardUpDownButton& operator= (const MidiKeyboardUpDownButton&);
+    JUCE_DECLARE_NON_COPYABLE (MidiKeyboardUpDownButton);
 };
 
 //==============================================================================

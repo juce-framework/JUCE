@@ -187,8 +187,7 @@ private:
         } while (--width > 0);
     }
 
-    SolidColourEdgeTableRenderer (const SolidColourEdgeTableRenderer&);
-    SolidColourEdgeTableRenderer& operator= (const SolidColourEdgeTableRenderer&);
+    JUCE_DECLARE_NON_COPYABLE (SolidColourEdgeTableRenderer);
 };
 
 //==============================================================================
@@ -259,8 +258,7 @@ private:
     bool vertical, horizontal;
     enum { numScaleBits = 12 };
 
-    LinearGradientPixelGenerator (const LinearGradientPixelGenerator&);
-    LinearGradientPixelGenerator& operator= (const LinearGradientPixelGenerator&);
+    JUCE_DECLARE_NON_COPYABLE (LinearGradientPixelGenerator);
 };
 
 //==============================================================================
@@ -302,8 +300,7 @@ protected:
     const double gx1, gy1;
     double maxDist, invScale, dy;
 
-    RadialGradientPixelGenerator (const RadialGradientPixelGenerator&);
-    RadialGradientPixelGenerator& operator= (const RadialGradientPixelGenerator&);
+    JUCE_DECLARE_NON_COPYABLE (RadialGradientPixelGenerator);
 };
 
 //==============================================================================
@@ -343,8 +340,7 @@ private:
     double tM10, tM00, lineYM01, lineYM11;
     const AffineTransform inverseTransform;
 
-    TransformedRadialGradientPixelGenerator (const TransformedRadialGradientPixelGenerator&);
-    TransformedRadialGradientPixelGenerator& operator= (const TransformedRadialGradientPixelGenerator&);
+    JUCE_DECLARE_NON_COPYABLE (TransformedRadialGradientPixelGenerator);
 };
 
 //==============================================================================
@@ -409,8 +405,7 @@ private:
     const Image::BitmapData& destData;
     PixelType* linePixels;
 
-    GradientEdgeTableRenderer (const GradientEdgeTableRenderer&);
-    GradientEdgeTableRenderer& operator= (const GradientEdgeTableRenderer&);
+    JUCE_DECLARE_NON_COPYABLE (GradientEdgeTableRenderer);
 };
 
 //==============================================================================
@@ -561,8 +556,7 @@ private:
         memcpy (dest, src, width * sizeof (PixelRGB));
     }
 
-    ImageFillEdgeTableRenderer (const ImageFillEdgeTableRenderer&);
-    ImageFillEdgeTableRenderer& operator= (const ImageFillEdgeTableRenderer&);
+    JUCE_DECLARE_NON_COPYABLE (ImageFillEdgeTableRenderer);
 };
 
 //==============================================================================
@@ -1007,8 +1001,7 @@ private:
         const float pixelOffset;
         const int pixelOffsetInt;
 
-        TransformedImageSpanInterpolator (const TransformedImageSpanInterpolator&);
-        TransformedImageSpanInterpolator& operator= (const TransformedImageSpanInterpolator&);
+        JUCE_DECLARE_NON_COPYABLE (TransformedImageSpanInterpolator);
     };
 
     //==============================================================================
@@ -1023,8 +1016,7 @@ private:
     HeapBlock <SrcPixelType> scratchBuffer;
     int scratchSize;
 
-    TransformedImageFillEdgeTableRenderer (const TransformedImageFillEdgeTableRenderer&);
-    TransformedImageFillEdgeTableRenderer& operator= (const TransformedImageFillEdgeTableRenderer&);
+    JUCE_DECLARE_NON_COPYABLE (TransformedImageFillEdgeTableRenderer);
 };
 
 //==============================================================================
@@ -1622,8 +1614,7 @@ private:
         const RectangleList& clip;
         const Rectangle<int> area;
 
-        SubRectangleIterator (const SubRectangleIterator&);
-        SubRectangleIterator& operator= (const SubRectangleIterator&);
+        JUCE_DECLARE_NON_COPYABLE (SubRectangleIterator);
     };
 
     //==============================================================================
@@ -1788,8 +1779,7 @@ private:
         const RectangleList& clip;
         const Rectangle<float>& area;
 
-        SubRectangleIteratorFloat (const SubRectangleIteratorFloat&);
-        SubRectangleIteratorFloat& operator= (const SubRectangleIteratorFloat&);
+        JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat);
     };
 
     ClipRegion_RectangleList& operator= (const ClipRegion_RectangleList&);

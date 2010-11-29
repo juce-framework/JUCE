@@ -489,8 +489,7 @@ private:
                || mouseDowns[0].position.getDistanceFrom (screenPos) >= 4;
     }
 
-    MouseInputSourceInternal (const MouseInputSourceInternal&);
-    MouseInputSourceInternal& operator= (const MouseInputSourceInternal&);
+    JUCE_DECLARE_NON_COPYABLE (MouseInputSourceInternal);
 };
 
 //==============================================================================

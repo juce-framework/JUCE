@@ -511,8 +511,7 @@ private:
     private:
         ElementComparator& comparator;
 
-        ComparatorAdapter (const ComparatorAdapter&);
-        ComparatorAdapter& operator= (const ComparatorAdapter&);
+        JUCE_DECLARE_NON_COPYABLE (ComparatorAdapter);
     };
 
     friend class SharedObject;

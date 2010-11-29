@@ -526,8 +526,7 @@ public:
 private:
     Component::SafePointer<ComboBox> box;
 
-    Callback (const Callback&);
-    Callback& operator= (const Callback&);
+    JUCE_DECLARE_NON_COPYABLE (Callback);
 };
 
 

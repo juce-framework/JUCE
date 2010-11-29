@@ -242,8 +242,7 @@ private:
     int numKPs, size;
     bool bold, italic;
 
-    FontDCHolder (const FontDCHolder&);
-    FontDCHolder& operator= (const FontDCHolder&);
+    JUCE_DECLARE_NON_COPYABLE (FontDCHolder);
 };
 
 juce_ImplementSingleton_SingleThreaded (FontDCHolder);

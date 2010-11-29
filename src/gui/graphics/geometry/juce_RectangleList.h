@@ -236,8 +236,7 @@ public:
         const RectangleList& owner;
         int index;
 
-        Iterator (const Iterator&);
-        Iterator& operator= (const Iterator&);
+        JUCE_DECLARE_NON_COPYABLE (Iterator);
     };
 
 private:

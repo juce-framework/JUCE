@@ -95,8 +95,8 @@ public:
 
 private:
     ByteOrder();
-    ByteOrder (const ByteOrder&);
-    ByteOrder& operator= (const ByteOrder&);
+
+    JUCE_DECLARE_NON_COPYABLE (ByteOrder);
 };
 
 

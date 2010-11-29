@@ -37,17 +37,16 @@ BEGIN_JUCE_NAMESPACE
 class ActionMessage  : public Message
 {
 public:
-    const String message;
-
     ActionMessage (const String& messageText, ActionListener* const listener_) throw()
         : message (messageText)
     {
         pointerParameter = listener_;
     }
 
+    const String message;
+
 private:
-    ActionMessage (const ActionMessage&);
-    ActionMessage& operator= (const ActionMessage&);
+    JUCE_DECLARE_NON_COPYABLE (ActionMessage);
 };
 
 ActionBroadcaster::CallbackReceiver::CallbackReceiver() {}

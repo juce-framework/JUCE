@@ -68,8 +68,8 @@ public:
 
 private:
     Primes();
-    Primes (const Primes&);
-    Primes& operator= (const Primes&);
+
+    JUCE_DECLARE_NON_COPYABLE (Primes);
 };
 
 

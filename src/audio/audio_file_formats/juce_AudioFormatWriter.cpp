@@ -250,8 +250,7 @@ private:
     ScopedPointer<AudioFormatWriter> writer;
     volatile bool isRunning;
 
-    Buffer (const Buffer&);
-    Buffer& operator= (const Buffer&);
+    JUCE_DECLARE_NON_COPYABLE (Buffer);
 };
 
 AudioFormatWriter::ThreadedWriter::ThreadedWriter (AudioFormatWriter* writer, TimeSliceThread& backgroundThread, int numSamplesToBuffer)

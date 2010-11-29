@@ -78,8 +78,7 @@ public:
     }
 
 private:
-    TempDialogWindow (const TempDialogWindow&);
-    TempDialogWindow& operator= (const TempDialogWindow&);
+    JUCE_DECLARE_NON_COPYABLE (TempDialogWindow);
 };
 
 int DialogWindow::showModalDialog (const String& dialogTitle,

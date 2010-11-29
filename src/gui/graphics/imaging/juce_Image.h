@@ -326,8 +326,7 @@ public:
         int lineStride, pixelStride, width, height;
 
     private:
-        BitmapData (const BitmapData&);
-        BitmapData& operator= (const BitmapData&);
+        JUCE_DECLARE_NON_COPYABLE (BitmapData);
     };
 
     /** Copies some pixel values to a rectangle of the image.

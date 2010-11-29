@@ -112,8 +112,7 @@ public:
         InterProcessLock& lock_;
         bool lockWasSuccessful;
 
-        ScopedLockType (const ScopedLockType&);
-        ScopedLockType& operator= (const ScopedLockType&);
+        JUCE_DECLARE_NON_COPYABLE (ScopedLockType);
     };
 
 private:
@@ -125,8 +124,7 @@ private:
     CriticalSection lock;
     String name;
 
-    InterProcessLock (const InterProcessLock&);
-    InterProcessLock& operator= (const InterProcessLock&);
+    JUCE_DECLARE_NON_COPYABLE (InterProcessLock);
 };
 
 

@@ -317,8 +317,7 @@ public:
         const ListType& list;
         int index;
 
-        Iterator (const Iterator&);
-        Iterator& operator= (const Iterator&);
+        JUCE_DECLARE_NON_COPYABLE (Iterator);
     };
 
     typedef ListenerList<ListenerClass, ArrayType> ThisType;
@@ -330,8 +329,7 @@ private:
     //==============================================================================
     ArrayType listeners;
 
-    ListenerList (const ListenerList&);
-    ListenerList& operator= (const ListenerList&);
+    JUCE_DECLARE_NON_COPYABLE (ListenerList);
 
     #undef LL_TEMPLATE
     #undef LL_PARAM

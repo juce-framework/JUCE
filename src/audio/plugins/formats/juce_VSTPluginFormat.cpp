@@ -90,7 +90,7 @@ BEGIN_JUCE_NAMESPACE
     If you're not interested in VSTs, you can disable them by changing the
     JUCE_PLUGINHOST_VST flag in juce_Config.h
 */
-#include "pluginterfaces/vst2.x/aeffectx.h"
+#include <pluginterfaces/vst2.x/aeffectx.h>
 
 #if JUCE_MSVC
   #pragma warning (pop)
@@ -237,7 +237,7 @@ class VSTPluginWindow;
 #if JUCE_MAC && JUCE_PPC
 static void* NewCFMFromMachO (void* const machofp) throw()
 {
-    void* result = juce_malloc (8);
+    void* result = (void*) new char[8];
 
     ((void**) result)[0] = machofp;
     ((void**) result)[1] = result;

@@ -45,51 +45,17 @@ const String SystemStats::getJUCEVersion()
 
 //==============================================================================
 #ifdef JUCE_DLL
+ void* juce_Malloc (int size)                   { return malloc (size); }
+ void* juce_Calloc (int size)                   { return calloc (1, size); }
+ void* juce_Realloc (void* block, int size)     { return realloc (block, size); }
+ void juce_Free (void* block)                   { free (block); }
 
-void* juce_Malloc (const int size)
-{
-    return malloc (size);
-}
-
-void* juce_Calloc (const int size)
-{
-    return calloc (1, size);
-}
-
-void* juce_Realloc (void* const block, const int size)
-{
-    return realloc (block, size);
-}
-
-void juce_Free (void* const block)
-{
-    free (block);
-}
-
-#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
-
-void* juce_DebugMalloc (const int size, const char* file, const int line)
-{
-    return _malloc_dbg  (size, _NORMAL_BLOCK, file, line);
-}
-
-void* juce_DebugCalloc (const int size, const char* file, const int line)
-{
-    return _calloc_dbg  (1, size, _NORMAL_BLOCK, file, line);
-}
-
-void* juce_DebugRealloc (void* const block, const int size, const char* file, const int line)
-{
-    return _realloc_dbg  (block, size, _NORMAL_BLOCK, file, line);
-}
-
-void juce_DebugFree (void* const block)
-{
-    _free_dbg (block, _NORMAL_BLOCK);
-}
-
+ #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+  void* juce_DebugMalloc (int size, const char* file, int line)                 { return _malloc_dbg  (size, _NORMAL_BLOCK, file, line); }
+  void* juce_DebugCalloc (int size, const char* file, int line)                 { return _calloc_dbg  (1, size, _NORMAL_BLOCK, file, line); }
+  void* juce_DebugRealloc (void* block, int size, const char* file, int line)   { return _realloc_dbg  (block, size, _NORMAL_BLOCK, file, line); }
+  void juce_DebugFree (void* block)                                             { _free_dbg (block, _NORMAL_BLOCK); }
+ #endif
 #endif
-#endif
-
 
 END_JUCE_NAMESPACE

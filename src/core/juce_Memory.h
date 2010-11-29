@@ -28,33 +28,22 @@
 
 //==============================================================================
 /*
-    This file defines the various juce_malloc(), juce_free() macros that should be used in
+    This file defines the various juce_malloc(), juce_free() macros that can be used in
     preference to the standard calls.
+
+    None of this stuff is actually used in the library itself, and will probably be
+    deprecated at some point in the future, to force everyone to use HeapBlock and other
+    safer allocation methods.
 */
 
-#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS && ! DOXYGEN
   #ifndef JUCE_DLL
     //==============================================================================
     // Win32 debug non-DLL versions..
 
-    /** This should be used instead of calling malloc directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_malloc(numBytes)                 _malloc_dbg  (numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-
-    /** This should be used instead of calling calloc directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_calloc(numBytes)                 _calloc_dbg  (1, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-
-    /** This should be used instead of calling realloc directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_realloc(location, numBytes)      _realloc_dbg (location, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-
-    /** This should be used instead of calling free directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_free(location)                   _free_dbg    (location, _NORMAL_BLOCK)
 
   #else
@@ -63,84 +52,64 @@
 
     // For the DLL, we'll define some functions in the DLL that will be used for allocation - that
     // way all juce calls in the DLL and in the host API will all use the same allocator.
-    extern JUCE_API void* juce_DebugMalloc (const int size, const char* file, const int line);
-    extern JUCE_API void* juce_DebugCalloc (const int size, const char* file, const int line);
-    extern JUCE_API void* juce_DebugRealloc (void* const block, const int size, const char* file, const int line);
-    extern JUCE_API void juce_DebugFree (void* const block);
+    extern JUCE_API void* juce_DebugMalloc (int size, const char* file, int line);
+    extern JUCE_API void* juce_DebugCalloc (int size, const char* file, int line);
+    extern JUCE_API void* juce_DebugRealloc (void* block, int size, const char* file, int line);
+    extern JUCE_API void juce_DebugFree (void* block);
 
-    /** This should be used instead of calling malloc directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_malloc(numBytes)                 JUCE_NAMESPACE::juce_DebugMalloc (numBytes, __FILE__, __LINE__)
-
-    /** This should be used instead of calling calloc directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_calloc(numBytes)                 JUCE_NAMESPACE::juce_DebugCalloc (numBytes, __FILE__, __LINE__)
-
-    /** This should be used instead of calling realloc directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_realloc(location, numBytes)      JUCE_NAMESPACE::juce_DebugRealloc (location, numBytes, __FILE__, __LINE__)
-
-    /** This should be used instead of calling free directly.
-        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-    */
     #define juce_free(location)                   JUCE_NAMESPACE::juce_DebugFree (location)
+
+    #define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
+              static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
+              static void* operator new (size_t, void* p)     { return p; } \
+              static void operator delete (void* p)           { juce_free (p); } \
+              static void operator delete (void*, void*)      {}
   #endif
 
-#elif defined (JUCE_DLL)
+#elif defined (JUCE_DLL) && ! DOXYGEN
   //==============================================================================
   // Win32 DLL (release) versions..
 
   // For the DLL, we'll define some functions in the DLL that will be used for allocation - that
   // way all juce calls in the DLL and in the host API will all use the same allocator.
-  extern JUCE_API void* juce_Malloc (const int size);
-  extern JUCE_API void* juce_Calloc (const int size);
-  extern JUCE_API void* juce_Realloc (void* const block, const int size);
-  extern JUCE_API void juce_Free (void* const block);
+  extern JUCE_API void* juce_Malloc (int size);
+  extern JUCE_API void* juce_Calloc (int size);
+  extern JUCE_API void* juce_Realloc (void* block, int size);
+  extern JUCE_API void juce_Free (void* block);
 
-  /** This should be used instead of calling malloc directly.
-      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_malloc(numBytes)                 JUCE_NAMESPACE::juce_Malloc (numBytes)
-
-  /** This should be used instead of calling calloc directly.
-      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_calloc(numBytes)                 JUCE_NAMESPACE::juce_Calloc (numBytes)
-
-  /** This should be used instead of calling realloc directly.
-      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_realloc(location, numBytes)      JUCE_NAMESPACE::juce_Realloc (location, numBytes)
-
-  /** This should be used instead of calling free directly.
-      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_free(location)                   JUCE_NAMESPACE::juce_Free (location)
 
+  #define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
+              static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
+              static void* operator new (size_t, void* p)     { return p; } \
+              static void operator delete (void* p)           { juce_free (p); } \
+              static void operator delete (void*, void*)      {}
 #else
-
   //==============================================================================
   // Mac, Linux and Win32 (release) versions..
 
-  /** This should be used instead of calling malloc directly.
+  /** This can be used instead of calling malloc directly.
       Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_malloc(numBytes)                 malloc (numBytes)
 
-  /** This should be used instead of calling calloc directly.
+  /** This can be used instead of calling calloc directly.
       Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_calloc(numBytes)                 calloc (1, numBytes)
 
-  /** This should be used instead of calling realloc directly.
+  /** This can be used instead of calling realloc directly.
       Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_realloc(location, numBytes)      realloc (location, numBytes)
 
-  /** This should be used instead of calling free directly.
+  /** This can be used instead of calling free directly.
       Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_free(location)                   free (location)
@@ -176,18 +145,17 @@
 #endif
 
 //==============================================================================
-/** Clears a block of memory. */
+/** Fills a block of memory with zeros. */
 inline void zeromem (void* memory, size_t numBytes) throw()         { memset (memory, 0, numBytes); }
 
-/** Clears a reference to a local structure. */
+/** Overwrites a structure or object with zeros. */
 template <typename Type>
 inline void zerostruct (Type& structure) throw()                    { memset (&structure, 0, sizeof (structure)); }
 
-/** A handy function that calls delete on a pointer if it's non-zero, and then sets
-    the pointer to null.
+/** Delete an object pointer, and sets the pointer to null.
 
-    Never use this if there's any way you could use a ScopedPointer or other safer way of
-    managing the lieftimes of your objects!
+    Remember that it's not good c++ practice to use delete directly - always try to use a ScopedPointer
+    or other automatic lieftime-management system rather than resorting to deleting raw pointers!
 */
 template <typename Type>
 inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = 0; }

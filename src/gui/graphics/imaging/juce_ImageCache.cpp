@@ -123,8 +123,7 @@ private:
     OwnedArray<Item> images;
     CriticalSection lock;
 
-    Pimpl (const Pimpl&);
-    Pimpl& operator= (const Pimpl&);
+    JUCE_DECLARE_NON_COPYABLE (Pimpl);
 };
 
 juce_ImplementSingleton_SingleThreaded (ImageCache::Pimpl);

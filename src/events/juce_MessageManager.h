@@ -308,8 +308,7 @@ private:
 
     void init (Thread* thread, ThreadPoolJob* job);
 
-    MessageManagerLock (const MessageManagerLock&);
-    MessageManagerLock& operator= (const MessageManagerLock&);
+    JUCE_DECLARE_NON_COPYABLE (MessageManagerLock);
 };
 
 

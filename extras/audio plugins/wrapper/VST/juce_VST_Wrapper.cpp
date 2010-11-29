@@ -63,10 +63,10 @@
  #endif
 
  // VSTSDK V2.4 includes..
- #include "public.sdk/source/vst2.x/audioeffectx.h"
- #include "public.sdk/source/vst2.x/aeffeditor.h"
- #include "public.sdk/source/vst2.x/audioeffectx.cpp"
- #include "public.sdk/source/vst2.x/audioeffect.cpp"
+ #include <public.sdk/source/vst2.x/audioeffectx.h>
+ #include <public.sdk/source/vst2.x/aeffeditor.h>
+ #include <public.sdk/source/vst2.x/audioeffectx.cpp>
+ #include <public.sdk/source/vst2.x/audioeffect.cpp>
 
  #if ! VST_2_4_EXTENSIONS
   #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
@@ -74,10 +74,10 @@
 
 #else
  // VSTSDK V2.3 includes..
- #include "source/common/audioeffectx.h"
- #include "source/common/AEffEditor.hpp"
- #include "source/common/audioeffectx.cpp"
- #include "source/common/AudioEffect.cpp"
+ #include <source/common/audioeffectx.h>
+ #include <source/common/AEffEditor.hpp>
+ #include <source/common/audioeffectx.cpp>
+ #include <source/common/AudioEffect.cpp>
 
  #if (! VST_2_3_EXTENSIONS) || VST_2_4_EXTENSIONS
   #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag

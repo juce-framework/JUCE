@@ -472,8 +472,7 @@ private:
 
     static inline int makeWord (const uint8 a, const uint8 b)    { return (b << 8) | a; }
 
-    GIFLoader (const GIFLoader&);
-    GIFLoader& operator= (const GIFLoader&);
+    JUCE_DECLARE_NON_COPYABLE (GIFLoader);
 };
 
 #endif

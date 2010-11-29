@@ -95,8 +95,7 @@ private:
     var oldValue;
     const bool isAddingNewProperty : 1, isDeletingProperty : 1;
 
-    SetPropertyAction (const SetPropertyAction&);
-    SetPropertyAction& operator= (const SetPropertyAction&);
+    JUCE_DECLARE_NON_COPYABLE (SetPropertyAction);
 };
 
 //==============================================================================
@@ -152,8 +151,7 @@ private:
     const int childIndex;
     const bool isDeleting;
 
-    AddOrRemoveChildAction (const AddOrRemoveChildAction&);
-    AddOrRemoveChildAction& operator= (const AddOrRemoveChildAction&);
+    JUCE_DECLARE_NON_COPYABLE (AddOrRemoveChildAction);
 };
 
 //==============================================================================
@@ -201,8 +199,7 @@ private:
     const SharedObjectPtr parent;
     const int startIndex, endIndex;
 
-    MoveChildAction (const MoveChildAction&);
-    MoveChildAction& operator= (const MoveChildAction&);
+    JUCE_DECLARE_NON_COPYABLE (MoveChildAction);
 };
 
 

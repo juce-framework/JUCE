@@ -103,8 +103,7 @@ private:
 
     void callListeners();
 
-    ChangeBroadcaster (const ChangeBroadcaster&);
-    ChangeBroadcaster& operator= (const ChangeBroadcaster&);
+    JUCE_DECLARE_NON_COPYABLE (ChangeBroadcaster);
 };
 
 

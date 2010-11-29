@@ -1433,8 +1433,7 @@ public:
     ScopedPointer<Component> component;
 
 private:
-    PopupMenuCompletionCallback (const PopupMenuCompletionCallback&);
-    PopupMenuCompletionCallback& operator= (const PopupMenuCompletionCallback&);
+    JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback);
 };
 
 

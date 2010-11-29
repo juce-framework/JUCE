@@ -162,8 +162,8 @@ private:
     static CPUFlags cpuFlags;
 
     SystemStats();
-    SystemStats (const SystemStats&);
-    SystemStats& operator= (const SystemStats&);
+
+    JUCE_DECLARE_NON_COPYABLE (SystemStats);
 };
 
 

@@ -69,7 +69,7 @@ public:
         {
             if (e->type == kVstSysExType)
             {
-                juce_free (((VstMidiSysexEvent*) e)->sysexDump);
+                delete[] (((VstMidiSysexEvent*) e)->sysexDump);
                 e->type = kVstMidiType;
                 e->byteSize = sizeof (VstMidiEvent);
                 e->noteLength = 0;
@@ -86,10 +86,9 @@ public:
             VstMidiSysexEvent* const se = (VstMidiSysexEvent*) e;
 
             if (se->type == kVstSysExType)
-                se->sysexDump = (char*) juce_realloc (se->sysexDump, numBytes);
-            else
-                se->sysexDump = (char*) juce_malloc (numBytes);
+                delete[] se->sysexDump;
 
+            se->sysexDump = new char [numBytes];
             memcpy (se->sysexDump, midiData, numBytes);
 
             se->type = kVstSysExType;
@@ -165,7 +164,7 @@ public:
                 VstMidiEvent* const e = (VstMidiEvent*) (events->events[i]);
 
                 if (e->type == kVstSysExType)
-                    juce_free (((VstMidiSysexEvent*) e)->sysexDump);
+                    delete[] (((VstMidiSysexEvent*) e)->sysexDump);
 
                 juce_free (e);
             }

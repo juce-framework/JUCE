@@ -325,8 +325,7 @@ private:
         startThread (7);
     }
 
-    InternalTimerThread (const InternalTimerThread&);
-    InternalTimerThread& operator= (const InternalTimerThread&);
+    JUCE_DECLARE_NON_COPYABLE (InternalTimerThread);
 };
 
 InternalTimerThread* InternalTimerThread::instance = 0;

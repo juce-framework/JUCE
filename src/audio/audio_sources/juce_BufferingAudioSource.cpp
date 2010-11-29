@@ -114,8 +114,7 @@ private:
             deleteInstance();
     }
 
-    SharedBufferingAudioSourceThread (const SharedBufferingAudioSourceThread&);
-    SharedBufferingAudioSourceThread& operator= (const SharedBufferingAudioSourceThread&);
+    JUCE_DECLARE_NON_COPYABLE (SharedBufferingAudioSourceThread);
 };
 
 juce_ImplementSingleton (SharedBufferingAudioSourceThread)

@@ -2135,8 +2135,7 @@ public:
     private:
         Pimpl& pimpl;
 
-        ScopedDiscOpener (const ScopedDiscOpener&);
-        ScopedDiscOpener& operator= (const ScopedDiscOpener&);
+        JUCE_DECLARE_NON_COPYABLE (ScopedDiscOpener);
     };
 
     DiskState getDiskState()

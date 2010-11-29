@@ -180,8 +180,7 @@ public:
 private:
     MagnifierComponent* const magnifierComp;
 
-    PeerHolderComp (const PeerHolderComp&);
-    PeerHolderComp& operator= (const PeerHolderComp&);
+    JUCE_DECLARE_NON_COPYABLE (PeerHolderComp);
 };
 
 

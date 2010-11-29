@@ -152,8 +152,7 @@ private:
     bool triggered;
     const bool manualReset;
 
-    WaitableEventImpl (const WaitableEventImpl&);
-    WaitableEventImpl& operator= (const WaitableEventImpl&);
+    JUCE_DECLARE_NON_COPYABLE (WaitableEventImpl);
 };
 
 WaitableEvent::WaitableEvent (const bool manualReset) throw()

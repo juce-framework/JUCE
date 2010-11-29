@@ -784,8 +784,7 @@ private:
         CGContextConcatCTM (context, t);
     }
 
-    CoreGraphicsContext (const CoreGraphicsContext&);
-    CoreGraphicsContext& operator= (const CoreGraphicsContext&);
+    JUCE_DECLARE_NON_COPYABLE (CoreGraphicsContext);
 };
 
 LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()

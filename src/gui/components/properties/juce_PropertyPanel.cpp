@@ -137,8 +137,7 @@ private:
     int titleHeight;
     bool sectionIsOpen;
 
-    PropertySectionComponent (const PropertySectionComponent&);
-    PropertySectionComponent& operator= (const PropertySectionComponent&);
+    JUCE_DECLARE_NON_COPYABLE (PropertySectionComponent);
 };
 
 //==============================================================================
@@ -188,8 +187,7 @@ public:
 private:
     OwnedArray<PropertySectionComponent> sections;
 
-    PropertyHolderComponent (const PropertyHolderComponent&);
-    PropertyHolderComponent& operator= (const PropertyHolderComponent&);
+    JUCE_DECLARE_NON_COPYABLE (PropertyHolderComponent);
 };
 
 

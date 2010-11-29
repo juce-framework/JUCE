@@ -108,7 +108,7 @@
     ASIO SDK installed, you can disable ASIO support by commenting-out the
     "#define JUCE_ASIO" line in juce_Config.h, and rebuild your Juce library.
  */
- #include "iasiodrv.h"
+ #include <iasiodrv.h>
 #endif
 
 //==============================================================================

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	97
+#define JUCE_BUILDNUMBER	98
 
 /** Current Juce version number.
 
@@ -857,33 +857,22 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #define __JUCE_MEMORY_JUCEHEADER__
 
 /*
-	This file defines the various juce_malloc(), juce_free() macros that should be used in
+	This file defines the various juce_malloc(), juce_free() macros that can be used in
 	preference to the standard calls.
+
+	None of this stuff is actually used in the library itself, and will probably be
+	deprecated at some point in the future, to force everyone to use HeapBlock and other
+	safer allocation methods.
 */
 
-#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS && ! DOXYGEN
   #ifndef JUCE_DLL
 
 	// Win32 debug non-DLL versions..
 
-	/** This should be used instead of calling malloc directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_malloc(numBytes)		 _malloc_dbg  (numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-
-	/** This should be used instead of calling calloc directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_calloc(numBytes)		 _calloc_dbg  (1, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-
-	/** This should be used instead of calling realloc directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_realloc(location, numBytes)	  _realloc_dbg (location, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-
-	/** This should be used instead of calling free directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_free(location)		   _free_dbg	(location, _NORMAL_BLOCK)
 
   #else
@@ -892,83 +881,64 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 	// For the DLL, we'll define some functions in the DLL that will be used for allocation - that
 	// way all juce calls in the DLL and in the host API will all use the same allocator.
-	extern JUCE_API void* juce_DebugMalloc (const int size, const char* file, const int line);
-	extern JUCE_API void* juce_DebugCalloc (const int size, const char* file, const int line);
-	extern JUCE_API void* juce_DebugRealloc (void* const block, const int size, const char* file, const int line);
-	extern JUCE_API void juce_DebugFree (void* const block);
+	extern JUCE_API void* juce_DebugMalloc (int size, const char* file, int line);
+	extern JUCE_API void* juce_DebugCalloc (int size, const char* file, int line);
+	extern JUCE_API void* juce_DebugRealloc (void* block, int size, const char* file, int line);
+	extern JUCE_API void juce_DebugFree (void* block);
 
-	/** This should be used instead of calling malloc directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_malloc(numBytes)		 JUCE_NAMESPACE::juce_DebugMalloc (numBytes, __FILE__, __LINE__)
-
-	/** This should be used instead of calling calloc directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_calloc(numBytes)		 JUCE_NAMESPACE::juce_DebugCalloc (numBytes, __FILE__, __LINE__)
-
-	/** This should be used instead of calling realloc directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_realloc(location, numBytes)	  JUCE_NAMESPACE::juce_DebugRealloc (location, numBytes, __FILE__, __LINE__)
-
-	/** This should be used instead of calling free directly.
-		Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-	*/
 	#define juce_free(location)		   JUCE_NAMESPACE::juce_DebugFree (location)
+
+	#define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
+			  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
+			  static void* operator new (size_t, void* p)	 { return p; } \
+			  static void operator delete (void* p)	   { juce_free (p); } \
+			  static void operator delete (void*, void*)	  {}
   #endif
 
-#elif defined (JUCE_DLL)
+#elif defined (JUCE_DLL) && ! DOXYGEN
 
   // Win32 DLL (release) versions..
 
   // For the DLL, we'll define some functions in the DLL that will be used for allocation - that
   // way all juce calls in the DLL and in the host API will all use the same allocator.
-  extern JUCE_API void* juce_Malloc (const int size);
-  extern JUCE_API void* juce_Calloc (const int size);
-  extern JUCE_API void* juce_Realloc (void* const block, const int size);
-  extern JUCE_API void juce_Free (void* const block);
+  extern JUCE_API void* juce_Malloc (int size);
+  extern JUCE_API void* juce_Calloc (int size);
+  extern JUCE_API void* juce_Realloc (void* block, int size);
+  extern JUCE_API void juce_Free (void* block);
 
-  /** This should be used instead of calling malloc directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_malloc(numBytes)		 JUCE_NAMESPACE::juce_Malloc (numBytes)
-
-  /** This should be used instead of calling calloc directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_calloc(numBytes)		 JUCE_NAMESPACE::juce_Calloc (numBytes)
-
-  /** This should be used instead of calling realloc directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_realloc(location, numBytes)	  JUCE_NAMESPACE::juce_Realloc (location, numBytes)
-
-  /** This should be used instead of calling free directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
   #define juce_free(location)		   JUCE_NAMESPACE::juce_Free (location)
 
+  #define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
+			  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
+			  static void* operator new (size_t, void* p)	 { return p; } \
+			  static void operator delete (void* p)	   { juce_free (p); } \
+			  static void operator delete (void*, void*)	  {}
 #else
 
   // Mac, Linux and Win32 (release) versions..
 
-  /** This should be used instead of calling malloc directly.
+  /** This can be used instead of calling malloc directly.
 	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_malloc(numBytes)		 malloc (numBytes)
 
-  /** This should be used instead of calling calloc directly.
+  /** This can be used instead of calling calloc directly.
 	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_calloc(numBytes)		 calloc (1, numBytes)
 
-  /** This should be used instead of calling realloc directly.
+  /** This can be used instead of calling realloc directly.
 	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_realloc(location, numBytes)	  realloc (location, numBytes)
 
-  /** This should be used instead of calling free directly.
+  /** This can be used instead of calling free directly.
 	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
   */
   #define juce_free(location)		   free (location)
@@ -1000,18 +970,17 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
   #define alloca		  __builtin_alloca
 #endif
 
-/** Clears a block of memory. */
+/** Fills a block of memory with zeros. */
 inline void zeromem (void* memory, size_t numBytes) throw()	 { memset (memory, 0, numBytes); }
 
-/** Clears a reference to a local structure. */
+/** Overwrites a structure or object with zeros. */
 template <typename Type>
 inline void zerostruct (Type& structure) throw()			{ memset (&structure, 0, sizeof (structure)); }
 
-/** A handy function that calls delete on a pointer if it's non-zero, and then sets
-	the pointer to null.
+/** Delete an object pointer, and sets the pointer to null.
 
-	Never use this if there's any way you could use a ScopedPointer or other safer way of
-	managing the lieftimes of your objects!
+	Remember that it's not good c++ practice to use delete directly - always try to use a ScopedPointer
+	or other automatic lieftime-management system rather than resorting to deleting raw pointers!
 */
 template <typename Type>
 inline void deleteAndZero (Type& pointer)			   { delete pointer; pointer = 0; }
@@ -1434,8 +1403,8 @@ public:
 
 private:
 	ByteOrder();
-	ByteOrder (const ByteOrder&);
-	ByteOrder& operator= (const ByteOrder&);
+
+	JUCE_DECLARE_NON_COPYABLE (ByteOrder);
 };
 
 #if JUCE_USE_INTRINSICS
@@ -2631,8 +2600,7 @@ public:
 		String& result;
 		int nextIndex;
 
-		Concatenator (const Concatenator&);
-		Concatenator& operator= (const Concatenator&);
+		JUCE_DECLARE_NON_COPYABLE (Concatenator);
 	};
 
 private:
@@ -3214,15 +3182,7 @@ private:
 	}
 };
 
-#if JUCE_DLL && ! DOXYGEN  // This hack makes use of the leak detector macros to add dll-safe allocators to all the classes..
-  #define JUCE_LEAK_DETECTOR(OwnerClass) \
-		public:\
-		  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-		  static void* operator new (size_t, void* p)	 { return p; } \
-		  static void operator delete (void* p)	   { juce_free (p); } \
-		  static void operator delete (void*, void*)	  { }
-
-#elif JUCE_CHECK_MEMORY_LEAKS || DOXYGEN
+#if DOXYGEN || (JUCE_CHECK_MEMORY_LEAKS && ! defined (JUCE_LEAK_DETECTOR))
   /** This macro lets you embed a leak-detecting object inside a class.
 
 	  To use it, simply declare a JUCE_LEAK_DETECTOR(YourClassName) inside a private section
@@ -3494,13 +3454,13 @@ private:
 
 	E.g. instead of this:
 	@code
-		int* temp = (int*) juce_malloc (1024 * sizeof (int));
+		int* temp = (int*) malloc (1024 * sizeof (int));
 		memcpy (temp, xyz, 1024 * sizeof (int));
-		juce_free (temp);
-		temp = (int*) juce_calloc (2048 * sizeof (int));
+		free (temp);
+		temp = (int*) calloc (2048 * sizeof (int));
 		temp[0] = 1234;
 		memcpy (foobar, temp, 2048 * sizeof (int));
-		juce_free (temp);
+		free (temp);
 	@endcode
 
 	..you could just write this:
@@ -3541,7 +3501,7 @@ public:
 		If you want an array of zero values, you can use the calloc() method instead.
 	*/
 	explicit HeapBlock (const size_t numElements)
-		: data (static_cast <ElementType*> (::juce_malloc (numElements * sizeof (ElementType))))
+		: data (static_cast <ElementType*> (::malloc (numElements * sizeof (ElementType))))
 	{
 	}
 
@@ -3551,7 +3511,7 @@ public:
 	*/
 	~HeapBlock()
 	{
-		::juce_free (data);
+		::free (data);
 	}
 
 	/** Returns a raw pointer to the allocated data.
@@ -3621,8 +3581,8 @@ public:
 	*/
 	void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
-		::juce_free (data);
-		data = static_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
+		::free (data);
+		data = static_cast <ElementType*> (::malloc (newNumElements * elementSize));
 	}
 
 	/** Allocates a specified amount of memory and clears it.
@@ -3630,8 +3590,8 @@ public:
 	*/
 	void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
-		::juce_free (data);
-		data = static_cast <ElementType*> (::juce_calloc (newNumElements * elementSize));
+		::free (data);
+		data = static_cast <ElementType*> (::calloc (newNumElements, elementSize));
 	}
 
 	/** Allocates a specified amount of memory and optionally clears it.
@@ -3640,12 +3600,12 @@ public:
 	*/
 	void allocate (const size_t newNumElements, const bool initialiseToZero)
 	{
-		::juce_free (data);
+		::free (data);
 
 		if (initialiseToZero)
-			data = static_cast <ElementType*> (::juce_calloc (newNumElements * sizeof (ElementType)));
+			data = static_cast <ElementType*> (::calloc (newNumElements, sizeof (ElementType)));
 		else
-			data = static_cast <ElementType*> (::juce_malloc (newNumElements * sizeof (ElementType)));
+			data = static_cast <ElementType*> (::malloc (newNumElements * sizeof (ElementType)));
 	}
 
 	/** Re-allocates a specified amount of memory.
@@ -3656,9 +3616,9 @@ public:
 	void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		if (data == 0)
-			data = static_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
+			data = static_cast <ElementType*> (::malloc (newNumElements * elementSize));
 		else
-			data = static_cast <ElementType*> (::juce_realloc (data, newNumElements * elementSize));
+			data = static_cast <ElementType*> (::realloc (data, newNumElements * elementSize));
 	}
 
 	/** Frees any currently-allocated data.
@@ -3666,7 +3626,7 @@ public:
 	*/
 	void free()
 	{
-		::juce_free (data);
+		::free (data);
 		data = 0;
 	}
 
@@ -3682,8 +3642,7 @@ private:
 
 	ElementType* data;
 
-	HeapBlock (const HeapBlock&);
-	HeapBlock& operator= (const HeapBlock&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeapBlock);
 };
 
 #endif   // __JUCE_HEAPBLOCK_JUCEHEADER__
@@ -3770,8 +3729,7 @@ public:
 	int numAllocated;
 
 private:
-	ArrayAllocationBase (const ArrayAllocationBase&);
-	ArrayAllocationBase& operator= (const ArrayAllocationBase&);
+	JUCE_DECLARE_NON_COPYABLE (ArrayAllocationBase);
 };
 
 #endif   // __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
@@ -4109,8 +4067,7 @@ private:
 	mutable pthread_mutex_t internal;
 #endif
 
-	CriticalSection (const CriticalSection&);
-	CriticalSection& operator= (const CriticalSection&);
+	JUCE_DECLARE_NON_COPYABLE (CriticalSection);
 };
 
 /**
@@ -4140,8 +4097,7 @@ public:
 	typedef ScopedLockType ScopedUnlockType;
 
 private:
-	DummyCriticalSection (const DummyCriticalSection&);
-	DummyCriticalSection& operator= (const DummyCriticalSection&);
+	JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection);
 };
 
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
@@ -12749,8 +12705,7 @@ public:
 		const ListType& list;
 		int index;
 
-		Iterator (const Iterator&);
-		Iterator& operator= (const Iterator&);
+		JUCE_DECLARE_NON_COPYABLE (Iterator);
 	};
 
 	typedef ListenerList<ListenerClass, ArrayType> ThisType;
@@ -12762,8 +12717,7 @@ private:
 
 	ArrayType listeners;
 
-	ListenerList (const ListenerList&);
-	ListenerList& operator= (const ListenerList&);
+	JUCE_DECLARE_NON_COPYABLE (ListenerList);
 
 	#undef LL_TEMPLATE
 	#undef LL_PARAM
@@ -13092,8 +13046,7 @@ private:
 
 	void callListeners();
 
-	ChangeBroadcaster (const ChangeBroadcaster&);
-	ChangeBroadcaster& operator= (const ChangeBroadcaster&);
+	JUCE_DECLARE_NON_COPYABLE (ChangeBroadcaster);
 };
 
 #endif   // __JUCE_CHANGEBROADCASTER_JUCEHEADER__
@@ -13830,8 +13783,7 @@ private:
 	private:
 		ElementComparator& comparator;
 
-		ComparatorAdapter (const ComparatorAdapter&);
-		ComparatorAdapter& operator= (const ComparatorAdapter&);
+		JUCE_DECLARE_NON_COPYABLE (ComparatorAdapter);
 	};
 
 	friend class SharedObject;
@@ -14359,8 +14311,8 @@ public:
 
 private:
 	PlatformUtilities();
-	PlatformUtilities (const PlatformUtilities&);
-	PlatformUtilities& operator= (const PlatformUtilities&);
+
+	JUCE_DECLARE_NON_COPYABLE (PlatformUtilities);
 };
 
 #if JUCE_MAC || JUCE_IOS
@@ -14377,8 +14329,7 @@ public:
 private:
 	void* pool;
 
-	ScopedAutoReleasePool (const ScopedAutoReleasePool&);
-	ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
+	JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
 };
 
 #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool pool;
@@ -14668,8 +14619,7 @@ private:
 
 	const CriticalSection& lock_;
 
-	ScopedLock (const ScopedLock&);
-	ScopedLock& operator= (const ScopedLock&);
+	JUCE_DECLARE_NON_COPYABLE (ScopedLock);
 };
 
 /**
@@ -14738,8 +14688,7 @@ private:
 
 	const CriticalSection& lock_;
 
-	ScopedUnlock (const ScopedLock&);
-	ScopedUnlock& operator= (const ScopedUnlock&);
+	JUCE_DECLARE_NON_COPYABLE (ScopedUnlock);
 };
 
 #endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
@@ -15134,8 +15083,8 @@ private:
 	static CPUFlags cpuFlags;
 
 	SystemStats();
-	SystemStats (const SystemStats&);
-	SystemStats& operator= (const SystemStats&);
+
+	JUCE_DECLARE_NON_COPYABLE (SystemStats);
 };
 
 #endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
@@ -15433,8 +15382,8 @@ public:
 
 private:
 	Primes();
-	Primes (const Primes&);
-	Primes& operator= (const Primes&);
+
+	JUCE_DECLARE_NON_COPYABLE (Primes);
 };
 
 #endif   // __JUCE_PRIMES_JUCEHEADER__
@@ -17083,13 +17032,14 @@ public:
 												indicates that a default compression level should be used.
 		@param deleteDestStreamWhenDestroyed	whether or not to delete the destStream object when
 												this stream is destroyed
-		@param noWrap			   this is used internally by the ZipFile class
-												and should be ignored by user applications
+		@param windowBits			   this is used internally to change the window size used
+												by zlib - leave it as 0 unless you specifically need to set
+												its value for some reason
 	*/
 	GZIPCompressorOutputStream (OutputStream* destStream,
 								int compressionLevel = 0,
 								bool deleteDestStreamWhenDestroyed = false,
-								bool noWrap = false);
+								int windowBits = 0);
 
 	/** Destructor. */
 	~GZIPCompressorOutputStream();
@@ -17098,6 +17048,15 @@ public:
 	int64 getPosition();
 	bool setPosition (int64 newPosition);
 	bool write (const void* destBuffer, int howMany);
+
+	/** These are preset values that can be used for the constructor's windowBits paramter.
+		For more info about this, see the zlib documentation for its windowBits parameter.
+	*/
+	enum WindowBitsValues
+	{
+		windowBitsRaw = -15,
+		windowBitsGZIP = 15 + 16
+	};
 
 private:
 
@@ -17849,8 +17808,7 @@ public:
 		InterProcessLock& lock_;
 		bool lockWasSuccessful;
 
-		ScopedLockType (const ScopedLockType&);
-		ScopedLockType& operator= (const ScopedLockType&);
+		JUCE_DECLARE_NON_COPYABLE (ScopedLockType);
 	};
 
 private:
@@ -17862,8 +17820,7 @@ private:
 	CriticalSection lock;
 	String name;
 
-	InterProcessLock (const InterProcessLock&);
-	InterProcessLock& operator= (const InterProcessLock&);
+	JUCE_DECLARE_NON_COPYABLE (InterProcessLock);
 };
 
 #endif   // __JUCE_INTERPROCESSLOCK_JUCEHEADER__
@@ -17938,8 +17895,8 @@ public:
 
 private:
 	Process();
-	Process (const Process&);
-	Process& operator= (const Process&);
+
+	JUCE_DECLARE_NON_COPYABLE (Process);
 };
 
 #endif   // __JUCE_PROCESS_JUCEHEADER__
@@ -18377,8 +18334,7 @@ private:
 	mutable Thread::ThreadID writerThreadId;
 	mutable Array <Thread::ThreadID> readerThreads;
 
-	ReadWriteLock (const ReadWriteLock&);
-	ReadWriteLock& operator= (const ReadWriteLock&);
+	JUCE_DECLARE_NON_COPYABLE (ReadWriteLock);
 };
 
 #endif   // __JUCE_READWRITELOCK_JUCEHEADER__
@@ -18446,8 +18402,7 @@ private:
 
 	const ReadWriteLock& lock_;
 
-	ScopedReadLock (const ScopedReadLock&);
-	ScopedReadLock& operator= (const ScopedReadLock&);
+	JUCE_DECLARE_NON_COPYABLE (ScopedReadLock);
 };
 
 #endif   // __JUCE_SCOPEDREADLOCK_JUCEHEADER__
@@ -18525,8 +18480,7 @@ private:
 	const CriticalSection& lock_;
 	const bool lockWasSuccessful;
 
-	ScopedTryLock (const ScopedTryLock&);
-	ScopedTryLock& operator= (const ScopedTryLock&);
+	JUCE_DECLARE_NON_COPYABLE (ScopedTryLock);
 };
 
 #endif   // __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
@@ -18591,8 +18545,7 @@ private:
 
 	const ReadWriteLock& lock_;
 
-	ScopedWriteLock (const ScopedWriteLock&);
-	ScopedWriteLock& operator= (const ScopedWriteLock&);
+	JUCE_DECLARE_NON_COPYABLE (ScopedWriteLock);
 };
 
 #endif   // __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
@@ -22445,8 +22398,7 @@ public:
 		const Path& path;
 		size_t index;
 
-		Iterator (const Iterator&);
-		Iterator& operator= (const Iterator&);
+		JUCE_DECLARE_NON_COPYABLE (Iterator);
 	};
 
 	/** Loads a stored path from a data stream.
@@ -24159,8 +24111,8 @@ private:
 	// this isn't a class you should ever instantiate - it's just here for the
 	// static values in it.
 	Colours();
-	Colours (const Colours&);
-	Colours& operator= (const Colours&);
+
+	JUCE_DECLARE_NON_COPYABLE (Colours);
 };
 
 #endif   // __JUCE_COLOURS_JUCEHEADER__
@@ -25398,8 +25350,7 @@ public:
 		int lineStride, pixelStride, width, height;
 
 	private:
-		BitmapData (const BitmapData&);
-		BitmapData& operator= (const BitmapData&);
+		JUCE_DECLARE_NON_COPYABLE (BitmapData);
 	};
 
 	/** Copies some pixel values to a rectangle of the image.
@@ -25699,8 +25650,7 @@ public:
 		const RectangleList& owner;
 		int index;
 
-		Iterator (const Iterator&);
-		Iterator& operator= (const Iterator&);
+		JUCE_DECLARE_NON_COPYABLE (Iterator);
 	};
 
 private:
@@ -25852,11 +25802,10 @@ public:
 	static void deleteAll();
 
 private:
-	DeletedAtShutdown (const DeletedAtShutdown&);
-	DeletedAtShutdown& operator= (const DeletedAtShutdown&);
-
 	static CriticalSection& getLock();
 	static Array <DeletedAtShutdown*>& getObjects();
+
+	JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown);
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
@@ -25969,8 +25918,7 @@ private:
 	void endModal (Component* component, int returnValue);
 	void endModal (Component* component);
 
-	ModalComponentManager (const ModalComponentManager&);
-	ModalComponentManager& operator= (const ModalComponentManager&);
+	JUCE_DECLARE_NON_COPYABLE (ModalComponentManager);
 };
 
 #endif   // __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
@@ -27997,8 +27945,7 @@ public:
 		SafeComponentPtr safePointer1, safePointer2;
 		Component* const component2;
 
-		BailOutChecker (const BailOutChecker&);
-		BailOutChecker& operator= (const BailOutChecker&);
+		JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
 	};
 
    #ifndef DOXYGEN
@@ -28682,8 +28629,7 @@ private:
 	private:
 		ApplicationCommandTarget* const owner;
 
-		CommandTargetMessageInvoker (const CommandTargetMessageInvoker&);
-		CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
+		JUCE_DECLARE_NON_COPYABLE (CommandTargetMessageInvoker);
 	};
 
 	ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
@@ -28977,8 +28923,7 @@ private:
 	ScopedPointer<InterProcessLock> appLock;
 	static JUCEApplication* appInstance;
 
-	JUCEApplication (const JUCEApplication&);
-	JUCEApplication& operator= (const JUCEApplication&);
+	JUCE_DECLARE_NON_COPYABLE (JUCEApplication);
 };
 
 #endif   // __JUCE_APPLICATION_JUCEHEADER__
@@ -30734,8 +30679,7 @@ public:
 		}
 
 	private:
-		ConverterInstance (const ConverterInstance&);
-		ConverterInstance& operator= (const ConverterInstance&);
+		JUCE_DECLARE_NON_COPYABLE (ConverterInstance);
 
 		const int sourceChannels, destChannels;
 	};
@@ -30800,8 +30744,7 @@ public:
 
 private:
 	AudioDataConverters();
-	AudioDataConverters (const AudioDataConverters&);
-	AudioDataConverters& operator= (const AudioDataConverters&);
+	JUCE_DECLARE_NON_COPYABLE (AudioDataConverters);
 };
 
 #endif   // __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -34349,8 +34292,7 @@ protected:
 private:
 	String typeName;
 
-	AudioIODeviceType (const AudioIODeviceType&);
-	AudioIODeviceType& operator= (const AudioIODeviceType&);
+	JUCE_DECLARE_NON_COPYABLE (AudioIODeviceType);
 };
 
 #endif   // __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
@@ -35561,8 +35503,7 @@ public:
 		const MidiBuffer& buffer;
 		const uint8* data;
 
-		Iterator (const Iterator&);
-		Iterator& operator= (const Iterator&);
+		JUCE_DECLARE_NON_COPYABLE (Iterator);
 	};
 
 private:
@@ -39850,8 +39791,7 @@ private:
 
 	AudioProcessor* const owner;
 
-	AudioProcessorEditor (const AudioProcessorEditor&);
-	AudioProcessorEditor& operator= (const AudioProcessorEditor&);
+	JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor);
 };
 
 #endif   // __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
@@ -40974,7 +40914,7 @@ public:
 		{
 			if (e->type == kVstSysExType)
 			{
-				juce_free (((VstMidiSysexEvent*) e)->sysexDump);
+				delete[] (((VstMidiSysexEvent*) e)->sysexDump);
 				e->type = kVstMidiType;
 				e->byteSize = sizeof (VstMidiEvent);
 				e->noteLength = 0;
@@ -40991,10 +40931,9 @@ public:
 			VstMidiSysexEvent* const se = (VstMidiSysexEvent*) e;
 
 			if (se->type == kVstSysExType)
-				se->sysexDump = (char*) juce_realloc (se->sysexDump, numBytes);
-			else
-				se->sysexDump = (char*) juce_malloc (numBytes);
+				delete[] se->sysexDump;
 
+			se->sysexDump = new char [numBytes];
 			memcpy (se->sysexDump, midiData, numBytes);
 
 			se->type = kVstSysExType;
@@ -41068,7 +41007,7 @@ public:
 				VstMidiEvent* const e = (VstMidiEvent*) (events->events[i]);
 
 				if (e->type == kVstSysExType)
-					juce_free (((VstMidiSysexEvent*) e)->sysexDump);
+					delete[] (((VstMidiSysexEvent*) e)->sysexDump);
 
 				juce_free (e);
 			}
@@ -43505,8 +43444,7 @@ private:
 	SortedSet <ActionListener*> actionListeners;
 	CriticalSection actionListenerLock;
 
-	ActionBroadcaster (const ActionBroadcaster&);
-	ActionBroadcaster& operator= (const ActionBroadcaster&);
+	JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster);
 };
 
 #endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
@@ -44114,8 +44052,7 @@ private:
 
 	void init (Thread* thread, ThreadPoolJob* job);
 
-	MessageManagerLock (const MessageManagerLock&);
-	MessageManagerLock& operator= (const MessageManagerLock&);
+	JUCE_DECLARE_NON_COPYABLE (MessageManagerLock);
 };
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__
@@ -44645,8 +44582,7 @@ public:
 		const ElementType type;
 
 	private:
-		ElementBase (const ElementBase&);
-		ElementBase& operator= (const ElementBase&);
+		JUCE_DECLARE_NON_COPYABLE (ElementBase);
 	};
 
 	class JUCE_API  StartSubPath  : public ElementBase
@@ -44661,8 +44597,7 @@ public:
 		RelativePoint startPos;
 
 	private:
-		StartSubPath (const StartSubPath&);
-		StartSubPath& operator= (const StartSubPath&);
+		JUCE_DECLARE_NON_COPYABLE (StartSubPath);
 	};
 
 	class JUCE_API  CloseSubPath  : public ElementBase
@@ -44675,8 +44610,7 @@ public:
 		RelativePoint* getControlPoints (int& numPoints);
 
 	private:
-		CloseSubPath (const CloseSubPath&);
-		CloseSubPath& operator= (const CloseSubPath&);
+		JUCE_DECLARE_NON_COPYABLE (CloseSubPath);
 	};
 
 	class JUCE_API  LineTo  : public ElementBase
@@ -44691,8 +44625,7 @@ public:
 		RelativePoint endPoint;
 
 	private:
-		LineTo (const LineTo&);
-		LineTo& operator= (const LineTo&);
+		JUCE_DECLARE_NON_COPYABLE (LineTo);
 	};
 
 	class JUCE_API  QuadraticTo  : public ElementBase
@@ -44707,8 +44640,7 @@ public:
 		RelativePoint controlPoints[2];
 
 	private:
-		QuadraticTo (const QuadraticTo&);
-		QuadraticTo& operator= (const QuadraticTo&);
+		JUCE_DECLARE_NON_COPYABLE (QuadraticTo);
 	};
 
 	class JUCE_API  CubicTo  : public ElementBase
@@ -44723,8 +44655,7 @@ public:
 		RelativePoint controlPoints[3];
 
 	private:
-		CubicTo (const CubicTo&);
-		CubicTo& operator= (const CubicTo&);
+		JUCE_DECLARE_NON_COPYABLE (CubicTo);
 	};
 
 	OwnedArray <ElementBase> elements;
@@ -50783,12 +50714,12 @@ private:
 
 		void mouseDown (const MouseEvent& e)
 		{
-			myDragger.startDraggingComponent (this, e, 0);
+			myDragger.startDraggingComponent (this, e);
 		}
 
 		void mouseDrag (const MouseEvent& e)
 		{
-			myDragger.dragComponent (this, e);
+			myDragger.dragComponent (this, e, 0);
 		}
 	};
 	@endcode
@@ -50806,13 +50737,11 @@ public:
 	/** Call this from your component's mouseDown() method, to prepare for dragging.
 
 		@param componentToDrag	  the component that you want to drag
-		@param constrainer	  a constrainer object to use to keep the component
-									from going offscreen
+		@param e			the mouse event that is triggering the drag
 		@see dragComponent
 	*/
 	void startDraggingComponent (Component* componentToDrag,
-								 const MouseEvent& e,
-								 ComponentBoundsConstrainer* constrainer);
+								 const MouseEvent& e);
 
 	/** Call this from your mouseDrag() callback to move the component.
 
@@ -50823,14 +50752,17 @@ public:
 
 		@param componentToDrag	  the component that you want to drag
 		@param e			the current mouse-drag event
-		@see dragComponent
+		@param constrainer	  an optional constrainer object that should be used
+									to apply limits to the component's position. Pass
+									null if you don't want to contrain the movement.
+		@see startDraggingComponent
 	*/
 	void dragComponent (Component* componentToDrag,
-						const MouseEvent& e);
+						const MouseEvent& e,
+						ComponentBoundsConstrainer* constrainer);
 
 private:
 
-	ComponentBoundsConstrainer* constrainer;
 	Point<int> mouseDownWithinTarget;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentDragger);
@@ -52833,8 +52765,7 @@ private:
 	String text;
 	Justification justification;
 
-	GroupComponent (const GroupComponent&);
-	GroupComponent& operator= (const GroupComponent&);
+	JUCE_DECLARE_NON_COPYABLE (GroupComponent);
 };
 
 #endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
@@ -55734,8 +55665,7 @@ private:
 	friend class PopupMenu::Window;
 	bool isHighlighted, isTriggeredAutomatically;
 
-	PopupMenuCustomComponent (const PopupMenuCustomComponent&);
-	PopupMenuCustomComponent& operator= (const PopupMenuCustomComponent&);
+	JUCE_DECLARE_NON_COPYABLE (PopupMenuCustomComponent);
 };
 
 #endif   // __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
@@ -56363,8 +56293,7 @@ private:
 	void hoverTimerCallback();
 	void checkJustHoveredCallback();
 
-	MouseHoverDetector (const MouseHoverDetector&);
-	MouseHoverDetector& operator= (const MouseHoverDetector&);
+	JUCE_DECLARE_NON_COPYABLE (MouseHoverDetector);
 };
 
 #endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
@@ -61807,9 +61736,9 @@ private:
 	friend class Pimpl;
 
 	ImageCache();
-	ImageCache (const ImageCache&);
-	ImageCache& operator= (const ImageCache&);
 	~ImageCache();
+
+	JUCE_DECLARE_NON_COPYABLE (ImageCache);
 };
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__
@@ -62654,8 +62583,7 @@ private:
 	const String name;
 	UnitTestRunner* runner;
 
-	UnitTest (const UnitTest&);
-	UnitTest& operator= (const UnitTest&);
+	JUCE_DECLARE_NON_COPYABLE (UnitTest);
 };
 
 /**
@@ -62750,8 +62678,7 @@ private:
 	void addPass();
 	void addFail (const String& failureMessage);
 
-	UnitTestRunner (const UnitTestRunner&);
-	UnitTestRunner& operator= (const UnitTestRunner&);
+	JUCE_DECLARE_NON_COPYABLE (UnitTestRunner);
 };
 
 #endif   // __JUCE_UNITTEST_JUCEHEADER__
@@ -62771,7 +62698,7 @@ private:
   #pragma pack (pop)
 #endif
 
-#if JUCE_DLL
+#ifdef JUCE_DLL
   #undef JUCE_LEAK_DETECTOR(OwnerClass)
   #define JUCE_LEAK_DETECTOR(OwnerClass)
 #endif

@@ -293,8 +293,7 @@ private:
     const Point<int> imageOffset;
     bool hasCheckedForExternalDrag, drawImage;
 
-    DragImageComponent (const DragImageComponent&);
-    DragImageComponent& operator= (const DragImageComponent&);
+    JUCE_DECLARE_NON_COPYABLE (DragImageComponent);
 };
 
 

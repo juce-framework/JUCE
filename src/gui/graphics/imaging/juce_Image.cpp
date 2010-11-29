@@ -108,8 +108,6 @@ public:
         imageData = image_->getPixelData (area_.getX(), area_.getY());
     }
 
-    ~SubsectionSharedImage() {}
-
     Image::ImageType getType() const
     {
         return Image::SoftwareImage;
@@ -132,8 +130,7 @@ private:
     const ReferenceCountedObjectPtr<Image::SharedImage> image;
     const Rectangle<int> area;
 
-    SubsectionSharedImage (const SubsectionSharedImage&);
-    SubsectionSharedImage& operator= (const SubsectionSharedImage&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionSharedImage);
 };
 
 const Image Image::getClippedImage (const Rectangle<int>& area) const

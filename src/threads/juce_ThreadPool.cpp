@@ -75,10 +75,6 @@ public:
     {
     }
 
-    ~ThreadPoolThread()
-    {
-    }
-
     void run()
     {
         while (! threadShouldExit())
@@ -92,8 +88,7 @@ private:
     ThreadPool& pool;
     bool volatile busy;
 
-    ThreadPoolThread (const ThreadPoolThread&);
-    ThreadPoolThread& operator= (const ThreadPoolThread&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread);
 };
 
 //==============================================================================

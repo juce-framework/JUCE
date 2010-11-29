@@ -329,8 +329,7 @@ public:
         const ElementType type;
 
     private:
-        ElementBase (const ElementBase&);
-        ElementBase& operator= (const ElementBase&);
+        JUCE_DECLARE_NON_COPYABLE (ElementBase);
     };
 
     class JUCE_API  StartSubPath  : public ElementBase
@@ -345,8 +344,7 @@ public:
         RelativePoint startPos;
 
     private:
-        StartSubPath (const StartSubPath&);
-        StartSubPath& operator= (const StartSubPath&);
+        JUCE_DECLARE_NON_COPYABLE (StartSubPath);
     };
 
     class JUCE_API  CloseSubPath  : public ElementBase
@@ -359,8 +357,7 @@ public:
         RelativePoint* getControlPoints (int& numPoints);
 
     private:
-        CloseSubPath (const CloseSubPath&);
-        CloseSubPath& operator= (const CloseSubPath&);
+        JUCE_DECLARE_NON_COPYABLE (CloseSubPath);
     };
 
     class JUCE_API  LineTo  : public ElementBase
@@ -375,8 +372,7 @@ public:
         RelativePoint endPoint;
 
     private:
-        LineTo (const LineTo&);
-        LineTo& operator= (const LineTo&);
+        JUCE_DECLARE_NON_COPYABLE (LineTo);
     };
 
     class JUCE_API  QuadraticTo  : public ElementBase
@@ -391,8 +387,7 @@ public:
         RelativePoint controlPoints[2];
 
     private:
-        QuadraticTo (const QuadraticTo&);
-        QuadraticTo& operator= (const QuadraticTo&);
+        JUCE_DECLARE_NON_COPYABLE (QuadraticTo);
     };
 
     class JUCE_API  CubicTo  : public ElementBase
@@ -407,8 +402,7 @@ public:
         RelativePoint controlPoints[3];
 
     private:
-        CubicTo (const CubicTo&);
-        CubicTo& operator= (const CubicTo&);
+        JUCE_DECLARE_NON_COPYABLE (CubicTo);
     };
 
     //==============================================================================

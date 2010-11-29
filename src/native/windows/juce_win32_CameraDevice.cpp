@@ -691,8 +691,7 @@ private:
     CriticalSection listenerLock;
 
     //==============================================================================
-    DShowCameraDeviceInteral (const DShowCameraDeviceInteral&);
-    DShowCameraDeviceInteral& operator= (const DShowCameraDeviceInteral&);
+    JUCE_DECLARE_NON_COPYABLE (DShowCameraDeviceInteral);
 };
 
 

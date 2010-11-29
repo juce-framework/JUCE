@@ -87,8 +87,7 @@ public:
     bool isActive, isDeleted;
 
 private:
-    ModalItem (const ModalItem&);
-    ModalItem& operator= (const ModalItem&);
+    JUCE_DECLARE_NON_COPYABLE (ModalItem);
 };
 
 //==============================================================================
@@ -256,8 +255,7 @@ private:
     int& value;
     bool& finished;
 
-    ReturnValueRetriever (const ReturnValueRetriever&);
-    ReturnValueRetriever& operator= (const ReturnValueRetriever&);
+    JUCE_DECLARE_NON_COPYABLE (ReturnValueRetriever);
 };
 
 int ModalComponentManager::runEventLoopForCurrentComponent()

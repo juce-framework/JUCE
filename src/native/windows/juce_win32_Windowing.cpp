@@ -1066,8 +1066,7 @@ private:
     private:
         Image image;
 
-        TemporaryImage (const TemporaryImage&);
-        TemporaryImage& operator= (const TemporaryImage&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryImage);
     };
 
     TemporaryImage offscreenImageGenerator;
@@ -1938,8 +1937,7 @@ private:
             }
         }
 
-        JuceDropTarget (const JuceDropTarget&);
-        JuceDropTarget& operator= (const JuceDropTarget&);
+        JUCE_DECLARE_NON_COPYABLE (JuceDropTarget);
     };
 
     void doSettingChange()
@@ -2806,8 +2804,7 @@ private:
         }
     }
 
-    JuceEnumFormatEtc (const JuceEnumFormatEtc&);
-    JuceEnumFormatEtc& operator= (const JuceEnumFormatEtc&);
+    JUCE_DECLARE_NON_COPYABLE (JuceEnumFormatEtc);
 };
 
 class JuceDataObject  : public ComBaseClassHelper <IDataObject>
@@ -2899,8 +2896,7 @@ private:
     const FORMATETC* const format;
     const STGMEDIUM* const medium;
 
-    JuceDataObject (const JuceDataObject&);
-    JuceDataObject& operator= (const JuceDataObject&);
+    JUCE_DECLARE_NON_COPYABLE (JuceDataObject);
 };
 
 static HDROP createHDrop (const StringArray& fileNames)

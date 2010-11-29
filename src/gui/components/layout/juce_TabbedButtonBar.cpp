@@ -155,8 +155,7 @@ public:
 private:
     TabbedButtonBar& owner;
 
-    BehindFrontTabComp (const BehindFrontTabComp&);
-    BehindFrontTabComp& operator= (const BehindFrontTabComp&);
+    JUCE_DECLARE_NON_COPYABLE (BehindFrontTabComp);
 };
 
 

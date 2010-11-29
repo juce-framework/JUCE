@@ -95,8 +95,7 @@ public:
 private:
     var value;
 
-    SimpleValueSource (const SimpleValueSource&);
-    SimpleValueSource& operator= (const SimpleValueSource&);
+    JUCE_DECLARE_NON_COPYABLE (SimpleValueSource);
 };
 
 

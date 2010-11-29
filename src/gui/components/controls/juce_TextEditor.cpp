@@ -758,15 +758,6 @@ private:
 //==============================================================================
 class TextEditor::InsertAction  : public UndoableAction
 {
-    TextEditor& owner;
-    const String text;
-    const int insertIndex, oldCaretPos, newCaretPos;
-    const Font font;
-    const Colour colour;
-
-    InsertAction (const InsertAction&);
-    InsertAction& operator= (const InsertAction&);
-
 public:
     InsertAction (TextEditor& owner_,
                   const String& text_,
@@ -782,10 +773,6 @@ public:
           newCaretPos (newCaretPos_),
           font (font_),
           colour (colour_)
-    {
-    }
-
-    ~InsertAction()
     {
     }
 
@@ -805,19 +792,20 @@ public:
     {
         return text.length() + 16;
     }
+
+private:
+    TextEditor& owner;
+    const String text;
+    const int insertIndex, oldCaretPos, newCaretPos;
+    const Font font;
+    const Colour colour;
+
+    JUCE_DECLARE_NON_COPYABLE (InsertAction);
 };
 
 //==============================================================================
 class TextEditor::RemoveAction  : public UndoableAction
 {
-    TextEditor& owner;
-    const Range<int> range;
-    const int oldCaretPos, newCaretPos;
-    Array <UniformTextSection*> removedSections;
-
-    RemoveAction (const RemoveAction&);
-    RemoveAction& operator= (const RemoveAction&);
-
 public:
     RemoveAction (TextEditor& owner_,
                   const Range<int> range_,
@@ -864,6 +852,14 @@ public:
 
         return n + 16;
     }
+
+private:
+    TextEditor& owner;
+    const Range<int> range;
+    const int oldCaretPos, newCaretPos;
+    Array <UniformTextSection*> removedSections;
+
+    JUCE_DECLARE_NON_COPYABLE (RemoveAction);
 };
 
 //==============================================================================
@@ -909,8 +905,7 @@ public:
 private:
     TextEditor& owner;
 
-    TextHolderComponent (const TextHolderComponent&);
-    TextHolderComponent& operator= (const TextHolderComponent&);
+    JUCE_DECLARE_NON_COPYABLE (TextHolderComponent);
 };
 
 //==============================================================================
@@ -949,8 +944,7 @@ private:
     float lastWordWrapWidth;
     bool rentrant;
 
-    TextEditorViewport (const TextEditorViewport&);
-    TextEditorViewport& operator= (const TextEditorViewport&);
+    JUCE_DECLARE_NON_COPYABLE (TextEditorViewport);
 };
 
 //==============================================================================
@@ -1795,8 +1789,7 @@ public:
 private:
     Component::SafePointer<TextEditor> editor;
 
-    TextEditorMenuPerformer (const TextEditorMenuPerformer&);
-    TextEditorMenuPerformer& operator= (const TextEditorMenuPerformer&);
+    JUCE_DECLARE_NON_COPYABLE (TextEditorMenuPerformer);
 };
 
 

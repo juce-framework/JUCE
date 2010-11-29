@@ -82,8 +82,7 @@ private:
     //==============================================================================
     const CriticalSection& lock_;
 
-    ScopedLock (const ScopedLock&);
-    ScopedLock& operator= (const ScopedLock&);
+    JUCE_DECLARE_NON_COPYABLE (ScopedLock);
 };
 
 
@@ -155,8 +154,7 @@ private:
     //==============================================================================
     const CriticalSection& lock_;
 
-    ScopedUnlock (const ScopedLock&);
-    ScopedUnlock& operator= (const ScopedUnlock&);
+    JUCE_DECLARE_NON_COPYABLE (ScopedUnlock);
 };
 
 

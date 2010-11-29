@@ -325,8 +325,7 @@ public:
         }
 
     private:
-        Add (const Add&);
-        Add& operator= (const Add&);
+        JUCE_DECLARE_NON_COPYABLE (Add);
     };
 
     //==============================================================================
@@ -353,8 +352,7 @@ public:
         }
 
     private:
-        Subtract (const Subtract&);
-        Subtract& operator= (const Subtract&);
+        JUCE_DECLARE_NON_COPYABLE (Subtract);
     };
 
     //==============================================================================
@@ -378,8 +376,7 @@ public:
         }
 
     private:
-        Multiply (const Multiply&);
-        Multiply& operator= (const Multiply&);
+        JUCE_DECLARE_NON_COPYABLE (Multiply);
     };
 
     //==============================================================================
@@ -406,8 +403,7 @@ public:
         }
 
     private:
-        Divide (const Divide&);
-        Divide& operator= (const Divide&);
+        JUCE_DECLARE_NON_COPYABLE (Divide);
     };
 
     //==============================================================================
@@ -765,8 +761,7 @@ public:
             return e;
         }
 
-        Parser (const Parser&);
-        Parser& operator= (const Parser&);
+        JUCE_DECLARE_NON_COPYABLE (Parser);
     };
 };
 

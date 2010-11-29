@@ -568,8 +568,7 @@ public:
         }
 
     private:
-        ConverterInstance (const ConverterInstance&);
-        ConverterInstance& operator= (const ConverterInstance&);
+        JUCE_DECLARE_NON_COPYABLE (ConverterInstance);
 
         const int sourceChannels, destChannels;
     };
@@ -640,8 +639,7 @@ public:
 
 private:
     AudioDataConverters();
-    AudioDataConverters (const AudioDataConverters&);
-    AudioDataConverters& operator= (const AudioDataConverters&);
+    JUCE_DECLARE_NON_COPYABLE (AudioDataConverters);
 };
 
 

@@ -107,15 +107,7 @@ private:
 };
 
 //==============================================================================
-#if JUCE_DLL && ! DOXYGEN  // This hack makes use of the leak detector macros to add dll-safe allocators to all the classes..
-  #define JUCE_LEAK_DETECTOR(OwnerClass) \
-        public:\
-          static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-          static void* operator new (size_t, void* p)     { return p; } \
-          static void operator delete (void* p)           { juce_free (p); } \
-          static void operator delete (void*, void*)      { }
-
-#elif JUCE_CHECK_MEMORY_LEAKS || DOXYGEN
+#if DOXYGEN || (JUCE_CHECK_MEMORY_LEAKS && ! defined (JUCE_LEAK_DETECTOR))
   /** This macro lets you embed a leak-detecting object inside a class.
 
       To use it, simply declare a JUCE_LEAK_DETECTOR(YourClassName) inside a private section

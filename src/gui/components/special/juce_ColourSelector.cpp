@@ -55,8 +55,7 @@ public:
     }
 
 private:
-    ColourComponentSlider (const ColourComponentSlider&);
-    ColourComponentSlider& operator= (const ColourComponentSlider&);
+    JUCE_DECLARE_NON_COPYABLE (ColourComponentSlider);
 };
 
 //==============================================================================
@@ -77,8 +76,7 @@ public:
     }
 
 private:
-    ColourSpaceMarker (const ColourSpaceMarker&);
-    ColourSpaceMarker& operator= (const ColourSpaceMarker&);
+    JUCE_DECLARE_NON_COPYABLE (ColourSpaceMarker);
 };
 
 //==============================================================================
@@ -173,8 +171,7 @@ private:
                           edge * 2, edge * 2);
     }
 
-    ColourSpaceView (const ColourSpaceView&);
-    ColourSpaceView& operator= (const ColourSpaceView&);
+    JUCE_DECLARE_NON_COPYABLE (ColourSpaceView);
 };
 
 //==============================================================================
@@ -205,8 +202,7 @@ public:
     }
 
 private:
-    HueSelectorMarker (const HueSelectorMarker&);
-    HueSelectorMarker& operator= (const HueSelectorMarker&);
+    JUCE_DECLARE_NON_COPYABLE (HueSelectorMarker);
 };
 
 //==============================================================================
@@ -267,8 +263,7 @@ private:
     HueSelectorMarker marker;
     const int edge;
 
-    HueSelectorComp (const HueSelectorComp&);
-    HueSelectorComp& operator= (const HueSelectorComp&);
+    JUCE_DECLARE_NON_COPYABLE (HueSelectorComp);
 };
 
 //==============================================================================
@@ -316,8 +311,7 @@ private:
     ColourSelector& owner;
     const int index;
 
-    SwatchComponent (const SwatchComponent&);
-    SwatchComponent& operator= (const SwatchComponent&);
+    JUCE_DECLARE_NON_COPYABLE (SwatchComponent);
 };
 
 //==============================================================================

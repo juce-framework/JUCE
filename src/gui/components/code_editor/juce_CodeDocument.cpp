@@ -732,13 +732,6 @@ void CodeDocument::sendListenerChangeMessage (const int startLine, const int end
 //==============================================================================
 class CodeDocumentInsertAction   : public UndoableAction
 {
-    CodeDocument& owner;
-    const String text;
-    int insertPos;
-
-    CodeDocumentInsertAction (const CodeDocumentInsertAction&);
-    CodeDocumentInsertAction& operator= (const CodeDocumentInsertAction&);
-
 public:
     CodeDocumentInsertAction (CodeDocument& owner_, const String& text_, const int insertPos_) throw()
         : owner (owner_),
@@ -746,8 +739,6 @@ public:
           insertPos (insertPos_)
     {
     }
-
-    ~CodeDocumentInsertAction() {}
 
     bool perform()
     {
@@ -764,6 +755,13 @@ public:
     }
 
     int getSizeInUnits()        { return text.length() + 32; }
+
+private:
+    CodeDocument& owner;
+    const String text;
+    int insertPos;
+
+    JUCE_DECLARE_NON_COPYABLE (CodeDocumentInsertAction);
 };
 
 void CodeDocument::insert (const String& text, const int insertPos, const bool undoable)
@@ -838,13 +836,6 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
 //==============================================================================
 class CodeDocumentDeleteAction  : public UndoableAction
 {
-    CodeDocument& owner;
-    int startPos, endPos;
-    String removedText;
-
-    CodeDocumentDeleteAction (const CodeDocumentDeleteAction&);
-    CodeDocumentDeleteAction& operator= (const CodeDocumentDeleteAction&);
-
 public:
     CodeDocumentDeleteAction (CodeDocument& owner_, const int startPos_, const int endPos_) throw()
         : owner (owner_),
@@ -854,8 +845,6 @@ public:
         removedText = owner.getTextBetween (CodeDocument::Position (&owner, startPos),
                                             CodeDocument::Position (&owner, endPos));
     }
-
-    ~CodeDocumentDeleteAction() {}
 
     bool perform()
     {
@@ -872,6 +861,13 @@ public:
     }
 
     int getSizeInUnits()    { return removedText.length() + 32; }
+
+private:
+    CodeDocument& owner;
+    int startPos, endPos;
+    String removedText;
+
+    JUCE_DECLARE_NON_COPYABLE (CodeDocumentDeleteAction);
 };
 
 void CodeDocument::remove (const int startPos, const int endPos, const bool undoable)

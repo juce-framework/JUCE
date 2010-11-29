@@ -896,8 +896,7 @@ public:
     int lastIndex;
 
 private:
-    InsertPointHighlight (const InsertPointHighlight&);
-    InsertPointHighlight& operator= (const InsertPointHighlight&);
+    JUCE_DECLARE_NON_COPYABLE (InsertPointHighlight);
 };
 
 //==============================================================================
@@ -924,8 +923,7 @@ public:
     }
 
 private:
-    TargetGroupHighlight (const TargetGroupHighlight&);
-    TargetGroupHighlight& operator= (const TargetGroupHighlight&);
+    JUCE_DECLARE_NON_COPYABLE (TargetGroupHighlight);
 };
 
 //==============================================================================

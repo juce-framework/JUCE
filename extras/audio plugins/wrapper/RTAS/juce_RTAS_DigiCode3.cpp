@@ -52,7 +52,7 @@
  #if JucePlugin_Build_VST
 
  #define DllMain DllMainRTAS
- #include "DLLMain.cpp"
+ #include <DLLMain.cpp>
  #undef DllMain
 
  extern BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID);
@@ -66,15 +66,15 @@
         return DllMainVST (hInstance, ul_reason_for_call, lpReserved);
  }
  #else
- #include "DLLMain.cpp"
+ #include <DLLMain.cpp>
  #endif
 
- #include "DefaultSwap.cpp"
+ #include <DefaultSwap.cpp>
 
 #else
  //==============================================================================
- #include "PlugInInitialize.cpp"
- #include "Dispatcher.cpp"
+ #include <PlugInInitialize.cpp>
+ #include <Dispatcher.cpp>
 #endif
 
 #else

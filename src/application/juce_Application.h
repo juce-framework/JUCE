@@ -287,8 +287,7 @@ private:
     ScopedPointer<InterProcessLock> appLock;
     static JUCEApplication* appInstance;
 
-    JUCEApplication (const JUCEApplication&);
-    JUCEApplication& operator= (const JUCEApplication&);
+    JUCE_DECLARE_NON_COPYABLE (JUCEApplication);
 };
 
 

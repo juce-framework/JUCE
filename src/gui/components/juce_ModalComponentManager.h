@@ -141,8 +141,7 @@ private:
     void endModal (Component* component, int returnValue);
     void endModal (Component* component);
 
-    ModalComponentManager (const ModalComponentManager&);
-    ModalComponentManager& operator= (const ModalComponentManager&);
+    JUCE_DECLARE_NON_COPYABLE (ModalComponentManager);
 };
 
 

@@ -65,10 +65,9 @@ public:
 private:
     CodeEditorComponent& owner;
 
-    CaretComponent (const CaretComponent&);
-    CaretComponent& operator= (const CaretComponent&);
-
     bool shouldBeShown() const      { return owner.hasKeyboardFocus (true); }
+
+    JUCE_DECLARE_NON_COPYABLE (CaretComponent);
 };
 
 //==============================================================================
@@ -77,10 +76,6 @@ class CodeEditorComponent::CodeEditorLine
 public:
     CodeEditorLine() throw()
        : highlightColumnStart (0), highlightColumnEnd (0)
-    {
-    }
-
-    ~CodeEditorLine() throw()
     {
     }
 

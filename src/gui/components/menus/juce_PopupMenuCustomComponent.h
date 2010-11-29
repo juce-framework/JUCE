@@ -83,8 +83,7 @@ private:
     friend class PopupMenu::Window;
     bool isHighlighted, isTriggeredAutomatically;
 
-    PopupMenuCustomComponent (const PopupMenuCustomComponent&);
-    PopupMenuCustomComponent& operator= (const PopupMenuCustomComponent&);
+    JUCE_DECLARE_NON_COPYABLE (PopupMenuCustomComponent);
 };
 
 

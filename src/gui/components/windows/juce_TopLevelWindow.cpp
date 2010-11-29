@@ -128,8 +128,7 @@ private:
                 && tlw->isShowing();
     }
 
-    TopLevelWindowManager (const TopLevelWindowManager&);
-    TopLevelWindowManager& operator= (const TopLevelWindowManager&);
+    JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager);
 };
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)

@@ -86,8 +86,7 @@ private:
     SortedSet <ActionListener*> actionListeners;
     CriticalSection actionListenerLock;
 
-    ActionBroadcaster (const ActionBroadcaster&);
-    ActionBroadcaster& operator= (const ActionBroadcaster&);
+    JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster);
 };
 
 

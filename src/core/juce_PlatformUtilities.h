@@ -197,8 +197,8 @@ public:
 
 private:
     PlatformUtilities();
-    PlatformUtilities (const PlatformUtilities&);
-    PlatformUtilities& operator= (const PlatformUtilities&);
+
+    JUCE_DECLARE_NON_COPYABLE (PlatformUtilities);
 };
 
 
@@ -217,8 +217,7 @@ public:
 private:
     void* pool;
 
-    ScopedAutoReleasePool (const ScopedAutoReleasePool&);
-    ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
+    JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
 };
 
 #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool pool;

@@ -191,8 +191,7 @@ private:
     Component::SafePointer<MenuBarComponent> bar;
     const int topLevelIndex;
 
-    AsyncCallback (const AsyncCallback&);
-    AsyncCallback& operator= (const AsyncCallback&);
+    JUCE_DECLARE_NON_COPYABLE (AsyncCallback);
 };
 
 void MenuBarComponent::showMenu (int index)

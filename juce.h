@@ -61,7 +61,7 @@ BEGIN_JUCE_NAMESPACE
   #pragma pack (pop)
 #endif
 
-#if JUCE_DLL
+#ifdef JUCE_DLL
   #undef JUCE_LEAK_DETECTOR(OwnerClass)
   #define JUCE_LEAK_DETECTOR(OwnerClass)
 #endif

@@ -150,8 +150,7 @@ private:
     InputStream* inputStream;
     ScopedPointer<InputStream> streamToDelete;
 
-    ZipInputStream (const ZipInputStream&);
-    ZipInputStream& operator= (const ZipInputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipInputStream);
 };
 
 

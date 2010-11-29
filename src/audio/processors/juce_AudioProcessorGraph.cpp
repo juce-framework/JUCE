@@ -373,8 +373,7 @@ public:
 private:
     const int channelNum;
 
-    ClearChannelOp (const ClearChannelOp&);
-    ClearChannelOp& operator= (const ClearChannelOp&);
+    JUCE_DECLARE_NON_COPYABLE (ClearChannelOp);
 };
 
 //==============================================================================
@@ -396,8 +395,7 @@ public:
 private:
     const int srcChannelNum, dstChannelNum;
 
-    CopyChannelOp (const CopyChannelOp&);
-    CopyChannelOp& operator= (const CopyChannelOp&);
+    JUCE_DECLARE_NON_COPYABLE (CopyChannelOp);
 };
 
 //==============================================================================
@@ -419,8 +417,7 @@ public:
 private:
     const int srcChannelNum, dstChannelNum;
 
-    AddChannelOp (const AddChannelOp&);
-    AddChannelOp& operator= (const AddChannelOp&);
+    JUCE_DECLARE_NON_COPYABLE (AddChannelOp);
 };
 
 //==============================================================================
@@ -441,8 +438,7 @@ public:
 private:
     const int bufferNum;
 
-    ClearMidiBufferOp (const ClearMidiBufferOp&);
-    ClearMidiBufferOp& operator= (const ClearMidiBufferOp&);
+    JUCE_DECLARE_NON_COPYABLE (ClearMidiBufferOp);
 };
 
 //==============================================================================
@@ -464,8 +460,7 @@ public:
 private:
     const int srcBufferNum, dstBufferNum;
 
-    CopyMidiBufferOp (const CopyMidiBufferOp&);
-    CopyMidiBufferOp& operator= (const CopyMidiBufferOp&);
+    JUCE_DECLARE_NON_COPYABLE (CopyMidiBufferOp);
 };
 
 //==============================================================================
@@ -488,8 +483,7 @@ public:
 private:
     const int srcBufferNum, dstBufferNum;
 
-    AddMidiBufferOp (const AddMidiBufferOp&);
-    AddMidiBufferOp& operator= (const AddMidiBufferOp&);
+    JUCE_DECLARE_NON_COPYABLE (AddMidiBufferOp);
 };
 
 //==============================================================================
@@ -535,8 +529,7 @@ private:
     int totalChans;
     int midiBufferToUse;
 
-    ProcessBufferOp (const ProcessBufferOp&);
-    ProcessBufferOp& operator= (const ProcessBufferOp&);
+    JUCE_DECLARE_NON_COPYABLE (ProcessBufferOp);
 };
 
 //==============================================================================

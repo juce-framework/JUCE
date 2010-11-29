@@ -137,8 +137,7 @@ protected:
 private:
     String typeName;
 
-    AudioIODeviceType (const AudioIODeviceType&);
-    AudioIODeviceType& operator= (const AudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE (AudioIODeviceType);
 };
 
 

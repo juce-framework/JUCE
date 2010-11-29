@@ -130,8 +130,7 @@ private:
     mutable Thread::ThreadID writerThreadId;
     mutable Array <Thread::ThreadID> readerThreads;
 
-    ReadWriteLock (const ReadWriteLock&);
-    ReadWriteLock& operator= (const ReadWriteLock&);
+    JUCE_DECLARE_NON_COPYABLE (ReadWriteLock);
 };
 
 

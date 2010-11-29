@@ -48,7 +48,7 @@ BEGIN_JUCE_NAMESPACE
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
-    GZIPCompressorHelper (const int compressionLevel, const bool nowrap)
+    GZIPCompressorHelper (const int compressionLevel, const int windowBits)
         : data (0),
           dataSize (0),
           compLevel (compressionLevel),
@@ -62,7 +62,7 @@ public:
         zerostruct (stream);
 
         streamIsValid = (deflateInit2 (&stream, compLevel, Z_DEFLATED,
-                                       nowrap ? -MAX_WBITS : MAX_WBITS,
+                                       windowBits != 0 ? windowBits : MAX_WBITS,
                                        8, strategy) == Z_OK);
     }
 
@@ -135,7 +135,7 @@ public:
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
                                                         int compressionLevel,
                                                         const bool deleteDestStream,
-                                                        const bool noWrap)
+                                                        const int windowBits)
   : destStream (destStream_),
     streamToDelete (deleteDestStream ? destStream_ : 0),
     buffer ((size_t) GZIPCompressorHelper::gzipCompBufferSize)
@@ -143,7 +143,7 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
     if (compressionLevel < 1 || compressionLevel > 9)
         compressionLevel = -1;
 
-    helper = new GZIPCompressorHelper (compressionLevel, noWrap);
+    helper = new GZIPCompressorHelper (compressionLevel, windowBits);
 }
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()

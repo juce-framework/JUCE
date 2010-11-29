@@ -94,8 +94,7 @@ private:
     const CriticalSection& lock_;
     const bool lockWasSuccessful;
 
-    ScopedTryLock (const ScopedTryLock&);
-    ScopedTryLock& operator= (const ScopedTryLock&);
+    JUCE_DECLARE_NON_COPYABLE (ScopedTryLock);
 };
 
 

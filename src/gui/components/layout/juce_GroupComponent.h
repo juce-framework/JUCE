@@ -97,8 +97,7 @@ private:
     String text;
     Justification justification;
 
-    GroupComponent (const GroupComponent&);
-    GroupComponent& operator= (const GroupComponent&);
+    JUCE_DECLARE_NON_COPYABLE (GroupComponent);
 };
 
 

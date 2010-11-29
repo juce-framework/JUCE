@@ -113,8 +113,7 @@ public:
     int numAllocated;
 
 private:
-    ArrayAllocationBase (const ArrayAllocationBase&);
-    ArrayAllocationBase& operator= (const ArrayAllocationBase&);
+    JUCE_DECLARE_NON_COPYABLE (ArrayAllocationBase);
 };
 
 

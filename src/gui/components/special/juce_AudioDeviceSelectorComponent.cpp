@@ -74,8 +74,7 @@ private:
     AudioDeviceManager* const manager;
     float level;
 
-    SimpleDeviceManagerInputLevelMeter (const SimpleDeviceManagerInputLevelMeter&);
-    SimpleDeviceManagerInputLevelMeter& operator= (const SimpleDeviceManagerInputLevelMeter&);
+    JUCE_DECLARE_NON_COPYABLE (SimpleDeviceManagerInputLevelMeter);
 };
 
 
@@ -894,8 +893,7 @@ public:
 private:
     ScopedPointer<ChannelSelectorListBox> inputChanList, outputChanList;
 
-    AudioDeviceSettingsPanel (const AudioDeviceSettingsPanel&);
-    AudioDeviceSettingsPanel& operator= (const AudioDeviceSettingsPanel&);
+    JUCE_DECLARE_NON_COPYABLE (AudioDeviceSettingsPanel);
 };
 
 

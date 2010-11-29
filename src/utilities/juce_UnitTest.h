@@ -167,8 +167,7 @@ private:
     const String name;
     UnitTestRunner* runner;
 
-    UnitTest (const UnitTest&);
-    UnitTest& operator= (const UnitTest&);
+    JUCE_DECLARE_NON_COPYABLE (UnitTest);
 };
 
 
@@ -266,8 +265,7 @@ private:
     void addPass();
     void addFail (const String& failureMessage);
 
-    UnitTestRunner (const UnitTestRunner&);
-    UnitTestRunner& operator= (const UnitTestRunner&);
+    JUCE_DECLARE_NON_COPYABLE (UnitTestRunner);
 };
 
 

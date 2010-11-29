@@ -117,9 +117,9 @@ private:
     friend class Pimpl;
 
     ImageCache();
-    ImageCache (const ImageCache&);
-    ImageCache& operator= (const ImageCache&);
     ~ImageCache();
+
+    JUCE_DECLARE_NON_COPYABLE (ImageCache);
 };
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__

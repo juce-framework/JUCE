@@ -1034,8 +1034,7 @@ public:
         String& result;
         int nextIndex;
 
-        Concatenator (const Concatenator&);
-        Concatenator& operator= (const Concatenator&);
+        JUCE_DECLARE_NON_COPYABLE (Concatenator);
     };
 
 private:

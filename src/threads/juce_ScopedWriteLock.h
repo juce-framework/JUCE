@@ -82,8 +82,7 @@ private:
     //==============================================================================
     const ReadWriteLock& lock_;
 
-    ScopedWriteLock (const ScopedWriteLock&);
-    ScopedWriteLock& operator= (const ScopedWriteLock&);
+    JUCE_DECLARE_NON_COPYABLE (ScopedWriteLock);
 };
 
 

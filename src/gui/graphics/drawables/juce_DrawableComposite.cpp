@@ -226,8 +226,7 @@ struct RentrancyCheckSetter
 private:
     bool& b;
 
-    RentrancyCheckSetter (const RentrancyCheckSetter&);
-    RentrancyCheckSetter& operator= (const RentrancyCheckSetter&);
+    JUCE_DECLARE_NON_COPYABLE (RentrancyCheckSetter);
 };
 
 void DrawableComposite::updateBoundsToFitChildren()

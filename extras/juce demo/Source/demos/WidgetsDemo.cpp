@@ -109,7 +109,7 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
-        dragger.startDraggingComponent (this, e, 0);
+        dragger.startDraggingComponent (this, e);
     }
 
     void mouseDrag (const MouseEvent& e)
@@ -137,7 +137,7 @@ public:
                 addToDesktop (ComponentPeer::windowIsTemporary);
             }
 
-            dragger.dragComponent (this, e);
+            dragger.dragComponent (this, e, 0);
         }
     }
 

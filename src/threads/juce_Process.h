@@ -95,8 +95,8 @@ public:
 
 private:
     Process();
-    Process (const Process&);
-    Process& operator= (const Process&);
+
+    JUCE_DECLARE_NON_COPYABLE (Process);
 };
 
 

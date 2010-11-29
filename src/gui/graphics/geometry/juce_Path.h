@@ -675,8 +675,7 @@ public:
         const Path& path;
         size_t index;
 
-        Iterator (const Iterator&);
-        Iterator& operator= (const Iterator&);
+        JUCE_DECLARE_NON_COPYABLE (Iterator);
     };
 
     //==============================================================================

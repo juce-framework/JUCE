@@ -218,8 +218,7 @@ public:
         const MidiBuffer& buffer;
         const uint8* data;
 
-        Iterator (const Iterator&);
-        Iterator& operator= (const Iterator&);
+        JUCE_DECLARE_NON_COPYABLE (Iterator);
     };
 
 private:

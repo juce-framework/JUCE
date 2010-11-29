@@ -50,13 +50,14 @@ public:
                                                 indicates that a default compression level should be used.
         @param deleteDestStreamWhenDestroyed    whether or not to delete the destStream object when
                                                 this stream is destroyed
-        @param noWrap                           this is used internally by the ZipFile class
-                                                and should be ignored by user applications
+        @param windowBits                       this is used internally to change the window size used
+                                                by zlib - leave it as 0 unless you specifically need to set
+                                                its value for some reason
     */
     GZIPCompressorOutputStream (OutputStream* destStream,
                                 int compressionLevel = 0,
                                 bool deleteDestStreamWhenDestroyed = false,
-                                bool noWrap = false);
+                                int windowBits = 0);
 
     /** Destructor. */
     ~GZIPCompressorOutputStream();
@@ -66,6 +67,15 @@ public:
     int64 getPosition();
     bool setPosition (int64 newPosition);
     bool write (const void* destBuffer, int howMany);
+
+    /** These are preset values that can be used for the constructor's windowBits paramter.
+        For more info about this, see the zlib documentation for its windowBits parameter.
+    */
+    enum WindowBitsValues
+    {
+        windowBitsRaw = -15,
+        windowBitsGZIP = 15 + 16
+    };
 
 private:
     //==============================================================================

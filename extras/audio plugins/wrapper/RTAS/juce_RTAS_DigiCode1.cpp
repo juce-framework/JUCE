@@ -47,13 +47,13 @@
  #undef UNICODE
 #endif
 
-#include "CEffectGroup.cpp"
-#include "CEffectGroupMIDI.cpp"
-#include "CEffectMIDIUtils.cpp"
-#include "CEffectProcess.cpp"
-#include "CEffectProcessAS.cpp"
-#include "CEffectType.cpp"
-#include "CEffectTypeRTAS.cpp"
-#include "ChunkDataParser.cpp"
+#include <CEffectGroup.cpp>
+#include <CEffectGroupMIDI.cpp>
+#include <CEffectMIDIUtils.cpp>
+#include <CEffectProcess.cpp>
+#include <CEffectProcessAS.cpp>
+#include <CEffectType.cpp>
+#include <CEffectTypeRTAS.cpp>
+#include <ChunkDataParser.cpp>
 
 #endif

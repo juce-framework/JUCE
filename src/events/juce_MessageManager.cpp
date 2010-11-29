@@ -233,8 +233,7 @@ public:
     WaitableEvent lockedEvent, releaseEvent;
 
 private:
-    SharedEvents (const SharedEvents&);
-    SharedEvents& operator= (const SharedEvents&);
+    JUCE_DECLARE_NON_COPYABLE (SharedEvents);
 };
 
 class MessageManagerLock::BlockingMessage   : public CallbackMessage

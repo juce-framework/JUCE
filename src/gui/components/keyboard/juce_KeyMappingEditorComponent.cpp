@@ -147,8 +147,7 @@ public:
     private:
         KeyMappingEditorComponent& owner;
 
-        KeyEntryWindow (const KeyEntryWindow&);
-        KeyEntryWindow& operator= (const KeyEntryWindow&);
+        JUCE_DECLARE_NON_COPYABLE (KeyEntryWindow);
     };
 
     void assignNewKey()

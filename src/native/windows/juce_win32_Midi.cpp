@@ -185,8 +185,7 @@ private:
         MIDIHDR hdr;
         char data [256];
 
-        MidiHeader (const MidiHeader&);
-        MidiHeader& operator= (const MidiHeader&);
+        JUCE_DECLARE_NON_COPYABLE (MidiHeader);
     };
 
     enum { numHeaders = 32 };

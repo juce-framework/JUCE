@@ -329,8 +329,7 @@ private:
         return false;
     }
 
-    WASAPIDeviceBase (const WASAPIDeviceBase&);
-    WASAPIDeviceBase& operator= (const WASAPIDeviceBase&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIDeviceBase);
 };
 
 //==============================================================================
@@ -446,8 +445,7 @@ public:
     ScopedPointer <AudioData::Converter> converter;
 
 private:
-    WASAPIInputDevice (const WASAPIInputDevice&);
-    WASAPIInputDevice& operator= (const WASAPIInputDevice&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIInputDevice);
 };
 
 //==============================================================================
@@ -533,8 +531,7 @@ public:
     ScopedPointer <AudioData::Converter> converter;
 
 private:
-    WASAPIOutputDevice (const WASAPIOutputDevice&);
-    WASAPIOutputDevice& operator= (const WASAPIOutputDevice&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIOutputDevice);
 };
 
 //==============================================================================

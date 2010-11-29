@@ -191,8 +191,7 @@ private:
     Array <MouseListener*> listeners;
     int numDeepMouseListeners;
 
-    MouseListenerList (const MouseListenerList&);
-    MouseListenerList& operator= (const MouseListenerList&);
+    JUCE_DECLARE_NON_COPYABLE (MouseListenerList);
 };
 
 

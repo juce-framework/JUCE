@@ -153,8 +153,7 @@ private:
     uint8* data;
     int dataSize;
 
-    GZIPDecompressHelper (const GZIPDecompressHelper&);
-    GZIPDecompressHelper& operator= (const GZIPDecompressHelper&);
+    JUCE_DECLARE_NON_COPYABLE (GZIPDecompressHelper);
 };
 
 //==============================================================================

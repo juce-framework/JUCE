@@ -34,7 +34,7 @@
 #if JucePlugin_Build_RTAS
 
 #ifdef _MSC_VER
-  #include "Mac2Win.H"
+  #include <Mac2Win.H>
 #endif
 
 /* Note about include paths
@@ -73,14 +73,14 @@
    some filename clashes between them.
 
 */
-#include "CEffectGroupMIDI.h"
-#include "CEffectProcessMIDI.h"
-#include "CEffectProcessRTAS.h"
-#include "CCustomView.h"
-#include "CEffectTypeRTAS.h"
-#include "CPluginControl.h"
-#include "CPluginControl_OnOff.h"
-#include "FicProcessTokens.h"
+#include <CEffectGroupMIDI.h>
+#include <CEffectProcessMIDI.h>
+#include <CEffectProcessRTAS.h>
+#include <CCustomView.h>
+#include <CEffectTypeRTAS.h>
+#include <CPluginControl.h>
+#include <CPluginControl_OnOff.h>
+#include <FicProcessTokens.h>
 
 //==============================================================================
 #ifdef _MSC_VER
@@ -904,8 +904,7 @@ private:
         AudioProcessor* const juceFilter;
         const int index;
 
-        JucePluginControl (const JucePluginControl&);
-        JucePluginControl& operator= (const JucePluginControl&);
+        JUCE_DECLARE_NON_COPYABLE (JucePluginControl);
     };
 };
 

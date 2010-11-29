@@ -362,8 +362,7 @@ private:
     const char* wildcardUTF8;
     NSDirectoryEnumerator* enumerator;
 
-    Pimpl (const Pimpl&);
-    Pimpl& operator= (const Pimpl&);
+    JUCE_DECLARE_NON_COPYABLE (Pimpl);
 };
 
 DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)

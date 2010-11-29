@@ -138,8 +138,7 @@ private:
     int pendingBytes;
     double pendingDataTime;
 
-    MidiDataConcatenator (const MidiDataConcatenator&);
-    MidiDataConcatenator& operator= (const MidiDataConcatenator&);
+    JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator);
 };
 
 #endif

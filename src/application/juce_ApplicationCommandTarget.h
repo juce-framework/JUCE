@@ -247,8 +247,7 @@ private:
     private:
         ApplicationCommandTarget* const owner;
 
-        CommandTargetMessageInvoker (const CommandTargetMessageInvoker&);
-        CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
+        JUCE_DECLARE_NON_COPYABLE (CommandTargetMessageInvoker);
     };
 
     ScopedPointer <CommandTargetMessageInvoker> messageInvoker;

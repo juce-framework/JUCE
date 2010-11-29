@@ -46,10 +46,6 @@ public:
         setAlwaysOnTop (true);
     }
 
-    ~DragOverlayComp()
-    {
-    }
-
     void paint (Graphics& g)
     {
         g.drawImageAt (image, 0, 0);
@@ -58,8 +54,7 @@ public:
 private:
     Image image;
 
-    DragOverlayComp (const DragOverlayComp&);
-    DragOverlayComp& operator= (const DragOverlayComp&);
+    JUCE_DECLARE_NON_COPYABLE (DragOverlayComp);
 };
 
 

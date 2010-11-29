@@ -1909,8 +1909,7 @@ private:
 #if JUCE_USE_XSHM
         bool useARGBImagesForRendering, shmCompletedDrawing;
 #endif
-        LinuxRepaintManager (const LinuxRepaintManager&);
-        LinuxRepaintManager& operator= (const LinuxRepaintManager&);
+        JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager);
     };
 
     ScopedPointer <LinuxRepaintManager> repainter;

@@ -173,6 +173,5 @@ private:
         return UnknownHost;
     }
 
-    PluginHostType (const PluginHostType&);
-    PluginHostType& operator= (const PluginHostType&);
+    JUCE_DECLARE_NON_COPYABLE (PluginHostType);
 };

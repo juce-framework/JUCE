@@ -42,7 +42,7 @@
     list of the necessary Digidesign paths in juce_RTAS_Wrapper.cpp
 */
 
-#include "CEffectProcessMIDI.cpp"
-#include "PlugInUtils.cpp"
+#include <CEffectProcessMIDI.cpp>
+#include <PlugInUtils.cpp>
 
 #endif

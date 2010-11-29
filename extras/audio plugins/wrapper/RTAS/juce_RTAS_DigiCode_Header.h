@@ -49,7 +49,7 @@
   #pragma pack (2)
   #pragma warning (disable: 4267 4996 4311 4312 4103)
 
-  #include "ForcedInclude.h"
+  #include <ForcedInclude.h>
 
 #else
 
@@ -65,7 +65,7 @@
   #define PLUGIN_SDK_DIRECTMIDI     1
   #define DIGI_PASCAL
 
-  #include "MacAlwaysInclude.h"
+  #include <MacAlwaysInclude.h>
 
 #endif
 #endif

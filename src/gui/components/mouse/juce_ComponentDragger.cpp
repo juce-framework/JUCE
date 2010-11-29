@@ -33,7 +33,6 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ComponentDragger::ComponentDragger()
-    : constrainer (0)
 {
 }
 
@@ -42,22 +41,20 @@ ComponentDragger::~ComponentDragger()
 }
 
 //==============================================================================
-void ComponentDragger::startDraggingComponent (Component* const componentToDrag, const MouseEvent& e,
-                                               ComponentBoundsConstrainer* const constrainer_)
+void ComponentDragger::startDraggingComponent (Component* const componentToDrag, const MouseEvent& e)
 {
     jassert (componentToDrag != 0);
+    jassert (e.mods.isAnyMouseButtonDown()); // The event has to be a drag event!
 
     if (componentToDrag != 0)
-    {
-        constrainer = constrainer_;
         mouseDownWithinTarget = e.getEventRelativeTo (componentToDrag).getMouseDownPosition();
-    }
 }
 
-void ComponentDragger::dragComponent (Component* const componentToDrag, const MouseEvent& e)
+void ComponentDragger::dragComponent (Component* const componentToDrag, const MouseEvent& e,
+                                      ComponentBoundsConstrainer* const constrainer)
 {
     jassert (componentToDrag != 0);
-    jassert (e.mods.isAnyMouseButtonDown()); // (the event has to be a drag event..)
+    jassert (e.mods.isAnyMouseButtonDown()); // The event has to be a drag event!
 
     if (componentToDrag != 0)
     {

@@ -2106,8 +2106,7 @@ public:
         SafeComponentPtr safePointer1, safePointer2;
         Component* const component2;
 
-        BailOutChecker (const BailOutChecker&);
-        BailOutChecker& operator= (const BailOutChecker&);
+        JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
     };
 
     //==============================================================================

@@ -64,8 +64,7 @@ public:
     }
 
 private:
-    AlertWindowTextEditor (const AlertWindowTextEditor&);
-    AlertWindowTextEditor& operator= (const AlertWindowTextEditor&);
+    JUCE_DECLARE_NON_COPYABLE (AlertWindowTextEditor);
 
     static juce_wchar getDefaultPasswordChar() throw()
     {
@@ -295,8 +294,7 @@ public:
 private:
     int bestWidth;
 
-    AlertTextComp (const AlertTextComp&);
-    AlertTextComp& operator= (const AlertTextComp&);
+    JUCE_DECLARE_NON_COPYABLE (AlertTextComp);
 };
 
 void AlertWindow::addTextBlock (const String& textBlock)
@@ -561,12 +559,12 @@ bool AlertWindow::containsAnyExtraComponents() const
 //==============================================================================
 void AlertWindow::mouseDown (const MouseEvent& e)
 {
-    dragger.startDraggingComponent (this, e, &constrainer);
+    dragger.startDraggingComponent (this, e);
 }
 
 void AlertWindow::mouseDrag (const MouseEvent& e)
 {
-    dragger.dragComponent (this, e);
+    dragger.dragComponent (this, e, &constrainer);
 }
 
 bool AlertWindow::keyPressed (const KeyPress& key)

@@ -519,8 +519,7 @@ private:
         }
     }
 
-    IPhoneAudioIODevice (const IPhoneAudioIODevice&);
-    IPhoneAudioIODevice& operator= (const IPhoneAudioIODevice&);
+    JUCE_DECLARE_NON_COPYABLE (IPhoneAudioIODevice);
 };
 
 

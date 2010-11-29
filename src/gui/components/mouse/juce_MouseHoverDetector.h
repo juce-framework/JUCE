@@ -124,8 +124,7 @@ private:
     void hoverTimerCallback();
     void checkJustHoveredCallback();
 
-    MouseHoverDetector (const MouseHoverDetector&);
-    MouseHoverDetector& operator= (const MouseHoverDetector&);
+    JUCE_DECLARE_NON_COPYABLE (MouseHoverDetector);
 };
 
 #endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__

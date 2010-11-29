@@ -117,8 +117,7 @@ public:
     }
 
 private:
-    ShadowWindow (const ShadowWindow&);
-    ShadowWindow& operator= (const ShadowWindow&);
+    JUCE_DECLARE_NON_COPYABLE (ShadowWindow);
 };
 
 
