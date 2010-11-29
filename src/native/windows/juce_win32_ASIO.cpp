@@ -735,9 +735,6 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     IASIO* volatile asioObject;
@@ -1646,6 +1643,8 @@ private:
                 break;
         }
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODevice);
 };
 
 //==============================================================================
@@ -1760,8 +1759,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     StringArray deviceNames;
     OwnedArray <CLSID> classIds;
@@ -1859,8 +1856,7 @@ private:
         }
     }
 
-    ASIOAudioIODeviceType (const ASIOAudioIODeviceType&);
-    ASIOAudioIODeviceType& operator= (const ASIOAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODeviceType);
 };
 
 AudioIODeviceType* juce_createAudioIODeviceType_ASIO()

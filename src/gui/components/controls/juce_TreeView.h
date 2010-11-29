@@ -457,10 +457,8 @@ public:
     */
     const String getItemIdentifierString() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     TreeView* ownerView;
     TreeViewItem* parentItem;
     OwnedArray <TreeViewItem> subItems;
@@ -490,8 +488,7 @@ private:
     TreeViewItem* getNextVisibleItem (bool recurse) const throw();
     TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
-    TreeViewItem (const TreeViewItem&);
-    TreeViewItem& operator= (const TreeViewItem&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem);
 };
 
 
@@ -746,8 +743,6 @@ public:
     /** @internal */
     void itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y);
 
-    juce_UseDebuggingNewOperator
-
 private:
     friend class TreeViewItem;
     friend class TreeViewContentComponent;
@@ -781,8 +776,7 @@ private:
                                      const StringArray& files, const String& sourceDescription,
                                      Component* sourceComponent) const throw();
 
-    TreeView (const TreeView&);
-    TreeView& operator= (const TreeView&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };
 
 #endif   // __JUCE_TREEVIEW_JUCEHEADER__

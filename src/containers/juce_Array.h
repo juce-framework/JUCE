@@ -981,10 +981,9 @@ public:
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
+    //==============================================================================
     ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
     int numUsed;
 };

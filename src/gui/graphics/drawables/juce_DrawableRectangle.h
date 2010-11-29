@@ -89,8 +89,6 @@ public:
         static const Identifier topLeft, topRight, bottomLeft, cornerSize;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
     /** @internal */
@@ -103,6 +101,7 @@ private:
     const AffineTransform calculateTransform() const;
 
     DrawableRectangle& operator= (const DrawableRectangle&);
+    JUCE_LEAK_DETECTOR (DrawableRectangle);
 };
 
 

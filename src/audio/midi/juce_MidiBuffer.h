@@ -213,10 +213,8 @@ public:
                            int& numBytesOfMidiData,
                            int& samplePosition) throw();
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         const MidiBuffer& buffer;
         const uint8* data;
 
@@ -224,11 +222,8 @@ public:
         Iterator& operator= (const Iterator&);
     };
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class MidiBuffer::Iterator;
     MemoryBlock data;
     int bytesUsed;
@@ -238,6 +233,8 @@ private:
     static int getEventTime (const void* d) throw();
     static uint16 getEventDataSize (const void* d) throw();
     static uint16 getEventTotalSize (const void* d) throw();
+
+    JUCE_LEAK_DETECTOR (MidiBuffer);
 };
 
 

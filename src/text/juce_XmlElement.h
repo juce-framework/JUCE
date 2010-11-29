@@ -685,10 +685,7 @@ public:
     */
     static XmlElement* createTextElement (const String& text);
 
-
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     friend class XmlDocument;
 
@@ -717,6 +714,8 @@ private:
     void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
     void getChildElementsAsArray (XmlElement**) const throw();
     void reorderChildElements (XmlElement**, int) throw();
+
+    JUCE_LEAK_DETECTOR (XmlElement);
 };
 
 

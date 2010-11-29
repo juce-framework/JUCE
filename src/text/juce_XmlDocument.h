@@ -151,8 +151,6 @@ public:
 
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     String originalText;
     const juce_wchar* input;
@@ -178,8 +176,7 @@ private:
     const String expandExternalEntity (const String& entity);
     const String getParameterEntity (const String& entity);
 
-    XmlDocument (const XmlDocument&);
-    XmlDocument& operator= (const XmlDocument&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument);
 };
 
 

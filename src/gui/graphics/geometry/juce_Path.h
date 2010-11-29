@@ -721,10 +721,8 @@ public:
     void restoreFromString (const String& stringVersion);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class PathFlatteningIterator;
     friend class Path::Iterator;
     ArrayAllocationBase <float, DummyCriticalSection> data;
@@ -737,6 +735,8 @@ private:
     static const float quadMarker;
     static const float cubicMarker;
     static const float closeSubPathMarker;
+
+    JUCE_LEAK_DETECTOR (Path);
 };
 
 #endif   // __JUCE_PATH_JUCEHEADER__

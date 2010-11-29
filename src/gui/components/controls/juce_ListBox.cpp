@@ -142,8 +142,6 @@ public:
         return String::empty;
     }
 
-    juce_UseDebuggingNewOperator
-
     ScopedPointer<Component> customComponent;
 
 private:
@@ -151,8 +149,7 @@ private:
     int row;
     bool selected, isDragging, selectRowOnMouseUp;
 
-    ListBoxRowComponent (const ListBoxRowComponent&);
-    ListBoxRowComponent& operator= (const ListBoxRowComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBoxRowComponent);
 };
 
 
@@ -337,17 +334,13 @@ public:
         return Viewport::keyPressed (key);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ListBox& owner;
     OwnedArray<ListBoxRowComponent> rows;
     int firstIndex, firstWholeIndex, lastWholeIndex;
     bool hasUpdated;
 
-    ListViewport (const ListViewport&);
-    ListViewport& operator= (const ListViewport&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListViewport);
 };
 
 

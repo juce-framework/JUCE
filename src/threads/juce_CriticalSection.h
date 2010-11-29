@@ -94,8 +94,6 @@ public:
     /** Provides the type of scoped unlocker to use with this type of critical section object. */
     typedef ScopedUnlock    ScopedUnlockType;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================

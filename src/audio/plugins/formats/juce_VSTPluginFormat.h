@@ -52,14 +52,11 @@ public:
     bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    VSTPluginFormat (const VSTPluginFormat&);
-    VSTPluginFormat& operator= (const VSTPluginFormat&);
-
+    //==============================================================================
     void recursiveFileSearch (StringArray& results, const File& dir, const bool recursive);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginFormat);
 };
 
 

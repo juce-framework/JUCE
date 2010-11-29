@@ -127,10 +127,8 @@ public:
     */
     const Image getDownImage() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     bool hitTest (int x, int y);
     /** @internal */
@@ -149,8 +147,7 @@ private:
 
     const Image getCurrentImage() const;
 
-    ImageButton (const ImageButton&);
-    ImageButton& operator= (const ImageButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageButton);
 };
 
 

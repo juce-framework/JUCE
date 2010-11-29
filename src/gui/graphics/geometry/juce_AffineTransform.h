@@ -243,8 +243,9 @@ public:
     float mat10, mat11, mat12;
 
 
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (AffineTransform);
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__

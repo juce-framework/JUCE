@@ -349,8 +349,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     String server, headers;
     MemoryBlock postData;
@@ -421,8 +419,7 @@ private:
         }
     }
 
-    WebInputStream (const WebInputStream&);
-    WebInputStream& operator= (const WebInputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
 };
 
 InputStream* URL::createInputStream (const bool usePostCommand,

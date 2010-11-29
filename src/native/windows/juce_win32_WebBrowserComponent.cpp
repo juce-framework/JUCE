@@ -135,9 +135,6 @@ public:
     //==============================================================================
     IWebBrowser2* browser;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     IConnectionPoint* connectionPoint;
     DWORD adviseCookie;
@@ -197,14 +194,13 @@ private:
         }
 
         //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
         WebBrowserComponent* const owner;
 
-        EventHandler (const EventHandler&);
-        EventHandler& operator= (const EventHandler&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler);
     };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponentInternal);
 };
 
 

@@ -79,15 +79,12 @@ public:
 
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     InputStream* const source;
     ScopedPointer <InputStream> sourceToDelete;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
-    SubregionStream (const SubregionStream&);
-    SubregionStream& operator= (const SubregionStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream);
 };
 
 #endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__

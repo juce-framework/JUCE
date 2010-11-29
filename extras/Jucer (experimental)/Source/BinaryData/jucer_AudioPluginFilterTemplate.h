@@ -64,9 +64,9 @@ public:
     void getStateInformation (MemoryBlock& destData);
     void setStateInformation (const void* data, int sizeInBytes);
 
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME);
 };
 
 #endif  // HEADERGUARD

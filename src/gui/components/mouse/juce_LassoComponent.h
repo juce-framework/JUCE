@@ -230,14 +230,14 @@ public:
     /** @internal */
     bool hitTest (int, int)             { return false; }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Array <SelectableItemType> originalSelection;
     LassoSource <SelectableItemType>* source;
     int outlineThickness;
     Point<int> dragStartPos;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LassoComponent);
 };
 
 

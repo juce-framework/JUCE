@@ -130,8 +130,6 @@ public:
 
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** @internal */
     virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = 0);
 
@@ -163,8 +161,7 @@ private:
 
     void setWindowActive (bool isNowActive);
 
-    TopLevelWindow (const TopLevelWindow&);
-    TopLevelWindow& operator= (const TopLevelWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow);
 };
 
 

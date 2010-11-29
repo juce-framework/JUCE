@@ -143,8 +143,9 @@ public:
     */
     bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
+
+private:
+    JUCE_LEAK_DETECTOR (WavAudioFormat);
 };
 
 

@@ -71,9 +71,6 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool perform (const InvocationInfo& info);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer <Project> currentProject;
 
@@ -85,6 +82,8 @@ private:
 
         return "projectWindowPos_" + currentProject->getProjectUID();
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow);
 };
 
 

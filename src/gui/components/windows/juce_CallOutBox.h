@@ -108,9 +108,8 @@ public:
     /** @internal */
     void handleCommandMessage (int commandId);
 
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int borderSpace;
     float arrowSize;
     Component& content;
@@ -122,8 +121,7 @@ private:
     void refreshPath();
     void drawCallOutBoxBackground (Graphics& g, const Path& outline, int width, int height);
 
-    CallOutBox (const CallOutBox&);
-    CallOutBox& operator= (const CallOutBox&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox);
 };
 
 

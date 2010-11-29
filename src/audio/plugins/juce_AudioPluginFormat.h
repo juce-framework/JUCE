@@ -105,15 +105,11 @@ public:
     virtual const FileSearchPath getDefaultLocationsToSearch() = 0;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 protected:
+    //==============================================================================
     AudioPluginFormat() throw();
 
-    AudioPluginFormat (const AudioPluginFormat&);
-    AudioPluginFormat& operator= (const AudioPluginFormat&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormat);
 };
 
 

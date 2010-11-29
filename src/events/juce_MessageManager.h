@@ -162,10 +162,8 @@ public:
     /** @internal */
     ~MessageManager() throw();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     MessageManager() throw();
 
     friend class MessageListener;
@@ -192,8 +190,7 @@ private:
     Thread::ThreadID volatile threadWithLock;
     CriticalSection lockingLock;
 
-    MessageManager (const MessageManager&);
-    MessageManager& operator= (const MessageManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager);
 };
 
 

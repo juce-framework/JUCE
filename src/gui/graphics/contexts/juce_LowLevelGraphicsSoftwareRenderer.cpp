@@ -1897,16 +1897,20 @@ public:
     {
         if (clip != 0)
         {
+            cloneClipIfMultiplyReferenced();
+
             if (isOnlyTranslated)
             {
-                cloneClipIfMultiplyReferenced();
                 clip = clip->excludeClipRectangle (r.translated (xOffset, yOffset));
             }
             else
             {
-                RectangleList all (getClipBounds());
-                all.subtract (r);
-                return clipToRectangleList (all);
+                Path p;
+                p.addRectangle (r.toFloat());
+                p.applyTransform (complexTransform);
+                p.addRectangle (clip->getClipBounds().toFloat());
+                p.setUsingNonZeroWinding (false);
+                clip = clip->clipToPath (p, AffineTransform::identity);
             }
         }
 
@@ -1966,7 +1970,7 @@ public:
             if (isOnlyTranslated)
                 return clip->getClipBounds().translated (-xOffset, -yOffset);
             else
-                return clip->getClipBounds().toFloat().transformed (getTransform().inverted()).getSmallestIntegerContainer();
+                return clip->getClipBounds().toFloat().transformed (complexTransform.inverted()).getSmallestIntegerContainer();
         }
 
         return Rectangle<int>();
@@ -1987,7 +1991,8 @@ public:
         }
         else
         {
-            s->complexTransform = s->complexTransform.followedBy (AffineTransform::translation ((float) -clip.getX(), (float) -clip.getY()));
+            s->complexTransform = s->complexTransform.followedBy (AffineTransform::translation ((float) -clip.getX(),
+                                                                                                (float) -clip.getY()));
         }
 
         s->cloneClipIfMultiplyReferenced();
@@ -2423,14 +2428,10 @@ public:
     int glyph, lastAccessCount;
     Font font;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer <EdgeTable> edgeTable;
 
-    CachedGlyph (const CachedGlyph&);
-    CachedGlyph& operator= (const CachedGlyph&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyph);
 };
 
 //==============================================================================
@@ -2495,16 +2496,12 @@ public:
         oldest->draw (state, x, y);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     friend class OwnedArray <CachedGlyph>;
     OwnedArray <CachedGlyph> glyphs;
     int accessCounter, hits, misses;
 
-    GlyphCache (const GlyphCache&);
-    GlyphCache& operator= (const GlyphCache&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache);
 };
 
 juce_ImplementSingleton_SingleThreaded (LowLevelGraphicsSoftwareRenderer::GlyphCache);

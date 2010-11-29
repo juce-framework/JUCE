@@ -116,10 +116,6 @@ public:
         ScopedLockType& operator= (const ScopedLockType&);
     };
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class Pimpl;

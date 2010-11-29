@@ -60,12 +60,9 @@ public:
     virtual void selectedFileChanged (const File& newSelectedFile) = 0;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    FilePreviewComponent (const FilePreviewComponent&);
-    FilePreviewComponent& operator= (const FilePreviewComponent&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePreviewComponent);
 };
 
 

@@ -137,8 +137,9 @@ public:
     bool loadFromXml (const XmlElement& xml);
 
 
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (PluginDescription);
 };
 
 

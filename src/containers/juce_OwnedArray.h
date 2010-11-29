@@ -788,16 +788,12 @@ public:
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
     int numUsed;
 
-    // disallow copy constructor and assignment
-    OwnedArray (const OwnedArray&);
-    OwnedArray& operator= (const OwnedArray&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray);
 };
 
 

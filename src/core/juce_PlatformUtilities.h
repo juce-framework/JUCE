@@ -325,8 +325,6 @@ public:
     int getRemoteId() const                     { return remoteId; }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** @internal */
     void handleCallbackInternal();
 
@@ -337,8 +335,7 @@ private:
 
     bool open (bool openInExclusiveMode);
 
-    AppleRemoteDevice (const AppleRemoteDevice&);
-    AppleRemoteDevice& operator= (const AppleRemoteDevice&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppleRemoteDevice);
 };
 
 #endif

@@ -248,13 +248,10 @@ public:
         events->releaseEvent.wait();
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     ReferenceCountedObjectPtr <MessageManagerLock::SharedEvents> events;
 
-    BlockingMessage (const BlockingMessage&);
-    BlockingMessage& operator= (const BlockingMessage&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockingMessage);
 };
 
 //==============================================================================

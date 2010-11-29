@@ -164,10 +164,8 @@ public:
     /** @internal */
     void timerCallback();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioFormatManager& formatManagerToUse;
     AudioThumbnailCache& cache;
     ScopedPointer <InputSource> source;
@@ -194,6 +192,8 @@ private:
 
     // returns true if more needs to be read
     bool readNextBlockFromAudioFile (AudioFormatReader& reader);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail);
 };
 
 

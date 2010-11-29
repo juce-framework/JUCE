@@ -139,9 +139,6 @@ public:
     void removeListener (Listener* listenerToRemove);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** @internal */
     CameraDevice (const String& name, int index);
@@ -151,8 +148,7 @@ private:
     bool isRecording;
     String name;
 
-    CameraDevice (const CameraDevice&);
-    CameraDevice& operator= (const CameraDevice&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the CameraDevice::Listener class directly. */

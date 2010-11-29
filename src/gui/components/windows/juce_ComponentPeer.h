@@ -355,10 +355,8 @@ public:
     virtual int getCurrentRenderingEngine() throw();
     virtual void setCurrentRenderingEngine (int index);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     Component* const component;
     const int styleFlags;
     RectangleList maskedRegion;
@@ -380,10 +378,8 @@ private:
 
     void setLastDragDropTarget (Component* comp);
 
-    ComponentPeer (const ComponentPeer&);
-    ComponentPeer& operator= (const ComponentPeer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer);
 };
-
 
 
 #endif   // __JUCE_COMPONENTPEER_JUCEHEADER__

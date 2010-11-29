@@ -148,10 +148,8 @@ public:
     virtual void stopBackgroundThread();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     void* internal;
 
     struct PendingMessage
@@ -160,8 +158,6 @@ protected:
 
         MidiMessage message;
         PendingMessage* next;
-
-        juce_UseDebuggingNewOperator
     };
 
     CriticalSection lock;
@@ -171,8 +167,7 @@ protected:
     void run();
 
 private:
-    MidiOutput (const MidiOutput&);
-    MidiOutput& operator= (const MidiOutput&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput);
 };
 
 

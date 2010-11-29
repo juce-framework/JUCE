@@ -102,16 +102,12 @@ public:
                        const Image& sourceImage,
                        const Rectangle<int>& destinationArea) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     HeapBlock <float> values;
     const int size;
 
-    // no reason not to implement these one day..
-    ImageConvolutionKernel (const ImageConvolutionKernel&);
-    ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageConvolutionKernel);
 };
 
 

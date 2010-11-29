@@ -351,14 +351,14 @@ protected:
 
                     if (++count == 8)
                     {
-                        dataBlock.writeByte (mask);
+                        dataBlock.writeByte ((char) mask);
                         count = 0;
                         mask = 0;
                     }
                 }
 
                 if (mask != 0)
-                    dataBlock.writeByte (mask);
+                    dataBlock.writeByte ((char) mask);
 
                 for (int i = maskStride - w / 8; --i >= 0;)
                     dataBlock.writeByte (0);

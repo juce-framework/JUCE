@@ -108,10 +108,8 @@ public:
     */
     var* getVarPointer (const Identifier& name) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     struct NamedValue
     {
         NamedValue() throw();

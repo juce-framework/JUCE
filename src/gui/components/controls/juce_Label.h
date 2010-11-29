@@ -256,10 +256,8 @@ public:
     /** Returns true if the editor is currently focused and active. */
     bool isBeingEdited() const throw();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** Creates the TextEditor component that will be used when the user has clicked on the label.
         Subclasses can override this if they need to customise this component in some way.
     */
@@ -314,6 +312,7 @@ protected:
     void valueChanged (Value&);
 
 private:
+    //==============================================================================
     Value textValue;
     String lastTextValue;
     Font font;
@@ -331,8 +330,7 @@ private:
     bool updateFromTextEditorContents();
     void callChangeListeners();
 
-    Label (const Label&);
-    Label& operator= (const Label&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */

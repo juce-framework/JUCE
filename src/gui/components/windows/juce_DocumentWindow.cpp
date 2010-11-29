@@ -52,13 +52,10 @@ public:
             owner.closeButtonPressed();
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     DocumentWindow& owner;
 
-    ButtonListenerProxy (const ButtonListenerProxy&);
-    ButtonListenerProxy& operator= (const ButtonListenerProxy&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonListenerProxy);
 };
 
 //==============================================================================

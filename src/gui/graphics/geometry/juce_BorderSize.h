@@ -116,11 +116,11 @@ public:
     bool operator!= (const BorderSize& other) const throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int top, left, bottom, right;
+
+    JUCE_LEAK_DETECTOR (BorderSize);
 };
 
 

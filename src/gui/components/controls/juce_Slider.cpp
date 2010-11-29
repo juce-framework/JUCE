@@ -77,16 +77,12 @@ public:
         BubbleComponent::setPosition (owner);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     Slider* owner;
     Font font;
     String text;
 
-    SliderPopupDisplayComponent (const SliderPopupDisplayComponent&);
-    SliderPopupDisplayComponent& operator= (const SliderPopupDisplayComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderPopupDisplayComponent);
 };
 
 //==============================================================================

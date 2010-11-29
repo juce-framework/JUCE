@@ -715,9 +715,6 @@ public:
         }
 
         //==============================================================================
-        juce_UseDebuggingNewOperator
-
-        //==============================================================================
         //xxx most of these members should probably be private...
 
         Direct2DLowLevelGraphicsContext& owner;
@@ -761,13 +758,10 @@ public:
         ComSmartPtr <ID2D1GradientStopCollection> gradientStops;
 
     private:
-        SavedState (const SavedState&);
-        SavedState& operator= (const SavedState& other);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState);
     };
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     HWND hwnd;
     ComSmartPtr <ID2D1HwndRenderTarget> renderingTarget;
@@ -907,6 +901,8 @@ private:
         matrix._32 = transform.mat12;
         return matrix;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DLowLevelGraphicsContext);
 };
 
 

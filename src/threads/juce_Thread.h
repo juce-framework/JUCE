@@ -272,10 +272,8 @@ public:
     static void stopAllThreads (int timeoutInMillisecs);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     const String threadName_;
     void* volatile threadHandle_;
     CriticalSection startStopLock;
@@ -291,8 +289,7 @@ private:
     static Array<Thread*> runningThreads;
     static CriticalSection runningThreadsLock;
 
-    Thread (const Thread&);
-    Thread& operator= (const Thread&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);
 };
 
 #endif   // __JUCE_THREAD_JUCEHEADER__

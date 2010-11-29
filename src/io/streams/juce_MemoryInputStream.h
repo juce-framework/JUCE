@@ -76,16 +76,13 @@ public:
     bool isExhausted();
     int read (void* destBuffer, int maxBytesToRead);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     const char* data;
     size_t dataSize, position;
     MemoryBlock internalCopy;
 
-    MemoryInputStream (const MemoryInputStream&);
-    MemoryInputStream& operator= (const MemoryInputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream);
 };
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__

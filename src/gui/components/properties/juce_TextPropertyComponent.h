@@ -86,15 +86,12 @@ public:
     /** @internal */
     void textWasEdited();
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<Label> textEditor;
 
     void createEditor (int maxNumChars, bool isMultiLine);
 
-    TextPropertyComponent (const TextPropertyComponent&);
-    TextPropertyComponent& operator= (const TextPropertyComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent);
 };
 
 

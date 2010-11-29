@@ -358,8 +358,6 @@ public:
     */
     static const Font fromString (const String& fontDescription);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
@@ -382,6 +380,8 @@ private:
 
     ReferenceCountedObjectPtr <SharedFontInternal> font;
     void dupeInternalIfShared();
+
+    JUCE_LEAK_DETECTOR (Font);
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__

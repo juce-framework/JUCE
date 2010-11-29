@@ -62,17 +62,13 @@ public:
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     AudioSource* const input;
     const bool deleteInputWhenDeleted;
     OwnedArray <IIRFilter> iirFilters;
 
-    IIRFilterAudioSource (const IIRFilterAudioSource&);
-    IIRFilterAudioSource& operator= (const IIRFilterAudioSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IIRFilterAudioSource);
 };
 
 

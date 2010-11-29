@@ -55,10 +55,8 @@ public:
     ~ArrowButton();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void paintButton (Graphics& g,
                       bool isMouseOverButton,
@@ -74,8 +72,7 @@ private:
     Path path;
     int offset;
 
-    ArrowButton (const ArrowButton&);
-    ArrowButton& operator= (const ArrowButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton);
 };
 
 

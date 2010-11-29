@@ -144,9 +144,6 @@ public:
     void closeFiles();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     ScopedPointer <PropertiesFile> userProps, commonProps;
@@ -156,10 +153,9 @@ private:
     int commonSettingsAreReadOnly;
     InterProcessLock* processLock;
 
-    ApplicationProperties (const ApplicationProperties&);
-    ApplicationProperties& operator= (const ApplicationProperties&);
-
     void openFiles();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationProperties);
 };
 
 

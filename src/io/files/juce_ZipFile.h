@@ -165,10 +165,8 @@ public:
                           const File& targetDirectory,
                           bool shouldOverwriteFiles = true);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class ZipInputStream;
     class ZipFilenameComparator;
     class ZipEntryInfo;
@@ -190,8 +188,7 @@ private:
     int findEndOfZipEntryTable (InputStream& input, int& numEntries);
     static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
-    ZipFile (const ZipFile&);
-    ZipFile& operator= (const ZipFile&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile);
 };
 
 #endif   // __JUCE_ZIPFILE_JUCEHEADER__

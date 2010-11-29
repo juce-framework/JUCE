@@ -233,13 +233,13 @@ public:
     static const int fastForwardKey; /**< key-code for a multimedia 'fast-forward' key, (not all keyboards will have one) */
     static const int rewindKey;      /**< key-code for a multimedia 'rewind' key, (not all keyboards will have one) */
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     int keyCode;
     ModifierKeys mods;
     juce_wchar textCharacter;
+
+    JUCE_LEAK_DETECTOR (KeyPress);
 };
 
 

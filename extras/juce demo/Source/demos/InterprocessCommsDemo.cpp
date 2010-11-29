@@ -294,9 +294,6 @@ public:
     OwnedArray <DemoInterprocessConnection, CriticalSection> activeConnections;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ComboBox modeSelector;
     TextButton sendButton;
@@ -304,6 +301,8 @@ private:
     Label modeLabel, pipeLabel, numberLabel, hostLabel;
 
     ScopedPointer<DemoInterprocessConnectionServer> server;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessCommsDemo);
 };
 
 

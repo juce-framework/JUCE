@@ -156,17 +156,15 @@ public:
     StreamingSocket* waitForNextConnection() const;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     String hostName;
     int volatile portNumber, handle;
     bool connected, isListener;
 
     StreamingSocket (const String& hostname, int portNumber, int handle);
-    StreamingSocket (const StreamingSocket&);
-    StreamingSocket& operator= (const StreamingSocket&);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StreamingSocket);
 };
 
 
@@ -286,18 +284,16 @@ public:
     DatagramSocket* waitForNextConnection() const;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     String hostName;
     int volatile portNumber, handle;
     bool connected, allowBroadcast;
     void* serverAddress;
 
     DatagramSocket (const String& hostname, int portNumber, int handle, int localPortNumber);
-    DatagramSocket (const DatagramSocket&);
-    DatagramSocket& operator= (const DatagramSocket&);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DatagramSocket);
 };
 
 

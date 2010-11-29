@@ -73,12 +73,9 @@ public:
     */
     void post();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    CallbackMessage (const CallbackMessage&);
-    CallbackMessage& operator= (const CallbackMessage&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackMessage);
 };
 
 

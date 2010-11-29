@@ -41,8 +41,6 @@ public:
     void paint (Graphics& g);
     void resized();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     StringArray facts;
@@ -50,6 +48,8 @@ private:
     Image image;
 
     void tryToLoadImage();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemPreviewComponent);
 };
 
 

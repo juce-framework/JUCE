@@ -228,14 +228,13 @@ public:
     bool fromBase64Encoding  (const String& encodedString);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     HeapBlock <char> data;
     size_t size;
     static const char* const encodingTable;
+
+    JUCE_LEAK_DETECTOR (MemoryBlock);
 };
 
 

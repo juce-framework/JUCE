@@ -39,7 +39,7 @@ struct ThumbnailCacheEntry
     uint32 lastUsed;
     MemoryBlock data;
 
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (ThumbnailCacheEntry);
 };
 
 //==============================================================================

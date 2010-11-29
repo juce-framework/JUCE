@@ -136,8 +136,6 @@ public:
     const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** Returns true if this var has the same value as the one supplied. */
     bool equals (const var& other) const throw();
 

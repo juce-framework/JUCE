@@ -277,12 +277,12 @@ public:
     virtual void skipNextBytes (int64 numBytesToSkip);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     //==============================================================================
     InputStream() throw()  {}
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream);
 };
 
 #endif   // __JUCE_INPUTSTREAM_JUCEHEADER__

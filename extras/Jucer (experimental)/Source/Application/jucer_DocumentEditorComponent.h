@@ -50,15 +50,11 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool perform (const InvocationInfo& info);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     OpenDocumentManager::Document* document;
 
 private:
-    DocumentEditorComponent (const DocumentEditorComponent&);
-    DocumentEditorComponent& operator= (const DocumentEditorComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentEditorComponent);
 };
 
 

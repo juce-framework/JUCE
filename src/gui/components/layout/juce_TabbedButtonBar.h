@@ -65,10 +65,8 @@ public:
     void clicked (const ModifierKeys& mods);
     bool hitTest (int x, int y);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     friend class TabbedButtonBar;
     TabbedButtonBar& owner;
     int overlapPixels;
@@ -85,8 +83,8 @@ protected:
     int getIndex() const;
 
 private:
-    TabBarButton (const TabBarButton&);
-    TabBarButton& operator= (const TabBarButton&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabBarButton);
 };
 
 
@@ -271,8 +269,6 @@ public:
     /** @internal */
     void lookAndFeelChanged();
 
-    juce_UseDebuggingNewOperator
-
 protected:
     //==============================================================================
     /** This creates one of the tabs.
@@ -305,8 +301,7 @@ private:
 
     void showExtraItemsMenu();
 
-    TabbedButtonBar (const TabbedButtonBar&);
-    TabbedButtonBar& operator= (const TabbedButtonBar&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar);
 };
 
 

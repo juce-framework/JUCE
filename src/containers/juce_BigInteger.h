@@ -304,10 +304,8 @@ public:
     */
     void loadFromMemoryBlock (const MemoryBlock& data);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     HeapBlock <uint32> values;
     int numValues, highestBit;
     bool negative;
@@ -317,6 +315,8 @@ private:
 
     static inline int bitToIndex (const int bit) throw()        { return bit >> 5; }
     static inline uint32 bitToMask (const int bit) throw()      { return 1 << (bit & 31); }
+
+    JUCE_LEAK_DETECTOR (BigInteger);
 };
 
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */

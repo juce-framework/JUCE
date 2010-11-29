@@ -846,9 +846,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
-    //==============================================================================
     String outputDeviceId, inputDeviceId;
     String lastError;
 
@@ -909,8 +906,7 @@ private:
     }
 
     //==============================================================================
-    WASAPIAudioIODevice (const WASAPIAudioIODevice&);
-    WASAPIAudioIODevice& operator= (const WASAPIAudioIODevice&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODevice);
 };
 
 
@@ -1053,8 +1049,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     StringArray outputDeviceNames, outputDeviceIds;
     StringArray inputDeviceNames, inputDeviceIds;
 
@@ -1083,8 +1077,7 @@ private:
     }
 
     //==============================================================================
-    WASAPIAudioIODeviceType (const WASAPIAudioIODeviceType&);
-    WASAPIAudioIODeviceType& operator= (const WASAPIAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODeviceType);
 };
 
 }

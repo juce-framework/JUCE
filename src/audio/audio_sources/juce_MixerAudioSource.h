@@ -104,9 +104,6 @@ public:
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     Array <AudioSource*> inputs;
@@ -116,8 +113,7 @@ private:
     double currentSampleRate;
     int bufferSizeExpected;
 
-    MixerAudioSource (const MixerAudioSource&);
-    MixerAudioSource& operator= (const MixerAudioSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerAudioSource);
 };
 
 

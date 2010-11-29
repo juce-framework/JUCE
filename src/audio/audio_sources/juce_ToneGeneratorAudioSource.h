@@ -63,17 +63,13 @@ public:
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     double frequency, sampleRate;
     double currentPhase, phasePerSample;
     float amplitude;
 
-    ToneGeneratorAudioSource (const ToneGeneratorAudioSource&);
-    ToneGeneratorAudioSource& operator= (const ToneGeneratorAudioSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToneGeneratorAudioSource);
 };
 
 

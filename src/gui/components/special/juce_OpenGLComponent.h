@@ -81,8 +81,9 @@ public:
     static void getAvailablePixelFormats (Component* component,
                                           OwnedArray <OpenGLPixelFormat>& results);
 
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (OpenGLPixelFormat);
 };
 
 //==============================================================================
@@ -163,11 +164,12 @@ public:
     */
     static OpenGLContext* getCurrentContext();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     OpenGLContext() throw();
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext);
 };
 
 
@@ -330,9 +332,6 @@ public:
     CriticalSection& getContextLock() throw()       { return contextLock; }
 
     //==============================================================================
-    /** @internal */
-    void paint (Graphics& g);
-
     /** Returns the native handle of an embedded heavyweight window, if there is one.
 
         E.g. On windows, this will return the HWND of the sub-window containing
@@ -344,7 +343,10 @@ public:
         This can be called back on the same thread that created the context. */
     void deleteContext();
 
-    juce_UseDebuggingNewOperator
+
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics& g);
 
 private:
     const OpenGLType type;
@@ -364,8 +366,7 @@ private:
     void updateContextPosition();
     void internalRepaint (int x, int y, int w, int h);
 
-    OpenGLComponent (const OpenGLComponent&);
-    OpenGLComponent& operator= (const OpenGLComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };
 
 

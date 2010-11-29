@@ -61,14 +61,14 @@ public:
     void decrypt (uint32& data1, uint32& data2) const throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     uint32 p[18];
     HeapBlock <uint32> s[4];
 
     uint32 F (uint32 x) const throw();
+
+    JUCE_LEAK_DETECTOR (BlowFish);
 };
 
 

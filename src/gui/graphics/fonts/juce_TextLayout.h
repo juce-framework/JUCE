@@ -140,14 +140,14 @@ public:
                      const Justification& layoutFlags) const;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class Token;
     friend class OwnedArray <Token>;
     OwnedArray <Token> tokens;
     int totalLines;
+
+    JUCE_LEAK_DETECTOR (TextLayout);
 };
 
 

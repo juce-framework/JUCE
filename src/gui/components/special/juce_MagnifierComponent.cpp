@@ -133,13 +133,10 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     MagnifierComponent* const magnifierComp;
 
-    MagnifyingPeer (const MagnifyingPeer&);
-    MagnifyingPeer& operator= (const MagnifyingPeer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MagnifyingPeer);
 };
 
 

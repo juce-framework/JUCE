@@ -107,13 +107,13 @@ public:
 
     void registerType (DocumentType* type);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     OwnedArray <DocumentType> types;
     OwnedArray <Document> documents;
     Array <DocumentCloseListener*> listeners;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenDocumentManager);
 };
 
 

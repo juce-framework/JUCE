@@ -134,11 +134,8 @@ public:
     {
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
-    JucerToolbarButton (const JucerToolbarButton&);
-    JucerToolbarButton& operator= (const JucerToolbarButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerToolbarButton);
 };
 
 
@@ -235,8 +232,6 @@ public:
     /** @internal */
     void handleAsyncUpdate();
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     struct ComponentPosition
@@ -260,6 +255,5 @@ private:
     OwnedArray <ComponentPosition> components;
     OwnedArray <MarkerPosition> markers;
 
-    RelativeRectangleLayoutManager (const RelativeRectangleLayoutManager&);
-    RelativeRectangleLayoutManager& operator= (const RelativeRectangleLayoutManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleLayoutManager);
 };

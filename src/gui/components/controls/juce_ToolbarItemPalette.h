@@ -63,8 +63,6 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
-
 private:
     ToolbarItemFactory& factory;
     Toolbar* toolbar;
@@ -75,8 +73,7 @@ private:
     void replaceComponent (ToolbarItemComponent* comp);
     void addComponent (int itemId, int index);
 
-    ToolbarItemPalette (const ToolbarItemPalette&);
-    ToolbarItemPalette& operator= (const ToolbarItemPalette&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette);
 };
 
 

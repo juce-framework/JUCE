@@ -1038,9 +1038,6 @@ public:
         Concatenator& operator= (const Concatenator&);
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator // (adds debugging info to find leaked objects)
-
 private:
     //==============================================================================
     juce_wchar* text;

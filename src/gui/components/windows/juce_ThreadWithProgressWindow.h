@@ -146,10 +146,8 @@ public:
     */
     AlertWindow* getAlertWindow() const throw()         { return alertWindow; }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     void timerCallback();
 
     double progress;
@@ -158,8 +156,7 @@ private:
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
 
-    ThreadWithProgressWindow (const ThreadWithProgressWindow&);
-    ThreadWithProgressWindow& operator= (const ThreadWithProgressWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow);
 };
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__

@@ -79,12 +79,13 @@ public:
     /** @internal */
     void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
+    //==============================================================================
     int offsetX, offsetY;
     float radius, opacity;
+
+    JUCE_LEAK_DETECTOR (DropShadowEffect);
 };
 
 

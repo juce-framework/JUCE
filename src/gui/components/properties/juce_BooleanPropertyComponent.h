@@ -86,14 +86,11 @@ public:
     /** @internal */
     void buttonClicked (Button*);
 
-    juce_UseDebuggingNewOperator
-
 private:
     ToggleButton button;
     String onText, offText;
 
-    BooleanPropertyComponent (const BooleanPropertyComponent&);
-    BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BooleanPropertyComponent);
 };
 
 

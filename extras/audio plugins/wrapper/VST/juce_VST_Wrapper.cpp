@@ -1374,17 +1374,15 @@ public:
         }
       #endif
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         JuceVSTWrapper& wrapper;
         ScopedPointer<AudioProcessorEditor> editor;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper);
     };
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     AudioProcessor* filter;
     JUCE_NAMESPACE::MemoryBlock chunkMemory;
@@ -1465,6 +1463,8 @@ private:
   #else
     HWND hostWindow;
   #endif
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper);
 };
 
 //==============================================================================

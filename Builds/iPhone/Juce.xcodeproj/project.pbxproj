@@ -521,6 +521,7 @@
 		C8441B7B3E4CCD4A257B4BFE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_FileLogger.h; path = ../../src/core/juce_FileLogger.h; sourceTree = SOURCE_ROOT; };
 		5B789AAC295BA4BB6D5AD4A3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Initialisation.cpp; path = ../../src/core/juce_Initialisation.cpp; sourceTree = SOURCE_ROOT; };
 		92ACFFCCCD1C85A0F8C6F80F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Initialisation.h; path = ../../src/core/juce_Initialisation.h; sourceTree = SOURCE_ROOT; };
+		DFE0DF77674CB28A2485FFDF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_LeakedObjectDetector.h; path = ../../src/core/juce_LeakedObjectDetector.h; sourceTree = SOURCE_ROOT; };
 		4555F03DBD059EEDECEF9F85 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Logger.cpp; path = ../../src/core/juce_Logger.cpp; sourceTree = SOURCE_ROOT; };
 		63F44EC0485FCA050814967E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Logger.h; path = ../../src/core/juce_Logger.h; sourceTree = SOURCE_ROOT; };
 		94BDD1E20915D83AA6729D94 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MathsFunctions.h; path = ../../src/core/juce_MathsFunctions.h; sourceTree = SOURCE_ROOT; };
@@ -1245,6 +1246,7 @@
 				C8441B7B3E4CCD4A257B4BFE,
 				5B789AAC295BA4BB6D5AD4A3,
 				92ACFFCCCD1C85A0F8C6F80F,
+				DFE0DF77674CB28A2485FFDF,
 				4555F03DBD059EEDECEF9F85,
 				63F44EC0485FCA050814967E,
 				94BDD1E20915D83AA6729D94,

@@ -281,10 +281,8 @@ public:
         backgroundColourId          = 0x1005700,  /**< A colour to use to fill the window's background. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
@@ -342,6 +340,7 @@ protected:
     ScopedPointer <ResizableBorderComponent> resizableBorder;
 
 private:
+    //==============================================================================
     Component::SafePointer <Component> contentComponent;
     bool resizeToFitContent, fullscreen;
     ComponentDragger dragger;
@@ -354,14 +353,13 @@ private:
 
     void updateLastPos();
 
-    ResizableWindow (const ResizableWindow&);
-    ResizableWindow& operator= (const ResizableWindow&);
-
-    // (xxx remove these eventually)
-    // temporarily here to stop old code compiling, as the parameters for these methods have changed..
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // The parameters for these methods have changed - please update your code!
     void getBorderThickness (int& left, int& top, int& right, int& bottom);
-    // temporarily here to stop old code compiling, as the parameters for these methods have changed..
     void getContentComponentBorder (int& left, int& top, int& right, int& bottom);
+   #endif
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow);
 };
 
 

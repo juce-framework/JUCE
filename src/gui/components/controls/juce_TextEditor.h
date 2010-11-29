@@ -573,8 +573,6 @@ public:
     */
     virtual void performPopupMenuAction (int menuItemID);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
     //==============================================================================
@@ -684,8 +682,7 @@ private:
     void repaintText (const Range<int>& range);
     UndoManager* getUndoManager() throw();
 
-    TextEditor (const TextEditor&);
-    TextEditor& operator= (const TextEditor&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */

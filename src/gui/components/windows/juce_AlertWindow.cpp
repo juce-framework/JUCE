@@ -559,9 +559,9 @@ bool AlertWindow::containsAnyExtraComponents() const
 }
 
 //==============================================================================
-void AlertWindow::mouseDown (const MouseEvent&)
+void AlertWindow::mouseDown (const MouseEvent& e)
 {
-    dragger.startDraggingComponent (this, &constrainer);
+    dragger.startDraggingComponent (this, e, &constrainer);
 }
 
 void AlertWindow::mouseDrag (const MouseEvent& e)

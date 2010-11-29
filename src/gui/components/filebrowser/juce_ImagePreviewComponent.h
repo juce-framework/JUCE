@@ -56,8 +56,6 @@ public:
     /** @internal */
     void timerCallback();
 
-    juce_UseDebuggingNewOperator
-
 private:
     File fileToLoad;
     Image currentThumbnail;
@@ -65,8 +63,7 @@ private:
 
     void getThumbSize (int& w, int& h) const;
 
-    ImagePreviewComponent (const ImagePreviewComponent&);
-    ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePreviewComponent);
 };
 
 

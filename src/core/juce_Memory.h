@@ -32,7 +32,7 @@
     preference to the standard calls.
 */
 
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
   #ifndef JUCE_DLL
     //==============================================================================
     // Win32 debug non-DLL versions..
@@ -89,18 +89,6 @@
     #define juce_free(location)                   JUCE_NAMESPACE::juce_DebugFree (location)
   #endif
 
-  #if ! defined (_AFXDLL)
-    /** This macro can be added to classes to add extra debugging information to the memory
-        allocated for them, so you can see the type of objects involved when there's a dump
-        of leaked objects at program shutdown. (Only works on win32 at the moment).
-    */
-    #define juce_UseDebuggingNewOperator \
-      static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-      static void* operator new (size_t, void* p)     { return p; } \
-      static void operator delete (void* p)           { juce_free (p); } \
-      static void operator delete (void*, void*)      { }
-  #endif
-
 #elif defined (JUCE_DLL)
   //==============================================================================
   // Win32 DLL (release) versions..
@@ -132,12 +120,6 @@
   */
   #define juce_free(location)                   JUCE_NAMESPACE::juce_Free (location)
 
-  #define juce_UseDebuggingNewOperator \
-    static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-    static void* operator new (size_t, void* p)     { return p; } \
-    static void operator delete (void* p)           { juce_free (p); } \
-    static void operator delete (void*, void*)      { }
-
 #else
 
   //==============================================================================
@@ -166,22 +148,15 @@
 #endif
 
 //==============================================================================
-/** This macro can be added to classes to add extra debugging information to the memory
-    allocated for them, so you can see the type of objects involved when there's a dump
-    of leaked objects at program shutdown. (Only works on win32 at the moment).
-
-    Note that if you create a class that inherits from a class that uses this macro,
-    your class must also use the macro, otherwise you'll probably get compile errors
-    because of ambiguous new operators.
-
-    Most of the JUCE classes use it, so see these for examples of where it should go.
+/** (Deprecated) This was a win32-specific way of checking for object leaks - now please
+    use the JUCE_LEAK_DETECTOR instead.
 */
 #ifndef juce_UseDebuggingNewOperator
   #define juce_UseDebuggingNewOperator
 #endif
 
 //==============================================================================
-#if JUCE_MSVC
+#if JUCE_MSVC || DOXYGEN
   /** This is a compiler-independent way of declaring a variable as being thread-local.
 
       E.g.
@@ -210,6 +185,9 @@ inline void zerostruct (Type& structure) throw()                    { memset (&s
 
 /** A handy function that calls delete on a pointer if it's non-zero, and then sets
     the pointer to null.
+
+    Never use this if there's any way you could use a ScopedPointer or other safer way of
+    managing the lieftimes of your objects!
 */
 template <typename Type>
 inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = 0; }

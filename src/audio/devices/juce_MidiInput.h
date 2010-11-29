@@ -170,18 +170,16 @@ public:
     */
     virtual void stop();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     String name;
     void* internal;
 
     explicit MidiInput (const String& name);
 
 private:
-    MidiInput (const MidiInput&);
-    MidiInput& operator= (const MidiInput&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput);
 };
 
 

@@ -371,10 +371,8 @@ public:
     /** @internal */
     void valueChanged (Value&);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     struct ItemInfo
     {
         String name;
@@ -399,8 +397,7 @@ private:
     ItemInfo* getItemForId (int itemId) const throw();
     ItemInfo* getItemForIndex (int index) const throw();
 
-    ComboBox (const ComboBox&);
-    ComboBox& operator= (const ComboBox&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */

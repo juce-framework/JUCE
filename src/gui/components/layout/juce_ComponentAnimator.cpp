@@ -172,13 +172,10 @@ public:
                          0, 0, image.getWidth(), image.getHeight());
         }
 
-        juce_UseDebuggingNewOperator
-
     private:
         Image image;
 
-        ProxyComponent (const ProxyComponent&);
-        ProxyComponent& operator= (const ProxyComponent&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyComponent);
     };
 
     Component::SafePointer<Component> component;

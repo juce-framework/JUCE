@@ -85,16 +85,13 @@ public:
     void mouseDrag (const MouseEvent& e);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     StretchableLayoutManager* layout;
     int itemIndex, mouseDownPos;
     bool isVertical;
 
-    StretchableLayoutResizerBar (const StretchableLayoutResizerBar&);
-    StretchableLayoutResizerBar& operator= (const StretchableLayoutResizerBar&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutResizerBar);
 };
 
 

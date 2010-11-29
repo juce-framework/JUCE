@@ -106,10 +106,8 @@ public:
     Uuid& operator= (const uint8* rawData);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     union
     {
         uint8 asBytes [16];
@@ -117,6 +115,8 @@ private:
         int64 asInt64[2];
 
     } value;
+
+    JUCE_LEAK_DETECTOR (Uuid);
 };
 
 

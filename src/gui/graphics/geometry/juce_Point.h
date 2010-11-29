@@ -165,10 +165,8 @@ public:
     /** Returns the point as a string in the form "x, y". */
     const String toString() const                                       { return String (x) + ", " + String (y); }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ValueType x, y;
 };
 

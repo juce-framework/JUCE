@@ -75,10 +75,8 @@ public:
     void releaseResources();
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioSource* const input;
     const bool deleteInputWhenDeleted;
     double ratio, lastRatio;
@@ -103,8 +101,7 @@ private:
 
     void applyFilter (float* samples, int num, FilterState& fs);
 
-    ResamplingAudioSource (const ResamplingAudioSource&);
-    ResamplingAudioSource& operator= (const ResamplingAudioSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResamplingAudioSource);
 };
 
 

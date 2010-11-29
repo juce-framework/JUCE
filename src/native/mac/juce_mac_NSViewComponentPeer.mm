@@ -281,8 +281,6 @@ public:
     void performAnyPendingRepaintsNow();
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     NSWindow* window;
     JuceNSView* view;
     bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, recursiveToFrontCall;
@@ -290,6 +288,9 @@ public:
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
     static Array<int> keysCurrentlyDown;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer);
 };
 
 //==============================================================================

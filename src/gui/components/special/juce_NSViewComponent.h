@@ -79,14 +79,12 @@ public:
     /** @internal */
     void paint (Graphics& g);
 
-    juce_UseDebuggingNewOperator
 
 private:
     friend class NSViewComponentInternal;
     ScopedPointer <NSViewComponentInternal> info;
 
-    NSViewComponent (const NSViewComponent&);
-    NSViewComponent& operator= (const NSViewComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponent);
 };
 
 #endif

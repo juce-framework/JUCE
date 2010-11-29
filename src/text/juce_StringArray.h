@@ -329,11 +329,11 @@ public:
     void minimiseStorageOverheads();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Array <String> strings;
+
+    JUCE_LEAK_DETECTOR (StringArray);
 };
 
 

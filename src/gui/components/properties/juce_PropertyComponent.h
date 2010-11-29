@@ -107,16 +107,17 @@ public:
     /** By default, this just repaints the component. */
     void enablementChanged();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** Used by the PropertyPanel to determine how high this component needs to be.
-
         A subclass can update this value in its constructor but shouldn't alter it later
         as changes won't necessarily be picked up.
     */
     int preferredHeight;
+
+
+private:
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyComponent);
 };
 
 

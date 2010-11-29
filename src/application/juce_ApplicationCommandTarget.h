@@ -233,10 +233,8 @@ public:
     */
     ApplicationCommandTarget* findFirstTargetParentComponent();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     // (for async invocation of commands)
     class CommandTargetMessageInvoker  : public MessageListener
     {
@@ -258,8 +256,7 @@ private:
     friend class CommandTargetMessageInvoker;
     bool tryToInvoke (const InvocationInfo& info, bool async);
 
-    ApplicationCommandTarget (const ApplicationCommandTarget&);
-    ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget);
 };
 
 

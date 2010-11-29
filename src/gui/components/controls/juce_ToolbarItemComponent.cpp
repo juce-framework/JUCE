@@ -129,14 +129,11 @@ public:
         setBounds (0, 0, getParentWidth(), getParentHeight());
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     bool isDragging;
 
-    ItemDragAndDropOverlayComponent (const ItemDragAndDropOverlayComponent&);
-    ItemDragAndDropOverlayComponent& operator= (const ItemDragAndDropOverlayComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemDragAndDropOverlayComponent);
 };
 
 

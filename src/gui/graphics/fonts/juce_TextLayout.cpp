@@ -35,12 +35,6 @@ BEGIN_JUCE_NAMESPACE
 class TextLayout::Token
 {
 public:
-    String text;
-    Font font;
-    int x, y, w, h;
-    int line, lineHeight;
-    bool isWhitespace, isNewLine;
-
     Token (const String& t,
            const Font& f,
            const bool isWhitespace_)
@@ -69,10 +63,6 @@ public:
     {
     }
 
-    ~Token()
-    {
-    }
-
     void draw (Graphics& g,
                const int xOffset,
                const int yOffset)
@@ -87,7 +77,14 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
+    String text;
+    Font font;
+    int x, y, w, h;
+    int line, lineHeight;
+    bool isWhitespace, isNewLine;
+
+private:
+    JUCE_LEAK_DETECTOR (Token);
 };
 
 

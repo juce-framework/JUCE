@@ -242,10 +242,8 @@ public:
     /** @internal */
     const Rectangle<int> getTitleBarArea();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int titleBarHeight, menuBarHeight, requiredButtons;
     bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
     ScopedPointer <Button> titleBarButtons [3];
@@ -259,8 +257,7 @@ private:
 
     void repaintTitleBar();
 
-    DocumentWindow (const DocumentWindow&);
-    DocumentWindow& operator= (const DocumentWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentWindow);
 };
 
 

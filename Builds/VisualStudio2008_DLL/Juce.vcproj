@@ -388,6 +388,7 @@
           <File RelativePath="..\..\src\core\juce_FileLogger.h"/>
           <File RelativePath="..\..\src\core\juce_Initialisation.cpp"/>
           <File RelativePath="..\..\src\core\juce_Initialisation.h"/>
+          <File RelativePath="..\..\src\core\juce_LeakedObjectDetector.h"/>
           <File RelativePath="..\..\src\core\juce_Logger.cpp"/>
           <File RelativePath="..\..\src\core\juce_Logger.h"/>
           <File RelativePath="..\..\src\core\juce_MathsFunctions.h"/>

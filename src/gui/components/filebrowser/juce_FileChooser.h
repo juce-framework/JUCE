@@ -169,10 +169,8 @@ public:
     */
     const Array<File>& getResults() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     String title, filters;
     File startingFile;
     Array<File> results;
@@ -186,6 +184,8 @@ private:
                                     const String& filters, bool selectsDirectories, bool selectsFiles,
                                     bool isSave, bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
                                     FilePreviewComponent* previewComponent);
+
+    JUCE_LEAK_DETECTOR (FileChooser);
 };
 
 

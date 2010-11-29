@@ -1509,6 +1509,9 @@
     <ClInclude Include="..\..\src\core\juce_Initialisation.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\juce_LeakedObjectDetector.h">
+      <Filter>Juce\Source\core</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\core\juce_Logger.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>

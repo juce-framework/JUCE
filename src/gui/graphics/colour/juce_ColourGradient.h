@@ -152,10 +152,9 @@ public:
     bool operator== (const ColourGradient& other) const throw();
     bool operator!= (const ColourGradient& other) const throw();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
+    //==============================================================================
     struct ColourPoint
     {
         ColourPoint() throw() {}
@@ -172,6 +171,8 @@ private:
     };
 
     Array <ColourPoint> colours;
+
+    JUCE_LEAK_DETECTOR (ColourGradient);
 };
 
 

@@ -467,10 +467,11 @@
   #define JUCE_INCLUDE_JPEGLIB_CODE	 1
 #endif
 
-/** JUCE_CHECK_MEMORY_LEAKS: Enables a memory-leak check when an app terminates.
-	(Currently, this only affects Windows builds in debug mode).
+/** JUCE_CHECK_MEMORY_LEAKS: Enables a memory-leak check for certain objects when
+	the app terminates. See the LeakedObjectDetector class and the JUCE_LEAK_DETECTOR
+	macro for more details about enabling leak checking for specific classes.
 */
-#ifndef JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_DEBUG && ! defined (JUCE_CHECK_MEMORY_LEAKS)
   #define JUCE_CHECK_MEMORY_LEAKS 1
 #endif
 
@@ -637,6 +638,42 @@
 	If the expression parameter is false, the macro will cause a compile error.
 */
 #define static_jassert(expression)	  JuceStaticAssert<expression>::dummy();
+
+/** This is a shorthand macro for declaring stubs for a class's copy constructor and
+	operator=.
+
+	For example, instead of
+	@code
+	class MyClass
+	{
+		etc..
+
+	private:
+		MyClass (const MyClass&);
+		MyClass& operator= (const MyClass&);
+	};@endcode
+
+	..you can just write:
+
+	@code
+	class MyClass
+	{
+		etc..
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (MyClass);
+	};@endcode
+*/
+#define JUCE_DECLARE_NON_COPYABLE(className) \
+	className (const className&);\
+	className& operator= (const className&);
+
+/** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
+	JUCE_LEAK_DETECTOR macro for a class.
+*/
+#define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
+	JUCE_DECLARE_NON_COPYABLE(className)\
+	JUCE_LEAK_DETECTOR(className)
 
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
 
@@ -824,7 +861,7 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 	preference to the standard calls.
 */
 
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
   #ifndef JUCE_DLL
 
 	// Win32 debug non-DLL versions..
@@ -881,18 +918,6 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 	#define juce_free(location)		   JUCE_NAMESPACE::juce_DebugFree (location)
   #endif
 
-  #if ! defined (_AFXDLL)
-	/** This macro can be added to classes to add extra debugging information to the memory
-		allocated for them, so you can see the type of objects involved when there's a dump
-		of leaked objects at program shutdown. (Only works on win32 at the moment).
-	*/
-	#define juce_UseDebuggingNewOperator \
-	  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-	  static void* operator new (size_t, void* p)	 { return p; } \
-	  static void operator delete (void* p)	   { juce_free (p); } \
-	  static void operator delete (void*, void*)	  { }
-  #endif
-
 #elif defined (JUCE_DLL)
 
   // Win32 DLL (release) versions..
@@ -924,12 +949,6 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
   */
   #define juce_free(location)		   JUCE_NAMESPACE::juce_Free (location)
 
-  #define juce_UseDebuggingNewOperator \
-	static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-	static void* operator new (size_t, void* p)	 { return p; } \
-	static void operator delete (void* p)	   { juce_free (p); } \
-	static void operator delete (void*, void*)	  { }
-
 #else
 
   // Mac, Linux and Win32 (release) versions..
@@ -956,21 +975,14 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 #endif
 
-/** This macro can be added to classes to add extra debugging information to the memory
-	allocated for them, so you can see the type of objects involved when there's a dump
-	of leaked objects at program shutdown. (Only works on win32 at the moment).
-
-	Note that if you create a class that inherits from a class that uses this macro,
-	your class must also use the macro, otherwise you'll probably get compile errors
-	because of ambiguous new operators.
-
-	Most of the JUCE classes use it, so see these for examples of where it should go.
+/** (Deprecated) This was a win32-specific way of checking for object leaks - now please
+	use the JUCE_LEAK_DETECTOR instead.
 */
 #ifndef juce_UseDebuggingNewOperator
   #define juce_UseDebuggingNewOperator
 #endif
 
-#if JUCE_MSVC
+#if JUCE_MSVC || DOXYGEN
   /** This is a compiler-independent way of declaring a variable as being thread-local.
 
 	  E.g.
@@ -997,6 +1009,9 @@ inline void zerostruct (Type& structure) throw()			{ memset (&structure, 0, size
 
 /** A handy function that calls delete on a pointer if it's non-zero, and then sets
 	the pointer to null.
+
+	Never use this if there's any way you could use a ScopedPointer or other safer way of
+	managing the lieftimes of your objects!
 */
 template <typename Type>
 inline void deleteAndZero (Type& pointer)			   { delete pointer; pointer = 0; }
@@ -2620,8 +2635,6 @@ public:
 		Concatenator& operator= (const Concatenator&);
 	};
 
-	juce_UseDebuggingNewOperator // (adds debugging info to find leaked objects)
-
 private:
 
 	juce_wchar* text;
@@ -2783,32 +2796,10 @@ private:
 #endif   // __JUCE_LOGGER_JUCEHEADER__
 /*** End of inlined file: juce_Logger.h ***/
 
-END_JUCE_NAMESPACE
 
-#endif   // __JUCE_STANDARDHEADER_JUCEHEADER__
-/*** End of inlined file: juce_StandardHeader.h ***/
-
-
-BEGIN_JUCE_NAMESPACE
-
-#if JUCE_MSVC
-  // this is set explicitly in case the app is using a different packing size.
-  #pragma pack (push, 8)
-  #pragma warning (push)
-  #pragma warning (disable: 4786) // (old vc6 warning about long class names)
-#endif
-
-// this is where all the class header files get brought in..
-
-/*** Start of inlined file: juce_core_includes.h ***/
-#ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
-#define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
-
-#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
-
-/*** Start of inlined file: juce_AbstractFifo.h ***/
-#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
-#define __JUCE_ABSTRACTFIFO_JUCEHEADER__
+/*** Start of inlined file: juce_LeakedObjectDetector.h ***/
+#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+#define __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
 
 
 /*** Start of inlined file: juce_Atomic.h ***/
@@ -3149,6 +3140,143 @@ inline void Atomic<Type>::memoryBarrier() throw()
 /*** End of inlined file: juce_Atomic.h ***/
 
 /**
+	Embedding an instance of this class inside another class can be used as a low-overhead
+	way of detecting leaked instances.
+
+	This class keeps an internal static count of the number of instances that are
+	active, so that when the app is shutdown and the static destructors are called,
+	it can check whether there are any left-over instances that may have been leaked.
+
+	To use it, use the JUCE_LEAK_DETECTOR macro as a simple way to put one in your
+	class declaration. Have a look through the juce codebase for examples, it's used
+	in most of the classes.
+*/
+template <class OwnerClass>
+class LeakedObjectDetector
+{
+public:
+
+	LeakedObjectDetector() throw()				  { ++(getCounter().numObjects); }
+	LeakedObjectDetector (const LeakedObjectDetector&) throw()	  { ++(getCounter().numObjects); }
+
+	~LeakedObjectDetector()
+	{
+		if (--(getCounter().numObjects) < 0)
+		{
+			DBG ("*** Dangling pointer deletion! Class: " << String (typeid (OwnerClass).name()));
+
+			/** If you hit this, then you've managed to delete more instances of this class than you've
+				created.. That indicates that you're deleting some dangling pointers.
+
+				Note that although this assertion will have been triggered during a destructor, it might
+				not be this particular deletion that's at fault - the incorrect one may have happened
+				at an earlier point in the program, and simply not been detected until now.
+
+				Most errors like this are caused by using old-fashioned, non-RAII techniques for
+				your object management. Tut, tut. Always, always use ScopedPointers, OwnedArrays,
+				ReferenceCountedObjects, etc, and avoid the 'delete' operator at all costs!
+			*/
+			jassertfalse;
+		}
+	}
+
+private:
+
+	class LeakCounter
+	{
+	public:
+		LeakCounter() {}
+
+		~LeakCounter()
+		{
+			if (numObjects.value > 0)
+			{
+				DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << String (typeid (OwnerClass).name()));
+
+				/** If you hit this, then you've leaked one or more objects of the type specified by
+					the 'OwnerClass' template parameter - the name should have been printed by the line above.
+
+					If you're leaking, it's probably because you're using old-fashioned, non-RAII techniques for
+					your object management. Tut, tut. Always, always use ScopedPointers, OwnedArrays,
+					ReferenceCountedObjects, etc, and avoid the 'delete' operator at all costs!
+				*/
+				jassertfalse;
+			}
+		}
+
+		Atomic<int> numObjects;
+	};
+
+	static LeakCounter& getCounter() throw()
+	{
+		static LeakCounter counter;
+		return counter;
+	}
+};
+
+#if JUCE_DLL && ! DOXYGEN  // This hack makes use of the leak detector macros to add dll-safe allocators to all the classes..
+  #define JUCE_LEAK_DETECTOR(OwnerClass) \
+		public:\
+		  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
+		  static void* operator new (size_t, void* p)	 { return p; } \
+		  static void operator delete (void* p)	   { juce_free (p); } \
+		  static void operator delete (void*, void*)	  { }
+
+#elif JUCE_CHECK_MEMORY_LEAKS || DOXYGEN
+  /** This macro lets you embed a leak-detecting object inside a class.
+
+	  To use it, simply declare a JUCE_LEAK_DETECTOR(YourClassName) inside a private section
+	  of the class declaration. E.g.
+
+	  @code
+	  class MyClass
+	  {
+	  public:
+		  MyClass();
+		  void blahBlah();
+
+	  private:
+		  JUCE_LEAK_DETECTOR (MyClass);
+	  };@endcode
+
+	  @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
+  */
+  #define JUCE_LEAK_DETECTOR(OwnerClass)	 LeakedObjectDetector<OwnerClass> leakDetector ## __LINE__;
+#else
+  #define JUCE_LEAK_DETECTOR(OwnerClass)
+#endif
+
+#endif   // __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+/*** End of inlined file: juce_LeakedObjectDetector.h ***/
+
+END_JUCE_NAMESPACE
+
+#endif   // __JUCE_STANDARDHEADER_JUCEHEADER__
+/*** End of inlined file: juce_StandardHeader.h ***/
+
+
+BEGIN_JUCE_NAMESPACE
+
+#if JUCE_MSVC
+  // this is set explicitly in case the app is using a different packing size.
+  #pragma pack (push, 8)
+  #pragma warning (push)
+  #pragma warning (disable: 4786) // (old vc6 warning about long class names)
+#endif
+
+// this is where all the class header files get brought in..
+
+/*** Start of inlined file: juce_core_includes.h ***/
+#ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
+#define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
+
+#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
+
+/*** Start of inlined file: juce_AbstractFifo.h ***/
+#ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
+#define __JUCE_ABSTRACTFIFO_JUCEHEADER__
+
+/**
 	Encapsulates the logic required to implement a lock-free FIFO.
 
 	This class handles the logic needed when building a single-reader, single-writer FIFO.
@@ -3322,14 +3450,12 @@ public:
 	*/
 	void finishedRead (int numRead) throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int bufferSize;
 	Atomic <int> validStart, validEnd;
 
-	AbstractFifo (const AbstractFifo&);
-	AbstractFifo& operator= (const AbstractFifo&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbstractFifo);
 };
 
 #endif   // __JUCE_ABSTRACTFIFO_JUCEHEADER__
@@ -3967,8 +4093,6 @@ public:
 
 	/** Provides the type of scoped unlocker to use with this type of critical section object. */
 	typedef ScopedUnlock	ScopedUnlockType;
-
-	juce_UseDebuggingNewOperator
 
 private:
 
@@ -4963,9 +5087,8 @@ public:
 	/** Returns the type of scoped lock to use for locking this array */
 	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
 	int numUsed;
 };
@@ -5250,9 +5373,8 @@ public:
 	*/
 	void loadFromMemoryBlock (const MemoryBlock& data);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	HeapBlock <uint32> values;
 	int numValues, highestBit;
 	bool negative;
@@ -5262,6 +5384,8 @@ private:
 
 	static inline int bitToIndex (const int bit) throw()	{ return bit >> 5; }
 	static inline uint32 bitToMask (const int bit) throw()	  { return 1 << (bit & 31); }
+
+	JUCE_LEAK_DETECTOR (BigInteger);
 };
 
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */
@@ -5618,13 +5742,13 @@ public:
 	*/
 	bool fromBase64Encoding  (const String& encodedString);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	HeapBlock <char> data;
 	size_t size;
 	static const char* const encodingTable;
+
+	JUCE_LEAK_DETECTOR (MemoryBlock);
 };
 
 #endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
@@ -5870,11 +5994,12 @@ public:
 	*/
 	virtual void skipNextBytes (int64 numBytesToSkip);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	InputStream() throw()  {}
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream);
 };
 
 #endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
@@ -6049,7 +6174,9 @@ public:
 	*/
 	virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputStream);
 };
 
 /** Writes a number to a stream as 8-bit characters in the default system encoding. */
@@ -6171,8 +6298,6 @@ public:
 	/** If this variant is a method pointer, this invokes it on a target object. */
 	const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
 
-	juce_UseDebuggingNewOperator
-
 	/** Returns true if this var has the same value as the one supplied. */
 	bool equals (const var& other) const throw();
 
@@ -6293,9 +6418,8 @@ public:
 	*/
 	var* getVarPointer (const Identifier& name) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	struct NamedValue
 	{
 		NamedValue() throw();
@@ -6640,10 +6764,11 @@ public:
 	/** Removes all properties and methods from the object. */
 	void clear();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	NamedValueSet properties;
+
+	JUCE_LEAK_DETECTOR (DynamicObject);
 };
 
 #endif   // __JUCE_DYNAMICOBJECT_JUCEHEADER__
@@ -7015,9 +7140,8 @@ public:
 	*/
 	const Expression getInput (int index) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class Helpers;
 	friend class Helpers;
 
@@ -7042,11 +7166,8 @@ private:
 		virtual const String getSymbolName() const;
 		virtual const String getFunctionName() const;
 
-		juce_UseDebuggingNewOperator
-
 	private:
-		Term (const Term& other);
-		Term& operator= (const Term&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Term);
 	};
 
 	friend class ScopedPointer<Term>;
@@ -7825,15 +7946,12 @@ public:
 	/** Returns the type of scoped lock to use for locking this array */
 	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
 	int numUsed;
 
-	// disallow copy constructor and assignment
-	OwnedArray (const OwnedArray&);
-	OwnedArray& operator= (const OwnedArray&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray);
 };
 
 #endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
@@ -8147,10 +8265,11 @@ public:
 	*/
 	void minimiseStorageOverheads();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Array <String> strings;
+
+	JUCE_LEAK_DETECTOR (StringArray);
 };
 
 #endif   // __JUCE_STRINGARRAY_JUCEHEADER__
@@ -8269,11 +8388,12 @@ public:
 	*/
 	void minimiseStorageOverheads();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	StringArray keys, values;
 	bool ignoreCase;
+
+	JUCE_LEAK_DETECTOR (StringPairArray);
 };
 
 #endif   // __JUCE_STRINGPAIRARRAY_JUCEHEADER__
@@ -8450,9 +8570,8 @@ public:
 	/** Subtracts a number of seconds from this time. */
 	const RelativeTime& operator-= (double secondsToSubtract) throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	double seconds;
 };
 
@@ -9675,8 +9794,6 @@ public:
 	/** Adds a separator character to the end of a path if it doesn't already have one. */
 	static const String addTrailingSeparator (const String& path);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	String fullPath;
@@ -9695,6 +9812,7 @@ private:
 
 	static const String parseAbsolutePath (const String& path);
 
+	JUCE_LEAK_DETECTOR (File);
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__
@@ -10342,8 +10460,6 @@ public:
 	*/
 	static XmlElement* createTextElement (const String& text);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	friend class XmlDocument;
 
@@ -10372,6 +10488,8 @@ private:
 	void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
 	void getChildElementsAsArray (XmlElement**) const throw();
 	void reorderChildElements (XmlElement**, int) throw();
+
+	JUCE_LEAK_DETECTOR (XmlElement);
 };
 
 #endif   // __JUCE_XMLELEMENT_JUCEHEADER__
@@ -10541,12 +10659,9 @@ public:
 	*/
 	PropertySet* getFallbackPropertySet() const throw()		 { return fallbackProperties; }
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
-	/** Subclasses can override this to be told when one of the properies has been changed.
-	*/
+	/** Subclasses can override this to be told when one of the properies has been changed. */
 	virtual void propertyChanged();
 
 private:
@@ -10555,6 +10670,8 @@ private:
 	PropertySet* fallbackProperties;
 	CriticalSection lock;
 	bool ignoreCaseOfKeys;
+
+	JUCE_LEAK_DETECTOR (PropertySet);
 };
 
 #endif   // __JUCE_PROPERTYSET_JUCEHEADER__
@@ -10794,9 +10911,8 @@ public:
 				: rangeToConstrain.movedToStartAt (jlimit (start, end - otherLen, rangeToConstrain.getStart()));
 	}
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ValueType start, end;
 };
 
@@ -11458,9 +11574,8 @@ public:
 	/** Returns the type of scoped lock to use for locking this array */
 	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
 	int numUsed;
 };
@@ -11964,9 +12079,8 @@ public:
 	/** Returns the type of scoped lock to use for locking this array */
 	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
 	int numUsed;
 
@@ -12249,9 +12363,8 @@ public:
 		return values != other.values;
 	}
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	// alternating start/end values of ranges of values that are present.
 	Array<Type, DummyCriticalSection> values;
 
@@ -12814,16 +12927,14 @@ public:
 		*/
 		void sendChangeMessage (bool dispatchSynchronously);
 
-		juce_UseDebuggingNewOperator
-
 	protected:
+
 		friend class Value;
 		SortedSet <Value*> valuesWithListeners;
 
 		void handleAsyncUpdate();
 
-		ValueSource (const ValueSource&);
-		ValueSource& operator= (const ValueSource&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSource);
 	};
 
 	/** Creates a Value object that uses this valueSource object as its underlying data. */
@@ -12832,9 +12943,8 @@ public:
 	/** Returns the ValueSource that this value is referring to. */
 	ValueSource& getValueSource() throw()	   { return *value; }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class ValueSource;
 	ReferenceCountedObjectPtr <ValueSource> value;
 	ListenerList <Listener> listeners;
@@ -13238,8 +13348,6 @@ public:
 	*/
 	bool redo();
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	OwnedArray <OwnedArray <UndoableAction> > transactions;
@@ -13248,9 +13356,7 @@ private:
 	int totalUnitsStored, maxNumUnitsToKeep, minimumTransactionsToKeep, nextIndex;
 	bool newTransaction, reentrancyCheck;
 
-	// disallow copy constructor
-	UndoManager (const UndoManager&);
-	UndoManager& operator= (const UndoManager&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UndoManager);
 };
 
 #endif   // __JUCE_UNDOMANAGER_JUCEHEADER__
@@ -13659,9 +13765,8 @@ public:
 	*/
 	static const ValueTree invalid;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class SetPropertyAction;
 	friend class SetPropertyAction;
 	class AddOrRemoveChildAction;
@@ -13706,10 +13811,9 @@ private:
 		bool isEquivalentTo (const SharedObject& other) const;
 		XmlElement* createXml() const;
 
-		juce_UseDebuggingNewOperator
-
 	private:
 		SharedObject& operator= (const SharedObject&);
+		JUCE_LEAK_DETECTOR (SharedObject);
 	};
 
 	template <typename ElementComparator>
@@ -13822,16 +13926,14 @@ public:
 											   const String& welcomeMessage,
 											   const int maxInitialFileSizeBytes = 128 * 1024);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	File logFile;
 	CriticalSection logLock;
 
 	void trimFileSize (int maxFileSizeBytes) const;
 
-	FileLogger (const FileLogger&);
-	FileLogger& operator= (const FileLogger&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileLogger);
 };
 
 #endif   // __JUCE_FILELOGGER_JUCEHEADER__
@@ -13990,6 +14092,9 @@ public:
 
 
 #endif
+#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_LOGGER_JUCEHEADER__
 
 #endif
@@ -14066,8 +14171,6 @@ public:
 		this was valid).
 	*/
 	void printStatistics();
-
-	juce_UseDebuggingNewOperator
 
 private:
 
@@ -14374,8 +14477,6 @@ public:
 	*/
 	int getRemoteId() const			 { return remoteId; }
 
-	juce_UseDebuggingNewOperator
-
 	/** @internal */
 	void handleCallbackInternal();
 
@@ -14386,8 +14487,7 @@ private:
 
 	bool open (bool openInExclusiveMode);
 
-	AppleRemoteDevice (const AppleRemoteDevice&);
-	AppleRemoteDevice& operator= (const AppleRemoteDevice&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppleRemoteDevice);
 };
 
 #endif
@@ -14491,10 +14591,11 @@ public:
 	*/
 	void setSeedRandomly();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int64 seed;
+
+	JUCE_LEAK_DETECTOR (Random);
 };
 
 #endif   // __JUCE_RANDOM_JUCEHEADER__
@@ -15125,9 +15226,8 @@ public:
 	/** Sets this UUID from 16-bytes of raw data. */
 	Uuid& operator= (const uint8* rawData);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	union
 	{
 		uint8 asBytes [16];
@@ -15135,6 +15235,8 @@ private:
 		int64 asInt64[2];
 
 	} value;
+
+	JUCE_LEAK_DETECTOR (Uuid);
 };
 
 #endif   // __JUCE_UUID_JUCEHEADER__
@@ -15177,13 +15279,14 @@ public:
 	/** Decrypts a pair of 32-bit integers. */
 	void decrypt (uint32& data1, uint32& data2) const throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	uint32 p[18];
 	HeapBlock <uint32> s[4];
 
 	uint32 F (uint32 x) const throw();
+
+	JUCE_LEAK_DETECTOR (BlowFish);
 };
 
 #endif   // __JUCE_BLOWFISH_JUCEHEADER__
@@ -15260,9 +15363,8 @@ public:
 	/** Compares this to another MD5. */
 	bool operator!= (const MD5& other) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	uint8 result [16];
 
 	struct ProcessContext
@@ -15279,6 +15381,8 @@ private:
 	};
 
 	void processStream (InputStream& input, int64 numBytesToRead);
+
+	JUCE_LEAK_DETECTOR (MD5);
 };
 
 #endif   // __JUCE_MD5_JUCEHEADER__
@@ -15412,13 +15516,15 @@ public:
 							   const int* randomSeeds = 0,
 							   int numRandomSeeds = 0);
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	BigInteger part1, part2;
 
 private:
+
 	static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
+
+	JUCE_LEAK_DETECTOR (RSAKey);
 };
 
 #endif   // __JUCE_RSAKEY_JUCEHEADER__
@@ -15512,8 +15618,6 @@ public:
 	*/
 	float getEstimatedProgress() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	class NativeIterator
@@ -15528,15 +15632,12 @@ private:
 
 		class Pimpl;
 
-		juce_UseDebuggingNewOperator
-
 	private:
 		friend class DirectoryIterator;
 		friend class ScopedPointer<Pimpl>;
 		ScopedPointer<Pimpl> pimpl;
 
-		NativeIterator (const NativeIterator&);
-		NativeIterator& operator= (const NativeIterator&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeIterator);
 	};
 
 	friend class ScopedPointer<NativeIterator::Pimpl>;
@@ -15550,8 +15651,7 @@ private:
 	ScopedPointer <DirectoryIterator> subIterator;
 	File currentFile;
 
-	DirectoryIterator (const DirectoryIterator&);
-	DirectoryIterator& operator= (const DirectoryIterator&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryIterator);
 };
 
 #endif   // __JUCE_DIRECTORYITERATOR_JUCEHEADER__
@@ -15595,9 +15695,8 @@ public:
 	int64 getPosition();
 	bool setPosition (int64 pos);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	File file;
 	void* fileHandle;
 	int64 currentPosition, totalSize;
@@ -15607,8 +15706,7 @@ private:
 	void closeHandle();
 	size_t readInternal (void* buffer, size_t numBytes);
 
-	FileInputStream (const FileInputStream&);
-	FileInputStream& operator= (const FileInputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputStream);
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__
@@ -15666,9 +15764,8 @@ public:
 	bool setPosition (int64 pos);
 	bool write (const void* data, int numBytes);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	File file;
 	void* fileHandle;
 	int64 currentPosition;
@@ -15681,8 +15778,7 @@ private:
 	int64 setPositionInternal (int64 newPosition);
 	int writeInternal (const void* data, int numBytes);
 
-	FileOutputStream (const FileOutputStream&);
-	FileOutputStream& operator= (const FileOutputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileOutputStream);
 };
 
 #endif   // __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
@@ -15815,12 +15911,13 @@ public:
 	bool isFileInPath (const File& fileToCheck,
 					   bool checkRecursively) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	StringArray directories;
 
 	void init (const String& path);
+
+	JUCE_LEAK_DETECTOR (FileSearchPath);
 };
 
 #endif   // __JUCE_FILESEARCHPATH_JUCEHEADER__
@@ -15898,17 +15995,15 @@ public:
 	*/
 	void cancelPendingReads();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	void* internal;
 	String currentPipeName;
 	CriticalSection lock;
 
-	NamedPipe (const NamedPipe&);
-	NamedPipe& operator= (const NamedPipe&);
-
 	bool openInternal (const String& pipeName, const bool createPipe);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NamedPipe);
 };
 
 #endif   // __JUCE_NAMEDPIPE_JUCEHEADER__
@@ -16038,16 +16133,13 @@ public:
 	*/
 	bool deleteTemporaryFile() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	File temporaryFile, targetFile;
 
 	void createTempFile (const File& parentDirectory, String name, const String& suffix, int optionFlags);
 
-	TemporaryFile (const TemporaryFile&);
-	TemporaryFile& operator= (const TemporaryFile&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryFile);
 };
 
 #endif   // __JUCE_TEMPORARYFILE_JUCEHEADER__
@@ -16102,7 +16194,9 @@ public:
 	*/
 	virtual int64 hashCode() const = 0;
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (InputSource);
 };
 
 #endif   // __JUCE_INPUTSOURCE_JUCEHEADER__
@@ -16235,9 +16329,8 @@ public:
 						  const File& targetDirectory,
 						  bool shouldOverwriteFiles = true);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class ZipInputStream;
 	class ZipFilenameComparator;
 	class ZipEntryInfo;
@@ -16259,8 +16352,7 @@ private:
 	int findEndOfZipEntryTable (InputStream& input, int& numEntries);
 	static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
-	ZipFile (const ZipFile&);
-	ZipFile& operator= (const ZipFile&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile);
 };
 
 #endif   // __JUCE_ZIPFILE_JUCEHEADER__
@@ -16461,16 +16553,15 @@ public:
 	*/
 	StreamingSocket* waitForNextConnection() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	String hostName;
 	int volatile portNumber, handle;
 	bool connected, isListener;
 
 	StreamingSocket (const String& hostname, int portNumber, int handle);
-	StreamingSocket (const StreamingSocket&);
-	StreamingSocket& operator= (const StreamingSocket&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StreamingSocket);
 };
 
 /**
@@ -16584,17 +16675,16 @@ public:
 	*/
 	DatagramSocket* waitForNextConnection() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	String hostName;
 	int volatile portNumber, handle;
 	bool connected, allowBroadcast;
 	void* serverAddress;
 
 	DatagramSocket (const String& hostname, int portNumber, int handle, int localPortNumber);
-	DatagramSocket (const DatagramSocket&);
-	DatagramSocket& operator= (const DatagramSocket&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DatagramSocket);
 };
 
 #endif   // __JUCE_SOCKET_JUCEHEADER__
@@ -16854,11 +16944,12 @@ public:
 	*/
 	static const String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	String url, postData;
 	StringPairArray parameters, filesToUpload, mimeTypes;
+
+	JUCE_LEAK_DETECTOR (URL);
 };
 
 #endif   // __JUCE_URL_JUCEHEADER__
@@ -16916,9 +17007,8 @@ public:
 	const String readString();
 	bool isExhausted();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	InputStream* const source;
 	ScopedPointer <InputStream> sourceToDelete;
 	int bufferSize;
@@ -16926,8 +17016,7 @@ private:
 	HeapBlock <char> buffer;
 	void ensureBuffered();
 
-	BufferedInputStream (const BufferedInputStream&);
-	BufferedInputStream& operator= (const BufferedInputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferedInputStream);
 };
 
 #endif   // __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
@@ -16957,13 +17046,11 @@ public:
 	InputStream* createInputStreamFor (const String& relatedItemPath);
 	int64 hashCode() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	const File file;
 
-	FileInputSource (const FileInputSource&);
-	FileInputSource& operator= (const FileInputSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputSource);
 };
 
 #endif   // __JUCE_FILEINPUTSOURCE_JUCEHEADER__
@@ -17012,9 +17099,8 @@ public:
 	bool setPosition (int64 newPosition);
 	bool write (const void* destBuffer, int howMany);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	OutputStream* const destStream;
 	ScopedPointer <OutputStream> streamToDelete;
 	HeapBlock <uint8> buffer;
@@ -17023,8 +17109,7 @@ private:
 	ScopedPointer <GZIPCompressorHelper> helper;
 	bool doNextBlock();
 
-	GZIPCompressorOutputStream (const GZIPCompressorOutputStream&);
-	GZIPCompressorOutputStream& operator= (const GZIPCompressorOutputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream);
 };
 
 #endif   // __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
@@ -17083,8 +17168,6 @@ public:
 	bool isExhausted();
 	int read (void* destBuffer, int maxBytesToRead);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	InputStream* const sourceStream;
 	ScopedPointer <InputStream> streamToDelete;
@@ -17099,8 +17182,7 @@ private:
 	friend class ScopedPointer <GZIPDecompressHelper>;
 	ScopedPointer <GZIPDecompressHelper> helper;
 
-	GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);
-	GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPDecompressorInputStream);
 };
 
 #endif   // __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
@@ -17165,15 +17247,13 @@ public:
 	bool isExhausted();
 	int read (void* destBuffer, int maxBytesToRead);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	const char* data;
 	size_t dataSize, position;
 	MemoryBlock internalCopy;
 
-	MemoryInputStream (const MemoryInputStream&);
-	MemoryInputStream& operator= (const MemoryInputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream);
 };
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
@@ -17262,15 +17342,13 @@ public:
 	bool setPosition (int64 newPosition);
 	int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	MemoryBlock& data;
 	MemoryBlock internalBlock;
 	size_t position, size;
 
-	MemoryOutputStream (const MemoryOutputStream&);
-	MemoryOutputStream& operator= (const MemoryOutputStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream);
 };
 
 /** Copies all the data that has been written to a MemoryOutputStream into another stream. */
@@ -17334,15 +17412,12 @@ public:
 	int read (void* destBuffer, int maxBytesToRead);
 	bool isExhausted();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	InputStream* const source;
 	ScopedPointer <InputStream> sourceToDelete;
 	const int64 startPositionInSourceStream, lengthOfSourceStream;
 
-	SubregionStream (const SubregionStream&);
-	SubregionStream& operator= (const SubregionStream&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream);
 };
 
 #endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__
@@ -17502,14 +17577,15 @@ public:
 	*/
 	void setIgnoresCase (bool shouldIgnoreCase);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	String languageName;
 	StringArray countryCodes;
 	StringPairArray translations;
 
 	void loadFromText (const String& fileContents);
+
+	JUCE_LEAK_DETECTOR (LocalisedStrings);
 };
 
 #endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
@@ -17648,8 +17724,6 @@ public:
 	*/
 	static XmlElement* parse (const String& xmlData);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	String originalText;
 	const juce_wchar* input;
@@ -17675,8 +17749,7 @@ private:
 	const String expandExternalEntity (const String& entity);
 	const String getParameterEntity (const String& entity);
 
-	XmlDocument (const XmlDocument&);
-	XmlDocument& operator= (const XmlDocument&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument);
 };
 
 #endif   // __JUCE_XMLDOCUMENT_JUCEHEADER__
@@ -17779,8 +17852,6 @@ public:
 		ScopedLockType (const ScopedLockType&);
 		ScopedLockType& operator= (const ScopedLockType&);
 	};
-
-	juce_UseDebuggingNewOperator
 
 private:
 
@@ -17944,13 +18015,11 @@ public:
 	*/
 	void reset() const throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	void* internal;
 
-	WaitableEvent (const WaitableEvent&);
-	WaitableEvent& operator= (const WaitableEvent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaitableEvent);
 };
 
 #endif   // __JUCE_WAITABLEEVENT_JUCEHEADER__
@@ -18191,9 +18260,8 @@ public:
 	*/
 	static void stopAllThreads (int timeoutInMillisecs);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	const String threadName_;
 	void* volatile threadHandle_;
 	CriticalSection startStopLock;
@@ -18209,8 +18277,7 @@ private:
 	static Array<Thread*> runningThreads;
 	static CriticalSection runningThreadsLock;
 
-	Thread (const Thread&);
-	Thread& operator= (const Thread&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);
 };
 
 #endif   // __JUCE_THREAD_JUCEHEADER__
@@ -18301,8 +18368,6 @@ public:
 		@see enterWrite, ScopedWriteLock
 	*/
 	void exitWrite() const throw();
-
-	juce_UseDebuggingNewOperator
 
 private:
 
@@ -18632,8 +18697,6 @@ public:
 	*/
 	void signalJobShouldExit();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	friend class ThreadPool;
 	friend class ThreadPoolThread;
@@ -18641,8 +18704,7 @@ private:
 	ThreadPool* pool;
 	bool shouldStop, isActive, shouldBeDeleted;
 
-	ThreadPoolJob (const ThreadPoolJob&);
-	ThreadPoolJob& operator= (const ThreadPoolJob&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob);
 };
 
 /**
@@ -18795,9 +18857,8 @@ public:
 	*/
 	bool setThreadPriorities (int newPriority);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	const int threadStopTimeout;
 	int priority;
 	class ThreadPoolThread;
@@ -18811,8 +18872,7 @@ private:
 	friend class ThreadPoolThread;
 	bool runNextJob();
 
-	ThreadPool (const ThreadPool&);
-	ThreadPool& operator= (const ThreadPool&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool);
 };
 
 #endif   // __JUCE_THREADPOOL_JUCEHEADER__
@@ -18910,8 +18970,6 @@ public:
 	/** @internal */
 	void run();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	CriticalSection callbackLock, listLock;
 	Array <TimeSliceClient*> clients;
@@ -18919,8 +18977,7 @@ private:
 	TimeSliceClient* clientBeingCalled;
 	bool clientsChanged;
 
-	TimeSliceThread (const TimeSliceThread&);
-	TimeSliceThread& operator= (const TimeSliceThread&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSliceThread);
 };
 
 #endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
@@ -19072,9 +19129,8 @@ public:
 	*/
 	static void hideWaitCursor();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class SharedCursorHandle;
 	friend class SharedCursorHandle;
 	SharedCursorHandle* cursorHandle;
@@ -19087,6 +19143,8 @@ private:
 	static void* createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
 	static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);
 	static void deleteMouseCursor (void* cursorHandle, bool isStandard);
+
+	JUCE_LEAK_DETECTOR (MouseCursor);
 };
 
 #endif   // __JUCE_MOUSECURSOR_JUCEHEADER__
@@ -19648,7 +19706,9 @@ public:
 	float mat00, mat01, mat02;
 	float mat10, mat11, mat12;
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (AffineTransform);
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
@@ -19788,9 +19848,8 @@ public:
 	/** Returns the point as a string in the form "x, y". */
 	const String toString() const                                       { return String (x) + ", " + String (y); }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ValueType x, y;
 };
 
@@ -20069,9 +20128,8 @@ public:
 	*/
 	static int getDoubleClickTimeout() throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	const Point<int> mouseDownPos;
 	const Time mouseDownTime;
 	const int numberOfClicks;
@@ -20079,6 +20137,7 @@ private:
 	static int doubleClickTimeOutMs;
 
 	MouseEvent& operator= (const MouseEvent&);
+	JUCE_LEAK_DETECTOR (MouseEvent);
 };
 
 #endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
@@ -20381,13 +20440,13 @@ public:
 	static const int fastForwardKey; /**< key-code for a multimedia 'fast-forward' key, (not all keyboards will have one) */
 	static const int rewindKey;	  /**< key-code for a multimedia 'rewind' key, (not all keyboards will have one) */
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	int keyCode;
 	ModifierKeys mods;
 	juce_wchar textCharacter;
+
+	JUCE_LEAK_DETECTOR (KeyPress);
 };
 
 #endif   // __JUCE_KEYPRESS_JUCEHEADER__
@@ -20842,9 +20901,8 @@ public:
 		return Line (start, getPointAlongLine (length - jmin (distanceToShortenBy, length)));
 	}
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Point<ValueType> start, end;
 
 	static bool findIntersection (const Point<ValueType>& p1, const Point<ValueType>& p2,
@@ -21475,7 +21533,7 @@ public:
 
 		This should only be used on floating point rectangles.
 	*/
-	const Rectangle<ValueType> transformed (const AffineTransform& transform) const throw()
+	const Rectangle transformed (const AffineTransform& transform) const throw()
 	{
 		float x1 = x,	 y1 = y;
 		float x2 = x + w, y2 = y;
@@ -21603,8 +21661,6 @@ public:
 						  toks[2].trim().getIntValue(),
 						  toks[3].trim().getIntValue());
 	}
-
-	juce_UseDebuggingNewOperator
 
 private:
 	friend class RectangleList;
@@ -22432,9 +22488,8 @@ public:
 	*/
 	void restoreFromString (const String& stringVersion);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class PathFlatteningIterator;
 	friend class Path::Iterator;
 	ArrayAllocationBase <float, DummyCriticalSection> data;
@@ -22447,6 +22502,8 @@ private:
 	static const float quadMarker;
 	static const float cubicMarker;
 	static const float closeSubPathMarker;
+
+	JUCE_LEAK_DETECTOR (Path);
 };
 
 #endif   // __JUCE_PATH_JUCEHEADER__
@@ -22521,9 +22578,8 @@ public:
 	*/
 	virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	String name;
 	bool isFallbackFont;
 
@@ -22532,8 +22588,7 @@ protected:
 	static const Ptr getFallbackTypeface();
 
 private:
-	Typeface (const Typeface&);
-	Typeface& operator= (const Typeface&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface);
 };
 
 /** A typeface that can be populated with custom glyphs.
@@ -22614,9 +22669,8 @@ public:
 	bool getOutlineForGlyph (int glyphNumber, Path& path);
 	int getGlyphForCharacter (juce_wchar character);
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	juce_wchar defaultCharacter;
 	float ascent;
 	bool isBold, isItalic;
@@ -22636,11 +22690,10 @@ private:
 	OwnedArray <GlyphInfo> glyphs;
 	short lookupTable [128];
 
-	CustomTypeface (const CustomTypeface&);
-	CustomTypeface& operator= (const CustomTypeface&);
-
 	GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) throw();
 	GlyphInfo* findGlyphSubstituting (juce_wchar character) throw();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface);
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__
@@ -22959,8 +23012,6 @@ public:
 	*/
 	static const Font fromString (const String& fontDescription);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	friend class FontGlyphAlphaMap;
@@ -22982,6 +23033,8 @@ private:
 
 	ReferenceCountedObjectPtr <SharedFontInternal> font;
 	void dupeInternalIfShared();
+
+	JUCE_LEAK_DETECTOR (Font);
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__
@@ -23138,8 +23191,6 @@ public:
 	/** Sets the end-cap style. */
 	void setEndStyle (EndCapStyle newStyle) throw()		 { endStyle = newStyle; }
 
-	juce_UseDebuggingNewOperator
-
 	/** Compares the stroke thickness, joint and end styles of two stroke types. */
 	bool operator== (const PathStrokeType& other) const throw();
 
@@ -23151,6 +23202,8 @@ private:
 	float thickness;
 	JointStyle jointStyle;
 	EndCapStyle endStyle;
+
+	JUCE_LEAK_DETECTOR (PathStrokeType);
 };
 
 #endif   // __JUCE_PATHSTROKETYPE_JUCEHEADER__
@@ -24028,9 +24081,8 @@ public:
 	/** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
 	const String toDisplayString (bool includeAlphaValue) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	PixelARGB argb;
 };
 
@@ -24234,9 +24286,8 @@ public:
 	bool operator== (const ColourGradient& other) const throw();
 	bool operator!= (const ColourGradient& other) const throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	struct ColourPoint
 	{
 		ColourPoint() throw() {}
@@ -24253,6 +24304,8 @@ private:
 	};
 
 	Array <ColourPoint> colours;
+
+	JUCE_LEAK_DETECTOR (ColourGradient);
 };
 
 #endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
@@ -24990,8 +25043,6 @@ public:
 	/** Returns true if this context is drawing to a vector-based device, such as a printer. */
 	bool isVectorDevice() const;
 
-	juce_UseDebuggingNewOperator
-
 	/** Create a graphics that uses a given low-level renderer.
 		For internal use only.
 		NB. The context will NOT be deleted by this object when it is deleted.
@@ -25009,8 +25060,7 @@ private:
 	bool saveStatePending;
 	void saveStateIfPending();
 
-	Graphics (const Graphics&);
-	Graphics& operator= (const Graphics& other);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics);
 };
 
 #endif   // __JUCE_GRAPHICS_JUCEHEADER__
@@ -25427,8 +25477,7 @@ public:
 		uint8* imageData;
 		NamedValueSet userData;
 
-		SharedImage (const SharedImage&);
-		SharedImage& operator= (const SharedImage&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedImage);
 	};
 
 	/** @internal */
@@ -25436,13 +25485,14 @@ public:
 	/** @internal */
 	explicit Image (SharedImage* instance);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class SharedImage;
 	friend class BitmapData;
 
 	ReferenceCountedObjectPtr<SharedImage> image;
+
+	JUCE_LEAK_DETECTOR (Image);
 };
 
 #endif   // __JUCE_IMAGE_JUCEHEADER__
@@ -25644,8 +25694,6 @@ public:
 		/** Returns the current rectangle. */
 		const Rectangle<int>* getRectangle() const throw()	   { return current; }
 
-		juce_UseDebuggingNewOperator
-
 	private:
 		const Rectangle<int>* current;
 		const RectangleList& owner;
@@ -25655,11 +25703,12 @@ public:
 		Iterator& operator= (const Iterator&);
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class Iterator;
 	Array <Rectangle<int> > rects;
+
+	JUCE_LEAK_DETECTOR (RectangleList);
 };
 
 #endif   // __JUCE_RECTANGLELIST_JUCEHEADER__
@@ -25751,10 +25800,11 @@ public:
 	bool operator== (const BorderSize& other) const throw();
 	bool operator!= (const BorderSize& other) const throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int top, left, bottom, right;
+
+	JUCE_LEAK_DETECTOR (BorderSize);
 };
 
 #endif   // __JUCE_BORDERSIZE_JUCEHEADER__
@@ -27913,9 +27963,8 @@ public:
 		bool operator== (ComponentType* component) const throw()	{ return comp == component; }
 		bool operator!= (ComponentType* component) const throw()	{ return comp != component; }
 
-		juce_UseDebuggingNewOperator
-
 	private:
+
 		ComponentType* comp;
 
 		void attach()   { if (comp != 0) comp->addComponentListener (this); }
@@ -27963,8 +28012,6 @@ public:
 	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
 													   const Point<int>& positionRelativeToThis) const;
    #endif
-
-	juce_UseDebuggingNewOperator
 
 private:
 
@@ -28058,11 +28105,9 @@ private:
 	friend class ComponentHelpers;
 
 	/* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
-	   You might need to give your subclasses a private dummy constructor like this one to avoid
-	   compiler warnings.
+	   You might need to give your subclasses a private dummy constructor to avoid compiler warnings.
 	*/
-	Component (const Component&);
-	Component& operator= (const Component&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Component);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
 	// This is included here just to cause a compile error if your code is still handling
@@ -28360,15 +28405,12 @@ public:
 	int intParameter3;	  /**< user-defined integer value. */
 	void* pointerParameter;	 /**< user-defined pointer value. */
 
-	juce_UseDebuggingNewOperator
-
 private:
 	friend class MessageListener;
 	friend class MessageManager;
 	MessageListener* messageRecipient;
 
-	Message (const Message&);
-	Message& operator= (const Message&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Message);
 };
 
 #endif   // __JUCE_MESSAGE_JUCEHEADER__
@@ -28626,9 +28668,8 @@ public:
 	*/
 	ApplicationCommandTarget* findFirstTargetParentComponent();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	// (for async invocation of commands)
 	class CommandTargetMessageInvoker  : public MessageListener
 	{
@@ -28650,8 +28691,7 @@ private:
 	friend class CommandTargetMessageInvoker;
 	bool tryToInvoke (const InvocationInfo& info, bool async);
 
-	ApplicationCommandTarget (const ApplicationCommandTarget&);
-	ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget);
 };
 
 #endif   // __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
@@ -29184,15 +29224,16 @@ public:
 	/** Returns true if the specified component is currently being animated. */
 	bool isAnimating (Component* component) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class AnimationTask;
 	OwnedArray <AnimationTask> tasks;
 	uint32 lastTime;
 
 	AnimationTask* findTaskFor (Component* component) const;
 	void timerCallback();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentAnimator);
 };
 
 #endif   // __JUCE_COMPONENTANIMATOR_JUCEHEADER__
@@ -29451,8 +29492,6 @@ public:
 	*/
 	bool isOrientationEnabled (DisplayOrientation orientation) const throw();
 
-	juce_UseDebuggingNewOperator
-
 	/** Tells this object to refresh its idea of what the screen resolution is.
 
 		(Called internally by the native code).
@@ -29511,8 +29550,7 @@ private:
 	Desktop();
 	~Desktop();
 
-	Desktop (const Desktop&);
-	Desktop& operator= (const Desktop&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop);
 };
 
 #endif   // __JUCE_DESKTOP_JUCEHEADER__
@@ -29789,8 +29827,6 @@ public:
 	*/
 	static ApplicationCommandTarget* findTargetForComponent (Component* component);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	OwnedArray <ApplicationCommandInfo> commands;
@@ -29808,8 +29844,7 @@ private:
 	virtual short getFirstCommandTarget() { return 0; }
    #endif
 
-	ApplicationCommandManager (const ApplicationCommandManager&);
-	ApplicationCommandManager& operator= (const ApplicationCommandManager&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandManager);
 };
 
 /**
@@ -30001,8 +30036,6 @@ public:
 												 const String& folderName,
 												 bool commonToAllUsers);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	virtual void propertyChanged();
 
@@ -30019,8 +30052,7 @@ private:
 
 	void timerCallback();
 
-	PropertiesFile (const PropertiesFile&);
-	PropertiesFile& operator= (const PropertiesFile&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile);
 };
 
 #endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__
@@ -30132,8 +30164,6 @@ public:
 	*/
 	void closeFiles();
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	ScopedPointer <PropertiesFile> userProps, commonProps;
@@ -30143,10 +30173,9 @@ private:
 	int commonSettingsAreReadOnly;
 	InterProcessLock* processLock;
 
-	ApplicationProperties (const ApplicationProperties&);
-	ApplicationProperties& operator= (const ApplicationProperties&);
-
 	void openFiles();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationProperties);
 };
 
 #endif   // __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
@@ -30957,9 +30986,8 @@ public:
 							  int64 startSampleInFile,
 							  int numSamples) = 0;
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** Used by AudioFormatReader subclasses to copy data to different formats. */
 	template <class DestSampleType, class SourceSampleType, class SourceEndianness>
 	struct ReadHelper
@@ -30988,8 +31016,7 @@ protected:
 private:
 	String formatName;
 
-	AudioFormatReader (const AudioFormatReader&);
-	AudioFormatReader& operator= (const AudioFormatReader&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReader);
 };
 
 #endif   // __JUCE_AUDIOFORMATREADER_JUCEHEADER__
@@ -31395,9 +31422,8 @@ public:
 							 int startSample,
 							 int numSamples) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int numChannels, size;
 	size_t allocatedBytes;
 	float** channels;
@@ -31406,6 +31432,8 @@ private:
 
 	void allocateData();
 	void allocateChannels (float** dataToReferTo);
+
+	JUCE_LEAK_DETECTOR (AudioSampleBuffer);
 };
 
 #endif   // __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
@@ -31689,9 +31717,8 @@ public:
 		ScopedPointer<Buffer> buffer;
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** The sample rate of the stream. */
 	double sampleRate;
 
@@ -31737,8 +31764,7 @@ private:
 	String formatName;
 	friend class ThreadedWriter;
 
-	AudioFormatWriter (const AudioFormatWriter&);
-	AudioFormatWriter& operator= (const AudioFormatWriter&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatWriter);
 };
 
 #endif   // __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
@@ -31914,7 +31940,8 @@ public:
 										const StringPairArray& metadataValues,
 										int qualityOptionIndex);
 
-	juce_UseDebuggingNewOperator
+private:
+	JUCE_LEAK_DETECTOR (AiffAudioFormat);
 };
 
 #endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
@@ -32049,14 +32076,15 @@ public:
 	*/
 	void abortBurn();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioCDBurner (const int deviceIndex);
 
 	class Pimpl;
 	friend class ScopedPointer<Pimpl>;
 	ScopedPointer<Pimpl> pimpl;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioCDBurner);
 };
 
 #endif
@@ -32197,9 +32225,8 @@ public:
 		samplesPerFrame = 44100 / framesPerSecond
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Array<int> trackStartSamples;
 
 #if JUCE_MAC
@@ -32222,8 +32249,7 @@ private:
 	AudioCDReader();
 #endif
 
-	AudioCDReader (const AudioCDReader&);
-	AudioCDReader& operator= (const AudioCDReader&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioCDReader);
 };
 
 #endif
@@ -32340,11 +32366,12 @@ public:
 	*/
 	AudioFormatReader* createReaderFor (InputStream* audioFileStream);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	OwnedArray<AudioFormat> knownFormats;
 	int defaultFormatIndex;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatManager);
 };
 
 #endif   // __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
@@ -32409,15 +32436,13 @@ public:
 						float& lowestRight,
 						float& highestRight);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioFormatReader* const source;
 	int64 startSample, length;
 	const bool deleteSourceWhenDeleted;
 
-	AudioSubsectionReader (const AudioSubsectionReader&);
-	AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSubsectionReader);
 };
 
 #endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
@@ -32554,9 +32579,8 @@ public:
 	/** @internal */
 	void timerCallback();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioFormatManager& formatManagerToUse;
 	AudioThumbnailCache& cache;
 	ScopedPointer <InputSource> source;
@@ -32583,6 +32607,8 @@ private:
 
 	// returns true if more needs to be read
 	bool readNextBlockFromAudioFile (AudioFormatReader& reader);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail);
 };
 
 #endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
@@ -32640,8 +32666,6 @@ public:
 	*/
 	void storeThumb (const AudioThumbnail& thumb, int64 hashCode);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	OwnedArray <ThumbnailCacheEntry> thumbs;
@@ -32650,6 +32674,8 @@ private:
 	friend class AudioThumbnail;
 	void addThumbnail (AudioThumbnail* thumb);
 	void removeThumbnail (AudioThumbnail* thumb);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnailCache);
 };
 
 #endif   // __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
@@ -32697,7 +32723,8 @@ public:
 										const StringPairArray& metadataValues,
 										int qualityOptionIndex);
 
-	juce_UseDebuggingNewOperator
+private:
+	JUCE_LEAK_DETECTOR (FlacAudioFormat);
 };
 
 #endif
@@ -32757,7 +32784,8 @@ public:
 										const StringPairArray& metadataValues,
 										int qualityOptionIndex);
 
-	juce_UseDebuggingNewOperator
+private:
+	JUCE_LEAK_DETECTOR (OggVorbisAudioFormat);
 };
 
 #endif
@@ -32807,7 +32835,8 @@ public:
 										const StringPairArray& metadataValues,
 										int qualityOptionIndex);
 
-	juce_UseDebuggingNewOperator
+private:
+	JUCE_LEAK_DETECTOR (QuickTimeAudioFormat);
 };
 
 #endif
@@ -32931,7 +32960,8 @@ public:
 	*/
 	bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
 
-	juce_UseDebuggingNewOperator
+private:
+	JUCE_LEAK_DETECTOR (WavAudioFormat);
 };
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
@@ -33054,9 +33084,8 @@ public:
 	/** Implements the PositionableAudioSource method. */
 	int getTotalLength() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioFormatReader* reader;
 	bool deleteReader;
 
@@ -33065,8 +33094,7 @@ private:
 
 	void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
 
-	AudioFormatReaderSource (const AudioFormatReaderSource&);
-	AudioFormatReaderSource& operator= (const AudioFormatReaderSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReaderSource);
 };
 
 #endif   // __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
@@ -33441,8 +33469,6 @@ public:
 	/** Implementation of the AudioIODeviceCallback method. */
 	void audioDeviceStopped();
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	CriticalSection readLock;
@@ -33455,8 +33481,7 @@ private:
 	AudioSampleBuffer tempBuffer;
 	float lastGain, gain;
 
-	AudioSourcePlayer (const AudioSourcePlayer&);
-	AudioSourcePlayer& operator= (const AudioSourcePlayer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourcePlayer);
 };
 
 #endif   // __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
@@ -33527,8 +33552,6 @@ public:
 	/** Implements the PositionableAudioSource method. */
 	bool isLooping() const			  { return source->isLooping(); }
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	PositionableAudioSource* source;
@@ -33544,8 +33567,7 @@ private:
 	bool readNextBufferChunk();
 	void readBufferSection (int start, int length, int bufferOffset);
 
-	BufferingAudioSource (const BufferingAudioSource&);
-	BufferingAudioSource& operator= (const BufferingAudioSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioSource);
 };
 
 #endif   // __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
@@ -33599,9 +33621,8 @@ public:
 	void releaseResources();
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioSource* const input;
 	const bool deleteInputWhenDeleted;
 	double ratio, lastRatio;
@@ -33626,8 +33647,7 @@ private:
 
 	void applyFilter (float* samples, int num, FilterState& fs);
 
-	ResamplingAudioSource (const ResamplingAudioSource&);
-	ResamplingAudioSource& operator= (const ResamplingAudioSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResamplingAudioSource);
 };
 
 #endif   // __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
@@ -33750,9 +33770,8 @@ public:
 	/** Implements the PositionableAudioSource method. */
 	bool isLooping() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	PositionableAudioSource* source;
 	ResamplingAudioSource* resamplerSource;
 	BufferingAudioSource* bufferingSource;
@@ -33766,8 +33785,7 @@ private:
 	int blockSize, readAheadBufferSize;
 	bool isPrepared, inputStreamEOF;
 
-	AudioTransportSource (const AudioTransportSource&);
-	AudioTransportSource& operator= (const AudioTransportSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioTransportSource);
 };
 
 #endif   // __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
@@ -33880,9 +33898,8 @@ public:
 	void releaseResources();
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int requiredNumberOfChannels;
 	Array <int> remappedInputs, remappedOutputs;
 
@@ -33894,8 +33911,7 @@ private:
 
 	CriticalSection lock;
 
-	ChannelRemappingAudioSource (const ChannelRemappingAudioSource&);
-	ChannelRemappingAudioSource& operator= (const ChannelRemappingAudioSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelRemappingAudioSource);
 };
 
 #endif   // __JUCE_CHANNELREMAPPINGAUDIOSOURCE_JUCEHEADER__
@@ -34010,9 +34026,8 @@ public:
 	*/
 	void copyCoefficientsFrom (const IIRFilter& other) throw();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	CriticalSection processLock;
 
 	void setCoefficients (double c1, double c2, double c3,
@@ -34024,6 +34039,7 @@ protected:
 
 	// (use the copyCoefficientsFrom() method instead of this operator)
 	IIRFilter& operator= (const IIRFilter&);
+	JUCE_LEAK_DETECTOR (IIRFilter);
 };
 
 #endif   // __JUCE_IIRFILTER_JUCEHEADER__
@@ -34056,16 +34072,13 @@ public:
 	void releaseResources();
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	AudioSource* const input;
 	const bool deleteInputWhenDeleted;
 	OwnedArray <IIRFilter> iirFilters;
 
-	IIRFilterAudioSource (const IIRFilterAudioSource&);
-	IIRFilterAudioSource& operator= (const IIRFilterAudioSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IIRFilterAudioSource);
 };
 
 #endif   // __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
@@ -34147,8 +34160,6 @@ public:
 	/** Implementation of the AudioSource method. */
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	Array <AudioSource*> inputs;
@@ -34158,8 +34169,7 @@ private:
 	double currentSampleRate;
 	int bufferSizeExpected;
 
-	MixerAudioSource (const MixerAudioSource&);
-	MixerAudioSource& operator= (const MixerAudioSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerAudioSource);
 };
 
 #endif   // __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
@@ -34208,16 +34218,13 @@ public:
 	/** Implementation of the AudioSource method. */
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	double frequency, sampleRate;
 	double currentPhase, phasePerSample;
 	float amplitude;
 
-	ToneGeneratorAudioSource (const ToneGeneratorAudioSource&);
-	ToneGeneratorAudioSource& operator= (const ToneGeneratorAudioSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToneGeneratorAudioSource);
 };
 
 #endif   // __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
@@ -35194,9 +35201,8 @@ public:
 	*/
 	static const String getControllerName (int controllerNumber);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	double timeStamp;
 	uint8* data;
 	int size;
@@ -35347,17 +35353,16 @@ public:
 	*/
 	virtual void stop();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	String name;
 	void* internal;
 
 	explicit MidiInput (const String& name);
 
 private:
-	MidiInput (const MidiInput&);
-	MidiInput& operator= (const MidiInput&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput);
 };
 
 #endif   // __JUCE_MIDIINPUT_JUCEHEADER__
@@ -35551,9 +35556,8 @@ public:
 						   int& numBytesOfMidiData,
 						   int& samplePosition) throw();
 
-		juce_UseDebuggingNewOperator
-
 	private:
+
 		const MidiBuffer& buffer;
 		const uint8* data;
 
@@ -35561,9 +35565,8 @@ public:
 		Iterator& operator= (const Iterator&);
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class MidiBuffer::Iterator;
 	MemoryBlock data;
 	int bytesUsed;
@@ -35573,6 +35576,8 @@ private:
 	static int getEventTime (const void* d) throw();
 	static uint16 getEventDataSize (const void* d) throw();
 	static uint16 getEventTotalSize (const void* d) throw();
+
+	JUCE_LEAK_DETECTOR (MidiBuffer);
 };
 
 #endif   // __JUCE_MIDIBUFFER_JUCEHEADER__
@@ -35687,9 +35692,8 @@ public:
 	*/
 	virtual void stopBackgroundThread();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	void* internal;
 
 	struct PendingMessage
@@ -35698,8 +35702,6 @@ protected:
 
 		MidiMessage message;
 		PendingMessage* next;
-
-		juce_UseDebuggingNewOperator
 	};
 
 	CriticalSection lock;
@@ -35709,8 +35711,7 @@ protected:
 	void run();
 
 private:
-	MidiOutput (const MidiOutput&);
-	MidiOutput& operator= (const MidiOutput&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput);
 };
 
 #endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
@@ -35794,13 +35795,16 @@ public:
 	/** Destructor. */
 	virtual ~SettableTooltipClient()				{}
 
+	/** Assigns a new tooltip to this object. */
 	virtual void setTooltip (const String& newTooltip)		  { tooltipString = newTooltip; }
 
+	/** Returns the tooltip assigned to this object. */
 	virtual const String getTooltip()				   { return tooltipString; }
 
-	juce_UseDebuggingNewOperator
-
 protected:
+	SettableTooltipClient() {}
+
+private:
 	String tooltipString;
 };
 
@@ -35867,8 +35871,6 @@ public:
 		outlineColourId	 = 0x1001c10	 /**< The colour to use to draw an outline around the tooltip. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	int millisecondsBeforeTipAppears;
@@ -35887,8 +35889,7 @@ private:
 	void showFor (const String& tip);
 	void hide();
 
-	TooltipWindow (const TooltipWindow&);
-	TooltipWindow& operator= (const TooltipWindow&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow);
 };
 
 #endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
@@ -36223,8 +36224,6 @@ public:
 	*/
 	void setState (const ButtonState newState);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	/** This method is called when the button has been clicked.
@@ -36346,8 +36345,7 @@ private:
 	void sendClickMessage (const ModifierKeys& modifiers);
 	void sendStateMessage();
 
-	Button (const Button&);
-	Button& operator= (const Button&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use Button::Listener instead. */
@@ -36630,8 +36628,6 @@ public:
 	/** @internal */
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	Range <double> totalRange, visibleRange;
@@ -36648,8 +36644,7 @@ private:
 	void updateThumbPosition();
 	void timerCallback();
 
-	ScrollBar (const ScrollBar&);
-	ScrollBar& operator= (const ScrollBar&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
@@ -36860,8 +36855,6 @@ public:
 	*/
 	ScrollBar* getHorizontalScrollBar() throw()		 { return &horizontalScrollBar; }
 
-	juce_UseDebuggingNewOperator
-
 	/** @internal */
 	void resized();
 	/** @internal */
@@ -36876,6 +36869,7 @@ public:
 	bool useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
 
 private:
+
 	Component::SafePointer<Component> contentComp;
 	Rectangle<int> lastVisibleArea;
 	int scrollBarThickness;
@@ -36888,8 +36882,7 @@ private:
 	void updateVisibleArea();
 	void deleteContentComp();
 
-	Viewport (const Viewport&);
-	Viewport& operator= (const Viewport&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Viewport);
 };
 
 #endif   // __JUCE_VIEWPORT_JUCEHEADER__
@@ -37231,19 +37224,16 @@ public:
 		Image customImage;
 		ApplicationCommandManager* commandManager;
 
-		juce_UseDebuggingNewOperator
-
 	private:
+
 		const PopupMenu& menu;
 		int index;
 
-		MenuItemIterator (const MenuItemIterator&);
-		MenuItemIterator& operator= (const MenuItemIterator&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuItemIterator);
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class Item;
 	class ItemComponent;
 	class Window;
@@ -37266,6 +37256,8 @@ private:
 	int showMenu (const Rectangle<int>& target, int itemIdThatMustBeVisible,
 				  int minimumWidth, int maximumNumColumns, int standardItemHeight,
 				  Component* componentAttachedTo, ModalComponentManager::Callback* callback);
+
+	JUCE_LEAK_DETECTOR (PopupMenu);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
@@ -37836,8 +37828,6 @@ public:
 	*/
 	virtual void performPopupMenuAction (int menuItemID);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	/** Scrolls the minimum distance needed to get the caret into view. */
@@ -37946,8 +37936,7 @@ private:
 	void repaintText (const Range<int>& range);
 	UndoManager* getUndoManager() throw();
 
-	TextEditor (const TextEditor&);
-	TextEditor& operator= (const TextEditor&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
@@ -38177,9 +38166,8 @@ public:
 	/** Returns true if the editor is currently focused and active. */
 	bool isBeingEdited() const throw();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** Creates the TextEditor component that will be used when the user has clicked on the label.
 		Subclasses can override this if they need to customise this component in some way.
 	*/
@@ -38233,6 +38221,7 @@ protected:
 	void valueChanged (Value&);
 
 private:
+
 	Value textValue;
 	String lastTextValue;
 	Font font;
@@ -38250,8 +38239,7 @@ private:
 	bool updateFromTextEditorContents();
 	void callChangeListeners();
 
-	Label (const Label&);
-	Label& operator= (const Label&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
@@ -38592,9 +38580,8 @@ public:
 	/** @internal */
 	void valueChanged (Value&);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	struct ItemInfo
 	{
 		String name;
@@ -38619,8 +38606,7 @@ private:
 	ItemInfo* getItemForId (int itemId) const throw();
 	ItemInfo* getItemForIndex (int index) const throw();
 
-	ComboBox (const ComboBox&);
-	ComboBox& operator= (const ComboBox&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
@@ -39027,8 +39013,6 @@ public:
 	*/
 	CriticalSection& getMidiCallbackLock() throw()	  { return midiCallbackLock; }
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	OwnedArray <AudioIODeviceType> availableDeviceTypes;
@@ -39106,8 +39090,7 @@ private:
 
 	AudioIODeviceType* findType (const String& inputName, const String& outputName);
 
-	AudioDeviceManager (const AudioDeviceManager&);
-	AudioDeviceManager& operator= (const AudioDeviceManager&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceManager);
 };
 
 #endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
@@ -39202,11 +39185,11 @@ public:
 		*/
 		MidiEventHolder* noteOffObject;
 
-		juce_UseDebuggingNewOperator
-
 	private:
+
 		friend class MidiMessageSequence;
 		MidiEventHolder (const MidiMessage& message);
+		JUCE_LEAK_DETECTOR (MidiEventHolder);
 	};
 
 	/** Clears the sequence. */
@@ -39375,8 +39358,6 @@ public:
 	/** Swaps this sequence with another one. */
 	void swapWith (MidiMessageSequence& other) throw();
 
-	juce_UseDebuggingNewOperator
-
 	/** @internal */
 	static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
 								const MidiMessageSequence::MidiEventHolder* second) throw();
@@ -39387,6 +39368,8 @@ private:
 	OwnedArray <MidiEventHolder> list;
 
 	void sort();
+
+	JUCE_LEAK_DETECTOR (MidiMessageSequence);
 };
 
 #endif   // __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
@@ -39530,17 +39513,15 @@ public:
 	*/
 	void convertTimestampTicksToSeconds();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	OwnedArray <MidiMessageSequence> tracks;
 	short timeFormat;
 
-	MidiFile (const MidiFile&);
-	MidiFile& operator= (const MidiFile&);
-
 	void readNextTrack (const uint8* data, int size);
 	void writeTrack (OutputStream& mainOut, int trackNum);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiFile);
 };
 
 #endif   // __JUCE_MIDIFILE_JUCEHEADER__
@@ -39711,9 +39692,8 @@ public:
 	*/
 	void removeListener (MidiKeyboardStateListener* listener);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	CriticalSection lock;
 	uint16 noteStates [128];
 	MidiBuffer eventsToAdd;
@@ -39722,8 +39702,7 @@ private:
 	void noteOnInternal (int midiChannel, int midiNoteNumber, float velocity);
 	void noteOffInternal (int midiChannel, int midiNoteNumber);
 
-	MidiKeyboardState (const MidiKeyboardState&);
-	MidiKeyboardState& operator= (const MidiKeyboardState&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardState);
 };
 
 #endif   // __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
@@ -39798,16 +39777,14 @@ public:
 	/** @internal */
 	void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	double lastCallbackTime;
 	CriticalSection midiCallbackLock;
 	MidiBuffer incomingMessages;
 	double sampleRate;
 
-	MidiMessageCollector (const MidiMessageCollector&);
-	MidiMessageCollector& operator= (const MidiMessageCollector&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiMessageCollector);
 };
 
 #endif   // __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
@@ -40560,8 +40537,6 @@ public:
 							   double sampleRate,
 							   int blockSize) throw();
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	/** Helper function that just converts an xml element into a binary blob.
@@ -40600,8 +40575,7 @@ private:
 	BigInteger changingParams;
 #endif
 
-	AudioProcessor (const AudioProcessor&);
-	AudioProcessor& operator= (const AudioProcessor&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor);
 };
 
 #endif   // __JUCE_AUDIOPROCESSOR_JUCEHEADER__
@@ -40714,7 +40688,9 @@ public:
 	*/
 	bool loadFromXml (const XmlElement& xml);
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (PluginDescription);
 };
 
 #endif   // __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
@@ -40750,13 +40726,11 @@ public:
 	*/
 	virtual void* getPlatformSpecificData();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	AudioPluginInstance();
 
-	AudioPluginInstance (const AudioPluginInstance&);
-	AudioPluginInstance& operator= (const AudioPluginInstance&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance);
 };
 
 #endif   // __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
@@ -40835,13 +40809,11 @@ public:
 	*/
 	virtual const FileSearchPath getDefaultLocationsToSearch() = 0;
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	AudioPluginFormat() throw();
 
-	AudioPluginFormat (const AudioPluginFormat&);
-	AudioPluginFormat& operator= (const AudioPluginFormat&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormat);
 };
 
 #endif   // __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
@@ -40868,11 +40840,9 @@ public:
 	bool doesPluginStillExist (const PluginDescription& desc);
 	const FileSearchPath getDefaultLocationsToSearch();
 
-	juce_UseDebuggingNewOperator
-
 private:
-	AudioUnitPluginFormat (const AudioUnitPluginFormat&);
-	AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginFormat);
 };
 
 #endif
@@ -40909,11 +40879,8 @@ public:
 	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
 	const FileSearchPath getDefaultLocationsToSearch();
 
-	juce_UseDebuggingNewOperator
-
 private:
-	DirectXPluginFormat (const DirectXPluginFormat&);
-	DirectXPluginFormat& operator= (const DirectXPluginFormat&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectXPluginFormat);
 };
 
 #endif
@@ -40950,11 +40917,8 @@ public:
 	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
 	const FileSearchPath getDefaultLocationsToSearch();
 
-	juce_UseDebuggingNewOperator
-
 private:
-	LADSPAPluginFormat (const LADSPAPluginFormat&);
-	LADSPAPluginFormat& operator= (const LADSPAPluginFormat&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LADSPAPluginFormat);
 };
 
 #endif
@@ -41154,13 +41118,11 @@ public:
 	bool doesPluginStillExist (const PluginDescription& desc);
 	const FileSearchPath getDefaultLocationsToSearch();
 
-	juce_UseDebuggingNewOperator
-
 private:
-	VSTPluginFormat (const VSTPluginFormat&);
-	VSTPluginFormat& operator= (const VSTPluginFormat&);
 
 	void recursiveFileSearch (StringArray& results, const File& dir, const bool recursive);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginFormat);
 };
 
 #endif
@@ -41233,13 +41195,11 @@ public:
 	*/
 	bool doesPluginStillExist (const PluginDescription& description) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	OwnedArray <AudioPluginFormat> formats;
 
-	AudioPluginFormatManager (const AudioPluginFormatManager&);
-	AudioPluginFormatManager& operator= (const AudioPluginFormatManager&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormatManager);
 };
 
 #endif   // __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
@@ -41374,13 +41334,11 @@ public:
 	*/
 	void recreateFromXml (const XmlElement& xml);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	OwnedArray <PluginDescription> types;
 
-	KnownPluginList (const KnownPluginList&);
-	KnownPluginList& operator= (const KnownPluginList&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList);
 };
 
 #endif   // __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
@@ -41470,9 +41428,8 @@ public:
 	*/
 	const StringArray& getFailedFiles() const throw()		   { return failedFiles; }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	KnownPluginList& list;
 	AudioPluginFormat& format;
 	StringArray filesOrIdentifiersToScan;
@@ -41484,8 +41441,7 @@ private:
 	const StringArray getDeadMansPedalFile();
 	void setDeadMansPedalFile (const StringArray& newContents);
 
-	PluginDirectoryScanner (const PluginDirectoryScanner&);
-	PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginDirectoryScanner);
 };
 
 #endif   // __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
@@ -42021,8 +41977,6 @@ public:
 	/** @internal */
 	void startDragAndDrop (const MouseEvent& e, const String& dragDescription);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	friend class ListViewport;
@@ -42041,8 +41995,7 @@ private:
 							bool deselectOthersFirst,
 							bool isMouseClick);
 
-	ListBox (const ListBox&);
-	ListBox& operator= (const ListBox&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox);
 };
 
 #endif   // __JUCE_LISTBOX_JUCEHEADER__
@@ -42110,8 +42063,6 @@ public:
 	*/
 	virtual const Font getFont();
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** @internal */
 	void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
@@ -42119,8 +42070,8 @@ protected:
 	void colourChanged();
 
 private:
-	TextButton (const TextButton&);
-	TextButton& operator= (const TextButton&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextButton);
 };
 
 #endif   // __JUCE_TEXTBUTTON_JUCEHEADER__
@@ -42171,9 +42122,8 @@ public:
 	/** @internal */
 	void timerCallback();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	KnownPluginList& list;
 	File deadMansPedalFile;
 	ListBox listBox;
@@ -42183,8 +42133,7 @@ private:
 
 	void scanFor (AudioPluginFormat* format);
 
-	PluginListComponent (const PluginListComponent&);
-	PluginListComponent& operator= (const PluginListComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
 };
 
 #endif   // __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
@@ -42267,9 +42216,8 @@ public:
 		*/
 		typedef ReferenceCountedObjectPtr <Node> Ptr;
 
-		juce_UseDebuggingNewOperator
-
 	private:
+
 		friend class AudioProcessorGraph;
 
 		const ScopedPointer<AudioProcessor> processor;
@@ -42280,8 +42228,7 @@ public:
 		void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
 		void unprepare();
 
-		Node (const Node&);
-		Node& operator= (const Node&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node);
 	};
 
 	/** Represents a connection between two channels of two nodes in an AudioProcessorGraph.
@@ -42320,9 +42267,9 @@ public:
 		*/
 		int destChannelIndex;
 
-		juce_UseDebuggingNewOperator
-
 	private:
+
+		JUCE_LEAK_DETECTOR (Connection);
 	};
 
 	/** Deletes all nodes and connections from this graph.
@@ -42516,14 +42463,11 @@ public:
 		/** @internal */
 		void setParentGraph (AudioProcessorGraph* graph);
 
-		juce_UseDebuggingNewOperator
-
 	private:
 		const IODeviceType type;
 		AudioProcessorGraph* graph;
 
-		AudioGraphIOProcessor (const AudioGraphIOProcessor&);
-		AudioGraphIOProcessor& operator= (const AudioGraphIOProcessor&);
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioGraphIOProcessor);
 	};
 
 	// AudioProcessor methods:
@@ -42563,9 +42507,8 @@ public:
 	/** @internal */
 	void handleAsyncUpdate();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ReferenceCountedArray <Node> nodes;
 	OwnedArray <Connection> connections;
 	int lastNodeId;
@@ -42586,8 +42529,7 @@ private:
 
 	bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
 
-	AudioProcessorGraph (const AudioProcessorGraph&);
-	AudioProcessorGraph& operator= (const AudioProcessorGraph&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph);
 };
 
 #endif   // __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
@@ -42657,9 +42599,8 @@ public:
 	/** @internal */
 	void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioProcessor* processor;
 	CriticalSection lock;
 	double sampleRate;
@@ -42673,8 +42614,7 @@ private:
 	MidiBuffer incomingMidi;
 	MidiMessageCollector messageCollector;
 
-	AudioProcessorPlayer (const AudioProcessorPlayer&);
-	AudioProcessorPlayer& operator= (const AudioProcessorPlayer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer);
 };
 
 #endif   // __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
@@ -42772,15 +42712,16 @@ public:
 	/** By default, this just repaints the component. */
 	void enablementChanged();
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** Used by the PropertyPanel to determine how high this component needs to be.
-
 		A subclass can update this value in its constructor but shouldn't alter it later
 		as changes won't necessarily be picked up.
 	*/
 	int preferredHeight;
+
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyComponent);
 };
 
 #endif   // __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
@@ -42898,8 +42839,6 @@ public:
 	/** @internal */
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	Viewport viewport;
 	class PropertyHolderComponent;
@@ -42908,6 +42847,8 @@ private:
 
 	void updatePropHolderLayout() const;
 	void updatePropHolderLayout (int width) const;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyPanel);
 };
 
 #endif   // __JUCE_PROPERTYPANEL_JUCEHEADER__
@@ -42932,13 +42873,11 @@ public:
 	void paint (Graphics& g);
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	PropertyPanel panel;
 
-	GenericAudioProcessorEditor (const GenericAudioProcessorEditor&);
-	GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericAudioProcessorEditor);
 };
 
 #endif   // __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
@@ -42997,7 +42936,9 @@ public:
 	*/
 	typedef ReferenceCountedObjectPtr <SynthesiserSound> Ptr;
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (SynthesiserSound);
 };
 
 /**
@@ -43114,8 +43055,6 @@ public:
 	*/
 	void setCurrentPlaybackSampleRate (double newRate);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	/** Returns the current target sample rate at which rendering is being done.
@@ -43146,6 +43085,8 @@ private:
 	int currentlyPlayingNote;
 	uint32 noteOnTime;
 	SynthesiserSound::Ptr currentlyPlayingSound;
+
+	JUCE_LEAK_DETECTOR (SynthesiserVoice);
 };
 
 /**
@@ -43338,8 +43279,6 @@ public:
 						  int startSample,
 						  int numSamples);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	/** This is used to control access to the rendering callback and the note trigger methods. */
@@ -43382,8 +43321,7 @@ private:
 	uint32 lastNoteOnCounter;
 	bool shouldStealNotes;
 
-	Synthesiser (const Synthesiser&);
-	Synthesiser& operator= (const Synthesiser&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser);
 };
 
 #endif   // __JUCE_SYNTHESISER_JUCEHEADER__
@@ -43444,9 +43382,8 @@ public:
 	bool appliesToNote (const int midiNoteNumber);
 	bool appliesToChannel (const int midiChannel);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class SamplerVoice;
 
 	String name;
@@ -43455,6 +43392,8 @@ private:
 	BigInteger midiNotes;
 	int length, attackSamples, releaseSamples;
 	int midiRootNote;
+
+	JUCE_LEAK_DETECTOR (SamplerSound);
 };
 
 /**
@@ -43491,13 +43430,14 @@ public:
 
 	void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	double pitchRatio;
 	double sourceSamplePosition;
 	float lgain, rgain, attackReleaseLevel, attackDelta, releaseDelta;
 	bool isInAttack, isInRelease;
+
+	JUCE_LEAK_DETECTOR (SamplerVoice);
 };
 
 #endif   // __JUCE_SAMPLER_JUCEHEADER__
@@ -43629,11 +43569,9 @@ public:
 	*/
 	void post();
 
-	juce_UseDebuggingNewOperator
-
 private:
-	CallbackMessage (const CallbackMessage&);
-	CallbackMessage& operator= (const CallbackMessage&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackMessage);
 };
 
 #endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
@@ -43798,9 +43736,8 @@ public:
 	*/
 	virtual void messageReceived (const MemoryBlock& message) = 0;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	CriticalSection pipeAndSocketLock;
 	ScopedPointer <StreamingSocket> socket;
 	ScopedPointer <NamedPipe> pipe;
@@ -43823,8 +43760,7 @@ private:
 	bool readNextMessageInt();
 	void run();
 
-	InterprocessConnection (const InterprocessConnection&);
-	InterprocessConnection& operator= (const InterprocessConnection&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection);
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
@@ -43889,17 +43825,13 @@ protected:
 	*/
 	virtual InterprocessConnection* createConnectionObject() = 0;
 
-public:
-
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ScopedPointer <StreamingSocket> socket;
 
 	void run();
 
-	InterprocessConnectionServer (const InterprocessConnectionServer&);
-	InterprocessConnectionServer& operator= (const InterprocessConnectionServer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnectionServer);
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
@@ -44043,9 +43975,8 @@ public:
 	/** @internal */
 	~MessageManager() throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	MessageManager() throw();
 
 	friend class MessageListener;
@@ -44072,8 +44003,7 @@ private:
 	Thread::ThreadID volatile threadWithLock;
 	CriticalSection lockingLock;
 
-	MessageManager (const MessageManager&);
-	MessageManager& operator= (const MessageManager&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager);
 };
 
 /** Used to make sure that the calling thread has exclusive access to the message loop.
@@ -44357,11 +44287,12 @@ public:
 	/** @internal */
 	void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int offsetX, offsetY;
 	float radius, opacity;
+
+	JUCE_LEAK_DETECTOR (DropShadowEffect);
 };
 
 #endif   // __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
@@ -44390,9 +44321,8 @@ public:
 	/** Destructor. */
 	~ArrowButton();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paintButton (Graphics& g,
 					  bool isMouseOverButton,
@@ -44408,8 +44338,7 @@ private:
 	Path path;
 	int offset;
 
-	ArrowButton (const ArrowButton&);
-	ArrowButton& operator= (const ArrowButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton);
 };
 
 #endif   // __JUCE_ARROWBUTTON_JUCEHEADER__
@@ -45032,9 +44961,8 @@ public:
 		ValueTree state;
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	friend class DrawableComposite;
 	friend class DrawableShape;
 
@@ -45054,8 +44982,7 @@ protected:
 private:
 	void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
 
-	Drawable (const Drawable&);
-	Drawable& operator= (const Drawable&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Drawable);
 };
 
 #endif   // __JUCE_DRAWABLE_JUCEHEADER__
@@ -45189,9 +45116,8 @@ public:
 		textColourId		 = 0x1004010, /**< The colour to use for the URL text. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paintButton (Graphics& g,
 					  bool isMouseOverButton,
@@ -45210,8 +45136,7 @@ private:
 	Colour backgroundOff, backgroundOn;
 	int edgeIndent;
 
-	DrawableButton (const DrawableButton&);
-	DrawableButton& operator= (const DrawableButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton);
 };
 
 #endif   // __JUCE_DRAWABLEBUTTON_JUCEHEADER__
@@ -45281,9 +45206,8 @@ public:
 	*/
 	void changeWidthToFitText();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void clicked();
 	/** @internal */
@@ -45294,6 +45218,7 @@ protected:
 					  bool isButtonDown);
 
 private:
+
 	URL url;
 	Font font;
 	bool resizeFont;
@@ -45301,8 +45226,7 @@ private:
 
 	const Font getFontToUse() const;
 
-	HyperlinkButton (const HyperlinkButton&);
-	HyperlinkButton& operator= (const HyperlinkButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HyperlinkButton);
 };
 
 #endif   // __JUCE_HYPERLINKBUTTON_JUCEHEADER__
@@ -45412,9 +45336,8 @@ public:
 	*/
 	const Image getDownImage() const;
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	bool hitTest (int x, int y);
 	/** @internal */
@@ -45433,8 +45356,7 @@ private:
 
 	const Image getCurrentImage() const;
 
-	ImageButton (const ImageButton&);
-	ImageButton& operator= (const ImageButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageButton);
 };
 
 #endif   // __JUCE_IMAGEBUTTON_JUCEHEADER__
@@ -45503,8 +45425,6 @@ public:
 	void setOutline (const Colour& outlineColour,
 					 float outlineStrokeWidth);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** @internal */
 	void paintButton (Graphics& g,
@@ -45512,14 +45432,14 @@ protected:
 					  bool isButtonDown);
 
 private:
+
 	Colour normalColour, overColour, downColour, outlineColour;
 	DropShadowEffect shadow;
 	Path shape;
 	bool maintainShapeProportions;
 	float outlineWidth;
 
-	ShapeButton (const ShapeButton&);
-	ShapeButton& operator= (const ShapeButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShapeButton);
 };
 
 #endif   // __JUCE_SHAPEBUTTON_JUCEHEADER__
@@ -45577,8 +45497,6 @@ public:
 		textColourId			= 0x1006501   /**< The colour to use for the button's text. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** @internal */
 	void paintButton (Graphics& g,
@@ -45590,8 +45508,7 @@ protected:
 
 private:
 
-	ToggleButton (const ToggleButton&);
-	ToggleButton& operator= (const ToggleButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleButton);
 };
 
 #endif   // __JUCE_TOGGLEBUTTON_JUCEHEADER__
@@ -45851,8 +45768,6 @@ public:
 	*/
 	static bool performExternalDragDropOfText (const String& text);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** Override this if you want to be able to perform an external drag a set of files
 		when the user drags outside of this container component.
@@ -45875,9 +45790,12 @@ protected:
 													   bool& canMoveFiles);
 
 private:
+
 	friend class DragImageComponent;
 	ScopedPointer <Component> dragImageComponent;
 	String currentDragDesc;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer);
 };
 
 #endif   // __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
@@ -46136,9 +46054,8 @@ public:
 	/** @internal */
 	static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ScopedPointer<Button> missingItemsButton;
 	bool vertical, isEditingActive;
 	ToolbarItemStyle toolbarStyle;
@@ -46153,8 +46070,7 @@ private:
 
 	ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;
 
-	Toolbar (const Toolbar&);
-	Toolbar& operator= (const Toolbar&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Toolbar);
 };
 
 #endif   // __JUCE_TOOLBAR_JUCEHEADER__
@@ -46315,8 +46231,6 @@ public:
 	/** @internal */
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	friend class Toolbar;
 	friend class ItemDragAndDropOverlayComponent;
@@ -46328,8 +46242,7 @@ private:
 	bool isActive, isBeingDragged, isBeingUsedAsAButton;
 	Rectangle<int> contentArea;
 
-	ToolbarItemComponent (const ToolbarItemComponent&);
-	ToolbarItemComponent& operator= (const ToolbarItemComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemComponent);
 };
 
 #endif   // __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
@@ -46387,16 +46300,14 @@ public:
 	/** @internal */
 	void enablementChanged();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	ScopedPointer<Drawable> normalImage, toggledOnImage;
 	Drawable* currentImage;
 
 	void updateDrawable();
 
-	ToolbarButton (const ToolbarButton&);
-	ToolbarButton& operator= (const ToolbarButton&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton);
 };
 
 #endif   // __JUCE_TOOLBARBUTTON_JUCEHEADER__
@@ -46745,9 +46656,8 @@ public:
 		int line, position;
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend class CodeDocumentInsertAction;
 	friend class CodeDocumentDeleteAction;
 	friend class Iterator;
@@ -46767,8 +46677,7 @@ private:
 	void remove (int startPos, int endPos, bool undoable);
 	void checkLastLineStatus();
 
-	CodeDocument (const CodeDocument&);
-	CodeDocument& operator= (const CodeDocument&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeDocument);
 };
 
 #endif   // __JUCE_CODEDOCUMENT_JUCEHEADER__
@@ -46818,7 +46727,9 @@ public:
 	*/
 	virtual const Colour getDefaultColour (int tokenType) = 0;
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (CodeTokeniser);
 };
 
 #endif   // __JUCE_CODETOKENISER_JUCEHEADER__
@@ -47037,9 +46948,8 @@ public:
 	/** @internal */
 	bool isTextInputActive() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	CodeDocument& document;
 
 	Font font;
@@ -47088,8 +46998,7 @@ private:
 	int indexToColumn (int line, int index) const throw();
 	int columnToIndex (int line, int column) const throw();
 
-	CodeEditorComponent (const CodeEditorComponent&);
-	CodeEditorComponent& operator= (const CodeEditorComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorComponent);
 };
 
 #endif   // __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
@@ -47140,7 +47049,9 @@ public:
 	/** This is a handy method for checking whether a string is a c++ reserved keyword. */
 	static bool isReservedKeyword (const String& token) throw();
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (CPlusPlusCodeTokeniser);
 };
 
 #endif   // __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
@@ -47223,9 +47134,8 @@ public:
 															 classes will probably use variations on this colour. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
@@ -47244,8 +47154,7 @@ private:
 
 	void timerCallback();
 
-	ProgressBar (const ProgressBar&);
-	ProgressBar& operator= (const ProgressBar&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar);
 };
 
 #endif   // __JUCE_PROGRESSBAR_JUCEHEADER__
@@ -47959,9 +47868,8 @@ public:
 		textBoxOutlineColourId	  = 0x1001700   /**< The colour to use for a border around the text-editor box. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void labelTextChanged (Label*);
 	/** @internal */
@@ -48001,6 +47909,7 @@ protected:
 	int getNumDecimalPlacesToDisplay() const throw()	{ return numDecimalPlaces; }
 
 private:
+
 	ListenerList <Listener> listeners;
 	Value currentValue, valueMin, valueMax;
 	double lastCurrentValue, lastValueMin, lastValueMax;
@@ -48040,8 +47949,7 @@ private:
 	void triggerChangeMessage (bool synchronous);
 	bool incDecDragDirectionIsHorizontal() const;
 
-	Slider (const Slider&);
-	Slider& operator= (const Slider&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
@@ -48418,8 +48326,6 @@ public:
 	/** Can be overridden for more control over the pop-up menu behaviour. */
 	virtual void showColumnChooserMenu (int columnIdClicked);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	struct ColumnInfo
 	{
@@ -48448,8 +48354,7 @@ private:
 	void updateColumnUnderMouse (int x, int y);
 	void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
-	TableHeaderComponent (const TableHeaderComponent&);
-	TableHeaderComponent operator= (const TableHeaderComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableHeaderComponent);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
@@ -48735,9 +48640,8 @@ public:
 	/** @internal */
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	TableHeaderComponent* header;
 	TableListBoxModel* model;
 	int columnIdNowBeingDragged;
@@ -48745,8 +48649,7 @@ private:
 
 	void updateColumnComponents() const;
 
-	TableListBox (const TableListBox&);
-	TableListBox& operator= (const TableListBox&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableListBox);
 };
 
 #endif   // __JUCE_TABLELISTBOX_JUCEHEADER__
@@ -48886,8 +48789,6 @@ public:
 	/** @internal */
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	ToolbarItemFactory& factory;
 	Toolbar* toolbar;
@@ -48898,8 +48799,7 @@ private:
 	void replaceComponent (ToolbarItemComponent* comp);
 	void addComponent (int itemId, int index);
 
-	ToolbarItemPalette (const ToolbarItemPalette&);
-	ToolbarItemPalette& operator= (const ToolbarItemPalette&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette);
 };
 
 #endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
@@ -49411,9 +49311,8 @@ public:
 	*/
 	const String getItemIdentifierString() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	TreeView* ownerView;
 	TreeViewItem* parentItem;
 	OwnedArray <TreeViewItem> subItems;
@@ -49443,8 +49342,7 @@ private:
 	TreeViewItem* getNextVisibleItem (bool recurse) const throw();
 	TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
-	TreeViewItem (const TreeViewItem&);
-	TreeViewItem& operator= (const TreeViewItem&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem);
 };
 
 /**
@@ -49691,8 +49589,6 @@ public:
 	/** @internal */
 	void itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	friend class TreeViewItem;
 	friend class TreeViewContentComponent;
@@ -49726,8 +49622,7 @@ private:
 									 const StringArray& files, const String& sourceDescription,
 									 Component* sourceComponent) const throw();
 
-	TreeView (const TreeView&);
-	TreeView& operator= (const TreeView&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };
 
 #endif   // __JUCE_TREEVIEW_JUCEHEADER__
@@ -49946,8 +49841,6 @@ public:
 	static int compareElements (const DirectoryContentsList::FileInfo* first,
 								const DirectoryContentsList::FileInfo* second);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	File root;
 	const FileFilter* fileFilter;
@@ -49967,8 +49860,7 @@ private:
 				  const Time& creationTime, bool isReadOnly);
 	void setTypeFlags (int newFlags);
 
-	DirectoryContentsList (const DirectoryContentsList&);
-	DirectoryContentsList& operator= (const DirectoryContentsList&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList);
 };
 
 #endif   // __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
@@ -50066,14 +49958,13 @@ public:
 	/** @internal */
 	void sendMouseClickMessage (const File& file, const MouseEvent& e);
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	DirectoryContentsList& fileList;
 	ListenerList <FileBrowserListener> listeners;
 
-	DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
-	DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsDisplayComponent);
 };
 
 #endif   // __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
@@ -50123,11 +50014,9 @@ public:
 	*/
 	virtual void selectedFileChanged (const File& newSelectedFile) = 0;
 
-	juce_UseDebuggingNewOperator
-
 private:
-	FilePreviewComponent (const FilePreviewComponent&);
-	FilePreviewComponent& operator= (const FilePreviewComponent&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePreviewComponent);
 };
 
 #endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
@@ -50295,8 +50184,6 @@ public:
 	/** @internal */
 	FilePreviewComponent* getPreviewComponent() const throw();
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	virtual const BigInteger getRoots (StringArray& rootNames, StringArray& rootPaths);
 
@@ -50322,8 +50209,7 @@ private:
 	void sendListenerChangeMessage();
 	bool isFileOrDirSuitable (const File& f) const;
 
-	FileBrowserComponent (const FileBrowserComponent&);
-	FileBrowserComponent& operator= (const FileBrowserComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowserComponent);
 };
 
 #endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
@@ -50477,9 +50363,8 @@ public:
 	*/
 	const Array<File>& getResults() const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	String title, filters;
 	File startingFile;
 	Array<File> results;
@@ -50493,6 +50378,8 @@ private:
 									const String& filters, bool selectsDirectories, bool selectsFiles,
 									bool isSave, bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
 									FilePreviewComponent* previewComponent);
+
+	JUCE_LEAK_DETECTOR (FileChooser);
 };
 
 #endif   // __JUCE_FILECHOOSER_JUCEHEADER__
@@ -50567,8 +50454,6 @@ public:
 	/** @internal */
 	void componentVisibilityChanged (Component& component);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	Component* owner;
@@ -50584,8 +50469,7 @@ private:
 	void bringShadowWindowsToFront();
 	void deleteShadowWindows();
 
-	DropShadower (const DropShadower&);
-	DropShadower& operator= (const DropShadower&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower);
 };
 
 #endif   // __JUCE_DROPSHADOWER_JUCEHEADER__
@@ -50684,8 +50568,6 @@ public:
 	*/
 	static TopLevelWindow* getActiveTopLevelWindow() throw();
 
-	juce_UseDebuggingNewOperator
-
 	/** @internal */
 	virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = 0);
 
@@ -50715,8 +50597,7 @@ private:
 
 	void setWindowActive (bool isNowActive);
 
-	TopLevelWindow (const TopLevelWindow&);
-	TopLevelWindow& operator= (const TopLevelWindow&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow);
 };
 
 #endif   // __JUCE_TOPLEVELWINDOW_JUCEHEADER__
@@ -50874,15 +50755,13 @@ public:
 	virtual void applyBoundsToComponent (Component* component,
 										 const Rectangle<int>& bounds);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int minW, maxW, minH, maxH;
 	int minOffTop, minOffLeft, minOffBottom, minOffRight;
 	double aspectRatio;
 
-	ComponentBoundsConstrainer (const ComponentBoundsConstrainer&);
-	ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBoundsConstrainer);
 };
 
 #endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
@@ -50904,7 +50783,7 @@ private:
 
 		void mouseDown (const MouseEvent& e)
 		{
-			myDragger.startDraggingComponent (this, 0);
+			myDragger.startDraggingComponent (this, e, 0);
 		}
 
 		void mouseDrag (const MouseEvent& e)
@@ -50932,6 +50811,7 @@ public:
 		@see dragComponent
 	*/
 	void startDraggingComponent (Component* componentToDrag,
+								 const MouseEvent& e,
 								 ComponentBoundsConstrainer* constrainer);
 
 	/** Call this from your mouseDrag() callback to move the component.
@@ -50948,14 +50828,12 @@ public:
 	void dragComponent (Component* componentToDrag,
 						const MouseEvent& e);
 
-	juce_UseDebuggingNewOperator
-
 private:
-	ComponentBoundsConstrainer* constrainer;
-	Point<int> originalPos;
 
-	ComponentDragger (const ComponentDragger&);
-	ComponentDragger& operator= (const ComponentDragger&);
+	ComponentBoundsConstrainer* constrainer;
+	Point<int> mouseDownWithinTarget;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentDragger);
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__
@@ -51098,9 +50976,8 @@ public:
 		int zone;
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
@@ -51125,8 +51002,7 @@ private:
 
 	void updateMouseZone (const MouseEvent& e);
 
-	ResizableBorderComponent (const ResizableBorderComponent&);
-	ResizableBorderComponent& operator= (const ResizableBorderComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableBorderComponent);
 };
 
 #endif   // __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
@@ -51174,9 +51050,8 @@ public:
 	/** Destructor. */
 	~ResizableCornerComponent();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
@@ -51194,8 +51069,7 @@ private:
 	ComponentBoundsConstrainer* constrainer;
 	Rectangle<int> originalBounds;
 
-	ResizableCornerComponent (const ResizableCornerComponent&);
-	ResizableCornerComponent& operator= (const ResizableCornerComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableCornerComponent);
 };
 
 #endif   // __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
@@ -51441,9 +51315,8 @@ public:
 		backgroundColourId	  = 0x1005700,  /**< A colour to use to fill the window's background. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paint (Graphics& g);
 	/** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
@@ -51501,6 +51374,7 @@ protected:
 	ScopedPointer <ResizableBorderComponent> resizableBorder;
 
 private:
+
 	Component::SafePointer <Component> contentComponent;
 	bool resizeToFitContent, fullscreen;
 	ComponentDragger dragger;
@@ -51513,14 +51387,13 @@ private:
 
 	void updateLastPos();
 
-	ResizableWindow (const ResizableWindow&);
-	ResizableWindow& operator= (const ResizableWindow&);
-
-	// (xxx remove these eventually)
-	// temporarily here to stop old code compiling, as the parameters for these methods have changed..
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// The parameters for these methods have changed - please update your code!
 	void getBorderThickness (int& left, int& top, int& right, int& bottom);
-	// temporarily here to stop old code compiling, as the parameters for these methods have changed..
 	void getContentComponentBorder (int& left, int& top, int& right, int& bottom);
+   #endif
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow);
 };
 
 #endif   // __JUCE_RESIZABLEWINDOW_JUCEHEADER__
@@ -51579,8 +51452,6 @@ public:
 	/** Checks to see if a point lies within this glyph. */
 	bool hitTest (float x, float y) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	friend class GlyphArrangement;
@@ -51590,6 +51461,7 @@ private:
 	int glyph;
 
 	PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
+	JUCE_LEAK_DETECTOR (PositionedGlyph);
 };
 
 /**
@@ -51780,15 +51652,16 @@ public:
 						float x, float y, float width, float height,
 						const Justification& justification);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	OwnedArray <PositionedGlyph> glyphs;
 
 	int insertEllipsis (const Font& font, float maxXPos, int startIndex, int endIndex);
 	int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
 						  const Justification& justification, float minimumHorizontalScale);
 	void spreadOutLine (int start, int numGlyphs, float targetWidth);
+
+	JUCE_LEAK_DETECTOR (GlyphArrangement);
 };
 
 #endif   // __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
@@ -51897,8 +51770,6 @@ public:
 	/** @internal */
 	void fileDoubleClicked (const File& file);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	class ContentComponent  : public Component
 	{
@@ -51919,8 +51790,7 @@ private:
 	ContentComponent* content;
 	const bool warnAboutOverwritingExistingFiles;
 
-	FileChooserDialogBox (const FileChooserDialogBox&);
-	FileChooserDialogBox& operator= (const FileChooserDialogBox&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
 };
 
 #endif   // __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
@@ -51994,13 +51864,11 @@ public:
 	/** @internal */
 	void returnKeyPressed (int currentSelectedRow);
 
-	juce_UseDebuggingNewOperator
-
 private:
-	FileListComponent (const FileListComponent&);
-	FileListComponent& operator= (const FileListComponent&);
 
 	File lastDirectory;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListComponent);
 };
 
 #endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
@@ -52174,8 +52042,6 @@ public:
 	/** @internal */
 	void fileDragExit (const StringArray& files);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	ComboBox filenameBox;
@@ -52191,8 +52057,7 @@ private:
 	void buttonClicked (Button* button);
 	void handleAsyncUpdate();
 
-	FilenameComponent (const FilenameComponent&);
-	FilenameComponent& operator= (const FilenameComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent);
 };
 
 #endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -52277,8 +52142,6 @@ public:
 	/** @internal */
 	void buttonClicked (Button* button);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	FileSearchPath path;
@@ -52291,8 +52154,7 @@ private:
 	void changed();
 	void updateButtons();
 
-	FileSearchPathListComponent (const FileSearchPathListComponent&);
-	FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileSearchPathListComponent);
 };
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
@@ -52357,13 +52219,11 @@ public:
 	*/
 	const String& getDragAndDropDescription() const throw()	  { return dragAndDropDescription; }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	String dragAndDropDescription;
 
-	FileTreeComponent (const FileTreeComponent&);
-	FileTreeComponent& operator= (const FileTreeComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileTreeComponent);
 };
 
 #endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
@@ -52400,8 +52260,6 @@ public:
 	/** @internal */
 	void timerCallback();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	File fileToLoad;
 	Image currentThumbnail;
@@ -52409,8 +52267,7 @@ private:
 
 	void getThumbSize (int& w, int& h) const;
 
-	ImagePreviewComponent (const ImagePreviewComponent&);
-	ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePreviewComponent);
 };
 
 #endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
@@ -52459,13 +52316,14 @@ public:
 	/** This always returns true. */
 	bool isDirectorySuitable (const File& file) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	StringArray fileWildcards, directoryWildcards;
 
 	static void parse (const String& pattern, StringArray& result);
 	static bool match (const File& file, const StringArray& wildcards);
+
+	JUCE_LEAK_DETECTOR (WildcardFileFilter);
 };
 
 #endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
@@ -52688,8 +52546,6 @@ public:
 	/** @internal */
 	void globalFocusChanged (Component* focusedComponent);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	ApplicationCommandManager* commandManager;
@@ -52720,6 +52576,7 @@ private:
 						Component* const originatingComponent) const;
 
 	KeyPressMappingSet& operator= (const KeyPressMappingSet&);
+	JUCE_LEAK_DETECTOR (KeyPressMappingSet);
 };
 
 #endif   // __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
@@ -52803,8 +52660,6 @@ public:
 	/** @internal */
 	void resized();
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	KeyPressMappingSet& mappings;
@@ -52821,8 +52676,7 @@ private:
 	friend class ScopedPointer<TopLevelItem>;
 	ScopedPointer<TopLevelItem> treeItem;
 
-	KeyMappingEditorComponent (const KeyMappingEditorComponent&);
-	KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingEditorComponent);
 };
 
 #endif   // __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
@@ -52879,15 +52733,11 @@ public:
 	~ComponentMovementWatcher();
 
 	/** This callback happens when the component that is being watched is moved
-		relative to its top-level peer window, or when it is resized.
-	*/
+		relative to its top-level peer window, or when it is resized. */
 	virtual void componentMovedOrResized (bool wasMoved, bool wasResized) = 0;
 
-	/** This callback happens when the component's top-level peer is changed.
-	*/
+	/** This callback happens when the component's top-level peer is changed. */
 	virtual void componentPeerChanged() = 0;
-
-	juce_UseDebuggingNewOperator
 
 	/** @internal */
 	void componentParentHierarchyChanged (Component& component);
@@ -52905,8 +52755,7 @@ private:
 	void unregister();
 	void registerWithParentComps();
 
-	ComponentMovementWatcher (const ComponentMovementWatcher&);
-	ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentMovementWatcher);
 };
 
 #endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
@@ -53041,9 +52890,8 @@ public:
 	void clicked (const ModifierKeys& mods);
 	bool hitTest (int x, int y);
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	friend class TabbedButtonBar;
 	TabbedButtonBar& owner;
 	int overlapPixels;
@@ -53060,8 +52908,8 @@ protected:
 	int getIndex() const;
 
 private:
-	TabBarButton (const TabBarButton&);
-	TabBarButton& operator= (const TabBarButton&);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabBarButton);
 };
 
 /**
@@ -53238,8 +53086,6 @@ public:
 	/** @internal */
 	void lookAndFeelChanged();
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	/** This creates one of the tabs.
@@ -53272,8 +53118,7 @@ private:
 
 	void showExtraItemsMenu();
 
-	TabbedButtonBar (const TabbedButtonBar&);
-	TabbedButtonBar& operator= (const TabbedButtonBar&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar);
 };
 
 #endif   // __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
@@ -53455,8 +53300,6 @@ public:
 	/** @internal */
 	void lookAndFeelChanged();
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	ScopedPointer<TabbedButtonBar> tabs;
@@ -53479,8 +53322,7 @@ private:
 	friend class TabCompButtonBar;
 	void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
-	TabbedComponent (const TabbedComponent&);
-	TabbedComponent& operator= (const TabbedComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent);
 };
 
 #endif   // __JUCE_TABBEDCOMPONENT_JUCEHEADER__
@@ -53630,14 +53472,11 @@ public:
 	/** @internal */
 	void handleAsyncUpdate();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	ApplicationCommandManager* manager;
 	ListenerList <Listener> listeners;
 
-	MenuBarModel (const MenuBarModel&);
-	MenuBarModel& operator= (const MenuBarModel&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarModel);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
@@ -53712,9 +53551,8 @@ public:
 	void menuCommandInvoked (MenuBarModel* menuBarModel,
 							 const ApplicationCommandTarget::InvocationInfo& info);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class AsyncCallback;
 	friend class AsyncCallback;
 	MenuBarModel* model;
@@ -53732,8 +53570,7 @@ private:
 	void repaintMenuItem (int index);
 	void menuDismissed (int topLevelIndex, int itemId);
 
-	MenuBarComponent (const MenuBarComponent&);
-	MenuBarComponent& operator= (const MenuBarComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
 };
 
 #endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__
@@ -53943,9 +53780,8 @@ public:
 	/** @internal */
 	const Rectangle<int> getTitleBarArea();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int titleBarHeight, menuBarHeight, requiredButtons;
 	bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
 	ScopedPointer <Button> titleBarButtons [3];
@@ -53959,8 +53795,7 @@ private:
 
 	void repaintTitleBar();
 
-	DocumentWindow (const DocumentWindow&);
-	DocumentWindow& operator= (const DocumentWindow&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentWindow);
 };
 
 #endif   // __JUCE_DOCUMENTWINDOW_JUCEHEADER__
@@ -53998,11 +53833,12 @@ public:
 	/** @internal */
 	void broughtToFront();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	void updateOrder();
 	MultiDocumentPanel* getOwner() const throw();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanelWindow);
 };
 
 /**
@@ -54210,9 +54046,8 @@ public:
 	/** @internal */
 	void componentNameChanged (Component&);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	LayoutMode mode;
 	Array <Component*> components;
 	ScopedPointer<TabbedComponent> tabComponent;
@@ -54226,6 +54061,8 @@ private:
 	void updateOrder();
 
 	void addWindow (Component* component);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanel);
 };
 
 #endif   // __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
@@ -54448,9 +54285,8 @@ public:
 	void setItemPosition (int itemIndex,
 						  int newPosition);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	struct ItemLayoutProperties
 	{
 		int itemIndex;
@@ -54469,8 +54305,7 @@ private:
 	int getMaximumSizeOfItems (int startIndex, int endIndex) const;
 	void updatePrefSizesToMatchCurrentPositions();
 
-	StretchableLayoutManager (const StretchableLayoutManager&);
-	StretchableLayoutManager& operator= (const StretchableLayoutManager&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutManager);
 };
 
 #endif   // __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
@@ -54535,15 +54370,13 @@ public:
 	/** @internal */
 	void mouseDrag (const MouseEvent& e);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	StretchableLayoutManager* layout;
 	int itemIndex, mouseDownPos;
 	bool isVertical;
 
-	StretchableLayoutResizerBar (const StretchableLayoutResizerBar&);
-	StretchableLayoutResizerBar& operator= (const StretchableLayoutResizerBar&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutResizerBar);
 };
 
 #endif   // __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
@@ -54610,9 +54443,8 @@ public:
 	/** Returns the size of one of the items. */
 	double getItemSize (int index) const throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	struct Item
 	{
 		double size;
@@ -54623,8 +54455,7 @@ private:
 
 	OwnedArray <Item> items;
 
-	StretchableObjectResizer (const StretchableObjectResizer&);
-	StretchableObjectResizer& operator= (const StretchableObjectResizer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableObjectResizer);
 };
 
 #endif   // __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
@@ -54760,13 +54591,14 @@ public:
 					 int x, int y, int w, int h,
 					 const Justification& layoutFlags) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class Token;
 	friend class OwnedArray <Token>;
 	OwnedArray <Token> tokens;
 	int totalLines;
+
+	JUCE_LEAK_DETECTOR (TextLayout);
 };
 
 #endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
@@ -55062,9 +54894,8 @@ public:
 		outlineColourId		 = 0x1001820   /**< An optional colour to use to draw a border around the window. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
@@ -55083,6 +54914,7 @@ protected:
 	int getDesktopWindowStyleFlags() const;
 
 private:
+
 	String text;
 	TextLayout textLayout;
 	AlertIconType alertIconType;
@@ -55102,9 +54934,7 @@ private:
 
 	void updateLayout (bool onlyIncreaseSize);
 
-	// disable copy constructor
-	AlertWindow (const AlertWindow&);
-	AlertWindow& operator= (const AlertWindow&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow);
 };
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -55680,9 +55510,8 @@ public:
 
 	static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	friend JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
 	static void clearDefaultLookAndFeel() throw(); // called at shutdown
 
@@ -55706,8 +55535,7 @@ private:
 	// This has been deprecated - see the new parameter list..
 	virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
 
-	LookAndFeel (const LookAndFeel&);
-	LookAndFeel& operator= (const LookAndFeel&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel);
 };
 
 #endif   // __JUCE_LOOKANDFEEL_JUCEHEADER__
@@ -55829,13 +55657,11 @@ public:
 												Button* closeButton,
 												bool positionTitleBarButtonsOnLeft);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	DropShadowEffect scrollbarShadow;
 
-	OldSchoolLookAndFeel (const OldSchoolLookAndFeel&);
-	OldSchoolLookAndFeel& operator= (const OldSchoolLookAndFeel&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OldSchoolLookAndFeel);
 };
 
 #endif   // __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
@@ -56217,10 +56043,11 @@ public:
 			sendChangeMessage();
 	}
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Array <SelectableItemType> selectedItems;
+
+	JUCE_LEAK_DETECTOR (SelectedItemSet <SelectableItemType>);
 };
 
 #endif   // __JUCE_SELECTEDITEMSET_JUCEHEADER__
@@ -56420,13 +56247,14 @@ public:
 	/** @internal */
 	bool hitTest (int, int)		 { return false; }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Array <SelectableItemType> originalSelection;
 	LassoSource <SelectableItemType>* source;
 	int outlineThickness;
 	Point<int> dragStartPos;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LassoComponent);
 };
 
 #endif   // __JUCE_LASSOCOMPONENT_JUCEHEADER__
@@ -56675,21 +56503,19 @@ public:
 	*/
 	void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
 
-	juce_UseDebuggingNewOperator
-
 	/** @internal */
 	void handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, const ModifierKeys& mods);
 	/** @internal */
 	void handleWheel (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, float x, float y);
 
 private:
+
 	friend class Desktop;
 	friend class ComponentPeer;
 	friend class MouseInputSourceInternal;
 	ScopedPointer<MouseInputSourceInternal> pimpl;
 
-	MouseInputSource (const MouseInputSource&);
-	MouseInputSource& operator= (const MouseInputSource&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource);
 };
 
 #endif   // __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
@@ -56762,14 +56588,11 @@ public:
 	/** @internal */
 	void buttonClicked (Button*);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	ToggleButton button;
 	String onText, offText;
 
-	BooleanPropertyComponent (const BooleanPropertyComponent&);
-	BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BooleanPropertyComponent);
 };
 
 #endif   // __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -56822,13 +56645,10 @@ public:
 	/** @internal */
 	void buttonClicked (Button*);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	TextButton button;
 
-	ButtonPropertyComponent (const ButtonPropertyComponent&);
-	ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonPropertyComponent);
 };
 
 #endif   // __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__
@@ -56913,8 +56733,6 @@ public:
 	/** @internal */
 	void comboBoxChanged (ComboBox*);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** The list of options that will be shown in the combo box.
 
@@ -56931,8 +56749,7 @@ private:
 	class RemapperValueSource;
 	void createComboBox();
 
-	ChoicePropertyComponent (const ChoicePropertyComponent&);
-	ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent);
 };
 
 #endif   // __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
@@ -57009,18 +56826,15 @@ public:
 	/** @internal */
 	void sliderValueChanged (Slider*);
 
-	juce_UseDebuggingNewOperator
-
 protected:
-
 	/** The slider component being used in this component.
-
 		Your subclass has access to this in case it needs to customise it in some way.
 	*/
 	Slider slider;
 
-	SliderPropertyComponent (const SliderPropertyComponent&);
-	SliderPropertyComponent& operator= (const SliderPropertyComponent&);
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderPropertyComponent);
 };
 
 #endif   // __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
@@ -57086,15 +56900,12 @@ public:
 	/** @internal */
 	void textWasEdited();
 
-	juce_UseDebuggingNewOperator
-
 private:
 	ScopedPointer<Label> textEditor;
 
 	void createEditor (int maxNumChars, bool isMultiLine);
 
-	TextPropertyComponent (const TextPropertyComponent&);
-	TextPropertyComponent& operator= (const TextPropertyComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent);
 };
 
 #endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
@@ -57191,8 +57002,6 @@ public:
 	/** @internal */
 	void* originalWndProc;
 
-	juce_UseDebuggingNewOperator
-
 private:
 	class Pimpl;
 	friend class Pimpl;
@@ -57203,8 +57012,7 @@ private:
 	void setControlBounds (const Rectangle<int>& bounds) const;
 	void setControlVisible (bool b) const;
 
-	ActiveXControlComponent (const ActiveXControlComponent&);
-	ActiveXControlComponent& operator= (const ActiveXControlComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent);
 };
 
 #endif
@@ -57277,9 +57085,8 @@ public:
 	/** @internal */
 	void childBoundsChanged (Component*);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	AudioDeviceManager& deviceManager;
 	ScopedPointer<ComboBox> deviceTypeDropDown;
 	ScopedPointer<Label> deviceTypeDropDownLabel;
@@ -57295,8 +57102,7 @@ private:
 	ScopedPointer<ComboBox> midiOutputSelector;
 	ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
 
-	AudioDeviceSelectorComponent (const AudioDeviceSelectorComponent&);
-	AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent);
 };
 
 #endif   // __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
@@ -57419,11 +57225,8 @@ protected:
 	virtual void paintContent (Graphics& g, int width, int height) = 0;
 
 public:
-
 	/** @internal */
 	void paint (Graphics& g);
-
-	juce_UseDebuggingNewOperator
 
 private:
 	Rectangle<int> content;
@@ -57431,8 +57234,7 @@ private:
 	float arrowTipX, arrowTipY;
 	DropShadowEffect shadow;
 
-	BubbleComponent (const BubbleComponent&);
-	BubbleComponent& operator= (const BubbleComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent);
 };
 
 #endif   // __JUCE_BUBBLECOMPONENT_JUCEHEADER__
@@ -57529,9 +57331,8 @@ public:
 	/** @internal */
 	void timerCallback();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int fadeOutLength, mouseClickCounter;
 	TextLayout textLayout;
 	int64 expiryTime;
@@ -57541,8 +57342,7 @@ private:
 			   bool removeWhenMouseClicked,
 			   bool deleteSelfAfterUse);
 
-	BubbleMessageComponent (const BubbleMessageComponent&);
-	BubbleMessageComponent& operator= (const BubbleMessageComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleMessageComponent);
 };
 
 #endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
@@ -57651,9 +57451,8 @@ public:
 		labelTextColourId		   = 0x1007001	 /**< the colour used for the labels next to the sliders. */
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	class ColourSpaceView;
 	class HueSelectorComp;
 	class SwatchComponent;
@@ -57680,8 +57479,7 @@ private:
 	void paint (Graphics& g);
 	void resized();
 
-	ColourSelector (const ColourSelector&);
-	ColourSelector& operator= (const ColourSelector&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
 	// This constructor is here temporarily to prevent old code compiling, because the parameters
@@ -57759,8 +57557,6 @@ public:
 	*/
 	void setResamplingQuality (Graphics::ResamplingQuality newQuality);
 
-	juce_UseDebuggingNewOperator
-
 	/** @internal */
 	void childBoundsChanged (Component*);
 
@@ -57785,8 +57581,7 @@ private:
 	void passOnMouseEventToPeer (const MouseEvent& e);
 	int scaleInt (int n) const;
 
-	MagnifierComponent (const MagnifierComponent&);
-	MagnifierComponent& operator= (const MagnifierComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MagnifierComponent);
 };
 
 #endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
@@ -58065,10 +57860,7 @@ public:
 	/** @internal */
 	void colourChanged();
 
-	juce_UseDebuggingNewOperator
-
 protected:
-	friend class MidiKeyboardUpDownButton;
 
 	/** Draws a white note in the given rectangle.
 
@@ -58143,6 +57935,8 @@ protected:
 
 private:
 
+	friend class MidiKeyboardUpDownButton;
+
 	MidiKeyboardState& state;
 	int xOffset, blackNoteLength;
 	float keyWidth;
@@ -58172,8 +57966,7 @@ private:
 	void updateNoteUnderMouse (const Point<int>& pos);
 	void repaintNote (const int midiNoteNumber);
 
-	MidiKeyboardComponent (const MidiKeyboardComponent&);
-	MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent);
 };
 
 #endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
@@ -58236,14 +58029,11 @@ public:
 	/** @internal */
 	void paint (Graphics& g);
 
-	juce_UseDebuggingNewOperator
-
 private:
 	friend class NSViewComponentInternal;
 	ScopedPointer <NSViewComponentInternal> info;
 
-	NSViewComponent (const NSViewComponent&);
-	NSViewComponent& operator= (const NSViewComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponent);
 };
 
 #endif
@@ -58308,7 +58098,9 @@ public:
 	static void getAvailablePixelFormats (Component* component,
 										  OwnedArray <OpenGLPixelFormat>& results);
 
-	juce_UseDebuggingNewOperator
+private:
+
+	JUCE_LEAK_DETECTOR (OpenGLPixelFormat);
 };
 
 /**
@@ -58385,10 +58177,12 @@ public:
 	*/
 	static OpenGLContext* getCurrentContext();
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	OpenGLContext() throw();
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext);
 };
 
 /**
@@ -58541,9 +58335,6 @@ public:
 	*/
 	CriticalSection& getContextLock() throw()	   { return contextLock; }
 
-	/** @internal */
-	void paint (Graphics& g);
-
 	/** Returns the native handle of an embedded heavyweight window, if there is one.
 
 		E.g. On windows, this will return the HWND of the sub-window containing
@@ -58555,7 +58346,8 @@ public:
 		This can be called back on the same thread that created the context. */
 	void deleteContext();
 
-	juce_UseDebuggingNewOperator
+	/** @internal */
+	void paint (Graphics& g);
 
 private:
 	const OpenGLType type;
@@ -58575,8 +58367,7 @@ private:
 	void updateContextPosition();
 	void internalRepaint (int x, int y, int w, int h);
 
-	OpenGLComponent (const OpenGLComponent&);
-	OpenGLComponent& operator= (const OpenGLComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };
 
 #endif
@@ -58687,8 +58478,6 @@ public:
 	/** @internal */
 	void buttonClicked (Button* button);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	String currentPageName;
@@ -58696,8 +58485,7 @@ private:
 	OwnedArray<DrawableButton> buttons;
 	int buttonSize;
 
-	PreferencesPanel (const PreferencesPanel&);
-	PreferencesPanel& operator= (const PreferencesPanel&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreferencesPanel);
 };
 
 #endif   // __JUCE_PREFERENCESPANEL_JUCEHEADER__
@@ -58881,9 +58669,8 @@ public:
 	/** @internal */
 	void paint (Graphics& g);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	File movieFile;
 	bool movieLoaded, controllerVisible, looping;
 
@@ -58901,8 +58688,7 @@ private:
 	void* movie;
 #endif
 
-	QuickTimeMovieComponent (const QuickTimeMovieComponent&);
-	QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeMovieComponent);
 };
 
 #endif
@@ -58956,12 +58742,9 @@ public:
 	void paint (Graphics& g);
 #endif
 
-	juce_UseDebuggingNewOperator
-
 private:
 
-	SystemTrayIconComponent (const SystemTrayIconComponent&);
-	SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SystemTrayIconComponent);
 };
 
 #endif
@@ -59055,9 +58838,8 @@ public:
 	/** @internal */
 	void visibilityChanged();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	WebBrowserComponentInternal* browser;
 	bool blankPageShown, unloadPageWhenBrowserIsHidden;
 	String lastURL;
@@ -59067,8 +58849,7 @@ private:
 	void reloadLastURL();
 	void checkWindowAssociation();
 
-	WebBrowserComponent (const WebBrowserComponent&);
-	WebBrowserComponent& operator= (const WebBrowserComponent&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponent);
 };
 
 #endif
@@ -59162,9 +58943,8 @@ public:
 	/** @internal */
 	void handleCommandMessage (int commandId);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	int borderSpace;
 	float arrowSize;
 	Component& content;
@@ -59176,8 +58956,7 @@ private:
 	void refreshPath();
 	void drawCallOutBoxBackground (Graphics& g, const Path& outline, int width, int height);
 
-	CallOutBox (const CallOutBox&);
-	CallOutBox& operator= (const CallOutBox&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox);
 };
 
 #endif   // __JUCE_CALLOUTBOX_JUCEHEADER__
@@ -59499,9 +59278,8 @@ public:
 	virtual int getCurrentRenderingEngine() throw();
 	virtual void setCurrentRenderingEngine (int index);
 
-	juce_UseDebuggingNewOperator
-
 protected:
+
 	Component* const component;
 	const int styleFlags;
 	RectangleList maskedRegion;
@@ -59523,8 +59301,7 @@ private:
 
 	void setLastDragDropTarget (Component* comp);
 
-	ComponentPeer (const ComponentPeer&);
-	ComponentPeer& operator= (const ComponentPeer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer);
 };
 
 #endif   // __JUCE_COMPONENTPEER_JUCEHEADER__
@@ -59626,17 +59403,15 @@ public:
 								bool shouldBeResizable = false,
 								bool useBottomRightCornerResizer = false);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** @internal */
 	void resized();
 
 private:
+
 	bool escapeKeyTriggersCloseButton;
 
-	DialogWindow (const DialogWindow&);
-	DialogWindow& operator= (const DialogWindow&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogWindow);
 };
 
 #endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__
@@ -59759,15 +59534,13 @@ public:
 	/** @internal */
 	void timerCallback();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Image backgroundImage;
 	Time earliestTimeToDelete;
 	int originalClickCounter;
 
-	SplashScreen (const SplashScreen&);
-	SplashScreen& operator= (const SplashScreen&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen);
 };
 
 #endif   // __JUCE_SPLASHSCREEN_JUCEHEADER__
@@ -59892,9 +59665,8 @@ public:
 	*/
 	AlertWindow* getAlertWindow() const throw()	 { return alertWindow; }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	void timerCallback();
 
 	double progress;
@@ -59903,8 +59675,7 @@ private:
 	CriticalSection messageLock;
 	const int timeOutMsWhenCancelling;
 
-	ThreadWithProgressWindow (const ThreadWithProgressWindow&);
-	ThreadWithProgressWindow& operator= (const ThreadWithProgressWindow&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow);
 };
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
@@ -60094,9 +59865,8 @@ public:
 		}
 	}
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	// table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
 	HeapBlock<int> table;
 	Rectangle<int> bounds;
@@ -60109,6 +59879,8 @@ private:
 	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
 	void sanitiseLevels (bool useNonZeroWinding) throw();
 	static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
+
+	JUCE_LEAK_DETECTOR (EdgeTable);
 };
 
 #endif   // __JUCE_EDGETABLE_JUCEHEADER__
@@ -60223,7 +59995,8 @@ public:
 	*/
 	AffineTransform transform;
 
-	juce_UseDebuggingNewOperator
+private:
+	JUCE_LEAK_DETECTOR (FillType);
 };
 
 #endif   // __JUCE_FILLTYPE_JUCEHEADER__
@@ -60375,8 +60148,6 @@ public:
 	void setFont (const Font& newFont);
 	void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	OutputStream& out;
@@ -60407,8 +60178,7 @@ protected:
 	void writeTransform (const AffineTransform& trans) const;
 	void writeImage (const Image& im, int sx, int sy, int maxW, int maxH) const;
 
-	LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
-	LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsPostScriptRenderer);
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
@@ -60477,8 +60247,6 @@ public:
 	void drawGlyph (int glyphNumber, float x, float y);
 	void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 
 	Image image;
@@ -60492,8 +60260,7 @@ protected:
 	ScopedPointer <SavedState> currentState;
 	OwnedArray <SavedState> stateStack;
 
-	LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
-	LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer);
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
@@ -60724,9 +60491,8 @@ public:
 		ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	RelativeParallelogram bounds;
 	OwnedArray <Marker> markersX, markersY;
 	bool updateBoundsReentrant;
@@ -60735,6 +60501,7 @@ private:
 	void updateBoundsToFitChildren();
 
 	DrawableComposite& operator= (const DrawableComposite&);
+	JUCE_LEAK_DETECTOR (DrawableComposite);
 };
 
 #endif   // __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
@@ -60839,9 +60606,8 @@ public:
 		static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	Image image;
 	float opacity;
 	Colour overlayColour;
@@ -60850,6 +60616,7 @@ private:
 	void refreshTransformFromBounds();
 
 	DrawableImage& operator= (const DrawableImage&);
+	JUCE_LEAK_DETECTOR (DrawableImage);
 };
 
 #endif   // __JUCE_DRAWABLEIMAGE_JUCEHEADER__
@@ -61092,15 +60859,15 @@ public:
 		static const Identifier nonZeroWinding, point1, point2, point3;
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	bool rebuildPath (Path& path) const;
 
 private:
+
 	ScopedPointer<RelativePointPath> relativePath;
 
 	DrawablePath& operator= (const DrawablePath&);
+	JUCE_LEAK_DETECTOR (DrawablePath);
 };
 
 #endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
@@ -61170,8 +60937,6 @@ public:
 		static const Identifier topLeft, topRight, bottomLeft, cornerSize;
 	};
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** @internal */
 	bool rebuildPath (Path& path) const;
@@ -61183,6 +60948,7 @@ private:
 	const AffineTransform calculateTransform() const;
 
 	DrawableRectangle& operator= (const DrawableRectangle&);
+	JUCE_LEAK_DETECTOR (DrawableRectangle);
 };
 
 #endif   // __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
@@ -61295,9 +61061,8 @@ public:
 		static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;
 	};
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	RelativeParallelogram bounds;
 	RelativePoint fontSizeControlPoint;
 	Font font;
@@ -61308,6 +61073,7 @@ private:
 	void refreshBounds();
 
 	DrawableText& operator= (const DrawableText&);
+	JUCE_LEAK_DETECTOR (DrawableText);
 };
 
 #endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
@@ -61356,11 +61122,12 @@ public:
 	/** @internal */
 	void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	float radius;
 	Colour colour;
+
+	JUCE_LEAK_DETECTOR (GlowEffect);
 };
 
 #endif   // __JUCE_GLOWEFFECT_JUCEHEADER__
@@ -61464,9 +61231,8 @@ public:
 	bool isLastInSubpath() const throw()	{ return stackPos == stackBase.getData()
 														   && (index >= path.numElements || points [index] == Path::moveMarker); }
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	const Path& path;
 	const AffineTransform transform;
 	float* points;
@@ -61477,8 +61243,7 @@ private:
 	float* stackPos;
 	size_t index, stackSize;
 
-	PathFlatteningIterator (const PathFlatteningIterator&);
-	PathFlatteningIterator& operator= (const PathFlatteningIterator&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathFlatteningIterator);
 };
 
 #endif   // __JUCE_PATHITERATOR_JUCEHEADER__
@@ -61783,9 +61548,8 @@ public:
 	/** Compares two objects. */
 	bool operator!= (const PositionedRectangle& other) const throw();
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	double x, y, w, h;
 	uint8 xMode, yMode, wMode, hMode;
 
@@ -61799,6 +61563,8 @@ private:
 	void updatePosAndSize (double& xOut, double& wOut, double x, double w,
 						   uint8 xMode, uint8 wMode,
 						   int parentPos, int parentSize) const throw();
+
+	JUCE_LEAK_DETECTOR (PositionedRectangle);
 };
 
 #endif   // __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
@@ -61927,8 +61693,6 @@ public:
 	*/
 	void removeListener (Listener* listenerToRemove);
 
-	juce_UseDebuggingNewOperator
-
 protected:
 	/** @internal */
 	CameraDevice (const String& name, int index);
@@ -61938,8 +61702,7 @@ private:
 	bool isRecording;
 	String name;
 
-	CameraDevice (const CameraDevice&);
-	CameraDevice& operator= (const CameraDevice&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the CameraDevice::Listener class directly. */
@@ -62038,8 +61801,6 @@ public:
 	*/
 	static void setCacheTimeout (int millisecs);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	class Pimpl;
@@ -62131,15 +61892,12 @@ public:
 					   const Image& sourceImage,
 					   const Rectangle<int>& destinationArea) const;
 
-	juce_UseDebuggingNewOperator
-
 private:
+
 	HeapBlock <float> values;
 	const int size;
 
-	// no reason not to implement these one day..
-	ImageConvolutionKernel (const ImageConvolutionKernel&);
-	ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageConvolutionKernel);
 };
 
 #endif   // __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
@@ -62572,18 +62330,13 @@ protected:
 	*/
 	virtual void setLastDocumentOpened (const File& file) = 0;
 
-public:
-
-	juce_UseDebuggingNewOperator
-
 private:
 
 	File documentFile;
 	bool changedSinceSave;
 	String fileExtension, fileWildcard, openFileDialogTitle, saveFileDialogTitle;
 
-	FileBasedDocument (const FileBasedDocument&);
-	FileBasedDocument& operator= (const FileBasedDocument&);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBasedDocument);
 };
 
 #endif   // __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
@@ -62712,12 +62465,12 @@ public:
 	*/
 	void restoreFromString (const String& stringifiedVersion);
 
-	juce_UseDebuggingNewOperator
-
 private:
 
 	StringArray files;
 	int maxNumberOfItems;
+
+	JUCE_LEAK_DETECTOR (RecentlyOpenedFilesList);
 };
 
 #endif   // __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
@@ -63016,6 +62769,11 @@ private:
 #if JUCE_MSVC
   #pragma warning (pop)
   #pragma pack (pop)
+#endif
+
+#if JUCE_DLL
+  #undef JUCE_LEAK_DETECTOR(OwnerClass)
+  #define JUCE_LEAK_DETECTOR(OwnerClass)
 #endif
 
 END_JUCE_NAMESPACE

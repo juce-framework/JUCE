@@ -105,8 +105,6 @@ public:
     /** @internal */
     void comboBoxChanged (ComboBox*);
 
-    juce_UseDebuggingNewOperator
-
 protected:
     /** The list of options that will be shown in the combo box.
 
@@ -123,8 +121,7 @@ private:
     class RemapperValueSource;
     void createComboBox();
 
-    ChoicePropertyComponent (const ChoicePropertyComponent&);
-    ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent);
 };
 
 

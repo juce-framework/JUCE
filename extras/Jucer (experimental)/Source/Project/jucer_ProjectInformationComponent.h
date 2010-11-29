@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created for JUCE version: JUCE v1.52.92
+  Created for JUCE version: JUCE v1.52.97
 
   ------------------------------------------------------------------------------
 
@@ -51,10 +51,8 @@ public:
     void paint (Graphics& g);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     //[UserVariables]   -- You can add your own custom variables in this section.
     Project& project;
 
@@ -72,9 +70,7 @@ private:
     TextButton saveAndOpenButton;
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    ProjectInformationComponent (const ProjectInformationComponent&);
-    ProjectInformationComponent& operator= (const ProjectInformationComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectInformationComponent);
 };
 
 

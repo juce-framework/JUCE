@@ -420,10 +420,8 @@ public:
                              int startSample,
                              int numSamples) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int numChannels, size;
     size_t allocatedBytes;
     float** channels;
@@ -432,6 +430,8 @@ private:
 
     void allocateData();
     void allocateChannels (float** dataToReferTo);
+
+    JUCE_LEAK_DETECTOR (AudioSampleBuffer);
 };
 
 

@@ -890,11 +890,8 @@ public:
     */
     static const String getControllerName (int controllerNumber);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     double timeStamp;
     uint8* data;
     int size;

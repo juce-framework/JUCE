@@ -313,10 +313,9 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
 
-    //==============================================================================
 private:
+    //==============================================================================
     TableHeaderComponent* header;
     TableListBoxModel* model;
     int columnIdNowBeingDragged;
@@ -324,8 +323,7 @@ private:
 
     void updateColumnComponents() const;
 
-    TableListBox (const TableListBox&);
-    TableListBox& operator= (const TableListBox&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableListBox);
 };
 
 

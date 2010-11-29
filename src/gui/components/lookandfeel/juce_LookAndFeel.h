@@ -639,11 +639,9 @@ public:
 
     static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 
 private:
+    //==============================================================================
     friend JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
     static void clearDefaultLookAndFeel() throw(); // called at shutdown
 
@@ -668,8 +666,7 @@ private:
     // This has been deprecated - see the new parameter list..
     virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
 
-    LookAndFeel (const LookAndFeel&);
-    LookAndFeel& operator= (const LookAndFeel&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel);
 };
 
 

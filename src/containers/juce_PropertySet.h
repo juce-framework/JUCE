@@ -202,16 +202,10 @@ public:
     */
     PropertySet* getFallbackPropertySet() const throw()                 { return fallbackProperties; }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 protected:
     //==============================================================================
-    /** Subclasses can override this to be told when one of the properies has been changed.
-    */
+    /** Subclasses can override this to be told when one of the properies has been changed. */
     virtual void propertyChanged();
-
 
 private:
     //==============================================================================
@@ -219,6 +213,8 @@ private:
     PropertySet* fallbackProperties;
     CriticalSection lock;
     bool ignoreCaseOfKeys;
+
+    JUCE_LEAK_DETECTOR (PropertySet);
 };
 
 

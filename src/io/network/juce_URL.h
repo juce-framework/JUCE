@@ -286,13 +286,12 @@ public:
     */
     static const String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     String url, postData;
     StringPairArray parameters, filesToUpload, mimeTypes;
+
+    JUCE_LEAK_DETECTOR (URL);
 };
 
 

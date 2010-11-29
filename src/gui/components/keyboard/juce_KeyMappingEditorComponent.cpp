@@ -183,15 +183,12 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     KeyMappingEditorComponent& owner;
     const CommandID commandID;
     const int keyNum;
 
-    ChangeKeyButton (const ChangeKeyButton&);
-    ChangeKeyButton& operator= (const ChangeKeyButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeKeyButton);
 };
 
 //==============================================================================
@@ -247,8 +244,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     KeyMappingEditorComponent& owner;
     OwnedArray<ChangeKeyButton> keyChangeButtons;
@@ -256,8 +251,7 @@ private:
 
     enum { maxNumAssignments = 3 };
 
-    ItemComponent (const ItemComponent&);
-    ItemComponent& operator= (const ItemComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent);
 };
 
 //==============================================================================
@@ -278,14 +272,11 @@ public:
         return new ItemComponent (owner, commandID);
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     KeyMappingEditorComponent& owner;
     const CommandID commandID;
 
-    MappingItem (const MappingItem&);
-    MappingItem& operator= (const MappingItem&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MappingItem);
 };
 
 
@@ -333,14 +324,11 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     KeyMappingEditorComponent& owner;
     String categoryName;
 
-    CategoryItem (const CategoryItem&);
-    CategoryItem& operator= (const CategoryItem&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CategoryItem);
 };
 
 //==============================================================================

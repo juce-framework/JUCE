@@ -198,9 +198,6 @@ public:
     /** @internal */
     void fileDragExit (const StringArray& files);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     ComboBox filenameBox;
@@ -216,8 +213,7 @@ private:
     void buttonClicked (Button* button);
     void handleAsyncUpdate();
 
-    FilenameComponent (const FilenameComponent&);
-    FilenameComponent& operator= (const FilenameComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent);
 };
 
 

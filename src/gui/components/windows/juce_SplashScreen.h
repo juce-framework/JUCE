@@ -137,16 +137,13 @@ public:
     /** @internal */
     void timerCallback();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Image backgroundImage;
     Time earliestTimeToDelete;
     int originalClickCounter;
 
-    SplashScreen (const SplashScreen&);
-    SplashScreen& operator= (const SplashScreen&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen);
 };
 
 

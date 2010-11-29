@@ -427,6 +427,8 @@
               file="src/core/juce_Initialisation.cpp"/>
         <FILE id="nsfdNZAs" name="juce_Initialisation.h" compile="0" resource="0"
               file="src/core/juce_Initialisation.h"/>
+        <FILE id="hRYAldz" name="juce_LeakedObjectDetector.h" compile="0" resource="0"
+              file="src/core/juce_LeakedObjectDetector.h"/>
         <FILE id="43AWfo8b2" name="juce_Logger.cpp" compile="1" resource="0"
               file="src/core/juce_Logger.cpp"/>
         <FILE id="KrXxapCit" name="juce_Logger.h" compile="0" resource="0"

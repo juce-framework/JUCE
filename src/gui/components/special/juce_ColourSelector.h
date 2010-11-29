@@ -132,10 +132,8 @@ public:
     };
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class ColourSpaceView;
     class HueSelectorComp;
     class SwatchComponent;
@@ -162,8 +160,7 @@ private:
     void paint (Graphics& g);
     void resized();
 
-    ColourSelector (const ColourSelector&);
-    ColourSelector& operator= (const ColourSelector&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This constructor is here temporarily to prevent old code compiling, because the parameters

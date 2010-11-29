@@ -67,11 +67,8 @@ public:
     bool setPosition (int64 newPosition);
     bool write (const void* destBuffer, int howMany);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     OutputStream* const destStream;
     ScopedPointer <OutputStream> streamToDelete;
     HeapBlock <uint8> buffer;
@@ -80,8 +77,7 @@ private:
     ScopedPointer <GZIPCompressorHelper> helper;
     bool doNextBlock();
 
-    GZIPCompressorOutputStream (const GZIPCompressorOutputStream&);
-    GZIPCompressorOutputStream& operator= (const GZIPCompressorOutputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream);
 };
 
 #endif   // __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__

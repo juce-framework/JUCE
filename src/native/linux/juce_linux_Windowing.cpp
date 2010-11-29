@@ -651,8 +651,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     XImage* xImage;
     const int imageDepth;
@@ -675,6 +673,8 @@ private:
         jassertfalse;
         return 0;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XBitmapImage);
 };
 
 
@@ -1761,8 +1761,6 @@ public:
     const Image& getTaskbarIcon() const throw()           { return taskbarImage; }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     bool dontRepaint;
 
     static ModifierKeys currentModifiers;
@@ -2667,6 +2665,8 @@ private:
     {
         lastMousePos = Point<int> (0x100000, 0x100000);
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer);
 };
 
 ModifierKeys LinuxComponentPeer::currentModifiers;
@@ -3320,8 +3320,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     GLXContext renderContext;
 
 private:
@@ -3330,8 +3328,7 @@ private:
     int swapInterval;
 
     //==============================================================================
-    WindowedGLContext (const WindowedGLContext&);
-    WindowedGLContext& operator= (const WindowedGLContext&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
 
 //==============================================================================

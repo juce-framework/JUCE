@@ -229,10 +229,8 @@ public:
         ValueTree state;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     friend class DrawableComposite;
     friend class DrawableShape;
 
@@ -252,8 +250,7 @@ protected:
 private:
     void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
 
-    Drawable (const Drawable&);
-    Drawable& operator= (const Drawable&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Drawable);
 };
 
 

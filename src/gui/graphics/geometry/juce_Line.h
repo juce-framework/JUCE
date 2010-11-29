@@ -338,11 +338,8 @@ public:
         return Line (start, getPointAlongLine (length - jmin (distanceToShortenBy, length)));
     }
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Point<ValueType> start, end;
 
     static bool findIntersection (const Point<ValueType>& p1, const Point<ValueType>& p2,

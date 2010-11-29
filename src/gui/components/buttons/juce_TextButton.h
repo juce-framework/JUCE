@@ -90,9 +90,6 @@ public:
     virtual const Font getFont();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** @internal */
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
@@ -100,8 +97,8 @@ protected:
     void colourChanged();
 
 private:
-    TextButton (const TextButton&);
-    TextButton& operator= (const TextButton&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextButton);
 };
 
 

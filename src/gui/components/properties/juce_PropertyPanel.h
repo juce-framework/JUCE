@@ -149,8 +149,6 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
-
 private:
     Viewport viewport;
     class PropertyHolderComponent;
@@ -159,6 +157,8 @@ private:
 
     void updatePropHolderLayout() const;
     void updatePropHolderLayout (int width) const;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyPanel);
 };
 
 

@@ -65,12 +65,12 @@ public:
     /** @internal */
     void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     float radius;
     Colour colour;
+
+    JUCE_LEAK_DETECTOR (GlowEffect);
 };
 
 

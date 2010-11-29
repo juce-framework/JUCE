@@ -389,7 +389,8 @@ public:
         return true;
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsTypeface);
 };
 
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)

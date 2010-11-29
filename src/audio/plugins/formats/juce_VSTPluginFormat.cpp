@@ -426,9 +426,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
-    //==============================================================================
 #if JUCE_WINDOWS || JUCE_LINUX
     void* hModule;
     String fullParentDirectoryPathName;
@@ -682,6 +679,9 @@ public:
 #endif
 
 #endif
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleHandle);
 };
 
 //==============================================================================
@@ -783,10 +783,8 @@ public:
     void handleAsyncUpdate();
     VstIntPtr handleCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void *ptr, float opt);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class VSTPluginWindow;
     friend class VSTPluginFormat;
 
@@ -828,6 +826,7 @@ private:
     void setPower (const bool on);
 
     VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance);
 };
 
 //==============================================================================
@@ -1367,8 +1366,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     VSTPluginInstance& plugin;
     bool isOpen, wasShowing, recursiveResize;
@@ -1880,6 +1877,9 @@ private:
         innerWrapper->setSize (getWidth(), getHeight());
     }
 #endif
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow);
 };
 
 //==============================================================================

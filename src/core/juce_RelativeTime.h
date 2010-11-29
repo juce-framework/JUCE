@@ -187,10 +187,8 @@ public:
     const RelativeTime& operator-= (double secondsToSubtract) throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     double seconds;
 };
 

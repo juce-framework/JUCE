@@ -131,11 +131,8 @@ public:
     void copyCoefficientsFrom (const IIRFilter& other) throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 protected:
+    //==============================================================================
     CriticalSection processLock;
 
     void setCoefficients (double c1, double c2, double c3,
@@ -147,6 +144,7 @@ protected:
 
     // (use the copyCoefficientsFrom() method instead of this operator)
     IIRFilter& operator= (const IIRFilter&);
+    JUCE_LEAK_DETECTOR (IIRFilter);
 };
 
 

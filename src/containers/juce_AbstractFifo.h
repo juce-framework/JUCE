@@ -207,15 +207,12 @@ public:
     void finishedRead (int numRead) throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int bufferSize;
     Atomic <int> validStart, validEnd;
 
-    AbstractFifo (const AbstractFifo&);
-    AbstractFifo& operator= (const AbstractFifo&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbstractFifo);
 };
 
 

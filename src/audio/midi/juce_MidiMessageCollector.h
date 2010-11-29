@@ -91,17 +91,14 @@ public:
     /** @internal */
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     double lastCallbackTime;
     CriticalSection midiCallbackLock;
     MidiBuffer incomingMessages;
     double sampleRate;
 
-    MidiMessageCollector (const MidiMessageCollector&);
-    MidiMessageCollector& operator= (const MidiMessageCollector&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiMessageCollector);
 };
 
 

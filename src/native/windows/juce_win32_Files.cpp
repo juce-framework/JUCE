@@ -593,14 +593,11 @@ public:
         return true;
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     const String directoryWithWildCard;
     HANDLE handle;
 
-    Pimpl (const Pimpl&);
-    Pimpl& operator= (const Pimpl&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
 };
 
 DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)

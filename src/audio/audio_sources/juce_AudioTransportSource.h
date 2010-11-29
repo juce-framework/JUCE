@@ -156,10 +156,8 @@ public:
     /** Implements the PositionableAudioSource method. */
     bool isLooping() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     PositionableAudioSource* source;
     ResamplingAudioSource* resamplerSource;
     BufferingAudioSource* bufferingSource;
@@ -173,8 +171,7 @@ private:
     int blockSize, readAheadBufferSize;
     bool isPrepared, inputStreamEOF;
 
-    AudioTransportSource (const AudioTransportSource&);
-    AudioTransportSource& operator= (const AudioTransportSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioTransportSource);
 };
 
 

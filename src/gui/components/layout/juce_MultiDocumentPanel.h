@@ -63,12 +63,12 @@ public:
     /** @internal */
     void broughtToFront();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     void updateOrder();
     MultiDocumentPanel* getOwner() const throw();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanelWindow);
 };
 
 
@@ -283,11 +283,8 @@ public:
     /** @internal */
     void componentNameChanged (Component&);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 private:
+    //==============================================================================
     LayoutMode mode;
     Array <Component*> components;
     ScopedPointer<TabbedComponent> tabComponent;
@@ -301,6 +298,8 @@ private:
     void updateOrder();
 
     void addWindow (Component* component);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanel);
 };
 
 

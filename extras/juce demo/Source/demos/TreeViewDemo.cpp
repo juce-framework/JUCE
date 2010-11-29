@@ -238,8 +238,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer <XmlElement> treeXml;
 
@@ -251,6 +249,8 @@ private:
     TimeSliceThread thread;
 
     TextButton typeButton;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewDemo);
 };
 
 

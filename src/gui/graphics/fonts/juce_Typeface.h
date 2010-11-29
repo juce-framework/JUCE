@@ -106,10 +106,8 @@ public:
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     String name;
     bool isFallbackFont;
 
@@ -118,8 +116,7 @@ protected:
     static const Ptr getFallbackTypeface();
 
 private:
-    Typeface (const Typeface&);
-    Typeface& operator= (const Typeface&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface);
 };
 
 //==============================================================================
@@ -203,10 +200,8 @@ public:
     bool getOutlineForGlyph (int glyphNumber, Path& path);
     int getGlyphForCharacter (juce_wchar character);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     juce_wchar defaultCharacter;
     float ascent;
     bool isBold, isItalic;
@@ -227,11 +222,10 @@ private:
     OwnedArray <GlyphInfo> glyphs;
     short lookupTable [128];
 
-    CustomTypeface (const CustomTypeface&);
-    CustomTypeface& operator= (const CustomTypeface&);
-
     GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) throw();
     GlyphInfo* findGlyphSubstituting (juce_wchar character) throw();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface);
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__

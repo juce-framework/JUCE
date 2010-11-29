@@ -157,14 +157,11 @@ public:
     void recreateFromXml (const XmlElement& xml);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     OwnedArray <PluginDescription> types;
 
-    KnownPluginList (const KnownPluginList&);
-    KnownPluginList& operator= (const KnownPluginList&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownPluginList);
 };
 
 

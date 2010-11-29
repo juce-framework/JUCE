@@ -297,9 +297,9 @@ void Process::lowerPrivilege()
 
 void Process::terminate()
 {
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+  #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtDumpMemoryLeaks();
-#endif
+  #endif
 
     // bullet in the head in case there's a problem shutting down..
     ExitProcess (0);

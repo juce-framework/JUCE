@@ -223,10 +223,8 @@ public:
     */
     const Expression getInput (int index) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class Helpers;
     friend class Helpers;
 
@@ -251,11 +249,8 @@ private:
         virtual const String getSymbolName() const;
         virtual const String getFunctionName() const;
 
-        juce_UseDebuggingNewOperator
-
     private:
-        Term (const Term& other);
-        Term& operator= (const Term&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Term);
     };
 
     friend class ScopedPointer<Term>;

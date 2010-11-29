@@ -450,8 +450,6 @@ public:
         return true;
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     MainDemoWindow* mainWindow;
@@ -486,6 +484,8 @@ private:
         useNativeMenus             = 0x200e,
         goToKioskMode              = 0x200f
     };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComp);
 };
 
 //==============================================================================

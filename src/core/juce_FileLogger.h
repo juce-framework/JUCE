@@ -94,17 +94,14 @@ public:
                                                const String& welcomeMessage,
                                                const int maxInitialFileSizeBytes = 128 * 1024);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     File logFile;
     CriticalSection logLock;
 
     void trimFileSize (int maxFileSizeBytes) const;
 
-    FileLogger (const FileLogger&);
-    FileLogger& operator= (const FileLogger&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileLogger);
 };
 
 

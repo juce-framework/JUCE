@@ -395,8 +395,6 @@ public:
     /** Can be overridden for more control over the pop-up menu behaviour. */
     virtual void showColumnChooserMenu (int columnIdClicked);
 
-    juce_UseDebuggingNewOperator
-
 private:
     struct ColumnInfo
     {
@@ -425,8 +423,7 @@ private:
     void updateColumnUnderMouse (int x, int y);
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
-    TableHeaderComponent (const TableHeaderComponent&);
-    TableHeaderComponent operator= (const TableHeaderComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableHeaderComponent);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */

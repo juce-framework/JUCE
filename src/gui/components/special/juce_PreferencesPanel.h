@@ -132,8 +132,6 @@ public:
     /** @internal */
     void buttonClicked (Button* button);
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     String currentPageName;
@@ -141,8 +139,7 @@ private:
     OwnedArray<DrawableButton> buttons;
     int buttonSize;
 
-    PreferencesPanel (const PreferencesPanel&);
-    PreferencesPanel& operator= (const PreferencesPanel&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreferencesPanel);
 };
 
 

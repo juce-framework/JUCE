@@ -182,10 +182,6 @@ public:
                                                  const String& folderName,
                                                  bool commonToAllUsers);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 protected:
     virtual void propertyChanged();
 
@@ -202,8 +198,7 @@ private:
 
     void timerCallback();
 
-    PropertiesFile (const PropertiesFile&);
-    PropertiesFile& operator= (const PropertiesFile&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile);
 };
 
 #endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__

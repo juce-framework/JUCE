@@ -246,10 +246,9 @@ public:
         ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
+    //==============================================================================
     RelativeParallelogram bounds;
     OwnedArray <Marker> markersX, markersY;
     bool updateBoundsReentrant;
@@ -258,6 +257,7 @@ private:
     void updateBoundsToFitChildren();
 
     DrawableComposite& operator= (const DrawableComposite&);
+    JUCE_LEAK_DETECTOR (DrawableComposite);
 };
 
 

@@ -291,9 +291,8 @@ public:
     /** @internal */
     static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
 
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ScopedPointer<Button> missingItemsButton;
     bool vertical, isEditingActive;
     ToolbarItemStyle toolbarStyle;
@@ -308,8 +307,7 @@ private:
 
     ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;
 
-    Toolbar (const Toolbar&);
-    Toolbar& operator= (const Toolbar&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Toolbar);
 };
 
 

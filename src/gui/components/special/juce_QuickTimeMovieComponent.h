@@ -202,9 +202,9 @@ public:
     /** @internal */
     void paint (Graphics& g);
 
-    juce_UseDebuggingNewOperator
 
 private:
+    //==============================================================================
     File movieFile;
     bool movieLoaded, controllerVisible, looping;
 
@@ -222,8 +222,7 @@ private:
     void* movie;
 #endif
 
-    QuickTimeMovieComponent (const QuickTimeMovieComponent&);
-    QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeMovieComponent);
 };
 
 #endif

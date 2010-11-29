@@ -231,14 +231,11 @@ public:
         target.setBounds (getWidth() - 260, getHeight() - 160, 250, 150);
     }
 
-    //==============================================================================
-    // (need to put this in to disambiguate the new/delete operators used in the
-    // two base classes).
-    juce_UseDebuggingNewOperator
-
 private:
     DragAndDropDemoSource source;
     DragAndDropDemoTarget target;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropDemo);
 };
 
 

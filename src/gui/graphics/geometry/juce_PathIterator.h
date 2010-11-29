@@ -94,10 +94,8 @@ public:
     bool isLastInSubpath() const throw()        { return stackPos == stackBase.getData()
                                                            && (index >= path.numElements || points [index] == Path::moveMarker); }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     const Path& path;
     const AffineTransform transform;
     float* points;
@@ -108,8 +106,7 @@ private:
     float* stackPos;
     size_t index, stackSize;
 
-    PathFlatteningIterator (const PathFlatteningIterator&);
-    PathFlatteningIterator& operator= (const PathFlatteningIterator&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathFlatteningIterator);
 };
 
 

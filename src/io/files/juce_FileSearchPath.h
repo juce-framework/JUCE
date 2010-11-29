@@ -154,13 +154,13 @@ public:
     bool isFileInPath (const File& fileToCheck,
                        bool checkRecursively) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     StringArray directories;
 
     void init (const String& path);
+
+    JUCE_LEAK_DETECTOR (FileSearchPath);
 };
 
 #endif   // __JUCE_FILESEARCHPATH_JUCEHEADER__

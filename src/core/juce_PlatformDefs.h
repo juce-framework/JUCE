@@ -155,6 +155,41 @@
 */
 #define static_jassert(expression)      JuceStaticAssert<expression>::dummy();
 
+/** This is a shorthand macro for declaring stubs for a class's copy constructor and
+    operator=.
+
+    For example, instead of
+    @code
+    class MyClass
+    {
+        etc..
+
+    private:
+        MyClass (const MyClass&);
+        MyClass& operator= (const MyClass&);
+    };@endcode
+
+    ..you can just write:
+
+    @code
+    class MyClass
+    {
+        etc..
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE (MyClass);
+    };@endcode
+*/
+#define JUCE_DECLARE_NON_COPYABLE(className) \
+    className (const className&);\
+    className& operator= (const className&);
+
+/** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
+    JUCE_LEAK_DETECTOR macro for a class.
+*/
+#define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
+    JUCE_DECLARE_NON_COPYABLE(className)\
+    JUCE_LEAK_DETECTOR(className)
 
 //==============================================================================
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS

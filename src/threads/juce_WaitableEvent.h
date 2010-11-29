@@ -91,14 +91,11 @@ public:
     void reset() const throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     void* internal;
 
-    WaitableEvent (const WaitableEvent&);
-    WaitableEvent& operator= (const WaitableEvent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaitableEvent);
 };
 
 

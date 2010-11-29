@@ -78,16 +78,13 @@ public:
                         float& highestRight);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioFormatReader* const source;
     int64 startSample, length;
     const bool deleteSourceWhenDeleted;
 
-    AudioSubsectionReader (const AudioSubsectionReader&);
-    AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSubsectionReader);
 };
 
 #endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__

@@ -68,10 +68,8 @@ public:
     ~ResizableCornerComponent();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -89,8 +87,7 @@ private:
     ComponentBoundsConstrainer* constrainer;
     Rectangle<int> originalBounds;
 
-    ResizableCornerComponent (const ResizableCornerComponent&);
-    ResizableCornerComponent& operator= (const ResizableCornerComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableCornerComponent);
 };
 
 

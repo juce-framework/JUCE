@@ -595,7 +595,7 @@ public:
 
         This should only be used on floating point rectangles.
     */
-    const Rectangle<ValueType> transformed (const AffineTransform& transform) const throw()
+    const Rectangle transformed (const AffineTransform& transform) const throw()
     {
         float x1 = x,     y1 = y;
         float x2 = x + w, y2 = y;
@@ -725,9 +725,6 @@ public:
                           toks[2].trim().getIntValue(),
                           toks[3].trim().getIntValue());
     }
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     friend class RectangleList;

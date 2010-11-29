@@ -113,8 +113,6 @@ public:
     /** @internal */
     void* originalWndProc;
 
-    juce_UseDebuggingNewOperator
-
 private:
     class Pimpl;
     friend class Pimpl;
@@ -125,8 +123,7 @@ private:
     void setControlBounds (const Rectangle<int>& bounds) const;
     void setControlVisible (bool b) const;
 
-    ActiveXControlComponent (const ActiveXControlComponent&);
-    ActiveXControlComponent& operator= (const ActiveXControlComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent);
 };
 
 #endif

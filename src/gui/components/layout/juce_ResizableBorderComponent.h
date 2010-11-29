@@ -168,10 +168,9 @@ public:
         int zone;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -196,8 +195,7 @@ private:
 
     void updateMouseZone (const MouseEvent& e);
 
-    ResizableBorderComponent (const ResizableBorderComponent&);
-    ResizableBorderComponent& operator= (const ResizableBorderComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableBorderComponent);
 };
 
 

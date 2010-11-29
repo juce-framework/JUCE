@@ -174,18 +174,15 @@ public:
     void convertTimestampTicksToSeconds();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     OwnedArray <MidiMessageSequence> tracks;
     short timeFormat;
 
-    MidiFile (const MidiFile&);
-    MidiFile& operator= (const MidiFile&);
-
     void readNextTrack (const uint8* data, int size);
     void writeTrack (OutputStream& mainOut, int trackNum);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiFile);
 };
 
 

@@ -143,8 +143,6 @@ public:
     {
     }
 
-    ~OpenGLComponentWatcher() {}
-
     //==============================================================================
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
@@ -174,11 +172,11 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     OpenGLComponent* const owner;
     bool wasShowing;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponentWatcher);
 };
 
 //==============================================================================

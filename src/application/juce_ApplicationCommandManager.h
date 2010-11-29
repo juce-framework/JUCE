@@ -313,9 +313,6 @@ public:
     static ApplicationCommandTarget* findTargetForComponent (Component* component);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     OwnedArray <ApplicationCommandInfo> commands;
@@ -333,8 +330,7 @@ private:
     virtual short getFirstCommandTarget() { return 0; }
    #endif
 
-    ApplicationCommandManager (const ApplicationCommandManager&);
-    ApplicationCommandManager& operator= (const ApplicationCommandManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandManager);
 };
 
 

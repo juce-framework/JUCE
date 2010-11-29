@@ -133,12 +133,12 @@ public:
     */
     AudioFormatReader* createReaderFor (InputStream* audioFileStream);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     OwnedArray<AudioFormat> knownFormats;
     int defaultFormatIndex;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatManager);
 };
 
 

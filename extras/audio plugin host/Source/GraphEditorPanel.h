@@ -65,14 +65,11 @@ public:
     void endDraggingConnector (const MouseEvent& e);
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     FilterGraph& graph;
     ConnectorComponent* draggingConnector;
 
-    GraphEditorPanel (const GraphEditorPanel&);
-    GraphEditorPanel& operator= (const GraphEditorPanel&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphEditorPanel);
 };
 
 
@@ -98,10 +95,8 @@ public:
     //==============================================================================
     void resized();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioDeviceManager* deviceManager;
     AudioProcessorPlayer graphPlayer;
     MidiKeyboardState keyState;
@@ -109,6 +104,8 @@ private:
     GraphEditorPanel* graphPanel;
     Component* keyboardComp;
     Component* statusBar;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphDocumentComponent);
 };
 
 //==============================================================================

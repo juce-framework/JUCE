@@ -99,15 +99,13 @@ public:
     /** @internal */
     void sendMouseClickMessage (const File& file, const MouseEvent& e);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     DirectoryContentsList& fileList;
     ListenerList <FileBrowserListener> listeners;
 
-    DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
-    DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsDisplayComponent);
 };
 
 

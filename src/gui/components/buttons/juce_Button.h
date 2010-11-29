@@ -378,8 +378,6 @@ public:
     */
     void setState (const ButtonState newState);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
     //==============================================================================
@@ -504,8 +502,7 @@ private:
     void sendClickMessage (const ModifierKeys& modifiers);
     void sendStateMessage();
 
-    Button (const Button&);
-    Button& operator= (const Button&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use Button::Listener instead. */

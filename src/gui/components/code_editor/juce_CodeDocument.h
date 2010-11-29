@@ -378,10 +378,8 @@ public:
         int line, position;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class CodeDocumentInsertAction;
     friend class CodeDocumentDeleteAction;
     friend class Iterator;
@@ -401,8 +399,7 @@ private:
     void remove (int startPos, int endPos, bool undoable);
     void checkLastLineStatus();
 
-    CodeDocument (const CodeDocument&);
-    CodeDocument& operator= (const CodeDocument&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeDocument);
 };
 
 

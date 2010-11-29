@@ -74,15 +74,12 @@ public:
         notify();
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     URL_COMPONENTS& uc;
     HINTERNET& connection;
     const bool isFtp;
 
-    InternetConnectThread (const InternetConnectThread&);
-    InternetConnectThread& operator= (const InternetConnectThread&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternetConnectThread);
 };
 #endif
 

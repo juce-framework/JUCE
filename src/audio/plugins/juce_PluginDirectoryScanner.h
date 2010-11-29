@@ -105,10 +105,8 @@ public:
     */
     const StringArray& getFailedFiles() const throw()               { return failedFiles; }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     KnownPluginList& list;
     AudioPluginFormat& format;
     StringArray filesOrIdentifiersToScan;
@@ -120,8 +118,7 @@ private:
     const StringArray getDeadMansPedalFile();
     void setDeadMansPedalFile (const StringArray& newContents);
 
-    PluginDirectoryScanner (const PluginDirectoryScanner&);
-    PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginDirectoryScanner);
 };
 
 

@@ -177,10 +177,8 @@ public:
                            preferredHeight));
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioDeviceManager& deviceManager;
     const String noItemsMessage;
     StringArray items;
@@ -200,8 +198,7 @@ private:
         return getRowHeight() + 5;
     }
 
-    MidiInputSelectorComponentListBox (const MidiInputSelectorComponentListBox&);
-    MidiInputSelectorComponentListBox& operator= (const MidiInputSelectorComponentListBox&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputSelectorComponentListBox);
 };
 
 
@@ -799,10 +796,8 @@ public:
                        + getOutlineThickness() * 2;
         }
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         const AudioIODeviceType::DeviceSetupDetails setup;
         const BoxType type;
         const String noItemsMessage;
@@ -893,8 +888,7 @@ public:
             return getRowHeight() + 5;
         }
 
-        ChannelSelectorListBox (const ChannelSelectorListBox&);
-        ChannelSelectorListBox& operator= (const ChannelSelectorListBox&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelSelectorListBox);
     };
 
 private:

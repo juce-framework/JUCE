@@ -159,10 +159,8 @@ public:
         samplesPerFrame = 44100 / framesPerSecond
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Array<int> trackStartSamples;
 
 #if JUCE_MAC
@@ -185,8 +183,7 @@ private:
     AudioCDReader();
 #endif
 
-    AudioCDReader (const AudioCDReader&);
-    AudioCDReader& operator= (const AudioCDReader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioCDReader);
 };
 
 #endif

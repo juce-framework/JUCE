@@ -311,11 +311,11 @@ public:
             sendChangeMessage();
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Array <SelectableItemType> selectedItems;
+
+    JUCE_LEAK_DETECTOR (SelectedItemSet <SelectableItemType>);
 };
 
 

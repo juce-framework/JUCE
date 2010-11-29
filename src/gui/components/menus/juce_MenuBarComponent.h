@@ -99,11 +99,8 @@ public:
     void menuCommandInvoked (MenuBarModel* menuBarModel,
                              const ApplicationCommandTarget::InvocationInfo& info);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class AsyncCallback;
     friend class AsyncCallback;
     MenuBarModel* model;
@@ -121,8 +118,7 @@ private:
     void repaintMenuItem (int index);
     void menuDismissed (int topLevelIndex, int itemId);
 
-    MenuBarComponent (const MenuBarComponent&);
-    MenuBarComponent& operator= (const MenuBarComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
 };
 
 #endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__

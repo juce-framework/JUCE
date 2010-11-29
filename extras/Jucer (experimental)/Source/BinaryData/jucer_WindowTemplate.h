@@ -32,12 +32,9 @@ public:
        implementation calls the superclass's method.
     */
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    WINDOWCLASS (const WINDOWCLASS&);
-    WINDOWCLASS& operator= (const WINDOWCLASS&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WINDOWCLASS)
 };
 
 

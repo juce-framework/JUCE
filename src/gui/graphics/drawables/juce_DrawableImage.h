@@ -125,10 +125,8 @@ public:
         static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     Image image;
     float opacity;
     Colour overlayColour;
@@ -137,6 +135,7 @@ private:
     void refreshTransformFromBounds();
 
     DrawableImage& operator= (const DrawableImage&);
+    JUCE_LEAK_DETECTOR (DrawableImage);
 };
 
 

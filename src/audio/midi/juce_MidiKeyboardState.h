@@ -194,10 +194,8 @@ public:
     */
     void removeListener (MidiKeyboardStateListener* listener);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     CriticalSection lock;
     uint16 noteStates [128];
     MidiBuffer eventsToAdd;
@@ -206,8 +204,7 @@ private:
     void noteOnInternal (int midiChannel, int midiNoteNumber, float velocity);
     void noteOffInternal (int midiChannel, int midiNoteNumber);
 
-    MidiKeyboardState (const MidiKeyboardState&);
-    MidiKeyboardState& operator= (const MidiKeyboardState&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardState);
 };
 
 

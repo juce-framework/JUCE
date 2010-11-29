@@ -69,9 +69,6 @@ public:
         fileChooser.setBounds (10, 10, getWidth() - 20, 25);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     // this is the document that the editor component is showing
     CodeDocument codeDocument;
@@ -83,6 +80,8 @@ private:
     ScopedPointer<CodeEditorComponent> editor;
 
     FilenameComponent fileChooser;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorDemo);
 };
 
 

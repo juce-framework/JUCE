@@ -73,9 +73,6 @@ public:
         textColourId                    = 0x1006501   /**< The colour to use for the button's text. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** @internal */
     void paintButton (Graphics& g,
@@ -87,8 +84,7 @@ protected:
 
 private:
     //==============================================================================
-    ToggleButton (const ToggleButton&);
-    ToggleButton& operator= (const ToggleButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleButton);
 };
 
 

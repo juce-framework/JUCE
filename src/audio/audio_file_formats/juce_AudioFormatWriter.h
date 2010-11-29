@@ -192,10 +192,8 @@ public:
         ScopedPointer<Buffer> buffer;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** The sample rate of the stream. */
     double sampleRate;
 
@@ -241,8 +239,7 @@ private:
     String formatName;
     friend class ThreadedWriter;
 
-    AudioFormatWriter (const AudioFormatWriter&);
-    AudioFormatWriter& operator= (const AudioFormatWriter&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatWriter);
 };
 
 

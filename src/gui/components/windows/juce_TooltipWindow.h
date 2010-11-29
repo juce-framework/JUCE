@@ -94,8 +94,6 @@ public:
         outlineColourId         = 0x1001c10     /**< The colour to use to draw an outline around the tooltip. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
@@ -115,8 +113,7 @@ private:
     void showFor (const String& tip);
     void hide();
 
-    TooltipWindow (const TooltipWindow&);
-    TooltipWindow& operator= (const TooltipWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow);
 };
 
 

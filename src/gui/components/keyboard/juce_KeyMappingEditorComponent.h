@@ -115,8 +115,6 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     KeyPressMappingSet& mappings;
@@ -133,8 +131,7 @@ private:
     friend class ScopedPointer<TopLevelItem>;
     ScopedPointer<TopLevelItem> treeItem;
 
-    KeyMappingEditorComponent (const KeyMappingEditorComponent&);
-    KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingEditorComponent);
 };
 
 

@@ -104,6 +104,9 @@
 #ifndef __JUCE_INITIALISATION_JUCEHEADER__
  #include "core/juce_Initialisation.h"
 #endif
+#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+ #include "core/juce_LeakedObjectDetector.h"
+#endif
 #ifndef __JUCE_LOGGER_JUCEHEADER__
  #include "core/juce_Logger.h"
 #endif

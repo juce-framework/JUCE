@@ -142,13 +142,9 @@ protected:
     */
     virtual void paintContent (Graphics& g, int width, int height) = 0;
 
-
 public:
-    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
-
-    juce_UseDebuggingNewOperator
 
 private:
     Rectangle<int> content;
@@ -156,8 +152,7 @@ private:
     float arrowTipX, arrowTipY;
     DropShadowEffect shadow;
 
-    BubbleComponent (const BubbleComponent&);
-    BubbleComponent& operator= (const BubbleComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent);
 };
 
 

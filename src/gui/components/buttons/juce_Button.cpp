@@ -40,13 +40,10 @@ public:
     RepeatTimer (Button& owner_) : owner (owner_)   {}
     void timerCallback()    { owner.repeatTimerCallback(); }
 
-    juce_UseDebuggingNewOperator
-
 private:
     Button& owner;
 
-    RepeatTimer (const RepeatTimer&);
-    RepeatTimer& operator= (const RepeatTimer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RepeatTimer);
 };
 
 //==============================================================================

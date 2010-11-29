@@ -89,8 +89,6 @@ public:
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
     //==============================================================================
@@ -105,8 +103,7 @@ protected:
     ScopedPointer <SavedState> currentState;
     OwnedArray <SavedState> stateStack;
 
-    LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
-    LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer);
 };
 
 

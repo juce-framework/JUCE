@@ -140,10 +140,8 @@ public:
     static void hideWaitCursor();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class SharedCursorHandle;
     friend class SharedCursorHandle;
     SharedCursorHandle* cursorHandle;
@@ -156,6 +154,8 @@ private:
     static void* createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
     static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);
     static void deleteMouseCursor (void* cursorHandle, bool isStandard);
+
+    JUCE_LEAK_DETECTOR (MouseCursor);
 };
 
 #endif   // __JUCE_MOUSECURSOR_JUCEHEADER__

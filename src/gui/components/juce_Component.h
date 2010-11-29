@@ -2071,10 +2071,8 @@ public:
         bool operator== (ComponentType* component) const throw()    { return comp == component; }
         bool operator!= (ComponentType* component) const throw()    { return comp != component; }
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         ComponentType* comp;
 
         void attach()   { if (comp != 0) comp->addComponentListener (this); }
@@ -2124,9 +2122,6 @@ public:
     const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
                                                        const Point<int>& positionRelativeToThis) const;
    #endif
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
@@ -2222,11 +2217,9 @@ private:
     friend class ComponentHelpers;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
-       You might need to give your subclasses a private dummy constructor like this one to avoid
-       compiler warnings.
+       You might need to give your subclasses a private dummy constructor to avoid compiler warnings.
     */
-    Component (const Component&);
-    Component& operator= (const Component&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Component);
 
     //==============================================================================
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

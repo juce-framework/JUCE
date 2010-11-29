@@ -303,8 +303,6 @@ public:
     bool isOrientationEnabled (DisplayOrientation orientation) const throw();
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** Tells this object to refresh its idea of what the screen resolution is.
 
         (Called internally by the native code).
@@ -363,8 +361,7 @@ private:
     Desktop();
     ~Desktop();
 
-    Desktop (const Desktop&);
-    Desktop& operator= (const Desktop&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop);
 };
 
 

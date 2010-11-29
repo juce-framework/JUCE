@@ -152,9 +152,6 @@ public:
     */
     static bool performExternalDragDropOfText (const String& text);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** Override this if you want to be able to perform an external drag a set of files
         when the user drags outside of this container component.
@@ -177,9 +174,12 @@ protected:
                                                        bool& canMoveFiles);
 
 private:
+    //==============================================================================
     friend class DragImageComponent;
     ScopedPointer <Component> dragImageComponent;
     String currentDragDesc;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer);
 };
 
 

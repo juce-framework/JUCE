@@ -175,6 +175,8 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #include "juce_MathsFunctions.h"
 #include "juce_ByteOrder.h"
 #include "juce_Logger.h"
+#include "juce_LeakedObjectDetector.h"
+
 
 END_JUCE_NAMESPACE
 

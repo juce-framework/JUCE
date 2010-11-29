@@ -91,11 +91,8 @@ public:
     /** Implements the PositionableAudioSource method. */
     int getTotalLength() const;
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioFormatReader* reader;
     bool deleteReader;
 
@@ -104,8 +101,7 @@ private:
 
     void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
 
-    AudioFormatReaderSource (const AudioFormatReaderSource&);
-    AudioFormatReaderSource& operator= (const AudioFormatReaderSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReaderSource);
 };
 
 

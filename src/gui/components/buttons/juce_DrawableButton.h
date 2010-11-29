@@ -166,10 +166,8 @@ public:
         textColourId             = 0x1004010, /**< The colour to use for the URL text. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void paintButton (Graphics& g,
                       bool isMouseOverButton,
@@ -188,8 +186,7 @@ private:
     Colour backgroundOff, backgroundOn;
     int edgeIndent;
 
-    DrawableButton (const DrawableButton&);
-    DrawableButton& operator= (const DrawableButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton);
 };
 
 

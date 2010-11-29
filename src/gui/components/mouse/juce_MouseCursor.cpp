@@ -54,6 +54,11 @@ public:
     {
     }
 
+    ~SharedCursorHandle()
+    {
+        deleteMouseCursor (handle, isStandard);
+    }
+
     static SharedCursorHandle* createStandard (const MouseCursor::StandardCursorType type)
     {
         const ScopedLock sl (getLock());
@@ -94,10 +99,8 @@ public:
     void* getHandle() const throw()         { return handle; }
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     void* const handle;
     Atomic <int> refCount;
     const MouseCursor::StandardCursorType standardType;
@@ -115,12 +118,7 @@ private:
         return cursors;
     }
 
-    ~SharedCursorHandle()
-    {
-        deleteMouseCursor (handle, isStandard);
-    }
-
-    SharedCursorHandle& operator= (const SharedCursorHandle&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedCursorHandle);
 };
 
 //==============================================================================

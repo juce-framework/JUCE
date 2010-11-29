@@ -182,15 +182,15 @@ public:
     */
     void setIgnoresCase (bool shouldIgnoreCase);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     String languageName;
     StringArray countryCodes;
     StringPairArray translations;
 
     void loadFromText (const String& fileContents);
+
+    JUCE_LEAK_DETECTOR (LocalisedStrings);
 };
 
 

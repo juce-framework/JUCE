@@ -529,6 +529,7 @@
     <ClInclude Include="..\..\src\core\juce_ByteOrder.h"/>
     <ClInclude Include="..\..\src\core\juce_FileLogger.h"/>
     <ClInclude Include="..\..\src\core\juce_Initialisation.h"/>
+    <ClInclude Include="..\..\src\core\juce_LeakedObjectDetector.h"/>
     <ClInclude Include="..\..\src\core\juce_Logger.h"/>
     <ClInclude Include="..\..\src\core\juce_MathsFunctions.h"/>
     <ClInclude Include="..\..\src\core\juce_Memory.h"/>

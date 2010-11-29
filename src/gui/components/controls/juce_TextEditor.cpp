@@ -263,8 +263,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     Font font;
     Colour colour;
 
@@ -330,6 +328,7 @@ private:
     }
 
     UniformTextSection& operator= (const UniformTextSection& other);
+    JUCE_LEAK_DETECTOR (UniformTextSection);
 };
 
 //==============================================================================
@@ -718,8 +717,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     int indexInText;
     float lineY, lineHeight, maxDescent;
     float atomX, atomRight;
@@ -753,6 +750,8 @@ private:
     {
         return (x - 0.0001f) >= wordWrapWidth;
     }
+
+    JUCE_LEAK_DETECTOR (Iterator);
 };
 
 

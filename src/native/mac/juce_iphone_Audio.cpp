@@ -534,10 +534,6 @@ public:
     {
     }
 
-    ~IPhoneAudioIODeviceType()
-    {
-    }
-
     //==============================================================================
     void scanForDevices()
     {
@@ -574,12 +570,8 @@ public:
         return 0;
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    IPhoneAudioIODeviceType (const IPhoneAudioIODeviceType&);
-    IPhoneAudioIODeviceType& operator= (const IPhoneAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IPhoneAudioIODeviceType);
 };
 
 //==============================================================================

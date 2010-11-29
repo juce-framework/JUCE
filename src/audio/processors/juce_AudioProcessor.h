@@ -552,9 +552,6 @@ public:
                                double sampleRate,
                                int blockSize) throw();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
@@ -593,8 +590,7 @@ private:
     BigInteger changingParams;
 #endif
 
-    AudioProcessor (const AudioProcessor&);
-    AudioProcessor& operator= (const AudioProcessor&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor);
 };
 
 

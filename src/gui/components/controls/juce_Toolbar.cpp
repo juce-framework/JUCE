@@ -161,14 +161,11 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     const float fixedSize;
     const bool drawBar;
 
-    ToolbarSpacerComp (const ToolbarSpacerComp&);
-    ToolbarSpacerComp& operator= (const ToolbarSpacerComp&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarSpacerComp);
 };
 
 //==============================================================================
@@ -255,15 +252,12 @@ public:
         idealHeight = getHeight();
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     Component::SafePointer<Toolbar> owner;
     const int height;
     Array <int> oldIndexes;
 
-    MissingItemsComponent (const MissingItemsComponent&);
-    MissingItemsComponent& operator= (const MissingItemsComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingItemsComponent);
 };
 
 

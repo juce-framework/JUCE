@@ -204,8 +204,6 @@ public:
     /** @internal */
     FilePreviewComponent* getPreviewComponent() const throw();
 
-    juce_UseDebuggingNewOperator
-
 protected:
     virtual const BigInteger getRoots (StringArray& rootNames, StringArray& rootPaths);
 
@@ -231,8 +229,7 @@ private:
     void sendListenerChangeMessage();
     bool isFileOrDirSuitable (const File& f) const;
 
-    FileBrowserComponent (const FileBrowserComponent&);
-    FileBrowserComponent& operator= (const FileBrowserComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowserComponent);
 };
 
 

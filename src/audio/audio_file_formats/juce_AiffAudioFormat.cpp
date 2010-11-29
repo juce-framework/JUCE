@@ -214,13 +214,10 @@ public:
         return true;
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
-    AiffAudioFormatReader (const AiffAudioFormatReader&);
-    AiffAudioFormatReader& operator= (const AiffAudioFormatReader&);
-
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AiffAudioFormatReader);
 };
 
 //==============================================================================
@@ -285,8 +282,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     MemoryBlock tempBlock;
     uint32 lengthInSamples, bytesWritten;
@@ -294,9 +289,6 @@ private:
     bool writeFailed;
 
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
-
-    AiffAudioFormatWriter (const AiffAudioFormatWriter&);
-    AiffAudioFormatWriter& operator= (const AiffAudioFormatWriter&);
 
     void writeHeader()
     {
@@ -371,6 +363,8 @@ private:
 
         jassert (output->getPosition() == headerLen);
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AiffAudioFormatWriter);
 };
 
 //==============================================================================

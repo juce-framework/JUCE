@@ -215,9 +215,6 @@ public:
     bool redo();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     OwnedArray <OwnedArray <UndoableAction> > transactions;
@@ -226,9 +223,7 @@ private:
     int totalUnitsStored, maxNumUnitsToKeep, minimumTransactionsToKeep, nextIndex;
     bool newTransaction, reentrancyCheck;
 
-    // disallow copy constructor
-    UndoManager (const UndoManager&);
-    UndoManager& operator= (const UndoManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UndoManager);
 };
 
 

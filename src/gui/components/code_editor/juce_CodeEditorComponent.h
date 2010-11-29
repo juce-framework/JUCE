@@ -255,10 +255,8 @@ public:
     /** @internal */
     bool isTextInputActive() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     CodeDocument& document;
 
     Font font;
@@ -309,8 +307,7 @@ private:
     int indexToColumn (int line, int index) const throw();
     int columnToIndex (int line, int column) const throw();
 
-    CodeEditorComponent (const CodeEditorComponent&);
-    CodeEditorComponent& operator= (const CodeEditorComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorComponent);
 };
 
 

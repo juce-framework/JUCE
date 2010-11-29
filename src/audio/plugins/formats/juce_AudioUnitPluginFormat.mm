@@ -265,10 +265,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes);
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class AudioUnitPluginWindowCarbon;
     friend class AudioUnitPluginWindowCocoa;
     friend class AudioUnitPluginFormat;
@@ -404,6 +402,8 @@ private:
 
     //==============================================================================
     AudioUnitPluginInstance (const String& fileOrIdentifier);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance);
 };
 
 //==============================================================================
@@ -1080,10 +1080,8 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioUnitPluginInstance& plugin;
     ComponentRecord* componentRecord;
     AudioUnitCarbonView viewComponent;
@@ -1138,6 +1136,8 @@ private:
 
     friend class InnerWrapperComponent;
     ScopedPointer<InnerWrapperComponent> innerWrapper;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon);
 };
 
 #endif

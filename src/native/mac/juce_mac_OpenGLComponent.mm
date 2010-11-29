@@ -253,8 +253,6 @@ public:
     void* getNativeWindowHandle() const     { return viewHolder->view; }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     NSOpenGLContext* renderContext;
     ThreadSafeNSOpenGLView* view;
 
@@ -263,8 +261,7 @@ private:
     ScopedPointer <NSViewComponentInternal> viewHolder;
 
     //==============================================================================
-    WindowedGLContext (const WindowedGLContext&);
-    WindowedGLContext& operator= (const WindowedGLContext&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
 
 //==============================================================================
@@ -500,8 +497,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     Component::SafePointer<Component> component;
     OpenGLPixelFormat pixelFormat;
@@ -514,8 +509,7 @@ private:
     int lastWidth, lastHeight;
 
     //==============================================================================
-    GLESContext (const GLESContext&);
-    GLESContext& operator= (const GLESContext&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GLESContext);
 };
 
 

@@ -29,11 +29,6 @@
 //==============================================================================
 class BouncingBallComp  : public Component
 {
-    float x, y, size, dx, dy, w, h, parentWidth, parentHeight;
-    float innerX, innerY;
-    Colour colour;
-    Thread::ThreadID threadId;
-
 public:
     BouncingBallComp()
     {
@@ -110,7 +105,13 @@ public:
         repaint();
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    float x, y, size, dx, dy, w, h, parentWidth, parentHeight;
+    float innerX, innerY;
+    Colour colour;
+    Thread::ThreadID threadId;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp);
 };
 
 
@@ -118,8 +119,6 @@ public:
 class DemoThread    : public BouncingBallComp,
                       public Thread
 {
-    int interval;
-
 public:
     DemoThread()
         : Thread ("Juce Demo Thread")
@@ -161,7 +160,10 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    int interval;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoThread);
 };
 
 
@@ -205,7 +207,8 @@ public:
         // In this case there's no need to do anything here.
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoThreadPoolJob);
 };
 
 //==============================================================================

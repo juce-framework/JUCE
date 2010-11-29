@@ -74,8 +74,6 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<AudioProcessor> filter;
     ScopedPointer<AudioFilterStreamingDeviceManager> deviceManager;
@@ -83,8 +81,7 @@ private:
 
     void deleteFilter();
 
-    StandaloneFilterWindow (const StandaloneFilterWindow&);
-    StandaloneFilterWindow& operator= (const StandaloneFilterWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow);
 };
 
 #endif   // __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__

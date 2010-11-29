@@ -52,14 +52,10 @@ public:
         return true;
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     TextEditor& addressTextBox;
 
-    DemoBrowserComponent (DemoBrowserComponent&);
-    DemoBrowserComponent& operator= (const DemoBrowserComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoBrowserComponent);
 };
 
 
@@ -129,13 +125,13 @@ public:
             webView->goToURL (addressTextBox.getText());
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<DemoBrowserComponent> webView;
 
     TextEditor addressTextBox;
     TextButton goButton, backButton, forwardButton;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo);
 };
 
 

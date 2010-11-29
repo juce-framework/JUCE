@@ -46,9 +46,9 @@ DrawableComposite::DrawableComposite()
 }
 
 DrawableComposite::DrawableComposite (const DrawableComposite& other)
+    : bounds (other.bounds),
+      updateBoundsReentrant (false)
 {
-    bounds = other.bounds;
-
     for (int i = 0; i < other.getNumDrawables(); ++i)
         insertDrawable (other.getDrawable(i)->createCopy());
 
@@ -195,8 +195,10 @@ void DrawableComposite::refreshTransformFromBounds()
                                                           content.getRight(), content.getY(), resolved[1].getX(), resolved[1].getY(),
                                                           content.getX(), content.getBottom(), resolved[2].getX(), resolved[2].getY()));
 
-    if (! t.isSingularity())
-        setTransform (t);
+    if (t.isSingularity())
+        t = AffineTransform::identity;
+
+    setTransform (t);
 }
 
 void DrawableComposite::parentHierarchyChanged()

@@ -119,11 +119,11 @@ public:
     */
     void setSeedRandomly();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int64 seed;
+
+    JUCE_LEAK_DETECTOR (Random);
 };
 
 

@@ -1112,8 +1112,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     StringArray inChannels, outChannels;
     int outputDeviceIndex, inputDeviceIndex;
 
@@ -1136,9 +1134,6 @@ private:
 
     AudioIODeviceCallback* callback;
     CriticalSection startStopLock;
-
-    DSoundAudioIODevice (const DSoundAudioIODevice&);
-    DSoundAudioIODevice& operator= (const DSoundAudioIODevice&);
 
     const String openDevice (const BigInteger& inputChannels,
                              const BigInteger& outputChannels,
@@ -1278,6 +1273,8 @@ public:
             }
         }
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODevice);
 };
 
 
@@ -1358,8 +1355,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     StringArray outputDeviceNames;
     OwnedArray <GUID> outputGuids;
 
@@ -1442,8 +1437,7 @@ private:
     }
 
     //==============================================================================
-    DSoundAudioIODeviceType (const DSoundAudioIODeviceType&);
-    DSoundAudioIODeviceType& operator= (const DSoundAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODeviceType);
 };
 
 //==============================================================================

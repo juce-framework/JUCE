@@ -196,31 +196,6 @@ private:
 };
 
 
-#if JUCE_DEBUG
-namespace
-{
-    class ComponentLeakDetector
-    {
-    public:
-        ComponentLeakDetector() : componentCount (0) {}
-
-        ~ComponentLeakDetector()
-        {
-            /* If you hit this assertion, then you've leaked some Components.
-
-               In most cases this will be due to bad coding practices like using the manually deleting
-               objects rather than using ScopedPointers or embedded member objects to manage their lifetimes.
-            */
-            jassert (componentCount <= 0);
-        }
-
-        int componentCount;
-    };
-
-    ComponentLeakDetector leakDetector;
-}
-#endif
-
 //==============================================================================
 class Component::ComponentHelpers
 {
@@ -416,9 +391,6 @@ Component::Component()
     componentFlags_ (0),
     componentTransparency (0)
 {
-   #if JUCE_DEBUG
-    leakDetector.componentCount++;
-   #endif
 }
 
 Component::Component (const String& name)
@@ -430,9 +402,6 @@ Component::Component (const String& name)
     componentFlags_ (0),
     componentTransparency (0)
 {
-   #if JUCE_DEBUG
-    leakDetector.componentCount++;
-   #endif
 }
 
 Component::~Component()
@@ -457,18 +426,6 @@ Component::~Component()
 
     for (int i = childComponentList_.size(); --i >= 0;)
         childComponentList_.getUnchecked(i)->parentComponent_ = 0;
-
-   #if JUCE_DEBUG
-    leakDetector.componentCount--;
-
-    /* If you hit this assertion, then you've somehow managed to delete more components than
-       you have created.
-
-       In most cases this will be due to bad coding practices like manually deleting your objects
-       rather than using ScopedPointers or embedded member objects to manage their lifetimes.
-    */
-    jassert (leakDetector.componentCount >= 0);
-   #endif
 }
 
 //==============================================================================
@@ -1009,14 +966,15 @@ void Component::setBounds (const int x, const int y, int w, int h)
     const bool wasResized  = (getWidth() != w || getHeight() != h);
     const bool wasMoved    = (getX() != x || getY() != y);
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // It's a very bad idea to try to resize a window during its paint() method!
     jassert (! (flags.isInsidePaintCall && wasResized && isOnDesktop()));
-#endif
+   #endif
 
     if (wasMoved || wasResized)
     {
-        if (flags.visibleFlag)
+        const bool showing = isShowing();
+        if (showing)
         {
             // send a fake mouse move to trigger enter/exit messages if needed..
             sendFakeMouseMove();
@@ -1027,10 +985,13 @@ void Component::setBounds (const int x, const int y, int w, int h)
 
         bounds_.setBounds (x, y, w, h);
 
-        if (wasResized)
-            repaint();
-        else if (! flags.hasHeavyweightPeerFlag)
-            repaintParent();
+        if (showing)
+        {
+            if (wasResized)
+                repaint();
+            else if (! flags.hasHeavyweightPeerFlag)
+                repaintParent();
+        }
 
         if (flags.hasHeavyweightPeerFlag)
         {
@@ -1387,36 +1348,44 @@ Component* Component::removeChildComponent (const int index)
 
     if (child != 0)
     {
-        sendFakeMouseMove();
-        child->repaintParent();
+        const bool childShowing = child->isShowing();
+
+        if (childShowing)
+        {
+            sendFakeMouseMove();
+            child->repaintParent();
+        }
 
         childComponentList_.remove (index);
         child->parentComponent_ = 0;
 
-        JUCE_TRY
+        if (childShowing)
         {
-            if ((currentlyFocusedComponent == child)
-                || child->isParentOf (currentlyFocusedComponent))
+            JUCE_TRY
             {
-                // get rid first to force the grabKeyboardFocus to change to us.
-                giveAwayFocus();
-                grabKeyboardFocus();
+                if ((currentlyFocusedComponent == child)
+                    || child->isParentOf (currentlyFocusedComponent))
+                {
+                    // get rid first to force the grabKeyboardFocus to change to us.
+                    giveAwayFocus();
+                    grabKeyboardFocus();
+                }
             }
+          #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
+            catch (const std::exception& e)
+            {
+                currentlyFocusedComponent = 0;
+                Desktop::getInstance().triggerFocusCallback();
+                JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__);
+            }
+            catch (...)
+            {
+                currentlyFocusedComponent = 0;
+                Desktop::getInstance().triggerFocusCallback();
+                JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__);
+            }
+          #endif
         }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-        catch (const std::exception& e)
-        {
-            currentlyFocusedComponent = 0;
-            Desktop::getInstance().triggerFocusCallback();
-            JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__);
-        }
-        catch (...)
-        {
-            currentlyFocusedComponent = 0;
-            Desktop::getInstance().triggerFocusCallback();
-            JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__);
-        }
-#endif
 
         child->internalHierarchyChanged();
         internalChildrenChanged();
@@ -1849,26 +1818,23 @@ void Component::paintComponentAndChildren (Graphics& g)
                 {
                     child.paintWithinParentContext (g);
                 }
-                else
+                else if (g.reduceClipRegion (child.getBounds()))
                 {
-                    if (g.reduceClipRegion (child.getBounds()))
+                    bool nothingClipped = true;
+
+                    for (int j = i + 1; j < childComponentList_.size(); ++j)
                     {
-                        bool nothingClipped = true;
+                        const Component& sibling = *childComponentList_.getUnchecked (j);
 
-                        for (int j = i + 1; j < childComponentList_.size(); ++j)
+                        if (sibling.flags.opaqueFlag && sibling.isVisible() && sibling.affineTransform_ == 0)
                         {
-                            const Component& sibling = *childComponentList_.getUnchecked (j);
-
-                            if (sibling.flags.opaqueFlag && sibling.isVisible() && sibling.affineTransform_ == 0)
-                            {
-                                nothingClipped = false;
-                                g.excludeClipRegion (sibling.getBounds());
-                            }
+                            nothingClipped = false;
+                            g.excludeClipRegion (sibling.getBounds());
                         }
-
-                        if (nothingClipped || ! g.isClipEmpty())
-                            child.paintWithinParentContext (g);
                     }
+
+                    if (nothingClipped || ! g.isClipEmpty())
+                        child.paintWithinParentContext (g);
                 }
 
                 g.restoreState();
@@ -2362,11 +2328,8 @@ public:
             deleteInstance();
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
-    InternalDragRepeater (const InternalDragRepeater&);
-    InternalDragRepeater& operator= (const InternalDragRepeater&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalDragRepeater);
 };
 
 juce_ImplementSingleton_SingleThreaded (InternalDragRepeater)

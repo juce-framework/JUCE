@@ -133,7 +133,8 @@ public:
     */
     AffineTransform transform;
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_LEAK_DETECTOR (FillType);
 };
 
 

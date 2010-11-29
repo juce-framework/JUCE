@@ -107,11 +107,11 @@ public:
     /** Removes all properties and methods from the object. */
     void clear();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     NamedValueSet properties;
+
+    JUCE_LEAK_DETECTOR (DynamicObject);
 };
 
 

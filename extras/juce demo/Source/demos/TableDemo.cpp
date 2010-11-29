@@ -194,8 +194,6 @@ public:
         table.setBoundsInset (BorderSize (8));
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     TableListBox table;     // the table component itself
@@ -311,6 +309,8 @@ private:
 
         return String::empty;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableDemoComponent);
 };
 
 

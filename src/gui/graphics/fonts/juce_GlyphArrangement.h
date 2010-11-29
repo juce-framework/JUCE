@@ -81,9 +81,6 @@ public:
     /** Checks to see if a point lies within this glyph. */
     bool hitTest (float x, float y) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     friend class GlyphArrangement;
@@ -93,6 +90,7 @@ private:
     int glyph;
 
     PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
+    JUCE_LEAK_DETECTOR (PositionedGlyph);
 };
 
 
@@ -291,16 +289,16 @@ public:
                         const Justification& justification);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     OwnedArray <PositionedGlyph> glyphs;
 
     int insertEllipsis (const Font& font, float maxXPos, int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
                           const Justification& justification, float minimumHorizontalScale);
     void spreadOutLine (int start, int numGlyphs, float targetWidth);
+
+    JUCE_LEAK_DETECTOR (GlyphArrangement);
 };
 
 

@@ -98,19 +98,15 @@ public:
     */
     void cancelPendingReads();
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     void* internal;
     String currentPipeName;
     CriticalSection lock;
 
-    NamedPipe (const NamedPipe&);
-    NamedPipe& operator= (const NamedPipe&);
-
     bool openInternal (const String& pipeName, const bool createPipe);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NamedPipe);
 };
 
 

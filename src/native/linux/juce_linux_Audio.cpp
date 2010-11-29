@@ -319,8 +319,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     snd_pcm_t* handle;
     String error;
     int bitDepth, numChannelsRunning, latency;
@@ -383,6 +381,8 @@ private:
         DBG ("ALSA error: " + error + "\n");
         return true;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSADevice);
 };
 
 //==============================================================================
@@ -623,8 +623,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     String error;
     double sampleRate;
     int bufferSize, outputLatency, inputLatency;
@@ -679,6 +677,8 @@ private:
         for (i = 0; i < maxChansIn; ++i)
             channelNamesIn.add ("channel " + String ((int) i + 1));
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSAThread);
 };
 
 
@@ -978,8 +978,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     StringArray inputNames, outputNames, inputIds, outputIds;
     bool hasScanned;
@@ -1011,8 +1009,7 @@ private:
         return s;
     }*/
 
-    ALSAAudioIODeviceType (const ALSAAudioIODeviceType&);
-    ALSAAudioIODeviceType& operator= (const ALSAAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ALSAAudioIODeviceType);
 };
 
 //==============================================================================

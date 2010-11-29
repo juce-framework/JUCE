@@ -78,10 +78,8 @@ public:
     bool isExhausted();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     InputStream* const source;
     ScopedPointer <InputStream> sourceToDelete;
     int bufferSize;
@@ -89,8 +87,7 @@ private:
     HeapBlock <char> buffer;
     void ensureBuffered();
 
-    BufferedInputStream (const BufferedInputStream&);
-    BufferedInputStream& operator= (const BufferedInputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferedInputStream);
 };
 
 #endif   // __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__

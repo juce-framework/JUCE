@@ -139,8 +139,6 @@ public:
     /** @internal */
     void fileDoubleClicked (const File& file);
 
-    juce_UseDebuggingNewOperator
-
 private:
     class ContentComponent  : public Component
     {
@@ -161,8 +159,7 @@ private:
     ContentComponent* content;
     const bool warnAboutOverwritingExistingFiles;
 
-    FileChooserDialogBox (const FileChooserDialogBox&);
-    FileChooserDialogBox& operator= (const FileChooserDialogBox&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
 };
 
 

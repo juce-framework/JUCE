@@ -182,10 +182,8 @@ public:
     virtual void messageReceived (const MemoryBlock& message) = 0;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     CriticalSection pipeAndSocketLock;
     ScopedPointer <StreamingSocket> socket;
     ScopedPointer <NamedPipe> pipe;
@@ -209,8 +207,7 @@ private:
     bool readNextMessageInt();
     void run();
 
-    InterprocessConnection (const InterprocessConnection&);
-    InterprocessConnection& operator= (const InterprocessConnection&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection);
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__

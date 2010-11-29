@@ -95,10 +95,8 @@ public:
                                                              classes will probably use variations on this colour. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -117,8 +115,7 @@ private:
 
     void timerCallback();
 
-    ProgressBar (const ProgressBar&);
-    ProgressBar& operator= (const ProgressBar&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar);
 };
 
 

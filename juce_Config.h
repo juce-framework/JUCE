@@ -274,10 +274,11 @@
 #endif
 
 //=============================================================================
-/** JUCE_CHECK_MEMORY_LEAKS: Enables a memory-leak check when an app terminates.
-    (Currently, this only affects Windows builds in debug mode).
+/** JUCE_CHECK_MEMORY_LEAKS: Enables a memory-leak check for certain objects when
+    the app terminates. See the LeakedObjectDetector class and the JUCE_LEAK_DETECTOR
+    macro for more details about enabling leak checking for specific classes.
 */
-#ifndef JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_DEBUG && ! defined (JUCE_CHECK_MEMORY_LEAKS)
   #define JUCE_CHECK_MEMORY_LEAKS 1
 #endif
 

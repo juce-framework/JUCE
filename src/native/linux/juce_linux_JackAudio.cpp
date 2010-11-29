@@ -584,14 +584,11 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     StringArray inputNames, outputNames, inputIds, outputIds;
     bool hasScanned;
 
-    JackAudioIODeviceType (const JackAudioIODeviceType&);
-    JackAudioIODeviceType& operator= (const JackAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType);
 };
 
 //==============================================================================

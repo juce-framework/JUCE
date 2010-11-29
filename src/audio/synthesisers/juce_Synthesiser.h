@@ -76,8 +76,10 @@ public:
     */
     typedef ReferenceCountedObjectPtr <SynthesiserSound> Ptr;
 
+
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (SynthesiserSound);
 };
 
 
@@ -199,9 +201,6 @@ public:
     void setCurrentPlaybackSampleRate (double newRate);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     //==============================================================================
     /** Returns the current target sample rate at which rendering is being done.
@@ -233,6 +232,8 @@ private:
     int currentlyPlayingNote;
     uint32 noteOnTime;
     SynthesiserSound::Ptr currentlyPlayingSound;
+
+    JUCE_LEAK_DETECTOR (SynthesiserVoice);
 };
 
 
@@ -432,10 +433,6 @@ public:
                           int startSample,
                           int numSamples);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     //==============================================================================
     /** This is used to control access to the rendering callback and the note trigger methods. */
@@ -478,8 +475,7 @@ private:
     uint32 lastNoteOnCounter;
     bool shouldStealNotes;
 
-    Synthesiser (const Synthesiser&);
-    Synthesiser& operator= (const Synthesiser&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser);
 };
 
 

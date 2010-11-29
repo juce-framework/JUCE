@@ -126,8 +126,6 @@ public:
     void signalJobShouldExit();
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     friend class ThreadPool;
     friend class ThreadPoolThread;
@@ -135,8 +133,7 @@ private:
     ThreadPool* pool;
     bool shouldStop, isActive, shouldBeDeleted;
 
-    ThreadPoolJob (const ThreadPoolJob&);
-    ThreadPoolJob& operator= (const ThreadPoolJob&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob);
 };
 
 
@@ -294,10 +291,8 @@ public:
     bool setThreadPriorities (int newPriority);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     const int threadStopTimeout;
     int priority;
     class ThreadPoolThread;
@@ -311,8 +306,7 @@ private:
     friend class ThreadPoolThread;
     bool runNextJob();
 
-    ThreadPool (const ThreadPool&);
-    ThreadPool& operator= (const ThreadPool&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool);
 };
 
 

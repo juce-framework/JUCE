@@ -61,10 +61,8 @@ public:
     bool setPosition (int64 pos);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     File file;
     void* fileHandle;
     int64 currentPosition, totalSize;
@@ -74,8 +72,7 @@ private:
     void closeHandle();
     size_t readInternal (void* buffer, size_t numBytes);
 
-    FileInputStream (const FileInputStream&);
-    FileInputStream& operator= (const FileInputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputStream);
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__

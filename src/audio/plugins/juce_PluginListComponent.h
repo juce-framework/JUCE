@@ -80,10 +80,8 @@ public:
     /** @internal */
     void timerCallback();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     KnownPluginList& list;
     File deadMansPedalFile;
     ListBox listBox;
@@ -93,8 +91,7 @@ private:
 
     void scanFor (AudioPluginFormat* format);
 
-    PluginListComponent (const PluginListComponent&);
-    PluginListComponent& operator= (const PluginListComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
 };
 
 

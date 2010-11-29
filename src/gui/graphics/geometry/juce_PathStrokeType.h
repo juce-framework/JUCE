@@ -183,8 +183,6 @@ public:
     void setEndStyle (EndCapStyle newStyle) throw()             { endStyle = newStyle; }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** Compares the stroke thickness, joint and end styles of two stroke types. */
     bool operator== (const PathStrokeType& other) const throw();
 
@@ -196,6 +194,8 @@ private:
     float thickness;
     JointStyle jointStyle;
     EndCapStyle endStyle;
+
+    JUCE_LEAK_DETECTOR (PathStrokeType);
 };
 
 #endif   // __JUCE_PATHSTROKETYPE_JUCEHEADER__

@@ -305,8 +305,6 @@ public:
         return ok;
     }
 
-    juce_UseDebuggingNewOperator
-
     bool ok;
 
 private:
@@ -341,8 +339,7 @@ private:
 #endif
     }
 
-    QTAudioReader (const QTAudioReader&);
-    QTAudioReader& operator= (const QTAudioReader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QTAudioReader);
 };
 
 

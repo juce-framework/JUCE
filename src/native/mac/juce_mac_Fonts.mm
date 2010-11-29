@@ -334,8 +334,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     CGFontRef fontRef;
     float fontHeightToCGSizeFactor;
     CGAffineTransform renderingTransform;
@@ -479,8 +477,7 @@ private:
     ScopedPointer <CharToGlyphMapper> charToGlyphMapper;
 #endif
 
-    MacTypeface (const MacTypeface&);
-    MacTypeface& operator= (const MacTypeface&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MacTypeface);
 };
 
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)

@@ -53,12 +53,8 @@ public:
     const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
     const FileSearchPath getDefaultLocationsToSearch();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    DirectXPluginFormat (const DirectXPluginFormat&);
-    DirectXPluginFormat& operator= (const DirectXPluginFormat&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectXPluginFormat);
 };
 
 #endif

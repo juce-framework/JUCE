@@ -131,8 +131,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
     HMIDIIN deviceHandle;
 
 private:
@@ -222,8 +220,7 @@ private:
         return timeStamp * 0.001;
     }
 
-    MidiInCollector (const MidiInCollector&);
-    MidiInCollector& operator= (const MidiInCollector&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector);
 };
 
 Array <MidiInCollector*, CriticalSection> MidiInCollector::activeMidiCollectors;
@@ -331,7 +328,8 @@ struct MidiOutHandle
 
     static Array<MidiOutHandle*> activeHandles;
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_LEAK_DETECTOR (MidiOutHandle);
 };
 
 Array<MidiOutHandle*> MidiOutHandle::activeHandles;

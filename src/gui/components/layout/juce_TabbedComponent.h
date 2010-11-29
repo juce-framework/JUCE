@@ -212,13 +212,10 @@ public:
     /** @internal */
     void lookAndFeelChanged();
 
-    juce_UseDebuggingNewOperator
-
 protected:
     //==============================================================================
     ScopedPointer<TabbedButtonBar> tabs;
 
-    //==============================================================================
     /** This creates one of the tab buttons.
 
         If you need to use custom tab components, you can override this method and
@@ -237,8 +234,7 @@ private:
     friend class TabCompButtonBar;
     void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
-    TabbedComponent (const TabbedComponent&);
-    TabbedComponent& operator= (const TabbedComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent);
 };
 
 

@@ -755,8 +755,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     int inputLatency, outputLatency;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
@@ -790,9 +788,6 @@ private:
     int numInputChannelInfos, numOutputChannelInfos;
     HeapBlock <CallbackDetailsForChannel> inputChannelInfo, outputChannelInfo;
     HeapBlock <float*> tempInputBuffers, tempOutputBuffers;
-
-    CoreAudioInternal (const CoreAudioInternal&);
-    CoreAudioInternal& operator= (const CoreAudioInternal&);
 
     //==============================================================================
     static OSStatus audioIOProc (AudioDeviceID /*inDevice*/,
@@ -853,6 +848,8 @@ private:
 
         return 0;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioInternal);
 };
 
 
@@ -1075,8 +1072,6 @@ public:
 
     int inputIndex, outputIndex;
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<CoreAudioInternal> internal;
     bool isOpen_, isStarted;
@@ -1101,8 +1096,7 @@ private:
         return noErr;
     }
 
-    CoreAudioIODevice (const CoreAudioIODevice&);
-    CoreAudioIODevice& operator= (const CoreAudioIODevice&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODevice);
 };
 
 //==============================================================================
@@ -1258,8 +1252,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     StringArray inputDeviceNames, outputDeviceNames;
     Array <AudioDeviceID> inputIds, outputIds;
@@ -1296,8 +1288,7 @@ private:
         return total;
     }
 
-    CoreAudioIODeviceType (const CoreAudioIODeviceType&);
-    CoreAudioIODeviceType& operator= (const CoreAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODeviceType);
 };
 
 //==============================================================================

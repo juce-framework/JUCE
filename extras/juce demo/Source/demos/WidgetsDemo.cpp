@@ -107,9 +107,9 @@ public:
     {
     }
 
-    void mouseDown (const MouseEvent&)
+    void mouseDown (const MouseEvent& e)
     {
-        dragger.startDraggingComponent (this, 0);
+        dragger.startDraggingComponent (this, e, 0);
     }
 
     void mouseDrag (const MouseEvent& e)

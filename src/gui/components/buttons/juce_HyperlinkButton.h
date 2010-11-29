@@ -92,10 +92,8 @@ public:
     void changeWidthToFitText();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void clicked();
     /** @internal */
@@ -106,6 +104,7 @@ protected:
                       bool isButtonDown);
 
 private:
+    //==============================================================================
     URL url;
     Font font;
     bool resizeFont;
@@ -113,8 +112,7 @@ private:
 
     const Font getFontToUse() const;
 
-    HyperlinkButton (const HyperlinkButton&);
-    HyperlinkButton& operator= (const HyperlinkButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HyperlinkButton);
 };
 
 #endif   // __JUCE_HYPERLINKBUTTON_JUCEHEADER__

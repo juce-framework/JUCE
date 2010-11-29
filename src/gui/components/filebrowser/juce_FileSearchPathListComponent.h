@@ -104,8 +104,6 @@ public:
     /** @internal */
     void buttonClicked (Button* button);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
@@ -119,8 +117,7 @@ private:
     void changed();
     void updateButtons();
 
-    FileSearchPathListComponent (const FileSearchPathListComponent&);
-    FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileSearchPathListComponent);
 };
 
 

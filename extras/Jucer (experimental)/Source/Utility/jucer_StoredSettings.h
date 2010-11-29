@@ -73,8 +73,6 @@ public:
     const Image getFallbackImage();
     const Drawable* getImageFileIcon();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     ScopedPointer<PropertiesFile> props;
@@ -82,6 +80,8 @@ private:
 
     ScopedPointer<Drawable> imageFileIcon;
     Image fallbackImage;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings);
 };
 
 

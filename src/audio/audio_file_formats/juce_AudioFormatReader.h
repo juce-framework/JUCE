@@ -216,10 +216,8 @@ public:
                               int numSamples) = 0;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** Used by AudioFormatReader subclasses to copy data to different formats. */
     template <class DestSampleType, class SourceSampleType, class SourceEndianness>
     struct ReadHelper
@@ -248,8 +246,7 @@ protected:
 private:
     String formatName;
 
-    AudioFormatReader (const AudioFormatReader&);
-    AudioFormatReader& operator= (const AudioFormatReader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReader);
 };
 
 

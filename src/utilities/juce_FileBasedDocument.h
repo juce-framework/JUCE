@@ -279,19 +279,13 @@ protected:
     virtual void setLastDocumentOpened (const File& file) = 0;
 
 
-public:
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 private:
     //==============================================================================
     File documentFile;
     bool changedSinceSave;
     String fileExtension, fileWildcard, openFileDialogTitle, saveFileDialogTitle;
 
-    FileBasedDocument (const FileBasedDocument&);
-    FileBasedDocument& operator= (const FileBasedDocument&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBasedDocument);
 };
 
 

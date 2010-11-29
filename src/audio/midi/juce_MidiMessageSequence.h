@@ -84,13 +84,11 @@ public:
         */
         MidiEventHolder* noteOffObject;
 
-
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         friend class MidiMessageSequence;
         MidiEventHolder (const MidiMessage& message);
+        JUCE_LEAK_DETECTOR (MidiEventHolder);
     };
 
     //==============================================================================
@@ -268,8 +266,6 @@ public:
     void swapWith (MidiMessageSequence& other) throw();
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** @internal */
     static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
                                 const MidiMessageSequence::MidiEventHolder* second) throw();
@@ -280,6 +276,8 @@ private:
     OwnedArray <MidiEventHolder> list;
 
     void sort();
+
+    JUCE_LEAK_DETECTOR (MidiMessageSequence);
 };
 
 

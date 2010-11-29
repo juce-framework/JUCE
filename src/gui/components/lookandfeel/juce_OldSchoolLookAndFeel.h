@@ -148,14 +148,11 @@ public:
                                                 bool positionTitleBarButtonsOnLeft);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     DropShadowEffect scrollbarShadow;
 
-    OldSchoolLookAndFeel (const OldSchoolLookAndFeel&);
-    OldSchoolLookAndFeel& operator= (const OldSchoolLookAndFeel&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OldSchoolLookAndFeel);
 };
 
 

@@ -61,10 +61,6 @@ public:
     {
     }
 
-    ~GlyphInfo() throw()
-    {
-    }
-
     struct KerningPair
     {
         juce_wchar character2;
@@ -97,11 +93,8 @@ public:
     float width;
     Array <KerningPair> kerningPairs;
 
-    juce_UseDebuggingNewOperator
-
 private:
-    GlyphInfo (const GlyphInfo&);
-    GlyphInfo& operator= (const GlyphInfo&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphInfo);
 };
 
 //==============================================================================

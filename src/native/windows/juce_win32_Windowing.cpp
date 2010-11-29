@@ -337,11 +337,8 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
-    WindowsBitmapImage (const WindowsBitmapImage&);
-    WindowsBitmapImage& operator= (const WindowsBitmapImage&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage);
 };
 
 namespace IconConverters
@@ -1020,8 +1017,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     bool dontRepaint;
 
     static ModifierKeys currentModifiers;
@@ -2338,8 +2333,7 @@ private:
         return false;
     }
 
-    Win32ComponentPeer (const Win32ComponentPeer&);
-    Win32ComponentPeer& operator= (const Win32ComponentPeer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32ComponentPeer);
 };
 
 ModifierKeys Win32ComponentPeer::currentModifiers;

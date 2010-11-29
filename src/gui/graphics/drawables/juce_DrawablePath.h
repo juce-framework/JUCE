@@ -125,16 +125,15 @@ public:
         static const Identifier nonZeroWinding, point1, point2, point3;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     bool rebuildPath (Path& path) const;
 
 private:
+    //==============================================================================
     ScopedPointer<RelativePointPath> relativePath;
 
     DrawablePath& operator= (const DrawablePath&);
+    JUCE_LEAK_DETECTOR (DrawablePath);
 };
 
 

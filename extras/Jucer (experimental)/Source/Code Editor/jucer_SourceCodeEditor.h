@@ -48,11 +48,10 @@ public:
 
     void resized();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     CodeEditorComponent editor;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceCodeEditor);
 };
 
 

@@ -52,16 +52,11 @@ public:
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     Project::Item item;
     ListBox list;
 
-    //==============================================================================
-    GroupInformationComponent (const GroupInformationComponent&);
-    const GroupInformationComponent& operator= (const GroupInformationComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GroupInformationComponent);
 };
 
 

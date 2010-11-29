@@ -97,10 +97,8 @@ public:
         */
         typedef ReferenceCountedObjectPtr <Node> Ptr;
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         friend class AudioProcessorGraph;
 
         const ScopedPointer<AudioProcessor> processor;
@@ -111,8 +109,7 @@ public:
         void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
         void unprepare();
 
-        Node (const Node&);
-        Node& operator= (const Node&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node);
     };
 
     //==============================================================================
@@ -152,10 +149,9 @@ public:
         */
         int destChannelIndex;
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
+        JUCE_LEAK_DETECTOR (Connection);
     };
 
     //==============================================================================
@@ -356,14 +352,11 @@ public:
         /** @internal */
         void setParentGraph (AudioProcessorGraph* graph);
 
-        juce_UseDebuggingNewOperator
-
     private:
         const IODeviceType type;
         AudioProcessorGraph* graph;
 
-        AudioGraphIOProcessor (const AudioGraphIOProcessor&);
-        AudioGraphIOProcessor& operator= (const AudioGraphIOProcessor&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioGraphIOProcessor);
     };
 
     //==============================================================================
@@ -404,10 +397,8 @@ public:
     /** @internal */
     void handleAsyncUpdate();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ReferenceCountedArray <Node> nodes;
     OwnedArray <Connection> connections;
     int lastNodeId;
@@ -428,8 +419,7 @@ private:
 
     bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
 
-    AudioProcessorGraph (const AudioProcessorGraph&);
-    AudioProcessorGraph& operator= (const AudioProcessorGraph&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph);
 };
 
 

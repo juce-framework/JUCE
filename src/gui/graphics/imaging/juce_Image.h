@@ -408,8 +408,7 @@ public:
         uint8* imageData;
         NamedValueSet userData;
 
-        SharedImage (const SharedImage&);
-        SharedImage& operator= (const SharedImage&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedImage);
     };
 
     /** @internal */
@@ -417,14 +416,14 @@ public:
     /** @internal */
     explicit Image (SharedImage* instance);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class SharedImage;
     friend class BitmapData;
 
     ReferenceCountedObjectPtr<SharedImage> image;
+
+    JUCE_LEAK_DETECTOR (Image);
 };
 
 

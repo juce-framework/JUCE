@@ -428,8 +428,6 @@ public:
 
     int64 bwavChunkStart, bwavSize;
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<AudioData::Converter> converter;
     int bytesPerFrame;
@@ -437,8 +435,7 @@ private:
 
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 
-    WavAudioFormatReader (const WavAudioFormatReader&);
-    WavAudioFormatReader& operator= (const WavAudioFormatReader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatReader);
 };
 
 //==============================================================================
@@ -514,8 +511,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<AudioData::Converter> converter;
     MemoryBlock tempBlock, bwavChunk, smplChunk;
@@ -570,8 +565,7 @@ private:
         usesFloatingPointData = (bitsPerSample == 32);
     }
 
-    WavAudioFormatWriter (const WavAudioFormatWriter&);
-    WavAudioFormatWriter& operator= (const WavAudioFormatWriter&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatWriter);
 };
 
 //==============================================================================

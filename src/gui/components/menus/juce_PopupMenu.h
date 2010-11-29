@@ -370,21 +370,17 @@ public:
         Image customImage;
         ApplicationCommandManager* commandManager;
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         const PopupMenu& menu;
         int index;
 
-        MenuItemIterator (const MenuItemIterator&);
-        MenuItemIterator& operator= (const MenuItemIterator&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuItemIterator);
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
+    //==============================================================================
     class Item;
     class ItemComponent;
     class Window;
@@ -407,6 +403,8 @@ private:
     int showMenu (const Rectangle<int>& target, int itemIdThatMustBeVisible,
                   int minimumWidth, int maximumNumColumns, int standardItemHeight,
                   Component* componentAttachedTo, ModalComponentManager::Callback* callback);
+
+    JUCE_LEAK_DETECTOR (PopupMenu);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__

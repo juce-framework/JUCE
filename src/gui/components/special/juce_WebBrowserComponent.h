@@ -111,10 +111,8 @@ public:
     /** @internal */
     void visibilityChanged();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     WebBrowserComponentInternal* browser;
     bool blankPageShown, unloadPageWhenBrowserIsHidden;
     String lastURL;
@@ -124,8 +122,7 @@ private:
     void reloadLastURL();
     void checkWindowAssociation();
 
-    WebBrowserComponent (const WebBrowserComponent&);
-    WebBrowserComponent& operator= (const WebBrowserComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponent);
 };
 
 

@@ -47,7 +47,7 @@
 
         void mouseDown (const MouseEvent& e)
         {
-            myDragger.startDraggingComponent (this, 0);
+            myDragger.startDraggingComponent (this, e, 0);
         }
 
         void mouseDrag (const MouseEvent& e)
@@ -76,6 +76,7 @@ public:
         @see dragComponent
     */
     void startDraggingComponent (Component* componentToDrag,
+                                 const MouseEvent& e,
                                  ComponentBoundsConstrainer* constrainer);
 
     /** Call this from your mouseDrag() callback to move the component.
@@ -92,16 +93,12 @@ public:
     void dragComponent (Component* componentToDrag,
                         const MouseEvent& e);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ComponentBoundsConstrainer* constrainer;
-    Point<int> originalPos;
+    Point<int> mouseDownWithinTarget;
 
-    ComponentDragger (const ComponentDragger&);
-    ComponentDragger& operator= (const ComponentDragger&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentDragger);
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__

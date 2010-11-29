@@ -134,11 +134,8 @@ namespace FileChooserHelpers
                 getChildComponent(0)->setBounds (getLocalBounds());
         }
 
-        juce_UseDebuggingNewOperator
-
     private:
-        CustomComponentHolder (const CustomComponentHolder&);
-        CustomComponentHolder& operator= (const CustomComponentHolder&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponentHolder);
     };
 }
 

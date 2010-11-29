@@ -441,9 +441,6 @@ public:
     */
     CriticalSection& getMidiCallbackLock() throw()          { return midiCallbackLock; }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     OwnedArray <AudioIODeviceType> availableDeviceTypes;
@@ -522,8 +519,7 @@ private:
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);
 
-    AudioDeviceManager (const AudioDeviceManager&);
-    AudioDeviceManager& operator= (const AudioDeviceManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceManager);
 };
 
 #endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__

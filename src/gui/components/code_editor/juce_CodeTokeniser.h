@@ -63,8 +63,9 @@ public:
     virtual const Colour getDefaultColour (int tokenType) = 0;
 
 
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (CodeTokeniser);
 };
 
 

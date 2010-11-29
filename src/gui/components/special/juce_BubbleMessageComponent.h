@@ -118,9 +118,8 @@ public:
     /** @internal */
     void timerCallback();
 
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int fadeOutLength, mouseClickCounter;
     TextLayout textLayout;
     int64 expiryTime;
@@ -130,8 +129,7 @@ private:
                bool removeWhenMouseClicked,
                bool deleteSelfAfterUse);
 
-    BubbleMessageComponent (const BubbleMessageComponent&);
-    BubbleMessageComponent& operator= (const BubbleMessageComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleMessageComponent);
 };
 
 

@@ -56,18 +56,14 @@ public:
 
     //==============================================================================
     /** This callback happens when the component that is being watched is moved
-        relative to its top-level peer window, or when it is resized.
-    */
+        relative to its top-level peer window, or when it is resized. */
     virtual void componentMovedOrResized (bool wasMoved, bool wasResized) = 0;
 
-    /** This callback happens when the component's top-level peer is changed.
-    */
+    /** This callback happens when the component's top-level peer is changed. */
     virtual void componentPeerChanged() = 0;
 
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** @internal */
     void componentParentHierarchyChanged (Component& component);
     /** @internal */
@@ -85,8 +81,7 @@ private:
     void unregister();
     void registerWithParentComps();
 
-    ComponentMovementWatcher (const ComponentMovementWatcher&);
-    ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentMovementWatcher);
 };
 
 

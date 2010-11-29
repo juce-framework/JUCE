@@ -199,13 +199,13 @@ public:
         snd_seq_drain_output (seqHandle);
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     MidiOutput* const midiOutput;
     snd_seq_t* const seqHandle;
     snd_midi_event_t* midiParser;
     int maxEventSize;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice);
 };
 
 const StringArray MidiOutput::getDevices()
@@ -349,12 +349,12 @@ public:
         }
     };
 
-    juce_UseDebuggingNewOperator
-
 private:
     MidiInput* const midiInput;
     snd_seq_t* const seqHandle;
     MidiInputCallback* const callback;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputThread);
 };
 
 //==============================================================================

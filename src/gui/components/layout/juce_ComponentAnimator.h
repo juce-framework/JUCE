@@ -147,16 +147,16 @@ public:
     /** Returns true if the specified component is currently being animated. */
     bool isAnimating (Component* component) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class AnimationTask;
     OwnedArray <AnimationTask> tasks;
     uint32 lastTime;
 
     AnimationTask* findTaskFor (Component* component) const;
     void timerCallback();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentAnimator);
 };
 
 

@@ -88,10 +88,8 @@ public:
     /** @internal */
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioProcessor* processor;
     CriticalSection lock;
     double sampleRate;
@@ -105,8 +103,7 @@ private:
     MidiBuffer incomingMidi;
     MidiMessageCollector messageCollector;
 
-    AudioProcessorPlayer (const AudioProcessorPlayer&);
-    AudioProcessorPlayer& operator= (const AudioProcessorPlayer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer);
 };
 
 

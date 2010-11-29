@@ -92,18 +92,15 @@ public:
     /** @internal */
     void sliderValueChanged (Slider*);
 
-    juce_UseDebuggingNewOperator
-
 protected:
-    //==============================================================================
     /** The slider component being used in this component.
-
         Your subclass has access to this in case it needs to customise it in some way.
     */
     Slider slider;
 
-    SliderPropertyComponent (const SliderPropertyComponent&);
-    SliderPropertyComponent& operator= (const SliderPropertyComponent&);
+private:
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderPropertyComponent);
 };
 
 

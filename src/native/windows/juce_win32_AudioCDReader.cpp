@@ -1544,9 +1544,6 @@ static bool initialisedOk = false;
 class DeinitialiseTimer  : private Timer,
                            private DeletedAtShutdown
 {
-    DeinitialiseTimer (const DeinitialiseTimer&);
-    DeinitialiseTimer& operator= (const DeinitialiseTimer&);
-
 public:
     DeinitialiseTimer()
     {
@@ -1564,7 +1561,8 @@ public:
         delete this;
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeinitialiseTimer);
 };
 
 static void incUserCount()

@@ -143,9 +143,9 @@ void SystemStats::initialiseStats()
     (void) res;
     jassert (res == TIMERR_NOERROR);
 
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+  #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
+  #endif
 }
 
 //==============================================================================

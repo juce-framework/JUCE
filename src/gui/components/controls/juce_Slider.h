@@ -755,10 +755,8 @@ public:
         textBoxOutlineColourId      = 0x1001700   /**< The colour to use for a border around the text-editor box. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void labelTextChanged (Label*);
     /** @internal */
@@ -798,6 +796,7 @@ protected:
     int getNumDecimalPlacesToDisplay() const throw()        { return numDecimalPlaces; }
 
 private:
+    //==============================================================================
     ListenerList <Listener> listeners;
     Value currentValue, valueMin, valueMax;
     double lastCurrentValue, lastValueMin, lastValueMax;
@@ -837,8 +836,7 @@ private:
     void triggerChangeMessage (bool synchronous);
     bool incDecDragDirectionIsHorizontal() const;
 
-    Slider (const Slider&);
-    Slider& operator= (const Slider&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */

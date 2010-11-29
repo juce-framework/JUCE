@@ -69,18 +69,18 @@ public:
     virtual ~SettableTooltipClient()                                {}
 
     //==============================================================================
+    /** Assigns a new tooltip to this object. */
     virtual void setTooltip (const String& newTooltip)              { tooltipString = newTooltip; }
 
+    /** Returns the tooltip assigned to this object. */
     virtual const String getTooltip()                               { return tooltipString; }
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    SettableTooltipClient() {}
+
+private:
     String tooltipString;
 };
-
 
 
 #endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__

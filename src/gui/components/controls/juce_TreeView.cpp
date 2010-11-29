@@ -328,10 +328,8 @@ public:
         return owner.getTooltip();
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     TreeView& owner;
 
     struct RowItem
@@ -426,8 +424,7 @@ private:
         return false;
     }
 
-    TreeViewContentComponent (const TreeViewContentComponent&);
-    TreeViewContentComponent& operator= (const TreeViewContentComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewContentComponent);
 };
 
 //==============================================================================
@@ -458,14 +455,11 @@ public:
         updateComponents (hasScrolledSideways);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int lastX;
 
-    TreeViewport (const TreeViewport&);
-    TreeViewport& operator= (const TreeViewport&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport);
 };
 
 

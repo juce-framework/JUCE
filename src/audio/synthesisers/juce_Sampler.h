@@ -91,10 +91,8 @@ public:
     bool appliesToChannel (const int midiChannel);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     friend class SamplerVoice;
 
     String name;
@@ -103,6 +101,8 @@ private:
     BigInteger midiNotes;
     int length, attackSamples, releaseSamples;
     int midiRootNote;
+
+    JUCE_LEAK_DETECTOR (SamplerSound);
 };
 
 
@@ -144,14 +144,14 @@ public:
     void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     double pitchRatio;
     double sourceSamplePosition;
     float lgain, rgain, attackReleaseLevel, attackDelta, releaseDelta;
     bool isInAttack, isInRelease;
+
+    JUCE_LEAK_DETECTOR (SamplerVoice);
 };
 
 

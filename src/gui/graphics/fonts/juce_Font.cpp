@@ -459,8 +459,6 @@ public:
         return face->typeFace;
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     struct CachedFace
     {
@@ -478,8 +476,7 @@ private:
     int counter;
     OwnedArray <CachedFace> faces;
 
-    TypefaceCache (const TypefaceCache&);
-    TypefaceCache& operator= (const TypefaceCache&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypefaceCache);
 };
 
 juce_ImplementSingleton_SingleThreaded (TypefaceCache)

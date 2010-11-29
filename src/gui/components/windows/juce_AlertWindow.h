@@ -340,10 +340,8 @@ public:
         outlineColourId             = 0x1001820   /**< An optional colour to use to draw a border around the window. */
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -362,6 +360,7 @@ protected:
     int getDesktopWindowStyleFlags() const;
 
 private:
+    //==============================================================================
     String text;
     TextLayout textLayout;
     AlertIconType alertIconType;
@@ -381,9 +380,7 @@ private:
 
     void updateLayout (bool onlyIncreaseSize);
 
-    // disable copy constructor
-    AlertWindow (const AlertWindow&);
-    AlertWindow& operator= (const AlertWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow);
 };
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__

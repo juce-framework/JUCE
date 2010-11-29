@@ -215,7 +215,6 @@ public:
         return columnComponents [owner.getHeader().getIndexOfColumnId (columnId, true)];
     }
 
-    juce_UseDebuggingNewOperator
 
 private:
     TableListBox& owner;
@@ -223,8 +222,7 @@ private:
     int row;
     bool isSelected, isDragging, selectRowOnMouseUp;
 
-    TableListRowComp (const TableListRowComp&);
-    TableListRowComp& operator= (const TableListRowComp&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableListRowComp);
 };
 
 
@@ -259,15 +257,12 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     TableListBox& owner;
 
     enum { autoSizeColumnId = 0xf836743, autoSizeAllId = 0xf836744 };
 
-    TableListBoxHeader (const TableListBoxHeader&);
-    TableListBoxHeader& operator= (const TableListBoxHeader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableListBoxHeader);
 };
 
 //==============================================================================

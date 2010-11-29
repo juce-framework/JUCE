@@ -352,11 +352,10 @@ public:
     /** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
     const String toDisplayString (bool includeAlphaValue) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     PixelARGB argb;
 };
+
 
 #endif   // __JUCE_COLOUR_JUCEHEADER__

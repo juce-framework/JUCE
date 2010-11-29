@@ -84,16 +84,14 @@ public:
     /** @internal */
     void enablementChanged();
 
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ScopedPointer<Drawable> normalImage, toggledOnImage;
     Drawable* currentImage;
 
     void updateDrawable();
 
-    ToolbarButton (const ToolbarButton&);
-    ToolbarButton& operator= (const ToolbarButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton);
 };
 
 

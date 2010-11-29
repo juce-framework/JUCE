@@ -66,7 +66,9 @@ void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& 
                         .followedBy (getTransform())
                         .followedBy (transform));
 
-    paintEntireComponent (g, false);
+    if (! g.isClipEmpty())
+        paintEntireComponent (g, false);
+
     setAlpha (oldOpacity);
     g.restoreState();
 }

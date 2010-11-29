@@ -193,10 +193,8 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
     HeapBlock<int> table;
     Rectangle<int> bounds;
@@ -209,6 +207,8 @@ private:
     void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
     void sanitiseLevels (bool useNonZeroWinding) throw();
     static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
+
+    JUCE_LEAK_DETECTOR (EdgeTable);
 };
 
 

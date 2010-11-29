@@ -120,8 +120,6 @@ public:
     void run();
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     CriticalSection callbackLock, listLock;
     Array <TimeSliceClient*> clients;
@@ -129,8 +127,7 @@ private:
     TimeSliceClient* clientBeingCalled;
     bool clientsChanged;
 
-    TimeSliceThread (const TimeSliceThread&);
-    TimeSliceThread& operator= (const TimeSliceThread&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSliceThread);
 };
 
 

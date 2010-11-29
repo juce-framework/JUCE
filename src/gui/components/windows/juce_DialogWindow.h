@@ -120,18 +120,15 @@ public:
                                 bool shouldBeResizable = false,
                                 bool useBottomRightCornerResizer = false);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** @internal */
     void resized();
 
 private:
+    //==============================================================================
     bool escapeKeyTriggersCloseButton;
 
-    DialogWindow (const DialogWindow&);
-    DialogWindow& operator= (const DialogWindow&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogWindow);
 };
 
 #endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__

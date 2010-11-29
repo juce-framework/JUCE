@@ -66,13 +66,10 @@ public:
         return owner.createTabButton (tabName, tabIndex);
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     TabbedComponent& owner;
 
-    TabCompButtonBar (const TabCompButtonBar&);
-    TabCompButtonBar& operator= (const TabCompButtonBar&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabCompButtonBar);
 };
 
 

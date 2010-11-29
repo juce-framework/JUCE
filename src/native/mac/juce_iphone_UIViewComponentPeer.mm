@@ -152,8 +152,6 @@ public:
     void performAnyPendingRepaintsNow();
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     UIWindow* window;
     JuceUIView* view;
     JuceUIViewController* controller;
@@ -221,6 +219,9 @@ public:
     }
 
     Array <UITouch*> currentTouches;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer);
 };
 
 //==============================================================================

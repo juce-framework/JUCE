@@ -100,10 +100,8 @@ public:
     bool operator!= (const MD5& other) const;
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     uint8 result [16];
 
     struct ProcessContext
@@ -120,6 +118,8 @@ private:
     };
 
     void processStream (InputStream& input, int64 numBytesToRead);
+
+    JUCE_LEAK_DETECTOR (MD5);
 };
 
 

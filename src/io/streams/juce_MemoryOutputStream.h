@@ -110,16 +110,13 @@ public:
     int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     MemoryBlock& data;
     MemoryBlock internalBlock;
     size_t position, size;
 
-    MemoryOutputStream (const MemoryOutputStream&);
-    MemoryOutputStream& operator= (const MemoryOutputStream&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream);
 };
 
 /** Copies all the data that has been written to a MemoryOutputStream into another stream. */

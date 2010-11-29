@@ -446,10 +446,8 @@ public:
     */
     static const ValueTree invalid;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     class SetPropertyAction;
     friend class SetPropertyAction;
     class AddOrRemoveChildAction;
@@ -494,10 +492,9 @@ private:
         bool isEquivalentTo (const SharedObject& other) const;
         XmlElement* createXml() const;
 
-        juce_UseDebuggingNewOperator
-
     private:
         SharedObject& operator= (const SharedObject&);
+        JUCE_LEAK_DETECTOR (SharedObject);
     };
 
     template <typename ElementComparator>

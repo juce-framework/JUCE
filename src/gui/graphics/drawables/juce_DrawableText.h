@@ -131,10 +131,8 @@ public:
         static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;
     };
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     RelativeParallelogram bounds;
     RelativePoint fontSizeControlPoint;
     Font font;
@@ -145,6 +143,7 @@ private:
     void refreshBounds();
 
     DrawableText& operator= (const DrawableText&);
+    JUCE_LEAK_DETECTOR (DrawableText);
 };
 
 

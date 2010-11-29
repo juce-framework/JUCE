@@ -62,14 +62,11 @@ public:
     */
     virtual void* getPlatformSpecificData();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     AudioPluginInstance();
 
-    AudioPluginInstance (const AudioPluginInstance&);
-    AudioPluginInstance& operator= (const AudioPluginInstance&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance);
 };
 
 

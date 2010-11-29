@@ -133,10 +133,8 @@ public:
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     int requiredNumberOfChannels;
     Array <int> remappedInputs, remappedOutputs;
 
@@ -148,8 +146,7 @@ private:
 
     CriticalSection lock;
 
-    ChannelRemappingAudioSource (const ChannelRemappingAudioSource&);
-    ChannelRemappingAudioSource& operator= (const ChannelRemappingAudioSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelRemappingAudioSource);
 };
 
 

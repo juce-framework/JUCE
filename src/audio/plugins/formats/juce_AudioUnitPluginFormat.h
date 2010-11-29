@@ -51,12 +51,9 @@ public:
     bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    AudioUnitPluginFormat (const AudioUnitPluginFormat&);
-    AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginFormat);
 };
 
 #endif

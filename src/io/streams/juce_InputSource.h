@@ -66,8 +66,10 @@ public:
     */
     virtual int64 hashCode() const = 0;
 
+
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (InputSource);
 };
 
 

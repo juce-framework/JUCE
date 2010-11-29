@@ -66,14 +66,14 @@ public:
     /** This always returns true. */
     bool isDirectorySuitable (const File& file) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     StringArray fileWildcards, directoryWildcards;
 
     static void parse (const String& pattern, StringArray& result);
     static bool match (const File& file, const StringArray& wildcards);
+
+    JUCE_LEAK_DETECTOR (WildcardFileFilter);
 };
 
 

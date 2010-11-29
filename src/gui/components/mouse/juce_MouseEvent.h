@@ -312,10 +312,8 @@ public:
     static int getDoubleClickTimeout() throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     const Point<int> mouseDownPos;
     const Time mouseDownTime;
     const int numberOfClicks;
@@ -323,6 +321,7 @@ private:
     static int doubleClickTimeOutMs;
 
     MouseEvent& operator= (const MouseEvent&);
+    JUCE_LEAK_DETECTOR (MouseEvent);
 };
 
 

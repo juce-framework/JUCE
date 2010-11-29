@@ -83,14 +83,11 @@ public:
     */
     const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     String dragAndDropDescription;
 
-    FileTreeComponent (const FileTreeComponent&);
-    FileTreeComponent& operator= (const FileTreeComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileTreeComponent);
 };
 
 

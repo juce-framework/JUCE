@@ -322,10 +322,8 @@ public:
     /** Compares two objects. */
     bool operator!= (const PositionedRectangle& other) const throw();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     double x, y, w, h;
     uint8 xMode, yMode, wMode, hMode;
 
@@ -339,6 +337,8 @@ private:
     void updatePosAndSize (double& xOut, double& wOut, double x, double w,
                            uint8 xMode, uint8 wMode,
                            int parentPos, int parentSize) const throw();
+
+    JUCE_LEAK_DETECTOR (PositionedRectangle);
 };
 
 

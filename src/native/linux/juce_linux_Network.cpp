@@ -252,8 +252,6 @@ public:
     StringArray headerLines;
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     int socketHandle, levelsOfRedirection;
     const int timeoutSeconds;
@@ -393,6 +391,8 @@ private:
 
         return String::empty;
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JUCE_HTTPSocketStream);
 };
 
 //==============================================================================

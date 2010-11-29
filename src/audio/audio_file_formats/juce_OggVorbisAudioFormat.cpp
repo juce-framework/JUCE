@@ -241,7 +241,8 @@ public:
         return (long) static_cast <InputStream*> (datasource)->getPosition();
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader);
 };
 
 //==============================================================================
@@ -389,7 +390,8 @@ public:
         return true;
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter);
 };
 
 

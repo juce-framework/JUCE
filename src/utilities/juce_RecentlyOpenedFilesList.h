@@ -147,13 +147,12 @@ public:
     void restoreFromString (const String& stringifiedVersion);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     StringArray files;
     int maxNumberOfItems;
+
+    JUCE_LEAK_DETECTOR (RecentlyOpenedFilesList);
 };
 
 

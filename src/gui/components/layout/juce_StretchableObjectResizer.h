@@ -85,10 +85,8 @@ public:
     double getItemSize (int index) const throw();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     struct Item
     {
         double size;
@@ -99,8 +97,7 @@ private:
 
     OwnedArray <Item> items;
 
-    StretchableObjectResizer (const StretchableObjectResizer&);
-    StretchableObjectResizer& operator= (const StretchableObjectResizer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableObjectResizer);
 };
 
 

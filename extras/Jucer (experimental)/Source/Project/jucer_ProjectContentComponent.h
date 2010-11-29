@@ -65,9 +65,6 @@ public:
     bool isCommandActive (const CommandID commandID);
     bool perform (const InvocationInfo& info);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ScopedPointer<TreeView> projectTree;
     Project* project;
@@ -77,6 +74,8 @@ private:
     ScopedPointer<StretchableLayoutResizerBar> resizerBar;
 
     void updateMainWindowTitle();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent);
 };
 
 

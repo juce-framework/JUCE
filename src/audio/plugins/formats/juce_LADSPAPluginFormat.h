@@ -53,12 +53,8 @@ public:
     const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
     const FileSearchPath getDefaultLocationsToSearch();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    LADSPAPluginFormat (const LADSPAPluginFormat&);
-    LADSPAPluginFormat& operator= (const LADSPAPluginFormat&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LADSPAPluginFormat);
 };
 
 #endif

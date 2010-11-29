@@ -153,12 +153,12 @@ public:
     void minimiseStorageOverheads();
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     StringArray keys, values;
     bool ignoreCase;
+
+    JUCE_LEAK_DETECTOR (StringPairArray);
 };
 
 

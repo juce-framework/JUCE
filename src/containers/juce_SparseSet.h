@@ -285,10 +285,8 @@ public:
         return values != other.values;
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     // alternating start/end values of ranges of values that are present.
     Array<Type, DummyCriticalSection> values;
 

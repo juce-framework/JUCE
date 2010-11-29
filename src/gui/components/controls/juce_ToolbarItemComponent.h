@@ -192,8 +192,6 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
-
 private:
     friend class Toolbar;
     friend class ItemDragAndDropOverlayComponent;
@@ -205,8 +203,7 @@ private:
     bool isActive, isBeingDragged, isBeingUsedAsAButton;
     Rectangle<int> contentArea;
 
-    ToolbarItemComponent (const ToolbarItemComponent&);
-    ToolbarItemComponent& operator= (const ToolbarItemComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemComponent);
 };
 
 

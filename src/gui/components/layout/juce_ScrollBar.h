@@ -310,8 +310,6 @@ public:
     /** @internal */
     void resized();
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     Range <double> totalRange, visibleRange;
@@ -328,8 +326,7 @@ private:
     void updateThumbPosition();
     void timerCallback();
 
-    ScrollBar (const ScrollBar&);
-    ScrollBar& operator= (const ScrollBar&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
 };
 
 /** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */

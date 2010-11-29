@@ -379,8 +379,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     HGLRC renderContext;
 
 private:
@@ -491,8 +489,7 @@ private:
         return false;
     }
 
-    WindowedGLContext (const WindowedGLContext&);
-    WindowedGLContext& operator= (const WindowedGLContext&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
 
 //==============================================================================

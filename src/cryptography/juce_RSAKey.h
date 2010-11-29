@@ -102,14 +102,15 @@ public:
                                int numRandomSeeds = 0);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
+    //==============================================================================
     BigInteger part1, part2;
 
 private:
+    //==============================================================================
     static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
+
+    JUCE_LEAK_DETECTOR (RSAKey);
 };
 
 

@@ -51,8 +51,6 @@ namespace ActiveXHelpers
         HRESULT __stdcall SetClass (REFCLSID)                                                   { return S_OK; }
         HRESULT __stdcall SetStateBits (DWORD, DWORD)                                           { return E_NOTIMPL; }
         HRESULT __stdcall Stat (STATSTG*, DWORD)                                                { return E_NOTIMPL; }
-
-        juce_UseDebuggingNewOperator
     };
 
     //==============================================================================
@@ -76,8 +74,6 @@ namespace ActiveXHelpers
         HRESULT __stdcall SetStatusText (LPCOLESTR)                     { return S_OK; }
         HRESULT __stdcall EnableModeless (BOOL)                         { return S_OK; }
         HRESULT __stdcall TranslateAccelerator(LPMSG, WORD)             { return E_NOTIMPL; }
-
-        juce_UseDebuggingNewOperator
     };
 
     //==============================================================================
@@ -123,8 +119,6 @@ namespace ActiveXHelpers
         HRESULT __stdcall DiscardUndoState()            { return E_NOTIMPL; }
         HRESULT __stdcall DeactivateAndUndo()           { return E_NOTIMPL; }
         HRESULT __stdcall OnPosRectChange (LPCRECT)     { return S_OK; }
-
-        juce_UseDebuggingNewOperator
     };
 
     //==============================================================================
@@ -160,8 +154,6 @@ namespace ActiveXHelpers
         HRESULT __stdcall ShowObject()                                  { return S_OK; }
         HRESULT __stdcall OnShowWindow (BOOL)                           { return E_NOTIMPL; }
         HRESULT __stdcall RequestNewObjectLayout()                      { return E_NOTIMPL; }
-
-        juce_UseDebuggingNewOperator
     };
 
     //==============================================================================

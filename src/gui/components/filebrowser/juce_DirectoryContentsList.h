@@ -192,8 +192,6 @@ public:
     static int compareElements (const DirectoryContentsList::FileInfo* first,
                                 const DirectoryContentsList::FileInfo* second);
 
-    juce_UseDebuggingNewOperator
-
 private:
     File root;
     const FileFilter* fileFilter;
@@ -213,8 +211,7 @@ private:
                   const Time& creationTime, bool isReadOnly);
     void setTypeFlags (int newFlags);
 
-    DirectoryContentsList (const DirectoryContentsList&);
-    DirectoryContentsList& operator= (const DirectoryContentsList&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList);
 };
 
 

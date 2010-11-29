@@ -72,13 +72,10 @@ public:
     /** @internal */
     void buttonClicked (Button*);
 
-    juce_UseDebuggingNewOperator
-
 private:
     TextButton button;
 
-    ButtonPropertyComponent (const ButtonPropertyComponent&);
-    ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonPropertyComponent);
 };
 
 

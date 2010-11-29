@@ -41,8 +41,6 @@ public:
         sourceValue.addListener (this);
     }
 
-    ~NumericValueSource() {}
-
     void valueChanged (Value&)   { sendChangeMessage (true); }
     const var getValue() const   { return (Type) sourceValue.getValue(); }
 
@@ -55,13 +53,10 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     Value sourceValue;
 
-    NumericValueSource (const NumericValueSource&);
-    const NumericValueSource& operator= (const NumericValueSource&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NumericValueSource);
 };
 
 

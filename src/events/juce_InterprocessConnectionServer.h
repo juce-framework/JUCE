@@ -83,17 +83,13 @@ protected:
     virtual InterprocessConnection* createConnectionObject() = 0;
 
 
-public:
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     ScopedPointer <StreamingSocket> socket;
 
     void run();
 
-    InterprocessConnectionServer (const InterprocessConnectionServer&);
-    InterprocessConnectionServer& operator= (const InterprocessConnectionServer&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnectionServer);
 };
 
 

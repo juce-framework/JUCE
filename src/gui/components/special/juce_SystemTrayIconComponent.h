@@ -70,13 +70,10 @@ public:
     void paint (Graphics& g);
 #endif
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
-    SystemTrayIconComponent (const SystemTrayIconComponent&);
-    SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SystemTrayIconComponent);
 };
 
 

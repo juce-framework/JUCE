@@ -92,14 +92,11 @@ public:
     */
     bool doesPluginStillExist (const PluginDescription& description) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     OwnedArray <AudioPluginFormat> formats;
 
-    AudioPluginFormatManager (const AudioPluginFormatManager&);
-    AudioPluginFormatManager& operator= (const AudioPluginFormatManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormatManager);
 };
 
 

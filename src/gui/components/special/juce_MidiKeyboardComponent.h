@@ -304,12 +304,7 @@ public:
     /** @internal */
     void colourChanged();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
-    friend class MidiKeyboardUpDownButton;
-
     //==============================================================================
     /** Draws a white note in the given rectangle.
 
@@ -384,6 +379,8 @@ protected:
 
 private:
     //==============================================================================
+    friend class MidiKeyboardUpDownButton;
+
     MidiKeyboardState& state;
     int xOffset, blackNoteLength;
     float keyWidth;
@@ -413,8 +410,7 @@ private:
     void updateNoteUnderMouse (const Point<int>& pos);
     void repaintNote (const int midiNoteNumber);
 
-    MidiKeyboardComponent (const MidiKeyboardComponent&);
-    MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent);
 };
 
 

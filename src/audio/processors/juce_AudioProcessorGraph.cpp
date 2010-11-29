@@ -352,7 +352,7 @@ public:
                           const OwnedArray <MidiBuffer>& sharedMidiBuffers,
                           const int numSamples) = 0;
 
-    juce_UseDebuggingNewOperator
+    JUCE_LEAK_DETECTOR (AudioGraphRenderingOp);
 };
 
 //==============================================================================
@@ -570,10 +570,8 @@ public:
     int getNumBuffersNeeded() const         { return nodeIds.size(); }
     int getNumMidiBuffersNeeded() const     { return midiNodeIds.size(); }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioProcessorGraph& graph;
     const Array<void*>& orderedNodes;
     Array <int> nodeIds, channels, midiNodeIds;
@@ -953,8 +951,7 @@ private:
         }
     }
 
-    RenderingOpSequenceCalculator (const RenderingOpSequenceCalculator&);
-    RenderingOpSequenceCalculator& operator= (const RenderingOpSequenceCalculator&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderingOpSequenceCalculator);
 };
 
 }

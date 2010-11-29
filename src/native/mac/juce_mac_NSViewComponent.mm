@@ -118,11 +118,8 @@ public:
         return Rectangle<int> (0, 0, (int) r.size.width, (int) r.size.height);
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
-    NSViewComponentInternal (const NSViewComponentInternal&);
-    NSViewComponentInternal& operator= (const NSViewComponentInternal&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentInternal);
 };
 
 //==============================================================================

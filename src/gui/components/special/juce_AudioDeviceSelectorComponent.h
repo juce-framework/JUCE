@@ -90,10 +90,8 @@ public:
     /** @internal */
     void childBoundsChanged (Component*);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioDeviceManager& deviceManager;
     ScopedPointer<ComboBox> deviceTypeDropDown;
     ScopedPointer<Label> deviceTypeDropDownLabel;
@@ -109,8 +107,7 @@ private:
     ScopedPointer<ComboBox> midiOutputSelector;
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
 
-    AudioDeviceSelectorComponent (const AudioDeviceSelectorComponent&);
-    AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent);
 };
 
 

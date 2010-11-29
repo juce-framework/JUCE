@@ -659,8 +659,6 @@ public:
     bool isVectorDevice() const;
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** Create a graphics that uses a given low-level renderer.
         For internal use only.
         NB. The context will NOT be deleted by this object when it is deleted.
@@ -678,8 +676,7 @@ private:
     bool saveStatePending;
     void saveStateIfPending();
 
-    Graphics (const Graphics&);
-    Graphics& operator= (const Graphics& other);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics);
 };
 
 

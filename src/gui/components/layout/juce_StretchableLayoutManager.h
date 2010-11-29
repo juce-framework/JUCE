@@ -235,10 +235,8 @@ public:
                           int newPosition);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     struct ItemLayoutProperties
     {
         int itemIndex;
@@ -258,8 +256,7 @@ private:
     int getMaximumSizeOfItems (int startIndex, int endIndex) const;
     void updatePrefSizesToMatchCurrentPositions();
 
-    StretchableLayoutManager (const StretchableLayoutManager&);
-    StretchableLayoutManager& operator= (const StretchableLayoutManager&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutManager);
 };
 
 

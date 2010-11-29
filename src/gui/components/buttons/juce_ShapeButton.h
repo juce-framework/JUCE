@@ -89,9 +89,6 @@ public:
                      float outlineStrokeWidth);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     /** @internal */
     void paintButton (Graphics& g,
@@ -99,14 +96,14 @@ protected:
                       bool isButtonDown);
 
 private:
+    //==============================================================================
     Colour normalColour, overColour, downColour, outlineColour;
     DropShadowEffect shadow;
     Path shape;
     bool maintainShapeProportions;
     float outlineWidth;
 
-    ShapeButton (const ShapeButton&);
-    ShapeButton& operator= (const ShapeButton&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShapeButton);
 };
 
 

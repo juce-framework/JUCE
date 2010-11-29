@@ -297,16 +297,13 @@ public:
     {
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     FlacNamespace::FLAC__StreamDecoder* decoder;
     AudioSampleBuffer reservoir;
     int reservoirStart, samplesInReservoir;
     bool ok, scanningForLength;
 
-    FlacReader (const FlacReader&);
-    FlacReader& operator= (const FlacReader&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacReader);
 };
 
 
@@ -470,15 +467,12 @@ public:
         static_cast <FlacWriter*> (client_data)->writeMetaData (metadata);
     }
 
-    juce_UseDebuggingNewOperator
-
     bool ok;
 
 private:
     FlacNamespace::FLAC__StreamEncoder* encoder;
 
-    FlacWriter (const FlacWriter&);
-    FlacWriter& operator= (const FlacWriter&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacWriter);
 };
 
 

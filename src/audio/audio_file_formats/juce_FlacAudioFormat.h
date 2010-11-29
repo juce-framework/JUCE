@@ -66,8 +66,8 @@ public:
                                         const StringPairArray& metadataValues,
                                         int qualityOptionIndex);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_LEAK_DETECTOR (FlacAudioFormat);
 };
 
 

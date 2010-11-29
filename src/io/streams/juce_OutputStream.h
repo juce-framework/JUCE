@@ -201,8 +201,9 @@ public:
     */
     virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
+private:
     //==============================================================================
-    juce_UseDebuggingNewOperator
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputStream);
 };
 
 //==============================================================================

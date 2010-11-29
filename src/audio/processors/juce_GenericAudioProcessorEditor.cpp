@@ -82,9 +82,6 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class ParamSlider  : public Slider
@@ -113,15 +110,12 @@ private:
             return owner.getParameterText (index);
         }
 
-        //==============================================================================
-        juce_UseDebuggingNewOperator
-
     private:
+        //==============================================================================
         AudioProcessor& owner;
         const int index;
 
-        ParamSlider (const ParamSlider&);
-        ParamSlider& operator= (const ParamSlider&);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamSlider);
     };
 
     AudioProcessor& owner;
@@ -129,8 +123,7 @@ private:
     bool volatile paramHasChanged;
     ParamSlider slider;
 
-    ProcessorParameterPropertyComp (const ProcessorParameterPropertyComp&);
-    ProcessorParameterPropertyComp& operator= (const ProcessorParameterPropertyComp&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProcessorParameterPropertyComp);
 };
 
 

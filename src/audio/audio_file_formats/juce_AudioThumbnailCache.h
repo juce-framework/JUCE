@@ -75,9 +75,6 @@ public:
     void storeThumb (const AudioThumbnail& thumb, int64 hashCode);
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     OwnedArray <ThumbnailCacheEntry> thumbs;
@@ -86,6 +83,8 @@ private:
     friend class AudioThumbnail;
     void addThumbnail (AudioThumbnail* thumb);
     void removeThumbnail (AudioThumbnail* thumb);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnailCache);
 };
 
 

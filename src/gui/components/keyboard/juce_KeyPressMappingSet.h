@@ -226,11 +226,6 @@ public:
     /** @internal */
     void globalFocusChanged (Component* focusedComponent);
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-
 private:
     //==============================================================================
     ApplicationCommandManager* commandManager;
@@ -261,6 +256,7 @@ private:
                         Component* const originatingComponent) const;
 
     KeyPressMappingSet& operator= (const KeyPressMappingSet&);
+    JUCE_LEAK_DETECTOR (KeyPressMappingSet);
 };
 
 

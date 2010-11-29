@@ -89,8 +89,6 @@ public:
     void setResamplingQuality (Graphics::ResamplingQuality newQuality);
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     /** @internal */
     void childBoundsChanged (Component*);
 
@@ -116,8 +114,7 @@ private:
     void passOnMouseEventToPeer (const MouseEvent& e);
     int scaleInt (int n) const;
 
-    MagnifierComponent (const MagnifierComponent&);
-    MagnifierComponent& operator= (const MagnifierComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MagnifierComponent);
 };
 
 

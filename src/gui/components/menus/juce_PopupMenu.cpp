@@ -111,20 +111,8 @@ public:
             subMenu = new PopupMenu (*(other.subMenu));
     }
 
-    ~Item()
-    {
-        customComp = 0;
-    }
-
-    bool canBeTriggered() const throw()
-    {
-        return active && ! (isSeparator || (subMenu != 0));
-    }
-
-    bool hasActiveSubMenu() const throw()
-    {
-        return active && (subMenu != 0);
-    }
+    bool canBeTriggered() const throw()     { return active && ! (isSeparator || (subMenu != 0)); }
+    bool hasActiveSubMenu() const throw()   { return active && (subMenu != 0); }
 
     //==============================================================================
     const int itemId;
@@ -136,10 +124,10 @@ public:
     ScopedPointer <PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
 
-    juce_UseDebuggingNewOperator
-
 private:
     Item& operator= (const Item&);
+
+    JUCE_LEAK_DETECTOR (Item);
 };
 
 
@@ -238,13 +226,10 @@ public:
 
     PopupMenu::Item itemInfo;
 
-    juce_UseDebuggingNewOperator
-
 private:
     bool isHighlighted;
 
-    ItemComponent (const ItemComponent&);
-    ItemComponent& operator= (const ItemComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent);
 };
 
 
@@ -692,8 +677,6 @@ public:
     }
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     Window* owner;
     OwnedArray <PopupMenu::ItemComponent> items;
@@ -1198,8 +1181,7 @@ private:
             owner->disableTimerUntilMouseMoves();
     }
 
-    Window (const Window&);
-    Window& operator= (const Window&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Window);
 };
 
 
@@ -1349,13 +1331,10 @@ public:
             getChildComponent(0)->setBounds (getLocalBounds());
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     const int width, height;
 
-    NormalComponentWrapper (const NormalComponentWrapper&);
-    NormalComponentWrapper& operator= (const NormalComponentWrapper&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NormalComponentWrapper);
 };
 
 void PopupMenu::addCustomItem (const int itemResultId,
@@ -1397,10 +1376,6 @@ public:
         setName (name);
     }
 
-    ~HeaderItemComponent()
-    {
-    }
-
     void paint (Graphics& g)
     {
         Font f (getLookAndFeel().getPopupMenuFont());
@@ -1421,7 +1396,8 @@ public:
         idealWidth += idealWidth / 4;
     }
 
-    juce_UseDebuggingNewOperator
+private:
+    JUCE_LEAK_DETECTOR (HeaderItemComponent);
 };
 
 void PopupMenu::addSectionHeader (const String& title)
