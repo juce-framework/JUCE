@@ -60,6 +60,8 @@ private:
     String className;
 
     void addResourcesFromProjectItem (const Project::Item& node);
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile);
 };
 
 

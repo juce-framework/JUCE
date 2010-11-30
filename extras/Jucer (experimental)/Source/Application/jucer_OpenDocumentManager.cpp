@@ -161,8 +161,7 @@ private:
     File file;
     Time fileModificationTime;
 
-    UnknownDocument (const UnknownDocument&);
-    UnknownDocument& operator= (const UnknownDocument&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnknownDocument);
 };
 
 

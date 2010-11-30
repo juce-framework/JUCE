@@ -43,8 +43,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-// internal helper object that holds the zlib structures so they don't have to be
-// included publicly.
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
@@ -130,7 +128,6 @@ public:
     bool finished, shouldFinish;
 };
 
-
 //==============================================================================
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
                                                         int compressionLevel,
@@ -184,11 +181,7 @@ bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 bool GZIPCompressorOutputStream::doNextBlock()
 {
     const int len = helper->doNextBlock (buffer, (int) GZIPCompressorHelper::gzipCompBufferSize);
-
-    if (len > 0)
-        return destStream->write (buffer, len);
-    else
-        return true;
+    return len <= 0 || destStream->write (buffer, len);
 }
 
 int64 GZIPCompressorOutputStream::getPosition()

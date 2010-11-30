@@ -342,8 +342,7 @@ private:
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
     }
 
-    MakefileProjectExporter (const MakefileProjectExporter&);
-    MakefileProjectExporter& operator= (const MakefileProjectExporter&);
+    JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter);
 };
 
 

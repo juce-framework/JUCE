@@ -92,15 +92,15 @@ public:
 
     float gain, delay;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     AudioSampleBuffer delayBuffer;
     int delayPosition;
 
     // the synth!
     Synthesiser synth;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceDemoPluginAudioProcessor);
 };
 
 #endif  // __PLUGINPROCESSOR_H_526ED7A9__

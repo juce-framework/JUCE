@@ -192,8 +192,6 @@ public:
         getGraphPanel()->endDraggingConnector (e);
     }
 
-    juce_UseDebuggingNewOperator
-
     const uint32 filterID;
     const int index;
     const bool isInput;
@@ -201,13 +199,12 @@ public:
 private:
     FilterGraph& graph;
 
-    PinComponent (const PinComponent&);
-    PinComponent& operator= (const PinComponent&);
-
     GraphEditorPanel* getGraphPanel() const throw()
     {
         return findParentComponentOfClass ((GraphEditorPanel*) 0);
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PinComponent);
 };
 
 //==============================================================================
@@ -679,8 +676,6 @@ public:
         linePath.setUsingNonZeroWinding (true);
     }
 
-    juce_UseDebuggingNewOperator
-
     uint32 sourceFilterID, destFilterID;
     int sourceFilterChannel, destFilterChannel;
 
@@ -704,8 +699,7 @@ private:
         distanceFromEnd = juce_hypot (x - (x2 - getX()), y - (y2 - getY()));
     }
 
-    ConnectorComponent (const ConnectorComponent&);
-    ConnectorComponent& operator= (const ConnectorComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectorComponent);
 };
 
 
@@ -990,10 +984,6 @@ public:
         startTimer (100);
     }
 
-    ~TooltipBar()
-    {
-    }
-
     void paint (Graphics& g)
     {
         g.setFont (getHeight() * 0.7f, Font::bold);
@@ -1018,10 +1008,10 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     String tip;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipBar);
 };
 
 //==============================================================================

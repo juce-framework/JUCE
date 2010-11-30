@@ -1504,11 +1504,11 @@ BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender
     NSPoint p = [view convertPoint: [sender draggingLocation] fromView: nil];
     const Point<int> pos ((int) p.x, (int) ([view frame].size.height - p.y));
 
-    StringArray files;
-
     id list = [[sender draggingPasteboard] propertyListForType: bestType];
     if (list == nil)
         return false;
+
+    StringArray files;
 
     if ([list isKindOfClass: [NSArray class]])
     {

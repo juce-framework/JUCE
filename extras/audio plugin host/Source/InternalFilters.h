@@ -64,10 +64,8 @@ public:
     const StringArray searchPathsForPlugins (const FileSearchPath&, bool)         { return StringArray(); }
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
+    //==============================================================================
     PluginDescription audioInDesc;
     PluginDescription audioOutDesc;
     PluginDescription midiInDesc;

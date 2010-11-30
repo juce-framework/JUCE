@@ -185,10 +185,10 @@ double Time::getMillisecondCounterHiRes() throw()
 bool Time::setSystemTimeToThisTime() const
 {
     timeval t;
-    t.tv_sec = millisSinceEpoch % 1000000;
-    t.tv_usec = millisSinceEpoch - t.tv_sec;
+    t.tv_sec = millisSinceEpoch / 1000;
+    t.tv_usec = (millisSinceEpoch - t.tv_sec * 1000) * 1000;
 
-    return settimeofday (&t, 0) ? false : true;
+    return settimeofday (&t, 0) == 0;
 }
 
 

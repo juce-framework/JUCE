@@ -59,67 +59,6 @@ private:
     FilterConnection& operator= (const FilterConnection&);
 };
 
-
-//==============================================================================
-/**
-    Represents one of the filters in a FilterGraph.
-*/
-/*class FilterInGraph   : public ReferenceCountedObject
-{
-public:
-    //==============================================================================
-    FilterInGraph (FilterGraph& owner, AudioPluginInstance* const plugin);
-    ~FilterInGraph();
-
-    //==============================================================================
-    AudioPluginInstance* const filter;
-    uint32 uid;
-
-    //==============================================================================
-    void showUI (bool useGenericUI);
-
-    double getX() const throw()                     { return x; }
-    double getY() const throw()                     { return y; }
-    void setPosition (double x, double y) throw();
-
-    XmlElement* createXml() const;
-
-    static FilterInGraph* createForDescription (FilterGraph& owner,
-                                                const PluginDescription& desc,
-                                                String& errorMessage);
-
-    static FilterInGraph* createFromXml (FilterGraph& owner, const XmlElement& xml);
-
-    //==============================================================================
-    typedef ReferenceCountedObjectPtr <FilterInGraph> Ptr;
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class FilterGraphPlayer;
-    FilterGraph& owner;
-    double x, y;
-
-    friend class PluginWindow;
-    Component* activeUI;
-    Component* activeGenericUI;
-    int lastX, lastY;
-
-    MidiBuffer outputMidi;
-    AudioSampleBuffer processedAudio;
-    MidiBuffer processedMidi;
-
-    void prepareBuffers (int blockSize);
-    void renderBlock (int numSamples,
-                      const ReferenceCountedArray <FilterInGraph>& filters,
-                      const OwnedArray <FilterConnection>& connections);
-
-    FilterInGraph (const FilterInGraph&);
-    FilterInGraph& operator= (const FilterInGraph&);
-};
-*/
-
 //==============================================================================
 /**
     A collection of filters and some connections between them.
@@ -185,14 +124,8 @@ public:
     */
     static const int midiChannelNumber;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-    //friend class FilterGraphPlayer;
-    //ReferenceCountedArray <FilterInGraph> filters;
-    //OwnedArray <FilterConnection> connections;
-
+    //==============================================================================
     AudioProcessorGraph graph;
     AudioProcessorPlayer player;
 
@@ -201,76 +134,8 @@ private:
 
     void createNodeFromXml (const XmlElement& xml);
 
-    FilterGraph (const FilterGraph&);
-    FilterGraph& operator= (const FilterGraph&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterGraph);
 };
 
-
-//==============================================================================
-/**
-
-*/
-/*class FilterGraphPlayer   : public AudioIODeviceCallback,
-                            public MidiInputCallback,
-                            public ChangeListener
-
-{
-public:
-    //==============================================================================
-    FilterGraphPlayer (FilterGraph& graph);
-    ~FilterGraphPlayer();
-
-    //==============================================================================
-    void setAudioDeviceManager (AudioDeviceManager* dm);
-    AudioDeviceManager* getAudioDeviceManager() const throw()   { return deviceManager; }
-
-    //==============================================================================
-    void audioDeviceIOCallback (const float** inputChannelData,
-                                int totalNumInputChannels,
-                                float** outputChannelData,
-                                int totalNumOutputChannels,
-                                int numSamples);
-    void audioDeviceAboutToStart (double sampleRate, int numSamplesPerBlock);
-    void audioDeviceStopped();
-
-    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
-
-    void changeListenerCallback (ChangeBroadcaster*);
-
-    //==============================================================================
-    static int compareElements (FilterInGraph* const first, FilterInGraph* const second) throw();
-
-    const float** inputChannelData;
-    int totalNumInputChannels;
-    float** outputChannelData;
-    int totalNumOutputChannels;
-    MidiBuffer incomingMidi;
-
-    MidiKeyboardState keyState;
-    MidiMessageCollector messageCollector;
-
-    //==============================================================================
-    class PlayerAwareFilter
-    {
-    public:
-        virtual void setPlayer (FilterGraphPlayer* newPlayer) = 0;
-    };
-
-private:
-    FilterGraph& graph;
-    CriticalSection processLock;
-    double sampleRate;
-    int blockSize;
-    AudioDeviceManager* deviceManager;
-
-    ReferenceCountedArray <FilterInGraph> filters;
-    OwnedArray <FilterConnection> connections;
-
-    void update();
-
-    FilterGraphPlayer (const FilterGraphPlayer&);
-    FilterGraphPlayer& operator= (const FilterGraphPlayer&);
-};
-*/
 
 #endif

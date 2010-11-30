@@ -119,8 +119,7 @@ protected:
     const RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
 
 private:
-    ProjectExporter (const ProjectExporter&);
-    ProjectExporter& operator= (const ProjectExporter&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter);
 };
 
 

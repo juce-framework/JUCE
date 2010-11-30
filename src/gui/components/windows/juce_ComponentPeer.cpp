@@ -507,8 +507,31 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
                     return;
             }
 
-            const Point<int> pos (targetComp->getLocalPoint (component, position));
-            target->filesDropped (files, pos.getX(), pos.getY());
+            // We'll use an async message to deliver the drop, because if the target decides
+            // to run a modal loop, it can gum-up the operating system..
+            class AsyncFileDropMessage  : public CallbackMessage
+            {
+            public:
+                AsyncFileDropMessage (Component* target_, const Point<int>& position_, const StringArray& files_)
+                    : target (target_), position (position_), files (files_)
+                {
+                }
+
+                void messageCallback()
+                {
+                    if (target != 0)
+                        target->filesDropped (files, position.getX(), position.getY());
+                }
+
+            private:
+                Component::SafePointer<Component> target;
+                Point<int> position;
+                StringArray files;
+
+                JUCE_DECLARE_NON_COPYABLE (AsyncFileDropMessage);
+            };
+
+            (new AsyncFileDropMessage (targetComp, targetComp->getLocalPoint (component, position), files))->post();
         }
     }
 }

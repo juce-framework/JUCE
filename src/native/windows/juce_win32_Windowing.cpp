@@ -1850,8 +1850,6 @@ private:
         {
         }
 
-        ~JuceDropTarget() {}
-
         HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);

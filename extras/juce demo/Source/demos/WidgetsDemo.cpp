@@ -120,11 +120,9 @@ public:
         }
         else
         {
-            MouseEvent e2 (e.getEventRelativeTo (parent));
-
             // if the mouse is inside the parent component, we'll make that the
             // parent - otherwise, we'll put this comp on the desktop.
-            if (e2.x >= 0 && e2.y >= 0 && e2.x < parent->getWidth() && e2.y < parent->getHeight())
+            if (parent->getLocalBounds().contains (e.getEventRelativeTo (parent).getPosition()))
             {
                 // re-add this component to a parent component, which will
                 // remove it from the desktop..

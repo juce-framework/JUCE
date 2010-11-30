@@ -246,7 +246,6 @@ public:
         ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
     };
 
-
 private:
     //==============================================================================
     RelativeParallelogram bounds;

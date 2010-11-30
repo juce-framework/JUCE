@@ -535,6 +535,8 @@ private:
         return project.getWrapperFolder().getChildFile (project.getJuceSourceFilenameRoot() + (fileIndex != 0 ? String (fileIndex) : String::empty))
                                          .withFileExtension (".cpp");
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver);
 };
 
 

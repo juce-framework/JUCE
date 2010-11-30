@@ -243,7 +243,7 @@ protected:
     //==============================================================================
     void writeSolutionFile (OutputStream& out, const String& versionString, const File& vcProject)
     {
-        out << newLine << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
+        out << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
             << "Project(\"" << createGUID (project.getProjectName().toString() + "sln_guid") << "\") = \"" << project.getProjectName().toString() << "\", \""
             << vcProject.getFileName() << "\", \"" << projectGUID << '"' << newLine
             << "EndProject" << newLine
@@ -448,8 +448,7 @@ protected:
         return hasIcon;
     }
 
-    MSVCProjectExporterBase (const MSVCProjectExporterBase&);
-    MSVCProjectExporterBase& operator= (const MSVCProjectExporterBase&);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase);
 };
 
 
@@ -816,8 +815,7 @@ protected:
     }
 
     //==============================================================================
-    MSVCProjectExporterVC2008 (const MSVCProjectExporterVC2008&);
-    MSVCProjectExporterVC2008& operator= (const MSVCProjectExporterVC2008&);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2008);
 };
 
 
@@ -850,8 +848,7 @@ protected:
     const String getProjectVersionString() const    { return "8.00"; }
     const String getSolutionVersionString() const   { return String ("8.00") + newLine + "# Visual C++ Express 2005"; }
 
-    MSVCProjectExporterVC2005 (const MSVCProjectExporterVC2005&);
-    MSVCProjectExporterVC2005& operator= (const MSVCProjectExporterVC2005&);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005);
 };
 
 
@@ -1121,8 +1118,7 @@ private:
             << "}}}" << newLine;
     }
 
-    MSVCProjectExporterVC6 (const MSVCProjectExporterVC6&);
-    MSVCProjectExporterVC6& operator= (const MSVCProjectExporterVC6&);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC6);
 };
 
 
@@ -1552,8 +1548,7 @@ protected:
     }
 
     //==============================================================================
-    MSVCProjectExporterVC2010 (const MSVCProjectExporterVC2010&);
-    MSVCProjectExporterVC2010& operator= (const MSVCProjectExporterVC2010&);
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2010);
 };
 
 

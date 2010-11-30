@@ -322,8 +322,7 @@ private:
     void createDefaultConfigs();
     ValueTree getJuceConfigNode();
 
-    Project (const Project&);
-    const Project& operator= (const Project&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project);
 };
 
 
