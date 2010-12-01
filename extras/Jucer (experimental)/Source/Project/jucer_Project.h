@@ -312,8 +312,10 @@ public:
     static void resaveJucerFile (const File& file);
 
 private:
+    friend class Item;
     ValueTree projectRoot;
     static File lastDocumentOpened;
+    DrawableImage mainProjectIcon;
 
     const File getLocalJuceFolder();
     void updateProjectSettings();

@@ -58,6 +58,8 @@ Project::Project (const File& file_)
 
     setChangedFlag (false);
 
+    mainProjectIcon.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
+
     projectRoot.addListener (this);
 }
 
@@ -755,12 +757,10 @@ const Drawable* Project::Item::getIcon() const
     }
     else if (isMainGroup())
     {
-        static DrawableImage im;
-        im.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
-        return &im;
+        return &(getProject().mainProjectIcon);
     }
-    else
-        return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage();
+
+    return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage();
 }
 
 //==============================================================================
