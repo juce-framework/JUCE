@@ -1559,7 +1559,7 @@ void Component::exitModalState (const int returnValue)
 
                 void messageCallback()
                 {
-                    if (target != 0)
+                    if (target.getComponent() != 0) // (getComponent() required for VS2003 bug)
                         target->exitModalState (result);
                 }
 

@@ -60,6 +60,27 @@ void DialogWindow::resized()
     }
 }
 
+// (Sadly, this can't be made a local class inside the showModalDialog function, because the
+// VC compiler complains about the undefined copy constructor)
+class TempDialogWindow : public DialogWindow
+{
+public:
+    TempDialogWindow (const String& title, const Colour& colour, const bool escapeCloses)
+        : DialogWindow (title, colour, escapeCloses, true)
+    {
+        if (! JUCEApplication::isStandaloneApp())
+            setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
+    }
+
+    void closeButtonPressed()
+    {
+        setVisible (false);
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (TempDialogWindow);
+};
+
 
 //==============================================================================
 int DialogWindow::showModalDialog (const String& dialogTitle,
@@ -70,25 +91,6 @@ int DialogWindow::showModalDialog (const String& dialogTitle,
                                    const bool shouldBeResizable,
                                    const bool useBottomRightCornerResizer)
 {
-    class TempDialogWindow : public DialogWindow
-    {
-    public:
-        TempDialogWindow (const String& title, const Colour& colour, const bool escapeCloses)
-            : DialogWindow (title, colour, escapeCloses, true)
-        {
-            if (! JUCEApplication::isStandaloneApp())
-                setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
-        }
-
-        void closeButtonPressed()
-        {
-            setVisible (false);
-        }
-
-    private:
-        JUCE_DECLARE_NON_COPYABLE (TempDialogWindow);
-    };
-
     TempDialogWindow dw (dialogTitle, colour, escapeKeyTriggersCloseButton);
 
     dw.setContentComponent (contentComponent, true, true);

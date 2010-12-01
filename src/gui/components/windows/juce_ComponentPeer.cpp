@@ -528,7 +528,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
                 Point<int> position;
                 StringArray files;
 
-                JUCE_DECLARE_NON_COPYABLE (AsyncFileDropMessage);
+                // (NB: don't make this non-copyable, which messes up in VC)
             };
 
             (new AsyncFileDropMessage (targetComp, targetComp->getLocalPoint (component, position), files))->post();
