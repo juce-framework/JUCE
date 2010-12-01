@@ -126,6 +126,8 @@ private:
         return format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault;
 #endif
     }
+
+    JUCE_LEAK_DETECTOR (CoreGraphicsImage);
 };
 
 Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
@@ -646,10 +648,6 @@ private:
         {
         }
 
-        ~SavedState()
-        {
-        }
-
         FillType fillType;
         Font font;
         CGFontRef fontRef;
@@ -784,7 +782,7 @@ private:
         CGContextConcatCTM (context, t);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (CoreGraphicsContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsContext);
 };
 
 LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()

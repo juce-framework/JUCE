@@ -512,26 +512,28 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
             class AsyncFileDropMessage  : public CallbackMessage
             {
             public:
-                AsyncFileDropMessage (Component* target_, const Point<int>& position_, const StringArray& files_)
-                    : target (target_), position (position_), files (files_)
+                AsyncFileDropMessage (Component* target_, FileDragAndDropTarget* dropTarget_,
+                                      const Point<int>& position_, const StringArray& files_)
+                    : target (target_), dropTarget (dropTarget_), position (position_), files (files_)
                 {
                 }
 
                 void messageCallback()
                 {
                     if (target != 0)
-                        target->filesDropped (files, position.getX(), position.getY());
+                        dropTarget->filesDropped (files, position.getX(), position.getY());
                 }
 
             private:
                 Component::SafePointer<Component> target;
+                FileDragAndDropTarget* dropTarget;
                 Point<int> position;
                 StringArray files;
 
                 // (NB: don't make this non-copyable, which messes up in VC)
             };
 
-            (new AsyncFileDropMessage (targetComp, targetComp->getLocalPoint (component, position), files))->post();
+            (new AsyncFileDropMessage (targetComp, target, targetComp->getLocalPoint (component, position), files))->post();
         }
     }
 }

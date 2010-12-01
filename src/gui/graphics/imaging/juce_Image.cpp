@@ -65,10 +65,6 @@ public:
         imageData = imageDataAllocated;
     }
 
-    ~SoftwareSharedImage()
-    {
-    }
-
     Image::ImageType getType() const
     {
         return Image::SoftwareImage;
@@ -88,6 +84,8 @@ public:
 
 private:
     HeapBlock<uint8> imageDataAllocated;
+
+    JUCE_LEAK_DETECTOR (SoftwareSharedImage);
 };
 
 Image::SharedImage* Image::SharedImage::createSoftwareImage (Image::PixelFormat format, int width, int height, bool clearImage)

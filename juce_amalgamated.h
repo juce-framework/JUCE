@@ -675,6 +675,16 @@
 	JUCE_DECLARE_NON_COPYABLE(className)\
 	JUCE_LEAK_DETECTOR(className)
 
+#if ! DOXYGEN
+ #define JUCE_JOIN_MACRO_HELPER(a, b)  a ## b
+#endif
+
+/** Good old C macro concatenation helper.
+	This combines two items (which may themselves be macros) into a single string,
+	avoiding the pitfalls of the ## macro operator.
+*/
+#define JUCE_JOIN_MACRO(a, b)  JUCE_JOIN_MACRO_HELPER (a, b)
+
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
 
   #define JUCE_TRY try
@@ -3201,7 +3211,7 @@ private:
 
 	  @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
   */
-  #define JUCE_LEAK_DETECTOR(OwnerClass)	 LeakedObjectDetector<OwnerClass> leakDetector ## __LINE__;
+  #define JUCE_LEAK_DETECTOR(OwnerClass)	 LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
 #else
   #define JUCE_LEAK_DETECTOR(OwnerClass)
 #endif

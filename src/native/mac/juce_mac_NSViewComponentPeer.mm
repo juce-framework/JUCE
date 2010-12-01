@@ -1674,28 +1674,29 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
-class AsyncRepaintMessage  : public CallbackMessage
-{
-public:
-    NSViewComponentPeer* const peer;
-    const Rectangle<int> rect;
-
-    AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle<int>& rect_)
-        : peer (peer_), rect (rect_)
-    {
-    }
-
-    void messageCallback()
-    {
-        if (ComponentPeer::isValidPeer (peer))
-            peer->repaint (rect);
-    }
-};
-
 void NSViewComponentPeer::repaint (const Rectangle<int>& area)
 {
     if (insideDrawRect)
     {
+        class AsyncRepaintMessage  : public CallbackMessage
+        {
+        public:
+            AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle<int>& rect_)
+                : peer (peer_), rect (rect_)
+            {
+            }
+
+            void messageCallback()
+            {
+                if (ComponentPeer::isValidPeer (peer))
+                    peer->repaint (rect);
+            }
+
+        private:
+            NSViewComponentPeer* const peer;
+            const Rectangle<int> rect;
+        };
+
         (new AsyncRepaintMessage (this, area))->post();
     }
     else
