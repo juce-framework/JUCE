@@ -473,7 +473,7 @@ void ListBox::selectRowInternal (const int row,
     if ((! isRowSelected (row))
          || (deselectOthersFirst && getNumSelectedRows() > 1))
     {
-        if (((unsigned int) row) < (unsigned int) totalItems)
+        if (isPositiveAndBelow (row, totalItems))
         {
             if (deselectOthersFirst)
                 selected.clear();
@@ -594,7 +594,7 @@ int ListBox::getNumSelectedRows() const
 
 int ListBox::getSelectedRow (const int index) const
 {
-    return (((unsigned int) index) < (unsigned int) selected.size())
+    return (isPositiveAndBelow (index, selected.size()))
                 ? selected [index] : -1;
 }
 
@@ -611,11 +611,11 @@ int ListBox::getLastRowSelected() const
 //==============================================================================
 int ListBox::getRowContainingPosition (const int x, const int y) const throw()
 {
-    if (((unsigned int) x) < (unsigned int) getWidth())
+    if (isPositiveAndBelow (x, getWidth()))
     {
         const int row = (viewport->getViewPositionY() + y - viewport->getY()) / rowHeight;
 
-        if (((unsigned int) row) < (unsigned int) totalItems)
+        if (isPositiveAndBelow (row, totalItems))
             return row;
     }
 
@@ -624,7 +624,7 @@ int ListBox::getRowContainingPosition (const int x, const int y) const throw()
 
 int ListBox::getInsertionIndexForPosition (const int x, const int y) const throw()
 {
-    if (((unsigned int) x) < (unsigned int) getWidth())
+    if (isPositiveAndBelow (x, getWidth()))
     {
         const int row = (viewport->getViewPositionY() + y + rowHeight / 2 - viewport->getY()) / rowHeight;
         return jlimit (0, totalItems, row);

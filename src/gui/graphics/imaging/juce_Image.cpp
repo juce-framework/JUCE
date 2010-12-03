@@ -292,7 +292,7 @@ Image::BitmapData::~BitmapData()
 
 const Colour Image::BitmapData::getPixelColour (const int x, const int y) const throw()
 {
-    jassert (((unsigned int) x) < (unsigned int) width && ((unsigned int) y) < (unsigned int) height);
+    jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 
     const uint8* const pixel = getPixelPointer (x, y);
 
@@ -320,7 +320,7 @@ const Colour Image::BitmapData::getPixelColour (const int x, const int y) const 
 
 void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& colour) const throw()
 {
-    jassert (((unsigned int) x) < (unsigned int) width && ((unsigned int) y) < (unsigned int) height);
+    jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 
     uint8* const pixel = getPixelPointer (x, y);
     const PixelARGB col (colour.getPixelARGB());
@@ -401,8 +401,7 @@ void Image::clear (const Rectangle<int>& area, const Colour& colourToClearTo)
 //==============================================================================
 const Colour Image::getPixelAt (const int x, const int y) const
 {
-    if (((unsigned int) x) < (unsigned int) getWidth()
-         && ((unsigned int) y) < (unsigned int) getHeight())
+    if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight()))
     {
         const BitmapData srcData (*this, x, y, 1, 1);
         return srcData.getPixelColour (0, 0);
@@ -413,8 +412,7 @@ const Colour Image::getPixelAt (const int x, const int y) const
 
 void Image::setPixelAt (const int x, const int y, const Colour& colour)
 {
-    if (((unsigned int) x) < (unsigned int) getWidth()
-         && ((unsigned int) y) < (unsigned int) getHeight())
+    if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight()))
     {
         const BitmapData destData (*this, x, y, 1, 1, true);
         destData.setPixelColour (0, 0, colour);
@@ -423,8 +421,7 @@ void Image::setPixelAt (const int x, const int y, const Colour& colour)
 
 void Image::multiplyAlphaAt (const int x, const int y, const float multiplier)
 {
-    if (((unsigned int) x) < (unsigned int) getWidth()
-         && ((unsigned int) y) < (unsigned int) getHeight()
+    if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight())
          && hasAlphaChannel())
     {
         const BitmapData destData (*this, x, y, 1, 1, true);

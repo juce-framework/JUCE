@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_AudioFormat.h"
 #include "../dsp/juce_AudioSampleBuffer.h"
 #include "../../containers/juce_AbstractFifo.h"
+#include "juce_AudioThumbnail.h"
 
 
 //==============================================================================
@@ -187,7 +188,10 @@ public:
         : AbstractFifo (bufferSize),
           buffer (numChannels, bufferSize),
           timeSliceThread (timeSliceThread_),
-          writer (writer_), isRunning (true)
+          writer (writer_),
+          thumbnailToUpdate (0),
+          samplesWritten (0),
+          isRunning (true)
     {
         timeSliceThread.addTimeSliceClient (this);
     }
@@ -237,17 +241,43 @@ public:
 
         writer->writeFromAudioSampleBuffer (buffer, start1, size1);
 
+        const ScopedLock sl (thumbnailLock);
+        if (thumbnailToUpdate != 0)
+            thumbnailToUpdate->addBlock (samplesWritten, buffer, start1, size1);
+
+        samplesWritten += size1;
+
         if (size2 > 0)
+        {
             writer->writeFromAudioSampleBuffer (buffer, start2, size2);
+
+            if (thumbnailToUpdate != 0)
+                thumbnailToUpdate->addBlock (samplesWritten, buffer, start2, size2);
+
+            samplesWritten += size2;
+        }
 
         finishedRead (size1 + size2);
         return true;
+    }
+
+    void setThumbnail (AudioThumbnail* thumb)
+    {
+        if (thumb != 0)
+            thumb->reset (buffer.getNumChannels(), writer->sampleRate);
+
+        const ScopedLock sl (thumbnailLock);
+        thumbnailToUpdate = thumb;
+        samplesWritten = 0;
     }
 
 private:
     AudioSampleBuffer buffer;
     TimeSliceThread& timeSliceThread;
     ScopedPointer<AudioFormatWriter> writer;
+    CriticalSection thumbnailLock;
+    AudioThumbnail* thumbnailToUpdate;
+    int64 samplesWritten;
     volatile bool isRunning;
 
     JUCE_DECLARE_NON_COPYABLE (Buffer);
@@ -267,5 +297,9 @@ bool AudioFormatWriter::ThreadedWriter::write (const float** data, int numSample
     return buffer->write (data, numSamples);
 }
 
+void AudioFormatWriter::ThreadedWriter::setThumbnailToUpdate (AudioThumbnail* thumb)
+{
+    buffer->setThumbnail (thumb);
+}
 
 END_JUCE_NAMESPACE

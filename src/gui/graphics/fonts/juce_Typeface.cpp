@@ -170,7 +170,7 @@ void CustomTypeface::addGlyph (const juce_wchar character, const Path& path, con
     // Check that you're not trying to add the same character twice..
     jassert (findGlyph (character, false) == 0);
 
-    if (((unsigned int) character) < (unsigned int) numElementsInArray (lookupTable))
+    if (isPositiveAndBelow ((int) character, (int) numElementsInArray (lookupTable)))
         lookupTable [character] = (short) glyphs.size();
 
     glyphs.add (new GlyphInfo (character, path, width));
@@ -190,7 +190,7 @@ void CustomTypeface::addKerningPair (const juce_wchar char1, const juce_wchar ch
 
 CustomTypeface::GlyphInfo* CustomTypeface::findGlyph (const juce_wchar character, const bool loadIfNeeded) throw()
 {
-    if (((unsigned int) character) < (unsigned int) numElementsInArray (lookupTable) && lookupTable [character] > 0)
+    if (isPositiveAndBelow ((int) character, (int) numElementsInArray (lookupTable)) && lookupTable [character] > 0)
         return glyphs [(int) lookupTable [(int) character]];
 
     for (int i = 0; i < glyphs.size(); ++i)

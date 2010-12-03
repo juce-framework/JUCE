@@ -1201,7 +1201,7 @@ void TreeViewItem::removeSubItem (const int index, const bool deleteItem)
     {
         const ScopedLock sl (ownerView->nodeAlterationLock);
 
-        if (((unsigned int) index) < (unsigned int) subItems.size())
+        if (isPositiveAndBelow (index, subItems.size()))
         {
             subItems.remove (index, deleteItem);
             treeHasChanged();
@@ -1597,7 +1597,7 @@ TreeViewItem* TreeViewItem::getItemOnRow (int index) throw()
 
 TreeViewItem* TreeViewItem::findItemRecursively (int targetY) throw()
 {
-    if (((unsigned int) targetY) < (unsigned int) totalHeight)
+    if (isPositiveAndBelow (targetY, totalHeight))
     {
         const int h = itemHeight;
 

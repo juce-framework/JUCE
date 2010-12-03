@@ -216,8 +216,8 @@ public:
     //==============================================================================
     static inline bool hitTest (Component& comp, const Point<int>& localPoint)
     {
-        return ((unsigned int) localPoint.getX()) < (unsigned int) comp.getWidth()
-                 && ((unsigned int) localPoint.getY()) < (unsigned int) comp.getHeight()
+        return isPositiveAndBelow (localPoint.getX(), comp.getWidth())
+                 && isPositiveAndBelow (localPoint.getY(), comp.getHeight())
                  && comp.hitTest (localPoint.getX(), localPoint.getY());
     }
 

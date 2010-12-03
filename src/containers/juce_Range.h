@@ -120,7 +120,7 @@ public:
     /** Returns a range with the same length as this one, but moved to have the given start position. */
     const Range movedToStartAt (const ValueType newStart) const throw()
     {
-        return Range (newStart, newStart + getLength());
+        return Range (newStart, end + (newStart - start));
     }
 
     /** Changes the end position of the range, leaving the start unchanged.
@@ -146,7 +146,7 @@ public:
     /** Returns a range with the same length as this one, but moved to have the given start position. */
     const Range movedToEndAt (const ValueType newEnd) const throw()
     {
-        return Range (newEnd - getLength(), newEnd);
+        return Range (start + (newEnd - end), newEnd);
     }
 
     /** Changes the length of the range.

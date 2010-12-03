@@ -114,7 +114,7 @@ public:
                            int width, int height,
                            bool rowIsSelected)
     {
-        if (((unsigned int) row) < (unsigned int) items.size())
+        if (isPositiveAndBelow (row, items.size()))
         {
             if (rowIsSelected)
                 g.fillAll (findColour (TextEditor::highlightColourId)
@@ -185,7 +185,7 @@ private:
 
     void flipEnablement (const int row)
     {
-        if (((unsigned int) row) < (unsigned int) items.size())
+        if (isPositiveAndBelow (row, items.size()))
         {
             const String item (items [row]);
             deviceManager.setMidiInputEnabled (item, ! deviceManager.isMidiInputEnabled (item));
@@ -717,7 +717,7 @@ public:
                                int width, int height,
                                bool rowIsSelected)
         {
-            if (((unsigned int) row) < (unsigned int) items.size())
+            if (isPositiveAndBelow (row, items.size()))
             {
                 if (rowIsSelected)
                     g.fillAll (findColour (TextEditor::highlightColourId)
@@ -806,7 +806,7 @@ public:
         {
             jassert (type == audioInputType || type == audioOutputType);
 
-            if (((unsigned int) row) < (unsigned int) items.size())
+            if (isPositiveAndBelow (row, items.size()))
             {
                 AudioDeviceManager::AudioDeviceSetup config;
                 setup.manager->getAudioDeviceSetup (config);

@@ -403,7 +403,7 @@ public:
             HeapBlock <OSType> types;
             const int num = getAllDataSourcesForDevice (deviceID, types);
 
-            if (((unsigned int) index) < (unsigned int) num)
+            if (isPositiveAndBelow (index, num))
             {
                 AudioObjectPropertyAddress pa;
                 pa.mSelector = kAudioDevicePropertyDataSource;

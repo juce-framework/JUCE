@@ -109,8 +109,8 @@ public:
     inline ObjectClass* operator[] (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
-        return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-                                                                 : static_cast <ObjectClass*> (0);
+        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+                                                   : static_cast <ObjectClass*> (0);
     }
 
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -121,7 +121,7 @@ public:
     inline ObjectClass* getUnchecked (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        jassert (isPositiveAndBelow (index, numUsed));
         return data.elements [index];
     }
 
@@ -328,6 +328,11 @@ public:
                              // object has a private destructor, both OwnedArray and
                              // ScopedPointer would need to be friend classes..
         }
+        else
+        {
+            jassertfalse; // you're trying to set an object at a negative index, which doesn't have
+                          // any effect - but since the object is not being added, it may be leaking..
+        }
     }
 
     /** Adds elements from another array to the end of this array.
@@ -492,7 +497,7 @@ public:
         {
             const ScopedLockType lock (getLock());
 
-            if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+            if (isPositiveAndBelow (indexToRemove, numUsed))
             {
                 ObjectClass** const e = data.elements + indexToRemove;
 
@@ -529,7 +534,7 @@ public:
         ObjectClass* removedItem = 0;
         const ScopedLockType lock (getLock());
 
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (indexToRemove, numUsed))
         {
             ObjectClass** const e = data.elements + indexToRemove;
             removedItem = *e;
@@ -648,8 +653,8 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (((unsigned int) index1) < (unsigned int) numUsed
-             && ((unsigned int) index2) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (index1, numUsed)
+             && isPositiveAndBelow (index2, numUsed))
         {
             swapVariables (data.elements [index1],
                            data.elements [index2]);
@@ -676,9 +681,9 @@ public:
         {
             const ScopedLockType lock (getLock());
 
-            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+            if (isPositiveAndBelow (currentIndex, numUsed))
             {
-                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+                if (! isPositiveAndBelow (newIndex, numUsed))
                     newIndex = numUsed - 1;
 
                 ObjectClass* const value = data.elements [currentIndex];

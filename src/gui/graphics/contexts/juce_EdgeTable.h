@@ -133,7 +133,7 @@ public:
                 while (--numPoints >= 0)
                 {
                     const int level = *++line;
-                    jassert (((unsigned int) level) < (unsigned int) 256);
+                    jassert (isPositiveAndBelow (level, (int) 256));
                     const int endX = *++line;
                     jassert (endX >= x);
                     const int endOfRun = (endX >> 8);

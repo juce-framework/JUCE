@@ -825,7 +825,7 @@ public:
 
     bool getProgramNameIndexed (VstInt32 /*category*/, VstInt32 index, char* text)
     {
-        if (filter != 0 && ((unsigned int) index) < (unsigned int) filter->getNumPrograms())
+        if (filter != 0 && isPositiveAndBelow (index, filter->getNumPrograms()))
         {
             filter->getProgramName (index).copyToCString (text, 24);
             return true;
@@ -840,7 +840,7 @@ public:
         if (filter == 0)
             return 0.0f;
 
-        jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
+        jassert (isPositiveAndBelow (index, filter->getNumParameters()));
         return filter->getParameter (index);
     }
 
@@ -848,7 +848,7 @@ public:
     {
         if (filter != 0)
         {
-            jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
             filter->setParameter (index, value);
         }
     }
@@ -857,7 +857,7 @@ public:
     {
         if (filter != 0)
         {
-            jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
             filter->getParameterText (index).copyToCString (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
@@ -866,7 +866,7 @@ public:
     {
         if (filter != 0)
         {
-            jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
             filter->getParameterName (index).copyToCString (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
@@ -1278,8 +1278,8 @@ public:
                                public AsyncUpdater
     {
     public:
-        EditorCompWrapper (JuceVSTWrapper& wrapper_, AudioProcessorEditor* editor_)
-            : wrapper (wrapper_), editor (editor_)
+        EditorCompWrapper (JuceVSTWrapper& wrapper_, AudioProcessorEditor* editor)
+            : wrapper (wrapper_)
         {
             setOpaque (true);
             editor->setOpaque (true);
@@ -1296,8 +1296,8 @@ public:
 
         ~EditorCompWrapper()
         {
-            jassert (isParentOf (editor)); // you mustn't remove your editor from its parent!
-            editor = 0;
+            deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
+                                 // have been transferred to another parent which takes over ownership.
         }
 
         void paint (Graphics&) {}
@@ -1323,11 +1323,13 @@ public:
 
         AudioProcessorEditor* getEditorComp() const
         {
-            return editor;
+            return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
         }
 
         void resized()
         {
+            Component* const editor = getChildComponent(0);
+
             if (editor != 0)
                 editor->setBounds (getLocalBounds());
         }
@@ -1377,7 +1379,6 @@ public:
     private:
         //==============================================================================
         JuceVSTWrapper& wrapper;
-        ScopedPointer<AudioProcessorEditor> editor;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper);
     };

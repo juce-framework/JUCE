@@ -372,8 +372,8 @@ const MidiMessage MidiMessage::aftertouchChange (const int channel,
                                                  const int aftertouchValue) throw()
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (((unsigned int) noteNum) <= 127);
-    jassert (((unsigned int) aftertouchValue) <= 127);
+    jassert (isPositiveAndBelow (noteNum, (int) 128));
+    jassert (isPositiveAndBelow (aftertouchValue, (int) 128));
 
     return MidiMessage (0xa0 | jlimit (0, 15, channel - 1),
                         noteNum & 0x7f,
@@ -396,7 +396,7 @@ const MidiMessage MidiMessage::channelPressureChange (const int channel,
                                                       const int pressure) throw()
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (((unsigned int) pressure) <= 127);
+    jassert (isPositiveAndBelow (pressure, (int) 128));
 
     return MidiMessage (0xd0 | jlimit (0, 15, channel - 1),
                         pressure & 0x7f);
@@ -435,7 +435,7 @@ const MidiMessage MidiMessage::pitchWheel (const int channel,
                                            const int position) throw()
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (((unsigned int) position) <= 0x3fff);
+    jassert (isPositiveAndBelow (position, (int) 0x4000));
 
     return MidiMessage (0xe0 | jlimit (0, 15, channel - 1),
                         position & 127,
@@ -485,7 +485,7 @@ const MidiMessage MidiMessage::noteOn (const int channel,
                                        const uint8 velocity) throw()
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (((unsigned int) noteNumber) <= 127);
+    jassert (isPositiveAndBelow (noteNumber, (int) 128));
 
     return MidiMessage (0x90 | jlimit (0, 15, channel - 1),
                         noteNumber & 127,
@@ -496,7 +496,7 @@ const MidiMessage MidiMessage::noteOff (const int channel,
                                         const int noteNumber) throw()
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (((unsigned int) noteNumber) <= 127);
+    jassert (isPositiveAndBelow (noteNumber, (int) 128));
 
     return MidiMessage (0x80 | jlimit (0, 15, channel - 1), noteNumber & 127, 0);
 }
@@ -986,7 +986,7 @@ const String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includ
     static const char* const sharpNoteNames[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
     static const char* const flatNoteNames[]  = { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" };
 
-    if (((unsigned int) note) < 128)
+    if (isPositiveAndBelow (note, (int) 128))
     {
         String s (useSharps ? sharpNoteNames [note % 12]
                             : flatNoteNames  [note % 12]);
@@ -1035,7 +1035,7 @@ const String MidiMessage::getGMInstrumentName (const int n)
         "Applause", "Gunshot"
     };
 
-    return (((unsigned int) n) < 128) ? names[n] : (const char*) 0;
+    return isPositiveAndBelow (n, (int) 128) ? names[n] : (const char*) 0;
 }
 
 const String MidiMessage::getGMInstrumentBankName (const int n)
@@ -1048,7 +1048,7 @@ const String MidiMessage::getGMInstrumentBankName (const int n)
         "Synth Effects", "Ethnic", "Percussive", "Sound Effects"
     };
 
-    return (((unsigned int) n) <= 15) ? names[n] : (const char*) 0;
+    return isPositiveAndBelow (n, (int) 16) ? names[n] : (const char*) 0;
 }
 
 const String MidiMessage::getRhythmInstrumentName (const int n)
@@ -1097,7 +1097,7 @@ const String MidiMessage::getControllerName (const int n)
         "Poly Operation"
     };
 
-    return (((unsigned int) n) < 128) ? names[n] : (const char*) 0;
+    return isPositiveAndBelow (n, (int) 128) ? names[n] : (const char*) 0;
 }
 
 END_JUCE_NAMESPACE

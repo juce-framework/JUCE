@@ -680,9 +680,9 @@ private:
 
             if (betterQuality)
             {
-                if (((unsigned int) loResX) < (unsigned int) maxX)
+                if (isPositiveAndBelow (loResX, maxX))
                 {
-                    if (((unsigned int) loResY) < (unsigned int) maxY)
+                    if (isPositiveAndBelow (loResY, maxY))
                     {
                         // In the centre of the image..
                         render4PixelAverage (dest, this->srcData.getPixelPointer (loResX, loResY),
@@ -707,7 +707,7 @@ private:
                 }
                 else
                 {
-                    if (((unsigned int) loResY) < (unsigned int) maxY)
+                    if (isPositiveAndBelow (loResY, maxY))
                     {
                         // At a left or right hand edge..
                         if (! repeatPattern)

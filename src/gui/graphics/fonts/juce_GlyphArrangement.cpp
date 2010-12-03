@@ -156,7 +156,7 @@ void GlyphArrangement::clear()
 
 PositionedGlyph& GlyphArrangement::getGlyph (const int index) const
 {
-    jassert (((unsigned int) index) < (unsigned int) glyphs.size());
+    jassert (isPositiveAndBelow (index, glyphs.size()));
 
     return *glyphs [index];
 }

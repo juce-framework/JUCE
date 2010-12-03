@@ -147,7 +147,7 @@ void FileSearchPathListComponent::paintListBoxItem (int rowNumber, Graphics& g, 
 
 void FileSearchPathListComponent::deleteKeyPressed (int row)
 {
-    if (((unsigned int) row) < (unsigned int) path.getNumPaths())
+    if (isPositiveAndBelow (row, path.getNumPaths()))
     {
         path.remove (row);
         changed();

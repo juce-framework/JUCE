@@ -185,8 +185,8 @@ public:
     inline ElementType operator[] (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
-        return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-                                                                 : ElementType();
+        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+                                                   : ElementType();
     }
 
     /** Returns one of the elements in the set, without checking the index passed in.
@@ -200,7 +200,7 @@ public:
     inline ElementType getUnchecked (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        jassert (isPositiveAndBelow (index, numUsed));
         return data.elements [index];
     }
 
@@ -412,7 +412,7 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (indexToRemove, numUsed))
         {
             --numUsed;
 

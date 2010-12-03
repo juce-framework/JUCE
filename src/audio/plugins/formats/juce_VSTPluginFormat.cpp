@@ -2456,7 +2456,7 @@ const String VSTPluginInstance::getCategory() const
 //==============================================================================
 float VSTPluginInstance::getParameter (int index)
 {
-    if (effect != 0 && ((unsigned int) index) < (unsigned int) effect->numParams)
+    if (effect != 0 && isPositiveAndBelow (index, (int) effect->numParams))
     {
         try
         {
@@ -2473,7 +2473,7 @@ float VSTPluginInstance::getParameter (int index)
 
 void VSTPluginInstance::setParameter (int index, float newValue)
 {
-    if (effect != 0 && ((unsigned int) index) < (unsigned int) effect->numParams)
+    if (effect != 0 && isPositiveAndBelow (index, (int) effect->numParams))
     {
         try
         {

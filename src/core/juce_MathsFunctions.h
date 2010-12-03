@@ -122,6 +122,69 @@ inline Type jmin (const Type a, const Type b, const Type c)                     
 template <typename Type>
 inline Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
 
+/** Scans an array of values, returning the minimum value that it contains. */
+template <typename Type>
+const Type findMinimum (const Type* data, int numValues)
+{
+    if (numValues <= 0)
+        return Type();
+
+    Type result (*data++);
+
+    while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+    {
+        const Type& v = *data++;
+        if (v < result)  result = v;
+    }
+
+    return result;
+}
+
+/** Scans an array of values, returning the minimum value that it contains. */
+template <typename Type>
+const Type findMaximum (const Type* values, int numValues)
+{
+    if (numValues <= 0)
+        return Type();
+
+    Type result (*values++);
+
+    while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+    {
+        const Type& v = *values++;
+        if (result > v)  result = v;
+    }
+
+    return result;
+}
+
+/** Scans an array of values, returning the minimum and maximum values that it contains. */
+template <typename Type>
+void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highest)
+{
+    if (numValues <= 0)
+    {
+        lowest = Type();
+        highest = Type();
+    }
+    else
+    {
+        Type mn (*values++);
+        Type mx (mn);
+
+        while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+        {
+            const Type& v = *values++;
+
+            if (mx < v)  mx = v;
+            if (v < mn)  mn = v;
+        }
+
+        lowest = mn;
+        highest = mx;
+    }
+}
+
 
 //==============================================================================
 /** Constrains a value to keep it within a given range.
@@ -150,6 +213,44 @@ inline Type jlimit (const Type lowerLimit,
     return (valueToConstrain < lowerLimit) ? lowerLimit
                                            : ((upperLimit < valueToConstrain) ? upperLimit
                                                                               : valueToConstrain);
+}
+
+/** Returns true if a value is at least zero, and also below a specified upper limit.
+    This is basically a quicker way to write:
+    @code valueToTest >= 0 && valueToTest < upperLimit
+    @endcode
+*/
+template <typename Type>
+inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) throw()
+{
+    jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
+    return Type() <= valueToTest && valueToTest < upperLimit;
+}
+
+template <>
+inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) throw()
+{
+    jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
+    return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
+}
+
+/** Returns true if a value is at least zero, and also less than or equal to a specified upper limit.
+    This is basically a quicker way to write:
+    @code valueToTest >= 0 && valueToTest <= upperLimit
+    @endcode
+*/
+template <typename Type>
+inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) throw()
+{
+    jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
+    return Type() <= valueToTest && valueToTest <= upperLimit;
+}
+
+template <>
+inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) throw()
+{
+    jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
+    return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
 }
 
 //==============================================================================

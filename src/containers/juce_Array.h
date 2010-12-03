@@ -221,8 +221,8 @@ public:
     inline ElementType operator[] (const int index) const
     {
         const ScopedLockType lock (getLock());
-        return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-                                                                 : ElementType();
+        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+                                                   : ElementType();
     }
 
     /** Returns one of the elements in the array, without checking the index passed in.
@@ -237,7 +237,7 @@ public:
     inline const ElementType getUnchecked (const int index) const
     {
         const ScopedLockType lock (getLock());
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        jassert (isPositiveAndBelow (index, numUsed));
         return data.elements [index];
     }
 
@@ -253,7 +253,7 @@ public:
     inline ElementType& getReference (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        jassert (isPositiveAndBelow (index, numUsed));
         return data.elements [index];
     }
 
@@ -366,7 +366,7 @@ public:
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
 
-        if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (indexToInsertAt, numUsed))
         {
             ElementType* const insertPos = data.elements + indexToInsertAt;
             const int numberToMove = numUsed - indexToInsertAt;
@@ -404,7 +404,7 @@ public:
             data.ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
             ElementType* insertPos;
 
-            if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
+            if (isPositiveAndBelow (indexToInsertAt, numUsed))
             {
                 insertPos = data.elements + indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
@@ -444,7 +444,7 @@ public:
             data.ensureAllocatedSize (numUsed + numberOfElements);
             ElementType* insertPos;
 
-            if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
+            if (isPositiveAndBelow (indexToInsertAt, numUsed))
             {
                 insertPos = data.elements + indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
@@ -492,7 +492,7 @@ public:
         jassert (indexToChange >= 0);
         const ScopedLockType lock (getLock());
 
-        if (((unsigned int) indexToChange) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (indexToChange, numUsed))
         {
             data.elements [indexToChange] = newValue;
         }
@@ -515,7 +515,7 @@ public:
     void setUnchecked (const int indexToChange, ParameterType newValue)
     {
         const ScopedLockType lock (getLock());
-        jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
+        jassert (isPositiveAndBelow (indexToChange, numUsed));
         data.elements [indexToChange] = newValue;
     }
 
@@ -682,7 +682,7 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (indexToRemove, numUsed))
         {
             --numUsed;
 
@@ -855,8 +855,8 @@ public:
     {
         const ScopedLockType lock (getLock());
 
-        if (((unsigned int) index1) < (unsigned int) numUsed
-            && ((unsigned int) index2) < (unsigned int) numUsed)
+        if (isPositiveAndBelow (index1, numUsed)
+             && isPositiveAndBelow (index2, numUsed))
         {
             swapVariables (data.elements [index1],
                            data.elements [index2]);
@@ -883,9 +883,9 @@ public:
         {
             const ScopedLockType lock (getLock());
 
-            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+            if (isPositiveAndBelow (currentIndex, numUsed))
             {
-                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+                if (! isPositiveAndBelow (newIndex, numUsed))
                     newIndex = numUsed - 1;
 
                 char tempCopy [sizeof (ElementType)];

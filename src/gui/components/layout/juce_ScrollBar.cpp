@@ -369,18 +369,18 @@ void ScrollBar::mouseDown (const MouseEvent& e)
 
 void ScrollBar::mouseDrag (const MouseEvent& e)
 {
-    if (isDraggingThumb)
+    const int mousePos = vertical ? e.y : e.x;
+
+    if (isDraggingThumb && lastMousePos != mousePos)
     {
-        const int deltaPixels = ((vertical) ? e.y : e.x) - dragStartMousePos;
+        const int deltaPixels = mousePos - dragStartMousePos;
 
         setCurrentRangeStart (dragStartRange
                                 + deltaPixels * (totalRange.getLength() - visibleRange.getLength())
                                     / (thumbAreaSize - thumbSize));
     }
-    else
-    {
-        lastMousePos = (vertical) ? e.y : e.x;
-    }
+
+    lastMousePos = mousePos;
 }
 
 void ScrollBar::mouseUp (const MouseEvent&)

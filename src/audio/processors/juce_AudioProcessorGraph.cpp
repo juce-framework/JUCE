@@ -320,11 +320,11 @@ bool AudioProcessorGraph::removeIllegalConnections()
 
         if (source == 0 || dest == 0
              || (c->sourceChannelIndex != midiChannelIndex
-                  && (((unsigned int) c->sourceChannelIndex) >= (unsigned int) source->processor->getNumOutputChannels()))
+                  && ! isPositiveAndBelow (c->sourceChannelIndex, source->processor->getNumOutputChannels()))
              || (c->sourceChannelIndex == midiChannelIndex
                   && ! source->processor->producesMidi())
              || (c->destChannelIndex != midiChannelIndex
-                   && (((unsigned int) c->destChannelIndex) >= (unsigned int) dest->processor->getNumInputChannels()))
+                   && ! isPositiveAndBelow (c->destChannelIndex, dest->processor->getNumInputChannels()))
              || (c->destChannelIndex == midiChannelIndex
                    && ! dest->processor->acceptsMidi()))
         {

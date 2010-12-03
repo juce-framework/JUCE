@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	98
+#define JUCE_BUILDNUMBER	99
 
 /** Current Juce version number.
 
@@ -1101,6 +1101,69 @@ inline Type jmin (const Type a, const Type b, const Type c)				 { return (b < a)
 template <typename Type>
 inline Type jmin (const Type a, const Type b, const Type c, const Type d)		   { return jmin (a, jmin (b, c, d)); }
 
+/** Scans an array of values, returning the minimum value that it contains. */
+template <typename Type>
+const Type findMinimum (const Type* data, int numValues)
+{
+	if (numValues <= 0)
+		return Type();
+
+	Type result (*data++);
+
+	while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+	{
+		const Type& v = *data++;
+		if (v < result)  result = v;
+	}
+
+	return result;
+}
+
+/** Scans an array of values, returning the minimum value that it contains. */
+template <typename Type>
+const Type findMaximum (const Type* values, int numValues)
+{
+	if (numValues <= 0)
+		return Type();
+
+	Type result (*values++);
+
+	while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+	{
+		const Type& v = *values++;
+		if (result > v)  result = v;
+	}
+
+	return result;
+}
+
+/** Scans an array of values, returning the minimum and maximum values that it contains. */
+template <typename Type>
+void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highest)
+{
+	if (numValues <= 0)
+	{
+		lowest = Type();
+		highest = Type();
+	}
+	else
+	{
+		Type mn (*values++);
+		Type mx (mn);
+
+		while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+		{
+			const Type& v = *values++;
+
+			if (mx < v)  mx = v;
+			if (v < mn)  mn = v;
+		}
+
+		lowest = mn;
+		highest = mx;
+	}
+}
+
 /** Constrains a value to keep it within a given range.
 
 	This will check that the specified value lies between the lower and upper bounds
@@ -1127,6 +1190,44 @@ inline Type jlimit (const Type lowerLimit,
 	return (valueToConstrain < lowerLimit) ? lowerLimit
 										   : ((upperLimit < valueToConstrain) ? upperLimit
 																			  : valueToConstrain);
+}
+
+/** Returns true if a value is at least zero, and also below a specified upper limit.
+	This is basically a quicker way to write:
+	@code valueToTest >= 0 && valueToTest < upperLimit
+	@endcode
+*/
+template <typename Type>
+inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) throw()
+{
+	jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
+	return Type() <= valueToTest && valueToTest < upperLimit;
+}
+
+template <>
+inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) throw()
+{
+	jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
+	return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
+}
+
+/** Returns true if a value is at least zero, and also less than or equal to a specified upper limit.
+	This is basically a quicker way to write:
+	@code valueToTest >= 0 && valueToTest <= upperLimit
+	@endcode
+*/
+template <typename Type>
+inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) throw()
+{
+	jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
+	return Type() <= valueToTest && valueToTest <= upperLimit;
+}
+
+template <>
+inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) throw()
+{
+	jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
+	return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
 }
 
 /** Handy function to swap two values over.
@@ -2035,7 +2136,7 @@ public:
 
 		No checks are made to see if the index is within a valid range, so be careful!
 	*/
-	inline const juce_wchar& operator[] (int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text [index]; }
+	inline const juce_wchar& operator[] (int index) const throw()  { jassert (isPositiveAndNotGreaterThan (index, length())); return text [index]; }
 
 	/** Returns a character from the string such that it can also be altered.
 
@@ -4299,8 +4400,8 @@ public:
 	inline ElementType operator[] (const int index) const
 	{
 		const ScopedLockType lock (getLock());
-		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-																 : ElementType();
+		return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+												   : ElementType();
 	}
 
 	/** Returns one of the elements in the array, without checking the index passed in.
@@ -4315,7 +4416,7 @@ public:
 	inline const ElementType getUnchecked (const int index) const
 	{
 		const ScopedLockType lock (getLock());
-		jassert (((unsigned int) index) < (unsigned int) numUsed);
+		jassert (isPositiveAndBelow (index, numUsed));
 		return data.elements [index];
 	}
 
@@ -4331,7 +4432,7 @@ public:
 	inline ElementType& getReference (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		jassert (((unsigned int) index) < (unsigned int) numUsed);
+		jassert (isPositiveAndBelow (index, numUsed));
 		return data.elements [index];
 	}
 
@@ -4442,7 +4543,7 @@ public:
 		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 
-		if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (indexToInsertAt, numUsed))
 		{
 			ElementType* const insertPos = data.elements + indexToInsertAt;
 			const int numberToMove = numUsed - indexToInsertAt;
@@ -4480,7 +4581,7 @@ public:
 			data.ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
 			ElementType* insertPos;
 
-			if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
+			if (isPositiveAndBelow (indexToInsertAt, numUsed))
 			{
 				insertPos = data.elements + indexToInsertAt;
 				const int numberToMove = numUsed - indexToInsertAt;
@@ -4520,7 +4621,7 @@ public:
 			data.ensureAllocatedSize (numUsed + numberOfElements);
 			ElementType* insertPos;
 
-			if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
+			if (isPositiveAndBelow (indexToInsertAt, numUsed))
 			{
 				insertPos = data.elements + indexToInsertAt;
 				const int numberToMove = numUsed - indexToInsertAt;
@@ -4568,7 +4669,7 @@ public:
 		jassert (indexToChange >= 0);
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) indexToChange) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (indexToChange, numUsed))
 		{
 			data.elements [indexToChange] = newValue;
 		}
@@ -4591,7 +4692,7 @@ public:
 	void setUnchecked (const int indexToChange, ParameterType newValue)
 	{
 		const ScopedLockType lock (getLock());
-		jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
+		jassert (isPositiveAndBelow (indexToChange, numUsed));
 		data.elements [indexToChange] = newValue;
 	}
 
@@ -4757,7 +4858,7 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (indexToRemove, numUsed))
 		{
 			--numUsed;
 
@@ -4930,8 +5031,8 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) index1) < (unsigned int) numUsed
-			&& ((unsigned int) index2) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (index1, numUsed)
+			 && isPositiveAndBelow (index2, numUsed))
 		{
 			swapVariables (data.elements [index1],
 						   data.elements [index2]);
@@ -4958,9 +5059,9 @@ public:
 		{
 			const ScopedLockType lock (getLock());
 
-			if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+			if (isPositiveAndBelow (currentIndex, numUsed))
 			{
-				if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+				if (! isPositiveAndBelow (newIndex, numUsed))
 					newIndex = numUsed - 1;
 
 				char tempCopy [sizeof (ElementType)];
@@ -7255,8 +7356,8 @@ public:
 	inline ObjectClass* operator[] (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-																 : static_cast <ObjectClass*> (0);
+		return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+												   : static_cast <ObjectClass*> (0);
 	}
 
 	/** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -7267,7 +7368,7 @@ public:
 	inline ObjectClass* getUnchecked (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		jassert (((unsigned int) index) < (unsigned int) numUsed);
+		jassert (isPositiveAndBelow (index, numUsed));
 		return data.elements [index];
 	}
 
@@ -7472,6 +7573,11 @@ public:
 							 // object has a private destructor, both OwnedArray and
 							 // ScopedPointer would need to be friend classes..
 		}
+		else
+		{
+			jassertfalse; // you're trying to set an object at a negative index, which doesn't have
+						  // any effect - but since the object is not being added, it may be leaking..
+		}
 	}
 
 	/** Adds elements from another array to the end of this array.
@@ -7635,7 +7741,7 @@ public:
 		{
 			const ScopedLockType lock (getLock());
 
-			if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+			if (isPositiveAndBelow (indexToRemove, numUsed))
 			{
 				ObjectClass** const e = data.elements + indexToRemove;
 
@@ -7672,7 +7778,7 @@ public:
 		ObjectClass* removedItem = 0;
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (indexToRemove, numUsed))
 		{
 			ObjectClass** const e = data.elements + indexToRemove;
 			removedItem = *e;
@@ -7791,8 +7897,8 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) index1) < (unsigned int) numUsed
-			 && ((unsigned int) index2) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (index1, numUsed)
+			 && isPositiveAndBelow (index2, numUsed))
 		{
 			swapVariables (data.elements [index1],
 						   data.elements [index2]);
@@ -7819,9 +7925,9 @@ public:
 		{
 			const ScopedLockType lock (getLock());
 
-			if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+			if (isPositiveAndBelow (currentIndex, numUsed))
 			{
-				if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+				if (! isPositiveAndBelow (newIndex, numUsed))
 					newIndex = numUsed - 1;
 
 				ObjectClass* const value = data.elements [currentIndex];
@@ -10756,7 +10862,7 @@ public:
 	/** Returns a range with the same length as this one, but moved to have the given start position. */
 	const Range movedToStartAt (const ValueType newStart) const throw()
 	{
-		return Range (newStart, newStart + getLength());
+		return Range (newStart, end + (newStart - start));
 	}
 
 	/** Changes the end position of the range, leaving the start unchanged.
@@ -10782,7 +10888,7 @@ public:
 	/** Returns a range with the same length as this one, but moved to have the given start position. */
 	const Range movedToEndAt (const ValueType newEnd) const throw()
 	{
-		return Range (newEnd - getLength(), newEnd);
+		return Range (start + (newEnd - end), newEnd);
 	}
 
 	/** Changes the length of the range.
@@ -11003,8 +11109,8 @@ public:
 	inline const ReferenceCountedObjectPtr<ObjectClass> operator[] (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-																 : static_cast <ObjectClass*> (0);
+		return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+												   : static_cast <ObjectClass*> (0);
 	}
 
 	/** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -11015,7 +11121,7 @@ public:
 	inline const ReferenceCountedObjectPtr<ObjectClass> getUnchecked (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		jassert (((unsigned int) index) < (unsigned int) numUsed);
+		jassert (isPositiveAndBelow (index, numUsed));
 		return data.elements [index];
 	}
 
@@ -11290,7 +11396,7 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (indexToRemove, numUsed))
 		{
 			ObjectClass** const e = data.elements + indexToRemove;
 
@@ -11402,8 +11508,8 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) index1) < (unsigned int) numUsed
-			 && ((unsigned int) index2) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (index1, numUsed)
+			 && isPositiveAndBelow (index2, numUsed))
 		{
 			swapVariables (data.elements [index1],
 						   data.elements [index2]);
@@ -11430,9 +11536,9 @@ public:
 		{
 			const ScopedLockType lock (getLock());
 
-			if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+			if (isPositiveAndBelow (currentIndex, numUsed))
 			{
-				if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+				if (! isPositiveAndBelow (newIndex, numUsed))
 					newIndex = numUsed - 1;
 
 				ObjectClass* const value = data.elements [currentIndex];
@@ -11729,8 +11835,8 @@ public:
 	inline ElementType operator[] (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-																 : ElementType();
+		return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+												   : ElementType();
 	}
 
 	/** Returns one of the elements in the set, without checking the index passed in.
@@ -11744,7 +11850,7 @@ public:
 	inline ElementType getUnchecked (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		jassert (((unsigned int) index) < (unsigned int) numUsed);
+		jassert (isPositiveAndBelow (index, numUsed));
 		return data.elements [index];
 	}
 
@@ -11952,7 +12058,7 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 
-		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+		if (isPositiveAndBelow (indexToRemove, numUsed))
 		{
 			--numUsed;
 
@@ -12203,7 +12309,7 @@ public:
 	*/
 	const Range<Type> getRange (const int rangeIndex) const
 	{
-		if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
+		if (isPositiveAndBelow (rangeIndex, getNumRanges()))
 			return Range<Type> (values.getUnchecked (rangeIndex << 1),
 								values.getUnchecked ((rangeIndex << 1) + 1));
 		else
@@ -31085,7 +31191,7 @@ public:
 	*/
 	float* getSampleData (const int channelNumber) const throw()
 	{
-		jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+		jassert (isPositiveAndBelow (channelNumber, numChannels));
 		return channels [channelNumber];
 	}
 
@@ -31097,8 +31203,8 @@ public:
 	float* getSampleData (const int channelNumber,
 						  const int sampleOffset) const throw()
 	{
-		jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
-		jassert (((unsigned int) sampleOffset) < (unsigned int) size);
+		jassert (isPositiveAndBelow (channelNumber, numChannels));
+		jassert (isPositiveAndBelow (sampleOffset, size));
 		return channels [channelNumber] + sampleOffset;
 	}
 
@@ -31532,6 +31638,8 @@ public:
 #endif   // __JUCE_AUDIOSOURCE_JUCEHEADER__
 /*** End of inlined file: juce_AudioSource.h ***/
 
+class AudioThumbnail;
+
 /**
 	Writes samples to an audio file stream.
 
@@ -31676,6 +31784,13 @@ public:
 			AudioFormatWriter object is using. None of these channels can be null.
 		*/
 		bool write (const float** data, int numSamples);
+
+		/** Allows you to specify a thumbnail that this writer should update with the
+			incoming data.
+			The thumbnail will be cleared and will the writer will begin adding data to
+			it as it arrives. Pass a null pointer to stop the writer updating any thumbnails.
+		*/
+		void setThumbnailToUpdate (AudioThumbnail* thumbnailToUpdate);
 
 		/** @internal */
 		class Buffer; // (only public for VC6 compatibility)
@@ -32444,9 +32559,7 @@ class AudioThumbnailCache;
 
 	@see AudioThumbnailCache
 */
-class JUCE_API  AudioThumbnail	: public ChangeBroadcaster,
-									public TimeSliceClient,
-									private Timer
+class JUCE_API  AudioThumbnail	: public ChangeBroadcaster
 {
 public:
 
@@ -32468,6 +32581,9 @@ public:
 	/** Destructor. */
 	~AudioThumbnail();
 
+	/** Clears and resets the thumbnail. */
+	void clear();
+
 	/** Specifies the file or stream that contains the audio file.
 
 		For a file, just call
@@ -32482,29 +32598,46 @@ public:
 	*/
 	void setSource (InputSource* newSource);
 
+	/** Gives the thumbnail an AudioFormatReader to use directly.
+		This will start parsing the audio in a background thread (unless the hash code
+		can be looked-up successfully in the thumbnail cache).
+	*/
+	void setReader (AudioFormatReader* newReader, int64 hashCode);
+
+	/** Resets the thumbnail, ready for adding data with the specified format.
+		If you're going to generate a thumbnail yourself, call this before using addBlock()
+		to add the data.
+	*/
+	void reset (int numChannels, double sampleRate);
+
+	/** Adds a block of level data to the thumbnail.
+		Call reset() before using this, to tell the thumbnail about the data format.
+	*/
+	void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
+				   int startOffsetInBuffer, int numSamples);
+
 	/** Reloads the low res thumbnail data from an input stream.
 
-		The thumb will automatically attempt to reload itself from its
-		AudioThumbnailCache.
+		This is not an audio file stream! It takes a stream of thumbnail data that would
+		previously have been created by the saveTo() method.
+		@see saveTo
 	*/
 	void loadFrom (InputStream& input);
 
 	/** Saves the low res thumbnail data to an output stream.
 
-		The thumb will automatically attempt to save itself to its
-		AudioThumbnailCache after it finishes scanning the wave file.
+		The data that is written can later be reloaded using loadFrom().
+		@see loadFrom
 	*/
 	void saveTo (OutputStream& output) const;
 
-	/** Returns the number of channels in the file.
-	*/
+	/** Returns the number of channels in the file. */
 	int getNumChannels() const throw();
 
-	/** Returns the length of the audio file, in seconds.
-	*/
+	/** Returns the length of the audio file, in seconds. */
 	double getTotalLength() const throw();
 
-	/** Renders the waveform shape for a channel.
+	/** Draws the waveform for a channel.
 
 		The waveform will be drawn within  the specified rectangle, where startTime
 		and endTime specify the times within the audio file that should be positioned
@@ -32515,66 +32648,60 @@ public:
 		with the verticalZoomFactor parameter.
 	*/
 	void drawChannel (Graphics& g,
-					  int x, int y, int w, int h,
+					  const Rectangle<int>& area,
 					  double startTimeSeconds,
 					  double endTimeSeconds,
 					  int channelNum,
 					  float verticalZoomFactor);
 
+	/** Draws the waveforms for all channels in the thumbnail.
+
+		This will call drawChannel() to render each of the thumbnail's channels, stacked
+		above each other within the specified area.
+
+		@see drawChannel
+	*/
+	void drawChannels (Graphics& g,
+					   const Rectangle<int>& area,
+					   double startTimeSeconds,
+					   double endTimeSeconds,
+					   float verticalZoomFactor);
+
 	/** Returns true if the low res preview is fully generated. */
 	bool isFullyLoaded() const throw();
 
-	/** The binary data format that is stored in the thumbnail file. */
-	struct DataFormat
-	{
-		char   thumbnailMagic[4];	   /**< Should be 'jatm'. */
-		int32  samplesPerThumbSample;   /**< Number of source samples per thumbnail sample. */
-		int64  totalSamples;		/**< Total number of source samples. */
-		int64  numFinishedSamples;	  /**< Number of valid source samples that have been read into the thumbnail. */
-		int32  numThumbnailSamples;	 /**< Number of samples in the thumbnail data. */
-		int32  numChannels;		 /**< Number of audio channels. */
-		int32  sampleRate;		  /**< Source sample rate. */
-		char   future[16];		  /**< Reserved for future use. */
-		char   data[1];		 /**< The raw thumbnail samples, two signed bytes per
-											 sample (min and max values). Channels are interleaved. */
-
-		/** Flips the endianness of the values in this data structure if the CPU is big-endian. */
-		void flipEndiannessIfBigEndian() throw();
-	};
-
-	/** @internal */
-	bool useTimeSlice();
-	/** @internal */
-	void timerCallback();
+	// (this is only public to avoid a VC6 bug)
+	class LevelDataSource;
 
 private:
 
 	AudioFormatManager& formatManagerToUse;
 	AudioThumbnailCache& cache;
-	ScopedPointer <InputSource> source;
-	CriticalSection readerLock;
-	ScopedPointer <AudioFormatReader> reader;
-	MemoryBlock data, cachedLevels;
-	int orginalSamplesPerThumbnailSample;
-	int numChannelsCached, numSamplesCached;
-	double cachedStart, cachedTimePerPixel;
-	bool cacheNeedsRefilling;
-	const int timeBeforeDeletingReader;
 
-	friend class AudioThumbnailCache;
+	struct MinMaxValue;
+	class ThumbData;
+	class CachedWindow;
 
-	void clear();
-	AudioFormatReader* createReader() const;
-	void generateSection (AudioFormatReader& reader, int64 startSample, int numSamples);
-	char* getChannelData (int channel) const;
-	void refillCache (int numSamples, double startTime, double timePerPixel);
-	DataFormat* getData() const throw();
+	friend class LevelDataSource;
+	friend class ScopedPointer<LevelDataSource>;
+	friend class ThumbData;
+	friend class OwnedArray<ThumbData>;
+	friend class CachedWindow;
+	friend class ScopedPointer<CachedWindow>;
 
-	// true if it needs more callbacks from the readNextBlockFromAudioFile() method
-	bool initialiseFromAudioFile (AudioFormatReader& reader);
+	ScopedPointer<LevelDataSource> source;
+	ScopedPointer<CachedWindow> window;
+	OwnedArray<ThumbData> channels;
 
-	// returns true if more needs to be read
-	bool readNextBlockFromAudioFile (AudioFormatReader& reader);
+	int32 samplesPerThumbSample;
+	int64 totalSamples, numSamplesFinished;
+	int32 numChannels;
+	double sampleRate;
+	CriticalSection lock;
+
+	void setDataSource (LevelDataSource* newSource);
+	void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
+	void createChannels (int length);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail);
 };
@@ -32639,9 +32766,7 @@ private:
 	OwnedArray <ThumbnailCacheEntry> thumbs;
 	int maxNumThumbsToStore;
 
-	friend class AudioThumbnail;
-	void addThumbnail (AudioThumbnail* thumb);
-	void removeThumbnail (AudioThumbnail* thumb);
+	ThumbnailCacheEntry* findThumbFor (int64 hash) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnailCache);
 };
@@ -59759,7 +59884,7 @@ public:
 				while (--numPoints >= 0)
 				{
 					const int level = *++line;
-					jassert (((unsigned int) level) < (unsigned int) 256);
+					jassert (isPositiveAndBelow (level, (int) 256));
 					const int endX = *++line;
 					jassert (endX >= x);
 					const int endOfRun = (endX >> 8);

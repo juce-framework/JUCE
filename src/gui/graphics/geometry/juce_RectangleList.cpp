@@ -64,7 +64,7 @@ void RectangleList::clear()
 
 const Rectangle<int> RectangleList::getRectangle (const int index) const throw()
 {
-    if (((unsigned int) index) < (unsigned int) rects.size())
+    if (isPositiveAndBelow (index, rects.size()))
         return rects.getReference (index);
 
     return Rectangle<int>();

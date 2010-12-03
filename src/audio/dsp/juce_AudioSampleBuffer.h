@@ -110,7 +110,7 @@ public:
     */
     float* getSampleData (const int channelNumber) const throw()
     {
-        jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+        jassert (isPositiveAndBelow (channelNumber, numChannels));
         return channels [channelNumber];
     }
 
@@ -122,8 +122,8 @@ public:
     float* getSampleData (const int channelNumber,
                           const int sampleOffset) const throw()
     {
-        jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
-        jassert (((unsigned int) sampleOffset) < (unsigned int) size);
+        jassert (isPositiveAndBelow (channelNumber, numChannels));
+        jassert (isPositiveAndBelow (sampleOffset, size));
         return channels [channelNumber] + sampleOffset;
     }
 

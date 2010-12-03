@@ -114,8 +114,8 @@ public:
 
     bool contains (const Point<int>& position, bool) const
     {
-        return ((unsigned int) position.getX()) < (unsigned int) magnifierComp->getWidth()
-                && ((unsigned int) position.getY()) < (unsigned int) magnifierComp->getHeight();
+        return isPositiveAndBelow (position.getX(), magnifierComp->getWidth())
+                && isPositiveAndBelow (position.getY(), magnifierComp->getHeight());
     }
 
     void repaint (const Rectangle<int>& area)

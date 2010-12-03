@@ -82,20 +82,14 @@ public:
 
         if (thumbnail.getTotalLength() > 0)
         {
-            int heightPerChannel = (getHeight() - 4) / thumbnail.getNumChannels();
-
-            for (int i = 0; i < thumbnail.getNumChannels(); ++i)
-            {
-                thumbnail.drawChannel (g, 2, 2 + heightPerChannel * i,
-                                       getWidth() - 4, heightPerChannel,
-                                       startTime, endTime,
-                                       i, 1.0f);
-            }
+            thumbnail.drawChannels (g, getLocalBounds().reduced (2, 2),
+                                    startTime, endTime, 1.0f);
         }
         else
         {
             g.setFont (14.0f);
-            g.drawFittedText ("(No audio file selected)", 0, 0, getWidth(), getHeight(), Justification::centred, 2);
+            g.drawFittedText ("(No audio file selected)", 0, 0, getWidth(), getHeight(),
+                              Justification::centred, 2);
         }
     }
 

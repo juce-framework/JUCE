@@ -30,6 +30,7 @@
 #include "juce_AudioFormatReader.h"
 #include "../audio_sources/juce_AudioSource.h"
 #include "../../threads/juce_TimeSliceThread.h"
+class AudioThumbnail;
 
 
 //==============================================================================
@@ -183,6 +184,13 @@ public:
             AudioFormatWriter object is using. None of these channels can be null.
         */
         bool write (const float** data, int numSamples);
+
+        /** Allows you to specify a thumbnail that this writer should update with the
+            incoming data.
+            The thumbnail will be cleared and will the writer will begin adding data to
+            it as it arrives. Pass a null pointer to stop the writer updating any thumbnails.
+        */
+        void setThumbnailToUpdate (AudioThumbnail* thumbnailToUpdate);
 
         /** @internal */
         class Buffer; // (only public for VC6 compatibility)

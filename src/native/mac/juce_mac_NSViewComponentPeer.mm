@@ -1162,8 +1162,8 @@ bool NSViewComponentPeer::isFullScreen() const
 
 bool NSViewComponentPeer::contains (const Point<int>& position, bool trueIfInAChildWindow) const
 {
-    if (((unsigned int) position.getX()) >= (unsigned int) component->getWidth()
-        || ((unsigned int) position.getY()) >= (unsigned int) component->getHeight())
+    if (! (isPositiveAndBelow (position.getX(), component->getWidth())
+            && isPositiveAndBelow (position.getY(), component->getHeight())))
         return false;
 
     NSPoint p;

@@ -54,18 +54,26 @@ AudioThumbnailCache::~AudioThumbnailCache()
 {
 }
 
-bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode)
+ThumbnailCacheEntry* AudioThumbnailCache::findThumbFor (const int64 hash) const
 {
     for (int i = thumbs.size(); --i >= 0;)
-    {
-        if (thumbs[i]->hash == hashCode)
-        {
-            MemoryInputStream in (thumbs[i]->data, false);
-            thumb.loadFrom (in);
+        if (thumbs.getUnchecked(i)->hash == hash)
+            return thumbs.getUnchecked(i);
 
-            thumbs[i]->lastUsed = Time::getMillisecondCounter();
-            return true;
-        }
+    return 0;
+}
+
+bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode)
+{
+    ThumbnailCacheEntry* te = findThumbFor (hashCode);
+
+    if (te != 0)
+    {
+        te->lastUsed = Time::getMillisecondCounter();
+
+        MemoryInputStream in (te->data, false);
+        thumb.loadFrom (in);
+        return true;
     }
 
     return false;
@@ -74,19 +82,7 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode
 void AudioThumbnailCache::storeThumb (const AudioThumbnail& thumb,
                                       const int64 hashCode)
 {
-    MemoryOutputStream out;
-    thumb.saveTo (out);
-
-    ThumbnailCacheEntry* te = 0;
-
-    for (int i = thumbs.size(); --i >= 0;)
-    {
-        if (thumbs[i]->hash == hashCode)
-        {
-            te = thumbs[i];
-            break;
-        }
-    }
+    ThumbnailCacheEntry* te = findThumbFor (hashCode);
 
     if (te == 0)
     {
@@ -100,36 +96,30 @@ void AudioThumbnailCache::storeThumb (const AudioThumbnail& thumb,
         else
         {
             int oldest = 0;
-            unsigned int oldestTime = Time::getMillisecondCounter() + 1;
+            uint32 oldestTime = Time::getMillisecondCounter() + 1;
 
-            int i;
-            for (i = thumbs.size(); --i >= 0;)
-                if (thumbs[i]->lastUsed < oldestTime)
+            for (int i = thumbs.size(); --i >= 0;)
+            {
+                if (thumbs.getUnchecked(i)->lastUsed < oldestTime)
+                {
                     oldest = i;
+                    oldestTime = thumbs.getUnchecked(i)->lastUsed;
+                }
+            }
 
-            thumbs.set (i, te);
+            thumbs.set (oldest, te);
         }
     }
 
     te->lastUsed = Time::getMillisecondCounter();
-    te->data.setSize (0);
-    te->data.append (out.getData(), out.getDataSize());
+
+    MemoryOutputStream out (te->data, false);
+    thumb.saveTo (out);
 }
 
 void AudioThumbnailCache::clear()
 {
     thumbs.clear();
-}
-
-//==============================================================================
-void AudioThumbnailCache::addThumbnail (AudioThumbnail* const thumb)
-{
-    addTimeSliceClient (thumb);
-}
-
-void AudioThumbnailCache::removeThumbnail (AudioThumbnail* const thumb)
-{
-    removeTimeSliceClient (thumb);
 }
 
 

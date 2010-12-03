@@ -450,7 +450,7 @@ int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
 {
     const int i = menuResultCode - menuIdBase;
 
-    return (((unsigned int) i) < (unsigned int) types.size()) ? i : -1;
+    return isPositiveAndBelow (i, types.size()) ? i : -1;
 }
 
 END_JUCE_NAMESPACE

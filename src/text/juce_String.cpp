@@ -1262,7 +1262,7 @@ const String String::replaceCharacters (const String& charactersToReplace,
     {
         const int index = charactersToReplace.indexOfChar (*t);
 
-        if (((unsigned int) index) < (unsigned int) len2)
+        if (isPositiveAndBelow (index, len2))
             *t = charactersToInsertInstead [index];
 
         ++t;
@@ -1333,7 +1333,7 @@ const String String::toLowerCase() const
 //==============================================================================
 juce_wchar& String::operator[] (const int index)
 {
-    jassert (((unsigned int) index) <= (unsigned int) length());
+    jassert (isPositiveAndNotGreaterThan (index, length()));
     text = StringHolder::makeUnique (text);
     return text [index];
 }

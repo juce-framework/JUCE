@@ -1187,7 +1187,7 @@ void CodeEditorComponent::setColourForTokenType (const int tokenType, const Colo
 
 const Colour CodeEditorComponent::getColourForTokenType (const int tokenType) const
 {
-    if (((unsigned int) tokenType) >= (unsigned int) coloursForTokenCategories.size())
+    if (! isPositiveAndBelow (tokenType, coloursForTokenCategories.size()))
         return findColour (CodeEditorComponent::defaultTextColourId);
 
     return coloursForTokenCategories.getReference (tokenType);

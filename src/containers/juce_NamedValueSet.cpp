@@ -153,13 +153,13 @@ bool NamedValueSet::remove (const Identifier& name)
 
 const Identifier NamedValueSet::getName (const int index) const
 {
-    jassert (((unsigned int) index) < (unsigned int) values.size());
+    jassert (isPositiveAndBelow (index, values.size()));
     return values [index].name;
 }
 
 const var NamedValueSet::getValueAt (const int index) const
 {
-    jassert (((unsigned int) index) < (unsigned int) values.size());
+    jassert (isPositiveAndBelow (index, values.size()));
     return values [index].value;
 }
 

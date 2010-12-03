@@ -128,7 +128,7 @@ double MidiMessageSequence::getEndTime() const
 
 double MidiMessageSequence::getEventTime (const int index) const
 {
-    if (((unsigned int) index) < (unsigned int) list.size())
+    if (isPositiveAndBelow (index, list.size()))
         return list.getUnchecked (index)->message.getTimeStamp();
 
     return 0.0;
@@ -154,7 +154,7 @@ void MidiMessageSequence::addEvent (const MidiMessage& newMessage,
 void MidiMessageSequence::deleteEvent (const int index,
                                        const bool deleteMatchingNoteUp)
 {
-    if (((unsigned int) index) < (unsigned int) list.size())
+    if (isPositiveAndBelow (index, list.size()))
     {
         if (deleteMatchingNoteUp)
             deleteEvent (getIndexOfMatchingKeyUp (index), false);

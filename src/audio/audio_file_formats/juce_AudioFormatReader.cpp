@@ -111,22 +111,6 @@ bool AudioFormatReader::read (int* const* destSamples,
     return true;
 }
 
-static void findAudioBufferMaxMin (const float* const buffer, const int num, float& maxVal, float& minVal) throw()
-{
-    float mn = buffer[0];
-    float mx = mn;
-
-    for (int i = 1; i < num; ++i)
-    {
-        const float s = buffer[i];
-        if (s > mx)  mx = s;
-        if (s < mn)  mn = s;
-    }
-
-    maxVal = mx;
-    minVal = mn;
-}
-
 void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
                                        int64 numSamples,
                                        float& lowestLeft, float& highestLeft,
@@ -164,16 +148,16 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             numSamples -= numToDo;
             startSampleInFile += numToDo;
 
-            float bufmin, bufmax;
-            findAudioBufferMaxMin (reinterpret_cast<float*> (tempBuffer[0]), numToDo, bufmax, bufmin);
-            lmin = jmin (lmin, bufmin);
-            lmax = jmax (lmax, bufmax);
+            float bufMin, bufMax;
+            findMinAndMax (reinterpret_cast<float*> (tempBuffer[0]), numToDo, bufMin, bufMax);
+            lmin = jmin (lmin, bufMin);
+            lmax = jmax (lmax, bufMax);
 
             if (numChannels > 1)
             {
-                findAudioBufferMaxMin (reinterpret_cast<float*> (tempBuffer[1]), numToDo, bufmax, bufmin);
-                rmin = jmin (rmin, bufmin);
-                rmax = jmax (rmax, bufmax);
+                findMinAndMax (reinterpret_cast<float*> (tempBuffer[1]), numToDo, bufMin, bufMax);
+                rmin = jmin (rmin, bufMin);
+                rmax = jmax (rmax, bufMax);
             }
         }
 
@@ -205,21 +189,8 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
 
             for (int j = numChannels; --j >= 0;)
             {
-                int bufMax = std::numeric_limits<int>::min();
-                int bufMin = std::numeric_limits<int>::max();
-
-                const int* const b = tempBuffer[j];
-
-                for (int i = 0; i < numToDo; ++i)
-                {
-                    const int samp = b[i];
-
-                    if (samp < bufMin)
-                        bufMin = samp;
-
-                    if (samp > bufMax)
-                        bufMax = samp;
-                }
+                int bufMin, bufMax;
+                findMinAndMax (tempBuffer[j], numToDo, bufMin, bufMax);
 
                 if (j == 0)
                 {

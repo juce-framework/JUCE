@@ -127,7 +127,7 @@ private:
 #endif
     }
 
-    JUCE_LEAK_DETECTOR (CoreGraphicsImage);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsImage);
 };
 
 Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)

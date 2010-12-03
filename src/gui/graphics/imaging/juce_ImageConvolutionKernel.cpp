@@ -45,22 +45,16 @@ ImageConvolutionKernel::~ImageConvolutionKernel()
 //==============================================================================
 float ImageConvolutionKernel::getKernelValue (const int x, const int y) const throw()
 {
-    if (((unsigned int) x) < (unsigned int) size
-         && ((unsigned int) y) < (unsigned int) size)
-    {
+    if (isPositiveAndBelow (x, size) && isPositiveAndBelow (y, size))
         return values [x + y * size];
-    }
-    else
-    {
-        jassertfalse;
-        return 0;
-    }
+
+    jassertfalse;
+    return 0;
 }
 
 void ImageConvolutionKernel::setKernelValue (const int x, const int y, const float value) throw()
 {
-    if (((unsigned int) x) < (unsigned int) size
-         && ((unsigned int) y) < (unsigned int) size)
+    if (isPositiveAndBelow (x, size) && isPositiveAndBelow (y, size))
     {
         values [x + y * size] = value;
     }

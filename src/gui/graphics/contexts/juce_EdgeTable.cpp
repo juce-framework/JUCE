@@ -500,7 +500,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
             lastX = nextX;
 
             const int nextLevel = (level1 * (level2 + 1)) >> 8;
-            jassert (((unsigned int) nextLevel) < (unsigned int) 256);
+            jassert (isPositiveAndBelow (nextLevel, (int) 256));
 
             if (nextLevel != lastLevel)
             {

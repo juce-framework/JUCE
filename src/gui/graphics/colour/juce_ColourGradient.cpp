@@ -110,7 +110,7 @@ int ColourGradient::getNumColours() const throw()
 
 double ColourGradient::getColourPosition (const int index) const throw()
 {
-    if (((unsigned int) index) < (unsigned int) colours.size())
+    if (isPositiveAndBelow (index, colours.size()))
         return colours.getReference (index).position;
 
     return 0;
@@ -118,7 +118,7 @@ double ColourGradient::getColourPosition (const int index) const throw()
 
 const Colour ColourGradient::getColour (const int index) const throw()
 {
-    if (((unsigned int) index) < (unsigned int) colours.size())
+    if (isPositiveAndBelow (index, colours.size()))
         return colours.getReference (index).colour;
 
     return Colour();
@@ -126,7 +126,7 @@ const Colour ColourGradient::getColour (const int index) const throw()
 
 void ColourGradient::setColour (int index, const Colour& newColour) throw()
 {
-    if (((unsigned int) index) < (unsigned int) colours.size())
+    if (isPositiveAndBelow (index, colours.size()))
         colours.getReference (index).colour = newColour;
 }
 

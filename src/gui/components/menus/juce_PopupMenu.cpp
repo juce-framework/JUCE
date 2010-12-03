@@ -302,7 +302,7 @@ public:
         {
             const int y = target.getY() - windowPos.getY();
             ensureItemIsVisible (itemIdThatMustBeVisible,
-                                 (((unsigned int) y) < (unsigned int) windowPos.getHeight()) ? y : -1);
+                                 isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
         }
 
         resizeToBestWindowPos();
@@ -568,7 +568,7 @@ public:
         bool overScrollArea = false;
 
         if (isScrolling()
-             && (isOver || (isDown && ((unsigned int) localMousePos.getX()) < (unsigned int) getWidth()))
+             && (isOver || (isDown && isPositiveAndBelow (localMousePos.getX(), getWidth())))
              && ((isScrollZoneActive (false) && localMousePos.getY() < PopupMenuSettings::scrollZone)
                   || (isScrollZoneActive (true) && localMousePos.getY() > getHeight() - PopupMenuSettings::scrollZone)))
         {

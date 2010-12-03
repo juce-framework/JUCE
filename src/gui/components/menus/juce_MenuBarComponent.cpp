@@ -134,7 +134,7 @@ int MenuBarComponent::getItemAt (const int x, const int y)
 
 void MenuBarComponent::repaintMenuItem (int index)
 {
-    if (((unsigned int) index) < (unsigned int) xPositions.size())
+    if (isPositiveAndBelow (index, xPositions.size()))
     {
         const int x1 = xPositions [index];
         const int x2 = xPositions [index + 1];

@@ -323,7 +323,7 @@ MidiOutput* MidiOutput::openDevice (int index)
 {
     MidiOutput* mo = 0;
 
-    if (((unsigned int) index) < (unsigned int) MIDIGetNumberOfDestinations())
+    if (isPositiveAndBelow (index, (int) MIDIGetNumberOfDestinations()))
     {
         MIDIEndpointRef endPoint = MIDIGetDestination (index);
 
@@ -461,7 +461,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
     using namespace CoreMidiHelpers;
     MidiInput* newInput = 0;
 
-    if (((unsigned int) index) < (unsigned int) MIDIGetNumberOfSources())
+    if (isPositiveAndBelow (index, (int) MIDIGetNumberOfSources()))
     {
         MIDIEndpointRef endPoint = MIDIGetSource (index);
 

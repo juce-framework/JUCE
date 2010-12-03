@@ -1202,7 +1202,7 @@ float AudioUnitPluginInstance::getParameter (int index)
 
     Float32 value = 0.0f;
 
-    if (audioUnit != 0 && ((unsigned int) index) < (unsigned int) parameterIds.size())
+    if (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()))
     {
         AudioUnitGetParameter (audioUnit,
                                (UInt32) parameterIds.getUnchecked (index),
@@ -1217,7 +1217,7 @@ void AudioUnitPluginInstance::setParameter (int index, float newValue)
 {
     const ScopedLock sl (lock);
 
-    if (audioUnit != 0 && ((unsigned int) index) < (unsigned int) parameterIds.size())
+    if (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()))
     {
         AudioUnitSetParameter (audioUnit,
                                (UInt32) parameterIds.getUnchecked (index),
@@ -1350,7 +1350,7 @@ void AudioUnitPluginInstance::changeProgramName (int index, const String& newNam
 //==============================================================================
 const String AudioUnitPluginInstance::getInputChannelName (int index) const
 {
-    if (((unsigned int) index) < (unsigned int) getNumInputChannels())
+    if (isPositiveAndBelow (index, getNumInputChannels()))
         return "Input " + String (index + 1);
 
     return String::empty;
@@ -1358,7 +1358,7 @@ const String AudioUnitPluginInstance::getInputChannelName (int index) const
 
 bool AudioUnitPluginInstance::isInputChannelStereoPair (int index) const
 {
-    if (((unsigned int) index) >= (unsigned int) getNumInputChannels())
+    if (! isPositiveAndBelow (index, getNumInputChannels()))
         return false;
 
 
@@ -1367,7 +1367,7 @@ bool AudioUnitPluginInstance::isInputChannelStereoPair (int index) const
 
 const String AudioUnitPluginInstance::getOutputChannelName (int index) const
 {
-    if (((unsigned int) index) < (unsigned int) getNumOutputChannels())
+    if (isPositiveAndBelow (index, getNumOutputChannels()))
         return "Output " + String (index + 1);
 
     return String::empty;
@@ -1375,7 +1375,7 @@ const String AudioUnitPluginInstance::getOutputChannelName (int index) const
 
 bool AudioUnitPluginInstance::isOutputChannelStereoPair (int index) const
 {
-    if (((unsigned int) index) >= (unsigned int) getNumOutputChannels())
+    if (! isPositiveAndBelow (index, getNumOutputChannels()))
         return false;
 
     return true;

@@ -83,7 +83,7 @@ bool TabBarButton::hitTest (int mx, int my)
     if (owner.getOrientation() == TabbedButtonBar::TabsAtLeft
          || owner.getOrientation() == TabbedButtonBar::TabsAtRight)
     {
-        if (((unsigned int) mx) < (unsigned int) getWidth()
+        if (isPositiveAndBelow (mx, getWidth())
              && my >= area.getY() + overlapPixels
              && my < area.getBottom() - overlapPixels)
             return true;
@@ -91,7 +91,7 @@ bool TabBarButton::hitTest (int mx, int my)
     else
     {
         if (mx >= area.getX() + overlapPixels && mx < area.getRight() - overlapPixels
-             && ((unsigned int) my) < (unsigned int) getHeight())
+             && isPositiveAndBelow (my, getHeight()))
             return true;
     }
 
@@ -214,7 +214,7 @@ void TabbedButtonBar::addTab (const String& tabName,
 
     if (tabName.isNotEmpty())
     {
-        if (((unsigned int) insertIndex) > (unsigned int) tabs.size())
+        if (! isPositiveAndBelow (insertIndex, tabs.size()))
             insertIndex = tabs.size();
 
         TabInfo* newTab = new TabInfo();
@@ -292,7 +292,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
 {
     if (currentTabIndex != newIndex)
     {
-        if (((unsigned int) newIndex) >= (unsigned int) tabs.size())
+        if (! isPositiveAndBelow (newIndex, tabs.size()))
             newIndex = -1;
 
         currentTabIndex = newIndex;

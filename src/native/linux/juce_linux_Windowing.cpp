@@ -946,8 +946,7 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        if (((unsigned int) position.getX()) >= (unsigned int) ww
-             || ((unsigned int) position.getY()) >= (unsigned int) wh)
+        if (! (isPositiveAndBelow (position.getX(), ww) && isPositiveAndBelow (position.getY(), wh)))
             return false;
 
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -1206,67 +1205,56 @@ public:
         {
             case 2: // 'KeyPress'
             {
-                ScopedXLock xlock;
-                XKeyEvent* const keyEvent = (XKeyEvent*) &event->xkey;
-                updateKeyStates (keyEvent->keycode, true);
-
-                char utf8 [64];
-                zeromem (utf8, sizeof (utf8));
+                char utf8 [64] = { 0 };
+                juce_wchar unicodeChar = 0;
+                int keyCode = 0;
+                bool keyDownChange = false;
                 KeySym sym;
 
                 {
+                    ScopedXLock xlock;
+                    XKeyEvent* const keyEvent = (XKeyEvent*) &event->xkey;
+                    updateKeyStates (keyEvent->keycode, true);
+
                     const char* oldLocale = ::setlocale (LC_ALL, 0);
                     ::setlocale (LC_ALL, "");
                     XLookupString (keyEvent, utf8, sizeof (utf8), &sym, 0);
                     ::setlocale (LC_ALL, oldLocale);
+
+                    unicodeChar = String::fromUTF8 (utf8, sizeof (utf8) - 1) [0];
+                    keyCode = (int) unicodeChar;
+
+                    if (keyCode < 0x20)
+                        keyCode = XKeycodeToKeysym (display, keyEvent->keycode, currentModifiers.isShiftDown() ? 1 : 0);
+
+                    keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
                 }
-
-                const juce_wchar unicodeChar = String::fromUTF8 (utf8, sizeof (utf8) - 1) [0];
-                int keyCode = (int) unicodeChar;
-
-                if (keyCode < 0x20)
-                    keyCode = XKeycodeToKeysym (display, keyEvent->keycode, currentModifiers.isShiftDown() ? 1 : 0);
 
                 const ModifierKeys oldMods (currentModifiers);
                 bool keyPressed = false;
 
-                const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
-
                 if ((sym & 0xff00) == 0xff00)
                 {
-                    // Translate keypad
-                    if (sym == XK_KP_Divide)
-                        keyCode = XK_slash;
-                    else if (sym == XK_KP_Multiply)
-                        keyCode = XK_asterisk;
-                    else if (sym == XK_KP_Subtract)
-                        keyCode = XK_hyphen;
-                    else if (sym == XK_KP_Add)
-                        keyCode = XK_plus;
-                    else if (sym == XK_KP_Enter)
-                        keyCode = XK_Return;
-                    else if (sym == XK_KP_Decimal)
-                        keyCode = Keys::numLock ? XK_period : XK_Delete;
-                    else if (sym == XK_KP_0)
-                        keyCode = Keys::numLock ? XK_0 : XK_Insert;
-                    else if (sym == XK_KP_1)
-                        keyCode = Keys::numLock ? XK_1 : XK_End;
-                    else if (sym == XK_KP_2)
-                        keyCode = Keys::numLock ? XK_2 : XK_Down;
-                    else if (sym == XK_KP_3)
-                        keyCode = Keys::numLock ? XK_3 : XK_Page_Down;
-                    else if (sym == XK_KP_4)
-                        keyCode = Keys::numLock ? XK_4 : XK_Left;
-                    else if (sym == XK_KP_5)
-                        keyCode = XK_5;
-                    else if (sym == XK_KP_6)
-                        keyCode = Keys::numLock ? XK_6 : XK_Right;
-                    else if (sym == XK_KP_7)
-                        keyCode = Keys::numLock ? XK_7 : XK_Home;
-                    else if (sym == XK_KP_8)
-                        keyCode = Keys::numLock ? XK_8 : XK_Up;
-                    else if (sym == XK_KP_9)
-                        keyCode = Keys::numLock ? XK_9 : XK_Page_Up;
+                    switch (sym)  // Translate keypad
+                    {
+                        case XK_KP_Divide:      keyCode = XK_slash; break;
+                        case XK_KP_Multiply:    keyCode = XK_asterisk; break;
+                        case XK_KP_Subtract:    keyCode = XK_hyphen; break;
+                        case XK_KP_Add:         keyCode = XK_plus; break;
+                        case XK_KP_Enter:       keyCode = XK_Return; break;
+                        case XK_KP_Decimal:     keyCode = Keys::numLock ? XK_period : XK_Delete; break;
+                        case XK_KP_0:           keyCode = Keys::numLock ? XK_0 : XK_Insert; break;
+                        case XK_KP_1:           keyCode = Keys::numLock ? XK_1 : XK_End; break;
+                        case XK_KP_2:           keyCode = Keys::numLock ? XK_2 : XK_Down; break;
+                        case XK_KP_3:           keyCode = Keys::numLock ? XK_3 : XK_Page_Down; break;
+                        case XK_KP_4:           keyCode = Keys::numLock ? XK_4 : XK_Left; break;
+                        case XK_KP_5:           keyCode = XK_5; break;
+                        case XK_KP_6:           keyCode = Keys::numLock ? XK_6 : XK_Right; break;
+                        case XK_KP_7:           keyCode = Keys::numLock ? XK_7 : XK_Home; break;
+                        case XK_KP_8:           keyCode = Keys::numLock ? XK_8 : XK_Up; break;
+                        case XK_KP_9:           keyCode = Keys::numLock ? XK_9 : XK_Page_Up; break;
+                        default:                break;
+                    }
 
                     switch (sym)
                     {

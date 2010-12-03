@@ -489,10 +489,10 @@ void ValueTree::SharedObject::removeAllChildren (UndoManager* const undoManager)
 void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoManager* undoManager)
 {
     // The source index must be a valid index!
-    jassert (((unsigned int) currentIndex) < (unsigned int) children.size());
+    jassert (isPositiveAndBelow (currentIndex, children.size()));
 
     if (currentIndex != newIndex
-         && ((unsigned int) currentIndex) < (unsigned int) children.size())
+         && isPositiveAndBelow (currentIndex, children.size()))
     {
         if (undoManager == 0)
         {
@@ -501,7 +501,7 @@ void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoMan
         }
         else
         {
-            if (((unsigned int) newIndex) >= (unsigned int) children.size())
+            if (! isPositiveAndBelow (newIndex, children.size()))
                 newIndex = children.size() - 1;
 
             undoManager->perform (new MoveChildAction (this, currentIndex, newIndex));

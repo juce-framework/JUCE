@@ -109,7 +109,7 @@ void StringArray::clear()
 
 const String& StringArray::operator[] (const int index) const throw()
 {
-    if (((unsigned int) index) < (unsigned int) strings.size())
+    if (isPositiveAndBelow (index, strings.size()))
         return strings.getReference (index);
 
     return String::empty;
@@ -117,7 +117,7 @@ const String& StringArray::operator[] (const int index) const throw()
 
 String& StringArray::getReference (const int index) throw()
 {
-    jassert (((unsigned int) index) < (unsigned int) strings.size());
+    jassert (isPositiveAndBelow (index, strings.size()));
     return strings.getReference (index);
 }
 

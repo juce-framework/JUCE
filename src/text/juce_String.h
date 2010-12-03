@@ -442,7 +442,7 @@ public:
 
         No checks are made to see if the index is within a valid range, so be careful!
     */
-    inline const juce_wchar& operator[] (int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text [index]; }
+    inline const juce_wchar& operator[] (int index) const throw()  { jassert (isPositiveAndNotGreaterThan (index, length())); return text [index]; }
 
     /** Returns a character from the string such that it can also be altered.
 

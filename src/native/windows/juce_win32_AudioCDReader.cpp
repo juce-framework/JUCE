@@ -1671,7 +1671,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int deviceIndex)
         CDDeviceInfo list[8];
         const int num = FindCDDevices (list, 8);
 
-        if (((unsigned int) deviceIndex) < (unsigned int) num)
+        if (isPositiveAndBelow (deviceIndex, num))
         {
             CDDeviceHandle* const handle = openHandle (&(list[deviceIndex]));
 

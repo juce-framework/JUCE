@@ -142,7 +142,7 @@ public:
     */
     const Range<Type> getRange (const int rangeIndex) const
     {
-        if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
+        if (isPositiveAndBelow (rangeIndex, getNumRanges()))
             return Range<Type> (values.getUnchecked (rangeIndex << 1),
                                 values.getUnchecked ((rangeIndex << 1) + 1));
         else
