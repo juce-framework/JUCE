@@ -52,6 +52,9 @@ MessageManager::MessageManager() throw()
     threadWithLock (0)
 {
     messageThreadId = Thread::getCurrentThreadId();
+
+    if (JUCEApplication::isStandaloneApp())
+        Thread::setCurrentThreadName ("Juce Message Thread");
 }
 
 MessageManager::~MessageManager() throw()

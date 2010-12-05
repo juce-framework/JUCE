@@ -83,10 +83,14 @@
 #endif
 
 //==============================================================================
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IOS
 
-  #ifndef NDEBUG
+  #if defined (DEBUG) || defined (_DEBUG) || ! (defined (NDEBUG) || defined (_NDEBUG))
     #define JUCE_DEBUG 1
+  #endif
+
+  #if ! (defined (DEBUG) || defined (_DEBUG) || defined (NDEBUG) || defined (_NDEBUG))
+    #warning "Neither NDEBUG or DEBUG has been defined - you should set one of these to make it clear whether this is a release build,"
   #endif
 
   #ifdef __LITTLE_ENDIAN__
@@ -94,6 +98,9 @@
   #else
     #define JUCE_BIG_ENDIAN 1
   #endif
+#endif
+
+#if JUCE_MAC
 
   #if defined (__ppc__) || defined (__ppc64__)
     #define JUCE_PPC 1
@@ -117,19 +124,6 @@
 
 #endif
 
-//==============================================================================
-#if JUCE_IOS
-
-  #ifndef NDEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  #ifdef __LITTLE_ENDIAN__
-    #define JUCE_LITTLE_ENDIAN 1
-  #else
-    #define JUCE_BIG_ENDIAN 1
-  #endif
-#endif
 
 //==============================================================================
 #if JUCE_LINUX

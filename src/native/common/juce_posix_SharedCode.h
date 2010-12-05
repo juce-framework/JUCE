@@ -660,30 +660,36 @@ void* threadEntryProc (void* userData)
     return 0;
 }
 
-void* juce_createThread (void* userData)
+void Thread::launchThread()
 {
+    threadHandle_ = 0;
     pthread_t handle = 0;
 
-    if (pthread_create (&handle, 0, threadEntryProc, userData) == 0)
+    if (pthread_create (&handle, 0, threadEntryProc, this) == 0)
     {
         pthread_detach (handle);
-        return (void*) handle;
+        threadHandle_ = (void*) handle;
+        threadId_ = (ThreadID) threadHandle_;
     }
-
-    return 0;
 }
 
-void juce_killThread (void* handle)
+void Thread::closeThreadHandle()
 {
-    if (handle != 0)
-        pthread_cancel ((pthread_t) handle);
+    threadId_ = 0;
+    threadHandle_ = 0;
 }
 
-void juce_setCurrentThreadName (const String& /*name*/)
+void Thread::killThread()
+{
+    if (threadHandle_ != 0)
+        pthread_cancel ((pthread_t) threadHandle_);
+}
+
+void Thread::setCurrentThreadName (const String& /*name*/)
 {
 }
 
-bool juce_setThreadPriority (void* handle, int priority)
+bool Thread::setThreadPriority (void* handle, int priority)
 {
     struct sched_param param;
     int policy;

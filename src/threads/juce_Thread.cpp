@@ -32,60 +32,119 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_Time.h"
 
 
-// these functions are implemented in the platform-specific code.
-void* juce_createThread (void* userData);
-void juce_killThread (void* handle);
-bool juce_setThreadPriority (void* handle, int priority);
-void juce_setCurrentThreadName (const String& name);
-#if JUCE_WINDOWS
-void juce_CloseThreadHandle (void* handle);
-#endif
+//==============================================================================
+class RunningThreadsList
+{
+public:
+    RunningThreadsList()
+    {
+    }
+
+    void add (Thread* const thread)
+    {
+        const ScopedLock sl (lock);
+        jassert (! threads.contains (thread));
+        threads.add (thread);
+    }
+
+    void remove (Thread* const thread)
+    {
+        const ScopedLock sl (lock);
+        jassert (threads.contains (thread));
+        threads.removeValue (thread);
+    }
+
+    int size() const throw()
+    {
+        return threads.size();
+    }
+
+    Thread* getThreadWithID (const Thread::ThreadID targetID) const throw()
+    {
+        const ScopedLock sl (lock);
+
+        for (int i = threads.size(); --i >= 0;)
+        {
+            Thread* const t = threads.getUnchecked(i);
+
+            if (t->getThreadId() == targetID)
+                return t;
+        }
+
+        return 0;
+    }
+
+    void stopAll (const int timeOutMilliseconds)
+    {
+        signalAllThreadsToStop();
+
+        for (;;)
+        {
+            Thread* firstThread = getFirstThread();
+
+            if (firstThread != 0)
+                firstThread->stopThread (timeOutMilliseconds);
+            else
+                break;
+        }
+    }
+
+    static RunningThreadsList& getInstance()
+    {
+        static RunningThreadsList runningThreads;
+        return runningThreads;
+    }
+
+private:
+    Array<Thread*> threads;
+    CriticalSection lock;
+
+    void signalAllThreadsToStop()
+    {
+        const ScopedLock sl (lock);
+
+        for (int i = threads.size(); --i >= 0;)
+            threads.getUnchecked(i)->signalThreadShouldExit();
+    }
+
+    Thread* getFirstThread() const
+    {
+        const ScopedLock sl (lock);
+        return threads.getFirst();
+    }
+};
 
 
 //==============================================================================
-void Thread::threadEntryPoint (Thread* const thread)
+void Thread::threadEntryPoint()
 {
-    {
-        const ScopedLock sl (runningThreadsLock);
-        runningThreads.add (thread);
-    }
+    RunningThreadsList::getInstance().add (this);
 
     JUCE_TRY
     {
-        thread->threadId_ = Thread::getCurrentThreadId();
+        jassert (getCurrentThreadId() == threadId_);
 
-        if (thread->threadName_.isNotEmpty())
-            juce_setCurrentThreadName (thread->threadName_);
+        if (threadName_.isNotEmpty())
+            setCurrentThreadName (threadName_);
 
-        if (thread->startSuspensionEvent_.wait (10000))
+        if (startSuspensionEvent_.wait (10000))
         {
-            if (thread->affinityMask_ != 0)
-                setCurrentThreadAffinityMask (thread->affinityMask_);
+            if (affinityMask_ != 0)
+                setCurrentThreadAffinityMask (affinityMask_);
 
-            thread->run();
+            run();
         }
     }
     JUCE_CATCH_ALL_ASSERT
 
-    {
-        const ScopedLock sl (runningThreadsLock);
-
-        jassert (runningThreads.contains (thread));
-        runningThreads.removeValue (thread);
-    }
-
-#if JUCE_WINDOWS
-    juce_CloseThreadHandle (thread->threadHandle_);
-#endif
-
-    thread->threadHandle_ = 0;
-    thread->threadId_ = 0;
+    RunningThreadsList::getInstance().remove (this);
+    closeThreadHandle();
 }
 
 // used to wrap the incoming call from the platform-specific code
 void JUCE_API juce_threadEntryPoint (void* userData)
 {
-    Thread::threadEntryPoint (static_cast <Thread*> (userData));
+    static_cast <Thread*> (userData)->threadEntryPoint();
 }
 
 
@@ -93,8 +152,8 @@ void JUCE_API juce_threadEntryPoint (void* userData)
 Thread::Thread (const String& threadName)
     : threadName_ (threadName),
       threadHandle_ (0),
-      threadPriority_ (5),
       threadId_ (0),
+      threadPriority_ (5),
       affinityMask_ (0),
       threadShouldExit_ (false)
 {
@@ -103,8 +162,8 @@ Thread::Thread (const String& threadName)
 Thread::~Thread()
 {
     /* If your thread class's destructor has been called without first stopping the thread, that
-       means that this partially destructed object is still performing some work - and that's not
-       unlikely to be a safe approach to take!
+       means that this partially destructed object is still performing some work - and that's
+       probably a Bad Thing!
 
        To avoid this type of nastiness, always make sure you call stopThread() before or during
        your subclass's destructor.
@@ -123,8 +182,8 @@ void Thread::startThread()
 
     if (threadHandle_ == 0)
     {
-        threadHandle_ = juce_createThread (this);
-        juce_setThreadPriority (threadHandle_, threadPriority_);
+        launchThread();
+        setThreadPriority (threadHandle_, threadPriority_);
         startSuspensionEvent_.signal();
     }
 }
@@ -192,18 +251,16 @@ void Thread::stopThread (const int timeOutMilliseconds)
 
         if (isThreadRunning())
         {
-            // very bad karma if this point is reached, as
-            // there are bound to be locks and events left in
-            // silly states when a thread is killed by force..
+            // very bad karma if this point is reached, as there are bound to be
+            // locks and events left in silly states when a thread is killed by force..
             jassertfalse;
             Logger::writeToLog ("!! killing thread by force !!");
 
-            juce_killThread (threadHandle_);
+            killThread();
+
+            RunningThreadsList::getInstance().remove (this);
             threadHandle_ = 0;
             threadId_ = 0;
-
-            const ScopedLock sl2 (runningThreadsLock);
-            runningThreads.removeValue (this);
         }
     }
 }
@@ -213,17 +270,18 @@ bool Thread::setPriority (const int priority)
 {
     const ScopedLock sl (startStopLock);
 
-    const bool worked = juce_setThreadPriority (threadHandle_, priority);
-
-    if (worked)
+    if (setThreadPriority (threadHandle_, priority))
+    {
         threadPriority_ = priority;
+        return true;
+    }
 
-    return worked;
+    return false;
 }
 
 bool Thread::setCurrentThreadPriority (const int priority)
 {
-    return juce_setThreadPriority (0, priority);
+    return setThreadPriority (0, priority);
 }
 
 void Thread::setAffinityMask (const uint32 affinityMask)
@@ -245,53 +303,18 @@ void Thread::notify() const
 //==============================================================================
 int Thread::getNumRunningThreads()
 {
-    return runningThreads.size();
+    return RunningThreadsList::getInstance().size();
 }
 
 Thread* Thread::getCurrentThread()
 {
-    const ThreadID thisId = getCurrentThreadId();
-
-    const ScopedLock sl (runningThreadsLock);
-
-    for (int i = runningThreads.size(); --i >= 0;)
-    {
-        Thread* const t = runningThreads.getUnchecked(i);
-
-        if (t->threadId_ == thisId)
-            return t;
-    }
-
-    return 0;
+    return RunningThreadsList::getInstance().getThreadWithID (getCurrentThreadId());
 }
 
 void Thread::stopAllThreads (const int timeOutMilliseconds)
 {
-    {
-        const ScopedLock sl (runningThreadsLock);
-
-        for (int i = runningThreads.size(); --i >= 0;)
-            runningThreads.getUnchecked(i)->signalThreadShouldExit();
-    }
-
-    for (;;)
-    {
-        Thread* firstThread;
-
-        {
-            const ScopedLock sl (runningThreadsLock);
-            firstThread = runningThreads.getFirst();
-        }
-
-        if (firstThread == 0)
-            break;
-
-        firstThread->stopThread (timeOutMilliseconds);
-    }
+    RunningThreadsList::getInstance().stopAll (timeOutMilliseconds);
 }
-
-Array<Thread*> Thread::runningThreads;
-CriticalSection Thread::runningThreadsLock;
 
 
 END_JUCE_NAMESPACE

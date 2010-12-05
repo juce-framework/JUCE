@@ -104,8 +104,6 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
-void juce_setCurrentThreadName (const String& name);
-
 static bool juceInitialisedGUI = false;
 
 JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
@@ -119,12 +117,9 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
 
         MessageManager::getInstance();
         LookAndFeel::setDefaultLookAndFeel (0);
-        juce_setCurrentThreadName ("Juce Message Thread");
 
       #if JUCE_DEBUG
-        // This section is just for catching people who mess up their project settings and
-        // turn RTTI off..
-        try
+        try  // This section is just a safety-net for catching builds without RTTI enabled..
         {
             MemoryOutputStream mo;
             OutputStream* o = &mo;

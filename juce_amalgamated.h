@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	99
+#define JUCE_BUILDNUMBER	100
 
 /** Current Juce version number.
 
@@ -134,10 +134,14 @@
   #define JUCE_INTEL 1
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IOS
 
-  #ifndef NDEBUG
+  #if defined (DEBUG) || defined (_DEBUG) || ! (defined (NDEBUG) || defined (_NDEBUG))
 	#define JUCE_DEBUG 1
+  #endif
+
+  #if ! (defined (DEBUG) || defined (_DEBUG) || defined (NDEBUG) || defined (_NDEBUG))
+	#warning "Neither NDEBUG or DEBUG has been defined - you should set one of these to make it clear whether this is a release build,"
   #endif
 
   #ifdef __LITTLE_ENDIAN__
@@ -145,6 +149,9 @@
   #else
 	#define JUCE_BIG_ENDIAN 1
   #endif
+#endif
+
+#if JUCE_MAC
 
   #if defined (__ppc__) || defined (__ppc64__)
 	#define JUCE_PPC 1
@@ -166,19 +173,6 @@
 	#error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
   #endif
 
-#endif
-
-#if JUCE_IOS
-
-  #ifndef NDEBUG
-	#define JUCE_DEBUG 1
-  #endif
-
-  #ifdef __LITTLE_ENDIAN__
-	#define JUCE_LITTLE_ENDIAN 1
-  #else
-	#define JUCE_BIG_ENDIAN 1
-  #endif
 #endif
 
 #if JUCE_LINUX
@@ -18352,18 +18346,22 @@ private:
 
 	const String threadName_;
 	void* volatile threadHandle_;
+	ThreadID threadId_;
 	CriticalSection startStopLock;
 	WaitableEvent startSuspensionEvent_, defaultEvent_;
-
 	int threadPriority_;
-	ThreadID threadId_;
 	uint32 affinityMask_;
 	bool volatile threadShouldExit_;
 
+	friend class MessageManager;
 	friend void JUCE_API juce_threadEntryPoint (void*);
-	static void threadEntryPoint (Thread* thread);
-	static Array<Thread*> runningThreads;
-	static CriticalSection runningThreadsLock;
+
+	void launchThread();
+	void closeThreadHandle();
+	void killThread();
+	void threadEntryPoint();
+	static void setCurrentThreadName (const String& name);
+	static bool setThreadPriority (void* handle, int priority);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);
 };

@@ -118,10 +118,10 @@ void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData)
 {
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+  #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
     AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
                        GetCurrentThreadId(), TRUE);
-#endif
+  #endif
 
     juce_threadEntryPoint (userData);
 
@@ -129,31 +129,34 @@ static unsigned int __stdcall threadEntryProc (void* userData)
     return 0;
 }
 
-void juce_CloseThreadHandle (void* handle)
+void Thread::launchThread()
 {
-    CloseHandle ((HANDLE) handle);
+    unsigned int newThreadId;
+    threadHandle_ =  (void*) _beginthreadex (0, 0, &threadEntryProc, this, 0, &newThreadId);
+    threadId_ = (ThreadID) newThreadId;
 }
 
-void* juce_createThread (void* userData)
+void Thread::closeThreadHandle()
 {
-    unsigned int threadId;
-    return (void*) _beginthreadex (0, 0, &threadEntryProc, userData, 0, &threadId);
+    CloseHandle ((HANDLE) threadHandle_);
+    threadId_ = 0;
+    threadHandle_ = 0;
 }
 
-void juce_killThread (void* handle)
+void Thread::killThread()
 {
-    if (handle != 0)
+    if (threadHandle_ != 0)
     {
-#if JUCE_DEBUG
+      #if JUCE_DEBUG
         OutputDebugString (_T("** Warning - Forced thread termination **\n"));
-#endif
-        TerminateThread (handle, 0);
+      #endif
+        TerminateThread (threadHandle_, 0);
     }
 }
 
-void juce_setCurrentThreadName (const String& name)
+void Thread::setCurrentThreadName (const String& name)
 {
-#if JUCE_DEBUG && JUCE_MSVC
+  #if JUCE_DEBUG && JUCE_MSVC
     struct
     {
         DWORD dwType;
@@ -173,9 +176,9 @@ void juce_setCurrentThreadName (const String& name)
     }
     __except (EXCEPTION_CONTINUE_EXECUTION)
     {}
-#else
+  #else
     (void) name;
-#endif
+  #endif
 }
 
 Thread::ThreadID Thread::getCurrentThreadId()
@@ -183,8 +186,7 @@ Thread::ThreadID Thread::getCurrentThreadId()
     return (ThreadID) (pointer_sized_int) GetCurrentThreadId();
 }
 
-// priority 1 to 10 where 5=normal, 1=low
-bool juce_setThreadPriority (void* threadHandle, int priority)
+bool Thread::setThreadPriority (void* handle, int priority)
 {
     int pri = THREAD_PRIORITY_TIME_CRITICAL;
 
@@ -195,10 +197,10 @@ bool juce_setThreadPriority (void* threadHandle, int priority)
     else if (priority < 9)  pri = THREAD_PRIORITY_ABOVE_NORMAL;
     else if (priority < 10) pri = THREAD_PRIORITY_HIGHEST;
 
-    if (threadHandle == 0)
-        threadHandle = GetCurrentThread();
+    if (handle == 0)
+        handle = GetCurrentThread();
 
-    return SetThreadPriority (threadHandle, pri) != FALSE;
+    return SetThreadPriority (handle, pri) != FALSE;
 }
 
 void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
@@ -206,22 +208,23 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
     SetThreadAffinityMask (GetCurrentThread(), affinityMask);
 }
 
-static HANDLE sleepEvent = 0;
-
-void juce_initialiseThreadEvents()
+//==============================================================================
+struct SleepEvent
 {
-    if (sleepEvent == 0)
-#if JUCE_DEBUG
-        sleepEvent = CreateEvent (0, 0, 0, _T("Juce Sleep Event"));
-#else
-        sleepEvent = CreateEvent (0, 0, 0, 0);
-#endif
-}
+    SleepEvent()
+        : handle (CreateEvent (0, 0, 0,
+                    #if JUCE_DEBUG
+                       _T("Juce Sleep Event")))
+                    #else
+                       0))
+                    #endif
+    {
+    }
 
-void Thread::yield()
-{
-    Sleep (0);
-}
+    HANDLE handle;
+};
+
+static SleepEvent sleepEvent;
 
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
@@ -231,13 +234,16 @@ void JUCE_CALLTYPE Thread::sleep (const int millisecs)
     }
     else
     {
-        jassert (sleepEvent != 0);
-
         // unlike Sleep() this is guaranteed to return to the current thread after
         // the time expires, so we'll use this for short waits, which are more likely
         // to need to be accurate
-        WaitForSingleObject (sleepEvent, millisecs);
+        WaitForSingleObject (sleepEvent.handle, millisecs);
     }
+}
+
+void Thread::yield()
+{
+    Sleep (0);
 }
 
 //==============================================================================

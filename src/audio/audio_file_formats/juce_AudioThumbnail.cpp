@@ -349,8 +349,8 @@ public:
                       const double sampleRate, const int numChannels, const int samplesPerThumbSample,
                       LevelDataSource* levelData, const OwnedArray<ThumbData>& channels)
     {
-        refillCache (area.getWidth(), startTime, (endTime - startTime) / area.getWidth(),
-                     sampleRate, numChannels, samplesPerThumbSample, levelData, channels);
+        refillCache (area.getWidth(), startTime, endTime, sampleRate,
+                     numChannels, samplesPerThumbSample, levelData, channels);
 
         if (isPositiveAndBelow (channelNum, numChannelsCached))
         {
@@ -384,10 +384,12 @@ private:
     int numChannelsCached, numSamplesCached;
     bool cacheNeedsRefilling;
 
-    void refillCache (const int numSamples, double startTime, const double timePerPixel,
+    void refillCache (const int numSamples, double startTime, const double endTime,
                       const double sampleRate, const int numChannels, const int samplesPerThumbSample,
                       LevelDataSource* levelData, const OwnedArray<ThumbData>& channels)
     {
+        const double timePerPixel = (endTime - startTime) / numSamples;
+
         if (numSamples <= 0 || timePerPixel <= 0.0 || sampleRate <= 0)
         {
             invalidate();
@@ -685,7 +687,7 @@ double AudioThumbnail::getTotalLength() const throw()
 
 bool AudioThumbnail::isFullyLoaded() const throw()
 {
-    return numSamplesFinished >= totalSamples;
+    return numSamplesFinished >= totalSamples - samplesPerThumbSample;
 }
 
 void AudioThumbnail::drawChannel (Graphics& g, const Rectangle<int>& area, double startTime,

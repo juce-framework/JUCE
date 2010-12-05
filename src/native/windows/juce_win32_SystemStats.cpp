@@ -27,8 +27,6 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-extern void juce_initialiseThreadEvents();
-
 
 //==============================================================================
 void Logger::outputDebugString (const String& text)
@@ -115,8 +113,6 @@ const String SystemStats::getCpuVendor()
 //==============================================================================
 void SystemStats::initialiseStats()
 {
-    juce_initialiseThreadEvents();
-
     cpuFlags.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
     cpuFlags.hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
     cpuFlags.hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
