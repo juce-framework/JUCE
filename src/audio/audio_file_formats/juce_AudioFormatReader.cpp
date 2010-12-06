@@ -182,7 +182,8 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            read (tempBuffer, 2, startSampleInFile, numToDo, false);
+            if (! read (tempBuffer, 2, startSampleInFile, numToDo, false))
+                break;
 
             numSamples -= numToDo;
             startSampleInFile += numToDo;

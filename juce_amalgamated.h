@@ -29376,6 +29376,10 @@ public:
 	/** Returns the mouse position.
 
 		The co-ordinates are relative to the top-left of the main monitor.
+
+		Note that this is just a shortcut for calling getMainMouseSource().getScreenPosition(), and
+		you should only resort to grabbing the global mouse position if there's really no
+		way to get the coordinates via a mouse event callback instead.
 	*/
 	static const Point<int> getMousePosition();
 
@@ -29386,15 +29390,20 @@ public:
 	static void setMousePosition (const Point<int>& newPosition);
 
 	/** Returns the last position at which a mouse button was pressed.
+
+		Note that this is just a shortcut for calling getMainMouseSource().getLastMouseDownPosition(),
+		and in a multi-touch environment, it doesn't make much sense. ALWAYS prefer to
+		get this information via other means, such as MouseEvent::getMouseDownScreenPosition()
+		if possible, and only ever call this as a last resort.
 	*/
-	static const Point<int> getLastMouseDownPosition() throw();
+	static const Point<int> getLastMouseDownPosition();
 
 	/** Returns the number of times the mouse button has been clicked since the
 		app started.
 
 		Each mouse-down event increments this number by 1.
 	*/
-	static int getMouseButtonClickCounter() throw();
+	static int getMouseButtonClickCounter();
 
 	/** This lets you prevent the screensaver from becoming active.
 
@@ -29607,6 +29616,8 @@ private:
 	int allowedOrientations;
 
 	ComponentAnimator animator;
+
+	static const Point<int> getRawMousePosition();
 
 	void timerCallback();
 	void resetTimer();
@@ -32598,7 +32609,13 @@ public:
 
 	/** Gives the thumbnail an AudioFormatReader to use directly.
 		This will start parsing the audio in a background thread (unless the hash code
-		can be looked-up successfully in the thumbnail cache).
+		can be looked-up successfully in the thumbnail cache). Note that the reader
+		object will be held by the thumbnail and deleted later when no longer needed.
+		The thumbnail will actually keep hold of this reader until you clear the thumbnail
+		or change the input source, so the file will be held open for all this time. If
+		you don't want the thumbnail to keep a file handle open continuously, you
+		should use the setSource() method instead, which will only open the file when
+		it needs to.
 	*/
 	void setReader (AudioFormatReader* newReader, int64 hashCode);
 

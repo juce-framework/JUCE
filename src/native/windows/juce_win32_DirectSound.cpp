@@ -222,44 +222,17 @@ namespace
             DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
         }
     }
-
 }
 
 //==============================================================================
 class DSoundInternalOutChannel
 {
-    String name;
-    LPGUID guid;
-    int sampleRate, bufferSizeSamples;
-    float* leftBuffer;
-    float* rightBuffer;
-
-    IDirectSound* pDirectSound;
-    IDirectSoundBuffer* pOutputBuffer;
-    DWORD writeOffset;
-    int totalBytesPerBuffer;
-    int bytesPerBuffer;
-    unsigned int lastPlayCursor;
-
 public:
-    int bitDepth;
-    bool doneFlag;
-
-    DSoundInternalOutChannel (const String& name_,
-                              LPGUID guid_,
-                              int rate,
-                              int bufferSize,
-                              float* left,
-                              float* right)
-        : name (name_),
-          guid (guid_),
-          sampleRate (rate),
-          bufferSizeSamples (bufferSize),
-          leftBuffer (left),
-          rightBuffer (right),
-          pDirectSound (0),
-          pOutputBuffer (0),
-          bitDepth (16)
+    DSoundInternalOutChannel (const String& name_, LPGUID guid_, int rate,
+                              int bufferSize, float* left, float* right)
+        : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
+          bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
+          pDirectSound (0), pOutputBuffer (0)
     {
     }
 
@@ -274,34 +247,20 @@ public:
 
         if (pOutputBuffer != 0)
         {
-            JUCE_TRY
-            {
-                log ("closing dsound out: " + name);
-                hr = pOutputBuffer->Stop();
-                logError (hr);
-            }
-            CATCH
+            log ("closing dsound out: " + name);
+            hr = pOutputBuffer->Stop();
+            logError (hr);
 
-            JUCE_TRY
-            {
-                hr = pOutputBuffer->Release();
-                logError (hr);
-            }
-            CATCH
-
+            hr = pOutputBuffer->Release();
             pOutputBuffer = 0;
+            logError (hr);
         }
 
         if (pDirectSound != 0)
         {
-            JUCE_TRY
-            {
-                hr = pDirectSound->Release();
-                logError (hr);
-            }
-            CATCH
-
+            hr = pDirectSound->Release();
             pDirectSound = 0;
+            logError (hr);
         }
     }
 
@@ -470,8 +429,7 @@ public:
             DWORD dwSize1 = 0;
             DWORD dwSize2 = 0;
 
-            HRESULT hr = pOutputBuffer->Lock (writeOffset,
-                                              bytesPerBuffer,
+            HRESULT hr = pOutputBuffer->Lock (writeOffset, bytesPerBuffer,
                                               &lpbuf1, &dwSize1,
                                               &lpbuf2, &dwSize2, 0);
 
@@ -479,8 +437,7 @@ public:
             {
                 pOutputBuffer->Restore();
 
-                hr = pOutputBuffer->Lock (writeOffset,
-                                          bytesPerBuffer,
+                hr = pOutputBuffer->Lock (writeOffset, bytesPerBuffer,
                                           &lpbuf1, &dwSize1,
                                           &lpbuf2, &dwSize2, 0);
             }
@@ -489,9 +446,6 @@ public:
             {
                 if (bitDepth == 16)
                 {
-                    const float gainL = 32767.0f;
-                    const float gainR = 32767.0f;
-
                     int* dest = static_cast<int*> (lpbuf1);
                     const float* left = leftBuffer;
                     const float* right = rightBuffer;
@@ -501,107 +455,39 @@ public:
                     if (left == 0)
                     {
                         while (--samples1 >= 0)
-                        {
-                            int r = roundToInt (gainR * *right++);
-
-                            if (r < -32768)
-                                r = -32768;
-                            else if (r > 32767)
-                                r = 32767;
-
-                            *dest++ = (r << 16);
-                        }
+                            *dest++ = (convertInputValue (*right++) << 16);
 
                         dest = static_cast<int*> (lpbuf2);
 
                         while (--samples2 >= 0)
-                        {
-                            int r = roundToInt (gainR * *right++);
-
-                            if (r < -32768)
-                                r = -32768;
-                            else if (r > 32767)
-                                r = 32767;
-
-                            *dest++ = (r << 16);
-                        }
+                            *dest++ = (convertInputValue (*right++) << 16);
                     }
                     else if (right == 0)
                     {
                         while (--samples1 >= 0)
-                        {
-                            int l = roundToInt (gainL * *left++);
-
-                            if (l < -32768)
-                                l = -32768;
-                            else if (l > 32767)
-                                l = 32767;
-
-                            l &= 0xffff;
-
-                            *dest++ = l;
-                        }
+                            *dest++ = (0xffff & convertInputValue (*left++));
 
                         dest = static_cast<int*> (lpbuf2);
 
                         while (--samples2 >= 0)
-                        {
-                            int l = roundToInt (gainL * *left++);
-
-                            if (l < -32768)
-                                l = -32768;
-                            else if (l > 32767)
-                                l = 32767;
-
-                            l &= 0xffff;
-
-                            *dest++ = l;
-                        }
+                            *dest++ = (0xffff & convertInputValue (*left++));
                     }
                     else
                     {
                         while (--samples1 >= 0)
                         {
-                            int l = roundToInt (gainL * *left++);
-
-                            if (l < -32768)
-                                l = -32768;
-                            else if (l > 32767)
-                                l = 32767;
-
-                            l &= 0xffff;
-
-                            int r = roundToInt (gainR * *right++);
-
-                            if (r < -32768)
-                                r = -32768;
-                            else if (r > 32767)
-                                r = 32767;
-
-                            *dest++ = (r << 16) | l;
+                            const int l = convertInputValue (*left++);
+                            const int r = convertInputValue (*right++);
+                            *dest++ = (r << 16) | (0xffff & l);
                         }
 
                         dest = static_cast<int*> (lpbuf2);
 
                         while (--samples2 >= 0)
                         {
-                            int l = roundToInt (gainL * *left++);
-
-                            if (l < -32768)
-                                l = -32768;
-                            else if (l > 32767)
-                                l = 32767;
-
-                            l &= 0xffff;
-
-                            int r = roundToInt (gainR * *right++);
-
-                            if (r < -32768)
-                                r = -32768;
-                            else if (r > 32767)
-                                r = 32767;
-
-                            *dest++ = (r << 16) | l;
+                            const int l = convertInputValue (*left++);
+                            const int r = convertInputValue (*right++);
+                            *dest++ = (r << 16) | (0xffff & l);
                         }
                     }
                 }
@@ -621,7 +507,6 @@ public:
             }
 
             bytesEmpty -= bytesPerBuffer;
-
             return true;
         }
         else
@@ -629,11 +514,11 @@ public:
             return false;
         }
     }
-};
 
-//==============================================================================
-struct DSoundInternalInChannel
-{
+    int bitDepth;
+    bool doneFlag;
+
+private:
     String name;
     LPGUID guid;
     int sampleRate, bufferSizeSamples;
@@ -641,31 +526,28 @@ struct DSoundInternalInChannel
     float* rightBuffer;
 
     IDirectSound* pDirectSound;
-    IDirectSoundCapture* pDirectSoundCapture;
-    IDirectSoundCaptureBuffer* pInputBuffer;
+    IDirectSoundBuffer* pOutputBuffer;
+    DWORD writeOffset;
+    int totalBytesPerBuffer, bytesPerBuffer;
+    unsigned int lastPlayCursor;
 
+    static inline int convertInputValue (const float v) throw()
+    {
+        return jlimit (-32768, 32767, roundToInt (32767.0f * v));
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (DSoundInternalOutChannel);
+};
+
+//==============================================================================
+struct DSoundInternalInChannel
+{
 public:
-    unsigned int readOffset;
-    int bytesPerBuffer, totalBytesPerBuffer;
-    int bitDepth;
-    bool doneFlag;
-
-    DSoundInternalInChannel (const String& name_,
-                             LPGUID guid_,
-                             int rate,
-                             int bufferSize,
-                             float* left,
-                             float* right)
-        : name (name_),
-          guid (guid_),
-          sampleRate (rate),
-          bufferSizeSamples (bufferSize),
-          leftBuffer (left),
-          rightBuffer (right),
-          pDirectSound (0),
-          pDirectSoundCapture (0),
-          pInputBuffer (0),
-          bitDepth (16)
+    DSoundInternalInChannel (const String& name_, LPGUID guid_, int rate,
+                             int bufferSize, float* left, float* right)
+        : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
+          bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
+          pDirectSound (0), pDirectSoundCapture (0), pInputBuffer (0)
     {
     }
 
@@ -680,53 +562,34 @@ public:
 
         if (pInputBuffer != 0)
         {
-            JUCE_TRY
-            {
-                log ("closing dsound in: " + name);
-                hr = pInputBuffer->Stop();
-                logError (hr);
-            }
-            CATCH
+            log ("closing dsound in: " + name);
+            hr = pInputBuffer->Stop();
+            logError (hr);
 
-            JUCE_TRY
-            {
-                hr = pInputBuffer->Release();
-                logError (hr);
-            }
-            CATCH
-
+            hr = pInputBuffer->Release();
             pInputBuffer = 0;
+            logError (hr);
         }
 
         if (pDirectSoundCapture != 0)
         {
-            JUCE_TRY
-            {
-                hr = pDirectSoundCapture->Release();
-                logError (hr);
-            }
-            CATCH
-
+            hr = pDirectSoundCapture->Release();
             pDirectSoundCapture = 0;
+            logError (hr);
         }
 
         if (pDirectSound != 0)
         {
-            JUCE_TRY
-            {
-                hr = pDirectSound->Release();
-                logError (hr);
-            }
-            CATCH
-
+            hr = pDirectSound->Release();
             pDirectSound = 0;
+            logError (hr);
         }
     }
 
     const String open()
     {
         log ("opening dsound in device: " + name
-             + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
+              + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
         pDirectSound = 0;
         pDirectSoundCapture = 0;
@@ -818,8 +681,7 @@ public:
             DWORD dwsize1 = 0;
             DWORD dwsize2 = 0;
 
-            HRESULT hr = pInputBuffer->Lock (readOffset,
-                                             bytesPerBuffer,
+            HRESULT hr = pInputBuffer->Lock (readOffset, bytesPerBuffer,
                                              (void**) &lpbuf1, &dwsize1,
                                              (void**) &lpbuf2, &dwsize2, 0);
 
@@ -909,6 +771,24 @@ public:
             return false;
         }
     }
+
+    unsigned int readOffset;
+    int bytesPerBuffer, totalBytesPerBuffer;
+    int bitDepth;
+    bool doneFlag;
+
+private:
+    String name;
+    LPGUID guid;
+    int sampleRate, bufferSizeSamples;
+    float* leftBuffer;
+    float* rightBuffer;
+
+    IDirectSound* pDirectSound;
+    IDirectSoundCapture* pDirectSoundCapture;
+    IDirectSoundCaptureBuffer* pInputBuffer;
+
+    JUCE_DECLARE_NON_COPYABLE (DSoundInternalInChannel);
 };
 
 //==============================================================================
@@ -950,53 +830,9 @@ public:
         close();
     }
 
-    const StringArray getOutputChannelNames()
-    {
-        return outChannels;
-    }
-
-    const StringArray getInputChannelNames()
-    {
-        return inChannels;
-    }
-
-    int getNumSampleRates()
-    {
-        return 4;
-    }
-
-    double getSampleRate (int index)
-    {
-        const double samps[] = { 44100.0, 48000.0, 88200.0, 96000.0 };
-
-        return samps [jlimit (0, 3, index)];
-    }
-
-    int getNumBufferSizesAvailable()
-    {
-        return 50;
-    }
-
-    int getBufferSizeSamples (int index)
-    {
-        int n = 64;
-        for (int i = 0; i < index; ++i)
-            n += (n < 512) ? 32
-                           : ((n < 1024) ? 64
-                                         : ((n < 2048) ? 128 : 256));
-
-        return n;
-    }
-
-    int getDefaultBufferSize()
-    {
-        return 2560;
-    }
-
     const String open (const BigInteger& inputChannels,
                        const BigInteger& outputChannels,
-                       double sampleRate,
-                       int bufferSizeSamples)
+                       double sampleRate, int bufferSizeSamples)
     {
         lastError = openDevice (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
         isOpen_ = lastError.isEmpty();
@@ -1015,19 +851,35 @@ public:
         }
     }
 
-    bool isOpen()
+    bool isOpen()                                       { return isOpen_ && isThreadRunning(); }
+    int getCurrentBufferSizeSamples()                   { return bufferSizeSamples; }
+    double getCurrentSampleRate()                       { return sampleRate; }
+    const BigInteger getActiveOutputChannels() const    { return enabledOutputs; }
+    const BigInteger getActiveInputChannels() const     { return enabledInputs; }
+    int getOutputLatencyInSamples()                     { return (int) (getCurrentBufferSizeSamples() * 1.5); }
+    int getInputLatencyInSamples()                      { return getOutputLatencyInSamples(); }
+    const StringArray getOutputChannelNames()           { return outChannels; }
+    const StringArray getInputChannelNames()            { return inChannels; }
+
+    int getNumSampleRates()                             { return 4; }
+    int getDefaultBufferSize()                          { return 2560; }
+    int getNumBufferSizesAvailable()                    { return 50; }
+
+    double getSampleRate (int index)
     {
-        return isOpen_ && isThreadRunning();
+        const double samps[] = { 44100.0, 48000.0, 88200.0, 96000.0 };
+        return samps [jlimit (0, 3, index)];
     }
 
-    int getCurrentBufferSizeSamples()
+    int getBufferSizeSamples (int index)
     {
-        return bufferSizeSamples;
-    }
+        int n = 64;
+        for (int i = 0; i < index; ++i)
+            n += (n < 512) ? 32
+                           : ((n < 1024) ? 64
+                                         : ((n < 2048) ? 128 : 256));
 
-    double getCurrentSampleRate()
-    {
-        return sampleRate;
+        return n;
     }
 
     int getCurrentBitDepth()
@@ -1044,26 +896,6 @@ public:
             bits = 16;
 
         return bits;
-    }
-
-    const BigInteger getActiveOutputChannels() const
-    {
-        return enabledOutputs;
-    }
-
-    const BigInteger getActiveInputChannels() const
-    {
-        return enabledInputs;
-    }
-
-    int getOutputLatencyInSamples()
-    {
-        return (int) (getCurrentBufferSizeSamples() * 1.5);
-    }
-
-    int getInputLatencyInSamples()
-    {
-        return getOutputLatencyInSamples();
     }
 
     void start (AudioIODeviceCallback* call)
@@ -1101,15 +933,8 @@ public:
         }
     }
 
-    bool isPlaying()
-    {
-        return isStarted && isOpen_ && isThreadRunning();
-    }
-
-    const String getLastError()
-    {
-        return lastError;
-    }
+    bool isPlaying()                { return isStarted && isOpen_ && isThreadRunning(); }
+    const String getLastError()     { return lastError; }
 
     //==============================================================================
     StringArray inChannels, outChannels;
@@ -1129,7 +954,6 @@ private:
     int64 volatile lastBlockTime;
     double sampleRate;
     BigInteger enabledInputs, enabledOutputs;
-
     AudioSampleBuffer inputBuffers, outputBuffers;
 
     AudioIODeviceCallback* callback;
@@ -1137,8 +961,7 @@ private:
 
     const String openDevice (const BigInteger& inputChannels,
                              const BigInteger& outputChannels,
-                             double sampleRate_,
-                             int bufferSizeSamples_);
+                             double sampleRate_, int bufferSizeSamples_);
 
     void closeDevice()
     {
@@ -1289,10 +1112,6 @@ public:
         initialiseDSoundFunctions();
     }
 
-    ~DSoundAudioIODeviceType()
-    {
-    }
-
     //==============================================================================
     void scanForDevices()
     {
@@ -1315,7 +1134,7 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         return wantInputNames ? inputDeviceNames
-                               : outputDeviceNames;
+                              : outputDeviceNames;
     }
 
     int getDefaultDeviceIndex (bool /*forInput*/) const
@@ -1355,11 +1174,8 @@ public:
     }
 
     //==============================================================================
-    StringArray outputDeviceNames;
-    OwnedArray <GUID> outputGuids;
-
-    StringArray inputDeviceNames;
-    OwnedArray <GUID> inputGuids;
+    StringArray outputDeviceNames, inputDeviceNames;
+    OwnedArray <GUID> outputGuids, inputGuids;
 
 private:
     bool hasScanned;
@@ -1443,8 +1259,7 @@ private:
 //==============================================================================
 const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                                               const BigInteger& outputChannels,
-                                              double sampleRate_,
-                                              int bufferSizeSamples_)
+                                              double sampleRate_, int bufferSizeSamples_)
 {
     closeDevice();
     totalSamplesOut = 0;
@@ -1575,7 +1390,6 @@ AudioIODeviceType* juce_createAudioIODeviceType_DirectSound()
 {
     return new DSoundAudioIODeviceType();
 }
-
 
 #undef log
 
