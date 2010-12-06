@@ -48,8 +48,10 @@
 class JUCE_API  DynamicLibraryLoader
 {
 public:
-    DynamicLibraryLoader (const String& name);
+    DynamicLibraryLoader (const String& name = String::empty);
     ~DynamicLibraryLoader();
+
+    bool load (const String& libraryName);
 
     void* findProcAddress (const String& functionName);
 

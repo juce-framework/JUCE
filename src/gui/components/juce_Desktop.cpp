@@ -207,12 +207,17 @@ void Desktop::componentBroughtToFront (Component* const c)
 }
 
 //==============================================================================
-const Point<int> Desktop::getLastMouseDownPosition() throw()
+const Point<int> Desktop::getMousePosition()
+{
+    return getInstance().getMainMouseSource().getScreenPosition();
+}
+
+const Point<int> Desktop::getLastMouseDownPosition()
 {
     return getInstance().getMainMouseSource().getLastMouseDownPosition();
 }
 
-int Desktop::getMouseButtonClickCounter() throw()
+int Desktop::getMouseButtonClickCounter()
 {
     return getInstance().mouseClickCounter;
 }
@@ -288,7 +293,7 @@ void Desktop::removeGlobalMouseListener (MouseListener* const listener)
 
 void Desktop::timerCallback()
 {
-    if (lastFakeMouseMove != getMousePosition())
+    if (lastFakeMouseMove != getRawMousePosition())
         sendMouseMove();
 }
 
@@ -298,7 +303,7 @@ void Desktop::sendMouseMove()
     {
         startTimer (20);
 
-        lastFakeMouseMove = getMousePosition();
+        lastFakeMouseMove = getRawMousePosition();
 
         Component* const target = findComponentAt (lastFakeMouseMove);
 
@@ -326,7 +331,7 @@ void Desktop::resetTimer()
     else
         startTimer (100);
 
-    lastFakeMouseMove = getMousePosition();
+    lastFakeMouseMove = getRawMousePosition();
 }
 
 //==============================================================================

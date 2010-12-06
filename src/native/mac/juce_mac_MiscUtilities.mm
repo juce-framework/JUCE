@@ -143,7 +143,7 @@ bool Desktop::canUseSemiTransparentWindows() throw()
     return true;
 }
 
-const Point<int> Desktop::getMousePosition()
+const Point<int> Desktop::getRawMousePosition()
 {
     const ScopedAutoReleasePool pool;
     const NSPoint p ([NSEvent mouseLocation]);

@@ -1432,7 +1432,7 @@ public:
     void handleMotionNotifyEvent (const XPointerMovedEvent* const movedEvent)
     {
         updateKeyModifiers (movedEvent->state);
-        const Point<int> mousePos (Desktop::getMousePosition());
+        const Point<int> mousePos (movedEvent->x_root, movedEvent->y_root);
 
         if (lastMousePos != mousePos)
         {
@@ -2806,7 +2806,7 @@ bool Desktop::canUseSemiTransparentWindows() throw()
              && (matchedDepth == desiredDepth);
 }
 
-const Point<int> Desktop::getMousePosition()
+const Point<int> Desktop::getRawMousePosition()
 {
     Window root, child;
     int x, y, winx, winy;

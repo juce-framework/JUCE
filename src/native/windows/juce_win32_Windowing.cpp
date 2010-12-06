@@ -2439,7 +2439,7 @@ void Desktop::createMouseInputSources()
     mouseSources.add (new MouseInputSource (0, true));
 }
 
-const Point<int> Desktop::getMousePosition()
+const Point<int> Desktop::getRawMousePosition()
 {
     POINT mousePos;
     GetCursorPos (&mousePos);

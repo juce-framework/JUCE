@@ -29,22 +29,28 @@
 
 #include "juce_win32_DynamicLibraryLoader.h"
 
-
 //==============================================================================
 DynamicLibraryLoader::DynamicLibraryLoader (const String& name)
+    : libHandle (0)
 {
-    libHandle = LoadLibrary (name);
+    load (name);
 }
 
 DynamicLibraryLoader::~DynamicLibraryLoader()
 {
+    load (String::empty);
+}
+
+bool DynamicLibraryLoader::load (const String& name)
+{
     FreeLibrary ((HMODULE) libHandle);
+    libHandle = name.isNotEmpty() ? LoadLibrary (name) : 0;
+    return libHandle != 0;
 }
 
 void* DynamicLibraryLoader::findProcAddress (const String& functionName)
 {
     return (void*) GetProcAddress ((HMODULE) libHandle, functionName.toCString()); // (void* cast is required for mingw)
 }
-
 
 #endif

@@ -122,13 +122,13 @@ void Thread::threadEntryPoint()
 
     JUCE_TRY
     {
-        jassert (getCurrentThreadId() == threadId_);
-
         if (threadName_.isNotEmpty())
             setCurrentThreadName (threadName_);
 
         if (startSuspensionEvent_.wait (10000))
         {
+            jassert (getCurrentThreadId() == threadId_);
+
             if (affinityMask_ != 0)
                 setCurrentThreadAffinityMask (affinityMask_);
 

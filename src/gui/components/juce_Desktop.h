@@ -104,6 +104,10 @@ public:
     /** Returns the mouse position.
 
         The co-ordinates are relative to the top-left of the main monitor.
+
+        Note that this is just a shortcut for calling getMainMouseSource().getScreenPosition(), and
+        you should only resort to grabbing the global mouse position if there's really no
+        way to get the coordinates via a mouse event callback instead.
     */
     static const Point<int> getMousePosition();
 
@@ -114,15 +118,20 @@ public:
     static void setMousePosition (const Point<int>& newPosition);
 
     /** Returns the last position at which a mouse button was pressed.
+
+        Note that this is just a shortcut for calling getMainMouseSource().getLastMouseDownPosition(),
+        and in a multi-touch environment, it doesn't make much sense. ALWAYS prefer to
+        get this information via other means, such as MouseEvent::getMouseDownScreenPosition()
+        if possible, and only ever call this as a last resort.
     */
-    static const Point<int> getLastMouseDownPosition() throw();
+    static const Point<int> getLastMouseDownPosition();
 
     /** Returns the number of times the mouse button has been clicked since the
         app started.
 
         Each mouse-down event increments this number by 1.
     */
-    static int getMouseButtonClickCounter() throw();
+    static int getMouseButtonClickCounter();
 
     //==============================================================================
     /** This lets you prevent the screensaver from becoming active.
@@ -344,6 +353,8 @@ private:
     int allowedOrientations;
 
     ComponentAnimator animator;
+
+    static const Point<int> getRawMousePosition();
 
     void timerCallback();
     void resetTimer();
