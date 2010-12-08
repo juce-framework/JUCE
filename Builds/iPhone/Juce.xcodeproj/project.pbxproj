@@ -413,6 +413,7 @@
 		EBA6B46F7B3C11CA3744A4D0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioDataConverters.h; path = ../../src/audio/dsp/juce_AudioDataConverters.h; sourceTree = SOURCE_ROOT; };
 		A1D687AE613A8B61EB63923D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioSampleBuffer.cpp; path = ../../src/audio/dsp/juce_AudioSampleBuffer.cpp; sourceTree = SOURCE_ROOT; };
 		812620B53BE820D26A63B65D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioSampleBuffer.h; path = ../../src/audio/dsp/juce_AudioSampleBuffer.h; sourceTree = SOURCE_ROOT; };
+		11C1A96A35A2F03F8C34BD43 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Decibels.h; path = ../../src/audio/dsp/juce_Decibels.h; sourceTree = SOURCE_ROOT; };
 		E68EB4BC75216B5B56E3F937 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_IIRFilter.cpp; path = ../../src/audio/dsp/juce_IIRFilter.cpp; sourceTree = SOURCE_ROOT; };
 		EE2259D9768027C2C001EEAD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_IIRFilter.h; path = ../../src/audio/dsp/juce_IIRFilter.h; sourceTree = SOURCE_ROOT; };
 		B457515938E7141D5E79B671 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MidiBuffer.cpp; path = ../../src/audio/midi/juce_MidiBuffer.cpp; sourceTree = SOURCE_ROOT; };
@@ -1111,6 +1112,7 @@
 				EBA6B46F7B3C11CA3744A4D0,
 				A1D687AE613A8B61EB63923D,
 				812620B53BE820D26A63B65D,
+				11C1A96A35A2F03F8C34BD43,
 				E68EB4BC75216B5B56E3F937,
 				EE2259D9768027C2C001EEAD ); name = dsp; sourceTree = "<group>"; };
 		99B60B012D5CCF0BD861011D = { isa = PBXGroup; children = (

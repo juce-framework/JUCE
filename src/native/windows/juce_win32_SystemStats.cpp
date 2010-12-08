@@ -224,7 +224,7 @@ int64 Time::getHighResolutionTicks() throw()
     LARGE_INTEGER ticks;
     QueryPerformanceCounter (&ticks);
 
-    const int64 mainCounterAsHiResTicks = (GetTickCount() * hiResTicksPerSecond) / 1000;
+    const int64 mainCounterAsHiResTicks = (juce_millisecondsSinceStartup() * hiResTicksPerSecond) / 1000;
     const int64 newOffset = mainCounterAsHiResTicks - ticks.QuadPart;
 
     // fix for a very obscure PCI hardware bug that can make the counter

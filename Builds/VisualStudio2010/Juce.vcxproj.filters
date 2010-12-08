@@ -1329,6 +1329,9 @@
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioSampleBuffer.h">
       <Filter>Juce\Source\audio\dsp</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\audio\dsp\juce_Decibels.h">
+      <Filter>Juce\Source\audio\dsp</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\audio\dsp\juce_IIRFilter.h">
       <Filter>Juce\Source\audio\dsp</Filter>
     </ClInclude>

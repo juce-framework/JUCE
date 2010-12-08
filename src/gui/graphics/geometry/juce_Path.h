@@ -307,19 +307,13 @@ public:
 
     //==============================================================================
     /** Adds a rectangle to the path.
-
-        The rectangle is added as a new sub-path. (Any currently open paths will be
-        left open).
-
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
         @see addRoundedRectangle, addTriangle
     */
     void addRectangle (float x, float y, float width, float height);
 
     /** Adds a rectangle to the path.
-
-        The rectangle is added as a new sub-path. (Any currently open paths will be
-        left open).
-
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
         @see addRoundedRectangle, addTriangle
     */
     template <typename ValueType>
@@ -330,30 +324,45 @@ public:
     }
 
     /** Adds a rectangle with rounded corners to the path.
-
-        The rectangle is added as a new sub-path. (Any currently open paths will be
-        left open).
-
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
         @see addRectangle, addTriangle
     */
     void addRoundedRectangle (float x, float y, float width, float height,
                               float cornerSize);
 
     /** Adds a rectangle with rounded corners to the path.
-
-        The rectangle is added as a new sub-path. (Any currently open paths will be
-        left open).
-
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
         @see addRectangle, addTriangle
     */
     void addRoundedRectangle (float x, float y, float width, float height,
                               float cornerSizeX,
                               float cornerSizeY);
 
+    /** Adds a rectangle with rounded corners to the path.
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
+        @see addRectangle, addTriangle
+    */
+    template <typename ValueType>
+    void addRoundedRectangle (const Rectangle<ValueType>& rectangle, float cornerSizeX, float cornerSizeY)
+    {
+        addRoundedRectangle (static_cast <float> (rectangle.getX()), static_cast <float> (rectangle.getY()),
+                             static_cast <float> (rectangle.getWidth()), static_cast <float> (rectangle.getHeight()),
+                             cornerSizeX, cornerSizeY);
+    }
+
+    /** Adds a rectangle with rounded corners to the path.
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
+        @see addRectangle, addTriangle
+    */
+    template <typename ValueType>
+    void addRoundedRectangle (const Rectangle<ValueType>& rectangle, float cornerSize)
+    {
+        addRoundedRectangle (rectangle, cornerSize, cornerSize);
+    }
+
     /** Adds a triangle to the path.
 
-        The triangle is added as a new closed sub-path. (Any currently open paths will be
-        left open).
+        The triangle is added as a new closed sub-path. (Any currently open paths will be left open).
 
         Note that whether the vertices are specified in clockwise or anticlockwise
         order will affect how the triangle is filled when it overlaps other
@@ -365,8 +374,7 @@ public:
 
     /** Adds a quadrilateral to the path.
 
-        The quad is added as a new closed sub-path. (Any currently open paths will be
-        left open).
+        The quad is added as a new closed sub-path. (Any currently open paths will be left open).
 
         Note that whether the vertices are specified in clockwise or anticlockwise
         order will affect how the quad is filled when it overlaps other
@@ -379,8 +387,7 @@ public:
 
     /** Adds an ellipse to the path.
 
-        The shape is added as a new sub-path. (Any currently open paths will be
-        left open).
+        The shape is added as a new sub-path. (Any currently open paths will be left open).
 
         @see addArc
     */

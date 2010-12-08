@@ -1042,8 +1042,14 @@ private:
     juce_wchar* text;
 
     //==============================================================================
-    // internal constructor that preallocates a certain amount of memory
-    String (size_t numChars, int dummyVariable);
+    struct Preallocation
+    {
+        explicit Preallocation (size_t);
+        size_t numChars;
+    };
+
+    // This constructor preallocates a certain amount of memory
+    explicit String (const Preallocation&);
     String (const String& stringToCopy, size_t charsToAllocate);
 
     void createInternal (const juce_wchar* text, size_t numChars);

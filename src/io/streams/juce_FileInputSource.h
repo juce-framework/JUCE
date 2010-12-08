@@ -40,7 +40,7 @@ class JUCE_API  FileInputSource     : public InputSource
 {
 public:
     //==============================================================================
-    FileInputSource (const File& file);
+    FileInputSource (const File& file, bool useFileTimeInHashGeneration = false);
     ~FileInputSource();
 
     InputStream* createInputStream();
@@ -50,6 +50,7 @@ public:
 private:
     //==============================================================================
     const File file;
+    bool useFileTimeInHashGeneration;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputSource);
 };

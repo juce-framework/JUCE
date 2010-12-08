@@ -32,8 +32,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-FileInputSource::FileInputSource (const File& file_)
-    : file (file_)
+FileInputSource::FileInputSource (const File& file_, bool useFileTimeInHashGeneration_)
+    : file (file_), useFileTimeInHashGeneration (useFileTimeInHashGeneration_)
 {
 }
 
@@ -53,7 +53,12 @@ InputStream* FileInputSource::createInputStreamFor (const String& relatedItemPat
 
 int64 FileInputSource::hashCode() const
 {
-    return file.hashCode();
+    int64 h = file.hashCode();
+
+    if (useFileTimeInHashGeneration)
+        h ^= file.getLastModificationTime().toMilliseconds();
+
+    return h;
 }
 
 

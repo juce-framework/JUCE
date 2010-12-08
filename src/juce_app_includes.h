@@ -140,6 +140,9 @@
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
  #include "audio/dsp/juce_AudioSampleBuffer.h"
 #endif
+#ifndef __JUCE_DECIBELS_JUCEHEADER__
+ #include "audio/dsp/juce_Decibels.h"
+#endif
 #ifndef __JUCE_IIRFILTER_JUCEHEADER__
  #include "audio/dsp/juce_IIRFilter.h"
 #endif

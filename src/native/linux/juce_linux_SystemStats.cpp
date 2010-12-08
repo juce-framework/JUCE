@@ -69,27 +69,6 @@ namespace LinuxStatsHelpers
 
         return String::empty;
     }
-
-    bool getTimeSinceStartup (timeval* const t) throw()
-    {
-        if (gettimeofday (t, 0) != 0)
-            return false;
-
-        static unsigned int calibrate = 0;
-        static bool calibrated = false;
-
-        if (! calibrated)
-        {
-            calibrated = true;
-
-            struct sysinfo sysi;
-            if (sysinfo (&sysi) == 0)
-                calibrate = t->tv_sec - sysi.uptime;  // Safe to assume system was not brought up earlier than 1970!
-        }
-
-        t->tv_sec -= calibrate;
-        return true;
-    }
 }
 
 const String SystemStats::getCpuVendor()
@@ -156,20 +135,18 @@ void PlatformUtilities::fpuReset()
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() throw()
 {
-    timeval t;
-    if (LinuxStatsHelpers::getTimeSinceStartup (&t))
-        return (uint32) (t.tv_sec * 1000 + (t.tv_usec / 1000));
+    timespec t;
+    clock_gettime (CLOCK_MONOTONIC, &t);
 
-    return 0;
+    return t.tv_sec * 1000 + t.tv_nsec / 1000000;
 }
 
 int64 Time::getHighResolutionTicks() throw()
 {
-    timeval t;
-    if (LinuxStatsHelpers::getTimeSinceStartup (&t))
-        return ((int64) t.tv_sec * (int64) 1000000) + (int64) t.tv_usec;
+    timespec t;
+    clock_gettime (CLOCK_MONOTONIC, &t);
 
-    return 0;
+    return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / (int64) 1000);
 }
 
 int64 Time::getHighResolutionTicksPerSecond() throw()

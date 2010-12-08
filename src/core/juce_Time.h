@@ -314,19 +314,20 @@ public:
     */
     static int64 currentTimeMillis() throw();
 
-    /** Returns the number of millisecs since system startup.
+    /** Returns the number of millisecs since a fixed event (usually system startup).
 
-        Should be accurate to within a few millisecs, depending on platform,
+        This returns a monotonically increasing value which it unaffected by changes to the
+        system clock. It should be accurate to within a few millisecs, depending on platform,
         hardware, etc.
 
         @see getApproximateMillisecondCounter
     */
     static uint32 getMillisecondCounter() throw();
 
-    /** Returns the number of millisecs since system startup.
+    /** Returns the number of millisecs since a fixed event (usually system startup).
 
-        Same as getMillisecondCounter(), but returns a more accurate value, using
-        the high-res timer.
+        This has the same function as getMillisecondCounter(), but returns a more accurate
+        value, using a higher-resolution timer if one is available.
 
         @see getMillisecondCounter
     */

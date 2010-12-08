@@ -2712,8 +2712,14 @@ private:
 
 	juce_wchar* text;
 
-	// internal constructor that preallocates a certain amount of memory
-	String (size_t numChars, int dummyVariable);
+	struct Preallocation
+	{
+		explicit Preallocation (size_t);
+		size_t numChars;
+	};
+
+	// This constructor preallocates a certain amount of memory
+	explicit String (const Preallocation&);
 	String (const String& stringToCopy, size_t charsToAllocate);
 
 	void createInternal (const juce_wchar* text, size_t numChars);
@@ -8937,19 +8943,20 @@ public:
 	*/
 	static int64 currentTimeMillis() throw();
 
-	/** Returns the number of millisecs since system startup.
+	/** Returns the number of millisecs since a fixed event (usually system startup).
 
-		Should be accurate to within a few millisecs, depending on platform,
+		This returns a monotonically increasing value which it unaffected by changes to the
+		system clock. It should be accurate to within a few millisecs, depending on platform,
 		hardware, etc.
 
 		@see getApproximateMillisecondCounter
 	*/
 	static uint32 getMillisecondCounter() throw();
 
-	/** Returns the number of millisecs since system startup.
+	/** Returns the number of millisecs since a fixed event (usually system startup).
 
-		Same as getMillisecondCounter(), but returns a more accurate value, using
-		the high-res timer.
+		This has the same function as getMillisecondCounter(), but returns a more accurate
+		value, using a higher-resolution timer if one is available.
 
 		@see getMillisecondCounter
 	*/
@@ -17113,7 +17120,7 @@ class JUCE_API  FileInputSource	 : public InputSource
 {
 public:
 
-	FileInputSource (const File& file);
+	FileInputSource (const File& file, bool useFileTimeInHashGeneration = false);
 	~FileInputSource();
 
 	InputStream* createInputStream();
@@ -17123,6 +17130,7 @@ public:
 private:
 
 	const File file;
+	bool useFileTimeInHashGeneration;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputSource);
 };
@@ -21641,8 +21649,8 @@ public:
 	{
 		const int x1 = (int) std::floor (static_cast<float> (x));
 		const int y1 = (int) std::floor (static_cast<float> (y));
-		const int x2 = (int) std::floor (static_cast<float> (x + w + 0.9999f));
-		const int y2 = (int) std::floor (static_cast<float> (y + h + 0.9999f));
+		const int x2 = (int) std::ceil (static_cast<float> (x + w));
+		const int y2 = (int) std::ceil (static_cast<float> (y + h));
 
 		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
 	}
@@ -22166,19 +22174,13 @@ public:
 	const Point<float> getCurrentPosition() const;
 
 	/** Adds a rectangle to the path.
-
-		The rectangle is added as a new sub-path. (Any currently open paths will be
-		left open).
-
+		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
 		@see addRoundedRectangle, addTriangle
 	*/
 	void addRectangle (float x, float y, float width, float height);
 
 	/** Adds a rectangle to the path.
-
-		The rectangle is added as a new sub-path. (Any currently open paths will be
-		left open).
-
+		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
 		@see addRoundedRectangle, addTriangle
 	*/
 	template <typename ValueType>
@@ -22189,30 +22191,45 @@ public:
 	}
 
 	/** Adds a rectangle with rounded corners to the path.
-
-		The rectangle is added as a new sub-path. (Any currently open paths will be
-		left open).
-
+		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
 		@see addRectangle, addTriangle
 	*/
 	void addRoundedRectangle (float x, float y, float width, float height,
 							  float cornerSize);
 
 	/** Adds a rectangle with rounded corners to the path.
-
-		The rectangle is added as a new sub-path. (Any currently open paths will be
-		left open).
-
+		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
 		@see addRectangle, addTriangle
 	*/
 	void addRoundedRectangle (float x, float y, float width, float height,
 							  float cornerSizeX,
 							  float cornerSizeY);
 
+	/** Adds a rectangle with rounded corners to the path.
+		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
+		@see addRectangle, addTriangle
+	*/
+	template <typename ValueType>
+	void addRoundedRectangle (const Rectangle<ValueType>& rectangle, float cornerSizeX, float cornerSizeY)
+	{
+		addRoundedRectangle (static_cast <float> (rectangle.getX()), static_cast <float> (rectangle.getY()),
+							 static_cast <float> (rectangle.getWidth()), static_cast <float> (rectangle.getHeight()),
+							 cornerSizeX, cornerSizeY);
+	}
+
+	/** Adds a rectangle with rounded corners to the path.
+		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
+		@see addRectangle, addTriangle
+	*/
+	template <typename ValueType>
+	void addRoundedRectangle (const Rectangle<ValueType>& rectangle, float cornerSize)
+	{
+		addRoundedRectangle (rectangle, cornerSize, cornerSize);
+	}
+
 	/** Adds a triangle to the path.
 
-		The triangle is added as a new closed sub-path. (Any currently open paths will be
-		left open).
+		The triangle is added as a new closed sub-path. (Any currently open paths will be left open).
 
 		Note that whether the vertices are specified in clockwise or anticlockwise
 		order will affect how the triangle is filled when it overlaps other
@@ -22224,8 +22241,7 @@ public:
 
 	/** Adds a quadrilateral to the path.
 
-		The quad is added as a new closed sub-path. (Any currently open paths will be
-		left open).
+		The quad is added as a new closed sub-path. (Any currently open paths will be left open).
 
 		Note that whether the vertices are specified in clockwise or anticlockwise
 		order will affect how the quad is filled when it overlaps other
@@ -22238,8 +22254,7 @@ public:
 
 	/** Adds an ellipse to the path.
 
-		The shape is added as a new sub-path. (Any currently open paths will be
-		left open).
+		The shape is added as a new sub-path. (Any currently open paths will be left open).
 
 		@see addArc
 	*/
@@ -32601,11 +32616,11 @@ public:
 		@endcode
 
 		You can pass a zero in here to clear the thumbnail.
-
-		The source that is passed in will be deleted by this object when it is no
-		longer needed
+		The source that is passed in will be deleted by this object when it is no longer needed.
+		@returns true if the source could be opened as a valid audio file, false if this failed for
+		some reason.
 	*/
-	void setSource (InputSource* newSource);
+	bool setSource (InputSource* newSource);
 
 	/** Gives the thumbnail an AudioFormatReader to use directly.
 		This will start parsing the audio in a background thread (unless the hash code
@@ -32685,6 +32700,9 @@ public:
 	/** Returns true if the low res preview is fully generated. */
 	bool isFullyLoaded() const throw();
 
+	/** Returns the hash code that was set by setSource() or setReader(). */
+	int64 getHashCode() const;
+
 	// (this is only public to avoid a VC6 bug)
 	class LevelDataSource;
 
@@ -32714,7 +32732,7 @@ private:
 	double sampleRate;
 	CriticalSection lock;
 
-	void setDataSource (LevelDataSource* newSource);
+	bool setDataSource (LevelDataSource* newSource);
 	void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
 	void createChannels (int length);
 
@@ -39220,6 +39238,88 @@ private:
 
 #endif
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_DECIBELS_JUCEHEADER__
+
+/*** Start of inlined file: juce_Decibels.h ***/
+#ifndef __JUCE_DECIBELS_JUCEHEADER__
+#define __JUCE_DECIBELS_JUCEHEADER__
+
+/**
+	This class contains some helpful static methods for dealing with decibel values.
+*/
+class Decibels
+{
+public:
+
+	/** Converts a dBFS value to its equivalent gain level.
+
+		A gain of 1.0 = 0 dB, and lower gains map onto negative decibel values. Any
+		decibel value lower than minusInfinityDb will return a gain of 0.
+	*/
+	template <typename Type>
+	static Type decibelsToGain (const Type decibels,
+								const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+	{
+		return decibels > minusInfinityDb ? powf ((Type) 10.0, decibels * (Type) 0.05)
+										  : Type();
+	}
+
+	/** Converts a gain level into a dBFS value.
+
+		A gain of 1.0 = 0 dB, and lower gains map onto negative decibel values.
+		If the gain is 0 (or negative), then the method will return the value
+		provided as minusInfinityDb.
+	*/
+	template <typename Type>
+	static Type gainToDecibels (const Type gain,
+								const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+	{
+		return gain > Type() ? jmax (minusInfinityDb, (Type) std::log (gain) * (Type) 20.0)
+							 : minusInfinityDb;
+	}
+
+	/** Converts a decibel reading to a string, with the 'dB' suffix.
+		If the decibel value is lower than minusInfinityDb, the return value will
+		be "-INF dB".
+	*/
+	template <typename Type>
+	static const String toString (const Type decibels,
+								  const int decimalPlaces = 2,
+								  const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+	{
+		String s;
+
+		if (decibels <= minusInfinityDb)
+		{
+			s = "-INF dB";
+		}
+		else
+		{
+			if (decibels >= Type())
+				s << '+';
+
+			s << String (decibels, decimalPlaces) << " dB";
+		}
+
+		return s;
+	}
+
+private:
+
+	enum
+	{
+		defaultMinusInfinitydB = -100
+	};
+
+	Decibels(); // This class can't be instantiated, it's just a holder for static methods..
+	JUCE_DECLARE_NON_COPYABLE (Decibels);
+};
+
+#endif   // __JUCE_DECIBELS_JUCEHEADER__
+/*** End of inlined file: juce_Decibels.h ***/
+
 
 #endif
 #ifndef __JUCE_IIRFILTER_JUCEHEADER__

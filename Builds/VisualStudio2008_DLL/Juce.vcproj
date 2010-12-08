@@ -183,6 +183,7 @@
             <File RelativePath="..\..\src\audio\dsp\juce_AudioDataConverters.h"/>
             <File RelativePath="..\..\src\audio\dsp\juce_AudioSampleBuffer.cpp"/>
             <File RelativePath="..\..\src\audio\dsp\juce_AudioSampleBuffer.h"/>
+            <File RelativePath="..\..\src\audio\dsp\juce_Decibels.h"/>
             <File RelativePath="..\..\src\audio\dsp\juce_IIRFilter.cpp"/>
             <File RelativePath="..\..\src\audio\dsp\juce_IIRFilter.h"/>
           </Filter>

@@ -91,11 +91,11 @@ public:
         @endcode
 
         You can pass a zero in here to clear the thumbnail.
-
-        The source that is passed in will be deleted by this object when it is no
-        longer needed
+        The source that is passed in will be deleted by this object when it is no longer needed.
+        @returns true if the source could be opened as a valid audio file, false if this failed for
+        some reason.
     */
-    void setSource (InputSource* newSource);
+    bool setSource (InputSource* newSource);
 
     /** Gives the thumbnail an AudioFormatReader to use directly.
         This will start parsing the audio in a background thread (unless the hash code
@@ -177,6 +177,8 @@ public:
     /** Returns true if the low res preview is fully generated. */
     bool isFullyLoaded() const throw();
 
+    /** Returns the hash code that was set by setSource() or setReader(). */
+    int64 getHashCode() const;
 
     // (this is only public to avoid a VC6 bug)
     class LevelDataSource;
@@ -207,7 +209,7 @@ private:
     double sampleRate;
     CriticalSection lock;
 
-    void setDataSource (LevelDataSource* newSource);
+    bool setDataSource (LevelDataSource* newSource);
     void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
     void createChannels (int length);
 

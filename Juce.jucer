@@ -189,6 +189,8 @@
                 resource="0" file="src/audio/dsp/juce_AudioSampleBuffer.cpp"/>
           <FILE id="ALRRctFtO" name="juce_AudioSampleBuffer.h" compile="0" resource="0"
                 file="src/audio/dsp/juce_AudioSampleBuffer.h"/>
+          <FILE id="vERxbEd" name="juce_Decibels.h" compile="0" resource="0"
+                file="src/audio/dsp/juce_Decibels.h"/>
           <FILE id="GlESUU1V" name="juce_IIRFilter.cpp" compile="1" resource="0"
                 file="src/audio/dsp/juce_IIRFilter.cpp"/>
           <FILE id="Vu9xVqUfN" name="juce_IIRFilter.h" compile="0" resource="0"

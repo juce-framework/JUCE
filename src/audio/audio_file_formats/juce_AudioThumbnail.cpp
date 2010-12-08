@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioThumbnail.h"
 #include "juce_AudioThumbnailCache.h"
+#include "../../events/juce_MessageManager.h"
 
 
 //==============================================================================
@@ -582,8 +583,10 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 }
 
 //==============================================================================
-void AudioThumbnail::setDataSource (LevelDataSource* newSource)
+bool AudioThumbnail::setDataSource (LevelDataSource* newSource)
 {
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
     numSamplesFinished = 0;
 
     if (cache.loadThumb (*this, newSource->hashCode) && isFullyLoaded())
@@ -608,14 +611,15 @@ void AudioThumbnail::setDataSource (LevelDataSource* newSource)
 
         createChannels (1 + (int) (totalSamples / samplesPerThumbSample));
     }
+
+    return sampleRate > 0 && totalSamples > 0;
 }
 
-void AudioThumbnail::setSource (InputSource* const newSource)
+bool AudioThumbnail::setSource (InputSource* const newSource)
 {
     clear();
 
-    if (newSource != 0)
-        setDataSource (new LevelDataSource (*this, newSource));
+    return newSource != 0 && setDataSource (new LevelDataSource (*this, newSource));
 }
 
 void AudioThumbnail::setReader (AudioFormatReader* newReader, int64 hash)
@@ -624,6 +628,11 @@ void AudioThumbnail::setReader (AudioFormatReader* newReader, int64 hash)
 
     if (newReader != 0)
         setDataSource (new LevelDataSource (*this, newReader, hash));
+}
+
+int64 AudioThumbnail::getHashCode() const
+{
+    return source == 0 ? 0 : source->hashCode;
 }
 
 void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer& incoming,

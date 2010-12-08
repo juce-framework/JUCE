@@ -469,6 +469,7 @@
     <ClInclude Include="..\..\src\audio\devices\juce_MidiOutput.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioDataConverters.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioSampleBuffer.h"/>
+    <ClInclude Include="..\..\src\audio\dsp\juce_Decibels.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_IIRFilter.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiBuffer.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiFile.h"/>

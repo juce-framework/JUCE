@@ -212,12 +212,14 @@ String& String::operator= (const String& other) throw()
 {
     juce_wchar* const newText = other.text;
     StringHolder::retain (newText);
-    StringHolder::release (reinterpret_cast <Atomic<juce_wchar*>*> (&text)->exchange (newText));
+    StringHolder::release (reinterpret_cast <Atomic<juce_wchar*>&> (text).exchange (newText));
     return *this;
 }
 
-String::String (const size_t numChars, const int /*dummyVariable*/)
-    : text (StringHolder::createUninitialised (numChars))
+inline String::Preallocation::Preallocation (const size_t numChars_) : numChars (numChars_) {}
+
+String::String (const Preallocation& preallocationSize)
+    : text (StringHolder::createUninitialised (preallocationSize.numChars))
 {
 }
 
@@ -272,7 +274,7 @@ String::String (const juce_wchar* const t, const size_t maxChars)
 
 const String String::charToString (const juce_wchar character)
 {
-    String result ((size_t) 1, (int) 0);
+    String result (Preallocation (1));
     result.text[0] = character;
     result.text[1] = 0;
     return result;
@@ -1104,7 +1106,7 @@ bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) con
 const String String::repeatedString (const String& stringToRepeat, int numberOfTimesToRepeat)
 {
     const int len = stringToRepeat.length();
-    String result ((size_t) (len * numberOfTimesToRepeat + 1), (int) 0);
+    String result (Preallocation (len * numberOfTimesToRepeat + 1));
     juce_wchar* n = result.text;
     *n = 0;
 
@@ -1125,7 +1127,7 @@ const String String::paddedLeft (const juce_wchar padCharacter, int minimumLengt
     if (len >= minimumLength || padCharacter == 0)
         return *this;
 
-    String result ((size_t) minimumLength + 1, (int) 0);
+    String result (Preallocation (minimumLength + 1));
     juce_wchar* n = result.text;
 
     minimumLength -= len;
@@ -1192,7 +1194,7 @@ const String String::replaceSection (int index, int numCharsToReplace, const Str
     if (newTotalLen <= 0)
         return String::empty;
 
-    String result ((size_t) newTotalLen, (int) 0);
+    String result (Preallocation ((size_t) newTotalLen));
 
     StringHolder::copyChars (result.text, text, index);
 
@@ -1566,7 +1568,7 @@ const String String::retainCharacters (const String& charactersToRetain) const
     if (isEmpty())
         return empty;
 
-    String result (StringHolder::getAllocatedNumChars (text), (int) 0);
+    String result (Preallocation (StringHolder::getAllocatedNumChars (text)));
     juce_wchar* dst = result.text;
     const juce_wchar* src = text;
 
@@ -1587,7 +1589,7 @@ const String String::removeCharacters (const String& charactersToRemove) const
     if (isEmpty())
         return empty;
 
-    String result (StringHolder::getAllocatedNumChars (text), (int) 0);
+    String result (Preallocation (StringHolder::getAllocatedNumChars (text)));
     juce_wchar* dst = result.text;
     const juce_wchar* src = text;
 
@@ -1675,7 +1677,7 @@ const String String::formatted (const juce_wchar* const pf, ... )
     va_start (args, pf);
 
     size_t bufferSize = 256;
-    String result (bufferSize, (int) 0);
+    String result (Preallocation ((size_t) bufferSize));
     result.text[0] = 0;
 
     for (;;)
@@ -1801,9 +1803,7 @@ const String String::toHexString (const short number)
     return toHexString ((int) (unsigned short) number);
 }
 
-const String String::toHexString (const unsigned char* data,
-                                  const int size,
-                                  const int groupSize)
+const String String::toHexString (const unsigned char* data, const int size, const int groupSize)
 {
     if (size <= 0)
         return empty;
@@ -1812,7 +1812,7 @@ const String String::toHexString (const unsigned char* data,
     if (groupSize > 0)
         numChars += size / groupSize;
 
-    String s ((size_t) numChars, (int) 0);
+    String s (Preallocation ((size_t) numChars));
 
     juce_wchar* d = s.text;
 
@@ -2067,7 +2067,7 @@ const String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
         if (buffer [numBytes] == 0)
             break;
 
-    String result ((size_t) numBytes + 1, (int) 0);
+    String result (Preallocation (numBytes + 1));
     juce_wchar* dest = result.text;
 
     size_t i = 0;
