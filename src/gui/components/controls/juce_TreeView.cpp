@@ -586,9 +586,9 @@ void TreeView::clearSelectedItems()
         rootItem->deselectAllRecursively();
 }
 
-int TreeView::getNumSelectedItems() const throw()
+int TreeView::getNumSelectedItems (int maximumDepthToSearchTo) const throw()
 {
-    return (rootItem != 0) ? rootItem->countSelectedItemsRecursively() : 0;
+    return (rootItem != 0) ? rootItem->countSelectedItemsRecursively (maximumDepthToSearchTo) : 0;
 }
 
 TreeViewItem* TreeView::getSelectedItem (const int index) const throw()
@@ -1623,12 +1623,13 @@ TreeViewItem* TreeViewItem::findItemRecursively (int targetY) throw()
     return 0;
 }
 
-int TreeViewItem::countSelectedItemsRecursively() const throw()
+int TreeViewItem::countSelectedItemsRecursively (int depth) const throw()
 {
     int total = isSelected() ? 1 : 0;
 
-    for (int i = subItems.size(); --i >= 0;)
-        total += subItems.getUnchecked(i)->countSelectedItemsRecursively();
+    if (depth != 0)
+        for (int i = subItems.size(); --i >= 0;)
+            total += subItems.getUnchecked(i)->countSelectedItemsRecursively (depth - 1);
 
     return total;
 }
@@ -1654,7 +1655,7 @@ TreeViewItem* TreeViewItem::getSelectedItemWithIndex (int index) throw()
             if (found != 0)
                 return found;
 
-            index -= item->countSelectedItemsRecursively();
+            index -= item->countSelectedItemsRecursively (-1);
         }
     }
 

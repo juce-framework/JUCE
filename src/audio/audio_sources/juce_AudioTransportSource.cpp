@@ -170,6 +170,11 @@ double AudioTransportSource::getCurrentPosition() const
         return 0.0;
 }
 
+double AudioTransportSource::getLengthInSeconds() const
+{
+    return getTotalLength() / sampleRate;
+}
+
 void AudioTransportSource::setNextReadPosition (int newPosition)
 {
     if (positionableSource != 0)

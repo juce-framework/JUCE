@@ -83,243 +83,283 @@ private:
 };
 #endif
 
-void* juce_openInternetFile (const String& url,
-                             const String& headers,
-                             const MemoryBlock& postData,
-                             const bool isPost,
-                             URL::OpenStreamProgressCallback* callback,
-                             void* callbackContext,
-                             int timeOutMs)
+
+//==============================================================================
+class WebInputStream  : public InputStream
 {
-    if (sessionHandle == 0)
-        sessionHandle = InternetOpen (_T("juce"),
-                                      INTERNET_OPEN_TYPE_PRECONFIG,
-                                      0, 0, 0);
-
-    if (sessionHandle != 0)
+public:
+    //==============================================================================
+    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
+                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
+      : connection (0), request (0),
+        address (address_), headers (headers_), postData (postData_), position (0),
+        finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        // break up the url..
-        TCHAR file[1024], server[1024];
+        createConnection (progressCallback, progressCallbackContext);
 
-        URL_COMPONENTS uc;
-        zerostruct (uc);
-
-        uc.dwStructSize = sizeof (uc);
-        uc.dwUrlPathLength = sizeof (file);
-        uc.dwHostNameLength = sizeof (server);
-        uc.lpszUrlPath = file;
-        uc.lpszHostName = server;
-
-        if (InternetCrackUrl (url, 0, 0, &uc))
+        if (responseHeaders != 0 && ! isError())
         {
-            int disable = 1;
-            InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
+            DWORD bufferSizeBytes = 4096;
 
-            if (timeOutMs == 0)
-                timeOutMs = 30000;
-            else if (timeOutMs < 0)
-                timeOutMs = -1;
-
-            InternetSetOption (sessionHandle, INTERNET_OPTION_CONNECT_TIMEOUT, &timeOutMs, sizeof (timeOutMs));
-
-            const bool isFtp = url.startsWithIgnoreCase ("ftp:");
-
-#if WORKAROUND_TIMEOUT_BUG
-            HINTERNET connection = 0;
-
+            for (;;)
             {
-                InternetConnectThread connectThread (uc, connection, isFtp);
-                connectThread.wait (timeOutMs);
+                HeapBlock<char> buffer ((size_t) bufferSizeBytes);
 
-                if (connection == 0)
+                if (HttpQueryInfo (request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
                 {
-                    InternetCloseHandle (sessionHandle);
-                    sessionHandle = 0;
-                }
-            }
-#else
-            HINTERNET connection = InternetConnect (sessionHandle,
-                                                    uc.lpszHostName,
-                                                    uc.nPort,
-                                                    _T(""), _T(""),
-                                                    isFtp ? INTERNET_SERVICE_FTP
-                                                          : INTERNET_SERVICE_HTTP,
-                                                    0, 0);
-#endif
+                    StringArray headersArray;
+                    headersArray.addLines (reinterpret_cast <const WCHAR*> (buffer.getData()));
 
-            if (connection != 0)
-            {
-                if (isFtp)
-                {
-                    HINTERNET request = FtpOpenFile (connection,
-                                                     uc.lpszUrlPath,
-                                                     GENERIC_READ,
-                                                     FTP_TRANSFER_TYPE_BINARY | INTERNET_FLAG_NEED_FILE,
-                                                     0);
-
-                    ConnectionAndRequestStruct* const result = new ConnectionAndRequestStruct();
-                    result->connection = connection;
-                    result->request = request;
-                    return result;
-                }
-                else
-                {
-                    const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
-
-                    DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
-
-                    if (url.startsWithIgnoreCase ("https:"))
-                        flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
-                                                        //  IE7 seems to automatically work out when it's https)
-
-                    HINTERNET request = HttpOpenRequest (connection,
-                                                         isPost ? _T("POST")
-                                                                : _T("GET"),
-                                                         uc.lpszUrlPath,
-                                                         0, 0, mimeTypes, flags, 0);
-
-                    if (request != 0)
+                    for (int i = 0; i < headersArray.size(); ++i)
                     {
-                        INTERNET_BUFFERS buffers;
-                        zerostruct (buffers);
-                        buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
-                        buffers.lpcszHeader = (LPCTSTR) headers;
-                        buffers.dwHeadersLength = headers.length();
-                        buffers.dwBufferTotal = (DWORD) postData.getSize();
-                        ConnectionAndRequestStruct* result = 0;
+                        const String& header = headersArray[i];
+                        const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                        const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                        const String previousValue ((*responseHeaders) [key]);
 
-                        if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
+                        responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                    }
+
+                    break;
+                }
+
+                if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+                    break;
+            }
+
+        }
+    }
+
+    ~WebInputStream()
+    {
+        close();
+    }
+
+    //==============================================================================
+    bool isError() const        { return request == 0; }
+    bool isExhausted()          { return finished; }
+    int64 getPosition()         { return position; }
+
+    int64 getTotalLength()
+    {
+        if (! isError())
+        {
+            DWORD index = 0, result = 0, size = sizeof (result);
+
+            if (HttpQueryInfo (request, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &result, &size, &index))
+                return (int64) result;
+        }
+
+        return -1;
+    }
+
+    int read (void* buffer, int bytesToRead)
+    {
+        DWORD bytesRead = 0;
+
+        if (! (finished || isError()))
+        {
+            InternetReadFile (request, buffer, bytesToRead, &bytesRead);
+            position += bytesRead;
+
+            if (bytesRead == 0)
+                finished = true;
+        }
+
+        return (int) bytesRead;
+    }
+
+    bool setPosition (int64 wantedPos)
+    {
+        if (isError())
+            return false;
+
+        if (wantedPos != position)
+        {
+            finished = false;
+            position = (int64) InternetSetFilePointer (request, (LONG) wantedPos, 0, FILE_BEGIN, 0);
+
+            if (position == wantedPos)
+                return true;
+
+            if (wantedPos < position)
+            {
+                close();
+                position = 0;
+                createConnection (0, 0);
+            }
+
+            skipNextBytes (wantedPos - position);
+        }
+
+        return true;
+    }
+
+private:
+    //==============================================================================
+    HINTERNET connection, request;
+    String address, headers;
+    MemoryBlock postData;
+    int64 position;
+    bool finished;
+    const bool isPost;
+    int timeOutMs;
+
+    void close()
+    {
+        if (request != 0)
+        {
+            InternetCloseHandle (request);
+            request = 0;
+        }
+
+        if (connection != 0)
+        {
+            InternetCloseHandle (connection);
+            connection = 0;
+        }
+    }
+
+    void createConnection (URL::OpenStreamProgressCallback* progressCallback,
+                           void* progressCallbackContext)
+    {
+        static HINTERNET sessionHandle = InternetOpen (_T("juce"), INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
+
+        close();
+
+        if (sessionHandle != 0)
+        {
+            // break up the url..
+            TCHAR file[1024], server[1024];
+
+            URL_COMPONENTS uc;
+            zerostruct (uc);
+            uc.dwStructSize = sizeof (uc);
+            uc.dwUrlPathLength = sizeof (file);
+            uc.dwHostNameLength = sizeof (server);
+            uc.lpszUrlPath = file;
+            uc.lpszHostName = server;
+
+            if (InternetCrackUrl (address, 0, 0, &uc))
+            {
+                int disable = 1;
+                InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
+
+                if (timeOutMs == 0)
+                    timeOutMs = 30000;
+                else if (timeOutMs < 0)
+                    timeOutMs = -1;
+
+                InternetSetOption (sessionHandle, INTERNET_OPTION_CONNECT_TIMEOUT, &timeOutMs, sizeof (timeOutMs));
+
+                const bool isFtp = address.startsWithIgnoreCase ("ftp:");
+
+              #if WORKAROUND_TIMEOUT_BUG
+                connection = 0;
+
+                {
+                    InternetConnectThread connectThread (uc, connection, isFtp);
+                    connectThread.wait (timeOutMs);
+
+                    if (connection == 0)
+                    {
+                        InternetCloseHandle (sessionHandle);
+                        sessionHandle = 0;
+                    }
+                }
+              #else
+                connection = InternetConnect (sessionHandle, uc.lpszHostName, uc.nPort,
+                                              _T(""), _T(""),
+                                              isFtp ? INTERNET_SERVICE_FTP
+                                                    : INTERNET_SERVICE_HTTP,
+                                              0, 0);
+              #endif
+
+                if (connection != 0)
+                {
+                    if (isFtp)
+                    {
+                        request = FtpOpenFile (connection, uc.lpszUrlPath, GENERIC_READ,
+                                               FTP_TRANSFER_TYPE_BINARY | INTERNET_FLAG_NEED_FILE, 0);
+                    }
+                    else
+                    {
+                        const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
+
+                        DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
+
+                        if (address.startsWithIgnoreCase ("https:"))
+                            flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
+                                                            //  IE7 seems to automatically work out when it's https)
+
+                        request = HttpOpenRequest (connection, isPost ? _T("POST") : _T("GET"),
+                                                   uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
+
+                        if (request != 0)
                         {
-                            int bytesSent = 0;
+                            INTERNET_BUFFERS buffers;
+                            zerostruct (buffers);
+                            buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
+                            buffers.lpcszHeader = static_cast <LPCTSTR> (headers);
+                            buffers.dwHeadersLength = headers.length();
+                            buffers.dwBufferTotal = (DWORD) postData.getSize();
+                            ConnectionAndRequestStruct* result = 0;
 
-                            for (;;)
+                            if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
                             {
-                                const int bytesToDo = jmin (1024, (int) postData.getSize() - bytesSent);
-                                DWORD bytesDone = 0;
+                                int bytesSent = 0;
 
-                                if (bytesToDo > 0
-                                     && ! InternetWriteFile (request,
-                                                             static_cast <const char*> (postData.getData()) + bytesSent,
-                                                             bytesToDo, &bytesDone))
+                                for (;;)
                                 {
-                                    break;
-                                }
+                                    const int bytesToDo = jmin (1024, (int) postData.getSize() - bytesSent);
+                                    DWORD bytesDone = 0;
 
-                                if (bytesToDo == 0 || (int) bytesDone < bytesToDo)
-                                {
-                                    result = new ConnectionAndRequestStruct();
-                                    result->connection = connection;
-                                    result->request = request;
-
-                                    if (! HttpEndRequest (request, 0, 0, 0))
+                                    if (bytesToDo > 0
+                                         && ! InternetWriteFile (request,
+                                                                 static_cast <const char*> (postData.getData()) + bytesSent,
+                                                                 bytesToDo, &bytesDone))
+                                    {
                                         break;
+                                    }
 
-                                    return result;
+                                    if (bytesToDo == 0 || (int) bytesDone < bytesToDo)
+                                    {
+                                        if (HttpEndRequest (request, 0, 0, 0))
+                                            return;
+
+                                        break;
+                                    }
+
+                                    bytesSent += bytesDone;
+
+                                    if (progressCallback != 0 && ! progressCallback (progressCallbackContext, bytesSent, postData.getSize()))
+                                        break;
                                 }
-
-                                bytesSent += bytesDone;
-
-                                if (callback != 0 && ! callback (callbackContext, bytesSent, postData.getSize()))
-                                    break;
                             }
                         }
 
-                        InternetCloseHandle (request);
+                        close();
                     }
-
-                    InternetCloseHandle (connection);
                 }
             }
         }
     }
 
-    return 0;
-}
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
+};
 
-int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
+InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
+                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
 {
-    DWORD bytesRead = 0;
-    const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
+    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
+                                                           progressCallback, progressCallbackContext,
+                                                           headers, timeOutMs, responseHeaders));
 
-    if (crs != 0)
-        InternetReadFile (crs->request,
-                          buffer, bytesToRead,
-                          &bytesRead);
-
-    return bytesRead;
+    return wi->isError() ? 0 : wi.release();
 }
 
-int juce_seekInInternetFile (void* handle, int newPosition)
-{
-    if (handle != 0)
-    {
-        const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
-        return InternetSetFilePointer (crs->request, newPosition, 0, FILE_BEGIN, 0);
-    }
-
-    return -1;
-}
-
-int64 juce_getInternetFileContentLength (void* handle)
-{
-    const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
-
-    if (crs != 0)
-    {
-        DWORD index = 0, result = 0, size = sizeof (result);
-
-        if (HttpQueryInfo (crs->request, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &result, &size, &index))
-            return (int64) result;
-    }
-
-    return -1;
-}
-
-void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
-{
-    const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
-
-    if (crs != 0)
-    {
-        DWORD bufferSizeBytes = 4096;
-
-        for (;;)
-        {
-            HeapBlock<char> buffer ((size_t) bufferSizeBytes);
-
-            if (HttpQueryInfo (crs->request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
-            {
-                StringArray headersArray;
-                headersArray.addLines (reinterpret_cast <const WCHAR*> (buffer.getData()));
-
-                for (int i = 0; i < headersArray.size(); ++i)
-                {
-                    const String& header = headersArray[i];
-                    const String key (header.upToFirstOccurrenceOf (": ", false, false));
-                    const String value (header.fromFirstOccurrenceOf (": ", false, false));
-                    const String previousValue (headers [key]);
-
-                    headers.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
-                }
-
-                break;
-            }
-
-            if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-                break;
-        }
-    }
-}
-
-void juce_closeInternetFile (void* handle)
-{
-    if (handle != 0)
-    {
-        ScopedPointer <ConnectionAndRequestStruct> crs (static_cast <ConnectionAndRequestStruct*> (handle));
-        InternetCloseHandle (crs->request);
-        InternetCloseHandle (crs->connection);
-    }
-}
 
 //==============================================================================
 namespace MACAddressHelpers

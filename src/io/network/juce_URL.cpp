@@ -126,6 +126,62 @@ namespace URLHelpers
 
         return url[i] == ':' ? i + 1 : 0;
     }
+
+    void createHeadersAndPostData (const URL& url, String& headers, MemoryBlock& postData)
+    {
+        MemoryOutputStream data (postData, false);
+
+        if (url.getFilesToUpload().size() > 0)
+        {
+            // need to upload some files, so do it as multi-part...
+            const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
+
+            headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
+
+            data << "--" << boundary;
+
+            int i;
+            for (i = 0; i < url.getParameters().size(); ++i)
+            {
+                data << "\r\nContent-Disposition: form-data; name=\""
+                     << url.getParameters().getAllKeys() [i]
+                     << "\"\r\n\r\n"
+                     << url.getParameters().getAllValues() [i]
+                     << "\r\n--"
+                     << boundary;
+            }
+
+            for (i = 0; i < url.getFilesToUpload().size(); ++i)
+            {
+                const File file (url.getFilesToUpload().getAllValues() [i]);
+                const String paramName (url.getFilesToUpload().getAllKeys() [i]);
+
+                data << "\r\nContent-Disposition: form-data; name=\"" << paramName
+                     << "\"; filename=\"" << file.getFileName() << "\"\r\n";
+
+                const String mimeType (url.getMimeTypesOfUploadFiles()
+                                          .getValue (paramName, String::empty));
+
+                if (mimeType.isNotEmpty())
+                    data << "Content-Type: " << mimeType << "\r\n";
+
+                data << "Content-Transfer-Encoding: binary\r\n\r\n"
+                     << file << "\r\n--" << boundary;
+            }
+
+            data << "--\r\n";
+            data.flush();
+        }
+        else
+        {
+            data << getMangledParameters (url.getParameters()) << url.getPostData();
+            data.flush();
+
+            // just a short text attachment, so use simple url encoding..
+            headers << "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
+                    << postData.getSize() << "\r\n";
+        }
+    }
 }
 
 const String URL::toString (const bool includeGetParameters) const
@@ -201,27 +257,20 @@ const URL URL::withNewSubPath (const String& newPath) const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    if (possibleURL.startsWithIgnoreCase ("http:")
-         || possibleURL.startsWithIgnoreCase ("ftp:"))
-        return true;
+    const char* validProtocols[] = { "http:", "ftp:", "https:" };
 
-    if (possibleURL.startsWithIgnoreCase ("file:")
-         || possibleURL.containsChar ('@')
-         || possibleURL.endsWithChar ('.')
-         || (! possibleURL.containsChar ('.')))
-        return false;
-
-    if (possibleURL.startsWithIgnoreCase ("www.")
-         && possibleURL.substring (5).containsChar ('.'))
-        return true;
-
-    const char* commonTLDs[] = { "com", "net", "org", "uk", "de", "fr", "jp" };
-
-    for (int i = 0; i < numElementsInArray (commonTLDs); ++i)
-        if ((possibleURL + "/").containsIgnoreCase ("." + String (commonTLDs[i]) + "/"))
+    for (int i = 0; i < numElementsInArray (validProtocols); ++i)
+        if (possibleURL.startsWithIgnoreCase (validProtocols[i]))
             return true;
 
-    return false;
+    if (possibleURL.containsChar ('@')
+         || possibleURL.containsChar (' '))
+        return false;
+
+    const String topLevelDomain (possibleURL.upToFirstOccurrenceOf ("/", false, false)
+                                            .fromLastOccurrenceOf (".", false, false));
+
+    return topLevelDomain.isNotEmpty() && topLevelDomain.length() <= 3;
 }
 
 bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
@@ -234,194 +283,6 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 }
 
 //==============================================================================
-void* juce_openInternetFile (const String& url,
-                             const String& headers,
-                             const MemoryBlock& optionalPostData,
-                             const bool isPost,
-                             URL::OpenStreamProgressCallback* callback,
-                             void* callbackContext,
-                             int timeOutMs);
-
-void juce_closeInternetFile (void* handle);
-int juce_readFromInternetFile (void* handle, void* dest, int bytesToRead);
-int juce_seekInInternetFile (void* handle, int newPosition);
-int64 juce_getInternetFileContentLength (void* handle);
-void juce_getInternetFileHeaders (void* handle, StringPairArray& headers);
-
-
-//==============================================================================
-class WebInputStream  : public InputStream
-{
-public:
-    //==============================================================================
-    WebInputStream (const URL& url,
-                    const bool isPost_,
-                    URL::OpenStreamProgressCallback* const progressCallback_,
-                    void* const progressCallbackContext_,
-                    const String& extraHeaders,
-                    const int timeOutMs_,
-                    StringPairArray* const responseHeaders)
-      : position (0),
-        finished (false),
-        isPost (isPost_),
-        progressCallback (progressCallback_),
-        progressCallbackContext (progressCallbackContext_),
-        timeOutMs (timeOutMs_)
-    {
-        server = url.toString (! isPost);
-
-        if (isPost_)
-            createHeadersAndPostData (url);
-
-        headers += extraHeaders;
-
-        if (! headers.endsWithChar ('\n'))
-            headers << "\r\n";
-
-        handle = juce_openInternetFile (server, headers, postData, isPost,
-                                        progressCallback_, progressCallbackContext_,
-                                        timeOutMs);
-
-        if (responseHeaders != 0)
-            juce_getInternetFileHeaders (handle, *responseHeaders);
-    }
-
-    ~WebInputStream()
-    {
-        juce_closeInternetFile (handle);
-    }
-
-    //==============================================================================
-    bool isError() const        { return handle == 0; }
-    int64 getTotalLength()      { return juce_getInternetFileContentLength (handle); }
-    bool isExhausted()          { return finished; }
-    int64 getPosition()         { return position; }
-
-    int read (void* dest, int bytes)
-    {
-        if (finished || isError())
-        {
-            return 0;
-        }
-        else
-        {
-            const int bytesRead = juce_readFromInternetFile (handle, dest, bytes);
-            position += bytesRead;
-
-            if (bytesRead == 0)
-                finished = true;
-
-            return bytesRead;
-        }
-    }
-
-    bool setPosition (int64 wantedPos)
-    {
-        if (wantedPos != position)
-        {
-            finished = false;
-
-            const int actualPos = juce_seekInInternetFile (handle, (int) wantedPos);
-
-            if (actualPos == wantedPos)
-            {
-                position = wantedPos;
-            }
-            else
-            {
-                if (wantedPos < position)
-                {
-                    juce_closeInternetFile (handle);
-
-                    position = 0;
-                    finished = false;
-
-                    handle = juce_openInternetFile (server, headers, postData, isPost,
-                                                    progressCallback, progressCallbackContext,
-                                                    timeOutMs);
-                }
-
-                skipNextBytes (wantedPos - position);
-            }
-        }
-
-        return true;
-    }
-
-    //==============================================================================
-private:
-    String server, headers;
-    MemoryBlock postData;
-    int64 position;
-    bool finished;
-    const bool isPost;
-    void* handle;
-    URL::OpenStreamProgressCallback* const progressCallback;
-    void* const progressCallbackContext;
-    const int timeOutMs;
-
-    void createHeadersAndPostData (const URL& url)
-    {
-        MemoryOutputStream data (postData, false);
-
-        if (url.getFilesToUpload().size() > 0)
-        {
-            // need to upload some files, so do it as multi-part...
-            const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
-
-            headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
-
-            data << "--" << boundary;
-
-            int i;
-            for (i = 0; i < url.getParameters().size(); ++i)
-            {
-                data << "\r\nContent-Disposition: form-data; name=\""
-                     << url.getParameters().getAllKeys() [i]
-                     << "\"\r\n\r\n"
-                     << url.getParameters().getAllValues() [i]
-                     << "\r\n--"
-                     << boundary;
-            }
-
-            for (i = 0; i < url.getFilesToUpload().size(); ++i)
-            {
-                const File file (url.getFilesToUpload().getAllValues() [i]);
-                const String paramName (url.getFilesToUpload().getAllKeys() [i]);
-
-                data << "\r\nContent-Disposition: form-data; name=\"" << paramName
-                     << "\"; filename=\"" << file.getFileName() << "\"\r\n";
-
-                const String mimeType (url.getMimeTypesOfUploadFiles()
-                                          .getValue (paramName, String::empty));
-
-                if (mimeType.isNotEmpty())
-                    data << "Content-Type: " << mimeType << "\r\n";
-
-                data << "Content-Transfer-Encoding: binary\r\n\r\n"
-                     << file << "\r\n--" << boundary;
-            }
-
-            data << "--\r\n";
-            data.flush();
-        }
-        else
-        {
-            data << URLHelpers::getMangledParameters (url.getParameters())
-                 << url.getPostData();
-
-            data.flush();
-
-            // just a short text attachment, so use simple url encoding..
-            headers = "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                        + String ((unsigned int) postData.getSize())
-                        + "\r\n";
-        }
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
-};
-
 InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
                                      void* const progressCallbackContext,
@@ -429,11 +290,20 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      const int timeOutMs,
                                      StringPairArray* const responseHeaders) const
 {
-    ScopedPointer <WebInputStream> wi (new WebInputStream (*this, usePostCommand,
-                                                           progressCallback, progressCallbackContext,
-                                                           extraHeaders, timeOutMs, responseHeaders));
+    String headers;
+    MemoryBlock postData;
 
-    return wi->isError() ? 0 : wi.release();
+    if (usePostCommand)
+        URLHelpers::createHeadersAndPostData (*this, headers, postData);
+
+    headers += extraHeaders;
+
+    if (! headers.endsWithChar ('\n'))
+        headers << "\r\n";
+
+    return createNativeStream (toString (! usePostCommand), usePostCommand, postData,
+                               progressCallback, progressCallbackContext,
+                               headers, timeOutMs, responseHeaders);
 }
 
 //==============================================================================
@@ -581,5 +451,6 @@ bool URL::launchInDefaultBrowser() const
 
     return PlatformUtilities::openDocument (u, String::empty);
 }
+
 
 END_JUCE_NAMESPACE

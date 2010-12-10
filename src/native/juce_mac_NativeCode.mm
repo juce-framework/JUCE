@@ -34,6 +34,8 @@
 
 #if JUCE_MAC || JUCE_IOS
 
+#undef JUCE_BUILD_NATIVE
+#define JUCE_BUILD_NATIVE 1
 #include "mac/juce_mac_NativeIncludes.h"
 
 BEGIN_JUCE_NAMESPACE

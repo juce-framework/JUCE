@@ -567,7 +567,8 @@ private:
     //==============================================================================
     AudioProcessorGraph& graph;
     const Array<void*>& orderedNodes;
-    Array <int> nodeIds, channels, midiNodeIds;
+    Array <int> channels;
+    Array <uint32> nodeIds, midiNodeIds;
 
     //==============================================================================
     void createRenderingOpsForNode (AudioProcessorGraph::Node* const node,
@@ -850,7 +851,7 @@ private:
         return 0;
     }
 
-    int getBufferContaining (const int nodeId, const int outputChannel) const
+    int getBufferContaining (const uint32 nodeId, const int outputChannel) const
     {
         if (outputChannel == AudioProcessorGraph::midiChannelIndex)
         {
@@ -897,7 +898,7 @@ private:
 
     bool isBufferNeededLater (int stepIndexToSearchFrom,
                               int inputChannelOfIndexToIgnore,
-                              const int nodeId,
+                              const uint32 nodeId,
                               const int outputChanIndex) const
     {
         while (stepIndexToSearchFrom < orderedNodes.size())
@@ -927,7 +928,7 @@ private:
         return false;
     }
 
-    void markBufferAsContaining (int bufferNum, int nodeId, int outputIndex)
+    void markBufferAsContaining (int bufferNum, uint32 nodeId, int outputIndex)
     {
         if (outputIndex == AudioProcessorGraph::midiChannelIndex)
         {

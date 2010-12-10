@@ -82,7 +82,7 @@
 #undef PACKED
 
 //==============================================================================
-#if JUCE_ASIO
+#if JUCE_ASIO && JUCE_BUILD_NATIVE
 /*
     This is very frustrating - we only need to use a handful of definitions from
     a couple of the header files in Steinberg's ASIO SDK, and it'd be easy to copy
@@ -112,7 +112,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_USE_CDBURNER
+#if JUCE_USE_CDBURNER && JUCE_BUILD_NATIVE
 
  /* You'll need the Platform SDK for these headers - if you don't have it and don't
     need to use CD-burning, then you might just want to disable the JUCE_USE_CDBURNER
@@ -123,7 +123,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_USE_CAMERA
+#if JUCE_USE_CAMERA && JUCE_BUILD_NATIVE
 
  /*  If you're using the camera classes, you'll need access to a few DirectShow headers.
 
@@ -147,7 +147,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_WASAPI
+#if JUCE_WASAPI && JUCE_BUILD_NATIVE
  #include <MMReg.h>
  #include <mmdeviceapi.h>
  #include <Audioclient.h>
@@ -183,7 +183,7 @@
  #pragma warning (pop)
 #endif
 
-#if JUCE_DIRECT2D
+#if JUCE_DIRECT2D && JUCE_BUILD_NATIVE
  #include <d2d1.h>
  #include <dwrite.h>
 #endif

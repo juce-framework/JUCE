@@ -142,8 +142,6 @@ using namespace JUCE_NAMESPACE;
 
 class JuceURLConnectionMessageThread  : public Thread
 {
-    JuceURLConnection* owner;
-
 public:
     JuceURLConnectionMessageThread (JuceURLConnection* owner_)
         : Thread ("http connection"),
@@ -166,6 +164,9 @@ public:
             [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
     }
+
+private:
+    JuceURLConnection* owner;
 };
 
 
@@ -324,119 +325,155 @@ public:
 }
 
 @end
+
 BEGIN_JUCE_NAMESPACE
 
-
-void* juce_openInternetFile (const String& url,
-                             const String& headers,
-                             const MemoryBlock& postData,
-                             const bool isPost,
-                             URL::OpenStreamProgressCallback* callback,
-                             void* callbackContext,
-                             int timeOutMs)
+//==============================================================================
+class WebInputStream  : public InputStream
 {
-    const ScopedAutoReleasePool pool;
-
-    NSMutableURLRequest* req = [NSMutableURLRequest
-            requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
-               cachePolicy: NSURLRequestUseProtocolCachePolicy
-           timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
-
-    if (req == nil)
-        return 0;
-
-    [req setHTTPMethod: isPost ? @"POST" : @"GET"];
-    //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
-
-    StringArray headerLines;
-    headerLines.addLines (headers);
-    headerLines.removeEmptyStrings (true);
-
-    for (int i = 0; i < headerLines.size(); ++i)
+public:
+    //==============================================================================
+    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
+                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
+      : connection (nil),
+        address (address_), headers (headers_), postData (postData_), position (0),
+        finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
-        const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
+        JUCE_AUTORELEASEPOOL
+        connection = createConnection (progressCallback, progressCallbackContext);
 
-        if (key.isNotEmpty() && value.isNotEmpty())
-            [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+        if (responseHeaders != 0 && connection != 0 && connection->headers != 0)
+        {
+            NSEnumerator* enumerator = [connection->headers keyEnumerator];
+            NSString* key;
+
+            while ((key = [enumerator nextObject]) != nil)
+                responseHeaders->set (nsStringToJuce (key),
+                                      nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
+        }
     }
 
-    if (isPost && postData.getSize() > 0)
+    ~WebInputStream()
     {
-        [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                         length: postData.getSize()]];
+        close();
     }
 
-    JuceURLConnection* const s = [[JuceURLConnection alloc] initWithRequest: req
-                                                               withCallback: callback
-                                                                withContext: callbackContext];
+    //==============================================================================
+    bool isError() const        { return connection == nil; }
+    int64 getTotalLength()      { return connection == nil ? -1 : connection->contentLength; }
+    bool isExhausted()          { return finished; }
+    int64 getPosition()         { return position; }
 
-    if ([s isOpen])
-        return s;
-
-    [s release];
-    return 0;
-}
-
-void juce_closeInternetFile (void* handle)
-{
-    JuceURLConnection* const s = (JuceURLConnection*) handle;
-
-    if (s != 0)
+    int read (void* buffer, int bytesToRead)
     {
-        const ScopedAutoReleasePool pool;
-        [s stop];
+        if (finished || isError())
+        {
+            return 0;
+        }
+        else
+        {
+            JUCE_AUTORELEASEPOOL
+            const int bytesRead = [connection read: static_cast <char*> (buffer) numBytes: bytesToRead];
+            position += bytesRead;
+
+            if (bytesRead == 0)
+                finished = true;
+
+            return bytesRead;
+        }
+    }
+
+    bool setPosition (int64 wantedPos)
+    {
+        if (wantedPos != position)
+        {
+            finished = false;
+
+            if (wantedPos < position)
+            {
+                close();
+                position = 0;
+                connection = createConnection (0, 0);
+            }
+
+            skipNextBytes (wantedPos - position);
+        }
+
+        return true;
+    }
+
+    //==============================================================================
+private:
+    JuceURLConnection* connection;
+    String address, headers;
+    MemoryBlock postData;
+    int64 position;
+    bool finished;
+    const bool isPost;
+    const int timeOutMs;
+
+    void close()
+    {
+        [connection stop];
+        [connection release];
+        connection = nil;
+    }
+
+    JuceURLConnection* createConnection (URL::OpenStreamProgressCallback* progressCallback,
+                                         void* progressCallbackContext)
+    {
+        NSMutableURLRequest* req = [NSMutableURLRequest  requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
+                                                            cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                                        timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
+
+        if (req == nil)
+            return 0;
+
+        [req setHTTPMethod: isPost ? @"POST" : @"GET"];
+        //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
+
+        StringArray headerLines;
+        headerLines.addLines (headers);
+        headerLines.removeEmptyStrings (true);
+
+        for (int i = 0; i < headerLines.size(); ++i)
+        {
+            const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
+            const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
+
+            if (key.isNotEmpty() && value.isNotEmpty())
+                [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+        }
+
+        if (isPost && postData.getSize() > 0)
+            [req setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                             length: postData.getSize()]];
+
+        JuceURLConnection* const s = [[JuceURLConnection alloc] initWithRequest: req
+                                                                   withCallback: progressCallback
+                                                                    withContext: progressCallbackContext];
+
+        if ([s isOpen])
+            return s;
+
         [s release];
-    }
-}
-
-int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
-{
-    JuceURLConnection* const s = (JuceURLConnection*) handle;
-
-    if (s != 0)
-    {
-        const ScopedAutoReleasePool pool;
-        return [s read: (char*) buffer numBytes: bytesToRead];
+        return 0;
     }
 
-    return 0;
-}
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
+};
 
-int64 juce_getInternetFileContentLength (void* handle)
+InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
+                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
 {
-    JuceURLConnection* const s = (JuceURLConnection*) handle;
+    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
+                                                           progressCallback, progressCallbackContext,
+                                                           headers, timeOutMs, responseHeaders));
 
-    if (s != 0)
-        return s->contentLength;
-
-    return -1;
+    return wi->isError() ? 0 : wi.release();
 }
 
-void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
-{
-    JuceURLConnection* const s = (JuceURLConnection*) handle;
-
-    if (s != 0 && s->headers != 0)
-    {
-        NSEnumerator* enumerator = [s->headers keyEnumerator];
-        NSString* key;
-
-        while ((key = [enumerator nextObject]) != nil)
-            headers.set (nsStringToJuce (key),
-                         nsStringToJuce ((NSString*) [s->headers objectForKey: key]));
-    }
-}
-
-
-int juce_seekInInternetFile (void* handle, int /*newPosition*/)
-{
-    JuceURLConnection* const s = (JuceURLConnection*) handle;
-
-    if (s != 0)
-        return [s readPosition];
-
-    return 0;
-}
 
 #endif

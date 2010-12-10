@@ -34,6 +34,8 @@
 
 #if JUCE_WINDOWS
 
+#undef JUCE_BUILD_NATIVE
+#define JUCE_BUILD_NATIVE 1
 #include "windows/juce_win32_NativeIncludes.h"
 #include "../core/juce_StandardHeader.h"
 

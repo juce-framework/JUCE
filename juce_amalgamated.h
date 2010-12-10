@@ -17030,6 +17030,11 @@ private:
 	String url, postData;
 	StringPairArray parameters, filesToUpload, mimeTypes;
 
+	static InputStream* createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
+											OpenStreamProgressCallback* progressCallback,
+											void* progressCallbackContext, const String& headers,
+											const int timeOutMs, StringPairArray* responseHeaders);
+
 	JUCE_LEAK_DETECTOR (URL);
 };
 
@@ -33841,6 +33846,9 @@ public:
 	*/
 	double getCurrentPosition() const;
 
+	/** Returns the stream's length in seconds. */
+	double getLengthInSeconds() const;
+
 	/** Returns true if the player has stopped because its input stream ran out of data.
 	*/
 	bool hasStreamFinished() const throw()		  { return inputStreamEOF; }
@@ -49533,7 +49541,7 @@ private:
 	int getNumRows() const throw();
 	TreeViewItem* getItemOnRow (int index) throw();
 	void deselectAllRecursively();
-	int countSelectedItemsRecursively() const throw();
+	int countSelectedItemsRecursively (int depth) const throw();
 	TreeViewItem* getSelectedItemWithIndex (int index) throw();
 	TreeViewItem* getNextVisibleItem (bool recurse) const throw();
 	TreeViewItem* findItemFromIdentifierString (const String& identifierString);
@@ -49656,10 +49664,11 @@ public:
 	void clearSelectedItems();
 
 	/** Returns the number of items that are currently selected.
-
+		If maximumDepthToSearchTo is >= 0, it lets you specify a maximum depth to which the
+		tree will be recursed.
 		@see getSelectedItem, clearSelectedItems
 	*/
-	int getNumSelectedItems() const throw();
+	int getNumSelectedItems (int maximumDepthToSearchTo = -1) const throw();
 
 	/** Returns one of the selected items in the tree.
 

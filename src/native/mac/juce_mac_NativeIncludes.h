@@ -53,17 +53,21 @@
 #else
  #import <Cocoa/Cocoa.h>
  #import <CoreAudio/HostTime.h>
- #import <CoreAudio/AudioHardware.h>
- #import <CoreMIDI/MIDIServices.h>
- #import <QTKit/QTKit.h>
- #import <WebKit/WebKit.h>
- #import <DiscRecording/DiscRecording.h>
- #import <IOKit/IOKitLib.h>
- #import <IOKit/IOCFPlugIn.h>
- #import <IOKit/hid/IOHIDLib.h>
- #import <IOKit/hid/IOHIDKeys.h>
- #import <IOKit/pwr_mgt/IOPMLib.h>
- #include <Carbon/Carbon.h>
+ #if JUCE_BUILD_NATIVE
+  #import <CoreAudio/AudioHardware.h>
+  #import <CoreMIDI/MIDIServices.h>
+  #import <QTKit/QTKit.h>
+  #import <WebKit/WebKit.h>
+  #import <DiscRecording/DiscRecording.h>
+  #import <IOKit/IOKitLib.h>
+  #import <IOKit/IOCFPlugIn.h>
+  #import <IOKit/hid/IOHIDLib.h>
+  #import <IOKit/hid/IOHIDKeys.h>
+  #import <IOKit/pwr_mgt/IOPMLib.h>
+ #endif
+ #if JUCE_BUILD_MISC && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU)
+  #include <Carbon/Carbon.h>
+ #endif
  #include <sys/dir.h>
 #endif
 

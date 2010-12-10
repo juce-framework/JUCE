@@ -34,6 +34,8 @@
 
 #if JUCE_LINUX
 
+#undef JUCE_BUILD_NATIVE
+#define JUCE_BUILD_NATIVE 1
 #include "linux/juce_linux_NativeIncludes.h"
 
 BEGIN_JUCE_NAMESPACE
