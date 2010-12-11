@@ -293,7 +293,7 @@ void Desktop::removeGlobalMouseListener (MouseListener* const listener)
 
 void Desktop::timerCallback()
 {
-    if (lastFakeMouseMove != getRawMousePosition())
+    if (lastFakeMouseMove != getMousePosition())
         sendMouseMove();
 }
 
@@ -303,7 +303,7 @@ void Desktop::sendMouseMove()
     {
         startTimer (20);
 
-        lastFakeMouseMove = getRawMousePosition();
+        lastFakeMouseMove = getMousePosition();
 
         Component* const target = findComponentAt (lastFakeMouseMove);
 
@@ -331,7 +331,7 @@ void Desktop::resetTimer()
     else
         startTimer (100);
 
-    lastFakeMouseMove = getRawMousePosition();
+    lastFakeMouseMove = getMousePosition();
 }
 
 //==============================================================================

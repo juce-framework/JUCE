@@ -182,10 +182,6 @@ public:
 private:
     struct SyntaxToken
     {
-        String text;
-        int tokenType;
-        float width;
-
         SyntaxToken (const String& text_, const int type) throw()
             : text (text_), tokenType (type), width (-1.0f)
         {
@@ -195,6 +191,10 @@ private:
         {
             return text != other.text || tokenType != other.tokenType;
         }
+
+        String text;
+        int tokenType;
+        float width;
     };
 
     Array <SyntaxToken> tokens;

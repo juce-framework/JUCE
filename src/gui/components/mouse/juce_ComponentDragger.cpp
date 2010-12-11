@@ -59,7 +59,14 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
     if (componentToDrag != 0)
     {
         Rectangle<int> bounds (componentToDrag->getBounds());
-        bounds += e.getEventRelativeTo (componentToDrag).getPosition() - mouseDownWithinTarget;
+
+        // If the component is a window, multiple mouse events can get queued while it's in the same position,
+        // so their coordinates become wrong after the first one moves the window, so in that case, we'll use
+        // the current mouse position instead of the one that the event contains...
+        if (componentToDrag->isOnDesktop())
+            bounds += componentToDrag->getMouseXYRelative() - mouseDownWithinTarget;
+        else
+            bounds += e.getEventRelativeTo (componentToDrag).getPosition() - mouseDownWithinTarget;
 
         if (constrainer != 0)
             constrainer->setBoundsForComponent (componentToDrag, bounds, false, false, false, false);

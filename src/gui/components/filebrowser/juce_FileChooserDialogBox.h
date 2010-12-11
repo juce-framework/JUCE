@@ -144,7 +144,6 @@ private:
     {
     public:
         ContentComponent (const String& name, const String& instructions, FileBrowserComponent& chooserComponent);
-        ~ContentComponent();
 
         void paint (Graphics& g);
         void resized();
@@ -153,11 +152,14 @@ private:
         GlyphArrangement text;
 
         FileBrowserComponent& chooserComponent;
-        TextButton okButton, cancelButton;
+        TextButton okButton, cancelButton, newFolderButton;
     };
 
     ContentComponent* content;
     const bool warnAboutOverwritingExistingFiles;
+
+    void okButtonPressed();
+    void createNewFolder();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
 };

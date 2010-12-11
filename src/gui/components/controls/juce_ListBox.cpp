@@ -583,7 +583,7 @@ void ListBox::selectRowsBasedOnModifierKeys (const int row,
     }
     else if ((! mods.isPopupMenu()) || ! isRowSelected (row))
     {
-        selectRowInternal (row, false, true, true);
+        selectRowInternal (row, false, ! (multipleSelection && isRowSelected (row)), true);
     }
 }
 

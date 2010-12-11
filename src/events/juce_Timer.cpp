@@ -78,15 +78,7 @@ public:
             const int elapsed = now - lastTime;
             lastTime = now;
 
-            int timeUntilFirstTimer = 1000;
-
-            {
-                const ScopedLock sl (lock);
-                decrementAllCounters (elapsed);
-
-                if (firstTimer != 0)
-                    timeUntilFirstTimer = firstTimer->countdownMs;
-            }
+            const int timeUntilFirstTimer = getTimeUntilFirstTimer (elapsed);
 
             if (timeUntilFirstTimer <= 0)
             {
@@ -309,15 +301,14 @@ private:
         t->previous = 0;
     }
 
-    void decrementAllCounters (const int numMillisecs) const
+    int getTimeUntilFirstTimer (const int numMillisecsElapsed) const
     {
-        Timer* t = firstTimer;
+        const ScopedLock sl (lock);
 
-        while (t != 0)
-        {
-            t->countdownMs -= numMillisecs;
-            t = t->next;
-        }
+        for (Timer* t = firstTimer; t != 0; t = t->next)
+            t->countdownMs -= numMillisecsElapsed;
+
+        return firstTimer != 0 ? firstTimer->countdownMs : 1000;
     }
 
     void handleAsyncUpdate()

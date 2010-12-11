@@ -275,6 +275,7 @@ public:
          contentHeight (0),
          childYOffset (0),
          menuCreationTime (Time::getMillisecondCounter()),
+         lastMouseMoveTime (0),
          timeEnteredCurrentChildComp (0),
          scrollAcceleration (1.0)
     {

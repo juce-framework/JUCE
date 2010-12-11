@@ -375,12 +375,13 @@ private:
     //==============================================================================
     struct ItemInfo
     {
+        ItemInfo (const String& name, int itemId, bool isEnabled, bool isHeading);
+        bool isSeparator() const throw();
+        bool isRealItem() const throw();
+
         String name;
         int itemId;
         bool isEnabled : 1, isHeading : 1;
-
-        bool isSeparator() const throw();
-        bool isRealItem() const throw();
     };
 
     class Callback;

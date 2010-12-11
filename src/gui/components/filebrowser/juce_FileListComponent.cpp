@@ -89,16 +89,13 @@ class FileListItemComponent  : public Component,
 public:
     //==============================================================================
     FileListItemComponent (FileListComponent& owner_, TimeSliceThread& thread_)
-        : owner (owner_), thread (thread_),
-          highlighted (false), index (0), icon (0)
+        : owner (owner_), thread (thread_), index (0), highlighted (false)
     {
     }
 
     ~FileListItemComponent()
     {
         thread.removeTimeSliceClient (this);
-
-        clearIcon();
     }
 
     //==============================================================================
@@ -106,8 +103,7 @@ public:
     {
         getLookAndFeel().drawFileBrowserRow (g, getWidth(), getHeight(),
                                              file.getFileName(),
-                                             &icon,
-                                             fileSize, modTime,
+                                             &icon, fileSize, modTime,
                                              isDirectory, highlighted,
                                              index, owner);
     }
@@ -130,8 +126,7 @@ public:
     {
         thread.removeTimeSliceClient (this);
 
-        if (highlighted_ != highlighted
-             || index_ != index)
+        if (highlighted_ != highlighted || index_ != index)
         {
             index = index_;
             highlighted = highlighted_;
@@ -139,8 +134,7 @@ public:
         }
 
         File newFile;
-        String newFileSize;
-        String newModTime;
+        String newFileSize, newModTime;
 
         if (fileInfo != 0)
         {
@@ -156,11 +150,10 @@ public:
             file = newFile;
             fileSize = newFileSize;
             modTime = newModTime;
-
+            icon = Image::null;
             isDirectory = fileInfo != 0 && fileInfo->isDirectory;
-            repaint();
 
-            clearIcon();
+            repaint();
         }
 
         if (file != File::nonexistent && icon.isNull() && ! isDirectory)
@@ -187,18 +180,11 @@ private:
     //==============================================================================
     FileListComponent& owner;
     TimeSliceThread& thread;
-    bool highlighted;
-    int index;
     File file;
-    String fileSize;
-    String modTime;
+    String fileSize, modTime;
     Image icon;
-    bool isDirectory;
-
-    void clearIcon()
-    {
-        icon = Image::null;
-    }
+    int index;
+    bool highlighted, isDirectory;
 
     void updateIcon (const bool onlyUpdateIfCached)
     {

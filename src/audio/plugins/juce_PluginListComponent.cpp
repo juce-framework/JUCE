@@ -243,7 +243,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
 
         aw.addCustomComponent (&pathList);
         aw.addButton (TRANS("Scan"), 1, KeyPress::returnKey);
-        aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
+        aw.addButton (TRANS("Cancel"), 0, KeyPress::escapeKey);
 
         if (aw.runModalLoop() == 0)
             return;
@@ -262,7 +262,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
     AlertWindow aw (TRANS("Scanning for plugins..."),
                     TRANS("Searching for all possible plugin files..."), AlertWindow::NoIcon);
 
-    aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
+    aw.addButton (TRANS("Cancel"), 0, KeyPress::escapeKey);
     aw.addProgressBarComponent (progress);
 
     aw.enterModalState();

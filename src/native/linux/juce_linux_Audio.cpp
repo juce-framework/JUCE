@@ -225,15 +225,13 @@ public:
             return false;
         }
 
-        /*
-#if JUCE_DEBUG
+      #if 0
         // enable this to dump the config of the devices that get opened
         snd_output_t* out;
         snd_output_stdio_attach (&out, stderr, 0);
         snd_pcm_hw_params_dump (hwParams, out);
         snd_pcm_sw_params_dump (swParams, out);
-#endif
-        */
+      #endif
 
         numChannelsRunning = numChannels;
 

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	100
+#define JUCE_BUILDNUMBER	102
 
 /** Current Juce version number.
 
@@ -29637,8 +29637,6 @@ private:
 
 	ComponentAnimator animator;
 
-	static const Point<int> getRawMousePosition();
-
 	void timerCallback();
 	void resetTimer();
 
@@ -38716,12 +38714,13 @@ private:
 
 	struct ItemInfo
 	{
+		ItemInfo (const String& name, int itemId, bool isEnabled, bool isHeading);
+		bool isSeparator() const throw();
+		bool isRealItem() const throw();
+
 		String name;
 		int itemId;
 		bool isEnabled : 1, isHeading : 1;
-
-		bool isSeparator() const throw();
-		bool isRealItem() const throw();
 	};
 
 	class Callback;
@@ -51981,7 +51980,6 @@ private:
 	{
 	public:
 		ContentComponent (const String& name, const String& instructions, FileBrowserComponent& chooserComponent);
-		~ContentComponent();
 
 		void paint (Graphics& g);
 		void resized();
@@ -51990,11 +51988,14 @@ private:
 		GlyphArrangement text;
 
 		FileBrowserComponent& chooserComponent;
-		TextButton okButton, cancelButton;
+		TextButton okButton, cancelButton, newFolderButton;
 	};
 
 	ContentComponent* content;
 	const bool warnAboutOverwritingExistingFiles;
+
+	void okButtonPressed();
+	void createNewFolder();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
 };
@@ -56717,6 +56718,8 @@ private:
 	friend class ComponentPeer;
 	friend class MouseInputSourceInternal;
 	ScopedPointer<MouseInputSourceInternal> pimpl;
+
+	static const Point<int> getCurrentMousePosition();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource);
 };

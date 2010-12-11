@@ -172,6 +172,8 @@ private:
     friend class MouseInputSourceInternal;
     ScopedPointer<MouseInputSourceInternal> pimpl;
 
+    static const Point<int> getCurrentMousePosition();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource);
 };
 

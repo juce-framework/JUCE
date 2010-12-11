@@ -34,6 +34,22 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+ComboBox::ItemInfo::ItemInfo (const String& name_, int itemId_, bool isEnabled_, bool isHeading_)
+    : name (name_), itemId (itemId_), isEnabled (isEnabled_), isHeading (isHeading_)
+{
+}
+
+bool ComboBox::ItemInfo::isSeparator() const throw()
+{
+    return name.isEmpty();
+}
+
+bool ComboBox::ItemInfo::isRealItem() const throw()
+{
+    return ! (isHeading || name.isEmpty());
+}
+
+//==============================================================================
 ComboBox::ComboBox (const String& name)
     : Component (name),
       lastCurrentId (0),
@@ -106,20 +122,10 @@ void ComboBox::addItem (const String& newItemText, const int newItemId)
         if (separatorPending)
         {
             separatorPending = false;
-
-            ItemInfo* const item = new ItemInfo();
-            item->itemId = 0;
-            item->isEnabled = false;
-            item->isHeading = false;
-            items.add (item);
+            items.add (new ItemInfo (String::empty, 0, false, false));
         }
 
-        ItemInfo* const item = new ItemInfo();
-        item->name = newItemText;
-        item->itemId = newItemId;
-        item->isEnabled = true;
-        item->isHeading = false;
-        items.add (item);
+        items.add (new ItemInfo (newItemText, newItemId, true, false));
     }
 }
 
@@ -138,20 +144,10 @@ void ComboBox::addSectionHeading (const String& headingName)
         if (separatorPending)
         {
             separatorPending = false;
-
-            ItemInfo* const item = new ItemInfo();
-            item->itemId = 0;
-            item->isEnabled = false;
-            item->isHeading = false;
-            items.add (item);
+            items.add (new ItemInfo (String::empty, 0, false, false));
         }
 
-        ItemInfo* const item = new ItemInfo();
-        item->name = headingName;
-        item->itemId = 0;
-        item->isEnabled = true;
-        item->isHeading = true;
-        items.add (item);
+        items.add (new ItemInfo (headingName, 0, true, true));
     }
 }
 
@@ -183,17 +179,6 @@ void ComboBox::clear (const bool dontSendChangeMessage)
 }
 
 //==============================================================================
-bool ComboBox::ItemInfo::isSeparator() const throw()
-{
-    return name.isEmpty();
-}
-
-bool ComboBox::ItemInfo::isRealItem() const throw()
-{
-    return ! (isHeading || name.isEmpty());
-}
-
-//==============================================================================
 ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const throw()
 {
     if (itemId != 0)
@@ -208,9 +193,7 @@ ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const throw()
 
 ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const throw()
 {
-    int n = 0;
-
-    for (int i = 0; i < items.size(); ++i)
+    for (int n = 0, i = 0; i < items.size(); ++i)
     {
         ItemInfo* const item = items.getUnchecked(i);
 
@@ -237,24 +220,19 @@ const String ComboBox::getItemText (const int index) const
 {
     const ItemInfo* const item = getItemForIndex (index);
 
-    if (item != 0)
-        return item->name;
-
-    return String::empty;
+    return item != 0 ? item->name : String::empty;
 }
 
 int ComboBox::getItemId (const int index) const throw()
 {
     const ItemInfo* const item = getItemForIndex (index);
 
-    return (item != 0) ? item->itemId : 0;
+    return item != 0 ? item->itemId : 0;
 }
 
 int ComboBox::indexOfItemId (const int itemId) const throw()
 {
-    int n = 0;
-
-    for (int i = 0; i < items.size(); ++i)
+    for (int n = 0, i = 0; i < items.size(); ++i)
     {
         const ItemInfo* const item = items.getUnchecked(i);
 
@@ -386,19 +364,13 @@ const String ComboBox::getTextWhenNoChoicesAvailable() const
 //==============================================================================
 void ComboBox::paint (Graphics& g)
 {
-    getLookAndFeel().drawComboBox (g,
-                                   getWidth(),
-                                   getHeight(),
-                                   isButtonDown,
-                                   label->getRight(),
-                                   0,
-                                   getWidth() - label->getRight(),
-                                   getHeight(),
+    getLookAndFeel().drawComboBox (g, getWidth(), getHeight(), isButtonDown,
+                                   label->getRight(), 0, getWidth() - label->getRight(), getHeight(),
                                    *this);
 
     if (textWhenNothingSelected.isNotEmpty()
-        && label->getText().isEmpty()
-        && ! label->isBeingEdited())
+         && label->getText().isEmpty()
+         && ! label->isBeingEdited())
     {
         g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
         g.setFont (label->getFont());
@@ -566,7 +538,7 @@ void ComboBox::mouseDown (const MouseEvent& e)
 {
     beginDragAutoRepeat (300);
 
-    isButtonDown = isEnabled();
+    isButtonDown = isEnabled() && ! e.mods.isPopupMenu();
 
     if (isButtonDown && (e.eventComponent == this || ! label->isEditable()))
         showPopup();

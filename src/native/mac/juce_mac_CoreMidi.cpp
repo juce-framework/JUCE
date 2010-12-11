@@ -32,7 +32,7 @@
 //==============================================================================
 namespace CoreMidiHelpers
 {
-    static bool logError (const OSStatus err, const int lineNum)
+    bool logError (const OSStatus err, const int lineNum)
     {
         if (err == noErr)
             return true;
@@ -46,7 +46,7 @@ namespace CoreMidiHelpers
     #define CHECK_ERROR(a) CoreMidiHelpers::logError (a, __LINE__)
 
     //==============================================================================
-    static const String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
+    const String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
     {
         String result;
         CFStringRef str = 0;
@@ -108,7 +108,7 @@ namespace CoreMidiHelpers
         return result;
     }
 
-    static const String getConnectedEndpointName (MIDIEndpointRef endpoint)
+    const String getConnectedEndpointName (MIDIEndpointRef endpoint)
     {
         String result;
 
@@ -177,7 +177,7 @@ namespace CoreMidiHelpers
         return getEndpointName (endpoint, false);
     }
 
-    static MIDIClientRef getGlobalMidiClient()
+    MIDIClientRef getGlobalMidiClient()
     {
         static MIDIClientRef globalMidiClient = 0;
 
@@ -228,8 +228,8 @@ namespace CoreMidiHelpers
 
     //==============================================================================
     class MidiPortAndCallback;
-    static CriticalSection callbackLock;
-    static Array<MidiPortAndCallback*> activeCallbacks;
+    CriticalSection callbackLock;
+    Array<MidiPortAndCallback*> activeCallbacks;
 
     class MidiPortAndCallback
     {
@@ -280,7 +280,7 @@ namespace CoreMidiHelpers
         MidiDataConcatenator concatenator;
     };
 
-    static void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)
+    void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)
     {
         static_cast <MidiPortAndCallback*> (readProcRefCon)->handlePackets (pktlist);
     }

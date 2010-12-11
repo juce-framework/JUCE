@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_MouseEvent.h"
 #include "../juce_Component.h"
 #include "../../../events/juce_AsyncUpdater.h"
+#include "../../../events/juce_MessageManager.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../windows/juce_ComponentPeer.h"
 
@@ -44,10 +45,6 @@ public:
         : index (index_), isMouseDevice (isMouseDevice_), source (source_), lastPeer (0),
           isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (0),
           mouseEventCounter (0), lastTime (0)
-    {
-    }
-
-    ~MouseInputSourceInternal()
     {
     }
 
@@ -92,8 +89,12 @@ public:
         return 0;
     }
 
-    const Point<int> getScreenPosition() const throw()
+    const Point<int> getScreenPosition()
     {
+        // This must only be called with the message manager locked!
+        jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+        setScreenPos (MouseInputSource::getCurrentMousePosition(), Time::currentTimeMillis(), false);
         return lastScreenPos + unboundedMouseOffset;
     }
 
@@ -430,8 +431,8 @@ public:
     }
 
     //==============================================================================
-    int index;
-    bool isMouseDevice;
+    const int index;
+    const bool isMouseDevice;
     Point<int> lastScreenPos;
     ModifierKeys buttonState;
 
@@ -457,7 +458,7 @@ private:
         Component* component;
         ModifierKeys buttons;
 
-        bool canBePartOfMultipleClickWith (const RecentMouseDown& other, int maxTimeBetween) const
+        bool canBePartOfMultipleClickWith (const RecentMouseDown& other, const int maxTimeBetween) const
         {
             return time - other.time < maxTimeBetween
                     && abs (position.getX() - other.position.getX()) < 8

@@ -354,8 +354,6 @@ private:
 
     ComponentAnimator animator;
 
-    static const Point<int> getRawMousePosition();
-
     void timerCallback();
     void resetTimer();
 

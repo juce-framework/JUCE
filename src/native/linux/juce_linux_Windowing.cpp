@@ -2806,7 +2806,7 @@ bool Desktop::canUseSemiTransparentWindows() throw()
              && (matchedDepth == desiredDepth);
 }
 
-const Point<int> Desktop::getRawMousePosition()
+const Point<int> MouseInputSource::getCurrentMousePosition()
 {
     Window root, child;
     int x, y, winx, winy;
