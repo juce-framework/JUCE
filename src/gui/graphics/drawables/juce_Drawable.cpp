@@ -58,7 +58,8 @@ void Drawable::draw (Graphics& g, float opacity, const AffineTransform& transfor
 
 void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform)
 {
-    g.saveState();
+    Graphics::ScopedSaveState ss (g);
+
     const float oldOpacity = getAlpha();
     setAlpha (opacity);
     g.addTransform (AffineTransform::translation ((float) -originRelativeToComponent.getX(),
@@ -70,7 +71,6 @@ void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& 
         paintEntireComponent (g, false);
 
     setAlpha (oldOpacity);
-    g.restoreState();
 }
 
 void Drawable::drawAt (Graphics& g, float x, float y, float opacity) const

@@ -47,10 +47,6 @@ public:
         setSelectAllWhenFocused (true);
     }
 
-    ~AlertWindowTextEditor()
-    {
-    }
-
     void returnPressed()
     {
         // pass these up the component hierarchy to be trigger the buttons

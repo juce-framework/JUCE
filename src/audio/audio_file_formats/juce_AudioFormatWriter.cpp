@@ -264,7 +264,7 @@ public:
     void setThumbnail (AudioThumbnail* thumb)
     {
         if (thumb != 0)
-            thumb->reset (buffer.getNumChannels(), writer->sampleRate);
+            thumb->reset (buffer.getNumChannels(), writer->getSampleRate());
 
         const ScopedLock sl (thumbnailLock);
         thumbnailToUpdate = thumb;

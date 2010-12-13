@@ -89,13 +89,12 @@ public:
         return 0;
     }
 
-    const Point<int> getScreenPosition()
+    const Point<int> getScreenPosition() const
     {
-        // This must only be called with the message manager locked!
-        jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
-        setScreenPos (MouseInputSource::getCurrentMousePosition(), Time::currentTimeMillis(), false);
-        return lastScreenPos + unboundedMouseOffset;
+        // This needs to return the live position if possible, but it mustn't update the lastScreenPos
+        // value, because that can cause continuity problems.
+        return unboundedMouseOffset + (isMouseDevice ? MouseInputSource::getCurrentMousePosition()
+                                                     : lastScreenPos);
     }
 
     //==============================================================================

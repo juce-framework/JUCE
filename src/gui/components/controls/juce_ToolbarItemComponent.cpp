@@ -205,13 +205,12 @@ void ToolbarItemComponent::paintButton (Graphics& g, const bool over, const bool
 
     if (! contentArea.isEmpty())
     {
-        g.saveState();
+        Graphics::ScopedSaveState ss (g);
+
         g.reduceClipRegion (contentArea);
         g.setOrigin (contentArea.getX(), contentArea.getY());
 
         paintButtonArea (g, contentArea.getWidth(), contentArea.getHeight(), over, down);
-
-        g.restoreState();
     }
 }
 

@@ -120,9 +120,9 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 {
     Graphics g (&contextToPaintTo);
 
-#if JUCE_ENABLE_REPAINT_DEBUGGING
+  #if JUCE_ENABLE_REPAINT_DEBUGGING
     g.saveState();
-#endif
+  #endif
 
     JUCE_TRY
     {
@@ -130,18 +130,16 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     }
     JUCE_CATCH_EXCEPTION
 
-#if JUCE_ENABLE_REPAINT_DEBUGGING
+  #if JUCE_ENABLE_REPAINT_DEBUGGING
     // enabling this code will fill all areas that get repainted with a colour overlay, to show
     // clearly when things are being repainted.
-    {
-        g.restoreState();
+    g.restoreState();
 
-        g.fillAll (Colour ((uint8) Random::getSystemRandom().nextInt (255),
-                           (uint8) Random::getSystemRandom().nextInt (255),
-                           (uint8) Random::getSystemRandom().nextInt (255),
-                           (uint8) 0x50));
-    }
-#endif
+    g.fillAll (Colour ((uint8) Random::getSystemRandom().nextInt (255),
+                       (uint8) Random::getSystemRandom().nextInt (255),
+                       (uint8) Random::getSystemRandom().nextInt (255),
+                       (uint8) 0x50));
+  #endif
 
     /** If this fails, it's probably be because your CPU floating-point precision mode has
         been set to low.. This setting is sometimes changed by things like Direct3D, and can

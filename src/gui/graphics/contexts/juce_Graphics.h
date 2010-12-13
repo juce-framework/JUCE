@@ -603,16 +603,35 @@ public:
     /** Returns true if no drawing can be done because the clip region is zero. */
     bool isClipEmpty() const;
 
+    //==============================================================================
     /** Saves the current graphics state on an internal stack.
-
         To restore the state, use restoreState().
+        @see ScopedSaveState
     */
     void saveState();
 
     /** Restores a graphics state that was previously saved with saveState().
+        @see ScopedSaveState
     */
     void restoreState();
 
+    /** Uses RAII to save and restore the state of a graphics context.
+        On construction, this calls Graphics::saveState(), and on destruction it calls
+        Graphics::restoreState() on the Graphics object that you supply.
+    */
+    class ScopedSaveState
+    {
+    public:
+        ScopedSaveState (Graphics& g);
+        ~ScopedSaveState();
+
+    private:
+        Graphics& context;
+
+        JUCE_DECLARE_NON_COPYABLE (ScopedSaveState);
+    };
+
+    //==============================================================================
     /** Begins rendering to an off-screen bitmap which will later be flattened onto the current
         context with the given opacity.
 

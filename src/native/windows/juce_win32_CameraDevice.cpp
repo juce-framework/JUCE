@@ -244,10 +244,12 @@ public:
         const int rx = roundToInt (dx), ry = roundToInt (dy);
         const int rw = roundToInt (dw), rh = roundToInt (dh);
 
-        g.saveState();
-        g.excludeClipRegion (Rectangle<int> (rx, ry, rw, rh));
-        g.fillAll (Colours::black);
-        g.restoreState();
+        {
+            Graphics::ScopedSaveState ss (g);
+
+            g.excludeClipRegion (Rectangle<int> (rx, ry, rw, rh));
+            g.fillAll (Colours::black);
+        }
 
         g.drawImage (activeImage, rx, ry, rw, rh, 0, 0, width, height);
     }

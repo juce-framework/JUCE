@@ -91,7 +91,8 @@ void MenuBarComponent::paint (Graphics& g)
     {
         for (int i = 0; i < menuNames.size(); ++i)
         {
-            g.saveState();
+            Graphics::ScopedSaveState ss (g);
+
             g.setOrigin (xPositions [i], 0);
             g.reduceClipRegion (0, 0, xPositions[i + 1] - xPositions[i], getHeight());
 
@@ -104,8 +105,6 @@ void MenuBarComponent::paint (Graphics& g)
                                               i == currentPopupIndex,
                                               isMouseOverBar,
                                               *this);
-
-            g.restoreState();
         }
     }
 }

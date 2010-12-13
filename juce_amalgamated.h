@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	102
+#define JUCE_BUILDNUMBER	103
 
 /** Current Juce version number.
 
@@ -1198,12 +1198,14 @@ inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) throw()
 	return Type() <= valueToTest && valueToTest < upperLimit;
 }
 
+#if ! JUCE_VC6
 template <>
 inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) throw()
 {
 	jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
 	return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
 }
+#endif
 
 /** Returns true if a value is at least zero, and also less than or equal to a specified upper limit.
 	This is basically a quicker way to write:
@@ -1217,12 +1219,14 @@ inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) thro
 	return Type() <= valueToTest && valueToTest <= upperLimit;
 }
 
+#if ! JUCE_VC6
 template <>
 inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) throw()
 {
 	jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
 	return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
 }
+#endif
 
 /** Handy function to swap two values over.
 */
@@ -25090,14 +25094,31 @@ public:
 	bool isClipEmpty() const;
 
 	/** Saves the current graphics state on an internal stack.
-
 		To restore the state, use restoreState().
+		@see ScopedSaveState
 	*/
 	void saveState();
 
 	/** Restores a graphics state that was previously saved with saveState().
+		@see ScopedSaveState
 	*/
 	void restoreState();
+
+	/** Uses RAII to save and restore the state of a graphics context.
+		On construction, this calls Graphics::saveState(), and on destruction it calls
+		Graphics::restoreState() on the Graphics object that you supply.
+	*/
+	class ScopedSaveState
+	{
+	public:
+		ScopedSaveState (Graphics& g);
+		~ScopedSaveState();
+
+	private:
+		Graphics& context;
+
+		JUCE_DECLARE_NON_COPYABLE (ScopedSaveState);
+	};
 
 	/** Begins rendering to an off-screen bitmap which will later be flattened onto the current
 		context with the given opacity.

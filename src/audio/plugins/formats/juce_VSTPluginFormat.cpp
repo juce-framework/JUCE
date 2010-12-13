@@ -212,7 +212,7 @@ namespace
 }
 
 //==============================================================================
-typedef AEffect* (*MainCall) (audioMasterCallback);
+typedef AEffect* (VSTCALLBACK *MainCall) (audioMasterCallback);
 
 static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 

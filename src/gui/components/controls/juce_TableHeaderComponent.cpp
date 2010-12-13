@@ -543,7 +543,8 @@ void TableHeaderComponent::paint (Graphics& g)
                       || dragOverlayComp == 0
                       || ! dragOverlayComp->isVisible()))
             {
-                g.saveState();
+                Graphics::ScopedSaveState ss (g);
+
                 g.setOrigin (x, 0);
                 g.reduceClipRegion (0, 0, ci->width, getHeight());
 
@@ -551,8 +552,6 @@ void TableHeaderComponent::paint (Graphics& g)
                                           ci->id == columnIdUnderMouse,
                                           ci->id == columnIdUnderMouse && isMouseButtonDown(),
                                           ci->propertyFlags);
-
-                g.restoreState();
             }
 
             x += ci->width;

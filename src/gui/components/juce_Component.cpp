@@ -2426,8 +2426,6 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 {
     if (flags.mouseDownFlag)
     {
-        Desktop& desktop = Desktop::getInstance();
-
         flags.mouseDownFlag = false;
 
         BailOutChecker checker (this);
@@ -2447,6 +2445,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
         if (checker.shouldBailOut())
             return;
 
+        Desktop& desktop = Desktop::getInstance();
         desktop.resetTimer();
         desktop.mouseListeners.callChecked (checker, &MouseListener::mouseUp, me);
 
@@ -2473,8 +2472,6 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 {
     if (flags.mouseDownFlag)
     {
-        Desktop& desktop = Desktop::getInstance();
-
         flags.mouseOverFlag = reallyContains (relativePos, false);
 
         BailOutChecker checker (this);
@@ -2491,6 +2488,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
         if (checker.shouldBailOut())
             return;
 
+        Desktop& desktop = Desktop::getInstance();
         desktop.resetTimer();
         desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);
 

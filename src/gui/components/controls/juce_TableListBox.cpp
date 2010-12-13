@@ -63,11 +63,11 @@ public:
                     const int columnId = header.getColumnIdOfIndex (i, true);
                     const Rectangle<int> columnRect (header.getColumnPosition(i).withHeight (getHeight()));
 
-                    g.saveState();
+                    Graphics::ScopedSaveState ss (g);
+
                     g.reduceClipRegion (columnRect);
                     g.setOrigin (columnRect.getX(), 0);
                     model->paintCell (g, row, columnId, columnRect.getWidth(), columnRect.getHeight(), isSelected);
-                    g.restoreState();
                 }
             }
         }

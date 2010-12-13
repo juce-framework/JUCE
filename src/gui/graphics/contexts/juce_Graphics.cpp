@@ -719,5 +719,17 @@ void Graphics::drawImageTransformed (const Image& imageToDraw,
     }
 }
 
+//==============================================================================
+Graphics::ScopedSaveState::ScopedSaveState (Graphics& g)
+    : context (g)
+{
+    context.saveState();
+}
+
+Graphics::ScopedSaveState::~ScopedSaveState()
+{
+    context.restoreState();
+}
+
 
 END_JUCE_NAMESPACE

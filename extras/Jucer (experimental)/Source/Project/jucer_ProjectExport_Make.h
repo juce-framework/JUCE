@@ -211,12 +211,19 @@ private:
     {
         const String buildDirName ("build");
         const String intermediatesDirName (buildDirName + "/intermediate/" + config.getName().toString());
+        String outputDir (buildDirName);
+
+        if (config.getTargetBinaryRelativePath().toString().isNotEmpty())
+        {
+            RelativePath binaryPath (config.getTargetBinaryRelativePath().toString(), RelativePath::projectFolder);
+            outputDir = binaryPath.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+        }
 
         out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName().toString()) << ")" << newLine;
         out << "  BINDIR := " << escapeSpaces (buildDirName) << newLine
             << "  LIBDIR := " << escapeSpaces (buildDirName) << newLine
             << "  OBJDIR := " << escapeSpaces (intermediatesDirName) << newLine
-            << "  OUTDIR := " << escapeSpaces (buildDirName) << newLine;
+            << "  OUTDIR := " << escapeSpaces (outputDir) << newLine;
 
         writeCppFlags (out, config);
 

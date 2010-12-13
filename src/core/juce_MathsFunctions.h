@@ -227,12 +227,14 @@ inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) throw()
     return Type() <= valueToTest && valueToTest < upperLimit;
 }
 
+#if ! JUCE_VC6
 template <>
 inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) throw()
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
 }
+#endif
 
 /** Returns true if a value is at least zero, and also less than or equal to a specified upper limit.
     This is basically a quicker way to write:
@@ -246,12 +248,14 @@ inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) thro
     return Type() <= valueToTest && valueToTest <= upperLimit;
 }
 
+#if ! JUCE_VC6
 template <>
 inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) throw()
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
 }
+#endif
 
 //==============================================================================
 /** Handy function to swap two values over.

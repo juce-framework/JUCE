@@ -1437,14 +1437,12 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
     const int itemW = itemWidth < 0 ? width - indent : itemWidth;
 
     {
-        g.saveState();
+        Graphics::ScopedSaveState ss (g);
         g.setOrigin (indent, 0);
 
         if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0,
                                 drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
             paintItem (g, itemW, itemHeight);
-
-        g.restoreState();
     }
 
     g.setColour (ownerView->findColour (TreeView::linesColourId));
@@ -1497,15 +1495,14 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
         if (mightContainSubItems())
         {
-            g.saveState();
+            Graphics::ScopedSaveState ss (g);
+
             g.setOrigin (depth * indentWidth, 0);
             g.reduceClipRegion (0, 0, indentWidth, itemHeight);
 
             paintOpenCloseButton (g, indentWidth, itemHeight,
                 static_cast <TreeViewContentComponent*> (ownerView->viewport->getViewedComponent())
                     ->isMouseOverButton (this));
-
-            g.restoreState();
         }
     }
 
@@ -1524,13 +1521,12 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
             if (relY + ti->totalHeight >= clip.getY())
             {
-                g.saveState();
+                Graphics::ScopedSaveState ss (g);
+
                 g.setOrigin (0, relY);
 
                 if (g.reduceClipRegion (0, 0, width, ti->totalHeight))
                     ti->paintRecursively (g, width);
-
-                g.restoreState();
             }
         }
     }

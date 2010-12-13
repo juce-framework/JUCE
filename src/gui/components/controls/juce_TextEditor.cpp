@@ -1602,12 +1602,6 @@ void TextEditor::insertTextAtCaret (const String& newText_)
     if (allowedCharacters.isNotEmpty())
         newText = newText.retainCharacters (allowedCharacters);
 
-    if ((! returnKeyStartsNewLine) && newText == "\n")
-    {
-        returnPressed();
-        return;
-    }
-
     if (! isMultiLine())
         newText = newText.replaceCharacters ("\r\n", "  ");
     else
@@ -2043,7 +2037,11 @@ bool TextEditor::keyPressed (const KeyPress& key)
     else if (key == KeyPress::returnKey)
     {
         newTransaction();
-        insertTextAtCaret ("\n");
+
+        if (returnKeyStartsNewLine)
+            insertTextAtCaret ("\n");
+        else
+            returnPressed();
     }
     else if (key.isKeyCode (KeyPress::escapeKey))
     {
