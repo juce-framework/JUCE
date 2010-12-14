@@ -2252,8 +2252,9 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
         if (checker.shouldBailOut())
             return;
 
-        Desktop::getInstance().resetTimer();
-        Desktop::getInstance().mouseListeners.callChecked (checker, &MouseListener::mouseEnter, me);
+        Desktop& desktop = Desktop::getInstance();
+        desktop.resetTimer();
+        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseEnter, me);
 
         MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseEnter, me);
     }
@@ -2287,8 +2288,9 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
         if (checker.shouldBailOut())
             return;
 
-        Desktop::getInstance().resetTimer();
-        Desktop::getInstance().mouseListeners.callChecked (checker, &MouseListener::mouseExit, me);
+        Desktop& desktop = Desktop::getInstance();
+        desktop.resetTimer();
+        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseExit, me);
 
         MouseListenerList::sendMouseEvent (this, checker, &MouseListener::mouseExit, me);
     }
@@ -2908,7 +2910,27 @@ void Component::giveAwayFocus()
 }
 
 //==============================================================================
-bool Component::isMouseOver() const throw()             { return flags.mouseOverFlag; }
+bool Component::isMouseOver (const bool includeChildren) const
+{
+    if (flags.mouseOverFlag)
+        return true;
+
+    if (includeChildren)
+    {
+        Desktop& desktop = Desktop::getInstance();
+
+        for (int i = desktop.getNumMouseSources(); --i >= 0;)
+        {
+            Component* const c = desktop.getMouseSource(i)->getComponentUnderMouse();
+
+            if (isParentOf (c) && c->flags.mouseOverFlag) // (mouseOverFlag checked in case it's being dragged outside the comp)
+                return true;
+        }
+    }
+
+    return false;
+}
+
 bool Component::isMouseButtonDown() const throw()       { return flags.mouseDownFlag; }
 bool Component::isMouseOverOrDragging() const throw()   { return flags.mouseOverFlag || flags.mouseDownFlag; }
 

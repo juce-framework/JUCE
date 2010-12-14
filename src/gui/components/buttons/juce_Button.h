@@ -297,10 +297,6 @@ public:
     uint32 getMillisecondsSinceButtonDown() const throw();
 
     //==============================================================================
-    /** (overridden from Component to do special stuff). */
-    void setVisible (bool shouldBeVisible);
-
-    //==============================================================================
     /** Sets the tooltip for this button.
 
         @see TooltipClient, TooltipWindow
@@ -452,6 +448,8 @@ protected:
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
+    void visibilityChanged();
+    /** @internal */
     void focusGained (FocusChangeType cause);
     /** @internal */
     void focusLost (FocusChangeType cause);
@@ -475,7 +473,7 @@ private:
     friend class RepeatTimer;
     friend class ScopedPointer <RepeatTimer>;
     ScopedPointer <RepeatTimer> repeatTimer;
-    uint32 buttonPressTime, lastTimeCallbackTime;
+    uint32 buttonPressTime, lastRepeatTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
     int radioGroupId, commandID, connectedEdgeFlags;

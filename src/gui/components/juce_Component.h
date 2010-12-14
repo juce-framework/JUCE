@@ -1689,9 +1689,12 @@ public:
         for which this method will return true is the one that was originally
         clicked on.
 
+        If includeChildren is true, then this will also return true if the mouse is over
+        any of the component's children (recursively) as well as the component itself.
+
         @see isMouseButtonDown. isMouseOverOrDragging, mouseDrag
     */
-    bool isMouseOver() const throw();
+    bool isMouseOver (bool includeChildren = false) const;
 
     /** Returns true if the mouse button is currently held down in this component.
 

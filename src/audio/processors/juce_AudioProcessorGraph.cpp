@@ -546,10 +546,10 @@ public:
         : graph (graph_),
           orderedNodes (orderedNodes_)
     {
-        nodeIds.add (-2); // first buffer is read-only zeros
+        nodeIds.add (zeroNodeID); // first buffer is read-only zeros
         channels.add (0);
 
-        midiNodeIds.add (-2);
+        midiNodeIds.add (zeroNodeID);
 
         for (int i = 0; i < orderedNodes.size(); ++i)
         {
@@ -569,6 +569,10 @@ private:
     const Array<void*>& orderedNodes;
     Array <int> channels;
     Array <uint32> nodeIds, midiNodeIds;
+
+    enum { freeNodeID = 0xffffffff, zeroNodeID = 0xfffffffe };
+
+    static bool isNodeBusy (uint32 nodeID) throw()  { return nodeID != freeNodeID && nodeID != zeroNodeID; }
 
     //==============================================================================
     void createRenderingOpsForNode (AudioProcessorGraph::Node* const node,
@@ -828,19 +832,19 @@ private:
         if (forMidi)
         {
             for (int i = 1; i < midiNodeIds.size(); ++i)
-                if (midiNodeIds.getUnchecked(i) < 0)
+                if (midiNodeIds.getUnchecked(i) == freeNodeID)
                     return i;
 
-            midiNodeIds.add (-1);
+            midiNodeIds.add (freeNodeID);
             return midiNodeIds.size() - 1;
         }
         else
         {
             for (int i = 1; i < nodeIds.size(); ++i)
-                if (nodeIds.getUnchecked(i) < 0)
+                if (nodeIds.getUnchecked(i) == freeNodeID)
                     return i;
 
-            nodeIds.add (-1);
+            nodeIds.add (freeNodeID);
             channels.add (0);
             return nodeIds.size() - 1;
         }
@@ -875,23 +879,23 @@ private:
         int i;
         for (i = 0; i < nodeIds.size(); ++i)
         {
-            if (nodeIds.getUnchecked(i) >= 0
+            if (isNodeBusy (nodeIds.getUnchecked(i))
                  && ! isBufferNeededLater (stepIndex, -1,
                                            nodeIds.getUnchecked(i),
                                            channels.getUnchecked(i)))
             {
-                nodeIds.set (i, -1);
+                nodeIds.set (i, freeNodeID);
             }
         }
 
         for (i = 0; i < midiNodeIds.size(); ++i)
         {
-            if (midiNodeIds.getUnchecked(i) >= 0
+            if (isNodeBusy (midiNodeIds.getUnchecked(i))
                  && ! isBufferNeededLater (stepIndex, -1,
                                            midiNodeIds.getUnchecked(i),
                                            AudioProcessorGraph::midiChannelIndex))
             {
-                midiNodeIds.set (i, -1);
+                midiNodeIds.set (i, freeNodeID);
             }
         }
     }

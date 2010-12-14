@@ -27707,9 +27707,12 @@ public:
 		for which this method will return true is the one that was originally
 		clicked on.
 
+		If includeChildren is true, then this will also return true if the mouse is over
+		any of the component's children (recursively) as well as the component itself.
+
 		@see isMouseButtonDown. isMouseOverOrDragging, mouseDrag
 	*/
-	bool isMouseOver() const throw();
+	bool isMouseOver (bool includeChildren = false) const;
 
 	/** Returns true if the mouse button is currently held down in this component.
 
@@ -36299,9 +36302,6 @@ public:
 	*/
 	uint32 getMillisecondsSinceButtonDown() const throw();
 
-	/** (overridden from Component to do special stuff). */
-	void setVisible (bool shouldBeVisible);
-
 	/** Sets the tooltip for this button.
 
 		@see TooltipClient, TooltipWindow
@@ -36446,6 +36446,8 @@ protected:
 	/** @internal */
 	void parentHierarchyChanged();
 	/** @internal */
+	void visibilityChanged();
+	/** @internal */
 	void focusGained (FocusChangeType cause);
 	/** @internal */
 	void focusLost (FocusChangeType cause);
@@ -36469,7 +36471,7 @@ private:
 	friend class RepeatTimer;
 	friend class ScopedPointer <RepeatTimer>;
 	ScopedPointer <RepeatTimer> repeatTimer;
-	uint32 buttonPressTime, lastTimeCallbackTime;
+	uint32 buttonPressTime, lastRepeatTime;
 	ApplicationCommandManager* commandManagerToUse;
 	int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
 	int radioGroupId, commandID, connectedEdgeFlags;

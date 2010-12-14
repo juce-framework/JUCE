@@ -90,6 +90,7 @@ protected:
     const Array<RelativePath> getRTASFilesRequired() const
     {
         Array<RelativePath> s;
+
         if (isRTAS())
         {
             static const char* files[] = { "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode1.cpp",

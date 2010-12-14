@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Button.h"
 #include "../keyboard/juce_KeyPressMappingSet.h"
+#include "../mouse/juce_MouseInputSource.h"
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../../../events/juce_Timer.h"
 
@@ -51,7 +52,7 @@ Button::Button (const String& name)
   : Component (name),
     text (name),
     buttonPressTime (0),
-    lastTimeCallbackTime (0),
+    lastRepeatTime (0),
     commandManagerToUse (0),
     autoRepeatDelay (-1),
     autoRepeatSpeed (0),
@@ -230,7 +231,7 @@ void Button::enablementChanged()
 
 Button::ButtonState Button::updateState()
 {
-    return updateState (reallyContains (getMouseXYRelative(), true), isMouseButtonDown());
+    return updateState (isMouseOver (true), isMouseButtonDown());
 }
 
 Button::ButtonState Button::updateState (const bool over, const bool down)
@@ -259,7 +260,7 @@ void Button::setState (const ButtonState newState)
         if (buttonState == buttonDown)
         {
             buttonPressTime = Time::getApproximateMillisecondCounter();
-            lastTimeCallbackTime = buttonPressTime;
+            lastRepeatTime = 0;
         }
 
         sendStateMessage();
@@ -449,22 +450,10 @@ void Button::focusLost (FocusChangeType)
     repaint();
 }
 
-//==============================================================================
-void Button::setVisible (bool shouldBeVisible)
+void Button::visibilityChanged()
 {
-    if (shouldBeVisible != isVisible())
-    {
-        Component::setVisible (shouldBeVisible);
-
-        if (! shouldBeVisible)
-            needsToRelease = false;
-
-        updateState();
-    }
-    else
-    {
-        Component::setVisible (shouldBeVisible);
-    }
+    needsToRelease = false;
+    updateState();
 }
 
 void Button::parentHierarchyChanged()
@@ -651,22 +640,16 @@ void Button::repeatTimerCallback()
 
         repeatSpeed = jmax (1, repeatSpeed);
 
+        const uint32 now = Time::getMillisecondCounter();
+
+        // if we've been blocked from repeating often enough, speed up the repeat timer to compensate..
+        if (lastRepeatTime != 0 && (int) (now - lastRepeatTime) > repeatSpeed * 2)
+            repeatSpeed = jmax (1, repeatSpeed / 2);
+
+        lastRepeatTime = now;
         getRepeatTimer().startTimer (repeatSpeed);
 
-        const uint32 now = Time::getApproximateMillisecondCounter();
-        const int numTimesToCallback = (now > lastTimeCallbackTime) ? jmax (1, (int) (now - lastTimeCallbackTime) / repeatSpeed) : 1;
-
-        lastTimeCallbackTime = now;
-
-        Component::SafePointer<Component> deletionWatcher (this);
-
-        for (int i = numTimesToCallback; --i >= 0;)
-        {
-            internalClickCallback (ModifierKeys::getCurrentModifiers());
-
-            if (deletionWatcher == 0 || ! isDown())
-                return;
-        }
+        internalClickCallback (ModifierKeys::getCurrentModifiers());
     }
     else if (! needsToRelease)
     {
