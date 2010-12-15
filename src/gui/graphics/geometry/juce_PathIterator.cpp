@@ -34,9 +34,13 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
+const float PathFlatteningIterator::defaultTolerance = 0.6f;
+
+
+//==============================================================================
 PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
                                                 const AffineTransform& transform_,
-                                                float tolerence_)
+                                                const float tolerance)
     : x2 (0),
       y2 (0),
       closesSubPath (false),
@@ -44,7 +48,7 @@ PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
       path (path_),
       transform (transform_),
       points (path_.data.elements),
-      tolerence (tolerence_ * tolerence_),
+      toleranceSquared (tolerance * tolerance),
       subPathCloseX (0),
       subPathCloseY (0),
       isIdentityTransform (transform_.isIdentity()),
@@ -160,11 +164,6 @@ bool PathFlatteningIterator::next()
                 stackPos = stackBase + offset;
             }
 
-            const float dx1 = x1 - x2;
-            const float dy1 = y1 - y2;
-            const float dx2 = x2 - x3;
-            const float dy2 = y2 - y3;
-
             const float m1x = (x1 + x2) * 0.5f;
             const float m1y = (y1 + y2) * 0.5f;
             const float m2x = (x2 + x3) * 0.5f;
@@ -172,7 +171,10 @@ bool PathFlatteningIterator::next()
             const float m3x = (m1x + m2x) * 0.5f;
             const float m3y = (m1y + m2y) * 0.5f;
 
-            if (dx1*dx1 + dy1*dy1 + dx2*dx2 + dy2*dy2 > tolerence)
+            const float errorX = m3x - x2;
+            const float errorY = m3y - y2;
+
+            if (errorX * errorX + errorY * errorY > toleranceSquared)
             {
                 *stackPos++ = y3;
                 *stackPos++ = x3;
@@ -210,13 +212,6 @@ bool PathFlatteningIterator::next()
                 stackPos = stackBase + offset;
             }
 
-            const float dx1 = x1 - x2;
-            const float dy1 = y1 - y2;
-            const float dx2 = x2 - x3;
-            const float dy2 = y2 - y3;
-            const float dx3 = x3 - x4;
-            const float dy3 = y3 - y4;
-
             const float m1x = (x1 + x2) * 0.5f;
             const float m1y = (y1 + y2) * 0.5f;
             const float m2x = (x3 + x2) * 0.5f;
@@ -228,8 +223,13 @@ bool PathFlatteningIterator::next()
             const float m5x = (m3x + m2x) * 0.5f;
             const float m5y = (m3y + m2y) * 0.5f;
 
-            if (dx1*dx1 + dy1*dy1 + dx2*dx2
-                + dy2*dy2 + dx3*dx3 + dy3*dy3 > tolerence)
+            const float error1X = m4x - x2;
+            const float error1Y = m4y - y2;
+            const float error2X = m5x - x3;
+            const float error2Y = m5y - y3;
+
+            if (error1X * error1X + error1Y * error1Y > toleranceSquared
+                 || error2X * error2X + error2Y * error2Y > toleranceSquared)
             {
                 *stackPos++ = y4;
                 *stackPos++ = x4;

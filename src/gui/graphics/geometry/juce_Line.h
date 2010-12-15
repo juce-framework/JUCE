@@ -209,7 +209,8 @@ public:
                                               ValueType perpendicularDistance) const throw()
     {
         const Point<ValueType> delta (end - start);
-        const double length = juce_hypot (delta.getX(), delta.getY());
+        const double length = juce_hypot ((double) delta.getX(),
+                                          (double) delta.getY());
         if (length == 0)
             return start;
 

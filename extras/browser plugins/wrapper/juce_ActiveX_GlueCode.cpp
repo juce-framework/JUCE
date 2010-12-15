@@ -40,9 +40,9 @@
 #include <exdisp.h>
 #pragma warning (disable:4584)
 
+#include "juce_IncludeBrowserPluginInfo.h"
 #include "../../../juce_amalgamated.h"
 #include "juce_BrowserPluginComponent.h"
-#include "juce_IncludeBrowserPluginInfo.h"
 
 #ifndef JuceBrowserPlugin_ActiveXCLSID
 #error "For an activeX plugin, you need to define JuceBrowserPlugin_ActiveXCLSID in your BrowserPluginCharacteristics.h file!"

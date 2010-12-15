@@ -125,6 +125,12 @@ public:
         jassertfalse;
     }
 
+    float getScaleFactor()
+    {
+        jassertfalse; //xxx
+        return 1.0f;
+    }
+
     bool clipToRectangle (const Rectangle<int>& r)
     {
         currentState->clipToRectangle (r);

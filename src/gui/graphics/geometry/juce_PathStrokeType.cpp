@@ -303,7 +303,7 @@ namespace PathStrokeHelpers
 
             float dx = x2 - x1;
             float dy = y2 - y1;
-            const float len = juce_hypotf (dx, dy);
+            const float len = juce_hypot (dx, dy);
 
             if (len == 0)
             {
@@ -380,7 +380,7 @@ namespace PathStrokeHelpers
             LineSection& l = subPath.getReference (subPath.size() - 1);
             float dx = l.rx2 - l.rx1;
             float dy = l.ry2 - l.ry1;
-            const float len = juce_hypotf (dx, dy);
+            const float len = juce_hypot (dx, dy);
 
             if (len <= amountAtEnd && subPath.size() > 1)
             {
@@ -408,7 +408,7 @@ namespace PathStrokeHelpers
             LineSection& l = subPath.getReference (0);
             float dx = l.rx2 - l.rx1;
             float dy = l.ry2 - l.ry1;
-            const float len = juce_hypotf (dx, dy);
+            const float len = juce_hypot (dx, dy);
 
             if (len <= amountAtStart && subPath.size() > 1)
             {
@@ -551,6 +551,8 @@ namespace PathStrokeHelpers
                        const AffineTransform& transform,
                        const float extraAccuracy, const Arrowhead* const arrowhead)
     {
+        jassert (extraAccuracy > 0);
+
         if (thickness <= 0)
         {
             destPath.clear();
@@ -577,7 +579,7 @@ namespace PathStrokeHelpers
 
         // Iterate the path, creating a list of the
         // left/right-hand lines along either side of it...
-        PathFlatteningIterator it (*sourcePath, transform, 9.0f / extraAccuracy);
+        PathFlatteningIterator it (*sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
 
         Array <LineSection> subPath;
         subPath.ensureStorageAllocated (512);
@@ -585,7 +587,7 @@ namespace PathStrokeHelpers
         l.x1 = 0;
         l.y1 = 0;
 
-        const float minSegmentLength = 2.0f / (extraAccuracy * extraAccuracy);
+        const float minSegmentLength = 0.0001f;
 
         while (it.next())
         {
@@ -669,6 +671,8 @@ void PathStrokeType::createDashedStroke (Path& destPath,
                                          const AffineTransform& transform,
                                          const float extraAccuracy) const
 {
+    jassert (extraAccuracy > 0);
+
     if (thickness <= 0)
         return;
 
@@ -676,7 +680,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
     jassert ((numDashLengths & 1) == 0);
 
     Path newDestPath;
-    PathFlatteningIterator it (sourcePath, transform, 9.0f / extraAccuracy);
+    PathFlatteningIterator it (sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
 
     bool first = true;
     int dashNum = 0;
@@ -712,7 +716,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
 
             dx = it.x2 - it.x1;
             dy = it.y2 - it.y1;
-            lineLen = juce_hypotf (dx, dy);
+            lineLen = juce_hypot (dx, dy);
             lineEndPos += lineLen;
             first = it.closesSubPath;
         }

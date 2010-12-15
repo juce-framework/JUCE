@@ -57,8 +57,6 @@ class JuceMainMenuHandler   : private MenuBarModel::Listener,
                               private DeletedAtShutdown
 {
 public:
-    static JuceMainMenuHandler* instance;
-
     //==============================================================================
     JuceMainMenuHandler()
         : currentModel (0),
@@ -153,64 +151,6 @@ public:
         }
     }
 
-    static void flashMenuBar (NSMenu* menu)
-    {
-        if ([[menu title] isEqualToString: @"Apple"])
-            return;
-
-        [menu retain];
-
-        const unichar f35Key = NSF35FunctionKey;
-        NSString* f35String = [NSString stringWithCharacters: &f35Key length: 1];
-
-        NSMenuItem* item = [[NSMenuItem alloc] initWithTitle: @"x"
-                                                      action: nil
-                                               keyEquivalent: f35String];
-        [item setTarget: nil];
-        [menu insertItem: item atIndex: [menu numberOfItems]];
-        [item release];
-
-        if ([menu indexOfItem: item] >= 0)
-        {
-            NSEvent* f35Event = [NSEvent keyEventWithType: NSKeyDown
-                                                 location: NSZeroPoint
-                                            modifierFlags: NSCommandKeyMask
-                                                timestamp: 0
-                                             windowNumber: 0
-                                                  context: [NSGraphicsContext currentContext]
-                                               characters: f35String
-                              charactersIgnoringModifiers: f35String
-                                                isARepeat: NO
-                                                  keyCode: 0];
-
-            [menu performKeyEquivalent: f35Event];
-
-            if ([menu indexOfItem: item] >= 0)
-                [menu removeItem: item]; // (this throws if the item isn't actually in the menu)
-        }
-
-        [menu release];
-    }
-
-    static NSMenuItem* findMenuItem (NSMenu* const menu, const ApplicationCommandTarget::InvocationInfo& info)
-    {
-        for (NSInteger i = [menu numberOfItems]; --i >= 0;)
-        {
-            NSMenuItem* m = [menu itemAtIndex: i];
-            if ([m tag] == info.commandID)
-                return m;
-
-            if ([m submenu] != 0)
-            {
-                NSMenuItem* found = findMenuItem ([m submenu], info);
-                if (found != 0)
-                    return found;
-            }
-        }
-
-        return 0;
-    }
-
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
     {
         NSMenuItem* item = findMenuItem ([NSApp mainMenu], info);
@@ -219,8 +159,16 @@ public:
             flashMenuBar ([item menu]);
     }
 
-    void updateMenus()
+    void updateMenus (NSMenu* menu)
     {
+        if (PopupMenu::dismissAllActiveMenus())
+        {
+            // If we were running a juce menu, then we should let that modal loop finish before allowing
+            // the OS menus to start their own modal loop - so cancel the menu that was being opened..
+            if ([menu respondsToSelector: @selector (cancelTracking)])
+                [menu performSelector: @selector (cancelTracking)];
+        }
+
         if (Time::getMillisecondCounter() > lastUpdateTime + 500)
             menuBarItemsChanged (0);
     }
@@ -240,9 +188,6 @@ public:
             currentModel->menuItemSelected (commandId, topLevelIndex);
         }
     }
-
-    MenuBarModel* currentModel;
-    uint32 lastUpdateTime;
 
     void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
                       const int topLevelMenuId, const int topLevelIndex)
@@ -333,9 +278,14 @@ public:
         }
     }
 
-    JuceMenuCallback* callback;
-private:
+    static JuceMainMenuHandler* instance;
 
+    MenuBarModel* currentModel;
+    uint32 lastUpdateTime;
+    JuceMenuCallback* callback;
+
+private:
+    //==============================================================================
     NSMenu* createMenu (const PopupMenu menu,
                         const String& menuName,
                         const int topLevelMenuId,
@@ -354,11 +304,71 @@ private:
         [m update];
         return m;
     }
+
+    static NSMenuItem* findMenuItem (NSMenu* const menu, const ApplicationCommandTarget::InvocationInfo& info)
+    {
+        for (NSInteger i = [menu numberOfItems]; --i >= 0;)
+        {
+            NSMenuItem* m = [menu itemAtIndex: i];
+            if ([m tag] == info.commandID)
+                return m;
+
+            if ([m submenu] != 0)
+            {
+                NSMenuItem* found = findMenuItem ([m submenu], info);
+                if (found != 0)
+                    return found;
+            }
+        }
+
+        return 0;
+    }
+
+    static void flashMenuBar (NSMenu* menu)
+    {
+        if ([[menu title] isEqualToString: @"Apple"])
+            return;
+
+        [menu retain];
+
+        const unichar f35Key = NSF35FunctionKey;
+        NSString* f35String = [NSString stringWithCharacters: &f35Key length: 1];
+
+        NSMenuItem* item = [[NSMenuItem alloc] initWithTitle: @"x"
+                                                      action: nil
+                                               keyEquivalent: f35String];
+        [item setTarget: nil];
+        [menu insertItem: item atIndex: [menu numberOfItems]];
+        [item release];
+
+        if ([menu indexOfItem: item] >= 0)
+        {
+            NSEvent* f35Event = [NSEvent keyEventWithType: NSKeyDown
+                                                 location: NSZeroPoint
+                                            modifierFlags: NSCommandKeyMask
+                                                timestamp: 0
+                                             windowNumber: 0
+                                                  context: [NSGraphicsContext currentContext]
+                                               characters: f35String
+                              charactersIgnoringModifiers: f35String
+                                                isARepeat: NO
+                                                  keyCode: 0];
+
+            [menu performKeyEquivalent: f35Event];
+
+            if ([menu indexOfItem: item] >= 0)
+                [menu removeItem: item]; // (this throws if the item isn't actually in the menu)
+        }
+
+        [menu release];
+    }
 };
 
 JuceMainMenuHandler* JuceMainMenuHandler::instance = 0;
 
 END_JUCE_NAMESPACE
+
+//==============================================================================
 @implementation JuceMenuCallback
 
 - (JuceMenuCallback*) initWithOwner: (JuceMainMenuHandler*) owner_
@@ -412,10 +422,8 @@ END_JUCE_NAMESPACE
 
 - (void) menuNeedsUpdate: (NSMenu*) menu;
 {
-    (void) menu;
-
     if (JuceMainMenuHandler::instance != 0)
-        JuceMainMenuHandler::instance->updateMenus();
+        JuceMainMenuHandler::instance->updateMenus (menu);
 }
 
 @end

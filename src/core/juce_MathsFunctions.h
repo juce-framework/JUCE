@@ -292,25 +292,15 @@ inline void swapVariables (Type& variable1, Type& variable2)
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
-/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-    versions of these functions of various platforms and compilers. */
-inline double juce_hypot (double a, double b) throw()
+/** Using juce_hypot is easier than dealing with the different types of hypot function
+    that are provided by the various platforms and compilers. */
+template <typename Type>
+inline Type juce_hypot (Type a, Type b) throw()
 {
   #if JUCE_WINDOWS
-    return _hypot (a, b);
+    return static_cast <Type> (_hypot (a, b));
   #else
-    return hypot (a, b);
-  #endif
-}
-
-/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-    versions of these functions of various platforms and compilers. */
-inline float juce_hypotf (float a, float b) throw()
-{
-  #if JUCE_WINDOWS
-    return (float) _hypot (a, b);
-  #else
-    return hypotf (a, b);
+    return static_cast <Type> (hypot (a, b));
   #endif
 }
 

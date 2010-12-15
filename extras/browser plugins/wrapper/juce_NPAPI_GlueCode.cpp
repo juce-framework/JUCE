@@ -66,9 +66,9 @@
 #endif
 
 //==============================================================================
+#include "juce_IncludeBrowserPluginInfo.h"
 #include "../../../juce_amalgamated.h"
 #include "juce_BrowserPluginComponent.h"
-#include "juce_IncludeBrowserPluginInfo.h"
 
 #if JUCE_MAC && JUCE_DEBUG && 0
 #include <fstream>

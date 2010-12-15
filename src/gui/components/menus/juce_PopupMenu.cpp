@@ -1528,15 +1528,18 @@ int PopupMenu::showAt (Component* componentToAttachTo,
     }
 }
 
-void JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
+bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
 {
-    for (int i = Window::getActiveWindows().size(); --i >= 0;)
+    const int numWindows = Window::getActiveWindows().size();
+    for (int i = numWindows; --i >= 0;)
     {
         Window* const pmw = Window::getActiveWindows()[i];
 
         if (pmw != 0)
             pmw->dismissMenu (0);
     }
+
+    return numWindows > 0;
 }
 
 //==============================================================================

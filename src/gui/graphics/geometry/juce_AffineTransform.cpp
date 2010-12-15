@@ -244,5 +244,10 @@ bool AffineTransform::isOnlyTranslation() const throw()
         && (mat11 == 1.0f);
 }
 
+float AffineTransform::getScaleFactor() const throw()
+{
+    return juce_hypot (mat00 + mat01, mat10 + mat11);
+}
+
 
 END_JUCE_NAMESPACE

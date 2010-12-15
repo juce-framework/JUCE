@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	103
+#define JUCE_BUILDNUMBER	104
 
 /** Current Juce version number.
 
@@ -1261,25 +1261,15 @@ inline void swapVariables (Type& variable1, Type& variable2)
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
-/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-	versions of these functions of various platforms and compilers. */
-inline double juce_hypot (double a, double b) throw()
+/** Using juce_hypot is easier than dealing with the different types of hypot function
+	that are provided by the various platforms and compilers. */
+template <typename Type>
+inline Type juce_hypot (Type a, Type b) throw()
 {
   #if JUCE_WINDOWS
-	return _hypot (a, b);
+	return static_cast <Type> (_hypot (a, b));
   #else
-	return hypot (a, b);
-  #endif
-}
-
-/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-	versions of these functions of various platforms and compilers. */
-inline float juce_hypotf (float a, float b) throw()
-{
-  #if JUCE_WINDOWS
-	return (float) _hypot (a, b);
-  #else
-	return hypotf (a, b);
+	return static_cast <Type> (hypot (a, b));
   #endif
 }
 
@@ -19796,6 +19786,12 @@ public:
 	*/
 	float getTranslationY() const throw()		   { return mat12; }
 
+	/** Returns the approximate scale factor by which lengths will be transformed.
+		Obviously a length may be scaled by entirely different amounts depending on its
+		direction, so this is only appropriate as a rough guide.
+	*/
+	float getScaleFactor() const throw();
+
 	/* The transform matrix is:
 
 		(mat00 mat01 mat02)
@@ -19902,10 +19898,10 @@ public:
 	const Point operator-() const throw()				   { return Point (-x, -y); }
 
 	/** Returns the straight-line distance between this point and another one. */
-	ValueType getDistanceFromOrigin() const throw()			 { return (ValueType) juce_hypot (x, y); }
+	ValueType getDistanceFromOrigin() const throw()			 { return juce_hypot (x, y); }
 
 	/** Returns the straight-line distance between this point and another one. */
-	ValueType getDistanceFrom (const Point& other) const throw()	{ return (ValueType) juce_hypot (x - other.x, y - other.y); }
+	ValueType getDistanceFrom (const Point& other) const throw()	{ return juce_hypot (x - other.x, y - other.y); }
 
 	/** Returns the angle from this point to another one.
 
@@ -20872,7 +20868,8 @@ public:
 											  ValueType perpendicularDistance) const throw()
 	{
 		const Point<ValueType> delta (end - start);
-		const double length = juce_hypot (delta.getX(), delta.getY());
+		const double length = juce_hypot ((double) delta.getX(),
+										  (double) delta.getY());
 		if (length == 0)
 			return start;
 
@@ -21985,14 +21982,14 @@ public:
 
 		The path's winding rule is taken into account by this method.
 
-		The tolerence parameter is passed to the PathFlatteningIterator that
-		is used to trace the path - for more info about it, see the notes for
-		the PathFlatteningIterator constructor.
+		The tolerance parameter is the maximum error allowed when flattening the path,
+		so this method could return a false positive when your point is up to this distance
+		outside the path's boundary.
 
 		@see closeSubPath, setUsingNonZeroWinding
 	*/
 	bool contains (float x, float y,
-				   float tolerence = 10.0f) const;
+				   float tolerance = 1.0f) const;
 
 	/** Checks whether a point lies within the path.
 
@@ -22001,14 +21998,14 @@ public:
 
 		The path's winding rule is taken into account by this method.
 
-		The tolerence parameter is passed to the PathFlatteningIterator that
-		is used to trace the path - for more info about it, see the notes for
-		the PathFlatteningIterator constructor.
+		The tolerance parameter is the maximum error allowed when flattening the path,
+		so this method could return a false positive when your point is up to this distance
+		outside the path's boundary.
 
 		@see closeSubPath, setUsingNonZeroWinding
 	*/
 	bool contains (const Point<float>& point,
-				   float tolerence = 10.0f) const;
+				   float tolerance = 1.0f) const;
 
 	/** Checks whether a line crosses the path.
 
@@ -22016,12 +22013,12 @@ public:
 		lines or curves. It doesn't take into account whether the line is inside
 		or outside the path, or whether the path is open or closed.
 
-		The tolerence parameter is passed to the PathFlatteningIterator that
-		is used to trace the path - for more info about it, see the notes for
-		the PathFlatteningIterator constructor.
+		The tolerance parameter is the maximum error allowed when flattening the path,
+		so this method could return a false positive when your point is up to this distance
+		outside the path's boundary.
 	*/
 	bool intersectsLine (const Line<float>& line,
-						 float tolerence = 10.0f);
+						 float tolerance = 1.0f);
 
 	/** Cuts off parts of a line to keep the parts that are either inside or
 		outside this path.
@@ -23214,8 +23211,9 @@ public:
 		@param transform	an optional transform to apply to the points from the source path
 								as they are being used
 		@param extraAccuracy	if this is greater than 1.0, it will subdivide the path to
-								a higher resolution, which improved the quality if you'll later want
-								to enlarge the stroked path
+								a higher resolution, which improves the quality if you'll later want
+								to enlarge the stroked path. So for example, if you're planning on drawing
+								the stroke at 3x the size that you're creating it, you should set this to 3.
 
 		@see createDashedStroke
 	*/
@@ -23243,8 +23241,9 @@ public:
 		@param transform	an optional transform to apply to the points from the source path
 								as they are being used
 		@param extraAccuracy	if this is greater than 1.0, it will subdivide the path to
-								a higher resolution, which improved the quality if you'll later want
-								to enlarge the stroked path
+								a higher resolution, which improves the quality if you'll later want
+								to enlarge the stroked path. So for example, if you're planning on drawing
+								the stroke at 3x the size that you're creating it, you should set this to 3.
 	*/
 	void createDashedStroke (Path& destPath,
 							 const Path& sourcePath,
@@ -23267,8 +23266,9 @@ public:
 		@param transform		an optional transform to apply to the points from the source path
 									as they are being used
 		@param extraAccuracy	if this is greater than 1.0, it will subdivide the path to
-									a higher resolution, which improved the quality if you'll later want
-									to enlarge the stroked path
+									a higher resolution, which improves the quality if you'll later want
+									to enlarge the stroked path. So for example, if you're planning on drawing
+									the stroke at 3x the size that you're creating it, you should set this to 3.
 		@see createDashedStroke
 	*/
 	void createStrokeWithArrowheads (Path& destPath,
@@ -37307,7 +37307,7 @@ public:
 		by some means other than a user action, and you'd like to make sure that menus
 		aren't left hanging around.
 	*/
-	static void JUCE_CALLTYPE dismissAllActiveMenus();
+	static bool JUCE_CALLTYPE dismissAllActiveMenus();
 
 	/** Specifies a look-and-feel for the menu and any sub-menus that it has.
 
@@ -60277,6 +60277,7 @@ public:
 	*/
 	virtual void setOrigin (int x, int y) = 0;
 	virtual void addTransform (const AffineTransform& transform) = 0;
+	virtual float getScaleFactor() = 0;
 
 	virtual bool clipToRectangle (const Rectangle<int>& r) = 0;
 	virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
@@ -60342,6 +60343,7 @@ public:
 	bool isVectorDevice() const;
 	void setOrigin (int x, int y);
 	void addTransform (const AffineTransform& transform);
+	float getScaleFactor();
 
 	bool clipToRectangle (const Rectangle<int>& r);
 	bool clipToRectangleList (const RectangleList& clipRegion);
@@ -60440,6 +60442,7 @@ public:
 
 	void setOrigin (int x, int y);
 	void addTransform (const AffineTransform& transform);
+	float getScaleFactor();
 
 	bool clipToRectangle (const Rectangle<int>& r);
 	bool clipToRectangleList (const RectangleList& clipRegion);
@@ -61417,13 +61420,13 @@ public:
 
 		@param path	 the path to iterate along
 		@param transform	a transform to apply to each point in the path being iterated
-		@param tolerence	the amount by which the curves are allowed to deviate from the
-							lines into which they are being broken down - a higher tolerence
-							is a bit faster, but less smooth.
+		@param tolerance	the amount by which the curves are allowed to deviate from the lines
+							into which they are being broken down - a higher tolerance contains
+							less lines, so can be generated faster, but will be less smooth.
 	*/
 	PathFlatteningIterator (const Path& path,
 							const AffineTransform& transform = AffineTransform::identity,
-							float tolerence = 6.0f);
+							float tolerance = defaultTolerance);
 
 	/** Destructor. */
 	~PathFlatteningIterator();
@@ -61460,12 +61463,16 @@ public:
 	bool isLastInSubpath() const throw()	{ return stackPos == stackBase.getData()
 														   && (index >= path.numElements || points [index] == Path::moveMarker); }
 
+	/** This is the default value that should be used for the tolerance value (see the constructor parameters). */
+	static const float defaultTolerance;
+
 private:
 
 	const Path& path;
 	const AffineTransform transform;
 	float* points;
-	float tolerence, subPathCloseX, subPathCloseY;
+	const float toleranceSquared;
+	float subPathCloseX, subPathCloseY;
 	const bool isIdentityTransform;
 
 	HeapBlock <float> stackBase;

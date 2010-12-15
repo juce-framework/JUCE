@@ -819,7 +819,7 @@ private:
         float x = getCoordLength (strokeWidth, viewBoxW), y = 0.0f;
         transform.transformPoints (ox, oy, x, y);
 
-        return PathStrokeType (strokeWidth.isNotEmpty() ? juce_hypotf (x - ox, y - oy) : 1.0f,
+        return PathStrokeType (strokeWidth.isNotEmpty() ? juce_hypot (x - ox, y - oy) : 1.0f,
                                joinStyle, capStyle);
     }
 

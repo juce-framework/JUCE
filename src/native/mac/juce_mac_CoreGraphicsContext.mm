@@ -192,6 +192,12 @@ public:
         lastClipRectIsValid = false;
     }
 
+    float getScaleFactor()
+    {
+        CGAffineTransform t = CGContextGetCTM (context);
+        return (float) juce_hypot (t.a + t.c, t.b + t.d);
+    }
+
     bool clipToRectangle (const Rectangle<int>& r)
     {
         CGContextClipToRect (context, CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()));

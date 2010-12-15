@@ -96,8 +96,9 @@ public:
         @param transform        an optional transform to apply to the points from the source path
                                 as they are being used
         @param extraAccuracy    if this is greater than 1.0, it will subdivide the path to
-                                a higher resolution, which improved the quality if you'll later want
-                                to enlarge the stroked path
+                                a higher resolution, which improves the quality if you'll later want
+                                to enlarge the stroked path. So for example, if you're planning on drawing
+                                the stroke at 3x the size that you're creating it, you should set this to 3.
 
         @see createDashedStroke
     */
@@ -127,8 +128,9 @@ public:
         @param transform        an optional transform to apply to the points from the source path
                                 as they are being used
         @param extraAccuracy    if this is greater than 1.0, it will subdivide the path to
-                                a higher resolution, which improved the quality if you'll later want
-                                to enlarge the stroked path
+                                a higher resolution, which improves the quality if you'll later want
+                                to enlarge the stroked path. So for example, if you're planning on drawing
+                                the stroke at 3x the size that you're creating it, you should set this to 3.
     */
     void createDashedStroke (Path& destPath,
                              const Path& sourcePath,
@@ -152,8 +154,9 @@ public:
         @param transform            an optional transform to apply to the points from the source path
                                     as they are being used
         @param extraAccuracy        if this is greater than 1.0, it will subdivide the path to
-                                    a higher resolution, which improved the quality if you'll later want
-                                    to enlarge the stroked path
+                                    a higher resolution, which improves the quality if you'll later want
+                                    to enlarge the stroked path. So for example, if you're planning on drawing
+                                    the stroke at 3x the size that you're creating it, you should set this to 3.
         @see createDashedStroke
     */
     void createStrokeWithArrowheads (Path& destPath,

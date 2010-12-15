@@ -232,6 +232,12 @@ public:
     */
     float getTranslationY() const throw()                   { return mat12; }
 
+    /** Returns the approximate scale factor by which lengths will be transformed.
+        Obviously a length may be scaled by entirely different amounts depending on its
+        direction, so this is only appropriate as a rough guide.
+    */
+    float getScaleFactor() const throw();
+
     //==============================================================================
     /* The transform matrix is:
 

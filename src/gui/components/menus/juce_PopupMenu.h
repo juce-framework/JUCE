@@ -295,7 +295,7 @@ public:
         by some means other than a user action, and you'd like to make sure that menus
         aren't left hanging around.
     */
-    static void JUCE_CALLTYPE dismissAllActiveMenus();
+    static bool JUCE_CALLTYPE dismissAllActiveMenus();
 
 
     //==============================================================================

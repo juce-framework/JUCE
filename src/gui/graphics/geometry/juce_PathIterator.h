@@ -50,13 +50,13 @@ public:
 
         @param path         the path to iterate along
         @param transform    a transform to apply to each point in the path being iterated
-        @param tolerence    the amount by which the curves are allowed to deviate from the
-                            lines into which they are being broken down - a higher tolerence
-                            is a bit faster, but less smooth.
+        @param tolerance    the amount by which the curves are allowed to deviate from the lines
+                            into which they are being broken down - a higher tolerance contains
+                            less lines, so can be generated faster, but will be less smooth.
     */
     PathFlatteningIterator (const Path& path,
                             const AffineTransform& transform = AffineTransform::identity,
-                            float tolerence = 6.0f);
+                            float tolerance = defaultTolerance);
 
     /** Destructor. */
     ~PathFlatteningIterator();
@@ -94,12 +94,17 @@ public:
     bool isLastInSubpath() const throw()        { return stackPos == stackBase.getData()
                                                            && (index >= path.numElements || points [index] == Path::moveMarker); }
 
+
+    /** This is the default value that should be used for the tolerance value (see the constructor parameters). */
+    static const float defaultTolerance;
+
 private:
     //==============================================================================
     const Path& path;
     const AffineTransform transform;
     float* points;
-    float tolerence, subPathCloseX, subPathCloseY;
+    const float toleranceSquared;
+    float subPathCloseX, subPathCloseY;
     const bool isIdentityTransform;
 
     HeapBlock <float> stackBase;

@@ -107,14 +107,14 @@ public:
 
         The path's winding rule is taken into account by this method.
 
-        The tolerence parameter is passed to the PathFlatteningIterator that
-        is used to trace the path - for more info about it, see the notes for
-        the PathFlatteningIterator constructor.
+        The tolerance parameter is the maximum error allowed when flattening the path,
+        so this method could return a false positive when your point is up to this distance
+        outside the path's boundary.
 
         @see closeSubPath, setUsingNonZeroWinding
     */
     bool contains (float x, float y,
-                   float tolerence = 10.0f) const;
+                   float tolerance = 1.0f) const;
 
     /** Checks whether a point lies within the path.
 
@@ -123,14 +123,14 @@ public:
 
         The path's winding rule is taken into account by this method.
 
-        The tolerence parameter is passed to the PathFlatteningIterator that
-        is used to trace the path - for more info about it, see the notes for
-        the PathFlatteningIterator constructor.
+        The tolerance parameter is the maximum error allowed when flattening the path,
+        so this method could return a false positive when your point is up to this distance
+        outside the path's boundary.
 
         @see closeSubPath, setUsingNonZeroWinding
     */
     bool contains (const Point<float>& point,
-                   float tolerence = 10.0f) const;
+                   float tolerance = 1.0f) const;
 
     /** Checks whether a line crosses the path.
 
@@ -138,12 +138,12 @@ public:
         lines or curves. It doesn't take into account whether the line is inside
         or outside the path, or whether the path is open or closed.
 
-        The tolerence parameter is passed to the PathFlatteningIterator that
-        is used to trace the path - for more info about it, see the notes for
-        the PathFlatteningIterator constructor.
+        The tolerance parameter is the maximum error allowed when flattening the path,
+        so this method could return a false positive when your point is up to this distance
+        outside the path's boundary.
     */
     bool intersectsLine (const Line<float>& line,
-                         float tolerence = 10.0f);
+                         float tolerance = 1.0f);
 
     /** Cuts off parts of a line to keep the parts that are either inside or
         outside this path.

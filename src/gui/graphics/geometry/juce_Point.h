@@ -120,10 +120,10 @@ public:
     const Point operator-() const throw()                               { return Point (-x, -y); }
 
     /** Returns the straight-line distance between this point and another one. */
-    ValueType getDistanceFromOrigin() const throw()                     { return (ValueType) juce_hypot (x, y); }
+    ValueType getDistanceFromOrigin() const throw()                     { return juce_hypot (x, y); }
 
     /** Returns the straight-line distance between this point and another one. */
-    ValueType getDistanceFrom (const Point& other) const throw()        { return (ValueType) juce_hypot (x - other.x, y - other.y); }
+    ValueType getDistanceFrom (const Point& other) const throw()        { return juce_hypot (x - other.x, y - other.y); }
 
     /** Returns the angle from this point to another one.
 

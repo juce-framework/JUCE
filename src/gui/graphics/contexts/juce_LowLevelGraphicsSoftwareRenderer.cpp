@@ -1843,6 +1843,11 @@ public:
         }
     }
 
+    float getScaleFactor() const
+    {
+        return isOnlyTranslated ? 1.0f : complexTransform.getScaleFactor();
+    }
+
     bool clipToRectangle (const Rectangle<int>& r)
     {
         if (clip != 0)
@@ -2252,6 +2257,11 @@ void LowLevelGraphicsSoftwareRenderer::setOrigin (int x, int y)
 void LowLevelGraphicsSoftwareRenderer::addTransform (const AffineTransform& transform)
 {
     currentState->addTransform (transform);
+}
+
+float LowLevelGraphicsSoftwareRenderer::getScaleFactor()
+{
+    return currentState->getScaleFactor();
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle<int>& r)

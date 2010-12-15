@@ -55,6 +55,11 @@ namespace PathHelpers
 
         return String (start, (int) (t - start));
     }
+
+    inline double lengthOf (float x1, float y1, float x2, float y2) throw()
+    {
+        return juce_hypot ((double) (x1 - x2), (double) (y1 - y2));
+    }
 }
 
 //==============================================================================
@@ -966,13 +971,13 @@ const AffineTransform Path::getTransformToScaleToFit (const float x, const float
 }
 
 //==============================================================================
-bool Path::contains (const float x, const float y, const float tolerence) const
+bool Path::contains (const float x, const float y, const float tolerance) const
 {
     if (x <= pathXMin || x >= pathXMax
          || y <= pathYMin || y >= pathYMax)
         return false;
 
-    PathFlatteningIterator i (*this, AffineTransform::identity, tolerence);
+    PathFlatteningIterator i (*this, AffineTransform::identity, tolerance);
 
     int positiveCrossings = 0;
     int negativeCrossings = 0;
@@ -997,14 +1002,14 @@ bool Path::contains (const float x, const float y, const float tolerence) const
                              : ((negativeCrossings + positiveCrossings) & 1) != 0;
 }
 
-bool Path::contains (const Point<float>& point, const float tolerence) const
+bool Path::contains (const Point<float>& point, const float tolerance) const
 {
-    return contains (point.getX(), point.getY(), tolerence);
+    return contains (point.getX(), point.getY(), tolerance);
 }
 
-bool Path::intersectsLine (const Line<float>& line, const float tolerence)
+bool Path::intersectsLine (const Line<float>& line, const float tolerance)
 {
-    PathFlatteningIterator i (*this, AffineTransform::identity, tolerence);
+    PathFlatteningIterator i (*this, AffineTransform::identity, tolerance);
     Point<float> intersection;
 
     while (i.next())
@@ -1158,8 +1163,7 @@ const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
 
             if (lastWasLine)
             {
-                const double len1 = juce_hypot (startX - joinX,
-                                                startY - joinY);
+                const double len1 = PathHelpers::lengthOf (startX, startY, joinX, joinY);
 
                 if (len1 > 0)
                 {
@@ -1169,8 +1173,7 @@ const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
                     p.data.elements [p.numElements - 1] = (float) (joinY - (joinY - startY) * propNeeded);
                 }
 
-                const double len2 = juce_hypot (endX - joinX,
-                                                endY - joinY);
+                const double len2 = PathHelpers::lengthOf (endX, endY, joinX, joinY);
 
                 if (len2 > 0)
                 {
@@ -1200,8 +1203,7 @@ const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
                     endX = data.elements [indexOfPathStartThis + 4];
                     endY = data.elements [indexOfPathStartThis + 5];
 
-                    const double len1 = juce_hypot (startX - joinX,
-                                                    startY - joinY);
+                    const double len1 = PathHelpers::lengthOf (startX, startY, joinX, joinY);
 
                     if (len1 > 0)
                     {
@@ -1211,8 +1213,7 @@ const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
                         p.data.elements [p.numElements - 1] = (float) (joinY - (joinY - startY) * propNeeded);
                     }
 
-                    const double len2 = juce_hypot (endX - joinX,
-                                                    endY - joinY);
+                    const double len2 = PathHelpers::lengthOf (endX, endY, joinX, joinY);
 
                     if (len2 > 0)
                     {

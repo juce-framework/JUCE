@@ -274,7 +274,9 @@ void Desktop::triggerFocusCallback()
 
 void Desktop::handleAsyncUpdate()
 {
-    Component* currentFocus = Component::getCurrentlyFocusedComponent();
+    // The component may be deleted during this operation, but we'll use a SafePointer rather than a
+    // BailOutChecker so that any remaining listeners will still get a callback (with a null pointer).
+    Component::SafePointer<Component> currentFocus (Component::getCurrentlyFocusedComponent());
     focusListeners.call (&FocusChangeListener::globalFocusChanged, currentFocus);
 }
 
