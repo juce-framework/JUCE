@@ -109,7 +109,7 @@ public:
     /** Returns the component that was last known to be under this pointer. */
     Component* getComponentUnderMouse() const;
 
-    /** Tells the device to dispatch a mouse-move event.
+    /** Tells the device to dispatch a mouse-move or mouse-drag event.
         This is asynchronous - the event will occur on the message thread.
     */
     void triggerFakeMove() const;

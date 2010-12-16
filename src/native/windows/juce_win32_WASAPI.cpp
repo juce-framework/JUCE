@@ -28,7 +28,7 @@
 #if JUCE_INCLUDED_FILE && JUCE_WASAPI
 
 #ifndef WASAPI_ENABLE_LOGGING
- #define WASAPI_ENABLE_LOGGING 1
+ #define WASAPI_ENABLE_LOGGING 0
 #endif
 
 //==============================================================================
@@ -353,7 +353,8 @@ public:
         reservoirCapacity = 16384;
         reservoir.setSize (actualNumChannels * reservoirCapacity * sizeof (float));
         return openClient (newSampleRate, newChannels)
-                && (numChannels == 0 || check (client->GetService (__uuidof (IAudioCaptureClient), (void**) captureClient.resetAndGetPointerAddress())));
+                && (numChannels == 0 || check (client->GetService (__uuidof (IAudioCaptureClient),
+                                                                   (void**) captureClient.resetAndGetPointerAddress())));
     }
 
     void close()
@@ -363,18 +364,19 @@ public:
         reservoir.setSize (0);
     }
 
-    void updateFormat (bool isFloat)
+    template <class SourceType>
+    void updateFormatWithType (SourceType*)
     {
         typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> NativeType;
+        converter = new AudioData::ConverterInstance <AudioData::Pointer <SourceType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+    }
 
-        if (isFloat)
-            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
-        else if (bytesPerSample == 4)
-            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Int32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
-        else if (bytesPerSample == 3)
-            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Int24, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
-        else
-            converter = new AudioData::ConverterInstance <AudioData::Pointer <AudioData::Int16, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, NativeType> (actualNumChannels, 1);
+    void updateFormat (bool isFloat)
+    {
+        if (isFloat)                    updateFormatWithType ((AudioData::Float32*) 0);
+        else if (bytesPerSample == 4)   updateFormatWithType ((AudioData::Int32*) 0);
+        else if (bytesPerSample == 3)   updateFormatWithType ((AudioData::Int24*) 0);
+        else                            updateFormatWithType ((AudioData::Int16*) 0);
     }
 
     void copyBuffers (float** destBuffers, int numDestBuffers, int bufferSize, Thread& thread)
@@ -395,7 +397,7 @@ public:
 
                 bufferSize -= samplesToDo;
                 offset += samplesToDo;
-                reservoirSize -= samplesToDo;
+                reservoirSize = 0;
             }
             else
             {
@@ -405,14 +407,14 @@ public:
 
                 if (packetLength == 0)
                 {
-                    if (thread.threadShouldExit())
+                    if (thread.threadShouldExit()
+                         || WaitForSingleObject (clientEvent, 1000) == WAIT_TIMEOUT)
                         break;
 
-                    Thread::sleep (1);
                     continue;
                 }
 
-                uint8* inputData = 0;
+                uint8* inputData;
                 UINT32 numSamplesAvailable;
                 DWORD flags;
 
@@ -474,18 +476,19 @@ public:
         renderClient = 0;
     }
 
-    void updateFormat (bool isFloat)
+    template <class DestType>
+    void updateFormatWithType (DestType*)
     {
         typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> NativeType;
+        converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+    }
 
-        if (isFloat)
-            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
-        else if (bytesPerSample == 4)
-            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Int32, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
-        else if (bytesPerSample == 3)
-            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Int24, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
-        else
-            converter = new AudioData::ConverterInstance <NativeType, AudioData::Pointer <AudioData::Int16, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+    void updateFormat (bool isFloat)
+    {
+        if (isFloat)                    updateFormatWithType ((AudioData::Float32*) 0);
+        else if (bytesPerSample == 4)   updateFormatWithType ((AudioData::Int32*) 0);
+        else if (bytesPerSample == 3)   updateFormatWithType ((AudioData::Int24*) 0);
+        else                            updateFormatWithType ((AudioData::Int16*) 0);
     }
 
     void copyBuffers (const float** const srcBuffers, const int numSrcBuffers, int bufferSize, Thread& thread)
@@ -506,10 +509,10 @@ public:
 
             if (samplesToDo <= 0)
             {
-                if (thread.threadShouldExit())
+                if (thread.threadShouldExit()
+                     || WaitForSingleObject (clientEvent, 1000) == WAIT_TIMEOUT)
                     break;
 
-                Thread::sleep (0);
                 continue;
             }
 
@@ -675,11 +678,8 @@ public:
             return lastError;
         }
 
-        if (inputDevice != 0)
-            ResetEvent (inputDevice->clientEvent);
-
-        if (outputDevice != 0)
-            ResetEvent (outputDevice->clientEvent);
+        if (inputDevice != 0)   ResetEvent (inputDevice->clientEvent);
+        if (outputDevice != 0)  ResetEvent (outputDevice->clientEvent);
 
         startThread (8);
         Thread::sleep (5);
@@ -705,20 +705,15 @@ public:
     void close()
     {
         stop();
+        signalThreadShouldExit();
 
-        if (inputDevice != 0)
-            SetEvent (inputDevice->clientEvent);
-
-        if (outputDevice != 0)
-            SetEvent (outputDevice->clientEvent);
+        if (inputDevice != 0)   SetEvent (inputDevice->clientEvent);
+        if (outputDevice != 0)  SetEvent (outputDevice->clientEvent);
 
         stopThread (5000);
 
-        if (inputDevice != 0)
-            inputDevice->close();
-
-        if (outputDevice != 0)
-            outputDevice->close();
+        if (inputDevice != 0)   inputDevice->close();
+        if (outputDevice != 0)  outputDevice->close();
 
         isOpen_ = false;
     }
@@ -764,13 +759,13 @@ public:
     void setMMThreadPriority()
     {
         DynamicLibraryLoader dll ("avrt.dll");
-        DynamicLibraryImport (AvSetMmThreadCharacteristics, avSetMmThreadCharacteristics, HANDLE, dll, (LPCTSTR, LPDWORD))
+        DynamicLibraryImport (AvSetMmThreadCharacteristicsW, avSetMmThreadCharacteristics, HANDLE, dll, (LPCWSTR, LPDWORD))
         DynamicLibraryImport (AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, dll, (HANDLE, AVRT_PRIORITY))
 
         if (avSetMmThreadCharacteristics != 0 && avSetMmThreadPriority != 0)
         {
             DWORD dummy = 0;
-            HANDLE h = avSetMmThreadCharacteristics (_T("Pro Audio"), &dummy);
+            HANDLE h = avSetMmThreadCharacteristics (L"Pro Audio", &dummy);
 
             if (h != 0)
                 avSetMmThreadPriority (h, AVRT_PRIORITY_NORMAL);
@@ -783,13 +778,6 @@ public:
 
         const int bufferSize = currentBufferSizeSamples;
 
-        HANDLE events[2];
-        int numEvents = 0;
-        if (inputDevice != 0)
-            events [numEvents++] = inputDevice->clientEvent;
-        if (outputDevice != 0)
-            events [numEvents++] = outputDevice->clientEvent;
-
         const int numInputBuffers = getActiveInputChannels().countNumberOfSetBits();
         const int numOutputBuffers = getActiveOutputChannels().countNumberOfSetBits();
 
@@ -801,44 +789,28 @@ public:
 
         while (! threadShouldExit())
         {
-            const DWORD result = useExclusiveMode ? (inputDevice != 0 ? WaitForSingleObject (inputDevice->clientEvent, 1000) : S_OK)
-                                                  : WaitForMultipleObjects (numEvents, events, true, 1000);
-            if (result == WAIT_TIMEOUT)
-                continue;
-
-            if (threadShouldExit())
-                break;
-
             if (inputDevice != 0)
+            {
                 inputDevice->copyBuffers (inputBuffers, numInputBuffers, bufferSize, *this);
 
-            // Make the callback..
+                if (threadShouldExit())
+                    break;
+            }
+
+            JUCE_TRY
             {
                 const ScopedLock sl (startStopLock);
 
                 if (isStarted)
-                {
-                    JUCE_TRY
-                    {
-                        callback->audioDeviceIOCallback ((const float**) inputBuffers,
-                                                         numInputBuffers,
-                                                         outputBuffers,
-                                                         numOutputBuffers,
-                                                         bufferSize);
-                    }
-                    JUCE_CATCH_EXCEPTION
-                }
+                    callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers), numInputBuffers,
+                                                     outputBuffers, numOutputBuffers, bufferSize);
                 else
-                {
                     outs.clear();
-                }
             }
-
-            if (useExclusiveMode && WaitForSingleObject (outputDevice->clientEvent, 1000) == WAIT_TIMEOUT)
-                continue;
+            JUCE_CATCH_EXCEPTION
 
             if (outputDevice != 0)
-                outputDevice->copyBuffers ((const float**) outputBuffers, numOutputBuffers, bufferSize, *this);
+                outputDevice->copyBuffers (const_cast <const float**> (outputBuffers), numOutputBuffers, bufferSize, *this);
         }
     }
 

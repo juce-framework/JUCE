@@ -44,22 +44,16 @@ AudioFormatManager::AudioFormatManager()
 
 AudioFormatManager::~AudioFormatManager()
 {
-    clearFormats();
-    clearSingletonInstance();
 }
 
-juce_ImplementSingleton (AudioFormatManager);
-
-
 //==============================================================================
-void AudioFormatManager::registerFormat (AudioFormat* newFormat,
-                                         const bool makeThisTheDefaultFormat)
+void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool makeThisTheDefaultFormat)
 {
     jassert (newFormat != 0);
 
     if (newFormat != 0)
     {
-#if JUCE_DEBUG
+      #if JUCE_DEBUG
         for (int i = getNumKnownFormats(); --i >= 0;)
         {
             if (getKnownFormat (i)->getFormatName() == newFormat->getFormatName())
@@ -67,7 +61,7 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat,
                 jassertfalse; // trying to add the same format twice!
             }
         }
-#endif
+      #endif
 
         if (makeThisTheDefaultFormat)
             defaultFormatIndex = getNumKnownFormats();
@@ -78,21 +72,21 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat,
 
 void AudioFormatManager::registerBasicFormats()
 {
-#if JUCE_MAC
+  #if JUCE_MAC
     registerFormat (new AiffAudioFormat(), true);
     registerFormat (new WavAudioFormat(), false);
-#else
+  #else
     registerFormat (new WavAudioFormat(), true);
     registerFormat (new AiffAudioFormat(), false);
-#endif
+  #endif
 
-#if JUCE_USE_FLAC
+  #if JUCE_USE_FLAC
     registerFormat (new FlacAudioFormat(), false);
-#endif
+  #endif
 
-#if JUCE_USE_OGGVORBIS
+  #if JUCE_USE_OGGVORBIS
     registerFormat (new OggVorbisAudioFormat(), false);
-#endif
+  #endif
 }
 
 void AudioFormatManager::clearFormats()

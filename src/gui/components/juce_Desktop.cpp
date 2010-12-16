@@ -70,11 +70,10 @@ extern void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords,
 
 void Desktop::refreshMonitorSizes()
 {
-    const Array <Rectangle<int> > oldClipped (monitorCoordsClipped);
-    const Array <Rectangle<int> > oldUnclipped (monitorCoordsUnclipped);
+    Array <Rectangle<int> > oldClipped, oldUnclipped;
+    oldClipped.swapWithArray (monitorCoordsClipped);
+    oldUnclipped.swapWithArray (monitorCoordsUnclipped);
 
-    monitorCoordsClipped.clear();
-    monitorCoordsUnclipped.clear();
     juce_updateMultiMonitorInfo (monitorCoordsClipped, true);
     juce_updateMultiMonitorInfo (monitorCoordsUnclipped, false);
     jassert (monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
@@ -254,6 +253,51 @@ MouseInputSource* Desktop::getDraggingMouseSource (int index) const throw()
     }
 
     return 0;
+}
+
+//==============================================================================
+class MouseDragAutoRepeater  : public Timer
+{
+public:
+    MouseDragAutoRepeater() {}
+
+    void timerCallback()
+    {
+        Desktop& desktop = Desktop::getInstance();
+        int numMiceDown = 0;
+
+        for (int i = desktop.getNumMouseSources(); --i >= 0;)
+        {
+            MouseInputSource* const source = desktop.getMouseSource(i);
+            if (source->isDragging())
+            {
+                source->triggerFakeMove();
+                ++numMiceDown;
+            }
+        }
+
+        if (numMiceDown == 0)
+            desktop.beginDragAutoRepeat (0);
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (MouseDragAutoRepeater);
+};
+
+void Desktop::beginDragAutoRepeat (const int interval)
+{
+    if (interval > 0)
+    {
+        if (dragRepeater == 0)
+            dragRepeater = new MouseDragAutoRepeater();
+
+        if (dragRepeater->getTimerInterval() != interval)
+            dragRepeater->startTimer (interval);
+    }
+    else
+    {
+        dragRepeater = 0;
+    }
 }
 
 //==============================================================================

@@ -2297,59 +2297,6 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
 }
 
 //==============================================================================
-class InternalDragRepeater  : public Timer
-{
-public:
-    InternalDragRepeater()
-    {}
-
-    ~InternalDragRepeater()
-    {
-        clearSingletonInstance();
-    }
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (InternalDragRepeater)
-
-    void timerCallback()
-    {
-        Desktop& desktop = Desktop::getInstance();
-        int numMiceDown = 0;
-
-        for (int i = desktop.getNumMouseSources(); --i >= 0;)
-        {
-            MouseInputSource* const source = desktop.getMouseSource(i);
-            if (source->isDragging())
-            {
-                source->triggerFakeMove();
-                ++numMiceDown;
-            }
-        }
-
-        if (numMiceDown == 0)
-            deleteInstance();
-    }
-
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalDragRepeater);
-};
-
-juce_ImplementSingleton_SingleThreaded (InternalDragRepeater)
-
-
-void Component::beginDragAutoRepeat (const int interval)
-{
-    if (interval > 0)
-    {
-        if (InternalDragRepeater::getInstance()->getTimerInterval() != interval)
-            InternalDragRepeater::getInstance()->startTimer (interval);
-    }
-    else
-    {
-        InternalDragRepeater::deleteInstance();
-    }
-}
-
-//==============================================================================
 void Component::internalMouseDown (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     Desktop& desktop = Desktop::getInstance();
@@ -2559,7 +2506,15 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
 
 void Component::sendFakeMouseMove() const
 {
-    Desktop::getInstance().getMainMouseSource().triggerFakeMove();
+    MouseInputSource& mainMouse = Desktop::getInstance().getMainMouseSource();
+
+    if (! mainMouse.isDragging())
+        mainMouse.triggerFakeMove();
+}
+
+void Component::beginDragAutoRepeat (const int interval)
+{
+    Desktop::getInstance().beginDragAutoRepeat (interval);
 }
 
 void Component::broughtToFront()
@@ -2993,10 +2948,10 @@ ComponentPeer* Component::getPeer() const
 {
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);
-    else if (parentComponent_ != 0)
-        return parentComponent_->getPeer();
-    else
+    else if (parentComponent_ == 0)
         return 0;
+
+    return parentComponent_->getPeer();
 }
 
 //==============================================================================

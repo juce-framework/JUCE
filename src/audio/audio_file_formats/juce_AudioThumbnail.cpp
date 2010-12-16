@@ -370,9 +370,10 @@ public:
                 for (int w = clip.getWidth(); --w >= 0;)
                 {
                     if (cacheData->isNonZero())
-                        g.drawVerticalLine (x++, jmax (midY - cacheData->maxValue * vscale - 0.3f, topY),
-                                                 jmin (midY - cacheData->minValue * vscale + 0.3f, bottomY));
+                        g.drawVerticalLine (x, jmax (midY - cacheData->maxValue * vscale - 0.3f, topY),
+                                               jmin (midY - cacheData->minValue * vscale + 0.3f, bottomY));
 
+                    ++x;
                     ++cacheData;
                 }
             }

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	104
+#define JUCE_BUILDNUMBER	105
 
 /** Current Juce version number.
 
@@ -27535,24 +27535,21 @@ public:
 									float wheelIncrementY);
 
 	/** Ensures that a non-stop stream of mouse-drag events will be sent during the
-		next mouse-drag operation.
+		current mouse-drag operation.
 
-		This allows you to make sure that mouseDrag() events sent continuously, even
+		This allows you to make sure that mouseDrag() events are sent continuously, even
 		when the mouse isn't moving. This can be useful for things like auto-scrolling
 		components when the mouse is near an edge.
 
 		Call this method during a mouseDown() or mouseDrag() callback, specifying the
 		minimum interval between consecutive mouse drag callbacks. The callbacks
 		will continue until the mouse is released, and then the interval will be reset,
-		so you need to make sure it's called every time you begin a drag event. If it
-		is called when the mouse isn't actually being pressed, it will apply to the next
-		mouse-drag operation that happens.
-
+		so you need to make sure it's called every time you begin a drag event.
 		Passing an interval of 0 or less will cancel the auto-repeat.
 
-		@see mouseDrag
+		@see mouseDrag, Desktop::beginDragAutoRepeat
 	*/
-	static void beginDragAutoRepeat (int millisecondIntervalBetweenCallbacks);
+	static void beginDragAutoRepeat (int millisecondsBetweenCallbacks);
 
 	/** Causes automatic repaints when the mouse enters or exits this component.
 
@@ -29591,6 +29588,23 @@ public:
 	*/
 	MouseInputSource* getDraggingMouseSource (int index) const throw();
 
+	/** Ensures that a non-stop stream of mouse-drag events will be sent during the
+		current mouse-drag operation.
+
+		This allows you to make sure that mouseDrag() events are sent continuously, even
+		when the mouse isn't moving. This can be useful for things like auto-scrolling
+		components when the mouse is near an edge.
+
+		Call this method during a mouseDown() or mouseDrag() callback, specifying the
+		minimum interval between consecutive mouse drag callbacks. The callbacks
+		will continue until the mouse is released, and then the interval will be reset,
+		so you need to make sure it's called every time you begin a drag event.
+		Passing an interval of 0 or less will cancel the auto-repeat.
+
+		@see mouseDrag
+	*/
+	void beginDragAutoRepeat (int millisecondsBetweenCallbacks);
+
 	/** In a tablet device which can be turned around, this is used to inidicate the orientation. */
 	enum DisplayOrientation
 	{
@@ -29653,6 +29667,8 @@ private:
 
 	int mouseClickCounter;
 	void incrementMouseClickCounter() throw();
+
+	ScopedPointer<Timer> dragRepeater;
 
 	Component* kioskModeComponent;
 	Rectangle<int> kioskComponentOriginalBounds;
@@ -32424,8 +32440,6 @@ public:
 
 	/** Destructor. */
 	~AudioFormatManager();
-
-	juce_DeclareSingleton (AudioFormatManager, false);
 
 	/** Adds a format to the manager's list of available file types.
 
@@ -56680,7 +56694,7 @@ public:
 	/** Returns the component that was last known to be under this pointer. */
 	Component* getComponentUnderMouse() const;
 
-	/** Tells the device to dispatch a mouse-move event.
+	/** Tells the device to dispatch a mouse-move or mouse-drag event.
 		This is asynchronous - the event will occur on the message thread.
 	*/
 	void triggerFakeMove() const;

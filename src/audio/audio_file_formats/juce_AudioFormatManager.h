@@ -56,8 +56,6 @@ public:
     /** Destructor. */
     ~AudioFormatManager();
 
-    juce_DeclareSingleton (AudioFormatManager, false);
-
     //==============================================================================
     /** Adds a format to the manager's list of available file types.
 

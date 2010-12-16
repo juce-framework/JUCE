@@ -1514,24 +1514,21 @@ public:
 
     //==============================================================================
     /** Ensures that a non-stop stream of mouse-drag events will be sent during the
-        next mouse-drag operation.
+        current mouse-drag operation.
 
-        This allows you to make sure that mouseDrag() events sent continuously, even
+        This allows you to make sure that mouseDrag() events are sent continuously, even
         when the mouse isn't moving. This can be useful for things like auto-scrolling
         components when the mouse is near an edge.
 
         Call this method during a mouseDown() or mouseDrag() callback, specifying the
         minimum interval between consecutive mouse drag callbacks. The callbacks
         will continue until the mouse is released, and then the interval will be reset,
-        so you need to make sure it's called every time you begin a drag event. If it
-        is called when the mouse isn't actually being pressed, it will apply to the next
-        mouse-drag operation that happens.
-
+        so you need to make sure it's called every time you begin a drag event.
         Passing an interval of 0 or less will cancel the auto-repeat.
 
-        @see mouseDrag
+        @see mouseDrag, Desktop::beginDragAutoRepeat
     */
-    static void beginDragAutoRepeat (int millisecondIntervalBetweenCallbacks);
+    static void beginDragAutoRepeat (int millisecondsBetweenCallbacks);
 
     /** Causes automatic repaints when the mouse enters or exits this component.
 
