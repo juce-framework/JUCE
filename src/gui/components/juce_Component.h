@@ -2171,9 +2171,9 @@ private:
         bool isDisabledFlag             : 1;
         bool childCompFocusedFlag       : 1;
         bool dontClipGraphicsFlag       : 1;
-#if JUCE_DEBUG
+      #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
-#endif
+      #endif
     };
 
     union

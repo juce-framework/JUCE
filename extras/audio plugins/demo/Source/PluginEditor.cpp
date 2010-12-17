@@ -13,32 +13,38 @@
 
 //==============================================================================
 JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor* ownerFilter)
-    : AudioProcessorEditor (ownerFilter)
+    : AudioProcessorEditor (ownerFilter),
+      midiKeyboard (ownerFilter->keyboardState, MidiKeyboardComponent::horizontalKeyboard),
+      infoLabel (String::empty),
+      gainLabel ("", "Throughput level:"),
+      delayLabel ("", "Delay:"),
+      gainSlider ("gain"),
+      delaySlider ("delay")
 {
-    addAndMakeVisible (gainSlider = new Slider ("gain"));
-    gainSlider->setSliderStyle (Slider::Rotary);
-    gainSlider->addListener (this);
-    gainSlider->setRange (0.0, 1.0, 0.01);
-    Label* l = new Label ("", "Throughput level:");
-    l->attachToComponent (gainSlider, false);
-    l->setFont (Font (11.0f));
+    // add some sliders..
+    addAndMakeVisible (&gainSlider);
+    gainSlider.setSliderStyle (Slider::Rotary);
+    gainSlider.addListener (this);
+    gainSlider.setRange (0.0, 1.0, 0.01);
 
-    addAndMakeVisible (delaySlider = new Slider ("delay"));
-    delaySlider->setSliderStyle (Slider::Rotary);
-    delaySlider->addListener (this);
-    delaySlider->setRange (0.0, 1.0, 0.01);
-    l = new Label ("", "Delay:");
-    l->attachToComponent (delaySlider, false);
-    l->setFont (Font (11.0f));
+    addAndMakeVisible (&delaySlider);
+    delaySlider.setSliderStyle (Slider::Rotary);
+    delaySlider.addListener (this);
+    delaySlider.setRange (0.0, 1.0, 0.01);
 
-    // create and add the midi keyboard component..
-    addAndMakeVisible (midiKeyboard
-        = new MidiKeyboardComponent (ownerFilter->keyboardState,
-                                     MidiKeyboardComponent::horizontalKeyboard));
+    // add some labels for the sliders..
+    gainLabel.attachToComponent (&gainSlider, false);
+    gainLabel.setFont (Font (11.0f));
+
+    delayLabel.attachToComponent (&delaySlider, false);
+    delayLabel.setFont (Font (11.0f));
+
+    // add the midi keyboard component..
+    addAndMakeVisible (&midiKeyboard);
 
     // add a label that will display the current timecode and status..
-    addAndMakeVisible (infoLabel = new Label (String::empty, String::empty));
-    infoLabel->setColour (Label::textColourId, Colours::blue);
+    addAndMakeVisible (&infoLabel);
+    infoLabel.setColour (Label::textColourId, Colours::blue);
 
     // add the triangular resizer component for the bottom-right of the UI
     addAndMakeVisible (resizer = new ResizableCornerComponent (this, &resizeLimits));
@@ -53,7 +59,6 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
 
 JuceDemoPluginAudioProcessorEditor::~JuceDemoPluginAudioProcessorEditor()
 {
-    deleteAllChildren();
 }
 
 //==============================================================================
@@ -65,12 +70,12 @@ void JuceDemoPluginAudioProcessorEditor::paint (Graphics& g)
 
 void JuceDemoPluginAudioProcessorEditor::resized()
 {
-    infoLabel->setBounds (10, 4, 400, 25);
-    gainSlider->setBounds (20, 60, 150, 40);
-    delaySlider->setBounds (200, 60, 150, 40);
+    infoLabel.setBounds (10, 4, 400, 25);
+    gainSlider.setBounds (20, 60, 150, 40);
+    delaySlider.setBounds (200, 60, 150, 40);
 
     const int keyboardHeight = 70;
-    midiKeyboard->setBounds (4, getHeight() - keyboardHeight - 4, getWidth() - 8, keyboardHeight);
+    midiKeyboard.setBounds (4, getHeight() - keyboardHeight - 4, getWidth() - 8, keyboardHeight);
 
     resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
 
@@ -89,25 +94,25 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
     if (lastDisplayedPosition != newPos)
         displayPositionInfo (newPos);
 
-    gainSlider->setValue (ourProcessor->gain, false);
-    delaySlider->setValue (ourProcessor->delay, false);
+    gainSlider.setValue (ourProcessor->gain, false);
+    delaySlider.setValue (ourProcessor->delay, false);
 }
 
 // This is our Slider::Listener callback, when the user drags a slider.
 void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 {
-    if (slider == gainSlider)
+    if (slider == &gainSlider)
     {
         // It's vital to use setParameterNotifyingHost to change any parameters that are automatable
         // by the host, rather than just modifying them directly, otherwise the host won't know
         // that they've changed.
         getProcessor()->setParameterNotifyingHost (JuceDemoPluginAudioProcessor::gainParam,
-                                                   (float) gainSlider->getValue());
+                                                   (float) gainSlider.getValue());
     }
-    else if (slider == delaySlider)
+    else if (slider == &delaySlider)
     {
         getProcessor()->setParameterNotifyingHost (JuceDemoPluginAudioProcessor::delayParam,
-                                                   (float) delaySlider->getValue());
+                                                   (float) delaySlider.getValue());
     }
 }
 
@@ -169,5 +174,5 @@ void JuceDemoPluginAudioProcessorEditor::displayPositionInfo (const AudioPlayHea
     else if (pos.isPlaying)
         displayText << "  (playing)";
 
-    infoLabel->setText (displayText, false);
+    infoLabel.setText (displayText, false);
 }

@@ -177,6 +177,12 @@ public:
     /** Returns true if the low res preview is fully generated. */
     bool isFullyLoaded() const throw();
 
+    /** Returns the highest level in the thumbnail.
+        Note that because the thumb only stores low-resolution data, this isn't
+        an accurate representation of the highest value, it's only a rough approximation.
+    */
+    float getApproximatePeak() const;
+
     /** Returns the hash code that was set by setSource() or setReader(). */
     int64 getHashCode() const;
 

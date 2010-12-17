@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	105
+#define JUCE_BUILDNUMBER	106
 
 /** Current Juce version number.
 
@@ -28178,9 +28178,9 @@ private:
 		bool isDisabledFlag		 : 1;
 		bool childCompFocusedFlag	   : 1;
 		bool dontClipGraphicsFlag	   : 1;
-#if JUCE_DEBUG
+	  #if JUCE_DEBUG
 		bool isInsidePaintCall	  : 1;
-#endif
+	  #endif
 	};
 
 	union
@@ -29126,18 +29126,19 @@ private:
 class InternalTimerThread;
 
 /**
-	Repeatedly calls a user-defined method at a specified time interval.
+	Makes repeated callbacks to a virtual method at a specified time interval.
 
 	A Timer's timerCallback() method will be repeatedly called at a given
-	interval. Initially when a Timer object is created, they will do nothing
-	until the startTimer() method is called, then the message thread will
-	start calling it back until stopTimer() is called.
+	interval. When you create a Timer object, it will do nothing until the
+	startTimer() method is called, which will cause the message thread to
+	start making callbacks at the specified interval, until stopTimer() is called
+	or the object is deleted.
 
 	The time interval isn't guaranteed to be precise to any more than maybe
 	10-20ms, and the intervals may end up being much longer than requested if the
-	system is busy. Because it's the message thread that is doing the callbacks,
-	any messages that take a significant amount of time to process will block
-	all the timers for that period.
+	system is busy. Because the callbacks are made by the main message thread,
+	anything that blocks the message queue for a period of time will also prevent
+	any timers from running until it can carry on.
 
 	If you need to have a single callback that is shared by multiple timers with
 	different frequencies, then the MultiTimer class allows you to do that - its
@@ -32740,6 +32741,12 @@ public:
 
 	/** Returns true if the low res preview is fully generated. */
 	bool isFullyLoaded() const throw();
+
+	/** Returns the highest level in the thumbnail.
+		Note that because the thumb only stores low-resolution data, this isn't
+		an accurate representation of the highest value, it's only a rough approximation.
+	*/
+	float getApproximatePeak() const;
 
 	/** Returns the hash code that was set by setSource() or setReader(). */
 	int64 getHashCode() const;

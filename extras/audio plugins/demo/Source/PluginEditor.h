@@ -34,11 +34,11 @@ public:
     void sliderValueChanged (Slider*);
 
 private:
-    MidiKeyboardComponent* midiKeyboard;
-    Label* infoLabel;
-    Slider* gainSlider;
-    Slider* delaySlider;
-    ResizableCornerComponent* resizer;
+    MidiKeyboardComponent midiKeyboard;
+    Label infoLabel, gainLabel, delayLabel;
+    Slider gainSlider;
+    Slider delaySlider;
+    ScopedPointer<ResizableCornerComponent> resizer;
     ComponentBoundsConstrainer resizeLimits;
 
     AudioPlayHead::CurrentPositionInfo lastDisplayedPosition;

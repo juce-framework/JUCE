@@ -470,8 +470,7 @@ void Component::setVisible (bool shouldBeVisible)
 
         if (! shouldBeVisible)
         {
-            if (currentlyFocusedComponent == this
-                || isParentOf (currentlyFocusedComponent))
+            if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
             {
                 if (parentComponent_ != 0)
                     parentComponent_->grabKeyboardFocus();
@@ -1358,32 +1357,18 @@ Component* Component::removeChildComponent (const int index)
         childComponentList_.remove (index);
         child->parentComponent_ = 0;
 
-        if (childShowing)
+        // (NB: there are obscure situations where a childShowing = false, but it still has the focus)
+        if (currentlyFocusedComponent == child || child->isParentOf (currentlyFocusedComponent))
         {
-            JUCE_TRY
-            {
-                if ((currentlyFocusedComponent == child)
-                    || child->isParentOf (currentlyFocusedComponent))
-                {
-                    // get rid first to force the grabKeyboardFocus to change to us.
-                    giveAwayFocus();
-                    grabKeyboardFocus();
-                }
-            }
-          #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-            catch (const std::exception& e)
-            {
-                currentlyFocusedComponent = 0;
-                Desktop::getInstance().triggerFocusCallback();
-                JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__);
-            }
-            catch (...)
-            {
-                currentlyFocusedComponent = 0;
-                Desktop::getInstance().triggerFocusCallback();
-                JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__);
-            }
-          #endif
+            SafePointer<Component> thisPointer (this);
+
+            giveAwayFocus();
+
+            if (thisPointer == 0)
+                return child;
+
+            if (childShowing)
+                grabKeyboardFocus();
         }
 
         child->internalHierarchyChanged();
@@ -2854,14 +2839,13 @@ Component* JUCE_CALLTYPE Component::getCurrentlyFocusedComponent() throw()
 
 void Component::giveAwayFocus()
 {
-    // use a copy so we can clear the value before the call
-    SafePointer<Component> componentLosingFocus (currentlyFocusedComponent);
-
+    Component* const componentLosingFocus = currentlyFocusedComponent;
     currentlyFocusedComponent = 0;
-    Desktop::getInstance().triggerFocusCallback();
 
     if (componentLosingFocus != 0)
         componentLosingFocus->internalFocusLoss (focusChangedDirectly);
+
+    Desktop::getInstance().triggerFocusCallback();
 }
 
 //==============================================================================

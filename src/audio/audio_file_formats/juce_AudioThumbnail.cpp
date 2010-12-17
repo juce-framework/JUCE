@@ -62,6 +62,12 @@ struct AudioThumbnail::MinMaxValue
         return maxValue > minValue;
     }
 
+    inline int getPeak() const throw()
+    {
+        return jmax (std::abs ((int) minValue),
+                     std::abs ((int) maxValue));
+    }
+
     inline void read (InputStream& input)
     {
         minValue = input.readByte();
@@ -262,6 +268,7 @@ class AudioThumbnail::ThumbData
 {
 public:
     ThumbData (const int numThumbSamples)
+        : peakLevel (-1)
     {
         ensureSize (numThumbSamples);
     }
@@ -308,6 +315,8 @@ public:
 
     void write (const MinMaxValue* const source, const int startIndex, const int numValues)
     {
+        resetPeak();
+
         if (startIndex + numValues > data.size())
             ensureSize (startIndex + numValues);
 
@@ -317,8 +326,29 @@ public:
             dest[i] = source[i];
     }
 
+    void resetPeak()
+    {
+        peakLevel = -1;
+    }
+
+    int getPeak()
+    {
+        if (peakLevel < 0)
+        {
+            for (int i = 0; i < data.size(); ++i)
+            {
+                const int peak = data[i].getPeak();
+                if (peak > peakLevel)
+                    peakLevel = peak;
+            }
+        }
+
+        return peakLevel;
+    }
+
 private:
     Array <MinMaxValue> data;
+    int peakLevel;
 
     void ensureSize (const int thumbSamples)
     {
@@ -698,6 +728,16 @@ double AudioThumbnail::getTotalLength() const throw()
 bool AudioThumbnail::isFullyLoaded() const throw()
 {
     return numSamplesFinished >= totalSamples - samplesPerThumbSample;
+}
+
+float AudioThumbnail::getApproximatePeak() const
+{
+    int peak = 0;
+
+    for (int i = channels.size(); --i >= 0;)
+        peak = jmax (peak, channels.getUnchecked(i)->getPeak());
+
+    return jlimit (0, 127, peak) / 127.0f;
 }
 
 void AudioThumbnail::drawChannel (Graphics& g, const Rectangle<int>& area, double startTime,

@@ -546,10 +546,10 @@ public:
         : graph (graph_),
           orderedNodes (orderedNodes_)
     {
-        nodeIds.add (zeroNodeID); // first buffer is read-only zeros
+        nodeIds.add ((uint32) zeroNodeID); // first buffer is read-only zeros
         channels.add (0);
 
-        midiNodeIds.add (zeroNodeID);
+        midiNodeIds.add ((uint32) zeroNodeID);
 
         for (int i = 0; i < orderedNodes.size(); ++i)
         {
@@ -835,7 +835,7 @@ private:
                 if (midiNodeIds.getUnchecked(i) == freeNodeID)
                     return i;
 
-            midiNodeIds.add (freeNodeID);
+            midiNodeIds.add ((uint32) freeNodeID);
             return midiNodeIds.size() - 1;
         }
         else
@@ -844,7 +844,7 @@ private:
                 if (nodeIds.getUnchecked(i) == freeNodeID)
                     return i;
 
-            nodeIds.add (freeNodeID);
+            nodeIds.add ((uint32) freeNodeID);
             channels.add (0);
             return nodeIds.size() - 1;
         }
@@ -884,7 +884,7 @@ private:
                                            nodeIds.getUnchecked(i),
                                            channels.getUnchecked(i)))
             {
-                nodeIds.set (i, freeNodeID);
+                nodeIds.set (i, (uint32) freeNodeID);
             }
         }
 
@@ -895,7 +895,7 @@ private:
                                            midiNodeIds.getUnchecked(i),
                                            AudioProcessorGraph::midiChannelIndex))
             {
-                midiNodeIds.set (i, freeNodeID);
+                midiNodeIds.set (i, (uint32) freeNodeID);
             }
         }
     }
