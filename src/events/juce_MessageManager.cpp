@@ -88,7 +88,7 @@ void MessageManager::postMessageToQueue (Message* const message)
 }
 
 //==============================================================================
-CallbackMessage::CallbackMessage() throw() {}
+CallbackMessage::CallbackMessage() throw() : deleteOnDelivery (true) {}
 CallbackMessage::~CallbackMessage() {}
 
 void CallbackMessage::post()
@@ -103,7 +103,7 @@ void MessageManager::deliverMessage (Message* const message)
 {
     JUCE_TRY
     {
-        const ScopedPointer <Message> messageDeleter (message);
+        ScopedPointer <Message> messageDeleter (message);
         MessageListener* const recipient = message->messageRecipient;
 
         if (recipient == 0)
@@ -113,6 +113,9 @@ void MessageManager::deliverMessage (Message* const message)
             if (callbackMessage != 0)
             {
                 callbackMessage->messageCallback();
+
+                if (! callbackMessage->isMessageDeletedOnDelivery())
+                    messageDeleter.release();
             }
             else if (message->intParameter1 == quitMessageId)
             {

@@ -73,8 +73,22 @@ public:
     */
     void post();
 
+    /** This can be used to indicate whether the MessageManager should delete the
+        message after it has been delivered.
+        By default, messages will be deleted, but you might want to disable this so that you
+        can re-use the same message.
+    */
+    void setMessageIsDeletedOnDelivery (bool shouldBeDeleted) throw()       { deleteOnDelivery = shouldBeDeleted; }
+
+    /** Returns true if the message should be deleted after is has been delivered.
+        @see setMessageIsDeletedOnDelivery
+    */
+    bool isMessageDeletedOnDelivery() const throw()                         { return deleteOnDelivery; }
+
 private:
     //==============================================================================
+    bool deleteOnDelivery;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackMessage);
 };
 

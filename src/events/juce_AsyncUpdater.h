@@ -27,6 +27,7 @@
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
 #include "../core/juce_Atomic.h"
+#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -44,7 +45,7 @@ class JUCE_API  AsyncUpdater
 public:
     //==============================================================================
     /** Creates an AsyncUpdater object. */
-    AsyncUpdater() throw();
+    AsyncUpdater();
 
     /** Destructor.
 
@@ -101,7 +102,8 @@ private:
     //==============================================================================
     class AsyncUpdaterMessage;
     friend class AsyncUpdaterMessage;
-
+    friend class ScopedPointer<AsyncUpdaterMessage>;
+    ScopedPointer<AsyncUpdaterMessage> message;
     Atomic<AsyncUpdaterMessage*> pendingMessage;
 };
 

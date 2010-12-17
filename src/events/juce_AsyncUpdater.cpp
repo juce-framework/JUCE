@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_AsyncUpdater.h"
 #include "juce_CallbackMessage.h"
-#include "../containers/juce_ScopedPointer.h"
 #include "juce_MessageManager.h"
 
 
@@ -40,6 +39,7 @@ public:
     AsyncUpdaterMessage (AsyncUpdater& owner_)
         : owner (owner_)
     {
+        setMessageIsDeletedOnDelivery (false);
     }
 
     void messageCallback()
@@ -48,11 +48,13 @@ public:
             owner.handleAsyncUpdate();
     }
 
+private:
     AsyncUpdater& owner;
 };
 
 //==============================================================================
-AsyncUpdater::AsyncUpdater() throw()
+AsyncUpdater::AsyncUpdater()
+   : message (new AsyncUpdaterMessage (*this))
 {
 }
 
@@ -64,18 +66,14 @@ AsyncUpdater::~AsyncUpdater()
     // deleting this object, or find some other way to avoid such a race condition.
     jassert ((! isUpdatePending()) || MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-    pendingMessage = 0;
+    if (pendingMessage.exchange (0) != 0)
+        message.release()->setMessageIsDeletedOnDelivery (true);
 }
 
 void AsyncUpdater::triggerAsyncUpdate()
 {
-    if (pendingMessage.value == 0)
-    {
-        ScopedPointer<AsyncUpdaterMessage> pending (new AsyncUpdaterMessage (*this));
-
-        if (pendingMessage.compareAndSetBool (pending, 0))
-            pending.release()->post();
-    }
+    if (pendingMessage.compareAndSetBool (message, 0))
+        message->post();
 }
 
 void AsyncUpdater::cancelPendingUpdate() throw()
