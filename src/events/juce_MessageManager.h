@@ -299,11 +299,9 @@ public:
 
 
 private:
-    class SharedEvents;
     class BlockingMessage;
-    friend class SharedEvents;
-    friend class BlockingMessage;
-    SharedEvents* sharedEvents;
+    friend class ReferenceCountedObjectPtr<BlockingMessage>;
+    ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
     bool locked;
 
     void init (Thread* thread, ThreadPoolJob* job);

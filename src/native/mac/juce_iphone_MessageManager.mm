@@ -107,79 +107,41 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 }
 
 //==============================================================================
-namespace iOSMessageLoopHelpers
+struct MessageDispatchSystem
 {
-    static CFRunLoopRef runLoop = 0;
-    static CFRunLoopSourceRef runLoopSource = 0;
-    static OwnedArray <Message, CriticalSection>* pendingMessages = 0;
-    static JuceCustomMessageHandler* juceCustomMessageHandler = 0;
-
-    void runLoopSourceCallback (void*)
+    MessageDispatchSystem()
+        : juceCustomMessageHandler (0)
     {
-        if (pendingMessages != 0)
-        {
-            int numDispatched = 0;
-
-            do
-            {
-                Message* const nextMessage = pendingMessages->removeAndReturn (0);
-
-                if (nextMessage == 0)
-                    return;
-
-                const ScopedAutoReleasePool pool;
-                MessageManager::getInstance()->deliverMessage (nextMessage);
-
-            } while (++numDispatched <= 4);
-
-            CFRunLoopSourceSignal (runLoopSource);
-            CFRunLoopWakeUp (runLoop);
-        }
+        juceCustomMessageHandler = [[JuceCustomMessageHandler alloc] init];
     }
-}
+
+    ~MessageDispatchSystem()
+    {
+        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceCustomMessageHandler];
+        [juceCustomMessageHandler release];
+    }
+
+    JuceCustomMessageHandler* juceCustomMessageHandler;
+    MessageQueue messageQueue;
+};
+
+static MessageDispatchSystem* dispatcher = 0;
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    using namespace iOSMessageLoopHelpers;
-    pendingMessages = new OwnedArray <Message, CriticalSection>();
-
-    runLoop = CFRunLoopGetCurrent();
-    CFRunLoopSourceContext sourceContext;
-    zerostruct (sourceContext);
-    sourceContext.perform = runLoopSourceCallback;
-    runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
-    CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
-
-    if (juceCustomMessageHandler == 0)
-        juceCustomMessageHandler = [[JuceCustomMessageHandler alloc] init];
+    if (dispatcher == 0)
+        dispatcher = new MessageDispatchSystem();
 }
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    using namespace iOSMessageLoopHelpers;
-    CFRunLoopSourceInvalidate (runLoopSource);
-    CFRelease (runLoopSource);
-    runLoopSource = 0;
-    deleteAndZero (pendingMessages);
-
-    if (juceCustomMessageHandler != 0)
-    {
-        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceCustomMessageHandler];
-        [juceCustomMessageHandler release];
-        juceCustomMessageHandler = 0;
-    }
+    deleteAndZero (dispatcher);
 }
 
 bool juce_postMessageToSystemQueue (Message* message)
 {
-    using namespace iOSMessageLoopHelpers;
-
-    if (pendingMessages != 0)
-    {
-        pendingMessages->add (message);
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
-    }
+    if (dispatcher != 0)
+        dispatcher->messageQueue.post (message);
 
     return true;
 }
@@ -190,14 +152,14 @@ void MessageManager::broadcastMessage (const String& value)
 
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)
 {
-    using namespace iOSMessageLoopHelpers;
-
     if (isThisTheMessageThread())
     {
         return (*callback) (data);
     }
     else
     {
+        jassert (dispatcher != 0); // trying to call this when the juce system isn't initialised..
+
         // If a thread has a MessageManagerLock and then tries to call this method, it'll
         // deadlock because the message manager is blocked from running, so can never
         // call your function..
@@ -211,11 +173,11 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
         cmp.result = 0;
         cmp.hasBeenExecuted = false;
 
-        [juceCustomMessageHandler performSelectorOnMainThread: @selector (performCallback:)
-                                                   withObject: [NSData dataWithBytesNoCopy: &cmp
-                                                                                    length: sizeof (cmp)
-                                                                              freeWhenDone: NO]
-                                                waitUntilDone: YES];
+        [dispatcher->juceCustomMessageHandler performSelectorOnMainThread: @selector (performCallback:)
+                                                               withObject: [NSData dataWithBytesNoCopy: &cmp
+                                                                                                length: sizeof (cmp)
+                                                                                          freeWhenDone: NO]
+                                                            waitUntilDone: YES];
 
         return cmp.result;
     }

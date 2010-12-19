@@ -84,11 +84,11 @@ MessageManager* MessageManager::getInstance() throw()
 void MessageManager::postMessageToQueue (Message* const message)
 {
     if (quitMessagePosted || ! juce_postMessageToSystemQueue (message))
-        delete message;
+        Message::Ptr deleter (message); // (this will delete messages that were just created with a 0 ref count)
 }
 
 //==============================================================================
-CallbackMessage::CallbackMessage() throw() : deleteOnDelivery (true) {}
+CallbackMessage::CallbackMessage() throw() {}
 CallbackMessage::~CallbackMessage() {}
 
 void CallbackMessage::post()
@@ -103,7 +103,6 @@ void MessageManager::deliverMessage (Message* const message)
 {
     JUCE_TRY
     {
-        ScopedPointer <Message> messageDeleter (message);
         MessageListener* const recipient = message->messageRecipient;
 
         if (recipient == 0)
@@ -113,9 +112,6 @@ void MessageManager::deliverMessage (Message* const message)
             if (callbackMessage != 0)
             {
                 callbackMessage->messageCallback();
-
-                if (! callbackMessage->isMessageDeletedOnDelivery())
-                    messageDeleter.release();
             }
             else if (message->intParameter1 == quitMessageId)
             {
@@ -201,9 +197,11 @@ bool MessageManager::isThisTheMessageThread() const throw()
 
 void MessageManager::setCurrentThreadAsMessageThread()
 {
-    if (messageThreadId != Thread::getCurrentThreadId())
+    const Thread::ThreadID thisThread = Thread::getCurrentThreadId();
+
+    if (messageThreadId != thisThread)
     {
-        messageThreadId = Thread::getCurrentThreadId();
+        messageThreadId = thisThread;
 
         // This is needed on windows to make sure the message window is created by this thread
         doPlatformSpecificShutdown();
@@ -228,48 +226,32 @@ bool MessageManager::currentThreadHasLockedMessageManager() const throw()
     accessed from another thread inside a MM lock, you're screwed. (this is exactly what happens
     in Cocoa).
 */
-class MessageManagerLock::SharedEvents   : public ReferenceCountedObject
-{
-public:
-    SharedEvents()   {}
-
-    /* This class just holds a couple of events to communicate between the BlockingMessage
-       and the MessageManagerLock. Because both of these objects may be deleted at any time,
-       this shared data must be kept in a separate, ref-counted container. */
-    WaitableEvent lockedEvent, releaseEvent;
-
-private:
-    JUCE_DECLARE_NON_COPYABLE (SharedEvents);
-};
-
 class MessageManagerLock::BlockingMessage   : public CallbackMessage
 {
 public:
-    BlockingMessage (MessageManagerLock::SharedEvents* const events_) : events (events_) {}
+    BlockingMessage() {}
 
     void messageCallback()
     {
-        events->lockedEvent.signal();
-        events->releaseEvent.wait();
+        lockedEvent.signal();
+        releaseEvent.wait();
     }
 
-private:
-    ReferenceCountedObjectPtr <MessageManagerLock::SharedEvents> events;
+    WaitableEvent lockedEvent, releaseEvent;
 
+private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockingMessage);
 };
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock (Thread* const threadToCheck)
-    : sharedEvents (0),
-      locked (false)
+    : locked (false)
 {
     init (threadToCheck, 0);
 }
 
 MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal)
-    : sharedEvents (0),
-      locked (false)
+    : locked (false)
 {
     init (0, jobToCheckForExitSignal);
 }
@@ -300,19 +282,16 @@ void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const
                 }
             }
 
-            sharedEvents = new SharedEvents();
-            sharedEvents->incReferenceCount();
+            blockingMessage = new BlockingMessage();
+            blockingMessage->post();
 
-            (new BlockingMessage (sharedEvents))->post();
-
-            while (! sharedEvents->lockedEvent.wait (50))
+            while (! blockingMessage->lockedEvent.wait (20))
             {
                 if ((threadToCheck != 0 && threadToCheck->threadShouldExit())
                       || (job != 0 && job->shouldExit()))
                 {
-                    sharedEvents->releaseEvent.signal();
-                    sharedEvents->decReferenceCount();
-                    sharedEvents = 0;
+                    blockingMessage->releaseEvent.signal();
+                    blockingMessage = 0;
                     MessageManager::instance->lockingLock.exit();
                     return;
                 }
@@ -328,12 +307,12 @@ void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const
 
 MessageManagerLock::~MessageManagerLock() throw()
 {
-    if (sharedEvents != 0)
+    if (blockingMessage != 0)
     {
         jassert (MessageManager::instance == 0 || MessageManager::instance->currentThreadHasLockedMessageManager());
 
-        sharedEvents->releaseEvent.signal();
-        sharedEvents->decReferenceCount();
+        blockingMessage->releaseEvent.signal();
+        blockingMessage = 0;
 
         if (MessageManager::instance != 0)
         {

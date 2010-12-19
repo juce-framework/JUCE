@@ -65,7 +65,9 @@ static LRESULT CALLBACK juce_MessageWndProc (HWND h,
                 // here in case there are windows modal dialog boxes doing their own
                 // dispatch loop and not calling our version
 
-                MessageManager::getInstance()->deliverMessage ((Message*) lParam);
+                Message* const message = reinterpret_cast <Message*> (lParam);
+                MessageManager::getInstance()->deliverMessage (message);
+                message->decReferenceCount();
                 return 0;
             }
             else if (message == broadcastId)
@@ -153,7 +155,9 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
     {
         if (m.message == specialId && m.hwnd == juce_messageWindowHandle)
         {
-            MessageManager::getInstance()->deliverMessage ((Message*) (void*) m.lParam);
+            Message* const message = reinterpret_cast <Message*> (m.lParam);
+            MessageManager::getInstance()->deliverMessage (message);
+            message->decReferenceCount();
         }
         else if (m.message == WM_QUIT)
         {
@@ -184,6 +188,7 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
 //==============================================================================
 bool juce_postMessageToSystemQueue (Message* message)
 {
+    message->incReferenceCount();
     return PostMessage (juce_messageWindowHandle, specialId, 0, (LPARAM) message) != 0;
 }
 

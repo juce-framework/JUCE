@@ -44,24 +44,10 @@ class AppDelegateRedirector
 public:
     AppDelegateRedirector()
     {
-#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
-        runLoop = CFRunLoopGetMain();
-#else
-        runLoop = CFRunLoopGetCurrent();
-#endif
-        CFRunLoopSourceContext sourceContext;
-        zerostruct (sourceContext);
-        sourceContext.info = this;
-        sourceContext.perform = runLoopSourceCallback;
-        runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
-        CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
     }
 
     virtual ~AppDelegateRedirector()
     {
-        CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
-        CFRunLoopSourceInvalidate (runLoopSource);
-        CFRelease (runLoopSource);
     }
 
     virtual NSApplicationTerminateReply shouldTerminate()
@@ -137,40 +123,13 @@ public:
 
     void postMessage (Message* const m)
     {
-        messages.add (m);
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
+        messageQueue.post (m);
     }
 
 private:
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
-    OwnedArray <Message, CriticalSection> messages;
-
-    void runLoopCallback()
-    {
-        int numDispatched = 0;
-
-        do
-        {
-            Message* const nextMessage = messages.removeAndReturn (0);
-
-            if (nextMessage == 0)
-                return;
-
-            const ScopedAutoReleasePool pool;
-            MessageManager::getInstance()->deliverMessage (nextMessage);
-
-        } while (++numDispatched <= 4);
-
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
-    }
-
-    static void runLoopSourceCallback (void* info)
-    {
-        static_cast <AppDelegateRedirector*> (info)->runLoopCallback();
-    }
+    MessageQueue messageQueue;
 };
 
 

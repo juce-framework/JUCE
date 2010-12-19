@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	106
+#define JUCE_BUILDNUMBER	107
 
 /** Current Juce version number.
 
@@ -11025,6 +11025,7 @@ template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSec
 class ReferenceCountedArray
 {
 public:
+	typedef ReferenceCountedObjectPtr<ObjectClass> ObjectClassPtr;
 
 	/** Creates an empty array.
 		@see ReferenceCountedObject, Array, OwnedArray
@@ -11101,7 +11102,7 @@ public:
 
 		@see getUnchecked
 	*/
-	inline const ReferenceCountedObjectPtr<ObjectClass> operator[] (const int index) const throw()
+	inline const ObjectClassPtr operator[] (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
 		return isPositiveAndBelow (index, numUsed) ? data.elements [index]
@@ -11113,7 +11114,7 @@ public:
 		This is a faster and less safe version of operator[] which doesn't check the index passed in, so
 		it can be used when you're sure the index if always going to be legal.
 	*/
-	inline const ReferenceCountedObjectPtr<ObjectClass> getUnchecked (const int index) const throw()
+	inline const ObjectClassPtr getUnchecked (const int index) const throw()
 	{
 		const ScopedLockType lock (getLock());
 		jassert (isPositiveAndBelow (index, numUsed));
@@ -11125,7 +11126,7 @@ public:
 		This will return a null pointer if the array's empty.
 		@see getLast
 	*/
-	inline const ReferenceCountedObjectPtr<ObjectClass> getFirst() const throw()
+	inline const ObjectClassPtr getFirst() const throw()
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [0]
@@ -11137,7 +11138,7 @@ public:
 		This will return a null pointer if the array's empty.
 		@see getFirst
 	*/
-	inline const ReferenceCountedObjectPtr<ObjectClass> getLast() const throw()
+	inline const ObjectClassPtr getLast() const throw()
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [numUsed - 1]
@@ -11407,6 +11408,43 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 		}
+	}
+
+	/** Removes and returns an object from the array.
+
+		This will remove the object at a given index and return it, moving back all
+		the subsequent objects to close the gap. If the index passed in is out-of-range,
+		nothing will happen and a null pointer will be returned.
+
+		@param indexToRemove	the index of the element to remove
+		@see remove, removeObject, removeRange
+	*/
+	const ObjectClassPtr removeAndReturn (const int indexToRemove)
+	{
+		ObjectClassPtr removedItem;
+		const ScopedLockType lock (getLock());
+
+		if (isPositiveAndBelow (indexToRemove, numUsed))
+		{
+			ObjectClass** const e = data.elements + indexToRemove;
+
+			if (*e != 0)
+			{
+				removedItem = *e;
+				(*e)->decReferenceCount();
+			}
+
+			--numUsed;
+			const int numberToShift = numUsed - indexToRemove;
+
+			if (numberToShift > 0)
+				memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
+
+			if ((numUsed << 1) < data.numAllocated)
+				minimiseStorageOverheads();
+		}
+
+		return removedItem;
 	}
 
 	/** Removes the first occurrence of a specified object from the array.
@@ -12476,6 +12514,123 @@ private:
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_CallbackMessage.h ***/
+#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+#define __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Message.h ***/
+#ifndef __JUCE_MESSAGE_JUCEHEADER__
+#define __JUCE_MESSAGE_JUCEHEADER__
+
+class MessageListener;
+class MessageManager;
+
+/** The base class for objects that can be delivered to a MessageListener.
+
+	The simplest Message object contains a few integer and pointer parameters
+	that the user can set, and this is enough for a lot of purposes. For passing more
+	complex data, subclasses of Message can also be used.
+
+	@see MessageListener, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  Message  : public ReferenceCountedObject
+{
+public:
+
+	/** Creates an uninitialised message.
+
+		The class's variables will also be left uninitialised.
+	*/
+	Message() throw();
+
+	/** Creates a message object, filling in the member variables.
+
+		The corresponding public member variables will be set from the parameters
+		passed in.
+	*/
+	Message (int intParameter1,
+			 int intParameter2,
+			 int intParameter3,
+			 void* pointerParameter) throw();
+
+	/** Destructor. */
+	virtual ~Message();
+
+	// These values can be used for carrying simple data that the application needs to
+	// pass around. For more complex messages, just create a subclass.
+
+	int intParameter1;	  /**< user-defined integer value. */
+	int intParameter2;	  /**< user-defined integer value. */
+	int intParameter3;	  /**< user-defined integer value. */
+	void* pointerParameter;	 /**< user-defined pointer value. */
+
+	/** A typedef for pointers to messages. */
+	typedef ReferenceCountedObjectPtr <Message> Ptr;
+
+private:
+	friend class MessageListener;
+	friend class MessageManager;
+	MessageListener* messageRecipient;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Message);
+};
+
+#endif   // __JUCE_MESSAGE_JUCEHEADER__
+/*** End of inlined file: juce_Message.h ***/
+
+/**
+	A message that calls a custom function when it gets delivered.
+
+	You can use this class to fire off actions that you want to be performed later
+	on the message thread.
+
+	Unlike other Message objects, these don't get sent to a MessageListener, you
+	just call the post() method to send them, and when they arrive, your
+	messageCallback() method will automatically be invoked.
+
+	Always create an instance of a CallbackMessage on the heap, as it will be
+	deleted automatically after the message has been delivered.
+
+	@see MessageListener, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  CallbackMessage   : public Message
+{
+public:
+
+	CallbackMessage() throw();
+
+	/** Destructor. */
+	~CallbackMessage();
+
+	/** Called when the message is delivered.
+
+		You should implement this method and make it do whatever action you want
+		to perform.
+
+		Note that like all other messages, this object will be deleted immediately
+		after this method has been invoked.
+	*/
+	virtual void messageCallback() = 0;
+
+	/** Instead of sending this message to a MessageListener, just call this method
+		to post it to the event queue.
+
+		After you've called this, this object will belong to the MessageManager,
+		which will delete it later. So make sure you don't delete the object yourself,
+		call post() more than once, or call post() on a stack-based obect!
+	*/
+	void post();
+
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackMessage);
+};
+
+#endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+/*** End of inlined file: juce_CallbackMessage.h ***/
+
 /**
 	Has a callback method that is triggered asynchronously.
 
@@ -12515,6 +12670,10 @@ public:
 
 		If called after triggerAsyncUpdate() and before the handleAsyncUpdate()
 		callback happens, this will cancel the handleAsyncUpdate() callback.
+
+		Note that this method simply cancels the next callback - if a callback is already
+		in progress on a different thread, this won't block until it finishes, so there's
+		no guarantee that the callback isn't still running when you return from
 	*/
 	void cancelPendingUpdate() throw();
 
@@ -12542,11 +12701,10 @@ public:
 
 private:
 
-	class AsyncUpdaterMessage;
-	friend class AsyncUpdaterMessage;
-	friend class ScopedPointer<AsyncUpdaterMessage>;
-	ScopedPointer<AsyncUpdaterMessage> message;
-	Atomic<AsyncUpdaterMessage*> pendingMessage;
+	ReferenceCountedObjectPtr<CallbackMessage> message;
+	Atomic<int>& getDeliveryFlag() const throw();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncUpdater);
 };
 
 #endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
@@ -28476,64 +28634,6 @@ struct JUCE_API  ApplicationCommandInfo
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
 #define __JUCE_MESSAGELISTENER_JUCEHEADER__
 
-
-/*** Start of inlined file: juce_Message.h ***/
-#ifndef __JUCE_MESSAGE_JUCEHEADER__
-#define __JUCE_MESSAGE_JUCEHEADER__
-
-class MessageListener;
-class MessageManager;
-
-/** The base class for objects that can be delivered to a MessageListener.
-
-	The simplest Message object contains a few integer and pointer parameters
-	that the user can set, and this is enough for a lot of purposes. For passing more
-	complex data, subclasses of Message can also be used.
-
-	@see MessageListener, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  Message
-{
-public:
-
-	/** Creates an uninitialised message.
-
-		The class's variables will also be left uninitialised.
-	*/
-	Message() throw();
-
-	/** Creates a message object, filling in the member variables.
-
-		The corresponding public member variables will be set from the parameters
-		passed in.
-	*/
-	Message (int intParameter1,
-			 int intParameter2,
-			 int intParameter3,
-			 void* pointerParameter) throw();
-
-	/** Destructor. */
-	virtual ~Message();
-
-	// These values can be used for carrying simple data that the application needs to
-	// pass around. For more complex messages, just create a subclass.
-
-	int intParameter1;	  /**< user-defined integer value. */
-	int intParameter2;	  /**< user-defined integer value. */
-	int intParameter3;	  /**< user-defined integer value. */
-	void* pointerParameter;	 /**< user-defined pointer value. */
-
-private:
-	friend class MessageListener;
-	friend class MessageManager;
-	MessageListener* messageRecipient;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Message);
-};
-
-#endif   // __JUCE_MESSAGE_JUCEHEADER__
-/*** End of inlined file: juce_Message.h ***/
-
 /**
 	MessageListener subclasses can post and receive Message objects.
 
@@ -30889,6 +30989,8 @@ public:
 	A set of routines to convert buffers of 32-bit floating point data to and from
 	various integer formats.
 
+	Note that these functions are deprecated - the AudioData class provides a much more
+	flexible set of conversion classes now.
 */
 class JUCE_API  AudioDataConverters
 {
@@ -32681,7 +32783,7 @@ public:
 		If you're going to generate a thumbnail yourself, call this before using addBlock()
 		to add the data.
 	*/
-	void reset (int numChannels, double sampleRate);
+	void reset (int numChannels, double sampleRate, int64 totalSamplesInSource = 0);
 
 	/** Adds a block of level data to the thumbnail.
 		Call reset() before using this, to tell the thumbnail about the data format.
@@ -43777,76 +43879,6 @@ private:
 #endif
 #ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
 
-/*** Start of inlined file: juce_CallbackMessage.h ***/
-#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-#define __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-
-/**
-	A message that calls a custom function when it gets delivered.
-
-	You can use this class to fire off actions that you want to be performed later
-	on the message thread.
-
-	Unlike other Message objects, these don't get sent to a MessageListener, you
-	just call the post() method to send them, and when they arrive, your
-	messageCallback() method will automatically be invoked.
-
-	Always create an instance of a CallbackMessage on the heap, as it will be
-	deleted automatically after the message has been delivered.
-
-	@see MessageListener, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  CallbackMessage   : public Message
-{
-public:
-
-	CallbackMessage() throw();
-
-	/** Destructor. */
-	~CallbackMessage();
-
-	/** Called when the message is delivered.
-
-		You should implement this method and make it do whatever action you want
-		to perform.
-
-		Note that like all other messages, this object will be deleted immediately
-		after this method has been invoked.
-	*/
-	virtual void messageCallback() = 0;
-
-	/** Instead of sending this message to a MessageListener, just call this method
-		to post it to the event queue.
-
-		After you've called this, this object will belong to the MessageManager,
-		which will delete it later. So make sure you don't delete the object yourself,
-		call post() more than once, or call post() on a stack-based obect!
-	*/
-	void post();
-
-	/** This can be used to indicate whether the MessageManager should delete the
-		message after it has been delivered.
-		By default, messages will be deleted, but you might want to disable this so that you
-		can re-use the same message.
-	*/
-	void setMessageIsDeletedOnDelivery (bool shouldBeDeleted) throw()	   { deleteOnDelivery = shouldBeDeleted; }
-
-	/** Returns true if the message should be deleted after is has been delivered.
-		@see setMessageIsDeletedOnDelivery
-	*/
-	bool isMessageDeletedOnDelivery() const throw()			 { return deleteOnDelivery; }
-
-private:
-
-	bool deleteOnDelivery;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackMessage);
-};
-
-#endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-/*** End of inlined file: juce_CallbackMessage.h ***/
-
-
 #endif
 #ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
 
@@ -44374,11 +44406,9 @@ public:
 	bool lockWasGained() const throw()			  { return locked; }
 
 private:
-	class SharedEvents;
 	class BlockingMessage;
-	friend class SharedEvents;
-	friend class BlockingMessage;
-	SharedEvents* sharedEvents;
+	friend class ReferenceCountedObjectPtr<BlockingMessage>;
+	ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
 	bool locked;
 
 	void init (Thread* thread, ThreadPoolJob* job);

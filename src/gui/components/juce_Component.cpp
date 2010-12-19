@@ -1536,6 +1536,10 @@ void Component::exitModalState (const int returnValue)
         }
         else
         {
+            // if component methods are being called from threads other than the message
+            // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
+            CHECK_MESSAGE_MANAGER_IS_LOCKED
+
             class ExitModalStateMessage   : public CallbackMessage
             {
             public:
@@ -2111,6 +2115,10 @@ void Component::parentSizeChanged()
 
 void Component::addComponentListener (ComponentListener* const newListener)
 {
+    // if component methods are being called from threads other than the message
+    // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
+
     componentListeners.add (newListener);
 }
 
@@ -2156,6 +2164,10 @@ void Component::paintOverChildren (Graphics&)
 //==============================================================================
 void Component::postCommandMessage (const int commandId)
 {
+    // if component methods are being called from threads other than the message
+    // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
+    CHECK_MESSAGE_MANAGER_IS_LOCKED
+
     class CustomCommandMessage   : public CallbackMessage
     {
     public:

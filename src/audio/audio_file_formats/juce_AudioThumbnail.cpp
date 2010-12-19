@@ -553,14 +553,15 @@ void AudioThumbnail::clear()
     sendChangeMessage();
 }
 
-void AudioThumbnail::reset (int newNumChannels, double newSampleRate)
+void AudioThumbnail::reset (int newNumChannels, double newSampleRate, int64 totalSamplesInSource)
 {
     clear();
 
     numChannels = newNumChannels;
     sampleRate = newSampleRate;
+    totalSamples = totalSamplesInSource;
 
-    createChannels (0);
+    createChannels (1 + (int) (totalSamplesInSource / samplesPerThumbSample));
 }
 
 void AudioThumbnail::createChannels (const int length)

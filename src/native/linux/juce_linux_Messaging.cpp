@@ -153,7 +153,7 @@ public:
 
 private:
     CriticalSection lock;
-    OwnedArray <Message> queue;
+    ReferenceCountedArray <Message> queue;
     int fd[2];
     int bytesInSocket;
     int totalEventCount;
@@ -193,15 +193,15 @@ private:
         return true;
     }
 
-    Message* popNextMessage()
+    const Message::Ptr popNextMessage()
     {
-        ScopedLock sl (lock);
+        const ScopedLock sl (lock);
 
         if (bytesInSocket > 0)
         {
             --bytesInSocket;
 
-            ScopedUnlock ul (lock);
+            const ScopedUnlock ul (lock);
             unsigned char x;
             size_t numBytes = read (fd[1], &x, 1);
             (void) numBytes;
@@ -212,7 +212,7 @@ private:
 
     bool dispatchNextInternalMessage()
     {
-        ScopedPointer <Message> msg (popNextMessage());
+        const Message::Ptr msg (popNextMessage());
 
         if (msg == 0)
             return false;
@@ -228,7 +228,7 @@ private:
         else
         {
             // Handle "normal" messages
-            MessageManager::getInstance()->deliverMessage (msg.release());
+            MessageManager::getInstance()->deliverMessage (msg);
         }
 
         return true;

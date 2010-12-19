@@ -581,6 +581,8 @@ public:
     A set of routines to convert buffers of 32-bit floating point data to and from
     various integer formats.
 
+    Note that these functions are deprecated - the AudioData class provides a much more
+    flexible set of conversion classes now.
 */
 class JUCE_API  AudioDataConverters
 {

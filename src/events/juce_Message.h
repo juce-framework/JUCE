@@ -26,8 +26,10 @@
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
 #define __JUCE_MESSAGE_JUCEHEADER__
 
+#include "../containers/juce_ReferenceCountedObject.h"
 class MessageListener;
 class MessageManager;
+
 
 //==============================================================================
 /** The base class for objects that can be delivered to a MessageListener.
@@ -38,7 +40,7 @@ class MessageManager;
 
     @see MessageListener, MessageManager, ActionListener, ChangeListener
 */
-class JUCE_API  Message
+class JUCE_API  Message  : public ReferenceCountedObject
 {
 public:
     //==============================================================================
@@ -70,6 +72,8 @@ public:
     int intParameter3;          /**< user-defined integer value. */
     void* pointerParameter;     /**< user-defined pointer value. */
 
+    /** A typedef for pointers to messages. */
+    typedef ReferenceCountedObjectPtr <Message> Ptr;
 
     //==============================================================================
 private:

@@ -63,6 +63,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../application/juce_Application.h"
 #include "../utilities/juce_SystemClipboard.h"
 #include "../events/juce_MessageManager.h"
+#include "../containers/juce_ReferenceCountedArray.h"
 #include "../gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../gui/graphics/imaging/juce_ImageFileFormat.h"
 #include "../gui/graphics/imaging/juce_CameraDevice.h"
@@ -111,6 +112,74 @@ namespace
         return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
     }
 }
+
+//==============================================================================
+class MessageQueue
+{
+public:
+    MessageQueue()
+    {
+      #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 && ! JUCE_IOS
+        runLoop = CFRunLoopGetMain();
+      #else
+        runLoop = CFRunLoopGetCurrent();
+      #endif
+
+        CFRunLoopSourceContext sourceContext;
+        zerostruct (sourceContext);
+        sourceContext.info = this;
+        sourceContext.perform = runLoopSourceCallback;
+        runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
+        CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
+    }
+
+    ~MessageQueue()
+    {
+        CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
+        CFRunLoopSourceInvalidate (runLoopSource);
+        CFRelease (runLoopSource);
+    }
+
+    void post (Message* const message)
+    {
+        messages.add (message);
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
+    }
+
+private:
+    ReferenceCountedArray <Message, CriticalSection> messages;
+    CriticalSection lock;
+    CFRunLoopRef runLoop;
+    CFRunLoopSourceRef runLoopSource;
+
+    bool deliverNextMessage()
+    {
+        const Message::Ptr nextMessage (messages.removeAndReturn (0));
+
+        if (nextMessage == 0)
+            return false;
+
+        const ScopedAutoReleasePool pool;
+        MessageManager::getInstance()->deliverMessage (nextMessage);
+        return true;
+    }
+
+    void runLoopCallback()
+    {
+        for (int i = 4; --i >= 0;)
+            if (! deliverNextMessage())
+                return;
+
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
+    }
+
+    static void runLoopSourceCallback (void* info)
+    {
+        static_cast <MessageQueue*> (info)->runLoopCallback();
+    }
+};
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1

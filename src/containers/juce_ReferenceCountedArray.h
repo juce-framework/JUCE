@@ -49,6 +49,8 @@ template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSec
 class ReferenceCountedArray
 {
 public:
+    typedef ReferenceCountedObjectPtr<ObjectClass> ObjectClassPtr;
+
     //==============================================================================
     /** Creates an empty array.
         @see ReferenceCountedObject, Array, OwnedArray
@@ -126,7 +128,7 @@ public:
 
         @see getUnchecked
     */
-    inline const ReferenceCountedObjectPtr<ObjectClass> operator[] (const int index) const throw()
+    inline const ObjectClassPtr operator[] (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
         return isPositiveAndBelow (index, numUsed) ? data.elements [index]
@@ -138,7 +140,7 @@ public:
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
         it can be used when you're sure the index if always going to be legal.
     */
-    inline const ReferenceCountedObjectPtr<ObjectClass> getUnchecked (const int index) const throw()
+    inline const ObjectClassPtr getUnchecked (const int index) const throw()
     {
         const ScopedLockType lock (getLock());
         jassert (isPositiveAndBelow (index, numUsed));
@@ -150,7 +152,7 @@ public:
         This will return a null pointer if the array's empty.
         @see getLast
     */
-    inline const ReferenceCountedObjectPtr<ObjectClass> getFirst() const throw()
+    inline const ObjectClassPtr getFirst() const throw()
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [0]
@@ -162,7 +164,7 @@ public:
         This will return a null pointer if the array's empty.
         @see getFirst
     */
-    inline const ReferenceCountedObjectPtr<ObjectClass> getLast() const throw()
+    inline const ObjectClassPtr getLast() const throw()
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
@@ -434,6 +436,43 @@ public:
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
         }
+    }
+
+    /** Removes and returns an object from the array.
+
+        This will remove the object at a given index and return it, moving back all
+        the subsequent objects to close the gap. If the index passed in is out-of-range,
+        nothing will happen and a null pointer will be returned.
+
+        @param indexToRemove    the index of the element to remove
+        @see remove, removeObject, removeRange
+    */
+    const ObjectClassPtr removeAndReturn (const int indexToRemove)
+    {
+        ObjectClassPtr removedItem;
+        const ScopedLockType lock (getLock());
+
+        if (isPositiveAndBelow (indexToRemove, numUsed))
+        {
+            ObjectClass** const e = data.elements + indexToRemove;
+
+            if (*e != 0)
+            {
+                removedItem = *e;
+                (*e)->decReferenceCount();
+            }
+
+            --numUsed;
+            const int numberToShift = numUsed - indexToRemove;
+
+            if (numberToShift > 0)
+                memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
+
+            if ((numUsed << 1) < data.numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        return removedItem;
     }
 
     /** Removes the first occurrence of a specified object from the array.

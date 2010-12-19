@@ -182,12 +182,12 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         case userHomeDirectory:                 resultPath = nsStringToJuce (NSHomeDirectory()); break;
 
       #if JUCE_IOS
-        case userDocumentsDirectory:            resultPath = getIOSSystemLocation (NSDocumentDirectory); break;
-        case userDesktopDirectory:              resultPath = getIOSSystemLocation (NSDesktopDirectory); break;
+        case userDocumentsDirectory:            resultPath = FileHelpers::getIOSSystemLocation (NSDocumentDirectory); break;
+        case userDesktopDirectory:              resultPath = FileHelpers::getIOSSystemLocation (NSDesktopDirectory); break;
 
         case tempDirectory:
         {
-            File tmp (getIOSSystemLocation (NSCachesDirectory));
+            File tmp (FileHelpers::getIOSSystemLocation (NSCachesDirectory));
             tmp = tmp.getChildFile (juce_getExecutableFile().getFileNameWithoutExtension());
             tmp.createDirectory();
             return tmp.getFullPathName();

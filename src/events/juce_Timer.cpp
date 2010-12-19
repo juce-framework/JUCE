@@ -64,6 +64,7 @@ public:
     void run()
     {
         uint32 lastTime = Time::getMillisecondCounter();
+        Message::Ptr message (new Message());
 
         while (! threadShouldExit())
         {
@@ -89,7 +90,7 @@ public:
                 */
                 if (callbackNeeded.compareAndSetBool (1, 0))
                 {
-                    postMessage (new Message());
+                    postMessage (message);
 
                     /* Sometimes our message can get discarded by the OS (e.g. when running as an RTAS
                        when the app has a modal loop), so this is how long to wait before assuming the
