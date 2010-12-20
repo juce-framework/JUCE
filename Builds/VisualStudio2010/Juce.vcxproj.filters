@@ -1500,6 +1500,9 @@
     <ClInclude Include="..\..\src\containers\juce_Variant.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\containers\juce_WeakReference.h">
+      <Filter>Juce\Source\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\core\juce_Atomic.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>

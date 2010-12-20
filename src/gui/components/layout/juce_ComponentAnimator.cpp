@@ -178,7 +178,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyComponent);
     };
 
-    Component::SafePointer<Component> component;
+    WeakReference<Component> component;
     ScopedPointer<Component> proxy;
 
     Rectangle<int> destination;
@@ -212,7 +212,7 @@ ComponentAnimator::~ComponentAnimator()
 ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* const component) const
 {
     for (int i = tasks.size(); --i >= 0;)
-        if (component == tasks.getUnchecked(i)->component.getComponent())
+        if (component == tasks.getUnchecked(i)->component.get())
             return tasks.getUnchecked(i);
 
     return 0;

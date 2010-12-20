@@ -415,6 +415,8 @@
               file="src/containers/juce_Variant.cpp"/>
         <FILE id="8q9BHXyE6" name="juce_Variant.h" compile="0" resource="0"
               file="src/containers/juce_Variant.h"/>
+        <FILE id="Nw7LSeh" name="juce_WeakReference.h" compile="0" resource="0"
+              file="src/containers/juce_WeakReference.h"/>
       </GROUP>
       <GROUP id="LTuqRhF2Y" name="core">
         <FILE id="9zAJsfSFe" name="juce_Atomic.h" compile="0" resource="0"

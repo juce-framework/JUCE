@@ -174,7 +174,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 
     while (target != 0)
     {
-        const Component::SafePointer<Component> deletionChecker (target);
+        const WeakReference<Component> deletionChecker (target);
 
         if (target->keyListeners_ != 0)
         {
@@ -228,7 +228,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 
     while (target != 0)
     {
-        const Component::SafePointer<Component> deletionChecker (target);
+        const WeakReference<Component> deletionChecker (target);
 
         keyWasUsed = target->keyStateChanged (isKeyDown);
 
@@ -305,7 +305,7 @@ void ComponentPeer::handleMovedOrResized()
 
     if (component->flags.hasHeavyweightPeerFlag && ! nowMinimised)
     {
-        const Component::SafePointer<Component> deletionChecker (component);
+        const WeakReference<Component> deletionChecker (component);
 
         const Rectangle<int> newBounds (getBounds());
         const bool wasMoved   = (component->getPosition() != newBounds.getPosition());
@@ -523,7 +523,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
                 }
 
             private:
-                Component::SafePointer<Component> target;
+                WeakReference<Component> target;
                 FileDragAndDropTarget* dropTarget;
                 Point<int> position;
                 StringArray files;

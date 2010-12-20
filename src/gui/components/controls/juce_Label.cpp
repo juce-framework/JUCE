@@ -264,7 +264,7 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
 {
     if (editor != 0)
     {
-        Component::SafePointer<Component> deletionChecker (this);
+        WeakReference<Component> deletionChecker (this);
 
         editorAboutToBeHidden (editor);
 
@@ -448,7 +448,7 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
 
         if (changed)
         {
-            Component::SafePointer<Component> deletionChecker (this);
+            WeakReference<Component> deletionChecker (this);
             textWasEdited();
 
             if (deletionChecker != 0)

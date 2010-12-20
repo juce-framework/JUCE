@@ -702,7 +702,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             fullScreen = shouldBeFullScreen;
-            const Component::SafePointer<Component> deletionChecker (component);
+            const WeakReference<Component> deletionChecker (component);
 
             if (! fullScreen)
             {

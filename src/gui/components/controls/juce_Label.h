@@ -317,9 +317,9 @@ private:
     String lastTextValue;
     Font font;
     Justification justification;
-    ScopedPointer <TextEditor> editor;
-    ListenerList <Listener> listeners;
-    Component::SafePointer<Component> ownerComponent;
+    ScopedPointer<TextEditor> editor;
+    ListenerList<Listener> listeners;
+    WeakReference<Component> ownerComponent;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
     bool editSingleClick : 1;

@@ -92,6 +92,9 @@
 #ifndef __JUCE_VARIANT_JUCEHEADER__
  #include "containers/juce_Variant.h"
 #endif
+#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
+ #include "containers/juce_WeakReference.h"
+#endif
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
  #include "core/juce_Atomic.h"
 #endif

@@ -381,6 +381,7 @@
           <File RelativePath="..\..\src\containers\juce_ValueTree.h"/>
           <File RelativePath="..\..\src\containers\juce_Variant.cpp"/>
           <File RelativePath="..\..\src\containers\juce_Variant.h"/>
+          <File RelativePath="..\..\src\containers\juce_WeakReference.h"/>
         </Filter>
         <Filter Name="core">
           <File RelativePath="..\..\src\core\juce_Atomic.h"/>

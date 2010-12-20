@@ -825,7 +825,7 @@ public:
 
         if (windowH != 0)
         {
-            Component::SafePointer<Component> deletionChecker (component);
+            WeakReference<Component> deletionChecker (component);
 
             wx = x;
             wy = y;

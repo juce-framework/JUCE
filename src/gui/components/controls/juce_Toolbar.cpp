@@ -843,7 +843,7 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
     setEditingActive (true);
 
    #if JUCE_DEBUG
-    Component::SafePointer<Component> checker (this);
+    WeakReference<Component> checker (this);
    #endif
 
     ToolbarCustomisationDialog dw (factory, this, optionFlags);

@@ -192,7 +192,7 @@ public:
 
         if (newComponent != current)
         {
-            Component::SafePointer<Component> safeNewComp (newComponent);
+            WeakReference<Component> safeNewComp (newComponent);
             const ModifierKeys originalButtonState (buttonState);
 
             if (current != 0)
@@ -437,7 +437,7 @@ public:
 
 private:
     MouseInputSource& source;
-    Component::SafePointer<Component> componentUnderMouse;
+    WeakReference<Component> componentUnderMouse;
     ComponentPeer* lastPeer;
 
     Point<int> unboundedMouseOffset;

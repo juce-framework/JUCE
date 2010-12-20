@@ -253,7 +253,7 @@ public:
 
 private:
     //==============================================================================
-    Component::SafePointer<Component> contentComp;
+    WeakReference<Component> contentComp;
     Rectangle<int> lastVisibleArea;
     int scrollBarThickness;
     int singleStepX, singleStepY;

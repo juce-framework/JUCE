@@ -83,7 +83,7 @@ protected:
 
 private:
     //==============================================================================
-    Component::SafePointer<Component> component;
+    WeakReference<Component> component;
     ComponentBoundsConstrainer* constrainer;
     Rectangle<int> originalBounds;
 

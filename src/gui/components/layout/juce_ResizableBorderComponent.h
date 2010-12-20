@@ -187,7 +187,7 @@ protected:
     bool hitTest (int x, int y);
 
 private:
-    Component::SafePointer<Component> component;
+    WeakReference<Component> component;
     ComponentBoundsConstrainer* constrainer;
     BorderSize borderSize;
     Rectangle<int> originalBounds;

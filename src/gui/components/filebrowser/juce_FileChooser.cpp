@@ -102,7 +102,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
                               const bool selectMultipleFiles,
                               FilePreviewComponent* const previewComponent)
 {
-    Component::SafePointer<Component> previouslyFocused (Component::getCurrentlyFocusedComponent());
+    WeakReference<Component> previouslyFocused (Component::getCurrentlyFocusedComponent());
 
     results.clear();
 

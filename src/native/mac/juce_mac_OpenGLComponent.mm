@@ -498,7 +498,7 @@ public:
 
     //==============================================================================
 private:
-    Component::SafePointer<Component> component;
+    WeakReference<Component> component;
     OpenGLPixelFormat pixelFormat;
     JuceGLView* view;
     CAEAGLLayer* glLayer;

@@ -72,7 +72,7 @@ public:
 
 private:
     //==============================================================================
-    Component::SafePointer<Component> component;
+    WeakReference<Component> component;
     ComponentPeer* lastPeer;
     Array <Component*> registeredParentComps;
     bool reentrant;

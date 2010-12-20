@@ -516,6 +516,7 @@
 		7CABDD863B47D8ADC900A4D8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ValueTree.h; path = ../../src/containers/juce_ValueTree.h; sourceTree = SOURCE_ROOT; };
 		4DF9D333038A442870668D31 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Variant.cpp; path = ../../src/containers/juce_Variant.cpp; sourceTree = SOURCE_ROOT; };
 		A81B4FC81A75E21E5B96E506 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Variant.h; path = ../../src/containers/juce_Variant.h; sourceTree = SOURCE_ROOT; };
+		35D32D0A21ABDB7861E3E5B8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_WeakReference.h; path = ../../src/containers/juce_WeakReference.h; sourceTree = SOURCE_ROOT; };
 		149E6ECBA264A264C7BB3FB3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Atomic.h; path = ../../src/core/juce_Atomic.h; sourceTree = SOURCE_ROOT; };
 		45AFA4791D59FBB1B548FB2C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ByteOrder.h; path = ../../src/core/juce_ByteOrder.h; sourceTree = SOURCE_ROOT; };
 		D66C00E06B06EAD3B5257DD6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FileLogger.cpp; path = ../../src/core/juce_FileLogger.cpp; sourceTree = SOURCE_ROOT; };
@@ -1240,7 +1241,8 @@
 				5D27EE211D9BFF6A58C4DC42,
 				7CABDD863B47D8ADC900A4D8,
 				4DF9D333038A442870668D31,
-				A81B4FC81A75E21E5B96E506 ); name = containers; sourceTree = "<group>"; };
+				A81B4FC81A75E21E5B96E506,
+				35D32D0A21ABDB7861E3E5B8 ); name = containers; sourceTree = "<group>"; };
 		1AF37A533ABDD889670F9349 = { isa = PBXGroup; children = (
 				149E6ECBA264A264C7BB3FB3,
 				45AFA4791D59FBB1B548FB2C,

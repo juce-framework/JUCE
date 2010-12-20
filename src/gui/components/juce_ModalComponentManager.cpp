@@ -268,7 +268,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
     if (currentlyModal == 0)
         return 0;
 
-    Component::SafePointer<Component> prevFocused (Component::getCurrentlyFocusedComponent());
+    WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
 
     int returnValue = 0;
     bool finished = false;

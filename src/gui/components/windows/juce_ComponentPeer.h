@@ -368,7 +368,7 @@ protected:
 
 private:
     //==============================================================================
-    Component::SafePointer<Component> lastFocusedComponent, dragAndDropTargetComponent;
+    WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 

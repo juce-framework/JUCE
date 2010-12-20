@@ -526,6 +526,7 @@
     <ClInclude Include="..\..\src\containers\juce_Value.h"/>
     <ClInclude Include="..\..\src\containers\juce_ValueTree.h"/>
     <ClInclude Include="..\..\src\containers\juce_Variant.h"/>
+    <ClInclude Include="..\..\src\containers\juce_WeakReference.h"/>
     <ClInclude Include="..\..\src\core\juce_Atomic.h"/>
     <ClInclude Include="..\..\src\core\juce_ByteOrder.h"/>
     <ClInclude Include="..\..\src\core\juce_FileLogger.h"/>

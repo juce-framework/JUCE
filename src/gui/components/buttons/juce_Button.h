@@ -465,7 +465,7 @@ protected:
 private:
     //==============================================================================
     Array <KeyPress> shortcuts;
-    Component::SafePointer<Component> keySource;
+    WeakReference<Component> keySource;
     String text;
     ListenerList <Listener> buttonListeners;
 

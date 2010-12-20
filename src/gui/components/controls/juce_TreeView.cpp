@@ -341,10 +341,10 @@ private:
 
         ~RowItem()
         {
-            component.deleteAndZero();
+            delete component.get();
         }
 
-        Component::SafePointer<Component> component;
+        WeakReference<Component> component;
         TreeViewItem* item;
         int uid;
         bool shouldKeep;

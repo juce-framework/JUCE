@@ -129,10 +129,10 @@ void TabbedComponent::clearTabs()
 
     for (int i = contentComponents.size(); --i >= 0;)
     {
-        Component::SafePointer<Component>& c = *contentComponents.getUnchecked (i);
+        WeakReference<Component>& c = *contentComponents.getUnchecked (i);
 
         if (c != 0 && (bool) c->getProperties() [deleteComponentId])
-            c.deleteAndZero();
+            delete c.get();
     }
 
     contentComponents.clear();
@@ -144,7 +144,7 @@ void TabbedComponent::addTab (const String& tabName,
                               const bool deleteComponentWhenNotNeeded,
                               const int insertIndex)
 {
-    contentComponents.insert (insertIndex, new Component::SafePointer<Component> (contentComponent));
+    contentComponents.insert (insertIndex, new WeakReference<Component> (contentComponent));
 
     if (contentComponent != 0)
         contentComponent->getProperties().set (deleteComponentId, deleteComponentWhenNotNeeded);
@@ -159,12 +159,12 @@ void TabbedComponent::setTabName (const int tabIndex, const String& newName)
 
 void TabbedComponent::removeTab (const int tabIndex)
 {
-    Component::SafePointer<Component>* c = contentComponents [tabIndex];
+    WeakReference<Component>* c = contentComponents [tabIndex];
 
     if (c != 0)
     {
         if ((bool) ((*c)->getProperties() [deleteComponentId]))
-            c->deleteAndZero();
+            delete c->get();
 
         contentComponents.remove (tabIndex);
         tabs->removeTab (tabIndex);
@@ -183,7 +183,7 @@ const StringArray TabbedComponent::getTabNames() const
 
 Component* TabbedComponent::getTabContentComponent (const int tabIndex) const throw()
 {
-    Component::SafePointer<Component>* const c = contentComponents [tabIndex];
+    WeakReference<Component>* const c = contentComponents [tabIndex];
     return c != 0 ? *c : 0;
 }
 

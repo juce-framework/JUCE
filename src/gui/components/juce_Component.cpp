@@ -411,20 +411,26 @@ Component::~Component()
 
     componentListeners.call (&ComponentListener::componentBeingDeleted, *this);
 
+    weakReferenceMaster.clear();
+
+    while (childComponentList_.size() > 0)
+        removeChildComponent (childComponentList_.size() - 1, false, true);
+
     if (parentComponent_ != 0)
-    {
-        parentComponent_->removeChildComponent (this);
-    }
+        parentComponent_->removeChildComponent (parentComponent_->childComponentList_.indexOf (this), true, false);
     else if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
-    {
-        giveAwayFocus();
-    }
+        giveAwayFocus (currentlyFocusedComponent != this);
 
     if (flags.hasHeavyweightPeerFlag)
         removeFromDesktop();
 
-    for (int i = childComponentList_.size(); --i >= 0;)
-        childComponentList_.getUnchecked(i)->parentComponent_ = 0;
+    // Something has added some children to this component during its destructor! Not a smart idea!
+    jassert (childComponentList_.size() == 0);
+}
+
+const WeakReference<Component>::SharedRef& Component::getWeakReference()
+{
+    return weakReferenceMaster (this);
 }
 
 //==============================================================================
@@ -460,7 +466,7 @@ void Component::setVisible (bool shouldBeVisible)
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
         CHECK_MESSAGE_MANAGER_IS_LOCKED
 
-        SafePointer<Component> safePointer (this);
+        WeakReference<Component> safePointer (this);
 
         flags.visibleFlag = shouldBeVisible;
 
@@ -475,7 +481,7 @@ void Component::setVisible (bool shouldBeVisible)
                 if (parentComponent_ != 0)
                     parentComponent_->grabKeyboardFocus();
                 else
-                    giveAwayFocus();
+                    giveAwayFocus (true);
             }
         }
 
@@ -566,7 +572,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
     if (styleWanted != currentStyleFlags || ! flags.hasHeavyweightPeerFlag)
     {
-        SafePointer<Component> safePointer (this);
+        WeakReference<Component> safePointer (this);
 
 #if JUCE_LINUX
         // it's wise to give the component a non-zero size before
@@ -1333,10 +1339,15 @@ void Component::addAndMakeVisible (Component* const child, int zOrder)
 
 void Component::removeChildComponent (Component* const child)
 {
-    removeChildComponent (childComponentList_.indexOf (child));
+    removeChildComponent (childComponentList_.indexOf (child), true, true);
 }
 
 Component* Component::removeChildComponent (const int index)
+{
+    return removeChildComponent (index, true, true);
+}
+
+Component* Component::removeChildComponent (const int index, bool sendParentEvents, const bool sendChildEvents)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -1346,9 +1357,9 @@ Component* Component::removeChildComponent (const int index)
 
     if (child != 0)
     {
-        const bool childShowing = child->isShowing();
+        sendParentEvents = sendParentEvents && child->isShowing();
 
-        if (childShowing)
+        if (sendParentEvents)
         {
             sendFakeMouseMove();
             child->repaintParent();
@@ -1360,19 +1371,22 @@ Component* Component::removeChildComponent (const int index)
         // (NB: there are obscure situations where a childShowing = false, but it still has the focus)
         if (currentlyFocusedComponent == child || child->isParentOf (currentlyFocusedComponent))
         {
-            SafePointer<Component> thisPointer (this);
+            const WeakReference<Component> thisPointer (this);
 
-            giveAwayFocus();
+            giveAwayFocus (sendChildEvents || currentlyFocusedComponent != child);
 
             if (thisPointer == 0)
                 return child;
 
-            if (childShowing)
+            if (sendParentEvents)
                 grabKeyboardFocus();
         }
 
-        child->internalHierarchyChanged();
-        internalChildrenChanged();
+        if (sendChildEvents)
+            child->internalHierarchyChanged();
+
+        if (sendParentEvents)
+            internalChildrenChanged();
     }
 
     return child;
@@ -1536,10 +1550,6 @@ void Component::exitModalState (const int returnValue)
         }
         else
         {
-            // if component methods are being called from threads other than the message
-            // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-            CHECK_MESSAGE_MANAGER_IS_LOCKED
-
             class ExitModalStateMessage   : public CallbackMessage
             {
             public:
@@ -1548,12 +1558,12 @@ void Component::exitModalState (const int returnValue)
 
                 void messageCallback()
                 {
-                    if (target.getComponent() != 0) // (getComponent() required for VS2003 bug)
+                    if (target.get() != 0) // (get() required for VS2003 bug)
                         target->exitModalState (result);
                 }
 
             private:
-                Component::SafePointer<Component> target;
+                WeakReference<Component> target;
                 int result;
             };
 
@@ -1943,7 +1953,7 @@ void Component::sendLookAndFeelChange()
 {
     repaint();
 
-    SafePointer<Component> safePointer (this);
+    WeakReference<Component> safePointer (this);
 
     lookAndFeelChanged();
 
@@ -2164,10 +2174,6 @@ void Component::paintOverChildren (Graphics&)
 //==============================================================================
 void Component::postCommandMessage (const int commandId)
 {
-    // if component methods are being called from threads other than the message
-    // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
-
     class CustomCommandMessage   : public CallbackMessage
     {
     public:
@@ -2176,12 +2182,12 @@ void Component::postCommandMessage (const int commandId)
 
         void messageCallback()
         {
-            if (target != 0)
+            if (target.get() != 0)  // (get() required for VS2003 bug)
                 target->handleCommandMessage (commandId);
         }
 
     private:
-        Component::SafePointer<Component> target;
+        WeakReference<Component> target;
         int commandId;
     };
 
@@ -2549,7 +2555,7 @@ void Component::focusGained (FocusChangeType)
 
 void Component::internalFocusGain (const FocusChangeType cause)
 {
-    SafePointer<Component> safePointer (this);
+    WeakReference<Component> safePointer (this);
 
     focusGained (cause);
 
@@ -2564,7 +2570,7 @@ void Component::focusLost (FocusChangeType)
 
 void Component::internalFocusLoss (const FocusChangeType cause)
 {
-    SafePointer<Component> safePointer (this);
+    WeakReference<Component> safePointer (this);
 
     focusLost (focusChangedDirectly);
 
@@ -2585,7 +2591,7 @@ void Component::internalChildFocusChange (FocusChangeType cause)
     {
         flags.childCompFocusedFlag = childIsNowFocused;
 
-        SafePointer<Component> safePointer (this);
+        WeakReference<Component> safePointer (this);
         focusOfChildComponentChanged (cause);
 
         if (safePointer == 0)
@@ -2618,7 +2624,7 @@ void Component::setEnabled (const bool shouldBeEnabled)
 
 void Component::sendEnablementChangeMessage()
 {
-    SafePointer<Component> safePointer (this);
+    WeakReference<Component> safePointer (this);
 
     enablementChanged();
 
@@ -2706,13 +2712,13 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
 
             if (peer != 0)
             {
-                SafePointer<Component> safePointer (this);
+                WeakReference<Component> safePointer (this);
 
                 peer->grabFocus();
 
                 if (peer->isFocused() && currentlyFocusedComponent != this)
                 {
-                    SafePointer<Component> componentLosingFocus (currentlyFocusedComponent);
+                    WeakReference<Component> componentLosingFocus (currentlyFocusedComponent);
 
                     currentlyFocusedComponent = this;
 
@@ -2822,7 +2828,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
             {
                 if (nextComp->isCurrentlyBlockedByAnotherModalComponent())
                 {
-                    SafePointer<Component> nextCompPointer (nextComp);
+                    WeakReference<Component> nextCompPointer (nextComp);
                     internalModalInputAttempt();
 
                     if (nextCompPointer == 0 || nextComp->isCurrentlyBlockedByAnotherModalComponent())
@@ -2849,12 +2855,12 @@ Component* JUCE_CALLTYPE Component::getCurrentlyFocusedComponent() throw()
     return currentlyFocusedComponent;
 }
 
-void Component::giveAwayFocus()
+void Component::giveAwayFocus (const bool sendFocusLossEvent)
 {
     Component* const componentLosingFocus = currentlyFocusedComponent;
     currentlyFocusedComponent = 0;
 
-    if (componentLosingFocus != 0)
+    if (sendFocusLossEvent && componentLosingFocus != 0)
         componentLosingFocus->internalFocusLoss (focusChangedDirectly);
 
     Desktop::getInstance().triggerFocusCallback();
@@ -2951,15 +2957,21 @@ ComponentPeer* Component::getPeer() const
 }
 
 //==============================================================================
-Component::BailOutChecker::BailOutChecker (Component* const component1, Component* const component2_)
-    : safePointer1 (component1), safePointer2 (component2_), component2 (component2_)
+Component::BailOutChecker::BailOutChecker (Component* const component)
+    : safePointer1 (component)
+{
+    jassert (component != 0);
+}
+
+Component::BailOutChecker::BailOutChecker (Component* const component1, Component* const component2)
+    : safePointer1 (component1), safePointer2 (component2)
 {
     jassert (component1 != 0);
 }
 
 bool Component::BailOutChecker::shouldBailOut() const throw()
 {
-    return safePointer1 == 0 || safePointer2.getComponent() != component2;
+    return safePointer1 == 0 || safePointer2.wasObjectDeleted();
 }
 
 

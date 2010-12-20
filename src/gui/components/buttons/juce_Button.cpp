@@ -149,7 +149,7 @@ void Button::setToggleState (const bool shouldBeOn,
 
         if (sendChangeNotification)
         {
-            Component::SafePointer<Component> deletionWatcher (this);
+            WeakReference<Component> deletionWatcher (this);
             sendClickMessage (ModifierKeys());
 
             if (deletionWatcher == 0)
@@ -200,7 +200,7 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
 
     if (p != 0 && radioGroupId != 0)
     {
-        Component::SafePointer<Component> deletionWatcher (this);
+        WeakReference<Component> deletionWatcher (this);
 
         for (int i = p->getNumChildComponents(); --i >= 0;)
         {
@@ -460,7 +460,7 @@ void Button::parentHierarchyChanged()
 {
     Component* const newKeySource = (shortcuts.size() == 0) ? 0 : getTopLevelComponent();
 
-    if (newKeySource != keySource.getComponent())
+    if (newKeySource != keySource.get())
     {
         if (keySource != 0)
             keySource->removeKeyListener (this);

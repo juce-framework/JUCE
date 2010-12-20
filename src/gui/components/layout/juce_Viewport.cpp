@@ -77,7 +77,7 @@ void Viewport::deleteContentComp()
 
 void Viewport::setViewedComponent (Component* const newViewedComponent)
 {
-    if (contentComp.getComponent() != newViewedComponent)
+    if (contentComp.get() != newViewedComponent)
     {
         deleteContentComp();
         contentComp = newViewedComponent;

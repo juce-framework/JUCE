@@ -492,7 +492,7 @@ public:
 
     void inputAttemptWhenModal()
     {
-        Component::SafePointer<Component> deletionChecker (this);
+        WeakReference<Component> deletionChecker (this);
 
         timerCallback();
 
@@ -684,7 +684,7 @@ private:
     Component::SafePointer<PopupMenu::ItemComponent> currentChild;
     ScopedPointer <Window> activeSubMenu;
     ApplicationCommandManager** managerOfChosenCommand;
-    Component::SafePointer<Component> componentAttachedTo;
+    WeakReference<Component> componentAttachedTo;
     Component* componentAttachedToOriginal;
     Rectangle<int> windowPos;
     Point<int> lastMouse;
@@ -1448,8 +1448,8 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
 {
     ScopedPointer<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
 
-    Component::SafePointer<Component> prevFocused (Component::getCurrentlyFocusedComponent());
-    Component::SafePointer<Component> prevTopLevel ((prevFocused != 0) ? prevFocused->getTopLevelComponent() : 0);
+    WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
+    WeakReference<Component> prevTopLevel ((prevFocused != 0) ? prevFocused->getTopLevelComponent() : 0);
     Window::wasHiddenBecauseOfAppChange() = false;
 
     PopupMenuCompletionCallback* callback = new PopupMenuCompletionCallback();

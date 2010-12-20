@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	107
+#define JUCE_BUILDNUMBER	108
 
 /** Current Juce version number.
 
@@ -14089,6 +14089,177 @@ private:
 
 #endif
 #ifndef __JUCE_VARIANT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
+
+/*** Start of inlined file: juce_WeakReference.h ***/
+#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
+#define __JUCE_WEAKREFERENCE_JUCEHEADER__
+
+/**
+	This class acts as a pointer which will automatically become null if the object
+	to which it points is deleted.
+
+	To accomplish this, the source object needs to implement a couple of minor tricks. It
+	must provide a getWeakReference() method and use a WeakReference::Master object to store
+	a master pointer to itself. It must also clear the pointer when it's getting destroyed.
+
+	E.g.
+	@code
+	class MyObject
+	{
+	public:
+		MyObject()
+		{
+			// If you're planning on using your WeakReferences in a multi-threaded situation, you may choose
+			// to call getWeakReference() here in the constructor, to avoid rare race conditions that could
+			// occur if multiple threads tried to be the first to call it.
+		}
+
+		~MyObject()
+		{
+			// this will zero all the references - you need to call this in your destructor.
+			masterReference.clear();
+		}
+
+		// Your object must provide a method that matches this signature, and which
+		// returns the result of the WeakReference::Master::operator() method.
+		const WeakReference<ObjectType>::SharedRef& getWeakReference()
+		{
+			return masterReference (this);
+		}
+
+	private:
+		WeakReference<MyObject>::Master masterReference;
+	};
+	@endcode
+
+	@see WeakReference::Master
+*/
+template <class ObjectType>
+class WeakReference
+{
+public:
+	/** Creates a null SafePointer. */
+	WeakReference() throw() {}
+
+	/** Creates a WeakReference that points at the given object. */
+	WeakReference (ObjectType* const object)  : holder (object != 0 ? object->getWeakReference() : 0) {}
+
+	/** Creates a copy of another WeakReference. */
+	WeakReference (const WeakReference& other) throw()	  : holder (other.holder) {}
+
+	/** Copies another pointer to this one. */
+	WeakReference& operator= (const WeakReference& other)	   { holder = other.holder; return *this; }
+
+	/** Copies another pointer to this one. */
+	WeakReference& operator= (ObjectType* const newObject)	  { holder = newObject != 0 ? newObject->getWeakReference() : 0; return *this; }
+
+	/** Returns the object that this pointer refers to, or null if the object no longer exists. */
+	ObjectType* get() const throw()				 { return holder != 0 ? holder->get() : 0; }
+
+	/** Returns the object that this pointer refers to, or null if the object no longer exists. */
+	operator ObjectType*() const throw()			{ return get(); }
+
+	/** Returns the object that this pointer refers to, or null if the object no longer exists. */
+	ObjectType* operator->() throw()				{ return get(); }
+
+	/** Returns the object that this pointer refers to, or null if the object no longer exists. */
+	const ObjectType* operator->() const throw()		{ return get(); }
+
+	/** This returns true if this reference has been pointing at an object, but that object has
+		since been deleted.
+
+		If this reference was only ever pointing at a null pointer, this will return false. Using
+		operator=() to make this refer to a different object will reset this flag to match the status
+		of the reference from which you're copying.
+	*/
+	bool wasObjectDeleted() const throw()			   { return holder != 0 && holder->get() == 0; }
+
+	bool operator== (ObjectType* const object) const throw()	{ return get() == object; }
+	bool operator!= (ObjectType* const object) const throw()	{ return get() != object; }
+
+	/** This class is used internally by the WeakReference class - don't use it directly
+		in your code!
+		@see WeakReference
+	*/
+	class SharedPointer   : public ReferenceCountedObject
+	{
+	public:
+		explicit SharedPointer (ObjectType* const owner_) throw() : owner (owner_) {}
+
+		inline ObjectType* get() const throw()	  { return owner; }
+		void clearPointer() throw()		 { owner = 0; }
+
+	private:
+		ObjectType* volatile owner;
+
+		JUCE_DECLARE_NON_COPYABLE (SharedPointer);
+	};
+
+	typedef ReferenceCountedObjectPtr<SharedPointer> SharedRef;
+
+	/**
+		This class is embedded inside an object to which you want to attach WeakReference pointers.
+		See the WeakReference class notes for an example of how to use this class.
+		@see WeakReference
+	*/
+	class Master
+	{
+	public:
+		Master() throw() {}
+
+		~Master()
+		{
+			// You must remember to call clear() in your source object's destructor! See the notes
+			// for the WeakReference class for an example of how to do this.
+			jassert (sharedPointer == 0 || sharedPointer->get() == 0);
+		}
+
+		/** The first call to this method will create an internal object that is shared by all weak
+			references to the object.
+			You need to call this from your main object's getWeakReference() method - see the WeakReference
+			class notes for an example.
+		 */
+		const SharedRef& operator() (ObjectType* const object)
+		{
+			if (sharedPointer == 0)
+			{
+				sharedPointer = new SharedPointer (object);
+			}
+			else
+			{
+				// You're trying to create a weak reference to an object that has already been deleted!!
+				jassert (sharedPointer->get() != 0);
+			}
+
+			return sharedPointer;
+		}
+
+		/** The object that owns this master pointer should call this before it gets destroyed,
+			to zero all the references to this object that may be out there. See the WeakReference
+			class notes for an example of how to do this.
+		*/
+		void clear()
+		{
+			if (sharedPointer != 0)
+				sharedPointer->clearPointer();
+		}
+
+	private:
+		SharedRef sharedPointer;
+
+		JUCE_DECLARE_NON_COPYABLE (Master);
+	};
+
+private:
+	SharedRef holder;
+};
+
+#endif   // __JUCE_WEAKREFERENCE_JUCEHEADER__
+/*** End of inlined file: juce_WeakReference.h ***/
+
 
 #endif
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
@@ -28191,62 +28362,47 @@ public:
 
 		The ComponentType typedef must be Component, or some subclass of Component.
 
-		Note that this class isn't thread-safe, and assumes that all the code that uses
-		it is running on the message thread.
+		You may also want to use a WeakReference<Component> object for the same purpose.
 	*/
 	template <class ComponentType>
-	class SafePointer   : private ComponentListener
+	class SafePointer
 	{
 	public:
 		/** Creates a null SafePointer. */
-		SafePointer()					   : comp (0) {}
+		SafePointer() throw() {}
 
 		/** Creates a SafePointer that points at the given component. */
-		SafePointer (ComponentType* const component)	: comp (component)   { attach(); }
+		SafePointer (ComponentType* const component)	: weakRef (component) {}
 
 		/** Creates a copy of another SafePointer. */
-		SafePointer (const SafePointer& other)		  : comp (other.comp)  { attach(); }
-
-		/** Destructor. */
-		~SafePointer()					  { detach(); }
+		SafePointer (const SafePointer& other) throw()	  : weakRef (other.weakRef) {}
 
 		/** Copies another pointer to this one. */
-		SafePointer& operator= (const SafePointer& other)   { return operator= (other.comp); }
+		SafePointer& operator= (const SafePointer& other)	   { weakRef = other.weakRef; return *this; }
 
 		/** Copies another pointer to this one. */
-		SafePointer& operator= (ComponentType* const newComponent)
-		{
-			detach();
-			comp = newComponent;
-			attach();
-			return *this;
-		}
+		SafePointer& operator= (ComponentType* const newComponent)  { weakRef = newComponent; return *this; }
 
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
-		operator ComponentType*() const throw()		 { return comp; }
+		ComponentType* getComponent() const throw()	 { return dynamic_cast <ComponentType*> (weakRef.get()); }
 
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
-		ComponentType* getComponent() const throw()	 { return comp; }
+		operator ComponentType*() const throw()		 { return getComponent(); }
 
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
-		ComponentType* operator->() throw()		 { jassert (comp != 0); return comp; }
+		ComponentType* operator->() throw()		 { return getComponent(); }
 
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
-		const ComponentType* operator->() const throw()	 { jassert (comp != 0); return comp; }
+		const ComponentType* operator->() const throw()	 { return getComponent(); }
 
 		/** If the component is valid, this deletes it and sets this pointer to null. */
-		void deleteAndZero()				{ delete comp; jassert (comp == 0); }
+		void deleteAndZero()				{ delete getComponent(); jassert (getComponent() == 0); }
 
-		bool operator== (ComponentType* component) const throw()	{ return comp == component; }
-		bool operator!= (ComponentType* component) const throw()	{ return comp != component; }
+		bool operator== (ComponentType* component) const throw()	{ return weakRef == component; }
+		bool operator!= (ComponentType* component) const throw()	{ return weakRef != component; }
 
 	private:
-
-		ComponentType* comp;
-
-		void attach()   { if (comp != 0) comp->addComponentListener (this); }
-		void detach()   { if (comp != 0) comp->removeComponentListener (this); }
-		void componentBeingDeleted (Component&)	 { comp = 0; }
+		WeakReference<Component> weakRef;
 	};
 
 	/** A class to keep an eye on one or two components and check for them being deleted.
@@ -28258,21 +28414,17 @@ public:
 	class BailOutChecker
 	{
 	public:
-		/** Creates a checker that watches either one or two components.
-			component1 must be a valid component; component2 can be null if you only need
-			to check on one component.
-		*/
-		BailOutChecker (Component* component1,
-						Component* component2 = 0);
+		/** Creates a checker that watches one component. */
+		BailOutChecker (Component* component1);
 
-		/** Returns true if either of the two components have been deleted since this
-			object was created. */
+		/** Creates a checker that watches two components. */
+		BailOutChecker (Component* component1, Component* component2);
+
+		/** Returns true if either of the two components have been deleted since this object was created. */
 		bool shouldBailOut() const throw();
 
 	private:
-		typedef SafePointer<Component> SafeComponentPtr;
-		SafeComponentPtr safePointer1, safePointer2;
-		Component* const component2;
+		const WeakReference<Component> safePointer1, safePointer2;
 
 		JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
 	};
@@ -28315,6 +28467,10 @@ private:
 	ScopedPointer <Array <KeyListener*> > keyListeners_;
 	ListenerList <ComponentListener> componentListeners;
 	NamedValueSet properties;
+
+	friend class WeakReference<Component>;
+	WeakReference<Component>::Master weakReferenceMaster;
+	const WeakReference<Component>::SharedRef& getWeakReference();
 
 	struct ComponentFlags
 	{
@@ -28365,6 +28521,7 @@ private:
 	void internalModifierKeysChanged();
 	void internalChildrenChanged();
 	void internalHierarchyChanged();
+	Component* removeChildComponent (const int index, bool sendParentEvents, bool sendChildEvents);
 	void paintComponentAndChildren (Graphics& g);
 	void paintComponent (Graphics& g);
 	void paintWithinParentContext (Graphics& g);
@@ -28373,7 +28530,7 @@ private:
 	void sendFakeMouseMove() const;
 	void takeKeyboardFocus (const FocusChangeType cause);
 	void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
-	static void giveAwayFocus();
+	static void giveAwayFocus (bool sendFocusLossEvent);
 	void sendEnablementChangeMessage();
 	void sendVisibilityChangeMessage();
 
@@ -36587,7 +36744,7 @@ protected:
 private:
 
 	Array <KeyPress> shortcuts;
-	Component::SafePointer<Component> keySource;
+	WeakReference<Component> keySource;
 	String text;
 	ListenerList <Listener> buttonListeners;
 
@@ -37147,7 +37304,7 @@ public:
 
 private:
 
-	Component::SafePointer<Component> contentComp;
+	WeakReference<Component> contentComp;
 	Rectangle<int> lastVisibleArea;
 	int scrollBarThickness;
 	int singleStepX, singleStepY;
@@ -38503,9 +38660,9 @@ private:
 	String lastTextValue;
 	Font font;
 	Justification justification;
-	ScopedPointer <TextEditor> editor;
-	ListenerList <Listener> listeners;
-	Component::SafePointer<Component> ownerComponent;
+	ScopedPointer<TextEditor> editor;
+	ListenerList<Listener> listeners;
+	WeakReference<Component> ownerComponent;
 	int horizontalBorderSize, verticalBorderSize;
 	float minimumHorizontalScale;
 	bool editSingleClick : 1;
@@ -51288,7 +51445,7 @@ protected:
 	bool hitTest (int x, int y);
 
 private:
-	Component::SafePointer<Component> component;
+	WeakReference<Component> component;
 	ComponentBoundsConstrainer* constrainer;
 	BorderSize borderSize;
 	Rectangle<int> originalBounds;
@@ -51359,7 +51516,7 @@ protected:
 
 private:
 
-	Component::SafePointer<Component> component;
+	WeakReference<Component> component;
 	ComponentBoundsConstrainer* constrainer;
 	Rectangle<int> originalBounds;
 
@@ -53042,7 +53199,7 @@ public:
 
 private:
 
-	Component::SafePointer<Component> component;
+	WeakReference<Component> component;
 	ComponentPeer* lastPeer;
 	Array <Component*> registeredParentComps;
 	bool reentrant;
@@ -53608,8 +53765,8 @@ protected:
 
 private:
 
-	OwnedArray <Component::SafePointer<Component> > contentComponents;
-	Component::SafePointer<Component> panelComponent;
+	OwnedArray <WeakReference<Component> > contentComponents;
+	WeakReference<Component> panelComponent;
 	int tabDepth;
 	int outlineThickness, edgeIndent;
 	static const Identifier deleteComponentId;
@@ -59586,7 +59743,7 @@ protected:
 
 private:
 
-	Component::SafePointer<Component> lastFocusedComponent, dragAndDropTargetComponent;
+	WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
 	Component* lastDragAndDropCompUnderMouse;
 	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 

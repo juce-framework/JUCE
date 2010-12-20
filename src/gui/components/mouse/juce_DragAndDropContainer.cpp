@@ -240,7 +240,7 @@ public:
                     if (owner->shouldDropFilesWhenDraggedExternally (dragDescLocal, source, files, canMoveFiles)
                          && files.size() > 0)
                     {
-                        Component::SafePointer<Component> cdw (this);
+                        WeakReference<Component> cdw (this);
                         setVisible (false);
 
                         if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
@@ -279,11 +279,11 @@ public:
 
 private:
     Image image;
-    Component::SafePointer<Component> source;
-    Component::SafePointer<Component> mouseDragSource;
+    WeakReference<Component> source;
+    WeakReference<Component> mouseDragSource;
     DragAndDropContainer* const owner;
 
-    Component::SafePointer<Component> currentlyOverComp;
+    WeakReference<Component> currentlyOverComp;
     DragAndDropTarget* getCurrentlyOver()
     {
         return dynamic_cast <DragAndDropTarget*> (static_cast <Component*> (currentlyOverComp));

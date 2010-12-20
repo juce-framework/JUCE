@@ -617,7 +617,7 @@ public:
     String title, message, button1, button2, button3;
     AlertWindow::AlertIconType iconType;
     int numButtons, returnValue;
-    Component::SafePointer<Component> associatedComponent;
+    WeakReference<Component> associatedComponent;
 
     int showModal() const
     {

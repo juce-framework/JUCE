@@ -225,8 +225,8 @@ protected:
 
 private:
     //==============================================================================
-    OwnedArray <Component::SafePointer<Component> > contentComponents;
-    Component::SafePointer<Component> panelComponent;
+    OwnedArray <WeakReference<Component> > contentComponents;
+    WeakReference<Component> panelComponent;
     int tabDepth;
     int outlineThickness, edgeIndent;
     static const Identifier deleteComponentId;
