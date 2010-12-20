@@ -201,8 +201,20 @@ public:
     */
     virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
+    //==============================================================================
+    /** Sets the string that will be written to the stream when the writeNewLine()
+        method is called.
+        By default this will be set the the value of NewLine::getDefault().
+    */
+    void setNewLineString (const String& newLineString);
+
+    /** Returns the current new-line string that was set by setNewLineString(). */
+    const String& getNewLineString() const throw()          { return newLineString; }
+
 private:
     //==============================================================================
+    String newLineString;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputStream);
 };
 
@@ -224,6 +236,15 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock&
 
 /** Writes the contents of a file to a stream. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead);
+
+/** Writes a new-line to a stream.
+    You can use the predefined symbol 'newLine' to invoke this, e.g.
+    @code
+    myOutputStream << "Hello World" << newLine << newLine;
+    @endcode
+    @see OutputStream::setNewLineString
+*/
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__

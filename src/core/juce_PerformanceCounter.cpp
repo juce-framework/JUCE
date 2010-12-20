@@ -46,7 +46,7 @@ PerformanceCounter::PerformanceCounter (const String& name_,
         String s ("**** Counter for \"");
         s << name_ << "\" started at: "
           << Time::getCurrentTime().toString (true, true)
-          << "\r\n";
+          << newLine;
 
         outputFile.appendText (s, false, false);
     }
@@ -90,7 +90,7 @@ void PerformanceCounter::printStatistics()
 
         Logger::outputDebugString (s);
 
-        s << "\r\n";
+        s << newLine;
 
         if (outputFile != File::nonexistent)
             outputFile.appendText (s, false, false);

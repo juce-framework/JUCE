@@ -261,11 +261,6 @@ namespace XmlOutputFunctions
             out.write (blanks, numSpaces);
         }
     }
-
-    void writeNewLine (OutputStream& out)
-    {
-        out.write ("\r\n", 2);
-    }
 }
 
 void XmlElement::writeElementAsText (OutputStream& outputStream,
@@ -288,7 +283,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
             {
                 if (lineLen > lineWrapLength && indentationLevel >= 0)
                 {
-                    writeNewLine (outputStream);
+                    outputStream << newLine;
                     writeSpaces (outputStream, attIndent);
                     lineLen = 0;
                 }
@@ -320,7 +315,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                 else
                 {
                     if (indentationLevel >= 0 && ! lastWasTextNode)
-                        writeNewLine (outputStream);
+                        outputStream << newLine;
 
                     child->writeElementAsText (outputStream,
                                                lastWasTextNode ? 0 : (indentationLevel + (indentationLevel >= 0 ? 2 : 0)), lineWrapLength);
@@ -332,7 +327,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
 
             if (indentationLevel >= 0 && ! lastWasTextNode)
             {
-                writeNewLine (outputStream);
+                outputStream << newLine;
                 writeSpaces (outputStream, indentationLevel);
             }
 
@@ -377,14 +372,9 @@ void XmlElement::writeToStream (OutputStream& output,
         output << "<?xml version=\"1.0\" encoding=\"" << encodingType << "\"?>";
 
         if (allOnOneLine)
-        {
             output.writeByte (' ');
-        }
         else
-        {
-            writeNewLine (output);
-            writeNewLine (output);
-        }
+            output << newLine << newLine;
     }
 
     if (dtdToUse.isNotEmpty())
@@ -394,13 +384,13 @@ void XmlElement::writeToStream (OutputStream& output,
         if (allOnOneLine)
             output.writeByte (' ');
         else
-            writeNewLine (output);
+            output << newLine;
     }
 
     writeElementAsText (output, allOnOneLine ? -1 : 0, lineWrapLength);
 
     if (! allOnOneLine)
-        writeNewLine (output);
+        output << newLine;
 }
 
 bool XmlElement::writeToFile (const File& file,

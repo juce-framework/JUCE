@@ -202,7 +202,6 @@ LookAndFeel::LookAndFeel()
 
         ScrollBar::backgroundColourId,              0x00000000,
         ScrollBar::thumbColourId,                   0xffffffff,
-        ScrollBar::trackColourId,                   0xffffffff,
 
         TreeView::linesColourId,                    0x4c000000,
         TreeView::backgroundColourId,               0x00000000,
@@ -870,9 +869,20 @@ void LookAndFeel::drawScrollbar (Graphics& g,
     }
 
     const Colour thumbColour (scrollbar.findColour (ScrollBar::thumbColourId));
+    Colour trackColour1, trackColour2;
 
-    g.setGradientFill (ColourGradient (thumbColour.overlaidWith (Colour (0x44000000)), gx1, gy1,
-                                       thumbColour.overlaidWith (Colour (0x19000000)), gx2, gy2, false));
+    if (scrollbar.isColourSpecified (ScrollBar::trackColourId))
+    {
+        trackColour1 = trackColour2 = scrollbar.findColour (ScrollBar::trackColourId);
+    }
+    else
+    {
+        trackColour1 = thumbColour.overlaidWith (Colour (0x44000000));
+        trackColour2 = thumbColour.overlaidWith (Colour (0x19000000));
+    }
+
+    g.setGradientFill (ColourGradient (trackColour1, gx1, gy1,
+                                       trackColour2, gx2, gy2, false));
     g.fillPath (slotPath);
 
     if (isScrollbarVertical)

@@ -2804,6 +2804,47 @@ JUCE_API std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basi
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
 
+/** This class is used for represent a new-line character sequence.
+
+	To write a new-line to a stream, you can use the predefined 'newLine' variable, e.g.
+	@code
+	myOutputStream << "Hello World" << newLine << newLine;
+	@endcode
+
+	The exact character sequence that will be used for the new-line can be set and
+	retrieved with OutputStream::setNewLineString() and OutputStream::getNewLineString().
+*/
+class NewLine
+{
+public:
+	/** Returns the default new-line sequence that the library uses.
+		@see OutputStream::setNewLineString()
+	*/
+	static const char* getDefault() throw()         { return "\r\n"; }
+
+	/** Returns the default new-line sequence that the library uses.
+		@see getDefault()
+	*/
+	operator const String() const		   { return getDefault(); }
+};
+
+/** An object representing a new-line, which can be written to a string or stream.
+
+	To write a new-line to a stream, you can use the predefined 'newLine' variable like this:
+	@code
+	myOutputStream << "Hello World" << newLine << newLine;
+	@endcode
+*/
+extern NewLine newLine;
+
+/** Writes a new-line sequence to a string.
+	You can use the predefined object 'newLine' to invoke this, e.g.
+	@code
+	myString << "Hello World" << newLine << newLine;
+	@endcode
+*/
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&);
+
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
 
@@ -6235,7 +6276,18 @@ public:
 	*/
 	virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
+	/** Sets the string that will be written to the stream when the writeNewLine()
+		method is called.
+		By default this will be set the the value of NewLine::getDefault().
+	*/
+	void setNewLineString (const String& newLineString);
+
+	/** Returns the current new-line string that was set by setNewLineString(). */
+	const String& getNewLineString() const throw()	  { return newLineString; }
+
 private:
+
+	String newLineString;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputStream);
 };
@@ -6257,6 +6309,15 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock&
 
 /** Writes the contents of a file to a stream. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead);
+
+/** Writes a new-line to a stream.
+	You can use the predefined symbol 'newLine' to invoke this, e.g.
+	@code
+	myOutputStream << "Hello World" << newLine << newLine;
+	@endcode
+	@see OutputStream::setNewLineString
+*/
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_OutputStream.h ***/
@@ -50898,8 +50959,6 @@ public:
 	/** @internal */
 	void componentBroughtToFront (Component& component);
 	/** @internal */
-	void componentChildrenChanged (Component& component);
-	/** @internal */
 	void componentParentHierarchyChanged (Component& component);
 	/** @internal */
 	void componentVisibilityChanged (Component& component);
@@ -50907,17 +50966,15 @@ public:
 private:
 
 	Component* owner;
-	int numShadows;
-	Component* shadowWindows[4];
+	OwnedArray<Component> shadowWindows;
 	Image shadowImageSections[12];
-	const int shadowEdge, xOffset, yOffset;
+	const int xOffset, yOffset;
 	const float alpha, blurRadius;
-	bool inDestructor, reentrant;
+	bool reentrant;
 
 	void updateShadows();
 	void setShadowImage (const Image& src, int num, int w, int h, int sx, int sy);
 	void bringShadowWindowsToFront();
-	void deleteShadowWindows();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower);
 };

@@ -119,33 +119,34 @@ void DrawableButton::resized()
 {
     Button::resized();
 
-    if (style == ImageRaw)
+    if (currentImage != 0)
     {
-        currentImage->setOriginWithOriginalSize (Point<float>());
-    }
-    else if (currentImage != 0)
-    {
-        Rectangle<int> imageSpace;
-
-        if (style == ImageOnButtonBackground)
+        if (style == ImageRaw)
         {
-            imageSpace = getLocalBounds().reduced (getWidth() / 4, getHeight() / 4);
+            currentImage->setOriginWithOriginalSize (Point<float>());
         }
         else
         {
-            const int textH = (style == ImageAboveTextLabel)
-                                ? jmin (16, proportionOfHeight (0.25f))
-                                : 0;
+            Rectangle<int> imageSpace;
 
-            const int indentX = jmin (edgeIndent, proportionOfWidth (0.3f));
-            const int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
+            if (style == ImageOnButtonBackground)
+            {
+                imageSpace = getLocalBounds().reduced (getWidth() / 4, getHeight() / 4);
+            }
+            else
+            {
+                const int textH = (style == ImageAboveTextLabel) ? jmin (16, proportionOfHeight (0.25f)) : 0;
 
-            imageSpace.setBounds (indentX, indentY,
-                                  getWidth() - indentX * 2,
-                                  getHeight() - indentY * 2 - textH);
+                const int indentX = jmin (edgeIndent, proportionOfWidth (0.3f));
+                const int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
+
+                imageSpace.setBounds (indentX, indentY,
+                                      getWidth() - indentX * 2,
+                                      getHeight() - indentY * 2 - textH);
+            }
+
+            currentImage->setTransformToFit (imageSpace.toFloat(), RectanglePlacement::centred);
         }
-
-        currentImage->setTransformToFit (imageSpace.toFloat(), RectanglePlacement::centred);
     }
 }
 

@@ -51,10 +51,10 @@ FileLogger::FileLogger (const File& logFile_,
     }
 
     String welcome;
-    welcome << "\r\n**********************************************************\r\n"
-            << welcomeMessage
-            << "\r\nLog started: " << Time::getCurrentTime().toString (true, true)
-            << "\r\n";
+    welcome << newLine
+            << "**********************************************************" << newLine
+            << welcomeMessage << newLine
+            << "Log started: " << Time::getCurrentTime().toString (true, true) << newLine;
 
     logMessage (welcome);
 }
@@ -71,7 +71,7 @@ void FileLogger::logMessage (const String& message)
     const ScopedLock sl (logLock);
 
     FileOutputStream out (logFile, 256);
-    out << message << "\r\n";
+    out << message << newLine;
 }
 
 

@@ -40,8 +40,6 @@
 extern ApplicationCommandManager* commandManager;
 
 //==============================================================================
-static const char* const newLine = "\r\n";
-
 const char* const projectItemDragType   = "Project Items";
 const char* const drawableItemDragType  = "Drawable Items";
 const char* const componentItemDragType = "Components";

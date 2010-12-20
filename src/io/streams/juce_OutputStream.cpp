@@ -52,6 +52,7 @@ void juce_CheckForDanglingStreams()
 
 //==============================================================================
 OutputStream::OutputStream()
+    : newLineString (NewLine::getDefault())
 {
   #if JUCE_DEBUG
     activeStreams.add (this);
@@ -251,6 +252,12 @@ int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWri
 }
 
 //==============================================================================
+void OutputStream::setNewLineString (const String& newLineString_)
+{
+    newLineString = newLineString_;
+}
+
+//==============================================================================
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
 {
     return stream << String (number);
@@ -287,6 +294,11 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileTo
         stream.writeFromInputStream (*in, -1);
 
     return stream;
+}
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&)
+{
+    return stream << stream.getNewLineString();
 }
 
 

@@ -71,8 +71,6 @@ public:
     /** @internal */
     void componentBroughtToFront (Component& component);
     /** @internal */
-    void componentChildrenChanged (Component& component);
-    /** @internal */
     void componentParentHierarchyChanged (Component& component);
     /** @internal */
     void componentVisibilityChanged (Component& component);
@@ -81,17 +79,15 @@ public:
 private:
     //==============================================================================
     Component* owner;
-    int numShadows;
-    Component* shadowWindows[4];
+    OwnedArray<Component> shadowWindows;
     Image shadowImageSections[12];
-    const int shadowEdge, xOffset, yOffset;
+    const int xOffset, yOffset;
     const float alpha, blurRadius;
-    bool inDestructor, reentrant;
+    bool reentrant;
 
     void updateShadows();
     void setShadowImage (const Image& src, int num, int w, int h, int sx, int sy);
     void bringShadowWindowsToFront();
-    void deleteShadowWindows();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower);
 };

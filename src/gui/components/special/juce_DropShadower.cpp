@@ -38,45 +38,30 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 class ShadowWindow  : public Component
 {
-    Component* owner;
-    Image shadowImageSections [12];
-    const int type;   // 0 = left, 1 = right, 2 = top, 3 = bottom. left + right are full-height
-
 public:
-    ShadowWindow (Component* const owner_,
-                  const int type_,
-                  const Image shadowImageSections_ [12])
-        : owner (owner_),
+    ShadowWindow (Component& owner, const int type_, const Image shadowImageSections [12])
+        : topLeft (shadowImageSections [type_ * 3]),
+          bottomRight (shadowImageSections [type_ * 3 + 1]),
+          filler (shadowImageSections [type_ * 3 + 2]),
           type (type_)
     {
-        for  (int i = 0; i < numElementsInArray (shadowImageSections); ++i)
-            shadowImageSections [i] = shadowImageSections_ [i];
-
         setInterceptsMouseClicks (false, false);
 
-        if (owner_->isOnDesktop())
+        if (owner.isOnDesktop())
         {
             setSize (1, 1); // to keep the OS happy by not having zero-size windows
             addToDesktop (ComponentPeer::windowIgnoresMouseClicks
                             | ComponentPeer::windowIsTemporary
                             | ComponentPeer::windowIgnoresKeyPresses);
         }
-        else if (owner_->getParentComponent() != 0)
+        else if (owner.getParentComponent() != 0)
         {
-            owner_->getParentComponent()->addChildComponent (this);
+            owner.getParentComponent()->addChildComponent (this);
         }
-    }
-
-    ~ShadowWindow()
-    {
     }
 
     void paint (Graphics& g)
     {
-        const Image& topLeft      = shadowImageSections [type * 3];
-        const Image& bottomRight  = shadowImageSections [type * 3 + 1];
-        const Image& filler       = shadowImageSections [type * 3 + 2];
-
         g.setOpacity (1.0f);
 
         if (type < 2)
@@ -117,6 +102,9 @@ public:
     }
 
 private:
+    const Image topLeft, bottomRight, filler;
+    const int type;   // 0 = left, 1 = right, 2 = top, 3 = bottom. left + right are full-height
+
     JUCE_DECLARE_NON_COPYABLE (ShadowWindow);
 };
 
@@ -127,13 +115,10 @@ DropShadower::DropShadower (const float alpha_,
                             const int yOffset_,
                             const float blurRadius_)
    : owner (0),
-     numShadows (0),
-     shadowEdge (jmax (xOffset_, yOffset_) + (int) blurRadius_),
      xOffset (xOffset_),
      yOffset (yOffset_),
      alpha (alpha_),
      blurRadius (blurRadius_),
-     inDestructor (false),
      reentrant (false)
 {
 }
@@ -143,21 +128,8 @@ DropShadower::~DropShadower()
     if (owner != 0)
         owner->removeComponentListener (this);
 
-    inDestructor = true;
-
-    deleteShadowWindows();
-}
-
-void DropShadower::deleteShadowWindows()
-{
-    if (numShadows > 0)
-    {
-        int i;
-        for (i = numShadows; --i >= 0;)
-            delete shadowWindows[i];
-
-        numShadows = 0;
-    }
+    reentrant = true;
+    shadowWindows.clear();
 }
 
 void DropShadower::setOwner (Component* componentToFollow)
@@ -191,13 +163,9 @@ void DropShadower::componentBroughtToFront (Component&)
     bringShadowWindowsToFront();
 }
 
-void DropShadower::componentChildrenChanged (Component&)
-{
-}
-
 void DropShadower::componentParentHierarchyChanged (Component&)
 {
-    deleteShadowWindows();
+    shadowWindows.clear();
     updateShadows();
 }
 
@@ -208,22 +176,22 @@ void DropShadower::componentVisibilityChanged (Component&)
 
 void DropShadower::updateShadows()
 {
-    if (reentrant || inDestructor || (owner == 0))
+    if (reentrant || owner == 0)
         return;
 
     reentrant = true;
 
-    ComponentPeer* const nw = owner->getPeer();
+    ComponentPeer* const peer = owner->getPeer();
+    const bool isOwnerVisible = owner->isVisible() && (peer == 0 || ! peer->isMinimised());
 
-    const bool isOwnerVisible = owner->isVisible()
-                                 && (nw == 0 || ! nw->isMinimised());
-
-    const bool createShadowWindows  = numShadows == 0
+    const bool createShadowWindows  = shadowWindows.size() == 0
                                          && owner->getWidth() > 0
                                          && owner->getHeight() > 0
                                          && isOwnerVisible
                                          && (Desktop::canUseSemiTransparentWindows()
                                               || owner->getParentComponent() != 0);
+
+    const int shadowEdge = jmax (xOffset, yOffset) + (int) blurRadius;
 
     if (createShadowWindows)
     {
@@ -274,18 +242,15 @@ void DropShadower::updateShadows()
         setShadowImage (bigIm, 11, shadowEdge, shadowEdge, shadowEdge2, ih - shadowEdge);
 
         for (int i = 0; i < 4; ++i)
-        {
-            shadowWindows[numShadows] = new ShadowWindow (owner, i, shadowImageSections);
-            ++numShadows;
-        }
+            shadowWindows.add (new ShadowWindow (*owner, i, shadowImageSections));
     }
 
-    if (numShadows > 0)
+    if (shadowWindows.size() >= 4)
     {
-        for (int i = numShadows; --i >= 0;)
+        for (int i = shadowWindows.size(); --i >= 0;)
         {
-            shadowWindows[i]->setAlwaysOnTop (owner->isAlwaysOnTop());
-            shadowWindows[i]->setVisible (isOwnerVisible);
+            shadowWindows.getUnchecked(i)->setAlwaysOnTop (owner->isAlwaysOnTop());
+            shadowWindows.getUnchecked(i)->setVisible (isOwnerVisible);
         }
 
         const int x = owner->getX();
@@ -293,25 +258,10 @@ void DropShadower::updateShadows()
         const int w = owner->getWidth();
         const int h = owner->getHeight() + shadowEdge + shadowEdge;
 
-        shadowWindows[0]->setBounds (x - shadowEdge,
-                                     y,
-                                     shadowEdge,
-                                     h);
-
-        shadowWindows[1]->setBounds (x + w,
-                                     y,
-                                     shadowEdge,
-                                     h);
-
-        shadowWindows[2]->setBounds (x,
-                                     y,
-                                     w,
-                                     shadowEdge);
-
-        shadowWindows[3]->setBounds (x,
-                                     owner->getBottom(),
-                                     w,
-                                     shadowEdge);
+        shadowWindows.getUnchecked(0)->setBounds (x - shadowEdge, y, shadowEdge, h);
+        shadowWindows.getUnchecked(1)->setBounds (x + w, y, shadowEdge, h);
+        shadowWindows.getUnchecked(2)->setBounds (x, y, w, shadowEdge);
+        shadowWindows.getUnchecked(3)->setBounds (x, owner->getBottom(), w, shadowEdge);
     }
 
     reentrant = false;
@@ -331,14 +281,14 @@ void DropShadower::setShadowImage (const Image& src, const int num, const int w,
 
 void DropShadower::bringShadowWindowsToFront()
 {
-    if (! (inDestructor || reentrant))
+    if (! reentrant)
     {
         updateShadows();
 
         reentrant = true;
 
-        for (int i = numShadows; --i >= 0;)
-            shadowWindows[i]->toBehind (owner);
+        for (int i = shadowWindows.size(); --i >= 0;)
+            shadowWindows.getUnchecked(i)->toBehind (owner);
 
         reentrant = false;
     }
