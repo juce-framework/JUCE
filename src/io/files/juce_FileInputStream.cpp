@@ -58,8 +58,6 @@ int64 FileInputStream::getTotalLength()
 
 int FileInputStream::read (void* buffer, int bytesToRead)
 {
-    int num = 0;
-
     if (needToSeek)
     {
         if (juce_fileSetPosition (fileHandle, currentPosition) < 0)
@@ -68,10 +66,10 @@ int FileInputStream::read (void* buffer, int bytesToRead)
         needToSeek = false;
     }
 
-    num = readInternal (buffer, bytesToRead);
+    const size_t num = readInternal (buffer, bytesToRead);
     currentPosition += num;
 
-    return num;
+    return (int) num;
 }
 
 bool FileInputStream::isExhausted()

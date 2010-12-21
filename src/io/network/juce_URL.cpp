@@ -179,7 +179,7 @@ namespace URLHelpers
 
             // just a short text attachment, so use simple url encoding..
             headers << "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                    << postData.getSize() << "\r\n";
+                    << (unsigned int) postData.getSize() << "\r\n";
         }
     }
 }

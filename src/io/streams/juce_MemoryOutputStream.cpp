@@ -78,7 +78,7 @@ bool MemoryOutputStream::write (const void* const buffer, int howMany)
         const size_t storageNeeded = position + howMany;
 
         if (storageNeeded >= data.getSize())
-            data.ensureSize ((storageNeeded + jmin (storageNeeded / 2, (size_t) (1024 * 1024)) + 32) & ~31);
+            data.ensureSize ((storageNeeded + jmin ((int) (storageNeeded / 2), 1024 * 1024) + 32) & ~31);
 
         memcpy (static_cast<char*> (data.getData()) + position, buffer, howMany);
         position += howMany;
@@ -136,12 +136,12 @@ const String MemoryOutputStream::toUTF8() const
 
 const String MemoryOutputStream::toString() const
 {
-    return String::createStringFromData (getData(), getDataSize());
+    return String::createStringFromData (getData(), (int) getDataSize());
 }
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead)
 {
-    stream.write (streamToRead.getData(), streamToRead.getDataSize());
+    stream.write (streamToRead.getData(), (int) streamToRead.getDataSize());
     return stream;
 }
 
