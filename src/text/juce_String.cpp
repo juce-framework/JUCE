@@ -35,7 +35,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_String.h"
-#include "../core/juce_Atomic.h"
+#include "../memory/juce_Atomic.h"
 #include "../io/streams/juce_OutputStream.h"
 
 #if JUCE_MSVC
@@ -2203,7 +2203,7 @@ void String::Concatenator::append (const String& s)
 #if JUCE_UNIT_TESTS
 
 #include "../utilities/juce_UnitTest.h"
-#include "../core/juce_Random.h"
+#include "../maths/juce_Random.h"
 
 class StringTests  : public UnitTest
 {

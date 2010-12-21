@@ -29,7 +29,7 @@
 #include "../geometry/juce_AffineTransform.h"
 #include "../geometry/juce_Rectangle.h"
 #include "../geometry/juce_RectangleList.h"
-#include "../../../containers/juce_MemoryBlock.h"
+#include "../../../memory/juce_MemoryBlock.h"
 class Path;
 class Image;
 

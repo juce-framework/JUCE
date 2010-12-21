@@ -38,7 +38,7 @@ JuceUpdater::JuceUpdater()
     addAndMakeVisible (&filenameComp);
     addAndMakeVisible (&checkNowButton);
     addAndMakeVisible (&currentVersionLabel);
-    checkNowButton.addButtonListener (this);
+    checkNowButton.addListener (this);
     filenameComp.addListener (this);
 
     currentVersionLabel.setFont (Font (14.0f, Font::italic));
@@ -53,7 +53,7 @@ JuceUpdater::JuceUpdater()
 
 JuceUpdater::~JuceUpdater()
 {
-    checkNowButton.removeButtonListener (this);
+    checkNowButton.removeListener (this);
     filenameComp.removeListener (this);
 }
 
@@ -339,13 +339,13 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
             : updater (updater_), version (0), applyButton ("Install this version...")
         {
             addAndMakeVisible (&applyButton);
-            applyButton.addButtonListener (this);
+            applyButton.addListener (this);
             setInterceptsMouseClicks (false, true);
         }
 
         ~UpdateListComponent()
         {
-            applyButton.removeButtonListener (this);
+            applyButton.removeListener (this);
         }
 
         void setVersion (VersionInfo* v)

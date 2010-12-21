@@ -272,4 +272,15 @@
 
 #endif
 
+//==============================================================================
+// Cross-compiler deprecation macros..
+#if JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
+ #define JUCE_DEPRECATED(functionDef)     __declspec(deprecated) functionDef
+#elif JUCE_GCC  && ! JUCE_NO_DEPRECATION_WARNINGS
+ #define JUCE_DEPRECATED(functionDef)     functionDef __attribute__ ((deprecated))
+#else
+ #define JUCE_DEPRECATED(functionDef)     functionDef
+#endif
+
+
 #endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__

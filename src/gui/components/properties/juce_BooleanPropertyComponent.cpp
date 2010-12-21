@@ -41,7 +41,7 @@ BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
 {
     addAndMakeVisible (&button);
     button.setClickingTogglesState (false);
-    button.addButtonListener (this);
+    button.addListener (this);
 }
 
 BooleanPropertyComponent::BooleanPropertyComponent (const Value& valueToControl,

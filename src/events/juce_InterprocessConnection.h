@@ -30,7 +30,7 @@
 #include "../threads/juce_Thread.h"
 #include "../io/network/juce_Socket.h"
 #include "../io/files/juce_NamedPipe.h"
-#include "../containers/juce_ScopedPointer.h"
+#include "../memory/juce_ScopedPointer.h"
 class InterprocessConnectionServer;
 
 

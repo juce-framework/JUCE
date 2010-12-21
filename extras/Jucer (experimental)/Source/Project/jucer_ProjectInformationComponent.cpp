@@ -110,16 +110,16 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
     addAndMakeVisible (&configTabBox);
     addAndMakeVisible (&editConfigsButton);
     editConfigsButton.setButtonText ("Add/Remove Configurations...");
-    editConfigsButton.addButtonListener (this);
+    editConfigsButton.addListener (this);
     addAndMakeVisible (&openProjectButton);
     openProjectButton.setButtonText ("Open Project in ");
-    openProjectButton.addButtonListener (this);
+    openProjectButton.addListener (this);
     addAndMakeVisible (&editExportersButton);
     editExportersButton.setButtonText ("Add/Remove Exporters...");
-    editExportersButton.addButtonListener (this);
+    editExportersButton.addListener (this);
     addAndMakeVisible (&saveAndOpenButton);
     saveAndOpenButton.setButtonText ("Save And Open in");
-    saveAndOpenButton.addButtonListener (this);
+    saveAndOpenButton.addListener (this);
 
     //[UserPreSize]
     rebuildConfigTabs();

@@ -29,7 +29,7 @@
 #include "juce_Colour.h"
 #include "../geometry/juce_Point.h"
 #include "../../../containers/juce_Array.h"
-#include "../../../containers/juce_HeapBlock.h"
+#include "../../../memory/juce_HeapBlock.h"
 
 
 //==============================================================================

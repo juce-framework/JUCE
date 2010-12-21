@@ -217,7 +217,7 @@ public:
         if (hideAdvancedOptionsWithButton)
         {
             addAndMakeVisible (showAdvancedSettingsButton = new TextButton (TRANS("Show advanced settings...")));
-            showAdvancedSettingsButton->addButtonListener (this);
+            showAdvancedSettingsButton->addListener (this);
         }
 
         type->scanForDevices();
@@ -408,7 +408,7 @@ public:
         {
             addAndMakeVisible (showUIButton = new TextButton (TRANS ("show this device's control panel"),
                                                               TRANS ("opens the device's own control panel")));
-            showUIButton->addButtonListener (this);
+            showUIButton->addListener (this);
         }
 
         resized();
@@ -434,7 +434,7 @@ public:
                 if (setup.maxNumOutputChannels > 0)
                 {
                     addAndMakeVisible (testButton = new TextButton (TRANS ("Test")));
-                    testButton->addButtonListener (this);
+                    testButton->addListener (this);
                 }
             }
 

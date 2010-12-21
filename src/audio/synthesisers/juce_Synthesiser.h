@@ -29,7 +29,7 @@
 #include "../dsp/juce_AudioSampleBuffer.h"
 #include "../midi/juce_MidiBuffer.h"
 #include "../../containers/juce_OwnedArray.h"
-#include "../../containers/juce_ReferenceCountedObject.h"
+#include "../../memory/juce_ReferenceCountedObject.h"
 #include "../../containers/juce_ReferenceCountedArray.h"
 #include "../../threads/juce_CriticalSection.h"
 

@@ -95,11 +95,7 @@ OBJECTS := \
   $(OBJDIR)/juce_Sampler_98f716a4.o \
   $(OBJDIR)/juce_Synthesiser_2bffa1dd.o \
   $(OBJDIR)/juce_AbstractFifo_dfc0bd23.o \
-  $(OBJDIR)/juce_BigInteger_63589133.o \
   $(OBJDIR)/juce_DynamicObject_69d02ab3.o \
-  $(OBJDIR)/juce_Expression_1e9a5aad.o \
-  $(OBJDIR)/juce_Identifier_89fa043e.o \
-  $(OBJDIR)/juce_MemoryBlock_edd65761.o \
   $(OBJDIR)/juce_NamedValueSet_6b0793df.o \
   $(OBJDIR)/juce_PropertySet_914b5922.o \
   $(OBJDIR)/juce_Value_16231646.o \
@@ -109,7 +105,6 @@ OBJECTS := \
   $(OBJDIR)/juce_Initialisation_fec765a9.o \
   $(OBJDIR)/juce_Logger_4f4f7f72.o \
   $(OBJDIR)/juce_PerformanceCounter_6422080e.o \
-  $(OBJDIR)/juce_Random_36899d25.o \
   $(OBJDIR)/juce_RelativeTime_bc5ef35b.o \
   $(OBJDIR)/juce_SystemStats_c00d8758.o \
   $(OBJDIR)/juce_Time_16acdd6f.o \
@@ -286,6 +281,10 @@ OBJECTS := \
   $(OBJDIR)/juce_MemoryOutputStream_8003c78f.o \
   $(OBJDIR)/juce_OutputStream_9a068a6e.o \
   $(OBJDIR)/juce_SubregionStream_9156f331.o \
+  $(OBJDIR)/juce_BigInteger_b44f43d6.o \
+  $(OBJDIR)/juce_Expression_6f910d50.o \
+  $(OBJDIR)/juce_Random_a529cb7b.o \
+  $(OBJDIR)/juce_MemoryBlock_52f17c52.o \
   $(OBJDIR)/juce_linux_NativeCode_b464a4a9.o \
   $(OBJDIR)/juce_win32_NativeCode_2eaaf382.o \
   $(OBJDIR)/juce_posix_NamedPipe_aa308c65.o \
@@ -329,6 +328,7 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_WebBrowserComponent_2a4dd461.o \
   $(OBJDIR)/juce_win32_Windowing_635b4f6a.o \
   $(OBJDIR)/juce_CharacterFunctions_b1a5ac62.o \
+  $(OBJDIR)/juce_Identifier_e99ee619.o \
   $(OBJDIR)/juce_LocalisedStrings_3ddfa55e.o \
   $(OBJDIR)/juce_String_80587b01.o \
   $(OBJDIR)/juce_StringArray_4aaa67a2.o \
@@ -642,29 +642,9 @@ $(OBJDIR)/juce_AbstractFifo_dfc0bd23.o: ../../src/containers/juce_AbstractFifo.c
 	@echo "Compiling juce_AbstractFifo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_BigInteger_63589133.o: ../../src/containers/juce_BigInteger.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_BigInteger.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_DynamicObject_69d02ab3.o: ../../src/containers/juce_DynamicObject.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_DynamicObject.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Expression_1e9a5aad.o: ../../src/containers/juce_Expression.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_Expression.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Identifier_89fa043e.o: ../../src/containers/juce_Identifier.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_Identifier.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_MemoryBlock_edd65761.o: ../../src/containers/juce_MemoryBlock.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_MemoryBlock.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_NamedValueSet_6b0793df.o: ../../src/containers/juce_NamedValueSet.cpp
@@ -710,11 +690,6 @@ $(OBJDIR)/juce_Logger_4f4f7f72.o: ../../src/core/juce_Logger.cpp
 $(OBJDIR)/juce_PerformanceCounter_6422080e.o: ../../src/core/juce_PerformanceCounter.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_PerformanceCounter.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Random_36899d25.o: ../../src/core/juce_Random.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_Random.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RelativeTime_bc5ef35b.o: ../../src/core/juce_RelativeTime.cpp
@@ -1597,6 +1572,26 @@ $(OBJDIR)/juce_SubregionStream_9156f331.o: ../../src/io/streams/juce_SubregionSt
 	@echo "Compiling juce_SubregionStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_BigInteger_b44f43d6.o: ../../src/maths/juce_BigInteger.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_BigInteger.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Expression_6f910d50.o: ../../src/maths/juce_Expression.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_Expression.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Random_a529cb7b.o: ../../src/maths/juce_Random.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_Random.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MemoryBlock_52f17c52.o: ../../src/memory/juce_MemoryBlock.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_MemoryBlock.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_linux_NativeCode_b464a4a9.o: ../../src/native/juce_linux_NativeCode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_linux_NativeCode.cpp"
@@ -1810,6 +1805,11 @@ $(OBJDIR)/juce_win32_Windowing_635b4f6a.o: ../../src/native/windows/juce_win32_W
 $(OBJDIR)/juce_CharacterFunctions_b1a5ac62.o: ../../src/text/juce_CharacterFunctions.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_CharacterFunctions.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Identifier_e99ee619.o: ../../src/text/juce_Identifier.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_Identifier.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LocalisedStrings_3ddfa55e.o: ../../src/text/juce_LocalisedStrings.cpp

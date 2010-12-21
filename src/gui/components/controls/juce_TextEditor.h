@@ -27,7 +27,7 @@
 #define __JUCE_TEXTEDITOR_JUCEHEADER__
 
 #include "../juce_Component.h"
-#include "../../../containers/juce_Range.h"
+#include "../../../maths/juce_Range.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../utilities/juce_UndoManager.h"
 #include "../layout/juce_Viewport.h"

@@ -83,11 +83,11 @@ public:
 
         // add some buttons..
         addAndMakeVisible (&goButton);
-        goButton.addButtonListener (this);
+        goButton.addListener (this);
         addAndMakeVisible (&backButton);
-        backButton.addButtonListener (this);
+        backButton.addListener (this);
         addAndMakeVisible (&forwardButton);
-        forwardButton.addButtonListener (this);
+        forwardButton.addListener (this);
 
         // send the browser to a start page..
         webView->goToURL ("http://www.google.com");

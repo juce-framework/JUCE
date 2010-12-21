@@ -29,7 +29,7 @@
 #include "../windows/juce_AlertWindow.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../threads/juce_Thread.h"
-#include "../../../containers/juce_ScopedPointer.h"
+#include "../../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

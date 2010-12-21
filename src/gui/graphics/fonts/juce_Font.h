@@ -28,7 +28,7 @@
 
 #include "juce_Typeface.h"
 #include "../../../text/juce_StringArray.h"
-#include "../../../containers/juce_ReferenceCountedObject.h"
+#include "../../../memory/juce_ReferenceCountedObject.h"
 #include "../../../containers/juce_OwnedArray.h"
 class LowLevelGraphicsContext;
 

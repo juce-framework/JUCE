@@ -155,7 +155,7 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
 
     addAndMakeVisible (recordButton = new TextButton (String::empty));
     recordButton->setButtonText (T("Record"));
-    recordButton->addButtonListener (this);
+    recordButton->addListener (this);
     recordButton->setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
     recordButton->setColour (TextButton::textColourOffId, Colours::black);
 

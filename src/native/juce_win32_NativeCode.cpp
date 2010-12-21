@@ -43,7 +43,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 #include "../core/juce_Singleton.h"
-#include "../core/juce_Random.h"
+#include "../maths/juce_Random.h"
 #include "../core/juce_SystemStats.h"
 #include "../threads/juce_Process.h"
 #include "../threads/juce_Thread.h"

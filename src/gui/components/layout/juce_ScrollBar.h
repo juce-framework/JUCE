@@ -27,7 +27,7 @@
 #define __JUCE_SCROLLBAR_JUCEHEADER__
 
 #include "../../../events/juce_AsyncUpdater.h"
-#include "../../../containers/juce_Range.h"
+#include "../../../maths/juce_Range.h"
 #include "../../../events/juce_Timer.h"
 #include "../buttons/juce_Button.h"
 

@@ -50,7 +50,7 @@ PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
     addAndMakeVisible (&listBox);
 
     addAndMakeVisible (&optionsButton);
-    optionsButton.addButtonListener (this);
+    optionsButton.addListener (this);
     optionsButton.setTriggeredOnMouseDown (true);
 
     setSize (400, 600);

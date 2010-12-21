@@ -403,7 +403,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     if (showResetToDefaultButton)
     {
         addAndMakeVisible (&resetButton);
-        resetButton.addButtonListener (treeItem);
+        resetButton.addListener (treeItem);
     }
 
     addAndMakeVisible (&tree);

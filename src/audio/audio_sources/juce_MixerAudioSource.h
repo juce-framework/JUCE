@@ -29,7 +29,7 @@
 #include "juce_AudioSource.h"
 #include "../../threads/juce_CriticalSection.h"
 #include "../../containers/juce_Array.h"
-#include "../../containers/juce_BigInteger.h"
+#include "../../maths/juce_BigInteger.h"
 
 
 //==============================================================================

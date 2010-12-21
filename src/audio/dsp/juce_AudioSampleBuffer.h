@@ -26,7 +26,7 @@
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
 #define __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
 
-#include "../../containers/juce_HeapBlock.h"
+#include "../../memory/juce_HeapBlock.h"
 class AudioFormatReader;
 class AudioFormatWriter;
 

@@ -28,7 +28,7 @@
 
 #include "juce_Path.h"
 #include "juce_Rectangle.h"
-#include "../../../containers/juce_Expression.h"
+#include "../../../maths/juce_Expression.h"
 #include "../../../containers/juce_OwnedArray.h"
 #include "../../../containers/juce_ValueTree.h"
 

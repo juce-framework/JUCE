@@ -30,7 +30,7 @@
 
 #include "juce_AudioFormatReader.h"
 #include "../../containers/juce_Array.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../memory/juce_ScopedPointer.h"
 #include "../../text/juce_StringArray.h"
 #if JUCE_MAC
 #include "../../io/files/juce_File.h"

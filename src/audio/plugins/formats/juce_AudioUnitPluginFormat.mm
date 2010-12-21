@@ -410,8 +410,8 @@ private:
 AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier)
     : fileOrIdentifier (fileOrIdentifier),
       wantsMidiMessages (false), wasPlaying (false), prepared (false),
-      audioUnit (0),
-      currentBuffer (0)
+      currentBuffer (0),
+      audioUnit (0)
 {
     using namespace AudioUnitFormatHelpers;
 

@@ -28,8 +28,8 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_TableListBox.h"
-#include "../../../containers/juce_BigInteger.h"
-#include "../../../core/juce_Random.h"
+#include "../../../maths/juce_BigInteger.h"
+#include "../../../maths/juce_Random.h"
 #include "../mouse/juce_DragAndDropContainer.h"
 #include "../../graphics/imaging/juce_Image.h"
 #include "../../../text/juce_LocalisedStrings.h"

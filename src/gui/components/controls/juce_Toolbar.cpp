@@ -270,7 +270,7 @@ Toolbar::Toolbar()
     addChildComponent (missingItemsButton = getLookAndFeel().createToolbarMissingItemsButton (*this));
 
     missingItemsButton->setAlwaysOnTop (true);
-    missingItemsButton->addButtonListener (this);
+    missingItemsButton->addListener (this);
 }
 
 Toolbar::~Toolbar()
@@ -777,7 +777,7 @@ private:
             if ((optionFlags & Toolbar::showResetToDefaultsButton) != 0)
             {
                 addAndMakeVisible (&defaultButton);
-                defaultButton.addButtonListener (this);
+                defaultButton.addListener (this);
             }
 
             addAndMakeVisible (&instructions);

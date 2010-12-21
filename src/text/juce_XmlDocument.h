@@ -30,7 +30,7 @@
 #include "juce_StringArray.h"
 #include "../io/files/juce_File.h"
 #include "../io/streams/juce_InputSource.h"
-#include "../containers/juce_ScopedPointer.h"
+#include "../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

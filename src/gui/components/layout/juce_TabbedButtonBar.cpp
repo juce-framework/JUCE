@@ -368,7 +368,7 @@ void TabbedButtonBar::resized()
         if (extraTabsButton == 0)
         {
             addAndMakeVisible (extraTabsButton = getLookAndFeel().createTabBarExtrasButton());
-            extraTabsButton->addButtonListener (behindFrontTab);
+            extraTabsButton->addListener (behindFrontTab);
             extraTabsButton->setAlwaysOnTop (true);
             extraTabsButton->setTriggeredOnMouseDown (true);
         }

@@ -355,8 +355,8 @@ private:
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // The parameters for these methods have changed - please update your code!
-    void getBorderThickness (int& left, int& top, int& right, int& bottom);
-    void getContentComponentBorder (int& left, int& top, int& right, int& bottom);
+    JUCE_DEPRECATED (void getBorderThickness (int& left, int& top, int& right, int& bottom));
+    JUCE_DEPRECATED (void getContentComponentBorder (int& left, int& top, int& right, int& bottom));
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow);

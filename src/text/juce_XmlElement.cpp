@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/streams/juce_MemoryOutputStream.h"
 #include "../io/files/juce_TemporaryFile.h"
 #include "../threads/juce_Thread.h"
-#include "../containers/juce_ScopedPointer.h"
+#include "../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

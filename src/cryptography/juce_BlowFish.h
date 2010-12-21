@@ -26,7 +26,7 @@
 #ifndef __JUCE_BLOWFISH_JUCEHEADER__
 #define __JUCE_BLOWFISH_JUCEHEADER__
 
-#include "../containers/juce_HeapBlock.h"
+#include "../memory/juce_HeapBlock.h"
 
 
 //==============================================================================

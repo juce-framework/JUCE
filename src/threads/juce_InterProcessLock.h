@@ -27,7 +27,7 @@
 #define __JUCE_INTERPROCESSLOCK_JUCEHEADER__
 
 #include "../text/juce_String.h"
-#include "../containers/juce_ScopedPointer.h"
+#include "../memory/juce_ScopedPointer.h"
 
 //==============================================================================
 /**

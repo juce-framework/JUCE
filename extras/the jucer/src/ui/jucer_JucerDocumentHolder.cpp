@@ -305,7 +305,7 @@ public:
         addAndMakeVisible (editor = new CodeEditorComponent (codeDocument, &tokeniser));
 
         addAndMakeVisible (switchButton = new TextButton (String::empty));
-        switchButton->addButtonListener (this);
+        switchButton->addListener (this);
 
         setWantsKeyboardFocus (true);
     }

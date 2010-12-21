@@ -28,7 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MidiMessage.h"
-#include "../../containers/juce_MemoryBlock.h"
+#include "../../memory/juce_MemoryBlock.h"
 
 
 //==============================================================================

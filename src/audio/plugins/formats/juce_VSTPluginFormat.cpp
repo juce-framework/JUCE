@@ -61,7 +61,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_VSTPluginFormat.h"
 #include "../../../threads/juce_Process.h"
 #include "../../../threads/juce_ScopedLock.h"
-#include "../../../core/juce_Random.h"
+#include "../../../maths/juce_Random.h"
 #include "../../../io/files/juce_DirectoryIterator.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../events/juce_AsyncUpdater.h"
@@ -1152,10 +1152,10 @@ public:
           plugin (plugin_),
           isOpen (false),
           wasShowing (false),
-          pluginRefusesToResize (false),
+          recursiveResize (false),
           pluginWantsKeys (false),
-          alreadyInside (false),
-          recursiveResize (false)
+          pluginRefusesToResize (false),
+          alreadyInside (false)
     {
 #if JUCE_WINDOWS
         sizeCheckCount = 0;

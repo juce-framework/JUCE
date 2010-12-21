@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_PerformanceCounter.h"
 #include "juce_Time.h"
+#include "../text/juce_NewLine.h"
 
 
 //==============================================================================

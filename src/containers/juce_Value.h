@@ -29,7 +29,7 @@
 #include "juce_Variant.h"
 #include "../events/juce_AsyncUpdater.h"
 #include "../events/juce_ListenerList.h"
-#include "juce_ReferenceCountedObject.h"
+#include "../memory/juce_ReferenceCountedObject.h"
 #include "juce_SortedSet.h"
 
 

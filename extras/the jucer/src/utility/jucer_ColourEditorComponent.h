@@ -116,7 +116,7 @@ private:
             if (canResetToDefault)
             {
                 addAndMakeVisible (defaultButton = new TextButton (T("Reset to Default")));
-                defaultButton->addButtonListener (this);
+                defaultButton->addListener (this);
             }
         }
 

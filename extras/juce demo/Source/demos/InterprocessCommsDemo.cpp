@@ -89,7 +89,7 @@ public:
         addChildComponent (&sendButton);
         sendButton.setBounds (240, 120, 200, 24);
         sendButton.changeWidthToFitText();
-        sendButton.addButtonListener (this);
+        sendButton.addListener (this);
 
         addChildComponent (&incomingMessages);
         incomingMessages.setReadOnly (true);

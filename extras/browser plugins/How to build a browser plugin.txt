@@ -4,7 +4,7 @@
     =============================
     
 These classes let you easily turn a normal Juce component into a Mac/Windows NPAPI plugin 
-for use in Firefox, Safari, Opera, etc.
+for use in Firefox, Safari, Chrome, etc., and/or an ActiveX plugin for IE.
 
 To create your plugin, your code just needs to implement the createBrowserPlugin() function 
 to return a subclass of BrowserPluginComponent, and this acts as the plugin window.

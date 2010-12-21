@@ -30,7 +30,7 @@
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../../../events/juce_ChangeBroadcaster.h"
 #include "../../../audio/midi/juce_MidiKeyboardState.h"
-#include "../../../containers/juce_BigInteger.h"
+#include "../../../maths/juce_BigInteger.h"
 
 
 //==============================================================================

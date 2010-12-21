@@ -50,7 +50,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Time.h"
 #include "../threads/juce_Thread.h"
-#include "../containers/juce_MemoryBlock.h"
+#include "../memory/juce_MemoryBlock.h"
 #include "../text/juce_LocalisedStrings.h"
 
 //==============================================================================

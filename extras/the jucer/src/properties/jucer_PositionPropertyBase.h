@@ -60,7 +60,7 @@ public:
           allowRelativeOptions (allowRelativeOptions_)
     {
         addAndMakeVisible (button = new TextButton (T("mode")));
-        button->addButtonListener (this);
+        button->addListener (this);
         button->setTriggeredOnMouseDown (true);
         button->setConnectedEdges (TextButton::ConnectedOnLeft | TextButton::ConnectedOnRight);
 

@@ -35,7 +35,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/streams/juce_SubregionStream.h"
 #include "../io/streams/juce_GZIPDecompressorInputStream.h"
 #include "../io/streams/juce_GZIPCompressorOutputStream.h"
-#include "../containers/juce_ScopedPointer.h"
+#include "../memory/juce_ScopedPointer.h"
 #include "../core/juce_SystemStats.h"
 #include "../threads/juce_InterProcessLock.h"
 #include "../threads/juce_ScopedLock.h"

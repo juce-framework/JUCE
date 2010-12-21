@@ -44,7 +44,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
     setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
     Component::addAndMakeVisible (&optionsButton);
-    optionsButton.addButtonListener (this);
+    optionsButton.addListener (this);
     optionsButton.setTriggeredOnMouseDown (true);
 
     JUCE_TRY

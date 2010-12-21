@@ -27,7 +27,7 @@
 #define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

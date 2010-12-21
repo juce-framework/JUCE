@@ -26,8 +26,8 @@
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
 #define __JUCE_SAMPLER_JUCEHEADER__
 
-#include "../../containers/juce_BigInteger.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../maths/juce_BigInteger.h"
+#include "../../memory/juce_ScopedPointer.h"
 #include "juce_Synthesiser.h"
 
 

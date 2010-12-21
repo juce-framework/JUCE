@@ -43,10 +43,11 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 #include "../core/juce_SystemStats.h"
 #include "../core/juce_Time.h"
-#include "../core/juce_Random.h"
+#include "../maths/juce_Random.h"
 #include "../core/juce_Singleton.h"
 #include "../core/juce_PlatformUtilities.h"
-#include "../containers/juce_MemoryBlock.h"
+#include "../memory/juce_MemoryBlock.h"
+#include "../containers/juce_ReferenceCountedArray.h"
 #include "../utilities/juce_DeletedAtShutdown.h"
 #include "../utilities/juce_SystemClipboard.h"
 #include "../text/juce_StringArray.h"

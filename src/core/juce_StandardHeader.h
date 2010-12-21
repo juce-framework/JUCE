@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      52
-#define JUCE_BUILDNUMBER        108
+#define JUCE_BUILDNUMBER        109
 
 /** Current Juce version number.
 
@@ -171,11 +171,11 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
   extern JUCE_API void juce_LogAssertion (const char* filename, int lineNum) throw();
 #endif
 
-#include "juce_Memory.h"
-#include "juce_MathsFunctions.h"
-#include "juce_ByteOrder.h"
+#include "../memory/juce_Memory.h"
+#include "../maths/juce_MathsFunctions.h"
+#include "../memory/juce_ByteOrder.h"
 #include "juce_Logger.h"
-#include "juce_LeakedObjectDetector.h"
+#include "../memory/juce_LeakedObjectDetector.h"
 
 
 END_JUCE_NAMESPACE

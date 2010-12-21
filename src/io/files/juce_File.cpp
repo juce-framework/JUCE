@@ -36,9 +36,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_DirectoryIterator.h"
 #include "juce_TemporaryFile.h"
 #include "../../core/juce_SystemStats.h"
-#include "../../core/juce_Random.h"
+#include "../../maths/juce_Random.h"
 #include "../../core/juce_PlatformUtilities.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -925,7 +925,7 @@ const File File::createTempFile (const String& fileNameEnding)
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"
-#include "../../core/juce_Random.h"
+#include "../../maths/juce_Random.h"
 
 class FileTests  : public UnitTest
 {

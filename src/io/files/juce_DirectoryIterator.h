@@ -27,7 +27,7 @@
 #define __JUCE_DIRECTORYITERATOR_JUCEHEADER__
 
 #include "juce_File.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

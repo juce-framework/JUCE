@@ -31,7 +31,7 @@ class ComponentPeer;
 class MouseInputSourceInternal;
 #include "../keyboard/juce_ModifierKeys.h"
 #include "../../../core/juce_Time.h"
-#include "../../../containers/juce_ScopedPointer.h"
+#include "../../../memory/juce_ScopedPointer.h"
 #include "../../graphics/geometry/juce_Point.h"
 #include "../juce_Desktop.h"
 

@@ -29,8 +29,8 @@
 #include "../../containers/juce_Array.h"
 #include "../../core/juce_Time.h"
 #include "../../text/juce_StringArray.h"
-#include "../../containers/juce_MemoryBlock.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../memory/juce_MemoryBlock.h"
+#include "../../memory/juce_ScopedPointer.h"
 class FileInputStream;
 class FileOutputStream;
 

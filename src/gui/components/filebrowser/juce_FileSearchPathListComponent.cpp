@@ -49,18 +49,18 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     listBox.setOutlineThickness (1);
 
     addAndMakeVisible (&addButton);
-    addButton.addButtonListener (this);
+    addButton.addListener (this);
     addButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
 
     addAndMakeVisible (&removeButton);
-    removeButton.addButtonListener (this);
+    removeButton.addListener (this);
     removeButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
 
     addAndMakeVisible (&changeButton);
-    changeButton.addButtonListener (this);
+    changeButton.addListener (this);
 
     addAndMakeVisible (&upButton);
-    upButton.addButtonListener (this);
+    upButton.addListener (this);
 
     {
         Path arrowPath;
@@ -73,7 +73,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     }
 
     addAndMakeVisible (&downButton);
-    downButton.addButtonListener (this);
+    downButton.addListener (this);
 
     {
         Path arrowPath;

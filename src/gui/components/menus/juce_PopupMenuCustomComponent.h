@@ -28,7 +28,7 @@
 
 #include "juce_PopupMenu.h"
 #include "../juce_Component.h"
-#include "../../../containers/juce_ReferenceCountedObject.h"
+#include "../../../memory/juce_ReferenceCountedObject.h"
 
 
 //==============================================================================

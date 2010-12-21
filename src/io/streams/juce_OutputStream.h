@@ -27,6 +27,7 @@
 #define __JUCE_OUTPUTSTREAM_JUCEHEADER__
 
 #include "../../text/juce_String.h"
+#include "../../text/juce_NewLine.h"
 #include "juce_InputStream.h"
 class File;
 

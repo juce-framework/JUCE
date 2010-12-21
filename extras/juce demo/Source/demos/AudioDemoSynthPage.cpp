@@ -259,13 +259,13 @@ AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (sineButton = new ToggleButton (String::empty));
     sineButton->setButtonText (T("Use sine wave"));
     sineButton->setRadioGroupId (321);
-    sineButton->addButtonListener (this);
+    sineButton->addListener (this);
     sineButton->setToggleState (true, false);
 
     addAndMakeVisible (sampledButton = new ToggleButton (String::empty));
     sampledButton->setButtonText (T("Use sampled sound"));
     sampledButton->setRadioGroupId (321);
-    sampledButton->addButtonListener (this);
+    sampledButton->addListener (this);
 
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 

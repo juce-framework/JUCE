@@ -94,7 +94,7 @@ void FilenameComponent::lookAndFeelChanged()
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);
     resized();
 
-    browseButton->addButtonListener (this);
+    browseButton->addListener (this);
 }
 
 void FilenameComponent::setTooltip (const String& newTooltip)

@@ -47,9 +47,9 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     setResizable (true, true);
     setResizeLimits (300, 300, 1200, 1000);
 
-    content->okButton.addButtonListener (this);
-    content->cancelButton.addButtonListener (this);
-    content->newFolderButton.addButtonListener (this);
+    content->okButton.addListener (this);
+    content->cancelButton.addListener (this);
+    content->newFolderButton.addListener (this);
     content->chooserComponent.addListener (this);
 
     selectionChanged();

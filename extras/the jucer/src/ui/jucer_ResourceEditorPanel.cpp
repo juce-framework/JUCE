@@ -37,7 +37,7 @@ public:
     {
         setInterceptsMouseClicks (false, true);
         addAndMakeVisible (reloadButton = new TextButton (T("Reload")));
-        reloadButton->addButtonListener (this);
+        reloadButton->addListener (this);
     }
 
     ~ResourceListButton()
@@ -85,13 +85,13 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& document_)
     : document (document_)
 {
     addAndMakeVisible (addButton = new TextButton (T("Add new resource...")));
-    addButton->addButtonListener (this);
+    addButton->addListener (this);
 
     addAndMakeVisible (reloadAllButton = new TextButton (T("Reload all resources")));
-    reloadAllButton->addButtonListener (this);
+    reloadAllButton->addListener (this);
 
     addAndMakeVisible (delButton = new TextButton (T("Delete selected resources")));
-    delButton->addButtonListener (this);
+    delButton->addListener (this);
     delButton->setEnabled (false);
 
     addAndMakeVisible (listBox = new TableListBox (String::empty, this));

@@ -58,10 +58,10 @@ public:
         textBox.setText ("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789");
 
         addAndMakeVisible (&boldButton);
-        boldButton.addButtonListener (this);
+        boldButton.addListener (this);
 
         addAndMakeVisible (&italicButton);
-        italicButton.addButtonListener (this);
+        italicButton.addListener (this);
 
         addAndMakeVisible (&sizeSlider);
         sizeSlider.setRange (3.0, 150.0, 0.1);

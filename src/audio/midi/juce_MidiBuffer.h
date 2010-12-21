@@ -26,7 +26,7 @@
 #ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
 #define __JUCE_MIDIBUFFER_JUCEHEADER__
 
-#include "../../containers/juce_MemoryBlock.h"
+#include "../../memory/juce_MemoryBlock.h"
 #include "juce_MidiMessage.h"
 
 

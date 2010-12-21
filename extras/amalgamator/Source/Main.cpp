@@ -27,8 +27,6 @@
 
 
 //==============================================================================
-static const char* newLine = "\n";
-
 static bool matchesWildcard (const String& filename, const StringArray& wildcards)
 {
     for (int i = wildcards.size(); --i >= 0;)
@@ -280,6 +278,8 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
                   << temp.getFile().getFullPathName() << "\n\n";
         return false;
     }
+
+    out->setNewLineString ("\n");
 
     if (! parseFile (targetFile.getParentDirectory(),
                      targetFile,

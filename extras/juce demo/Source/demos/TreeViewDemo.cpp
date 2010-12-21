@@ -141,7 +141,7 @@ public:
         thread.startThread (3);
 
         addAndMakeVisible (&typeButton);
-        typeButton.addButtonListener (this);
+        typeButton.addListener (this);
         typeButton.setAlwaysOnTop (true);
         typeButton.setTriggeredOnMouseDown (true);
 

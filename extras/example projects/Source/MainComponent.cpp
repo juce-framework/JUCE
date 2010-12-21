@@ -44,7 +44,7 @@ MainComponent::MainComponent ()
 
     addAndMakeVisible (quitButton = new TextButton (String::empty));
     quitButton->setButtonText (T("Quit"));
-    quitButton->addButtonListener (this);
+    quitButton->addListener (this);
 
 
     //[UserPreSize]

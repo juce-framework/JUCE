@@ -344,7 +344,7 @@ void DocumentWindow::lookAndFeelChanged()
                 if (buttonListener == 0)
                     buttonListener = new ButtonListenerProxy (*this);
 
-                titleBarButtons[i]->addButtonListener (buttonListener);
+                titleBarButtons[i]->addListener (buttonListener);
                 titleBarButtons[i]->setWantsKeyboardFocus (false);
 
                 // (call the Component method directly to avoid the assertion in ResizableWindow)

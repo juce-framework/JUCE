@@ -535,7 +535,7 @@ void AudioDataConverters::deinterleaveSamples (const float* const source,
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"
-#include "../../core/juce_Random.h"
+#include "../../maths/juce_Random.h"
 
 class AudioConversionTests  : public UnitTest
 {

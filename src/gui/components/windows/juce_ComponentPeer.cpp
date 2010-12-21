@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Desktop.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../../core/juce_Time.h"
-#include "../../../core/juce_Random.h"
+#include "../../../maths/juce_Random.h"
 #include "../layout/juce_ComponentBoundsConstrainer.h"
 #include "../mouse/juce_FileDragAndDropTarget.h"
 #include "../mouse/juce_MouseInputSource.h"

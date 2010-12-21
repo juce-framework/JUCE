@@ -26,7 +26,7 @@
 #ifndef __JUCE_MD5_JUCEHEADER__
 #define __JUCE_MD5_JUCEHEADER__
 
-#include "../containers/juce_MemoryBlock.h"
+#include "../memory/juce_MemoryBlock.h"
 #include "../io/streams/juce_InputStream.h"
 #include "../io/files/juce_File.h"
 

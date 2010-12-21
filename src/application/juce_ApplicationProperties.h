@@ -29,7 +29,7 @@
 #include "../utilities/juce_PropertiesFile.h"
 #include "../utilities/juce_DeletedAtShutdown.h"
 #include "../core/juce_Singleton.h"
-#include "../containers/juce_ScopedPointer.h"
+#include "../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

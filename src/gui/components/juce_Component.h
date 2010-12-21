@@ -40,7 +40,7 @@
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_Array.h"
 #include "../../containers/juce_NamedValueSet.h"
-#include "../../containers/juce_WeakReference.h"
+#include "../../memory/juce_WeakReference.h"
 #include "juce_ModalComponentManager.h"
 
 class LookAndFeel;

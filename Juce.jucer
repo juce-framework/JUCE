@@ -359,30 +359,12 @@
         <FILE id="MMVvnl2oo" name="juce_Array.h" compile="0" resource="0" file="src/containers/juce_Array.h"/>
         <FILE id="I2LILZNlU" name="juce_ArrayAllocationBase.h" compile="0"
               resource="0" file="src/containers/juce_ArrayAllocationBase.h"/>
-        <FILE id="T2Ys7NAuy" name="juce_BigInteger.cpp" compile="1" resource="0"
-              file="src/containers/juce_BigInteger.cpp"/>
-        <FILE id="yo9C7IDcf" name="juce_BigInteger.h" compile="0" resource="0"
-              file="src/containers/juce_BigInteger.h"/>
         <FILE id="1cwWOJ3Mv" name="juce_DynamicObject.cpp" compile="1" resource="0"
               file="src/containers/juce_DynamicObject.cpp"/>
         <FILE id="e3gh56Kq6" name="juce_DynamicObject.h" compile="0" resource="0"
               file="src/containers/juce_DynamicObject.h"/>
         <FILE id="RNHQjBFmS" name="juce_ElementComparator.h" compile="0" resource="0"
               file="src/containers/juce_ElementComparator.h"/>
-        <FILE id="01ekjVT" name="juce_Expression.cpp" compile="1" resource="0"
-              file="src/containers/juce_Expression.cpp"/>
-        <FILE id="MpE62KG" name="juce_Expression.h" compile="0" resource="0"
-              file="src/containers/juce_Expression.h"/>
-        <FILE id="ssHjnrvya" name="juce_HeapBlock.h" compile="0" resource="0"
-              file="src/containers/juce_HeapBlock.h"/>
-        <FILE id="3Wo76GZwg" name="juce_Identifier.cpp" compile="1" resource="0"
-              file="src/containers/juce_Identifier.cpp"/>
-        <FILE id="8q7r0YE6b" name="juce_Identifier.h" compile="0" resource="0"
-              file="src/containers/juce_Identifier.h"/>
-        <FILE id="GJt7L3I14" name="juce_MemoryBlock.cpp" compile="1" resource="0"
-              file="src/containers/juce_MemoryBlock.cpp"/>
-        <FILE id="09FY4g3q" name="juce_MemoryBlock.h" compile="0" resource="0"
-              file="src/containers/juce_MemoryBlock.h"/>
         <FILE id="zy1yAvLC1" name="juce_NamedValueSet.cpp" compile="1" resource="0"
               file="src/containers/juce_NamedValueSet.cpp"/>
         <FILE id="YIzV0n7ns" name="juce_NamedValueSet.h" compile="0" resource="0"
@@ -393,13 +375,8 @@
               file="src/containers/juce_PropertySet.cpp"/>
         <FILE id="O3bVIfg59" name="juce_PropertySet.h" compile="0" resource="0"
               file="src/containers/juce_PropertySet.h"/>
-        <FILE id="QXwSdGP77" name="juce_Range.h" compile="0" resource="0" file="src/containers/juce_Range.h"/>
         <FILE id="q1WQH39S3" name="juce_ReferenceCountedArray.h" compile="0"
               resource="0" file="src/containers/juce_ReferenceCountedArray.h"/>
-        <FILE id="zEp5U1KiQ" name="juce_ReferenceCountedObject.h" compile="0"
-              resource="0" file="src/containers/juce_ReferenceCountedObject.h"/>
-        <FILE id="Mt2QA9Qv3" name="juce_ScopedPointer.h" compile="0" resource="0"
-              file="src/containers/juce_ScopedPointer.h"/>
         <FILE id="CPW4LfoeP" name="juce_SortedSet.h" compile="0" resource="0"
               file="src/containers/juce_SortedSet.h"/>
         <FILE id="jo9VOycN5" name="juce_SparseSet.h" compile="0" resource="0"
@@ -415,14 +392,8 @@
               file="src/containers/juce_Variant.cpp"/>
         <FILE id="8q9BHXyE6" name="juce_Variant.h" compile="0" resource="0"
               file="src/containers/juce_Variant.h"/>
-        <FILE id="Nw7LSeh" name="juce_WeakReference.h" compile="0" resource="0"
-              file="src/containers/juce_WeakReference.h"/>
       </GROUP>
       <GROUP id="LTuqRhF2Y" name="core">
-        <FILE id="9zAJsfSFe" name="juce_Atomic.h" compile="0" resource="0"
-              file="src/core/juce_Atomic.h"/>
-        <FILE id="BVStueO0" name="juce_ByteOrder.h" compile="0" resource="0"
-              file="src/core/juce_ByteOrder.h"/>
         <FILE id="Hth1NsyDV" name="juce_FileLogger.cpp" compile="1" resource="0"
               file="src/core/juce_FileLogger.cpp"/>
         <FILE id="7nItXGiB" name="juce_FileLogger.h" compile="0" resource="0"
@@ -431,16 +402,10 @@
               file="src/core/juce_Initialisation.cpp"/>
         <FILE id="nsfdNZAs" name="juce_Initialisation.h" compile="0" resource="0"
               file="src/core/juce_Initialisation.h"/>
-        <FILE id="hRYAldz" name="juce_LeakedObjectDetector.h" compile="0" resource="0"
-              file="src/core/juce_LeakedObjectDetector.h"/>
         <FILE id="43AWfo8b2" name="juce_Logger.cpp" compile="1" resource="0"
               file="src/core/juce_Logger.cpp"/>
         <FILE id="KrXxapCit" name="juce_Logger.h" compile="0" resource="0"
               file="src/core/juce_Logger.h"/>
-        <FILE id="PtcTLlFez" name="juce_MathsFunctions.h" compile="0" resource="0"
-              file="src/core/juce_MathsFunctions.h"/>
-        <FILE id="S0q5apCvk" name="juce_Memory.h" compile="0" resource="0"
-              file="src/core/juce_Memory.h"/>
         <FILE id="el20KnKqi" name="juce_PerformanceCounter.cpp" compile="1"
               resource="0" file="src/core/juce_PerformanceCounter.cpp"/>
         <FILE id="ZDqYtDm8E" name="juce_PerformanceCounter.h" compile="0" resource="0"
@@ -449,10 +414,6 @@
               file="src/core/juce_PlatformDefs.h"/>
         <FILE id="o1vDnzWWu" name="juce_PlatformUtilities.h" compile="0" resource="0"
               file="src/core/juce_PlatformUtilities.h"/>
-        <FILE id="XVALcRmOR" name="juce_Random.cpp" compile="1" resource="0"
-              file="src/core/juce_Random.cpp"/>
-        <FILE id="i42D5OGHz" name="juce_Random.h" compile="0" resource="0"
-              file="src/core/juce_Random.h"/>
         <FILE id="n3tbSp" name="juce_RelativeTime.cpp" compile="1" resource="0"
               file="src/core/juce_RelativeTime.cpp"/>
         <FILE id="51S3JEvsR" name="juce_RelativeTime.h" compile="0" resource="0"
@@ -1251,6 +1212,42 @@
                 file="src/io/streams/juce_SubregionStream.h"/>
         </GROUP>
       </GROUP>
+      <GROUP id="1A2IQ32" name="maths">
+        <FILE id="1m7atLN" name="juce_BigInteger.cpp" compile="1" resource="0"
+              file="src/maths/juce_BigInteger.cpp"/>
+        <FILE id="psVWPIJ" name="juce_BigInteger.h" compile="0" resource="0"
+              file="src/maths/juce_BigInteger.h"/>
+        <FILE id="HTlnl6C" name="juce_Expression.cpp" compile="1" resource="0"
+              file="src/maths/juce_Expression.cpp"/>
+        <FILE id="3xPwpN" name="juce_Expression.h" compile="0" resource="0"
+              file="src/maths/juce_Expression.h"/>
+        <FILE id="rt09REF" name="juce_MathsFunctions.h" compile="0" resource="0"
+              file="src/maths/juce_MathsFunctions.h"/>
+        <FILE id="YOsrZ7v" name="juce_Random.cpp" compile="1" resource="0"
+              file="src/maths/juce_Random.cpp"/>
+        <FILE id="VLf8lcH" name="juce_Random.h" compile="0" resource="0" file="src/maths/juce_Random.h"/>
+        <FILE id="X1MGYQU" name="juce_Range.h" compile="0" resource="0" file="src/maths/juce_Range.h"/>
+      </GROUP>
+      <GROUP id="kTXuVhA" name="memory">
+        <FILE id="coZd5H5" name="juce_Atomic.h" compile="0" resource="0" file="src/memory/juce_Atomic.h"/>
+        <FILE id="DbDZ422" name="juce_ByteOrder.h" compile="0" resource="0"
+              file="src/memory/juce_ByteOrder.h"/>
+        <FILE id="fsu57zu" name="juce_HeapBlock.h" compile="0" resource="0"
+              file="src/memory/juce_HeapBlock.h"/>
+        <FILE id="n924l1" name="juce_LeakedObjectDetector.h" compile="0" resource="0"
+              file="src/memory/juce_LeakedObjectDetector.h"/>
+        <FILE id="lL6otkK" name="juce_Memory.h" compile="0" resource="0" file="src/memory/juce_Memory.h"/>
+        <FILE id="LgiWuqc" name="juce_MemoryBlock.cpp" compile="1" resource="0"
+              file="src/memory/juce_MemoryBlock.cpp"/>
+        <FILE id="IDj7DQ2" name="juce_MemoryBlock.h" compile="0" resource="0"
+              file="src/memory/juce_MemoryBlock.h"/>
+        <FILE id="0fuAAWP" name="juce_ReferenceCountedObject.h" compile="0"
+              resource="0" file="src/memory/juce_ReferenceCountedObject.h"/>
+        <FILE id="WElk5bz" name="juce_ScopedPointer.h" compile="0" resource="0"
+              file="src/memory/juce_ScopedPointer.h"/>
+        <FILE id="KAVuOQ" name="juce_WeakReference.h" compile="0" resource="0"
+              file="src/memory/juce_WeakReference.h"/>
+      </GROUP>
       <GROUP id="fRwnaei56" name="native">
         <FILE id="m3AUpRM7f" name="juce_linux_NativeCode.cpp" compile="1" resource="0"
               file="src/native/juce_linux_NativeCode.cpp"/>
@@ -1420,10 +1417,15 @@
               resource="0" file="src/text/juce_CharacterFunctions.cpp"/>
         <FILE id="McKZNzGvH" name="juce_CharacterFunctions.h" compile="0" resource="0"
               file="src/text/juce_CharacterFunctions.h"/>
+        <FILE id="iGtCiI8" name="juce_Identifier.cpp" compile="1" resource="0"
+              file="src/text/juce_Identifier.cpp"/>
+        <FILE id="CPlhWqs" name="juce_Identifier.h" compile="0" resource="0"
+              file="src/text/juce_Identifier.h"/>
         <FILE id="HCYu323Km" name="juce_LocalisedStrings.cpp" compile="1" resource="0"
               file="src/text/juce_LocalisedStrings.cpp"/>
         <FILE id="omEQRDHD" name="juce_LocalisedStrings.h" compile="0" resource="0"
               file="src/text/juce_LocalisedStrings.h"/>
+        <FILE id="LzGg5HD" name="juce_NewLine.h" compile="0" resource="0" file="src/text/juce_NewLine.h"/>
         <FILE id="k4WycuGq4" name="juce_String.cpp" compile="1" resource="0"
               file="src/text/juce_String.cpp"/>
         <FILE id="fUeX2geSR" name="juce_String.h" compile="0" resource="0"

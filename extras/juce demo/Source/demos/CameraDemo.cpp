@@ -50,11 +50,11 @@ public:
         cameraSelectorComboBox.addListener (this);
 
         addAndMakeVisible (&snapshotButton);
-        snapshotButton.addButtonListener (this);
+        snapshotButton.addListener (this);
         snapshotButton.setEnabled (false);
 
         addAndMakeVisible (&recordMovieButton);
-        recordMovieButton.addButtonListener (this);
+        recordMovieButton.addListener (this);
         recordMovieButton.setEnabled (false);
 
         cameraSelectorComboBox.setSelectedId (2);

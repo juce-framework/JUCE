@@ -29,7 +29,7 @@
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "juce_FilePreviewComponent.h"
 #include "../../../io/files/juce_File.h"
-#include "../../../containers/juce_BigInteger.h"
+#include "../../../maths/juce_BigInteger.h"
 #include "../controls/juce_TextEditor.h"
 #include "../controls/juce_ComboBox.h"
 #include "../buttons/juce_DrawableButton.h"

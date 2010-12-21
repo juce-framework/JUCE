@@ -28,7 +28,7 @@
 
 #include "../colour/juce_ColourGradient.h"
 #include "../imaging/juce_Image.h"
-#include "../../../containers/juce_ScopedPointer.h"
+#include "../../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

@@ -141,7 +141,7 @@ public:
                                  << b->getRadioGroupId() << ");\n";
 
         if (needsButtonListener (component))
-            code.constructorCode << memberVariableName << "->addButtonListener (this);\n";
+            code.constructorCode << memberVariableName << "->addListener (this);\n";
     }
 
     void fillInGeneratedCode (Component* component, GeneratedCode& code)

@@ -54,7 +54,7 @@ void PreferencesPanel::addSettingsPage (const String& title,
 
     button->setImages (icon, overIcon, downIcon);
     button->setRadioGroupId (1);
-    button->addButtonListener (this);
+    button->addListener (this);
     button->setClickingTogglesState (true);
     button->setWantsKeyboardFocus (false);
     addAndMakeVisible (button);

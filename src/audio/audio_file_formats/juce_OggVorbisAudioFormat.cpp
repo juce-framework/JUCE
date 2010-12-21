@@ -79,7 +79,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_OggVorbisAudioFormat.h"
 #include "../../application/juce_Application.h"
-#include "../../core/juce_Random.h"
+#include "../../maths/juce_Random.h"
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../text/juce_LocalisedStrings.h"
 

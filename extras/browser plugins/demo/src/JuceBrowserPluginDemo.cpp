@@ -42,7 +42,7 @@ public:
 
         addAndMakeVisible (button = new TextButton ("Send a message to the webpage"));
         button->setBounds (320, 8, 180, 22);
-        button->addButtonListener (this);
+        button->addListener (this);
         button->setEnabled (false);
 
         ourJavascriptObject = new DemoBrowserObject (this);

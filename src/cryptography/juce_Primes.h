@@ -26,7 +26,7 @@
 #ifndef __JUCE_PRIMES_JUCEHEADER__
 #define __JUCE_PRIMES_JUCEHEADER__
 
-#include "../containers/juce_BigInteger.h"
+#include "../maths/juce_BigInteger.h"
 
 
 //==============================================================================

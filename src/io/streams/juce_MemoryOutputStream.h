@@ -27,8 +27,8 @@
 #define __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 
 #include "juce_OutputStream.h"
-#include "../../containers/juce_MemoryBlock.h"
-#include "../../containers/juce_ScopedPointer.h"
+#include "../../memory/juce_MemoryBlock.h"
+#include "../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================

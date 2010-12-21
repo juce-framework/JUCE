@@ -27,8 +27,8 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#include "juce_Atomic.h"
-#include "juce_Random.h"
+#include "../memory/juce_Atomic.h"
+#include "../maths/juce_Random.h"
 #include "juce_PlatformUtilities.h"
 #include "juce_SystemStats.h"
 #include "../text/juce_LocalisedStrings.h"

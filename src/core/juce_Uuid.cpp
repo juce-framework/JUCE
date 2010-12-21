@@ -28,10 +28,10 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Uuid.h"
-#include "juce_Random.h"
+#include "../maths/juce_Random.h"
 #include "juce_Time.h"
 #include "../io/network/juce_MACAddress.h"
-#include "../containers/juce_MemoryBlock.h"
+#include "../memory/juce_MemoryBlock.h"
 
 
 //==============================================================================

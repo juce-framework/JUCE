@@ -26,7 +26,7 @@
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
 #define __JUCE_MESSAGE_JUCEHEADER__
 
-#include "../containers/juce_ReferenceCountedObject.h"
+#include "../memory/juce_ReferenceCountedObject.h"
 class MessageListener;
 class MessageManager;
 

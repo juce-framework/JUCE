@@ -35,26 +35,11 @@
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
  #include "containers/juce_ArrayAllocationBase.h"
 #endif
-#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
- #include "containers/juce_BigInteger.h"
-#endif
 #ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
  #include "containers/juce_DynamicObject.h"
 #endif
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
  #include "containers/juce_ElementComparator.h"
-#endif
-#ifndef __JUCE_EXPRESSION_JUCEHEADER__
- #include "containers/juce_Expression.h"
-#endif
-#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
- #include "containers/juce_HeapBlock.h"
-#endif
-#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
- #include "containers/juce_Identifier.h"
-#endif
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
- #include "containers/juce_MemoryBlock.h"
 #endif
 #ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
  #include "containers/juce_NamedValueSet.h"
@@ -65,17 +50,8 @@
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
  #include "containers/juce_PropertySet.h"
 #endif
-#ifndef __JUCE_RANGE_JUCEHEADER__
- #include "containers/juce_Range.h"
-#endif
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
  #include "containers/juce_ReferenceCountedArray.h"
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
- #include "containers/juce_ReferenceCountedObject.h"
-#endif
-#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
- #include "containers/juce_ScopedPointer.h"
 #endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
  #include "containers/juce_SortedSet.h"
@@ -92,32 +68,14 @@
 #ifndef __JUCE_VARIANT_JUCEHEADER__
  #include "containers/juce_Variant.h"
 #endif
-#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
- #include "containers/juce_WeakReference.h"
-#endif
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
- #include "core/juce_Atomic.h"
-#endif
-#ifndef __JUCE_BYTEORDER_JUCEHEADER__
- #include "core/juce_ByteOrder.h"
-#endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
  #include "core/juce_FileLogger.h"
 #endif
 #ifndef __JUCE_INITIALISATION_JUCEHEADER__
  #include "core/juce_Initialisation.h"
 #endif
-#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
- #include "core/juce_LeakedObjectDetector.h"
-#endif
 #ifndef __JUCE_LOGGER_JUCEHEADER__
  #include "core/juce_Logger.h"
-#endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
- #include "core/juce_MathsFunctions.h"
-#endif
-#ifndef __JUCE_MEMORY_JUCEHEADER__
- #include "core/juce_Memory.h"
 #endif
 #ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
  #include "core/juce_PerformanceCounter.h"
@@ -127,9 +85,6 @@
 #endif
 #ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
  #include "core/juce_PlatformUtilities.h"
-#endif
-#ifndef __JUCE_RANDOM_JUCEHEADER__
- #include "core/juce_Random.h"
 #endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
  #include "core/juce_RelativeTime.h"
@@ -227,11 +182,59 @@
 #ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
  #include "io/streams/juce_SubregionStream.h"
 #endif
+#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
+ #include "maths/juce_BigInteger.h"
+#endif
+#ifndef __JUCE_EXPRESSION_JUCEHEADER__
+ #include "maths/juce_Expression.h"
+#endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+ #include "maths/juce_MathsFunctions.h"
+#endif
+#ifndef __JUCE_RANDOM_JUCEHEADER__
+ #include "maths/juce_Random.h"
+#endif
+#ifndef __JUCE_RANGE_JUCEHEADER__
+ #include "maths/juce_Range.h"
+#endif
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+ #include "memory/juce_Atomic.h"
+#endif
+#ifndef __JUCE_BYTEORDER_JUCEHEADER__
+ #include "memory/juce_ByteOrder.h"
+#endif
+#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+ #include "memory/juce_HeapBlock.h"
+#endif
+#ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
+ #include "memory/juce_LeakedObjectDetector.h"
+#endif
+#ifndef __JUCE_MEMORY_JUCEHEADER__
+ #include "memory/juce_Memory.h"
+#endif
+#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+ #include "memory/juce_MemoryBlock.h"
+#endif
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+ #include "memory/juce_ReferenceCountedObject.h"
+#endif
+#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
+ #include "memory/juce_ScopedPointer.h"
+#endif
+#ifndef __JUCE_WEAKREFERENCE_JUCEHEADER__
+ #include "memory/juce_WeakReference.h"
+#endif
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
  #include "text/juce_CharacterFunctions.h"
 #endif
+#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
+ #include "text/juce_Identifier.h"
+#endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
  #include "text/juce_LocalisedStrings.h"
+#endif
+#ifndef __JUCE_NEWLINE_JUCEHEADER__
+ #include "text/juce_NewLine.h"
 #endif
 #ifndef __JUCE_STRING_JUCEHEADER__
  #include "text/juce_String.h"

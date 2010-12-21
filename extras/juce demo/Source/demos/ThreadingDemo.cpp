@@ -232,7 +232,7 @@ public:
         controlButton.setTopLeftPosition (20, 20);
         controlButton.setTriggeredOnMouseDown (true);
         controlButton.setAlwaysOnTop (true);
-        controlButton.addButtonListener (this);
+        controlButton.addListener (this);
     }
 
     ~ThreadingDemo()

@@ -125,10 +125,10 @@ class PinComponent   : public Component,
 public:
     PinComponent (FilterGraph& graph_,
                   const uint32 filterID_, const int index_, const bool isInput_)
-        : graph (graph_),
-          filterID (filterID_),
+        : filterID (filterID_),
           index (index_),
-          isInput (isInput_)
+          isInput (isInput_),
+          graph (graph_)
     {
         const AudioProcessorGraph::Node::Ptr node (graph.getNodeForId (filterID_));
 
@@ -153,10 +153,6 @@ public:
         }
 
         setSize (16, 16);
-    }
-
-    ~PinComponent()
-    {
     }
 
     void paint (Graphics& g)
@@ -443,9 +439,9 @@ public:
 private:
     int pinSize;
     Point<int> originalPos;
+    Font font;
     int numIns, numOuts;
     DropShadowEffect shadow;
-    Font font;
 
     GraphEditorPanel* getGraphPanel() const throw()
     {
@@ -462,11 +458,11 @@ class ConnectorComponent   : public Component,
 {
 public:
     ConnectorComponent (FilterGraph& graph_)
-        : graph (graph_),
-          sourceFilterID (0),
+        : sourceFilterID (0),
           destFilterID (0),
           sourceFilterChannel (0),
           destFilterChannel (0),
+          graph (graph_),
           lastInputX (0),
           lastInputY (0),
           lastOutputX (0),

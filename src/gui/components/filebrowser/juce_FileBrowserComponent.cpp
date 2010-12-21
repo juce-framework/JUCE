@@ -127,7 +127,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     fileLabel.attachToComponent (&filenameBox, true);
 
     addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
-    goUpButton->addButtonListener (this);
+    goUpButton->addListener (this);
     goUpButton->setTooltip (TRANS ("go up to parent directory"));
 
     if (previewComp != 0)

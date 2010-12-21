@@ -344,15 +344,18 @@ void Button::handleCommandMessage (int commandId)
 }
 
 //==============================================================================
-void Button::addButtonListener (ButtonListener* const newListener)
+void Button::addListener (ButtonListener* const newListener)
 {
     buttonListeners.add (newListener);
 }
 
-void Button::removeButtonListener (ButtonListener* const listener)
+void Button::removeListener (ButtonListener* const listener)
 {
     buttonListeners.remove (listener);
 }
+
+void Button::addButtonListener (ButtonListener* l)      { addListener (l); }
+void Button::removeButtonListener (ButtonListener* l)   { removeListener (l); }
 
 void Button::sendClickMessage (const ModifierKeys& modifiers)
 {

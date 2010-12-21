@@ -26,7 +26,7 @@
 #ifndef __JUCE_VARIANT_JUCEHEADER__
 #define __JUCE_VARIANT_JUCEHEADER__
 
-#include "juce_Identifier.h"
+#include "../text/juce_Identifier.h"
 #include "../io/streams/juce_OutputStream.h"
 #include "../io/streams/juce_InputStream.h"
 

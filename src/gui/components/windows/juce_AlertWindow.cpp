@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../../application/juce_Application.h"
-#include "../../../containers/juce_ScopedPointer.h"
+#include "../../../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -158,7 +158,7 @@ void AlertWindow::addButton (const String& name,
     b->setCommandToTrigger (0, returnValue, false);
     b->addShortcut (shortcutKey1);
     b->addShortcut (shortcutKey2);
-    b->addButtonListener (this);
+    b->addListener (this);
     b->changeWidthToFitText (getLookAndFeel().getAlertWindowButtonHeight());
 
     addAndMakeVisible (b, 0);

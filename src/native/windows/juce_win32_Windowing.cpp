@@ -2237,9 +2237,8 @@ private:
 
                 case SC_MAXIMIZE:
                     if (! sendInputAttemptWhenModalMessage())
-                        return 0;
+                        setFullScreen (true);
 
-                    setFullScreen (true);
                     return 0;
 
                 case SC_MINIMIZE:

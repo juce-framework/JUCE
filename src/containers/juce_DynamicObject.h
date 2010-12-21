@@ -27,7 +27,7 @@
 #define __JUCE_DYNAMICOBJECT_JUCEHEADER__
 
 #include "juce_NamedValueSet.h"
-#include "juce_ReferenceCountedObject.h"
+#include "../memory/juce_ReferenceCountedObject.h"
 
 
 //==============================================================================

@@ -526,7 +526,7 @@ public:
         addAndMakeVisible (db);
         db->setBounds (90, 30, 80, 80);
         db->setTooltip ("this is an image-only DrawableButton");
-        db->addButtonListener (buttonListener);
+        db->addListener (buttonListener);
 
         //==============================================================================
         // create an image-on-button-shape button from the same drawables..
@@ -546,7 +546,7 @@ public:
         addAndMakeVisible (db);
         db->setBounds (200, 70, 50, 50);
         db->setTooltip ("this is a DrawableButton on a standard button background");
-        db->addButtonListener (buttonListener);
+        db->addListener (buttonListener);
 
         //==============================================================================
         HyperlinkButton* hyperlink
@@ -580,7 +580,7 @@ public:
         addAndMakeVisible (animateButton);
         animateButton->changeWidthToFitText (24);
         animateButton->setTopLeftPosition (350, 70);
-        animateButton->addButtonListener (this);
+        animateButton->addListener (this);
     }
 
     ~ButtonsPage()
@@ -693,12 +693,12 @@ public:
         depthLabel.attachToComponent (&depthSlider, false);
 
         addAndMakeVisible (&orientationButton);
-        orientationButton.addButtonListener (this);
+        orientationButton.addListener (this);
         orientationButton.changeWidthToFitText (22);
         orientationButton.setTopLeftPosition (depthSlider.getX(), depthSlider.getBottom() + 20);
 
         addAndMakeVisible (&customiseButton);
-        customiseButton.addButtonListener (this);
+        customiseButton.addListener (this);
         customiseButton.changeWidthToFitText (22);
         customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
     }
@@ -1103,7 +1103,7 @@ public:
         //==============================================================================
         addAndMakeVisible (&menuButton);
         menuButton.setBounds (10, 10, 200, 24);
-        menuButton.addButtonListener (this);
+        menuButton.addListener (this);
         menuButton.setTriggeredOnMouseDown (true); // because this button pops up a menu, this lets us
                                                     // hold down the button and drag straight onto the menu
 
@@ -1112,7 +1112,7 @@ public:
         enableButton.setBounds (230, 10, 180, 24);
         enableButton.setTooltip ("Enables/disables all the components");
         enableButton.setToggleState (true, false);
-        enableButton.addButtonListener (this);
+        enableButton.addListener (this);
 
         addAndMakeVisible (&transformSlider);
         transformSlider.setSliderStyle (Slider::LinearBar);

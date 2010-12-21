@@ -26,7 +26,7 @@
 #ifndef __JUCE_TYPEFACE_JUCEHEADER__
 #define __JUCE_TYPEFACE_JUCEHEADER__
 
-#include "../../../containers/juce_ReferenceCountedObject.h"
+#include "../../../memory/juce_ReferenceCountedObject.h"
 #include "../../../containers/juce_OwnedArray.h"
 #include "../../../io/streams/juce_InputStream.h"
 #include "../../../io/streams/juce_OutputStream.h"

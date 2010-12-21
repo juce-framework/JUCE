@@ -26,7 +26,7 @@
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
-#include "../core/juce_Atomic.h"
+#include "../memory/juce_Atomic.h"
 #include "../events/juce_CallbackMessage.h"
 
 

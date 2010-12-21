@@ -26,7 +26,7 @@
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 #define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
-#include "juce_HeapBlock.h"
+#include "../memory/juce_HeapBlock.h"
 
 
 //==============================================================================

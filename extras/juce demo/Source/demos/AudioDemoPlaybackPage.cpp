@@ -144,7 +144,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
 
     addAndMakeVisible (startStopButton = new TextButton (String::empty));
     startStopButton->setButtonText (T("Play/Stop"));
-    startStopButton->addButtonListener (this);
+    startStopButton->addListener (this);
     startStopButton->setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
 
     addAndMakeVisible (fileTreeComp = new FileTreeComponent (directoryList));

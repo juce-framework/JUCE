@@ -26,7 +26,7 @@
 #ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 #define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 
-#include "../../../containers/juce_Range.h"
+#include "../../../maths/juce_Range.h"
 
 
 //==============================================================================

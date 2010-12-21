@@ -26,7 +26,7 @@
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 #define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 
-#include "juce_ReferenceCountedObject.h"
+#include "../memory/juce_ReferenceCountedObject.h"
 #include "juce_ArrayAllocationBase.h"
 #include "juce_ElementComparator.h"
 #include "../threads/juce_CriticalSection.h"

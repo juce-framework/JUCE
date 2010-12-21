@@ -356,10 +356,10 @@ void Slider::lookAndFeelChanged()
     if (style == IncDecButtons)
     {
         addAndMakeVisible (incButton = lf.createSliderButton (true));
-        incButton->addButtonListener (this);
+        incButton->addListener (this);
 
         addAndMakeVisible (decButton = lf.createSliderButton (false));
-        decButton->addButtonListener (this);
+        decButton->addListener (this);
 
         if (incDecButtonMode != incDecButtonsNotDraggable)
         {

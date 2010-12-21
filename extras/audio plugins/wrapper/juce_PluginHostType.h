@@ -58,7 +58,8 @@ public:
         SteinbergWavelab6,
         SteinbergWavelab7,
         SteinbergWavelabGeneric,
-        MuseReceptorGeneric
+        MuseReceptorGeneric,
+        MagixSamplitude
     };
 
     const HostType type;
@@ -114,6 +115,11 @@ public:
         return type == MuseReceptorGeneric;
     }
 
+    bool isSamplitude() const throw()
+    {
+        return type == MagixSamplitude;
+    }
+
     //==============================================================================
     static String getHostPath()
     {
@@ -127,7 +133,7 @@ private:
         const String hostPath (getHostPath());
         const String hostFilename (File (hostPath).getFileName());
 
-#if JUCE_MAC
+      #if JUCE_MAC
         if (hostPath.containsIgnoreCase     ("Live 6."))        return AbletonLive6;
         if (hostPath.containsIgnoreCase     ("Live 7."))        return AbletonLive7;
         if (hostPath.containsIgnoreCase     ("Live 8."))        return AbletonLive8;
@@ -140,7 +146,7 @@ private:
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))      return SteinbergWavelab7;
         if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
 
-#elif JUCE_WINDOWS
+      #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
         if (hostFilename.containsIgnoreCase ("Live 7."))        return AbletonLive7;
         if (hostFilename.containsIgnoreCase ("Live 8."))        return AbletonLive8;
@@ -161,15 +167,14 @@ private:
         if (hostPath.containsIgnoreCase     ("Wavelab 6"))      return SteinbergWavelab6;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))      return SteinbergWavelab7;
         if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
-        if (hostFilename.containsIgnoreCase ("reaper"))         return Reaper;
         if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
+        if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
 
-
-#elif JUCE_LINUX
+      #elif JUCE_LINUX
         jassertfalse   // not yet done!
-#else
+      #else
         #error
-#endif
+      #endif
         return UnknownHost;
     }
 

@@ -59,38 +59,21 @@ public:
 */
 class JUCEHelloWorldApplication : public JUCEApplication
 {
-    /* Important! NEVER embed objects directly inside your JUCEApplication class! Use
-       ONLY pointers to objects, which you should create during the initialise() method
-       (NOT in the constructor!) and delete in the shutdown() method (NOT in the
-       destructor!)
-
-       This is because the application object gets created before Juce has been properly
-       initialised, so any embedded objects would also get constructed too soon.
-   */
-    HelloWorldWindow* helloWorldWindow;
-
 public:
     //==============================================================================
     JUCEHelloWorldApplication()
         : helloWorldWindow (0)
     {
-        // NEVER do anything in here that could involve any Juce function being called
-        // - leave all your startup tasks until the initialise() method.
     }
 
     ~JUCEHelloWorldApplication()
     {
-        // Your shutdown() method should already have done all the things necessary to
-        // clean up this app object, so you should never need to put anything in
-        // the destructor.
-
-        // Making any Juce calls in here could be very dangerous...
     }
 
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        // just create the main window...
+        // For this demo, we'll just create the main window...
         helloWorldWindow = new HelloWorldWindow();
 
         /*  ..and now return, which will fall into to the main event
@@ -104,20 +87,23 @@ public:
 
     void shutdown()
     {
-        // clear up..
+        // This method is where you should clear-up your app's resources..
 
-        if (helloWorldWindow != 0)
-            delete helloWorldWindow;
+        // The helloWorldWindow variable is a ScopedPointer, so setting it to a null
+        // pointer will delete the window.
+        helloWorldWindow = 0;
     }
 
     //==============================================================================
     const String getApplicationName()
     {
-        return T("Hello World for JUCE");
+        return "Hello World for JUCE";
     }
 
     const String getApplicationVersion()
     {
+        // The ProjectInfo::versionString value is automatically updated by the Jucer, and
+        // can be found in the JuceHeader.h file that it generates for our project.
         return ProjectInfo::versionString;
     }
 
@@ -129,6 +115,9 @@ public:
     void anotherInstanceStarted (const String& commandLine)
     {
     }
+
+private:
+    ScopedPointer<HelloWorldWindow> helloWorldWindow;
 };
 
 

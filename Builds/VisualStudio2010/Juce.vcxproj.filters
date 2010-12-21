@@ -149,6 +149,12 @@
     <Filter Include="Juce\Source\io\streams">
       <UniqueIdentifier>{C2308939-D584-9814-C8E8-EFA033FFC652}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce\Source\maths">
+      <UniqueIdentifier>{61F03A35-213F-52B3-6C8B-3C71CDEFBE96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce\Source\memory">
+      <UniqueIdentifier>{A9DDD283-8C5F-BBFD-E0C3-1ACD2FF8EB74}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce\Source\native">
       <UniqueIdentifier>{A5F8397A-22E0-232C-6BDB-9A112412C424}</UniqueIdentifier>
     </Filter>
@@ -382,19 +388,7 @@
     <ClCompile Include="..\..\src\containers\juce_AbstractFifo.cpp">
       <Filter>Juce\Source\containers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\containers\juce_BigInteger.cpp">
-      <Filter>Juce\Source\containers</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\containers\juce_DynamicObject.cpp">
-      <Filter>Juce\Source\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\containers\juce_Expression.cpp">
-      <Filter>Juce\Source\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\containers\juce_Identifier.cpp">
-      <Filter>Juce\Source\containers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\containers\juce_MemoryBlock.cpp">
       <Filter>Juce\Source\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\containers\juce_NamedValueSet.cpp">
@@ -422,9 +416,6 @@
       <Filter>Juce\Source\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\juce_PerformanceCounter.cpp">
-      <Filter>Juce\Source\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\juce_Random.cpp">
       <Filter>Juce\Source\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\juce_RelativeTime.cpp">
@@ -955,6 +946,18 @@
     <ClCompile Include="..\..\src\io\streams\juce_SubregionStream.cpp">
       <Filter>Juce\Source\io\streams</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\maths\juce_BigInteger.cpp">
+      <Filter>Juce\Source\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\maths\juce_Expression.cpp">
+      <Filter>Juce\Source\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\maths\juce_Random.cpp">
+      <Filter>Juce\Source\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memory\juce_MemoryBlock.cpp">
+      <Filter>Juce\Source\memory</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\native\juce_linux_NativeCode.cpp">
       <Filter>Juce\Source\native</Filter>
     </ClCompile>
@@ -1160,6 +1163,9 @@
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\text\juce_CharacterFunctions.cpp">
+      <Filter>Juce\Source\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\text\juce_Identifier.cpp">
       <Filter>Juce\Source\text</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\text\juce_LocalisedStrings.cpp">
@@ -1443,25 +1449,10 @@
     <ClInclude Include="..\..\src\containers\juce_ArrayAllocationBase.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_BigInteger.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_DynamicObject.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_ElementComparator.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_Expression.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_HeapBlock.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_Identifier.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_MemoryBlock.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_NamedValueSet.h">
@@ -1473,16 +1464,7 @@
     <ClInclude Include="..\..\src\containers\juce_PropertySet.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_Range.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_ReferenceCountedArray.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_ReferenceCountedObject.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_ScopedPointer.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_SortedSet.h">
@@ -1500,31 +1482,13 @@
     <ClInclude Include="..\..\src\containers\juce_Variant.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\containers\juce_WeakReference.h">
-      <Filter>Juce\Source\containers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_Atomic.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_ByteOrder.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\juce_FileLogger.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\juce_Initialisation.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_LeakedObjectDetector.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\juce_Logger.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_MathsFunctions.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_Memory.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\juce_PerformanceCounter.h">
@@ -1534,9 +1498,6 @@
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\juce_PlatformUtilities.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_Random.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\juce_RelativeTime.h">
@@ -2142,6 +2103,48 @@
     <ClInclude Include="..\..\src\io\streams\juce_SubregionStream.h">
       <Filter>Juce\Source\io\streams</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\maths\juce_BigInteger.h">
+      <Filter>Juce\Source\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\maths\juce_Expression.h">
+      <Filter>Juce\Source\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\maths\juce_MathsFunctions.h">
+      <Filter>Juce\Source\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\maths\juce_Random.h">
+      <Filter>Juce\Source\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\maths\juce_Range.h">
+      <Filter>Juce\Source\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_Atomic.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_ByteOrder.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_HeapBlock.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_LeakedObjectDetector.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_Memory.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_MemoryBlock.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_ReferenceCountedObject.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_ScopedPointer.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_WeakReference.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\native\common\juce_MidiDataConcatenator.h">
       <Filter>Juce\Source\native\common</Filter>
     </ClInclude>
@@ -2172,7 +2175,13 @@
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_Identifier.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\text\juce_LocalisedStrings.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_NewLine.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\text\juce_String.h">

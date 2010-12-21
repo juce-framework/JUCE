@@ -290,7 +290,7 @@ AudioDemoLatencyPage::AudioDemoLatencyPage (AudioDeviceManager& deviceManager_)
 
     addAndMakeVisible (startTestButton = new TextButton (String::empty));
     startTestButton->setButtonText ("Test Latency");
-    startTestButton->addButtonListener (this);
+    startTestButton->addListener (this);
 
     addAndMakeVisible (testResultsBox = new TextEditor (String::empty));
     testResultsBox->setMultiLine (true);

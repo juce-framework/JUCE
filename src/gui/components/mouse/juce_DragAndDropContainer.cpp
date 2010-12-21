@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../windows/juce_ComponentPeer.h"
 #include "../juce_Desktop.h"
 #include "../../../events/juce_Timer.h"
-#include "../../../core/juce_Random.h"
+#include "../../../maths/juce_Random.h"
 #include "../../graphics/imaging/juce_Image.h"
 #include "../mouse/juce_MouseEvent.h"
 #include "../mouse/juce_MouseInputSource.h"

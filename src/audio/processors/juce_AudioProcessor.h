@@ -30,7 +30,7 @@
 #include "../dsp/juce_AudioSampleBuffer.h"
 #include "../midi/juce_MidiBuffer.h"
 #include "../../text/juce_XmlElement.h"
-#include "../../containers/juce_BigInteger.h"
+#include "../../maths/juce_BigInteger.h"
 #include "juce_AudioProcessorListener.h"
 #include "juce_AudioPlayHead.h"
 

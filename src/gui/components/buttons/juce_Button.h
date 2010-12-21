@@ -176,7 +176,7 @@ public:
     /**
         Used to receive callbacks when a button is clicked.
 
-        @see Button::addButtonListener, Button::removeButtonListener
+        @see Button::addListener, Button::removeListener
     */
     class Listener
     {
@@ -192,18 +192,15 @@ public:
     };
 
     /** Registers a listener to receive events when this button's state changes.
-
         If the listener is already registered, this will not register it again.
-
-        @see removeButtonListener
+        @see removeListener
     */
-    void addButtonListener (Listener* newListener);
+    void addListener (Listener* newListener);
 
     /** Removes a previously-registered button listener
-
-        @see addButtonListener
+        @see addListener
     */
-    void removeButtonListener (Listener* listener);
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** Causes the button to act as if it's been clicked.
@@ -375,6 +372,11 @@ public:
     void setState (const ButtonState newState);
 
 
+    //==============================================================================
+    // These are deprecated - please use addListener() and removeListener() instead!
+    JUCE_DEPRECATED (void addButtonListener (Listener*));
+    JUCE_DEPRECATED (void removeButtonListener (Listener*));
+
 protected:
     //==============================================================================
     /** This method is called when the button has been clicked.
@@ -503,8 +505,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
 };
 
-/** This typedef is just for compatibility with old code - newer code should use Button::Listener instead. */
-typedef Button::Listener ButtonListener;
+#ifndef DOXYGEN
+ /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
+ typedef Button::Listener ButtonListener;
+#endif
 
 #if JUCE_VC6
  #undef Listener

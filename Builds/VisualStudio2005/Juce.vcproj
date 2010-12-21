@@ -350,27 +350,15 @@
           <File RelativePath="..\..\src\containers\juce_AbstractFifo.h"/>
           <File RelativePath="..\..\src\containers\juce_Array.h"/>
           <File RelativePath="..\..\src\containers\juce_ArrayAllocationBase.h"/>
-          <File RelativePath="..\..\src\containers\juce_BigInteger.cpp"/>
-          <File RelativePath="..\..\src\containers\juce_BigInteger.h"/>
           <File RelativePath="..\..\src\containers\juce_DynamicObject.cpp"/>
           <File RelativePath="..\..\src\containers\juce_DynamicObject.h"/>
           <File RelativePath="..\..\src\containers\juce_ElementComparator.h"/>
-          <File RelativePath="..\..\src\containers\juce_Expression.cpp"/>
-          <File RelativePath="..\..\src\containers\juce_Expression.h"/>
-          <File RelativePath="..\..\src\containers\juce_HeapBlock.h"/>
-          <File RelativePath="..\..\src\containers\juce_Identifier.cpp"/>
-          <File RelativePath="..\..\src\containers\juce_Identifier.h"/>
-          <File RelativePath="..\..\src\containers\juce_MemoryBlock.cpp"/>
-          <File RelativePath="..\..\src\containers\juce_MemoryBlock.h"/>
           <File RelativePath="..\..\src\containers\juce_NamedValueSet.cpp"/>
           <File RelativePath="..\..\src\containers\juce_NamedValueSet.h"/>
           <File RelativePath="..\..\src\containers\juce_OwnedArray.h"/>
           <File RelativePath="..\..\src\containers\juce_PropertySet.cpp"/>
           <File RelativePath="..\..\src\containers\juce_PropertySet.h"/>
-          <File RelativePath="..\..\src\containers\juce_Range.h"/>
           <File RelativePath="..\..\src\containers\juce_ReferenceCountedArray.h"/>
-          <File RelativePath="..\..\src\containers\juce_ReferenceCountedObject.h"/>
-          <File RelativePath="..\..\src\containers\juce_ScopedPointer.h"/>
           <File RelativePath="..\..\src\containers\juce_SortedSet.h"/>
           <File RelativePath="..\..\src\containers\juce_SparseSet.h"/>
           <File RelativePath="..\..\src\containers\juce_Value.cpp"/>
@@ -379,26 +367,18 @@
           <File RelativePath="..\..\src\containers\juce_ValueTree.h"/>
           <File RelativePath="..\..\src\containers\juce_Variant.cpp"/>
           <File RelativePath="..\..\src\containers\juce_Variant.h"/>
-          <File RelativePath="..\..\src\containers\juce_WeakReference.h"/>
         </Filter>
         <Filter Name="core">
-          <File RelativePath="..\..\src\core\juce_Atomic.h"/>
-          <File RelativePath="..\..\src\core\juce_ByteOrder.h"/>
           <File RelativePath="..\..\src\core\juce_FileLogger.cpp"/>
           <File RelativePath="..\..\src\core\juce_FileLogger.h"/>
           <File RelativePath="..\..\src\core\juce_Initialisation.cpp"/>
           <File RelativePath="..\..\src\core\juce_Initialisation.h"/>
-          <File RelativePath="..\..\src\core\juce_LeakedObjectDetector.h"/>
           <File RelativePath="..\..\src\core\juce_Logger.cpp"/>
           <File RelativePath="..\..\src\core\juce_Logger.h"/>
-          <File RelativePath="..\..\src\core\juce_MathsFunctions.h"/>
-          <File RelativePath="..\..\src\core\juce_Memory.h"/>
           <File RelativePath="..\..\src\core\juce_PerformanceCounter.cpp"/>
           <File RelativePath="..\..\src\core\juce_PerformanceCounter.h"/>
           <File RelativePath="..\..\src\core\juce_PlatformDefs.h"/>
           <File RelativePath="..\..\src\core\juce_PlatformUtilities.h"/>
-          <File RelativePath="..\..\src\core\juce_Random.cpp"/>
-          <File RelativePath="..\..\src\core\juce_Random.h"/>
           <File RelativePath="..\..\src\core\juce_RelativeTime.cpp"/>
           <File RelativePath="..\..\src\core\juce_RelativeTime.h"/>
           <File RelativePath="..\..\src\core\juce_Singleton.h"/>
@@ -835,6 +815,28 @@
             <File RelativePath="..\..\src\io\streams\juce_SubregionStream.h"/>
           </Filter>
         </Filter>
+        <Filter Name="maths">
+          <File RelativePath="..\..\src\maths\juce_BigInteger.cpp"/>
+          <File RelativePath="..\..\src\maths\juce_BigInteger.h"/>
+          <File RelativePath="..\..\src\maths\juce_Expression.cpp"/>
+          <File RelativePath="..\..\src\maths\juce_Expression.h"/>
+          <File RelativePath="..\..\src\maths\juce_MathsFunctions.h"/>
+          <File RelativePath="..\..\src\maths\juce_Random.cpp"/>
+          <File RelativePath="..\..\src\maths\juce_Random.h"/>
+          <File RelativePath="..\..\src\maths\juce_Range.h"/>
+        </Filter>
+        <Filter Name="memory">
+          <File RelativePath="..\..\src\memory\juce_Atomic.h"/>
+          <File RelativePath="..\..\src\memory\juce_ByteOrder.h"/>
+          <File RelativePath="..\..\src\memory\juce_HeapBlock.h"/>
+          <File RelativePath="..\..\src\memory\juce_LeakedObjectDetector.h"/>
+          <File RelativePath="..\..\src\memory\juce_Memory.h"/>
+          <File RelativePath="..\..\src\memory\juce_MemoryBlock.cpp"/>
+          <File RelativePath="..\..\src\memory\juce_MemoryBlock.h"/>
+          <File RelativePath="..\..\src\memory\juce_ReferenceCountedObject.h"/>
+          <File RelativePath="..\..\src\memory\juce_ScopedPointer.h"/>
+          <File RelativePath="..\..\src\memory\juce_WeakReference.h"/>
+        </Filter>
         <Filter Name="native">
           <File RelativePath="..\..\src\native\juce_linux_NativeCode.cpp"/>
           <File RelativePath="..\..\src\native\juce_mac_NativeCode.mm"/>
@@ -925,8 +927,11 @@
         <Filter Name="text">
           <File RelativePath="..\..\src\text\juce_CharacterFunctions.cpp"/>
           <File RelativePath="..\..\src\text\juce_CharacterFunctions.h"/>
+          <File RelativePath="..\..\src\text\juce_Identifier.cpp"/>
+          <File RelativePath="..\..\src\text\juce_Identifier.h"/>
           <File RelativePath="..\..\src\text\juce_LocalisedStrings.cpp"/>
           <File RelativePath="..\..\src\text\juce_LocalisedStrings.h"/>
+          <File RelativePath="..\..\src\text\juce_NewLine.h"/>
           <File RelativePath="..\..\src\text\juce_String.cpp"/>
           <File RelativePath="..\..\src\text\juce_String.h"/>
           <File RelativePath="..\..\src\text\juce_StringArray.cpp"/>

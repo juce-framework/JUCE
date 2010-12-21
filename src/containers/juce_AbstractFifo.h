@@ -26,7 +26,7 @@
 #ifndef __JUCE_ABSTRACTFIFO_JUCEHEADER__
 #define __JUCE_ABSTRACTFIFO_JUCEHEADER__
 
-#include "../core/juce_Atomic.h"
+#include "../memory/juce_Atomic.h"
 
 
 //==============================================================================
