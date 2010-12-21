@@ -317,7 +317,7 @@ private:
         startThread (7);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (InternalTimerThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalTimerThread);
 };
 
 InternalTimerThread* InternalTimerThread::instance = 0;

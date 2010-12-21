@@ -236,9 +236,6 @@ public:
           wildCard (wildCard_),
           dir (opendir (directory.getFullPathName().toUTF8()))
     {
-        if (wildCard == "*.*")
-            wildCard = "*";
-
         wildcardUTF8 = wildCard.toUTF8();
     }
 
@@ -252,41 +249,30 @@ public:
                bool* const isDir, bool* const isHidden, int64* const fileSize,
                Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
-        if (dir == 0)
-            return false;
-
-        for (;;)
+        if (dir != 0)
         {
-            struct dirent* const de = readdir (dir);
-
-            if (de == 0)
-                return false;
-
-            if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
+            for (;;)
             {
-                filenameFound = String::fromUTF8 (de->d_name);
-                const String path (parentDir + filenameFound);
+                struct dirent* const de = readdir (dir);
 
-                if (isDir != 0 || fileSize != 0 || modTime != 0 || creationTime != 0)
+                if (de == 0)
+                    break;
+
+                if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
                 {
-                    struct stat info;
-                    const bool statOk = juce_stat (path, info);
+                    filenameFound = String::fromUTF8 (de->d_name);
 
-                    if (isDir != 0)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
-                    if (fileSize != 0)      *fileSize = statOk ? info.st_size : 0;
-                    if (modTime != 0)       *modTime = statOk ? (int64) info.st_mtime * 1000 : 0;
-                    if (creationTime != 0)  *creationTime = statOk ? (int64) info.st_ctime * 1000 : 0;
+                    updateStatInfoForFile (parentDir + filenameFound, isDir, fileSize, modTime, creationTime, isReadOnly);
+
+                    if (isHidden != 0)
+                        *isHidden = filenameFound.startsWithChar ('.');
+
+                    return true;
                 }
-
-                if (isHidden != 0)
-                    *isHidden = filenameFound.startsWithChar ('.');
-
-                if (isReadOnly != 0)
-                    *isReadOnly = access (path.toUTF8(), W_OK) != 0;
-
-                return true;
             }
         }
+
+        return false;
     }
 
 private:

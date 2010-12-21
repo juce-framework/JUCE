@@ -37,11 +37,6 @@
 #endif
 
 //==============================================================================
-struct ConnectionAndRequestStruct
-{
-    HINTERNET connection, request;
-};
-
 static HINTERNET sessionHandle = 0;
 
 #ifndef WORKAROUND_TIMEOUT_BUG
@@ -304,7 +299,6 @@ private:
                             buffers.lpcszHeader = static_cast <LPCTSTR> (headers);
                             buffers.dwHeadersLength = headers.length();
                             buffers.dwBufferTotal = (DWORD) postData.getSize();
-                            ConnectionAndRequestStruct* result = 0;
 
                             if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
                             {

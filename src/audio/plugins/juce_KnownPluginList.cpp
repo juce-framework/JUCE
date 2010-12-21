@@ -100,12 +100,12 @@ namespace
         if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
             return File (fileOrIdentifier).getLastModificationTime();
 
-        return Time (0);
+        return Time();
     }
 
     bool timesAreDifferent (const Time& t1, const Time& t2) throw()
     {
-        return t1 != t2 || t1 == Time (0);
+        return t1 != t2 || t1 == Time();
     }
 }
 

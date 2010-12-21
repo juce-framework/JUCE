@@ -105,7 +105,7 @@ public:
     /** When evaluating an Expression object, this class is used to resolve symbols and
         perform functions that the expression uses.
     */
-    class EvaluationContext
+    class JUCE_API  EvaluationContext
     {
     public:
         EvaluationContext();

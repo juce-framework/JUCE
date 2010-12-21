@@ -586,8 +586,8 @@ public:
         if (isDir != 0)         *isDir = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
         if (isHidden != 0)      *isHidden = ((findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
         if (fileSize != 0)      *fileSize = findData.nFileSizeLow + (((int64) findData.nFileSizeHigh) << 32);
-        if (modTime != 0)       *modTime = fileTimeToTime (&findData.ftLastWriteTime);
-        if (creationTime != 0)  *creationTime = fileTimeToTime (&findData.ftCreationTime);
+        if (modTime != 0)       *modTime = Time (fileTimeToTime (&findData.ftLastWriteTime));
+        if (creationTime != 0)  *creationTime = Time (fileTimeToTime (&findData.ftCreationTime));
         if (isReadOnly != 0)    *isReadOnly = ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0);
 
         return true;

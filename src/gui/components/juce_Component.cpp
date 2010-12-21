@@ -1368,18 +1368,24 @@ Component* Component::removeChildComponent (const int index, bool sendParentEven
         childComponentList_.remove (index);
         child->parentComponent_ = 0;
 
-        // (NB: there are obscure situations where a childShowing = false, but it still has the focus)
+        // (NB: there are obscure situations where child->isShowing() = false, but it still has the focus)
         if (currentlyFocusedComponent == child || child->isParentOf (currentlyFocusedComponent))
         {
-            const WeakReference<Component> thisPointer (this);
-
-            giveAwayFocus (sendChildEvents || currentlyFocusedComponent != child);
-
-            if (thisPointer == 0)
-                return child;
-
             if (sendParentEvents)
+            {
+                const WeakReference<Component> thisPointer (this);
+
+                giveAwayFocus (sendChildEvents || currentlyFocusedComponent != child);
+
+                if (thisPointer == 0)
+                    return child;
+
                 grabKeyboardFocus();
+            }
+            else
+            {
+                giveAwayFocus (sendChildEvents || currentlyFocusedComponent != child);
+            }
         }
 
         if (sendChildEvents)

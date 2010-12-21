@@ -212,7 +212,7 @@ public:
         desc.uid = ((int) componentDesc.componentType)
                     ^ ((int) componentDesc.componentSubType)
                     ^ ((int) componentDesc.componentManufacturer);
-        desc.lastFileModTime = 0;
+        desc.lastFileModTime = Time();
         desc.pluginFormatName = "AudioUnit";
         desc.category = getCategory();
         desc.manufacturerName = manufacturer;

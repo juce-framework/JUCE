@@ -52,9 +52,6 @@ public:
     */
     Time() throw();
 
-    /** Creates a copy of another Time object. */
-    Time (const Time& other) throw();
-
     /** Creates a time based on a number of milliseconds.
 
         The internal millisecond count is set to 0 (1st January 1970). To create a
@@ -64,7 +61,7 @@ public:
                                         'epoch' (midnight Jan 1st 1970).
         @see getCurrentTime, currentTimeMillis
     */
-    Time (int64 millisecondsSinceEpoch) throw();
+    explicit Time (int64 millisecondsSinceEpoch) throw();
 
     /** Creates a time from a set of date components.
 
@@ -88,6 +85,9 @@ public:
           int seconds = 0,
           int milliseconds = 0,
           bool useLocalTime = true) throw();
+
+    /** Creates a copy of another Time object. */
+    Time (const Time& other) throw();
 
     /** Destructor. */
     ~Time() throw();
@@ -248,32 +248,10 @@ public:
     const String formatted (const String& format) const;
 
     //==============================================================================
-    /** Adds a RelativeTime to this time and returns the result. */
-    const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
-
-    /** Subtracts a RelativeTime from this time and returns the result. */
-    const Time operator- (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch - delta.inMilliseconds()); }
-
-    /** Returns the relative time difference between this time and another one. */
-    const RelativeTime operator- (const Time& other) const throw()  { return RelativeTime::milliseconds (millisSinceEpoch - other.millisSinceEpoch); }
-
-    /** Compares two Time objects. */
-    bool operator== (const Time& other) const throw()               { return millisSinceEpoch == other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator!= (const Time& other) const throw()               { return millisSinceEpoch != other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator<  (const Time& other) const throw()               { return millisSinceEpoch < other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator<= (const Time& other) const throw()               { return millisSinceEpoch <= other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator>  (const Time& other) const throw()               { return millisSinceEpoch > other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator>= (const Time& other) const throw()               { return millisSinceEpoch >= other.millisSinceEpoch; }
+    /** Adds a RelativeTime to this time. */
+    Time& operator+= (const RelativeTime& delta);
+    /** Subtracts a RelativeTime from this time. */
+    Time& operator-= (const RelativeTime& delta);
 
     //==============================================================================
     /** Tries to set the computer's clock.
@@ -389,6 +367,30 @@ private:
     //==============================================================================
     int64 millisSinceEpoch;
 };
+
+//==============================================================================
+/** Adds a RelativeTime to a Time. */
+const Time operator+ (const Time& time, const RelativeTime& delta);
+/** Adds a RelativeTime to a Time. */
+const Time operator+ (const RelativeTime& delta, const Time& time);
+
+/** Subtracts a RelativeTime from a Time. */
+const Time operator- (const Time& time, const RelativeTime& delta);
+/** Returns the relative time difference between two times. */
+const RelativeTime operator- (const Time& time1, const Time& time2);
+
+/** Compares two Time objects. */
+bool operator== (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator!= (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator<  (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator<= (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator>  (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator>= (const Time& time1, const Time& time2);
 
 
 #endif   // __JUCE_TIME_JUCEHEADER__

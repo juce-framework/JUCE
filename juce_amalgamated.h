@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	109
+#define JUCE_BUILDNUMBER	110
 
 /** Current Juce version number.
 
@@ -3296,7 +3296,8 @@ private:
 	}
 };
 
-#if DOXYGEN || (JUCE_CHECK_MEMORY_LEAKS && ! defined (JUCE_LEAK_DETECTOR))
+#if DOXYGEN || ! defined (JUCE_LEAK_DETECTOR)
+ #if (DOXYGEN || JUCE_CHECK_MEMORY_LEAKS)
   /** This macro lets you embed a leak-detecting object inside a class.
 
 	  To use it, simply declare a JUCE_LEAK_DETECTOR(YourClassName) inside a private section
@@ -3316,8 +3317,9 @@ private:
 	  @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
   */
   #define JUCE_LEAK_DETECTOR(OwnerClass)	 LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
-#else
+ #else
   #define JUCE_LEAK_DETECTOR(OwnerClass)
+ #endif
 #endif
 
 #endif   // __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
@@ -7885,73 +7887,61 @@ public:
 	~RelativeTime() throw();
 
 	/** Creates a new RelativeTime object representing a number of milliseconds.
-
 		@see minutes, hours, days, weeks
 	*/
 	static const RelativeTime milliseconds (int milliseconds) throw();
 
 	/** Creates a new RelativeTime object representing a number of milliseconds.
-
 		@see minutes, hours, days, weeks
 	*/
 	static const RelativeTime milliseconds (int64 milliseconds) throw();
 
 	/** Creates a new RelativeTime object representing a number of minutes.
-
 		@see milliseconds, hours, days, weeks
 	*/
 	static const RelativeTime minutes (double numberOfMinutes) throw();
 
 	/** Creates a new RelativeTime object representing a number of hours.
-
 		@see milliseconds, minutes, days, weeks
 	*/
 	static const RelativeTime hours (double numberOfHours) throw();
 
 	/** Creates a new RelativeTime object representing a number of days.
-
 		@see milliseconds, minutes, hours, weeks
 	*/
 	static const RelativeTime days (double numberOfDays) throw();
 
 	/** Creates a new RelativeTime object representing a number of weeks.
-
 		@see milliseconds, minutes, hours, days
 	*/
 	static const RelativeTime weeks (double numberOfWeeks) throw();
 
 	/** Returns the number of milliseconds this time represents.
-
 		@see milliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
 	*/
 	int64 inMilliseconds() const throw();
 
 	/** Returns the number of seconds this time represents.
-
 		@see inMilliseconds, inMinutes, inHours, inDays, inWeeks
 	*/
 	double inSeconds() const throw()	{ return seconds; }
 
 	/** Returns the number of minutes this time represents.
-
 		@see inMilliseconds, inSeconds, inHours, inDays, inWeeks
 	*/
 	double inMinutes() const throw();
 
 	/** Returns the number of hours this time represents.
-
 		@see inMilliseconds, inSeconds, inMinutes, inDays, inWeeks
 	*/
 	double inHours() const throw();
 
 	/** Returns the number of days this time represents.
-
 		@see inMilliseconds, inSeconds, inMinutes, inHours, inWeeks
 	*/
 	double inDays() const throw();
 
 	/** Returns the number of weeks this time represents.
-
 		@see inMilliseconds, inSeconds, inMinutes, inHours, inDays
 	*/
 	double inWeeks() const throw();
@@ -7973,30 +7963,6 @@ public:
 	*/
 	const String getDescription (const String& returnValueForZeroTime = "0") const;
 
-	/** Compares two RelativeTimes. */
-	bool operator== (const RelativeTime& other) const throw();
-	/** Compares two RelativeTimes. */
-	bool operator!= (const RelativeTime& other) const throw();
-
-	/** Compares two RelativeTimes. */
-	bool operator>  (const RelativeTime& other) const throw();
-	/** Compares two RelativeTimes. */
-	bool operator<  (const RelativeTime& other) const throw();
-	/** Compares two RelativeTimes. */
-	bool operator>= (const RelativeTime& other) const throw();
-	/** Compares two RelativeTimes. */
-	bool operator<= (const RelativeTime& other) const throw();
-
-	/** Adds another RelativeTime to this one and returns the result. */
-	const RelativeTime  operator+  (const RelativeTime& timeToAdd) const throw();
-	/** Subtracts another RelativeTime from this one and returns the result. */
-	const RelativeTime  operator-  (const RelativeTime& timeToSubtract) const throw();
-
-	/** Adds a number of seconds to this RelativeTime and returns the result. */
-	const RelativeTime  operator+  (double secondsToAdd) const throw();
-	/** Subtracts a number of seconds from this RelativeTime and returns the result. */
-	const RelativeTime  operator-  (double secondsToSubtract) const throw();
-
 	/** Adds another RelativeTime to this one. */
 	const RelativeTime& operator+= (const RelativeTime& timeToAdd) throw();
 	/** Subtracts another RelativeTime from this one. */
@@ -8004,7 +7970,6 @@ public:
 
 	/** Adds a number of seconds to this time. */
 	const RelativeTime& operator+= (double secondsToAdd) throw();
-
 	/** Subtracts a number of seconds from this time. */
 	const RelativeTime& operator-= (double secondsToSubtract) throw();
 
@@ -8012,6 +7977,24 @@ private:
 
 	double seconds;
 };
+
+/** Compares two RelativeTimes. */
+bool operator== (const RelativeTime& t1, const RelativeTime& t2) throw();
+/** Compares two RelativeTimes. */
+bool operator!= (const RelativeTime& t1, const RelativeTime& t2) throw();
+/** Compares two RelativeTimes. */
+bool operator>  (const RelativeTime& t1, const RelativeTime& t2) throw();
+/** Compares two RelativeTimes. */
+bool operator<  (const RelativeTime& t1, const RelativeTime& t2) throw();
+/** Compares two RelativeTimes. */
+bool operator>= (const RelativeTime& t1, const RelativeTime& t2) throw();
+/** Compares two RelativeTimes. */
+bool operator<= (const RelativeTime& t1, const RelativeTime& t2) throw();
+
+/** Adds two RelativeTimes together. */
+const RelativeTime  operator+  (const RelativeTime&  t1, const RelativeTime& t2) throw();
+/** Subtracts two RelativeTimes. */
+const RelativeTime  operator-  (const RelativeTime&  t1, const RelativeTime& t2) throw();
 
 #endif   // __JUCE_RELATIVETIME_JUCEHEADER__
 /*** End of inlined file: juce_RelativeTime.h ***/
@@ -8038,9 +8021,6 @@ public:
 	*/
 	Time() throw();
 
-	/** Creates a copy of another Time object. */
-	Time (const Time& other) throw();
-
 	/** Creates a time based on a number of milliseconds.
 
 		The internal millisecond count is set to 0 (1st January 1970). To create a
@@ -8050,7 +8030,7 @@ public:
 										'epoch' (midnight Jan 1st 1970).
 		@see getCurrentTime, currentTimeMillis
 	*/
-	Time (int64 millisecondsSinceEpoch) throw();
+	explicit Time (int64 millisecondsSinceEpoch) throw();
 
 	/** Creates a time from a set of date components.
 
@@ -8074,6 +8054,9 @@ public:
 		  int seconds = 0,
 		  int milliseconds = 0,
 		  bool useLocalTime = true) throw();
+
+	/** Creates a copy of another Time object. */
+	Time (const Time& other) throw();
 
 	/** Destructor. */
 	~Time() throw();
@@ -8231,32 +8214,10 @@ public:
 	*/
 	const String formatted (const String& format) const;
 
-	/** Adds a RelativeTime to this time and returns the result. */
-	const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
-
-	/** Subtracts a RelativeTime from this time and returns the result. */
-	const Time operator- (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch - delta.inMilliseconds()); }
-
-	/** Returns the relative time difference between this time and another one. */
-	const RelativeTime operator- (const Time& other) const throw()  { return RelativeTime::milliseconds (millisSinceEpoch - other.millisSinceEpoch); }
-
-	/** Compares two Time objects. */
-	bool operator== (const Time& other) const throw()		   { return millisSinceEpoch == other.millisSinceEpoch; }
-
-	/** Compares two Time objects. */
-	bool operator!= (const Time& other) const throw()		   { return millisSinceEpoch != other.millisSinceEpoch; }
-
-	/** Compares two Time objects. */
-	bool operator<  (const Time& other) const throw()		   { return millisSinceEpoch < other.millisSinceEpoch; }
-
-	/** Compares two Time objects. */
-	bool operator<= (const Time& other) const throw()		   { return millisSinceEpoch <= other.millisSinceEpoch; }
-
-	/** Compares two Time objects. */
-	bool operator>  (const Time& other) const throw()		   { return millisSinceEpoch > other.millisSinceEpoch; }
-
-	/** Compares two Time objects. */
-	bool operator>= (const Time& other) const throw()		   { return millisSinceEpoch >= other.millisSinceEpoch; }
+	/** Adds a RelativeTime to this time. */
+	Time& operator+= (const RelativeTime& delta);
+	/** Subtracts a RelativeTime from this time. */
+	Time& operator-= (const RelativeTime& delta);
 
 	/** Tries to set the computer's clock.
 
@@ -8367,6 +8328,29 @@ private:
 
 	int64 millisSinceEpoch;
 };
+
+/** Adds a RelativeTime to a Time. */
+const Time operator+ (const Time& time, const RelativeTime& delta);
+/** Adds a RelativeTime to a Time. */
+const Time operator+ (const RelativeTime& delta, const Time& time);
+
+/** Subtracts a RelativeTime from a Time. */
+const Time operator- (const Time& time, const RelativeTime& delta);
+/** Returns the relative time difference between two times. */
+const RelativeTime operator- (const Time& time1, const Time& time2);
+
+/** Compares two Time objects. */
+bool operator== (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator!= (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator<  (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator<= (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator>  (const Time& time1, const Time& time2);
+/** Compares two Time objects. */
+bool operator>= (const Time& time1, const Time& time2);
 
 #endif   // __JUCE_TIME_JUCEHEADER__
 /*** End of inlined file: juce_Time.h ***/
@@ -17469,7 +17453,7 @@ public:
 	/** When evaluating an Expression object, this class is used to resolve symbols and
 		perform functions that the expression uses.
 	*/
-	class EvaluationContext
+	class JUCE_API  EvaluationContext
 	{
 	public:
 		EvaluationContext();
@@ -19386,6 +19370,7 @@ private:
 	const int threadStopTimeout;
 	int priority;
 	class ThreadPoolThread;
+	friend class OwnedArray <ThreadPoolThread>;
 	OwnedArray <ThreadPoolThread> threads;
 	Array <ThreadPoolJob*> jobs;
 
@@ -36591,7 +36576,7 @@ public:
 
 		@see Button::addListener, Button::removeListener
 	*/
-	class Listener
+	class JUCE_API  Listener
 	{
 	public:
 		/** Destructor. */

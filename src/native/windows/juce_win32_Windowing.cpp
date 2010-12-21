@@ -923,7 +923,7 @@ public:
         }
     }
 
-    void handleTaskBarEvent (const LPARAM lParam, const WPARAM wParam)
+    void handleTaskBarEvent (const LPARAM lParam)
     {
         if (component->isCurrentlyBlockedByAnotherModalComponent())
         {
@@ -948,8 +948,8 @@ public:
                 eventMods = eventMods.withoutMouseButtons();
 
             const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
-                                Point<int>(), eventMods, component, component, getMouseEventTime(),
-                                Point<int>(), getMouseEventTime(), 1, false);
+                                Point<int>(), eventMods, component, component, Time (getMouseEventTime()),
+                                Point<int>(), Time (getMouseEventTime()), 1, false);
 
             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
             {
@@ -2180,7 +2180,7 @@ private:
                 return TRUE;
 
             case WM_TRAYNOTIFY:
-                handleTaskBarEvent (lParam, wParam);
+                handleTaskBarEvent (lParam);
                 break;
 
             case WM_SYNCPAINT:

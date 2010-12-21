@@ -250,6 +250,24 @@ namespace
 
         return statfs (f.getFullPathName().toUTF8(), &result) == 0;
     }
+
+    void updateStatInfoForFile (const String& path, bool* const isDir, int64* const fileSize,
+                                Time* const modTime, Time* const creationTime, bool* const isReadOnly)
+    {
+        if (isDir != 0 || fileSize != 0 || modTime != 0 || creationTime != 0)
+        {
+            juce_statStruct info;
+            const bool statOk = juce_stat (path, info);
+
+            if (isDir != 0)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+            if (fileSize != 0)      *fileSize = statOk ? info.st_size : 0;
+            if (modTime != 0)       *modTime = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
+            if (creationTime != 0)  *creationTime = Time (statOk ? (int64) info.st_ctime * 1000 : 0);
+        }
+
+        if (isReadOnly != 0)
+            *isReadOnly = access (path.toUTF8(), W_OK) != 0;
+    }
 }
 
 bool File::isDirectory() const

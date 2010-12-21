@@ -35,7 +35,7 @@ class QuickTimeWindowWithFileBrowser  : public Component,
 public:
     QuickTimeWindowWithFileBrowser()
         : fileChooser ("movie", File::nonexistent, true, false, false,
-                       "*.*", String::empty, "(choose a video file to play)")
+                       "*", String::empty, "(choose a video file to play)")
     {
         addAndMakeVisible (&qtComp);
 

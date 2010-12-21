@@ -47,127 +47,84 @@ RelativeTime::~RelativeTime() throw()
 }
 
 //==============================================================================
-const RelativeTime RelativeTime::milliseconds (const int milliseconds) throw()
-{
-    return RelativeTime (milliseconds * 0.001);
-}
-
-const RelativeTime RelativeTime::milliseconds (const int64 milliseconds) throw()
-{
-    return RelativeTime (milliseconds * 0.001);
-}
-
-const RelativeTime RelativeTime::minutes (const double numberOfMinutes) throw()
-{
-    return RelativeTime (numberOfMinutes * 60.0);
-}
-
-const RelativeTime RelativeTime::hours (const double numberOfHours) throw()
-{
-    return RelativeTime (numberOfHours * (60.0 * 60.0));
-}
-
-const RelativeTime RelativeTime::days (const double numberOfDays) throw()
-{
-    return RelativeTime (numberOfDays * (60.0 * 60.0 * 24.0));
-}
-
-const RelativeTime RelativeTime::weeks (const double numberOfWeeks) throw()
-{
-    return RelativeTime (numberOfWeeks * (60.0 * 60.0 * 24.0 * 7.0));
-}
+const RelativeTime RelativeTime::milliseconds (const int milliseconds) throw()   { return RelativeTime (milliseconds * 0.001); }
+const RelativeTime RelativeTime::milliseconds (const int64 milliseconds) throw() { return RelativeTime (milliseconds * 0.001); }
+const RelativeTime RelativeTime::minutes (const double numberOfMinutes) throw()  { return RelativeTime (numberOfMinutes * 60.0); }
+const RelativeTime RelativeTime::hours (const double numberOfHours) throw()      { return RelativeTime (numberOfHours * (60.0 * 60.0)); }
+const RelativeTime RelativeTime::days (const double numberOfDays) throw()        { return RelativeTime (numberOfDays * (60.0 * 60.0 * 24.0)); }
+const RelativeTime RelativeTime::weeks (const double numberOfWeeks) throw()      { return RelativeTime (numberOfWeeks * (60.0 * 60.0 * 24.0 * 7.0)); }
 
 //==============================================================================
-int64 RelativeTime::inMilliseconds() const throw()
-{
-    return (int64) (seconds * 1000.0);
-}
+int64 RelativeTime::inMilliseconds() const throw()  { return (int64) (seconds * 1000.0); }
+double RelativeTime::inMinutes() const throw()      { return seconds / 60.0; }
+double RelativeTime::inHours() const throw()        { return seconds / (60.0 * 60.0); }
+double RelativeTime::inDays() const throw()         { return seconds / (60.0 * 60.0 * 24.0); }
+double RelativeTime::inWeeks() const throw()        { return seconds / (60.0 * 60.0 * 24.0 * 7.0); }
 
-double RelativeTime::inMinutes() const throw()
-{
-    return seconds / 60.0;
-}
-
-double RelativeTime::inHours() const throw()
-{
-    return seconds / (60.0 * 60.0);
-}
-
-double RelativeTime::inDays() const throw()
-{
-    return seconds / (60.0 * 60.0 * 24.0);
-}
-
-double RelativeTime::inWeeks() const throw()
-{
-    return seconds / (60.0 * 60.0 * 24.0 * 7.0);
-}
-
+//==============================================================================
 const String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 {
     if (seconds < 0.001 && seconds > -0.001)
         return returnValueForZeroTime;
 
     String result;
+    result.preallocateStorage (16);
 
     if (seconds < 0)
-        result = "-";
+        result << '-';
 
     int fieldsShown = 0;
-    int n = abs ((int) inWeeks());
+    int n = std::abs ((int) inWeeks());
     if (n > 0)
     {
-        result << n << ((n == 1) ? TRANS(" week ")
-                                 : TRANS(" weeks "));
+        result << n << (n == 1 ? TRANS(" week ")
+                               : TRANS(" weeks "));
         ++fieldsShown;
     }
 
-    n = abs ((int) inDays()) % 7;
+    n = std::abs ((int) inDays()) % 7;
     if (n > 0)
     {
-        result << n << ((n == 1) ? TRANS(" day ")
-                                 : TRANS(" days "));
+        result << n << (n == 1 ? TRANS(" day ")
+                               : TRANS(" days "));
         ++fieldsShown;
     }
 
     if (fieldsShown < 2)
     {
-        n = abs ((int) inHours()) % 24;
+        n = std::abs ((int) inHours()) % 24;
         if (n > 0)
         {
-            result << n << ((n == 1) ? TRANS(" hr ")
-                                     : TRANS(" hrs "));
+            result << n << (n == 1 ? TRANS(" hr ")
+                                   : TRANS(" hrs "));
             ++fieldsShown;
         }
 
         if (fieldsShown < 2)
         {
-            n = abs ((int) inMinutes()) % 60;
+            n = std::abs ((int) inMinutes()) % 60;
             if (n > 0)
             {
-                result << n << ((n == 1) ? TRANS(" min ")
-                                         : TRANS(" mins "));
+                result << n << (n == 1 ? TRANS(" min ")
+                                       : TRANS(" mins "));
                 ++fieldsShown;
             }
 
             if (fieldsShown < 2)
             {
-                n = abs ((int) inSeconds()) % 60;
+                n = std::abs ((int) inSeconds()) % 60;
                 if (n > 0)
                 {
-                    result << n << ((n == 1) ? TRANS(" sec ")
-                                             : TRANS(" secs "));
+                    result << n << (n == 1 ? TRANS(" sec ")
+                                           : TRANS(" secs "));
                     ++fieldsShown;
                 }
 
-                if (fieldsShown < 1)
+                if (fieldsShown == 0)
                 {
-                    n = abs ((int) inMilliseconds()) % 1000;
+                    n = std::abs ((int) inMilliseconds()) % 1000;
                     if (n > 0)
-                    {
                         result << n << TRANS(" ms");
-                        ++fieldsShown;
-                    }
                 }
             }
         }
@@ -181,34 +138,6 @@ RelativeTime& RelativeTime::operator= (const RelativeTime& other) throw()
 {
     seconds = other.seconds;
     return *this;
-}
-
-bool RelativeTime::operator== (const RelativeTime& other) const throw()   { return seconds == other.seconds; }
-bool RelativeTime::operator!= (const RelativeTime& other) const throw()   { return seconds != other.seconds; }
-bool RelativeTime::operator>  (const RelativeTime& other) const throw()   { return seconds > other.seconds; }
-bool RelativeTime::operator<  (const RelativeTime& other) const throw()   { return seconds < other.seconds; }
-bool RelativeTime::operator>= (const RelativeTime& other) const throw()   { return seconds >= other.seconds; }
-bool RelativeTime::operator<= (const RelativeTime& other) const throw()   { return seconds <= other.seconds; }
-
-//==============================================================================
-const RelativeTime RelativeTime::operator+ (const RelativeTime& timeToAdd) const throw()
-{
-    return RelativeTime (seconds + timeToAdd.seconds);
-}
-
-const RelativeTime RelativeTime::operator- (const RelativeTime& timeToSubtract) const throw()
-{
-    return RelativeTime (seconds - timeToSubtract.seconds);
-}
-
-const RelativeTime RelativeTime::operator+ (const double secondsToAdd) const throw()
-{
-    return RelativeTime (seconds + secondsToAdd);
-}
-
-const RelativeTime RelativeTime::operator- (const double secondsToSubtract) const throw()
-{
-    return RelativeTime (seconds - secondsToSubtract);
 }
 
 //==============================================================================
@@ -235,5 +164,16 @@ const RelativeTime& RelativeTime::operator-= (const double secondsToSubtract) th
     seconds -= secondsToSubtract;
     return *this;
 }
+
+bool operator== (const RelativeTime& t1, const RelativeTime& t2) throw()  { return t1.inSeconds() == t2.inSeconds(); }
+bool operator!= (const RelativeTime& t1, const RelativeTime& t2) throw()  { return t1.inSeconds() != t2.inSeconds(); }
+bool operator>  (const RelativeTime& t1, const RelativeTime& t2) throw()  { return t1.inSeconds() >  t2.inSeconds(); }
+bool operator<  (const RelativeTime& t1, const RelativeTime& t2) throw()  { return t1.inSeconds() <  t2.inSeconds(); }
+bool operator>= (const RelativeTime& t1, const RelativeTime& t2) throw()  { return t1.inSeconds() >= t2.inSeconds(); }
+bool operator<= (const RelativeTime& t1, const RelativeTime& t2) throw()  { return t1.inSeconds() <= t2.inSeconds(); }
+
+const RelativeTime operator+ (const RelativeTime&  t1, const RelativeTime& t2) throw()    { RelativeTime t (t1); return t += t2; }
+const RelativeTime operator- (const RelativeTime&  t1, const RelativeTime& t2) throw()    { RelativeTime t (t1); return t -= t2; }
+
 
 END_JUCE_NAMESPACE

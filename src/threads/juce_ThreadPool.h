@@ -296,6 +296,7 @@ private:
     const int threadStopTimeout;
     int priority;
     class ThreadPoolThread;
+    friend class OwnedArray <ThreadPoolThread>;
     OwnedArray <ThreadPoolThread> threads;
     Array <ThreadPoolJob*> jobs;
 

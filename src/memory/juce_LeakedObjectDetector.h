@@ -107,7 +107,8 @@ private:
 };
 
 //==============================================================================
-#if DOXYGEN || (JUCE_CHECK_MEMORY_LEAKS && ! defined (JUCE_LEAK_DETECTOR))
+#if DOXYGEN || ! defined (JUCE_LEAK_DETECTOR)
+ #if (DOXYGEN || JUCE_CHECK_MEMORY_LEAKS)
   /** This macro lets you embed a leak-detecting object inside a class.
 
       To use it, simply declare a JUCE_LEAK_DETECTOR(YourClassName) inside a private section
@@ -127,8 +128,9 @@ private:
       @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
   */
   #define JUCE_LEAK_DETECTOR(OwnerClass)         LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
-#else
+ #else
   #define JUCE_LEAK_DETECTOR(OwnerClass)
+ #endif
 #endif
 
 

@@ -178,7 +178,7 @@ public:
 
         @see Button::addListener, Button::removeListener
     */
-    class Listener
+    class JUCE_API  Listener
     {
     public:
         /** Destructor. */
