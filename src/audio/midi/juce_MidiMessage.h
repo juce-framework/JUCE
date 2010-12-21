@@ -896,12 +896,13 @@ private:
     uint8* data;
     int size;
 
+   #ifndef DOXYGEN
     union
     {
         uint8 asBytes[4];
         uint32 asInt32;
     } preallocatedData;
+   #endif
 };
-
 
 #endif   // __JUCE_MIDIMESSAGE_JUCEHEADER__

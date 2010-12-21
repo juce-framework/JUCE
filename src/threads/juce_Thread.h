@@ -283,8 +283,10 @@ private:
     uint32 affinityMask_;
     bool volatile threadShouldExit_;
 
+   #ifndef DOXYGEN
     friend class MessageManager;
     friend void JUCE_API juce_threadEntryPoint (void*);
+   #endif
 
     void launchThread();
     void closeThreadHandle();

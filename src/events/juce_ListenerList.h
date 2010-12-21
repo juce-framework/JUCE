@@ -72,12 +72,14 @@ template <class ListenerClass,
 class ListenerList
 {
     // Horrible macros required to support VC6/7..
-    #if JUCE_VC8_OR_EARLIER
-      #define LL_TEMPLATE(a)   typename P##a, typename Q##a
-      #define LL_PARAM(a)      Q##a& param##a
-    #else
-      #define LL_TEMPLATE(a)   typename P##a
-      #define LL_PARAM(a)      PARAMETER_TYPE(P##a) param##a
+    #ifndef DOXYGEN
+     #if JUCE_VC8_OR_EARLIER
+       #define LL_TEMPLATE(a)   typename P##a, typename Q##a
+       #define LL_PARAM(a)      Q##a& param##a
+     #else
+       #define LL_TEMPLATE(a)   typename P##a
+       #define LL_PARAM(a)      PARAMETER_TYPE(P##a) param##a
+     #endif
     #endif
 
 public:

@@ -26,8 +26,10 @@
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
-class JUCE_API  ScopedLock;
-class JUCE_API  ScopedUnlock;
+#ifndef DOXYGEN
+ class JUCE_API  ScopedLock;
+ class JUCE_API  ScopedUnlock;
+#endif
 
 
 //==============================================================================

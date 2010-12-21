@@ -28,13 +28,15 @@
 
 
 //==============================================================================
-#if JUCE_MSVC
+#ifndef DOXYGEN
+ #if JUCE_MSVC
   #pragma pack (push, 1)
   #define PACKED
-#elif JUCE_GCC
+ #elif JUCE_GCC
   #define PACKED __attribute__((packed))
-#else
+ #else
   #define PACKED
+ #endif
 #endif
 
 class PixelRGB;
@@ -258,15 +260,18 @@ private:
 
         struct
         {
-#if JUCE_BIG_ENDIAN
+          #if JUCE_BIG_ENDIAN
             uint8 a : 8, r : 8, g : 8, b : 8;
-#else
+          #else
             uint8 b, g, r, a;
-#endif
+          #endif
         } PACKED components;
     };
-
-} PACKED;
+}
+#ifndef DOXYGEN
+ PACKED
+#endif
+;
 
 
 //==============================================================================
@@ -424,7 +429,11 @@ private:
     uint8 b, g, r;
 #endif
 
-} PACKED;
+}
+#ifndef DOXYGEN
+ PACKED
+#endif
+;
 
 forcedinline void PixelARGB::blend (const PixelRGB& src) throw()
 {
@@ -553,7 +562,11 @@ public:
 private:
     //==============================================================================
     uint8 a : 8;
-} PACKED;
+}
+#ifndef DOXYGEN
+ PACKED
+#endif
+;
 
 forcedinline void PixelRGB::blend (const PixelAlpha& src) throw()
 {

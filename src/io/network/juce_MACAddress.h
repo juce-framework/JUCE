@@ -79,11 +79,13 @@ public:
 
     //==============================================================================
 private:
+   #ifndef DOXYGEN
     union
     {
         uint64 asInt64;
         uint8 asBytes[6];
     };
+   #endif
 };
 
 

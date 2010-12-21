@@ -483,15 +483,15 @@
   #define JUCE_QUICKTIME 0
   #undef  JUCE_OPENGL
   #define JUCE_OPENGL 0
-  #undef JUCE_USE_CDBURNER
+  #undef  JUCE_USE_CDBURNER
   #define JUCE_USE_CDBURNER 0
-  #undef JUCE_USE_CDREADER
+  #undef  JUCE_USE_CDREADER
   #define JUCE_USE_CDREADER 0
-  #undef JUCE_WEB_BROWSER
+  #undef  JUCE_WEB_BROWSER
   #define JUCE_WEB_BROWSER 0
-  #undef JUCE_PLUGINHOST_AU
+  #undef  JUCE_PLUGINHOST_AU
   #define JUCE_PLUGINHOST_AU 0
-  #undef JUCE_PLUGINHOST_VST
+  #undef  JUCE_PLUGINHOST_VST
   #define JUCE_PLUGINHOST_VST 0
 #endif
 
@@ -4103,8 +4103,10 @@ public:
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
-class JUCE_API  ScopedLock;
-class JUCE_API  ScopedUnlock;
+#ifndef DOXYGEN
+ class JUCE_API  ScopedLock;
+ class JUCE_API  ScopedUnlock;
+#endif
 
 /**
 	Prevents multiple threads from accessing shared objects at the same time.
@@ -6040,7 +6042,9 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_OutputStream.h ***/
 
-class JUCE_API  DynamicObject;
+#ifndef DOXYGEN
+ class JUCE_API  DynamicObject;
+#endif
 
 /**
 	A variant class, that can be used to hold a range of primitive values.
@@ -12284,12 +12288,14 @@ template <class ListenerClass,
 class ListenerList
 {
 	// Horrible macros required to support VC6/7..
-	#if JUCE_VC8_OR_EARLIER
-	  #define LL_TEMPLATE(a)   typename P##a, typename Q##a
-	  #define LL_PARAM(a)	  Q##a& param##a
-	#else
-	  #define LL_TEMPLATE(a)   typename P##a
-	  #define LL_PARAM(a)	  PARAMETER_TYPE(P##a) param##a
+	#ifndef DOXYGEN
+	 #if JUCE_VC8_OR_EARLIER
+	   #define LL_TEMPLATE(a)   typename P##a, typename Q##a
+	   #define LL_PARAM(a)	  Q##a& param##a
+	 #else
+	   #define LL_TEMPLATE(a)   typename P##a
+	   #define LL_PARAM(a)	  PARAMETER_TYPE(P##a) param##a
+	 #endif
 	#endif
 
 public:
@@ -14868,6 +14874,7 @@ public:
 
 private:
 
+   #ifndef DOXYGEN
 	union
 	{
 		uint8 asBytes [16];
@@ -14875,6 +14882,7 @@ private:
 		int64 asInt64[2];
 
 	} value;
+   #endif
 
 	JUCE_LEAK_DETECTOR (Uuid);
 };
@@ -15325,9 +15333,10 @@ private:
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& value);
 
-/** For backwards compatibility, BitArray is defined to be an alias for BigInteger.
-*/
-typedef BigInteger BitArray;
+#ifndef DOXYGEN
+ // For backwards compatibility, BitArray is defined as an alias for BigInteger.
+ typedef BigInteger BitArray;
+#endif
 
 #endif   // __JUCE_BIGINTEGER_JUCEHEADER__
 /*** End of inlined file: juce_BigInteger.h ***/
@@ -16349,11 +16358,13 @@ public:
 	bool operator!= (const MACAddress& other) const throw();
 
 private:
+   #ifndef DOXYGEN
 	union
 	{
 		uint64 asInt64;
 		uint8 asBytes[6];
 	};
+   #endif
 };
 
 #endif   // __JUCE_MACADDRESS_JUCEHEADER__
@@ -18782,8 +18793,10 @@ private:
 	uint32 affinityMask_;
 	bool volatile threadShouldExit_;
 
+   #ifndef DOXYGEN
 	friend class MessageManager;
 	friend void JUCE_API juce_threadEntryPoint (void*);
+   #endif
 
 	void launchThread();
 	void closeThreadHandle();
@@ -23751,13 +23764,15 @@ private:
 #ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
 #define __JUCE_PIXELFORMATS_JUCEHEADER__
 
-#if JUCE_MSVC
+#ifndef DOXYGEN
+ #if JUCE_MSVC
   #pragma pack (push, 1)
   #define PACKED
-#elif JUCE_GCC
+ #elif JUCE_GCC
   #define PACKED __attribute__((packed))
-#else
+ #else
   #define PACKED
+ #endif
 #endif
 
 class PixelRGB;
@@ -23978,15 +23993,18 @@ private:
 
 		struct
 		{
-#if JUCE_BIG_ENDIAN
+		  #if JUCE_BIG_ENDIAN
 			uint8 a : 8, r : 8, g : 8, b : 8;
-#else
+		  #else
 			uint8 b, g, r, a;
-#endif
+		  #endif
 		} PACKED components;
 	};
-
-} PACKED;
+}
+#ifndef DOXYGEN
+ PACKED
+#endif
+;
 
 /**
 	Represents a 24-bit RGB pixel, and can perform compositing operations on it.
@@ -24141,7 +24159,11 @@ private:
 	uint8 b, g, r;
 #endif
 
-} PACKED;
+}
+#ifndef DOXYGEN
+ PACKED
+#endif
+;
 
 forcedinline void PixelARGB::blend (const PixelRGB& src) throw()
 {
@@ -24268,7 +24290,11 @@ public:
 private:
 
 	uint8 a : 8;
-} PACKED;
+}
+#ifndef DOXYGEN
+ PACKED
+#endif
+;
 
 forcedinline void PixelRGB::blend (const PixelAlpha& src) throw()
 {
@@ -28540,6 +28566,7 @@ private:
 	friend class MouseInputSource;
 	friend class MouseInputSourceInternal;
 
+   #ifndef DOXYGEN
 	static Component* currentlyFocusedComponent;
 
 	String componentName_;
@@ -28652,6 +28679,7 @@ protected:
 	virtual void internalRepaint (int x, int y, int w, int h);
 	/** @internal */
 	virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
+   #endif
 };
 
 #endif   // __JUCE_COMPONENT_JUCEHEADER__
@@ -35735,11 +35763,13 @@ private:
 	uint8* data;
 	int size;
 
+   #ifndef DOXYGEN
 	union
 	{
 		uint8 asBytes[4];
 		uint32 asInt32;
 	} preallocatedData;
+   #endif
 };
 
 #endif   // __JUCE_MIDIMESSAGE_JUCEHEADER__
@@ -59044,12 +59074,14 @@ private:
 
 // (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
 // amalgamated build)
-#if JUCE_WINDOWS
+#ifndef DOXYGEN
+ #if JUCE_WINDOWS
 
   typedef ActiveXControlComponent QTCompBaseClass;
-#elif JUCE_MAC
+ #elif JUCE_MAC
 
   typedef NSViewComponent QTCompBaseClass;
+ #endif
 #endif
 
 // this is used to disable QuickTime, and is defined in juce_Config.h

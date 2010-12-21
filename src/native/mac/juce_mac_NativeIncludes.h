@@ -88,7 +88,7 @@
  #include <GLUT/glut.h>
 #endif
 
-#if ! CGFLOAT_DEFINED
+#if ! (CGFLOAT_DEFINED || defined (DOXYGEN))
   #define CGFloat float
 #endif
 

@@ -2111,6 +2111,7 @@ private:
     friend class MouseInputSource;
     friend class MouseInputSourceInternal;
 
+   #ifndef DOXYGEN
     static Component* currentlyFocusedComponent;
 
     //==============================================================================
@@ -2226,6 +2227,7 @@ protected:
     virtual void internalRepaint (int x, int y, int w, int h);
     /** @internal */
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
+   #endif
 };
 
 

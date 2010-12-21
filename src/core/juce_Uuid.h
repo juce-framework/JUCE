@@ -108,6 +108,7 @@ public:
 
 private:
     //==============================================================================
+   #ifndef DOXYGEN
     union
     {
         uint8 asBytes [16];
@@ -115,6 +116,7 @@ private:
         int64 asInt64[2];
 
     } value;
+   #endif
 
     JUCE_LEAK_DETECTOR (Uuid);
 };

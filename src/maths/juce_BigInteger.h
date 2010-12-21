@@ -323,9 +323,10 @@ private:
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& value);
 
 //==============================================================================
-/** For backwards compatibility, BitArray is defined to be an alias for BigInteger.
-*/
-typedef BigInteger BitArray;
+#ifndef DOXYGEN
+ // For backwards compatibility, BitArray is defined as an alias for BigInteger.
+ typedef BigInteger BitArray;
+#endif
 
 
 #endif   // __JUCE_BIGINTEGER_JUCEHEADER__
