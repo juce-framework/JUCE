@@ -129,6 +129,7 @@ void DrawableShape::paint (Graphics& g)
 
 void DrawableShape::pathChanged()
 {
+    rebuildPath (path);
     strokeChanged();
 }
 

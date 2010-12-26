@@ -28,7 +28,7 @@
 
 #include "juce_ResizableWindow.h"
 #include "../buttons/juce_Button.h"
-#include "../menus/juce_MenuBarComponent.h"
+#include "../menus/juce_MenuBarModel.h"
 
 
 //==============================================================================
@@ -142,6 +142,7 @@ public:
     */
     void setTitleBarTextCentred (bool textShouldBeCentred);
 
+    //==============================================================================
     /** Creates a menu inside this window.
 
         @param menuBarModel     this specifies a MenuBarModel that should be used to
@@ -155,6 +156,17 @@ public:
     */
     void setMenuBar (MenuBarModel* menuBarModel,
                      int menuBarHeight = 0);
+
+    /** Returns the current menu bar component, or null if there isn't one.
+        This is probably a MenuBarComponent, unless a custom one has been set using
+        setMenuBarComponent().
+    */
+    Component* getMenuBarComponent() const throw();
+
+    /** Replaces the current menu bar with a custom component.
+        The component will be owned and deleted by the document window.
+    */
+    void setMenuBarComponent (Component* newMenuBarComponent);
 
     //==============================================================================
     /** This method is called when the user tries to close the window.
@@ -248,7 +260,7 @@ private:
     bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
     ScopedPointer <Button> titleBarButtons [3];
     Image titleBarIcon;
-    ScopedPointer <MenuBarComponent> menuBar;
+    ScopedPointer <Component> menuBar;
     MenuBarModel* menuBarModel;
 
     class ButtonListenerProxy;

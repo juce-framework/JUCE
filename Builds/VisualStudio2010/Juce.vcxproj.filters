@@ -1455,6 +1455,9 @@
     <ClInclude Include="..\..\src\containers\juce_ElementComparator.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\containers\juce_LinkedListPointer.h">
+      <Filter>Juce\Source\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_NamedValueSet.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>

@@ -43,6 +43,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Desktop.h"
 #include "../../graphics/drawables/juce_DrawableComposite.h"
 #include "../../graphics/drawables/juce_DrawablePath.h"
+#include "../menus/juce_MenuBarComponent.h"
 
 
 //==============================================================================

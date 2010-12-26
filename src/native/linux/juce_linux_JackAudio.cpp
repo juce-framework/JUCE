@@ -59,7 +59,7 @@ void* juce_load_jack_function (const char* const name)
   }
 
 //==============================================================================
-JUCE_DECL_JACK_FUNCTION (jack_client_t*, jack_client_open, (const char* client_name, jack_options_t options, jack_status_t* status), (client_name, options, status));
+JUCE_DECL_JACK_FUNCTION (jack_client_t*, jack_client_open, (const char* client_name, jack_options_t options, jack_status_t* status, ...), (client_name, options, status));
 JUCE_DECL_JACK_FUNCTION (int, jack_client_close, (jack_client_t *client), (client));
 JUCE_DECL_JACK_FUNCTION (int, jack_activate, (jack_client_t* client), (client));
 JUCE_DECL_JACK_FUNCTION (int, jack_deactivate, (jack_client_t* client), (client));

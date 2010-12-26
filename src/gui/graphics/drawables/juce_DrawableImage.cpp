@@ -244,13 +244,18 @@ void DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* 
 
     const RelativeParallelogram newBounds (controller.getBoundingBox());
 
-    if (newOpacity != opacity || overlayColour != newOverlayColour || image != newImage)
+    if (bounds != newBounds || newOpacity != opacity
+         || overlayColour != newOverlayColour || image != newImage)
     {
         repaint();
         opacity = newOpacity;
         overlayColour = newOverlayColour;
         bounds = newBounds;
-        setImage (newImage);
+
+        if (image != newImage)
+            setImage (newImage);
+        else
+            refreshTransformFromBounds();
     }
 }
 

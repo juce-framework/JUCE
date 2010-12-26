@@ -1018,33 +1018,40 @@ void Component::setBounds (const int x, const int y, int w, int h)
 
 void Component::sendMovedResizedMessages (const bool wasMoved, const bool wasResized)
 {
-    JUCE_TRY
+    BailOutChecker checker (this);
+
+    if (wasMoved)
     {
-        if (wasMoved)
-            moved();
+        moved();
 
-        if (wasResized)
-        {
-            resized();
-
-            for (int i = childComponentList_.size(); --i >= 0;)
-            {
-                childComponentList_.getUnchecked(i)->parentSizeChanged();
-
-                i = jmin (i, childComponentList_.size());
-            }
-        }
-
-        BailOutChecker checker (this);
-
-        if (parentComponent_ != 0)
-            parentComponent_->childBoundsChanged (this);
-
-        if (! checker.shouldBailOut())
-            componentListeners.callChecked (checker, &ComponentListener::componentMovedOrResized,
-                                            *this, wasMoved, wasResized);
+        if (checker.shouldBailOut())
+            return;
     }
-    JUCE_CATCH_EXCEPTION
+
+    if (wasResized)
+    {
+        resized();
+
+        if (checker.shouldBailOut())
+            return;
+
+        for (int i = childComponentList_.size(); --i >= 0;)
+        {
+            childComponentList_.getUnchecked(i)->parentSizeChanged();
+
+            if (checker.shouldBailOut())
+                return;
+
+            i = jmin (i, childComponentList_.size());
+        }
+    }
+
+    if (parentComponent_ != 0)
+        parentComponent_->childBoundsChanged (this);
+
+    if (! checker.shouldBailOut())
+        componentListeners.callChecked (checker, &ComponentListener::componentMovedOrResized,
+                                        *this, wasMoved, wasResized);
 }
 
 void Component::setSize (const int w, const int h)
@@ -2561,12 +2568,15 @@ void Component::focusGained (FocusChangeType)
 
 void Component::internalFocusGain (const FocusChangeType cause)
 {
-    WeakReference<Component> safePointer (this);
+    internalFocusGain (cause, WeakReference<Component> (this));
+}
 
+void Component::internalFocusGain (const FocusChangeType cause, const WeakReference<Component>& safePointer)
+{
     focusGained (cause);
 
     if (safePointer != 0)
-        internalChildFocusChange (cause);
+        internalChildFocusChange (cause, safePointer);
 }
 
 void Component::focusLost (FocusChangeType)
@@ -2581,7 +2591,7 @@ void Component::internalFocusLoss (const FocusChangeType cause)
     focusLost (focusChangedDirectly);
 
     if (safePointer != 0)
-        internalChildFocusChange (cause);
+        internalChildFocusChange (cause, safePointer);
 }
 
 void Component::focusOfChildComponentChanged (FocusChangeType /*cause*/)
@@ -2589,7 +2599,7 @@ void Component::focusOfChildComponentChanged (FocusChangeType /*cause*/)
     // base class does nothing
 }
 
-void Component::internalChildFocusChange (FocusChangeType cause)
+void Component::internalChildFocusChange (FocusChangeType cause, const WeakReference<Component>& safePointer)
 {
     const bool childIsNowFocused = hasKeyboardFocus (true);
 
@@ -2597,7 +2607,6 @@ void Component::internalChildFocusChange (FocusChangeType cause)
     {
         flags.childCompFocusedFlag = childIsNowFocused;
 
-        WeakReference<Component> safePointer (this);
         focusOfChildComponentChanged (cause);
 
         if (safePointer == 0)
@@ -2605,7 +2614,7 @@ void Component::internalChildFocusChange (FocusChangeType cause)
     }
 
     if (parentComponent_ != 0)
-        parentComponent_->internalChildFocusChange (cause);
+        parentComponent_->internalChildFocusChange (cause, WeakReference<Component> (parentComponent_));
 }
 
 //==============================================================================
@@ -2711,54 +2720,32 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
     // give the focus to this component
     if (currentlyFocusedComponent != this)
     {
-        JUCE_TRY
+        // get the focus onto our desktop window
+        ComponentPeer* const peer = getPeer();
+
+        if (peer != 0)
         {
-            // get the focus onto our desktop window
-            ComponentPeer* const peer = getPeer();
+            WeakReference<Component> safePointer (this);
 
-            if (peer != 0)
+            peer->grabFocus();
+
+            if (peer->isFocused() && currentlyFocusedComponent != this)
             {
-                WeakReference<Component> safePointer (this);
+                WeakReference<Component> componentLosingFocus (currentlyFocusedComponent);
 
-                peer->grabFocus();
+                currentlyFocusedComponent = this;
 
-                if (peer->isFocused() && currentlyFocusedComponent != this)
-                {
-                    WeakReference<Component> componentLosingFocus (currentlyFocusedComponent);
+                Desktop::getInstance().triggerFocusCallback();
 
-                    currentlyFocusedComponent = this;
+                // call this after setting currentlyFocusedComponent so that the one that's
+                // losing it has a chance to see where focus is going
+                if (componentLosingFocus != 0)
+                    componentLosingFocus->internalFocusLoss (cause);
 
-                    Desktop::getInstance().triggerFocusCallback();
-
-                    // call this after setting currentlyFocusedComponent so that the one that's
-                    // losing it has a chance to see where focus is going
-                    if (componentLosingFocus != 0)
-                        componentLosingFocus->internalFocusLoss (cause);
-
-                    if (currentlyFocusedComponent == this)
-                    {
-                        focusGained (cause);
-
-                        if (safePointer != 0)
-                            internalChildFocusChange (cause);
-                    }
-                }
+                if (currentlyFocusedComponent == this)
+                    internalFocusGain (cause, safePointer);
             }
         }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-        catch (const std::exception& e)
-        {
-            currentlyFocusedComponent = 0;
-            Desktop::getInstance().triggerFocusCallback();
-            JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__);
-        }
-        catch (...)
-        {
-            currentlyFocusedComponent = 0;
-            Desktop::getInstance().triggerFocusCallback();
-            JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__);
-        }
-#endif
     }
 }
 

@@ -2180,9 +2180,10 @@ private:
     void internalMouseMove  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
     void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, float amountX, float amountY);
     void internalBroughtToFront();
+    void internalFocusGain (const FocusChangeType cause, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType cause);
     void internalFocusLoss (const FocusChangeType cause);
-    void internalChildFocusChange (FocusChangeType cause);
+    void internalChildFocusChange (FocusChangeType cause, const WeakReference<Component>&);
     void internalModalInputAttempt();
     void internalModifierKeysChanged();
     void internalChildrenChanged();

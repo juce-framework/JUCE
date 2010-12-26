@@ -29,6 +29,7 @@
 #include "juce_String.h"
 #include "../io/streams/juce_OutputStream.h"
 #include "../io/files/juce_File.h"
+#include "../containers/juce_LinkedListPointer.h"
 
 
 //==============================================================================
@@ -451,7 +452,7 @@ public:
 
         @see getNextElement, isTextElement, forEachXmlChildElement
     */
-    inline XmlElement* getNextElement() const throw()           { return nextElement; }
+    inline XmlElement* getNextElement() const throw()           { return nextListItem; }
 
     /** Returns the next of this element's siblings which has the specified tag
         name.
@@ -690,8 +691,9 @@ private:
     friend class XmlDocument;
 
     String tagName;
-    XmlElement* firstChildElement;
-    XmlElement* nextElement;
+    friend class LinkedListPointer <XmlElement>;
+    LinkedListPointer <XmlElement> firstChildElement;
+    LinkedListPointer <XmlElement> nextListItem;
 
     struct XmlAttributeNode
     {
@@ -699,7 +701,7 @@ private:
         XmlAttributeNode (const String& name, const String& value) throw();
 
         String name, value;
-        XmlAttributeNode* next;
+        LinkedListPointer<XmlAttributeNode> nextListItem;
 
         bool hasName (const String& name) const throw();
 
@@ -707,7 +709,8 @@ private:
         XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
 
-    XmlAttributeNode* attributes;
+    friend class LinkedListPointer<XmlAttributeNode>;
+    LinkedListPointer <XmlAttributeNode> attributes;
 
     XmlElement (int) throw();
     void copyChildrenAndAttributesFrom (const XmlElement& other);

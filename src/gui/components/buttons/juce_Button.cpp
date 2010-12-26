@@ -147,9 +147,10 @@ void Button::setToggleState (const bool shouldBeOn,
         lastToggleState = shouldBeOn;
         repaint();
 
+        WeakReference<Component> deletionWatcher (this);
+
         if (sendChangeNotification)
         {
-            WeakReference<Component> deletionWatcher (this);
             sendClickMessage (ModifierKeys());
 
             if (deletionWatcher == 0)
@@ -157,7 +158,14 @@ void Button::setToggleState (const bool shouldBeOn,
         }
 
         if (lastToggleState)
+        {
             turnOffOtherButtonsInGroup (sendChangeNotification);
+
+            if (deletionWatcher == 0)
+                return;
+        }
+
+        sendStateMessage();
     }
 }
 

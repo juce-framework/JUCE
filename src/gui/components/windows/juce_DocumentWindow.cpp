@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_DocumentWindow.h"
 #include "juce_ComponentPeer.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
+#include "../menus/juce_MenuBarComponent.h"
 #include "../../graphics/imaging/juce_Image.h"
 
 
@@ -67,11 +68,11 @@ DocumentWindow::DocumentWindow (const String& title,
       titleBarHeight (26),
       menuBarHeight (24),
       requiredButtons (requiredButtons_),
-#if JUCE_MAC
+    #if JUCE_MAC
       positionTitleBarButtonsOnLeft (true),
-#else
+    #else
       positionTitleBarButtonsOnLeft (false),
-#endif
+    #endif
       drawTitleTextCentred (true),
       menuBarModel (0)
 {
@@ -138,28 +139,39 @@ void DocumentWindow::setTitleBarTextCentred (const bool textShouldBeCentred)
     repaintTitleBar();
 }
 
-void DocumentWindow::setMenuBar (MenuBarModel* menuBarModel_,
-                                 const int menuBarHeight_)
+//==============================================================================
+void DocumentWindow::setMenuBar (MenuBarModel* newMenuBarModel, const int newMenuBarHeight)
 {
-    if (menuBarModel != menuBarModel_)
+    if (menuBarModel != newMenuBarModel)
     {
         menuBar = 0;
 
-        menuBarModel = menuBarModel_;
-        menuBarHeight = (menuBarHeight_ > 0) ? menuBarHeight_
+        menuBarModel = newMenuBarModel;
+        menuBarHeight = newMenuBarHeight > 0 ? newMenuBarHeight
                                              : getLookAndFeel().getDefaultMenuBarHeight();
 
         if (menuBarModel != 0)
-        {
-            // (call the Component method directly to avoid the assertion in ResizableWindow)
-            Component::addAndMakeVisible (menuBar = new MenuBarComponent (menuBarModel));
-            menuBar->setEnabled (isActiveWindow());
-        }
+            setMenuBarComponent (new MenuBarComponent (menuBarModel));
 
         resized();
     }
 }
 
+Component* DocumentWindow::getMenuBarComponent() const throw()
+{
+    return menuBar;
+}
+
+void DocumentWindow::setMenuBarComponent (Component* newMenuBarComponent)
+{
+    // (call the Component method directly to avoid the assertion in ResizableWindow)
+    Component::addAndMakeVisible (menuBar = newMenuBarComponent);
+
+    if (menuBar != 0)
+        menuBar->setEnabled (isActiveWindow());
+
+    resized();
+}
 
 //==============================================================================
 void DocumentWindow::closeButtonPressed()
@@ -269,8 +281,8 @@ const BorderSize DocumentWindow::getContentComponentBorder()
     BorderSize border (getBorderThickness());
 
     border.setTop (border.getTop()
-                        + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
-                        + (menuBar != 0 ? menuBarHeight : 0));
+                    + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
+                    + (menuBar != 0 ? menuBarHeight : 0));
 
     return border;
 }
@@ -289,20 +301,9 @@ const Rectangle<int> DocumentWindow::getTitleBarArea()
                            getTitleBarHeight());
 }
 
-Button* DocumentWindow::getCloseButton() const throw()
-{
-    return titleBarButtons[2];
-}
-
-Button* DocumentWindow::getMinimiseButton() const throw()
-{
-    return titleBarButtons[0];
-}
-
-Button* DocumentWindow::getMaximiseButton() const throw()
-{
-    return titleBarButtons[1];
-}
+Button* DocumentWindow::getCloseButton() const throw()      { return titleBarButtons[2]; }
+Button* DocumentWindow::getMinimiseButton() const throw()   { return titleBarButtons[0]; }
+Button* DocumentWindow::getMaximiseButton() const throw()   { return titleBarButtons[1]; }
 
 int DocumentWindow::getDesktopWindowStyleFlags() const
 {
@@ -328,14 +329,16 @@ void DocumentWindow::lookAndFeelChanged()
 
     if (! isUsingNativeTitleBar())
     {
-        titleBarButtons[0] = ((requiredButtons & minimiseButton) != 0)
-                                ? getLookAndFeel().createDocumentWindowButton (minimiseButton) : 0;
+        LookAndFeel& lf = getLookAndFeel();
 
-        titleBarButtons[1] = ((requiredButtons & maximiseButton) != 0)
-                                ? getLookAndFeel().createDocumentWindowButton (maximiseButton) : 0;
+        if ((requiredButtons & minimiseButton) != 0)
+            titleBarButtons[0] = lf.createDocumentWindowButton (minimiseButton);
 
-        titleBarButtons[2] = ((requiredButtons & closeButton) != 0)
-                                ? getLookAndFeel().createDocumentWindowButton (closeButton) : 0;
+        if ((requiredButtons & maximiseButton) != 0)
+            titleBarButtons[1] = lf.createDocumentWindowButton (maximiseButton);
+
+        if ((requiredButtons & closeButton) != 0)
+            titleBarButtons[2] = lf.createDocumentWindowButton (closeButton);
 
         for (i = 0; i < 3; ++i)
         {
@@ -354,11 +357,11 @@ void DocumentWindow::lookAndFeelChanged()
 
         if (getCloseButton() != 0)
         {
-#if JUCE_MAC
+          #if JUCE_MAC
             getCloseButton()->addShortcut (KeyPress ('w', ModifierKeys::commandModifier, 0));
-#else
+          #else
             getCloseButton()->addShortcut (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0));
-#endif
+          #endif
         }
     }
 

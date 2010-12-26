@@ -385,7 +385,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 
         node = new XmlElement (String (input, tagLen));
         input += tagLen;
-        XmlElement::XmlAttributeNode* lastAttribute = 0;
+        LinkedListPointer<XmlElement::XmlAttributeNode>::Appender attributeAppender (node->attributes);
 
         // look for attributes
         for (;;)
@@ -437,14 +437,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
                                                                     String::empty);
 
                             readQuotedString (newAtt->value);
-
-                            if (lastAttribute == 0)
-                                node->attributes = newAtt;
-                            else
-                                lastAttribute->next = newAtt;
-
-                            lastAttribute = newAtt;
-
+                            attributeAppender.append (newAtt);
                             continue;
                         }
                     }
@@ -465,7 +458,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 
 void XmlDocument::readChildElements (XmlElement* parent)
 {
-    XmlElement* lastChildNode = 0;
+    LinkedListPointer<XmlElement>::Appender childAppender (parent->firstChildElement);
 
     for (;;)
     {
@@ -521,14 +514,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                     ++len;
                 }
 
-                XmlElement* const e = XmlElement::createTextElement (String (inputStart, len));
-
-                if (lastChildNode != 0)
-                    lastChildNode->nextElement = e;
-                else
-                    parent->addChildElement (e);
-
-                lastChildNode = e;
+                childAppender.append (XmlElement::createTextElement (String (inputStart, len)));
             }
             else
             {
@@ -536,18 +522,9 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 XmlElement* const n = readNextElement (true);
 
                 if (n != 0)
-                {
-                    if (lastChildNode == 0)
-                        parent->addChildElement (n);
-                    else
-                        lastChildNode->nextElement = n;
-
-                    lastChildNode = n;
-                }
+                    childAppender.append (n);
                 else
-                {
                     return;
-                }
             }
         }
         else  // must be a character block
@@ -589,12 +566,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                             if (n == 0)
                                 break;
 
-                            if (lastChildNode == 0)
-                                parent->addChildElement (n);
-                            else
-                                lastChildNode->nextElement = n;
-
-                            lastChildNode = n;
+                            childAppender.append (n);
                         }
 
                         input = oldInput;
@@ -635,14 +607,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
 
             if ((! ignoreEmptyTextElements) || textElementContent.containsNonWhitespaceChars())
             {
-                XmlElement* const textElement = XmlElement::createTextElement (textElementContent);
-
-                if (lastChildNode != 0)
-                    lastChildNode->nextElement = textElement;
-                else
-                    parent->addChildElement (textElement);
-
-                lastChildNode = textElement;
+                childAppender.append (XmlElement::createTextElement (textElementContent));
             }
         }
     }
@@ -870,18 +835,16 @@ const String XmlDocument::getParameterEntity (const String& entity)
 {
     for (int i = 0; i < tokenisedDTD.size(); ++i)
     {
-        if (tokenisedDTD[i] == entity)
+        if (tokenisedDTD[i] == entity
+             && tokenisedDTD [i - 1] == "%"
+             && tokenisedDTD [i - 2].equalsIgnoreCase ("<!entity"))
         {
-            if (tokenisedDTD [i - 1] == "%"
-                && tokenisedDTD [i - 2].equalsIgnoreCase ("<!entity"))
-            {
-                const String ent (tokenisedDTD [i + 1].trimCharactersAtEnd (">"));
+            const String ent (tokenisedDTD [i + 1].trimCharactersAtEnd (">"));
 
-                if (ent.equalsIgnoreCase ("system"))
-                    return getFileContents (tokenisedDTD [i + 2].trimCharactersAtEnd (">"));
-                else
-                    return ent.trim().unquoted();
-            }
+            if (ent.equalsIgnoreCase ("system"))
+                return getFileContents (tokenisedDTD [i + 2].trimCharactersAtEnd (">"));
+            else
+                return ent.trim().unquoted();
         }
     }
 

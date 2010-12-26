@@ -490,6 +490,7 @@
 		F77C9170829579FABA5679AD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DynamicObject.cpp; path = ../../src/containers/juce_DynamicObject.cpp; sourceTree = SOURCE_ROOT; };
 		34C402EF9ADCAD34FB657D43 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DynamicObject.h; path = ../../src/containers/juce_DynamicObject.h; sourceTree = SOURCE_ROOT; };
 		7DA9AC75A4D9227C8FC4B2F7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ElementComparator.h; path = ../../src/containers/juce_ElementComparator.h; sourceTree = SOURCE_ROOT; };
+		9289A1E6B141F24C57FF0927 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_LinkedListPointer.h; path = ../../src/containers/juce_LinkedListPointer.h; sourceTree = SOURCE_ROOT; };
 		70E5409425A76782B6188B31 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_NamedValueSet.cpp; path = ../../src/containers/juce_NamedValueSet.cpp; sourceTree = SOURCE_ROOT; };
 		BB4A73064B0FC74ECCA19116 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_NamedValueSet.h; path = ../../src/containers/juce_NamedValueSet.h; sourceTree = SOURCE_ROOT; };
 		C1913C90ED7BE51E823887CD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_OwnedArray.h; path = ../../src/containers/juce_OwnedArray.h; sourceTree = SOURCE_ROOT; };
@@ -1217,6 +1218,7 @@
 				F77C9170829579FABA5679AD,
 				34C402EF9ADCAD34FB657D43,
 				7DA9AC75A4D9227C8FC4B2F7,
+				9289A1E6B141F24C57FF0927,
 				70E5409425A76782B6188B31,
 				BB4A73064B0FC74ECCA19116,
 				C1913C90ED7BE51E823887CD,

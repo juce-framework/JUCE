@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	110
+#define JUCE_BUILDNUMBER	111
 
 /** Current Juce version number.
 
@@ -6625,6 +6625,325 @@ private:
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+
+/*** Start of inlined file: juce_LinkedListPointer.h ***/
+#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+#define __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+
+/**
+	Helps to manipulate singly-linked lists of objects.
+
+	For objects that are designed to contain a pointer to the subsequent item in the
+	list, this class contains methods to deal with the list. To use it, the ObjectType
+	class that it points to must contain a LinkedListPointer called nextListItem, e.g.
+
+	@code
+	struct MyObject
+	{
+		int x, y, z;
+
+		// A linkable object must contain a member with this name and type, which must be
+		// accessible by the LinkedListPointer class. (This doesn't mean it has to be public -
+		// you could make your class a friend of a LinkedListPointer<MyObject> instead).
+		LinkedListPointer<MyObject> nextListItem;
+	};
+
+	LinkedListPointer<MyObject> myList;
+	myList.append (new MyObject());
+	myList.append (new MyObject());
+
+	int numItems = myList.size(); // returns 2
+	MyObject* lastInList = myList.getLast();
+	@endcode
+*/
+template <class ObjectType>
+class LinkedListPointer
+{
+public:
+
+	/** Creates a null pointer to an empty list. */
+	LinkedListPointer() throw()
+		: item (0)
+	{
+	}
+
+	/** Creates a pointer to a list whose head is the item provided. */
+	explicit LinkedListPointer (ObjectType* const headItem) throw()
+		: item (headItem)
+	{
+	}
+
+	/** Sets this pointer to point to a new list. */
+	LinkedListPointer& operator= (ObjectType* const newItem) throw()
+	{
+		item = newItem;
+		return *this;
+	}
+
+	/** Returns the item which this pointer points to. */
+	inline operator ObjectType*() const throw()
+	{
+		return item;
+	}
+
+	/** Returns the item which this pointer points to. */
+	inline ObjectType* get() const throw()
+	{
+		return item;
+	}
+
+	/** Returns the last item in the list which this pointer points to.
+		This will iterate the list and return the last item found. Obviously the speed
+		of this operation will be proportional to the size of the list. If the list is
+		empty the return value will be this object.
+		If you're planning on appending a number of items to your list, it's much more
+		efficient to use the Appender class than to repeatedly call getLast() to find the end.
+	*/
+	LinkedListPointer& getLast() throw()
+	{
+		LinkedListPointer* l = this;
+
+		while (l->item != 0)
+			l = &(l->item->nextListItem);
+
+		return *l;
+	}
+
+	/** Returns the number of items in the list.
+		Obviously with a simple linked list, getting the size involves iterating the list, so
+		this can be a lengthy operation - be careful when using this method in your code.
+	*/
+	int size() const throw()
+	{
+		int total = 0;
+
+		for (ObjectType* i = item; i != 0; i = i->nextListItem)
+			++total;
+
+		return total;
+	}
+
+	/** Returns the item at a given index in the list.
+		Since the only way to find an item is to iterate the list, this operation can obviously
+		be slow, depending on its size, so you should be careful when using this in algorithms.
+	*/
+	LinkedListPointer& operator[] (int index) throw()
+	{
+		LinkedListPointer* l = this;
+
+		while (--index >= 0 && l->item != 0)
+			l = &(l->item->nextListItem);
+
+		return *l;
+	}
+
+	/** Returns the item at a given index in the list.
+		Since the only way to find an item is to iterate the list, this operation can obviously
+		be slow, depending on its size, so you should be careful when using this in algorithms.
+	*/
+	const LinkedListPointer& operator[] (int index) const throw()
+	{
+		const LinkedListPointer* l = this;
+
+		while (--index >= 0 && l->item != 0)
+			l = &(l->item->nextListItem);
+
+		return *l;
+	}
+
+	/** Returns true if the list contains the given item. */
+	bool contains (const ObjectType* const itemToLookFor) const throw()
+	{
+		for (ObjectType* i = item; i != 0; i = i->nextListItem)
+			if (itemToLookFor == i)
+				return true;
+
+		return false;
+	}
+
+	/** Inserts an item into the list, placing it before the item that this pointer
+		currently points to.
+	*/
+	void insertNext (ObjectType* const newItem)
+	{
+		jassert (newItem != 0);
+		jassert (newItem->nextListItem == 0);
+		newItem->nextListItem = item;
+		item = newItem;
+	}
+
+	/** Inserts an item at a numeric index in the list.
+		Obviously this will involve iterating the list to find the item at the given index,
+		so be careful about the impact this may have on execution time.
+	*/
+	void insertAtIndex (int index, ObjectType* newItem)
+	{
+		jassert (newItem != 0);
+		LinkedListPointer* l = this;
+
+		while (index != 0 && l->item != 0)
+		{
+			l = &(l->item->nextListItem);
+			--index;
+		}
+
+		l->insertNext (newItem);
+	}
+
+	/** Replaces the object that this pointer points to, appending the rest of the list to
+		the new object, and returning the old one.
+	*/
+	ObjectType* replaceNext (ObjectType* const newItem) throw()
+	{
+		jassert (newItem != 0);
+		jassert (newItem->nextListItem == 0);
+
+		ObjectType* const oldItem = item;
+		item = newItem;
+		item->nextListItem = oldItem->nextListItem;
+		oldItem->nextListItem = 0;
+		return oldItem;
+	}
+
+	/** Adds an item to the end of the list.
+
+		This operation involves iterating the whole list, so can be slow - if you need to
+		append a number of items to your list, it's much more efficient to use the Appender
+		class than to repeatedly call append().
+	*/
+	void append (ObjectType* const newItem)
+	{
+		getLast().item = newItem;
+	}
+
+	/** Creates copies of all the items in another list and adds them to this one.
+		This will use the ObjectType's copy constructor to try to create copies of each
+		item in the other list, and appends them to this list.
+	*/
+	void addCopyOfList (const LinkedListPointer& other)
+	{
+		LinkedListPointer* insertPoint = this;
+
+		for (ObjectType* i = other.item; i != 0; i = i->nextListItem)
+		{
+			insertPoint->insertNext (new ObjectType (*i));
+			insertPoint = &(insertPoint->item->nextListItem);
+		}
+	}
+
+	/** Removes the head item from the list.
+		This won't delete the object that is removed, but returns it, so the caller can
+		delete it if necessary.
+	*/
+	ObjectType* removeNext() throw()
+	{
+		if (item == 0)
+			return 0;
+
+		ObjectType* const oldItem = item;
+		oldItem->nextListItem = 0;
+		item = item->nextListItem;
+		return oldItem;
+	}
+
+	/** Removes a specific item from the list.
+		Note that this will not delete the item, it simply unlinks it from the list.
+	*/
+	void remove (ObjectType* const item)
+	{
+		LinkedListPointer* l = findPointerTo (item);
+
+		if (l != 0)
+			l->removeNext();
+	}
+
+	/** Iterates the list, calling the delete operator on all of its elements and
+		leaving this pointer empty.
+	*/
+	void deleteAll()
+	{
+		while (item != 0)
+		{
+			ObjectType* const oldItem = item;
+			item = oldItem->nextListItem;
+			delete oldItem;
+		}
+	}
+
+	/** Finds a pointer to a given item.
+		If the item is found in the list, this returns the pointer that points to it. If
+		the item isn't found, this returns null.
+	*/
+	LinkedListPointer* findPointerTo (ObjectType* const itemToLookFor) throw()
+	{
+		LinkedListPointer* l = this;
+
+		while (l->item != 0)
+		{
+			if (l->item == itemToLookFor)
+				return l;
+
+			l = &(l->item->nextListItem);
+		}
+
+		return 0;
+	}
+
+	/** Copies the items in the list to an array.
+		The destArray must contain enough elements to hold the entire list - no checks are
+		made for this!
+	*/
+	void copyToArray (ObjectType** destArray) const throw()
+	{
+		jassert (destArray != 0);
+
+		for (ObjectType* i = item; i != 0; i = i->nextListItem)
+			*destArray++ = i;
+	}
+
+	/**
+		Allows efficient repeated insertions into a list.
+
+		You can create an Appender object which points to the last element in your
+		list, and then repeatedly call Appender::append() to add items to the end
+		of the list in O(1) time.
+	*/
+	class Appender
+	{
+	public:
+		/** Creates an appender which will add items to the given list.
+		*/
+		Appender (LinkedListPointer& endOfListPointer) throw()
+			: endOfList (&endOfListPointer)
+		{
+			// This can only be used to add to the end of a list.
+			jassert (endOfListPointer.item == 0);
+		}
+
+		/** Appends an item to the list. */
+		void append (ObjectType* const newItem) throw()
+		{
+			*endOfList = newItem;
+			endOfList = &(newItem->nextListItem);
+		}
+
+	private:
+		LinkedListPointer* endOfList;
+
+		JUCE_DECLARE_NON_COPYABLE (Appender);
+	};
+
+private:
+
+	ObjectType* item;
+};
+
+#endif   // __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+/*** End of inlined file: juce_LinkedListPointer.h ***/
+
+
+#endif
 #ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
 
 #endif
@@ -9835,7 +10154,7 @@ public:
 
 		@see getNextElement, isTextElement, forEachXmlChildElement
 	*/
-	inline XmlElement* getNextElement() const throw()	   { return nextElement; }
+	inline XmlElement* getNextElement() const throw()	   { return nextListItem; }
 
 	/** Returns the next of this element's siblings which has the specified tag
 		name.
@@ -10070,8 +10389,9 @@ private:
 	friend class XmlDocument;
 
 	String tagName;
-	XmlElement* firstChildElement;
-	XmlElement* nextElement;
+	friend class LinkedListPointer <XmlElement>;
+	LinkedListPointer <XmlElement> firstChildElement;
+	LinkedListPointer <XmlElement> nextListItem;
 
 	struct XmlAttributeNode
 	{
@@ -10079,7 +10399,7 @@ private:
 		XmlAttributeNode (const String& name, const String& value) throw();
 
 		String name, value;
-		XmlAttributeNode* next;
+		LinkedListPointer<XmlAttributeNode> nextListItem;
 
 		bool hasName (const String& name) const throw();
 
@@ -10087,7 +10407,8 @@ private:
 		XmlAttributeNode& operator= (const XmlAttributeNode&);
 	};
 
-	XmlAttributeNode* attributes;
+	friend class LinkedListPointer<XmlAttributeNode>;
+	LinkedListPointer <XmlAttributeNode> attributes;
 
 	XmlElement (int) throw();
 	void copyChildrenAndAttributesFrom (const XmlElement& other);
@@ -28618,9 +28939,10 @@ private:
 	void internalMouseMove  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
 	void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, float amountX, float amountY);
 	void internalBroughtToFront();
+	void internalFocusGain (const FocusChangeType cause, const WeakReference<Component>&);
 	void internalFocusGain (const FocusChangeType cause);
 	void internalFocusLoss (const FocusChangeType cause);
-	void internalChildFocusChange (FocusChangeType cause);
+	void internalChildFocusChange (FocusChangeType cause, const WeakReference<Component>&);
 	void internalModalInputAttempt();
 	void internalModifierKeysChanged();
 	void internalChildrenChanged();
@@ -53892,11 +54214,6 @@ private:
 #define __JUCE_DOCUMENTWINDOW_JUCEHEADER__
 
 
-/*** Start of inlined file: juce_MenuBarComponent.h ***/
-#ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
-#define __JUCE_MENUBARCOMPONENT_JUCEHEADER__
-
-
 /*** Start of inlined file: juce_MenuBarModel.h ***/
 #ifndef __JUCE_MENUBARMODEL_JUCEHEADER__
 #define __JUCE_MENUBARMODEL_JUCEHEADER__
@@ -54044,97 +54361,6 @@ typedef MenuBarModel::Listener MenuBarModelListener;
 /*** End of inlined file: juce_MenuBarModel.h ***/
 
 /**
-	A menu bar component.
-
-	@see MenuBarModel
-*/
-class JUCE_API  MenuBarComponent  : public Component,
-									private MenuBarModel::Listener,
-									private Timer
-{
-public:
-
-	/** Creates a menu bar.
-
-		@param model	the model object to use to control this bar. You can
-							pass 0 into this if you like, and set the model later
-							using the setModel() method
-	*/
-	MenuBarComponent (MenuBarModel* model);
-
-	/** Destructor. */
-	~MenuBarComponent();
-
-	/** Changes the model object to use to control the bar.
-
-		This can be 0, in which case the bar will be empty. Don't delete the object
-		that is passed-in while it's still being used by this MenuBar.
-	*/
-	void setModel (MenuBarModel* newModel);
-
-	/** Returns the current menu bar model being used.
-	*/
-	MenuBarModel* getModel() const throw();
-
-	/** Pops up one of the menu items.
-
-		This lets you manually open one of the menus - it could be triggered by a
-		key shortcut, for example.
-	*/
-	void showMenu (int menuIndex);
-
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void resized();
-	/** @internal */
-	void mouseEnter (const MouseEvent& e);
-	/** @internal */
-	void mouseExit (const MouseEvent& e);
-	/** @internal */
-	void mouseDown (const MouseEvent& e);
-	/** @internal */
-	void mouseDrag (const MouseEvent& e);
-	/** @internal */
-	void mouseUp (const MouseEvent& e);
-	/** @internal */
-	void mouseMove (const MouseEvent& e);
-	/** @internal */
-	void handleCommandMessage (int commandId);
-	/** @internal */
-	bool keyPressed (const KeyPress& key);
-	/** @internal */
-	void menuBarItemsChanged (MenuBarModel* menuBarModel);
-	/** @internal */
-	void menuCommandInvoked (MenuBarModel* menuBarModel,
-							 const ApplicationCommandTarget::InvocationInfo& info);
-
-private:
-
-	class AsyncCallback;
-	friend class AsyncCallback;
-	MenuBarModel* model;
-
-	StringArray menuNames;
-	Array <int> xPositions;
-	int itemUnderMouse, currentPopupIndex, topLevelIndexClicked;
-	int lastMouseX, lastMouseY;
-
-	int getItemAt (int x, int y);
-	void setItemUnderMouse (int index);
-	void setOpenItem (int index);
-	void updateItemUnderMouse (int x, int y);
-	void timerCallback();
-	void repaintMenuItem (int index);
-	void menuDismissed (int topLevelIndex, int itemId);
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
-};
-
-#endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__
-/*** End of inlined file: juce_MenuBarComponent.h ***/
-
-/**
 	A resizable window with a title bar and maximise, minimise and close buttons.
 
 	This subclass of ResizableWindow creates a fairly standard type of window with
@@ -54256,6 +54482,17 @@ public:
 	void setMenuBar (MenuBarModel* menuBarModel,
 					 int menuBarHeight = 0);
 
+	/** Returns the current menu bar component, or null if there isn't one.
+		This is probably a MenuBarComponent, unless a custom one has been set using
+		setMenuBarComponent().
+	*/
+	Component* getMenuBarComponent() const throw();
+
+	/** Replaces the current menu bar with a custom component.
+		The component will be owned and deleted by the document window.
+	*/
+	void setMenuBarComponent (Component* newMenuBarComponent);
+
 	/** This method is called when the user tries to close the window.
 
 		This is triggered by the user clicking the close button, or using some other
@@ -54344,7 +54581,7 @@ private:
 	bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
 	ScopedPointer <Button> titleBarButtons [3];
 	Image titleBarIcon;
-	ScopedPointer <MenuBarComponent> menuBar;
+	ScopedPointer <Component> menuBar;
 	MenuBarModel* menuBarModel;
 
 	class ButtonListenerProxy;
@@ -56228,6 +56465,102 @@ private:
 
 #endif
 #ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
+
+/*** Start of inlined file: juce_MenuBarComponent.h ***/
+#ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
+#define __JUCE_MENUBARCOMPONENT_JUCEHEADER__
+
+/**
+	A menu bar component.
+
+	@see MenuBarModel
+*/
+class JUCE_API  MenuBarComponent  : public Component,
+									private MenuBarModel::Listener,
+									private Timer
+{
+public:
+
+	/** Creates a menu bar.
+
+		@param model	the model object to use to control this bar. You can
+							pass 0 into this if you like, and set the model later
+							using the setModel() method
+	*/
+	MenuBarComponent (MenuBarModel* model);
+
+	/** Destructor. */
+	~MenuBarComponent();
+
+	/** Changes the model object to use to control the bar.
+
+		This can be 0, in which case the bar will be empty. Don't delete the object
+		that is passed-in while it's still being used by this MenuBar.
+	*/
+	void setModel (MenuBarModel* newModel);
+
+	/** Returns the current menu bar model being used.
+	*/
+	MenuBarModel* getModel() const throw();
+
+	/** Pops up one of the menu items.
+
+		This lets you manually open one of the menus - it could be triggered by a
+		key shortcut, for example.
+	*/
+	void showMenu (int menuIndex);
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void resized();
+	/** @internal */
+	void mouseEnter (const MouseEvent& e);
+	/** @internal */
+	void mouseExit (const MouseEvent& e);
+	/** @internal */
+	void mouseDown (const MouseEvent& e);
+	/** @internal */
+	void mouseDrag (const MouseEvent& e);
+	/** @internal */
+	void mouseUp (const MouseEvent& e);
+	/** @internal */
+	void mouseMove (const MouseEvent& e);
+	/** @internal */
+	void handleCommandMessage (int commandId);
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+	/** @internal */
+	void menuBarItemsChanged (MenuBarModel* menuBarModel);
+	/** @internal */
+	void menuCommandInvoked (MenuBarModel* menuBarModel,
+							 const ApplicationCommandTarget::InvocationInfo& info);
+
+private:
+
+	class AsyncCallback;
+	friend class AsyncCallback;
+	MenuBarModel* model;
+
+	StringArray menuNames;
+	Array <int> xPositions;
+	int itemUnderMouse, currentPopupIndex, topLevelIndexClicked;
+	int lastMouseX, lastMouseY;
+
+	int getItemAt (int x, int y);
+	void setItemUnderMouse (int index);
+	void setOpenItem (int index);
+	void updateItemUnderMouse (int x, int y);
+	void timerCallback();
+	void repaintMenuItem (int index);
+	void menuDismissed (int topLevelIndex, int itemId);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
+};
+
+#endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__
+/*** End of inlined file: juce_MenuBarComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_MENUBARMODEL_JUCEHEADER__

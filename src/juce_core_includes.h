@@ -41,6 +41,9 @@
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
  #include "containers/juce_ElementComparator.h"
 #endif
+#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+ #include "containers/juce_LinkedListPointer.h"
+#endif
 #ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
  #include "containers/juce_NamedValueSet.h"
 #endif

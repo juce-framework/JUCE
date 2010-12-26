@@ -353,6 +353,7 @@
           <File RelativePath="..\..\src\containers\juce_DynamicObject.cpp"/>
           <File RelativePath="..\..\src\containers\juce_DynamicObject.h"/>
           <File RelativePath="..\..\src\containers\juce_ElementComparator.h"/>
+          <File RelativePath="..\..\src\containers\juce_LinkedListPointer.h"/>
           <File RelativePath="..\..\src\containers\juce_NamedValueSet.cpp"/>
           <File RelativePath="..\..\src\containers\juce_NamedValueSet.h"/>
           <File RelativePath="..\..\src\containers\juce_OwnedArray.h"/>

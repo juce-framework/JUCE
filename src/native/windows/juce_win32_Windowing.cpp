@@ -492,6 +492,7 @@ public:
           isDragging (false),
           isMouseOver (false),
           hasCreatedCaret (false),
+          constrainerIsResizing (false),
           currentWindowIcon (0),
           dropTarget (0),
           updateLayeredWindowAlpha (255),
@@ -1029,7 +1030,7 @@ private:
   #if JUCE_DIRECT2D
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
   #endif
-    bool fullScreen, isDragging, isMouseOver, hasCreatedCaret;
+    bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
     BorderSize windowBorder;
     HICON currentWindowIcon;
     ScopedPointer<NOTIFYICONDATA> taskBarIcon;
@@ -1542,6 +1543,14 @@ private:
 
     void doCaptureChanged()
     {
+        if (constrainerIsResizing)
+        {
+            if (constrainer != 0)
+                constrainer->resizeEnd();
+
+            constrainerIsResizing = false;
+        }
+
         if (isDragging)
             doMouseUp (getCurrentMousePos(), (WPARAM) 0);
     }
@@ -1764,9 +1773,15 @@ private:
         return false;
     }
 
+    bool isConstrainedNativeWindow() const
+    {
+        return constrainer != 0
+                && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable);
+    }
+
     LRESULT handleSizeConstraining (RECT* const r, const WPARAM wParam)
     {
-        if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+        if (isConstrainedNativeWindow())
         {
             Rectangle<int> pos (r->left, r->top, r->right - r->left, r->bottom - r->top);
 
@@ -1787,7 +1802,7 @@ private:
 
     LRESULT handlePositionChanging (WINDOWPOS* const wp)
     {
-        if (constrainer != 0 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+        if (isConstrainedNativeWindow())
         {
             if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
                  && ! Component::isMouseButtonDownAnywhere())
@@ -2279,6 +2294,32 @@ private:
                 break;
 
             case WM_NCLBUTTONDOWN:
+                if (! sendInputAttemptWhenModalMessage())
+                {
+                    switch (wParam)
+                    {
+                    case HTBOTTOM:
+                    case HTBOTTOMLEFT:
+                    case HTBOTTOMRIGHT:
+                    case HTGROWBOX:
+                    case HTLEFT:
+                    case HTRIGHT:
+                    case HTTOP:
+                    case HTTOPLEFT:
+                    case HTTOPRIGHT:
+                        if (isConstrainedNativeWindow())
+                        {
+                            constrainerIsResizing = true;
+                            constrainer->resizeStart();
+                        }
+                        break;
+
+                    default:
+                        break;
+                    };
+                }
+                break;
+
             case WM_NCRBUTTONDOWN:
             case WM_NCMBUTTONDOWN:
                 sendInputAttemptWhenModalMessage();
