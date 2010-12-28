@@ -27,7 +27,8 @@
 #define __JUCE_NAMEDVALUESET_JUCEHEADER__
 
 #include "juce_Variant.h"
-#include "../containers/juce_Array.h"
+#include "../containers/juce_LinkedListPointer.h"
+class XmlElement;
 
 
 //==============================================================================
@@ -85,14 +86,12 @@ public:
     bool remove (const Identifier& name);
 
     /** Returns the name of the value at a given index.
-        The index must be between 0 and size() - 1. Out-of-range indexes will
-        return an empty identifier.
+        The index must be between 0 and size() - 1.
     */
     const Identifier getName (int index) const;
 
     /** Returns the value of the item at a given index.
-        The index must be between 0 and size() - 1. Out-of-range indexes will
-        return an empty identifier.
+        The index must be between 0 and size() - 1.
     */
     const var getValueAt (int index) const;
 
@@ -108,19 +107,34 @@ public:
     */
     var* getVarPointer (const Identifier& name) const;
 
+    //==============================================================================
+    /** Sets properties to the values of all of an XML element's attributes. */
+    void setFromXmlAttributes (const XmlElement& xml);
+
+    /** Sets attributes in an XML element corresponding to each of this object's
+        properties.
+    */
+    void copyToXmlAttributes (XmlElement& xml) const;
+
 private:
     //==============================================================================
-    struct NamedValue
+    class NamedValue
     {
+    public:
         NamedValue() throw();
         NamedValue (const Identifier& name, const var& value);
         bool operator== (const NamedValue& other) const throw();
 
+        LinkedListPointer<NamedValue> nextListItem;
         Identifier name;
         var value;
+
+    private:
+        JUCE_LEAK_DETECTOR (NamedValue);
     };
 
-    Array <NamedValue> values;
+    friend class LinkedListPointer<NamedValue>;
+    LinkedListPointer<NamedValue> values;
 };
 
 

@@ -65,7 +65,8 @@
   #import <IOKit/hid/IOHIDKeys.h>
   #import <IOKit/pwr_mgt/IOPMLib.h>
  #endif
- #if JUCE_BUILD_MISC && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU)
+ #if JUCE_BUILD_MISC && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
+    && ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
   #include <Carbon/Carbon.h>
  #endif
  #include <sys/dir.h>

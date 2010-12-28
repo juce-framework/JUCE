@@ -32,40 +32,23 @@ namespace SystemStatsHelpers
     static int64 highResTimerFrequency = 0;
     static double highResTimerToMillisecRatio = 0;
 
-    #if JUCE_INTEL
-
-    static void juce_getCpuVendor (char* const v) throw()
+  #if JUCE_INTEL
+    void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
     {
-        int vendor[4];
-        zerostruct (vendor);
-        int dummy = 0;
+        uint32 la = a, lb = b, lc = c, ld = d;
 
         asm ("mov %%ebx, %%esi \n\t"
              "cpuid \n\t"
              "xchg %%esi, %%ebx"
-               : "=a" (dummy), "=S" (vendor[0]), "=c" (vendor[2]), "=d" (vendor[1]) : "a" (0));
+               : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld) : "a" (type)
+           #if JUCE_64BIT
+                  , "b" (lb), "c" (lc), "d" (ld)
+           #endif
+        );
 
-        memcpy (v, vendor, 16);
+        a = la; b = lb; c = lc; d = ld;
     }
-
-    static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures)
-    {
-        unsigned int cpu = 0;
-        unsigned int ext = 0;
-        unsigned int family = 0;
-        unsigned int dummy = 0;
-
-        asm ("mov %%ebx, %%esi \n\t"
-             "cpuid \n\t"
-             "xchg %%esi, %%ebx"
-               : "=a" (family), "=S" (ext), "=c" (dummy), "=d" (cpu) : "a" (1));
-
-        familyModel = family;
-        extFeatures = ext;
-        return cpu;
-    }
-
-    #endif
+  #endif
 }
 
 //==============================================================================
@@ -83,8 +66,8 @@ void SystemStats::initialiseStats()
       #endif
 
       #if JUCE_INTEL
-        unsigned int familyModel, extFeatures;
-        const unsigned int features = getCPUIDWord (familyModel, extFeatures);
+        uint32 familyModel = 0, extFeatures = 0, features = 0, dummy = 0;
+        doCPUID (familyModel, extFeatures, dummy, features, 1);
 
         cpuFlags.hasMMX = ((features & (1 << 23)) != 0);
         cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
@@ -162,9 +145,13 @@ int SystemStats::getMemorySizeInMegabytes()
 const String SystemStats::getCpuVendor()
 {
 #if JUCE_INTEL
-    char v [16];
-    SystemStatsHelpers::juce_getCpuVendor (v);
-    return String (v, 16);
+    uint32 dummy = 0;
+    uint32 vendor[4];
+    zerostruct (vendor);
+
+    SystemStatsHelpers::doCPUID (dummy, vendor[0], vendor[2], vendor[1], 0);
+
+    return String (reinterpret_cast <const char*> (vendor), 12);
 #else
     return String::empty;
 #endif

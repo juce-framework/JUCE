@@ -78,6 +78,8 @@
 #undef min
 #define NO_DUMMY_DECL
 
+#define JUCE_AMALGAMATED_TEMPLATE 1
+
 #if JUCE_BUILD_NATIVE
  #include "../juce_amalgamated.h"  // FORCE_AMALGAMATOR_INCLUDE
 #endif
@@ -91,8 +93,6 @@
  #include "../src/native/mac/juce_mac_CarbonViewWrapperComponent.h"
  END_JUCE_NAMESPACE
 #endif
-
-#define JUCE_AMALGAMATED_TEMPLATE 1
 
 //==============================================================================
 #if JUCE_BUILD_CORE

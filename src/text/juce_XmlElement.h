@@ -586,13 +586,11 @@ public:
         To improve performance, the compareElements() method can be declared as static or const.
 
         @param comparator   the comparator to use for comparing elements.
-        @param retainOrderOfEquivalentItems     if this is true, then items
-                            which the comparator says are equivalent will be
-                            kept in the order in which they currently appear
-                            in the array. This is slower to perform, but may
-                            be important in some cases. If it's false, a faster
-                            algorithm is used, but equivalent elements may be
-                            rearranged.
+        @param retainOrderOfEquivalentItems     if this is true, then items which the comparator
+                            says are equivalent will be kept in the order in which they
+                            currently appear in the array. This is slower to perform, but
+                            may be important in some cases. If it's false, a faster algorithm
+                            is used, but equivalent elements may be rearranged.
     */
     template <class ElementComparator>
     void sortChildElements (ElementComparator& comparator,
@@ -688,20 +686,13 @@ public:
 
     //==============================================================================
 private:
-    friend class XmlDocument;
-
-    String tagName;
-    friend class LinkedListPointer <XmlElement>;
-    LinkedListPointer <XmlElement> firstChildElement;
-    LinkedListPointer <XmlElement> nextListItem;
-
     struct XmlAttributeNode
     {
         XmlAttributeNode (const XmlAttributeNode& other) throw();
         XmlAttributeNode (const String& name, const String& value) throw();
 
-        String name, value;
         LinkedListPointer<XmlAttributeNode> nextListItem;
+        String name, value;
 
         bool hasName (const String& name) const throw();
 
@@ -709,8 +700,14 @@ private:
         XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
 
+    friend class XmlDocument;
     friend class LinkedListPointer<XmlAttributeNode>;
+    friend class LinkedListPointer <XmlElement>;
+
+    LinkedListPointer <XmlElement> nextListItem;
+    LinkedListPointer <XmlElement> firstChildElement;
     LinkedListPointer <XmlAttributeNode> attributes;
+    String tagName;
 
     XmlElement (int) throw();
     void copyChildrenAndAttributesFrom (const XmlElement& other);

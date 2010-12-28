@@ -830,20 +830,10 @@ void ValueTree::removeListener (Listener* listener)
 //==============================================================================
 XmlElement* ValueTree::SharedObject::createXml() const
 {
-    XmlElement* xml = new XmlElement (type.toString());
+    XmlElement* const xml = new XmlElement (type.toString());
+    properties.copyToXmlAttributes (*xml);
 
-    int i;
-    for (i = 0; i < properties.size(); ++i)
-    {
-        Identifier name (properties.getName(i));
-        const var& v = properties [name];
-
-        jassert (! v.isObject()); // DynamicObjects can't be stored as XML!
-
-        xml->setAttribute (name.toString(), v.toString());
-    }
-
-    for (i = 0; i < children.size(); ++i)
+    for (int i = 0; i < children.size(); ++i)
         xml->addChildElement (children.getUnchecked(i)->createXml());
 
     return xml;
@@ -857,16 +847,10 @@ XmlElement* ValueTree::createXml() const
 ValueTree ValueTree::fromXml (const XmlElement& xml)
 {
     ValueTree v (xml.getTagName());
-
-    const int numAtts = xml.getNumAttributes(); // xxx inefficient - should write an att iterator..
-
-    for (int i = 0; i < numAtts; ++i)
-        v.setProperty (xml.getAttributeName (i), var (xml.getAttributeValue (i)), 0);
+    v.object->properties.setFromXmlAttributes (xml);
 
     forEachXmlChildElement (xml, e)
-    {
         v.addChild (fromXml (*e), -1, 0);
-    }
 
     return v;
 }
@@ -917,13 +901,18 @@ ValueTree ValueTree::readFromStream (InputStream& input)
         const String name (input.readString());
         jassert (name.isNotEmpty());
         const var value (var::readFromStream (input));
-        v.setProperty (name, value, 0);
+        v.object->properties.set (name, value);
     }
 
     const int numChildren = input.readCompressedInt();
 
     for (i = 0; i < numChildren; ++i)
-        v.addChild (readFromStream (input), -1, 0);
+    {
+        ValueTree child (readFromStream (input));
+
+        v.object->children.add (child.object);
+        child.object->parent = v.object;
+    }
 
     return v;
 }

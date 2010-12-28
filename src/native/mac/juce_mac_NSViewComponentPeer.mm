@@ -1659,9 +1659,17 @@ void Desktop::createMouseInputSources()
 //==============================================================================
 void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
-    // Very annoyingly, this function has to use the old SetSystemUIMode function,
-    // which is in Carbon.framework. But, because there's no Cocoa equivalent, it
-    // is apparently still available in 64-bit apps..
+  #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+    if (enableOrDisable)
+    {
+        [NSApp setPresentationOptions: NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar];
+        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+    }
+    else
+    {
+        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+    }
+  #else
     if (enableOrDisable)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
@@ -1671,6 +1679,7 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
     {
         SetSystemUIMode (kUIModeNormal, 0);
     }
+  #endif
 }
 
 //==============================================================================

@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_NamedValueSet.h"
+#include "../text/juce_XmlElement.h"
 
 
 //==============================================================================
@@ -51,23 +52,42 @@ NamedValueSet::NamedValueSet() throw()
 }
 
 NamedValueSet::NamedValueSet (const NamedValueSet& other)
-    : values (other.values)
 {
+    values.addCopyOfList (other.values);
 }
 
 NamedValueSet& NamedValueSet::operator= (const NamedValueSet& other)
 {
-    values = other.values;
+    clear();
+    values.addCopyOfList (other.values);
     return *this;
 }
 
 NamedValueSet::~NamedValueSet()
 {
+    clear();
+}
+
+void NamedValueSet::clear()
+{
+    values.deleteAll();
 }
 
 bool NamedValueSet::operator== (const NamedValueSet& other) const
 {
-    return values == other.values;
+    const NamedValue* i1 = values;
+    const NamedValue* i2 = other.values;
+
+    while (i1 != 0 && i2 != 0)
+    {
+        if (! (*i1 == *i2))
+            return false;
+
+        i1 = i1->nextListItem;
+        i2 = i2->nextListItem;
+    }
+
+    return true;
 }
 
 bool NamedValueSet::operator!= (const NamedValueSet& other) const
@@ -82,13 +102,9 @@ int NamedValueSet::size() const throw()
 
 const var& NamedValueSet::operator[] (const Identifier& name) const
 {
-    for (int i = values.size(); --i >= 0;)
-    {
-        const NamedValue& v = values.getReference(i);
-
-        if (v.name == name)
-            return v.value;
-    }
+    for (NamedValue* i = values; i != 0; i = i->nextListItem)
+        if (i->name == name)
+            return i->value;
 
     return var::null;
 }
@@ -101,34 +117,34 @@ const var NamedValueSet::getWithDefault (const Identifier& name, const var& defa
 
 var* NamedValueSet::getVarPointer (const Identifier& name) const
 {
-    for (int i = values.size(); --i >= 0;)
-    {
-        NamedValue& v = values.getReference(i);
-
-        if (v.name == name)
-            return &(v.value);
-    }
+    for (NamedValue* i = values; i != 0; i = i->nextListItem)
+        if (i->name == name)
+            return &(i->value);
 
     return 0;
 }
 
 bool NamedValueSet::set (const Identifier& name, const var& newValue)
 {
-    for (int i = values.size(); --i >= 0;)
-    {
-        NamedValue& v = values.getReference(i);
+    LinkedListPointer<NamedValue>* i = &values;
 
-        if (v.name == name)
+    while (i->get() != 0)
+    {
+        NamedValue* const v = i->get();
+
+        if (v->name == name)
         {
-            if (v.value == newValue)
+            if (v->value == newValue)
                 return false;
 
-            v.value = newValue;
+            v->value = newValue;
             return true;
         }
+
+        i = &(v->nextListItem);
     }
 
-    values.add (NamedValue (name, newValue));
+    i->insertNext (new NamedValue (name, newValue));
     return true;
 }
 
@@ -139,13 +155,22 @@ bool NamedValueSet::contains (const Identifier& name) const
 
 bool NamedValueSet::remove (const Identifier& name)
 {
-    for (int i = values.size(); --i >= 0;)
+    LinkedListPointer<NamedValue>* i = &values;
+
+    for (;;)
     {
-        if (values.getReference(i).name == name)
+        NamedValue* const v = i->get();
+
+        if (v == 0)
+            break;
+
+        if (v->name == name)
         {
-            values.remove (i);
+            delete i->removeNext();
             return true;
         }
+
+        i = &(v->nextListItem);
     }
 
     return false;
@@ -153,19 +178,37 @@ bool NamedValueSet::remove (const Identifier& name)
 
 const Identifier NamedValueSet::getName (const int index) const
 {
-    jassert (isPositiveAndBelow (index, values.size()));
-    return values [index].name;
+    const NamedValue* const v = values[index];
+    jassert (v != 0);
+    return v->name;
 }
 
 const var NamedValueSet::getValueAt (const int index) const
 {
-    jassert (isPositiveAndBelow (index, values.size()));
-    return values [index].value;
+    const NamedValue* const v = values[index];
+    jassert (v != 0);
+    return v->value;
 }
 
-void NamedValueSet::clear()
+void NamedValueSet::setFromXmlAttributes (const XmlElement& xml)
 {
-    values.clear();
+    LinkedListPointer<NamedValue>::Appender appender (values.getLast());
+
+    const int numAtts = xml.getNumAttributes(); // xxx inefficient - should write an att iterator..
+
+    for (int i = 0; i < numAtts; ++i)
+        set (xml.getAttributeName (i), var (xml.getAttributeValue (i)));
+}
+
+void NamedValueSet::copyToXmlAttributes (XmlElement& xml) const
+{
+    for (NamedValue* i = values; i != 0; i = i->nextListItem)
+    {
+        jassert (! i->value.isObject()); // DynamicObjects can't be stored as XML!
+
+        xml.setAttribute (i->name.toString(),
+                          i->value.toString());
+    }
 }
 
 

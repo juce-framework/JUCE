@@ -458,6 +458,11 @@ void Component::setName (const String& name)
     }
 }
 
+void Component::setComponentID (const String& newID)
+{
+    componentID = newID;
+}
+
 void Component::setVisible (bool shouldBeVisible)
 {
     if (flags.visibleFlag != shouldBeVisible)

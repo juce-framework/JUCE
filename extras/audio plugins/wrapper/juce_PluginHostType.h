@@ -59,7 +59,8 @@ public:
         SteinbergWavelab7,
         SteinbergWavelabGeneric,
         MuseReceptorGeneric,
-        MagixSamplitude
+        MagixSamplitude,
+        FruityLoops
     };
 
     const HostType type;
@@ -120,6 +121,11 @@ public:
         return type == MagixSamplitude;
     }
 
+    bool isFruityLoops() const throw()
+    {
+        return type == FruityLoops;
+    }
+
     //==============================================================================
     static String getHostPath()
     {
@@ -169,6 +175,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
         if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
+        if (hostFilename.startsWith ("FL")                      return FruityLoops;
 
       #elif JUCE_LINUX
         jassertfalse   // not yet done!

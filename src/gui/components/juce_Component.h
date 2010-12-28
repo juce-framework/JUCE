@@ -108,6 +108,17 @@ public:
     */
     virtual void setName (const String& newName);
 
+    /** Returns the ID string that was set by setComponentID().
+        @see setComponentID
+    */
+    const String& getComponentID() const throw()            { return componentID; }
+
+    /** Sets the component's ID string.
+        You can retrieve the ID using getComponentID().
+        @see getComponentID
+    */
+    void setComponentID (const String& newID);
+
     //==============================================================================
     /** Makes the component visible or invisible.
 
@@ -2115,7 +2126,7 @@ private:
     static Component* currentlyFocusedComponent;
 
     //==============================================================================
-    String componentName_;
+    String componentName_, componentID;
     Component* parentComponent_;
     Rectangle<int> bounds_;
     ScopedPointer <AffineTransform> affineTransform_;

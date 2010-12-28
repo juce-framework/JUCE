@@ -140,60 +140,6 @@ private:
 
 
 //==============================================================================
-class DrawableComponent    : public Component,
-                             public ValueTree::Listener
-{
-public:
-    DrawableComponent (const ValueTree& drawable_)
-    {
-        setDrawable (drawable_);
-    }
-
-    ~DrawableComponent()
-    {
-    }
-
-    void setDrawable (const ValueTree& newDrawable)
-    {
-        drawable.removeListener (this);
-        drawable = newDrawable;
-        drawable.addListener (this);
-        drawableObject = Drawable::createFromValueTree (drawable, 0); // xxx image provider missing
-        addAndMakeVisible (drawableObject);
-        resized();
-        repaint();
-    }
-
-    void resized()
-    {
-/*        DrawableComposite* dc = dynamic_cast <DrawableComposite*> (static_cast <Drawable*> (drawableObject));
-
-        if (dc != 0)
-        {
-            const RelativeCoordinate origin, right (getWidth()), bottom (getHeight());
-
-            dc->setContentArea (RelativeRectangle (origin, right, origin, bottom));
-            //dc->resetBoundingBoxToContentArea();
-        }*/
-    }
-
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)       { updateGraphics(); }
-    void valueTreeChildrenChanged (ValueTree&)                          { updateGraphics(); }
-    void valueTreeParentChanged (ValueTree&)                            { updateGraphics(); }
-
-private:
-    ValueTree drawable;
-    ScopedPointer<Drawable> drawableObject;
-
-    void updateGraphics()
-    {
-        if (drawableObject != 0)
-            drawableObject->refreshFromValueTree (drawable, 0);
-    }
-};
-
-
-//==============================================================================
 /**
 */
 class RelativeRectangleLayoutManager    : public ComponentListener,
