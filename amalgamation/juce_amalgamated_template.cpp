@@ -273,6 +273,7 @@
  #include "../src/gui/components/keyboard/juce_KeyPressMappingSet.cpp"
  #include "../src/gui/components/keyboard/juce_ModifierKeys.cpp"
  #include "../src/gui/components/layout/juce_ComponentAnimator.cpp"
+ #include "../src/gui/components/layout/juce_ComponentBuilder.cpp"
  #include "../src/gui/components/layout/juce_ComponentBoundsConstrainer.cpp"
  #include "../src/gui/components/layout/juce_ComponentMovementWatcher.cpp"
  #include "../src/gui/components/layout/juce_GroupComponent.cpp"

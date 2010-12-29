@@ -175,17 +175,18 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
     while (target != 0)
     {
         const WeakReference<Component> deletionChecker (target);
+        const Array <KeyListener*>* const keyListeners = target->keyListeners;
 
-        if (target->keyListeners_ != 0)
+        if (keyListeners != 0)
         {
-            for (int i = target->keyListeners_->size(); --i >= 0;)
+            for (int i = keyListeners->size(); --i >= 0;)
             {
-                keyWasUsed = target->keyListeners_->getUnchecked(i)->keyPressed (keyInfo, target);
+                keyWasUsed = keyListeners->getUnchecked(i)->keyPressed (keyInfo, target);
 
                 if (keyWasUsed || deletionChecker == 0)
                     return keyWasUsed;
 
-                i = jmin (i, target->keyListeners_->size());
+                i = jmin (i, keyListeners->size());
             }
         }
 
@@ -202,7 +203,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
             break;
         }
 
-        target = target->parentComponent_;
+        target = target->getParentComponent();
     }
 
     return keyWasUsed;
@@ -235,20 +236,22 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
         if (keyWasUsed || deletionChecker == 0)
             break;
 
-        if (target->keyListeners_ != 0)
+        const Array <KeyListener*>* const keyListeners = target->keyListeners;
+
+        if (keyListeners != 0)
         {
-            for (int i = target->keyListeners_->size(); --i >= 0;)
+            for (int i = keyListeners->size(); --i >= 0;)
             {
-                keyWasUsed = target->keyListeners_->getUnchecked(i)->keyStateChanged (isKeyDown, target);
+                keyWasUsed = keyListeners->getUnchecked(i)->keyStateChanged (isKeyDown, target);
 
                 if (keyWasUsed || deletionChecker == 0)
                     return keyWasUsed;
 
-                i = jmin (i, target->keyListeners_->size());
+                i = jmin (i, keyListeners->size());
             }
         }
 
-        target = target->parentComponent_;
+        target = target->getParentComponent();
     }
 
     return keyWasUsed;
@@ -313,7 +316,7 @@ void ComponentPeer::handleMovedOrResized()
 
         if (wasMoved || wasResized)
         {
-            component->bounds_ = newBounds;
+            component->bounds = newBounds;
 
             if (wasResized)
                 component->repaint();

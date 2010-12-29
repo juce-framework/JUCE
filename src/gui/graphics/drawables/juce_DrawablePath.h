@@ -64,13 +64,11 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    const ValueTree createValueTree (ImageProvider* imageProvider) const;
+    const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
     /** @internal */
     static const Identifier valueTreeType;
-    /** @internal */
-    const Identifier getValueTreeType() const       { return valueTreeType; }
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */

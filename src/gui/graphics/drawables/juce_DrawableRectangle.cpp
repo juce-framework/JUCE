@@ -143,12 +143,12 @@ Value DrawableRectangle::ValueTreeWrapper::getCornerSizeValue (UndoManager* undo
 }
 
 //==============================================================================
-void DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder)
 {
     ValueTreeWrapper v (tree);
-    setName (v.getID());
+    setComponentID (v.getID());
 
-    if (refreshFillTypes (v, getParent(), imageProvider))
+    if (refreshFillTypes (v, getParent(), builder.getImageProvider()))
         repaint();
 
     RelativeParallelogram newBounds (v.getRectangle());
@@ -166,12 +166,12 @@ void DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ImageProvid
     }
 }
 
-const ValueTree DrawableRectangle::createValueTree (ImageProvider* imageProvider) const
+const ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);
 
-    v.setID (getName(), 0);
+    v.setID (getComponentID());
     writeTo (v, imageProvider, 0);
     v.setRectangle (bounds, 0);
     v.setCornerSize (cornerSize, 0);

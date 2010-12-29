@@ -226,10 +226,10 @@ void DrawableImage::ValueTreeWrapper::setBoundingBox (const RelativeParallelogra
 
 
 //==============================================================================
-void DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawableImage::refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder)
 {
     const ValueTreeWrapper controller (tree);
-    setName (controller.getID());
+    setComponentID (controller.getID());
 
     const float newOpacity = controller.getOpacity();
     const Colour newOverlayColour (controller.getOverlayColour());
@@ -237,10 +237,11 @@ void DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* 
     Image newImage;
     const var imageIdentifier (controller.getImageIdentifier());
 
-    jassert (imageProvider != 0 || imageIdentifier.isVoid()); // if you're using images, you need to provide something that can load and save them!
 
-    if (imageProvider != 0)
-        newImage = imageProvider->getImageForIdentifier (imageIdentifier);
+    jassert (builder.getImageProvider() != 0 || imageIdentifier.isVoid()); // if you're using images, you need to provide something that can load and save them!
+
+    if (builder.getImageProvider() != 0)
+        newImage = builder.getImageProvider()->getImageForIdentifier (imageIdentifier);
 
     const RelativeParallelogram newBounds (controller.getBoundingBox());
 
@@ -259,12 +260,12 @@ void DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* 
     }
 }
 
-const ValueTree DrawableImage::createValueTree (ImageProvider* imageProvider) const
+const ValueTree DrawableImage::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);
 
-    v.setID (getName(), 0);
+    v.setID (getComponentID());
     v.setOpacity (opacity, 0);
     v.setOverlayColour (overlayColour, 0);
     v.setBoundingBox (bounds, 0);

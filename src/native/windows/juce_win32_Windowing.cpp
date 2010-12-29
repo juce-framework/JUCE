@@ -54,8 +54,6 @@ extern bool juce_IsRunningInWine();
   #define AC_SRC_ALPHA  0x01
 #endif
 
-static HPALETTE palette = 0;
-static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
 
 #define WM_TRAYNOTIFY WM_USER + 100
@@ -247,25 +245,6 @@ public:
             // only open if we're not palettised
             if (n > 8)
                 hdd = DrawDibOpen();
-        }
-
-        if (createPaletteIfNeeded)
-        {
-            HDC dc = GetDC (0);
-            const int n = GetDeviceCaps (dc, BITSPIXEL);
-            ReleaseDC (0, dc);
-
-            if (n <= 8)
-                palette = CreateHalftonePalette (dc);
-
-            createPaletteIfNeeded = false;
-        }
-
-        if (palette != 0)
-        {
-            SelectPalette (dc, palette, FALSE);
-            RealizePalette (dc);
-            SetStretchBltMode (dc, HALFTONE);
         }
 
         SetMapMode (dc, MM_TEXT);
@@ -2201,13 +2180,8 @@ private:
             case WM_SYNCPAINT:
                 return 0;
 
-            case WM_PALETTECHANGED:
-                InvalidateRect (h, 0, 0);
-                break;
-
             case WM_DISPLAYCHANGE:
                 InvalidateRect (h, 0, 0);
-                createPaletteIfNeeded = true;
                 // intentional fall-through...
             case WM_SETTINGCHANGE:  // note the fall-through in the previous case!
                 doSettingChange();

@@ -2446,14 +2446,14 @@ Button* LookAndFeel::createTabBarExtrasButton()
     dp.setFill (Colour (0x59000000));
 
     DrawableComposite normalImage;
-    normalImage.insertDrawable (ellipse);
-    normalImage.insertDrawable (dp);
+    normalImage.addAndMakeVisible (ellipse.createCopy());
+    normalImage.addAndMakeVisible (dp.createCopy());
 
     dp.setFill (Colour (0xcc000000));
 
     DrawableComposite overImage;
-    overImage.insertDrawable (ellipse);
-    overImage.insertDrawable (dp);
+    overImage.addAndMakeVisible (ellipse.createCopy());
+    overImage.addAndMakeVisible (dp.createCopy());
 
     DrawableButton* db = new DrawableButton ("tabs", DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, 0);

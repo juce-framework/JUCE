@@ -103,14 +103,14 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     currentPathBox.setEditableText (true);
 
     StringArray rootNames, rootPaths;
-    const BigInteger separators (getRoots (rootNames, rootPaths));
+    getRoots (rootNames, rootPaths);
 
     for (int i = 0; i < rootNames.size(); ++i)
     {
-        if (separators [i])
+        if (rootNames[i].isEmpty())
             currentPathBox.addSeparator();
-
-        currentPathBox.addItem (rootNames[i], i + 1);
+        else
+            currentPathBox.addItem (rootNames[i], i + 1);
     }
 
     currentPathBox.addSeparator();
@@ -213,7 +213,8 @@ bool FileBrowserComponent::isDirectorySuitable (const File&) const
 bool FileBrowserComponent::isFileOrDirSuitable (const File& f) const
 {
     if (f.isDirectory())
-        return (flags & canSelectDirectories) != 0 && (fileFilter == 0 || fileFilter->isDirectorySuitable (f));
+        return (flags & canSelectDirectories) != 0
+                && (fileFilter == 0 || fileFilter->isDirectorySuitable (f));
 
     return (flags & canSelectFiles) != 0 && f.exists()
             && (fileFilter == 0 || fileFilter->isFileSuitable (f));
@@ -278,6 +279,15 @@ void FileBrowserComponent::goUp()
 void FileBrowserComponent::refresh()
 {
     fileList->refresh();
+}
+
+void FileBrowserComponent::setFileFilter (const FileFilter* const newFileFilter)
+{
+    if (fileFilter != newFileFilter)
+    {
+        fileFilter = newFileFilter;
+        refresh();
+    }
 }
 
 const String FileBrowserComponent::getActionVerb() const
@@ -427,7 +437,6 @@ void FileBrowserComponent::buttonClicked (Button*)
     goUp();
 }
 
-
 void FileBrowserComponent::comboBoxChanged (ComboBox*)
 {
     const String newText (currentPathBox.getText().trim().unquoted());
@@ -464,10 +473,8 @@ void FileBrowserComponent::comboBoxChanged (ComboBox*)
     }
 }
 
-const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
+void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
 {
-    BigInteger separators;
-
 #if JUCE_WINDOWS
     Array<File> roots;
     File::findFileSystemRoots (roots);
@@ -497,7 +504,8 @@ const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringA
         rootNames.add (name);
     }
 
-    separators.setBit (rootPaths.size());
+    rootPaths.add (String::empty);
+    rootNames.add (String::empty);
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
     rootNames.add ("Documents");
@@ -513,7 +521,8 @@ const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringA
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add ("Desktop");
 
-    separators.setBit (rootPaths.size());
+    rootPaths.add (String::empty);
+    rootNames.add (String::empty);
 
     Array <File> volumes;
     File vol ("/Volumes");
@@ -539,8 +548,6 @@ const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringA
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add ("Desktop");
 #endif
-
-    return separators;
 }
 
 

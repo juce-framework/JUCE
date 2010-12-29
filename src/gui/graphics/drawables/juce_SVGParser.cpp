@@ -161,7 +161,7 @@ private:
             else if (e->hasTagName ("switch"))      d = parseSwitch (*e);
             else if (e->hasTagName ("style"))       parseCSSStyle (*e);
 
-            parentDrawable->insertDrawable (d);
+            parentDrawable->addAndMakeVisible (d);
         }
     }
 

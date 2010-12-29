@@ -239,10 +239,10 @@ void DrawableText::ValueTreeWrapper::setFontSizeControlPoint (const RelativePoin
 }
 
 //==============================================================================
-void DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
+void DrawableText::refreshFromValueTree (const ValueTree& tree, ComponentBuilder&)
 {
     ValueTreeWrapper v (tree);
-    setName (v.getID());
+    setComponentID (v.getID());
 
     const RelativeParallelogram newBounds (v.getBoundingBox());
     const RelativePoint newFontPoint (v.getFontSizeControlPoint());
@@ -264,12 +264,12 @@ void DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
     }
 }
 
-const ValueTree DrawableText::createValueTree (ImageProvider*) const
+const ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);
 
-    v.setID (getName(), 0);
+    v.setID (getComponentID());
     v.setText (text, 0);
     v.setFont (font, 0);
     v.setJustification (justification, 0);

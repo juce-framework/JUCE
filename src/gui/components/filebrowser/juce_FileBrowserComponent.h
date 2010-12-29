@@ -29,7 +29,6 @@
 #include "juce_DirectoryContentsDisplayComponent.h"
 #include "juce_FilePreviewComponent.h"
 #include "../../../io/files/juce_File.h"
-#include "../../../maths/juce_BigInteger.h"
 #include "../controls/juce_TextEditor.h"
 #include "../controls/juce_ComboBox.h"
 #include "../buttons/juce_DrawableButton.h"
@@ -148,6 +147,9 @@ public:
     /** Refreshes the directory that's currently being listed. */
     void refresh();
 
+    /** Changes the filter that's being used to sift the files. */
+    void setFileFilter (const FileFilter* newFileFilter);
+
     /** Returns a verb to describe what should happen when the file is accepted.
 
         E.g. if browsing in "load file" mode, this will be "Open", if in "save file"
@@ -205,7 +207,10 @@ public:
     FilePreviewComponent* getPreviewComponent() const throw();
 
 protected:
-    virtual const BigInteger getRoots (StringArray& rootNames, StringArray& rootPaths);
+    /** Returns a list of names and paths for the default places the user might want to look.
+        Use an empty string to indicate a section break.
+    */
+    virtual void getRoots (StringArray& rootNames, StringArray& rootPaths);
 
 private:
     //==============================================================================

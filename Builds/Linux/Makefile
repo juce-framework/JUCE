@@ -12,7 +12,7 @@ ifeq ($(CONFIG),Debug)
   BINDIR := build
   LIBDIR := build
   OBJDIR := build/intermediate/Debug
-  OUTDIR := build
+  OUTDIR := ../../bin
   CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0
   CXXFLAGS += $(CFLAGS) 
@@ -27,7 +27,7 @@ ifeq ($(CONFIG),Release)
   BINDIR := build
   LIBDIR := build
   OBJDIR := build/intermediate/Release
-  OUTDIR := build
+  OUTDIR := ../../bin
   CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -Os
   CXXFLAGS += $(CFLAGS) 
@@ -171,6 +171,7 @@ OBJECTS := \
   $(OBJDIR)/juce_ModifierKeys_eea16d64.o \
   $(OBJDIR)/juce_ComponentAnimator_ad5663d2.o \
   $(OBJDIR)/juce_ComponentBoundsConstrainer_a33c10ae.o \
+  $(OBJDIR)/juce_ComponentBuilder_2aa6c5a.o \
   $(OBJDIR)/juce_ComponentMovementWatcher_cbb3e7cc.o \
   $(OBJDIR)/juce_GroupComponent_456e237a.o \
   $(OBJDIR)/juce_MultiDocumentPanel_50e05aac.o \
@@ -1020,6 +1021,11 @@ $(OBJDIR)/juce_ComponentAnimator_ad5663d2.o: ../../src/gui/components/layout/juc
 $(OBJDIR)/juce_ComponentBoundsConstrainer_a33c10ae.o: ../../src/gui/components/layout/juce_ComponentBoundsConstrainer.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ComponentBoundsConstrainer.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ComponentBuilder_2aa6c5a.o: ../../src/gui/components/layout/juce_ComponentBuilder.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_ComponentBuilder.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentMovementWatcher_cbb3e7cc.o: ../../src/gui/components/layout/juce_ComponentMovementWatcher.cpp

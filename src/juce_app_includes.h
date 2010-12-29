@@ -428,6 +428,9 @@
 #ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
  #include "gui/components/layout/juce_ComponentBoundsConstrainer.h"
 #endif
+#ifndef __JUCE_COMPONENTBUILDER_JUCEHEADER__
+ #include "gui/components/layout/juce_ComponentBuilder.h"
+#endif
 #ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
  #include "gui/components/layout/juce_ComponentMovementWatcher.h"
 #endif

@@ -50,75 +50,6 @@ public:
     ~DrawableComposite();
 
     //==============================================================================
-    /** Adds a new sub-drawable to this one.
-
-        This passes in a Drawable pointer for this object to look after. To add a copy
-        of a drawable, use the form of this method that takes a Drawable reference instead.
-
-        @param drawable         the object to add - this will be deleted automatically
-                                when no longer needed, so the caller mustn't keep any
-                                pointers to it.
-        @param index            where to insert it in the list of drawables. 0 is the back,
-                                -1 is the front, or any value from 0 and getNumDrawables()
-                                can be used
-        @see removeDrawable
-    */
-    void insertDrawable (Drawable* drawable, int index = -1);
-
-    /** Adds a new sub-drawable to this one.
-
-        This takes a copy of a Drawable and adds it to this object. To pass in a Drawable
-        for this object to look after, use the form of this method that takes a Drawable
-        pointer instead.
-
-        @param drawable         the object to add - an internal copy will be made of this object
-        @param index            where to insert it in the list of drawables. 0 is the back,
-                                -1 is the front, or any value from 0 and getNumDrawables()
-                                can be used
-        @see removeDrawable
-    */
-    void insertDrawable (const Drawable& drawable, int index = -1);
-
-    /** Deletes one of the Drawable objects.
-
-        @param index    the index of the drawable to delete, between 0
-                        and (getNumDrawables() - 1).
-        @param deleteDrawable   if this is true, the drawable that is removed will also
-                        be deleted. If false, it'll just be removed.
-        @see insertDrawable, getNumDrawables
-    */
-    void removeDrawable (int index, bool deleteDrawable = true);
-
-    /** Returns the number of drawables contained inside this one.
-
-        @see getDrawable
-    */
-    int getNumDrawables() const throw();
-
-    /** Returns one of the drawables that are contained in this one.
-
-        Each drawable also has a transform associated with it - you can use getDrawableTransform()
-        to find it.
-
-        The pointer returned is managed by this object and will be deleted when no longer
-        needed, so be careful what you do with it.
-
-        @see getNumDrawables
-    */
-    Drawable* getDrawable (int index) const;
-
-    /** Looks for a child drawable with the specified name. */
-    Drawable* getDrawableWithName (const String& name) const throw();
-
-    /** Brings one of the Drawables to the front.
-
-        @param index    the index of the drawable to move, between 0
-                        and (getNumDrawables() - 1).
-        @see insertDrawable, getNumDrawables
-    */
-    void bringToFront (int index);
-
-    //==============================================================================
     /** Sets the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
         @see setContentArea
     */
@@ -185,13 +116,11 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    const ValueTree createValueTree (ImageProvider* imageProvider) const;
+    const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
     /** @internal */
     static const Identifier valueTreeType;
-    /** @internal */
-    const Identifier getValueTreeType() const    { return valueTreeType; }
     /** @internal */
     const Expression getSymbolValue (const String& symbol, const String& member) const;
     /** @internal */
@@ -212,13 +141,8 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        int getNumDrawables() const;
-        ValueTree getDrawableState (int index) const;
-        ValueTree getDrawableWithId (const String& objectId, bool recursive) const;
-        int indexOfDrawable (const ValueTree& item) const;
-        void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
-        void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
-        void removeDrawable (const ValueTree& child, UndoManager* undoManager);
+        ValueTree getChildList() const;
+        ValueTree getChildListCreating (UndoManager* undoManager);
 
         const RelativeParallelogram getBoundingBox() const;
         void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
@@ -240,8 +164,6 @@ public:
     private:
         static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY, markerTag;
 
-        ValueTree getChildList() const;
-        ValueTree getChildListCreating (UndoManager* undoManager);
         ValueTree getMarkerList (bool xAxis) const;
         ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
     };

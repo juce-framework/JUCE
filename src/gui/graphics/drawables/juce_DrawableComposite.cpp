@@ -28,10 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawableComposite.h"
-#include "juce_DrawablePath.h"
-#include "juce_DrawableImage.h"
-#include "juce_DrawableText.h"
-#include "../imaging/juce_Image.h"
 
 
 //==============================================================================
@@ -49,8 +45,13 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
     : bounds (other.bounds),
       updateBoundsReentrant (false)
 {
-    for (int i = 0; i < other.getNumDrawables(); ++i)
-        insertDrawable (other.getDrawable(i)->createCopy());
+    for (int i = 0; i < other.getNumChildComponents(); ++i)
+    {
+        const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
+
+        if (d != 0)
+            addAndMakeVisible (d->createCopy());
+    }
 
     markersX.addCopiesOf (other.markersX);
     markersY.addCopiesOf (other.markersY);
@@ -62,68 +63,17 @@ DrawableComposite::~DrawableComposite()
 }
 
 //==============================================================================
-int DrawableComposite::getNumDrawables() const throw()
-{
-    return getNumChildComponents();
-}
-
-Drawable* DrawableComposite::getDrawable (int index) const
-{
-    return dynamic_cast <Drawable*> (getChildComponent (index));
-}
-
-void DrawableComposite::insertDrawable (Drawable* drawable, const int index)
-{
-    if (drawable != 0)
-        addAndMakeVisible (drawable, index);
-}
-
-void DrawableComposite::insertDrawable (const Drawable& drawable, const int index)
-{
-    insertDrawable (drawable.createCopy(), index);
-}
-
-void DrawableComposite::removeDrawable (const int index, const bool deleteDrawable)
-{
-    Drawable* const d = getDrawable (index);
-
-    if (deleteDrawable)
-        delete d;
-    else
-        removeChildComponent (d);
-}
-
-Drawable* DrawableComposite::getDrawableWithName (const String& name) const throw()
-{
-    for (int i = getNumChildComponents(); --i >= 0;)
-        if (getChildComponent(i)->getName() == name)
-            return getDrawable (i);
-
-    return 0;
-}
-
-void DrawableComposite::bringToFront (const int index)
-{
-    Drawable* d = getDrawable (index);
-    if (d != 0)
-        d->toFront (false);
-}
-
 const Rectangle<float> DrawableComposite::getDrawableBounds() const
 {
     Rectangle<float> r;
 
-    for (int i = getNumDrawables(); --i >= 0;)
+    for (int i = getNumChildComponents(); --i >= 0;)
     {
-        Drawable* const d = getDrawable(i);
+        const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
 
         if (d != 0)
-        {
-            if (d->isTransformed())
-                r = r.getUnion (d->getDrawableBounds().transformed (d->getTransform()));
-            else
-                r = r.getUnion (d->getDrawableBounds());
-        }
+            r = r.getUnion (d->isTransformed() ? d->getDrawableBounds().transformed (d->getTransform())
+                                               : d->getDrawableBounds());
     }
 
     return r;
@@ -131,9 +81,9 @@ const Rectangle<float> DrawableComposite::getDrawableBounds() const
 
 void DrawableComposite::markerHasMoved()
 {
-    for (int i = getNumDrawables(); --i >= 0;)
+    for (int i = getNumChildComponents(); --i >= 0;)
     {
-        Drawable* const d = getDrawable(i);
+        Drawable* const d = dynamic_cast <Drawable*> (getChildComponent(i));
 
         if (d != 0)
             d->markerHasMoved();
@@ -383,69 +333,6 @@ ValueTree DrawableComposite::ValueTreeWrapper::getChildListCreating (UndoManager
     return state.getOrCreateChildWithName (childGroupTag, undoManager);
 }
 
-int DrawableComposite::ValueTreeWrapper::getNumDrawables() const
-{
-    return getChildList().getNumChildren();
-}
-
-ValueTree DrawableComposite::ValueTreeWrapper::getDrawableState (int index) const
-{
-    return getChildList().getChild (index);
-}
-
-ValueTree DrawableComposite::ValueTreeWrapper::getDrawableWithId (const String& objectId, bool recursive) const
-{
-    if (getID() == objectId)
-        return state;
-
-    if (! recursive)
-    {
-        return getChildList().getChildWithProperty (idProperty, objectId);
-    }
-    else
-    {
-        const ValueTree childList (getChildList());
-
-        for (int i = getNumDrawables(); --i >= 0;)
-        {
-            const ValueTree& child = childList.getChild (i);
-
-            if (child [Drawable::ValueTreeWrapperBase::idProperty] == objectId)
-                return child;
-
-            if (child.hasType (DrawableComposite::valueTreeType))
-            {
-                ValueTree v (DrawableComposite::ValueTreeWrapper (child).getDrawableWithId (objectId, true));
-
-                if (v.isValid())
-                    return v;
-            }
-        }
-
-        return ValueTree::invalid;
-    }
-}
-
-int DrawableComposite::ValueTreeWrapper::indexOfDrawable (const ValueTree& item) const
-{
-    return getChildList().indexOf (item);
-}
-
-void DrawableComposite::ValueTreeWrapper::addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager)
-{
-    getChildListCreating (undoManager).addChild (newDrawableState, index, undoManager);
-}
-
-void DrawableComposite::ValueTreeWrapper::moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager)
-{
-    getChildListCreating (undoManager).moveChild (currentIndex, newIndex, undoManager);
-}
-
-void DrawableComposite::ValueTreeWrapper::removeDrawable (const ValueTree& child, UndoManager* undoManager)
-{
-    getChildList().removeChild (child, undoManager);
-}
-
 const RelativeParallelogram DrawableComposite::ValueTreeWrapper::getBoundingBox() const
 {
     return RelativeParallelogram (state.getProperty (topLeft, "0, 0"),
@@ -551,10 +438,10 @@ void DrawableComposite::ValueTreeWrapper::removeMarker (bool xAxis, const ValueT
 }
 
 //==============================================================================
-void DrawableComposite::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawableComposite::refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder)
 {
     const ValueTreeWrapper wrapper (tree);
-    setName (wrapper.getID());
+    setComponentID (wrapper.getID());
 
     const RelativeParallelogram newBounds (wrapper.getBoundingBox());
     if (bounds != newBounds)
@@ -594,50 +481,27 @@ void DrawableComposite::refreshFromValueTree (const ValueTree& tree, ImageProvid
             *m = newMarker;
     }
 
-    // Remove deleted drawables..
-    for (i = getNumDrawables(); --i >= wrapper.getNumDrawables();)
-        delete getDrawable(i);
-
-    // Update drawables and add new ones..
-    for (i = 0; i < wrapper.getNumDrawables(); ++i)
-    {
-        const ValueTree newDrawable (wrapper.getDrawableState (i));
-        Drawable* d = getDrawable(i);
-
-        if (d != 0)
-        {
-            if (newDrawable.hasType (d->getValueTreeType()))
-            {
-                d->refreshFromValueTree (newDrawable, imageProvider);
-            }
-            else
-            {
-                delete d;
-                d = 0;
-            }
-        }
-
-        if (d == 0)
-        {
-            d = createChildFromValueTree (this, newDrawable, imageProvider);
-            addAndMakeVisible (d, i);
-        }
-    }
+    builder.updateChildComponents (*this, wrapper.getChildList());
 
     refreshTransformFromBounds();
 }
 
-const ValueTree DrawableComposite::createValueTree (ImageProvider* imageProvider) const
+const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);
 
-    v.setID (getName(), 0);
+    v.setID (getComponentID());
     v.setBoundingBox (bounds, 0);
 
+    ValueTree childList (v.getChildListCreating (0));
+
     int i;
-    for (i = 0; i < getNumDrawables(); ++i)
-        v.addDrawable (getDrawable(i)->createValueTree (imageProvider), -1, 0);
+    for (i = getNumChildComponents(); --i >= 0;)
+    {
+        const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
+        childList.addChild (d->createValueTree (imageProvider), -1, 0);
+    }
 
     for (i = 0; i < markersX.size(); ++i)
         v.setMarker (true, *markersX.getUnchecked(i), 0);

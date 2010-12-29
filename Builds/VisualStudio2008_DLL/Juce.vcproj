@@ -544,6 +544,8 @@
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentAnimator.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.h"/>
+              <File RelativePath="..\..\src\gui\components\layout\juce_ComponentBuilder.cpp"/>
+              <File RelativePath="..\..\src\gui\components\layout\juce_ComponentBuilder.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_GroupComponent.cpp"/>

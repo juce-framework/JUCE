@@ -78,7 +78,7 @@ bool DrawableShape::isStrokeVisible() const throw()
 
 bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
                                       Expression::EvaluationContext* /*nameFinder*/,
-                                      ImageProvider* imageProvider)
+                                      ComponentBuilder::ImageProvider* imageProvider)
 {
     bool hasChanged = false;
 
@@ -105,7 +105,7 @@ bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
     return hasChanged;
 }
 
-void DrawableShape::writeTo (FillAndStrokeState& state, ImageProvider* imageProvider, UndoManager* undoManager) const
+void DrawableShape::writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const
 {
     state.setMainFill (mainFill, 0, 0, 0, imageProvider, undoManager);
     state.setStrokeFill (strokeFill, 0, 0, 0, imageProvider, undoManager);
@@ -182,7 +182,7 @@ DrawableShape::FillAndStrokeState::FillAndStrokeState (const ValueTree& state_)
 }
 
 const FillType DrawableShape::FillAndStrokeState::getMainFill (Expression::EvaluationContext* nameFinder,
-                                                               ImageProvider* imageProvider) const
+                                                               ComponentBuilder::ImageProvider* imageProvider) const
 {
     return readFillType (state.getChildWithName (fill), 0, 0, 0, nameFinder, imageProvider);
 }
@@ -198,14 +198,14 @@ ValueTree DrawableShape::FillAndStrokeState::getMainFillState()
 }
 
 void DrawableShape::FillAndStrokeState::setMainFill (const FillType& newFill, const RelativePoint* gp1, const RelativePoint* gp2,
-                                                     const RelativePoint* gp3, ImageProvider* imageProvider, UndoManager* undoManager)
+                                                     const RelativePoint* gp3, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager)
 {
     ValueTree v (state.getOrCreateChildWithName (fill, undoManager));
     writeFillType (v, newFill, gp1, gp2, gp3, imageProvider, undoManager);
 }
 
 const FillType DrawableShape::FillAndStrokeState::getStrokeFill (Expression::EvaluationContext* nameFinder,
-                                                                 ImageProvider* imageProvider) const
+                                                                 ComponentBuilder::ImageProvider* imageProvider) const
 {
     return readFillType (state.getChildWithName (stroke), 0, 0, 0, nameFinder, imageProvider);
 }
@@ -221,7 +221,7 @@ ValueTree DrawableShape::FillAndStrokeState::getStrokeFillState()
 }
 
 void DrawableShape::FillAndStrokeState::setStrokeFill (const FillType& newFill, const RelativePoint* gp1, const RelativePoint* gp2,
-                                                       const RelativePoint* gp3, ImageProvider* imageProvider, UndoManager* undoManager)
+                                                       const RelativePoint* gp3, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager)
 {
     ValueTree v (state.getOrCreateChildWithName (stroke, undoManager));
     writeFillType (v, newFill, gp1, gp2, gp3, imageProvider, undoManager);
@@ -251,7 +251,7 @@ void DrawableShape::FillAndStrokeState::setStrokeType (const PathStrokeType& new
 }
 
 const FillType DrawableShape::FillAndStrokeState::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2, RelativePoint* const gp3,
-                                                                Expression::EvaluationContext* const nameFinder, ImageProvider* imageProvider)
+                                                                Expression::EvaluationContext* const nameFinder, ComponentBuilder::ImageProvider* imageProvider)
 {
     const String newType (v[type].toString());
 
@@ -326,7 +326,7 @@ namespace DrawableShapeHelpers
 
 void DrawableShape::FillAndStrokeState::writeFillType (ValueTree& v, const FillType& fillType,
                                                        const RelativePoint* const gp1, const RelativePoint* const gp2, const RelativePoint* gp3,
-                                                       ImageProvider* imageProvider, UndoManager* const undoManager)
+                                                       ComponentBuilder::ImageProvider* imageProvider, UndoManager* const undoManager)
 {
     if (fillType.isColour())
     {

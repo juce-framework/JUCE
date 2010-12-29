@@ -97,7 +97,7 @@ public:
 
         @see setName
     */
-    const String& getName() const throw()                   { return componentName_; }
+    const String& getName() const throw()                   { return componentName; }
 
     /** Sets the name of this component.
 
@@ -277,7 +277,7 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    inline int getX() const throw()                         { return bounds_.getX(); }
+    inline int getX() const throw()                         { return bounds.getX(); }
 
     /** Returns the y coordinate of the top of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -286,13 +286,13 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    inline int getY() const throw()                         { return bounds_.getY(); }
+    inline int getY() const throw()                         { return bounds.getY(); }
 
     /** Returns the component's width in pixels. */
-    inline int getWidth() const throw()                     { return bounds_.getWidth(); }
+    inline int getWidth() const throw()                     { return bounds.getWidth(); }
 
     /** Returns the component's height in pixels. */
-    inline int getHeight() const throw()                    { return bounds_.getHeight(); }
+    inline int getHeight() const throw()                    { return bounds.getHeight(); }
 
     /** Returns the x coordinate of the component's right-hand edge.
         This is a distance in pixels from the left edge of the component's parent.
@@ -301,10 +301,10 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    int getRight() const throw()                            { return bounds_.getRight(); }
+    int getRight() const throw()                            { return bounds.getRight(); }
 
     /** Returns the component's top-left position as a Point. */
-    const Point<int> getPosition() const throw()            { return bounds_.getPosition(); }
+    const Point<int> getPosition() const throw()            { return bounds.getPosition(); }
 
     /** Returns the y coordinate of the bottom edge of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -313,7 +313,7 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    int getBottom() const throw()                           { return bounds_.getBottom(); }
+    int getBottom() const throw()                           { return bounds.getBottom(); }
 
     /** Returns this component's bounding box.
         The rectangle returned is relative to the top-left of the component's parent.
@@ -322,7 +322,7 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    const Rectangle<int>& getBounds() const throw()         { return bounds_; }
+    const Rectangle<int>& getBounds() const throw()         { return bounds; }
 
     /** Returns the component's bounds, relative to its own origin.
         This is like getBounds(), but returns the rectangle in local coordinates, In practice, it'll
@@ -706,7 +706,7 @@ public:
         If this is the highest-level component or hasn't yet been added to
         a parent, this will return null.
     */
-    Component* getParentComponent() const throw()                   { return parentComponent_; }
+    Component* getParentComponent() const throw()                   { return parentComponent; }
 
     /** Searches the parent components for a component of a specified class.
 
@@ -720,14 +720,14 @@ public:
     TargetClass* findParentComponentOfClass (TargetClass* const dummyParameter = 0) const
     {
         (void) dummyParameter;
-        Component* p = parentComponent_;
+        Component* p = parentComponent;
         while (p != 0)
         {
             TargetClass* target = dynamic_cast <TargetClass*> (p);
             if (target != 0)
                 return target;
 
-            p = p->parentComponent_;
+            p = p->parentComponent;
         }
 
         return 0;
@@ -1022,7 +1022,7 @@ public:
 
         @see setComponentEffect
     */
-    ImageEffectFilter* getComponentEffect() const throw()               { return effect_; }
+    ImageEffectFilter* getComponentEffect() const throw()               { return effect; }
 
     //==============================================================================
     /** Finds the appropriate look-and-feel to use for this component.
@@ -2078,7 +2078,7 @@ public:
     };
 
     //==============================================================================
-    /** A class to keep an eye on one or two components and check for them being deleted.
+    /** A class to keep an eye on a component and check for it being deleted.
 
         This is designed for use with the ListenerList::callChecked() methods, to allow
         the list iterator to stop cleanly if the component is deleted by a listener callback
@@ -2088,16 +2088,13 @@ public:
     {
     public:
         /** Creates a checker that watches one component. */
-        BailOutChecker (Component* component1);
-
-        /** Creates a checker that watches two components. */
-        BailOutChecker (Component* component1, Component* component2);
+        BailOutChecker (Component* component);
 
         /** Returns true if either of the two components have been deleted since this object was created. */
         bool shouldBailOut() const throw();
 
     private:
-        const WeakReference<Component> safePointer1, safePointer2;
+        const WeakReference<Component> safePointer;
 
         JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
     };
@@ -2118,7 +2115,6 @@ public:
 private:
     //==============================================================================
     friend class ComponentPeer;
-    friend class InternalDragRepeater;
     friend class MouseInputSource;
     friend class MouseInputSourceInternal;
 
@@ -2126,21 +2122,21 @@ private:
     static Component* currentlyFocusedComponent;
 
     //==============================================================================
-    String componentName_, componentID;
-    Component* parentComponent_;
-    Rectangle<int> bounds_;
-    ScopedPointer <AffineTransform> affineTransform_;
-    Array <Component*> childComponentList_;
-    LookAndFeel* lookAndFeel_;
-    MouseCursor cursor_;
-    ImageEffectFilter* effect_;
-    Image bufferedImage_;
+    String componentName, componentID;
+    Component* parentComponent;
+    Rectangle<int> bounds;
+    ScopedPointer <AffineTransform> affineTransform;
+    Array <Component*> childComponentList;
+    LookAndFeel* lookAndFeel;
+    MouseCursor cursor;
+    ImageEffectFilter* effect;
+    Image bufferedImage;
 
     class MouseListenerList;
     friend class MouseListenerList;
     friend class ScopedPointer <MouseListenerList>;
-    ScopedPointer <MouseListenerList> mouseListeners_;
-    ScopedPointer <Array <KeyListener*> > keyListeners_;
+    ScopedPointer <MouseListenerList> mouseListeners;
+    ScopedPointer <Array <KeyListener*> > keyListeners;
     ListenerList <ComponentListener> componentListeners;
     NamedValueSet properties;
 
@@ -2176,7 +2172,7 @@ private:
 
     union
     {
-        uint32 componentFlags_;
+        uint32 componentFlags;
         ComponentFlags flags;
     };
 

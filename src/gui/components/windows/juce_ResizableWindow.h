@@ -268,6 +268,16 @@ public:
     */
     void setContentComponentSize (int width, int height);
 
+    /** Returns the width of the frame to use around the window.
+        @see getContentComponentBorder
+    */
+    virtual const BorderSize getBorderThickness();
+
+    /** Returns the insets to use when positioning the content component.
+        @see getBorderThickness
+    */
+    virtual const BorderSize getContentComponentBorder();
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the window.
 
@@ -305,18 +315,6 @@ protected:
     void activeWindowStatusChanged();
     /** @internal */
     int getDesktopWindowStyleFlags() const;
-
-    /** Returns the width of the border to use around the window.
-
-        @see getContentComponentBorder
-    */
-    virtual const BorderSize getBorderThickness();
-
-    /** Returns the insets to use when positioning the content component.
-
-        @see getBorderThickness
-    */
-    virtual const BorderSize getContentComponentBorder();
 
 #if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component

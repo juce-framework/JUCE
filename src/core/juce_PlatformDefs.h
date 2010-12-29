@@ -145,15 +145,17 @@
 
 //==============================================================================
 #ifndef DOXYGEN
+  BEGIN_JUCE_NAMESPACE
   template <bool b> struct JuceStaticAssert;
   template <> struct JuceStaticAssert <true> { static void dummy() {} };
+  END_JUCE_NAMESPACE
 #endif
 
 /** A compile-time assertion macro.
 
     If the expression parameter is false, the macro will cause a compile error.
 */
-#define static_jassert(expression)      JuceStaticAssert<expression>::dummy();
+#define static_jassert(expression)      JUCE_NAMESPACE::JuceStaticAssert<expression>::dummy();
 
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and
     operator=.

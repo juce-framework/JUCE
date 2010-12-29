@@ -1,0 +1,276 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-10 by Raw Material Software Ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
+
+  ==============================================================================
+*/
+
+#include "../../../core/juce_StandardHeader.h"
+
+BEGIN_JUCE_NAMESPACE
+
+#include "juce_ComponentBuilder.h"
+
+
+//=============================================================================
+namespace ComponentBuilderHelpers
+{
+    const String getStateId (const ValueTree& state)
+    {
+        return state [ComponentBuilder::idProperty].toString();
+    }
+
+    Component* findComponentWithID (OwnedArray<Component>& components, const String& compId)
+    {
+        jassert (compId.isNotEmpty());
+
+        for (int i = components.size(); --i >= 0;)
+        {
+            Component* const c = components.getUnchecked (i);
+
+            if (c->getComponentID() == compId)
+                return components.removeAndReturn (i);
+        }
+
+        return 0;
+    }
+
+    Component* findComponentWithID (Component* const c, const String& compId)
+    {
+        jassert (compId.isNotEmpty());
+        if (c->getComponentID() == compId)
+            return c;
+
+        for (int i = c->getNumChildComponents(); --i >= 0;)
+        {
+            Component* const child = findComponentWithID (c->getChildComponent (i), compId);
+
+            if (child != 0)
+                return child;
+        }
+
+        return 0;
+    }
+
+    Component* createNewComponent (ComponentBuilder::TypeHandler& type,
+                                   const ValueTree& state, Component* parent)
+    {
+        Component* const c = type.addNewComponentFromState (state, parent);
+        jassert (c != 0);
+        c->setComponentID (getStateId (state));
+        return c;
+    }
+}
+
+//=============================================================================
+const Identifier ComponentBuilder::idProperty ("id");
+
+ComponentBuilder::ComponentBuilder (const ValueTree& state_)
+    : state (state_)
+{
+    state.addListener (this);
+}
+
+ComponentBuilder::~ComponentBuilder()
+{
+    state.removeListener (this);
+}
+
+Component* ComponentBuilder::getComponent()
+{
+    if (component == 0)
+    {
+        jassert (types.size() > 0);  // You need to register all the necessary types before you can load a component!
+
+        TypeHandler* const type = getHandlerForState (state);
+        jassert (type != 0); // trying to create a component from an unknown type of ValueTree
+
+        if (type != 0)
+            component = ComponentBuilderHelpers::createNewComponent (*type, state, 0);
+    }
+
+    return component;
+}
+
+Component* ComponentBuilder::getAndReleaseComponent()
+{
+    getComponent();
+    return component.release();
+}
+
+void ComponentBuilder::registerTypeHandler (ComponentBuilder::TypeHandler* const type)
+{
+    jassert (type != 0);
+
+    // Don't try to move your types around! Once a type has been added to a builder, the
+    // builder owns it, and you should leave it alone!
+    jassert (type->builder == 0);
+
+    types.add (type);
+    type->builder = this;
+}
+
+ComponentBuilder::TypeHandler* ComponentBuilder::getHandlerForState (const ValueTree& s) const
+{
+    const Identifier targetType (s.getType());
+
+    for (int i = 0; i < types.size(); ++i)
+    {
+        TypeHandler* const t = types.getUnchecked(i);
+
+        if (t->getType() == targetType)
+            return t;
+    }
+
+    return 0;
+}
+
+int ComponentBuilder::getNumHandlers() const throw()
+{
+    return types.size();
+}
+
+ComponentBuilder::TypeHandler* ComponentBuilder::getHandler (const int index) const throw()
+{
+    return types [index];
+}
+
+void ComponentBuilder::updateComponent (const ValueTree& state)
+{
+    using namespace ComponentBuilderHelpers;
+
+    if (component != 0)
+    {
+        const String compId (getStateId (state));
+
+        if (compId.isEmpty() && state.getParent().isValid())
+        {
+            // ..handle the case where a child of the actual state node has changed.
+            updateComponent (state.getParent());
+        }
+        else
+        {
+            TypeHandler* const type = getHandlerForState (state);
+
+            if (type != 0)
+            {
+                Component* const changedComp = findComponentWithID (component, compId);
+
+                if (changedComp != 0)
+                    type->updateComponentFromState (changedComp, state);
+            }
+        }
+    }
+}
+
+void ComponentBuilder::setImageProvider (ImageProvider* newImageProvider) throw()
+{
+    imageProvider = newImageProvider;
+}
+
+ComponentBuilder::ImageProvider* ComponentBuilder::getImageProvider() const throw()
+{
+    return imageProvider;
+}
+
+void ComponentBuilder::valueTreePropertyChanged (ValueTree& tree, const Identifier&)
+{
+    updateComponent (tree);
+}
+
+void ComponentBuilder::valueTreeChildrenChanged (ValueTree& tree)
+{
+    updateComponent (tree);
+}
+
+void ComponentBuilder::valueTreeParentChanged (ValueTree& tree)
+{
+    updateComponent (tree);
+}
+
+//==============================================================================
+ComponentBuilder::TypeHandler::TypeHandler (const Identifier& valueTreeType_)
+   : builder (0), valueTreeType (valueTreeType_)
+{
+}
+
+ComponentBuilder::TypeHandler::~TypeHandler()
+{
+}
+
+ComponentBuilder* ComponentBuilder::TypeHandler::getBuilder() const throw()
+{
+    // A type handler needs to be registered with a ComponentBuilder before using it!
+    jassert (builder != 0);
+    return builder;
+}
+
+void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree& children)
+{
+    using namespace ComponentBuilderHelpers;
+
+    const int numExistingChildComps = parent.getNumChildComponents();
+
+    Array <Component*> componentsInOrder;
+    componentsInOrder.ensureStorageAllocated (numExistingChildComps);
+
+    {
+        OwnedArray<Component> existingComponents;
+        existingComponents.ensureStorageAllocated (numExistingChildComps);
+
+        int i;
+        for (i = 0; i < numExistingChildComps; ++i)
+            existingComponents.add (parent.getChildComponent (i));
+
+        const int newNumChildren = children.getNumChildren();
+        for (i = 0; i < newNumChildren; ++i)
+        {
+            const ValueTree childState (children.getChild (i));
+
+            ComponentBuilder::TypeHandler* const type = getHandlerForState (childState);
+            jassert (type != 0);
+
+            if (type != 0)
+            {
+                Component* c = findComponentWithID (existingComponents, getStateId (childState));
+
+                if (c == 0)
+                    c = createNewComponent (*type, childState, &parent);
+
+                componentsInOrder.add (c);
+            }
+        }
+
+        // (remaining unused items in existingComponents get deleted here as it goes out of scope)
+    }
+
+    // Make sure the z-order is correct..
+    if (componentsInOrder.size() > 0)
+    {
+        componentsInOrder.getLast()->toFront (false);
+
+        for (int i = componentsInOrder.size() - 1; --i >= 0;)
+            componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+    }
+}
+
+
+END_JUCE_NAMESPACE

@@ -616,6 +616,9 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentBuilder.cpp">
+      <Filter>Juce\Source\gui\components\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
@@ -1735,6 +1738,9 @@
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.h">
+      <Filter>Juce\Source\gui\components\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentBuilder.h">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h">

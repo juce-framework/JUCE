@@ -112,6 +112,16 @@ public:
                                     int minimumWhenOffTheBottom,
                                     int minimumWhenOffTheRight) throw();
 
+
+    /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+    int getMinimumWhenOffTheTop() const throw()         { return minOffTop; }
+    /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+    int getMinimumWhenOffTheLeft() const throw()        { return minOffLeft; }
+    /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+    int getMinimumWhenOffTheBottom() const throw()      { return minOffBottom; }
+    /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+    int getMinimumWhenOffTheRight() const throw()       { return minOffRight; }
+
     //==============================================================================
     /** Specifies a width-to-height ratio that the resizer should always maintain.
 

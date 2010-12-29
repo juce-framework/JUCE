@@ -716,6 +716,10 @@
                   resource="0" file="src/gui/components/layout/juce_ComponentBoundsConstrainer.cpp"/>
             <FILE id="f7Kk9YmVd" name="juce_ComponentBoundsConstrainer.h" compile="0"
                   resource="0" file="src/gui/components/layout/juce_ComponentBoundsConstrainer.h"/>
+            <FILE id="0GeyNq1" name="juce_ComponentBuilder.cpp" compile="1" resource="0"
+                  file="src/gui/components/layout/juce_ComponentBuilder.cpp"/>
+            <FILE id="VZuk8cB" name="juce_ComponentBuilder.h" compile="0" resource="0"
+                  file="src/gui/components/layout/juce_ComponentBuilder.h"/>
             <FILE id="nzIQyYlAT" name="juce_ComponentMovementWatcher.cpp" compile="1"
                   resource="0" file="src/gui/components/layout/juce_ComponentMovementWatcher.cpp"/>
             <FILE id="S2Qpuktm9" name="juce_ComponentMovementWatcher.h" compile="0"

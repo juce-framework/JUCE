@@ -50,6 +50,15 @@
 
 */
 
+/* This line is here just to help catch syntax errors caused by mistakes in other header
+   files that are included before juce.h. If you hit an error at this line, it must be some
+   kind of syntax problem in whatever code immediately precedes this header.
+
+   This also acts as a sanity-check in case you're trying to build with a C or obj-C compiler
+   rather than a proper C++ one.
+*/
+namespace JuceDummyNamespace {}
+
 #define JUCE_PUBLIC_INCLUDES 1
 
 // (this includes things that need defining outside of the JUCE namespace)
@@ -64,7 +73,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	1
+#define JUCE_BUILDNUMBER	2
 
 /** Current Juce version number.
 
@@ -623,15 +632,17 @@
 #endif
 
 #ifndef DOXYGEN
+  BEGIN_JUCE_NAMESPACE
   template <bool b> struct JuceStaticAssert;
   template <> struct JuceStaticAssert <true> { static void dummy() {} };
+  END_JUCE_NAMESPACE
 #endif
 
 /** A compile-time assertion macro.
 
 	If the expression parameter is false, the macro will cause a compile error.
 */
-#define static_jassert(expression)	  JuceStaticAssert<expression>::dummy();
+#define static_jassert(expression)	  JUCE_NAMESPACE::JuceStaticAssert<expression>::dummy();
 
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and
 	operator=.
@@ -26910,7 +26921,7 @@ public:
 
 		@see setName
 	*/
-	const String& getName() const throw()		   { return componentName_; }
+	const String& getName() const throw()		   { return componentName; }
 
 	/** Sets the name of this component.
 
@@ -27086,7 +27097,7 @@ public:
 		bounds will no longer be a direct reflection of the position at which it appears within
 		its parent, as the transform will be applied to its bounding box.
 	*/
-	inline int getX() const throw()			 { return bounds_.getX(); }
+	inline int getX() const throw()			 { return bounds.getX(); }
 
 	/** Returns the y coordinate of the top of this component.
 		This is a distance in pixels from the top edge of the component's parent.
@@ -27095,13 +27106,13 @@ public:
 		bounds will no longer be a direct reflection of the position at which it appears within
 		its parent, as the transform will be applied to its bounding box.
 	*/
-	inline int getY() const throw()			 { return bounds_.getY(); }
+	inline int getY() const throw()			 { return bounds.getY(); }
 
 	/** Returns the component's width in pixels. */
-	inline int getWidth() const throw()			 { return bounds_.getWidth(); }
+	inline int getWidth() const throw()			 { return bounds.getWidth(); }
 
 	/** Returns the component's height in pixels. */
-	inline int getHeight() const throw()			{ return bounds_.getHeight(); }
+	inline int getHeight() const throw()			{ return bounds.getHeight(); }
 
 	/** Returns the x coordinate of the component's right-hand edge.
 		This is a distance in pixels from the left edge of the component's parent.
@@ -27110,10 +27121,10 @@ public:
 		bounds will no longer be a direct reflection of the position at which it appears within
 		its parent, as the transform will be applied to its bounding box.
 	*/
-	int getRight() const throw()				{ return bounds_.getRight(); }
+	int getRight() const throw()				{ return bounds.getRight(); }
 
 	/** Returns the component's top-left position as a Point. */
-	const Point<int> getPosition() const throw()		{ return bounds_.getPosition(); }
+	const Point<int> getPosition() const throw()		{ return bounds.getPosition(); }
 
 	/** Returns the y coordinate of the bottom edge of this component.
 		This is a distance in pixels from the top edge of the component's parent.
@@ -27122,7 +27133,7 @@ public:
 		bounds will no longer be a direct reflection of the position at which it appears within
 		its parent, as the transform will be applied to its bounding box.
 	*/
-	int getBottom() const throw()			   { return bounds_.getBottom(); }
+	int getBottom() const throw()			   { return bounds.getBottom(); }
 
 	/** Returns this component's bounding box.
 		The rectangle returned is relative to the top-left of the component's parent.
@@ -27131,7 +27142,7 @@ public:
 		bounds will no longer be a direct reflection of the position at which it appears within
 		its parent, as the transform will be applied to its bounding box.
 	*/
-	const Rectangle<int>& getBounds() const throw()	 { return bounds_; }
+	const Rectangle<int>& getBounds() const throw()	 { return bounds; }
 
 	/** Returns the component's bounds, relative to its own origin.
 		This is like getBounds(), but returns the rectangle in local coordinates, In practice, it'll
@@ -27510,7 +27521,7 @@ public:
 		If this is the highest-level component or hasn't yet been added to
 		a parent, this will return null.
 	*/
-	Component* getParentComponent() const throw()		   { return parentComponent_; }
+	Component* getParentComponent() const throw()		   { return parentComponent; }
 
 	/** Searches the parent components for a component of a specified class.
 
@@ -27524,14 +27535,14 @@ public:
 	TargetClass* findParentComponentOfClass (TargetClass* const dummyParameter = 0) const
 	{
 		(void) dummyParameter;
-		Component* p = parentComponent_;
+		Component* p = parentComponent;
 		while (p != 0)
 		{
 			TargetClass* target = dynamic_cast <TargetClass*> (p);
 			if (target != 0)
 				return target;
 
-			p = p->parentComponent_;
+			p = p->parentComponent;
 		}
 
 		return 0;
@@ -27820,7 +27831,7 @@ public:
 
 		@see setComponentEffect
 	*/
-	ImageEffectFilter* getComponentEffect() const throw()		   { return effect_; }
+	ImageEffectFilter* getComponentEffect() const throw()		   { return effect; }
 
 	/** Finds the appropriate look-and-feel to use for this component.
 
@@ -28851,7 +28862,7 @@ public:
 		WeakReference<Component> weakRef;
 	};
 
-	/** A class to keep an eye on one or two components and check for them being deleted.
+	/** A class to keep an eye on a component and check for it being deleted.
 
 		This is designed for use with the ListenerList::callChecked() methods, to allow
 		the list iterator to stop cleanly if the component is deleted by a listener callback
@@ -28861,16 +28872,13 @@ public:
 	{
 	public:
 		/** Creates a checker that watches one component. */
-		BailOutChecker (Component* component1);
-
-		/** Creates a checker that watches two components. */
-		BailOutChecker (Component* component1, Component* component2);
+		BailOutChecker (Component* component);
 
 		/** Returns true if either of the two components have been deleted since this object was created. */
 		bool shouldBailOut() const throw();
 
 	private:
-		const WeakReference<Component> safePointer1, safePointer2;
+		const WeakReference<Component> safePointer;
 
 		JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
 	};
@@ -28890,28 +28898,27 @@ public:
 private:
 
 	friend class ComponentPeer;
-	friend class InternalDragRepeater;
 	friend class MouseInputSource;
 	friend class MouseInputSourceInternal;
 
    #ifndef DOXYGEN
 	static Component* currentlyFocusedComponent;
 
-	String componentName_, componentID;
-	Component* parentComponent_;
-	Rectangle<int> bounds_;
-	ScopedPointer <AffineTransform> affineTransform_;
-	Array <Component*> childComponentList_;
-	LookAndFeel* lookAndFeel_;
-	MouseCursor cursor_;
-	ImageEffectFilter* effect_;
-	Image bufferedImage_;
+	String componentName, componentID;
+	Component* parentComponent;
+	Rectangle<int> bounds;
+	ScopedPointer <AffineTransform> affineTransform;
+	Array <Component*> childComponentList;
+	LookAndFeel* lookAndFeel;
+	MouseCursor cursor;
+	ImageEffectFilter* effect;
+	Image bufferedImage;
 
 	class MouseListenerList;
 	friend class MouseListenerList;
 	friend class ScopedPointer <MouseListenerList>;
-	ScopedPointer <MouseListenerList> mouseListeners_;
-	ScopedPointer <Array <KeyListener*> > keyListeners_;
+	ScopedPointer <MouseListenerList> mouseListeners;
+	ScopedPointer <Array <KeyListener*> > keyListeners;
 	ListenerList <ComponentListener> componentListeners;
 	NamedValueSet properties;
 
@@ -28947,7 +28954,7 @@ private:
 
 	union
 	{
-		uint32 componentFlags_;
+		uint32 componentFlags;
 		ComponentFlags flags;
 	};
 
@@ -45674,6 +45681,165 @@ public:
 #endif   // __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 /*** End of inlined file: juce_RelativeCoordinate.h ***/
 
+
+/*** Start of inlined file: juce_ComponentBuilder.h ***/
+#ifndef __JUCE_COMPONENTBUILDER_JUCEHEADER__
+#define __JUCE_COMPONENTBUILDER_JUCEHEADER__
+
+/**
+	Loads and maintains a tree of Components from a ValueTree that represents them.
+
+	To allow the state of a tree of components to be saved as a ValueTree and re-loaded,
+	this class lets you register a set of type-handlers for the different components that
+	are involved, and then uses these types to re-create a set of components from its
+	stored state.
+
+	Essentially, to use this, you need to create a ComponentBuilder with your ValueTree,
+	then use registerTypeHandler() to give it a set of type handlers that can cope with
+	all the items in your tree. Then you can call getComponent() to build the component.
+	Once you've got the component you can either take it and delete the ComponentBuilder
+	object, or if you keep the ComponentBuilder around, it'll monitor any changes in the
+	ValueTree and automatically update the component to reflect these changes.
+*/
+class JUCE_API  ComponentBuilder  : public ValueTree::Listener
+{
+public:
+	/**
+	*/
+	explicit ComponentBuilder (const ValueTree& state);
+
+	/** Destructor. */
+	~ComponentBuilder();
+
+	/**
+	*/
+	ValueTree& getState() throw()		   { return state; }
+
+	/**
+	*/
+	const ValueTree& getState() const throw()   { return state; }
+
+	/**
+	*/
+	Component* getComponent();
+
+	/**
+	*/
+	Component* getAndReleaseComponent();
+
+	/**
+	*/
+	class JUCE_API  TypeHandler
+	{
+	public:
+		/**
+		*/
+		explicit TypeHandler (const Identifier& valueTreeType);
+
+		/** Destructor. */
+		virtual ~TypeHandler();
+
+		/**
+		*/
+		const Identifier& getType() const throw()	   { return valueTreeType; }
+
+		/**
+		*/
+		virtual Component* addNewComponentFromState (const ValueTree& state, Component* parent) = 0;
+
+		/**
+		*/
+		virtual void updateComponentFromState (Component* component, const ValueTree& state) = 0;
+
+		/**
+		*/
+		ComponentBuilder* getBuilder() const throw();
+
+	private:
+		friend class ComponentBuilder;
+		ComponentBuilder* builder;
+		const Identifier valueTreeType;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypeHandler);
+	};
+
+	/**
+	*/
+	void registerTypeHandler (TypeHandler* type);
+
+	/**
+	*/
+	TypeHandler* getHandlerForState (const ValueTree& state) const;
+
+	/**
+	*/
+	int getNumHandlers() const throw();
+
+	/**
+	*/
+	TypeHandler* getHandler (int index) const throw();
+
+	/** This class is used when loading Drawables that contain images, and retrieves
+		the image for a stored identifier.
+		@see Drawable::createFromValueTree
+	*/
+	class JUCE_API  ImageProvider
+	{
+	public:
+		ImageProvider() {}
+		virtual ~ImageProvider() {}
+
+		/** Retrieves the image associated with this identifier, which could be any
+			kind of string, number, filename, etc.
+
+			The image that is returned will be owned by the caller, but it may come
+			from the ImageCache.
+		*/
+		virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
+
+		/** Returns an identifier to be used to refer to a given image.
+			This is used when converting a drawable into a ValueTree, so if you're
+			only loading drawables, you can just return a var::null here.
+		*/
+		virtual const var getIdentifierForImage (const Image& image) = 0;
+	};
+
+	/** */
+	void setImageProvider (ImageProvider* newImageProvider) throw();
+
+	/** */
+	ImageProvider* getImageProvider() const throw();
+
+	/** @internal */
+	void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
+	/** @internal */
+	void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
+	/** @internal */
+	void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
+
+	/**
+	*/
+	void updateChildComponents (Component& parent, const ValueTree& children);
+
+	/**
+	*/
+	static const Identifier idProperty;
+
+private:
+
+	ValueTree state;
+	OwnedArray <TypeHandler> types;
+	ScopedPointer<Component> component;
+	ImageProvider* imageProvider;
+
+	void updateComponent (const ValueTree& state);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
+};
+
+#endif   // __JUCE_COMPONENTBUILDER_JUCEHEADER__
+/*** End of inlined file: juce_ComponentBuilder.h ***/
+
 class DrawableComposite;
 
 /**
@@ -45793,54 +45959,20 @@ public:
 	*/
 	static Drawable* createFromSVG (const XmlElement& svgDocument);
 
-	/** This class is used when loading Drawables that contain images, and retrieves
-		the image for a stored identifier.
-		@see Drawable::createFromValueTree
-	*/
-	class JUCE_API  ImageProvider
-	{
-	public:
-		ImageProvider() {}
-		virtual ~ImageProvider() {}
-
-		/** Retrieves the image associated with this identifier, which could be any
-			kind of string, number, filename, etc.
-
-			The image that is returned will be owned by the caller, but it may come
-			from the ImageCache.
-		*/
-		virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
-
-		/** Returns an identifier to be used to refer to a given image.
-			This is used when converting a drawable into a ValueTree, so if you're
-			only loading drawables, you can just return a var::null here.
-		*/
-		virtual const var getIdentifierForImage (const Image& image) = 0;
-	};
-
 	/** Tries to create a Drawable from a previously-saved ValueTree.
 		The ValueTree must have been created by the createValueTree() method.
 		If there are any images used within the drawable, you'll need to provide a valid
 		ImageProvider object that can be used to retrieve these images from whatever type
 		of identifier is used to represent them.
 	*/
-	static Drawable* createFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
-
-	/** Tries to refresh a Drawable from the same ValueTree that was used to create it.
-		@returns the damage rectangle that will need repainting due to any changes that were made.
-	*/
-	virtual void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider) = 0;
+	static Drawable* createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider);
 
 	/** Creates a ValueTree to represent this Drawable.
-		The VarTree that is returned can be turned back into a Drawable with
-		createFromValueTree().
-		If there are any images used in this drawable, you'll need to provide a valid
-		ImageProvider object that can be used to create storable representations of them.
+		The ValueTree that is returned can be turned back into a Drawable with createFromValueTree().
+		If there are any images used in this drawable, you'll need to provide a valid ImageProvider
+		object that can be used to create storable representations of them.
 	*/
-	virtual const ValueTree createValueTree (ImageProvider* imageProvider) const = 0;
-
-	/** Returns the tag ID that is used for a ValueTree that stores this type of drawable.  */
-	virtual const Identifier getValueTreeType() const = 0;
+	virtual const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const = 0;
 
 	/** Returns the area that this drawble covers.
 		The result is expressed in this drawable's own coordinate space, and does not take
@@ -45858,19 +45990,18 @@ public:
 		ValueTree& getState() throw()	   { return state; }
 
 		const String getID() const;
-		void setID (const String& newID, UndoManager* undoManager);
-		static const Identifier idProperty;
+		void setID (const String& newID);
 
 		ValueTree state;
 	};
+
+	static void registerDrawableTypes (ComponentBuilder& componentBuilder);
 
 protected:
 
 	friend class DrawableComposite;
 	friend class DrawableShape;
 
-	/** @internal */
-	static Drawable* createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	void transformContextToCorrectOrigin (Graphics& g);
 	/** @internal */
@@ -51035,6 +51166,9 @@ public:
 	/** Refreshes the directory that's currently being listed. */
 	void refresh();
 
+	/** Changes the filter that's being used to sift the files. */
+	void setFileFilter (const FileFilter* newFileFilter);
+
 	/** Returns a verb to describe what should happen when the file is accepted.
 
 		E.g. if browsing in "load file" mode, this will be "Open", if in "save file"
@@ -51089,7 +51223,10 @@ public:
 	FilePreviewComponent* getPreviewComponent() const throw();
 
 protected:
-	virtual const BigInteger getRoots (StringArray& rootNames, StringArray& rootPaths);
+	/** Returns a list of names and paths for the default places the user might want to look.
+		Use an empty string to indicate a section break.
+	*/
+	virtual void getRoots (StringArray& rootNames, StringArray& rootPaths);
 
 private:
 
@@ -51592,6 +51729,15 @@ public:
 									int minimumWhenOffTheLeft,
 									int minimumWhenOffTheBottom,
 									int minimumWhenOffTheRight) throw();
+
+	/** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+	int getMinimumWhenOffTheTop() const throw()	 { return minOffTop; }
+	/** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+	int getMinimumWhenOffTheLeft() const throw()	{ return minOffLeft; }
+	/** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+	int getMinimumWhenOffTheBottom() const throw()	  { return minOffBottom; }
+	/** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
+	int getMinimumWhenOffTheRight() const throw()	   { return minOffRight; }
 
 	/** Specifies a width-to-height ratio that the resizer should always maintain.
 
@@ -52204,6 +52350,16 @@ public:
 	*/
 	void setContentComponentSize (int width, int height);
 
+	/** Returns the width of the frame to use around the window.
+		@see getContentComponentBorder
+	*/
+	virtual const BorderSize getBorderThickness();
+
+	/** Returns the insets to use when positioning the content component.
+		@see getBorderThickness
+	*/
+	virtual const BorderSize getContentComponentBorder();
+
 	/** A set of colour IDs to use to change the colour of various aspects of the window.
 
 		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
@@ -52240,18 +52396,6 @@ protected:
 	void activeWindowStatusChanged();
 	/** @internal */
 	int getDesktopWindowStyleFlags() const;
-
-	/** Returns the width of the border to use around the window.
-
-		@see getContentComponentBorder
-	*/
-	virtual const BorderSize getBorderThickness();
-
-	/** Returns the insets to use when positioning the content component.
-
-		@see getBorderThickness
-	*/
-	virtual const BorderSize getContentComponentBorder();
 
 #if JUCE_DEBUG
 	/** Overridden to warn people about adding components directly to this component
@@ -53603,6 +53747,9 @@ private:
 
 #endif
 #ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_COMPONENTBUILDER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
@@ -61217,74 +61364,6 @@ public:
 	/** Destructor. */
 	~DrawableComposite();
 
-	/** Adds a new sub-drawable to this one.
-
-		This passes in a Drawable pointer for this object to look after. To add a copy
-		of a drawable, use the form of this method that takes a Drawable reference instead.
-
-		@param drawable	 the object to add - this will be deleted automatically
-								when no longer needed, so the caller mustn't keep any
-								pointers to it.
-		@param index		where to insert it in the list of drawables. 0 is the back,
-								-1 is the front, or any value from 0 and getNumDrawables()
-								can be used
-		@see removeDrawable
-	*/
-	void insertDrawable (Drawable* drawable, int index = -1);
-
-	/** Adds a new sub-drawable to this one.
-
-		This takes a copy of a Drawable and adds it to this object. To pass in a Drawable
-		for this object to look after, use the form of this method that takes a Drawable
-		pointer instead.
-
-		@param drawable	 the object to add - an internal copy will be made of this object
-		@param index		where to insert it in the list of drawables. 0 is the back,
-								-1 is the front, or any value from 0 and getNumDrawables()
-								can be used
-		@see removeDrawable
-	*/
-	void insertDrawable (const Drawable& drawable, int index = -1);
-
-	/** Deletes one of the Drawable objects.
-
-		@param index	the index of the drawable to delete, between 0
-						and (getNumDrawables() - 1).
-		@param deleteDrawable   if this is true, the drawable that is removed will also
-						be deleted. If false, it'll just be removed.
-		@see insertDrawable, getNumDrawables
-	*/
-	void removeDrawable (int index, bool deleteDrawable = true);
-
-	/** Returns the number of drawables contained inside this one.
-
-		@see getDrawable
-	*/
-	int getNumDrawables() const throw();
-
-	/** Returns one of the drawables that are contained in this one.
-
-		Each drawable also has a transform associated with it - you can use getDrawableTransform()
-		to find it.
-
-		The pointer returned is managed by this object and will be deleted when no longer
-		needed, so be careful what you do with it.
-
-		@see getNumDrawables
-	*/
-	Drawable* getDrawable (int index) const;
-
-	/** Looks for a child drawable with the specified name. */
-	Drawable* getDrawableWithName (const String& name) const throw();
-
-	/** Brings one of the Drawables to the front.
-
-		@param index	the index of the drawable to move, between 0
-						and (getNumDrawables() - 1).
-		@see insertDrawable, getNumDrawables
-	*/
-	void bringToFront (int index);
-
 	/** Sets the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
 		@see setContentArea
 	*/
@@ -61349,13 +61428,11 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
-	/** @internal */
-	const Identifier getValueTreeType() const	{ return valueTreeType; }
 	/** @internal */
 	const Expression getSymbolValue (const String& symbol, const String& member) const;
 	/** @internal */
@@ -61375,13 +61452,8 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		int getNumDrawables() const;
-		ValueTree getDrawableState (int index) const;
-		ValueTree getDrawableWithId (const String& objectId, bool recursive) const;
-		int indexOfDrawable (const ValueTree& item) const;
-		void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
-		void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
-		void removeDrawable (const ValueTree& child, UndoManager* undoManager);
+		ValueTree getChildList() const;
+		ValueTree getChildListCreating (UndoManager* undoManager);
 
 		const RelativeParallelogram getBoundingBox() const;
 		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
@@ -61403,8 +61475,6 @@ public:
 	private:
 		static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY, markerTag;
 
-		ValueTree getChildList() const;
-		ValueTree getChildListCreating (UndoManager* undoManager);
 		ValueTree getMarkerList (bool xAxis) const;
 		ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
 	};
@@ -61492,13 +61562,11 @@ public:
 	/** @internal */
 	const Rectangle<float> getDrawableBounds() const;
 	/** @internal */
-	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
-	/** @internal */
-	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawableImage's state into a ValueTree. */
 	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
@@ -61615,18 +61683,18 @@ public:
 		FillAndStrokeState (const ValueTree& state);
 
 		const FillType getMainFill (Expression::EvaluationContext* nameFinder,
-									ImageProvider* imageProvider) const;
+									ComponentBuilder::ImageProvider* imageProvider) const;
 		ValueTree getMainFillState();
 		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
 						  const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-						  ImageProvider* imageProvider, UndoManager* undoManager);
+						  ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
 
 		const FillType getStrokeFill (Expression::EvaluationContext* nameFinder,
-									  ImageProvider* imageProvider) const;
+									  ComponentBuilder::ImageProvider* imageProvider) const;
 		ValueTree getStrokeFillState();
 		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
 							const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-							ImageProvider* imageProvider, UndoManager* undoManager);
+							ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
 
 		const PathStrokeType getStrokeType() const;
 		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
@@ -61634,11 +61702,11 @@ public:
 		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
 											RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
 											Expression::EvaluationContext* nameFinder,
-											ImageProvider* imageProvider);
+											ComponentBuilder::ImageProvider* imageProvider);
 
 		static void writeFillType (ValueTree& v, const FillType& fillType,
 								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-								   const RelativePoint* gradientPoint3, ImageProvider* imageProvider,
+								   const RelativePoint* gradientPoint3, ComponentBuilder::ImageProvider* imageProvider,
 								   UndoManager* undoManager);
 
 		static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
@@ -61668,10 +61736,10 @@ protected:
 	/** Updates the details from a FillAndStrokeState object, returning true if something changed. */
 	bool refreshFillTypes (const FillAndStrokeState& newState,
 						   Expression::EvaluationContext* nameFinder,
-						   ImageProvider* imageProvider);
+						   ComponentBuilder::ImageProvider* imageProvider);
 
 	/** Writes the stroke and fill details to a FillAndStrokeState object. */
-	void writeTo (FillAndStrokeState& state, ImageProvider* imageProvider, UndoManager* undoManager) const;
+	void writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const;
 
 	PathStrokeType strokeType;
 	Path path, strokePath;
@@ -61717,13 +61785,11 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
-	/** @internal */
-	const Identifier getValueTreeType() const	   { return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
 	class ValueTreeWrapper   : public DrawableShape::FillAndStrokeState
@@ -61831,13 +61897,11 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
-	/** @internal */
-	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawableRectangle's state into a ValueTree. */
 	class ValueTreeWrapper   : public DrawableShape::FillAndStrokeState
@@ -61940,13 +62004,11 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	void refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
-	/** @internal */
-	const Identifier getValueTreeType() const	{ return valueTreeType; }
 	/** @internal */
 	const Rectangle<float> getDrawableBounds() const;
 

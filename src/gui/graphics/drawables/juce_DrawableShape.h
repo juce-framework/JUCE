@@ -96,18 +96,18 @@ public:
         FillAndStrokeState (const ValueTree& state);
 
         const FillType getMainFill (Expression::EvaluationContext* nameFinder,
-                                    ImageProvider* imageProvider) const;
+                                    ComponentBuilder::ImageProvider* imageProvider) const;
         ValueTree getMainFillState();
         void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
                           const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-                          ImageProvider* imageProvider, UndoManager* undoManager);
+                          ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
 
         const FillType getStrokeFill (Expression::EvaluationContext* nameFinder,
-                                      ImageProvider* imageProvider) const;
+                                      ComponentBuilder::ImageProvider* imageProvider) const;
         ValueTree getStrokeFillState();
         void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
                             const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-                            ImageProvider* imageProvider, UndoManager* undoManager);
+                            ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
 
         const PathStrokeType getStrokeType() const;
         void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
@@ -115,11 +115,11 @@ public:
         static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
                                             RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
                                             Expression::EvaluationContext* nameFinder,
-                                            ImageProvider* imageProvider);
+                                            ComponentBuilder::ImageProvider* imageProvider);
 
         static void writeFillType (ValueTree& v, const FillType& fillType,
                                    const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-                                   const RelativePoint* gradientPoint3, ImageProvider* imageProvider,
+                                   const RelativePoint* gradientPoint3, ComponentBuilder::ImageProvider* imageProvider,
                                    UndoManager* undoManager);
 
         static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
@@ -149,10 +149,10 @@ protected:
     /** Updates the details from a FillAndStrokeState object, returning true if something changed. */
     bool refreshFillTypes (const FillAndStrokeState& newState,
                            Expression::EvaluationContext* nameFinder,
-                           ImageProvider* imageProvider);
+                           ComponentBuilder::ImageProvider* imageProvider);
 
     /** Writes the stroke and fill details to a FillAndStrokeState object. */
-    void writeTo (FillAndStrokeState& state, ImageProvider* imageProvider, UndoManager* undoManager) const;
+    void writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const;
 
 
     //==============================================================================

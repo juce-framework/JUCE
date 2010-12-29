@@ -440,12 +440,12 @@ void DrawablePath::ValueTreeWrapper::Element::removePoint (UndoManager* undoMana
 }
 
 //==============================================================================
-void DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+void DrawablePath::refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder)
 {
     ValueTreeWrapper v (tree);
-    setName (v.getID());
+    setComponentID (v.getID());
 
-    if (refreshFillTypes (v, getParent(), imageProvider))
+    if (refreshFillTypes (v, getParent(), builder.getImageProvider()))
         repaint();
 
     ScopedPointer<RelativePointPath> newRelativePath (new RelativePointPath (tree));
@@ -467,12 +467,12 @@ void DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* i
     relativePath = newRelativePath;
 }
 
-const ValueTree DrawablePath::createValueTree (ImageProvider* imageProvider) const
+const ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);
 
-    v.setID (getName(), 0);
+    v.setID (getComponentID());
     writeTo (v, imageProvider, 0);
 
     if (relativePath != 0)
