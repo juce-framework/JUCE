@@ -175,7 +175,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
         if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
-        if (hostFilename.startsWith ("FL")                      return FruityLoops;
+        if (hostFilename.startsWith ("FL"))                     return FruityLoops;
 
       #elif JUCE_LINUX
         jassertfalse   // not yet done!
