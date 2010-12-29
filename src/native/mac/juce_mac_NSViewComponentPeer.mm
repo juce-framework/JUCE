@@ -1662,7 +1662,8 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
     if (enableOrDisable)
     {
-        [NSApp setPresentationOptions: NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar];
+        [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
+                                                          : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
         kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
     }
     else
