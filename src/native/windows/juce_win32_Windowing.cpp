@@ -2003,11 +2003,10 @@ private:
                 return 0;
 
             case WM_NCPAINT:
-                if (wParam != 1)
-                    handlePaintMessage();
-
                 if (hasTitleBar())
                     break;
+                else if (wParam != 1)
+                    handlePaintMessage();
 
                 return 0;
 

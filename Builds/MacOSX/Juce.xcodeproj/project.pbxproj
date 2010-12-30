@@ -143,6 +143,7 @@
 		9AA76460DA7D34CE6A69E2B1 = { isa = PBXBuildFile; fileRef = 45E5EE9E0173683D721FABDA; };
 		4E81BC4A50CF1883F529E152 = { isa = PBXBuildFile; fileRef = F8FCCCE06D31FEF697FCD80D; };
 		8FBB6BF0C5406E1BA481CFEF = { isa = PBXBuildFile; fileRef = A6AD7357F905309D1B461EB7; };
+		260EF664D324038F9DC6C35B = { isa = PBXBuildFile; fileRef = F665A039C3A85EFDAA3E1245; };
 		F5F3F25D9F377128DC74D95B = { isa = PBXBuildFile; fileRef = FF046140CCF1EDB0DFF80178; };
 		C64A2BF05224582134872415 = { isa = PBXBuildFile; fileRef = A95F42C5CB0C2E5052B31568; };
 		0A9C9486A6B31F21B1472D2B = { isa = PBXBuildFile; fileRef = A31221E2A50CCE9DF06B5F4B; };
@@ -666,6 +667,8 @@
 		44CDA79090B115C3B62A2168 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ComponentMovementWatcher.h; path = ../../src/gui/components/layout/juce_ComponentMovementWatcher.h; sourceTree = SOURCE_ROOT; };
 		A6AD7357F905309D1B461EB7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GroupComponent.cpp; path = ../../src/gui/components/layout/juce_GroupComponent.cpp; sourceTree = SOURCE_ROOT; };
 		E9242E8425497D889C764C66 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_GroupComponent.h; path = ../../src/gui/components/layout/juce_GroupComponent.h; sourceTree = SOURCE_ROOT; };
+		F665A039C3A85EFDAA3E1245 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MarkerList.cpp; path = ../../src/gui/components/layout/juce_MarkerList.cpp; sourceTree = SOURCE_ROOT; };
+		8A9F1A98C0C96BF655F606AB = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MarkerList.h; path = ../../src/gui/components/layout/juce_MarkerList.h; sourceTree = SOURCE_ROOT; };
 		FF046140CCF1EDB0DFF80178 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MultiDocumentPanel.cpp; path = ../../src/gui/components/layout/juce_MultiDocumentPanel.cpp; sourceTree = SOURCE_ROOT; };
 		B6A223FB5B4A9388C83D6FC7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MultiDocumentPanel.h; path = ../../src/gui/components/layout/juce_MultiDocumentPanel.h; sourceTree = SOURCE_ROOT; };
 		A95F42C5CB0C2E5052B31568 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ResizableBorderComponent.cpp; path = ../../src/gui/components/layout/juce_ResizableBorderComponent.cpp; sourceTree = SOURCE_ROOT; };
@@ -1397,6 +1400,8 @@
 				44CDA79090B115C3B62A2168,
 				A6AD7357F905309D1B461EB7,
 				E9242E8425497D889C764C66,
+				F665A039C3A85EFDAA3E1245,
+				8A9F1A98C0C96BF655F606AB,
 				FF046140CCF1EDB0DFF80178,
 				B6A223FB5B4A9388C83D6FC7,
 				A95F42C5CB0C2E5052B31568,
@@ -2077,6 +2082,7 @@
 				9AA76460DA7D34CE6A69E2B1,
 				4E81BC4A50CF1883F529E152,
 				8FBB6BF0C5406E1BA481CFEF,
+				260EF664D324038F9DC6C35B,
 				F5F3F25D9F377128DC74D95B,
 				C64A2BF05224582134872415,
 				0A9C9486A6B31F21B1472D2B,

@@ -277,6 +277,7 @@
  #include "../src/gui/components/layout/juce_ComponentBoundsConstrainer.cpp"
  #include "../src/gui/components/layout/juce_ComponentMovementWatcher.cpp"
  #include "../src/gui/components/layout/juce_GroupComponent.cpp"
+ #include "../src/gui/components/layout/juce_MarkerList.cpp"
  #include "../src/gui/components/layout/juce_MultiDocumentPanel.cpp"
  #include "../src/gui/components/layout/juce_ResizableBorderComponent.cpp"
  #include "../src/gui/components/layout/juce_ResizableCornerComponent.cpp"

@@ -95,10 +95,6 @@ void Drawable::transformContextToCorrectOrigin (Graphics& g)
                  originRelativeToComponent.getY());
 }
 
-void Drawable::markerHasMoved()
-{
-}
-
 void Drawable::parentHierarchyChanged()
 {
     setBoundsToEnclose (getDrawableBounds());
@@ -176,21 +172,6 @@ Drawable* Drawable::createFromImageFile (const File& file)
 }
 
 //==============================================================================
-Drawable* Drawable::createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider)
-{
-    ComponentBuilder builder (tree);
-    builder.setImageProvider (imageProvider);
-    registerDrawableTypes (builder);
-
-    Drawable* d = dynamic_cast<Drawable*> (builder.getComponent());
-
-    if (d != 0)
-        return dynamic_cast<Drawable*> (builder.getAndReleaseComponent());
-
-    return 0;
-}
-
-//==============================================================================
 template <class DrawableClass>
 class DrawableTypeHandler  : public ComponentBuilder::TypeHandler
 {
@@ -219,7 +200,7 @@ public:
     }
 };
 
-void Drawable::registerDrawableTypes (ComponentBuilder& builder)
+void Drawable::registerDrawableTypeHandlers (ComponentBuilder& builder)
 {
     builder.registerTypeHandler (new DrawableTypeHandler <DrawablePath>());
     builder.registerTypeHandler (new DrawableTypeHandler <DrawableComposite>());
@@ -228,13 +209,24 @@ void Drawable::registerDrawableTypes (ComponentBuilder& builder)
     builder.registerTypeHandler (new DrawableTypeHandler <DrawableText>());
 }
 
+Drawable* Drawable::createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider)
+{
+    ComponentBuilder builder (tree);
+    builder.setImageProvider (imageProvider);
+    registerDrawableTypeHandlers (builder);
+
+    ScopedPointer<Component> comp (builder.createComponent());
+    Drawable* const d = dynamic_cast<Drawable*> (static_cast <Component*> (comp));
+
+    if (d != 0)
+        comp.release();
+
+    return d;
+}
+
 //==============================================================================
 Drawable::ValueTreeWrapperBase::ValueTreeWrapperBase (const ValueTree& state_)
     : state (state_)
-{
-}
-
-Drawable::ValueTreeWrapperBase::~ValueTreeWrapperBase()
 {
 }
 

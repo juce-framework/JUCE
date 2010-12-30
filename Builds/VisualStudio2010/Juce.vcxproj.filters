@@ -625,6 +625,9 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_GroupComponent.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\layout\juce_MarkerList.cpp">
+      <Filter>Juce\Source\gui\components\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
@@ -1747,6 +1750,9 @@
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_GroupComponent.h">
+      <Filter>Juce\Source\gui\components\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\layout\juce_MarkerList.h">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h">

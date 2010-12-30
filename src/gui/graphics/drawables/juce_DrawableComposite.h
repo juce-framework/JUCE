@@ -27,6 +27,7 @@
 #define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 
 #include "juce_Drawable.h"
+#include "../../components/layout/juce_MarkerList.h"
 
 
 //==============================================================================
@@ -85,24 +86,6 @@ public:
     void resetContentAreaAndBoundingBoxToFitChildren();
 
     //==============================================================================
-    /** Represents a named marker position.
-        @see DrawableComposite::getMarker
-    */
-    struct Marker
-    {
-        Marker (const Marker&);
-        Marker (const String& name, const RelativeCoordinate& position);
-        bool operator!= (const Marker&) const throw();
-
-        String name;
-        RelativeCoordinate position;
-    };
-
-    int getNumMarkers (bool xAxis) const throw();
-    const Marker* getMarker (bool xAxis, int index) const throw();
-    void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
-    void removeMarker (bool xAxis, int index);
-
     /** The name of the marker that defines the left edge of the content area. */
     static const char* const contentLeftMarkerName;
     /** The name of the marker that defines the right edge of the content area. */
@@ -126,13 +109,13 @@ public:
     /** @internal */
     const Rectangle<float> getDrawableBounds() const;
     /** @internal */
-    void markerHasMoved();
-    /** @internal */
     void childBoundsChanged (Component*);
     /** @internal */
     void childrenChanged();
     /** @internal */
     void parentHierarchyChanged();
+    /** @internal */
+    MarkerList* getMarkers (bool xAxis);
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
@@ -151,27 +134,19 @@ public:
         const RelativeRectangle getContentArea() const;
         void setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager);
 
-        int getNumMarkers (bool xAxis) const;
-        const ValueTree getMarkerState (bool xAxis, int index) const;
-        const ValueTree getMarkerState (bool xAxis, const String& name) const;
-        bool containsMarker (bool xAxis, const ValueTree& state) const;
-        const Marker getMarker (bool xAxis, const ValueTree& state) const;
-        void setMarker (bool xAxis, const Marker& marker, UndoManager* undoManager);
-        void removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager);
+        MarkerList::ValueTreeWrapper getMarkerList (bool xAxis) const;
+        MarkerList::ValueTreeWrapper getMarkerListCreating (bool xAxis, UndoManager* undoManager);
 
-        static const Identifier nameProperty, posProperty, topLeft, topRight, bottomLeft;
+        static const Identifier topLeft, topRight, bottomLeft;
 
     private:
-        static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY, markerTag;
-
-        ValueTree getMarkerList (bool xAxis) const;
-        ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
+        static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY;
     };
 
 private:
     //==============================================================================
     RelativeParallelogram bounds;
-    OwnedArray <Marker> markersX, markersY;
+    MarkerList markersX, markersY;
     bool updateBoundsReentrant;
 
     void refreshTransformFromBounds();

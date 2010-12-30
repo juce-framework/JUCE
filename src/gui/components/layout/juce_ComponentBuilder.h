@@ -49,7 +49,10 @@
 class JUCE_API  ComponentBuilder  : public ValueTree::Listener
 {
 public:
-    /**
+    /** Creates a ComponentBuilder that will use the given state.
+        Once you've created your builder, you should use registerTypeHandler() to register some
+        type handlers for it, and then you can call createComponent() or getManagedComponent()
+        to get the actual component.
     */
     explicit ComponentBuilder (const ValueTree& state);
 
@@ -57,52 +60,89 @@ public:
     ~ComponentBuilder();
 
     //==============================================================================
-    /**
-    */
+    /** Returns the ValueTree that this builder is working with. */
     ValueTree& getState() throw()               { return state; }
 
-    /**
-    */
+    /** Returns the ValueTree that this builder is working with. */
     const ValueTree& getState() const throw()   { return state; }
 
-    /**
-    */
-    Component* getComponent();
+    /** Returns the builder's component (creating it if necessary).
 
-    /**
+        The first time that this method is called, the builder will attempt to create a component
+        from the ValueTree, so you must have registered some suitable type handlers before calling
+        this. If there's a problem and the component can't be created, this method returns 0.
+
+        The component that is returned is owned by this ComponentBuilder, so you can put it inside
+        your own parent components, but don't delete it! The ComponentBuilder will delete it automatically
+        when the builder is destroyed. If you want to get a component that you can delete yourself,
+        call createComponent() instead.
+
+        The ComponentBuilder will update this component if any changes are made to the ValueTree, so if
+        there's a chance that the tree might change, be careful not to keep any pointers to sub-components,
+        as they may be changed or removed.
     */
-    Component* getAndReleaseComponent();
+    Component* getManagedComponent();
+
+    /** Creates and returns a new instance of the component that the ValueTree represents.
+        The caller is responsible for using and deleting the object that is returned. Unlike
+        getManagedComponent(), the component that is returned will not be updated by the builder.
+    */
+    Component* createComponent();
 
     //==============================================================================
     /**
+        The class is a base class for objects that manage the loading of a type of component
+        from a ValueTree.
+
+        To store and re-load a tree of components as a ValueTree, each component type must have
+        a TypeHandler to represent it.
+
+        @see ComponentBuilder::registerTypeHandler(), Drawable::registerDrawableTypeHandlers()
     */
     class JUCE_API  TypeHandler
     {
     public:
-        /**
+        //==============================================================================
+        /** Creates a TypeHandler.
+            The valueTreeType must be the type name of the ValueTrees that this handler can parse.
         */
         explicit TypeHandler (const Identifier& valueTreeType);
 
         /** Destructor. */
         virtual ~TypeHandler();
 
-        /**
-        */
+        /** Returns the type of the ValueTrees that this handler can parse. */
         const Identifier& getType() const throw()           { return valueTreeType; }
 
-        /**
+        /** Returns the builder that this type is registered with. */
+        ComponentBuilder* getBuilder() const throw();
+
+        //==============================================================================
+        /** This method must create a new component from the given state, add it to the specified
+            parent component (which may be null), and return it.
+
+            The ValueTree will have been pre-checked to make sure that its type matches the type
+            that this handler supports.
+
+            There's no need to set the new Component's ID to match that of the state - the builder
+            will take care of that itself.
         */
         virtual Component* addNewComponentFromState (const ValueTree& state, Component* parent) = 0;
 
-        /**
+        /** This method must update an existing component from a new ValueTree state.
+
+            A component that has been created with addNewComponentFromState() may need to be updated
+            if the ValueTree changes, so this method is used to do that. Your implementation must do
+            whatever's necessary to update the component from the new state provided.
+
+            The ValueTree will have been pre-checked to make sure that its type matches the type
+            that this handler supports, and the component will have been created by this type's
+            addNewComponentFromState() method.
         */
         virtual void updateComponentFromState (Component* component, const ValueTree& state) = 0;
 
-        /**
-        */
-        ComponentBuilder* getBuilder() const throw();
-
     private:
+        //==============================================================================
         friend class ComponentBuilder;
         ComponentBuilder* builder;
         const Identifier valueTreeType;
@@ -110,26 +150,37 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypeHandler);
     };
 
-    /**
+    //==============================================================================
+    /** Adds a type handler that the builder can use when trying to load components.
+        @see Drawable::registerDrawableTypeHandlers()
     */
     void registerTypeHandler (TypeHandler* type);
 
-    /**
-    */
+    /** Tries to find a registered type handler that can load a component from the given ValueTree. */
     TypeHandler* getHandlerForState (const ValueTree& state) const;
 
-    /**
+    /** Returns the number of registered type handlers.
+        @see getHandler, registerTypeHandler
     */
     int getNumHandlers() const throw();
 
-    /**
+    /** Returns one of the registered type handlers.
+        @see getNumHandlers, registerTypeHandler
     */
     TypeHandler* getHandler (int index) const throw();
 
     //=============================================================================
-    /** This class is used when loading Drawables that contain images, and retrieves
-        the image for a stored identifier.
-        @see Drawable::createFromValueTree
+    /** This class is used when references to images need to be stored in ValueTrees.
+
+        An instance of an ImageProvider provides a mechanism for converting an Image to/from
+        a reference, which may be a file, URL, ID string, or whatever system is appropriate in
+        your app.
+
+        When you're loading components from a ValueTree that may need a way of loading images, you
+        should call ComponentBuilder::setImageProvider() to supply a suitable provider before
+        trying to load the component.
+
+        @see ComponentBuilder::setImageProvider()
     */
     class JUCE_API  ImageProvider
     {
@@ -146,19 +197,35 @@ public:
         virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
 
         /** Returns an identifier to be used to refer to a given image.
-            This is used when converting a drawable into a ValueTree, so if you're
-            only loading drawables, you can just return a var::null here.
+            This is used when a reference to an image is stored in a ValueTree.
         */
         virtual const var getIdentifierForImage (const Image& image) = 0;
     };
 
-    /** */
+    //==============================================================================
+    /** Gives the builder an ImageProvider object that the type handlers can use when
+        loading images from stored references.
+
+        The object that is passed in is not owned by the builder, so the caller must delete
+        it when it is no longer needed, but not while the builder may still be using it. To
+        clear the image provider, just call setImageProvider (0).
+    */
     void setImageProvider (ImageProvider* newImageProvider) throw();
 
-    /** */
+    /** Returns the current image provider that this builder is using, or 0 if none has been set. */
     ImageProvider* getImageProvider() const throw();
 
     //=============================================================================
+    /** Updates the children of a parent component by updating them from the children of
+        a given ValueTree.
+    */
+    void updateChildComponents (Component& parent, const ValueTree& children);
+
+    /** An identifier for the property of the ValueTrees that is used to store a unique ID
+        for that component.
+    */
+    static const Identifier idProperty;
+
     /** @internal */
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
     /** @internal */
@@ -166,22 +233,15 @@ public:
     /** @internal */
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 
-    /**
-    */
-    void updateChildComponents (Component& parent, const ValueTree& children);
-
-    /**
-    */
-    static const Identifier idProperty;
-
 private:
     //=============================================================================
     ValueTree state;
     OwnedArray <TypeHandler> types;
     ScopedPointer<Component> component;
     ImageProvider* imageProvider;
-
-    void updateComponent (const ValueTree& state);
+   #if JUCE_DEBUG
+    WeakReference<Component> componentRef;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
 };

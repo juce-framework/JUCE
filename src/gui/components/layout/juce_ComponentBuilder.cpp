@@ -78,6 +78,35 @@ namespace ComponentBuilderHelpers
         c->setComponentID (getStateId (state));
         return c;
     }
+
+    void updateComponent (ComponentBuilder& builder, const ValueTree& state)
+    {
+        Component* topLevelComp = builder.getManagedComponent();
+
+        if (topLevelComp != 0)
+        {
+            const String compId (getStateId (state));
+
+            if (compId.isEmpty() && state.getParent().isValid())
+            {
+                // ..handle the case where a child of the actual state node has changed.
+                updateComponent (builder, state.getParent());
+            }
+            else
+            {
+                ComponentBuilder::TypeHandler* const type = builder.getHandlerForState (state);
+
+                if (type != 0)
+                {
+                    Component* const changedComp = findComponentWithID (topLevelComp, compId);
+
+                    if (changedComp != 0)
+                        type->updateComponentFromState (changedComp, state);
+                }
+            }
+        }
+    }
+
 }
 
 //=============================================================================
@@ -92,28 +121,36 @@ ComponentBuilder::ComponentBuilder (const ValueTree& state_)
 ComponentBuilder::~ComponentBuilder()
 {
     state.removeListener (this);
+
+   #if JUCE_DEBUG
+    // Don't delete the managed component!! The builder owns that component, and will delete
+    // it automatically when it gets deleted.
+    jassert (componentRef.get() == static_cast <Component*> (component));
+   #endif
 }
 
-Component* ComponentBuilder::getComponent()
+Component* ComponentBuilder::getManagedComponent()
 {
     if (component == 0)
     {
-        jassert (types.size() > 0);  // You need to register all the necessary types before you can load a component!
+        component = createComponent();
 
-        TypeHandler* const type = getHandlerForState (state);
-        jassert (type != 0); // trying to create a component from an unknown type of ValueTree
-
-        if (type != 0)
-            component = ComponentBuilderHelpers::createNewComponent (*type, state, 0);
+       #if JUCE_DEBUG
+        componentRef = component;
+       #endif
     }
 
     return component;
 }
 
-Component* ComponentBuilder::getAndReleaseComponent()
+Component* ComponentBuilder::createComponent()
 {
-    getComponent();
-    return component.release();
+    jassert (types.size() > 0);  // You need to register all the necessary types before you can load a component!
+
+    TypeHandler* const type = getHandlerForState (state);
+    jassert (type != 0); // trying to create a component from an unknown type of ValueTree
+
+    return type != 0 ? ComponentBuilderHelpers::createNewComponent (*type, state, 0) : 0;
 }
 
 void ComponentBuilder::registerTypeHandler (ComponentBuilder::TypeHandler* const type)
@@ -153,34 +190,6 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandler (const int index) co
     return types [index];
 }
 
-void ComponentBuilder::updateComponent (const ValueTree& state)
-{
-    using namespace ComponentBuilderHelpers;
-
-    if (component != 0)
-    {
-        const String compId (getStateId (state));
-
-        if (compId.isEmpty() && state.getParent().isValid())
-        {
-            // ..handle the case where a child of the actual state node has changed.
-            updateComponent (state.getParent());
-        }
-        else
-        {
-            TypeHandler* const type = getHandlerForState (state);
-
-            if (type != 0)
-            {
-                Component* const changedComp = findComponentWithID (component, compId);
-
-                if (changedComp != 0)
-                    type->updateComponentFromState (changedComp, state);
-            }
-        }
-    }
-}
-
 void ComponentBuilder::setImageProvider (ImageProvider* newImageProvider) throw()
 {
     imageProvider = newImageProvider;
@@ -193,17 +202,17 @@ ComponentBuilder::ImageProvider* ComponentBuilder::getImageProvider() const thro
 
 void ComponentBuilder::valueTreePropertyChanged (ValueTree& tree, const Identifier&)
 {
-    updateComponent (tree);
+    ComponentBuilderHelpers::updateComponent (*this, tree);
 }
 
 void ComponentBuilder::valueTreeChildrenChanged (ValueTree& tree)
 {
-    updateComponent (tree);
+    ComponentBuilderHelpers::updateComponent (*this, tree);
 }
 
 void ComponentBuilder::valueTreeParentChanged (ValueTree& tree)
 {
-    updateComponent (tree);
+    ComponentBuilderHelpers::updateComponent (*this, tree);
 }
 
 //==============================================================================

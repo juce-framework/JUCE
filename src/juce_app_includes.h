@@ -437,6 +437,9 @@
 #ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
  #include "gui/components/layout/juce_GroupComponent.h"
 #endif
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+ #include "gui/components/layout/juce_MarkerList.h"
+#endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
  #include "gui/components/layout/juce_MultiDocumentPanel.h"
 #endif

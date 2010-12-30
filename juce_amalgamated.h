@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	2
+#define JUCE_BUILDNUMBER	3
 
 /** Current Juce version number.
 
@@ -26874,6 +26874,7 @@ class LookAndFeel;
 class MouseInputSource;
 class MouseInputSourceInternal;
 class ComponentPeer;
+class MarkerList;
 
 /**
 	The base class for all JUCE user-interface objects.
@@ -28802,6 +28803,13 @@ public:
 		@see setColour, findColour
 	*/
 	virtual void colourChanged();
+
+	/** Components can implement this method to provide a MarkerList.
+		The default implementation of this method returns 0, but you can override it to
+		return a pointer to the component's marker list. If xAxis is true, it should
+		return the X marker list; if false, it should return the Y markers.
+	*/
+	virtual MarkerList* getMarkers (bool xAxis);
 
 	/** Returns the underlying native window handle for this component.
 
@@ -45704,58 +45712,97 @@ public:
 class JUCE_API  ComponentBuilder  : public ValueTree::Listener
 {
 public:
-	/**
+	/** Creates a ComponentBuilder that will use the given state.
+		Once you've created your builder, you should use registerTypeHandler() to register some
+		type handlers for it, and then you can call createComponent() or getManagedComponent()
+		to get the actual component.
 	*/
 	explicit ComponentBuilder (const ValueTree& state);
 
 	/** Destructor. */
 	~ComponentBuilder();
 
-	/**
-	*/
+	/** Returns the ValueTree that this builder is working with. */
 	ValueTree& getState() throw()		   { return state; }
 
-	/**
-	*/
+	/** Returns the ValueTree that this builder is working with. */
 	const ValueTree& getState() const throw()   { return state; }
 
-	/**
+	/** Returns the builder's component (creating it if necessary).
+
+		The first time that this method is called, the builder will attempt to create a component
+		from the ValueTree, so you must have registered some suitable type handlers before calling
+		this. If there's a problem and the component can't be created, this method returns 0.
+
+		The component that is returned is owned by this ComponentBuilder, so you can put it inside
+		your own parent components, but don't delete it! The ComponentBuilder will delete it automatically
+		when the builder is destroyed. If you want to get a component that you can delete yourself,
+		call createComponent() instead.
+
+		The ComponentBuilder will update this component if any changes are made to the ValueTree, so if
+		there's a chance that the tree might change, be careful not to keep any pointers to sub-components,
+		as they may be changed or removed.
 	*/
-	Component* getComponent();
+	Component* getManagedComponent();
+
+	/** Creates and returns a new instance of the component that the ValueTree represents.
+		The caller is responsible for using and deleting the object that is returned. Unlike
+		getManagedComponent(), the component that is returned will not be updated by the builder.
+	*/
+	Component* createComponent();
 
 	/**
-	*/
-	Component* getAndReleaseComponent();
+		The class is a base class for objects that manage the loading of a type of component
+		from a ValueTree.
 
-	/**
+		To store and re-load a tree of components as a ValueTree, each component type must have
+		a TypeHandler to represent it.
+
+		@see ComponentBuilder::registerTypeHandler(), Drawable::registerDrawableTypeHandlers()
 	*/
 	class JUCE_API  TypeHandler
 	{
 	public:
-		/**
+
+		/** Creates a TypeHandler.
+			The valueTreeType must be the type name of the ValueTrees that this handler can parse.
 		*/
 		explicit TypeHandler (const Identifier& valueTreeType);
 
 		/** Destructor. */
 		virtual ~TypeHandler();
 
-		/**
-		*/
+		/** Returns the type of the ValueTrees that this handler can parse. */
 		const Identifier& getType() const throw()	   { return valueTreeType; }
 
-		/**
+		/** Returns the builder that this type is registered with. */
+		ComponentBuilder* getBuilder() const throw();
+
+		/** This method must create a new component from the given state, add it to the specified
+			parent component (which may be null), and return it.
+
+			The ValueTree will have been pre-checked to make sure that its type matches the type
+			that this handler supports.
+
+			There's no need to set the new Component's ID to match that of the state - the builder
+			will take care of that itself.
 		*/
 		virtual Component* addNewComponentFromState (const ValueTree& state, Component* parent) = 0;
 
-		/**
+		/** This method must update an existing component from a new ValueTree state.
+
+			A component that has been created with addNewComponentFromState() may need to be updated
+			if the ValueTree changes, so this method is used to do that. Your implementation must do
+			whatever's necessary to update the component from the new state provided.
+
+			The ValueTree will have been pre-checked to make sure that its type matches the type
+			that this handler supports, and the component will have been created by this type's
+			addNewComponentFromState() method.
 		*/
 		virtual void updateComponentFromState (Component* component, const ValueTree& state) = 0;
 
-		/**
-		*/
-		ComponentBuilder* getBuilder() const throw();
-
 	private:
+
 		friend class ComponentBuilder;
 		ComponentBuilder* builder;
 		const Identifier valueTreeType;
@@ -45763,25 +45810,35 @@ public:
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypeHandler);
 	};
 
-	/**
+	/** Adds a type handler that the builder can use when trying to load components.
+		@see Drawable::registerDrawableTypeHandlers()
 	*/
 	void registerTypeHandler (TypeHandler* type);
 
-	/**
-	*/
+	/** Tries to find a registered type handler that can load a component from the given ValueTree. */
 	TypeHandler* getHandlerForState (const ValueTree& state) const;
 
-	/**
+	/** Returns the number of registered type handlers.
+		@see getHandler, registerTypeHandler
 	*/
 	int getNumHandlers() const throw();
 
-	/**
+	/** Returns one of the registered type handlers.
+		@see getNumHandlers, registerTypeHandler
 	*/
 	TypeHandler* getHandler (int index) const throw();
 
-	/** This class is used when loading Drawables that contain images, and retrieves
-		the image for a stored identifier.
-		@see Drawable::createFromValueTree
+	/** This class is used when references to images need to be stored in ValueTrees.
+
+		An instance of an ImageProvider provides a mechanism for converting an Image to/from
+		a reference, which may be a file, URL, ID string, or whatever system is appropriate in
+		your app.
+
+		When you're loading components from a ValueTree that may need a way of loading images, you
+		should call ComponentBuilder::setImageProvider() to supply a suitable provider before
+		trying to load the component.
+
+		@see ComponentBuilder::setImageProvider()
 	*/
 	class JUCE_API  ImageProvider
 	{
@@ -45798,17 +45855,32 @@ public:
 		virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
 
 		/** Returns an identifier to be used to refer to a given image.
-			This is used when converting a drawable into a ValueTree, so if you're
-			only loading drawables, you can just return a var::null here.
+			This is used when a reference to an image is stored in a ValueTree.
 		*/
 		virtual const var getIdentifierForImage (const Image& image) = 0;
 	};
 
-	/** */
+	/** Gives the builder an ImageProvider object that the type handlers can use when
+		loading images from stored references.
+
+		The object that is passed in is not owned by the builder, so the caller must delete
+		it when it is no longer needed, but not while the builder may still be using it. To
+		clear the image provider, just call setImageProvider (0).
+	*/
 	void setImageProvider (ImageProvider* newImageProvider) throw();
 
-	/** */
+	/** Returns the current image provider that this builder is using, or 0 if none has been set. */
 	ImageProvider* getImageProvider() const throw();
+
+	/** Updates the children of a parent component by updating them from the children of
+		a given ValueTree.
+	*/
+	void updateChildComponents (Component& parent, const ValueTree& children);
+
+	/** An identifier for the property of the ValueTrees that is used to store a unique ID
+		for that component.
+	*/
+	static const Identifier idProperty;
 
 	/** @internal */
 	void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
@@ -45817,22 +45889,15 @@ public:
 	/** @internal */
 	void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 
-	/**
-	*/
-	void updateChildComponents (Component& parent, const ValueTree& children);
-
-	/**
-	*/
-	static const Identifier idProperty;
-
 private:
 
 	ValueTree state;
 	OwnedArray <TypeHandler> types;
 	ScopedPointer<Component> component;
 	ImageProvider* imageProvider;
-
-	void updateComponent (const ValueTree& state);
+   #if JUCE_DEBUG
+	WeakReference<Component> componentRef;
+   #endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
 };
@@ -45964,6 +46029,7 @@ public:
 		If there are any images used within the drawable, you'll need to provide a valid
 		ImageProvider object that can be used to retrieve these images from whatever type
 		of identifier is used to represent them.
+		Internally, this uses a ComponentBuilder, and registerDrawableTypeHandlers().
 	*/
 	static Drawable* createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider);
 
@@ -45985,7 +46051,6 @@ public:
 	{
 	public:
 		ValueTreeWrapperBase (const ValueTree& state);
-		~ValueTreeWrapperBase();
 
 		ValueTree& getState() throw()	   { return state; }
 
@@ -45995,7 +46060,11 @@ public:
 		ValueTree state;
 	};
 
-	static void registerDrawableTypes (ComponentBuilder& componentBuilder);
+	/** Registers a set of ComponentBuilder::TypeHandler objects that can be used to
+		load all the different Drawable types from a saved state.
+		@see ComponentBuilder::registerTypeHandler()
+	*/
+	static void registerDrawableTypeHandlers (ComponentBuilder& componentBuilder);
 
 protected:
 
@@ -46004,8 +46073,6 @@ protected:
 
 	/** @internal */
 	void transformContextToCorrectOrigin (Graphics& g);
-	/** @internal */
-	void markerHasMoved();
 	/** @internal */
 	void parentHierarchyChanged();
 	/** @internal */
@@ -53891,6 +53958,120 @@ private:
 
 
 #endif
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+
+/*** Start of inlined file: juce_MarkerList.h ***/
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+#define __JUCE_MARKERLIST_JUCEHEADER__
+
+/**
+	Holds a set of named marker points along a one-dimensional axis.
+
+	This class is used to store sets of X and Y marker points in components.
+	@see Component::getMarkers().
+
+	The MarkerList is also a ChangeBroadcaster, so that listeners can register to receive
+	a callback when a marker is moved,
+*/
+class JUCE_API  MarkerList  : public ChangeBroadcaster
+{
+public:
+
+	/** Creates an empty marker list. */
+	MarkerList();
+	/** Creates a copy of another marker list. */
+	MarkerList (const MarkerList& other);
+	/** Copies another marker list to this one. */
+	MarkerList& operator= (const MarkerList& other);
+	/** Destructor. */
+	~MarkerList();
+
+	/** Represents a marker in a MarkerList. */
+	class JUCE_API  Marker
+	{
+	public:
+		/** Creates a copy of another Marker. */
+		Marker (const Marker& other);
+		/** Creates a Marker with a given name and position. */
+		Marker (const String& name, const RelativeCoordinate& position);
+
+		/** The marker's name. */
+		String name;
+
+		/** The marker's position. */
+		RelativeCoordinate position;
+
+		/** Returns true if both the names and positions of these two markers match. */
+		bool operator== (const Marker&) const throw();
+		/** Returns true if either the name or position of these two markers differ. */
+		bool operator!= (const Marker&) const throw();
+	};
+
+	/** Returns the number of markers in the list. */
+	int getNumMarkers() const throw();
+
+	/** Returns one of the markers in the list, by its index. */
+	const Marker* getMarker (int index) const throw();
+
+	/** Returns a named marker, or 0 if no such name is found.
+		Note that name comparisons are case-sensitive.
+	*/
+	const Marker* getMarker (const String& name) const throw();
+
+	/** Sets the position of a marker.
+
+		If the name already exists, then the existing marker is moved; if it doesn't exist, then a
+		new marker is added.
+	*/
+	void setMarker (const String& name, const RelativeCoordinate& position);
+
+	/** Deletes the marker at the given list index. */
+	void removeMarker (int index);
+
+	/** Deletes the marker with the given name. */
+	void removeMarker (const String& name);
+
+	/** Returns true if all the markers in these two lists match exactly. */
+	bool operator== (const MarkerList& other) const throw();
+	/** Returns true if not all the markers in these two lists match exactly. */
+	bool operator!= (const MarkerList& other) const throw();
+
+	/** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
+	class ValueTreeWrapper
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		int getNumMarkers() const;
+		const ValueTree getMarkerState (int index) const;
+		const ValueTree getMarkerState (const String& name) const;
+		bool containsMarker (const ValueTree& state) const;
+		const MarkerList::Marker getMarker (const ValueTree& state) const;
+		void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
+		void removeMarker (const ValueTree& state, UndoManager* undoManager);
+
+		void applyTo (MarkerList& markerList);
+		void readFrom (const MarkerList& markerList, UndoManager* undoManager);
+
+	private:
+		ValueTree state;
+
+		static const Identifier markerTag, nameProperty, posProperty;
+	};
+
+private:
+
+	OwnedArray<Marker> markers;
+	void markersHaveChanged();
+
+	JUCE_LEAK_DETECTOR (MarkerList);
+};
+
+#endif   // __JUCE_MARKERLIST_JUCEHEADER__
+/*** End of inlined file: juce_MarkerList.h ***/
+
+
+#endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
 
 /*** Start of inlined file: juce_MultiDocumentPanel.h ***/
@@ -61398,24 +61579,6 @@ public:
 	*/
 	void resetContentAreaAndBoundingBoxToFitChildren();
 
-	/** Represents a named marker position.
-		@see DrawableComposite::getMarker
-	*/
-	struct Marker
-	{
-		Marker (const Marker&);
-		Marker (const String& name, const RelativeCoordinate& position);
-		bool operator!= (const Marker&) const throw();
-
-		String name;
-		RelativeCoordinate position;
-	};
-
-	int getNumMarkers (bool xAxis) const throw();
-	const Marker* getMarker (bool xAxis, int index) const throw();
-	void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
-	void removeMarker (bool xAxis, int index);
-
 	/** The name of the marker that defines the left edge of the content area. */
 	static const char* const contentLeftMarkerName;
 	/** The name of the marker that defines the right edge of the content area. */
@@ -61438,13 +61601,13 @@ public:
 	/** @internal */
 	const Rectangle<float> getDrawableBounds() const;
 	/** @internal */
-	void markerHasMoved();
-	/** @internal */
 	void childBoundsChanged (Component*);
 	/** @internal */
 	void childrenChanged();
 	/** @internal */
 	void parentHierarchyChanged();
+	/** @internal */
+	MarkerList* getMarkers (bool xAxis);
 
 	/** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
 	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
@@ -61462,27 +61625,19 @@ public:
 		const RelativeRectangle getContentArea() const;
 		void setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager);
 
-		int getNumMarkers (bool xAxis) const;
-		const ValueTree getMarkerState (bool xAxis, int index) const;
-		const ValueTree getMarkerState (bool xAxis, const String& name) const;
-		bool containsMarker (bool xAxis, const ValueTree& state) const;
-		const Marker getMarker (bool xAxis, const ValueTree& state) const;
-		void setMarker (bool xAxis, const Marker& marker, UndoManager* undoManager);
-		void removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager);
+		MarkerList::ValueTreeWrapper getMarkerList (bool xAxis) const;
+		MarkerList::ValueTreeWrapper getMarkerListCreating (bool xAxis, UndoManager* undoManager);
 
-		static const Identifier nameProperty, posProperty, topLeft, topRight, bottomLeft;
+		static const Identifier topLeft, topRight, bottomLeft;
 
 	private:
-		static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY, markerTag;
-
-		ValueTree getMarkerList (bool xAxis) const;
-		ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
+		static const Identifier childGroupTag, markerGroupTagX, markerGroupTagY;
 	};
 
 private:
 
 	RelativeParallelogram bounds;
-	OwnedArray <Marker> markersX, markersY;
+	MarkerList markersX, markersY;
 	bool updateBoundsReentrant;
 
 	void refreshTransformFromBounds();

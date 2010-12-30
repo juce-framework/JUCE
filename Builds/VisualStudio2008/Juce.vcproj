@@ -548,6 +548,8 @@
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_GroupComponent.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_GroupComponent.h"/>
+              <File RelativePath="..\..\src\gui\components\layout\juce_MarkerList.cpp"/>
+              <File RelativePath="..\..\src\gui\components\layout\juce_MarkerList.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ResizableBorderComponent.cpp"/>

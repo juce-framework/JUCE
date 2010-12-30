@@ -174,6 +174,7 @@ OBJECTS := \
   $(OBJDIR)/juce_ComponentBuilder_2aa6c5a.o \
   $(OBJDIR)/juce_ComponentMovementWatcher_cbb3e7cc.o \
   $(OBJDIR)/juce_GroupComponent_456e237a.o \
+  $(OBJDIR)/juce_MarkerList_aea878b4.o \
   $(OBJDIR)/juce_MultiDocumentPanel_50e05aac.o \
   $(OBJDIR)/juce_ResizableBorderComponent_7f4f2182.o \
   $(OBJDIR)/juce_ResizableCornerComponent_1cac2df9.o \
@@ -1036,6 +1037,11 @@ $(OBJDIR)/juce_ComponentMovementWatcher_cbb3e7cc.o: ../../src/gui/components/lay
 $(OBJDIR)/juce_GroupComponent_456e237a.o: ../../src/gui/components/layout/juce_GroupComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_GroupComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MarkerList_aea878b4.o: ../../src/gui/components/layout/juce_MarkerList.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_MarkerList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MultiDocumentPanel_50e05aac.o: ../../src/gui/components/layout/juce_MultiDocumentPanel.cpp

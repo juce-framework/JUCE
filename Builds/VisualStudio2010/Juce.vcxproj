@@ -257,6 +257,7 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentBuilder.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_GroupComponent.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\layout\juce_MarkerList.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableBorderComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.cpp"/>
@@ -607,6 +608,7 @@
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentBuilder.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_GroupComponent.h"/>
+    <ClInclude Include="..\..\src\gui\components\layout\juce_MarkerList.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableBorderComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.h"/>

@@ -728,6 +728,10 @@
                   file="src/gui/components/layout/juce_GroupComponent.cpp"/>
             <FILE id="JsmHuUYf" name="juce_GroupComponent.h" compile="0" resource="0"
                   file="src/gui/components/layout/juce_GroupComponent.h"/>
+            <FILE id="V5xE9Zr" name="juce_MarkerList.cpp" compile="1" resource="0"
+                  file="src/gui/components/layout/juce_MarkerList.cpp"/>
+            <FILE id="yRrV92n" name="juce_MarkerList.h" compile="0" resource="0"
+                  file="src/gui/components/layout/juce_MarkerList.h"/>
             <FILE id="VDH7MUcn5" name="juce_MultiDocumentPanel.cpp" compile="1"
                   resource="0" file="src/gui/components/layout/juce_MultiDocumentPanel.cpp"/>
             <FILE id="FHg3JXTUa" name="juce_MultiDocumentPanel.h" compile="0" resource="0"

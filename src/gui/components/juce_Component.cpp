@@ -2050,6 +2050,12 @@ void Component::colourChanged()
 }
 
 //==============================================================================
+MarkerList* Component::getMarkers (bool /*xAxis*/)
+{
+    return 0;
+}
+
+//==============================================================================
 const Rectangle<int> Component::getLocalBounds() const throw()
 {
     return Rectangle<int> (getWidth(), getHeight());

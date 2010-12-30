@@ -28,7 +28,6 @@
 
 #include "../../components/juce_Component.h"
 #include "../geometry/juce_RelativeCoordinate.h"
-#include "../../../text/juce_XmlElement.h"
 #include "../../../containers/juce_ValueTree.h"
 #include "../../components/layout/juce_ComponentBuilder.h"
 class DrawableComposite;
@@ -163,6 +162,7 @@ public:
         If there are any images used within the drawable, you'll need to provide a valid
         ImageProvider object that can be used to retrieve these images from whatever type
         of identifier is used to represent them.
+        Internally, this uses a ComponentBuilder, and registerDrawableTypeHandlers().
     */
     static Drawable* createFromValueTree (const ValueTree& tree, ComponentBuilder::ImageProvider* imageProvider);
 
@@ -185,7 +185,6 @@ public:
     {
     public:
         ValueTreeWrapperBase (const ValueTree& state);
-        ~ValueTreeWrapperBase();
 
         ValueTree& getState() throw()           { return state; }
 
@@ -195,7 +194,12 @@ public:
         ValueTree state;
     };
 
-    static void registerDrawableTypes (ComponentBuilder& componentBuilder);
+    //==============================================================================
+    /** Registers a set of ComponentBuilder::TypeHandler objects that can be used to
+        load all the different Drawable types from a saved state.
+        @see ComponentBuilder::registerTypeHandler()
+    */
+    static void registerDrawableTypeHandlers (ComponentBuilder& componentBuilder);
 
 protected:
     //==============================================================================
@@ -204,8 +208,6 @@ protected:
 
     /** @internal */
     void transformContextToCorrectOrigin (Graphics& g);
-    /** @internal */
-    void markerHasMoved();
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
