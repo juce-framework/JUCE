@@ -237,12 +237,14 @@ public:
     */
     ObjectType* removeNext() throw()
     {
-        if (item == 0)
-            return 0;
-
         ObjectType* const oldItem = item;
-        oldItem->nextListItem = 0;
-        item = item->nextListItem;
+
+        if (oldItem != 0)
+        {
+            item = oldItem->nextListItem;
+            oldItem->nextListItem = 0;
+        }
+
         return oldItem;
     }
 

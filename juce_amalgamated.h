@@ -6412,12 +6412,14 @@ public:
 	*/
 	ObjectType* removeNext() throw()
 	{
-		if (item == 0)
-			return 0;
-
 		ObjectType* const oldItem = item;
-		oldItem->nextListItem = 0;
-		item = item->nextListItem;
+
+		if (oldItem != 0)
+		{
+			item = oldItem->nextListItem;
+			oldItem->nextListItem = 0;
+		}
+
 		return oldItem;
 	}
 
@@ -54042,6 +54044,7 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
+		ValueTree& getState() throw()	   { return state; }
 		int getNumMarkers() const;
 		const ValueTree getMarkerState (int index) const;
 		const ValueTree getMarkerState (const String& name) const;
@@ -54053,10 +54056,10 @@ public:
 		void applyTo (MarkerList& markerList);
 		void readFrom (const MarkerList& markerList, UndoManager* undoManager);
 
+		static const Identifier markerTag, nameProperty, posProperty;
+
 	private:
 		ValueTree state;
-
-		static const Identifier markerTag, nameProperty, posProperty;
 	};
 
 private:

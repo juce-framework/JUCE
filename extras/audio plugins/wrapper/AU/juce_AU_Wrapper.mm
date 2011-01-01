@@ -41,7 +41,7 @@
  #define BUILD_AU_CARBON_UI 1
 #endif
 
-#if JUCE_64BIT
+#ifdef __LP64__
  #undef BUILD_AU_CARBON_UI  // (not possible in a 64-bit build)
 #endif
 

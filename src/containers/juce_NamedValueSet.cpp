@@ -192,12 +192,13 @@ const var NamedValueSet::getValueAt (const int index) const
 
 void NamedValueSet::setFromXmlAttributes (const XmlElement& xml)
 {
-    LinkedListPointer<NamedValue>::Appender appender (values.getLast());
+    clear();
+    LinkedListPointer<NamedValue>::Appender appender (values);
 
     const int numAtts = xml.getNumAttributes(); // xxx inefficient - should write an att iterator..
 
     for (int i = 0; i < numAtts; ++i)
-        set (xml.getAttributeName (i), var (xml.getAttributeValue (i)));
+        appender.append (new NamedValue (xml.getAttributeName (i), var (xml.getAttributeValue (i))));
 }
 
 void NamedValueSet::copyToXmlAttributes (XmlElement& xml) const
