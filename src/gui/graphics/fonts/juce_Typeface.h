@@ -69,6 +69,12 @@ public:
     /** Destructor. */
     virtual ~Typeface();
 
+    /** Returns true if this typeface can be used to render the specified font.
+        When called, the font will already have been checked to make sure that its name and
+        style flags match the typeface.
+    */
+    virtual bool isSuitableForFont (const Font&) const          { return true; }
+
     /** Returns the ascent of the font, as a proportion of its height.
         The height is considered to always be normalised as 1.0, so this will be a
         value less that 1.0, indicating the proportion of the font that lies above
@@ -105,6 +111,8 @@ public:
     */
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
+    /** Returns true if the typeface uses hinting. */
+    virtual bool isHinted() const                           { return false; }
 
 protected:
     //==============================================================================

@@ -36,11 +36,8 @@
 
     This class is used to store sets of X and Y marker points in components.
     @see Component::getMarkers().
-
-    The MarkerList is also a ChangeBroadcaster, so that listeners can register to receive
-    a callback when a marker is moved,
 */
-class JUCE_API  MarkerList  : public ChangeBroadcaster
+class JUCE_API  MarkerList
 {
 public:
     //==============================================================================
@@ -106,6 +103,37 @@ public:
     bool operator!= (const MarkerList& other) const throw();
 
     //==============================================================================
+    /**
+        A class for receiving events when changes are made to a MarkerList.
+
+        You can register a MarkerList::Listener with a MarkerList using the MarkerList::addListener()
+        method, and it will be called when markers are moved, added, or deleted.
+
+        @see MarkerList::addListener, MarkerList::removeListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        /** Called when something in the given marker list changes. */
+        virtual void markersChanged (MarkerList* markerList) = 0;
+
+        /** Called when the given marker list is being deleted. */
+        virtual void markerListBeingDeleted (MarkerList* markerList);
+    };
+
+    /** Registers a listener that will be called when the markers are changed. */
+    void addListener (Listener* listener);
+
+    /** Deregisters a previously-registered listener. */
+    void removeListener (Listener* listener);
+
+    /** Synchronously calls markersChanged() on all the registered listeners. */
+    void markersHaveChanged();
+
+    //==============================================================================
     /** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
     class ValueTreeWrapper
     {
@@ -133,7 +161,7 @@ public:
 private:
     //==============================================================================
     OwnedArray<Marker> markers;
-    void markersHaveChanged();
+    ListenerList <Listener> listeners;
 
     JUCE_LEAK_DETECTOR (MarkerList);
 };

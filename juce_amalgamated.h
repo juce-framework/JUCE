@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	3
+#define JUCE_BUILDNUMBER	4
 
 /** Current Juce version number.
 
@@ -17892,8 +17892,11 @@ public:
 	/** Returns the type of this expression. */
 	Type getType() const throw();
 
-	/** If this expression is a symbol, this returns its name. */
+	/** If this expression is a symbol, this returns its full name. */
 	const String getSymbol() const;
+
+	/** For a symbol that contains a dot, this returns the two */
+	void getSymbolParts (String& objectName, String& memberName) const;
 
 	/** If this expression is a function, this returns its name. */
 	const String getFunction() const;
@@ -17936,7 +17939,7 @@ private:
 																				 double overallTarget, Term* topLevelTerm) const;
 		virtual const ReferenceCountedObjectPtr<Term> negated();
 		virtual Type getType() const throw() = 0;
-		virtual const String getSymbolName() const;
+		virtual void getSymbolParts (String& objectName, String& memberName) const;
 		virtual const String getFunctionName() const;
 
 	private:
@@ -23409,6 +23412,12 @@ public:
 	/** Destructor. */
 	virtual ~Typeface();
 
+	/** Returns true if this typeface can be used to render the specified font.
+		When called, the font will already have been checked to make sure that its name and
+		style flags match the typeface.
+	*/
+	virtual bool isSuitableForFont (const Font&) const	  { return true; }
+
 	/** Returns the ascent of the font, as a proportion of its height.
 		The height is considered to always be normalised as 1.0, so this will be a
 		value less that 1.0, indicating the proportion of the font that lies above
@@ -23444,6 +23453,9 @@ public:
 		The path returned will be normalised to a font height of 1.0.
 	*/
 	virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
+
+	/** Returns true if the typeface uses hinting. */
+	virtual bool isHinted() const			   { return false; }
 
 protected:
 
@@ -23887,10 +23899,11 @@ private:
 	class SharedFontInternal  : public ReferenceCountedObject
 	{
 	public:
-		SharedFontInternal (const String& typefaceName, float height, float horizontalScale,
-							float kerning, float ascent, int styleFlags,
-							Typeface* typeface) throw();
+		SharedFontInternal (const String& typefaceName, float height, int styleFlags) throw();
+		SharedFontInternal (const Typeface::Ptr& typeface) throw();
 		SharedFontInternal (const SharedFontInternal& other) throw();
+
+		bool operator== (const SharedFontInternal&) const throw();
 
 		String typefaceName;
 		float height, horizontalScale, kerning, ascent;
@@ -28878,7 +28891,7 @@ public:
 		the list iterator to stop cleanly if the component is deleted by a listener callback
 		while the list is still being iterated.
 	*/
-	class BailOutChecker
+	class JUCE_API  BailOutChecker
 	{
 	public:
 		/** Creates a checker that watches one component. */
@@ -28893,16 +28906,49 @@ public:
 		JUCE_DECLARE_NON_COPYABLE (BailOutChecker);
 	};
 
+	/**
+		Base class for objects that can be used to automatically position a component according to
+		some kind of algorithm.
+
+		The component class simply holds onto a reference to a Positioner, but doesn't actually do
+		anything with it - all the functionality must be implemented by the positioner itself (e.g.
+		it might choose to watch some kind of value and move the component when the value changes).
+	*/
+	class JUCE_API  Positioner
+	{
+	public:
+		/** Creates a Positioner which can control the specified component. */
+		explicit Positioner (Component& component) throw();
+		/** Destructor. */
+		virtual ~Positioner() {}
+
+		/** Returns the component that this positioner controls. */
+		Component& getComponent() const throw()	 { return component; }
+
+	private:
+		Component& component;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
+	};
+
+	/** Returns the Positioner object that has been set for this component.
+		@see setPositioner()
+	*/
+	Positioner* getPositioner() const throw();
+
+	/** Sets a new Positioner object for this component.
+		If there's currently another positioner set, it will be deleted. The object that is passed in
+		will be deleted automatically by this component when it's no longer required. Pass a null pointer
+		to clear the current positioner.
+		@see getPositioner()
+	*/
+	void setPositioner (Positioner* newPositioner);
+
    #ifndef DOXYGEN
-	/** This method is deprecated - use localPointToGlobal instead. */
-	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
-
-	/** This method is deprecated - use getLocalPoint instead. */
-	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
-
-	/** This method is deprecated - use getLocalPoint instead. */
-	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
-													   const Point<int>& positionRelativeToThis) const;
+	// These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
+	JUCE_DEPRECATED (const Point<int> relativePositionToGlobal (const Point<int>&) const);
+	JUCE_DEPRECATED (const Point<int> globalPositionToRelative (const Point<int>&) const);
+	JUCE_DEPRECATED (const Point<int> relativePositionToOtherComponent (const Component*, const Point<int>&) const);
    #endif
 
 private:
@@ -28917,6 +28963,7 @@ private:
 	String componentName, componentID;
 	Component* parentComponent;
 	Rectangle<int> bounds;
+	ScopedPointer <Positioner> positioner;
 	ScopedPointer <AffineTransform> affineTransform;
 	Array <Component*> childComponentList;
 	LookAndFeel* lookAndFeel;
@@ -33468,6 +33515,9 @@ public:
 	/** Returns true if the low res preview is fully generated. */
 	bool isFullyLoaded() const throw();
 
+	/** Returns the number of samples that have been set in the thumbnail. */
+	int64 getNumSamplesFinished() const throw();
+
 	/** Returns the highest level in the thumbnail.
 		Note that because the thumb only stores low-resolution data, this isn't
 		an accurate representation of the highest value, it's only a rough approximation.
@@ -33477,8 +33527,10 @@ public:
 	/** Returns the hash code that was set by setSource() or setReader(). */
 	int64 getHashCode() const;
 
+   #ifndef DOXYGEN
 	// (this is only public to avoid a VC6 bug)
 	class LevelDataSource;
+   #endif
 
 private:
 
@@ -42737,7 +42789,8 @@ public:
 		@see selectRow
 	*/
 	void selectRowsBasedOnModifierKeys (int rowThatWasClickedOn,
-										const ModifierKeys& modifiers);
+										const ModifierKeys& modifiers,
+										bool isMouseUpEvent);
 
 	/** Scrolls the list to a particular position.
 
@@ -45291,6 +45344,8 @@ private:
 #ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 #define __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 
+class Component;
+
 /**
 	Expresses a coordinate as a dynamically evaluated expression.
 
@@ -45372,6 +45427,7 @@ public:
 	struct Strings
 	{
 		static const String parent;         /**< "parent" */
+		static const String this_;          /**< "this" */
 		static const String left;           /**< "left" */
 		static const String right;          /**< "right" */
 		static const String top;            /**< "top" */
@@ -45498,6 +45554,9 @@ public:
 	*/
 	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
 
+	/** Returns true if this rectangle depends on any other coordinates for its position. */
+	bool isDynamic() const;
+
 	/** Returns a string which represents this point.
 		This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
 		the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
@@ -45509,6 +45568,9 @@ public:
 		This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
 	*/
 	void renameSymbolIfUsed (const String& oldName, const String& newName);
+
+	/** */
+	void applyToComponent (Component& component) const;
 
 	// The actual rectangle coords...
 	RelativeCoordinate left, right, top, bottom;
@@ -53971,11 +54033,8 @@ private:
 
 	This class is used to store sets of X and Y marker points in components.
 	@see Component::getMarkers().
-
-	The MarkerList is also a ChangeBroadcaster, so that listeners can register to receive
-	a callback when a marker is moved,
 */
-class JUCE_API  MarkerList  : public ChangeBroadcaster
+class JUCE_API  MarkerList
 {
 public:
 
@@ -54038,6 +54097,36 @@ public:
 	/** Returns true if not all the markers in these two lists match exactly. */
 	bool operator!= (const MarkerList& other) const throw();
 
+	/**
+		A class for receiving events when changes are made to a MarkerList.
+
+		You can register a MarkerList::Listener with a MarkerList using the MarkerList::addListener()
+		method, and it will be called when markers are moved, added, or deleted.
+
+		@see MarkerList::addListener, MarkerList::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when something in the given marker list changes. */
+		virtual void markersChanged (MarkerList* markerList) = 0;
+
+		/** Called when the given marker list is being deleted. */
+		virtual void markerListBeingDeleted (MarkerList* markerList);
+	};
+
+	/** Registers a listener that will be called when the markers are changed. */
+	void addListener (Listener* listener);
+
+	/** Deregisters a previously-registered listener. */
+	void removeListener (Listener* listener);
+
+	/** Synchronously calls markersChanged() on all the registered listeners. */
+	void markersHaveChanged();
+
 	/** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
 	class ValueTreeWrapper
 	{
@@ -54065,7 +54154,7 @@ public:
 private:
 
 	OwnedArray<Marker> markers;
-	void markersHaveChanged();
+	ListenerList <Listener> listeners;
 
 	JUCE_LEAK_DETECTOR (MarkerList);
 };

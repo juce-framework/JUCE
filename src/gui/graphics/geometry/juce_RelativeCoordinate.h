@@ -31,6 +31,7 @@
 #include "../../../maths/juce_Expression.h"
 #include "../../../containers/juce_OwnedArray.h"
 #include "../../../containers/juce_ValueTree.h"
+class Component;
 
 
 //==============================================================================
@@ -120,6 +121,7 @@ public:
     struct Strings
     {
         static const String parent;         /**< "parent" */
+        static const String this_;          /**< "this" */
         static const String left;           /**< "left" */
         static const String right;          /**< "right" */
         static const String top;            /**< "top" */
@@ -251,6 +253,9 @@ public:
     */
     void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
 
+    /** Returns true if this rectangle depends on any other coordinates for its position. */
+    bool isDynamic() const;
+
     /** Returns a string which represents this point.
         This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
         the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
@@ -262,6 +267,9 @@ public:
         This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
     */
     void renameSymbolIfUsed (const String& oldName, const String& newName);
+
+    /** */
+    void applyToComponent (Component& component) const;
 
     // The actual rectangle coords...
     RelativeCoordinate left, right, top, bottom;

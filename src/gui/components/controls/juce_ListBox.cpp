@@ -80,7 +80,7 @@ public:
         {
             if (! selected)
             {
-                owner.selectRowsBasedOnModifierKeys (row, e.mods);
+                owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
                 if (owner.getModel() != 0)
                     owner.getModel()->listBoxItemClicked (row, e);
@@ -96,7 +96,7 @@ public:
     {
         if (isEnabled() && selectRowOnMouseUp && ! isDragging)
         {
-            owner.selectRowsBasedOnModifierKeys (row, e.mods);
+            owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
 
             if (owner.getModel() != 0)
                 owner.getModel()->listBoxItemClicked (row, e);
@@ -571,7 +571,8 @@ void ListBox::deselectAllRows()
 }
 
 void ListBox::selectRowsBasedOnModifierKeys (const int row,
-                                             const ModifierKeys& mods)
+                                             const ModifierKeys& mods,
+                                             const bool isMouseUpEvent)
 {
     if (multipleSelection && mods.isCommandDown())
     {
@@ -583,7 +584,7 @@ void ListBox::selectRowsBasedOnModifierKeys (const int row,
     }
     else if ((! mods.isPopupMenu()) || ! isRowSelected (row))
     {
-        selectRowInternal (row, false, ! (multipleSelection && isRowSelected (row)), true);
+        selectRowInternal (row, false, ! (multipleSelection && (! isMouseUpEvent) && isRowSelected (row)), true);
     }
 }
 

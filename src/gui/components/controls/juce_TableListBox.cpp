@@ -146,7 +146,7 @@ public:
         {
             if (! isSelected)
             {
-                owner.selectRowsBasedOnModifierKeys (row, e.mods);
+                owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
                 const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
@@ -183,7 +183,7 @@ public:
     {
         if (selectRowOnMouseUp && e.mouseWasClicked() && isEnabled())
         {
-            owner.selectRowsBasedOnModifierKeys (row, e.mods);
+            owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
 
             const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 

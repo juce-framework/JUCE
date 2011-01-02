@@ -177,6 +177,9 @@ public:
     /** Returns true if the low res preview is fully generated. */
     bool isFullyLoaded() const throw();
 
+    /** Returns the number of samples that have been set in the thumbnail. */
+    int64 getNumSamplesFinished() const throw();
+
     /** Returns the highest level in the thumbnail.
         Note that because the thumb only stores low-resolution data, this isn't
         an accurate representation of the highest value, it's only a rough approximation.
@@ -186,8 +189,10 @@ public:
     /** Returns the hash code that was set by setSource() or setReader(). */
     int64 getHashCode() const;
 
+   #ifndef DOXYGEN
     // (this is only public to avoid a VC6 bug)
     class LevelDataSource;
+   #endif
 
 private:
     //==============================================================================

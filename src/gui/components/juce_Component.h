@@ -2093,7 +2093,7 @@ public:
         the list iterator to stop cleanly if the component is deleted by a listener callback
         while the list is still being iterated.
     */
-    class BailOutChecker
+    class JUCE_API  BailOutChecker
     {
     public:
         /** Creates a checker that watches one component. */
@@ -2109,16 +2109,50 @@ public:
     };
 
     //==============================================================================
+    /**
+        Base class for objects that can be used to automatically position a component according to
+        some kind of algorithm.
+
+        The component class simply holds onto a reference to a Positioner, but doesn't actually do
+        anything with it - all the functionality must be implemented by the positioner itself (e.g.
+        it might choose to watch some kind of value and move the component when the value changes).
+    */
+    class JUCE_API  Positioner
+    {
+    public:
+        /** Creates a Positioner which can control the specified component. */
+        explicit Positioner (Component& component) throw();
+        /** Destructor. */
+        virtual ~Positioner() {}
+
+        /** Returns the component that this positioner controls. */
+        Component& getComponent() const throw()     { return component; }
+
+    private:
+        Component& component;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
+    };
+
+    /** Returns the Positioner object that has been set for this component.
+        @see setPositioner()
+    */
+    Positioner* getPositioner() const throw();
+
+    /** Sets a new Positioner object for this component.
+        If there's currently another positioner set, it will be deleted. The object that is passed in
+        will be deleted automatically by this component when it's no longer required. Pass a null pointer
+        to clear the current positioner.
+        @see getPositioner()
+    */
+    void setPositioner (Positioner* newPositioner);
+
+    //==============================================================================
    #ifndef DOXYGEN
-    /** This method is deprecated - use localPointToGlobal instead. */
-    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
-
-    /** This method is deprecated - use getLocalPoint instead. */
-    const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
-
-    /** This method is deprecated - use getLocalPoint instead. */
-    const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
-                                                       const Point<int>& positionRelativeToThis) const;
+    // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
+    JUCE_DEPRECATED (const Point<int> relativePositionToGlobal (const Point<int>&) const);
+    JUCE_DEPRECATED (const Point<int> globalPositionToRelative (const Point<int>&) const);
+    JUCE_DEPRECATED (const Point<int> relativePositionToOtherComponent (const Component*, const Point<int>&) const);
    #endif
 
 private:
@@ -2134,6 +2168,7 @@ private:
     String componentName, componentID;
     Component* parentComponent;
     Rectangle<int> bounds;
+    ScopedPointer <Positioner> positioner;
     ScopedPointer <AffineTransform> affineTransform;
     Array <Component*> childComponentList;
     LookAndFeel* lookAndFeel;

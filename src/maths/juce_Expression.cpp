@@ -101,13 +101,14 @@ public:
             return 0;
         }
 
-        Type getType() const throw()                            { return symbolType; }
-        Term* clone() const                                     { return new Symbol (mainSymbol, member); }
-        int getNumInputs() const                                { return 0; }
-        Term* getInput (int) const                              { return 0; }
-        const String getSymbolName() const                      { return toString(); }
+        Type getType() const throw()                                        { return symbolType; }
+        Term* clone() const                                                 { return new Symbol (mainSymbol, member); }
+        int getNumInputs() const                                            { return 0; }
+        Term* getInput (int) const                                          { return 0; }
+        const String toString() const                                       { return joinParts (mainSymbol, member); }
+        void getSymbolParts (String& objectName, String& memberName) const  { objectName = mainSymbol; memberName = member; }
 
-        const String toString() const
+        static const String joinParts (const String& mainSymbol, const String& member)
         {
             return member.isEmpty() ? mainSymbol
                                     : mainSymbol + "." + member;
@@ -894,6 +895,9 @@ const Expression Expression::withRenamedSymbol (const String& oldSymbol, const S
 {
     jassert (newSymbol.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_"));
 
+    if (oldSymbol == newSymbol)
+        return *this;
+
     Expression newExpression (term->clone());
     Helpers::renameSymbol (newExpression.term, oldSymbol, newSymbol);
     return newExpression;
@@ -916,7 +920,14 @@ Expression::Type Expression::getType() const throw()
 
 const String Expression::getSymbol() const
 {
-    return term->getSymbolName();
+    String objectName, memberName;
+    term->getSymbolParts (objectName, memberName);
+    return Expression::Helpers::Symbol::joinParts (objectName, memberName);
+}
+
+void Expression::getSymbolParts (String& objectName, String& memberName) const
+{
+    term->getSymbolParts (objectName, memberName);
 }
 
 const String Expression::getFunction() const
@@ -966,10 +977,9 @@ const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::negated()
     return new Helpers::Negate (this);
 }
 
-const String Expression::Term::getSymbolName() const
+void Expression::Term::getSymbolParts (String&, String&) const
 {
     jassertfalse; // You should only call getSymbol() on an expression that's actually a symbol!
-    return String::empty;
 }
 
 const String Expression::Term::getFunctionName() const

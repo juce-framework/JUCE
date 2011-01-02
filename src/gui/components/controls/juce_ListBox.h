@@ -330,7 +330,8 @@ public:
         @see selectRow
     */
     void selectRowsBasedOnModifierKeys (int rowThatWasClickedOn,
-                                        const ModifierKeys& modifiers);
+                                        const ModifierKeys& modifiers,
+                                        bool isMouseUpEvent);
 
     //==============================================================================
     /** Scrolls the list to a particular position.

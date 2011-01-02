@@ -85,24 +85,20 @@ namespace ComponentBuilderHelpers
 
         if (topLevelComp != 0)
         {
-            const String compId (getStateId (state));
+            ComponentBuilder::TypeHandler* const type = builder.getHandlerForState (state);
 
-            if (compId.isEmpty() && state.getParent().isValid())
+            if (type == 0)
             {
                 // ..handle the case where a child of the actual state node has changed.
-                updateComponent (builder, state.getParent());
+                if (state.getParent().isValid())
+                    updateComponent (builder, state.getParent());
             }
             else
             {
-                ComponentBuilder::TypeHandler* const type = builder.getHandlerForState (state);
+                Component* const changedComp = findComponentWithID (topLevelComp, getStateId (state));
 
-                if (type != 0)
-                {
-                    Component* const changedComp = findComponentWithID (topLevelComp, compId);
-
-                    if (changedComp != 0)
-                        type->updateComponentFromState (changedComp, state);
-                }
+                if (changedComp != 0)
+                    type->updateComponentFromState (changedComp, state);
             }
         }
     }

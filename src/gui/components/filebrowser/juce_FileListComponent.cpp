@@ -110,7 +110,7 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
-        owner.selectRowsBasedOnModifierKeys (index, e.mods);
+        owner.selectRowsBasedOnModifierKeys (index, e.mods, false);
         owner.sendMouseClickMessage (file, e);
     }
 

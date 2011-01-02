@@ -2394,10 +2394,12 @@ class LowLevelGraphicsSoftwareRenderer::CachedGlyph
 {
 public:
     CachedGlyph() : glyph (0), lastAccessCount (0) {}
-    ~CachedGlyph()  {}
 
-    void draw (SavedState& state, const float x, const float y) const
+    void draw (SavedState& state, float x, const float y) const
     {
+        if (snapToIntegerCoordinate)
+            x = std::floor (x + 0.5f);
+
         if (edgeTable != 0)
             state.fillEdgeTable (*edgeTable, x, roundToInt (y));
     }
@@ -2405,6 +2407,7 @@ public:
     void generate (const Font& newFont, const int glyphNumber)
     {
         font = newFont;
+        snapToIntegerCoordinate = newFont.getTypeface()->isHinted();
         glyph = glyphNumber;
         edgeTable = 0;
 
@@ -2425,8 +2428,9 @@ public:
         }
     }
 
-    int glyph, lastAccessCount;
     Font font;
+    int glyph, lastAccessCount;
+    bool snapToIntegerCoordinate;
 
 private:
     ScopedPointer <EdgeTable> edgeTable;
@@ -2441,8 +2445,7 @@ public:
     GlyphCache()
         : accessCounter (0), hits (0), misses (0)
     {
-        for (int i = 120; --i >= 0;)
-            glyphs.add (new CachedGlyph());
+        addNewGlyphSlots (120);
     }
 
     ~GlyphCache()
@@ -2481,10 +2484,7 @@ public:
         if (hits + ++misses > (glyphs.size() << 4))
         {
             if (misses * 2 > hits)
-            {
-                for (int i = 32; --i >= 0;)
-                    glyphs.add (new CachedGlyph());
-            }
+                addNewGlyphSlots (32);
 
             hits = misses = 0;
             oldest = glyphs.getLast();
@@ -2500,6 +2500,12 @@ private:
     friend class OwnedArray <CachedGlyph>;
     OwnedArray <CachedGlyph> glyphs;
     int accessCounter, hits, misses;
+
+    void addNewGlyphSlots (int num)
+    {
+        while (--num >= 0)
+            glyphs.add (new CachedGlyph());
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache);
 };

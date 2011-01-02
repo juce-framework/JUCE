@@ -54,6 +54,7 @@ MarkerList& MarkerList::operator= (const MarkerList& other)
 
 MarkerList::~MarkerList()
 {
+    listeners.call (&MarkerList::Listener::markerListBeingDeleted, this);
 }
 
 bool MarkerList::operator== (const MarkerList& other) const throw()
@@ -148,7 +149,21 @@ void MarkerList::removeMarker (const String& name)
 
 void MarkerList::markersHaveChanged()
 {
-    sendChangeMessage();
+    listeners.call (&MarkerList::Listener::markersChanged, this);
+}
+
+void MarkerList::Listener::markerListBeingDeleted (MarkerList* markerList)
+{
+}
+
+void MarkerList::addListener (Listener* listener)
+{
+    listeners.add (listener);
+}
+
+void MarkerList::removeListener (Listener* listener)
+{
+    listeners.remove (listener);
 }
 
 //==============================================================================

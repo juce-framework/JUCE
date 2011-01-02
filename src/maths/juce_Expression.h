@@ -202,8 +202,11 @@ public:
     /** Returns the type of this expression. */
     Type getType() const throw();
 
-    /** If this expression is a symbol, this returns its name. */
+    /** If this expression is a symbol, this returns its full name. */
     const String getSymbol() const;
+
+    /** For a symbol that contains a dot, this returns the two */
+    void getSymbolParts (String& objectName, String& memberName) const;
 
     /** If this expression is a function, this returns its name. */
     const String getFunction() const;
@@ -246,7 +249,7 @@ private:
                                                                                  double overallTarget, Term* topLevelTerm) const;
         virtual const ReferenceCountedObjectPtr<Term> negated();
         virtual Type getType() const throw() = 0;
-        virtual const String getSymbolName() const;
+        virtual void getSymbolParts (String& objectName, String& memberName) const;
         virtual const String getFunctionName() const;
 
     private:

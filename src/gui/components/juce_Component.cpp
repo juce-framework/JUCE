@@ -2056,6 +2056,24 @@ MarkerList* Component::getMarkers (bool /*xAxis*/)
 }
 
 //==============================================================================
+Component::Positioner::Positioner (Component& component_) throw()
+    : component (component_)
+{
+}
+
+Component::Positioner* Component::getPositioner() const throw()
+{
+    return positioner;
+}
+
+void Component::setPositioner (Positioner* newPositioner)
+{
+    // You can only assign a positioner to the component that it was created for!
+    jassert (newPositioner == 0 || this == &(newPositioner->getComponent()));
+    positioner = newPositioner;
+}
+
+//==============================================================================
 const Rectangle<int> Component::getLocalBounds() const throw()
 {
     return Rectangle<int> (getWidth(), getHeight());

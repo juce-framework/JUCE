@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_RelativeCoordinate.h"
 #include "../drawables/juce_DrawablePath.h"
+#include "../../components/layout/juce_MarkerList.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
 
 
@@ -46,7 +47,273 @@ namespace RelativeCoordinateHelpers
 }
 
 //==============================================================================
+class RelativeComponentPositioner  : public Component::Positioner,
+                                     public ComponentListener,
+                                     public MarkerList::Listener,
+                                     public Expression::EvaluationContext
+{
+public:
+    RelativeComponentPositioner (Component& component_)
+        : Component::Positioner (component_), registeredOk (false)
+    {
+    }
+
+    ~RelativeComponentPositioner()
+    {
+        unregisterListeners();
+    }
+
+    const Expression getSymbolValue (const String& objectName, const String& member) const
+    {
+        jassert (objectName.isNotEmpty());
+
+        if (member.isNotEmpty())
+        {
+            const Component* comp = getSourceComponent (objectName);
+
+            if (comp == 0)
+            {
+                if (objectName == RelativeCoordinate::Strings::parent)
+                    comp = getComponent().getParentComponent();
+                else if (objectName == RelativeCoordinate::Strings::this_ || objectName == getComponent().getComponentID())
+                    comp = &getComponent();
+            }
+
+            if (comp != 0)
+            {
+                if (member == RelativeCoordinate::Strings::left)   return xToExpression (comp, 0);
+                if (member == RelativeCoordinate::Strings::right)  return xToExpression (comp, comp->getWidth());
+                if (member == RelativeCoordinate::Strings::top)    return yToExpression (comp, 0);
+                if (member == RelativeCoordinate::Strings::bottom) return yToExpression (comp, comp->getHeight());
+            }
+        }
+
+        for (int i = sourceMarkerLists.size(); --i >= 0;)
+        {
+            MarkerList* const markerList = sourceMarkerLists.getUnchecked(i);
+            const MarkerList::Marker* const marker = markerList->getMarker (objectName);
+
+            if (marker != 0)
+                return marker->position.getExpression();
+        }
+
+        return Expression::EvaluationContext::getSymbolValue (objectName, member);
+    }
+
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
+    {
+        apply();
+    }
+
+    void componentParentHierarchyChanged (Component& component)
+    {
+        apply();
+    }
+
+    void componentBeingDeleted (Component& component)
+    {
+        jassert (sourceComponents.contains (&component));
+        sourceComponents.removeValue (&component);
+    }
+
+    void markersChanged (MarkerList* markerList)
+    {
+        apply();
+    }
+
+    void markerListBeingDeleted (MarkerList* markerList)
+    {
+        jassert (sourceMarkerLists.contains (markerList));
+        sourceMarkerLists.removeValue (markerList);
+    }
+
+    void apply()
+    {
+        if (! registeredOk)
+        {
+            unregisterListeners();
+            registeredOk = registerCoordinates();
+        }
+
+        applyToComponentBounds();
+    }
+
+protected:
+    bool addCoordinate (const RelativeCoordinate& coord)
+    {
+        return registerListeners (coord.getExpression());
+    }
+
+    virtual bool registerCoordinates() = 0;
+    virtual void applyToComponentBounds() = 0;
+
+private:
+    Array <Component*> sourceComponents;
+    Array <MarkerList*> sourceMarkerLists;
+    bool registeredOk;
+
+    bool registerListeners (const Expression& e)
+    {
+        bool ok = true;
+
+        if (e.getType() == Expression::symbolType)
+        {
+            String objectName, memberName;
+            e.getSymbolParts (objectName, memberName);
+
+            if (memberName.isNotEmpty())
+                ok = registerComponentEdge (objectName, memberName) && ok;
+            else
+                ok = registerMarker (objectName) && ok;
+        }
+        else
+        {
+            for (int i = e.getNumInputs(); --i >= 0;)
+                ok = registerListeners (e.getInput (i)) && ok;
+        }
+
+        return ok;
+    }
+
+    bool registerComponentEdge (const String& objectName, const String memberName)
+    {
+        Component* comp = findComponent (objectName);
+
+        if (comp == 0)
+        {
+            if (objectName == RelativeCoordinate::Strings::parent)
+                comp = getComponent().getParentComponent();
+            else if (objectName == RelativeCoordinate::Strings::this_ || objectName == getComponent().getComponentID())
+                comp = &getComponent();
+        }
+
+        if (comp != 0)
+        {
+            if (comp != &getComponent())
+                registerComponentListener (comp);
+
+            return true;
+        }
+        else
+        {
+            // The component we want doesn't exist, so watch the parent in case the hierarchy changes and it appears later..
+            Component* const parent = getComponent().getParentComponent();
+
+            if (parent != 0)
+                registerComponentListener (parent);
+            else
+                registerComponentListener (&getComponent());
+
+            return false;
+        }
+    }
+
+    bool registerMarker (const String markerName)
+    {
+        Component* const parent = getComponent().getParentComponent();
+
+        if (parent != 0)
+        {
+            MarkerList* list = parent->getMarkers (true);
+
+            if (list == 0 || list->getMarker (markerName) == 0)
+                list = parent->getMarkers (false);
+
+            if (list != 0 && list->getMarker (markerName) != 0)
+            {
+                registerMarkerListListener (list);
+                return true;
+            }
+            else
+            {
+                // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
+                registerMarkerListListener (parent->getMarkers (true));
+                registerMarkerListListener (parent->getMarkers (false));
+            }
+        }
+
+        return false;
+    }
+
+    void registerComponentListener (Component* const comp)
+    {
+        if (comp != 0 && ! sourceComponents.contains (comp))
+        {
+            comp->addComponentListener (this);
+            sourceComponents.add (comp);
+        }
+    }
+
+    void registerMarkerListListener (MarkerList* const list)
+    {
+        if (list != 0 && ! sourceMarkerLists.contains (list))
+        {
+            list->addListener (this);
+            sourceMarkerLists.add (list);
+        }
+    }
+
+    void unregisterListeners()
+    {
+        int i;
+        for (i = sourceComponents.size(); --i >= 0;)
+            sourceComponents.getUnchecked(i)->removeComponentListener (this);
+
+        for (i = sourceMarkerLists.size(); --i >= 0;)
+            sourceMarkerLists.getUnchecked(i)->removeListener (this);
+
+        sourceComponents.clear();
+        sourceMarkerLists.clear();
+    }
+
+    Component* findComponent (const String& componentID) const
+    {
+        Component* const parent = getComponent().getParentComponent();
+
+        if (parent != 0)
+        {
+            for (int i = parent->getNumChildComponents(); --i >= 0;)
+            {
+                Component* const c = parent->getChildComponent(i);
+
+                if (c->getComponentID() == componentID)
+                    return c;
+            }
+        }
+
+        return 0;
+    }
+
+    Component* getSourceComponent (const String& objectName) const
+    {
+        for (int i = sourceComponents.size(); --i >= 0;)
+        {
+            Component* const comp = sourceComponents.getUnchecked(i);
+
+            if (comp->getComponentID() == objectName)
+                return comp;
+        }
+
+        return 0;
+    }
+
+    const Expression xToExpression (const Component* const source, const int x) const
+    {
+        return Expression ((double) (getComponent().getLocalPoint (source, Point<int> (x, 0)).getX() + getComponent().getX()));
+    }
+
+    const Expression yToExpression (const Component* const source, const int y) const
+    {
+        return Expression ((double) (getComponent().getLocalPoint (source, Point<int> (0, y)).getY() + getComponent().getY()));
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeComponentPositioner);
+};
+
+
+//==============================================================================
 const String RelativeCoordinate::Strings::parent ("parent");
+const String RelativeCoordinate::Strings::this_ ("this");
 const String RelativeCoordinate::Strings::left ("left");
 const String RelativeCoordinate::Strings::right ("right");
 const String RelativeCoordinate::Strings::top ("top");
@@ -301,7 +568,7 @@ const Rectangle<float> RelativeRectangle::resolve (const Expression::EvaluationC
     const double t = top.resolve (context);
     const double b = bottom.resolve (context);
 
-    return Rectangle<float> ((float) l, (float) t, (float) (r - l), (float) (b - t));
+    return Rectangle<float> ((float) l, (float) t, (float) jmax (0.0, r - l), (float) jmax (0.0, b - t));
 }
 
 void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* context)
@@ -310,6 +577,11 @@ void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const Ex
     right.moveToAbsolute (newPos.getRight(), context);
     top.moveToAbsolute (newPos.getY(), context);
     bottom.moveToAbsolute (newPos.getBottom(), context);
+}
+
+bool RelativeRectangle::isDynamic() const
+{
+    return left.isDynamic() || right.isDynamic() || top.isDynamic() || bottom.isDynamic();
 }
 
 const String RelativeRectangle::toString() const
@@ -323,6 +595,73 @@ void RelativeRectangle::renameSymbolIfUsed (const String& oldName, const String&
     right.renameSymbolIfUsed (oldName, newName);
     top.renameSymbolIfUsed (oldName, newName);
     bottom.renameSymbolIfUsed (oldName, newName);
+}
+
+
+//==============================================================================
+class RelativeRectangleComponentPositioner  : public RelativeComponentPositioner
+{
+public:
+    RelativeRectangleComponentPositioner (Component& component_, const RelativeRectangle& rectangle_)
+        : RelativeComponentPositioner (component_),
+          rectangle (rectangle_)
+    {
+    }
+
+    bool registerCoordinates()
+    {
+        bool ok = addCoordinate (rectangle.left);
+        ok = addCoordinate (rectangle.right) && ok;
+        ok = addCoordinate (rectangle.top) && ok;
+        ok = addCoordinate (rectangle.bottom) && ok;
+        return ok;
+    }
+
+    bool isUsingRectangle (const RelativeRectangle& other) const throw()
+    {
+        return rectangle == other;
+    }
+
+    void applyToComponentBounds()
+    {
+        for (int i = 4; --i >= 0;)
+        {
+            const Rectangle<int> newBounds (rectangle.resolve (this).getSmallestIntegerContainer());
+
+            if (newBounds == getComponent().getBounds())
+                return;
+
+            getComponent().setBounds (newBounds);
+        }
+
+        jassertfalse; // must be a recursive reference!
+    }
+
+private:
+    const RelativeRectangle rectangle;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleComponentPositioner);
+};
+
+void RelativeRectangle::applyToComponent (Component& component) const
+{
+    if (isDynamic())
+    {
+        RelativeRectangleComponentPositioner* current = dynamic_cast <RelativeRectangleComponentPositioner*> (component.getPositioner());
+
+        if (current == 0 || ! current->isUsingRectangle (*this))
+        {
+            RelativeRectangleComponentPositioner* p = new RelativeRectangleComponentPositioner (component, *this);
+
+            component.setPositioner (p);
+            p->apply();
+        }
+    }
+    else
+    {
+        component.setPositioner (0);
+        component.setBounds (resolve (0).getSmallestIntegerContainer());
+    }
 }
 
 

@@ -96,10 +96,6 @@ public:
         setClickingTogglesState (false);
     }
 
-    ~JucerToolbarButton()
-    {
-    }
-
     //==============================================================================
     bool getToolbarItemSizes (int toolbarDepth, bool isToolbarVertical, int& preferredSize, int& minSize, int& maxSize)
     {
@@ -136,70 +132,4 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerToolbarButton);
-};
-
-
-//==============================================================================
-/**
-*/
-class RelativeRectangleLayoutManager    : public ComponentListener,
-                                          public Expression::EvaluationContext,
-                                          public AsyncUpdater
-{
-public:
-    //==============================================================================
-    /**
-    */
-    RelativeRectangleLayoutManager (Component* parentComponent);
-
-    /** Destructor. */
-    ~RelativeRectangleLayoutManager();
-
-    //==============================================================================
-    /**
-    */
-    void setMarker (const String& name, const RelativeCoordinate& coord);
-
-    /**
-    */
-    void setComponentBounds (Component* component, const String& componentName, const RelativeRectangle& bounds);
-
-    /**
-    */
-    void applyLayout();
-
-    //==============================================================================
-    /** @internal */
-    const Expression getSymbolValue (const String& symbol, const String& member) const;
-    /** @internal */
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-    /** @internal */
-    void componentBeingDeleted (Component& component);
-    /** @internal */
-    void handleAsyncUpdate();
-
-private:
-    //==============================================================================
-    struct ComponentPosition
-    {
-        ComponentPosition (Component* component, const String& name, const RelativeRectangle& coords);
-
-        Component* component;
-        String name;
-        RelativeRectangle coords;
-    };
-
-    struct MarkerPosition
-    {
-        MarkerPosition (const String& name, const RelativeCoordinate& coord);
-
-        String markerName;
-        RelativeCoordinate position;
-    };
-
-    Component* parent;
-    OwnedArray <ComponentPosition> components;
-    OwnedArray <MarkerPosition> markers;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleLayoutManager);
 };

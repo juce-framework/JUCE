@@ -48,15 +48,121 @@ namespace FontValues
 }
 
 //==============================================================================
-Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const float horizontalScale_,
-                                              const float kerning_, const float ascent_, const int styleFlags_,
-                                              Typeface* const typeface_) throw()
+class TypefaceCache  : public DeletedAtShutdown
+{
+public:
+    TypefaceCache (int numToCache = 10)
+        : counter (1)
+    {
+        while (--numToCache >= 0)
+            faces.add (CachedFace());
+    }
+
+    ~TypefaceCache()
+    {
+        clearSingletonInstance();
+    }
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (TypefaceCache)
+
+    const Typeface::Ptr findTypefaceFor (const Font& font)
+    {
+        // (can't initialise defaultFace in the constructor or in getDefaultTypeface() because of recursion).
+        if (defaultFace == 0)
+            defaultFace = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (Font());
+
+        const int flags = font.getStyleFlags() & (Font::bold | Font::italic);
+        const String faceName (font.getTypefaceName());
+
+        int i;
+        for (i = faces.size(); --i >= 0;)
+        {
+            CachedFace& face = faces.getReference(i);
+
+            if (face.flags == flags
+                 && face.typefaceName == faceName
+                 && face.typeface->isSuitableForFont (font))
+            {
+                face.lastUsageCount = ++counter;
+                return face.typeface;
+            }
+        }
+
+        int replaceIndex = 0;
+        int bestLastUsageCount = std::numeric_limits<int>::max();
+
+        for (i = faces.size(); --i >= 0;)
+        {
+            const int lu = faces.getReference(i).lastUsageCount;
+
+            if (bestLastUsageCount > lu)
+            {
+                bestLastUsageCount = lu;
+                replaceIndex = i;
+            }
+        }
+
+        CachedFace& face = faces.getReference (replaceIndex);
+        face.typefaceName = faceName;
+        face.flags = flags;
+        face.lastUsageCount = ++counter;
+        face.typeface = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
+        jassert (face.typeface != 0); // the look and feel must return a typeface!
+
+        return face.typeface;
+    }
+
+    const Typeface::Ptr getDefaultTypeface() const throw()
+    {
+        return defaultFace;
+    }
+
+private:
+    struct CachedFace
+    {
+        CachedFace() throw()
+            : lastUsageCount (0), flags (-1)
+        {
+        }
+
+        // Although it seems a bit wacky to store the name here, it's because it may be a
+        // placeholder rather than a real one, e.g. "<Sans-Serif>" vs the actual typeface name.
+        // Since the typeface itself doesn't know that it may have this alias, the name under
+        // which it was fetched needs to be stored separately.
+        String typefaceName;
+        int lastUsageCount, flags;
+        Typeface::Ptr typeface;
+    };
+
+    Array <CachedFace> faces;
+    Typeface::Ptr defaultFace;
+    int counter;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypefaceCache);
+};
+
+juce_ImplementSingleton_SingleThreaded (TypefaceCache)
+
+
+//==============================================================================
+Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const int styleFlags_) throw()
     : typefaceName (typefaceName_),
       height (height_),
-      horizontalScale (horizontalScale_),
-      kerning (kerning_),
-      ascent (ascent_),
+      horizontalScale (1.0f),
+      kerning (0),
+      ascent (0),
       styleFlags (styleFlags_),
+      typeface (TypefaceCache::getInstance()->getDefaultTypeface())
+{
+}
+
+Font::SharedFontInternal::SharedFontInternal (const Typeface::Ptr& typeface_) throw()
+    : typefaceName (typeface_->getName()),
+      height (FontValues::defaultFontHeight),
+      horizontalScale (1.0f),
+      kerning (0),
+      ascent (0),
+      styleFlags (Font::plain),
       typeface (typeface_)
 {
 }
@@ -72,25 +178,33 @@ Font::SharedFontInternal::SharedFontInternal (const SharedFontInternal& other) t
 {
 }
 
+bool Font::SharedFontInternal::operator== (const SharedFontInternal& other) const throw()
+{
+    return height == other.height
+            && styleFlags == other.styleFlags
+            && horizontalScale == other.horizontalScale
+            && kerning == other.kerning
+            && typefaceName == other.typefaceName;
+}
 
 //==============================================================================
 Font::Font()
-    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::defaultFontHeight,
-                                    1.0f, 0, 0, Font::plain, 0))
+    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::defaultFontHeight, Font::plain))
 {
 }
 
 Font::Font (const float fontHeight, const int styleFlags_)
-    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::limitFontHeight (fontHeight),
-                                    1.0f, 0, 0, styleFlags_, 0))
+    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::limitFontHeight (fontHeight), styleFlags_))
 {
 }
 
-Font::Font (const String& typefaceName_,
-            const float fontHeight,
-            const int styleFlags_)
-    : font (new SharedFontInternal (typefaceName_, FontValues::limitFontHeight (fontHeight),
-                                    1.0f, 0, 0, styleFlags_, 0))
+Font::Font (const String& typefaceName_, const float fontHeight, const int styleFlags_)
+    : font (new SharedFontInternal (typefaceName_, FontValues::limitFontHeight (fontHeight), styleFlags_))
+{
+}
+
+Font::Font (const Typeface::Ptr& typeface)
+    : font (new SharedFontInternal (typeface))
 {
 }
 
@@ -109,20 +223,10 @@ Font::~Font() throw()
 {
 }
 
-Font::Font (const Typeface::Ptr& typeface)
-    : font (new SharedFontInternal (typeface->getName(), FontValues::defaultFontHeight,
-                                    1.0f, 0, 0, Font::plain, typeface))
-{
-}
-
 bool Font::operator== (const Font& other) const throw()
 {
     return font == other.font
-            || (font->height == other.font->height
-                && font->styleFlags == other.font->styleFlags
-                && font->horizontalScale == other.font->horizontalScale
-                && font->kerning == other.font->kerning
-                && font->typefaceName == other.font->typefaceName);
+            || *font == *other.font;
 }
 
 bool Font::operator!= (const Font& other) const throw()
@@ -400,88 +504,6 @@ const Font Font::fromString (const String& fontDescription)
 }
 
 //==============================================================================
-class TypefaceCache  : public DeletedAtShutdown
-{
-public:
-    TypefaceCache (int numToCache = 10)
-        : counter (1)
-    {
-        while (--numToCache >= 0)
-            faces.add (new CachedFace());
-    }
-
-    ~TypefaceCache()
-    {
-        clearSingletonInstance();
-    }
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (TypefaceCache)
-
-    const Typeface::Ptr findTypefaceFor (const Font& font)
-    {
-        const int flags = font.getStyleFlags() & (Font::bold | Font::italic);
-        const String faceName (font.getTypefaceName());
-
-        int i;
-        for (i = faces.size(); --i >= 0;)
-        {
-            CachedFace* const face = faces.getUnchecked(i);
-
-            if (face->flags == flags
-                 && face->typefaceName == faceName)
-            {
-                face->lastUsageCount = ++counter;
-                return face->typeFace;
-            }
-        }
-
-        int replaceIndex = 0;
-        int bestLastUsageCount = std::numeric_limits<int>::max();
-
-        for (i = faces.size(); --i >= 0;)
-        {
-            const int lu = faces.getUnchecked(i)->lastUsageCount;
-
-            if (bestLastUsageCount > lu)
-            {
-                bestLastUsageCount = lu;
-                replaceIndex = i;
-            }
-        }
-
-        CachedFace* const face = faces.getUnchecked (replaceIndex);
-        face->typefaceName = faceName;
-        face->flags = flags;
-        face->lastUsageCount = ++counter;
-        face->typeFace = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
-        jassert (face->typeFace != 0); // the look and feel must return a typeface!
-
-        return face->typeFace;
-    }
-
-private:
-    struct CachedFace
-    {
-        CachedFace() throw()
-            : lastUsageCount (0), flags (-1)
-        {
-        }
-
-        String typefaceName;
-        int lastUsageCount;
-        int flags;
-        Typeface::Ptr typeFace;
-    };
-
-    int counter;
-    OwnedArray <CachedFace> faces;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypefaceCache);
-};
-
-juce_ImplementSingleton_SingleThreaded (TypefaceCache)
-
-
 Typeface* Font::getTypeface() const
 {
     if (font->typeface == 0)
