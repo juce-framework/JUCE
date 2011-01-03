@@ -305,10 +305,10 @@ namespace DrawablePathHelpers
 float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const
 {
     using namespace DrawablePathHelpers;
-    const Identifier i (state.getType());
+    const Identifier type (state.getType());
     float bestProp = 0;
 
-    if (i == cubicToElement)
+    if (type == cubicToElement)
     {
         RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getControlPoint (1)), rp4 (getEndPoint());
 
@@ -329,7 +329,7 @@ float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Po
             }
         }
     }
-    else if (i == quadraticToElement)
+    else if (type == quadraticToElement)
     {
         RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getEndPoint());
         const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder) };
@@ -349,7 +349,7 @@ float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Po
             }
         }
     }
-    else if (i == lineToElement)
+    else if (type == lineToElement)
     {
         RelativePoint rp1 (getStartPoint()), rp2 (getEndPoint());
         const Line<float> line (rp1.resolve (nameFinder), rp2.resolve (nameFinder));
@@ -362,9 +362,9 @@ float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Po
 ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder, UndoManager* undoManager)
 {
     ValueTree newTree;
-    const Identifier i (state.getType());
+    const Identifier type (state.getType());
 
-    if (i == cubicToElement)
+    if (type == cubicToElement)
     {
         float bestProp = findProportionAlongLine (targetPoint, nameFinder);
 
@@ -392,7 +392,7 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
 
         state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
     }
-    else if (i == quadraticToElement)
+    else if (type == quadraticToElement)
     {
         float bestProp = findProportionAlongLine (targetPoint, nameFinder);
 
@@ -414,7 +414,7 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
 
         state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
     }
-    else if (i == lineToElement)
+    else if (type == lineToElement)
     {
         RelativePoint rp1 (getStartPoint()), rp2 (getEndPoint());
         const Line<float> line (rp1.resolve (nameFinder), rp2.resolve (nameFinder));
@@ -427,7 +427,7 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
 
         state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
     }
-    else if (i == closeSubPathElement)
+    else if (type == closeSubPathElement)
     {
     }
 

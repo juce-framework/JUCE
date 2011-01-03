@@ -100,12 +100,12 @@ public:
         return Expression::EvaluationContext::getSymbolValue (objectName, member);
     }
 
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
+    void componentMovedOrResized (Component&, bool /*wasMoved*/, bool /*wasResized*/)
     {
         apply();
     }
 
-    void componentParentHierarchyChanged (Component& component)
+    void componentParentHierarchyChanged (Component&)
     {
         apply();
     }
@@ -116,7 +116,7 @@ public:
         sourceComponents.removeValue (&component);
     }
 
-    void markersChanged (MarkerList* markerList)
+    void markersChanged (MarkerList*)
     {
         apply();
     }
@@ -162,7 +162,7 @@ private:
             e.getSymbolParts (objectName, memberName);
 
             if (memberName.isNotEmpty())
-                ok = registerComponentEdge (objectName, memberName) && ok;
+                ok = registerComponent (objectName) && ok;
             else
                 ok = registerMarker (objectName) && ok;
         }
@@ -175,15 +175,15 @@ private:
         return ok;
     }
 
-    bool registerComponentEdge (const String& objectName, const String memberName)
+    bool registerComponent (const String& componentID)
     {
-        Component* comp = findComponent (objectName);
+        Component* comp = findComponent (componentID);
 
         if (comp == 0)
         {
-            if (objectName == RelativeCoordinate::Strings::parent)
+            if (componentID == RelativeCoordinate::Strings::parent)
                 comp = getComponent().getParentComponent();
-            else if (objectName == RelativeCoordinate::Strings::this_ || objectName == getComponent().getComponentID())
+            else if (componentID == RelativeCoordinate::Strings::this_ || componentID == getComponent().getComponentID())
                 comp = &getComponent();
         }
 

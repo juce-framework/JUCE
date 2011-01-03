@@ -245,7 +245,7 @@ bool AudioCDReader::isTrackAudio (int trackNum) const
     return tracks [trackNum].hasFileExtension (".aiff");
 }
 
-void AudioCDReader::enableIndexScanning (bool b)
+void AudioCDReader::enableIndexScanning (bool)
 {
     // any way to do this on a Mac??
 }
@@ -255,7 +255,7 @@ int AudioCDReader::getLastIndex() const
     return 0;
 }
 
-const Array <int> AudioCDReader::findIndexesInTrack (const int trackNumber)
+const Array <int> AudioCDReader::findIndexesInTrack (const int /*trackNumber*/)
 {
     return Array <int>();
 }

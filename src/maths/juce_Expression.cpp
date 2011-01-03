@@ -427,9 +427,11 @@ public:
 
     static Constant* findTermToAdjust (Term* const term, const bool mustBeFlagged)
     {
-        Constant* c = dynamic_cast<Constant*> (term);
-        if (c != 0 && (c->isResolutionTarget || ! mustBeFlagged))
-            return c;
+        {
+            Constant* c = dynamic_cast<Constant*> (term);
+            if (c != 0 && (c->isResolutionTarget || ! mustBeFlagged))
+                return c;
+        }
 
         if (dynamic_cast<Function*> (term) != 0)
             return 0;

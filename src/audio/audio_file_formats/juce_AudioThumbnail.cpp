@@ -685,7 +685,7 @@ void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer&
 
         for (int chan = 0; chan < numChans; ++chan)
         {
-            const float* const source = incoming.getSampleData (chan, startOffsetInBuffer);
+            const float* const sourceData = incoming.getSampleData (chan, startOffsetInBuffer);
             MinMaxValue* const dest = thumbData + numToDo * chan;
             thumbChannels [chan] = dest;
 
@@ -693,7 +693,7 @@ void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer&
             {
                 float low, high;
                 const int start = i * samplesPerThumbSample;
-                findMinAndMax (source + start, jmin (samplesPerThumbSample, numSamples - start), low, high);
+                findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start), low, high);
                 dest[i].setFloat (low, high);
             }
         }

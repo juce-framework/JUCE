@@ -671,13 +671,13 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
 	className (const className&);\
-	className& operator= (const className&);
+	className& operator= (const className&)
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
 	JUCE_LEAK_DETECTOR macro for a class.
 */
 #define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
-	JUCE_DECLARE_NON_COPYABLE(className)\
+	JUCE_DECLARE_NON_COPYABLE(className);\
 	JUCE_LEAK_DETECTOR(className)
 
 #if ! DOXYGEN
@@ -1274,7 +1274,7 @@ inline void swapVariables (Type& variable1, Type& variable2)
 	inline int numElementsInArray (Type (&array)[N])
 	{
 		(void) array; // (required to avoid a spurious warning in MS compilers)
-		sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+		(void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
 		return N;
 	}
 #endif
@@ -6426,9 +6426,9 @@ public:
 	/** Removes a specific item from the list.
 		Note that this will not delete the item, it simply unlinks it from the list.
 	*/
-	void remove (ObjectType* const item)
+	void remove (ObjectType* const itemToRemove)
 	{
-		LinkedListPointer* l = findPointerTo (item);
+		LinkedListPointer* const l = findPointerTo (itemToRemove);
 
 		if (l != 0)
 			l->removeNext();
@@ -23457,6 +23457,9 @@ public:
 	/** Returns true if the typeface uses hinting. */
 	virtual bool isHinted() const			   { return false; }
 
+	/** Changes the number of fonts that are cached in memory. */
+	static void setTypefaceCacheSize (int numFontsToCache);
+
 protected:
 
 	String name;
@@ -23899,6 +23902,7 @@ private:
 	class SharedFontInternal  : public ReferenceCountedObject
 	{
 	public:
+		SharedFontInternal (float height, int styleFlags) throw();
 		SharedFontInternal (const String& typefaceName, float height, int styleFlags) throw();
 		SharedFontInternal (const Typeface::Ptr& typeface) throw();
 		SharedFontInternal (const SharedFontInternal& other) throw();

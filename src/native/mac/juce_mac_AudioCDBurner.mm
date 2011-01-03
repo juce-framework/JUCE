@@ -230,21 +230,26 @@ END_JUCE_NAMESPACE
 
 - (void) cleanupTrackAfterBurn: (DRTrack*) track
 {
+    (void) track;
 }
 
 - (BOOL) cleanupTrackAfterVerification: (DRTrack*) track
 {
+    (void) track;
     return true;
 }
 
 - (uint64_t) estimateLengthOfTrack: (DRTrack*) track
 {
+    (void) track;
     return lengthInFrames;
 }
 
 - (BOOL) prepareTrack: (DRTrack*) track forBurn: (DRBurn*) burn
          toMedia: (NSDictionary*) mediaInfo
 {
+    (void) track; (void) burn; (void) mediaInfo;
+
     if (source != 0)
         source->prepareToPlay (44100 / 75, 44100);
 
@@ -254,6 +259,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) prepareTrackForVerification: (DRTrack*) track
 {
+    (void) track;
     if (source != 0)
         source->prepareToPlay (44100 / 75, 44100);
 
@@ -264,6 +270,8 @@ END_JUCE_NAMESPACE
         length: (uint32_t) bufferLength atAddress: (uint64_t) address
         blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
 {
+    (void) track; (void) address; (void) blockSize; (void) flags;
+
     if (source != 0)
     {
         const int numSamples = JUCE_NAMESPACE::jmin ((int) bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
@@ -307,6 +315,7 @@ END_JUCE_NAMESPACE
         atAddress: (uint64_t) address blockSize: (uint32_t) blockSize
         ioFlags: (uint32_t*) flags
 {
+    (void) track; (void) address; (void) blockSize; (void) flags;
     zeromem (buffer, bufferLength);
     return bufferLength;
 }
@@ -315,6 +324,7 @@ END_JUCE_NAMESPACE
          length: (uint32_t) bufferLength atAddress: (uint64_t) address
          blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
 {
+    (void) track; (void) buffer; (void) bufferLength; (void) address; (void) blockSize; (void) flags;
     return true;
 }
 

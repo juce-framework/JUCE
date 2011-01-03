@@ -134,7 +134,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
     if (processor != 0)
     {
-        const ScopedLock sl (processor->getCallbackLock());
+        const ScopedLock sl2 (processor->getCallbackLock());
 
         if (processor->isSuspended())
         {

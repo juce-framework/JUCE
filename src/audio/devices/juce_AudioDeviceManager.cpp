@@ -610,21 +610,21 @@ void AudioDeviceManager::addAudioCallback (AudioIODeviceCallback* newCallback)
     callbacks.add (newCallback);
 }
 
-void AudioDeviceManager::removeAudioCallback (AudioIODeviceCallback* callback)
+void AudioDeviceManager::removeAudioCallback (AudioIODeviceCallback* callbackToRemove)
 {
-    if (callback != 0)
+    if (callbackToRemove != 0)
     {
         bool needsDeinitialising = currentAudioDevice != 0;
 
         {
             const ScopedLock sl (audioCallbackLock);
 
-            needsDeinitialising = needsDeinitialising && callbacks.contains (callback);
-            callbacks.removeValue (callback);
+            needsDeinitialising = needsDeinitialising && callbacks.contains (callbackToRemove);
+            callbacks.removeValue (callbackToRemove);
         }
 
         if (needsDeinitialising)
-            callback->audioDeviceStopped();
+            callbackToRemove->audioDeviceStopped();
     }
 }
 
@@ -791,13 +791,13 @@ bool AudioDeviceManager::isMidiInputEnabled (const String& name) const
 }
 
 void AudioDeviceManager::addMidiInputCallback (const String& name,
-                                               MidiInputCallback* callback)
+                                               MidiInputCallback* callbackToAdd)
 {
-    removeMidiInputCallback (name, callback);
+    removeMidiInputCallback (name, callbackToAdd);
 
     if (name.isEmpty())
     {
-        midiCallbacks.add (callback);
+        midiCallbacks.add (callbackToAdd);
         midiCallbackDevices.add (0);
     }
     else
@@ -807,7 +807,7 @@ void AudioDeviceManager::addMidiInputCallback (const String& name,
             if (enabledMidiInputs[i]->getName() == name)
             {
                 const ScopedLock sl (midiCallbackLock);
-                midiCallbacks.add (callback);
+                midiCallbacks.add (callbackToAdd);
                 midiCallbackDevices.add (enabledMidiInputs[i]);
                 break;
             }
@@ -815,8 +815,7 @@ void AudioDeviceManager::addMidiInputCallback (const String& name,
     }
 }
 
-void AudioDeviceManager::removeMidiInputCallback (const String& name,
-                                                  MidiInputCallback* /*callback*/)
+void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* /*callback*/)
 {
     const ScopedLock sl (midiCallbackLock);
 

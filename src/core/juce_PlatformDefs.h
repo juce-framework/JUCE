@@ -184,13 +184,13 @@
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
     className (const className&);\
-    className& operator= (const className&);
+    className& operator= (const className&)
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
 */
 #define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(className) \
-    JUCE_DECLARE_NON_COPYABLE(className)\
+    JUCE_DECLARE_NON_COPYABLE(className);\
     JUCE_LEAK_DETECTOR(className)
 
 

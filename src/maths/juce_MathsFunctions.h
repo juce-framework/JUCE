@@ -284,7 +284,7 @@ inline void swapVariables (Type& variable1, Type& variable2)
     inline int numElementsInArray (Type (&array)[N])
     {
         (void) array; // (required to avoid a spurious warning in MS compilers)
-        sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+        (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
         return N;
     }
 #endif

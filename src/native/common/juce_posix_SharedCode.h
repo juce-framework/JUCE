@@ -772,5 +772,6 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
        or the SUPPORT_AFFINITIES macro was turned off
     */
     jassertfalse;
+    (void) affinityMask;
 #endif
 }

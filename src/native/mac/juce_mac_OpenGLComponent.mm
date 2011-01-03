@@ -95,6 +95,7 @@ END_JUCE_NAMESPACE
 
 - (void) _surfaceNeedsUpdate: (NSNotification*) notification
 {
+    (void) notification;
     const ScopedLock sl (*contextLock);
     needsUpdate = true;
 }
@@ -212,7 +213,7 @@ public:
     const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
     void* getRawContext() const throw()             { return renderContext; }
 
-    void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight)
+    void updateWindowPosition (int /*x*/, int /*y*/, int /*w*/, int /*h*/, int /*outerWindowHeight*/)
     {
     }
 
@@ -285,7 +286,7 @@ void juce_glViewport (const int w, const int h)
 }
 
 void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
-                                                  OwnedArray <OpenGLPixelFormat>& results)
+                                                  OwnedArray <OpenGLPixelFormat>& /*results*/)
 {
 /*    GLint attribs [64];
     int n = 0;

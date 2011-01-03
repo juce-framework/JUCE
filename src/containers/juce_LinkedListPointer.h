@@ -251,9 +251,9 @@ public:
     /** Removes a specific item from the list.
         Note that this will not delete the item, it simply unlinks it from the list.
     */
-    void remove (ObjectType* const item)
+    void remove (ObjectType* const itemToRemove)
     {
-        LinkedListPointer* l = findPointerTo (item);
+        LinkedListPointer* const l = findPointerTo (itemToRemove);
 
         if (l != 0)
             l->removeNext();

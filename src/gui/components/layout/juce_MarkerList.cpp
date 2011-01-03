@@ -152,7 +152,7 @@ void MarkerList::markersHaveChanged()
     listeners.call (&MarkerList::Listener::markersChanged, this);
 }
 
-void MarkerList::Listener::markerListBeingDeleted (MarkerList* markerList)
+void MarkerList::Listener::markerListBeingDeleted (MarkerList*)
 {
 }
 

@@ -114,6 +114,10 @@ public:
     /** Returns true if the typeface uses hinting. */
     virtual bool isHinted() const                           { return false; }
 
+    //==============================================================================
+    /** Changes the number of fonts that are cached in memory. */
+    static void setTypefaceCacheSize (int numFontsToCache);
+
 protected:
     //==============================================================================
     String name;

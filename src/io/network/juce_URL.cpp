@@ -291,17 +291,17 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      StringPairArray* const responseHeaders) const
 {
     String headers;
-    MemoryBlock postData;
+    MemoryBlock headersAndPostData;
 
     if (usePostCommand)
-        URLHelpers::createHeadersAndPostData (*this, headers, postData);
+        URLHelpers::createHeadersAndPostData (*this, headers, headersAndPostData);
 
     headers += extraHeaders;
 
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
 
-    return createNativeStream (toString (! usePostCommand), usePostCommand, postData,
+    return createNativeStream (toString (! usePostCommand), usePostCommand, headersAndPostData,
                                progressCallback, progressCallbackContext,
                                headers, timeOutMs, responseHeaders);
 }

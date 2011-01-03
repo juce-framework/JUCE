@@ -1921,20 +1921,20 @@ public:
         }
     }
 
-    void clipToImageAlpha (const Image& image, const AffineTransform& t)
+    void clipToImageAlpha (const Image& sourceImage, const AffineTransform& t)
     {
         if (clip != 0)
         {
-            if (image.hasAlphaChannel())
+            if (sourceImage.hasAlphaChannel())
             {
                 cloneClipIfMultiplyReferenced();
-                clip = clip->clipToImageAlpha (image, getTransformWith (t),
+                clip = clip->clipToImageAlpha (sourceImage, getTransformWith (t),
                                                interpolationQuality != Graphics::lowResamplingQuality);
             }
             else
             {
                 Path p;
-                p.addRectangle (image.getBounds());
+                p.addRectangle (sourceImage.getBounds());
                 clipToPath (p, t);
             }
         }
@@ -1973,36 +1973,36 @@ public:
 
     SavedState* beginTransparencyLayer (float opacity)
     {
-        const Rectangle<int> clip (getUntransformedClipBounds());
+        const Rectangle<int> layerBounds (getUntransformedClipBounds());
 
         SavedState* s = new SavedState (*this);
-        s->image = Image (Image::ARGB, clip.getWidth(), clip.getHeight(), true);
+        s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
         s->compositionAlpha = opacity;
 
         if (s->isOnlyTranslated)
         {
-            s->xOffset -= clip.getX();
-            s->yOffset -= clip.getY();
+            s->xOffset -= layerBounds.getX();
+            s->yOffset -= layerBounds.getY();
         }
         else
         {
-            s->complexTransform = s->complexTransform.followedBy (AffineTransform::translation ((float) -clip.getX(),
-                                                                                                (float) -clip.getY()));
+            s->complexTransform = s->complexTransform.followedBy (AffineTransform::translation ((float) -layerBounds.getX(),
+                                                                                                (float) -layerBounds.getY()));
         }
 
         s->cloneClipIfMultiplyReferenced();
-        s->clip = s->clip->translated (-clip.getPosition());
+        s->clip = s->clip->translated (-layerBounds.getPosition());
         return s;
     }
 
     void endTransparencyLayer (SavedState& layerState)
     {
-        const Rectangle<int> clip (getUntransformedClipBounds());
+        const Rectangle<int> layerBounds (getUntransformedClipBounds());
 
         const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
         g->setOpacity (layerState.compositionAlpha);
-        g->drawImage (layerState.image, AffineTransform::translation ((float) clip.getX(),
-                                                                      (float) clip.getY()), false);
+        g->drawImage (layerState.image, AffineTransform::translation ((float) layerBounds.getX(),
+                                                                      (float) layerBounds.getY()), false);
     }
 
     //==============================================================================

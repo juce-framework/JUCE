@@ -283,7 +283,7 @@ bool CodeDocument::Position::operator!= (const Position& other) const throw()
     return ! operator== (other);
 }
 
-void CodeDocument::Position::setLineAndIndex (const int newLine, const int newIndexInLine)
+void CodeDocument::Position::setLineAndIndex (const int newLineNum, const int newIndexInLine)
 {
     jassert (owner != 0);
 
@@ -295,7 +295,7 @@ void CodeDocument::Position::setLineAndIndex (const int newLine, const int newIn
     }
     else
     {
-        if (newLine >= owner->lines.size())
+        if (newLineNum >= owner->lines.size())
         {
             line = owner->lines.size() - 1;
 
@@ -307,7 +307,7 @@ void CodeDocument::Position::setLineAndIndex (const int newLine, const int newIn
         }
         else
         {
-            line = jmax (0, newLine);
+            line = jmax (0, newLineNum);
 
             CodeDocumentLine* const l = owner->lines.getUnchecked (line);
             jassert (l != 0);
@@ -566,10 +566,10 @@ bool CodeDocument::writeToStream (OutputStream& stream)
     return true;
 }
 
-void CodeDocument::setNewLineCharacters (const String& newLine) throw()
+void CodeDocument::setNewLineCharacters (const String& newLineChars_) throw()
 {
-    jassert (newLine == "\r\n" || newLine == "\n" || newLine == "\r");
-    newLineChars = newLine;
+    jassert (newLineChars_ == "\r\n" || newLineChars_ == "\n" || newLineChars_ == "\r");
+    newLineChars = newLineChars_;
 }
 
 void CodeDocument::newTransaction()

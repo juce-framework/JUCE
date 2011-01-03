@@ -79,8 +79,8 @@ void CallOutBox::paint (Graphics& g)
     if (background.isNull())
     {
         background = Image (Image::ARGB, getWidth(), getHeight(), true);
-        Graphics g (background);
-        getLookAndFeel().drawCallOutBoxBackground (*this, g, outline);
+        Graphics g2 (background);
+        getLookAndFeel().drawCallOutBoxBackground (*this, g2, outline);
     }
 
     g.setColour (Colours::black);

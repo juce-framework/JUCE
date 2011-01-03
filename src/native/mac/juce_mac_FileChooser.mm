@@ -87,9 +87,9 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool selectsDirectory,
                                       bool selectsFiles,
                                       bool isSaveDialogue,
-                                      bool warnAboutOverwritingExistingFiles,
+                                      bool /*warnAboutOverwritingExistingFiles*/,
                                       bool selectMultipleFiles,
-                                      FilePreviewComponent* extraInfoComponent)
+                                      FilePreviewComponent* /*extraInfoComponent*/)
 {
     const ScopedAutoReleasePool pool;
 

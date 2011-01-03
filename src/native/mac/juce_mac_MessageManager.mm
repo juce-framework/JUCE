@@ -450,7 +450,7 @@ bool juce_postMessageToSystemQueue (Message* message)
     return true;
 }
 
-void MessageManager::broadcastMessage (const String& value)
+void MessageManager::broadcastMessage (const String&)
 {
 }
 

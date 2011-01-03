@@ -51,11 +51,10 @@ namespace FontValues
 class TypefaceCache  : public DeletedAtShutdown
 {
 public:
-    TypefaceCache (int numToCache = 10)
-        : counter (1)
+    TypefaceCache()
+        : counter (0)
     {
-        while (--numToCache >= 0)
-            faces.add (CachedFace());
+        setSize (10);
     }
 
     ~TypefaceCache()
@@ -64,6 +63,12 @@ public:
     }
 
     juce_DeclareSingleton_SingleThreaded_Minimal (TypefaceCache)
+
+    void setSize (const int numToCache)
+    {
+        faces.clear():
+        faces.insertMultiple (-1, CachedFace(), numToCache);
+    }
 
     const Typeface::Ptr findTypefaceFor (const Font& font)
     {
@@ -143,8 +148,23 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (TypefaceCache)
 
+void Typeface::setTypefaceCacheSize (int numFontsToCache)
+{
+    TypefaceCache::getInstance()->setSize (numFontsToCache);
+}
 
 //==============================================================================
+Font::SharedFontInternal::SharedFontInternal (const float height_, const int styleFlags_) throw()
+    : typefaceName (Font::getDefaultSansSerifFontName()),
+      height (height_),
+      horizontalScale (1.0f),
+      kerning (0),
+      ascent (0),
+      styleFlags (styleFlags_),
+      typeface (TypefaceCache::getInstance()->getDefaultTypeface())
+{
+}
+
 Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const int styleFlags_) throw()
     : typefaceName (typefaceName_),
       height (height_),
@@ -152,7 +172,7 @@ Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const
       kerning (0),
       ascent (0),
       styleFlags (styleFlags_),
-      typeface (TypefaceCache::getInstance()->getDefaultTypeface())
+      typeface (0)
 {
 }
 
@@ -189,12 +209,12 @@ bool Font::SharedFontInternal::operator== (const SharedFontInternal& other) cons
 
 //==============================================================================
 Font::Font()
-    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::defaultFontHeight, Font::plain))
+    : font (new SharedFontInternal (FontValues::defaultFontHeight, Font::plain))
 {
 }
 
 Font::Font (const float fontHeight, const int styleFlags_)
-    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::limitFontHeight (fontHeight), styleFlags_))
+    : font (new SharedFontInternal (FontValues::limitFontHeight (fontHeight), styleFlags_))
 {
 }
 

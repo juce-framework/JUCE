@@ -138,18 +138,20 @@ public:
     static void sendWheelEvent (Component& comp, BailOutChecker& checker, const MouseEvent& e,
                                 const float wheelIncrementX, const float wheelIncrementY)
     {
-        MouseListenerList* const list = comp.mouseListeners;
-
-        if (list != 0)
         {
-            for (int i = list->listeners.size(); --i >= 0;)
+            MouseListenerList* const list = comp.mouseListeners;
+
+            if (list != 0)
             {
-                list->listeners.getUnchecked(i)->mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+                for (int i = list->listeners.size(); --i >= 0;)
+                {
+                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
 
-                if (checker.shouldBailOut())
-                    return;
+                    if (checker.shouldBailOut())
+                        return;
 
-                i = jmin (i, list->listeners.size());
+                    i = jmin (i, list->listeners.size());
+                }
             }
         }
 
@@ -1543,7 +1545,7 @@ int Component::runModalLoop()
     return ModalComponentManager::getInstance()->runEventLoopForCurrentComponent();
 }
 
-void Component::enterModalState (const bool takeKeyboardFocus, ModalComponentManager::Callback* const callback)
+void Component::enterModalState (const bool shouldTakeKeyboardFocus, ModalComponentManager::Callback* const callback)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -1559,7 +1561,7 @@ void Component::enterModalState (const bool takeKeyboardFocus, ModalComponentMan
         flags.currentlyModalFlag = true;
         setVisible (true);
 
-        if (takeKeyboardFocus)
+        if (shouldTakeKeyboardFocus)
             grabKeyboardFocus();
     }
 }
