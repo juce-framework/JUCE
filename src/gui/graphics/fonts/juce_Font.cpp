@@ -66,7 +66,7 @@ public:
 
     void setSize (const int numToCache)
     {
-        faces.clear():
+        faces.clear();
         faces.insertMultiple (-1, CachedFace(), numToCache);
     }
 
