@@ -35,10 +35,10 @@
 /**
     Base class for Component::Positioners that are based upon relative coordinates.
 */
-class RelativeCoordinatePositionerBase  : public Component::Positioner,
-                                          public ComponentListener,
-                                          public MarkerList::Listener,
-                                          public Expression::EvaluationContext
+class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
+                                                    public ComponentListener,
+                                                    public MarkerList::Listener,
+                                                    public Expression::EvaluationContext
 {
 public:
     RelativeCoordinatePositionerBase (Component& component_);

@@ -49,7 +49,7 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
 {
     for (int i = 0; i < other.getNumChildComponents(); ++i)
     {
-        const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
+        const Drawable* const d = dynamic_cast <const Drawable*> (other.getChildComponent(i));
 
         if (d != 0)
             addAndMakeVisible (d->createCopy());

@@ -55,8 +55,11 @@ public:
     */
     void setPath (const Path& newPath);
 
-    /** */
-    void setPath (const RelativePointPath& source);
+    /** Sets the path using a RelativePointPath.
+        Calling this will set up a Component::Positioner to automatically update the path
+        if any of the points in the source path are dynamic.
+    */
+    void setPath (const RelativePointPath& newPath);
 
     /** Returns the current path. */
     const Path& getPath() const;

@@ -47,12 +47,10 @@ RelativePointPath::RelativePointPath (const RelativePointPath& other)
 }
 
 RelativePointPath::RelativePointPath (const Path& path)
+    : usesNonZeroWinding (path.isUsingNonZeroWinding()),
+      containsDynamicPoints (false)
 {
-    usesNonZeroWinding = path.isUsingNonZeroWinding();
-
-    Path::Iterator i (path);
-
-    while (i.next())
+    for (Path::Iterator i (path); i.next();)
     {
         switch (i.elementType)
         {
@@ -86,8 +84,8 @@ bool RelativePointPath::operator== (const RelativePointPath& other) const throw(
             return false;
 
         int numPoints1, numPoints2;
-        RelativePoint* const points1 = e1->getControlPoints (numPoints1);
-        RelativePoint* const points2 = e2->getControlPoints (numPoints2);
+        const RelativePoint* const points1 = e1->getControlPoints (numPoints1);
+        const RelativePoint* const points2 = e2->getControlPoints (numPoints2);
 
         jassert (numPoints1 == numPoints2);
 
@@ -108,6 +106,7 @@ void RelativePointPath::swapWith (RelativePointPath& other) throw()
 {
     elements.swapWithArray (other.elements);
     swapVariables (usesNonZeroWinding, other.usesNonZeroWinding);
+    swapVariables (containsDynamicPoints, other.containsDynamicPoints);
 }
 
 void RelativePointPath::createPath (Path& path, Expression::EvaluationContext* coordFinder) const

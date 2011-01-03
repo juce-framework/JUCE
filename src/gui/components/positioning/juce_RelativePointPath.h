@@ -46,7 +46,7 @@ public:
     //==============================================================================
     RelativePointPath();
     RelativePointPath (const RelativePointPath& other);
-    RelativePointPath (const Path& path);
+    explicit RelativePointPath (const Path& path);
     ~RelativePointPath();
 
     bool operator== (const RelativePointPath& other) const throw();

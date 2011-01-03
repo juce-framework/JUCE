@@ -74,7 +74,7 @@ const Path& DrawablePath::getStrokePath() const
     return strokePath;
 }
 
-bool DrawablePath::rebuildPath (Path& path) const
+bool DrawablePath::rebuildPath (Path&) const
 {
     return false;
 }
@@ -142,22 +142,22 @@ const RelativePointPath* DrawablePath::getRelativePath() const
     return current != 0 ? &(current->path) : 0;
 }
 
-void DrawablePath::setPath (const RelativePointPath& source)
+void DrawablePath::setPath (const RelativePointPath& newRelativePath)
 {
-    if (source.containsAnyDynamicPoints())
+    if (newRelativePath.containsAnyDynamicPoints())
     {
         const RelativePointPath* current = getRelativePath();
 
-        if (current == 0 || source != *current)
+        if (current == 0 || newRelativePath != *current)
         {
-            RelativePositioner* const p = new RelativePositioner (*this, source);
+            RelativePositioner* const p = new RelativePositioner (*this, newRelativePath);
             setPositioner (p);
             p->apply();
         }
     }
     else
     {
-        applyRelativePath (source);
+        applyRelativePath (newRelativePath);
     }
 }
 

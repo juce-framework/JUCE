@@ -57571,10 +57571,10 @@ private:
 /**
 	Base class for Component::Positioners that are based upon relative coordinates.
 */
-class RelativeCoordinatePositionerBase  : public Component::Positioner,
-										  public ComponentListener,
-										  public MarkerList::Listener,
-										  public Expression::EvaluationContext
+class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
+													public ComponentListener,
+													public MarkerList::Listener,
+													public Expression::EvaluationContext
 {
 public:
 	RelativeCoordinatePositionerBase (Component& component_);
@@ -57758,7 +57758,7 @@ public:
 
 	RelativePointPath();
 	RelativePointPath (const RelativePointPath& other);
-	RelativePointPath (const Path& path);
+	explicit RelativePointPath (const Path& path);
 	~RelativePointPath();
 
 	bool operator== (const RelativePointPath& other) const throw();
@@ -62144,8 +62144,11 @@ public:
 	*/
 	void setPath (const Path& newPath);
 
-	/** */
-	void setPath (const RelativePointPath& source);
+	/** Sets the path using a RelativePointPath.
+		Calling this will set up a Component::Positioner to automatically update the path
+		if any of the points in the source path are dynamic.
+	*/
+	void setPath (const RelativePointPath& newPath);
 
 	/** Returns the current path. */
 	const Path& getPath() const;
