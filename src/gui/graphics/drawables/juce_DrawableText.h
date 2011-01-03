@@ -28,6 +28,7 @@
 
 #include "juce_Drawable.h"
 #include "../fonts/juce_GlyphArrangement.h"
+#include "../../components/positioning/juce_RelativeParallelogram.h"
 
 
 //==============================================================================

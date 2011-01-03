@@ -437,9 +437,6 @@
 #ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
  #include "gui/components/layout/juce_GroupComponent.h"
 #endif
-#ifndef __JUCE_MARKERLIST_JUCEHEADER__
- #include "gui/components/layout/juce_MarkerList.h"
-#endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
  #include "gui/components/layout/juce_MultiDocumentPanel.h"
 #endif
@@ -520,6 +517,27 @@
 #endif
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
  #include "gui/components/mouse/juce_TooltipClient.h"
+#endif
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+ #include "gui/components/positioning/juce_MarkerList.h"
+#endif
+#ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
+ #include "gui/components/positioning/juce_RelativeCoordinate.h"
+#endif
+#ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+ #include "gui/components/positioning/juce_RelativeCoordinatePositioner.h"
+#endif
+#ifndef __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
+ #include "gui/components/positioning/juce_RelativeParallelogram.h"
+#endif
+#ifndef __JUCE_RELATIVEPOINT_JUCEHEADER__
+ #include "gui/components/positioning/juce_RelativePoint.h"
+#endif
+#ifndef __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+ #include "gui/components/positioning/juce_RelativePointPath.h"
+#endif
+#ifndef __JUCE_RELATIVERECTANGLE_JUCEHEADER__
+ #include "gui/components/positioning/juce_RelativeRectangle.h"
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
  #include "gui/components/properties/juce_BooleanPropertyComponent.h"
@@ -721,9 +739,6 @@
 #endif
 #ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
  #include "gui/graphics/geometry/juce_RectangleList.h"
-#endif
-#ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
- #include "gui/graphics/geometry/juce_RelativeCoordinate.h"
 #endif
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
  #include "gui/graphics/imaging/juce_CameraDevice.h"

@@ -731,6 +731,11 @@ bool AudioThumbnail::isFullyLoaded() const throw()
     return numSamplesFinished >= totalSamples - samplesPerThumbSample;
 }
 
+int64 AudioThumbnail::getNumSamplesFinished() const throw()
+{
+    return numSamplesFinished;
+}
+
 float AudioThumbnail::getApproximatePeak() const
 {
     int peak = 0;

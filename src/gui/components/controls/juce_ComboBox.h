@@ -397,6 +397,7 @@ private:
 
     ItemInfo* getItemForId (int itemId) const throw();
     ItemInfo* getItemForIndex (int index) const throw();
+    bool selectIfEnabled (int index);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
 };

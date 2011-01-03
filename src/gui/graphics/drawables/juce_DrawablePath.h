@@ -27,6 +27,7 @@
 #define __JUCE_DRAWABLEPATH_JUCEHEADER__
 
 #include "juce_DrawableShape.h"
+#include "../../components/positioning/juce_RelativePointPath.h"
 
 
 //==============================================================================
@@ -53,6 +54,9 @@ public:
         @see setFillColour, setStrokeType
     */
     void setPath (const Path& newPath);
+
+    /** */
+    void setPath (const RelativePointPath& source);
 
     /** Returns the current path. */
     const Path& getPath() const;
@@ -120,6 +124,9 @@ public:
 
         ValueTree getPathState();
 
+        void readFrom (const RelativePointPath& path, UndoManager* undoManager);
+        void writeTo (RelativePointPath& path) const;
+
         static const Identifier nonZeroWinding, point1, point2, point3;
     };
 
@@ -128,7 +135,10 @@ protected:
 
 private:
     //==============================================================================
-    ScopedPointer<RelativePointPath> relativePath;
+    class RelativePositioner;
+    friend class RelativePositioner;
+    void applyRelativePath (const RelativePointPath& newPath);
+    const RelativePointPath* getRelativePath() const;
 
     DrawablePath& operator= (const DrawablePath&);
     JUCE_LEAK_DETECTOR (DrawablePath);

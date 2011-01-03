@@ -101,6 +101,9 @@
     <Filter Include="Juce\Source\gui\components\mouse">
       <UniqueIdentifier>{B0D9CCC8-4718-BF06-EA13-DA2333E77AEE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce\Source\gui\components\positioning">
+      <UniqueIdentifier>{34D7048B-783F-B48F-2D42-7F22515A2741}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce\Source\gui\components\properties">
       <UniqueIdentifier>{6A81EDB6-D54A-343C-8BB0-CCE4DAA4823F}</UniqueIdentifier>
     </Filter>
@@ -625,9 +628,6 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_GroupComponent.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\components\layout\juce_MarkerList.cpp">
-      <Filter>Juce\Source\gui\components\layout</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
@@ -693,6 +693,27 @@
     </ClCompile>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseListener.cpp">
       <Filter>Juce\Source\gui\components\mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_MarkerList.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeCoordinate.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeCoordinatePositioner.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeParallelogram.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativePoint.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativePointPath.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeRectangle.cpp">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\components\properties\juce_BooleanPropertyComponent.cpp">
       <Filter>Juce\Source\gui\components\properties</Filter>
@@ -866,9 +887,6 @@
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_RectangleList.cpp">
-      <Filter>Juce\Source\gui\graphics\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.cpp">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.cpp">
@@ -1752,9 +1770,6 @@
     <ClInclude Include="..\..\src\gui\components\layout\juce_GroupComponent.h">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\components\layout\juce_MarkerList.h">
-      <Filter>Juce\Source\gui\components\layout</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
@@ -1835,6 +1850,27 @@
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_TooltipClient.h">
       <Filter>Juce\Source\gui\components\mouse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_MarkerList.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeCoordinate.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeCoordinatePositioner.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeParallelogram.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativePoint.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativePointPath.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeRectangle.h">
+      <Filter>Juce\Source\gui\components\positioning</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\properties\juce_BooleanPropertyComponent.h">
       <Filter>Juce\Source\gui\components\properties</Filter>
@@ -2035,9 +2071,6 @@
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RectangleList.h">
-      <Filter>Juce\Source\gui\graphics\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.h">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_CameraDevice.h">

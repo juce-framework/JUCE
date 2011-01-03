@@ -27,6 +27,7 @@
 #define __JUCE_DRAWABLERECTANGLE_JUCEHEADER__
 
 #include "juce_DrawableShape.h"
+#include "../../components/positioning/juce_RelativeParallelogram.h"
 
 
 //==============================================================================

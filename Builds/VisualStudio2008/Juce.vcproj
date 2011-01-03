@@ -548,8 +548,6 @@
               <File RelativePath="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_GroupComponent.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_GroupComponent.h"/>
-              <File RelativePath="..\..\src\gui\components\layout\juce_MarkerList.cpp"/>
-              <File RelativePath="..\..\src\gui\components\layout\juce_MarkerList.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ResizableBorderComponent.cpp"/>
@@ -605,6 +603,22 @@
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseListener.cpp"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseListener.h"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_TooltipClient.h"/>
+            </Filter>
+            <Filter Name="positioning">
+              <File RelativePath="..\..\src\gui\components\positioning\juce_MarkerList.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_MarkerList.h"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeCoordinate.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeCoordinate.h"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeCoordinatePositioner.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeCoordinatePositioner.h"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeParallelogram.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeParallelogram.h"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativePoint.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativePoint.h"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativePointPath.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativePointPath.h"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeRectangle.cpp"/>
+              <File RelativePath="..\..\src\gui\components\positioning\juce_RelativeRectangle.h"/>
             </Filter>
             <Filter Name="properties">
               <File RelativePath="..\..\src\gui\components\properties\juce_BooleanPropertyComponent.cpp"/>
@@ -750,8 +764,6 @@
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Rectangle.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_RectangleList.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_RectangleList.h"/>
-              <File RelativePath="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.cpp"/>
-              <File RelativePath="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.h"/>
             </Filter>
             <Filter Name="imaging">
               <Filter Name="image_file_formats">

@@ -277,7 +277,6 @@
  #include "../src/gui/components/layout/juce_ComponentBoundsConstrainer.cpp"
  #include "../src/gui/components/layout/juce_ComponentMovementWatcher.cpp"
  #include "../src/gui/components/layout/juce_GroupComponent.cpp"
- #include "../src/gui/components/layout/juce_MarkerList.cpp"
  #include "../src/gui/components/layout/juce_MultiDocumentPanel.cpp"
  #include "../src/gui/components/layout/juce_ResizableBorderComponent.cpp"
  #include "../src/gui/components/layout/juce_ResizableCornerComponent.cpp"
@@ -327,7 +326,13 @@
  #include "../src/gui/components/windows/juce_ThreadWithProgressWindow.cpp"
  #include "../src/gui/components/windows/juce_TooltipWindow.cpp"
  #include "../src/gui/components/windows/juce_TopLevelWindow.cpp"
- #include "../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp"
+ #include "../src/gui/components/positioning/juce_MarkerList.cpp"
+ #include "../src/gui/components/positioning/juce_RelativeCoordinate.cpp"
+ #include "../src/gui/components/positioning/juce_RelativePoint.cpp"
+ #include "../src/gui/components/positioning/juce_RelativeRectangle.cpp"
+ #include "../src/gui/components/positioning/juce_RelativePointPath.cpp"
+ #include "../src/gui/components/positioning/juce_RelativeParallelogram.cpp"
+ #include "../src/gui/components/positioning/juce_RelativeCoordinatePositioner.cpp"
 #endif
 
 #if JUCE_BUILD_MISC  // (put these in misc to balance the file sizes and avoid problems in iphone build)

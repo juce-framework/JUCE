@@ -289,6 +289,19 @@ void ComboBox::setSelectedId (const int newItemId, const bool dontSendChangeMess
     }
 }
 
+bool ComboBox::selectIfEnabled (const int index)
+{
+    const ItemInfo* const item = getItemForIndex (index);
+
+    if (item != 0 && item->isEnabled)
+    {
+        setSelectedItemIndex (index);
+        return true;
+    }
+
+    return false;
+}
+
 void ComboBox::valueChanged (Value&)
 {
     if (lastCurrentId != (int) currentId.getValue())
@@ -438,12 +451,20 @@ bool ComboBox::keyPressed (const KeyPress& key)
 {
     if (key.isKeyCode (KeyPress::upKey) || key.isKeyCode (KeyPress::leftKey))
     {
-        setSelectedItemIndex (jmax (0, getSelectedItemIndex() - 1));
+        int index = getSelectedItemIndex() - 1;
+
+        while (index >= 0 && ! selectIfEnabled (index))
+            --index;
+
         return true;
     }
     else if (key.isKeyCode (KeyPress::downKey) || key.isKeyCode (KeyPress::rightKey))
     {
-        setSelectedItemIndex (jmin (getSelectedItemIndex() + 1, getNumItems() - 1));
+        int index = getSelectedItemIndex() + 1;
+
+        while (index < getNumItems() && ! selectIfEnabled (index))
+            ++index;
+
         return true;
     }
     else if (key.isKeyCode (KeyPress::returnKey))

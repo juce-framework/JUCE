@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	4
+#define JUCE_BUILDNUMBER	6
 
 /** Current Juce version number.
 
@@ -10428,6 +10428,7 @@ private:
 	friend class XmlDocument;
 	friend class LinkedListPointer<XmlAttributeNode>;
 	friend class LinkedListPointer <XmlElement>;
+	friend class LinkedListPointer <XmlElement>::Appender;
 
 	LinkedListPointer <XmlElement> nextListItem;
 	LinkedListPointer <XmlElement> firstChildElement;
@@ -39567,6 +39568,7 @@ private:
 
 	ItemInfo* getItemForId (int itemId) const throw();
 	ItemInfo* getItemForIndex (int index) const throw();
+	bool selectIfEnabled (int index);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
 };
@@ -45348,8 +45350,6 @@ private:
 #ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 #define __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 
-class Component;
-
 /**
 	Expresses a coordinate as a dynamically evaluated expression.
 
@@ -45445,313 +45445,6 @@ public:
 private:
 
 	Expression term;
-};
-
-/**
-	An X-Y position stored as a pair of RelativeCoordinate values.
-
-	@see RelativeCoordinate, RelativeRectangle
-*/
-class JUCE_API  RelativePoint
-{
-public:
-	/** Creates a point at the origin. */
-	RelativePoint();
-
-	/** Creates an absolute point, relative to the origin. */
-	RelativePoint (const Point<float>& absolutePoint);
-
-	/** Creates an absolute point, relative to the origin. */
-	RelativePoint (float absoluteX, float absoluteY);
-
-	/** Creates an absolute point from two coordinates. */
-	RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
-
-	/** Creates a point from a stringified representation.
-		The string must contain a pair of coordinates, separated by space or a comma. The syntax for the coordinate
-		strings is explained in the RelativeCoordinate class.
-		@see toString
-	*/
-	RelativePoint (const String& stringVersion);
-
-	bool operator== (const RelativePoint& other) const throw();
-	bool operator!= (const RelativePoint& other) const throw();
-
-	/** Calculates the absolute position of this point.
-
-		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
-		be needed to calculate the result.
-	*/
-	const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
-
-	/** Changes the values of this point's coordinates to make it resolve to the specified position.
-
-		Calling this will leave any anchor points unchanged, but will set any absolute
-		or relative positions to whatever values are necessary to make the resultant position
-		match the position that is provided.
-	*/
-	void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
-
-	/** Returns a string which represents this point.
-		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
-		coordinates, see the RelativeCoordinate constructor notes.
-		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
-	*/
-	const String toString() const;
-
-	/** Renames a symbol if it is used by any of the coordinates.
-		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
-	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName);
-
-	/** Returns true if this point depends on any other coordinates for its position. */
-	bool isDynamic() const;
-
-	// The actual X and Y coords...
-	RelativeCoordinate x, y;
-};
-
-/**
-	An rectangle stored as a set of RelativeCoordinate values.
-
-	The rectangle's top, left, bottom and right edge positions are each stored as a RelativeCoordinate.
-
-	@see RelativeCoordinate, RelativePoint
-*/
-class JUCE_API  RelativeRectangle
-{
-public:
-
-	/** Creates a zero-size rectangle at the origin. */
-	RelativeRectangle();
-
-	/** Creates an absolute rectangle, relative to the origin. */
-	explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
-
-	/** Creates a rectangle from four coordinates. */
-	RelativeRectangle (const RelativeCoordinate& left, const RelativeCoordinate& right,
-					   const RelativeCoordinate& top, const RelativeCoordinate& bottom);
-
-	/** Creates a rectangle from a stringified representation.
-		The string must contain a sequence of 4 coordinates, separated by commas, in the order
-		left, top, right, bottom. The syntax for the coordinate strings is explained in the
-		RelativeCoordinate class.
-		@see toString
-	*/
-	explicit RelativeRectangle (const String& stringVersion);
-
-	bool operator== (const RelativeRectangle& other) const throw();
-	bool operator!= (const RelativeRectangle& other) const throw();
-
-	/** Calculates the absolute position of this rectangle.
-
-		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
-		be needed to calculate the result.
-	*/
-	const Rectangle<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
-
-	/** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
-
-		Calling this will leave any anchor points unchanged, but will set any absolute
-		or relative positions to whatever values are necessary to make the resultant position
-		match the position that is provided.
-	*/
-	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
-
-	/** Returns true if this rectangle depends on any other coordinates for its position. */
-	bool isDynamic() const;
-
-	/** Returns a string which represents this point.
-		This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
-		the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
-		The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
-	*/
-	const String toString() const;
-
-	/** Renames a symbol if it is used by any of the coordinates.
-		This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
-	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName);
-
-	/** */
-	void applyToComponent (Component& component) const;
-
-	// The actual rectangle coords...
-	RelativeCoordinate left, right, top, bottom;
-};
-
-/**
-	A path object that consists of RelativePoint coordinates rather than the normal fixed ones.
-
-	One of these paths can be converted into a Path object for drawing and manipulation, but
-	unlike a Path, its points can be dynamic instead of just fixed.
-
-	@see RelativePoint, RelativeCoordinate
-*/
-class JUCE_API  RelativePointPath
-{
-public:
-
-	RelativePointPath();
-	RelativePointPath (const RelativePointPath& other);
-	RelativePointPath (const ValueTree& drawable);
-	RelativePointPath (const Path& path);
-	~RelativePointPath();
-
-	/** Resolves this points in this path and adds them to a normal Path object. */
-	void createPath (Path& path, Expression::EvaluationContext* coordFinder);
-
-	/** Returns true if the path contains any non-fixed points. */
-	bool containsAnyDynamicPoints() const;
-
-	/** Writes the path to this drawable encoding. */
-	void writeTo (ValueTree state, UndoManager* undoManager) const;
-
-	/** Quickly swaps the contents of this path with another. */
-	void swapWith (RelativePointPath& other) throw();
-
-	/** The types of element that may be contained in this path.
-		@see RelativePointPath::ElementBase
-	*/
-	enum ElementType
-	{
-		nullElement,
-		startSubPathElement,
-		closeSubPathElement,
-		lineToElement,
-		quadraticToElement,
-		cubicToElement
-	};
-
-	/** Base class for the elements that make up a RelativePointPath.
-	*/
-	class JUCE_API  ElementBase
-	{
-	public:
-		ElementBase (ElementType type);
-		virtual ~ElementBase() {}
-		virtual const ValueTree createTree() const = 0;
-		virtual void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const = 0;
-		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
-
-		const ElementType type;
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE (ElementBase);
-	};
-
-	class JUCE_API  StartSubPath  : public ElementBase
-	{
-	public:
-		StartSubPath (const RelativePoint& pos);
-		~StartSubPath() {}
-		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-		RelativePoint* getControlPoints (int& numPoints);
-
-		RelativePoint startPos;
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE (StartSubPath);
-	};
-
-	class JUCE_API  CloseSubPath  : public ElementBase
-	{
-	public:
-		CloseSubPath();
-		~CloseSubPath() {}
-		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-		RelativePoint* getControlPoints (int& numPoints);
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE (CloseSubPath);
-	};
-
-	class JUCE_API  LineTo  : public ElementBase
-	{
-	public:
-		LineTo (const RelativePoint& endPoint);
-		~LineTo() {}
-		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-		RelativePoint* getControlPoints (int& numPoints);
-
-		RelativePoint endPoint;
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE (LineTo);
-	};
-
-	class JUCE_API  QuadraticTo  : public ElementBase
-	{
-	public:
-		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
-		~QuadraticTo() {}
-		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-		RelativePoint* getControlPoints (int& numPoints);
-
-		RelativePoint controlPoints[2];
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE (QuadraticTo);
-	};
-
-	class JUCE_API  CubicTo  : public ElementBase
-	{
-	public:
-		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
-		~CubicTo() {}
-		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-		RelativePoint* getControlPoints (int& numPoints);
-
-		RelativePoint controlPoints[3];
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE (CubicTo);
-	};
-
-	OwnedArray <ElementBase> elements;
-	bool usesNonZeroWinding;
-
-private:
-	bool containsDynamicPoints;
-
-	void parse (const ValueTree& state);
-
-	RelativePointPath& operator= (const RelativePointPath&);
-};
-
-/**
-	A parallelogram defined by three RelativePoint positions.
-
-	@see RelativePoint, RelativeCoordinate
-*/
-class JUCE_API  RelativeParallelogram
-{
-public:
-
-	RelativeParallelogram();
-	RelativeParallelogram (const Rectangle<float>& simpleRectangle);
-	RelativeParallelogram (const RelativePoint& topLeft, const RelativePoint& topRight, const RelativePoint& bottomLeft);
-	RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
-	~RelativeParallelogram();
-
-	void resolveThreePoints (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
-	void resolveFourCorners (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
-	const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
-	void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-	const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
-
-	bool operator== (const RelativeParallelogram& other) const throw();
-	bool operator!= (const RelativeParallelogram& other) const throw();
-
-	static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) throw();
-	static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) throw();
-
-	RelativePoint topLeft, topRight, bottomLeft;
 };
 
 #endif   // __JUCE_RELATIVECOORDINATE_JUCEHEADER__
@@ -54026,148 +53719,6 @@ private:
 
 
 #endif
-#ifndef __JUCE_MARKERLIST_JUCEHEADER__
-
-/*** Start of inlined file: juce_MarkerList.h ***/
-#ifndef __JUCE_MARKERLIST_JUCEHEADER__
-#define __JUCE_MARKERLIST_JUCEHEADER__
-
-/**
-	Holds a set of named marker points along a one-dimensional axis.
-
-	This class is used to store sets of X and Y marker points in components.
-	@see Component::getMarkers().
-*/
-class JUCE_API  MarkerList
-{
-public:
-
-	/** Creates an empty marker list. */
-	MarkerList();
-	/** Creates a copy of another marker list. */
-	MarkerList (const MarkerList& other);
-	/** Copies another marker list to this one. */
-	MarkerList& operator= (const MarkerList& other);
-	/** Destructor. */
-	~MarkerList();
-
-	/** Represents a marker in a MarkerList. */
-	class JUCE_API  Marker
-	{
-	public:
-		/** Creates a copy of another Marker. */
-		Marker (const Marker& other);
-		/** Creates a Marker with a given name and position. */
-		Marker (const String& name, const RelativeCoordinate& position);
-
-		/** The marker's name. */
-		String name;
-
-		/** The marker's position. */
-		RelativeCoordinate position;
-
-		/** Returns true if both the names and positions of these two markers match. */
-		bool operator== (const Marker&) const throw();
-		/** Returns true if either the name or position of these two markers differ. */
-		bool operator!= (const Marker&) const throw();
-	};
-
-	/** Returns the number of markers in the list. */
-	int getNumMarkers() const throw();
-
-	/** Returns one of the markers in the list, by its index. */
-	const Marker* getMarker (int index) const throw();
-
-	/** Returns a named marker, or 0 if no such name is found.
-		Note that name comparisons are case-sensitive.
-	*/
-	const Marker* getMarker (const String& name) const throw();
-
-	/** Sets the position of a marker.
-
-		If the name already exists, then the existing marker is moved; if it doesn't exist, then a
-		new marker is added.
-	*/
-	void setMarker (const String& name, const RelativeCoordinate& position);
-
-	/** Deletes the marker at the given list index. */
-	void removeMarker (int index);
-
-	/** Deletes the marker with the given name. */
-	void removeMarker (const String& name);
-
-	/** Returns true if all the markers in these two lists match exactly. */
-	bool operator== (const MarkerList& other) const throw();
-	/** Returns true if not all the markers in these two lists match exactly. */
-	bool operator!= (const MarkerList& other) const throw();
-
-	/**
-		A class for receiving events when changes are made to a MarkerList.
-
-		You can register a MarkerList::Listener with a MarkerList using the MarkerList::addListener()
-		method, and it will be called when markers are moved, added, or deleted.
-
-		@see MarkerList::addListener, MarkerList::removeListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener() {}
-
-		/** Called when something in the given marker list changes. */
-		virtual void markersChanged (MarkerList* markerList) = 0;
-
-		/** Called when the given marker list is being deleted. */
-		virtual void markerListBeingDeleted (MarkerList* markerList);
-	};
-
-	/** Registers a listener that will be called when the markers are changed. */
-	void addListener (Listener* listener);
-
-	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener);
-
-	/** Synchronously calls markersChanged() on all the registered listeners. */
-	void markersHaveChanged();
-
-	/** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
-	class ValueTreeWrapper
-	{
-	public:
-		ValueTreeWrapper (const ValueTree& state);
-
-		ValueTree& getState() throw()	   { return state; }
-		int getNumMarkers() const;
-		const ValueTree getMarkerState (int index) const;
-		const ValueTree getMarkerState (const String& name) const;
-		bool containsMarker (const ValueTree& state) const;
-		const MarkerList::Marker getMarker (const ValueTree& state) const;
-		void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
-		void removeMarker (const ValueTree& state, UndoManager* undoManager);
-
-		void applyTo (MarkerList& markerList);
-		void readFrom (const MarkerList& markerList, UndoManager* undoManager);
-
-		static const Identifier markerTag, nameProperty, posProperty;
-
-	private:
-		ValueTree state;
-	};
-
-private:
-
-	OwnedArray<Marker> markers;
-	ListenerList <Listener> listeners;
-
-	JUCE_LEAK_DETECTOR (MarkerList);
-};
-
-#endif   // __JUCE_MARKERLIST_JUCEHEADER__
-/*** End of inlined file: juce_MarkerList.h ***/
-
-
-#endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
 
 /*** Start of inlined file: juce_MultiDocumentPanel.h ***/
@@ -57864,6 +57415,572 @@ private:
 
 #endif
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+
+/*** Start of inlined file: juce_MarkerList.h ***/
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+#define __JUCE_MARKERLIST_JUCEHEADER__
+
+/**
+	Holds a set of named marker points along a one-dimensional axis.
+
+	This class is used to store sets of X and Y marker points in components.
+	@see Component::getMarkers().
+*/
+class JUCE_API  MarkerList
+{
+public:
+
+	/** Creates an empty marker list. */
+	MarkerList();
+	/** Creates a copy of another marker list. */
+	MarkerList (const MarkerList& other);
+	/** Copies another marker list to this one. */
+	MarkerList& operator= (const MarkerList& other);
+	/** Destructor. */
+	~MarkerList();
+
+	/** Represents a marker in a MarkerList. */
+	class JUCE_API  Marker
+	{
+	public:
+		/** Creates a copy of another Marker. */
+		Marker (const Marker& other);
+		/** Creates a Marker with a given name and position. */
+		Marker (const String& name, const RelativeCoordinate& position);
+
+		/** The marker's name. */
+		String name;
+
+		/** The marker's position. */
+		RelativeCoordinate position;
+
+		/** Returns true if both the names and positions of these two markers match. */
+		bool operator== (const Marker&) const throw();
+		/** Returns true if either the name or position of these two markers differ. */
+		bool operator!= (const Marker&) const throw();
+	};
+
+	/** Returns the number of markers in the list. */
+	int getNumMarkers() const throw();
+
+	/** Returns one of the markers in the list, by its index. */
+	const Marker* getMarker (int index) const throw();
+
+	/** Returns a named marker, or 0 if no such name is found.
+		Note that name comparisons are case-sensitive.
+	*/
+	const Marker* getMarker (const String& name) const throw();
+
+	/** Sets the position of a marker.
+
+		If the name already exists, then the existing marker is moved; if it doesn't exist, then a
+		new marker is added.
+	*/
+	void setMarker (const String& name, const RelativeCoordinate& position);
+
+	/** Deletes the marker at the given list index. */
+	void removeMarker (int index);
+
+	/** Deletes the marker with the given name. */
+	void removeMarker (const String& name);
+
+	/** Returns true if all the markers in these two lists match exactly. */
+	bool operator== (const MarkerList& other) const throw();
+	/** Returns true if not all the markers in these two lists match exactly. */
+	bool operator!= (const MarkerList& other) const throw();
+
+	/**
+		A class for receiving events when changes are made to a MarkerList.
+
+		You can register a MarkerList::Listener with a MarkerList using the MarkerList::addListener()
+		method, and it will be called when markers are moved, added, or deleted.
+
+		@see MarkerList::addListener, MarkerList::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when something in the given marker list changes. */
+		virtual void markersChanged (MarkerList* markerList) = 0;
+
+		/** Called when the given marker list is being deleted. */
+		virtual void markerListBeingDeleted (MarkerList* markerList);
+	};
+
+	/** Registers a listener that will be called when the markers are changed. */
+	void addListener (Listener* listener);
+
+	/** Deregisters a previously-registered listener. */
+	void removeListener (Listener* listener);
+
+	/** Synchronously calls markersChanged() on all the registered listeners. */
+	void markersHaveChanged();
+
+	/** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
+	class ValueTreeWrapper
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		ValueTree& getState() throw()	   { return state; }
+		int getNumMarkers() const;
+		const ValueTree getMarkerState (int index) const;
+		const ValueTree getMarkerState (const String& name) const;
+		bool containsMarker (const ValueTree& state) const;
+		const MarkerList::Marker getMarker (const ValueTree& state) const;
+		void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
+		void removeMarker (const ValueTree& state, UndoManager* undoManager);
+
+		void applyTo (MarkerList& markerList);
+		void readFrom (const MarkerList& markerList, UndoManager* undoManager);
+
+		static const Identifier markerTag, nameProperty, posProperty;
+
+	private:
+		ValueTree state;
+	};
+
+private:
+
+	OwnedArray<Marker> markers;
+	ListenerList <Listener> listeners;
+
+	JUCE_LEAK_DETECTOR (MarkerList);
+};
+
+#endif   // __JUCE_MARKERLIST_JUCEHEADER__
+/*** End of inlined file: juce_MarkerList.h ***/
+
+
+#endif
+#ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+
+/*** Start of inlined file: juce_RelativeCoordinatePositioner.h ***/
+#ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+#define __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+
+/**
+	Base class for Component::Positioners that are based upon relative coordinates.
+*/
+class RelativeCoordinatePositionerBase  : public Component::Positioner,
+										  public ComponentListener,
+										  public MarkerList::Listener,
+										  public Expression::EvaluationContext
+{
+public:
+	RelativeCoordinatePositionerBase (Component& component_);
+	~RelativeCoordinatePositionerBase();
+
+	const Expression getSymbolValue (const String& objectName, const String& member) const;
+
+	void componentMovedOrResized (Component&, bool, bool);
+	void componentParentHierarchyChanged (Component&);
+	void componentBeingDeleted (Component& component);
+	void markersChanged (MarkerList*);
+	void markerListBeingDeleted (MarkerList* markerList);
+
+	void apply();
+
+protected:
+	bool addCoordinate (const RelativeCoordinate& coord);
+
+	virtual bool registerCoordinates() = 0;
+	virtual void applyToComponentBounds() = 0;
+
+private:
+	Array <Component*> sourceComponents;
+	Array <MarkerList*> sourceMarkerLists;
+	bool registeredOk;
+
+	bool registerListeners (const Expression& e);
+	bool registerComponent (const String& componentID);
+	bool registerMarker (const String markerName);
+	void registerComponentListener (Component* const comp);
+	void registerMarkerListListener (MarkerList* const list);
+	void unregisterListeners();
+	Component* findComponent (const String& componentID) const;
+	Component* getSourceComponent (const String& objectName) const;
+	const Expression xToExpression (const Component* const source, const int x) const;
+	const Expression yToExpression (const Component* const source, const int y) const;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase);
+};
+
+#endif   // __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+/*** End of inlined file: juce_RelativeCoordinatePositioner.h ***/
+
+
+#endif
+#ifndef __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
+
+/*** Start of inlined file: juce_RelativeParallelogram.h ***/
+#ifndef __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
+#define __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_RelativePoint.h ***/
+#ifndef __JUCE_RELATIVEPOINT_JUCEHEADER__
+#define __JUCE_RELATIVEPOINT_JUCEHEADER__
+
+/**
+	An X-Y position stored as a pair of RelativeCoordinate values.
+
+	@see RelativeCoordinate, RelativeRectangle
+*/
+class JUCE_API  RelativePoint
+{
+public:
+	/** Creates a point at the origin. */
+	RelativePoint();
+
+	/** Creates an absolute point, relative to the origin. */
+	RelativePoint (const Point<float>& absolutePoint);
+
+	/** Creates an absolute point, relative to the origin. */
+	RelativePoint (float absoluteX, float absoluteY);
+
+	/** Creates an absolute point from two coordinates. */
+	RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
+
+	/** Creates a point from a stringified representation.
+		The string must contain a pair of coordinates, separated by space or a comma. The syntax for the coordinate
+		strings is explained in the RelativeCoordinate class.
+		@see toString
+	*/
+	RelativePoint (const String& stringVersion);
+
+	bool operator== (const RelativePoint& other) const throw();
+	bool operator!= (const RelativePoint& other) const throw();
+
+	/** Calculates the absolute position of this point.
+
+		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+		be needed to calculate the result.
+	*/
+	const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+
+	/** Changes the values of this point's coordinates to make it resolve to the specified position.
+
+		Calling this will leave any anchor points unchanged, but will set any absolute
+		or relative positions to whatever values are necessary to make the resultant position
+		match the position that is provided.
+	*/
+	void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+
+	/** Returns a string which represents this point.
+		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
+		coordinates, see the RelativeCoordinate constructor notes.
+		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
+	*/
+	const String toString() const;
+
+	/** Renames a symbol if it is used by any of the coordinates.
+		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
+	*/
+	void renameSymbolIfUsed (const String& oldName, const String& newName);
+
+	/** Returns true if this point depends on any other coordinates for its position. */
+	bool isDynamic() const;
+
+	// The actual X and Y coords...
+	RelativeCoordinate x, y;
+};
+
+#endif   // __JUCE_RELATIVEPOINT_JUCEHEADER__
+/*** End of inlined file: juce_RelativePoint.h ***/
+
+/**
+	A parallelogram defined by three RelativePoint positions.
+
+	@see RelativePoint, RelativeCoordinate
+*/
+class JUCE_API  RelativeParallelogram
+{
+public:
+
+	RelativeParallelogram();
+	RelativeParallelogram (const Rectangle<float>& simpleRectangle);
+	RelativeParallelogram (const RelativePoint& topLeft, const RelativePoint& topRight, const RelativePoint& bottomLeft);
+	RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
+	~RelativeParallelogram();
+
+	void resolveThreePoints (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
+	void resolveFourCorners (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
+	const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
+	void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+	const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
+
+	bool operator== (const RelativeParallelogram& other) const throw();
+	bool operator!= (const RelativeParallelogram& other) const throw();
+
+	static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) throw();
+	static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) throw();
+
+	RelativePoint topLeft, topRight, bottomLeft;
+};
+
+#endif   // __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
+/*** End of inlined file: juce_RelativeParallelogram.h ***/
+
+
+#endif
+#ifndef __JUCE_RELATIVEPOINT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+
+/*** Start of inlined file: juce_RelativePointPath.h ***/
+#ifndef __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+#define __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+
+class DrawablePath;
+
+/**
+	A path object that consists of RelativePoint coordinates rather than the normal fixed ones.
+
+	One of these paths can be converted into a Path object for drawing and manipulation, but
+	unlike a Path, its points can be dynamic instead of just fixed.
+
+	@see RelativePoint, RelativeCoordinate
+*/
+class JUCE_API  RelativePointPath
+{
+public:
+
+	RelativePointPath();
+	RelativePointPath (const RelativePointPath& other);
+	RelativePointPath (const Path& path);
+	~RelativePointPath();
+
+	bool operator== (const RelativePointPath& other) const throw();
+	bool operator!= (const RelativePointPath& other) const throw();
+
+	/** Resolves this points in this path and adds them to a normal Path object. */
+	void createPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+
+	/** Returns true if the path contains any non-fixed points. */
+	bool containsAnyDynamicPoints() const;
+
+	/** Quickly swaps the contents of this path with another. */
+	void swapWith (RelativePointPath& other) throw();
+
+	/** The types of element that may be contained in this path.
+		@see RelativePointPath::ElementBase
+	*/
+	enum ElementType
+	{
+		nullElement,
+		startSubPathElement,
+		closeSubPathElement,
+		lineToElement,
+		quadraticToElement,
+		cubicToElement
+	};
+
+	/** Base class for the elements that make up a RelativePointPath.
+	*/
+	class JUCE_API  ElementBase
+	{
+	public:
+		ElementBase (ElementType type);
+		virtual ~ElementBase() {}
+		virtual const ValueTree createTree() const = 0;
+		virtual void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const = 0;
+		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
+		virtual ElementBase* clone() const = 0;
+		bool isDynamic();
+
+		const ElementType type;
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (ElementBase);
+	};
+
+	class JUCE_API  StartSubPath  : public ElementBase
+	{
+	public:
+		StartSubPath (const RelativePoint& pos);
+		const ValueTree createTree() const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
+		ElementBase* clone() const;
+
+		RelativePoint startPos;
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (StartSubPath);
+	};
+
+	class JUCE_API  CloseSubPath  : public ElementBase
+	{
+	public:
+		CloseSubPath();
+		const ValueTree createTree() const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
+		ElementBase* clone() const;
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (CloseSubPath);
+	};
+
+	class JUCE_API  LineTo  : public ElementBase
+	{
+	public:
+		LineTo (const RelativePoint& endPoint);
+		const ValueTree createTree() const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
+		ElementBase* clone() const;
+
+		RelativePoint endPoint;
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (LineTo);
+	};
+
+	class JUCE_API  QuadraticTo  : public ElementBase
+	{
+	public:
+		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
+		const ValueTree createTree() const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
+		ElementBase* clone() const;
+
+		RelativePoint controlPoints[2];
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (QuadraticTo);
+	};
+
+	class JUCE_API  CubicTo  : public ElementBase
+	{
+	public:
+		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
+		const ValueTree createTree() const;
+		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
+		ElementBase* clone() const;
+
+		RelativePoint controlPoints[3];
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (CubicTo);
+	};
+
+	void addElement (ElementBase* newElement);
+
+	OwnedArray <ElementBase> elements;
+	bool usesNonZeroWinding;
+
+private:
+	class Positioner;
+	friend class Positioner;
+	bool containsDynamicPoints;
+
+	void applyTo (DrawablePath& path) const;
+
+	RelativePointPath& operator= (const RelativePointPath&);
+	JUCE_LEAK_DETECTOR (RelativePointPath);
+};
+
+#endif   // __JUCE_RELATIVEPOINTPATH_JUCEHEADER__
+/*** End of inlined file: juce_RelativePointPath.h ***/
+
+
+#endif
+#ifndef __JUCE_RELATIVERECTANGLE_JUCEHEADER__
+
+/*** Start of inlined file: juce_RelativeRectangle.h ***/
+#ifndef __JUCE_RELATIVERECTANGLE_JUCEHEADER__
+#define __JUCE_RELATIVERECTANGLE_JUCEHEADER__
+
+class Component;
+
+/**
+	An rectangle stored as a set of RelativeCoordinate values.
+
+	The rectangle's top, left, bottom and right edge positions are each stored as a RelativeCoordinate.
+
+	@see RelativeCoordinate, RelativePoint
+*/
+class JUCE_API  RelativeRectangle
+{
+public:
+
+	/** Creates a zero-size rectangle at the origin. */
+	RelativeRectangle();
+
+	/** Creates an absolute rectangle, relative to the origin. */
+	explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
+
+	/** Creates a rectangle from four coordinates. */
+	RelativeRectangle (const RelativeCoordinate& left, const RelativeCoordinate& right,
+					   const RelativeCoordinate& top, const RelativeCoordinate& bottom);
+
+	/** Creates a rectangle from a stringified representation.
+		The string must contain a sequence of 4 coordinates, separated by commas, in the order
+		left, top, right, bottom. The syntax for the coordinate strings is explained in the
+		RelativeCoordinate class.
+		@see toString
+	*/
+	explicit RelativeRectangle (const String& stringVersion);
+
+	bool operator== (const RelativeRectangle& other) const throw();
+	bool operator!= (const RelativeRectangle& other) const throw();
+
+	/** Calculates the absolute position of this rectangle.
+
+		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+		be needed to calculate the result.
+	*/
+	const Rectangle<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+
+	/** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
+
+		Calling this will leave any anchor points unchanged, but will set any absolute
+		or relative positions to whatever values are necessary to make the resultant position
+		match the position that is provided.
+	*/
+	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+
+	/** Returns true if this rectangle depends on any other coordinates for its position. */
+	bool isDynamic() const;
+
+	/** Returns a string which represents this point.
+		This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
+		the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
+		The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
+	*/
+	const String toString() const;
+
+	/** Renames a symbol if it is used by any of the coordinates.
+		This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
+	*/
+	void renameSymbolIfUsed (const String& oldName, const String& newName);
+
+	/** Creates and sets an appropriate Component::Positioner object for the given component, which will
+		keep it positioned with this rectangle.
+	*/
+	void applyToComponent (Component& component) const;
+
+	// The actual rectangle coords...
+	RelativeCoordinate left, right, top, bottom;
+};
+
+#endif   // __JUCE_RELATIVERECTANGLE_JUCEHEADER__
+/*** End of inlined file: juce_RelativeRectangle.h ***/
+
 
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -62027,6 +62144,9 @@ public:
 	*/
 	void setPath (const Path& newPath);
 
+	/** */
+	void setPath (const RelativePointPath& source);
+
 	/** Returns the current path. */
 	const Path& getPath() const;
 
@@ -62091,6 +62211,9 @@ public:
 
 		ValueTree getPathState();
 
+		void readFrom (const RelativePointPath& path, UndoManager* undoManager);
+		void writeTo (RelativePointPath& path) const;
+
 		static const Identifier nonZeroWinding, point1, point2, point3;
 	};
 
@@ -62099,7 +62222,10 @@ protected:
 
 private:
 
-	ScopedPointer<RelativePointPath> relativePath;
+	class RelativePositioner;
+	friend class RelativePositioner;
+	void applyRelativePath (const RelativePointPath& newPath);
+	const RelativePointPath* getRelativePath() const;
 
 	DrawablePath& operator= (const DrawablePath&);
 	JUCE_LEAK_DETECTOR (DrawablePath);
@@ -62811,9 +62937,6 @@ private:
 
 #endif
 #ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__

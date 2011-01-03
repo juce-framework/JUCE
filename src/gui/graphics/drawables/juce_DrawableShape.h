@@ -29,6 +29,7 @@
 #include "juce_Drawable.h"
 #include "../contexts/juce_FillType.h"
 #include "../colour/juce_ColourGradient.h"
+#include "../../components/positioning/juce_RelativePoint.h"
 
 
 //==============================================================================

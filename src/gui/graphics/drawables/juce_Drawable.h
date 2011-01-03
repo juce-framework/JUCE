@@ -27,7 +27,7 @@
 #define __JUCE_DRAWABLE_JUCEHEADER__
 
 #include "../../components/juce_Component.h"
-#include "../geometry/juce_RelativeCoordinate.h"
+#include "../../components/positioning/juce_RelativeCoordinate.h"
 #include "../../../containers/juce_ValueTree.h"
 #include "../../components/layout/juce_ComponentBuilder.h"
 class DrawableComposite;

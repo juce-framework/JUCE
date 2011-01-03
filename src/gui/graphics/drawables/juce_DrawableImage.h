@@ -28,6 +28,7 @@
 
 #include "juce_Drawable.h"
 #include "../imaging/juce_Image.h"
+#include "../../components/positioning/juce_RelativeParallelogram.h"
 
 
 //==============================================================================

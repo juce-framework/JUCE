@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawablePath.h"
 #include "juce_DrawableComposite.h"
+#include "../../components/positioning/juce_RelativeCoordinatePositioner.h"
 
 
 //==============================================================================
@@ -39,8 +40,10 @@ DrawablePath::DrawablePath()
 DrawablePath::DrawablePath (const DrawablePath& other)
     : DrawableShape (other)
 {
-    if (other.relativePath != 0)
-        relativePath = new RelativePointPath (*other.relativePath);
+    const RelativePointPath* const relativePath = other.getRelativePath();
+
+    if (relativePath != 0)
+        setPath (*relativePath);
     else
         setPath (other.path);
 }
@@ -73,14 +76,89 @@ const Path& DrawablePath::getStrokePath() const
 
 bool DrawablePath::rebuildPath (Path& path) const
 {
-    if (relativePath != 0)
+    return false;
+}
+
+void DrawablePath::applyRelativePath (const RelativePointPath& relativePath)
+{
+    Path newPath;
+    relativePath.createPath (newPath, 0);
+
+    if (path != newPath)
     {
-        path.clear();
-        relativePath->createPath (path, getParent());
-        return true;
+        path.swapWithPath (newPath);
+        pathChanged();
+    }
+}
+
+//==============================================================================
+class DrawablePath::RelativePositioner  : public RelativeCoordinatePositionerBase
+{
+public:
+    RelativePositioner (DrawablePath& component_, const RelativePointPath& path_)
+        : RelativeCoordinatePositionerBase (component_),
+          path (path_),
+          owner (component_)
+    {
     }
 
-    return false;
+    bool registerCoordinates()
+    {
+        bool ok = true;
+
+        for (int i = 0; i < path.elements.size(); ++i)
+        {
+            RelativePointPath::ElementBase* const e = path.elements.getUnchecked(i);
+
+            int numPoints;
+            RelativePoint* const points = e->getControlPoints (numPoints);
+
+            for (int j = numPoints; --j >= 0;)
+            {
+                ok = addCoordinate (points[j].x) && ok;
+                ok = addCoordinate (points[j].y) && ok;
+            }
+        }
+
+        return ok;
+    }
+
+    void applyToComponentBounds()
+    {
+        owner.applyRelativePath (path);
+    }
+
+    const RelativePointPath path;
+
+private:
+    DrawablePath& owner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativePositioner);
+};
+
+const RelativePointPath* DrawablePath::getRelativePath() const
+{
+    RelativePositioner* current = dynamic_cast <RelativePositioner*> (getPositioner());
+    return current != 0 ? &(current->path) : 0;
+}
+
+void DrawablePath::setPath (const RelativePointPath& source)
+{
+    if (source.containsAnyDynamicPoints())
+    {
+        const RelativePointPath* current = getRelativePath();
+
+        if (current == 0 || source != *current)
+        {
+            RelativePositioner* const p = new RelativePositioner (*this, source);
+            setPositioner (p);
+            p->apply();
+        }
+    }
+    else
+    {
+        applyRelativePath (source);
+    }
 }
 
 //==============================================================================
@@ -111,6 +189,47 @@ bool DrawablePath::ValueTreeWrapper::usesNonZeroWinding() const
 void DrawablePath::ValueTreeWrapper::setUsesNonZeroWinding (bool b, UndoManager* undoManager)
 {
     state.setProperty (nonZeroWinding, b, undoManager);
+}
+
+void DrawablePath::ValueTreeWrapper::readFrom (const RelativePointPath& relativePath, UndoManager* undoManager)
+{
+    setUsesNonZeroWinding (relativePath.usesNonZeroWinding, undoManager);
+
+    ValueTree pathTree (getPathState());
+    pathTree.removeAllChildren (undoManager);
+
+    for (int i = 0; i < relativePath.elements.size(); ++i)
+        pathTree.addChild (relativePath.elements.getUnchecked(i)->createTree(), -1, undoManager);
+}
+
+void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& relativePath) const
+{
+    relativePath.usesNonZeroWinding = usesNonZeroWinding();
+    RelativePoint points[3];
+
+    const ValueTree pathTree (state.getChildWithName (path));
+    const int num = pathTree.getNumChildren();
+    for (int i = 0; i < num; ++i)
+    {
+        const Element e (pathTree.getChild(i));
+
+        const int numCps = e.getNumControlPoints();
+        for (int j = 0; j < numCps; ++j)
+            points[j] = e.getControlPoint (j);
+
+        const Identifier type (e.getType());
+
+        RelativePointPath::ElementBase* newElement = 0;
+
+        if (type == Element::startSubPathElement)       newElement = new RelativePointPath::StartSubPath (points[0]);
+        else if (type == Element::closeSubPathElement)  newElement = new RelativePointPath::CloseSubPath();
+        else if (type == Element::lineToElement)        newElement = new RelativePointPath::LineTo (points[0]);
+        else if (type == Element::quadraticToElement)   newElement = new RelativePointPath::QuadraticTo (points[0], points[1]);
+        else if (type == Element::cubicToElement)       newElement = new RelativePointPath::CubicTo (points[0], points[1], points[2]);
+        else                                            jassertfalse;
+
+        relativePath.addElement (newElement);
+    }
 }
 
 //==============================================================================
@@ -448,23 +567,16 @@ void DrawablePath::refreshFromValueTree (const ValueTree& tree, ComponentBuilder
     if (refreshFillTypes (v, getParent(), builder.getImageProvider()))
         repaint();
 
-    ScopedPointer<RelativePointPath> newRelativePath (new RelativePointPath (tree));
-
-    Path newPath;
-    newRelativePath->createPath (newPath, getParent());
-
-    if (! newRelativePath->containsAnyDynamicPoints())
-        newRelativePath = 0;
-
     const PathStrokeType newStroke (v.getStrokeType());
-    if (strokeType != newStroke || path != newPath)
+    if (strokeType != newStroke)
     {
-        path.swapWithPath (newPath);
         strokeType = newStroke;
-        pathChanged();
+        strokeChanged();
     }
 
-    relativePath = newRelativePath;
+    RelativePointPath newRelativePath;
+    v.writeTo (newRelativePath);
+    setPath (newRelativePath);
 }
 
 const ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
@@ -475,14 +587,16 @@ const ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* 
     v.setID (getComponentID());
     writeTo (v, imageProvider, 0);
 
+    const RelativePointPath* const relativePath = getRelativePath();
+
     if (relativePath != 0)
     {
-        relativePath->writeTo (tree, 0);
+        v.readFrom (*relativePath, 0);
     }
     else
     {
         RelativePointPath rp (path);
-        rp.writeTo (tree, 0);
+        v.readFrom (rp, 0);
     }
 
     return tree;

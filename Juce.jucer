@@ -728,10 +728,6 @@
                   file="src/gui/components/layout/juce_GroupComponent.cpp"/>
             <FILE id="JsmHuUYf" name="juce_GroupComponent.h" compile="0" resource="0"
                   file="src/gui/components/layout/juce_GroupComponent.h"/>
-            <FILE id="V5xE9Zr" name="juce_MarkerList.cpp" compile="1" resource="0"
-                  file="src/gui/components/layout/juce_MarkerList.cpp"/>
-            <FILE id="yRrV92n" name="juce_MarkerList.h" compile="0" resource="0"
-                  file="src/gui/components/layout/juce_MarkerList.h"/>
             <FILE id="VDH7MUcn5" name="juce_MultiDocumentPanel.cpp" compile="1"
                   resource="0" file="src/gui/components/layout/juce_MultiDocumentPanel.cpp"/>
             <FILE id="FHg3JXTUa" name="juce_MultiDocumentPanel.h" compile="0" resource="0"
@@ -836,6 +832,36 @@
                   file="src/gui/components/mouse/juce_MouseListener.h"/>
             <FILE id="hCJfcdNV" name="juce_TooltipClient.h" compile="0" resource="0"
                   file="src/gui/components/mouse/juce_TooltipClient.h"/>
+          </GROUP>
+          <GROUP id="atSBpAe" name="positioning">
+            <FILE id="A9UAxfF" name="juce_MarkerList.cpp" compile="1" resource="0"
+                  file="src/gui/components/positioning/juce_MarkerList.cpp"/>
+            <FILE id="cpzKkZg" name="juce_MarkerList.h" compile="0" resource="0"
+                  file="src/gui/components/positioning/juce_MarkerList.h"/>
+            <FILE id="rDGFuZ8" name="juce_RelativeCoordinate.cpp" compile="1" resource="0"
+                  file="src/gui/components/positioning/juce_RelativeCoordinate.cpp"/>
+            <FILE id="joDe8QG" name="juce_RelativeCoordinate.h" compile="0" resource="0"
+                  file="src/gui/components/positioning/juce_RelativeCoordinate.h"/>
+            <FILE id="1eZoAMe" name="juce_RelativeCoordinatePositioner.cpp" compile="1"
+                  resource="0" file="src/gui/components/positioning/juce_RelativeCoordinatePositioner.cpp"/>
+            <FILE id="XAiqum" name="juce_RelativeCoordinatePositioner.h" compile="0"
+                  resource="0" file="src/gui/components/positioning/juce_RelativeCoordinatePositioner.h"/>
+            <FILE id="hHlqkdv" name="juce_RelativeParallelogram.cpp" compile="1"
+                  resource="0" file="src/gui/components/positioning/juce_RelativeParallelogram.cpp"/>
+            <FILE id="CsV5EuL" name="juce_RelativeParallelogram.h" compile="0"
+                  resource="0" file="src/gui/components/positioning/juce_RelativeParallelogram.h"/>
+            <FILE id="0YwEobm" name="juce_RelativePoint.cpp" compile="1" resource="0"
+                  file="src/gui/components/positioning/juce_RelativePoint.cpp"/>
+            <FILE id="qfEgr1N" name="juce_RelativePoint.h" compile="0" resource="0"
+                  file="src/gui/components/positioning/juce_RelativePoint.h"/>
+            <FILE id="Tpw467z" name="juce_RelativePointPath.cpp" compile="1" resource="0"
+                  file="src/gui/components/positioning/juce_RelativePointPath.cpp"/>
+            <FILE id="IWnsihE" name="juce_RelativePointPath.h" compile="0" resource="0"
+                  file="src/gui/components/positioning/juce_RelativePointPath.h"/>
+            <FILE id="0KZhQdm" name="juce_RelativeRectangle.cpp" compile="1" resource="0"
+                  file="src/gui/components/positioning/juce_RelativeRectangle.cpp"/>
+            <FILE id="TFUIpnH" name="juce_RelativeRectangle.h" compile="0" resource="0"
+                  file="src/gui/components/positioning/juce_RelativeRectangle.h"/>
           </GROUP>
           <GROUP id="ynWya5uGz" name="properties">
             <FILE id="MUcTrPpj" name="juce_BooleanPropertyComponent.cpp" compile="1"
@@ -1101,10 +1127,6 @@
                   file="src/gui/graphics/geometry/juce_RectangleList.cpp"/>
             <FILE id="OEwUQsN86" name="juce_RectangleList.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_RectangleList.h"/>
-            <FILE id="qXlVCF8ol" name="juce_RelativeCoordinate.cpp" compile="1"
-                  resource="0" file="src/gui/graphics/geometry/juce_RelativeCoordinate.cpp"/>
-            <FILE id="OKz41frTz" name="juce_RelativeCoordinate.h" compile="0" resource="0"
-                  file="src/gui/graphics/geometry/juce_RelativeCoordinate.h"/>
           </GROUP>
           <GROUP id="UvRZ4CgGl" name="imaging">
             <GROUP id="UpDEgf4Fr" name="image_file_formats">

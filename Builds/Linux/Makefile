@@ -174,7 +174,6 @@ OBJECTS := \
   $(OBJDIR)/juce_ComponentBuilder_2aa6c5a.o \
   $(OBJDIR)/juce_ComponentMovementWatcher_cbb3e7cc.o \
   $(OBJDIR)/juce_GroupComponent_456e237a.o \
-  $(OBJDIR)/juce_MarkerList_aea878b4.o \
   $(OBJDIR)/juce_MultiDocumentPanel_50e05aac.o \
   $(OBJDIR)/juce_ResizableBorderComponent_7f4f2182.o \
   $(OBJDIR)/juce_ResizableCornerComponent_1cac2df9.o \
@@ -197,6 +196,13 @@ OBJECTS := \
   $(OBJDIR)/juce_MouseHoverDetector_d4af7a00.o \
   $(OBJDIR)/juce_MouseInputSource_8904aa23.o \
   $(OBJDIR)/juce_MouseListener_eb73f8a0.o \
+  $(OBJDIR)/juce_MarkerList_2fbb4ef.o \
+  $(OBJDIR)/juce_RelativeCoordinate_ab2eee5b.o \
+  $(OBJDIR)/juce_RelativeCoordinatePositioner_c1352791.o \
+  $(OBJDIR)/juce_RelativeParallelogram_5d17dbe6.o \
+  $(OBJDIR)/juce_RelativePoint_9d2cc957.o \
+  $(OBJDIR)/juce_RelativePointPath_a4fed61c.o \
+  $(OBJDIR)/juce_RelativeRectangle_cc5440b6.o \
   $(OBJDIR)/juce_BooleanPropertyComponent_92b54aa5.o \
   $(OBJDIR)/juce_ButtonPropertyComponent_3675d6bb.o \
   $(OBJDIR)/juce_ChoicePropertyComponent_b9b44bac.o \
@@ -255,7 +261,6 @@ OBJECTS := \
   $(OBJDIR)/juce_PathStrokeType_506dcb86.o \
   $(OBJDIR)/juce_PositionedRectangle_1b6e8982.o \
   $(OBJDIR)/juce_RectangleList_b6ae7ee8.o \
-  $(OBJDIR)/juce_RelativeCoordinate_23fb9d3.o \
   $(OBJDIR)/juce_GIFLoader_61887b90.o \
   $(OBJDIR)/juce_JPEGLoader_412d2ccc.o \
   $(OBJDIR)/juce_PNGLoader_7f80a3b5.o \
@@ -1039,11 +1044,6 @@ $(OBJDIR)/juce_GroupComponent_456e237a.o: ../../src/gui/components/layout/juce_G
 	@echo "Compiling juce_GroupComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MarkerList_aea878b4.o: ../../src/gui/components/layout/juce_MarkerList.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_MarkerList.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_MultiDocumentPanel_50e05aac.o: ../../src/gui/components/layout/juce_MultiDocumentPanel.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_MultiDocumentPanel.cpp"
@@ -1152,6 +1152,41 @@ $(OBJDIR)/juce_MouseInputSource_8904aa23.o: ../../src/gui/components/mouse/juce_
 $(OBJDIR)/juce_MouseListener_eb73f8a0.o: ../../src/gui/components/mouse/juce_MouseListener.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_MouseListener.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MarkerList_2fbb4ef.o: ../../src/gui/components/positioning/juce_MarkerList.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_MarkerList.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativeCoordinate_ab2eee5b.o: ../../src/gui/components/positioning/juce_RelativeCoordinate.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_RelativeCoordinate.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativeCoordinatePositioner_c1352791.o: ../../src/gui/components/positioning/juce_RelativeCoordinatePositioner.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_RelativeCoordinatePositioner.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativeParallelogram_5d17dbe6.o: ../../src/gui/components/positioning/juce_RelativeParallelogram.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_RelativeParallelogram.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativePoint_9d2cc957.o: ../../src/gui/components/positioning/juce_RelativePoint.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_RelativePoint.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativePointPath_a4fed61c.o: ../../src/gui/components/positioning/juce_RelativePointPath.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_RelativePointPath.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativeRectangle_cc5440b6.o: ../../src/gui/components/positioning/juce_RelativeRectangle.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_RelativeRectangle.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BooleanPropertyComponent_92b54aa5.o: ../../src/gui/components/properties/juce_BooleanPropertyComponent.cpp
@@ -1442,11 +1477,6 @@ $(OBJDIR)/juce_PositionedRectangle_1b6e8982.o: ../../src/gui/graphics/geometry/j
 $(OBJDIR)/juce_RectangleList_b6ae7ee8.o: ../../src/gui/graphics/geometry/juce_RectangleList.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_RectangleList.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_RelativeCoordinate_23fb9d3.o: ../../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RelativeCoordinate.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GIFLoader_61887b90.o: ../../src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.cpp

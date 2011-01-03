@@ -703,6 +703,7 @@ private:
     friend class XmlDocument;
     friend class LinkedListPointer<XmlAttributeNode>;
     friend class LinkedListPointer <XmlElement>;
+    friend class LinkedListPointer <XmlElement>::Appender;
 
     LinkedListPointer <XmlElement> nextListItem;
     LinkedListPointer <XmlElement> firstChildElement;

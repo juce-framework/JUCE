@@ -257,7 +257,6 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentBuilder.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_GroupComponent.cpp"/>
-    <ClCompile Include="..\..\src\gui\components\layout\juce_MarkerList.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableBorderComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.cpp"/>
@@ -280,6 +279,13 @@
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseHoverDetector.cpp"/>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseInputSource.cpp"/>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseListener.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_MarkerList.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeCoordinate.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeCoordinatePositioner.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeParallelogram.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativePoint.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativePointPath.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\positioning\juce_RelativeRectangle.cpp"/>
     <ClCompile Include="..\..\src\gui\components\properties\juce_BooleanPropertyComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\properties\juce_ButtonPropertyComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\properties\juce_ChoicePropertyComponent.cpp"/>
@@ -338,7 +344,6 @@
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_PathStrokeType.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_PositionedRectangle.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_RectangleList.cpp"/>
-    <ClCompile Include="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\imaging\image_file_formats\juce_JPEGLoader.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\imaging\image_file_formats\juce_PNGLoader.cpp"/>
@@ -608,7 +613,6 @@
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentBuilder.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_GroupComponent.h"/>
-    <ClInclude Include="..\..\src\gui\components\layout\juce_MarkerList.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableBorderComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.h"/>
@@ -636,6 +640,13 @@
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseInputSource.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseListener.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_TooltipClient.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_MarkerList.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeCoordinate.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeCoordinatePositioner.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeParallelogram.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativePoint.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativePointPath.h"/>
+    <ClInclude Include="..\..\src\gui\components\positioning\juce_RelativeRectangle.h"/>
     <ClInclude Include="..\..\src\gui\components\properties\juce_BooleanPropertyComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\properties\juce_ButtonPropertyComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\properties\juce_ChoicePropertyComponent.h"/>
@@ -703,7 +714,6 @@
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_PositionedRectangle.h"/>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_Rectangle.h"/>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RectangleList.h"/>
-    <ClInclude Include="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.h"/>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_CameraDevice.h"/>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_Image.h"/>
     <ClInclude Include="..\..\src\gui\graphics\imaging\juce_ImageCache.h"/>

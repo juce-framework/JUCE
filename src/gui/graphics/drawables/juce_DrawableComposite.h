@@ -27,7 +27,9 @@
 #define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 
 #include "juce_Drawable.h"
-#include "../../components/layout/juce_MarkerList.h"
+#include "../../components/positioning/juce_MarkerList.h"
+#include "../../components/positioning/juce_RelativeParallelogram.h"
+#include "../../components/positioning/juce_RelativeRectangle.h"
 
 
 //==============================================================================
