@@ -38,8 +38,8 @@
 
     @see Drawable
 */
-class JUCE_API  DrawableComposite  : public Drawable,
-                                     public Expression::EvaluationContext
+class JUCE_API  DrawableComposite  : public Drawable//,
+//                                     public Expression::EvaluationContext
 {
 public:
     //==============================================================================
@@ -107,8 +107,6 @@ public:
     /** @internal */
     static const Identifier valueTreeType;
     /** @internal */
-    const Expression getSymbolValue (const String& symbol, const String& member) const;
-    /** @internal */
     const Rectangle<float> getDrawableBounds() const;
     /** @internal */
     void childBoundsChanged (Component*);
@@ -151,7 +149,10 @@ private:
     MarkerList markersX, markersY;
     bool updateBoundsReentrant;
 
-    void refreshTransformFromBounds();
+    friend class Drawable::Positioner<DrawableComposite>;
+    bool registerCoordinates (RelativeCoordinatePositionerBase&);
+    void recalculateCoordinates (Expression::EvaluationContext*);
+
     void updateBoundsToFitChildren();
 
     DrawableComposite& operator= (const DrawableComposite&);

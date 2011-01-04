@@ -50,20 +50,89 @@ DrawableShape::~DrawableShape()
 {
 }
 
+//==============================================================================
+class DrawableShape::RelativePositioner  : public RelativeCoordinatePositionerBase
+{
+public:
+    RelativePositioner (DrawableShape& component_, const DrawableShape::RelativeFillType& fill_, bool isMainFill_)
+        : RelativeCoordinatePositionerBase (component_),
+          owner (component_),
+          fill (fill_),
+          isMainFill (isMainFill_)
+    {
+    }
+
+    bool registerCoordinates()
+    {
+        bool ok = addPoint (fill.gradientPoint1);
+        ok = addPoint (fill.gradientPoint2) && ok;
+        return addPoint (fill.gradientPoint3) && ok;
+    }
+
+    void applyToComponentBounds()
+    {
+        if (isMainFill ? owner.mainFill.recalculateCoords (this)
+                       : owner.strokeFill.recalculateCoords (this))
+            owner.repaint();
+    }
+
+private:
+    DrawableShape& owner;
+    const DrawableShape::RelativeFillType fill;
+    const bool isMainFill;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativePositioner);
+};
+
 void DrawableShape::setFill (const FillType& newFill)
 {
-    mainFill = newFill;
+    setFill (RelativeFillType (newFill));
 }
 
 void DrawableShape::setStrokeFill (const FillType& newFill)
 {
-    strokeFill = newFill;
+    setStrokeFill (RelativeFillType (newFill));
+}
+
+void DrawableShape::setFillInternal (RelativeFillType& fill, const RelativeFillType& newFill,
+                                     ScopedPointer<RelativeCoordinatePositionerBase>& positioner)
+{
+    if (fill != newFill)
+    {
+        fill = newFill;
+        positioner = 0;
+
+        if (fill.isDynamic())
+        {
+            positioner = new RelativePositioner (*this, fill, true);
+            positioner->apply();
+        }
+        else
+        {
+            fill.recalculateCoords (0);
+        }
+
+        repaint();
+    }
+}
+
+void DrawableShape::setFill (const RelativeFillType& newFill)
+{
+    setFillInternal (mainFill, newFill, mainFillPositioner);
+}
+
+void DrawableShape::setStrokeFill (const RelativeFillType& newFill)
+{
+    setFillInternal (strokeFill, newFill, strokeFillPositioner);
 }
 
 void DrawableShape::setStrokeType (const PathStrokeType& newStrokeType)
 {
-    strokeType = newStrokeType;
-    strokeChanged();
+    if (strokeType != newStrokeType)
+    {
+        strokeType = newStrokeType;
+        strokeChanged();
+    }
 }
 
 void DrawableShape::setStrokeThickness (const float newThickness)
@@ -73,42 +142,19 @@ void DrawableShape::setStrokeThickness (const float newThickness)
 
 bool DrawableShape::isStrokeVisible() const throw()
 {
-    return strokeType.getStrokeThickness() > 0.0f && ! strokeFill.isInvisible();
+    return strokeType.getStrokeThickness() > 0.0f && ! strokeFill.fill.isInvisible();
 }
 
-bool DrawableShape::refreshFillTypes (const FillAndStrokeState& newState,
-                                      Expression::EvaluationContext* /*nameFinder*/,
-                                      ComponentBuilder::ImageProvider* imageProvider)
+void DrawableShape::refreshFillTypes (const FillAndStrokeState& newState, ComponentBuilder::ImageProvider* imageProvider)
 {
-    bool hasChanged = false;
-
-    {
-        const FillType f (newState.getMainFill (getParent(), imageProvider));
-
-        if (mainFill != f)
-        {
-            hasChanged = true;
-            mainFill = f;
-        }
-    }
-
-    {
-        const FillType f (newState.getStrokeFill (getParent(), imageProvider));
-
-        if (strokeFill != f)
-        {
-            hasChanged = true;
-            strokeFill = f;
-        }
-    }
-
-    return hasChanged;
+    setFill (newState.getFill (FillAndStrokeState::fill, imageProvider));
+    setStrokeFill (newState.getFill (FillAndStrokeState::stroke, imageProvider));
 }
 
 void DrawableShape::writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const
 {
-    state.setMainFill (mainFill, 0, 0, 0, imageProvider, undoManager);
-    state.setStrokeFill (strokeFill, 0, 0, 0, imageProvider, undoManager);
+    state.setFill (FillAndStrokeState::fill, mainFill, imageProvider, undoManager);
+    state.setFill (FillAndStrokeState::stroke, strokeFill, imageProvider, undoManager);
     state.setStrokeType (strokeType, undoManager);
 }
 
@@ -117,19 +163,18 @@ void DrawableShape::paint (Graphics& g)
 {
     transformContextToCorrectOrigin (g);
 
-    g.setFillType (mainFill);
+    g.setFillType (mainFill.fill);
     g.fillPath (path);
 
     if (isStrokeVisible())
     {
-        g.setFillType (strokeFill);
+        g.setFillType (strokeFill.fill);
         g.fillPath (strokePath);
     }
 }
 
 void DrawableShape::pathChanged()
 {
-    rebuildPath (path);
     strokeChanged();
 }
 
@@ -160,6 +205,183 @@ bool DrawableShape::hitTest (int x, int y) const
 }
 
 //==============================================================================
+DrawableShape::RelativeFillType::RelativeFillType()
+{
+}
+
+DrawableShape::RelativeFillType::RelativeFillType (const FillType& fill_)
+    : fill (fill_)
+{
+    if (fill.isGradient())
+    {
+        const ColourGradient& g = *fill.gradient;
+
+        gradientPoint1 = g.point1.transformedBy (fill.transform);
+        gradientPoint2 = g.point2.transformedBy (fill.transform);
+        gradientPoint3 = Point<float> (g.point1.getX() + g.point2.getY() - g.point1.getY(),
+                                       g.point1.getY() + g.point1.getX() - g.point2.getX())
+                            .transformedBy (fill.transform);
+        fill.transform = AffineTransform::identity;
+    }
+}
+
+DrawableShape::RelativeFillType::RelativeFillType (const RelativeFillType& other)
+    : fill (other.fill),
+      gradientPoint1 (other.gradientPoint1),
+      gradientPoint2 (other.gradientPoint2),
+      gradientPoint3 (other.gradientPoint3)
+{
+}
+
+DrawableShape::RelativeFillType& DrawableShape::RelativeFillType::operator= (const RelativeFillType& other)
+{
+    fill = other.fill;
+    gradientPoint1 = other.gradientPoint1;
+    gradientPoint2 = other.gradientPoint2;
+    gradientPoint3 = other.gradientPoint3;
+    return *this;
+}
+
+bool DrawableShape::RelativeFillType::operator== (const RelativeFillType& other) const
+{
+    return fill == other.fill
+        && ((! fill.isGradient())
+             || (gradientPoint1 == other.gradientPoint1
+                 && gradientPoint2 == other.gradientPoint2
+                 && gradientPoint3 == other.gradientPoint3));
+}
+
+bool DrawableShape::RelativeFillType::operator!= (const RelativeFillType& other) const
+{
+    return ! operator== (other);
+}
+
+bool DrawableShape::RelativeFillType::recalculateCoords (Expression::EvaluationContext* context)
+{
+    if (fill.isGradient())
+    {
+        const Point<float> g1 (gradientPoint1.resolve (context));
+        const Point<float> g2 (gradientPoint2.resolve (context));
+        AffineTransform t;
+
+        ColourGradient& g = *fill.gradient;
+
+        if (g.isRadial)
+        {
+            const Point<float> g3 (gradientPoint3.resolve (context));
+            const Point<float> g3Source (g1.getX() + g2.getY() - g1.getY(),
+                                         g1.getY() + g1.getX() - g2.getX());
+
+            t = AffineTransform::fromTargetPoints (g1.getX(), g1.getY(), g1.getX(), g1.getY(),
+                                                   g2.getX(), g2.getY(), g2.getX(), g2.getY(),
+                                                   g3Source.getX(), g3Source.getY(), g3.getX(), g3.getY());
+        }
+
+        if (g.point1 != g1 || g.point2 != g2 || fill.transform != t)
+        {
+            g.point1 = g1;
+            g.point2 = g2;
+            fill.transform = t;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool DrawableShape::RelativeFillType::isDynamic() const
+{
+    return gradientPoint1.isDynamic() || gradientPoint2.isDynamic() || gradientPoint3.isDynamic();
+}
+
+void DrawableShape::RelativeFillType::writeTo (ValueTree& v, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const
+{
+    if (fill.isColour())
+    {
+        v.setProperty (FillAndStrokeState::type, "solid", undoManager);
+        v.setProperty (FillAndStrokeState::colour, String::toHexString ((int) fill.colour.getARGB()), undoManager);
+    }
+    else if (fill.isGradient())
+    {
+        v.setProperty (FillAndStrokeState::type, "gradient", undoManager);
+        v.setProperty (FillAndStrokeState::gradientPoint1, gradientPoint1.toString(), undoManager);
+        v.setProperty (FillAndStrokeState::gradientPoint2, gradientPoint2.toString(), undoManager);
+        v.setProperty (FillAndStrokeState::gradientPoint3, gradientPoint3.toString(), undoManager);
+
+        const ColourGradient& cg = *fill.gradient;
+        v.setProperty (FillAndStrokeState::radial, cg.isRadial, undoManager);
+
+        String s;
+        for (int i = 0; i < cg.getNumColours(); ++i)
+            s << ' ' << cg.getColourPosition (i)
+              << ' ' << String::toHexString ((int) cg.getColour(i).getARGB());
+
+        v.setProperty (FillAndStrokeState::colours, s.trimStart(), undoManager);
+    }
+    else if (fill.isTiledImage())
+    {
+        v.setProperty (FillAndStrokeState::type, "image", undoManager);
+
+        if (imageProvider != 0)
+            v.setProperty (FillAndStrokeState::imageId, imageProvider->getIdentifierForImage (fill.image), undoManager);
+
+        if (fill.getOpacity() < 1.0f)
+            v.setProperty (FillAndStrokeState::imageOpacity, fill.getOpacity(), undoManager);
+        else
+            v.removeProperty (FillAndStrokeState::imageOpacity, undoManager);
+    }
+    else
+    {
+        jassertfalse;
+    }
+}
+
+bool DrawableShape::RelativeFillType::readFrom (const ValueTree& v, ComponentBuilder::ImageProvider* imageProvider)
+{
+    const String newType (v [FillAndStrokeState::type].toString());
+
+    if (newType == "solid")
+    {
+        const String colourString (v [FillAndStrokeState::colour].toString());
+        fill.setColour (Colour (colourString.isEmpty() ? (uint32) 0xff000000
+                                                       : (uint32) colourString.getHexValue32()));
+        return true;
+    }
+    else if (newType == "gradient")
+    {
+        ColourGradient g;
+        g.isRadial = v [FillAndStrokeState::radial];
+
+        StringArray colourSteps;
+        colourSteps.addTokens (v [FillAndStrokeState::colours].toString(), false);
+
+        for (int i = 0; i < colourSteps.size() / 2; ++i)
+            g.addColour (colourSteps[i * 2].getDoubleValue(),
+                         Colour ((uint32)  colourSteps[i * 2 + 1].getHexValue32()));
+
+        fill.setGradient (g);
+
+        gradientPoint1 = RelativePoint (v [FillAndStrokeState::gradientPoint1]);
+        gradientPoint2 = RelativePoint (v [FillAndStrokeState::gradientPoint2]);
+        gradientPoint3 = RelativePoint (v [FillAndStrokeState::gradientPoint3]);
+        return true;
+    }
+    else if (newType == "image")
+    {
+        Image im;
+        if (imageProvider != 0)
+            im = imageProvider->getImageForIdentifier (v [FillAndStrokeState::imageId]);
+
+        fill.setTiledImage (im, AffineTransform::identity);
+        fill.setOpacity ((float) v.getProperty (FillAndStrokeState::imageOpacity, 1.0f));
+        return true;
+    }
+
+    jassertfalse;
+    return false;
+}
+
+//==============================================================================
 const Identifier DrawableShape::FillAndStrokeState::type ("type");
 const Identifier DrawableShape::FillAndStrokeState::colour ("colour");
 const Identifier DrawableShape::FillAndStrokeState::colours ("colours");
@@ -181,50 +403,28 @@ DrawableShape::FillAndStrokeState::FillAndStrokeState (const ValueTree& state_)
 {
 }
 
-const FillType DrawableShape::FillAndStrokeState::getMainFill (Expression::EvaluationContext* nameFinder,
-                                                               ComponentBuilder::ImageProvider* imageProvider) const
+const DrawableShape::RelativeFillType DrawableShape::FillAndStrokeState::getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider* imageProvider) const
 {
-    return readFillType (state.getChildWithName (fill), 0, 0, 0, nameFinder, imageProvider);
+    DrawableShape::RelativeFillType f;
+    f.readFrom (state.getChildWithName (fillOrStrokeType), imageProvider);
+    return f;
 }
 
-ValueTree DrawableShape::FillAndStrokeState::getMainFillState()
+ValueTree DrawableShape::FillAndStrokeState::getFillState (const Identifier& fillOrStrokeType)
 {
-    ValueTree v (state.getChildWithName (fill));
+    ValueTree v (state.getChildWithName (fillOrStrokeType));
     if (v.isValid())
         return v;
 
-    setMainFill (Colours::black, 0, 0, 0, 0, 0);
-    return getMainFillState();
+    setFill (fillOrStrokeType, FillType (Colours::black), 0, 0);
+    return getFillState (fillOrStrokeType);
 }
 
-void DrawableShape::FillAndStrokeState::setMainFill (const FillType& newFill, const RelativePoint* gp1, const RelativePoint* gp2,
-                                                     const RelativePoint* gp3, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager)
+void DrawableShape::FillAndStrokeState::setFill (const Identifier& fillOrStrokeType, const RelativeFillType& newFill,
+                                                 ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager)
 {
-    ValueTree v (state.getOrCreateChildWithName (fill, undoManager));
-    writeFillType (v, newFill, gp1, gp2, gp3, imageProvider, undoManager);
-}
-
-const FillType DrawableShape::FillAndStrokeState::getStrokeFill (Expression::EvaluationContext* nameFinder,
-                                                                 ComponentBuilder::ImageProvider* imageProvider) const
-{
-    return readFillType (state.getChildWithName (stroke), 0, 0, 0, nameFinder, imageProvider);
-}
-
-ValueTree DrawableShape::FillAndStrokeState::getStrokeFillState()
-{
-    ValueTree v (state.getChildWithName (stroke));
-    if (v.isValid())
-        return v;
-
-    setStrokeFill (Colours::black, 0, 0, 0, 0, 0);
-    return getStrokeFillState();
-}
-
-void DrawableShape::FillAndStrokeState::setStrokeFill (const FillType& newFill, const RelativePoint* gp1, const RelativePoint* gp2,
-                                                       const RelativePoint* gp3, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager)
-{
-    ValueTree v (state.getOrCreateChildWithName (stroke, undoManager));
-    writeFillType (v, newFill, gp1, gp2, gp3, imageProvider, undoManager);
+    ValueTree v (state.getOrCreateChildWithName (fillOrStrokeType, undoManager));
+    newFill.writeTo (v, imageProvider, undoManager);
 }
 
 const PathStrokeType DrawableShape::FillAndStrokeState::getStrokeType() const
@@ -248,123 +448,6 @@ void DrawableShape::FillAndStrokeState::setStrokeType (const PathStrokeType& new
                                      ? "miter" : (newStrokeType.getJointStyle() == PathStrokeType::curved ? "curved" : "bevel"), undoManager);
     state.setProperty (capStyle, newStrokeType.getEndStyle() == PathStrokeType::butt
                                      ? "butt" : (newStrokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), undoManager);
-}
-
-const FillType DrawableShape::FillAndStrokeState::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2, RelativePoint* const gp3,
-                                                                Expression::EvaluationContext* const nameFinder, ComponentBuilder::ImageProvider* imageProvider)
-{
-    const String newType (v[type].toString());
-
-    if (newType == "solid")
-    {
-        const String colourString (v [colour].toString());
-        return FillType (Colour (colourString.isEmpty() ? (uint32) 0xff000000
-                                                        : (uint32) colourString.getHexValue32()));
-    }
-    else if (newType == "gradient")
-    {
-        RelativePoint p1 (v [gradientPoint1]), p2 (v [gradientPoint2]), p3 (v [gradientPoint3]);
-
-        ColourGradient g;
-
-        if (gp1 != 0)  *gp1 = p1;
-        if (gp2 != 0)  *gp2 = p2;
-        if (gp3 != 0)  *gp3 = p3;
-
-        g.point1 = p1.resolve (nameFinder);
-        g.point2 = p2.resolve (nameFinder);
-        g.isRadial = v[radial];
-
-        StringArray colourSteps;
-        colourSteps.addTokens (v[colours].toString(), false);
-
-        for (int i = 0; i < colourSteps.size() / 2; ++i)
-            g.addColour (colourSteps[i * 2].getDoubleValue(),
-                         Colour ((uint32)  colourSteps[i * 2 + 1].getHexValue32()));
-
-        FillType fillType (g);
-
-        if (g.isRadial)
-        {
-            const Point<float> point3 (p3.resolve (nameFinder));
-            const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
-                                             g.point1.getY() + g.point1.getX() - g.point2.getX());
-
-            fillType.transform = AffineTransform::fromTargetPoints (g.point1.getX(), g.point1.getY(), g.point1.getX(), g.point1.getY(),
-                                                                    g.point2.getX(), g.point2.getY(), g.point2.getX(), g.point2.getY(),
-                                                                    point3Source.getX(), point3Source.getY(), point3.getX(), point3.getY());
-        }
-
-        return fillType;
-    }
-    else if (newType == "image")
-    {
-        Image im;
-        if (imageProvider != 0)
-            im = imageProvider->getImageForIdentifier (v[imageId]);
-
-        FillType f (im, AffineTransform::identity);
-        f.setOpacity ((float) v.getProperty (imageOpacity, 1.0f));
-        return f;
-    }
-
-    jassert (! v.isValid());
-    return FillType();
-}
-
-namespace DrawableShapeHelpers
-{
-    const Point<float> calcThirdGradientPoint (const FillType& fillType)
-    {
-        const ColourGradient& g = *fillType.gradient;
-        const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
-                                         g.point1.getY() + g.point1.getX() - g.point2.getX());
-
-        return point3Source.transformedBy (fillType.transform);
-    }
-}
-
-void DrawableShape::FillAndStrokeState::writeFillType (ValueTree& v, const FillType& fillType,
-                                                       const RelativePoint* const gp1, const RelativePoint* const gp2, const RelativePoint* gp3,
-                                                       ComponentBuilder::ImageProvider* imageProvider, UndoManager* const undoManager)
-{
-    if (fillType.isColour())
-    {
-        v.setProperty (type, "solid", undoManager);
-        v.setProperty (colour, String::toHexString ((int) fillType.colour.getARGB()), undoManager);
-    }
-    else if (fillType.isGradient())
-    {
-        v.setProperty (type, "gradient", undoManager);
-        v.setProperty (gradientPoint1, gp1 != 0 ? gp1->toString() : fillType.gradient->point1.toString(), undoManager);
-        v.setProperty (gradientPoint2, gp2 != 0 ? gp2->toString() : fillType.gradient->point2.toString(), undoManager);
-        v.setProperty (gradientPoint3, gp3 != 0 ? gp3->toString() : DrawableShapeHelpers::calcThirdGradientPoint (fillType).toString(), undoManager);
-
-        v.setProperty (radial, fillType.gradient->isRadial, undoManager);
-
-        String s;
-        for (int i = 0; i < fillType.gradient->getNumColours(); ++i)
-            s << ' ' << fillType.gradient->getColourPosition (i)
-              << ' ' << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
-
-        v.setProperty (colours, s.trimStart(), undoManager);
-    }
-    else if (fillType.isTiledImage())
-    {
-        v.setProperty (type, "image", undoManager);
-
-        if (imageProvider != 0)
-            v.setProperty (imageId, imageProvider->getIdentifierForImage (fillType.image), undoManager);
-
-        if (fillType.getOpacity() < 1.0f)
-            v.setProperty (imageOpacity, fillType.getOpacity(), undoManager);
-        else
-            v.removeProperty (imageOpacity, undoManager);
-    }
-    else
-    {
-        jassertfalse;
-    }
 }
 
 END_JUCE_NAMESPACE

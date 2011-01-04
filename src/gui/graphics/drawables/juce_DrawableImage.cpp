@@ -58,17 +58,14 @@ DrawableImage::~DrawableImage()
 void DrawableImage::setImage (const Image& imageToUse)
 {
     image = imageToUse;
-
     setBounds (imageToUse.getBounds());
 
-    if (image.isValid())
-    {
-        bounds.topLeft = RelativePoint (Point<float> (0.0f, 0.0f));
-        bounds.topRight = RelativePoint (Point<float> ((float) image.getWidth(), 0.0f));
-        bounds.bottomLeft = RelativePoint (Point<float> (0.0f, (float) image.getHeight()));
-    }
+    bounds.topLeft = RelativePoint (Point<float> (0.0f, 0.0f));
+    bounds.topRight = RelativePoint (Point<float> ((float) image.getWidth(), 0.0f));
+    bounds.bottomLeft = RelativePoint (Point<float> (0.0f, (float) image.getHeight()));
+    recalculateCoordinates (0);
 
-    refreshTransformFromBounds();
+    repaint();
 }
 
 void DrawableImage::setOpacity (const float newOpacity)
@@ -83,17 +80,38 @@ void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
 
 void DrawableImage::setBoundingBox (const RelativeParallelogram& newBounds)
 {
-    bounds = newBounds;
-    refreshTransformFromBounds();
+    if (bounds != newBounds)
+    {
+        bounds = newBounds;
+
+        if (bounds.isDynamic())
+        {
+            Drawable::Positioner<DrawableImage>* const p = new Drawable::Positioner<DrawableImage> (*this);
+            setPositioner (p);
+            p->apply();
+        }
+        else
+        {
+            setPositioner (0);
+            recalculateCoordinates (0);
+        }
+    }
 }
 
 //==============================================================================
-void DrawableImage::refreshTransformFromBounds()
+bool DrawableImage::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
 {
-    if (! image.isNull())
+    bool ok = positioner.addPoint (bounds.topLeft);
+    ok = positioner.addPoint (bounds.topRight) && ok;
+    return positioner.addPoint (bounds.bottomLeft) && ok;
+}
+
+void DrawableImage::recalculateCoordinates (Expression::EvaluationContext* context)
+{
+    if (image.isValid())
     {
         Point<float> resolved[3];
-        bounds.resolveThreePoints (resolved, getParent());
+        bounds.resolveThreePoints (resolved, context);
 
         const Point<float> tr (resolved[0] + (resolved[1] - resolved[0]) / (float) image.getWidth());
         const Point<float> bl (resolved[0] + (resolved[2] - resolved[0]) / (float) image.getHeight());
@@ -102,8 +120,10 @@ void DrawableImage::refreshTransformFromBounds()
                                                               tr.getX(), tr.getY(),
                                                               bl.getX(), bl.getY()));
 
-        if (! t.isSingularity())
-            setTransform (t);
+        if (t.isSingularity())
+            t = AffineTransform::identity;
+
+        setTransform (t);
     }
 }
 
@@ -251,12 +271,11 @@ void DrawableImage::refreshFromValueTree (const ValueTree& tree, ComponentBuilde
         repaint();
         opacity = newOpacity;
         overlayColour = newOverlayColour;
-        bounds = newBounds;
 
         if (image != newImage)
             setImage (newImage);
-        else
-            refreshTransformFromBounds();
+
+        setBoundingBox (newBounds);
     }
 }
 

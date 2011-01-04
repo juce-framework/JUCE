@@ -79,25 +79,25 @@ public:
         ValueTreeWrapper (const ValueTree& state);
 
         const RelativeParallelogram getRectangle() const;
-        void setRectangle (const RelativeParallelogram& newBounds, UndoManager* undoManager);
+        void setRectangle (const RelativeParallelogram& newBounds, UndoManager*);
 
-        void setCornerSize (const RelativePoint& cornerSize, UndoManager* undoManager);
+        void setCornerSize (const RelativePoint& cornerSize, UndoManager*);
         const RelativePoint getCornerSize() const;
-        Value getCornerSizeValue (UndoManager* undoManager) const;
+        Value getCornerSizeValue (UndoManager*) const;
 
         static const Identifier topLeft, topRight, bottomLeft, cornerSize;
     };
 
 
-protected:
-    /** @internal */
-    bool rebuildPath (Path& path) const;
-
 private:
+    friend class Drawable::Positioner<DrawableRectangle>;
+
     RelativeParallelogram bounds;
     RelativePoint cornerSize;
 
-    const AffineTransform calculateTransform() const;
+    void rebuildPath();
+    bool registerCoordinates (RelativeCoordinatePositionerBase&);
+    void recalculateCoordinates (Expression::EvaluationContext*);
 
     DrawableRectangle& operator= (const DrawableRectangle&);
     JUCE_LEAK_DETECTOR (DrawableRectangle);

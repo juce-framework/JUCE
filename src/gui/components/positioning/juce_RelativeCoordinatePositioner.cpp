@@ -121,6 +121,12 @@ bool RelativeCoordinatePositionerBase::addCoordinate (const RelativeCoordinate& 
     return registerListeners (coord.getExpression());
 }
 
+bool RelativeCoordinatePositionerBase::addPoint (const RelativePoint& point)
+{
+    const bool ok = addCoordinate (point.x);
+    return addCoordinate (point.y) && ok;
+}
+
 bool RelativeCoordinatePositionerBase::registerListeners (const Expression& e)
 {
     bool ok = true;

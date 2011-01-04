@@ -214,8 +214,6 @@ public:
 
 protected:
     //==============================================================================
-    ScopedPointer<TabbedButtonBar> tabs;
-
     /** This creates one of the tab buttons.
 
         If you need to use custom tab components, you can override this method and
@@ -223,15 +221,18 @@ protected:
     */
     virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
+    /** @internal */
+    ScopedPointer<TabbedButtonBar> tabs;
+
 private:
     //==============================================================================
-    OwnedArray <WeakReference<Component> > contentComponents;
+    Array <WeakReference<Component> > contentComponents;
     WeakReference<Component> panelComponent;
     int tabDepth;
     int outlineThickness, edgeIndent;
-    static const Identifier deleteComponentId;
 
-    friend class TabCompButtonBar;
+    class ButtonBar;
+    friend class ButtonBar;
     void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent);

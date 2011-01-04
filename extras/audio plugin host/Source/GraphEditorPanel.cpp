@@ -231,7 +231,7 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
-        originalPos = relativePositionToGlobal (Point<int>());
+        originalPos = localPointToGlobal (Point<int>());
 
         toFront (true);
 
@@ -277,7 +277,7 @@ public:
             Point<int> pos (originalPos + Point<int> (e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY()));
 
             if (getParentComponent() != 0)
-                pos = getParentComponent()->globalPositionToRelative (pos);
+                pos = getParentComponent()->getLocalPoint (0, pos);
 
             graph.setNodePosition (filterID,
                                    (pos.getX() + getWidth() / 2) / (double) getParentWidth(),

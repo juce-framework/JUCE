@@ -90,7 +90,7 @@ public:
         }
     }
 
-#if JUCE_MAC
+  #if JUCE_MAC
     static NSImage* createNSImage (const Image& image)
     {
         const ScopedAutoReleasePool pool;
@@ -111,7 +111,7 @@ public:
 
         return im;
     }
-#endif
+  #endif
 
     //==============================================================================
     CGContextRef context;
@@ -120,11 +120,11 @@ public:
 private:
     static CGBitmapInfo getCGImageFlags (const Image::PixelFormat& format)
     {
-#if JUCE_BIG_ENDIAN
+      #if JUCE_BIG_ENDIAN
         return format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big) : kCGBitmapByteOrderDefault;
-#else
+      #else
         return format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault;
-#endif
+      #endif
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsImage);
@@ -132,11 +132,11 @@ private:
 
 Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
 {
-#if USE_COREGRAPHICS_RENDERING
+  #if USE_COREGRAPHICS_RENDERING
     return new CoreGraphicsImage (format == RGB ? ARGB : format, width, height, clearImage);
-#else
+  #else
     return createSoftwareImage (format, width, height, clearImage);
-#endif
+  #endif
 }
 
 //==============================================================================
@@ -382,16 +382,16 @@ public:
     {
         if (replaceExistingContents)
         {
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+          #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
             CGContextClearRect (context, cgRect);
-#else
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+          #else
+           #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
             if (CGContextDrawLinearGradient == 0) // (just a way of checking whether we're running in 10.5 or later)
                 CGContextClearRect (context, cgRect);
             else
-  #endif
+           #endif
                 CGContextSetBlendMode (context, kCGBlendModeCopy);
-#endif
+          #endif
 
             fillCGRect (cgRect, false);
             CGContextSetBlendMode (context, kCGBlendModeNormal);
@@ -467,16 +467,16 @@ public:
 
         if (fillEntireClipAsTiles)
         {
-#if JUCE_IOS
+          #if JUCE_IOS
             CGContextDrawTiledImage (context, imageRect, image);
-#else
-  #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
+          #else
+           #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
             // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
             // if it's doing a transformation - it's quicker to just draw lots of images manually
             if (CGContextDrawTiledImage != 0 && transform.isOnlyTranslation())
                 CGContextDrawTiledImage (context, imageRect, image);
             else
-  #endif
+           #endif
             {
                 // Fallback to manually doing a tiled fill on 10.4
                 CGRect clip = CGRectIntegral (CGContextGetClipBoundingBox (context));
@@ -496,7 +496,7 @@ public:
                     y += ih;
                 }
             }
-#endif
+          #endif
         }
         else
         {
@@ -681,8 +681,7 @@ private:
 
     CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient)
     {
-        numGradientLookupEntries = gradient.createLookupTable (transform, gradientLookupTable);
-        --numGradientLookupEntries;
+        numGradientLookupEntries = gradient.createLookupTable (transform, gradientLookupTable) - 1;
 
         CGShadingRef result = 0;
         CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &gradientCallbacks);
@@ -803,7 +802,7 @@ const Image juce_loadWithCoreImage (InputStream& input)
     MemoryBlock data;
     input.readIntoMemoryBlock (data, -1);
 
-#if JUCE_IOS
+  #if JUCE_IOS
     JUCE_AUTORELEASEPOOL
     UIImage* image = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData()
                                                                   length: data.getSize()
@@ -813,7 +812,7 @@ const Image juce_loadWithCoreImage (InputStream& input)
     {
         CGImageRef loadedImage = image.CGImage;
 
-#else
+  #else
     CGDataProviderRef provider = CGDataProviderCreateWithData (0, data.getData(), data.getSize(), 0);
     CGImageSourceRef imageSource = CGImageSourceCreateWithDataProvider (provider, 0);
     CGDataProviderRelease (provider);
@@ -822,7 +821,7 @@ const Image juce_loadWithCoreImage (InputStream& input)
     {
         CGImageRef loadedImage = CGImageSourceCreateImageAtIndex (imageSource, 0, 0);
         CFRelease (imageSource);
-#endif
+  #endif
 
         if (loadedImage != 0)
         {
@@ -841,9 +840,9 @@ const Image juce_loadWithCoreImage (InputStream& input)
             CGContextDrawImage (cgImage->context, CGRectMake (0, 0, image.getWidth(), image.getHeight()), loadedImage);
             CGContextFlush (cgImage->context);
 
-#if ! JUCE_IOS
+          #if ! JUCE_IOS
             CFRelease (loadedImage);
-#endif
+          #endif
 
             // Because it's impossible to create a truly 24-bit CG image, this flag allows a user
             // to find out whether the file they just loaded the image from had an alpha channel or not.

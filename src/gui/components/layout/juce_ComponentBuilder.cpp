@@ -86,8 +86,9 @@ namespace ComponentBuilderHelpers
         if (topLevelComp != 0)
         {
             ComponentBuilder::TypeHandler* const type = builder.getHandlerForState (state);
+            const String uid (getStateId (state));
 
-            if (type == 0)
+            if (type == 0 || uid.isEmpty())
             {
                 // ..handle the case where a child of the actual state node has changed.
                 if (state.getParent().isValid())
@@ -95,21 +96,20 @@ namespace ComponentBuilderHelpers
             }
             else
             {
-                Component* const changedComp = findComponentWithID (topLevelComp, getStateId (state));
+                Component* const changedComp = findComponentWithID (topLevelComp, uid);
 
                 if (changedComp != 0)
                     type->updateComponentFromState (changedComp, state);
             }
         }
     }
-
 }
 
 //=============================================================================
 const Identifier ComponentBuilder::idProperty ("id");
 
 ComponentBuilder::ComponentBuilder (const ValueTree& state_)
-    : state (state_)
+    : state (state_), imageProvider (0)
 {
     state.addListener (this);
 }

@@ -61,6 +61,11 @@ DrawableComposite::~DrawableComposite()
     deleteAllChildren();
 }
 
+Drawable* DrawableComposite::createCopy() const
+{
+    return new DrawableComposite (*this);
+}
+
 //==============================================================================
 const Rectangle<float> DrawableComposite::getDrawableBounds() const
 {
@@ -98,13 +103,26 @@ void DrawableComposite::setContentArea (const RelativeRectangle& newArea)
     markersX.setMarker (contentRightMarkerName, newArea.right);
     markersY.setMarker (contentTopMarkerName, newArea.top);
     markersY.setMarker (contentBottomMarkerName, newArea.bottom);
-    refreshTransformFromBounds();
 }
 
-void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBoundingBox)
+void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBounds)
 {
-    bounds = newBoundingBox;
-    refreshTransformFromBounds();
+    if (bounds != newBounds)
+    {
+        bounds = newBounds;
+
+        if (bounds.isDynamic())
+        {
+            Drawable::Positioner<DrawableComposite>* const p = new Drawable::Positioner<DrawableComposite> (*this);
+            setPositioner (p);
+            p->apply();
+        }
+        else
+        {
+            setPositioner (0);
+            recalculateCoordinates (0);
+        }
+    }
 }
 
 void DrawableComposite::resetBoundingBoxToContentArea()
@@ -127,12 +145,19 @@ void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
     resetBoundingBoxToContentArea();
 }
 
-void DrawableComposite::refreshTransformFromBounds()
+bool DrawableComposite::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+{
+    bool ok = positioner.addPoint (bounds.topLeft);
+    ok = positioner.addPoint (bounds.topRight) && ok;
+    return positioner.addPoint (bounds.bottomLeft) && ok;
+}
+
+void DrawableComposite::recalculateCoordinates (Expression::EvaluationContext* context)
 {
     Point<float> resolved[3];
-    bounds.resolveThreePoints (resolved, getParent());
+    bounds.resolveThreePoints (resolved, context);
 
-    const Rectangle<float> content (getContentArea().resolve (getParent()));
+    const Rectangle<float> content (getContentArea().resolve (context));
 
     AffineTransform t (AffineTransform::fromTargetPoints (content.getX(), content.getY(), resolved[0].getX(), resolved[0].getY(),
                                                           content.getRight(), content.getY(), resolved[1].getX(), resolved[1].getY(),
@@ -211,27 +236,6 @@ const char* const DrawableComposite::contentLeftMarkerName = "left";
 const char* const DrawableComposite::contentRightMarkerName = "right";
 const char* const DrawableComposite::contentTopMarkerName = "top";
 const char* const DrawableComposite::contentBottomMarkerName = "bottom";
-
-//==============================================================================
-const Expression DrawableComposite::getSymbolValue (const String& symbol, const String& member) const
-{
-    jassert (member.isEmpty()) // the only symbols available in a Drawable are markers.
-
-    const MarkerList::Marker* m = markersX.getMarker (symbol);
-
-    if (m == 0)
-        m = markersY.getMarker (symbol);
-
-    if (m != 0)
-        return m->position.getExpression();
-
-    throw Expression::EvaluationError (symbol, member);
-}
-
-Drawable* DrawableComposite::createCopy() const
-{
-    return new DrawableComposite (*this);
-}
 
 //==============================================================================
 const Identifier DrawableComposite::valueTreeType ("Group");
@@ -321,16 +325,12 @@ void DrawableComposite::refreshFromValueTree (const ValueTree& tree, ComponentBu
     const ValueTreeWrapper wrapper (tree);
     setComponentID (wrapper.getID());
 
-    const RelativeParallelogram newBounds (wrapper.getBoundingBox());
-    if (bounds != newBounds)
-        bounds = newBounds;
-
     wrapper.getMarkerList (true).applyTo (markersX);
     wrapper.getMarkerList (false).applyTo (markersY);
 
-    builder.updateChildComponents (*this, wrapper.getChildList());
+    setBoundingBox (wrapper.getBoundingBox());
 
-    refreshTransformFromBounds();
+    builder.updateChildComponents (*this, wrapper.getChildList());
 }
 
 const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const

@@ -72,10 +72,6 @@ public:
 
     const Typeface::Ptr findTypefaceFor (const Font& font)
     {
-        // (can't initialise defaultFace in the constructor or in getDefaultTypeface() because of recursion).
-        if (defaultFace == 0)
-            defaultFace = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (Font());
-
         const int flags = font.getStyleFlags() & (Font::bold | Font::italic);
         const String faceName (font.getTypefaceName());
 
@@ -113,6 +109,9 @@ public:
         face.lastUsageCount = ++counter;
         face.typeface = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
         jassert (face.typeface != 0); // the look and feel must return a typeface!
+
+        if (defaultFace == 0 && font == Font())
+            defaultFace = face.typeface;
 
         return face.typeface;
     }

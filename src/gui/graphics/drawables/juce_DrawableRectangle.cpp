@@ -29,6 +29,8 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawableRectangle.h"
 #include "juce_DrawableComposite.h"
+#include "../../components/positioning/juce_RelativeCoordinatePositioner.h"
+
 
 //==============================================================================
 DrawableRectangle::DrawableRectangle()
@@ -36,7 +38,9 @@ DrawableRectangle::DrawableRectangle()
 }
 
 DrawableRectangle::DrawableRectangle (const DrawableRectangle& other)
-    : DrawableShape (other)
+    : DrawableShape (other),
+      bounds (other.bounds),
+      cornerSize (other.cornerSize)
 {
 }
 
@@ -52,51 +56,72 @@ Drawable* DrawableRectangle::createCopy() const
 //==============================================================================
 void DrawableRectangle::setRectangle (const RelativeParallelogram& newBounds)
 {
-    bounds = newBounds;
-    pathChanged();
-    strokeChanged();
+    if (bounds != newBounds)
+    {
+        bounds = newBounds;
+        rebuildPath();
+    }
 }
 
 void DrawableRectangle::setCornerSize (const RelativePoint& newSize)
 {
-    cornerSize = newSize;
-    pathChanged();
-    strokeChanged();
+    if (cornerSize != newSize)
+    {
+        cornerSize = newSize;
+        rebuildPath();
+    }
 }
 
-//==============================================================================
-bool DrawableRectangle::rebuildPath (Path& path) const
+void DrawableRectangle::rebuildPath()
+{
+    if (bounds.isDynamic() || cornerSize.isDynamic())
+    {
+        Drawable::Positioner<DrawableRectangle>* const p = new Drawable::Positioner<DrawableRectangle> (*this);
+        setPositioner (p);
+        p->apply();
+    }
+    else
+    {
+        setPositioner (0);
+        recalculateCoordinates (0);
+    }
+}
+
+bool DrawableRectangle::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+{
+    bool ok = positioner.addPoint (bounds.topLeft);
+    ok = positioner.addPoint (bounds.topRight) && ok;
+    ok = positioner.addPoint (bounds.bottomLeft) && ok;
+    return positioner.addPoint (cornerSize) && ok;
+}
+
+void DrawableRectangle::recalculateCoordinates (Expression::EvaluationContext* context)
 {
     Point<float> points[3];
-    bounds.resolveThreePoints (points, getParent());
+    bounds.resolveThreePoints (points, context);
+
+    const float cornerSizeX = (float) cornerSize.x.resolve (context);
+    const float cornerSizeY = (float) cornerSize.y.resolve (context);
 
     const float w = Line<float> (points[0], points[1]).getLength();
     const float h = Line<float> (points[0], points[2]).getLength();
 
-    const float cornerSizeX = (float) cornerSize.x.resolve (getParent());
-    const float cornerSizeY = (float) cornerSize.y.resolve (getParent());
-
-    path.clear();
+    Path newPath;
 
     if (cornerSizeX > 0 && cornerSizeY > 0)
-        path.addRoundedRectangle (0, 0, w, h, cornerSizeX, cornerSizeY);
+        newPath.addRoundedRectangle (0, 0, w, h, cornerSizeX, cornerSizeY);
     else
-        path.addRectangle (0, 0, w, h);
+        newPath.addRectangle (0, 0, w, h);
 
-    path.applyTransform (AffineTransform::fromTargetPoints (0, 0, points[0].getX(), points[0].getY(),
-                                                            w, 0, points[1].getX(), points[1].getY(),
-                                                            0, h, points[2].getX(), points[2].getY()));
-    return true;
-}
+    newPath.applyTransform (AffineTransform::fromTargetPoints (0, 0, points[0].getX(), points[0].getY(),
+                                                               w, 0, points[1].getX(), points[1].getY(),
+                                                               0, h, points[2].getX(), points[2].getY()));
 
-const AffineTransform DrawableRectangle::calculateTransform() const
-{
-    Point<float> resolved[3];
-    bounds.resolveThreePoints (resolved, getParent());
-
-    return AffineTransform::fromTargetPoints (resolved[0].getX(), resolved[0].getY(),
-                                              resolved[1].getX(), resolved[1].getY(),
-                                              resolved[2].getX(), resolved[2].getY());
+    if (path != newPath)
+    {
+        path.swapWithPath (newPath);
+        pathChanged();
+    }
 }
 
 //==============================================================================
@@ -148,22 +173,10 @@ void DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ComponentBu
     ValueTreeWrapper v (tree);
     setComponentID (v.getID());
 
-    if (refreshFillTypes (v, getParent(), builder.getImageProvider()))
-        repaint();
-
-    RelativeParallelogram newBounds (v.getRectangle());
-
-    const PathStrokeType newStroke (v.getStrokeType());
-    const RelativePoint newCornerSize (v.getCornerSize());
-
-    if (strokeType != newStroke || newBounds != bounds || newCornerSize != cornerSize)
-    {
-        repaint();
-        bounds = newBounds;
-        strokeType = newStroke;
-        cornerSize = newCornerSize;
-        pathChanged();
-    }
+    refreshFillTypes (v, builder.getImageProvider());
+    setStrokeType (v.getStrokeType());
+    setRectangle (v.getRectangle());
+    setCornerSize (v.getCornerSize());
 }
 
 const ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const

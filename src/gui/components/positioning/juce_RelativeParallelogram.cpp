@@ -103,6 +103,11 @@ const AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::E
                                               corners[2].getX(), corners[2].getY(), newBottomLeft.getX(), newBottomLeft.getY());
 }
 
+bool RelativeParallelogram::isDynamic() const
+{
+    return topLeft.isDynamic() || topRight.isDynamic() || bottomLeft.isDynamic();
+}
+
 bool RelativeParallelogram::operator== (const RelativeParallelogram& other) const throw()
 {
     return topLeft == other.topLeft && topRight == other.topRight && bottomLeft == other.bottomLeft;
@@ -129,5 +134,12 @@ const Point<float> RelativeParallelogram::getPointForInternalCoord (const Point<
             + Line<float> (Point<float>(), corners[1] - corners[0]).getPointAlongLine (point.getX())
             + Line<float> (Point<float>(), corners[2] - corners[0]).getPointAlongLine (point.getY());
 }
+
+const Rectangle<float> RelativeParallelogram::getBoundingBox (const Point<float>* const p) throw()
+{
+    const Point<float> points[] = { p[0], p[1], p[2], p[1] + (p[2] - p[0]) };
+    return Rectangle<float>::findAreaContainingPoints (points, 4);
+}
+
 
 END_JUCE_NAMESPACE

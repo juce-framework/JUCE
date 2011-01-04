@@ -51,12 +51,14 @@ public:
     const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
     void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
     const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
+    bool isDynamic() const;
 
     bool operator== (const RelativeParallelogram& other) const throw();
     bool operator!= (const RelativeParallelogram& other) const throw();
 
     static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) throw();
     static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) throw();
+    static const Rectangle<float> getBoundingBox (const Point<float>* parallelogramCorners) throw();
 
     //==============================================================================
     RelativePoint topLeft, topRight, bottomLeft;

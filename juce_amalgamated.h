@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	6
+#define JUCE_BUILDNUMBER	7
 
 /** Current Juce version number.
 
@@ -45451,6 +45451,273 @@ private:
 /*** End of inlined file: juce_RelativeCoordinate.h ***/
 
 
+/*** Start of inlined file: juce_RelativeCoordinatePositioner.h ***/
+#ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+#define __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_RelativePoint.h ***/
+#ifndef __JUCE_RELATIVEPOINT_JUCEHEADER__
+#define __JUCE_RELATIVEPOINT_JUCEHEADER__
+
+/**
+	An X-Y position stored as a pair of RelativeCoordinate values.
+
+	@see RelativeCoordinate, RelativeRectangle
+*/
+class JUCE_API  RelativePoint
+{
+public:
+	/** Creates a point at the origin. */
+	RelativePoint();
+
+	/** Creates an absolute point, relative to the origin. */
+	RelativePoint (const Point<float>& absolutePoint);
+
+	/** Creates an absolute point, relative to the origin. */
+	RelativePoint (float absoluteX, float absoluteY);
+
+	/** Creates an absolute point from two coordinates. */
+	RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
+
+	/** Creates a point from a stringified representation.
+		The string must contain a pair of coordinates, separated by space or a comma. The syntax for the coordinate
+		strings is explained in the RelativeCoordinate class.
+		@see toString
+	*/
+	RelativePoint (const String& stringVersion);
+
+	bool operator== (const RelativePoint& other) const throw();
+	bool operator!= (const RelativePoint& other) const throw();
+
+	/** Calculates the absolute position of this point.
+
+		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+		be needed to calculate the result.
+	*/
+	const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+
+	/** Changes the values of this point's coordinates to make it resolve to the specified position.
+
+		Calling this will leave any anchor points unchanged, but will set any absolute
+		or relative positions to whatever values are necessary to make the resultant position
+		match the position that is provided.
+	*/
+	void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+
+	/** Returns a string which represents this point.
+		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
+		coordinates, see the RelativeCoordinate constructor notes.
+		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
+	*/
+	const String toString() const;
+
+	/** Renames a symbol if it is used by any of the coordinates.
+		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
+	*/
+	void renameSymbolIfUsed (const String& oldName, const String& newName);
+
+	/** Returns true if this point depends on any other coordinates for its position. */
+	bool isDynamic() const;
+
+	// The actual X and Y coords...
+	RelativeCoordinate x, y;
+};
+
+#endif   // __JUCE_RELATIVEPOINT_JUCEHEADER__
+/*** End of inlined file: juce_RelativePoint.h ***/
+
+
+/*** Start of inlined file: juce_MarkerList.h ***/
+#ifndef __JUCE_MARKERLIST_JUCEHEADER__
+#define __JUCE_MARKERLIST_JUCEHEADER__
+
+/**
+	Holds a set of named marker points along a one-dimensional axis.
+
+	This class is used to store sets of X and Y marker points in components.
+	@see Component::getMarkers().
+*/
+class JUCE_API  MarkerList
+{
+public:
+
+	/** Creates an empty marker list. */
+	MarkerList();
+	/** Creates a copy of another marker list. */
+	MarkerList (const MarkerList& other);
+	/** Copies another marker list to this one. */
+	MarkerList& operator= (const MarkerList& other);
+	/** Destructor. */
+	~MarkerList();
+
+	/** Represents a marker in a MarkerList. */
+	class JUCE_API  Marker
+	{
+	public:
+		/** Creates a copy of another Marker. */
+		Marker (const Marker& other);
+		/** Creates a Marker with a given name and position. */
+		Marker (const String& name, const RelativeCoordinate& position);
+
+		/** The marker's name. */
+		String name;
+
+		/** The marker's position. */
+		RelativeCoordinate position;
+
+		/** Returns true if both the names and positions of these two markers match. */
+		bool operator== (const Marker&) const throw();
+		/** Returns true if either the name or position of these two markers differ. */
+		bool operator!= (const Marker&) const throw();
+	};
+
+	/** Returns the number of markers in the list. */
+	int getNumMarkers() const throw();
+
+	/** Returns one of the markers in the list, by its index. */
+	const Marker* getMarker (int index) const throw();
+
+	/** Returns a named marker, or 0 if no such name is found.
+		Note that name comparisons are case-sensitive.
+	*/
+	const Marker* getMarker (const String& name) const throw();
+
+	/** Sets the position of a marker.
+
+		If the name already exists, then the existing marker is moved; if it doesn't exist, then a
+		new marker is added.
+	*/
+	void setMarker (const String& name, const RelativeCoordinate& position);
+
+	/** Deletes the marker at the given list index. */
+	void removeMarker (int index);
+
+	/** Deletes the marker with the given name. */
+	void removeMarker (const String& name);
+
+	/** Returns true if all the markers in these two lists match exactly. */
+	bool operator== (const MarkerList& other) const throw();
+	/** Returns true if not all the markers in these two lists match exactly. */
+	bool operator!= (const MarkerList& other) const throw();
+
+	/**
+		A class for receiving events when changes are made to a MarkerList.
+
+		You can register a MarkerList::Listener with a MarkerList using the MarkerList::addListener()
+		method, and it will be called when markers are moved, added, or deleted.
+
+		@see MarkerList::addListener, MarkerList::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when something in the given marker list changes. */
+		virtual void markersChanged (MarkerList* markerList) = 0;
+
+		/** Called when the given marker list is being deleted. */
+		virtual void markerListBeingDeleted (MarkerList* markerList);
+	};
+
+	/** Registers a listener that will be called when the markers are changed. */
+	void addListener (Listener* listener);
+
+	/** Deregisters a previously-registered listener. */
+	void removeListener (Listener* listener);
+
+	/** Synchronously calls markersChanged() on all the registered listeners. */
+	void markersHaveChanged();
+
+	/** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
+	class ValueTreeWrapper
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		ValueTree& getState() throw()	   { return state; }
+		int getNumMarkers() const;
+		const ValueTree getMarkerState (int index) const;
+		const ValueTree getMarkerState (const String& name) const;
+		bool containsMarker (const ValueTree& state) const;
+		const MarkerList::Marker getMarker (const ValueTree& state) const;
+		void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
+		void removeMarker (const ValueTree& state, UndoManager* undoManager);
+
+		void applyTo (MarkerList& markerList);
+		void readFrom (const MarkerList& markerList, UndoManager* undoManager);
+
+		static const Identifier markerTag, nameProperty, posProperty;
+
+	private:
+		ValueTree state;
+	};
+
+private:
+
+	OwnedArray<Marker> markers;
+	ListenerList <Listener> listeners;
+
+	JUCE_LEAK_DETECTOR (MarkerList);
+};
+
+#endif   // __JUCE_MARKERLIST_JUCEHEADER__
+/*** End of inlined file: juce_MarkerList.h ***/
+
+/**
+	Base class for Component::Positioners that are based upon relative coordinates.
+*/
+class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
+													public ComponentListener,
+													public MarkerList::Listener,
+													public Expression::EvaluationContext
+{
+public:
+	RelativeCoordinatePositionerBase (Component& component_);
+	~RelativeCoordinatePositionerBase();
+
+	const Expression getSymbolValue (const String& objectName, const String& member) const;
+
+	void componentMovedOrResized (Component&, bool, bool);
+	void componentParentHierarchyChanged (Component&);
+	void componentBeingDeleted (Component& component);
+	void markersChanged (MarkerList*);
+	void markerListBeingDeleted (MarkerList* markerList);
+
+	void apply();
+
+	bool addCoordinate (const RelativeCoordinate& coord);
+	bool addPoint (const RelativePoint& point);
+
+protected:
+	virtual bool registerCoordinates() = 0;
+	virtual void applyToComponentBounds() = 0;
+
+private:
+	Array <Component*> sourceComponents;
+	Array <MarkerList*> sourceMarkerLists;
+	bool registeredOk;
+
+	bool registerListeners (const Expression& e);
+	bool registerComponent (const String& componentID);
+	bool registerMarker (const String markerName);
+	void registerComponentListener (Component* const comp);
+	void registerMarkerListListener (MarkerList* const list);
+	void unregisterListeners();
+	Component* findComponent (const String& componentID) const;
+	Component* getSourceComponent (const String& objectName) const;
+	const Expression xToExpression (const Component* const source, const int x) const;
+	const Expression yToExpression (const Component* const source, const int y) const;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase);
+};
+
+#endif   // __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
+/*** End of inlined file: juce_RelativeCoordinatePositioner.h ***/
+
+
 /*** Start of inlined file: juce_ComponentBuilder.h ***/
 #ifndef __JUCE_COMPONENTBUILDER_JUCEHEADER__
 #define __JUCE_COMPONENTBUILDER_JUCEHEADER__
@@ -45840,6 +46107,27 @@ protected:
 	void setBoundsToEnclose (const Rectangle<float>& area);
 
 	Point<int> originRelativeToComponent;
+
+  #ifndef DOXYGEN
+	/** Internal utility class used by Drawables. */
+	template <class DrawableType>
+	class Positioner  : public RelativeCoordinatePositionerBase
+	{
+	public:
+		Positioner (DrawableType& component_)
+			: RelativeCoordinatePositionerBase (component_),
+			  owner (component_)
+		{}
+
+		bool registerCoordinates()	  { return owner.registerCoordinates (*this); }
+		void applyToComponentBounds()   { owner.recalculateCoordinates (this); }
+
+	private:
+		DrawableType& owner;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
+	};
+  #endif
 
 private:
 	void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
@@ -54179,8 +54467,6 @@ public:
 
 protected:
 
-	ScopedPointer<TabbedButtonBar> tabs;
-
 	/** This creates one of the tab buttons.
 
 		If you need to use custom tab components, you can override this method and
@@ -54188,15 +54474,18 @@ protected:
 	*/
 	virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
+	/** @internal */
+	ScopedPointer<TabbedButtonBar> tabs;
+
 private:
 
-	OwnedArray <WeakReference<Component> > contentComponents;
+	Array <WeakReference<Component> > contentComponents;
 	WeakReference<Component> panelComponent;
 	int tabDepth;
 	int outlineThickness, edgeIndent;
-	static const Identifier deleteComponentId;
 
-	friend class TabCompButtonBar;
+	class ButtonBar;
+	friend class ButtonBar;
 	void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent);
@@ -57419,205 +57708,11 @@ private:
 #endif
 #ifndef __JUCE_MARKERLIST_JUCEHEADER__
 
-/*** Start of inlined file: juce_MarkerList.h ***/
-#ifndef __JUCE_MARKERLIST_JUCEHEADER__
-#define __JUCE_MARKERLIST_JUCEHEADER__
-
-/**
-	Holds a set of named marker points along a one-dimensional axis.
-
-	This class is used to store sets of X and Y marker points in components.
-	@see Component::getMarkers().
-*/
-class JUCE_API  MarkerList
-{
-public:
-
-	/** Creates an empty marker list. */
-	MarkerList();
-	/** Creates a copy of another marker list. */
-	MarkerList (const MarkerList& other);
-	/** Copies another marker list to this one. */
-	MarkerList& operator= (const MarkerList& other);
-	/** Destructor. */
-	~MarkerList();
-
-	/** Represents a marker in a MarkerList. */
-	class JUCE_API  Marker
-	{
-	public:
-		/** Creates a copy of another Marker. */
-		Marker (const Marker& other);
-		/** Creates a Marker with a given name and position. */
-		Marker (const String& name, const RelativeCoordinate& position);
-
-		/** The marker's name. */
-		String name;
-
-		/** The marker's position. */
-		RelativeCoordinate position;
-
-		/** Returns true if both the names and positions of these two markers match. */
-		bool operator== (const Marker&) const throw();
-		/** Returns true if either the name or position of these two markers differ. */
-		bool operator!= (const Marker&) const throw();
-	};
-
-	/** Returns the number of markers in the list. */
-	int getNumMarkers() const throw();
-
-	/** Returns one of the markers in the list, by its index. */
-	const Marker* getMarker (int index) const throw();
-
-	/** Returns a named marker, or 0 if no such name is found.
-		Note that name comparisons are case-sensitive.
-	*/
-	const Marker* getMarker (const String& name) const throw();
-
-	/** Sets the position of a marker.
-
-		If the name already exists, then the existing marker is moved; if it doesn't exist, then a
-		new marker is added.
-	*/
-	void setMarker (const String& name, const RelativeCoordinate& position);
-
-	/** Deletes the marker at the given list index. */
-	void removeMarker (int index);
-
-	/** Deletes the marker with the given name. */
-	void removeMarker (const String& name);
-
-	/** Returns true if all the markers in these two lists match exactly. */
-	bool operator== (const MarkerList& other) const throw();
-	/** Returns true if not all the markers in these two lists match exactly. */
-	bool operator!= (const MarkerList& other) const throw();
-
-	/**
-		A class for receiving events when changes are made to a MarkerList.
-
-		You can register a MarkerList::Listener with a MarkerList using the MarkerList::addListener()
-		method, and it will be called when markers are moved, added, or deleted.
-
-		@see MarkerList::addListener, MarkerList::removeListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener() {}
-
-		/** Called when something in the given marker list changes. */
-		virtual void markersChanged (MarkerList* markerList) = 0;
-
-		/** Called when the given marker list is being deleted. */
-		virtual void markerListBeingDeleted (MarkerList* markerList);
-	};
-
-	/** Registers a listener that will be called when the markers are changed. */
-	void addListener (Listener* listener);
-
-	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener);
-
-	/** Synchronously calls markersChanged() on all the registered listeners. */
-	void markersHaveChanged();
-
-	/** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
-	class ValueTreeWrapper
-	{
-	public:
-		ValueTreeWrapper (const ValueTree& state);
-
-		ValueTree& getState() throw()	   { return state; }
-		int getNumMarkers() const;
-		const ValueTree getMarkerState (int index) const;
-		const ValueTree getMarkerState (const String& name) const;
-		bool containsMarker (const ValueTree& state) const;
-		const MarkerList::Marker getMarker (const ValueTree& state) const;
-		void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
-		void removeMarker (const ValueTree& state, UndoManager* undoManager);
-
-		void applyTo (MarkerList& markerList);
-		void readFrom (const MarkerList& markerList, UndoManager* undoManager);
-
-		static const Identifier markerTag, nameProperty, posProperty;
-
-	private:
-		ValueTree state;
-	};
-
-private:
-
-	OwnedArray<Marker> markers;
-	ListenerList <Listener> listeners;
-
-	JUCE_LEAK_DETECTOR (MarkerList);
-};
-
-#endif   // __JUCE_MARKERLIST_JUCEHEADER__
-/*** End of inlined file: juce_MarkerList.h ***/
-
-
 #endif
 #ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
-
-/*** Start of inlined file: juce_RelativeCoordinatePositioner.h ***/
-#ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
-#define __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
-
-/**
-	Base class for Component::Positioners that are based upon relative coordinates.
-*/
-class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
-													public ComponentListener,
-													public MarkerList::Listener,
-													public Expression::EvaluationContext
-{
-public:
-	RelativeCoordinatePositionerBase (Component& component_);
-	~RelativeCoordinatePositionerBase();
-
-	const Expression getSymbolValue (const String& objectName, const String& member) const;
-
-	void componentMovedOrResized (Component&, bool, bool);
-	void componentParentHierarchyChanged (Component&);
-	void componentBeingDeleted (Component& component);
-	void markersChanged (MarkerList*);
-	void markerListBeingDeleted (MarkerList* markerList);
-
-	void apply();
-
-protected:
-	bool addCoordinate (const RelativeCoordinate& coord);
-
-	virtual bool registerCoordinates() = 0;
-	virtual void applyToComponentBounds() = 0;
-
-private:
-	Array <Component*> sourceComponents;
-	Array <MarkerList*> sourceMarkerLists;
-	bool registeredOk;
-
-	bool registerListeners (const Expression& e);
-	bool registerComponent (const String& componentID);
-	bool registerMarker (const String markerName);
-	void registerComponentListener (Component* const comp);
-	void registerMarkerListListener (MarkerList* const list);
-	void unregisterListeners();
-	Component* findComponent (const String& componentID) const;
-	Component* getSourceComponent (const String& objectName) const;
-	const Expression xToExpression (const Component* const source, const int x) const;
-	const Expression yToExpression (const Component* const source, const int y) const;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase);
-};
-
-#endif   // __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
-/*** End of inlined file: juce_RelativeCoordinatePositioner.h ***/
-
 
 #endif
 #ifndef __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
@@ -57625,78 +57720,6 @@ private:
 /*** Start of inlined file: juce_RelativeParallelogram.h ***/
 #ifndef __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
 #define __JUCE_RELATIVEPARALLELOGRAM_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_RelativePoint.h ***/
-#ifndef __JUCE_RELATIVEPOINT_JUCEHEADER__
-#define __JUCE_RELATIVEPOINT_JUCEHEADER__
-
-/**
-	An X-Y position stored as a pair of RelativeCoordinate values.
-
-	@see RelativeCoordinate, RelativeRectangle
-*/
-class JUCE_API  RelativePoint
-{
-public:
-	/** Creates a point at the origin. */
-	RelativePoint();
-
-	/** Creates an absolute point, relative to the origin. */
-	RelativePoint (const Point<float>& absolutePoint);
-
-	/** Creates an absolute point, relative to the origin. */
-	RelativePoint (float absoluteX, float absoluteY);
-
-	/** Creates an absolute point from two coordinates. */
-	RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
-
-	/** Creates a point from a stringified representation.
-		The string must contain a pair of coordinates, separated by space or a comma. The syntax for the coordinate
-		strings is explained in the RelativeCoordinate class.
-		@see toString
-	*/
-	RelativePoint (const String& stringVersion);
-
-	bool operator== (const RelativePoint& other) const throw();
-	bool operator!= (const RelativePoint& other) const throw();
-
-	/** Calculates the absolute position of this point.
-
-		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
-		be needed to calculate the result.
-	*/
-	const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
-
-	/** Changes the values of this point's coordinates to make it resolve to the specified position.
-
-		Calling this will leave any anchor points unchanged, but will set any absolute
-		or relative positions to whatever values are necessary to make the resultant position
-		match the position that is provided.
-	*/
-	void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
-
-	/** Returns a string which represents this point.
-		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
-		coordinates, see the RelativeCoordinate constructor notes.
-		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
-	*/
-	const String toString() const;
-
-	/** Renames a symbol if it is used by any of the coordinates.
-		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
-	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName);
-
-	/** Returns true if this point depends on any other coordinates for its position. */
-	bool isDynamic() const;
-
-	// The actual X and Y coords...
-	RelativeCoordinate x, y;
-};
-
-#endif   // __JUCE_RELATIVEPOINT_JUCEHEADER__
-/*** End of inlined file: juce_RelativePoint.h ***/
 
 /**
 	A parallelogram defined by three RelativePoint positions.
@@ -57718,12 +57741,14 @@ public:
 	const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
 	void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
 	const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
+	bool isDynamic() const;
 
 	bool operator== (const RelativeParallelogram& other) const throw();
 	bool operator!= (const RelativeParallelogram& other) const throw();
 
 	static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) throw();
 	static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) throw();
+	static const Rectangle<float> getBoundingBox (const Point<float>* parallelogramCorners) throw();
 
 	RelativePoint topLeft, topRight, bottomLeft;
 };
@@ -61744,8 +61769,8 @@ protected:
 
 	@see Drawable
 */
-class JUCE_API  DrawableComposite  : public Drawable,
-									 public Expression::EvaluationContext
+class JUCE_API  DrawableComposite  : public Drawable//,
+//					 public Expression::EvaluationContext
 {
 public:
 
@@ -61810,8 +61835,6 @@ public:
 	/** @internal */
 	static const Identifier valueTreeType;
 	/** @internal */
-	const Expression getSymbolValue (const String& symbol, const String& member) const;
-	/** @internal */
 	const Rectangle<float> getDrawableBounds() const;
 	/** @internal */
 	void childBoundsChanged (Component*);
@@ -61853,7 +61876,10 @@ private:
 	MarkerList markersX, markersY;
 	bool updateBoundsReentrant;
 
-	void refreshTransformFromBounds();
+	friend class Drawable::Positioner<DrawableComposite>;
+	bool registerCoordinates (RelativeCoordinatePositionerBase&);
+	void recalculateCoordinates (Expression::EvaluationContext*);
+
 	void updateBoundsToFitChildren();
 
 	DrawableComposite& operator= (const DrawableComposite&);
@@ -61967,7 +61993,9 @@ private:
 	Colour overlayColour;
 	RelativeParallelogram bounds;
 
-	void refreshTransformFromBounds();
+	friend class Drawable::Positioner<DrawableImage>;
+	bool registerCoordinates (RelativeCoordinatePositionerBase&);
+	void recalculateCoordinates (Expression::EvaluationContext*);
 
 	DrawableImage& operator= (const DrawableImage&);
 	JUCE_LEAK_DETECTOR (DrawableImage);
@@ -62006,6 +62034,29 @@ public:
 	/** Destructor. */
 	~DrawableShape();
 
+	/** A FillType wrapper that allows the gradient coordinates to be implemented using RelativePoint.
+	*/
+	class RelativeFillType
+	{
+	public:
+		RelativeFillType();
+		RelativeFillType (const FillType& fill);
+		RelativeFillType (const RelativeFillType&);
+		RelativeFillType& operator= (const RelativeFillType&);
+
+		bool operator== (const RelativeFillType&) const;
+		bool operator!= (const RelativeFillType&) const;
+
+		bool isDynamic() const;
+		bool recalculateCoords (Expression::EvaluationContext* context);
+
+		void writeTo (ValueTree& v, ComponentBuilder::ImageProvider*, UndoManager*) const;
+		bool readFrom (const ValueTree& v, ComponentBuilder::ImageProvider*);
+
+		FillType fill;
+		RelativePoint gradientPoint1, gradientPoint2, gradientPoint3;
+	};
+
 	/** Sets a fill type for the path.
 		This colour is used to fill the path - if you don't want the path to be
 		filled (e.g. if you're just drawing an outline), set this to a transparent
@@ -62015,20 +62066,34 @@ public:
 	*/
 	void setFill (const FillType& newFill);
 
+	/** Sets a fill type for the path.
+		This colour is used to fill the path - if you don't want the path to be
+		filled (e.g. if you're just drawing an outline), set this to a transparent
+		colour.
+
+		@see setPath, setStrokeFill
+	*/
+	void setFill (const RelativeFillType& newFill);
+
 	/** Returns the current fill type.
 		@see setFill
 	*/
-	const FillType& getFill() const throw()			 { return mainFill; }
+	const RelativeFillType& getFill() const throw()		 { return mainFill; }
 
 	/** Sets the fill type with which the outline will be drawn.
 		@see setFill
 	*/
 	void setStrokeFill (const FillType& newStrokeFill);
 
+	/** Sets the fill type with which the outline will be drawn.
+		@see setFill
+	*/
+	void setStrokeFill (const RelativeFillType& newStrokeFill);
+
 	/** Returns the current stroke fill.
 		@see setStrokeFill
 	*/
-	const FillType& getStrokeFill() const throw()		   { return strokeFill; }
+	const RelativeFillType& getStrokeFill() const throw()	   { return strokeFill; }
 
 	/** Changes the properties of the outline that will be drawn around the path.
 		If the stroke has 0 thickness, no stroke will be drawn.
@@ -62042,7 +62107,7 @@ public:
 	void setStrokeThickness (float newThickness);
 
 	/** Returns the current outline style. */
-	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
+	const PathStrokeType& getStrokeType() const throw()		 { return strokeType; }
 
 	/** @internal */
 	class FillAndStrokeState  : public  Drawable::ValueTreeWrapperBase
@@ -62050,32 +62115,13 @@ public:
 	public:
 		FillAndStrokeState (const ValueTree& state);
 
-		const FillType getMainFill (Expression::EvaluationContext* nameFinder,
-									ComponentBuilder::ImageProvider* imageProvider) const;
-		ValueTree getMainFillState();
-		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
-						  const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-						  ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
-
-		const FillType getStrokeFill (Expression::EvaluationContext* nameFinder,
-									  ComponentBuilder::ImageProvider* imageProvider) const;
-		ValueTree getStrokeFillState();
-		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
-							const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-							ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
+		ValueTree getFillState (const Identifier& fillOrStrokeType);
+		const RelativeFillType getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider*) const;
+		void setFill (const Identifier& fillOrStrokeType, const RelativeFillType& newFill,
+					  ComponentBuilder::ImageProvider*, UndoManager*);
 
 		const PathStrokeType getStrokeType() const;
-		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
-
-		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
-											RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
-											Expression::EvaluationContext* nameFinder,
-											ComponentBuilder::ImageProvider* imageProvider);
-
-		static void writeFillType (ValueTree& v, const FillType& fillType,
-								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-								   const RelativePoint* gradientPoint3, ComponentBuilder::ImageProvider* imageProvider,
-								   UndoManager* undoManager);
+		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager*);
 
 		static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
 								gradientPoint1, gradientPoint2, gradientPoint3, radial, imageId, imageOpacity;
@@ -62094,26 +62140,23 @@ protected:
 	void pathChanged();
 	/** Called when the cached stroke should be updated. */
 	void strokeChanged();
-
-	/** Implemented by subclasses to regenerate the path. */
-	virtual bool rebuildPath (Path& path) const = 0;
-
 	/** True if there's a stroke with a non-zero thickness and non-transparent colour. */
 	bool isStrokeVisible() const throw();
-
 	/** Updates the details from a FillAndStrokeState object, returning true if something changed. */
-	bool refreshFillTypes (const FillAndStrokeState& newState,
-						   Expression::EvaluationContext* nameFinder,
-						   ComponentBuilder::ImageProvider* imageProvider);
-
+	void refreshFillTypes (const FillAndStrokeState& newState, ComponentBuilder::ImageProvider*);
 	/** Writes the stroke and fill details to a FillAndStrokeState object. */
-	void writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const;
+	void writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider*, UndoManager*) const;
 
 	PathStrokeType strokeType;
 	Path path, strokePath;
 
 private:
-	FillType mainFill, strokeFill;
+	class RelativePositioner;
+	RelativeFillType mainFill, strokeFill;
+	ScopedPointer<RelativeCoordinatePositionerBase> mainFillPositioner, strokeFillPositioner;
+
+	void setFillInternal (RelativeFillType& fill, const RelativeFillType& newFill,
+						  ScopedPointer<RelativeCoordinatePositionerBase>& positioner);
 
 	DrawableShape& operator= (const DrawableShape&);
 };
@@ -62184,24 +62227,24 @@ public:
 			int getNumControlPoints() const throw();
 
 			const RelativePoint getControlPoint (int index) const;
-			Value getControlPointValue (int index, UndoManager* undoManager) const;
+			Value getControlPointValue (int index, UndoManager*) const;
 			const RelativePoint getStartPoint() const;
 			const RelativePoint getEndPoint() const;
-			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
-			float getLength (Expression::EvaluationContext* nameFinder) const;
+			void setControlPoint (int index, const RelativePoint& point, UndoManager*);
+			float getLength (Expression::EvaluationContext*) const;
 
 			ValueTreeWrapper getParent() const;
 			Element getPreviousElement() const;
 
 			const String getModeOfEndPoint() const;
-			void setModeOfEndPoint (const String& newMode, UndoManager* undoManager);
+			void setModeOfEndPoint (const String& newMode, UndoManager*);
 
-			void convertToLine (UndoManager* undoManager);
-			void convertToCubic (Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
+			void convertToLine (UndoManager*);
+			void convertToCubic (Expression::EvaluationContext*, UndoManager*);
 			void convertToPathBreak (UndoManager* undoManager);
-			ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
+			ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext*, UndoManager*);
 			void removePoint (UndoManager* undoManager);
-			float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const;
+			float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext*) const;
 
 			static const Identifier mode, startSubPathElement, closeSubPathElement,
 									lineToElement, quadraticToElement, cubicToElement;
@@ -62220,15 +62263,13 @@ public:
 		static const Identifier nonZeroWinding, point1, point2, point3;
 	};
 
-protected:
-	bool rebuildPath (Path& path) const;
-
 private:
+
+	ScopedPointer<RelativePointPath> relativePath;
 
 	class RelativePositioner;
 	friend class RelativePositioner;
-	void applyRelativePath (const RelativePointPath& newPath);
-	const RelativePointPath* getRelativePath() const;
+	void applyRelativePath (const RelativePointPath&, Expression::EvaluationContext*);
 
 	DrawablePath& operator= (const DrawablePath&);
 	JUCE_LEAK_DETECTOR (DrawablePath);
@@ -62290,24 +62331,24 @@ public:
 		ValueTreeWrapper (const ValueTree& state);
 
 		const RelativeParallelogram getRectangle() const;
-		void setRectangle (const RelativeParallelogram& newBounds, UndoManager* undoManager);
+		void setRectangle (const RelativeParallelogram& newBounds, UndoManager*);
 
-		void setCornerSize (const RelativePoint& cornerSize, UndoManager* undoManager);
+		void setCornerSize (const RelativePoint& cornerSize, UndoManager*);
 		const RelativePoint getCornerSize() const;
-		Value getCornerSizeValue (UndoManager* undoManager) const;
+		Value getCornerSizeValue (UndoManager*) const;
 
 		static const Identifier topLeft, topRight, bottomLeft, cornerSize;
 	};
 
-protected:
-	/** @internal */
-	bool rebuildPath (Path& path) const;
-
 private:
+	friend class Drawable::Positioner<DrawableRectangle>;
+
 	RelativeParallelogram bounds;
 	RelativePoint cornerSize;
 
-	const AffineTransform calculateTransform() const;
+	void rebuildPath();
+	bool registerCoordinates (RelativeCoordinatePositionerBase&);
+	void recalculateCoordinates (Expression::EvaluationContext*);
 
 	DrawableRectangle& operator= (const DrawableRectangle&);
 	JUCE_LEAK_DETECTOR (DrawableRectangle);
@@ -62425,12 +62466,17 @@ private:
 
 	RelativeParallelogram bounds;
 	RelativePoint fontSizeControlPoint;
-	Font font;
+	Point<float> resolvedPoints[3];
+	Font font, scaledFont;
 	String text;
 	Colour colour;
 	Justification justification;
 
+	friend class Drawable::Positioner<DrawableText>;
+	bool registerCoordinates (RelativeCoordinatePositionerBase&);
+	void recalculateCoordinates (Expression::EvaluationContext*);
 	void refreshBounds();
+	const AffineTransform getArrangementAndTransform (GlyphArrangement& glyphs) const;
 
 	DrawableText& operator= (const DrawableText&);
 	JUCE_LEAK_DETECTOR (DrawableText);

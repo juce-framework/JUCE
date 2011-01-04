@@ -131,7 +131,9 @@ private:
     Colour overlayColour;
     RelativeParallelogram bounds;
 
-    void refreshTransformFromBounds();
+    friend class Drawable::Positioner<DrawableImage>;
+    bool registerCoordinates (RelativeCoordinatePositionerBase&);
+    void recalculateCoordinates (Expression::EvaluationContext*);
 
     DrawableImage& operator= (const DrawableImage&);
     JUCE_LEAK_DETECTOR (DrawableImage);

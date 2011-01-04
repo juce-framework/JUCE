@@ -134,12 +134,17 @@ private:
     //==============================================================================
     RelativeParallelogram bounds;
     RelativePoint fontSizeControlPoint;
-    Font font;
+    Point<float> resolvedPoints[3];
+    Font font, scaledFont;
     String text;
     Colour colour;
     Justification justification;
 
+    friend class Drawable::Positioner<DrawableText>;
+    bool registerCoordinates (RelativeCoordinatePositionerBase&);
+    void recalculateCoordinates (Expression::EvaluationContext*);
     void refreshBounds();
+    const AffineTransform getArrangementAndTransform (GlyphArrangement& glyphs) const;
 
     DrawableText& operator= (const DrawableText&);
     JUCE_LEAK_DETECTOR (DrawableText);

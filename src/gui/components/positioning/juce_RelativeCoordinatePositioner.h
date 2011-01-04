@@ -26,7 +26,7 @@
 #ifndef __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
 #define __JUCE_RELATIVECOORDINATEPOSITIONER_JUCEHEADER__
 
-#include "juce_RelativeCoordinate.h"
+#include "juce_RelativePoint.h"
 #include "juce_MarkerList.h"
 #include "../juce_Component.h"
 
@@ -54,9 +54,10 @@ public:
 
     void apply();
 
-protected:
     bool addCoordinate (const RelativeCoordinate& coord);
+    bool addPoint (const RelativePoint& point);
 
+protected:
     virtual bool registerCoordinates() = 0;
     virtual void applyToComponentBounds() = 0;
 

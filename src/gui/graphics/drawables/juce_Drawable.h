@@ -28,6 +28,7 @@
 
 #include "../../components/juce_Component.h"
 #include "../../components/positioning/juce_RelativeCoordinate.h"
+#include "../../components/positioning/juce_RelativeCoordinatePositioner.h"
 #include "../../../containers/juce_ValueTree.h"
 #include "../../components/layout/juce_ComponentBuilder.h"
 class DrawableComposite;
@@ -214,6 +215,27 @@ protected:
     void setBoundsToEnclose (const Rectangle<float>& area);
 
     Point<int> originRelativeToComponent;
+
+  #ifndef DOXYGEN
+    /** Internal utility class used by Drawables. */
+    template <class DrawableType>
+    class Positioner  : public RelativeCoordinatePositionerBase
+    {
+    public:
+        Positioner (DrawableType& component_)
+            : RelativeCoordinatePositionerBase (component_),
+              owner (component_)
+        {}
+
+        bool registerCoordinates()      { return owner.registerCoordinates (*this); }
+        void applyToComponentBounds()   { owner.recalculateCoordinates (this); }
+
+    private:
+        DrawableType& owner;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
+    };
+  #endif
 
 private:
     void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);

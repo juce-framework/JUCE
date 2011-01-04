@@ -29,7 +29,7 @@
 #include "juce_Drawable.h"
 #include "../contexts/juce_FillType.h"
 #include "../colour/juce_ColourGradient.h"
-#include "../../components/positioning/juce_RelativePoint.h"
+#include "../../components/positioning/juce_RelativeCoordinatePositioner.h"
 
 
 //==============================================================================
@@ -51,6 +51,31 @@ public:
     ~DrawableShape();
 
     //==============================================================================
+    /** A FillType wrapper that allows the gradient coordinates to be implemented using RelativePoint.
+    */
+    class RelativeFillType
+    {
+    public:
+        RelativeFillType();
+        RelativeFillType (const FillType& fill);
+        RelativeFillType (const RelativeFillType&);
+        RelativeFillType& operator= (const RelativeFillType&);
+
+        bool operator== (const RelativeFillType&) const;
+        bool operator!= (const RelativeFillType&) const;
+
+        bool isDynamic() const;
+        bool recalculateCoords (Expression::EvaluationContext* context);
+
+        void writeTo (ValueTree& v, ComponentBuilder::ImageProvider*, UndoManager*) const;
+        bool readFrom (const ValueTree& v, ComponentBuilder::ImageProvider*);
+
+        //==============================================================================
+        FillType fill;
+        RelativePoint gradientPoint1, gradientPoint2, gradientPoint3;
+    };
+
+    //==============================================================================
     /** Sets a fill type for the path.
         This colour is used to fill the path - if you don't want the path to be
         filled (e.g. if you're just drawing an outline), set this to a transparent
@@ -60,20 +85,34 @@ public:
     */
     void setFill (const FillType& newFill);
 
+    /** Sets a fill type for the path.
+        This colour is used to fill the path - if you don't want the path to be
+        filled (e.g. if you're just drawing an outline), set this to a transparent
+        colour.
+
+        @see setPath, setStrokeFill
+    */
+    void setFill (const RelativeFillType& newFill);
+
     /** Returns the current fill type.
         @see setFill
     */
-    const FillType& getFill() const throw()                     { return mainFill; }
+    const RelativeFillType& getFill() const throw()                 { return mainFill; }
 
     /** Sets the fill type with which the outline will be drawn.
         @see setFill
     */
     void setStrokeFill (const FillType& newStrokeFill);
 
+    /** Sets the fill type with which the outline will be drawn.
+        @see setFill
+    */
+    void setStrokeFill (const RelativeFillType& newStrokeFill);
+
     /** Returns the current stroke fill.
         @see setStrokeFill
     */
-    const FillType& getStrokeFill() const throw()               { return strokeFill; }
+    const RelativeFillType& getStrokeFill() const throw()           { return strokeFill; }
 
     /** Changes the properties of the outline that will be drawn around the path.
         If the stroke has 0 thickness, no stroke will be drawn.
@@ -87,7 +126,7 @@ public:
     void setStrokeThickness (float newThickness);
 
     /** Returns the current outline style. */
-    const PathStrokeType& getStrokeType() const throw()         { return strokeType; }
+    const PathStrokeType& getStrokeType() const throw()             { return strokeType; }
 
     //==============================================================================
     /** @internal */
@@ -96,32 +135,13 @@ public:
     public:
         FillAndStrokeState (const ValueTree& state);
 
-        const FillType getMainFill (Expression::EvaluationContext* nameFinder,
-                                    ComponentBuilder::ImageProvider* imageProvider) const;
-        ValueTree getMainFillState();
-        void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
-                          const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-                          ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
-
-        const FillType getStrokeFill (Expression::EvaluationContext* nameFinder,
-                                      ComponentBuilder::ImageProvider* imageProvider) const;
-        ValueTree getStrokeFillState();
-        void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
-                            const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
-                            ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager);
+        ValueTree getFillState (const Identifier& fillOrStrokeType);
+        const RelativeFillType getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider*) const;
+        void setFill (const Identifier& fillOrStrokeType, const RelativeFillType& newFill,
+                      ComponentBuilder::ImageProvider*, UndoManager*);
 
         const PathStrokeType getStrokeType() const;
-        void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
-
-        static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
-                                            RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
-                                            Expression::EvaluationContext* nameFinder,
-                                            ComponentBuilder::ImageProvider* imageProvider);
-
-        static void writeFillType (ValueTree& v, const FillType& fillType,
-                                   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-                                   const RelativePoint* gradientPoint3, ComponentBuilder::ImageProvider* imageProvider,
-                                   UndoManager* undoManager);
+        void setStrokeType (const PathStrokeType& newStrokeType, UndoManager*);
 
         static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
                                 gradientPoint1, gradientPoint2, gradientPoint3, radial, imageId, imageOpacity;
@@ -140,28 +160,24 @@ protected:
     void pathChanged();
     /** Called when the cached stroke should be updated. */
     void strokeChanged();
-
-    /** Implemented by subclasses to regenerate the path. */
-    virtual bool rebuildPath (Path& path) const = 0;
-
     /** True if there's a stroke with a non-zero thickness and non-transparent colour. */
     bool isStrokeVisible() const throw();
-
     /** Updates the details from a FillAndStrokeState object, returning true if something changed. */
-    bool refreshFillTypes (const FillAndStrokeState& newState,
-                           Expression::EvaluationContext* nameFinder,
-                           ComponentBuilder::ImageProvider* imageProvider);
-
+    void refreshFillTypes (const FillAndStrokeState& newState, ComponentBuilder::ImageProvider*);
     /** Writes the stroke and fill details to a FillAndStrokeState object. */
-    void writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider* imageProvider, UndoManager* undoManager) const;
-
+    void writeTo (FillAndStrokeState& state, ComponentBuilder::ImageProvider*, UndoManager*) const;
 
     //==============================================================================
     PathStrokeType strokeType;
     Path path, strokePath;
 
 private:
-    FillType mainFill, strokeFill;
+    class RelativePositioner;
+    RelativeFillType mainFill, strokeFill;
+    ScopedPointer<RelativeCoordinatePositionerBase> mainFillPositioner, strokeFillPositioner;
+
+    void setFillInternal (RelativeFillType& fill, const RelativeFillType& newFill,
+                          ScopedPointer<RelativeCoordinatePositionerBase>& positioner);
 
     DrawableShape& operator= (const DrawableShape&);
 };

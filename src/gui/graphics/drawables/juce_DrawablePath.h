@@ -97,24 +97,24 @@ public:
             int getNumControlPoints() const throw();
 
             const RelativePoint getControlPoint (int index) const;
-            Value getControlPointValue (int index, UndoManager* undoManager) const;
+            Value getControlPointValue (int index, UndoManager*) const;
             const RelativePoint getStartPoint() const;
             const RelativePoint getEndPoint() const;
-            void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
-            float getLength (Expression::EvaluationContext* nameFinder) const;
+            void setControlPoint (int index, const RelativePoint& point, UndoManager*);
+            float getLength (Expression::EvaluationContext*) const;
 
             ValueTreeWrapper getParent() const;
             Element getPreviousElement() const;
 
             const String getModeOfEndPoint() const;
-            void setModeOfEndPoint (const String& newMode, UndoManager* undoManager);
+            void setModeOfEndPoint (const String& newMode, UndoManager*);
 
-            void convertToLine (UndoManager* undoManager);
-            void convertToCubic (Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
+            void convertToLine (UndoManager*);
+            void convertToCubic (Expression::EvaluationContext*, UndoManager*);
             void convertToPathBreak (UndoManager* undoManager);
-            ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder, UndoManager* undoManager);
+            ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext*, UndoManager*);
             void removePoint (UndoManager* undoManager);
-            float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext* nameFinder) const;
+            float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext*) const;
 
             static const Identifier mode, startSubPathElement, closeSubPathElement,
                                     lineToElement, quadraticToElement, cubicToElement;
@@ -133,15 +133,13 @@ public:
         static const Identifier nonZeroWinding, point1, point2, point3;
     };
 
-protected:
-    bool rebuildPath (Path& path) const;
-
 private:
     //==============================================================================
+    ScopedPointer<RelativePointPath> relativePath;
+
     class RelativePositioner;
     friend class RelativePositioner;
-    void applyRelativePath (const RelativePointPath& newPath);
-    const RelativePointPath* getRelativePath() const;
+    void applyRelativePath (const RelativePointPath&, Expression::EvaluationContext*);
 
     DrawablePath& operator= (const DrawablePath&);
     JUCE_LEAK_DETECTOR (DrawablePath);

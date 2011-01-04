@@ -57,38 +57,38 @@ DrawableText::~DrawableText()
 }
 
 //==============================================================================
-void DrawableText::refreshBounds()
-{
-    setBoundsToEnclose (getDrawableBounds());
-    repaint();
-}
-
 void DrawableText::setText (const String& newText)
 {
-    text = newText;
-    refreshBounds();
+    if (text != newText)
+    {
+        text = newText;
+        refreshBounds();
+    }
 }
 
 void DrawableText::setColour (const Colour& newColour)
 {
-    colour = newColour;
-    repaint();
+    if (colour != newColour)
+    {
+        colour = newColour;
+        repaint();
+    }
 }
 
 void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
 {
-    font = newFont;
-
-    if (applySizeAndScale)
+    if (font != newFont)
     {
-        Point<float> corners[3];
-        bounds.resolveThreePoints (corners, getParent());
+        font = newFont;
 
-        setFontSizeControlPoint (RelativePoint (RelativeParallelogram::getPointForInternalCoord (corners,
-                                    Point<float> (font.getHorizontalScale() * font.getHeight(), font.getHeight()))));
+        if (applySizeAndScale)
+        {
+            setFontSizeControlPoint (RelativePoint (RelativeParallelogram::getPointForInternalCoord (resolvedPoints,
+                                       Point<float> (font.getHorizontalScale() * font.getHeight(), font.getHeight()))));
+        }
+
+        refreshBounds();
     }
-
-    refreshBounds();
 }
 
 void DrawableText::setJustification (const Justification& newJustification)
@@ -99,14 +99,74 @@ void DrawableText::setJustification (const Justification& newJustification)
 
 void DrawableText::setBoundingBox (const RelativeParallelogram& newBounds)
 {
-    bounds = newBounds;
-    refreshBounds();
+    if (bounds != newBounds)
+    {
+        bounds = newBounds;
+        refreshBounds();
+    }
 }
 
 void DrawableText::setFontSizeControlPoint (const RelativePoint& newPoint)
 {
-    fontSizeControlPoint = newPoint;
-    refreshBounds();
+    if (fontSizeControlPoint != newPoint)
+    {
+        fontSizeControlPoint = newPoint;
+        refreshBounds();
+    }
+}
+
+void DrawableText::refreshBounds()
+{
+    if (bounds.isDynamic() || fontSizeControlPoint.isDynamic())
+    {
+        Drawable::Positioner<DrawableText>* const p = new Drawable::Positioner<DrawableText> (*this);
+        setPositioner (p);
+        p->apply();
+    }
+    else
+    {
+        setPositioner (0);
+        recalculateCoordinates (0);
+    }
+}
+
+bool DrawableText::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+{
+    bool ok = positioner.addPoint (bounds.topLeft);
+    ok = positioner.addPoint (bounds.topRight) && ok;
+    ok = positioner.addPoint (bounds.bottomLeft) && ok;
+    return positioner.addPoint (fontSizeControlPoint) && ok;
+}
+
+void DrawableText::recalculateCoordinates (Expression::EvaluationContext* context)
+{
+    bounds.resolveThreePoints (resolvedPoints, context);
+
+    const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
+    const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
+
+    const Point<float> fontCoords (RelativeParallelogram::getInternalCoordForPoint (resolvedPoints, fontSizeControlPoint.resolve (context)));
+    const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.getY());
+    const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.getX());
+
+    scaledFont = font;
+    scaledFont.setHeight (fontHeight);
+    scaledFont.setHorizontalScale (fontWidth / fontHeight);
+
+    setBoundsToEnclose (getDrawableBounds());
+    repaint();
+}
+
+const AffineTransform DrawableText::getArrangementAndTransform (GlyphArrangement& glyphs) const
+{
+    const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
+    const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
+
+    glyphs.addFittedText (scaledFont, text, 0, 0, w, h, justification, 0x100000);
+
+    return AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].getX(), resolvedPoints[0].getY(),
+                                              w, 0, resolvedPoints[1].getX(), resolvedPoints[1].getY(),
+                                              0, h, resolvedPoints[2].getX(), resolvedPoints[2].getY());
 }
 
 //==============================================================================
@@ -114,32 +174,16 @@ void DrawableText::paint (Graphics& g)
 {
     transformContextToCorrectOrigin (g);
 
-    Point<float> points[3];
-    bounds.resolveThreePoints (points, getParent());
-
-    const float w = Line<float> (points[0], points[1]).getLength();
-    const float h = Line<float> (points[0], points[2]).getLength();
-
-    const Point<float> fontCoords (bounds.getInternalCoordForPoint (points, fontSizeControlPoint.resolve (getParent())));
-    const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.getY());
-    const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.getX());
-
-    Font f (font);
-    f.setHeight (fontHeight);
-    f.setHorizontalScale (fontWidth / fontHeight);
-
     g.setColour (colour);
 
     GlyphArrangement ga;
-    ga.addFittedText (f, text, 0, 0, w, h, justification, 0x100000);
-    ga.draw (g, AffineTransform::fromTargetPoints (0, 0, points[0].getX(), points[0].getY(),
-                                                   w, 0, points[1].getX(), points[1].getY(),
-                                                   0, h, points[2].getX(), points[2].getY()));
+    const AffineTransform transform (getArrangementAndTransform (ga));
+    ga.draw (g, transform);
 }
 
 const Rectangle<float> DrawableText::getDrawableBounds() const
 {
-    return bounds.getBounds (getParent());
+    return RelativeParallelogram::getBoundingBox (resolvedPoints);
 }
 
 Drawable* DrawableText::createCopy() const
@@ -254,7 +298,6 @@ void DrawableText::refreshFromValueTree (const ValueTree& tree, ComponentBuilder
     if (text != newText || font != newFont || justification != newJustification
          || colour != newColour || bounds != newBounds || newFontPoint != fontSizeControlPoint)
     {
-        repaint();
         setBoundingBox (newBounds);
         setFontSizeControlPoint (newFontPoint);
         setColour (newColour);
