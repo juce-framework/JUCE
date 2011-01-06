@@ -38,8 +38,7 @@
 
     @see Drawable
 */
-class JUCE_API  DrawableComposite  : public Drawable//,
-//                                     public Expression::EvaluationContext
+class JUCE_API  DrawableComposite  : public Drawable
 {
 public:
     //==============================================================================

@@ -1026,6 +1026,7 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
     addAndMakeVisible (statusBar = new TooltipBar());
 
     deviceManager->addAudioCallback (&graphPlayer);
+    deviceManager->addMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
 
     graphPanel->updateComponents();
 }
@@ -1033,6 +1034,8 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
 GraphDocumentComponent::~GraphDocumentComponent()
 {
     deviceManager->removeAudioCallback (&graphPlayer);
+    deviceManager->removeMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+
     deleteAllChildren();
 
     graphPlayer.setProcessor (0);

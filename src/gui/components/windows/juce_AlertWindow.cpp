@@ -125,7 +125,7 @@ void AlertWindow::setMessage (const String& message)
     {
         text = newMessage;
 
-        font.setHeight (15.0f);
+        font = getLookAndFeel().getAlertWindowMessageFont();
 
         Font titleFont (font.getHeight() * 1.1f, Font::bold);
         textLayout.setText (getName() + "\n\n", titleFont);

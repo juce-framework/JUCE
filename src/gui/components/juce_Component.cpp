@@ -732,6 +732,21 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
 }
 
 //==============================================================================
+void Component::moveChildInternal (const int sourceIndex, const int destIndex)
+{
+    if (sourceIndex != destIndex)
+    {
+        Component* const c = childComponentList.getUnchecked (sourceIndex);
+        jassert (c != 0);
+        c->repaintParent();
+
+        childComponentList.move (sourceIndex, destIndex);
+
+        sendFakeMouseMove();
+        internalChildrenChanged();
+    }
+}
+
 void Component::toFront (const bool setAsForeground)
 {
     // if component methods are being called from threads other than the message
@@ -752,7 +767,7 @@ void Component::toFront (const bool setAsForeground)
     }
     else if (parentComponent != 0)
     {
-        Array<Component*>& childList = parentComponent->childComponentList;
+        const Array<Component*>& childList = parentComponent->childComponentList;
 
         if (childList.getLast() != this)
         {
@@ -770,13 +785,7 @@ void Component::toFront (const bool setAsForeground)
                         --insertIndex;
                 }
 
-                if (index != insertIndex)
-                {
-                    childList.move (index, insertIndex);
-                    sendFakeMouseMove();
-
-                    repaintParent();
-                }
+                parentComponent->moveChildInternal (index, insertIndex);
             }
         }
 
@@ -797,8 +806,7 @@ void Component::toBehind (Component* const other)
 
         if (parentComponent != 0)
         {
-            Array<Component*>& childList = parentComponent->childComponentList;
-
+            const Array<Component*>& childList = parentComponent->childComponentList;
             const int index = childList.indexOf (this);
 
             if (index >= 0 && childList [index + 1] != other)
@@ -810,10 +818,7 @@ void Component::toBehind (Component* const other)
                     if (index < otherIndex)
                         --otherIndex;
 
-                    childList.move (index, otherIndex);
-
-                    sendFakeMouseMove();
-                    repaintParent();
+                    parentComponent->moveChildInternal (index, otherIndex);
                 }
             }
         }
@@ -836,35 +841,27 @@ void Component::toBehind (Component* const other)
 
 void Component::toBack()
 {
-    Array<Component*>& childList = parentComponent->childComponentList;
-
     if (isOnDesktop())
     {
         jassertfalse; //xxx need to add this to native window
     }
-    else if (parentComponent != 0 && childList.getFirst() != this)
+    else if (parentComponent != 0)
     {
-        const int index = childList.indexOf (this);
+        const Array<Component*>& childList = parentComponent->childComponentList;
 
-        if (index > 0)
+        if (childList.getFirst() != this)
         {
-            int insertIndex = 0;
+            const int index = childList.indexOf (this);
 
-            if (flags.alwaysOnTopFlag)
+            if (index > 0)
             {
-                while (insertIndex < childList.size()
-                        && ! childList.getUnchecked (insertIndex)->isAlwaysOnTop())
-                {
-                    ++insertIndex;
-                }
-            }
+                int insertIndex = 0;
 
-            if (index != insertIndex)
-            {
-                childList.move (index, insertIndex);
+                if (flags.alwaysOnTopFlag)
+                    while (insertIndex < childList.size() && ! childList.getUnchecked (insertIndex)->isAlwaysOnTop())
+                        ++insertIndex;
 
-                sendFakeMouseMove();
-                repaintParent();
+                parentComponent->moveChildInternal (index, insertIndex);
             }
         }
     }

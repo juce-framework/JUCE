@@ -199,6 +199,7 @@ public:
 
     virtual int getAlertWindowButtonHeight();
 
+    virtual const Font getAlertWindowMessageFont();
     virtual const Font getAlertWindowFont();
 
     /** Draws a progress bar.

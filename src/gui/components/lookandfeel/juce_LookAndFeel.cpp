@@ -685,6 +685,11 @@ int LookAndFeel::getAlertWindowButtonHeight()
     return 28;
 }
 
+const Font LookAndFeel::getAlertWindowMessageFont()
+{
+    return Font (15.0f);
+}
+
 const Font LookAndFeel::getAlertWindowFont()
 {
     return Font (12.0f);

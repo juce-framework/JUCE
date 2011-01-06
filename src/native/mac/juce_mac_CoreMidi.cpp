@@ -399,7 +399,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 
         for (int i = 0; i < numPackets; ++i)
         {
-            p->timeStamp = 0;
+            p->timeStamp = AudioGetCurrentHostTime();
             p->length = jmin (maxPacketSize, bytesLeft);
             memcpy (p->data, message.getRawData() + pos, p->length);
             pos += p->length;
@@ -413,7 +413,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     {
         MIDIPacketList packets;
         packets.numPackets = 1;
-        packets.packet[0].timeStamp = 0;
+        packets.packet[0].timeStamp = AudioGetCurrentHostTime();
         packets.packet[0].length = message.getRawDataSize();
         *(int*) (packets.packet[0].data) = *(const int*) message.getRawData();
 

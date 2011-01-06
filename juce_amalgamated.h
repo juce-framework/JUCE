@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	7
+#define JUCE_BUILDNUMBER	8
 
 /** Current Juce version number.
 
@@ -9459,7 +9459,7 @@ public:
 		the file first and then re-writing it, it creates a new temporary file,
 		writes the data to that, and then moves the new file to replace the existing
 		file. This means that if the power gets pulled out or something crashes,
-		you're a lot less likely to end up with an empty file..
+		you're a lot less likely to end up with a corrupted or unfinished file..
 
 		Returns true if the operation succeeds, or false if it fails.
 
@@ -29038,7 +29038,8 @@ private:
 	void internalModifierKeysChanged();
 	void internalChildrenChanged();
 	void internalHierarchyChanged();
-	Component* removeChildComponent (const int index, bool sendParentEvents, bool sendChildEvents);
+	Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
+	void moveChildInternal (int sourceIndex, int destIndex);
 	void paintComponentAndChildren (Graphics& g);
 	void paintComponent (Graphics& g);
 	void paintWithinParentContext (Graphics& g);
@@ -56179,6 +56180,7 @@ public:
 
 	virtual int getAlertWindowButtonHeight();
 
+	virtual const Font getAlertWindowMessageFont();
 	virtual const Font getAlertWindowFont();
 
 	/** Draws a progress bar.
@@ -61769,8 +61771,7 @@ protected:
 
 	@see Drawable
 */
-class JUCE_API  DrawableComposite  : public Drawable//,
-//					 public Expression::EvaluationContext
+class JUCE_API  DrawableComposite  : public Drawable
 {
 public:
 

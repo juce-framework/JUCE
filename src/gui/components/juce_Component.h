@@ -2239,7 +2239,8 @@ private:
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();
-    Component* removeChildComponent (const int index, bool sendParentEvents, bool sendChildEvents);
+    Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
+    void moveChildInternal (int sourceIndex, int destIndex);
     void paintComponentAndChildren (Graphics& g);
     void paintComponent (Graphics& g);
     void paintWithinParentContext (Graphics& g);
