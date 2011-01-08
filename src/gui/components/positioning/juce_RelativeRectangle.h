@@ -45,7 +45,7 @@ public:
     RelativeRectangle();
 
     /** Creates an absolute rectangle, relative to the origin. */
-    explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
+    explicit RelativeRectangle (const Rectangle<float>& rect);
 
     /** Creates a rectangle from four coordinates. */
     RelativeRectangle (const RelativeCoordinate& left, const RelativeCoordinate& right,
@@ -78,7 +78,9 @@ public:
     */
     void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
 
-    /** Returns true if this rectangle depends on any other coordinates for its position. */
+    /** Returns true if this rectangle depends on any external symbols for its position.
+        Coordinates that refer to symbols based on "this" are assumed not to be dynamic.
+    */
     bool isDynamic() const;
 
     /** Returns a string which represents this point.

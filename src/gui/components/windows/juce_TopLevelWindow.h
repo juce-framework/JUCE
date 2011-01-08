@@ -148,8 +148,6 @@ protected:
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
-    void visibilityChanged();
-    /** @internal */
     virtual int getDesktopWindowStyleFlags() const;
     /** @internal */
     void recreateDesktopWindow();

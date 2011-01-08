@@ -28,6 +28,7 @@
 
 #include "../../../containers/juce_ValueTree.h"
 #include "../positioning/juce_RelativeCoordinate.h"
+class Component;
 
 
 //==============================================================================
@@ -63,7 +64,17 @@ public:
         /** The marker's name. */
         String name;
 
-        /** The marker's position. */
+        /** The marker's position.
+
+            The expression used to define the coordinate may use the names of other
+            markers, so that markers can be linked in arbitrary ways, but be careful
+            not to create recursive loops of markers whose positions are based on each
+            other! It can also refer to "parent.right" and "parent.bottom" so that you
+            can set markers which are relative to the size of the component that contains
+            them.
+
+            To resolve the coordinate, you can use the MarkerList::getMarkerPosition() method.
+        */
         RelativeCoordinate position;
 
         /** Returns true if both the names and positions of these two markers match. */
@@ -83,6 +94,12 @@ public:
         Note that name comparisons are case-sensitive.
     */
     const Marker* getMarker (const String& name) const throw();
+
+    /** Evaluates the given marker and returns its absolute position.
+        The parent component must be supplied in case the marker's expression refers to
+        the size of its parent component.
+    */
+    double getMarkerPosition (const Marker& marker, Component* parentComponent) const;
 
     /** Sets the position of a marker.
 
@@ -161,7 +178,7 @@ public:
 private:
     //==============================================================================
     OwnedArray<Marker> markers;
-    ListenerList <Listener> listeners;
+    ListenerList<Listener> listeners;
 
     JUCE_LEAK_DETECTOR (MarkerList);
 };

@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created for JUCE version: JUCE v1.52.97
+  Created for JUCE version: JUCE v1.53.8
 
   ------------------------------------------------------------------------------
 
@@ -29,10 +29,6 @@ class PropertiesWithHelpComponent  : public PropertyPanelWithTooltips
 public:
     PropertiesWithHelpComponent (Project& project_, int tabIndex_)
         : project (project_), tabIndex (tabIndex_)
-    {
-    }
-
-    ~PropertiesWithHelpComponent()
     {
     }
 
@@ -108,16 +104,21 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
       configTabBox (TabbedButtonBar::TabsAtTop)
 {
     addAndMakeVisible (&configTabBox);
+    configTabBox.setBounds (RelativeRectangle ("8, 0, this.left + parent.right - 16, this.top + parent.bottom - 36"));
     addAndMakeVisible (&editConfigsButton);
+    editConfigsButton.setBounds (RelativeRectangle ("8, parent.bottom - 30, this.left + 192, this.top + 22"));
     editConfigsButton.setButtonText ("Add/Remove Configurations...");
     editConfigsButton.addListener (this);
     addAndMakeVisible (&openProjectButton);
+    openProjectButton.setBounds (RelativeRectangle ("608, parent.bottom - 30, this.left + 208, this.top + 22"));
     openProjectButton.setButtonText ("Open Project in ");
     openProjectButton.addListener (this);
     addAndMakeVisible (&editExportersButton);
+    editExportersButton.setBounds (RelativeRectangle ("208, parent.bottom - 30, this.left + 160, this.top + 22"));
     editExportersButton.setButtonText ("Add/Remove Exporters...");
     editExportersButton.addListener (this);
     addAndMakeVisible (&saveAndOpenButton);
+    saveAndOpenButton.setBounds (RelativeRectangle ("391, parent.bottom - 30, this.left + 208, this.top + 22"));
     saveAndOpenButton.setButtonText ("Save And Open in");
     saveAndOpenButton.addListener (this);
 
@@ -136,7 +137,7 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
 #endif
     //[/UserPreSize]
 
-    setSize (859, 479);
+    setSize (836, 427);
 
     //[Constructor] You can add your own custom stuff here..
     configTabBox.setOutline (1);
@@ -166,16 +167,7 @@ void ProjectInformationComponent::resized()
     //[Userresized_Pre]
     //[/Userresized_Pre]
 
-    configTabBox.setBounds (Rectangle<int>::leftTopRightBottom (8, 0, (int) ((8.0 + getWidth()) - 16.0),
-                                                                (int) ((0.0 + getHeight()) - 36.0)));
-    editConfigsButton.setBounds (Rectangle<int>::leftTopRightBottom (8, (int) (getHeight() - 30.0), (int) (8.0 + 192.0),
-                                                                     (int) (getHeight() - 30.0 + 22.0)));
-    openProjectButton.setBounds (Rectangle<int>::leftTopRightBottom (608, (int) (getHeight() - 30.0), (int) (608.0 + 208.0),
-                                                                     (int) (getHeight() - 30.0 + 22.0)));
-    editExportersButton.setBounds (Rectangle<int>::leftTopRightBottom (208, (int) (getHeight() - 30.0),
-                                                                       (int) (208.0 + 160.0), (int) (getHeight() - 30.0 + 22.0)));
-    saveAndOpenButton.setBounds (Rectangle<int>::leftTopRightBottom (391, (int) (getHeight() - 30.0), (int) (391.0 + 208.0),
-                                                                     (int) (getHeight() - 30.0 + 22.0)));
+
 
     //[Userresized_Post]
     //[/Userresized_Post]
@@ -357,8 +349,8 @@ void ProjectInformationComponent::changeListenerCallback (ChangeBroadcaster*)
 
 JUCER_COMPONENT_METADATA_START
 
-<COMPONENT id="tO9EG1a" className="ProjectInformationComponent" width="859"
-           height="479" background="f6f9ff" parentClasses="public Component, public ChangeListener"
+<COMPONENT id="tO9EG1a" className="ProjectInformationComponent" width="836"
+           height="427" background="f6f9ff" parentClasses="public Component, public ChangeListener"
            constructorParams="Project&amp; project_" memberInitialisers="project (project_)">
   <COMPONENTS>
     <TABBEDCOMPONENT id="962c1575c4142253" memberName="configTabBox" focusOrder="0"

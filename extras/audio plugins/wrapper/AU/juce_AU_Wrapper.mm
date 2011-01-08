@@ -109,6 +109,8 @@ class EditorCompHolder;
                              withAU: (JuceAU*) au
                       withComponent: (AudioProcessorEditor*) editorComp;
 - (void) dealloc;
+- (void) shutdown;
+- (void) applicationWillTerminate: (NSNotification*) aNotification;
 - (void) viewDidMoveToWindow;
 - (BOOL) mouseDownCanMoveWindow;
 - (void) filterBeingDeleted: (JuceAU*) au_;
@@ -1010,6 +1012,10 @@ public:
     [self setHidden: NO];
     [self setPostsFrameChangedNotifications: YES];
 
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector (applicationWillTerminate:)
+                                                 name: NSApplicationWillTerminateNotification
+                                               object: nil];
     activeUIs.add (self);
 
     editorComp->addToDesktop (0, (void*) self);
@@ -1019,6 +1025,20 @@ public:
 }
 
 - (void) dealloc
+{
+    if (activeUIs.contains (self))
+        [self shutdown];
+
+    [super dealloc];
+}
+
+- (void) applicationWillTerminate: (NSNotification*) aNotification
+{
+    (void) aNotification;
+    [self shutdown];
+}
+
+- (void) shutdown
 {
     // there's some kind of component currently modal, but the host
     // is trying to delete our plugin..
@@ -1030,8 +1050,6 @@ public:
     activeUIs.removeValue (self);
     if (activePlugins.size() + activeUIs.size() == 0)
         shutdownJuce_GUI();
-
-    [super dealloc];
 }
 
 - (void) viewDidMoveToWindow

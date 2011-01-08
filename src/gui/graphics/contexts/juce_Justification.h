@@ -26,6 +26,8 @@
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
 #define __JUCE_JUSTIFICATION_JUCEHEADER__
 
+#include "../geometry/juce_Rectangle.h"
+
 
 //==============================================================================
 /**
@@ -74,9 +76,30 @@ public:
         The (x, y) position of the rectangle will be updated to position it inside the
         given space according to the justification flags.
     */
-    void applyToRectangle (int& x, int& y, int w, int h,
-                           int spaceX, int spaceY, int spaceW, int spaceH) const throw();
+    template <typename ValueType>
+    void applyToRectangle (ValueType& x, ValueType& y, ValueType w, ValueType h,
+                           ValueType spaceX, ValueType spaceY, ValueType spaceW, ValueType spaceH) const throw()
+    {
+        x = spaceX;
+        if ((flags & horizontallyCentred) != 0)     x += (spaceW - w) / (ValueType) 2;
+        else if ((flags & right) != 0)              x += spaceW - w;
 
+        y = spaceY;
+        if ((flags & verticallyCentred) != 0)       y += (spaceH - h) / (ValueType) 2;
+        else if ((flags & bottom) != 0)             y += spaceH - h;
+    }
+
+    /** Returns the new position of a rectangle that has been justified to fit within a given space.
+    */
+    template <typename ValueType>
+    const Rectangle<ValueType> appliedToRectangle (const Rectangle<ValueType>& areaToAdjust,
+                                                   const Rectangle<ValueType>& targetSpace) const throw()
+    {
+        ValueType x = areaToAdjust.getX(), y = areaToAdjust.getY();
+        applyToRectangle (x, y, areaToAdjust.getWidth(), areaToAdjust.getHeight(),
+                          targetSpace.getX(), targetSpace.getY(), targetSpace.getWidth(), targetSpace.getHeight());
+        return areaToAdjust.withPosition (x, y);
+    }
 
     //==============================================================================
     /** Flag values that can be combined and used in the constructor. */

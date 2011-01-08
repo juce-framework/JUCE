@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	8
+#define JUCE_BUILDNUMBER	9
 
 /** Current Juce version number.
 
@@ -21955,6 +21955,9 @@ public:
 	void setPosition (const ValueType newX, const ValueType newY) throw()			   { x = newX; y = newY; }
 
 	/** Returns a rectangle with the same size as this one, but a new position. */
+	const Rectangle withPosition (const ValueType newX, const ValueType newY) const throw()	 { return Rectangle (newX, newY, w, h); }
+
+	/** Returns a rectangle with the same size as this one, but a new position. */
 	const Rectangle withPosition (const Point<ValueType>& newPos) const throw()			 { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
 
 	/** Returns the rectangle's top-left position as a Point. */
@@ -22584,8 +22587,30 @@ public:
 		The (x, y) position of the rectangle will be updated to position it inside the
 		given space according to the justification flags.
 	*/
-	void applyToRectangle (int& x, int& y, int w, int h,
-						   int spaceX, int spaceY, int spaceW, int spaceH) const throw();
+	template <typename ValueType>
+	void applyToRectangle (ValueType& x, ValueType& y, ValueType w, ValueType h,
+						   ValueType spaceX, ValueType spaceY, ValueType spaceW, ValueType spaceH) const throw()
+	{
+		x = spaceX;
+		if ((flags & horizontallyCentred) != 0)	 x += (spaceW - w) / (ValueType) 2;
+		else if ((flags & right) != 0)		  x += spaceW - w;
+
+		y = spaceY;
+		if ((flags & verticallyCentred) != 0)	   y += (spaceH - h) / (ValueType) 2;
+		else if ((flags & bottom) != 0)		 y += spaceH - h;
+	}
+
+	/** Returns the new position of a rectangle that has been justified to fit within a given space.
+	*/
+	template <typename ValueType>
+	const Rectangle<ValueType> appliedToRectangle (const Rectangle<ValueType>& areaToAdjust,
+												   const Rectangle<ValueType>& targetSpace) const throw()
+	{
+		ValueType x = areaToAdjust.getX(), y = areaToAdjust.getY();
+		applyToRectangle (x, y, areaToAdjust.getWidth(), areaToAdjust.getHeight(),
+						  targetSpace.getX(), targetSpace.getY(), targetSpace.getWidth(), targetSpace.getHeight());
+		return areaToAdjust.withPosition (x, y);
+	}
 
 	/** Flag values that can be combined and used in the constructor. */
 	enum
@@ -25322,6 +25347,20 @@ public:
 	/** Returns the transform that should be applied to these source co-ordinates to fit them
 		into the destination rectangle using the current flags.
 	*/
+	template <typename ValueType>
+	const Rectangle<ValueType> appliedTo (const Rectangle<ValueType>& source,
+										  const Rectangle<ValueType>& destination) const throw()
+	{
+		double x = source.getX(), y = source.getY(), w = source.getWidth(), h = source.getHeight();
+		applyTo (x, y, w, h, static_cast <double> (destination.getX()), static_cast <double> (destination.getY()),
+				 static_cast <double> (destination.getWidth()), static_cast <double> (destination.getHeight()));
+		return Rectangle<ValueType> (static_cast <ValueType> (x), static_cast <ValueType> (y),
+									 static_cast <ValueType> (w), static_cast <ValueType> (h));
+	}
+
+	/** Returns the transform that should be applied to these source co-ordinates to fit them
+		into the destination rectangle using the current flags.
+	*/
 	const AffineTransform getTransformToFit (const Rectangle<float>& source,
 											 const Rectangle<float>& destination) const throw();
 
@@ -26895,6 +26934,7 @@ class MouseInputSource;
 class MouseInputSourceInternal;
 class ComponentPeer;
 class MarkerList;
+class RelativeRectangle;
 
 /**
 	The base class for all JUCE user-interface objects.
@@ -27316,6 +27356,53 @@ public:
 		@see setBounds
 	*/
 	void setBounds (const Rectangle<int>& newBounds);
+
+	/** Changes the component's position and size.
+
+		This is similar to the other setBounds() methods, but uses RelativeRectangle::applyToComponent()
+		to set the position, This uses a Component::Positioner to make sure that any dynamic
+		expressions are used in the RelativeRectangle will be automatically re-applied to the
+		component's bounds when the source values change. See RelativeRectangle::applyToComponent()
+		for more details.
+
+		When using relative expressions, the following symbols are available:
+		 - "this.left", "this.right", "this.top", "this.bottom" refer to the position of those
+		   edges in this component, so e.g. for a component whose width is always 100, you might
+		   set the right edge to the "this.left + 100".
+		 - "parent.left", "parent.right", "parent.top", "parent.bottom" refer to the parent component's
+		   positions, in its own coordinate space, so "parent.left", "parent.right" are always 0, and
+		   "parent.top", "parent.bottom" will actually be the width and height of the parent. So
+		   for example to make your component's right-hand edge always 10 pixels away from its parent's
+		   right-hand edge, you could set it to "parent.right - 10"
+		 - "[id].left", "[id].right", "[id].top", "[id].bottom", where [id] is the identifier of one of
+		   this component's siblings. A component's identifier is set with Component::setComponentID().
+		   So for example if you want your component to always be 50 pixels to the right of the one
+		   called "xyz", you could set your left edge to be "xyz.right + 50"
+		 - The name of a marker that is defined in the parent component. For markers to be used, the parent
+		   component must implement its Component::getMarkers() method, and return at least one
+		   valid MarkerList. So if you want your component's top edge to be 10 pixels below the
+		   marker called "foobar", you'd set it to "foobar + 10".
+
+		See the Expression class for details about the operators that are supported, but for example
+		if you wanted to make your component remain centred within its parent with a size of 100, 100,
+		you could express it as:
+		@code myComp.setBounds (RelativeBounds ("parent.right / 2 - 50, parent.bottom / 2 - 50, this.left + 100, this.top + 100"));
+		@endcode
+		..or an alternative way to achieve the same thing:
+		@code myComp.setBounds (RelativeBounds ("this.right - 100, this.bottom - 100, parent.right / 2 + 50, parent.bottom / 2 + 50"));
+		@endcode
+
+		Or if you wanted a 100x100 component whose top edge is lined up to a marker called "topMarker" and
+		which is positioned 50 pixels to the right of another component called "otherComp", you could write:
+		@code myComp.setBounds (RelativeBounds ("otherComp.right + 50, topMarker, this.left + 100, this.top + 100"));
+		@endcode
+
+		Be careful not to make your coordinate expressions recursive, though, or exceptions and assertions will
+		be thrown!
+
+		@see setBounds, RelativeRectangle::applyToComponent(), Expression
+	*/
+	void setBounds (const RelativeRectangle& newBounds);
 
 	/** Changes the component's position and size in terms of fractions of its parent's size.
 
@@ -45533,6 +45620,8 @@ public:
 #ifndef __JUCE_MARKERLIST_JUCEHEADER__
 #define __JUCE_MARKERLIST_JUCEHEADER__
 
+class Component;
+
 /**
 	Holds a set of named marker points along a one-dimensional axis.
 
@@ -45564,7 +45653,17 @@ public:
 		/** The marker's name. */
 		String name;
 
-		/** The marker's position. */
+		/** The marker's position.
+
+			The expression used to define the coordinate may use the names of other
+			markers, so that markers can be linked in arbitrary ways, but be careful
+			not to create recursive loops of markers whose positions are based on each
+			other! It can also refer to "parent.right" and "parent.bottom" so that you
+			can set markers which are relative to the size of the component that contains
+			them.
+
+			To resolve the coordinate, you can use the MarkerList::getMarkerPosition() method.
+		*/
 		RelativeCoordinate position;
 
 		/** Returns true if both the names and positions of these two markers match. */
@@ -45583,6 +45682,12 @@ public:
 		Note that name comparisons are case-sensitive.
 	*/
 	const Marker* getMarker (const String& name) const throw();
+
+	/** Evaluates the given marker and returns its absolute position.
+		The parent component must be supplied in case the marker's expression refers to
+		the size of its parent component.
+	*/
+	double getMarkerPosition (const Marker& marker, Component* parentComponent) const;
 
 	/** Sets the position of a marker.
 
@@ -45659,7 +45764,7 @@ public:
 private:
 
 	OwnedArray<Marker> markers;
-	ListenerList <Listener> listeners;
+	ListenerList<Listener> listeners;
 
 	JUCE_LEAK_DETECTOR (MarkerList);
 };
@@ -51737,8 +51842,6 @@ protected:
 	void focusOfChildComponentChanged (FocusChangeType cause);
 	/** @internal */
 	void parentHierarchyChanged();
-	/** @internal */
-	void visibilityChanged();
 	/** @internal */
 	virtual int getDesktopWindowStyleFlags() const;
 	/** @internal */
@@ -57949,7 +58052,7 @@ public:
 	RelativeRectangle();
 
 	/** Creates an absolute rectangle, relative to the origin. */
-	explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
+	explicit RelativeRectangle (const Rectangle<float>& rect);
 
 	/** Creates a rectangle from four coordinates. */
 	RelativeRectangle (const RelativeCoordinate& left, const RelativeCoordinate& right,
@@ -57981,7 +58084,9 @@ public:
 	*/
 	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
 
-	/** Returns true if this rectangle depends on any other coordinates for its position. */
+	/** Returns true if this rectangle depends on any external symbols for its position.
+		Coordinates that refer to symbols based on "this" are assumed not to be dynamic.
+	*/
 	bool isDynamic() const;
 
 	/** Returns a string which represents this point.

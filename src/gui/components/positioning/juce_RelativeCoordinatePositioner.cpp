@@ -72,7 +72,7 @@ const Expression RelativeCoordinatePositionerBase::getSymbolValue (const String&
         const MarkerList::Marker* const marker = markerList->getMarker (objectName);
 
         if (marker != 0)
-            return marker->position.getExpression();
+            return Expression (markerList->getMarkerPosition (*marker, getComponent().getParentComponent()));
     }
 
     return Expression::EvaluationContext::getSymbolValue (objectName, member);

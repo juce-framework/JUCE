@@ -196,7 +196,7 @@ public:
     class Negate  : public Term
     {
     public:
-        Negate (const TermPtr& input_) : input (input_)
+        explicit Negate (const TermPtr& input_) : input (input_)
         {
             jassert (input_ != 0);
         }
@@ -257,7 +257,6 @@ public:
         }
 
         Type getType() const throw()        { return operatorType; }
-
         int getNumInputs() const            { return 2; }
         Term* getInput (int index) const    { return index == 0 ? static_cast<Term*> (left) : (index == 1 ? static_cast<Term*> (right) : 0); }
 
@@ -416,7 +415,7 @@ public:
 
         for (int i = topLevel->getNumInputs(); --i >= 0;)
         {
-            Term* t = findDestinationFor (topLevel->getInput (i), inputTerm);
+            Term* const t = findDestinationFor (topLevel->getInput (i), inputTerm);
 
             if (t != 0)
                 return t;
@@ -428,7 +427,7 @@ public:
     static Constant* findTermToAdjust (Term* const term, const bool mustBeFlagged)
     {
         {
-            Constant* c = dynamic_cast<Constant*> (term);
+            Constant* const c = dynamic_cast<Constant*> (term);
             if (c != 0 && (c->isResolutionTarget || ! mustBeFlagged))
                 return c;
         }
@@ -440,14 +439,14 @@ public:
         const int numIns = term->getNumInputs();
         for (i = 0; i < numIns; ++i)
         {
-            Constant* c = dynamic_cast<Constant*> (term->getInput (i));
+            Constant* const c = dynamic_cast<Constant*> (term->getInput (i));
             if (c != 0 && (c->isResolutionTarget || ! mustBeFlagged))
                 return c;
         }
 
         for (i = 0; i < numIns; ++i)
         {
-            Constant* c = findTermToAdjust (term->getInput (i), mustBeFlagged);
+            Constant* const c = findTermToAdjust (term->getInput (i), mustBeFlagged);
             if (c != 0)
                 return c;
         }
@@ -457,7 +456,7 @@ public:
 
     static bool containsAnySymbols (const Term* const t)
     {
-        if (dynamic_cast <const Symbol*> (t) != 0)
+        if (t->getType() == Expression::symbolType)
             return true;
 
         for (int i = t->getNumInputs(); --i >= 0;)
@@ -469,7 +468,7 @@ public:
 
     static bool renameSymbol (Term* const t, const String& oldName, const String& newName)
     {
-        Symbol* const sym = dynamic_cast <Symbol*> (t);
+        Symbol* const sym = dynamic_cast<Symbol*> (t);
 
         if (sym != 0 && sym->mainSymbol == oldName)
         {
@@ -529,13 +528,13 @@ public:
             return c >= '0' && c <= '9';
         }
 
-        void skipWhitespace (int& i)
+        void skipWhitespace (int& i) throw()
         {
             while (CharacterFunctions::isWhitespace (text [i]))
                 ++i;
         }
 
-        bool readChar (const juce_wchar required)
+        bool readChar (const juce_wchar required) throw()
         {
             if (text[textIndex] == required)
             {
@@ -546,7 +545,7 @@ public:
             return false;
         }
 
-        bool readOperator (const char* ops, char* const opType = 0)
+        bool readOperator (const char* ops, char* const opType = 0) throw()
         {
             skipWhitespace (textIndex);
 
@@ -566,7 +565,7 @@ public:
             return false;
         }
 
-        bool readIdentifier (String& identifier)
+        bool readIdentifier (String& identifier) throw()
         {
             skipWhitespace (textIndex);
             int i = textIndex;
@@ -589,7 +588,7 @@ public:
             return false;
         }
 
-        Term* readNumber()
+        Term* readNumber() throw()
         {
             skipWhitespace (textIndex);
             int i = textIndex;
@@ -713,7 +712,7 @@ public:
             {
                 if (readOperator ("(")) // method call...
                 {
-                    Function* f = new Function (identifier, ReferenceCountedArray<Term>());
+                    Function* const f = new Function (identifier, ReferenceCountedArray<Term>());
                     ScopedPointer<Term> func (f);  // (can't use ScopedPointer<Function> in MSVC)
 
                     TermPtr param (readExpression());
@@ -874,7 +873,7 @@ const Expression Expression::adjustedToGiveNewResult (const double targetValue,
 
     jassert (termToAdjust != 0);
 
-    const Term* parent = Helpers::findDestinationFor (newTerm, termToAdjust);
+    const Term* const parent = Helpers::findDestinationFor (newTerm, termToAdjust);
 
     if (parent == 0)
     {

@@ -88,7 +88,7 @@ void ResamplingAudioSource::releaseResources()
 
 void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
 {
-    float localRatio;
+    double localRatio;
 
     {
         const ScopedLock sl (ratioLock);

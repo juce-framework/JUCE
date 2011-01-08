@@ -41,6 +41,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../core/juce_Time.h"
 #include "../../core/juce_PlatformUtilities.h"
 #include "mouse/juce_MouseInputSource.h"
+#include "positioning/juce_RelativeRectangle.h"
 
 
 //==============================================================================
@@ -1084,10 +1085,12 @@ void Component::setTopRightPosition (const int x, const int y)
 
 void Component::setBounds (const Rectangle<int>& r)
 {
-    setBounds (r.getX(),
-               r.getY(),
-               r.getWidth(),
-               r.getHeight());
+    setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight());
+}
+
+void Component::setBounds (const RelativeRectangle& newBounds)
+{
+    newBounds.applyToComponent (*this);
 }
 
 void Component::setBoundsRelative (const float x, const float y,
@@ -1164,13 +1167,8 @@ void Component::setBoundsToFit (int x, int y, int width, int height,
         }
 
         if (newW > 0 && newH > 0)
-        {
-            int newX, newY;
-            justification.applyToRectangle (newX, newY, newW, newH,
-                                            x, y, width, height);
-
-            setBounds (newX, newY, newW, newH);
-        }
+            setBounds (justification.appliedToRectangle (Rectangle<int> (0, 0, newW, newH),
+                                                         Rectangle<int> (x, y, width, height)));
     }
 }
 

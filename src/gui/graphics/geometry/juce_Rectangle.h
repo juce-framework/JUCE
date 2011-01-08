@@ -150,6 +150,9 @@ public:
     void setPosition (const ValueType newX, const ValueType newY) throw()                           { x = newX; y = newY; }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
+    const Rectangle withPosition (const ValueType newX, const ValueType newY) const throw()         { return Rectangle (newX, newY, w, h); }
+
+    /** Returns a rectangle with the same size as this one, but a new position. */
     const Rectangle withPosition (const Point<ValueType>& newPos) const throw()                     { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
 
     /** Returns the rectangle's top-left position as a Point. */

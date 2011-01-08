@@ -144,8 +144,23 @@ public:
     /** Returns the transform that should be applied to these source co-ordinates to fit them
         into the destination rectangle using the current flags.
     */
+    template <typename ValueType>
+    const Rectangle<ValueType> appliedTo (const Rectangle<ValueType>& source,
+                                          const Rectangle<ValueType>& destination) const throw()
+    {
+        double x = source.getX(), y = source.getY(), w = source.getWidth(), h = source.getHeight();
+        applyTo (x, y, w, h, static_cast <double> (destination.getX()), static_cast <double> (destination.getY()),
+                 static_cast <double> (destination.getWidth()), static_cast <double> (destination.getHeight()));
+        return Rectangle<ValueType> (static_cast <ValueType> (x), static_cast <ValueType> (y),
+                                     static_cast <ValueType> (w), static_cast <ValueType> (h));
+    }
+
+    /** Returns the transform that should be applied to these source co-ordinates to fit them
+        into the destination rectangle using the current flags.
+    */
     const AffineTransform getTransformToFit (const Rectangle<float>& source,
                                              const Rectangle<float>& destination) const throw();
+
 
 private:
     //==============================================================================

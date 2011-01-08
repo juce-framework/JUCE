@@ -324,24 +324,12 @@ void QuickTimeMovieComponent::setBoundsWithCorrectAspectRatio (const Rectangle<i
     int normalWidth, normalHeight;
     getMovieNormalSize (normalWidth, normalHeight);
 
-    if (normalWidth > 0 && normalHeight > 0 && ! spaceToFitWithin.isEmpty())
-    {
-        double x = 0.0, y = 0.0, w = normalWidth, h = normalHeight;
+    const Rectangle<int> normalSize (0, 0, normalWidth, normalHeight);
 
-        placement.applyTo (x, y, w, h,
-                           spaceToFitWithin.getX(), spaceToFitWithin.getY(),
-                           spaceToFitWithin.getWidth(), spaceToFitWithin.getHeight());
-
-        if (w > 0 && h > 0)
-        {
-            setBounds (roundToInt (x), roundToInt (y),
-                       roundToInt (w), roundToInt (h));
-        }
-    }
+    if (! (spaceToFitWithin.isEmpty() || normalSize.isEmpty()))
+        setBounds (placement.appliedTo (normalSize, spaceToFitWithin));
     else
-    {
         setBounds (spaceToFitWithin);
-    }
 }
 
 

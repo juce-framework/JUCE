@@ -37,6 +37,7 @@ namespace CodeHelpers
     const String makeHeaderGuardName (const File& file);
 
     const String stringLiteral (const String& text);
+    const String stringLiteralIfNotEmpty (const String& text); // if the string's empty, this returns an empty string
     const String boolLiteral (bool b);
     const String floatLiteral (float v);
     const String doubleLiteral (double v);

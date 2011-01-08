@@ -48,7 +48,7 @@ class MouseInputSource;
 class MouseInputSourceInternal;
 class ComponentPeer;
 class MarkerList;
-
+class RelativeRectangle;
 
 //==============================================================================
 /**
@@ -478,6 +478,53 @@ public:
         @see setBounds
     */
     void setBounds (const Rectangle<int>& newBounds);
+
+    /** Changes the component's position and size.
+
+        This is similar to the other setBounds() methods, but uses RelativeRectangle::applyToComponent()
+        to set the position, This uses a Component::Positioner to make sure that any dynamic
+        expressions are used in the RelativeRectangle will be automatically re-applied to the
+        component's bounds when the source values change. See RelativeRectangle::applyToComponent()
+        for more details.
+
+        When using relative expressions, the following symbols are available:
+         - "this.left", "this.right", "this.top", "this.bottom" refer to the position of those
+           edges in this component, so e.g. for a component whose width is always 100, you might
+           set the right edge to the "this.left + 100".
+         - "parent.left", "parent.right", "parent.top", "parent.bottom" refer to the parent component's
+           positions, in its own coordinate space, so "parent.left", "parent.right" are always 0, and
+           "parent.top", "parent.bottom" will actually be the width and height of the parent. So
+           for example to make your component's right-hand edge always 10 pixels away from its parent's
+           right-hand edge, you could set it to "parent.right - 10"
+         - "[id].left", "[id].right", "[id].top", "[id].bottom", where [id] is the identifier of one of
+           this component's siblings. A component's identifier is set with Component::setComponentID().
+           So for example if you want your component to always be 50 pixels to the right of the one
+           called "xyz", you could set your left edge to be "xyz.right + 50"
+         - The name of a marker that is defined in the parent component. For markers to be used, the parent
+           component must implement its Component::getMarkers() method, and return at least one
+           valid MarkerList. So if you want your component's top edge to be 10 pixels below the
+           marker called "foobar", you'd set it to "foobar + 10".
+
+        See the Expression class for details about the operators that are supported, but for example
+        if you wanted to make your component remain centred within its parent with a size of 100, 100,
+        you could express it as:
+        @code myComp.setBounds (RelativeBounds ("parent.right / 2 - 50, parent.bottom / 2 - 50, this.left + 100, this.top + 100"));
+        @endcode
+        ..or an alternative way to achieve the same thing:
+        @code myComp.setBounds (RelativeBounds ("this.right - 100, this.bottom - 100, parent.right / 2 + 50, parent.bottom / 2 + 50"));
+        @endcode
+
+        Or if you wanted a 100x100 component whose top edge is lined up to a marker called "topMarker" and
+        which is positioned 50 pixels to the right of another component called "otherComp", you could write:
+        @code myComp.setBounds (RelativeBounds ("otherComp.right + 50, topMarker, this.left + 100, this.top + 100"));
+        @endcode
+
+        Be careful not to make your coordinate expressions recursive, though, or exceptions and assertions will
+        be thrown!
+
+        @see setBounds, RelativeRectangle::applyToComponent(), Expression
+    */
+    void setBounds (const RelativeRectangle& newBounds);
 
     /** Changes the component's position and size in terms of fractions of its parent's size.
 

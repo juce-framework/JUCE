@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created for JUCE version: JUCE v1.52.97
+  Created for JUCE version: JUCE v1.53.8
 
   ------------------------------------------------------------------------------
 

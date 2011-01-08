@@ -195,6 +195,11 @@ namespace CodeHelpers
         return CodeHelpers::addEscapeChars (text).quoted();
     }
 
+    const String stringLiteralIfNotEmpty (const String& text)
+    {
+        return text.isNotEmpty() ? stringLiteral (text) : String::empty;
+    }
+
     const String boolLiteral (const bool b)
     {
         return b ? "true" : "false";

@@ -192,12 +192,6 @@ void TopLevelWindow::parentHierarchyChanged()
     setDropShadowEnabled (useDropShadow);
 }
 
-void TopLevelWindow::visibilityChanged()
-{
-    if (isShowing())
-        toFront (true);
-}
-
 int TopLevelWindow::getDesktopWindowStyleFlags() const
 {
     int styleFlags = ComponentPeer::windowAppearsOnTaskbar;

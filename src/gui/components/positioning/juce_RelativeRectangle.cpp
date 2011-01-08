@@ -40,6 +40,26 @@ namespace RelativeRectangleHelpers
         if (s[i] == ',')
             ++i;
     }
+
+    bool dependsOnSymbolsOtherThanThis (const Expression& e)
+    {
+        if (e.getType() == Expression::symbolType)
+        {
+            String objectName, memberName;
+            e.getSymbolParts (objectName, memberName);
+
+            if (objectName != RelativeCoordinate::Strings::this_)
+                return true;
+        }
+        else
+        {
+            for (int i = e.getNumInputs(); --i >= 0;)
+                if (dependsOnSymbolsOtherThanThis (e.getInput(i)))
+                    return true;
+        }
+
+        return false;
+    }
 }
 
 //==============================================================================
@@ -53,11 +73,13 @@ RelativeRectangle::RelativeRectangle (const RelativeCoordinate& left_, const Rel
 {
 }
 
-RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect, const String& componentName)
+RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect)
     : left (rect.getX()),
-      right (Expression::symbol (componentName + "." + RelativeCoordinate::Strings::left) + Expression ((double) rect.getWidth())),
+      right (Expression::symbol (RelativeCoordinate::Strings::this_ + "." + RelativeCoordinate::Strings::left)
+                                 + Expression ((double) rect.getWidth())),
       top (rect.getY()),
-      bottom (Expression::symbol (componentName + "." + RelativeCoordinate::Strings::top) + Expression ((double) rect.getHeight()))
+      bottom (Expression::symbol (RelativeCoordinate::Strings::this_ + "." + RelativeCoordinate::Strings::top)
+                                  + Expression ((double) rect.getHeight()))
 {
 }
 
@@ -103,7 +125,12 @@ void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const Ex
 
 bool RelativeRectangle::isDynamic() const
 {
-    return left.isDynamic() || right.isDynamic() || top.isDynamic() || bottom.isDynamic();
+    using namespace RelativeRectangleHelpers;
+
+    return dependsOnSymbolsOtherThanThis (left.getExpression())
+            || dependsOnSymbolsOtherThanThis (right.getExpression())
+            || dependsOnSymbolsOtherThanThis (top.getExpression())
+            || dependsOnSymbolsOtherThanThis (bottom.getExpression());
 }
 
 const String RelativeRectangle::toString() const
@@ -164,6 +191,31 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleComponentPositioner);
 };
 
+// An expression context that can evaluate expressions using "this"
+class TemporaryRectangleContext  : public Expression::EvaluationContext
+{
+public:
+    TemporaryRectangleContext (const RelativeRectangle& rect_)  : rect (rect_) {}
+
+    const Expression getSymbolValue (const String& objectName, const String& edge) const
+    {
+        if (objectName == RelativeCoordinate::Strings::this_)
+        {
+            if (edge == RelativeCoordinate::Strings::left)   return rect.left.getExpression();
+            if (edge == RelativeCoordinate::Strings::right)  return rect.right.getExpression();
+            if (edge == RelativeCoordinate::Strings::top)    return rect.top.getExpression();
+            if (edge == RelativeCoordinate::Strings::bottom) return rect.bottom.getExpression();
+        }
+
+        return Expression::EvaluationContext::getSymbolValue (objectName, edge);
+    }
+
+private:
+    const RelativeRectangle& rect;
+
+    JUCE_DECLARE_NON_COPYABLE (TemporaryRectangleContext);
+};
+
 void RelativeRectangle::applyToComponent (Component& component) const
 {
     if (isDynamic())
@@ -181,7 +233,9 @@ void RelativeRectangle::applyToComponent (Component& component) const
     else
     {
         component.setPositioner (0);
-        component.setBounds (resolve (0).getSmallestIntegerContainer());
+
+        TemporaryRectangleContext context (*this);
+        component.setBounds (resolve (&context).getSmallestIntegerContainer());
     }
 }
 
