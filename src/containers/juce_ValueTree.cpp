@@ -43,8 +43,6 @@ public:
     {
     }
 
-    ~SetPropertyAction() {}
-
     bool perform()
     {
         jassert (! (isAddingNewProperty && target->hasProperty (name)));
@@ -112,8 +110,6 @@ public:
         jassert (child != 0);
     }
 
-    ~AddOrRemoveChildAction() {}
-
     bool perform()
     {
         if (isDeleting)
@@ -165,8 +161,6 @@ public:
           endIndex (endIndex_)
     {
     }
-
-    ~MoveChildAction() {}
 
     bool perform()
     {
@@ -373,7 +367,7 @@ ValueTree ValueTree::SharedObject::getChildWithName (const Identifier& typeToMat
 {
     for (int i = 0; i < children.size(); ++i)
         if (children.getUnchecked(i)->type == typeToMatch)
-            return ValueTree (static_cast <SharedObject*> (children.getUnchecked(i)));
+            return ValueTree (children.getUnchecked(i).getObject());
 
     return ValueTree::invalid;
 }
@@ -382,7 +376,7 @@ ValueTree ValueTree::SharedObject::getOrCreateChildWithName (const Identifier& t
 {
     for (int i = 0; i < children.size(); ++i)
         if (children.getUnchecked(i)->type == typeToMatch)
-            return ValueTree (static_cast <SharedObject*> (children.getUnchecked(i)));
+            return ValueTree (children.getUnchecked(i).getObject());
 
     SharedObject* const newObject = new SharedObject (typeToMatch);
     addChild (newObject, -1, undoManager);
@@ -394,7 +388,7 @@ ValueTree ValueTree::SharedObject::getChildWithProperty (const Identifier& prope
 {
     for (int i = 0; i < children.size(); ++i)
         if (children.getUnchecked(i)->getProperty (propertyName) == propertyValue)
-            return ValueTree (static_cast <SharedObject*> (children.getUnchecked(i)));
+            return ValueTree (children.getUnchecked(i).getObject());
 
     return ValueTree::invalid;
 }
@@ -635,7 +629,7 @@ ValueTree ValueTree::getSibling (const int delta) const
         return invalid;
 
     const int index = object->parent->indexOf (*this) + delta;
-    return ValueTree (static_cast <SharedObject*> (object->parent->children [index]));
+    return ValueTree (object->parent->children [index].getObject());
 }
 
 const var& ValueTree::operator[] (const Identifier& name) const

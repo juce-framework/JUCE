@@ -276,7 +276,6 @@
     <ClCompile Include="..\..\src\gui\components\mouse\juce_DragAndDropContainer.cpp"/>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseCursor.cpp"/>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseEvent.cpp"/>
-    <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseHoverDetector.cpp"/>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseInputSource.cpp"/>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseListener.cpp"/>
     <ClCompile Include="..\..\src\gui\components\positioning\juce_MarkerList.cpp"/>
@@ -298,7 +297,6 @@
     <ClCompile Include="..\..\src\gui\components\special\juce_BubbleMessageComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\special\juce_ColourSelector.cpp"/>
     <ClCompile Include="..\..\src\gui\components\special\juce_DropShadower.cpp"/>
-    <ClCompile Include="..\..\src\gui\components\special\juce_MagnifierComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\special\juce_MidiKeyboardComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\special\juce_OpenGLComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\special\juce_PreferencesPanel.cpp"/>
@@ -628,7 +626,6 @@
     <ClInclude Include="..\..\src\gui\components\menus\juce_MenuBarComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\menus\juce_MenuBarModel.h"/>
     <ClInclude Include="..\..\src\gui\components\menus\juce_PopupMenu.h"/>
-    <ClInclude Include="..\..\src\gui\components\menus\juce_PopupMenuCustomComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_ComponentDragger.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_DragAndDropContainer.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_DragAndDropTarget.h"/>
@@ -636,7 +633,6 @@
     <ClInclude Include="..\..\src\gui\components\mouse\juce_LassoComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseCursor.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseEvent.h"/>
-    <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseHoverDetector.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseInputSource.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseListener.h"/>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_TooltipClient.h"/>
@@ -660,7 +656,6 @@
     <ClInclude Include="..\..\src\gui\components\special\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_ColourSelector.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_DropShadower.h"/>
-    <ClInclude Include="..\..\src\gui\components\special\juce_MagnifierComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_MidiKeyboardComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_NSViewComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_OpenGLComponent.h"/>

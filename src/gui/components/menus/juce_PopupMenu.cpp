@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_PopupMenu.h"
-#include "juce_PopupMenuCustomComponent.h"
 #include "../windows/juce_ComponentPeer.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../juce_Desktop.h"
@@ -57,7 +56,7 @@ public:
           const Image& im,
           const Colour& textColour_,
           const bool usesColour_,
-          PopupMenuCustomComponent* const customComp_,
+          CustomComponent* const customComp_,
           const PopupMenu* const subMenu_,
           ApplicationCommandManager* const commandManager_)
       : itemId (itemId_), text (text_), textColour (textColour_),
@@ -120,7 +119,7 @@ public:
     const Colour textColour;
     const bool active, isSeparator, isTicked, usesColour;
     Image image;
-    ReferenceCountedObjectPtr <PopupMenuCustomComponent> customComp;
+    ReferenceCountedObjectPtr <CustomComponent> customComp;
     ScopedPointer <PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
 
@@ -155,22 +154,15 @@ public:
             removeChildComponent (itemInfo.customComp);
     }
 
-    void getIdealSize (int& idealWidth,
-                       int& idealHeight,
-                       const int standardItemHeight)
+    void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
     {
         if (itemInfo.customComp != 0)
-        {
             itemInfo.customComp->getIdealSize (idealWidth, idealHeight);
-        }
         else
-        {
             getLookAndFeel().getIdealPopupMenuItemSize (itemInfo.text,
                                                         itemInfo.isSeparator,
                                                         standardItemHeight,
-                                                        idealWidth,
-                                                        idealHeight);
-        }
+                                                        idealWidth, idealHeight);
     }
 
     void paint (Graphics& g)
@@ -215,10 +207,7 @@ public:
             isHighlighted = shouldBeHighlighted;
 
             if (itemInfo.customComp != 0)
-            {
-                itemInfo.customComp->isHighlighted = shouldBeHighlighted;
-                itemInfo.customComp->repaint();
-            }
+                itemInfo.customComp->setHighlighted (shouldBeHighlighted);
 
             repaint();
         }
@@ -1126,9 +1115,7 @@ private:
                  && (isOver || (activeSubMenu == 0) || ! activeSubMenu->isVisible()))
             {
                 if (isOver && (c != 0) && (activeSubMenu != 0))
-                {
                     activeSubMenu->hide (0, true);
-                }
 
                 if (! isOver)
                     mic = 0;
@@ -1143,7 +1130,7 @@ private:
         if (currentChild != 0
              && currentChild->itemInfo.canBeTriggered()
              && (currentChild->itemInfo.customComp == 0
-                  || currentChild->itemInfo.customComp->isTriggeredAutomatically))
+                  || currentChild->itemInfo.customComp->isTriggeredAutomatically()))
         {
             dismissMenu (&currentChild->itemInfo);
         }
@@ -1294,8 +1281,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
 }
 
 //==============================================================================
-void PopupMenu::addCustomItem (const int itemResultId,
-                               PopupMenuCustomComponent* const customComponent)
+void PopupMenu::addCustomItem (const int itemResultId, CustomComponent* const customComponent)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1307,18 +1293,16 @@ void PopupMenu::addCustomItem (const int itemResultId,
                          Colours::black, false, customComponent, 0, 0));
 }
 
-class NormalComponentWrapper : public PopupMenuCustomComponent
+class NormalComponentWrapper : public PopupMenu::CustomComponent
 {
 public:
     NormalComponentWrapper (Component* const comp, const int w, const int h,
                             const bool triggerMenuItemAutomaticallyWhenClicked)
-        : PopupMenuCustomComponent (triggerMenuItemAutomaticallyWhenClicked),
+        : PopupMenu::CustomComponent (triggerMenuItemAutomaticallyWhenClicked),
           width (w), height (h)
     {
         addAndMakeVisible (comp);
     }
-
-    ~NormalComponentWrapper() {}
 
     void getIdealSize (int& idealWidth, int& idealHeight)
     {
@@ -1368,11 +1352,11 @@ void PopupMenu::addSeparator()
 
 
 //==============================================================================
-class HeaderItemComponent  : public PopupMenuCustomComponent
+class HeaderItemComponent  : public PopupMenu::CustomComponent
 {
 public:
     HeaderItemComponent (const String& name)
-        : PopupMenuCustomComponent (false)
+        : PopupMenu::CustomComponent (false)
     {
         setName (name);
     }
@@ -1389,8 +1373,7 @@ public:
                           Justification::bottomLeft, 1);
     }
 
-    void getIdealSize (int& idealWidth,
-                       int& idealHeight)
+    void getIdealSize (int& idealWidth, int& idealHeight)
     {
         getLookAndFeel().getIdealPopupMenuItemSize (getName(), false, -1, idealWidth, idealHeight);
         idealHeight += idealHeight / 2;
@@ -1596,17 +1579,23 @@ void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel)
 }
 
 //==============================================================================
-PopupMenuCustomComponent::PopupMenuCustomComponent (const bool isTriggeredAutomatically_)
+PopupMenu::CustomComponent::CustomComponent (const bool isTriggeredAutomatically_)
     : isHighlighted (false),
-      isTriggeredAutomatically (isTriggeredAutomatically_)
+      triggeredAutomatically (isTriggeredAutomatically_)
 {
 }
 
-PopupMenuCustomComponent::~PopupMenuCustomComponent()
+PopupMenu::CustomComponent::~CustomComponent()
 {
 }
 
-void PopupMenuCustomComponent::triggerMenuItem()
+void PopupMenu::CustomComponent::setHighlighted (bool shouldBeHighlighted)
+{
+    isHighlighted = shouldBeHighlighted;
+    repaint();
+}
+
+void PopupMenu::CustomComponent::triggerMenuItem()
 {
     PopupMenu::ItemComponent* const mic = dynamic_cast <PopupMenu::ItemComponent*> (getParentComponent());
 
@@ -1667,7 +1656,7 @@ bool PopupMenu::MenuItemIterator::next()
     isSeparator = item->isSeparator;
     isTicked = item->isTicked;
     isEnabled = item->active;
-    isSectionHeader = dynamic_cast <HeaderItemComponent*> (static_cast <PopupMenuCustomComponent*> (item->customComp)) != 0;
+    isSectionHeader = dynamic_cast <HeaderItemComponent*> (static_cast <CustomComponent*> (item->customComp)) != 0;
     isCustomComponent = (! isSectionHeader) && item->customComp != 0;
     customColour = item->usesColour ? &(item->textColour) : 0;
     customImage = item->image;

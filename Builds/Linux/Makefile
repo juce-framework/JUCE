@@ -193,7 +193,6 @@ OBJECTS := \
   $(OBJDIR)/juce_DragAndDropContainer_553e412.o \
   $(OBJDIR)/juce_MouseCursor_afb68802.o \
   $(OBJDIR)/juce_MouseEvent_f6ca6078.o \
-  $(OBJDIR)/juce_MouseHoverDetector_d4af7a00.o \
   $(OBJDIR)/juce_MouseInputSource_8904aa23.o \
   $(OBJDIR)/juce_MouseListener_eb73f8a0.o \
   $(OBJDIR)/juce_MarkerList_2fbb4ef.o \
@@ -215,7 +214,6 @@ OBJECTS := \
   $(OBJDIR)/juce_BubbleMessageComponent_22f737f9.o \
   $(OBJDIR)/juce_ColourSelector_ac8bb1e2.o \
   $(OBJDIR)/juce_DropShadower_5903f9f3.o \
-  $(OBJDIR)/juce_MagnifierComponent_58d7efb6.o \
   $(OBJDIR)/juce_MidiKeyboardComponent_896e2ac8.o \
   $(OBJDIR)/juce_OpenGLComponent_73944221.o \
   $(OBJDIR)/juce_PreferencesPanel_dbc7d503.o \
@@ -1139,11 +1137,6 @@ $(OBJDIR)/juce_MouseEvent_f6ca6078.o: ../../src/gui/components/mouse/juce_MouseE
 	@echo "Compiling juce_MouseEvent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MouseHoverDetector_d4af7a00.o: ../../src/gui/components/mouse/juce_MouseHoverDetector.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_MouseHoverDetector.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_MouseInputSource_8904aa23.o: ../../src/gui/components/mouse/juce_MouseInputSource.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_MouseInputSource.cpp"
@@ -1247,11 +1240,6 @@ $(OBJDIR)/juce_ColourSelector_ac8bb1e2.o: ../../src/gui/components/special/juce_
 $(OBJDIR)/juce_DropShadower_5903f9f3.o: ../../src/gui/components/special/juce_DropShadower.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_DropShadower.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_MagnifierComponent_58d7efb6.o: ../../src/gui/components/special/juce_MagnifierComponent.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_MagnifierComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiKeyboardComponent_896e2ac8.o: ../../src/gui/components/special/juce_MidiKeyboardComponent.cpp

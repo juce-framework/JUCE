@@ -685,9 +685,6 @@
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseEvent.cpp">
       <Filter>Juce\Source\gui\components\mouse</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseHoverDetector.cpp">
-      <Filter>Juce\Source\gui\components\mouse</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\mouse\juce_MouseInputSource.cpp">
       <Filter>Juce\Source\gui\components\mouse</Filter>
     </ClCompile>
@@ -749,9 +746,6 @@
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\components\special\juce_DropShadower.cpp">
-      <Filter>Juce\Source\gui\components\special</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\gui\components\special\juce_MagnifierComponent.cpp">
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\components\special\juce_MidiKeyboardComponent.cpp">
@@ -1815,9 +1809,6 @@
     <ClInclude Include="..\..\src\gui\components\menus\juce_PopupMenu.h">
       <Filter>Juce\Source\gui\components\menus</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\components\menus\juce_PopupMenuCustomComponent.h">
-      <Filter>Juce\Source\gui\components\menus</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_ComponentDragger.h">
       <Filter>Juce\Source\gui\components\mouse</Filter>
     </ClInclude>
@@ -1837,9 +1828,6 @@
       <Filter>Juce\Source\gui\components\mouse</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseEvent.h">
-      <Filter>Juce\Source\gui\components\mouse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseHoverDetector.h">
       <Filter>Juce\Source\gui\components\mouse</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\mouse\juce_MouseInputSource.h">
@@ -1909,9 +1897,6 @@
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\special\juce_DropShadower.h">
-      <Filter>Juce\Source\gui\components\special</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\components\special\juce_MagnifierComponent.h">
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\special\juce_MidiKeyboardComponent.h">

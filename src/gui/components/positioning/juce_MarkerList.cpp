@@ -257,12 +257,12 @@ public:
 
     const Expression getSymbolValue (const String& objectName, const String& member) const
     {
-        if (member.isNotEmpty())
+        if (member.isEmpty())
         {
             const MarkerList::Marker* const marker = markerList.getMarker (objectName);
 
             if (marker != 0)
-                return Expression ((double) marker->position.resolve (this));
+                return Expression (marker->position.resolve (this));
         }
         else if (parentComponent != 0 && objectName == RelativeCoordinate::Strings::parent)
         {

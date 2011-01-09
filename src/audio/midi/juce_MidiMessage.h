@@ -90,6 +90,12 @@ public:
                  int& numBytesUsed, uint8 lastStatusByte,
                  double timeStamp = 0);
 
+    /** Creates an active-sense message.
+        Since the MidiMessage has to contain a valid message, this default constructor
+        just initialises it with a simple one-byte active-sense message.
+    */
+    MidiMessage() throw();
+
     /** Creates a copy of another midi message. */
     MidiMessage (const MidiMessage& other);
 

@@ -26,14 +26,12 @@
 #ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
 #define __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
 
-class Component;
-class ComponentPeer;
-class MouseInputSourceInternal;
 #include "../keyboard/juce_ModifierKeys.h"
 #include "../../../core/juce_Time.h"
 #include "../../../memory/juce_ScopedPointer.h"
 #include "../../graphics/geometry/juce_Point.h"
 #include "../juce_Desktop.h"
+class MouseInputSourceInternal;
 
 
 //==============================================================================
@@ -132,12 +130,22 @@ public:
     */
     bool hasMouseMovedSignificantlySincePressed() const throw();
 
+    /** Returns true if this input source uses a visible mouse cursor. */
     bool hasMouseCursor() const throw();
+
+    /** Changes the mouse cursor, (if there is one). */
     void showMouseCursor (const MouseCursor& cursor);
+
+    /** Hides the mouse cursor (if there is one). */
     void hideCursor();
+
+    /** Un-hides the mouse cursor if it was hidden by hideCursor(). */
     void revealCursor();
+
+    /** Forces an update of the mouse cursor for whatever component it's currently over. */
     void forceMouseCursorUpdate();
 
+    /** Returns true if this mouse can be moved indefinitely in any direction without running out of space. */
     bool canDoUnboundedMovement() const throw();
 
     /** Allows the mouse to move beyond the edges of the screen.

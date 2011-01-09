@@ -75,6 +75,14 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
 }
 
 //==============================================================================
+MidiMessage::MidiMessage() throw()
+   : timeStamp (0),
+     data (static_cast<uint8*> (preallocatedData.asBytes)),
+     size (1)
+{
+    data[0] = 0xfe;
+}
+
 MidiMessage::MidiMessage (const void* const d, const int dataSize, const double t)
    : timeStamp (t),
      size (dataSize)

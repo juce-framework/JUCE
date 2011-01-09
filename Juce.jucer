@@ -792,8 +792,6 @@
                   file="src/gui/components/menus/juce_PopupMenu.cpp"/>
             <FILE id="VNJnvSCVQ" name="juce_PopupMenu.h" compile="0" resource="0"
                   file="src/gui/components/menus/juce_PopupMenu.h"/>
-            <FILE id="fdRptQQCr" name="juce_PopupMenuCustomComponent.h" compile="0"
-                  resource="0" file="src/gui/components/menus/juce_PopupMenuCustomComponent.h"/>
           </GROUP>
           <GROUP id="4Z6gX1IB5" name="mouse">
             <FILE id="zg6SjElG2" name="juce_ComponentDragger.cpp" compile="1" resource="0"
@@ -818,10 +816,6 @@
                   file="src/gui/components/mouse/juce_MouseEvent.cpp"/>
             <FILE id="w6gpReQJ" name="juce_MouseEvent.h" compile="0" resource="0"
                   file="src/gui/components/mouse/juce_MouseEvent.h"/>
-            <FILE id="jWJffCCWt" name="juce_MouseHoverDetector.cpp" compile="1"
-                  resource="0" file="src/gui/components/mouse/juce_MouseHoverDetector.cpp"/>
-            <FILE id="wLpGKPDBH" name="juce_MouseHoverDetector.h" compile="0" resource="0"
-                  file="src/gui/components/mouse/juce_MouseHoverDetector.h"/>
             <FILE id="RxLJE2TH8" name="juce_MouseInputSource.cpp" compile="1" resource="0"
                   file="src/gui/components/mouse/juce_MouseInputSource.cpp"/>
             <FILE id="bf62P4hKo" name="juce_MouseInputSource.h" compile="0" resource="0"
@@ -916,10 +910,6 @@
                   file="src/gui/components/special/juce_DropShadower.cpp"/>
             <FILE id="tNsR3nrMx" name="juce_DropShadower.h" compile="0" resource="0"
                   file="src/gui/components/special/juce_DropShadower.h"/>
-            <FILE id="dPsalIXYm" name="juce_MagnifierComponent.cpp" compile="1"
-                  resource="0" file="src/gui/components/special/juce_MagnifierComponent.cpp"/>
-            <FILE id="9mE7Snh9t" name="juce_MagnifierComponent.h" compile="0" resource="0"
-                  file="src/gui/components/special/juce_MagnifierComponent.h"/>
             <FILE id="azZgJ9Sn" name="juce_MidiKeyboardComponent.cpp" compile="1"
                   resource="0" file="src/gui/components/special/juce_MidiKeyboardComponent.cpp"/>
             <FILE id="lZq5kJdPd" name="juce_MidiKeyboardComponent.h" compile="0"

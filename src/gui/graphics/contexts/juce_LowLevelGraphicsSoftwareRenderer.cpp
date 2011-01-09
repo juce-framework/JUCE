@@ -650,7 +650,7 @@ public:
         }
 
         y = y_;
-        generate (static_cast <SrcPixelType*> (scratchBuffer), x, width);
+        generate (scratchBuffer.getData(), x, width);
 
         et.clipLineToMask (x, y_,
                            reinterpret_cast<uint8*> (scratchBuffer.getData()) + SrcPixelType::indexA,

@@ -286,7 +286,7 @@ private:
     WeakReference<Component> currentlyOverComp;
     DragAndDropTarget* getCurrentlyOver()
     {
-        return dynamic_cast <DragAndDropTarget*> (static_cast <Component*> (currentlyOverComp));
+        return dynamic_cast <DragAndDropTarget*> (currentlyOverComp.get());
     }
 
     String dragDesc;

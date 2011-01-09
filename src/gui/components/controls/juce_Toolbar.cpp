@@ -32,7 +32,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ToolbarItemFactory.h"
 #include "juce_ToolbarItemPalette.h"
 #include "../menus/juce_PopupMenu.h"
-#include "../menus/juce_PopupMenuCustomComponent.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../layout/juce_StretchableObjectResizer.h"
 #include "../windows/juce_DialogWindow.h"
@@ -169,11 +168,11 @@ private:
 };
 
 //==============================================================================
-class Toolbar::MissingItemsComponent  : public PopupMenuCustomComponent
+class Toolbar::MissingItemsComponent  : public PopupMenu::CustomComponent
 {
 public:
     MissingItemsComponent (Toolbar& owner_, const int height_)
-        : PopupMenuCustomComponent (true),
+        : PopupMenu::CustomComponent (true),
           owner (&owner_),
           height (height_)
     {

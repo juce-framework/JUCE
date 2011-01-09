@@ -447,6 +447,8 @@ MidiOutput* MidiOutput::openDevice (int index)
 
 MidiOutput::~MidiOutput()
 {
+    stopBackgroundThread();
+
     MidiOutHandle* const h = static_cast <MidiOutHandle*> (internal);
 
     if (MidiOutHandle::activeHandles.contains (h) && --(h->refCount) == 0)

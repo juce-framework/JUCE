@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	9
+#define JUCE_BUILDNUMBER	10
 
 /** Current Juce version number.
 
@@ -35473,6 +35473,12 @@ public:
 				 int& numBytesUsed, uint8 lastStatusByte,
 				 double timeStamp = 0);
 
+	/** Creates an active-sense message.
+		Since the MidiMessage has to contain a valid message, this default constructor
+		just initialises it with a simple one-byte active-sense message.
+	*/
+	MidiMessage() throw();
+
 	/** Creates a copy of another midi message. */
 	MidiMessage (const MidiMessage& other);
 
@@ -37943,8 +37949,6 @@ private:
 #ifndef __JUCE_POPUPMENU_JUCEHEADER__
 #define __JUCE_POPUPMENU_JUCEHEADER__
 
-class PopupMenuCustomComponent;
-
 /** Creates and displays a popup-menu.
 
 	To show a popup-menu, you create one of these, add some items to it, then
@@ -38059,19 +38063,10 @@ public:
 						  bool isTicked = false,
 						  const Image& iconToUse = Image::null);
 
-	/** Appends a custom menu item.
-
-		This will add a user-defined component to use as a menu item. The component
-		passed in will be deleted by this menu when it's no longer needed.
-
-		@see PopupMenuCustomComponent
-	*/
-	void addCustomItem (int itemResultId, PopupMenuCustomComponent* customComponent);
-
 	/** Appends a custom menu item that can't be used to trigger a result.
 
 		This will add a user-defined component to use as a menu item. Unlike the
-		addCustomItem() method that takes a PopupMenuCustomComponent, this version
+		addCustomItem() method that takes a PopupMenu::CustomComponent, this version
 		can't trigger a result from it, so doesn't take a menu ID. It also doesn't
 		delete the component when it's finished, so it's the caller's responsibility
 		to manage the component that is passed-in.
@@ -38081,7 +38076,7 @@ public:
 		menu ID specified in itemResultId. If this is false, the menu item can't
 		be triggered, so itemResultId is not used.
 
-		@see PopupMenuCustomComponent
+		@see CustomComponent
 	*/
 	void addCustomItem (int itemResultId,
 						Component* customComponent,
@@ -38282,6 +38277,64 @@ public:
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuItemIterator);
 	};
 
+	/** A user-defined copmonent that can be used as an item in a popup menu.
+		@see PopupMenu::addCustomItem
+	*/
+	class JUCE_API  CustomComponent  : public Component,
+									   public ReferenceCountedObject
+	{
+	public:
+		/** Creates a custom item.
+			If isTriggeredAutomatically is true, then the menu will automatically detect
+			a mouse-click on this component and use that to invoke the menu item. If it's
+			false, then it's up to your class to manually trigger the item when it wants to.
+		*/
+		CustomComponent (bool isTriggeredAutomatically = true);
+
+		/** Destructor. */
+		~CustomComponent();
+
+		/** Returns a rectangle with the size that this component would like to have.
+
+			Note that the size which this method returns isn't necessarily the one that
+			the menu will give it, as the items will be stretched to have a uniform width.
+		*/
+		virtual void getIdealSize (int& idealWidth, int& idealHeight) = 0;
+
+		/** Dismisses the menu, indicating that this item has been chosen.
+
+			This will cause the menu to exit from its modal state, returning
+			this item's id as the result.
+		*/
+		void triggerMenuItem();
+
+		/** Returns true if this item should be highlighted because the mouse is over it.
+			You can call this method in your paint() method to find out whether
+			to draw a highlight.
+		*/
+		bool isItemHighlighted() const throw()		  { return isHighlighted; }
+
+		/** @internal. */
+		bool isTriggeredAutomatically() const throw()	   { return triggeredAutomatically; }
+		/** @internal. */
+		void setHighlighted (bool shouldBeHighlighted);
+
+	private:
+
+		bool isHighlighted, triggeredAutomatically;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent);
+	};
+
+	/** Appends a custom menu item.
+
+		This will add a user-defined component to use as a menu item. The component
+		passed in will be deleted by this menu when it's no longer needed.
+
+		@see CustomComponent
+	*/
+	void addCustomItem (int itemResultId, CustomComponent* customComponent);
+
 private:
 
 	class Item;
@@ -38291,7 +38344,7 @@ private:
 	friend class MenuItemIterator;
 	friend class ItemComponent;
 	friend class Window;
-	friend class PopupMenuCustomComponent;
+	friend class CustomComponent;
 	friend class MenuBarComponent;
 	friend class OwnedArray <Item>;
 	friend class OwnedArray <ItemComponent>;
@@ -56960,70 +57013,6 @@ private:
 #ifndef __JUCE_POPUPMENU_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-
-/*** Start of inlined file: juce_PopupMenuCustomComponent.h ***/
-#ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-#define __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-
-/** A user-defined copmonent that can appear inside one of the rows of a popup menu.
-
-	@see PopupMenu::addCustomItem
-*/
-class JUCE_API  PopupMenuCustomComponent  : public Component,
-											public ReferenceCountedObject
-{
-public:
-	/** Destructor. */
-	~PopupMenuCustomComponent();
-
-	/** Chooses the size that this component would like to have.
-
-		Note that the size which this method returns isn't necessarily the one that
-		the menu will give it, as it will be stretched to fit the other items in
-		the menu.
-	*/
-	virtual void getIdealSize (int& idealWidth,
-							   int& idealHeight) = 0;
-
-	/** Dismisses the menu indicating that this item has been chosen.
-
-		This will cause the menu to exit from its modal state, returning
-		this item's id as the result.
-	*/
-	void triggerMenuItem();
-
-	/** Returns true if this item should be highlighted because the mouse is
-		over it.
-
-		You can call this method in your paint() method to find out whether
-		to draw a highlight.
-	*/
-	bool isItemHighlighted() const throw()		   { return isHighlighted; }
-
-protected:
-	/** Constructor.
-
-		If isTriggeredAutomatically is true, then the menu will automatically detect
-		a click on this component and use that to trigger it. If it's false, then it's
-		up to your class to manually trigger the item if it wants to.
-	*/
-	PopupMenuCustomComponent (bool isTriggeredAutomatically = true);
-
-private:
-	friend class PopupMenu;
-	friend class PopupMenu::ItemComponent;
-	friend class PopupMenu::Window;
-	bool isHighlighted, isTriggeredAutomatically;
-
-	JUCE_DECLARE_NON_COPYABLE (PopupMenuCustomComponent);
-};
-
-#endif   // __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-/*** End of inlined file: juce_PopupMenuCustomComponent.h ***/
-
-
-#endif
 #ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
 
 #endif
@@ -57549,117 +57538,12 @@ private:
 #ifndef __JUCE_MOUSEEVENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
-
-/*** Start of inlined file: juce_MouseHoverDetector.h ***/
-#ifndef __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
-#define __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
-
-/**
-	Monitors a component for mouse activity, and triggers a callback
-	when the mouse hovers in one place for a specified length of time.
-
-	To use a hover-detector, just create one and call its setHoverComponent()
-	method to start it watching a component. You can call setHoverComponent (0)
-	to make it inactive.
-
-	(Be careful not to delete a component that's being monitored without first
-	stopping or deleting the hover detector).
-*/
-class JUCE_API  MouseHoverDetector
-{
-public:
-
-	/** Creates a hover detector.
-
-		Initially the object is inactive, and you need to tell it which component
-		to monitor, using the setHoverComponent() method.
-
-		@param hoverTimeMillisecs   the number of milliseconds for which the mouse
-									needs to stay still before the mouseHovered() method
-									is invoked. You can change this setting later with
-									the setHoverTimeMillisecs() method
-	*/
-	MouseHoverDetector (int hoverTimeMillisecs = 400);
-
-	/** Destructor. */
-	virtual ~MouseHoverDetector();
-
-	/** Changes the time for which the mouse has to stay still before it's considered
-		to be hovering.
-	*/
-	void setHoverTimeMillisecs (int newTimeInMillisecs);
-
-	/** Changes the component that's being monitored for hovering.
-
-		Be careful not to delete a component that's being monitored without first
-		stopping or deleting the hover detector.
-	*/
-	void setHoverComponent (Component* newSourceComponent);
-
-protected:
-
-	/** Called back when the mouse hovers.
-
-		After the mouse has stayed still over the component for the length of time
-		specified by setHoverTimeMillisecs(), this method will be invoked.
-
-		When the mouse is first moved after this callback has occurred, the
-		mouseMovedAfterHover() method will be called.
-
-		@param mouseX   the mouse's X position relative to the component being monitored
-		@param mouseY   the mouse's Y position relative to the component being monitored
-	*/
-	virtual void mouseHovered (int mouseX,
-							   int mouseY) = 0;
-
-	/** Called when the mouse is moved away after just having hovered. */
-	virtual void mouseMovedAfterHover() = 0;
-
-private:
-
-	class JUCE_API  HoverDetectorInternal  : public MouseListener,
-											 public Timer
-	{
-	public:
-		MouseHoverDetector* owner;
-		int lastX, lastY;
-
-		void timerCallback();
-		void mouseEnter (const MouseEvent&);
-		void mouseExit (const MouseEvent&);
-		void mouseDown (const MouseEvent&);
-		void mouseUp (const MouseEvent&);
-		void mouseMove (const MouseEvent&);
-		void mouseWheelMove (const MouseEvent&, float, float);
-
-	} internalTimer;
-
-	friend class HoverDetectorInternal;
-
-	Component* source;
-	int hoverTimeMillisecs;
-	bool hasJustHovered;
-
-	void hoverTimerCallback();
-	void checkJustHoveredCallback();
-
-	JUCE_DECLARE_NON_COPYABLE (MouseHoverDetector);
-};
-
-#endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
-/*** End of inlined file: juce_MouseHoverDetector.h ***/
-
-
-#endif
 #ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
 
 /*** Start of inlined file: juce_MouseInputSource.h ***/
 #ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
 #define __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
 
-class Component;
-class ComponentPeer;
 class MouseInputSourceInternal;
 
 /**
@@ -57756,12 +57640,22 @@ public:
 	*/
 	bool hasMouseMovedSignificantlySincePressed() const throw();
 
+	/** Returns true if this input source uses a visible mouse cursor. */
 	bool hasMouseCursor() const throw();
+
+	/** Changes the mouse cursor, (if there is one). */
 	void showMouseCursor (const MouseCursor& cursor);
+
+	/** Hides the mouse cursor (if there is one). */
 	void hideCursor();
+
+	/** Un-hides the mouse cursor if it was hidden by hideCursor(). */
 	void revealCursor();
+
+	/** Forces an update of the mouse cursor for whatever component it's currently over. */
 	void forceMouseCursorUpdate();
 
+	/** Returns true if this mouse can be moved indefinitely in any direction without running out of space. */
 	bool canDoUnboundedMovement() const throw();
 
 	/** Allows the mouse to move beyond the edges of the screen.
@@ -59080,99 +58974,6 @@ private:
 
 #endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-
-/*** Start of inlined file: juce_MagnifierComponent.h ***/
-#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-#define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-
-/**
-	A component that contains another component, and can magnify or shrink it.
-
-	This component will continually update its size so that it fits the zoomed
-	version of the content component that you put inside it, so don't try to
-	change the size of this component directly - instead change that of the
-	content component.
-
-	To make it all work, the magnifier uses extremely cunning ComponentPeer tricks
-	to remap mouse events correctly. This means that the content component won't
-	appear to be a direct child of this component, and instead will think its
-	on the desktop.
-*/
-class JUCE_API  MagnifierComponent	: public Component
-{
-public:
-
-	/** Creates a MagnifierComponent.
-
-		This component will continually update its size so that it fits the zoomed
-		version of the content component that you put inside it, so don't try to
-		change the size of this component directly - instead change that of the
-		content component.
-
-		@param contentComponent	 the component to add as the magnified one
-		@param deleteContentCompWhenNoLongerNeeded  if true, the content component will
-									be deleted when this component is deleted. If false,
-									it's the caller's responsibility to delete it later.
-	*/
-	MagnifierComponent (Component* contentComponent,
-						bool deleteContentCompWhenNoLongerNeeded);
-
-	/** Destructor. */
-	~MagnifierComponent();
-
-	/** Returns the current content component. */
-	Component* getContentComponent() const		  { return content; }
-
-	/** Changes the zoom level.
-
-		The scale factor must be greater than zero. Values less than 1 will shrink the
-		image; values greater than 1 will multiply its size by this amount.
-
-		When this is called, this component will change its size to fit the full extent
-		of the newly zoomed content.
-	*/
-	void setScaleFactor (double newScaleFactor);
-
-	/** Returns the current zoom factor. */
-	double getScaleFactor() const			   { return scaleFactor; }
-
-	/** Changes the quality setting used to rescale the graphics.
-	*/
-	void setResamplingQuality (Graphics::ResamplingQuality newQuality);
-
-	/** @internal */
-	void childBoundsChanged (Component*);
-
-private:
-	Component* content;
-	Component* holderComp;
-	double scaleFactor;
-	ComponentPeer* peer;
-	bool deleteContent;
-	Graphics::ResamplingQuality quality;
-	MouseInputSource mouseSource;
-
-	void paint (Graphics& g);
-	void mouseDown (const MouseEvent& e);
-	void mouseUp (const MouseEvent& e);
-	void mouseDrag (const MouseEvent& e);
-	void mouseMove (const MouseEvent& e);
-	void mouseEnter (const MouseEvent& e);
-	void mouseExit (const MouseEvent& e);
-	void mouseWheelMove (const MouseEvent& e, float, float);
-
-	void passOnMouseEventToPeer (const MouseEvent& e);
-	int scaleInt (int n) const;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MagnifierComponent);
-};
-
-#endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-/*** End of inlined file: juce_MagnifierComponent.h ***/
-
 
 #endif
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__

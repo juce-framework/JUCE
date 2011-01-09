@@ -482,9 +482,6 @@
 #ifndef __JUCE_POPUPMENU_JUCEHEADER__
  #include "gui/components/menus/juce_PopupMenu.h"
 #endif
-#ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
- #include "gui/components/menus/juce_PopupMenuCustomComponent.h"
-#endif
 #ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
  #include "gui/components/mouse/juce_ComponentDragger.h"
 #endif
@@ -505,9 +502,6 @@
 #endif
 #ifndef __JUCE_MOUSEEVENT_JUCEHEADER__
  #include "gui/components/mouse/juce_MouseEvent.h"
-#endif
-#ifndef __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
- #include "gui/components/mouse/juce_MouseHoverDetector.h"
 #endif
 #ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
  #include "gui/components/mouse/juce_MouseInputSource.h"
@@ -577,9 +571,6 @@
 #endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
  #include "gui/components/special/juce_DropShadower.h"
-#endif
-#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_MagnifierComponent.h"
 #endif
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_MidiKeyboardComponent.h"

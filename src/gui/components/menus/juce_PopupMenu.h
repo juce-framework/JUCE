@@ -27,7 +27,7 @@
 #define __JUCE_POPUPMENU_JUCEHEADER__
 
 #include "../../../application/juce_ApplicationCommandManager.h"
-class PopupMenuCustomComponent;
+#include "../../../memory/juce_ReferenceCountedObject.h"
 
 
 //==============================================================================
@@ -147,19 +147,10 @@ public:
                           bool isTicked = false,
                           const Image& iconToUse = Image::null);
 
-    /** Appends a custom menu item.
-
-        This will add a user-defined component to use as a menu item. The component
-        passed in will be deleted by this menu when it's no longer needed.
-
-        @see PopupMenuCustomComponent
-    */
-    void addCustomItem (int itemResultId, PopupMenuCustomComponent* customComponent);
-
     /** Appends a custom menu item that can't be used to trigger a result.
 
         This will add a user-defined component to use as a menu item. Unlike the
-        addCustomItem() method that takes a PopupMenuCustomComponent, this version
+        addCustomItem() method that takes a PopupMenu::CustomComponent, this version
         can't trigger a result from it, so doesn't take a menu ID. It also doesn't
         delete the component when it's finished, so it's the caller's responsibility
         to manage the component that is passed-in.
@@ -169,7 +160,7 @@ public:
         menu ID specified in itemResultId. If this is false, the menu item can't
         be triggered, so itemResultId is not used.
 
-        @see PopupMenuCustomComponent
+        @see CustomComponent
     */
     void addCustomItem (int itemResultId,
                         Component* customComponent,
@@ -378,6 +369,64 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuItemIterator);
     };
 
+    //==============================================================================
+    /** A user-defined copmonent that can be used as an item in a popup menu.
+        @see PopupMenu::addCustomItem
+    */
+    class JUCE_API  CustomComponent  : public Component,
+                                       public ReferenceCountedObject
+    {
+    public:
+        /** Creates a custom item.
+            If isTriggeredAutomatically is true, then the menu will automatically detect
+            a mouse-click on this component and use that to invoke the menu item. If it's
+            false, then it's up to your class to manually trigger the item when it wants to.
+        */
+        CustomComponent (bool isTriggeredAutomatically = true);
+
+        /** Destructor. */
+        ~CustomComponent();
+
+        /** Returns a rectangle with the size that this component would like to have.
+
+            Note that the size which this method returns isn't necessarily the one that
+            the menu will give it, as the items will be stretched to have a uniform width.
+        */
+        virtual void getIdealSize (int& idealWidth, int& idealHeight) = 0;
+
+        /** Dismisses the menu, indicating that this item has been chosen.
+
+            This will cause the menu to exit from its modal state, returning
+            this item's id as the result.
+        */
+        void triggerMenuItem();
+
+        /** Returns true if this item should be highlighted because the mouse is over it.
+            You can call this method in your paint() method to find out whether
+            to draw a highlight.
+        */
+        bool isItemHighlighted() const throw()                  { return isHighlighted; }
+
+        /** @internal. */
+        bool isTriggeredAutomatically() const throw()           { return triggeredAutomatically; }
+        /** @internal. */
+        void setHighlighted (bool shouldBeHighlighted);
+
+    private:
+        //==============================================================================
+        bool isHighlighted, triggeredAutomatically;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent);
+    };
+
+    /** Appends a custom menu item.
+
+        This will add a user-defined component to use as a menu item. The component
+        passed in will be deleted by this menu when it's no longer needed.
+
+        @see CustomComponent
+    */
+    void addCustomItem (int itemResultId, CustomComponent* customComponent);
 
 private:
     //==============================================================================
@@ -388,7 +437,7 @@ private:
     friend class MenuItemIterator;
     friend class ItemComponent;
     friend class Window;
-    friend class PopupMenuCustomComponent;
+    friend class CustomComponent;
     friend class MenuBarComponent;
     friend class OwnedArray <Item>;
     friend class OwnedArray <ItemComponent>;

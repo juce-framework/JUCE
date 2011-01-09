@@ -584,7 +584,6 @@
               <File RelativePath="..\..\src\gui\components\menus\juce_MenuBarModel.h"/>
               <File RelativePath="..\..\src\gui\components\menus\juce_PopupMenu.cpp"/>
               <File RelativePath="..\..\src\gui\components\menus\juce_PopupMenu.h"/>
-              <File RelativePath="..\..\src\gui\components\menus\juce_PopupMenuCustomComponent.h"/>
             </Filter>
             <Filter Name="mouse">
               <File RelativePath="..\..\src\gui\components\mouse\juce_ComponentDragger.cpp"/>
@@ -598,8 +597,6 @@
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseCursor.h"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseEvent.cpp"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseEvent.h"/>
-              <File RelativePath="..\..\src\gui\components\mouse\juce_MouseHoverDetector.cpp"/>
-              <File RelativePath="..\..\src\gui\components\mouse\juce_MouseHoverDetector.h"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseInputSource.cpp"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseInputSource.h"/>
               <File RelativePath="..\..\src\gui\components\mouse\juce_MouseListener.cpp"/>
@@ -650,8 +647,6 @@
               <File RelativePath="..\..\src\gui\components\special\juce_ColourSelector.h"/>
               <File RelativePath="..\..\src\gui\components\special\juce_DropShadower.cpp"/>
               <File RelativePath="..\..\src\gui\components\special\juce_DropShadower.h"/>
-              <File RelativePath="..\..\src\gui\components\special\juce_MagnifierComponent.cpp"/>
-              <File RelativePath="..\..\src\gui\components\special\juce_MagnifierComponent.h"/>
               <File RelativePath="..\..\src\gui\components\special\juce_MidiKeyboardComponent.cpp"/>
               <File RelativePath="..\..\src\gui\components\special\juce_MidiKeyboardComponent.h"/>
               <File RelativePath="..\..\src\gui\components\special\juce_NSViewComponent.h"/>
