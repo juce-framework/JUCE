@@ -25,3 +25,48 @@
 
 #include "juce_IncludeCharacteristics.h"
 #include "../../../juce_amalgamated.h"
+
+
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
+
+// Helper class to workaround carbon windows not getting mouse-moves..
+class FakeMouseMoveGenerator  : public Timer
+{
+public:
+    FakeMouseMoveGenerator()
+    {
+        startTimer (1000 / 30);
+    }
+
+    void timerCallback()
+    {
+        // workaround for carbon windows not getting mouse-moves..
+        const Point<int> screenPos (Desktop::getInstance().getMainMouseSource().getScreenPosition());
+
+        if (screenPos != lastScreenPos)
+        {
+            lastScreenPos = screenPos;
+            const ModifierKeys mods (ModifierKeys::getCurrentModifiers());
+
+            if (! mods.isAnyMouseButtonDown())
+            {
+                Component* comp = Desktop::getInstance().findComponentAt (screenPos);
+
+                if (comp != 0)
+                {
+                    ComponentPeer* const peer = comp->getPeer();
+
+                    if (peer != 0 && ! peer->isFocused())
+                        peer->handleMouseEvent (0, screenPos - peer->getScreenPosition(), mods, Time::currentTimeMillis());
+                }
+            }
+        }
+    }
+
+private:
+    Point<int> lastScreenPos;
+};
+
+#else
+struct FakeMouseMoveGenerator {};
+#endif

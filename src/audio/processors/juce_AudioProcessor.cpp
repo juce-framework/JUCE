@@ -35,7 +35,6 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 AudioProcessor::AudioProcessor()
     : playHead (0),
-      activeEditor (0),
       sampleRate (0),
       blockSize (0),
       numInputChannels (0),
@@ -217,8 +216,6 @@ void AudioProcessor::reset()
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) throw()
 {
     const ScopedLock sl (callbackLock);
-
-    jassert (activeEditor == editor);
 
     if (activeEditor == editor)
         activeEditor = 0;

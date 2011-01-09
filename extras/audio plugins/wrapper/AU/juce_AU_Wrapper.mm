@@ -951,15 +951,13 @@ private:
 };
 
 //==============================================================================
-class EditorCompHolder : public Component,
-                         public ComponentListener
+class EditorCompHolder  : public Component
 {
 public:
     EditorCompHolder (AudioProcessorEditor* const editor)
     {
         setSize (editor->getWidth(), editor->getHeight());
         addAndMakeVisible (editor);
-        editor->addComponentListener (this);
 
        #if ! JucePlugin_EditorRequiresKeyboardFocus
         setWantsKeyboardFocus (false);
@@ -974,11 +972,11 @@ public:
                              // have been transferred to another parent which takes over ownership.
     }
 
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
+    void childBoundsChanged (Component*)
     {
         Component* editor = getChildComponent(0);
 
-        if (editor != 0 && wasResized)
+        if (editor != 0)
         {
             const int w = jmax (32, editor->getWidth());
             const int h = jmax (32, editor->getHeight());
@@ -988,13 +986,16 @@ public:
 
             NSView* view = (NSView*) getWindowHandle();
             NSRect r = [[view superview] frame];
-            r.size.width = component.getWidth();
-            r.size.height = component.getHeight();
+            r.size.width = editor->getWidth();
+            r.size.height = editor->getHeight();
             [[view superview] setFrame: r];
             [view setFrame: NSMakeRect (0, 0, editor->getWidth(), editor->getHeight())];
             [view setNeedsDisplay: YES];
         }
     }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (EditorCompHolder);
 };
 
 //==============================================================================
@@ -1044,6 +1045,7 @@ public:
     // is trying to delete our plugin..
     jassert (Component::getCurrentlyModalComponent() == 0);
 
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
     [self deleteEditor];
 
     jassert (activeUIs.contains (self));
@@ -1204,6 +1206,8 @@ public:
     void* getEventListenerUserData() const                      { return mEventListenerUserData; }
 
 private:
+    FakeMouseMoveGenerator fakeMouseGenerator;
+
     void deleteUI()
     {
         if (windowComp != 0)
@@ -1223,26 +1227,25 @@ private:
 
     //==============================================================================
     // Uses a child NSWindow to sit in front of a HIView and display our component
-    class ComponentInHIView  : public Component,
-                               public ComponentListener
+    class ComponentInHIView  : public Component
     {
     public:
         //==============================================================================
-        ComponentInHIView (Component* const editor_, HIViewRef parentHIView)
+        ComponentInHIView (AudioProcessorEditor* const editor_, HIViewRef parentHIView)
             : parentView (parentHIView),
               editor (editor_),
               recursive (false)
         {
             JUCE_AUTORELEASEPOOL
 
-            jassert (editor != 0);
-            addAndMakeVisible (editor);
+            jassert (editor_ != 0);
+            addAndMakeVisible (&editor);
             setOpaque (true);
             setVisible (true);
             setBroughtToFrontOnMouseClick (true);
 
-            setSize (editor->getWidth(), editor->getHeight());
-            SizeControl (parentHIView, editor->getWidth(), editor->getHeight());
+            setSize (editor.getWidth(), editor.getHeight());
+            SizeControl (parentHIView, editor.getWidth(), editor.getHeight());
 
             WindowRef windowRef = HIViewGetWindow (parentHIView);
             hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
@@ -1280,16 +1283,10 @@ private:
                                        NewEventHandlerUPP (windowVisibilityBodge),
                                        GetEventTypeCount (eventsToCatch), eventsToCatch,
                                        (void*) hostWindow, 0);
-
-            editor->addComponentListener (this);
         }
 
         ~ComponentInHIView()
         {
-            jassert (isParentOf (editor)); // you mustn't remove your editor from its parent!
-
-            editor->removeComponentListener (this);
-
             JUCE_AUTORELEASEPOOL
 
             NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
@@ -1298,8 +1295,6 @@ private:
 
             [hostWindow release];
             hostWindow = 0;
-
-            editor = 0;
         }
 
         void updateWindowPos()
@@ -1330,27 +1325,24 @@ private:
 
         void paint (Graphics& g) {}
 
-        void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
+        void childBoundsChanged (Component*)
         {
             if (! recursive)
             {
                 recursive = true;
 
-                if (editor != 0 && wasResized)
-                {
-                    const int w = jmax (32, editor->getWidth());
-                    const int h = jmax (32, editor->getHeight());
+                const int w = jmax (32, editor.getWidth());
+                const int h = jmax (32, editor.getHeight());
 
-                    SizeControl (parentView, w, h);
+                SizeControl (parentView, w, h);
 
-                    if (getWidth() != w || getHeight() != h)
-                        setSize (w, h);
+                if (getWidth() != w || getHeight() != h)
+                    setSize (w, h);
 
-                    editor->repaint();
+                editor.repaint();
 
-                    updateWindowPos();
-                    addSubWindow(); // (need this for AULab)
-                }
+                updateWindowPos();
+                addSubWindow(); // (need this for AULab)
 
                 recursive = false;
             }
@@ -1378,7 +1370,7 @@ private:
     private:
         HIViewRef parentView;
         NSWindow* hostWindow;
-        ScopedPointer<Component> editor;
+        EditorCompHolder editor;
         bool recursive;
 
         /* When you wrap a WindowRef as an NSWindow, it seems to bugger up the HideWindow

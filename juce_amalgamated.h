@@ -41698,7 +41698,7 @@ protected:
 
 private:
 	Array <AudioProcessorListener*> listeners;
-	AudioProcessorEditor* activeEditor;
+	Component::SafePointer<AudioProcessorEditor> activeEditor;
 	double sampleRate;
 	int blockSize, numInputChannels, numOutputChannels, latencySamples;
 	bool suspended, nonRealtime;

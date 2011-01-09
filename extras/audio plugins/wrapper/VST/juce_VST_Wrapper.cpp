@@ -185,15 +185,10 @@ namespace
             GetClassName (parent, windowType, 31);
 
             if (String (windowType).equalsIgnoreCase ("MDIClient"))
-            {
-                w = parent;
-                break;
-            }
+                return parent;
 
-            RECT windowPos;
+            RECT windowPos, parentPos;
             GetWindowRect (w, &windowPos);
-
-            RECT parentPos;
             GetWindowRect (parent, &parentPos);
 
             const int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
@@ -209,6 +204,42 @@ namespace
         }
 
         return w;
+    }
+
+    //==============================================================================
+    static HHOOK mouseWheelHook = 0;
+    static int mouseHookUsers = 0;
+
+    LRESULT CALLBACK mouseWheelHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
+    {
+        if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
+        {
+            const MSLLHOOKSTRUCT& hs = *(MSLLHOOKSTRUCT*) lParam;
+
+            Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x,
+                                                                                        hs.pt.y));
+            if (comp != 0 && comp->getWindowHandle() != 0)
+                return PostMessage ((HWND) comp->getWindowHandle(), WM_MOUSEWHEEL,
+                                    hs.mouseData & 0xffff0000, (hs.pt.x & 0xffff) | (hs.pt.y << 16));
+        }
+
+        return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
+    }
+
+    void registerMouseWheelHook()
+    {
+        if (mouseHookUsers++ == 0)
+            mouseWheelHook = SetWindowsHookEx (WH_MOUSE_LL, mouseWheelHookCallback,
+                                               (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
+    }
+
+    void unregisterMouseWheelHook()
+    {
+        if (--mouseHookUsers == 0 && mouseWheelHook != 0)
+        {
+            UnhookWindowsHookEx (mouseWheelHook);
+            mouseWheelHook = 0;
+        }
     }
 }
 
@@ -1288,14 +1319,20 @@ public:
             editor->setTopLeftPosition (0, 0);
             addAndMakeVisible (editor);
 
-          #if JUCE_WIN
+          #if JUCE_WINDOWS
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
+
+            registerMouseWheelHook();
           #endif
         }
 
         ~EditorCompWrapper()
         {
+          #if JUCE_WINDOWS
+            unregisterMouseWheelHook();
+          #endif
+
             deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
                                  // have been transferred to another parent which takes over ownership.
         }
@@ -1379,6 +1416,7 @@ public:
     private:
         //==============================================================================
         JuceVSTWrapper& wrapper;
+        FakeMouseMoveGenerator fakeMouseGenerator;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper);
     };
