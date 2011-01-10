@@ -62,7 +62,7 @@ Viewport::~Viewport()
 }
 
 //==============================================================================
-void Viewport::visibleAreaChanged (int, int, int, int)
+void Viewport::visibleAreaChanged (const Rectangle<int>&)
 {
 }
 
@@ -84,8 +84,8 @@ void Viewport::setViewedComponent (Component* const newViewedComponent)
 
         if (contentComp != 0)
         {
-            contentComp->setTopLeftPosition (0, 0);
             contentHolder.addAndMakeVisible (contentComp);
+            setViewPosition (0, 0);
             contentComp->addComponentListener (this);
         }
 
@@ -210,9 +210,9 @@ void Viewport::updateVisibleArea()
 
     Rectangle<int> contentBounds;
     if (contentComp != 0)
-        contentBounds = contentComp->getBounds();
+        contentBounds = contentHolder.getLocalArea (contentComp, contentComp->getLocalBounds());
 
-    const Point<int> visibleOrigin (-contentBounds.getPosition());
+    Point<int> visibleOrigin (-contentBounds.getPosition());
 
     if (hBarVisible)
     {
@@ -221,6 +221,10 @@ void Viewport::updateVisibleArea()
         horizontalScrollBar.setCurrentRange (visibleOrigin.getX(), contentArea.getWidth());
         horizontalScrollBar.setSingleStepSize (singleStepX);
         horizontalScrollBar.cancelPendingUpdate();
+    }
+    else
+    {
+        visibleOrigin.setX (0);
     }
 
     if (vBarVisible)
@@ -231,10 +235,16 @@ void Viewport::updateVisibleArea()
         verticalScrollBar.setSingleStepSize (singleStepY);
         verticalScrollBar.cancelPendingUpdate();
     }
+    else
+    {
+        visibleOrigin.setY (0);
+    }
 
     // Force the visibility *after* setting the ranges to avoid flicker caused by edge conditions in the numbers.
     horizontalScrollBar.setVisible (hBarVisible);
     verticalScrollBar.setVisible (vBarVisible);
+
+    setViewPosition (visibleOrigin);
 
     const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
                                       jmin (contentBounds.getWidth() - visibleOrigin.getX(),  contentArea.getWidth()),
@@ -243,7 +253,7 @@ void Viewport::updateVisibleArea()
     if (lastVisibleArea != visibleArea)
     {
         lastVisibleArea = visibleArea;
-        visibleAreaChanged (visibleArea.getX(), visibleArea.getY(), visibleArea.getWidth(), visibleArea.getHeight());
+        visibleAreaChanged (visibleArea);
     }
 
     horizontalScrollBar.handleUpdateNowIfNeeded();

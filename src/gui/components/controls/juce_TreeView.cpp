@@ -47,10 +47,6 @@ public:
     {
     }
 
-    ~TreeViewContentComponent()
-    {
-    }
-
     void mouseDown (const MouseEvent& e)
     {
         updateButtonUnderMouse (e);
@@ -432,7 +428,6 @@ class TreeView::TreeViewport  : public Viewport
 {
 public:
     TreeViewport() throw()  : lastX (-1)    {}
-    ~TreeViewport() throw()                 {}
 
     void updateComponents (const bool triggerResize = false)
     {
@@ -448,10 +443,10 @@ public:
         repaint();
     }
 
-    void visibleAreaChanged (int x, int, int, int)
+    void visibleAreaChanged (const Rectangle<int>& newVisibleArea)
     {
-        const bool hasScrolledSideways = (x != lastX);
-        lastX = x;
+        const bool hasScrolledSideways = (newVisibleArea.getX() != lastX);
+        lastX = newVisibleArea.getX();
         updateComponents (hasScrolledSideways);
     }
 

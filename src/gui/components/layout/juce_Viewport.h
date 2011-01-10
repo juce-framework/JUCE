@@ -179,8 +179,7 @@ public:
         This will be called when the visible area is moved either be scrolling or
         by calls to setViewPosition(), etc.
     */
-    virtual void visibleAreaChanged (int visibleX, int visibleY,
-                                     int visibleW, int visibleH);
+    virtual void visibleAreaChanged (const Rectangle<int>& newVisibleArea);
 
     //==============================================================================
     /** Turns scrollbars on or off.
@@ -264,6 +263,11 @@ private:
 
     void updateVisibleArea();
     void deleteContentComp();
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // If you get an error here, it's because this method's parameters have changed! See the new definition above..
+    virtual int visibleAreaChanged (int, int, int, int) { return 0; }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Viewport);
 };

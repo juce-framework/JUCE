@@ -169,10 +169,6 @@ public:
         content->setWantsKeyboardFocus (false);
     }
 
-    ~ListViewport()
-    {
-    }
-
     ListBoxRowComponent* getComponentForRow (const int row) const throw()
     {
         return rows [row % jmax (1, rows.size())];
@@ -196,7 +192,7 @@ public:
         return -1;
     }
 
-    void visibleAreaChanged (int, int, int, int)
+    void visibleAreaChanged (const Rectangle<int>&)
     {
         updateVisibleArea (true);
 

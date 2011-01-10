@@ -26,6 +26,8 @@
 #include "juce_IncludeCharacteristics.h"
 #include "../../../juce_amalgamated.h"
 
+#ifndef __JUCE_PLUGINHEADERS_JUCEHEADER__
+#define __JUCE_PLUGINHEADERS_JUCEHEADER__
 
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
 
@@ -69,4 +71,6 @@ private:
 
 #else
 struct FakeMouseMoveGenerator {};
+#endif
+
 #endif

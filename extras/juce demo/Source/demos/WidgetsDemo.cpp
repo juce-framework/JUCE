@@ -163,7 +163,7 @@ private:
 };
 
 //==============================================================================
-class CustomMenuComponent  : public PopupMenuCustomComponent,
+class CustomMenuComponent  : public PopupMenu::CustomComponent,
                              public Timer
 {
 public:

@@ -382,10 +382,6 @@ public:
     {
     }
 
-    ~Iterator()
-    {
-    }
-
     //==============================================================================
     bool next()
     {
@@ -912,35 +908,31 @@ private:
 class TextEditorViewport  : public Viewport
 {
 public:
-    TextEditorViewport (TextEditor* const owner_)
+    TextEditorViewport (TextEditor& owner_)
         : owner (owner_), lastWordWrapWidth (0), rentrant (false)
     {
     }
 
-    ~TextEditorViewport()
-    {
-    }
-
-    void visibleAreaChanged (int, int, int, int)
+    void visibleAreaChanged (const Rectangle<int>&)
     {
         if (! rentrant) // it's rare, but possible to get into a feedback loop as the viewport's scrollbars
                         // appear and disappear, causing the wrap width to change.
         {
-            const float wordWrapWidth = owner->getWordWrapWidth();
+            const float wordWrapWidth = owner.getWordWrapWidth();
 
             if (wordWrapWidth != lastWordWrapWidth)
             {
                 lastWordWrapWidth = wordWrapWidth;
 
                 rentrant = true;
-                owner->updateTextHolderSize();
+                owner.updateTextHolderSize();
                 rentrant = false;
             }
         }
     }
 
 private:
-    TextEditor* const owner;
+    TextEditor& owner;
     float lastWordWrapWidth;
     bool rentrant;
 
@@ -1000,7 +992,7 @@ TextEditor::TextEditor (const String& name,
 {
     setOpaque (true);
 
-    addAndMakeVisible (viewport = new TextEditorViewport (this));
+    addAndMakeVisible (viewport = new TextEditorViewport (*this));
     viewport->setViewedComponent (textHolder = new TextHolderComponent (*this));
     viewport->setWantsKeyboardFocus (false);
     viewport->setScrollBarsShown (false, false);
