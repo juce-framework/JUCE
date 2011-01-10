@@ -28,6 +28,37 @@
 #include "jucer_JucerDocumentHolder.h"
 
 //==============================================================================
+class EditingPanelBase::MagnifierComponent  : public Component
+{
+public:
+    MagnifierComponent (Component* content_)
+        : scaleFactor (1.0), content (content_)
+    {
+        addAndMakeVisible (content);
+        childBoundsChanged (content);
+    }
+
+    void childBoundsChanged (Component* child)
+    {
+        const Rectangle<int> childArea (getLocalArea (child, child->getLocalBounds()));
+        setSize (childArea.getWidth(), childArea.getHeight());
+    }
+
+    double getScaleFactor() const   { return scaleFactor; }
+
+    void setScaleFactor (double newScale)
+    {
+        scaleFactor = newScale;
+        content->setTransform (AffineTransform::scale ((float) scaleFactor,
+                                                       (float) scaleFactor));
+    }
+
+private:
+    double scaleFactor;
+    ScopedPointer<Component> content;
+};
+
+//==============================================================================
 class ZoomingViewport   : public Viewport
 {
 public:
@@ -137,7 +168,7 @@ EditingPanelBase::EditingPanelBase (JucerDocument& document_,
     addAndMakeVisible (viewport = new ZoomingViewport (this));
     addAndMakeVisible (propsPanel);
 
-    viewport->setViewedComponent (magnifier = new MagnifierComponent (editor, true));
+    viewport->setViewedComponent (magnifier = new MagnifierComponent (editor));
 }
 
 EditingPanelBase::~EditingPanelBase()
@@ -175,7 +206,7 @@ void EditingPanelBase::visibilityChanged()
             JucerDocumentHolder* const cdh = dynamic_cast <JucerDocumentHolder*> (getParentComponent()->getParentComponent());
 
             if (cdh != 0)
-                cdh->setViewportToLastPos (viewport);
+                cdh->setViewportToLastPos (viewport, *this);
 
             resized();
         }
@@ -187,7 +218,7 @@ void EditingPanelBase::visibilityChanged()
             JucerDocumentHolder* const cdh = dynamic_cast <JucerDocumentHolder*> (getParentComponent()->getParentComponent());
 
             if (cdh != 0)
-                cdh->storeLastViewportPos (viewport);
+                cdh->storeLastViewportPos (viewport, *this);
         }
     }
 
@@ -208,12 +239,12 @@ void EditingPanelBase::setZoom (double newScale)
 
 void EditingPanelBase::setZoom (double newScale, int anchorX, int anchorY)
 {
-    Point<int> anchor (viewport->relativePositionToOtherComponent (editor, Point<int> (anchorX, anchorY)));
+    Point<int> anchor (editor->getLocalPoint (viewport, Point<int> (anchorX, anchorY)));
 
     magnifier->setScaleFactor (newScale);
 
     resized();
-    anchor = editor->relativePositionToOtherComponent (viewport, anchor);
+    anchor = viewport->getLocalPoint (editor, anchor);
 
     viewport->setViewPosition (jlimit (0, jmax (0, viewport->getViewedComponent()->getWidth() - viewport->getViewWidth()),
                                        viewport->getViewPositionX() + anchor.getX() - anchorX),
@@ -223,7 +254,7 @@ void EditingPanelBase::setZoom (double newScale, int anchorX, int anchorY)
 
 void EditingPanelBase::xyToTargetXY (int& x, int& y) const
 {
-    Point<int> pos (relativePositionToOtherComponent (editor, Point<int> (x, y)));
+    Point<int> pos (editor->getLocalPoint (this, Point<int> (x, y)));
     x = pos.getX();
     y = pos.getY();
 }

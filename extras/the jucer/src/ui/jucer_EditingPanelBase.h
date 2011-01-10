@@ -64,6 +64,8 @@ public:
 
     void dragKeyHeldDown (bool isKeyDown);
 
+    class MagnifierComponent;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

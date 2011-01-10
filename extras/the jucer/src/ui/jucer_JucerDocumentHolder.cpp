@@ -576,21 +576,18 @@ void JucerDocumentHolder::showGraphics (PaintRoutine* routine)
 }
 
 //==============================================================================
-void JucerDocumentHolder::setViewportToLastPos (Viewport* vp)
+void JucerDocumentHolder::setViewportToLastPos (Viewport* vp, EditingPanelBase& editor)
 {
     vp->setViewPosition (lastViewportX, lastViewportY);
-
-    MagnifierComponent* magnifier = dynamic_cast <MagnifierComponent*> (vp->getViewedComponent());
-    magnifier->setScaleFactor (currentZoomLevel);
+    editor.setZoom (currentZoomLevel);
 }
 
-void JucerDocumentHolder::storeLastViewportPos (Viewport* vp)
+void JucerDocumentHolder::storeLastViewportPos (Viewport* vp, EditingPanelBase& editor)
 {
     lastViewportX = vp->getViewPositionX();
     lastViewportY = vp->getViewPositionY();
 
-    MagnifierComponent* magnifier = dynamic_cast <MagnifierComponent*> (vp->getViewedComponent());
-    currentZoomLevel = magnifier->getScaleFactor();
+    currentZoomLevel = editor.getZoom();
 }
 
 void JucerDocumentHolder::setZoom (double scale)

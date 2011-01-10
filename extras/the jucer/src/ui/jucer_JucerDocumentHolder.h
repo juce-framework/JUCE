@@ -54,8 +54,8 @@ public:
     void showLayout();
     void showGraphics (PaintRoutine* routine);
 
-    void setViewportToLastPos (Viewport* vp);
-    void storeLastViewportPos (Viewport* vp);
+    void setViewportToLastPos (Viewport* vp, EditingPanelBase& editor);
+    void storeLastViewportPos (Viewport* vp, EditingPanelBase& editor);
 
     const Image createComponentLayerSnapshot() const;
 
