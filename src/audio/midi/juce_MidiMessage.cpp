@@ -55,9 +55,7 @@ int MidiMessage::readVariableLengthVal (const uint8* data, int& numBytesUsed) th
 int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
 {
     // this method only works for valid starting bytes of a short midi message
-    jassert (firstByte >= 0x80
-              && firstByte != 0xf0
-              && firstByte != 0xf7);
+    jassert (firstByte >= 0x80 && firstByte != 0xf0 && firstByte != 0xf7);
 
     static const char messageLengths[] =
     {
@@ -78,9 +76,10 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
 MidiMessage::MidiMessage() throw()
    : timeStamp (0),
      data (static_cast<uint8*> (preallocatedData.asBytes)),
-     size (1)
+     size (2)
 {
-    data[0] = 0xfe;
+    data[0] = 0xf0;
+    data[1] = 0xf7;
 }
 
 MidiMessage::MidiMessage (const void* const d, const int dataSize, const double t)
@@ -516,8 +515,7 @@ const MidiMessage MidiMessage::allNotesOff (const int channel) throw()
 
 bool MidiMessage::isAllNotesOff() const throw()
 {
-    return (data[0] & 0xf0) == 0xb0
-            && data[1] == 123;
+    return (data[0] & 0xf0) == 0xb0 && data[1] == 123;
 }
 
 const MidiMessage MidiMessage::allSoundOff (const int channel) throw()
@@ -527,8 +525,7 @@ const MidiMessage MidiMessage::allSoundOff (const int channel) throw()
 
 bool MidiMessage::isAllSoundOff() const throw()
 {
-    return (data[0] & 0xf0) == 0xb0
-             && data[1] == 120;
+    return (data[0] & 0xf0) == 0xb0 && data[1] == 120;
 }
 
 const MidiMessage MidiMessage::allControllersOff (const int channel) throw()
@@ -573,12 +570,12 @@ const MidiMessage MidiMessage::createSysExMessage (const uint8* sysexData, const
 
 const uint8* MidiMessage::getSysExData() const throw()
 {
-    return (isSysEx()) ? getRawData() + 1 : 0;
+    return isSysEx() ? getRawData() + 1 : 0;
 }
 
 int MidiMessage::getSysExDataSize() const throw()
 {
-    return (isSysEx()) ? size - 2 : 0;
+    return isSysEx() ? size - 2 : 0;
 }
 
 bool MidiMessage::isMetaEvent() const throw()
@@ -594,10 +591,7 @@ bool MidiMessage::isActiveSense() const throw()
 //==============================================================================
 int MidiMessage::getMetaEventType() const throw()
 {
-    if (*data != 0xff)
-        return -1;
-    else
-        return data[1];
+    return *data != 0xff ? -1 : data[1];
 }
 
 int MidiMessage::getMetaEventLength() const throw()
@@ -643,21 +637,17 @@ const String MidiMessage::getTextFromTextMetaEvent() const
 
 bool MidiMessage::isTrackNameEvent() const throw()
 {
-    return (data[1] == 3)
-            && (*data == 0xff);
+    return (data[1] == 3) && (*data == 0xff);
 }
 
 bool MidiMessage::isTempoMetaEvent() const throw()
 {
-    return (data[1] == 81)
-            && (*data == 0xff);
+    return (data[1] == 81) && (*data == 0xff);
 }
 
 bool MidiMessage::isMidiChannelMetaEvent() const throw()
 {
-    return (data[1] == 0x20)
-            && (*data == 0xff)
-            && (data[2] == 1);
+    return (data[1] == 0x20) && (*data == 0xff) && (data[2] == 1);
 }
 
 int MidiMessage::getMidiChannelMetaEventChannel() const throw()
@@ -720,8 +710,7 @@ const MidiMessage MidiMessage::tempoMetaEvent (int microsecondsPerQuarterNote) t
 
 bool MidiMessage::isTimeSignatureMetaEvent() const throw()
 {
-    return (data[1] == 0x58)
-             && (*data == (uint8) 0xff);
+    return (data[1] == 0x58) && (*data == (uint8) 0xff);
 }
 
 void MidiMessage::getTimeSignatureInfo (int& numerator, int& denominator) const throw()

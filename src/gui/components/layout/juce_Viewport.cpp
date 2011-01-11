@@ -222,7 +222,7 @@ void Viewport::updateVisibleArea()
         horizontalScrollBar.setSingleStepSize (singleStepX);
         horizontalScrollBar.cancelPendingUpdate();
     }
-    else
+    else if (canShowHBar)
     {
         visibleOrigin.setX (0);
     }
@@ -235,7 +235,7 @@ void Viewport::updateVisibleArea()
         verticalScrollBar.setSingleStepSize (singleStepY);
         verticalScrollBar.cancelPendingUpdate();
     }
-    else
+    else if (canShowVBar)
     {
         visibleOrigin.setY (0);
     }

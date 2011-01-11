@@ -1563,7 +1563,7 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus, ModalCompon
 
 void Component::exitModalState (const int returnValue)
 {
-    if (isCurrentlyModal())
+    if (flags.currentlyModalFlag)
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {

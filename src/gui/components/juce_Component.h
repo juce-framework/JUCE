@@ -1046,7 +1046,8 @@ public:
         the graphics context that gets passed to the component's paint() callback.
         If you enable this mode, you'll need to make sure your paint method doesn't call anything like
         Graphics::fillAll(), and doesn't draw beyond the component's bounds, because that'll produce
-        artifacts.
+        artifacts. Your component also can't have any child components that may be placed beyond its
+        bounds.
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) throw();
 

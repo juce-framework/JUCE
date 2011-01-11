@@ -138,8 +138,7 @@ public:
     //==============================================================================
     OpenGLComponentWatcher (OpenGLComponent* const owner_)
         : ComponentMovementWatcher (owner_),
-          owner (owner_),
-          wasShowing (false)
+          owner (owner_)
     {
     }
 
@@ -155,26 +154,18 @@ public:
         owner->deleteContext();
     }
 
-    void componentVisibilityChanged (Component&)
+    void componentVisibilityChanged()
     {
-        const bool isShowingNow = owner->isShowing();
-
-        if (wasShowing != isShowingNow)
+        if (! owner->isShowing())
         {
-            wasShowing = isShowingNow;
-
-            if (! isShowingNow)
-            {
-                const ScopedLock sl (owner->getContextLock());
-                owner->deleteContext();
-            }
+            const ScopedLock sl (owner->getContextLock());
+            owner->deleteContext();
         }
     }
 
     //==============================================================================
 private:
     OpenGLComponent* const owner;
-    bool wasShowing;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponentWatcher);
 };

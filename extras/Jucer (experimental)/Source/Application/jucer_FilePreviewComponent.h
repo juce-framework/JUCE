@@ -34,13 +34,9 @@ class ItemPreviewComponent  : public Component
 {
 public:
     //==============================================================================
-    // This will delete the stream
     ItemPreviewComponent (const File& file);
-    ~ItemPreviewComponent();
 
     void paint (Graphics& g);
-    void resized();
-
 
 private:
     StringArray facts;

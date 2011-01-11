@@ -66,7 +66,7 @@ public:
                 WebBrowserComponent* const owner = dynamic_cast <WebBrowserComponent*> (getParentComponent());
                 jassert (owner != 0);
 
-                EventHandler* handler = new EventHandler (owner);
+                EventHandler* handler = new EventHandler (*owner);
                 connectionPoint->Advise (handler, &adviseCookie);
                 handler->Release();
             }
@@ -144,8 +144,8 @@ private:
                           public ComponentMovementWatcher
     {
     public:
-        EventHandler (WebBrowserComponent* const owner_)
-            : ComponentMovementWatcher (owner_),
+        EventHandler (WebBrowserComponent& owner_)
+            : ComponentMovementWatcher (&owner_),
               owner (owner_)
         {
         }
@@ -158,44 +158,33 @@ private:
         HRESULT __stdcall Invoke (DISPID dispIdMember, REFIID /*riid*/, LCID /*lcid*/, WORD /*wFlags*/, DISPPARAMS* pDispParams,
                                   VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/, UINT* /*puArgErr*/)
         {
-            switch (dispIdMember)
+            if (dispIdMember == DISPID_BEFORENAVIGATE2)
             {
-                case DISPID_BEFORENAVIGATE2:
-                {
-                    VARIANT* const vurl = pDispParams->rgvarg[5].pvarVal;
+                VARIANT* const vurl = pDispParams->rgvarg[5].pvarVal;
+                String url;
 
-                    String url;
+                if ((vurl->vt & VT_BYREF) != 0)
+                    url = *vurl->pbstrVal;
+                else
+                    url = vurl->bstrVal;
 
-                    if ((vurl->vt & VT_BYREF) != 0)
-                        url = *vurl->pbstrVal;
-                    else
-                        url = vurl->bstrVal;
+                *pDispParams->rgvarg->pboolVal
+                    = owner.pageAboutToLoad (url) ? VARIANT_FALSE
+                                                  : VARIANT_TRUE;
 
-                    *pDispParams->rgvarg->pboolVal
-                        = owner->pageAboutToLoad (url) ? VARIANT_FALSE
-                                                       : VARIANT_TRUE;
-
-                    return S_OK;
-                }
-
-                default:
-                    break;
+                return S_OK;
             }
 
             return E_NOTIMPL;
         }
 
-        void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) {}
-        void componentPeerChanged() {}
-
-        void componentVisibilityChanged (Component&)
-        {
-            owner->visibilityChanged();
-        }
+        void componentMovedOrResized (bool, bool )  {}
+        void componentPeerChanged()                 {}
+        void componentVisibilityChanged()           { owner.visibilityChanged(); }
 
         //==============================================================================
     private:
-        WebBrowserComponent* const owner;
+        WebBrowserComponent& owner;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler);
     };

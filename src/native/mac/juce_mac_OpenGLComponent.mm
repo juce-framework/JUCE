@@ -119,14 +119,12 @@ BEGIN_JUCE_NAMESPACE
 class WindowedGLContext     : public OpenGLContext
 {
 public:
-    WindowedGLContext (Component* const component,
+    WindowedGLContext (Component& component,
                        const OpenGLPixelFormat& pixelFormat_,
                        NSOpenGLContext* sharedContext)
         : renderContext (0),
           pixelFormat (pixelFormat_)
     {
-        jassert (component != 0);
-
         NSOpenGLPixelFormatAttribute attribs [64];
         int n = 0;
         attribs[n++] = NSOpenGLPFADoubleBuffer;
@@ -268,7 +266,7 @@ private:
 //==============================================================================
 OpenGLContext* OpenGLComponent::createContext()
 {
-    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (this, preferredPixelFormat,
+    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (*this, preferredPixelFormat,
                                                                contextToShareListsWith != 0 ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : 0));
 
     return (c->renderContext != 0) ? c.release() : 0;

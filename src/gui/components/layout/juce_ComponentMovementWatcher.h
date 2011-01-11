@@ -62,20 +62,27 @@ public:
     /** This callback happens when the component's top-level peer is changed. */
     virtual void componentPeerChanged() = 0;
 
+    /** This callback happens when the component's visibility state changes, possibly due to
+        one of its parents being made visible or invisible.
+    */
+    virtual void componentVisibilityChanged() = 0;
 
     //==============================================================================
     /** @internal */
     void componentParentHierarchyChanged (Component& component);
     /** @internal */
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-
+    /** @internal */
+    void componentBeingDeleted (Component& component);
+    /** @internal */
+    void componentVisibilityChanged (Component& component);
 
 private:
     //==============================================================================
     WeakReference<Component> component;
     ComponentPeer* lastPeer;
     Array <Component*> registeredParentComps;
-    bool reentrant;
+    bool reentrant, wasShowing;
     Rectangle<int> lastBounds;
 
     void unregister();

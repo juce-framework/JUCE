@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	10
+#define JUCE_BUILDNUMBER	11
 
 /** Current Juce version number.
 
@@ -27916,7 +27916,8 @@ public:
 		the graphics context that gets passed to the component's paint() callback.
 		If you enable this mode, you'll need to make sure your paint method doesn't call anything like
 		Graphics::fillAll(), and doesn't draw beyond the component's bounds, because that'll produce
-		artifacts.
+		artifacts. Your component also can't have any child components that may be placed beyond its
+		bounds.
 	*/
 	void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) throw();
 
@@ -35475,7 +35476,7 @@ public:
 
 	/** Creates an active-sense message.
 		Since the MidiMessage has to contain a valid message, this default constructor
-		just initialises it with a simple one-byte active-sense message.
+		just initialises it with an empty sysex message.
 	*/
 	MidiMessage() throw();
 
@@ -51903,6 +51904,8 @@ protected:
 	virtual int getDesktopWindowStyleFlags() const;
 	/** @internal */
 	void recreateDesktopWindow();
+	/** @internal */
+	void visibilityChanged();
 
 private:
 	friend class TopLevelWindowManager;
@@ -54066,17 +54069,26 @@ public:
 	/** This callback happens when the component's top-level peer is changed. */
 	virtual void componentPeerChanged() = 0;
 
+	/** This callback happens when the component's visibility state changes, possibly due to
+		one of its parents being made visible or invisible.
+	*/
+	virtual void componentVisibilityChanged() = 0;
+
 	/** @internal */
 	void componentParentHierarchyChanged (Component& component);
 	/** @internal */
 	void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+	/** @internal */
+	void componentBeingDeleted (Component& component);
+	/** @internal */
+	void componentVisibilityChanged (Component& component);
 
 private:
 
 	WeakReference<Component> component;
 	ComponentPeer* lastPeer;
 	Array <Component*> registeredParentComps;
-	bool reentrant;
+	bool reentrant, wasShowing;
 	Rectangle<int> lastBounds;
 
 	void unregister();

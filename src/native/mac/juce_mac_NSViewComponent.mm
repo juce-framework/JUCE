@@ -30,24 +30,17 @@
 //==============================================================================
 class NSViewComponentInternal  : public ComponentMovementWatcher
 {
-    Component* const owner;
-    NSViewComponentPeer* currentPeer;
-    bool wasShowing;
-
 public:
-    NSView* const view;
-
     //==============================================================================
-    NSViewComponentInternal (NSView* const view_, Component* const owner_)
-        : ComponentMovementWatcher (owner_),
+    NSViewComponentInternal (NSView* const view_, Component& owner_)
+        : ComponentMovementWatcher (&owner_),
           owner (owner_),
           currentPeer (0),
-          wasShowing (false),
           view (view_)
     {
         [view_ retain];
 
-        if (owner_->isShowing())
+        if (owner.isShowing())
             componentPeerChanged();
     }
 
@@ -72,13 +65,13 @@ public:
 
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
-        Component* const topComp = owner->getTopLevelComponent();
+        Component* const topComp = owner.getTopLevelComponent();
 
         if (topComp->getPeer() != 0)
         {
-            const Point<int> pos (topComp->getLocalPoint (owner, Point<int>()));
+            const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
 
-            NSRect r = NSMakeRect ((float) pos.getX(), (float) pos.getY(), (float) owner->getWidth(), (float) owner->getHeight());
+            NSRect r = NSMakeRect ((float) pos.getX(), (float) pos.getY(), (float) owner.getWidth(), (float) owner.getHeight());
             r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);
 
             [view setFrame: r];
@@ -87,7 +80,7 @@ public:
 
     void componentPeerChanged()
     {
-        NSViewComponentPeer* const peer = dynamic_cast <NSViewComponentPeer*> (owner->getPeer());
+        NSViewComponentPeer* const peer = dynamic_cast <NSViewComponentPeer*> (owner.getPeer());
 
         if (currentPeer != peer)
         {
@@ -104,10 +97,10 @@ public:
             }
         }
 
-        [view setHidden: ! owner->isShowing()];
+        [view setHidden: ! owner.isShowing()];
     }
 
-    void componentVisibilityChanged (Component&)
+    void componentVisibilityChanged()
     {
         componentPeerChanged();
     }
@@ -117,6 +110,13 @@ public:
         NSRect r = [view frame];
         return Rectangle<int> (0, 0, (int) r.size.width, (int) r.size.height);
     }
+
+private:
+    Component& owner;
+    NSViewComponentPeer* currentPeer;
+
+public:
+    NSView* const view;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentInternal);
@@ -136,7 +136,7 @@ void NSViewComponent::setView (void* view)
     if (view != getView())
     {
         if (view != 0)
-            info = new NSViewComponentInternal ((NSView*) view, this);
+            info = new NSViewComponentInternal ((NSView*) view, *this);
         else
             info = 0;
     }

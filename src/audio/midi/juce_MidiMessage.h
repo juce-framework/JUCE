@@ -92,7 +92,7 @@ public:
 
     /** Creates an active-sense message.
         Since the MidiMessage has to contain a valid message, this default constructor
-        just initialises it with a simple one-byte active-sense message.
+        just initialises it with an empty sysex message.
     */
     MidiMessage() throw();
 

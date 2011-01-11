@@ -204,7 +204,7 @@ public:
         createWindow();
     }
 
-    void componentVisibilityChanged (Component&)
+    void componentVisibilityChanged()
     {
         if (isShowing())
             createWindow();

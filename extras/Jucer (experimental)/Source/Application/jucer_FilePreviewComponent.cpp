@@ -34,10 +34,6 @@ ItemPreviewComponent::ItemPreviewComponent (const File& file_)
     tryToLoadImage();
 }
 
-ItemPreviewComponent::~ItemPreviewComponent()
-{
-}
-
 void ItemPreviewComponent::tryToLoadImage()
 {
     facts.clear();
@@ -78,8 +74,4 @@ void ItemPreviewComponent::paint (Graphics& g)
     g.setColour (Colours::white);
     g.drawMultiLineText (facts.joinIntoString ("\n"),
                          10, 15, getWidth() - 16);
-}
-
-void ItemPreviewComponent::resized()
-{
 }

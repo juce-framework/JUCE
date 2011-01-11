@@ -32,43 +32,40 @@ BEGIN_JUCE_NAMESPACE
 #include "windows/juce_ComponentPeer.h"
 #include "../../events/juce_MessageManager.h"
 #include "../../application/juce_Application.h"
+#include "layout/juce_ComponentMovementWatcher.h"
 
 
 //==============================================================================
-class ModalComponentManager::ModalItem  : public ComponentListener
+class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
 public:
     ModalItem (Component* const comp, Callback* const callback)
-        : component (comp), returnValue (0), isActive (true), isDeleted (false)
+        : ComponentMovementWatcher (comp),
+          component (comp), returnValue (0), isActive (true)
     {
+        jassert (comp != 0);
+
         if (callback != 0)
             callbacks.add (callback);
-
-        jassert (comp != 0);
-        component->addComponentListener (this);
     }
 
-    ~ModalItem()
-    {
-        if (! isDeleted)
-            component->removeComponentListener (this);
-    }
+    void componentMovedOrResized (bool, bool) {}
 
-    void componentBeingDeleted (Component&)
-    {
-        isDeleted = true;
-        cancel();
-    }
-
-    void componentVisibilityChanged (Component&)
+    void componentPeerChanged()
     {
         if (! component->isShowing())
             cancel();
     }
 
-    void componentParentHierarchyChanged (Component&)
+    void componentVisibilityChanged()
     {
         if (! component->isShowing())
+            cancel();
+    }
+
+    void componentBeingDeleted (Component& comp)
+    {
+        if (component == &comp || comp.isParentOf (component))
             cancel();
     }
 
@@ -84,7 +81,7 @@ public:
     Component* component;
     OwnedArray<Callback> callbacks;
     int returnValue;
-    bool isActive, isDeleted;
+    bool isActive;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (ModalItem);

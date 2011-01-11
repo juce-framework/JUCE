@@ -151,6 +151,8 @@ protected:
     virtual int getDesktopWindowStyleFlags() const;
     /** @internal */
     void recreateDesktopWindow();
+    /** @internal */
+    void visibilityChanged();
 
 private:
     friend class TopLevelWindowManager;

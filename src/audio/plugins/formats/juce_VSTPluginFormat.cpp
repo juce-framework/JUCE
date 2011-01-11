@@ -1151,7 +1151,6 @@ public:
 #endif
           plugin (plugin_),
           isOpen (false),
-          wasShowing (false),
           recursiveResize (false),
           pluginWantsKeys (false),
           pluginRefusesToResize (false),
@@ -1216,19 +1215,12 @@ public:
         }
     }
 
-    void componentVisibilityChanged (Component&)
+    void componentVisibilityChanged()
     {
-        const bool isShowingNow = isShowing();
-
-        if (wasShowing != isShowingNow)
-        {
-            wasShowing = isShowingNow;
-
-            if (isShowingNow)
-                openPluginWindow();
-            else
-                closePluginWindow();
-        }
+        if (isShowing())
+            openPluginWindow();
+        else
+            closePluginWindow();
 
         componentMovedOrResized (true, true);
     }
@@ -1368,7 +1360,7 @@ public:
     //==============================================================================
 private:
     VSTPluginInstance& plugin;
-    bool isOpen, wasShowing, recursiveResize;
+    bool isOpen, recursiveResize;
     bool pluginWantsKeys, pluginRefusesToResize, alreadyInside;
 
 #if JUCE_WINDOWS

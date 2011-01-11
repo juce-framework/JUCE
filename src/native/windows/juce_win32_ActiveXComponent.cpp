@@ -208,20 +208,11 @@ namespace ActiveXHelpers
 //==============================================================================
 class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
 {
-    ActiveXControlComponent& owner;
-    bool wasShowing;
-
 public:
-    HWND controlHWND;
-    IStorage* storage;
-    IOleClientSite* clientSite;
-    IOleObject* control;
-
     //==============================================================================
     Pimpl (HWND hwnd, ActiveXControlComponent& owner_)
         : ComponentMovementWatcher (&owner_),
           owner (owner_),
-          wasShowing (owner_.isShowing()),
           controlHWND (0),
           storage (new ActiveXHelpers::JuceIStorage()),
           clientSite (new ActiveXHelpers::JuceIOleClientSite (hwnd)),
@@ -255,19 +246,12 @@ public:
 
     void componentPeerChanged()
     {
-        const bool isShowingNow = owner.isShowing();
-
-        if (wasShowing != isShowingNow)
-        {
-            wasShowing = isShowingNow;
-            owner.setControlVisible (isShowingNow);
-        }
-
         componentMovedOrResized (true, true);
     }
 
-    void componentVisibilityChanged (Component&)
+    void componentVisibilityChanged()
     {
+        owner.setControlVisible (owner.isShowing());
         componentPeerChanged();
     }
 
@@ -316,6 +300,15 @@ public:
 
         return DefWindowProc (hwnd, message, wParam, lParam);
     }
+
+private:
+    ActiveXControlComponent& owner;
+
+public:
+    HWND controlHWND;
+    IStorage* storage;
+    IOleClientSite* clientSite;
+    IOleObject* control;
 };
 
 ActiveXControlComponent::ActiveXControlComponent()

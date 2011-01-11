@@ -34,7 +34,8 @@ BEGIN_JUCE_NAMESPACE
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
     : component (component_),
       lastPeer (0),
-      reentrant (false)
+      reentrant (false),
+      wasShowing (component_->isShowing())
 {
     jassert (component != 0); // can't use this with a null pointer..
 
@@ -45,7 +46,8 @@ ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
 
 ComponentMovementWatcher::~ComponentMovementWatcher()
 {
-    component->removeComponentListener (this);
+    if (component != 0)
+        component->removeComponentListener (this);
 
     unregister();
 }
@@ -53,10 +55,7 @@ ComponentMovementWatcher::~ComponentMovementWatcher()
 //==============================================================================
 void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 {
-    // agh! don't delete the target component without deleting this object first!
-    jassert (component != 0);
-
-    if (! reentrant)
+    if (component != 0 && ! reentrant)
     {
         reentrant = true;
 
@@ -75,30 +74,55 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
         unregister();
         registerWithParentComps();
 
-        reentrant = false;
-
         componentMovedOrResized (*component, true, true);
+
+        if (component != 0)
+            componentVisibilityChanged (*component);
+
+        reentrant = false;
     }
 }
 
 void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMoved, bool wasResized)
 {
-    // agh! don't delete the target component without deleting this object first!
-    jassert (component != 0);
-
-    if (wasMoved)
+    if (component != 0)
     {
-        const Point<int> pos (component->getTopLevelComponent()->getLocalPoint (component, Point<int>()));
+        if (wasMoved)
+        {
+            const Point<int> pos (component->getTopLevelComponent()->getLocalPoint (component, Point<int>()));
 
-        wasMoved = lastBounds.getPosition() != pos;
-        lastBounds.setPosition (pos);
+            wasMoved = lastBounds.getPosition() != pos;
+            lastBounds.setPosition (pos);
+        }
+
+        wasResized = (lastBounds.getWidth() != component->getWidth() || lastBounds.getHeight() != component->getHeight());
+        lastBounds.setSize (component->getWidth(), component->getHeight());
+
+        if (wasMoved || wasResized)
+            componentMovedOrResized (wasMoved, wasResized);
     }
+}
 
-    wasResized = (lastBounds.getWidth() != component->getWidth() || lastBounds.getHeight() != component->getHeight());
-    lastBounds.setSize (component->getWidth(), component->getHeight());
+void ComponentMovementWatcher::componentBeingDeleted (Component& comp)
+{
+    registeredParentComps.removeValue (&comp);
 
-    if (wasMoved || wasResized)
-        componentMovedOrResized (wasMoved, wasResized);
+    if (component == &comp)
+        unregister();
+}
+
+void ComponentMovementWatcher::componentVisibilityChanged (Component&)
+{
+    if (component != 0)
+    {
+        const bool isShowingNow = component->isShowing();
+
+        if (wasShowing != isShowingNow)
+        {
+            wasShowing = isShowingNow;
+            componentVisibilityChanged();
+        }
+    }
 }
 
 void ComponentMovementWatcher::registerWithParentComps()
