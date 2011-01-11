@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ComponentMovementWatcher.h"
+#include "../../../containers/juce_ScopedValueSetter.h"
 
 
 //==============================================================================
@@ -57,7 +58,7 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 {
     if (component != 0 && ! reentrant)
     {
-        reentrant = true;
+        const ScopedValueSetter<bool> setter (reentrant, true);
 
         ComponentPeer* const peer = component->getPeer();
 
@@ -78,8 +79,6 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 
         if (component != 0)
             componentVisibilityChanged (*component);
-
-        reentrant = false;
     }
 }
 

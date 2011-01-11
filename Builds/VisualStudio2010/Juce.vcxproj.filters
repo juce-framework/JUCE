@@ -1488,6 +1488,9 @@
     <ClInclude Include="..\..\src\containers\juce_ReferenceCountedArray.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\containers\juce_ScopedValueSetter.h">
+      <Filter>Juce\Source\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\containers\juce_SortedSet.h">
       <Filter>Juce\Source\containers</Filter>
     </ClInclude>

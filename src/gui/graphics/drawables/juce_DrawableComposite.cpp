@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawableComposite.h"
+#include "../../../containers/juce_ScopedValueSetter.h"
 
 
 //==============================================================================
@@ -186,22 +187,11 @@ void DrawableComposite::childrenChanged()
     updateBoundsToFitChildren();
 }
 
-struct RentrancyCheckSetter
-{
-    RentrancyCheckSetter (bool& b_) : b (b_)     { b_ = true; }
-    ~RentrancyCheckSetter()                      { b = false; }
-
-private:
-    bool& b;
-
-    JUCE_DECLARE_NON_COPYABLE (RentrancyCheckSetter);
-};
-
 void DrawableComposite::updateBoundsToFitChildren()
 {
     if (! updateBoundsReentrant)
     {
-        const RentrancyCheckSetter checkSetter (updateBoundsReentrant);
+        const ScopedValueSetter<bool> setter (updateBoundsReentrant, true, false);
 
         Rectangle<int> childArea;
 

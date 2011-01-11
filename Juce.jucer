@@ -379,6 +379,8 @@
               file="src/containers/juce_PropertySet.h"/>
         <FILE id="q1WQH39S3" name="juce_ReferenceCountedArray.h" compile="0"
               resource="0" file="src/containers/juce_ReferenceCountedArray.h"/>
+        <FILE id="YcflQG" name="juce_ScopedValueSetter.h" compile="0" resource="0"
+              file="src/containers/juce_ScopedValueSetter.h"/>
         <FILE id="CPW4LfoeP" name="juce_SortedSet.h" compile="0" resource="0"
               file="src/containers/juce_SortedSet.h"/>
         <FILE id="jo9VOycN5" name="juce_SparseSet.h" compile="0" resource="0"

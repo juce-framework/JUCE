@@ -1297,7 +1297,7 @@ private:
                 return;
             }
 
-            reentrant = true;
+            const ScopedValueSetter<bool> setter (reentrant, true, false);
 
             // this is the rectangle to update..
             int x = paintStruct.rcPaint.left;
@@ -1401,7 +1401,6 @@ private:
 
             DeleteObject (rgn);
             EndPaint (hwnd, &paintStruct);
-            reentrant = false;
         }
 
 #ifndef JUCE_GCC  //xxx should add this fn for gcc..

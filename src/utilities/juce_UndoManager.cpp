@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_UndoManager.h"
 #include "../application/juce_Application.h"
+#include "../containers/juce_ScopedValueSetter.h"
 
 
 //==============================================================================
@@ -194,20 +195,21 @@ bool UndoManager::undo()
     if (commandSet == 0)
         return false;
 
-    reentrancyCheck = true;
     bool failed = false;
 
-    for (int i = commandSet->size(); --i >= 0;)
     {
-        if (! commandSet->getUnchecked(i)->undo())
+        const ScopedValueSetter<bool> setter (reentrancyCheck, true);
+
+        for (int i = commandSet->size(); --i >= 0;)
         {
-            jassertfalse;
-            failed = true;
-            break;
+            if (! commandSet->getUnchecked(i)->undo())
+            {
+                jassertfalse;
+                failed = true;
+                break;
+            }
         }
     }
-
-    reentrancyCheck = false;
 
     if (failed)
         clearUndoHistory();
@@ -227,20 +229,21 @@ bool UndoManager::redo()
     if (commandSet == 0)
         return false;
 
-    reentrancyCheck = true;
     bool failed = false;
 
-    for (int i = 0; i < commandSet->size(); ++i)
     {
-        if (! commandSet->getUnchecked(i)->perform())
+        const ScopedValueSetter<bool> setter (reentrancyCheck, true);
+
+        for (int i = 0; i < commandSet->size(); ++i)
         {
-            jassertfalse;
-            failed = true;
-            break;
+            if (! commandSet->getUnchecked(i)->perform())
+            {
+                jassertfalse;
+                failed = true;
+                break;
+            }
         }
     }
-
-    reentrancyCheck = false;
 
     if (failed)
         clearUndoHistory();

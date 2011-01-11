@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	11
+#define JUCE_BUILDNUMBER	12
 
 /** Current Juce version number.
 
@@ -11330,6 +11330,82 @@ private:
 
 #endif   // __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 /*** End of inlined file: juce_ReferenceCountedArray.h ***/
+
+
+#endif
+#ifndef __JUCE_SCOPEDVALUESETTER_JUCEHEADER__
+
+/*** Start of inlined file: juce_ScopedValueSetter.h ***/
+#ifndef __JUCE_SCOPEDVALUESETTER_JUCEHEADER__
+#define __JUCE_SCOPEDVALUESETTER_JUCEHEADER__
+
+/**
+	Helper class providing an RAII-based mechanism for temporarily setting and
+	then re-setting a value.
+
+	E.g. @code
+	int x = 1;
+
+	{
+		ScopedValueSetter setter (x, 2);
+
+		// x is now 2
+	}
+
+	// x is now 1 again
+
+	{
+		ScopedValueSetter setter (x, 3, 4);
+
+		// x is now 3
+	}
+
+	// x is now 4
+	@endcode
+
+*/
+template <typename ValueType>
+class ScopedValueSetter
+{
+public:
+	/** Creates a ScopedValueSetter that will immediately change the specified value to the
+		given new value, and will then reset it to its original value when this object is deleted.
+	*/
+	ScopedValueSetter (ValueType& valueToSet,
+					   const ValueType& newValue)
+		: value (valueToSet),
+		  originalValue (valueToSet)
+	{
+		valueToSet = newValue;
+	}
+
+	/** Creates a ScopedValueSetter that will immediately change the specified value to the
+		given new value, and will then reset it to be valueWhenDeleted when this object is deleted.
+	*/
+	ScopedValueSetter (ValueType& valueToSet,
+					   const ValueType& newValue,
+					   const ValueType& valueWhenDeleted)
+		: value (valueToSet),
+		  originalValue (valueWhenDeleted)
+	{
+		valueToSet = newValue;
+	}
+
+	~ScopedValueSetter()
+	{
+		value = originalValue;
+	}
+
+private:
+
+	ValueType& value;
+	const ValueType originalValue;
+
+	JUCE_DECLARE_NON_COPYABLE (ScopedValueSetter);
+};
+
+#endif   // __JUCE_SCOPEDVALUESETTER_JUCEHEADER__
+/*** End of inlined file: juce_ScopedValueSetter.h ***/
 
 
 #endif

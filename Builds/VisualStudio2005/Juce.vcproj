@@ -360,6 +360,7 @@
           <File RelativePath="..\..\src\containers\juce_PropertySet.cpp"/>
           <File RelativePath="..\..\src\containers\juce_PropertySet.h"/>
           <File RelativePath="..\..\src\containers\juce_ReferenceCountedArray.h"/>
+          <File RelativePath="..\..\src\containers\juce_ScopedValueSetter.h"/>
           <File RelativePath="..\..\src\containers\juce_SortedSet.h"/>
           <File RelativePath="..\..\src\containers\juce_SparseSet.h"/>
           <File RelativePath="..\..\src\containers\juce_Value.cpp"/>

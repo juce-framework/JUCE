@@ -519,6 +519,7 @@
     <ClInclude Include="..\..\src\containers\juce_OwnedArray.h"/>
     <ClInclude Include="..\..\src\containers\juce_PropertySet.h"/>
     <ClInclude Include="..\..\src\containers\juce_ReferenceCountedArray.h"/>
+    <ClInclude Include="..\..\src\containers\juce_ScopedValueSetter.h"/>
     <ClInclude Include="..\..\src\containers\juce_SortedSet.h"/>
     <ClInclude Include="..\..\src\containers\juce_SparseSet.h"/>
     <ClInclude Include="..\..\src\containers\juce_Value.h"/>

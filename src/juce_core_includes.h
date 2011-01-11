@@ -56,6 +56,9 @@
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
  #include "containers/juce_ReferenceCountedArray.h"
 #endif
+#ifndef __JUCE_SCOPEDVALUESETTER_JUCEHEADER__
+ #include "containers/juce_ScopedValueSetter.h"
+#endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
  #include "containers/juce_SortedSet.h"
 #endif

@@ -33,6 +33,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/imaging/juce_Image.h"
 #include "../juce_Desktop.h"
 #include "../windows/juce_ComponentPeer.h"
+#include "../../../containers/juce_ScopedValueSetter.h"
 
 
 //==============================================================================
@@ -179,8 +180,6 @@ void DropShadower::updateShadows()
     if (reentrant || owner == 0)
         return;
 
-    reentrant = true;
-
     ComponentPeer* const peer = owner->getPeer();
     const bool isOwnerVisible = owner->isVisible() && (peer == 0 || ! peer->isMinimised());
 
@@ -191,80 +190,82 @@ void DropShadower::updateShadows()
                                          && (Desktop::canUseSemiTransparentWindows()
                                               || owner->getParentComponent() != 0);
 
-    const int shadowEdge = jmax (xOffset, yOffset) + (int) blurRadius;
-
-    if (createShadowWindows)
     {
-        // keep a cached version of the image to save doing the gaussian too often
-        String imageId;
-        imageId << shadowEdge << ',' << xOffset << ',' << yOffset << ',' << alpha;
+        const ScopedValueSetter<bool> setter (reentrant, true, false);
 
-        const int hash = imageId.hashCode();
+        const int shadowEdge = jmax (xOffset, yOffset) + (int) blurRadius;
 
-        Image bigIm (ImageCache::getFromHashCode (hash));
-
-        if (bigIm.isNull())
+        if (createShadowWindows)
         {
-            bigIm = Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true, Image::NativeImage);
+            // keep a cached version of the image to save doing the gaussian too often
+            String imageId;
+            imageId << shadowEdge << ',' << xOffset << ',' << yOffset << ',' << alpha;
 
-            Graphics bigG (bigIm);
-            bigG.setColour (Colours::black.withAlpha (alpha));
-            bigG.fillRect (shadowEdge + xOffset,
-                           shadowEdge + yOffset,
-                           bigIm.getWidth() - (shadowEdge * 2),
-                           bigIm.getHeight() - (shadowEdge * 2));
+            const int hash = imageId.hashCode();
 
-            ImageConvolutionKernel blurKernel (roundToInt (blurRadius * 2.0f));
-            blurKernel.createGaussianBlur (blurRadius);
+            Image bigIm (ImageCache::getFromHashCode (hash));
 
-            blurKernel.applyToImage (bigIm, bigIm,
-                                     Rectangle<int> (xOffset, yOffset,
-                                                     bigIm.getWidth(), bigIm.getHeight()));
+            if (bigIm.isNull())
+            {
+                bigIm = Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true, Image::NativeImage);
 
-            ImageCache::addImageToCache (bigIm, hash);
+                Graphics bigG (bigIm);
+                bigG.setColour (Colours::black.withAlpha (alpha));
+                bigG.fillRect (shadowEdge + xOffset,
+                               shadowEdge + yOffset,
+                               bigIm.getWidth() - (shadowEdge * 2),
+                               bigIm.getHeight() - (shadowEdge * 2));
+
+                ImageConvolutionKernel blurKernel (roundToInt (blurRadius * 2.0f));
+                blurKernel.createGaussianBlur (blurRadius);
+
+                blurKernel.applyToImage (bigIm, bigIm,
+                                         Rectangle<int> (xOffset, yOffset,
+                                                         bigIm.getWidth(), bigIm.getHeight()));
+
+                ImageCache::addImageToCache (bigIm, hash);
+            }
+
+            const int iw = bigIm.getWidth();
+            const int ih = bigIm.getHeight();
+            const int shadowEdge2 = shadowEdge * 2;
+
+            setShadowImage (bigIm, 0, shadowEdge, shadowEdge2, 0, 0);
+            setShadowImage (bigIm, 1, shadowEdge, shadowEdge2, 0, ih - shadowEdge2);
+            setShadowImage (bigIm, 2, shadowEdge, shadowEdge, 0, shadowEdge2);
+            setShadowImage (bigIm, 3, shadowEdge, shadowEdge2, iw - shadowEdge, 0);
+            setShadowImage (bigIm, 4, shadowEdge, shadowEdge2, iw - shadowEdge, ih - shadowEdge2);
+            setShadowImage (bigIm, 5, shadowEdge, shadowEdge, iw - shadowEdge, shadowEdge2);
+            setShadowImage (bigIm, 6, shadowEdge, shadowEdge, shadowEdge, 0);
+            setShadowImage (bigIm, 7, shadowEdge, shadowEdge, iw - shadowEdge2, 0);
+            setShadowImage (bigIm, 8, shadowEdge, shadowEdge, shadowEdge2, 0);
+            setShadowImage (bigIm, 9, shadowEdge, shadowEdge, shadowEdge, ih - shadowEdge);
+            setShadowImage (bigIm, 10, shadowEdge, shadowEdge, iw - shadowEdge2, ih - shadowEdge);
+            setShadowImage (bigIm, 11, shadowEdge, shadowEdge, shadowEdge2, ih - shadowEdge);
+
+            for (int i = 0; i < 4; ++i)
+                shadowWindows.add (new ShadowWindow (*owner, i, shadowImageSections));
         }
 
-        const int iw = bigIm.getWidth();
-        const int ih = bigIm.getHeight();
-        const int shadowEdge2 = shadowEdge * 2;
-
-        setShadowImage (bigIm, 0, shadowEdge, shadowEdge2, 0, 0);
-        setShadowImage (bigIm, 1, shadowEdge, shadowEdge2, 0, ih - shadowEdge2);
-        setShadowImage (bigIm, 2, shadowEdge, shadowEdge, 0, shadowEdge2);
-        setShadowImage (bigIm, 3, shadowEdge, shadowEdge2, iw - shadowEdge, 0);
-        setShadowImage (bigIm, 4, shadowEdge, shadowEdge2, iw - shadowEdge, ih - shadowEdge2);
-        setShadowImage (bigIm, 5, shadowEdge, shadowEdge, iw - shadowEdge, shadowEdge2);
-        setShadowImage (bigIm, 6, shadowEdge, shadowEdge, shadowEdge, 0);
-        setShadowImage (bigIm, 7, shadowEdge, shadowEdge, iw - shadowEdge2, 0);
-        setShadowImage (bigIm, 8, shadowEdge, shadowEdge, shadowEdge2, 0);
-        setShadowImage (bigIm, 9, shadowEdge, shadowEdge, shadowEdge, ih - shadowEdge);
-        setShadowImage (bigIm, 10, shadowEdge, shadowEdge, iw - shadowEdge2, ih - shadowEdge);
-        setShadowImage (bigIm, 11, shadowEdge, shadowEdge, shadowEdge2, ih - shadowEdge);
-
-        for (int i = 0; i < 4; ++i)
-            shadowWindows.add (new ShadowWindow (*owner, i, shadowImageSections));
-    }
-
-    if (shadowWindows.size() >= 4)
-    {
-        for (int i = shadowWindows.size(); --i >= 0;)
+        if (shadowWindows.size() >= 4)
         {
-            shadowWindows.getUnchecked(i)->setAlwaysOnTop (owner->isAlwaysOnTop());
-            shadowWindows.getUnchecked(i)->setVisible (isOwnerVisible);
+            for (int i = shadowWindows.size(); --i >= 0;)
+            {
+                shadowWindows.getUnchecked(i)->setAlwaysOnTop (owner->isAlwaysOnTop());
+                shadowWindows.getUnchecked(i)->setVisible (isOwnerVisible);
+            }
+
+            const int x = owner->getX();
+            const int y = owner->getY() - shadowEdge;
+            const int w = owner->getWidth();
+            const int h = owner->getHeight() + shadowEdge + shadowEdge;
+
+            shadowWindows.getUnchecked(0)->setBounds (x - shadowEdge, y, shadowEdge, h);
+            shadowWindows.getUnchecked(1)->setBounds (x + w, y, shadowEdge, h);
+            shadowWindows.getUnchecked(2)->setBounds (x, y, w, shadowEdge);
+            shadowWindows.getUnchecked(3)->setBounds (x, owner->getBottom(), w, shadowEdge);
         }
-
-        const int x = owner->getX();
-        const int y = owner->getY() - shadowEdge;
-        const int w = owner->getWidth();
-        const int h = owner->getHeight() + shadowEdge + shadowEdge;
-
-        shadowWindows.getUnchecked(0)->setBounds (x - shadowEdge, y, shadowEdge, h);
-        shadowWindows.getUnchecked(1)->setBounds (x + w, y, shadowEdge, h);
-        shadowWindows.getUnchecked(2)->setBounds (x, y, w, shadowEdge);
-        shadowWindows.getUnchecked(3)->setBounds (x, owner->getBottom(), w, shadowEdge);
     }
-
-    reentrant = false;
 
     if (createShadowWindows)
         bringShadowWindowsToFront();
@@ -285,12 +286,10 @@ void DropShadower::bringShadowWindowsToFront()
     {
         updateShadows();
 
-        reentrant = true;
+        const ScopedValueSetter<bool> setter (reentrant, true, false);
 
         for (int i = shadowWindows.size(); --i >= 0;)
             shadowWindows.getUnchecked(i)->toBehind (owner);
-
-        reentrant = false;
     }
 }
 
