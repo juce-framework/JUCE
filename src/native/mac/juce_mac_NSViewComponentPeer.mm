@@ -1546,7 +1546,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
     if (! component->isOpaque())
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
-#if USE_COREGRAPHICS_RENDERING
+  #if USE_COREGRAPHICS_RENDERING
     if (usingCoreGraphics)
     {
         CoreGraphicsContext context (cg, (float) [view frame].size.height);
@@ -1556,7 +1556,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
         insideDrawRect = false;
     }
     else
-#endif
+  #endif
     {
         Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
                     (int) (r.size.width + 0.5f),
@@ -1590,7 +1590,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
             insideDrawRect = false;
 
             CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-            CGImageRef image = CoreGraphicsImage::createImage (temp, false, colourSpace);
+            CGImageRef image = CoreGraphicsImage::createImage (temp, false, colourSpace, false);
             CGColorSpaceRelease (colourSpace);
             CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, temp.getWidth(), temp.getHeight()), image);
             CGImageRelease (image);
@@ -1602,9 +1602,9 @@ const StringArray NSViewComponentPeer::getAvailableRenderingEngines()
 {
     StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
-#if USE_COREGRAPHICS_RENDERING
+  #if USE_COREGRAPHICS_RENDERING
     s.add ("CoreGraphics Renderer");
-#endif
+  #endif
 
     return s;
 }

@@ -90,6 +90,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../gui/components/special/juce_WebBrowserComponent.h"
 #include "../gui/components/special/juce_OpenGLComponent.h"
 #include "../gui/components/special/juce_SystemTrayIconComponent.h"
+#include "../containers/juce_ScopedValueSetter.h"
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1

@@ -66,7 +66,8 @@ public:
     }
 
     //==============================================================================
-    static CGImageRef createImage (const Image& juceImage, const bool forAlpha, CGColorSpaceRef colourSpace)
+    static CGImageRef createImage (const Image& juceImage, const bool forAlpha,
+                                   CGColorSpaceRef colourSpace, const bool mustOutliveSource)
     {
         const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (juceImage.getSharedImage());
 
@@ -77,8 +78,18 @@ public:
         else
         {
             const Image::BitmapData srcData (juceImage, false);
+            CGDataProviderRef provider;
 
-            CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.height, 0);
+            if (mustOutliveSource)
+            {
+                CFDataRef data = CFDataCreate (0, (const UInt8*) srcData.data, (CFIndex) (srcData.lineStride * srcData.height));
+                provider = CGDataProviderCreateWithCFData (data);
+                CFRelease (data);
+            }
+            else
+            {
+                provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.height, 0);
+            }
 
             CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
                                                  8, srcData.pixelStride * 8, srcData.lineStride,
@@ -100,7 +111,7 @@ public:
         [im lockFocus];
 
         CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-        CGImageRef imageRef = createImage (image, false, colourSpace);
+        CGImageRef imageRef = createImage (image, false, colourSpace, false);
         CGColorSpaceRelease (colourSpace);
 
         CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
@@ -265,7 +276,7 @@ public:
             if (sourceImage.getFormat() != Image::SingleChannel)
                 singleChannelImage = sourceImage.convertedToFormat (Image::SingleChannel);
 
-            CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, true, greyColourSpace);
+            CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, true, greyColourSpace, true);
 
             flip();
             AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
@@ -277,7 +288,6 @@ public:
             applyTransform (t.inverted());
             flip();
 
-            CGContextFlush (context);
             CGImageRelease (image);
             lastClipRectIsValid = false;
         }
@@ -457,7 +467,7 @@ public:
     {
         const int iw = sourceImage.getWidth();
         const int ih = sourceImage.getHeight();
-        CGImageRef image = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace);
+        CGImageRef image = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace, false);
 
         CGContextSaveGState (context);
         CGContextSetAlpha (context, state->fillType.getOpacity());
