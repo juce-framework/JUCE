@@ -209,7 +209,8 @@ const Image Image::convertedToFormat (PixelFormat newFormat) const
     if (image == 0 || newFormat == image->format)
         return *this;
 
-    Image newImage (newFormat, image->width, image->height, false, image->getType());
+    const int w = image->width, h = image->height;
+    Image newImage (newFormat, w, h, false, image->getType());
 
     if (newFormat == SingleChannel)
     {
@@ -219,15 +220,15 @@ const Image Image::convertedToFormat (PixelFormat newFormat) const
         }
         else
         {
-            const BitmapData destData (newImage, 0, 0, image->width, image->height, true);
-            const BitmapData srcData (*this, 0, 0, image->width, image->height);
+            const BitmapData destData (newImage, 0, 0, w, h, true);
+            const BitmapData srcData (*this, 0, 0, w, h);
 
-            for (int y = 0; y < image->height; ++y)
+            for (int y = 0; y < h; ++y)
             {
                 const PixelARGB* src = (const PixelARGB*) srcData.getLinePointer(y);
                 uint8* dst = destData.getLinePointer (y);
 
-                for (int x = image->width; --x >= 0;)
+                for (int x = w; --x >= 0;)
                 {
                     *dst++ = src->getAlpha();
                     ++src;

@@ -277,6 +277,7 @@ public:
             applyTransform (t.inverted());
             flip();
 
+            CGContextFlush (context);
             CGImageRelease (image);
             lastClipRectIsValid = false;
         }
