@@ -1092,8 +1092,6 @@
                   file="src/gui/graphics/geometry/juce_AffineTransform.cpp"/>
             <FILE id="NWFLILuh7" name="juce_AffineTransform.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_AffineTransform.h"/>
-            <FILE id="EzBXrEdQc" name="juce_BorderSize.cpp" compile="1" resource="0"
-                  file="src/gui/graphics/geometry/juce_BorderSize.cpp"/>
             <FILE id="Yrgxtk9Y" name="juce_BorderSize.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_BorderSize.h"/>
             <FILE id="kctD1TPMS" name="juce_Line.h" compile="0" resource="0" file="src/gui/graphics/geometry/juce_Line.h"/>
@@ -1109,10 +1107,6 @@
             <FILE id="0sf51PJbY" name="juce_PathStrokeType.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_PathStrokeType.h"/>
             <FILE id="n1Fp2JipH" name="juce_Point.h" compile="0" resource="0" file="src/gui/graphics/geometry/juce_Point.h"/>
-            <FILE id="rYmmzSqNV" name="juce_PositionedRectangle.cpp" compile="1"
-                  resource="0" file="src/gui/graphics/geometry/juce_PositionedRectangle.cpp"/>
-            <FILE id="KBwtfubIY" name="juce_PositionedRectangle.h" compile="0"
-                  resource="0" file="src/gui/graphics/geometry/juce_PositionedRectangle.h"/>
             <FILE id="6SejKO45p" name="juce_Rectangle.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_Rectangle.h"/>
             <FILE id="HaB5yPbdw" name="juce_RectangleList.cpp" compile="1" resource="0"

@@ -545,7 +545,7 @@ public:
 
         @see setBounds
     */
-    void setBoundsInset (const BorderSize& borders);
+    void setBoundsInset (const BorderSize<int>& borders);
 
     /** Positions the component within a given rectangle, keeping its proportions
         unchanged.

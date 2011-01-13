@@ -55,7 +55,7 @@ public:
 
     void resized()
     {
-        reloadButton->setBoundsInset (BorderSize (2));
+        reloadButton->setBoundsInset (BorderSize<int> (2));
     }
 
     void buttonClicked (Button*)

@@ -1468,13 +1468,13 @@ void TextEditor::setIndents (const int newLeftIndent,
     topIndent = newTopIndent;
 }
 
-void TextEditor::setBorder (const BorderSize& border)
+void TextEditor::setBorder (const BorderSize<int>& border)
 {
     borderSize = border;
     resized();
 }
 
-const BorderSize TextEditor::getBorder() const
+const BorderSize<int> TextEditor::getBorder() const
 {
     return borderSize;
 }

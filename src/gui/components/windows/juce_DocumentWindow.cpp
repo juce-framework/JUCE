@@ -212,7 +212,7 @@ void DocumentWindow::paint (Graphics& g)
     {
         g.setColour (getBackgroundColour().overlaidWith (Colour (0x80000000)));
 
-        const BorderSize border (getBorderThickness());
+        const BorderSize<int> border (getBorderThickness());
 
         g.fillRect (0, 0, getWidth(), border.getTop());
         g.fillRect (0, border.getTop(), border.getLeft(), getHeight() - border.getTopAndBottom());
@@ -270,15 +270,15 @@ void DocumentWindow::resized()
                             titleBarArea.getWidth(), menuBarHeight);
 }
 
-const BorderSize DocumentWindow::getBorderThickness()
+const BorderSize<int> DocumentWindow::getBorderThickness()
 {
-    return BorderSize ((isFullScreen() || isUsingNativeTitleBar())
-                            ? 0 : (resizableBorder != 0 ? 4 : 1));
+    return BorderSize<int> ((isFullScreen() || isUsingNativeTitleBar())
+                                ? 0 : (resizableBorder != 0 ? 4 : 1));
 }
 
-const BorderSize DocumentWindow::getContentComponentBorder()
+const BorderSize<int> DocumentWindow::getContentComponentBorder()
 {
-    BorderSize border (getBorderThickness());
+    BorderSize<int> border (getBorderThickness());
 
     border.setTop (border.getTop()
                     + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
@@ -294,7 +294,7 @@ int DocumentWindow::getTitleBarHeight() const
 
 const Rectangle<int> DocumentWindow::getTitleBarArea()
 {
-    const BorderSize border (getBorderThickness());
+    const BorderSize<int> border (getBorderThickness());
 
     return Rectangle<int> (border.getLeft(), border.getTop(),
                            getWidth() - border.getLeftAndRight(),

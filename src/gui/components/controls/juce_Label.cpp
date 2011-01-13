@@ -348,7 +348,7 @@ void Label::mouseDoubleClick (const MouseEvent& e)
 void Label::resized()
 {
     if (editor != 0)
-        editor->setBoundsInset (BorderSize (0));
+        editor->setBoundsInset (BorderSize<int> (0));
 }
 
 void Label::focusGained (FocusChangeType cause)

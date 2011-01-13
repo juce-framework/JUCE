@@ -560,21 +560,19 @@ void Graphics::drawHorizontalLine (const int y, float left, float right) const
     context->drawHorizontalLine (y, left, right);
 }
 
-void Graphics::drawLine (float x1, float y1, float x2, float y2) const
+void Graphics::drawLine (const float x1, const float y1, const float x2, const float y2) const
 {
     context->drawLine (Line<float> (x1, y1, x2, y2));
 }
 
-void Graphics::drawLine (const float startX, const float startY,
-                         const float endX, const float endY,
-                         const float lineThickness) const
-{
-    drawLine (Line<float> (startX, startY, endX, endY),lineThickness);
-}
-
 void Graphics::drawLine (const Line<float>& line) const
 {
-    drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
+    context->drawLine (line);
+}
+
+void Graphics::drawLine (const float x1, const float y1, const float x2, const float y2, const float lineThickness) const
+{
+    drawLine (Line<float> (x1, y1, x2, y2), lineThickness);
 }
 
 void Graphics::drawLine (const Line<float>& line, const float lineThickness) const
@@ -584,42 +582,35 @@ void Graphics::drawLine (const Line<float>& line, const float lineThickness) con
     fillPath (p);
 }
 
-void Graphics::drawDashedLine (const float startX, const float startY,
-                               const float endX, const float endY,
-                               const float* const dashLengths,
-                               const int numDashLengths,
-                               const float lineThickness) const
+void Graphics::drawDashedLine (const Line<float>& line, const float* const dashLengths,
+                               const int numDashLengths, const float lineThickness, int n) const
 {
-    const double dx = endX - startX;
-    const double dy = endY - startY;
-    const double totalLen = juce_hypot (dx, dy);
+    jassert (n >= 0 && n < numDashLengths); // your start index must be valid!
 
-    if (totalLen >= 0.5)
+    const Point<double> delta ((line.getEnd() - line.getStart()).toDouble());
+    const double totalLen = delta.getDistanceFromOrigin();
+
+    if (totalLen >= 0.1)
     {
         const double onePixAlpha = 1.0 / totalLen;
 
-        double alpha = 0.0;
-        float x = startX;
-        float y = startY;
-        int n = 0;
-
-        while (alpha < 1.0f)
+        for (double alpha = 0.0; alpha < 1.0;)
         {
-            alpha = jmin (1.0, alpha + dashLengths[n++] * onePixAlpha);
-            n = n % numDashLengths;
+            jassert (dashLengths[n] > 0); // can't have zero-length dashes!
 
-            const float oldX = x;
-            const float oldY = y;
-
-            x = (float) (startX + dx * alpha);
-            y = (float) (startY + dy * alpha);
+            const double lastAlpha = alpha;
+            alpha = jmin (1.0, alpha + dashLengths [n] * onePixAlpha);
+            n = (n + 1) % numDashLengths;
 
             if ((n & 1) != 0)
             {
+                const Line<float> segment (line.getStart() + (delta * lastAlpha).toFloat(),
+                                           line.getStart() + (delta * alpha).toFloat());
+
                 if (lineThickness != 1.0f)
-                    drawLine (oldX, oldY, x, y, lineThickness);
+                    drawLine (segment, lineThickness);
                 else
-                    drawLine (oldX, oldY, x, y);
+                    context->drawLine (segment);
             }
         }
     }

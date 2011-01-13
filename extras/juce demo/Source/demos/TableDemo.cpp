@@ -191,7 +191,7 @@ public:
     void resized()
     {
         // position our table with a gap around its edge
-        table.setBoundsInset (BorderSize (8));
+        table.setBoundsInset (BorderSize<int> (8));
     }
 
 
@@ -235,7 +235,7 @@ private:
 
         void resized()
         {
-            comboBox.setBoundsInset (BorderSize (2));
+            comboBox.setBoundsInset (BorderSize<int> (2));
         }
 
         // Our demo code will call this when we may need to update our contents

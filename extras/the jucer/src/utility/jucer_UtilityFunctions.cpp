@@ -569,7 +569,7 @@ const String justificationToCode (const Justification& justification)
 //==============================================================================
 void drawResizableBorder (Graphics& g,
                           int w, int h,
-                          const BorderSize borderSize,
+                          const BorderSize<int> borderSize,
                           const bool isMouseOver)
 {
     g.setColour (Colours::orange.withAlpha (isMouseOver ? 0.4f : 0.3f));

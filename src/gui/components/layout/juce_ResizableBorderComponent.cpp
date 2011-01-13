@@ -53,7 +53,7 @@ bool ResizableBorderComponent::Zone::operator== (const ResizableBorderComponent:
 bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent::Zone& other) const throw()       { return zone != other.zone; }
 
 const ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
-                                                                                           const BorderSize& border,
+                                                                                           const BorderSize<int>& border,
                                                                                            const Point<int>& position)
 {
     int z = 0;
@@ -177,7 +177,7 @@ bool ResizableBorderComponent::hitTest (int x, int y)
             || y >= getHeight() - borderSize.getBottom();
 }
 
-void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSize)
+void ResizableBorderComponent::setBorderThickness (const BorderSize<int>& newBorderSize)
 {
     if (borderSize != newBorderSize)
     {
@@ -186,7 +186,7 @@ void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSi
     }
 }
 
-const BorderSize ResizableBorderComponent::getBorderThickness() const
+const BorderSize<int> ResizableBorderComponent::getBorderThickness() const
 {
     return borderSize;
 }

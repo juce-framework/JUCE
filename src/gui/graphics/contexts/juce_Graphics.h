@@ -374,21 +374,19 @@ public:
 
     /** Draws a dashed line using a custom set of dash-lengths.
 
-        @param startX           the line's start x co-ordinate
-        @param startY           the line's start y co-ordinate
-        @param endX             the line's end x co-ordinate
-        @param endY             the line's end y co-ordinate
+        @param line             the line to draw
         @param dashLengths      a series of lengths to specify the on/off lengths - e.g.
                                 { 4, 5, 6, 7 } will draw a line of 4 pixels, skip 5 pixels,
                                 draw 6 pixels, skip 7 pixels, and then repeat.
         @param numDashLengths   the number of elements in the array (this must be an even number).
         @param lineThickness    the thickness of the line to draw
+        @param dashIndexToStartFrom     the index in the dash-length array to use for the first segment
         @see PathStrokeType::createDashedStroke
     */
-    void drawDashedLine (float startX, float startY,
-                         float endX, float endY,
+    void drawDashedLine (const Line<float>& line,
                          const float* dashLengths, int numDashLengths,
-                         float lineThickness = 1.0f) const;
+                         float lineThickness = 1.0f,
+                         int dashIndexToStartFrom = 0) const;
 
     /** Draws a vertical line of pixels at a given x position.
 

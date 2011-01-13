@@ -117,7 +117,7 @@ public:
     void setFullScreen (bool shouldBeFullScreen);
     bool isFullScreen() const;
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const;
-    const BorderSize getFrameSize() const;
+    const BorderSize<int> getFrameSize() const;
     bool setAlwaysOnTop (bool alwaysOnTop);
     void toFront (bool makeActiveWindow);
     void toBehind (ComponentPeer* other);
@@ -680,9 +680,9 @@ bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInACh
     return v == view;
 }
 
-const BorderSize UIViewComponentPeer::getFrameSize() const
+const BorderSize<int> UIViewComponentPeer::getFrameSize() const
 {
-    return BorderSize();
+    return BorderSize<int>();
 }
 
 bool UIViewComponentPeer::setAlwaysOnTop (bool alwaysOnTop)

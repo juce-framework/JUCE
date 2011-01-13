@@ -408,10 +408,8 @@ void ListBox::paintOverChildren (Graphics& g)
 
 void ListBox::resized()
 {
-    viewport->setBoundsInset (BorderSize (outlineThickness + ((headerComponent != 0) ? headerComponent->getHeight() : 0),
-                                          outlineThickness,
-                                          outlineThickness,
-                                          outlineThickness));
+    viewport->setBoundsInset (BorderSize<int> (outlineThickness + ((headerComponent != 0) ? headerComponent->getHeight() : 0),
+                                               outlineThickness, outlineThickness, outlineThickness));
 
     viewport->setSingleStepSizes (20, getRowHeight());
 

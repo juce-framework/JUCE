@@ -488,13 +488,13 @@ public:
 
         @see getBorder
     */
-    void setBorder (const BorderSize& border);
+    void setBorder (const BorderSize<int>& border);
 
     /** Returns the size of border around the edge of the component.
 
         @see setBorder
     */
-    const BorderSize getBorder() const;
+    const BorderSize<int> getBorder() const;
 
     /** Used to disable the auto-scrolling which keeps the cursor visible.
 
@@ -616,7 +616,7 @@ private:
 
     ScopedPointer <Viewport> viewport;
     TextHolderComponent* textHolder;
-    BorderSize borderSize;
+    BorderSize<int> borderSize;
 
     bool readOnly                   : 1;
     bool multiline                  : 1;

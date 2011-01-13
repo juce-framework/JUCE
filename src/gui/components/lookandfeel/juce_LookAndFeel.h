@@ -456,16 +456,16 @@ public:
 
     virtual void drawResizableFrame (Graphics& g,
                                     int w, int h,
-                                    const BorderSize& borders);
+                                    const BorderSize<int>& borders);
 
     //==============================================================================
     virtual void fillResizableWindowBackground (Graphics& g, int w, int h,
-                                                const BorderSize& border,
+                                                const BorderSize<int>& border,
                                                 ResizableWindow& window);
 
     virtual void drawResizableWindowBorder (Graphics& g,
                                             int w, int h,
-                                            const BorderSize& border,
+                                            const BorderSize<int>& border,
                                             ResizableWindow& window);
 
     //==============================================================================

@@ -47,7 +47,7 @@ public:
         The default co-ordinates will be (0, 0, 0, 0).
     */
     Rectangle() throw()
-      : x (0), y (0), w (0), h (0)
+      : x(), y(), w(), h()
     {
     }
 
@@ -68,7 +68,7 @@ public:
 
     /** Creates a rectangle with a given size, and a position of (0, 0). */
     Rectangle (const ValueType width, const ValueType height) throw()
-      : x (0), y (0), w (width), h (height)
+      : x(), y(), w (width), h (height)
     {
     }
 
@@ -79,8 +79,8 @@ public:
         w (corner1.getX() - corner2.getX()),
         h (corner1.getY() - corner2.getY())
     {
-        if (w < 0) w = -w;
-        if (h < 0) h = -h;
+        if (w < ValueType()) w = -w;
+        if (h < ValueType()) h = -h;
     }
 
     /** Creates a Rectangle from a set of left, right, top, bottom coordinates.
@@ -105,7 +105,7 @@ public:
 
     //==============================================================================
     /** Returns true if the rectangle's width and height are both zero or less */
-    bool isEmpty() const throw()                                    { return w <= 0 || h <= 0; }
+    bool isEmpty() const throw()                                    { return w <= ValueType() || h <= ValueType(); }
 
     /** Returns the x co-ordinate of the rectangle's left-hand-side. */
     inline ValueType getX() const throw()                           { return x; }
@@ -503,12 +503,12 @@ public:
         const int maxX = jmax (otherX, x);
         otherW = jmin (otherX + otherW, x + w) - maxX;
 
-        if (otherW > 0)
+        if (otherW > ValueType())
         {
             const int maxY = jmax (otherY, y);
             otherH = jmin (otherY + otherH, y + h) - maxY;
 
-            if (otherH > 0)
+            if (otherH > ValueType())
             {
                 otherX = maxX; otherY = maxY;
                 return true;
@@ -675,12 +675,12 @@ public:
         const ValueType x = jmax (x1, x2);
         w1 = jmin (x1 + w1, x2 + w2) - x;
 
-        if (w1 > 0)
+        if (w1 > ValueType())
         {
             const ValueType y = jmax (y1, y2);
             h1 = jmin (y1 + h1, y2 + h2) - y;
 
-            if (h1 > 0)
+            if (h1 > ValueType())
             {
                 x1 = x; y1 = y;
                 return true;

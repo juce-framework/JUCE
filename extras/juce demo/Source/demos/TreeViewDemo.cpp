@@ -170,9 +170,9 @@ public:
     void resized()
     {
         if (treeView != 0)
-            treeView->setBoundsInset (BorderSize (40, 10, 10, 10));
+            treeView->setBoundsInset (BorderSize<int> (40, 10, 10, 10));
         else if (fileTreeComp != 0)
-            fileTreeComp->setBoundsInset (BorderSize (40, 10, 10, 10));
+            fileTreeComp->setBoundsInset (BorderSize<int> (40, 10, 10, 10));
 
         typeButton.changeWidthToFitText (22);
         typeButton.setTopLeftPosition (10, 10);

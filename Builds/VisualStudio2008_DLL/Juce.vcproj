@@ -747,7 +747,6 @@
             <Filter Name="geometry">
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_AffineTransform.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_AffineTransform.h"/>
-              <File RelativePath="..\..\src\gui\graphics\geometry\juce_BorderSize.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_BorderSize.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Line.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Path.cpp"/>
@@ -757,8 +756,6 @@
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_PathStrokeType.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_PathStrokeType.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Point.h"/>
-              <File RelativePath="..\..\src\gui\graphics\geometry\juce_PositionedRectangle.cpp"/>
-              <File RelativePath="..\..\src\gui\graphics\geometry\juce_PositionedRectangle.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Rectangle.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_RectangleList.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_RectangleList.h"/>

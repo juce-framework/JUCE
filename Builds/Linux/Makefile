@@ -253,11 +253,9 @@ OBJECTS := \
   $(OBJDIR)/juce_TextLayout_d18f700e.o \
   $(OBJDIR)/juce_Typeface_34b3026e.o \
   $(OBJDIR)/juce_AffineTransform_4a320188.o \
-  $(OBJDIR)/juce_BorderSize_bf140c3c.o \
   $(OBJDIR)/juce_Path_dcdd4594.o \
   $(OBJDIR)/juce_PathIterator_4e116c22.o \
   $(OBJDIR)/juce_PathStrokeType_506dcb86.o \
-  $(OBJDIR)/juce_PositionedRectangle_1b6e8982.o \
   $(OBJDIR)/juce_RectangleList_b6ae7ee8.o \
   $(OBJDIR)/juce_GIFLoader_61887b90.o \
   $(OBJDIR)/juce_JPEGLoader_412d2ccc.o \
@@ -1437,11 +1435,6 @@ $(OBJDIR)/juce_AffineTransform_4a320188.o: ../../src/gui/graphics/geometry/juce_
 	@echo "Compiling juce_AffineTransform.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_BorderSize_bf140c3c.o: ../../src/gui/graphics/geometry/juce_BorderSize.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_BorderSize.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_Path_dcdd4594.o: ../../src/gui/graphics/geometry/juce_Path.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_Path.cpp"
@@ -1455,11 +1448,6 @@ $(OBJDIR)/juce_PathIterator_4e116c22.o: ../../src/gui/graphics/geometry/juce_Pat
 $(OBJDIR)/juce_PathStrokeType_506dcb86.o: ../../src/gui/graphics/geometry/juce_PathStrokeType.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_PathStrokeType.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_PositionedRectangle_1b6e8982.o: ../../src/gui/graphics/geometry/juce_PositionedRectangle.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_PositionedRectangle.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RectangleList_b6ae7ee8.o: ../../src/gui/graphics/geometry/juce_RectangleList.cpp

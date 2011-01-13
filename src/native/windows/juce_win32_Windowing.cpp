@@ -560,10 +560,10 @@ public:
 
         if (GetWindowInfo (hwnd, &info))
         {
-            windowBorder = BorderSize (info.rcClient.top - info.rcWindow.top,
-                                       info.rcClient.left - info.rcWindow.left,
-                                       info.rcWindow.bottom - info.rcClient.bottom,
-                                       info.rcWindow.right - info.rcClient.right);
+            windowBorder = BorderSize<int> (info.rcClient.top - info.rcWindow.top,
+                                            info.rcClient.left - info.rcWindow.left,
+                                            info.rcWindow.bottom - info.rcClient.bottom,
+                                            info.rcWindow.right - info.rcClient.right);
         }
 
       #if JUCE_DIRECT2D
@@ -742,7 +742,7 @@ public:
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
-    const BorderSize getFrameSize() const
+    const BorderSize<int> getFrameSize() const
     {
         return windowBorder;
     }
@@ -1010,7 +1010,7 @@ private:
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
   #endif
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
-    BorderSize windowBorder;
+    BorderSize<int> windowBorder;
     HICON currentWindowIcon;
     ScopedPointer<NOTIFYICONDATA> taskBarIcon;
     IDropTarget* dropTarget;

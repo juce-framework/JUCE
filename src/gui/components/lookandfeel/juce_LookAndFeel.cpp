@@ -1820,7 +1820,7 @@ void LookAndFeel::drawCornerResizer (Graphics& g,
     }
 }
 
-void LookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSize& border)
+void LookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSize<int>& border)
 {
     if (! border.isEmpty())
     {
@@ -1843,13 +1843,13 @@ void LookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSiz
 
 //==============================================================================
 void LookAndFeel::fillResizableWindowBackground (Graphics& g, int /*w*/, int /*h*/,
-                                                 const BorderSize& /*border*/, ResizableWindow& window)
+                                                 const BorderSize<int>& /*border*/, ResizableWindow& window)
 {
    g.fillAll (window.getBackgroundColour());
 }
 
 void LookAndFeel::drawResizableWindowBorder (Graphics&, int /*w*/, int /*h*/,
-                                             const BorderSize& /*border*/, ResizableWindow&)
+                                             const BorderSize<int>& /*border*/, ResizableWindow&)
 {
 }
 

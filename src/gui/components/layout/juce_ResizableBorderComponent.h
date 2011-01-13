@@ -78,13 +78,13 @@ public:
 
         @see getBorderThickness
     */
-    void setBorderThickness (const BorderSize& newBorderSize);
+    void setBorderThickness (const BorderSize<int>& newBorderSize);
 
     /** Returns the number of pixels wide that the draggable edges of this component are.
 
         @see setBorderThickness
     */
-    const BorderSize getBorderThickness() const;
+    const BorderSize<int> getBorderThickness() const;
 
 
     //==============================================================================
@@ -118,7 +118,7 @@ public:
             zone that the point lies within.
         */
         static const Zone fromPositionOnBorder (const Rectangle<int>& totalSize,
-                                                const BorderSize& border,
+                                                const BorderSize<int>& border,
                                                 const Point<int>& position);
 
         /** Returns an appropriate mouse-cursor for this resize zone. */
@@ -189,7 +189,7 @@ protected:
 private:
     WeakReference<Component> component;
     ComponentBoundsConstrainer* constrainer;
-    BorderSize borderSize;
+    BorderSize<int> borderSize;
     Rectangle<int> originalBounds;
     Zone mouseZone;
 

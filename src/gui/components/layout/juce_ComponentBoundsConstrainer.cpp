@@ -144,7 +144,7 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* const compone
     jassert (component != 0);
 
     Rectangle<int> limits, bounds (targetBounds);
-    BorderSize border;
+    BorderSize<int> border;
 
     Component* const parent = component->getParentComponent();
 

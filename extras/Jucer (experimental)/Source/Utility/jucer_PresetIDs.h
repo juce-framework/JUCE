@@ -109,6 +109,9 @@ namespace Ids
     DECLARE_ID (rootItemVisible);
     DECLARE_ID (openByDefault);
     DECLARE_ID (locked);
+    DECLARE_ID (tooltip);
+    DECLARE_ID (memberName);
+    DECLARE_ID (focusOrder);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

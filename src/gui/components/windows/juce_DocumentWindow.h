@@ -238,9 +238,9 @@ public:
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
-    const BorderSize getBorderThickness();
+    const BorderSize<int> getBorderThickness();
     /** @internal */
-    const BorderSize getContentComponentBorder();
+    const BorderSize<int> getContentComponentBorder();
     /** @internal */
     void mouseDoubleClick (const MouseEvent& e);
     /** @internal */

@@ -131,18 +131,18 @@ void ResizableWindow::setContentComponentSize (int width, int height)
 {
     jassert (width > 0 && height > 0); // not a great idea to give it a zero size..
 
-    const BorderSize border (getContentComponentBorder());
+    const BorderSize<int> border (getContentComponentBorder());
 
     setSize (width + border.getLeftAndRight(),
              height + border.getTopAndBottom());
 }
 
-const BorderSize ResizableWindow::getBorderThickness()
+const BorderSize<int> ResizableWindow::getBorderThickness()
 {
-    return BorderSize (isUsingNativeTitleBar() ? 0 : ((resizableBorder != 0 && ! isFullScreen()) ? 5 : 3));
+    return BorderSize<int> (isUsingNativeTitleBar() ? 0 : ((resizableBorder != 0 && ! isFullScreen()) ? 5 : 3));
 }
 
-const BorderSize ResizableWindow::getContentComponentBorder()
+const BorderSize<int> ResizableWindow::getContentComponentBorder()
 {
     return getBorderThickness();
 }
@@ -208,7 +208,7 @@ void ResizableWindow::childBoundsChanged (Component* child)
         jassert (child->getWidth() > 0);
         jassert (child->getHeight() > 0);
 
-        const BorderSize borders (getContentComponentBorder());
+        const BorderSize<int> borders (getContentComponentBorder());
 
         setSize (child->getWidth() + borders.getLeftAndRight(),
                  child->getHeight() + borders.getTopAndBottom());
@@ -219,7 +219,7 @@ void ResizableWindow::childBoundsChanged (Component* child)
 //==============================================================================
 void ResizableWindow::activeWindowStatusChanged()
 {
-    const BorderSize border (getContentComponentBorder());
+    const BorderSize<int> border (getContentComponentBorder());
 
     Rectangle<int> area (getLocalBounds());
     repaint (area.removeFromTop (border.getTop()));

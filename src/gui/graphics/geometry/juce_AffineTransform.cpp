@@ -216,7 +216,7 @@ const AffineTransform AffineTransform::inverted() const throw()
 
 bool AffineTransform::isSingularity() const throw()
 {
-    return (mat00 * mat11 - mat10 * mat01) == 0.0;
+    return (mat00 * mat11 - mat10 * mat01) == 0;
 }
 
 const AffineTransform AffineTransform::fromTargetPoints (const float x00, const float y00,

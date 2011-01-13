@@ -722,9 +722,6 @@
 #ifndef __JUCE_POINT_JUCEHEADER__
  #include "gui/graphics/geometry/juce_Point.h"
 #endif
-#ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
- #include "gui/graphics/geometry/juce_PositionedRectangle.h"
-#endif
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
  #include "gui/graphics/geometry/juce_Rectangle.h"
 #endif

@@ -44,7 +44,7 @@ class Point
 public:
     //==============================================================================
     /** Creates a point with co-ordinates (0, 0). */
-    Point() throw()  : x (0), y (0) {}
+    Point() throw()  : x(), y() {}
 
     /** Creates a copy of another point. */
     Point (const Point& other) throw()  : x (other.x), y (other.y)  {}
@@ -156,11 +156,14 @@ public:
     const Point transformedBy (const AffineTransform& transform) const throw()    { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
                                                                                                   transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
+    /** Casts this point to a Point<int> object. */
+    const Point<int> toInt() const throw()                              { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+
     /** Casts this point to a Point<float> object. */
     const Point<float> toFloat() const throw()                          { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
-    /** Casts this point to a Point<int> object. */
-    const Point<int> toInt() const throw()                              { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+    /** Casts this point to a Point<double> object. */
+    const Point<double> toDouble() const throw()                        { return Point<double> (static_cast <double> (x), static_cast<double> (y)); }
 
     /** Returns the point as a string in the form "x, y". */
     const String toString() const                                       { return String (x) + ", " + String (y); }

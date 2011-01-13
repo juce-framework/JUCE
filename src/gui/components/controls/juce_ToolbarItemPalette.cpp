@@ -79,7 +79,7 @@ void ToolbarItemPalette::replaceComponent (ToolbarItemComponent* const comp)
 
 void ToolbarItemPalette::resized()
 {
-    viewport.setBoundsInset (BorderSize (1));
+    viewport.setBoundsInset (BorderSize<int> (1));
 
     Component* const itemHolder = viewport.getViewedComponent();
 

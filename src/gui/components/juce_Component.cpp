@@ -1126,7 +1126,7 @@ void Component::centreWithSize (const int width, const int height)
                width, height);
 }
 
-void Component::setBoundsInset (const BorderSize& borders)
+void Component::setBoundsInset (const BorderSize<int>& borders)
 {
     setBounds (borders.subtractedFrom (ComponentHelpers::getParentOrMainMonitorBounds (*this)));
 }

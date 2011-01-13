@@ -42,7 +42,7 @@ namespace TabbedComponentHelpers
             delete comp;
     }
 
-    const Rectangle<int> getTabArea (Rectangle<int>& content, BorderSize& outline,
+    const Rectangle<int> getTabArea (Rectangle<int>& content, BorderSize<int>& outline,
                                      const TabbedButtonBar::Orientation orientation, const int tabDepth)
     {
         switch (orientation)
@@ -245,7 +245,7 @@ void TabbedComponent::paint (Graphics& g)
     g.fillAll (findColour (backgroundColourId));
 
     Rectangle<int> content (getLocalBounds());
-    BorderSize outline (outlineThickness);
+    BorderSize<int> outline (outlineThickness);
     TabbedComponentHelpers::getTabArea (content, outline, getOrientation(), tabDepth);
 
     g.reduceClipRegion (content);
@@ -264,10 +264,10 @@ void TabbedComponent::paint (Graphics& g)
 void TabbedComponent::resized()
 {
     Rectangle<int> content (getLocalBounds());
-    BorderSize outline (outlineThickness);
+    BorderSize<int> outline (outlineThickness);
 
     tabs->setBounds (TabbedComponentHelpers::getTabArea (content, outline, getOrientation(), tabDepth));
-    content = BorderSize (edgeIndent).subtractedFrom (outline.subtractedFrom (content));
+    content = BorderSize<int> (edgeIndent).subtractedFrom (outline.subtractedFrom (content));
 
     for (int i = contentComponents.size(); --i >= 0;)
         if (contentComponents.getReference (i) != 0)

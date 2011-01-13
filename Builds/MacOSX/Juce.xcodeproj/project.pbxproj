@@ -222,11 +222,9 @@
 		803FFCA3DAC0C004A80143B4 = { isa = PBXBuildFile; fileRef = 91CB423DBC5F3CBEDD9CF2EF; };
 		F0556B3AD9D388177E26B90D = { isa = PBXBuildFile; fileRef = AF66A9951377E2D04C54CADD; };
 		0558FFF11AED944C6B3E5FB5 = { isa = PBXBuildFile; fileRef = 2ED8CC539A9D9BE611F67A9A; };
-		11109DE27B3E3E3863360113 = { isa = PBXBuildFile; fileRef = 4B550E0887AA76BBAF8BA5BF; };
 		CF73FAC91E319C464F07C966 = { isa = PBXBuildFile; fileRef = 29BC53FEE9BC27F44534C909; };
 		B6D3EDA0F2E3516F3922F23F = { isa = PBXBuildFile; fileRef = 312F208B501E0D7764C6B613; };
 		E7C9FAA5F8A4AEDAD8A8CC1D = { isa = PBXBuildFile; fileRef = 9D3F1BAB1D48DDECB9F35916; };
-		DC4BB8AFC054ECD4141B47CC = { isa = PBXBuildFile; fileRef = 11D8021D49B895410A836486; };
 		084C9F2D4F78134CB1EFE676 = { isa = PBXBuildFile; fileRef = 1B170F70AF8AA0A39074F671; };
 		4DAD08CD3A688747C9CA237B = { isa = PBXBuildFile; fileRef = 0F1C5770B363EF7DF64A876A; };
 		60FE8BFA252E3EF2D60B77AD = { isa = PBXBuildFile; fileRef = 6619D27E74F623B1E8CE8F71; };
@@ -839,7 +837,6 @@
 		932024E0F2A2CC22B7657691 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Typeface.h; path = ../../src/gui/graphics/fonts/juce_Typeface.h; sourceTree = SOURCE_ROOT; };
 		2ED8CC539A9D9BE611F67A9A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AffineTransform.cpp; path = ../../src/gui/graphics/geometry/juce_AffineTransform.cpp; sourceTree = SOURCE_ROOT; };
 		5CD42FFF9F1A509D117BD0CB = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AffineTransform.h; path = ../../src/gui/graphics/geometry/juce_AffineTransform.h; sourceTree = SOURCE_ROOT; };
-		4B550E0887AA76BBAF8BA5BF = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_BorderSize.cpp; path = ../../src/gui/graphics/geometry/juce_BorderSize.cpp; sourceTree = SOURCE_ROOT; };
 		C18F342C087F69D141B3FAF5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_BorderSize.h; path = ../../src/gui/graphics/geometry/juce_BorderSize.h; sourceTree = SOURCE_ROOT; };
 		4011751B9EFCA7B9345D7D7C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Line.h; path = ../../src/gui/graphics/geometry/juce_Line.h; sourceTree = SOURCE_ROOT; };
 		29BC53FEE9BC27F44534C909 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Path.cpp; path = ../../src/gui/graphics/geometry/juce_Path.cpp; sourceTree = SOURCE_ROOT; };
@@ -849,8 +846,6 @@
 		9D3F1BAB1D48DDECB9F35916 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_PathStrokeType.cpp; path = ../../src/gui/graphics/geometry/juce_PathStrokeType.cpp; sourceTree = SOURCE_ROOT; };
 		C2700BB57B9EED7BFE975564 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_PathStrokeType.h; path = ../../src/gui/graphics/geometry/juce_PathStrokeType.h; sourceTree = SOURCE_ROOT; };
 		132E3C38B4F0C6229EDF7000 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Point.h; path = ../../src/gui/graphics/geometry/juce_Point.h; sourceTree = SOURCE_ROOT; };
-		11D8021D49B895410A836486 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_PositionedRectangle.cpp; path = ../../src/gui/graphics/geometry/juce_PositionedRectangle.cpp; sourceTree = SOURCE_ROOT; };
-		469347B6414F2CE9DCEEA386 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_PositionedRectangle.h; path = ../../src/gui/graphics/geometry/juce_PositionedRectangle.h; sourceTree = SOURCE_ROOT; };
 		F8C44FF03700F6140950F373 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Rectangle.h; path = ../../src/gui/graphics/geometry/juce_Rectangle.h; sourceTree = SOURCE_ROOT; };
 		1B170F70AF8AA0A39074F671 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RectangleList.cpp; path = ../../src/gui/graphics/geometry/juce_RectangleList.cpp; sourceTree = SOURCE_ROOT; };
 		8B7D7435287A20CB2D8E3704 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_RectangleList.h; path = ../../src/gui/graphics/geometry/juce_RectangleList.h; sourceTree = SOURCE_ROOT; };
@@ -1613,7 +1608,6 @@
 		BF4679D9201C5AAE6751536B = { isa = PBXGroup; children = (
 				2ED8CC539A9D9BE611F67A9A,
 				5CD42FFF9F1A509D117BD0CB,
-				4B550E0887AA76BBAF8BA5BF,
 				C18F342C087F69D141B3FAF5,
 				4011751B9EFCA7B9345D7D7C,
 				29BC53FEE9BC27F44534C909,
@@ -1623,8 +1617,6 @@
 				9D3F1BAB1D48DDECB9F35916,
 				C2700BB57B9EED7BFE975564,
 				132E3C38B4F0C6229EDF7000,
-				11D8021D49B895410A836486,
-				469347B6414F2CE9DCEEA386,
 				F8C44FF03700F6140950F373,
 				1B170F70AF8AA0A39074F671,
 				8B7D7435287A20CB2D8E3704 ); name = geometry; sourceTree = "<group>"; };
@@ -2178,11 +2170,9 @@
 				803FFCA3DAC0C004A80143B4,
 				F0556B3AD9D388177E26B90D,
 				0558FFF11AED944C6B3E5FB5,
-				11109DE27B3E3E3863360113,
 				CF73FAC91E319C464F07C966,
 				B6D3EDA0F2E3516F3922F23F,
 				E7C9FAA5F8A4AEDAD8A8CC1D,
-				DC4BB8AFC054ECD4141B47CC,
 				084C9F2D4F78134CB1EFE676,
 				4DAD08CD3A688747C9CA237B,
 				60FE8BFA252E3EF2D60B77AD,

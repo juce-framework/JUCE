@@ -865,9 +865,6 @@
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_AffineTransform.cpp">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\graphics\geometry\juce_BorderSize.cpp">
-      <Filter>Juce\Source\gui\graphics\geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_Path.cpp">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClCompile>
@@ -875,9 +872,6 @@
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_PathStrokeType.cpp">
-      <Filter>Juce\Source\gui\graphics\geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\gui\graphics\geometry\juce_PositionedRectangle.cpp">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\geometry\juce_RectangleList.cpp">
@@ -2050,9 +2044,6 @@
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_Point.h">
-      <Filter>Juce\Source\gui\graphics\geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\gui\graphics\geometry\juce_PositionedRectangle.h">
       <Filter>Juce\Source\gui\graphics\geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\geometry\juce_Rectangle.h">

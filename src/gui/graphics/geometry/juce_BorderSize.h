@@ -38,87 +38,118 @@
 
     @see Rectangle
 */
-class JUCE_API  BorderSize
+template <typename ValueType>
+class BorderSize
 {
 public:
     //==============================================================================
     /** Creates a null border.
-
         All sizes are left as 0.
     */
-    BorderSize() throw();
+    BorderSize() throw()
+        : top(), left(), bottom(), right()
+    {
+    }
 
     /** Creates a copy of another border. */
-    BorderSize (const BorderSize& other) throw();
+    BorderSize (const BorderSize& other) throw()
+        : top (other.top), left (other.left), bottom (other.bottom), right (other.right)
+    {
+    }
 
     /** Creates a border with the given gaps. */
-    BorderSize (int topGap,
-                int leftGap,
-                int bottomGap,
-                int rightGap) throw();
+    BorderSize (ValueType topGap, ValueType leftGap, ValueType bottomGap, ValueType rightGap) throw()
+        : top (topGap), left (leftGap), bottom (bottomGap), right (rightGap)
+    {
+    }
 
     /** Creates a border with the given gap on all sides. */
-    explicit BorderSize (int allGaps) throw();
-
-    /** Destructor. */
-    ~BorderSize() throw();
+    explicit BorderSize (ValueType allGaps) throw()
+        : top (allGaps), left (allGaps), bottom (allGaps), right (allGaps)
+    {
+    }
 
     //==============================================================================
     /** Returns the gap that should be left at the top of the region. */
-    int getTop() const throw()                          { return top; }
+    ValueType getTop() const throw()                    { return top; }
 
     /** Returns the gap that should be left at the top of the region. */
-    int getLeft() const throw()                         { return left; }
+    ValueType getLeft() const throw()                   { return left; }
 
     /** Returns the gap that should be left at the top of the region. */
-    int getBottom() const throw()                       { return bottom; }
+    ValueType getBottom() const throw()                 { return bottom; }
 
     /** Returns the gap that should be left at the top of the region. */
-    int getRight() const throw()                        { return right; }
+    ValueType getRight() const throw()                  { return right; }
 
     /** Returns the sum of the top and bottom gaps. */
-    int getTopAndBottom() const throw()                 { return top + bottom; }
+    ValueType getTopAndBottom() const throw()           { return top + bottom; }
 
     /** Returns the sum of the left and right gaps. */
-    int getLeftAndRight() const throw()                 { return left + right; }
+    ValueType getLeftAndRight() const throw()           { return left + right; }
 
     /** Returns true if this border has no thickness along any edge. */
-    bool isEmpty() const throw()                        { return left + right + top + bottom == 0; }
+    bool isEmpty() const throw()                        { return left + right + top + bottom == ValueType(); }
 
     //==============================================================================
     /** Changes the top gap. */
-    void setTop (int newTopGap) throw();
+    void setTop (ValueType newTopGap) throw()           { top = newTopGap; }
 
     /** Changes the left gap. */
-    void setLeft (int newLeftGap) throw();
+    void setLeft (ValueType newLeftGap) throw()         { left = newLeftGap; }
 
     /** Changes the bottom gap. */
-    void setBottom (int newBottomGap) throw();
+    void setBottom (ValueType newBottomGap) throw()     { bottom = newBottomGap; }
 
     /** Changes the right gap. */
-    void setRight (int newRightGap) throw();
+    void setRight (ValueType newRightGap) throw()        { right = newRightGap; }
 
     //==============================================================================
     /** Returns a rectangle with these borders removed from it. */
-    const Rectangle<int> subtractedFrom (const Rectangle<int>& original) const throw();
+    const Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const throw()
+    {
+        return Rectangle<ValueType> (original.getX() + left,
+                                     original.getY() + top,
+                                     original.getWidth() - (left + right),
+                                     original.getHeight() - (top + bottom));
+    }
 
     /** Removes this border from a given rectangle. */
-    void subtractFrom (Rectangle<int>& rectangle) const throw();
+    void subtractFrom (Rectangle<ValueType>& rectangle) const throw()
+    {
+        rectangle = subtractedFrom (rectangle);
+    }
 
     /** Returns a rectangle with these borders added around it. */
-    const Rectangle<int> addedTo (const Rectangle<int>& original) const throw();
+    const Rectangle<ValueType> addedTo (const Rectangle<ValueType>& original) const throw()
+    {
+        return Rectangle<ValueType> (original.getX() - left,
+                                     original.getY() - top,
+                                     original.getWidth() + (left + right),
+                                     original.getHeight() + (top + bottom));
+    }
+
 
     /** Adds this border around a given rectangle. */
-    void addTo (Rectangle<int>& original) const throw();
+    void addTo (Rectangle<ValueType>& rectangle) const throw()
+    {
+        rectangle = addedTo (rectangle);
+    }
 
     //==============================================================================
-    bool operator== (const BorderSize& other) const throw();
-    bool operator!= (const BorderSize& other) const throw();
+    bool operator== (const BorderSize& other) const throw()
+    {
+        return top == other.top && left == other.left && bottom == other.bottom && right == other.right;
+    }
 
+    bool operator!= (const BorderSize& other) const throw()
+    {
+        return ! operator== (other);
+    }
 
 private:
     //==============================================================================
-    int top, left, bottom, right;
+    ValueType top, left, bottom, right;
 
     JUCE_LEAK_DETECTOR (BorderSize);
 };

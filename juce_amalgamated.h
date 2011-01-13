@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	12
+#define JUCE_BUILDNUMBER	13
 
 /** Current Juce version number.
 
@@ -20668,7 +20668,7 @@ class Point
 public:
 
 	/** Creates a point with co-ordinates (0, 0). */
-	Point() throw()  : x (0), y (0) {}
+	Point() throw()  : x(), y() {}
 
 	/** Creates a copy of another point. */
 	Point (const Point& other) throw()  : x (other.x), y (other.y)  {}
@@ -20779,11 +20779,14 @@ public:
 	const Point transformedBy (const AffineTransform& transform) const throw()	{ return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
 																								  transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
+	/** Casts this point to a Point<int> object. */
+	const Point<int> toInt() const throw()				  { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+
 	/** Casts this point to a Point<float> object. */
 	const Point<float> toFloat() const throw()			  { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
-	/** Casts this point to a Point<int> object. */
-	const Point<int> toInt() const throw()				  { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+	/** Casts this point to a Point<double> object. */
+	const Point<double> toDouble() const throw()			{ return Point<double> (static_cast <double> (x), static_cast<double> (y)); }
 
 	/** Returns the point as a string in the form "x, y". */
 	const String toString() const                                       { return String (x) + ", " + String (y); }
@@ -21930,7 +21933,7 @@ public:
 		The default co-ordinates will be (0, 0, 0, 0).
 	*/
 	Rectangle() throw()
-	  : x (0), y (0), w (0), h (0)
+	  : x(), y(), w(), h()
 	{
 	}
 
@@ -21951,7 +21954,7 @@ public:
 
 	/** Creates a rectangle with a given size, and a position of (0, 0). */
 	Rectangle (const ValueType width, const ValueType height) throw()
-	  : x (0), y (0), w (width), h (height)
+	  : x(), y(), w (width), h (height)
 	{
 	}
 
@@ -21962,8 +21965,8 @@ public:
 		w (corner1.getX() - corner2.getX()),
 		h (corner1.getY() - corner2.getY())
 	{
-		if (w < 0) w = -w;
-		if (h < 0) h = -h;
+		if (w < ValueType()) w = -w;
+		if (h < ValueType()) h = -h;
 	}
 
 	/** Creates a Rectangle from a set of left, right, top, bottom coordinates.
@@ -21987,7 +21990,7 @@ public:
 	~Rectangle() throw() {}
 
 	/** Returns true if the rectangle's width and height are both zero or less */
-	bool isEmpty() const throw()					{ return w <= 0 || h <= 0; }
+	bool isEmpty() const throw()					{ return w <= ValueType() || h <= ValueType(); }
 
 	/** Returns the x co-ordinate of the rectangle's left-hand-side. */
 	inline ValueType getX() const throw()			   { return x; }
@@ -22382,12 +22385,12 @@ public:
 		const int maxX = jmax (otherX, x);
 		otherW = jmin (otherX + otherW, x + w) - maxX;
 
-		if (otherW > 0)
+		if (otherW > ValueType())
 		{
 			const int maxY = jmax (otherY, y);
 			otherH = jmin (otherY + otherH, y + h) - maxY;
 
-			if (otherH > 0)
+			if (otherH > ValueType())
 			{
 				otherX = maxX; otherY = maxY;
 				return true;
@@ -22553,12 +22556,12 @@ public:
 		const ValueType x = jmax (x1, x2);
 		w1 = jmin (x1 + w1, x2 + w2) - x;
 
-		if (w1 > 0)
+		if (w1 > ValueType())
 		{
 			const ValueType y = jmax (y1, y2);
 			h1 = jmin (y1 + h1, y2 + h2) - y;
 
-			if (h1 > 0)
+			if (h1 > ValueType())
 			{
 				x1 = x; y1 = y;
 				return true;
@@ -25780,21 +25783,19 @@ public:
 
 	/** Draws a dashed line using a custom set of dash-lengths.
 
-		@param startX	   the line's start x co-ordinate
-		@param startY	   the line's start y co-ordinate
-		@param endX		 the line's end x co-ordinate
-		@param endY		 the line's end y co-ordinate
+		@param line		 the line to draw
 		@param dashLengths	  a series of lengths to specify the on/off lengths - e.g.
 								{ 4, 5, 6, 7 } will draw a line of 4 pixels, skip 5 pixels,
 								draw 6 pixels, skip 7 pixels, and then repeat.
 		@param numDashLengths   the number of elements in the array (this must be an even number).
 		@param lineThickness	the thickness of the line to draw
+		@param dashIndexToStartFrom	 the index in the dash-length array to use for the first segment
 		@see PathStrokeType::createDashedStroke
 	*/
-	void drawDashedLine (float startX, float startY,
-						 float endX, float endY,
+	void drawDashedLine (const Line<float>& line,
 						 const float* dashLengths, int numDashLengths,
-						 float lineThickness = 1.0f) const;
+						 float lineThickness = 1.0f,
+						 int dashIndexToStartFrom = 0) const;
 
 	/** Draws a vertical line of pixels at a given x position.
 
@@ -26758,82 +26759,113 @@ private:
 
 	@see Rectangle
 */
-class JUCE_API  BorderSize
+template <typename ValueType>
+class BorderSize
 {
 public:
 
 	/** Creates a null border.
-
 		All sizes are left as 0.
 	*/
-	BorderSize() throw();
+	BorderSize() throw()
+		: top(), left(), bottom(), right()
+	{
+	}
 
 	/** Creates a copy of another border. */
-	BorderSize (const BorderSize& other) throw();
+	BorderSize (const BorderSize& other) throw()
+		: top (other.top), left (other.left), bottom (other.bottom), right (other.right)
+	{
+	}
 
 	/** Creates a border with the given gaps. */
-	BorderSize (int topGap,
-				int leftGap,
-				int bottomGap,
-				int rightGap) throw();
+	BorderSize (ValueType topGap, ValueType leftGap, ValueType bottomGap, ValueType rightGap) throw()
+		: top (topGap), left (leftGap), bottom (bottomGap), right (rightGap)
+	{
+	}
 
 	/** Creates a border with the given gap on all sides. */
-	explicit BorderSize (int allGaps) throw();
-
-	/** Destructor. */
-	~BorderSize() throw();
-
-	/** Returns the gap that should be left at the top of the region. */
-	int getTop() const throw()			  { return top; }
+	explicit BorderSize (ValueType allGaps) throw()
+		: top (allGaps), left (allGaps), bottom (allGaps), right (allGaps)
+	{
+	}
 
 	/** Returns the gap that should be left at the top of the region. */
-	int getLeft() const throw()			 { return left; }
+	ValueType getTop() const throw()			{ return top; }
 
 	/** Returns the gap that should be left at the top of the region. */
-	int getBottom() const throw()			   { return bottom; }
+	ValueType getLeft() const throw()		   { return left; }
 
 	/** Returns the gap that should be left at the top of the region. */
-	int getRight() const throw()			{ return right; }
+	ValueType getBottom() const throw()		 { return bottom; }
+
+	/** Returns the gap that should be left at the top of the region. */
+	ValueType getRight() const throw()		  { return right; }
 
 	/** Returns the sum of the top and bottom gaps. */
-	int getTopAndBottom() const throw()		 { return top + bottom; }
+	ValueType getTopAndBottom() const throw()	   { return top + bottom; }
 
 	/** Returns the sum of the left and right gaps. */
-	int getLeftAndRight() const throw()		 { return left + right; }
+	ValueType getLeftAndRight() const throw()	   { return left + right; }
 
 	/** Returns true if this border has no thickness along any edge. */
-	bool isEmpty() const throw()			{ return left + right + top + bottom == 0; }
+	bool isEmpty() const throw()			{ return left + right + top + bottom == ValueType(); }
 
 	/** Changes the top gap. */
-	void setTop (int newTopGap) throw();
+	void setTop (ValueType newTopGap) throw()	   { top = newTopGap; }
 
 	/** Changes the left gap. */
-	void setLeft (int newLeftGap) throw();
+	void setLeft (ValueType newLeftGap) throw()	 { left = newLeftGap; }
 
 	/** Changes the bottom gap. */
-	void setBottom (int newBottomGap) throw();
+	void setBottom (ValueType newBottomGap) throw()	 { bottom = newBottomGap; }
 
 	/** Changes the right gap. */
-	void setRight (int newRightGap) throw();
+	void setRight (ValueType newRightGap) throw()	{ right = newRightGap; }
 
 	/** Returns a rectangle with these borders removed from it. */
-	const Rectangle<int> subtractedFrom (const Rectangle<int>& original) const throw();
+	const Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const throw()
+	{
+		return Rectangle<ValueType> (original.getX() + left,
+									 original.getY() + top,
+									 original.getWidth() - (left + right),
+									 original.getHeight() - (top + bottom));
+	}
 
 	/** Removes this border from a given rectangle. */
-	void subtractFrom (Rectangle<int>& rectangle) const throw();
+	void subtractFrom (Rectangle<ValueType>& rectangle) const throw()
+	{
+		rectangle = subtractedFrom (rectangle);
+	}
 
 	/** Returns a rectangle with these borders added around it. */
-	const Rectangle<int> addedTo (const Rectangle<int>& original) const throw();
+	const Rectangle<ValueType> addedTo (const Rectangle<ValueType>& original) const throw()
+	{
+		return Rectangle<ValueType> (original.getX() - left,
+									 original.getY() - top,
+									 original.getWidth() + (left + right),
+									 original.getHeight() + (top + bottom));
+	}
 
 	/** Adds this border around a given rectangle. */
-	void addTo (Rectangle<int>& original) const throw();
+	void addTo (Rectangle<ValueType>& rectangle) const throw()
+	{
+		rectangle = addedTo (rectangle);
+	}
 
-	bool operator== (const BorderSize& other) const throw();
-	bool operator!= (const BorderSize& other) const throw();
+	bool operator== (const BorderSize& other) const throw()
+	{
+		return top == other.top && left == other.left && bottom == other.bottom && right == other.right;
+	}
+
+	bool operator!= (const BorderSize& other) const throw()
+	{
+		return ! operator== (other);
+	}
 
 private:
 
-	int top, left, bottom, right;
+	ValueType top, left, bottom, right;
 
 	JUCE_LEAK_DETECTOR (BorderSize);
 };
@@ -27499,7 +27531,7 @@ public:
 
 		@see setBounds
 	*/
-	void setBoundsInset (const BorderSize& borders);
+	void setBoundsInset (const BorderSize<int>& borders);
 
 	/** Positions the component within a given rectangle, keeping its proportions
 		unchanged.
@@ -38929,13 +38961,13 @@ public:
 
 		@see getBorder
 	*/
-	void setBorder (const BorderSize& border);
+	void setBorder (const BorderSize<int>& border);
 
 	/** Returns the size of border around the edge of the component.
 
 		@see setBorder
 	*/
-	const BorderSize getBorder() const;
+	const BorderSize<int> getBorder() const;
 
 	/** Used to disable the auto-scrolling which keeps the cursor visible.
 
@@ -39054,7 +39086,7 @@ private:
 
 	ScopedPointer <Viewport> viewport;
 	TextHolderComponent* textHolder;
-	BorderSize borderSize;
+	BorderSize<int> borderSize;
 
 	bool readOnly		   : 1;
 	bool multiline		  : 1;
@@ -52293,13 +52325,13 @@ public:
 
 		@see getBorderThickness
 	*/
-	void setBorderThickness (const BorderSize& newBorderSize);
+	void setBorderThickness (const BorderSize<int>& newBorderSize);
 
 	/** Returns the number of pixels wide that the draggable edges of this component are.
 
 		@see setBorderThickness
 	*/
-	const BorderSize getBorderThickness() const;
+	const BorderSize<int> getBorderThickness() const;
 
 	/** Represents the different sections of a resizable border, which allow it to
 		resized in different ways.
@@ -52329,7 +52361,7 @@ public:
 			zone that the point lies within.
 		*/
 		static const Zone fromPositionOnBorder (const Rectangle<int>& totalSize,
-												const BorderSize& border,
+												const BorderSize<int>& border,
 												const Point<int>& position);
 
 		/** Returns an appropriate mouse-cursor for this resize zone. */
@@ -52399,7 +52431,7 @@ protected:
 private:
 	WeakReference<Component> component;
 	ComponentBoundsConstrainer* constrainer;
-	BorderSize borderSize;
+	BorderSize<int> borderSize;
 	Rectangle<int> originalBounds;
 	Zone mouseZone;
 
@@ -52709,12 +52741,12 @@ public:
 	/** Returns the width of the frame to use around the window.
 		@see getContentComponentBorder
 	*/
-	virtual const BorderSize getBorderThickness();
+	virtual const BorderSize<int> getBorderThickness();
 
 	/** Returns the insets to use when positioning the content component.
 		@see getBorderThickness
 	*/
-	virtual const BorderSize getContentComponentBorder();
+	virtual const BorderSize<int> getContentComponentBorder();
 
 	/** A set of colour IDs to use to change the colour of various aspects of the window.
 
@@ -55094,9 +55126,9 @@ public:
 	/** @internal */
 	void lookAndFeelChanged();
 	/** @internal */
-	const BorderSize getBorderThickness();
+	const BorderSize<int> getBorderThickness();
 	/** @internal */
-	const BorderSize getContentComponentBorder();
+	const BorderSize<int> getContentComponentBorder();
 	/** @internal */
 	void mouseDoubleClick (const MouseEvent& e);
 	/** @internal */
@@ -56671,15 +56703,15 @@ public:
 
 	virtual void drawResizableFrame (Graphics& g,
 									int w, int h,
-									const BorderSize& borders);
+									const BorderSize<int>& borders);
 
 	virtual void fillResizableWindowBackground (Graphics& g, int w, int h,
-												const BorderSize& border,
+												const BorderSize<int>& border,
 												ResizableWindow& window);
 
 	virtual void drawResizableWindowBorder (Graphics& g,
 											int w, int h,
-											const BorderSize& border,
+											const BorderSize<int>& border,
 											ResizableWindow& window);
 
 	virtual void drawDocumentWindowTitleBar (DocumentWindow& window,
@@ -60619,7 +60651,7 @@ public:
 		Whether or not the window has a normal window frame depends on the flags
 		that were set when the window was created by Component::addToDesktop()
 	*/
-	virtual const BorderSize getFrameSize() const = 0;
+	virtual const BorderSize<int> getFrameSize() const = 0;
 
 	/** This is called when the window's bounds change.
 
@@ -62664,560 +62696,6 @@ private:
 
 #endif
 #ifndef __JUCE_POINT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
-
-/*** Start of inlined file: juce_PositionedRectangle.h ***/
-#ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
-#define __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
-
-/**
-	A rectangle whose co-ordinates can be defined in terms of absolute or
-	proportional distances.
-
-	Designed mainly for storing component positions, this gives you a lot of
-	control over how each co-ordinate is stored, either as an absolute position,
-	or as a proportion of the size of a parent rectangle.
-
-	It also allows you to define the anchor points by which the rectangle is
-	positioned, so for example you could specify that the top right of the
-	rectangle should be an absolute distance from its parent's bottom-right corner.
-
-	This object can be stored as a string, which takes the form "x y w h", including
-	symbols like '%' and letters to indicate the anchor point. See its toString()
-	method for more info.
-
-	Example usage:
-	@code
-	class MyComponent
-	{
-		void resized()
-		{
-			// this will set the child component's x to be 20% of our width, its y
-			// to be 30, its width to be 150, and its height to be 50% of our
-			// height..
-			const PositionedRectangle pos1 ("20% 30 150 50%");
-			pos1.applyToComponent (*myChildComponent1);
-
-			// this will inset the child component with a gap of 10 pixels
-			// around each of its edges..
-			const PositionedRectangle pos2 ("10 10 20M 20M");
-			pos2.applyToComponent (*myChildComponent2);
-		}
-	};
-	@endcode
-*/
-class PositionedRectangle
-{
-public:
-
-	/** Creates an empty rectangle with all co-ordinates set to zero.
-
-		The default anchor point is top-left; the default
-	*/
-	PositionedRectangle() throw()
-		: x (0.0), y (0.0), w (0.0), h (0.0),
-		  xMode (anchorAtLeftOrTop | absoluteFromParentTopLeft),
-		  yMode (anchorAtLeftOrTop | absoluteFromParentTopLeft),
-		  wMode (absoluteSize), hMode (absoluteSize)
-	{
-	}
-
-	/** Initialises a PositionedRectangle from a saved string version.
-
-		The string must be in the format generated by toString().
-	*/
-	PositionedRectangle (const String& stringVersion) throw()
-	{
-		StringArray tokens;
-		tokens.addTokens (stringVersion, false);
-
-		decodePosString (tokens [0], xMode, x);
-		decodePosString (tokens [1], yMode, y);
-		decodeSizeString (tokens [2], wMode, w);
-		decodeSizeString (tokens [3], hMode, h);
-	}
-
-	/** Creates a copy of another PositionedRectangle. */
-	PositionedRectangle (const PositionedRectangle& other) throw()
-		: x (other.x), y (other.y), w (other.w), h (other.h),
-		  xMode (other.xMode), yMode (other.yMode),
-		  wMode (other.wMode), hMode (other.hMode)
-	{
-	}
-
-	/** Copies another PositionedRectangle. */
-	PositionedRectangle& operator= (const PositionedRectangle& other) throw()
-	{
-		x = other.x;
-		y = other.y;
-		w = other.w;
-		h = other.h;
-		xMode = other.xMode;
-		yMode = other.yMode;
-		wMode = other.wMode;
-		hMode = other.hMode;
-
-		return *this;
-	}
-
-	/** Returns a string version of this position, from which it can later be
-		re-generated.
-
-		The format is four co-ordinates, "x y w h".
-
-		- If a co-ordinate is absolute, it is stored as an integer, e.g. "100".
-		- If a co-ordinate is proportional to its parent's width or height, it is stored
-		  as a percentage, e.g. "80%".
-		- If the X or Y co-ordinate is relative to the parent's right or bottom edge, the
-		  number has "R" appended to it, e.g. "100R" means a distance of 100 pixels from
-		  the parent's right-hand edge.
-		- If the X or Y co-ordinate is relative to the parent's centre, the number has "C"
-		  appended to it, e.g. "-50C" would be 50 pixels left of the parent's centre.
-		- If the X or Y co-ordinate should be anchored at the component's right or bottom
-		  edge, then it has "r" appended to it. So "-50Rr" would mean that this component's
-		  right-hand edge should be 50 pixels left of the parent's right-hand edge.
-		- If the X or Y co-ordinate should be anchored at the component's centre, then it
-		  has "c" appended to it. So "-50Rc" would mean that this component's
-		  centre should be 50 pixels left of the parent's right-hand edge. "40%c" means that
-		  this component's centre should be placed 40% across the parent's width.
-		- If it's a width or height that should use the parentSizeMinusAbsolute mode, then
-		  the number has "M" appended to it.
-
-		To reload a stored string, use the constructor that takes a string parameter.
-	*/
-	const String toString() const throw()
-	{
-		String s;
-		s.preallocateStorage (12);
-		addPosDescription (s, xMode, x);  s << ' ';
-		addPosDescription (s, yMode, y);  s << ' ';
-		addSizeDescription (s, wMode, w); s << ' ';
-		addSizeDescription (s, hMode, h);
-		return s;
-	}
-
-	/** Calculates the absolute position, given the size of the space that
-		it should go in.
-
-		This will work out any proportional distances and sizes relative to the
-		target rectangle, and will return the absolute position.
-
-		@see applyToComponent
-	*/
-	const Rectangle<int> getRectangle (const Rectangle<int>& target) const throw()
-	{
-		jassert (! target.isEmpty());
-
-		double x_, y_, w_, h_;
-		applyPosAndSize (x_, w_, x, w, xMode, wMode, target.getX(), target.getWidth());
-		applyPosAndSize (y_, h_, y, h, yMode, hMode, target.getY(), target.getHeight());
-		return Rectangle<int> (roundToInt (x_), roundToInt (y_), roundToInt (w_), roundToInt (h_));
-	}
-
-	/** Same as getRectangle(), but returning the values as doubles rather than ints. */
-	void getRectangleDouble (const Rectangle<int>& target,
-							 double& x_, double& y_, double& w_, double& h_) const throw()
-	{
-		jassert (! target.isEmpty());
-		applyPosAndSize (x_, w_, x, w, xMode, wMode, target.getX(), target.getWidth());
-		applyPosAndSize (y_, h_, y, h, yMode, hMode, target.getY(), target.getHeight());
-	}
-
-	/** This sets the bounds of the given component to this position.
-
-		This is equivalent to writing:
-		@code
-		comp.setBounds (getRectangle (Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight())));
-		@endcode
-
-		@see getRectangle, updateFromComponent
-	*/
-	void applyToComponent (Component& comp) const throw()
-	{
-		comp.setBounds (getRectangle (Rectangle<int> (comp.getParentWidth(), comp.getParentHeight())));
-	}
-
-	/** Updates this object's co-ordinates to match the given rectangle.
-
-		This will set all co-ordinates based on the given rectangle, re-calculating
-		any proportional distances, and using the current anchor points.
-
-		So for example if the x co-ordinate mode is currently proportional, this will
-		re-calculate x based on the rectangle's relative position within the target
-		rectangle's width.
-
-		If the target rectangle's width or height are zero then it may not be possible
-		to re-calculate some proportional co-ordinates. In this case, those co-ordinates
-		will not be changed.
-	*/
-	void updateFrom (const Rectangle<int>& newPosition,
-					 const Rectangle<int>& targetSpaceToBeRelativeTo) throw()
-	{
-		updatePosAndSize (x, w, newPosition.getX(), newPosition.getWidth(), xMode, wMode, targetSpaceToBeRelativeTo.getX(), targetSpaceToBeRelativeTo.getWidth());
-		updatePosAndSize (y, h, newPosition.getY(), newPosition.getHeight(), yMode, hMode, targetSpaceToBeRelativeTo.getY(), targetSpaceToBeRelativeTo.getHeight());
-	}
-
-	/** Same functionality as updateFrom(), but taking doubles instead of ints.
-	*/
-	void updateFromDouble (const double newX, const double newY,
-						   const double newW, const double newH,
-						   const Rectangle<int>& target) throw()
-	{
-		updatePosAndSize (x, w, newX, newW, xMode, wMode, target.getX(), target.getWidth());
-		updatePosAndSize (y, h, newY, newH, yMode, hMode, target.getY(), target.getHeight());
-	}
-
-	/** Updates this object's co-ordinates to match the bounds of this component.
-
-		This is equivalent to calling updateFrom() with the component's bounds and
-		it parent size.
-
-		If the component doesn't currently have a parent, then proportional co-ordinates
-		might not be updated because it would need to know the parent's size to do the
-		maths for this.
-	*/
-	void updateFromComponent (const Component& comp) throw()
-	{
-		if (comp.getParentComponent() == 0 && ! comp.isOnDesktop())
-			updateFrom (comp.getBounds(), Rectangle<int>());
-		else
-			updateFrom (comp.getBounds(), Rectangle<int> (comp.getParentWidth(), comp.getParentHeight()));
-	}
-
-	/** Specifies the point within the rectangle, relative to which it should be positioned. */
-	enum AnchorPoint
-	{
-		anchorAtLeftOrTop		  = 1 << 0,	/**< The x or y co-ordinate specifies where the left or top edge of the rectangle should be. */
-		anchorAtRightOrBottom	  = 1 << 1,	/**< The x or y co-ordinate specifies where the right or bottom edge of the rectangle should be. */
-		anchorAtCentre		 = 1 << 2	 /**< The x or y co-ordinate specifies where the centre of the rectangle should be. */
-	};
-
-	/** Specifies how an x or y co-ordinate should be interpreted. */
-	enum PositionMode
-	{
-		absoluteFromParentTopLeft	   = 1 << 3,   /**< The x or y co-ordinate specifies an absolute distance from the parent's top or left edge. */
-		absoluteFromParentBottomRight   = 1 << 4,   /**< The x or y co-ordinate specifies an absolute distance from the parent's bottom or right edge. */
-		absoluteFromParentCentre	= 1 << 5,   /**< The x or y co-ordinate specifies an absolute distance from the parent's centre. */
-		proportionOfParentSize	  = 1 << 6	/**< The x or y co-ordinate specifies a proportion of the parent's width or height, measured from the parent's top or left. */
-	};
-
-	/** Specifies how the width or height should be interpreted. */
-	enum SizeMode
-	{
-		absoluteSize			= 1 << 0,   /**< The width or height specifies an absolute size. */
-		parentSizeMinusAbsolute	 = 1 << 1,   /**< The width or height is an amount that should be subtracted from the parent's width or height. */
-		proportionalSize		= 1 << 2,   /**< The width or height specifies a proportion of the parent's width or height. */
-	};
-
-	/** Sets all options for all co-ordinates.
-
-		This requires a reference rectangle to be specified, because if you're changing any
-		of the modes from proportional to absolute or vice-versa, then it'll need to convert
-		the co-ordinates, and will need to know the parent size so it can calculate this.
-	*/
-	void setModes (const AnchorPoint xAnchor, const PositionMode xMode_,
-				   const AnchorPoint yAnchor, const PositionMode yMode_,
-				   const SizeMode widthMode, const SizeMode heightMode,
-				   const Rectangle<int>& target) throw()
-	{
-		if (xMode != (xAnchor | xMode_) || wMode != widthMode)
-		{
-			double tx, tw;
-			applyPosAndSize (tx, tw, x, w, xMode, wMode, target.getX(), target.getWidth());
-
-			xMode = (uint8) (xAnchor | xMode_);
-			wMode = (uint8) widthMode;
-
-			updatePosAndSize (x, w, tx, tw, xMode, wMode, target.getX(), target.getWidth());
-		}
-
-		if (yMode != (yAnchor | yMode_) || hMode != heightMode)
-		{
-			double ty, th;
-			applyPosAndSize (ty, th, y, h, yMode, hMode, target.getY(), target.getHeight());
-
-			yMode = (uint8) (yAnchor | yMode_);
-			hMode = (uint8) heightMode;
-
-			updatePosAndSize (y, h, ty, th, yMode, hMode, target.getY(), target.getHeight());
-		}
-	}
-
-	/** Returns the anchoring mode for the x co-ordinate.
-		To change any of the modes, use setModes().
-	*/
-	AnchorPoint getAnchorPointX() const throw()
-	{
-		return (AnchorPoint) (xMode & (anchorAtLeftOrTop | anchorAtRightOrBottom | anchorAtCentre));
-	}
-
-	/** Returns the positioning mode for the x co-ordinate.
-		To change any of the modes, use setModes().
-	*/
-	PositionMode getPositionModeX() const throw()
-	{
-		return (PositionMode) (xMode & (absoluteFromParentTopLeft | absoluteFromParentBottomRight
-										 | absoluteFromParentCentre | proportionOfParentSize));
-	}
-
-	/** Returns the raw x co-ordinate.
-
-		If the x position mode is absolute, then this will be the absolute value. If it's
-		proportional, then this will be a fractional proportion, where 1.0 means the full
-		width of the parent space.
-	*/
-	double getX() const throw()				 { return x; }
-
-	/** Sets the raw value of the x co-ordinate.
-
-		See getX() for the meaning of this value.
-	*/
-	void setX (const double newX) throw()		   { x = newX; }
-
-	/** Returns the anchoring mode for the y co-ordinate.
-		To change any of the modes, use setModes().
-	*/
-	AnchorPoint getAnchorPointY() const throw()
-	{
-		return (AnchorPoint) (yMode & (anchorAtLeftOrTop | anchorAtRightOrBottom | anchorAtCentre));
-	}
-
-	/** Returns the positioning mode for the y co-ordinate.
-		To change any of the modes, use setModes().
-	*/
-	PositionMode getPositionModeY() const throw()
-	{
-		return (PositionMode) (yMode & (absoluteFromParentTopLeft | absoluteFromParentBottomRight
-										 | absoluteFromParentCentre | proportionOfParentSize));
-	}
-
-	/** Returns the raw y co-ordinate.
-
-		If the y position mode is absolute, then this will be the absolute value. If it's
-		proportional, then this will be a fractional proportion, where 1.0 means the full
-		height of the parent space.
-	*/
-	double getY() const throw()				 { return y; }
-
-	/** Sets the raw value of the y co-ordinate.
-
-		See getY() for the meaning of this value.
-	*/
-	void setY (const double newY) throw()		   { y = newY; }
-
-	/** Returns the mode used to calculate the width.
-		To change any of the modes, use setModes().
-	*/
-	SizeMode getWidthMode() const throw()		   { return (SizeMode) wMode; }
-
-	/** Returns the raw width value.
-
-		If the width mode is absolute, then this will be the absolute value. If the mode is
-		proportional, then this will be a fractional proportion, where 1.0 means the full
-		width of the parent space.
-	*/
-	double getWidth() const throw()			 { return w; }
-
-	/** Sets the raw width value.
-
-		See getWidth() for the details about what this value means.
-	*/
-	void setWidth (const double newWidth) throw()	   { w = newWidth; }
-
-	/** Returns the mode used to calculate the height.
-		To change any of the modes, use setModes().
-	*/
-	SizeMode getHeightMode() const throw()		  { return (SizeMode) hMode; }
-
-	/** Returns the raw height value.
-
-		If the height mode is absolute, then this will be the absolute value. If the mode is
-		proportional, then this will be a fractional proportion, where 1.0 means the full
-		height of the parent space.
-	*/
-	double getHeight() const throw()			{ return h; }
-
-	/** Sets the raw height value.
-
-		See getHeight() for the details about what this value means.
-	*/
-	void setHeight (const double newHeight) throw()	 { h = newHeight; }
-
-	/** If the size and position are constance, and wouldn't be affected by changes
-		in the parent's size, then this will return true.
-	*/
-	bool isPositionAbsolute() const throw()
-	{
-		return xMode == absoluteFromParentTopLeft
-			&& yMode == absoluteFromParentTopLeft
-			&& wMode == absoluteSize
-			&& hMode == absoluteSize;
-	}
-
-	/** Compares two objects. */
-	bool operator== (const PositionedRectangle& other) const throw()
-	{
-		return x == other.x && y == other.y
-			&& w == other.w && h == other.h
-			&& xMode == other.xMode && yMode == other.yMode
-			&& wMode == other.wMode && hMode == other.hMode;
-	}
-
-	/** Compares two objects. */
-	bool operator!= (const PositionedRectangle& other) const throw()
-	{
-		return ! operator== (other);
-	}
-
-private:
-
-	double x, y, w, h;
-	uint8 xMode, yMode, wMode, hMode;
-
-	void addPosDescription (String& s, const uint8 mode, const double value) const throw()
-	{
-		if ((mode & proportionOfParentSize) != 0)
-		{
-			s << (roundToInt (value * 100000.0) / 1000.0) << '%';
-		}
-		else
-		{
-			s << (roundToInt (value * 100.0) / 100.0);
-
-			if ((mode & absoluteFromParentBottomRight) != 0)
-				s << 'R';
-			else if ((mode & absoluteFromParentCentre) != 0)
-				s << 'C';
-		}
-
-		if ((mode & anchorAtRightOrBottom) != 0)
-			s << 'r';
-		else if ((mode & anchorAtCentre) != 0)
-			s << 'c';
-	}
-
-	void addSizeDescription (String& s, const uint8 mode, const double value) const throw()
-	{
-		if (mode == proportionalSize)
-			s << (roundToInt (value * 100000.0) / 1000.0) << '%';
-		else if (mode == parentSizeMinusAbsolute)
-			s << (roundToInt (value * 100.0) / 100.0) << 'M';
-		else
-			s << (roundToInt (value * 100.0) / 100.0);
-	}
-
-	void decodePosString (const String& s, uint8& mode, double& value) throw()
-	{
-		if (s.containsChar ('r'))
-			mode = anchorAtRightOrBottom;
-		else if (s.containsChar ('c'))
-			mode = anchorAtCentre;
-		else
-			mode = anchorAtLeftOrTop;
-
-		if (s.containsChar ('%'))
-		{
-			mode |= proportionOfParentSize;
-			value = s.removeCharacters ("%rcRC").getDoubleValue() / 100.0;
-		}
-		else
-		{
-			if (s.containsChar ('R'))
-				mode |= absoluteFromParentBottomRight;
-			else if (s.containsChar ('C'))
-				mode |= absoluteFromParentCentre;
-			else
-				mode |= absoluteFromParentTopLeft;
-
-			value = s.removeCharacters ("rcRC").getDoubleValue();
-		}
-	}
-
-	void decodeSizeString (const String& s, uint8& mode, double& value) throw()
-	{
-		if (s.containsChar ('%'))
-		{
-			mode = proportionalSize;
-			value = s.upToFirstOccurrenceOf ("%", false, false).getDoubleValue() / 100.0;
-		}
-		else if (s.containsChar ('M'))
-		{
-			mode = parentSizeMinusAbsolute;
-			value = s.getDoubleValue();
-		}
-		else
-		{
-			mode = absoluteSize;
-			value = s.getDoubleValue();
-		}
-	}
-
-	void applyPosAndSize (double& xOut, double& wOut, const double x_, const double w_,
-						  const uint8 xMode_, const uint8 wMode_,
-						  const int parentPos, const int parentSize) const throw()
-	{
-		if (wMode_ == proportionalSize)
-			wOut = roundToInt (w_ * parentSize);
-		else if (wMode_ == parentSizeMinusAbsolute)
-			wOut = jmax (0, parentSize - roundToInt (w_));
-		else
-			wOut = roundToInt (w_);
-
-		if ((xMode_ & proportionOfParentSize) != 0)
-			xOut = parentPos + x_ * parentSize;
-		else if ((xMode_ & absoluteFromParentBottomRight) != 0)
-			xOut = (parentPos + parentSize) - x_;
-		else if ((xMode_ & absoluteFromParentCentre) != 0)
-			xOut = x_ + (parentPos + parentSize / 2);
-		else
-			xOut = x_ + parentPos;
-
-		if ((xMode_ & anchorAtRightOrBottom) != 0)
-			xOut -= wOut;
-		else if ((xMode_ & anchorAtCentre) != 0)
-			xOut -= wOut / 2;
-	}
-
-	void updatePosAndSize (double& xOut, double& wOut, double x_, const double w_,
-						   const uint8 xMode_, const uint8 wMode_,
-						   const int parentPos, const int parentSize) const throw()
-	{
-		if (wMode_ == proportionalSize)
-		{
-			if (parentSize > 0)
-				wOut = w_ / parentSize;
-		}
-		else if (wMode_ == parentSizeMinusAbsolute)
-			wOut = parentSize - w_;
-		else
-			wOut = w_;
-
-		if ((xMode_ & anchorAtRightOrBottom) != 0)
-			x_ += w_;
-		else if ((xMode_ & anchorAtCentre) != 0)
-			x_ += w_ / 2;
-
-		if ((xMode_ & proportionOfParentSize) != 0)
-		{
-			if (parentSize > 0)
-				xOut = (x_ - parentPos) / parentSize;
-		}
-		else if ((xMode_ & absoluteFromParentBottomRight) != 0)
-			xOut = (parentPos + parentSize) - x_;
-		else if ((xMode_ & absoluteFromParentCentre) != 0)
-			xOut = x_ - (parentPos + parentSize / 2);
-		else
-			xOut = x_ - parentPos;
-	}
-
-	JUCE_LEAK_DETECTOR (PositionedRectangle);
-};
-
-#endif   // __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
-/*** End of inlined file: juce_PositionedRectangle.h ***/
-
 
 #endif
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__

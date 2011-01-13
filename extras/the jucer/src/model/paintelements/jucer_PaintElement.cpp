@@ -51,7 +51,7 @@ PaintElement::PaintElement (PaintRoutine* owner_,
 
     addChildComponent (border = new ResizableBorderComponent (this, this));
 
-    border->setBorderThickness (BorderSize (borderThickness));
+    border->setBorderThickness (BorderSize<int> (borderThickness));
 
     if (owner != 0)
         owner->getSelectedElements().addChangeListener (this);
@@ -260,7 +260,7 @@ void PaintElement::paint (Graphics& g)
 
     if (selected)
     {
-        const BorderSize borderSize (border->getBorderThickness());
+        const BorderSize<int> borderSize (border->getBorderThickness());
 
         drawResizableBorder (g, getWidth(), getHeight(), borderSize,
                              (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
