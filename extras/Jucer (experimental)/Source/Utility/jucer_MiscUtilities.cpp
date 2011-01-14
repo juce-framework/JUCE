@@ -38,7 +38,9 @@ const String createAlphaNumericUID()
     static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random r (Random::getSystemRandom().nextInt64());
 
-    for (int i = 7; --i >= 0;)
+    uid << chars [r.nextInt (52)]; // make sure the first character is always a letter
+
+    for (int i = 5; --i >= 0;)
     {
         r.setSeedRandomly();
         uid << chars [r.nextInt (numElementsInArray (chars))];

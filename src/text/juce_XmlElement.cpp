@@ -46,7 +46,7 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_, const Strin
       value (value_)
 {
   #if JUCE_DEBUG
-    // this checks whether the attribute name string contains any illegals characters..
+    // this checks whether the attribute name string contains any illegal characters..
     for (const juce_wchar* t = name; *t != 0; ++t)
         jassert (CharacterFunctions::isLetterOrDigit (*t) || *t == '_' || *t == '-' || *t == ':');
   #endif

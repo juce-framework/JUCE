@@ -116,7 +116,7 @@ public:
 
         bool referencesSymbol (const String& s, const EvaluationContext* c, int recursionDepth) const
         {
-            if (s == mainSymbol)
+            if (s == mainSymbol || (s.containsChar ('.') && s == toString()))
                 return true;
 
             if (++recursionDepth > 256)

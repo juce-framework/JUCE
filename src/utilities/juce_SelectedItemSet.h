@@ -82,11 +82,6 @@ public:
         return *this;
     }
 
-    /** Destructor. */
-    ~SelectedItemSet()
-    {
-    }
-
     //==============================================================================
     /** Clears any other currently selected items, and selects this item.
 

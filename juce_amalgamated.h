@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	13
+#define JUCE_BUILDNUMBER	14
 
 /** Current Juce version number.
 
@@ -6375,8 +6375,8 @@ public:
 
 		ObjectType* const oldItem = item;
 		item = newItem;
-		item->nextListItem = oldItem->nextListItem;
-		oldItem->nextListItem = 0;
+		item->nextListItem = oldItem->nextListItem.item;
+		oldItem->nextListItem = (ObjectType*) 0;
 		return oldItem;
 	}
 
@@ -6417,7 +6417,7 @@ public:
 		if (oldItem != 0)
 		{
 			item = oldItem->nextListItem;
-			oldItem->nextListItem = 0;
+			oldItem->nextListItem = (ObjectType*) 0;
 		}
 
 		return oldItem;
@@ -6513,6 +6513,8 @@ public:
 private:
 
 	ObjectType* item;
+
+	JUCE_DECLARE_NON_COPYABLE (LinkedListPointer);
 };
 
 #endif   // __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
@@ -6607,7 +6609,9 @@ private:
 	{
 	public:
 		NamedValue() throw();
+		NamedValue (const NamedValue&);
 		NamedValue (const Identifier& name, const var& value);
+		NamedValue& operator= (const NamedValue&);
 		bool operator== (const NamedValue& other) const throw();
 
 		LinkedListPointer<NamedValue> nextListItem;
@@ -21080,7 +21084,6 @@ private:
 	static int doubleClickTimeOutMs;
 
 	MouseEvent& operator= (const MouseEvent&);
-	JUCE_LEAK_DETECTOR (MouseEvent);
 };
 
 #endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
@@ -57209,11 +57212,6 @@ public:
 		}
 
 		return *this;
-	}
-
-	/** Destructor. */
-	~SelectedItemSet()
-	{
 	}
 
 	/** Clears any other currently selected items, and selects this item.

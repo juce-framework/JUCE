@@ -237,7 +237,6 @@ public:
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
         project.getProjectType() = Project::audioPlugin;
-        project.getObjectiveCClassSuffix() = project.getProjectUID();
 
         Project::Item group (project.createNewGroup());
         project.getMainGroup().addChild (group, 0);

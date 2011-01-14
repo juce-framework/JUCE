@@ -200,8 +200,8 @@ public:
 
         ObjectType* const oldItem = item;
         item = newItem;
-        item->nextListItem = oldItem->nextListItem;
-        oldItem->nextListItem = 0;
+        item->nextListItem = oldItem->nextListItem.item;
+        oldItem->nextListItem = (ObjectType*) 0;
         return oldItem;
     }
 
@@ -242,7 +242,7 @@ public:
         if (oldItem != 0)
         {
             item = oldItem->nextListItem;
-            oldItem->nextListItem = 0;
+            oldItem->nextListItem = (ObjectType*) 0;
         }
 
         return oldItem;
@@ -339,6 +339,8 @@ public:
 private:
     //==============================================================================
     ObjectType* item;
+
+    JUCE_DECLARE_NON_COPYABLE (LinkedListPointer);
 };
 
 

@@ -350,9 +350,6 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getLast()->setTooltip ("Sets an icon to use for the executable.");
     }
 
-    props.add (new TextPropertyComponent (getObjectiveCClassSuffix(), "Objective-C Name Suffix", 256, false));
-    props.getLast()->setTooltip ("An optional string which will be appended to objective-C class names. If you're building a plugin, it's important to define this, to avoid name clashes between multiple plugin modules that are dynamically loaded into the same address space.");
-
     if (isAudioPlugin())
     {
         props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"));

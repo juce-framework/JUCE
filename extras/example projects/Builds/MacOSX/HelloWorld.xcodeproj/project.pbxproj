@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		3F902D2C41E0C1FFC90C2724 = { isa = PBXBuildFile; fileRef = C820D5B3DC8B4E486B13FF4A; };
@@ -93,6 +93,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
+				"JUCE_ObjCExtraSuffix=JtTAKTK1s",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		2BF0DFE3F61DBC969BCBD0C4 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -107,6 +108,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
+				"JUCE_ObjCExtraSuffix=JtTAKTK1s",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
 		1C939EADBAB81B95A46A6581 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -168,7 +170,7 @@
 				4B8D17F77F2E2E7A2419CB17,
 				172414663F1A38D78D2B00C3,
 				CB4944AF280662FF07FEFEC4 ); buildRules = ( ); dependencies = ( ); name = HelloWorld; productName = HelloWorld; productReference = D5A29444C637255D66ACB7AE; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = 4297D3C9A6348BA224516847; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
+		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 4297D3C9A6348BA224516847; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
 	};
 	rootObject = 9A0E300BBDAFA50EA37EA0D9;
 }

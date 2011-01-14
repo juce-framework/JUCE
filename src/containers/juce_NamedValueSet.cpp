@@ -41,6 +41,18 @@ inline NamedValueSet::NamedValue::NamedValue (const Identifier& name_, const var
 {
 }
 
+NamedValueSet::NamedValue::NamedValue (const NamedValue& other)
+    : name (other.name), value (other.value)
+{
+}
+
+NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (const NamedValueSet::NamedValue& other)
+{
+    name = other.name;
+    value = other.value;
+    return *this;
+}
+
 bool NamedValueSet::NamedValue::operator== (const NamedValueSet::NamedValue& other) const throw()
 {
     return name == other.name && value == other.value;

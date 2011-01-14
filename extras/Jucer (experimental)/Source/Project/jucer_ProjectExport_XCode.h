@@ -55,10 +55,9 @@ public:
 
         if (getRTASFolder().toString().isEmpty())
             getRTASFolder() = "~/SDKs/PT_80_SDK";
-    }
 
-    ~XCodeProjectExporter()
-    {
+        if (getSettings() ["objCExtraSuffix"].isVoid())
+            getObjCSuffix() = createAlphaNumericUID();
     }
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -72,6 +71,8 @@ public:
     }
 
     //==============================================================================
+    Value getObjCSuffix()       { return getSetting ("objCExtraSuffix"); }
+
     bool isDefaultFormatForCurrentOS()
     {
       #if JUCE_MAC
@@ -88,7 +89,7 @@ public:
     {
         ProjectExporter::createPropertyEditors (props);
 
-        props.add (new TextPropertyComponent (getSetting ("objCExtraSuffix"), "Objective-C class name suffix", 64, false));
+        props.add (new TextPropertyComponent (getObjCSuffix(), "Objective-C class name suffix", 64, false));
         props.getLast()->setTooltip ("Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
                                      "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming the obj-C classes in your executable to avoid this.");
 
@@ -504,6 +505,13 @@ private:
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
         }
 
+        if (iPhone)
+        {
+            s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"iPhone Developer\"");
+            s.add ("SDKROOT = iphoneos");
+            s.add ("TARGETED_DEVICE_FAMILY = \"1,2\"");
+        }
+
         s.add ("ZERO_LINK = NO");
 
         if (! isRTAS())   // (dwarf seems to be incompatible with the RTAS libs)
@@ -567,11 +575,7 @@ private:
             jassertfalse;
         }
 
-        if (iPhone)
-        {
-            s.add ("SDKROOT = iphonesimulator3.2");
-        }
-        else
+        if (! iPhone)
         {
             const String sdk (config.getMacSDKVersion().toString());
             const String sdkCompat (config.getMacCompatibilityVersion().toString());
@@ -638,7 +642,7 @@ private:
         }
 
         {
-            const String objCSuffix (getSetting ("objCExtraSuffix").toString().trim());
+            const String objCSuffix (getObjCSuffix().toString().trim());
             if (objCSuffix.isNotEmpty())
                 defines.set ("JUCE_ObjCExtraSuffix", replacePreprocessorTokens (config, objCSuffix));
         }
@@ -692,7 +696,7 @@ private:
         output << "// !$*UTF8*$!\n{\n"
                   "\tarchiveVersion = 1;\n"
                   "\tclasses = {\n\t};\n"
-                  "\tobjectVersion = 44;\n"
+                  "\tobjectVersion = 45;\n"
                   "\tobjects = {\n\n";
 
         Array <ValueTree*> objects;
@@ -1019,7 +1023,7 @@ private:
         ValueTree* v = new ValueTree (createID ("__root"));
         v->setProperty ("isa", "PBXProject", 0);
         v->setProperty ("buildConfigurationList", createID ("__projList"), 0);
-        v->setProperty ("compatibilityVersion", "Xcode 3.0", 0);
+        v->setProperty ("compatibilityVersion", "Xcode 3.1", 0);
         v->setProperty ("hasScannedForEncodings", (int) 0, 0);
         v->setProperty ("mainGroup", getIDForGroup (project.getMainGroup()), 0);
         v->setProperty ("projectDirPath", "\"\"", 0);

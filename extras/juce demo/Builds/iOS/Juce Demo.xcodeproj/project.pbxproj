@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		1DF18F6B9CCFF7BD07C36AC2 = { isa = PBXBuildFile; fileRef = CE3A43E4FB4D61350C000764; };
@@ -167,7 +167,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				SDKROOT = iphonesimulator3.2;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -175,8 +174,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
+				"JUCE_ObjCExtraSuffix=JSLvvV6j",
 				"JUCE_UNIT_TESTS=1",
-				"JUCER_XCODE_IPHONE_25ADD7EF=1"); }; name = Debug; };
+				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Debug; };
 		8EF7C7FFD55219581A5075F3 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
@@ -184,14 +184,14 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				SDKROOT = iphonesimulator3.2;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
+				"JUCE_ObjCExtraSuffix=JSLvvV6j",
 				"JUCE_UNIT_TESTS=1",
-				"JUCER_XCODE_IPHONE_25ADD7EF=1"); }; name = Release; };
+				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Release; };
 		7FA986B99AFC795723E00AB0 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;
@@ -204,6 +204,9 @@
 				WARNING_CFLAGS = -Wreorder;
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				ZERO_LINK = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "JuceDemo"; }; name = Debug; };
@@ -219,6 +222,9 @@
 				WARNING_CFLAGS = -Wreorder;
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				ZERO_LINK = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "JuceDemo"; }; name = Release; };
@@ -268,7 +274,7 @@
 				AE930F136F638C3C939F7146,
 				7A3A0C722E5F96990CA1B5F2,
 				2E5F3CCB074AC0B18683A4F3 ); buildRules = ( ); dependencies = ( ); name = "Juce Demo"; productName = "Juce Demo"; productReference = 39B98C60B57B831FE5215CDD; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		FD051827ADE403C022034508 = { isa = PBXProject; buildConfigurationList = 2B22E1D006C8AF43954EE79D; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = D6A4B94A747BFCF299B17932; projectDirPath = ""; projectRoot = ""; targets = ( F26B86DEACDEE5DFB60E10B1 ); };
+		FD051827ADE403C022034508 = { isa = PBXProject; buildConfigurationList = 2B22E1D006C8AF43954EE79D; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = D6A4B94A747BFCF299B17932; projectDirPath = ""; projectRoot = ""; targets = ( F26B86DEACDEE5DFB60E10B1 ); };
 	};
 	rootObject = FD051827ADE403C022034508;
 }

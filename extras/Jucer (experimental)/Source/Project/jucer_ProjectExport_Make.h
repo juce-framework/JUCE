@@ -59,10 +59,6 @@ public:
             getVSTFolder() = "~/SDKs/vstsdk2.4";
     }
 
-    ~MakefileProjectExporter()
-    {
-    }
-
     //==============================================================================
     bool isDefaultFormatForCurrentOS()
     {

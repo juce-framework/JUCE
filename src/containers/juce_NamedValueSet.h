@@ -122,7 +122,9 @@ private:
     {
     public:
         NamedValue() throw();
+        NamedValue (const NamedValue&);
         NamedValue (const Identifier& name, const var& value);
+        NamedValue& operator= (const NamedValue&);
         bool operator== (const NamedValue& other) const throw();
 
         LinkedListPointer<NamedValue> nextListItem;

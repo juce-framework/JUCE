@@ -321,7 +321,6 @@ private:
     static int doubleClickTimeOutMs;
 
     MouseEvent& operator= (const MouseEvent&);
-    JUCE_LEAK_DETECTOR (MouseEvent);
 };
 
 

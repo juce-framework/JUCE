@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		A43062AA3FCA13D950980A9D = { isa = PBXBuildFile; fileRef = 3DC11B31DA65802201AFD1A3; };
@@ -114,6 +114,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
+				"JUCE_ObjCExtraSuffix=M73TRi",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		90901561E3F7FD713257B23D = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -128,6 +129,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
+				"JUCE_ObjCExtraSuffix=M73TRi",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
 		8133D32BA8816D704BF648FA = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -194,7 +196,7 @@
 				B02D5D856D086055BAA5AE80,
 				8CC459E43DF37AB224B7E23C,
 				30E98A3D15EFB4DAAD89D12D ); buildRules = ( ); dependencies = ( ); name = "Plugin Host"; productName = "Plugin Host"; productReference = 3B43D9C2C41077380D379A07; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		FFAE6699AB89F7E949098342 = { isa = PBXProject; buildConfigurationList = 3DBB3F42145D936BBD5425D7; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = E1B7497DFD48F160861E53A2; projectDirPath = ""; projectRoot = ""; targets = ( 04F5D340BA63D9F8DE145DFB ); };
+		FFAE6699AB89F7E949098342 = { isa = PBXProject; buildConfigurationList = 3DBB3F42145D936BBD5425D7; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = E1B7497DFD48F160861E53A2; projectDirPath = ""; projectRoot = ""; targets = ( 04F5D340BA63D9F8DE145DFB ); };
 	};
 	rootObject = FFAE6699AB89F7E949098342;
 }

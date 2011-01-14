@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		BAEB975FAD8A99FA884DC593 = { isa = PBXBuildFile; fileRef = 6B236CD90C0803738D7B5235; };
@@ -70,7 +70,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				SDKROOT = iphonesimulator3.2;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -78,7 +77,8 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
-				"JUCER_XCODE_IPHONE_25ADD7EF=1"); }; name = Debug; };
+				"JUCE_ObjCExtraSuffix=JtTAKTK1s",
+				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Debug; };
 		2BF0DFE3F61DBC969BCBD0C4 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
@@ -86,13 +86,13 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				SDKROOT = iphonesimulator3.2;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
-				"JUCER_XCODE_IPHONE_25ADD7EF=1"); }; name = Release; };
+				"JUCE_ObjCExtraSuffix=JtTAKTK1s",
+				"JUCER_XCODE_IPHONE_5BC26AE3=1"); }; name = Release; };
 		1C939EADBAB81B95A46A6581 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;
@@ -105,6 +105,9 @@
 				WARNING_CFLAGS = -Wreorder;
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				ZERO_LINK = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "HelloWorld"; }; name = Debug; };
@@ -120,6 +123,9 @@
 				WARNING_CFLAGS = -Wreorder;
 				GCC_MODEL_TUNING = G5;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				ZERO_LINK = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
 				PRODUCT_NAME = "HelloWorld"; }; name = Release; };
@@ -148,7 +154,7 @@
 				4B8D17F77F2E2E7A2419CB17,
 				172414663F1A38D78D2B00C3,
 				CB4944AF280662FF07FEFEC4 ); buildRules = ( ); dependencies = ( ); name = HelloWorld; productName = HelloWorld; productReference = D5A29444C637255D66ACB7AE; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = 4297D3C9A6348BA224516847; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
+		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 4297D3C9A6348BA224516847; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
 	};
 	rootObject = 9A0E300BBDAFA50EA37EA0D9;
 }

@@ -129,19 +129,14 @@ class FontDCHolder  : private DeletedAtShutdown
 public:
     //==============================================================================
     FontDCHolder()
-        : dc (0), numKPs (0), size (0),
+        : dc (0), fontH (0), previousFontH (0), numKPs (0), size (0),
           bold (false), italic (false)
     {
     }
 
     ~FontDCHolder()
     {
-        if (dc != 0)
-        {
-            DeleteDC (dc);
-            DeleteObject (fontH);
-        }
-
+        deleteDCAndFont();
         clearSingletonInstance();
     }
 
@@ -157,14 +152,7 @@ public:
             italic = italic_;
             size = size_;
 
-            if (dc != 0)
-            {
-                DeleteDC (dc);
-                DeleteObject (fontH);
-                kps.free();
-            }
-
-            fontH = 0;
+            deleteDCAndFont();
 
             dc = CreateCompatibleDC (0);
             SetMapperFlags (dc, 0);
@@ -187,7 +175,7 @@ public:
 
             if (standardSizedFont != 0)
             {
-                if (SelectObject (dc, standardSizedFont) != 0)
+                if ((previousFontH = SelectObject (dc, standardSizedFont)) != 0)
                 {
                     fontH = standardSizedFont;
 
@@ -204,14 +192,6 @@ public:
                         }
                     }
                 }
-                else
-                {
-                    jassertfalse;
-                }
-            }
-            else
-            {
-                jassertfalse;
             }
         }
 
@@ -236,11 +216,30 @@ public:
 private:
     //==============================================================================
     HFONT fontH;
+    HGDIOBJ previousFontH;
     HDC dc;
     String fontName;
     HeapBlock <KERNINGPAIR> kps;
     int numKPs, size;
     bool bold, italic;
+
+    void deleteDCAndFont()
+    {
+        if (dc != 0)
+        {
+            SelectObject (dc, previousFontH); // Replacing the previous font before deleting the DC avoids a warning in BoundsChecker
+            DeleteDC (dc);
+            dc = 0;
+        }
+
+        if (fontH != 0)
+        {
+            DeleteObject (fontH);
+            fontH = 0;
+        }
+
+        kps.free();
+    }
 
     JUCE_DECLARE_NON_COPYABLE (FontDCHolder);
 };

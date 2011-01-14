@@ -364,9 +364,6 @@ private:
             << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
             << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine;
 
-        if (project.getObjectiveCClassSuffix().toString().isNotEmpty())
-            out << "#define JUCE_ObjCExtraSuffix            " << project.getObjectiveCClassSuffix().toString() << newLine;
-
         out << "#define JUCE_USE_VSTSDK_2_4             1" << newLine
             << newLine
             << "#endif   // " << headerGuard << newLine;

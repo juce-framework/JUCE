@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		519A1FD5D107BA064C820D19 = { isa = PBXBuildFile; fileRef = EA2AB86C7C92284FED89D52F; };
@@ -76,6 +76,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
+				"JUCE_ObjCExtraSuffix=OTDGfH",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		4DFAC29D863495AD1E31B6B9 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -89,6 +90,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
+				"JUCE_ObjCExtraSuffix=OTDGfH",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
 		4EAD81574ACF05AC27D04B76 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -146,7 +148,7 @@
 				6D960AB00F450781A680A10C,
 				492D061FDF3111EE0092E6B8,
 				ED422768B82C5C079964D4A9 ); buildRules = ( ); dependencies = ( ); name = Amalgamator; productName = Amalgamator; productReference = F8AC870D665D0F64E9129D83; productInstallPath = /usr/bin; productType = "com.apple.product-type.tool"; };
-		BC0813C44DC69E1626F486CE = { isa = PBXProject; buildConfigurationList = FA25EC7DB69A3A88993F2853; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = 5DCB99F3A59154C29483AE9B; projectDirPath = ""; projectRoot = ""; targets = ( C15E717C5DA07024CAFE5177 ); };
+		BC0813C44DC69E1626F486CE = { isa = PBXProject; buildConfigurationList = FA25EC7DB69A3A88993F2853; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 5DCB99F3A59154C29483AE9B; projectDirPath = ""; projectRoot = ""; targets = ( C15E717C5DA07024CAFE5177 ); };
 	};
 	rootObject = BC0813C44DC69E1626F486CE;
 }

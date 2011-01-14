@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		7BDFF9F0E16DF33A980F46DC = { isa = PBXBuildFile; fileRef = 046FA2877C08618339161EE2; };
@@ -256,6 +256,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
+				"JUCE_ObjCExtraSuffix=zNNCr",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		673FACB8969ADED17ACEFF7C = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -270,6 +271,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
+				"JUCE_ObjCExtraSuffix=zNNCr",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
 		69D26A715A354ED1735D8438 = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -352,7 +354,7 @@
 				87CCE4CB1FAB40B6F21DEACE,
 				5362E03ADF975A126C1F2F7B,
 				08881173C882953BE5F11D6C ); buildRules = ( ); dependencies = ( ); name = "The Jucer"; productName = "The Jucer"; productReference = 12E1601866B3489844AFD645; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		D64DFDDF5D2CD74A8171CF81 = { isa = PBXProject; buildConfigurationList = 045AC698C60073CCF5CC6116; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = B01AA6CC1327A5DBCB35B7BF; projectDirPath = ""; projectRoot = ""; targets = ( EB946A866C16B958168C9A39 ); };
+		D64DFDDF5D2CD74A8171CF81 = { isa = PBXProject; buildConfigurationList = 045AC698C60073CCF5CC6116; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = B01AA6CC1327A5DBCB35B7BF; projectDirPath = ""; projectRoot = ""; targets = ( EB946A866C16B958168C9A39 ); };
 	};
 	rootObject = D64DFDDF5D2CD74A8171CF81;
 }

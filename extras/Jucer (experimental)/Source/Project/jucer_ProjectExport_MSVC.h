@@ -52,8 +52,6 @@ public:
         projectGUID = createGUID (project.getProjectUID());
     }
 
-    ~MSVCProjectExporterBase()  {}
-
     //==============================================================================
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
@@ -464,8 +462,6 @@ public:
         name = getName();
     }
 
-    ~MSVCProjectExporterVC2008()  {}
-
     static const char* getName()                    { return "Visual Studio 2008"; }
     static const char* getValueTreeTypeName()       { return "VS2008"; }
 
@@ -830,8 +826,6 @@ public:
         name = getName();
     }
 
-    ~MSVCProjectExporterVC2005()  {}
-
     static const char* getName()                    { return "Visual Studio 2005"; }
     static const char* getValueTreeTypeName()       { return "VS2005"; }
 
@@ -863,8 +857,6 @@ public:
     {
         name = getName();
     }
-
-    ~MSVCProjectExporterVC6()  {}
 
     static const char* getName()                   { return "Visual C++ 6.0"; }
     static const char* getValueTreeTypeName()      { return "MSVC6"; }
@@ -1132,8 +1124,6 @@ public:
     {
         name = getName();
     }
-
-    ~MSVCProjectExporterVC2010()  {}
 
     static const char* getName()                    { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()       { return "VS2010"; }

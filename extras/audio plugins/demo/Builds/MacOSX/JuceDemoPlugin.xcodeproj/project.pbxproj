@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 45;
 	objects = {
 
 		0860A8808F16C84CE7641D04 = { isa = PBXBuildFile; fileRef = 91F0411829B13595887CE52A; };
@@ -366,7 +366,7 @@
 				F0F39FCA8C402F34BB74F6B3,
 				9519B014653C694C3456E5A4,
 				06539322921079C10A447670 ); buildRules = ( ); dependencies = ( ); name = JuceDemoPlugin; productName = JuceDemoPlugin; productReference = AF721FB8136D2CAA9404AD8D; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/Components/"; productType = "com.apple.product-type.bundle"; };
-		64CEAC70FBD5AC5BD1D686C9 = { isa = PBXProject; buildConfigurationList = 91EB753864A948DE4421285E; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = E1C5E3C67B4A2621AD2D3E05; projectDirPath = ""; projectRoot = ""; targets = ( 792509270ABF8E6A65E16172 ); };
+		64CEAC70FBD5AC5BD1D686C9 = { isa = PBXProject; buildConfigurationList = 91EB753864A948DE4421285E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = E1C5E3C67B4A2621AD2D3E05; projectDirPath = ""; projectRoot = ""; targets = ( 792509270ABF8E6A65E16172 ); };
 	};
 	rootObject = 64CEAC70FBD5AC5BD1D686C9;
 }

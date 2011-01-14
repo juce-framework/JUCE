@@ -147,6 +147,7 @@ class WindowsBitmapImage  : public Image::SharedImage
 public:
     //==============================================================================
     HBITMAP hBitmap;
+    HGDIOBJ previousBitmap;
     BITMAPV4HEADER bitmapInfo;
     HDC hdc;
     unsigned char* bitmapData;
@@ -195,7 +196,7 @@ public:
                                     (void**) &bitmapData,
                                     0, 0);
 
-        SelectObject (hdc, hBitmap);
+        previousBitmap = SelectObject (hdc, hBitmap);
 
         if (format_ == Image::ARGB && clearImage)
             zeromem (bitmapData, abs (h * lineStride));
@@ -205,6 +206,7 @@ public:
 
     ~WindowsBitmapImage()
     {
+        SelectObject (hdc, previousBitmap); // Selecting the previous bitmap before deleting the DC avoids a warning in BoundsChecker
         DeleteDC (hdc);
         DeleteObject (hBitmap);
     }
