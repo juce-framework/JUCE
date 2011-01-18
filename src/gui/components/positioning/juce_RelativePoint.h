@@ -62,10 +62,10 @@ public:
 
     /** Calculates the absolute position of this point.
 
-        You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+        You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
         be needed to calculate the result.
     */
-    const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+    const Point<float> resolve (const Expression::Scope* evaluationContext) const;
 
     /** Changes the values of this point's coordinates to make it resolve to the specified position.
 
@@ -73,7 +73,7 @@ public:
         or relative positions to whatever values are necessary to make the resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+    void moveToAbsolute (const Point<float>& newPos, const Expression::Scope* evaluationContext);
 
     /** Returns a string which represents this point.
         This returns a comma-separated pair of coordinates. For details of the string syntax used by the
@@ -81,11 +81,6 @@ public:
         The string that is returned can be passed to the RelativePoint constructor to recreate the point.
     */
     const String toString() const;
-
-    /** Renames a symbol if it is used by any of the coordinates.
-        This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
-    */
-    void renameSymbolIfUsed (const String& oldName, const String& newName);
 
     /** Returns true if this point depends on any other coordinates for its position. */
     bool isDynamic() const;

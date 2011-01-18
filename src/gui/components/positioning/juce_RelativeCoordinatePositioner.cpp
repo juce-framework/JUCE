@@ -31,6 +31,163 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+RelativeCoordinatePositionerBase::ComponentScope::ComponentScope (Component& component_)
+    : component (component_)
+{
+}
+
+const Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (const String& symbol) const
+{
+    switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
+    {
+        case RelativeCoordinate::StandardStrings::x:
+        case RelativeCoordinate::StandardStrings::left:   return Expression ((double) component.getX());
+        case RelativeCoordinate::StandardStrings::y:
+        case RelativeCoordinate::StandardStrings::top:    return Expression ((double) component.getY());
+        case RelativeCoordinate::StandardStrings::width:  return Expression ((double) component.getWidth());
+        case RelativeCoordinate::StandardStrings::height: return Expression ((double) component.getHeight());
+        case RelativeCoordinate::StandardStrings::right:  return Expression ((double) component.getRight());
+        case RelativeCoordinate::StandardStrings::bottom: return Expression ((double) component.getBottom());
+        default: break;
+    }
+
+    MarkerList* list;
+    const MarkerList::Marker* const marker = findMarker (symbol, list);
+
+    if (marker != 0)
+        return marker->position.getExpression();
+
+    return Expression::Scope::getSymbolValue (symbol);
+}
+
+void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const String& scopeName, Visitor& visitor) const
+{
+    Component* targetComp = 0;
+
+    if (scopeName == RelativeCoordinate::Strings::parent)
+        targetComp = component.getParentComponent();
+    else
+        targetComp = findSiblingComponent (scopeName);
+
+    if (targetComp != 0)
+        visitor.visit (ComponentScope (*targetComp));
+}
+
+const String RelativeCoordinatePositionerBase::ComponentScope::getScopeUID() const
+{
+    return String::toHexString ((pointer_sized_int) (void*) &component);
+}
+
+Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponent (const String& componentID) const
+{
+    Component* const parent = component.getParentComponent();
+
+    if (parent != 0)
+    {
+        for (int i = parent->getNumChildComponents(); --i >= 0;)
+        {
+            Component* const c = parent->getChildComponent(i);
+
+            if (c->getComponentID() == componentID)
+                return c;
+        }
+    }
+
+    return 0;
+}
+
+const MarkerList::Marker* RelativeCoordinatePositionerBase::ComponentScope::findMarker (const String& name, MarkerList*& list) const
+{
+    const MarkerList::Marker* marker = 0;
+
+    Component* const parent = component.getParentComponent();
+
+    if (parent != 0)
+    {
+        list = parent->getMarkers (true);
+        if (list != 0)
+            marker = list->getMarker (name);
+
+        if (marker == 0)
+        {
+            list = parent->getMarkers (false);
+
+            if (list != 0)
+                marker = list->getMarker (name);
+        }
+    }
+
+    return marker;
+}
+
+//==============================================================================
+class RelativeCoordinatePositionerBase::DependencyFinderScope  : public ComponentScope
+{
+public:
+    DependencyFinderScope (Component& component_, RelativeCoordinatePositionerBase& positioner_, bool& ok_)
+        : ComponentScope (component_), positioner (positioner_), ok (ok_)
+    {
+    }
+
+    const Expression getSymbolValue (const String& symbol) const
+    {
+        if (symbol == RelativeCoordinate::Strings::left || symbol == RelativeCoordinate::Strings::x
+             || symbol == RelativeCoordinate::Strings::width || symbol == RelativeCoordinate::Strings::right
+             || symbol == RelativeCoordinate::Strings::top || symbol == RelativeCoordinate::Strings::y
+             || symbol == RelativeCoordinate::Strings::height || symbol == RelativeCoordinate::Strings::bottom)
+        {
+            positioner.registerComponentListener (component);
+        }
+        else
+        {
+            MarkerList* list;
+            const MarkerList::Marker* const marker = findMarker (symbol, list);
+
+            if (marker != 0)
+            {
+                positioner.registerMarkerListListener (list);
+            }
+            else
+            {
+                // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
+                positioner.registerMarkerListListener (component.getMarkers (true));
+                positioner.registerMarkerListListener (component.getMarkers (false));
+                ok = false;
+            }
+        }
+
+        return ComponentScope::getSymbolValue (symbol);
+    }
+
+    void visitRelativeScope (const String& scopeName, Visitor& visitor) const
+    {
+        Component* targetComp = 0;
+
+        if (scopeName == RelativeCoordinate::Strings::parent)
+            targetComp = component.getParentComponent();
+        else
+            targetComp = findSiblingComponent (scopeName);
+
+        if (targetComp != 0)
+        {
+            visitor.visit (DependencyFinderScope (*targetComp, positioner, ok));
+        }
+        else
+        {
+            // The named component doesn't exist, so we'll watch the parent for changes in case it appears later..
+            positioner.registerComponentListener (component);
+            ok = false;
+        }
+    }
+
+private:
+    RelativeCoordinatePositionerBase& positioner;
+    bool& ok;
+
+    JUCE_DECLARE_NON_COPYABLE (DependencyFinderScope);
+};
+
+//==============================================================================
 RelativeCoordinatePositionerBase::RelativeCoordinatePositionerBase (Component& component_)
     : Component::Positioner (component_), registeredOk (false)
 {
@@ -39,43 +196,6 @@ RelativeCoordinatePositionerBase::RelativeCoordinatePositionerBase (Component& c
 RelativeCoordinatePositionerBase::~RelativeCoordinatePositionerBase()
 {
     unregisterListeners();
-}
-
-const Expression RelativeCoordinatePositionerBase::getSymbolValue (const String& objectName, const String& member) const
-{
-    jassert (objectName.isNotEmpty());
-
-    if (member.isNotEmpty())
-    {
-        const Component* comp = getSourceComponent (objectName);
-
-        if (comp == 0)
-        {
-            if (objectName == RelativeCoordinate::Strings::parent)
-                comp = getComponent().getParentComponent();
-            else if (objectName == RelativeCoordinate::Strings::this_ || objectName == getComponent().getComponentID())
-                comp = &getComponent();
-        }
-
-        if (comp != 0)
-        {
-            if (member == RelativeCoordinate::Strings::left)   return xToExpression (comp, 0);
-            if (member == RelativeCoordinate::Strings::right)  return xToExpression (comp, comp->getWidth());
-            if (member == RelativeCoordinate::Strings::top)    return yToExpression (comp, 0);
-            if (member == RelativeCoordinate::Strings::bottom) return yToExpression (comp, comp->getHeight());
-        }
-    }
-
-    for (int i = sourceMarkerLists.size(); --i >= 0;)
-    {
-        MarkerList* const markerList = sourceMarkerLists.getUnchecked(i);
-        const MarkerList::Marker* const marker = markerList->getMarker (objectName);
-
-        if (marker != 0)
-            return Expression (markerList->getMarkerPosition (*marker, getComponent().getParentComponent()));
-    }
-
-    return Expression::EvaluationContext::getSymbolValue (objectName, member);
 }
 
 void RelativeCoordinatePositionerBase::componentMovedOrResized (Component&, bool /*wasMoved*/, bool /*wasResized*/)
@@ -118,7 +238,10 @@ void RelativeCoordinatePositionerBase::apply()
 
 bool RelativeCoordinatePositionerBase::addCoordinate (const RelativeCoordinate& coord)
 {
-    return registerListeners (coord.getExpression());
+    bool ok = true;
+    DependencyFinderScope finderScope (getComponent(), *this, ok);
+    coord.getExpression().evaluate (finderScope);
+    return ok;
 }
 
 bool RelativeCoordinatePositionerBase::addPoint (const RelativePoint& point)
@@ -127,95 +250,12 @@ bool RelativeCoordinatePositionerBase::addPoint (const RelativePoint& point)
     return addCoordinate (point.y) && ok;
 }
 
-bool RelativeCoordinatePositionerBase::registerListeners (const Expression& e)
+void RelativeCoordinatePositionerBase::registerComponentListener (Component& comp)
 {
-    bool ok = true;
-
-    if (e.getType() == Expression::symbolType)
+    if (! sourceComponents.contains (&comp))
     {
-        String objectName, memberName;
-        e.getSymbolParts (objectName, memberName);
-
-        if (memberName.isNotEmpty())
-            ok = registerComponent (objectName) && ok;
-        else
-            ok = registerMarker (objectName) && ok;
-    }
-    else
-    {
-        for (int i = e.getNumInputs(); --i >= 0;)
-            ok = registerListeners (e.getInput (i)) && ok;
-    }
-
-    return ok;
-}
-
-bool RelativeCoordinatePositionerBase::registerComponent (const String& componentID)
-{
-    Component* comp = findComponent (componentID);
-
-    if (comp == 0)
-    {
-        if (componentID == RelativeCoordinate::Strings::parent)
-            comp = getComponent().getParentComponent();
-        else if (componentID == RelativeCoordinate::Strings::this_ || componentID == getComponent().getComponentID())
-            comp = &getComponent();
-    }
-
-    if (comp != 0)
-    {
-        if (comp != &getComponent())
-            registerComponentListener (comp);
-
-        return true;
-    }
-    else
-    {
-        // The component we want doesn't exist, so watch the parent in case the hierarchy changes and it appears later..
-        Component* const parent = getComponent().getParentComponent();
-
-        if (parent != 0)
-            registerComponentListener (parent);
-        else
-            registerComponentListener (&getComponent());
-
-        return false;
-    }
-}
-
-bool RelativeCoordinatePositionerBase::registerMarker (const String markerName)
-{
-    Component* const parent = getComponent().getParentComponent();
-
-    if (parent != 0)
-    {
-        MarkerList* list = parent->getMarkers (true);
-
-        if (list == 0 || list->getMarker (markerName) == 0)
-            list = parent->getMarkers (false);
-
-        if (list != 0 && list->getMarker (markerName) != 0)
-        {
-            registerMarkerListListener (list);
-            return true;
-        }
-        else
-        {
-            // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
-            registerMarkerListListener (parent->getMarkers (true));
-            registerMarkerListListener (parent->getMarkers (false));
-        }
-    }
-
-    return false;
-}
-
-void RelativeCoordinatePositionerBase::registerComponentListener (Component* const comp)
-{
-    if (comp != 0 && ! sourceComponents.contains (comp))
-    {
-        comp->addComponentListener (this);
-        sourceComponents.add (comp);
+        comp.addComponentListener (this);
+        sourceComponents.add (&comp);
     }
 }
 
@@ -241,45 +281,5 @@ void RelativeCoordinatePositionerBase::unregisterListeners()
     sourceMarkerLists.clear();
 }
 
-Component* RelativeCoordinatePositionerBase::findComponent (const String& componentID) const
-{
-    Component* const parent = getComponent().getParentComponent();
-
-    if (parent != 0)
-    {
-        for (int i = parent->getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = parent->getChildComponent(i);
-
-            if (c->getComponentID() == componentID)
-                return c;
-        }
-    }
-
-    return 0;
-}
-
-Component* RelativeCoordinatePositionerBase::getSourceComponent (const String& objectName) const
-{
-    for (int i = sourceComponents.size(); --i >= 0;)
-    {
-        Component* const comp = sourceComponents.getUnchecked(i);
-
-        if (comp->getComponentID() == objectName)
-            return comp;
-    }
-
-    return 0;
-}
-
-const Expression RelativeCoordinatePositionerBase::xToExpression (const Component* const source, const int x) const
-{
-    return Expression ((double) (getComponent().getLocalPoint (source, Point<int> (x, 0)).getX() + getComponent().getX()));
-}
-
-const Expression RelativeCoordinatePositionerBase::yToExpression (const Component* const source, const int y) const
-{
-    return Expression ((double) (getComponent().getLocalPoint (source, Point<int> (0, y)).getY() + getComponent().getY()));
-}
 
 END_JUCE_NAMESPACE

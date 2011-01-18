@@ -95,13 +95,13 @@ bool DrawableRectangle::registerCoordinates (RelativeCoordinatePositionerBase& p
     return positioner.addPoint (cornerSize) && ok;
 }
 
-void DrawableRectangle::recalculateCoordinates (Expression::EvaluationContext* context)
+void DrawableRectangle::recalculateCoordinates (Expression::Scope* scope)
 {
     Point<float> points[3];
-    bounds.resolveThreePoints (points, context);
+    bounds.resolveThreePoints (points, scope);
 
-    const float cornerSizeX = (float) cornerSize.x.resolve (context);
-    const float cornerSizeY = (float) cornerSize.y.resolve (context);
+    const float cornerSizeX = (float) cornerSize.x.resolve (scope);
+    const float cornerSizeY = (float) cornerSize.y.resolve (scope);
 
     const float w = Line<float> (points[0], points[1]).getLength();
     const float h = Line<float> (points[0], points[2]).getLength();

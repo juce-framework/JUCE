@@ -32,15 +32,28 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 const String RelativeCoordinate::Strings::parent ("parent");
-const String RelativeCoordinate::Strings::this_ ("this");
 const String RelativeCoordinate::Strings::left ("left");
 const String RelativeCoordinate::Strings::right ("right");
 const String RelativeCoordinate::Strings::top ("top");
 const String RelativeCoordinate::Strings::bottom ("bottom");
-const String RelativeCoordinate::Strings::parentLeft ("parent.left");
-const String RelativeCoordinate::Strings::parentTop ("parent.top");
-const String RelativeCoordinate::Strings::parentRight ("parent.right");
-const String RelativeCoordinate::Strings::parentBottom ("parent.bottom");
+const String RelativeCoordinate::Strings::x ("x");
+const String RelativeCoordinate::Strings::y ("y");
+const String RelativeCoordinate::Strings::width ("width");
+const String RelativeCoordinate::Strings::height ("height");
+
+RelativeCoordinate::StandardStrings::Type RelativeCoordinate::StandardStrings::getTypeOf (const String& s) throw()
+{
+    if (s == Strings::left)    return left;
+    if (s == Strings::right)   return right;
+    if (s == Strings::top)     return top;
+    if (s == Strings::bottom)  return bottom;
+    if (s == Strings::x)       return x;
+    if (s == Strings::y)       return y;
+    if (s == Strings::width)   return width;
+    if (s == Strings::height)  return height;
+    if (s == Strings::parent)  return parent;
+    return unknown;
+}
 
 //==============================================================================
 RelativeCoordinate::RelativeCoordinate()
@@ -92,12 +105,12 @@ bool RelativeCoordinate::operator!= (const RelativeCoordinate& other) const thro
     return ! operator== (other);
 }
 
-double RelativeCoordinate::resolve (const Expression::EvaluationContext* context) const
+double RelativeCoordinate::resolve (const Expression::Scope* scope) const
 {
     try
     {
-        if (context != 0)
-            return term.evaluate (*context);
+        if (scope != 0)
+            return term.evaluate (*scope);
         else
             return term.evaluate();
     }
@@ -107,12 +120,12 @@ double RelativeCoordinate::resolve (const Expression::EvaluationContext* context
     return 0.0;
 }
 
-bool RelativeCoordinate::isRecursive (const Expression::EvaluationContext* context) const
+bool RelativeCoordinate::isRecursive (const Expression::Scope* scope) const
 {
     try
     {
-        if (context != 0)
-            term.evaluate (*context);
+        if (scope != 0)
+            term.evaluate (*scope);
         else
             term.evaluate();
     }
@@ -124,34 +137,22 @@ bool RelativeCoordinate::isRecursive (const Expression::EvaluationContext* conte
     return false;
 }
 
-void RelativeCoordinate::moveToAbsolute (double newPos, const Expression::EvaluationContext* context)
+void RelativeCoordinate::moveToAbsolute (double newPos, const Expression::Scope* scope)
 {
     try
     {
-        if (context != 0)
+        if (scope != 0)
         {
-            term = term.adjustedToGiveNewResult (newPos, *context);
+            term = term.adjustedToGiveNewResult (newPos, *scope);
         }
         else
         {
-            Expression::EvaluationContext defaultContext;
-            term = term.adjustedToGiveNewResult (newPos, defaultContext);
+            Expression::Scope defaultScope;
+            term = term.adjustedToGiveNewResult (newPos, defaultScope);
         }
     }
     catch (...)
     {}
-}
-
-bool RelativeCoordinate::references (const String& coordName, const Expression::EvaluationContext* context) const
-{
-    try
-    {
-        return term.referencesSymbol (coordName, context);
-    }
-    catch (...)
-    {}
-
-    return false;
 }
 
 bool RelativeCoordinate::isDynamic() const
@@ -164,13 +165,6 @@ const String RelativeCoordinate::toString() const
     return term.toString();
 }
 
-void RelativeCoordinate::renameSymbolIfUsed (const String& oldName, const String& newName)
-{
-    jassert (newName.isNotEmpty() && newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_"));
-
-    if (term.referencesSymbol (oldName, 0))
-        term = term.withRenamedSymbol (oldName, newName);
-}
 
 
 END_JUCE_NAMESPACE

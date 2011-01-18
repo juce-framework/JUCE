@@ -150,7 +150,7 @@ private:
 
     friend class Drawable::Positioner<DrawableComposite>;
     bool registerCoordinates (RelativeCoordinatePositionerBase&);
-    void recalculateCoordinates (Expression::EvaluationContext*);
+    void recalculateCoordinates (Expression::Scope*);
 
     void updateBoundsToFitChildren();
 

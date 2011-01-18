@@ -138,14 +138,14 @@ bool DrawableText::registerCoordinates (RelativeCoordinatePositionerBase& positi
     return positioner.addPoint (fontSizeControlPoint) && ok;
 }
 
-void DrawableText::recalculateCoordinates (Expression::EvaluationContext* context)
+void DrawableText::recalculateCoordinates (Expression::Scope* scope)
 {
-    bounds.resolveThreePoints (resolvedPoints, context);
+    bounds.resolveThreePoints (resolvedPoints, scope);
 
     const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
     const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
 
-    const Point<float> fontCoords (RelativeParallelogram::getInternalCoordForPoint (resolvedPoints, fontSizeControlPoint.resolve (context)));
+    const Point<float> fontCoords (RelativeParallelogram::getInternalCoordForPoint (resolvedPoints, fontSizeControlPoint.resolve (scope)));
     const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.getY());
     const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.getX());
 

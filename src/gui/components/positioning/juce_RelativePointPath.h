@@ -54,7 +54,7 @@ public:
 
     //==============================================================================
     /** Resolves this points in this path and adds them to a normal Path object. */
-    void createPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+    void createPath (Path& path, Expression::Scope* scope) const;
 
     /** Returns true if the path contains any non-fixed points. */
     bool containsAnyDynamicPoints() const;
@@ -85,7 +85,7 @@ public:
         ElementBase (ElementType type);
         virtual ~ElementBase() {}
         virtual const ValueTree createTree() const = 0;
-        virtual void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const = 0;
+        virtual void addToPath (Path& path, Expression::Scope*) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
         virtual ElementBase* clone() const = 0;
         bool isDynamic();
@@ -102,7 +102,7 @@ public:
     public:
         StartSubPath (const RelativePoint& pos);
         const ValueTree createTree() const;
-        void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+        void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
 
@@ -118,7 +118,7 @@ public:
     public:
         CloseSubPath();
         const ValueTree createTree() const;
-        void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+        void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
 
@@ -132,7 +132,7 @@ public:
     public:
         LineTo (const RelativePoint& endPoint);
         const ValueTree createTree() const;
-        void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+        void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
 
@@ -148,7 +148,7 @@ public:
     public:
         QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
         const ValueTree createTree() const;
-        void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+        void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
 
@@ -164,7 +164,7 @@ public:
     public:
         CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
         const ValueTree createTree() const;
-        void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+        void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
 

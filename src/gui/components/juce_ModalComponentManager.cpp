@@ -65,6 +65,8 @@ public:
 
     void componentBeingDeleted (Component& comp)
     {
+        ComponentMovementWatcher::componentBeingDeleted (comp);
+
         if (component == &comp || comp.isParentOf (component))
             cancel();
     }
@@ -201,9 +203,14 @@ void ModalComponentManager::handleAsyncUpdate()
         if (! item->isActive)
         {
             for (int j = item->callbacks.size(); --j >= 0;)
+            {
                 item->callbacks.getUnchecked(j)->modalStateFinished (item->returnValue);
 
-            stack.remove (i);
+                if (! stack.contains (item))
+                    break;
+            }
+
+            stack.removeObject (item);
         }
     }
 }

@@ -97,7 +97,7 @@ private:
 
     void rebuildPath();
     bool registerCoordinates (RelativeCoordinatePositionerBase&);
-    void recalculateCoordinates (Expression::EvaluationContext*);
+    void recalculateCoordinates (Expression::Scope*);
 
     DrawableRectangle& operator= (const DrawableRectangle&);
     JUCE_LEAK_DETECTOR (DrawableRectangle);

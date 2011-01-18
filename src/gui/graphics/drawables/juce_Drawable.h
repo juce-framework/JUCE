@@ -228,7 +228,11 @@ protected:
         {}
 
         bool registerCoordinates()      { return owner.registerCoordinates (*this); }
-        void applyToComponentBounds()   { owner.recalculateCoordinates (this); }
+        void applyToComponentBounds()
+        {
+            ComponentScope scope (getComponent());
+            owner.recalculateCoordinates (&scope);
+        }
 
     private:
         DrawableType& owner;

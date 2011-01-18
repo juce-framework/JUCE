@@ -69,18 +69,18 @@ public:
     //==============================================================================
     /** Calculates the absolute position of this coordinate.
 
-        You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+        You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
         be needed to calculate the result.
     */
-    double resolve (const Expression::EvaluationContext* evaluationContext) const;
+    double resolve (const Expression::Scope* evaluationScope) const;
 
     /** Returns true if this coordinate uses the specified coord name at any level in its evaluation.
         This will recursively check any coordinates upon which this one depends.
     */
-    bool references (const String& coordName, const Expression::EvaluationContext* evaluationContext) const;
+    bool references (const String& coordName, const Expression::Scope* evaluationScope) const;
 
     /** Returns true if there's a recursive loop when trying to resolve this coordinate's position. */
-    bool isRecursive (const Expression::EvaluationContext* evaluationContext) const;
+    bool isRecursive (const Expression::Scope* evaluationScope) const;
 
     /** Returns true if this coordinate depends on any other coordinates for its position. */
     bool isDynamic() const;
@@ -92,10 +92,7 @@ public:
         or relative position to whatever value is necessary to make its resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (double absoluteTargetPosition, const Expression::EvaluationContext* evaluationContext);
-
-    /** Changes the name of a symbol if it is used as part of the coordinate's expression. */
-    void renameSymbolIfUsed (const String& oldName, const String& newName);
+    void moveToAbsolute (double absoluteTargetPosition, const Expression::Scope* evaluationScope);
 
     /** Returns the expression that defines this coordinate. */
     const Expression& getExpression() const         { return term; }
@@ -118,15 +115,27 @@ public:
     struct Strings
     {
         static const String parent;         /**< "parent" */
-        static const String this_;          /**< "this" */
         static const String left;           /**< "left" */
         static const String right;          /**< "right" */
         static const String top;            /**< "top" */
         static const String bottom;         /**< "bottom" */
-        static const String parentLeft;     /**< "parent.left" */
-        static const String parentTop;      /**< "parent.top" */
-        static const String parentRight;    /**< "parent.right" */
-        static const String parentBottom;   /**< "parent.bottom" */
+        static const String x;              /**< "x" */
+        static const String y;              /**< "y" */
+        static const String width;          /**< "width" */
+        static const String height;         /**< "height" */
+    };
+
+    struct StandardStrings
+    {
+        enum Type
+        {
+            left, right, top, bottom,
+            x, y, width, height,
+            parent,
+            unknown
+        };
+
+        static Type getTypeOf (const String& s) throw();
     };
 
 private:

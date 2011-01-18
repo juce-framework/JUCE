@@ -101,7 +101,7 @@ public:
             const RelativePoint getStartPoint() const;
             const RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager*);
-            float getLength (Expression::EvaluationContext*) const;
+            float getLength (Expression::Scope*) const;
 
             ValueTreeWrapper getParent() const;
             Element getPreviousElement() const;
@@ -110,11 +110,11 @@ public:
             void setModeOfEndPoint (const String& newMode, UndoManager*);
 
             void convertToLine (UndoManager*);
-            void convertToCubic (Expression::EvaluationContext*, UndoManager*);
+            void convertToCubic (Expression::Scope*, UndoManager*);
             void convertToPathBreak (UndoManager* undoManager);
-            ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext*, UndoManager*);
+            ValueTree insertPoint (const Point<float>& targetPoint, Expression::Scope*, UndoManager*);
             void removePoint (UndoManager* undoManager);
-            float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext*) const;
+            float findProportionAlongLine (const Point<float>& targetPoint, Expression::Scope*) const;
 
             static const Identifier mode, startSubPathElement, closeSubPathElement,
                                     lineToElement, quadraticToElement, cubicToElement;
@@ -139,7 +139,7 @@ private:
 
     class RelativePositioner;
     friend class RelativePositioner;
-    void applyRelativePath (const RelativePointPath&, Expression::EvaluationContext*);
+    void applyRelativePath (const RelativePointPath&, Expression::Scope*);
 
     DrawablePath& operator= (const DrawablePath&);
     JUCE_LEAK_DETECTOR (DrawablePath);

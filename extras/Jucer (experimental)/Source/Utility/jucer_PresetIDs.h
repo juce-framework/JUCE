@@ -112,6 +112,7 @@ namespace Ids
     DECLARE_ID (tooltip);
     DECLARE_ID (memberName);
     DECLARE_ID (focusOrder);
+    DECLARE_ID (hidden);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

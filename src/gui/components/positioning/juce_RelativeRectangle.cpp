@@ -30,6 +30,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_RelativeRectangle.h"
 #include "juce_RelativeCoordinatePositioner.h"
 
+
+//==============================================================================
 namespace RelativeRectangleHelpers
 {
     inline void skipComma (const juce_wchar* const s, int& i)
@@ -43,13 +45,23 @@ namespace RelativeRectangleHelpers
 
     bool dependsOnSymbolsOtherThanThis (const Expression& e)
     {
+        if (e.getType() == Expression::operatorType && e.getSymbolOrFunction() == ".")
+            return true;
+
         if (e.getType() == Expression::symbolType)
         {
-            String objectName, memberName;
-            e.getSymbolParts (objectName, memberName);
+            switch (RelativeCoordinate::StandardStrings::getTypeOf (e.getSymbolOrFunction()))
+            {
+                case RelativeCoordinate::StandardStrings::x:
+                case RelativeCoordinate::StandardStrings::y:
+                case RelativeCoordinate::StandardStrings::left:
+                case RelativeCoordinate::StandardStrings::right:
+                case RelativeCoordinate::StandardStrings::top:
+                case RelativeCoordinate::StandardStrings::bottom:   return false;
+                default: break;
+            }
 
-            if (objectName != RelativeCoordinate::Strings::this_)
-                return true;
+            return true;
         }
         else
         {
@@ -75,11 +87,9 @@ RelativeRectangle::RelativeRectangle (const RelativeCoordinate& left_, const Rel
 
 RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect)
     : left (rect.getX()),
-      right (Expression::symbol (RelativeCoordinate::Strings::this_ + "." + RelativeCoordinate::Strings::left)
-                                 + Expression ((double) rect.getWidth())),
+      right (Expression::symbol (RelativeCoordinate::Strings::left) + Expression ((double) rect.getWidth())),
       top (rect.getY()),
-      bottom (Expression::symbol (RelativeCoordinate::Strings::this_ + "." + RelativeCoordinate::Strings::top)
-                                  + Expression ((double) rect.getHeight()))
+      bottom (Expression::symbol (RelativeCoordinate::Strings::top) + Expression ((double) rect.getHeight()))
 {
 }
 
@@ -105,22 +115,59 @@ bool RelativeRectangle::operator!= (const RelativeRectangle& other) const throw(
     return ! operator== (other);
 }
 
-const Rectangle<float> RelativeRectangle::resolve (const Expression::EvaluationContext* context) const
+//==============================================================================
+// An expression context that can evaluate expressions using "this"
+class RelativeRectangleLocalScope  : public Expression::Scope
 {
-    const double l = left.resolve (context);
-    const double r = right.resolve (context);
-    const double t = top.resolve (context);
-    const double b = bottom.resolve (context);
+public:
+    RelativeRectangleLocalScope (const RelativeRectangle& rect_)  : rect (rect_) {}
 
-    return Rectangle<float> ((float) l, (float) t, (float) jmax (0.0, r - l), (float) jmax (0.0, b - t));
+    const Expression getSymbolValue (const String& symbol) const
+    {
+        switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
+        {
+            case RelativeCoordinate::StandardStrings::x:
+            case RelativeCoordinate::StandardStrings::left:     return rect.left.getExpression();
+            case RelativeCoordinate::StandardStrings::y:
+            case RelativeCoordinate::StandardStrings::top:      return rect.top.getExpression();
+            case RelativeCoordinate::StandardStrings::right:    return rect.right.getExpression();
+            case RelativeCoordinate::StandardStrings::bottom:   return rect.bottom.getExpression();
+            default: break;
+        }
+
+        return Expression::Scope::getSymbolValue (symbol);
+    }
+
+private:
+    const RelativeRectangle& rect;
+
+    JUCE_DECLARE_NON_COPYABLE (RelativeRectangleLocalScope);
+};
+
+const Rectangle<float> RelativeRectangle::resolve (const Expression::Scope* scope) const
+{
+    if (scope == 0)
+    {
+        RelativeRectangleLocalScope scope (*this);
+        return resolve (&scope);
+    }
+    else
+    {
+        const double l = left.resolve (scope);
+        const double r = right.resolve (scope);
+        const double t = top.resolve (scope);
+        const double b = bottom.resolve (scope);
+
+        return Rectangle<float> ((float) l, (float) t, (float) jmax (0.0, r - l), (float) jmax (0.0, b - t));
+    }
 }
 
-void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* context)
+void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const Expression::Scope* scope)
 {
-    left.moveToAbsolute (newPos.getX(), context);
-    right.moveToAbsolute (newPos.getRight(), context);
-    top.moveToAbsolute (newPos.getY(), context);
-    bottom.moveToAbsolute (newPos.getBottom(), context);
+    left.moveToAbsolute (newPos.getX(), scope);
+    right.moveToAbsolute (newPos.getRight(), scope);
+    top.moveToAbsolute (newPos.getY(), scope);
+    bottom.moveToAbsolute (newPos.getBottom(), scope);
 }
 
 bool RelativeRectangle::isDynamic() const
@@ -138,12 +185,12 @@ const String RelativeRectangle::toString() const
     return left.toString() + ", " + top.toString() + ", " + right.toString() + ", " + bottom.toString();
 }
 
-void RelativeRectangle::renameSymbolIfUsed (const String& oldName, const String& newName)
+void RelativeRectangle::renameSymbol (const Expression::Symbol& oldSymbol, const String& newName, const Expression::Scope& scope)
 {
-    left.renameSymbolIfUsed (oldName, newName);
-    right.renameSymbolIfUsed (oldName, newName);
-    top.renameSymbolIfUsed (oldName, newName);
-    bottom.renameSymbolIfUsed (oldName, newName);
+    left = left.getExpression().withRenamedSymbol (oldSymbol, newName, scope);
+    right = right.getExpression().withRenamedSymbol (oldSymbol, newName, scope);
+    top = top.getExpression().withRenamedSymbol (oldSymbol, newName, scope);
+    bottom = bottom.getExpression().withRenamedSymbol (oldSymbol, newName, scope);
 }
 
 //==============================================================================
@@ -174,7 +221,8 @@ public:
     {
         for (int i = 4; --i >= 0;)
         {
-            const Rectangle<int> newBounds (rectangle.resolve (this).getSmallestIntegerContainer());
+            ComponentScope scope (getComponent());
+            const Rectangle<int> newBounds (rectangle.resolve (&scope).getSmallestIntegerContainer());
 
             if (newBounds == getComponent().getBounds())
                 return;
@@ -189,31 +237,6 @@ private:
     const RelativeRectangle rectangle;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleComponentPositioner);
-};
-
-// An expression context that can evaluate expressions using "this"
-class TemporaryRectangleContext  : public Expression::EvaluationContext
-{
-public:
-    TemporaryRectangleContext (const RelativeRectangle& rect_)  : rect (rect_) {}
-
-    const Expression getSymbolValue (const String& objectName, const String& edge) const
-    {
-        if (objectName == RelativeCoordinate::Strings::this_)
-        {
-            if (edge == RelativeCoordinate::Strings::left)   return rect.left.getExpression();
-            if (edge == RelativeCoordinate::Strings::right)  return rect.right.getExpression();
-            if (edge == RelativeCoordinate::Strings::top)    return rect.top.getExpression();
-            if (edge == RelativeCoordinate::Strings::bottom) return rect.bottom.getExpression();
-        }
-
-        return Expression::EvaluationContext::getSymbolValue (objectName, edge);
-    }
-
-private:
-    const RelativeRectangle& rect;
-
-    JUCE_DECLARE_NON_COPYABLE (TemporaryRectangleContext);
 };
 
 void RelativeRectangle::applyToComponent (Component& component) const
@@ -233,9 +256,7 @@ void RelativeRectangle::applyToComponent (Component& component) const
     else
     {
         component.setPositioner (0);
-
-        TemporaryRectangleContext context (*this);
-        component.setBounds (resolve (&context).getSmallestIntegerContainer());
+        component.setBounds (resolve (0).getSmallestIntegerContainer());
     }
 }
 

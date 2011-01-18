@@ -109,10 +109,10 @@ void RelativePointPath::swapWith (RelativePointPath& other) throw()
     swapVariables (containsDynamicPoints, other.containsDynamicPoints);
 }
 
-void RelativePointPath::createPath (Path& path, Expression::EvaluationContext* coordFinder) const
+void RelativePointPath::createPath (Path& path, Expression::Scope* scope) const
 {
     for (int i = 0; i < elements.size(); ++i)
-        elements.getUnchecked(i)->addToPath (path, coordFinder);
+        elements.getUnchecked(i)->addToPath (path, scope);
 }
 
 bool RelativePointPath::containsAnyDynamicPoints() const
@@ -159,9 +159,9 @@ const ValueTree RelativePointPath::StartSubPath::createTree() const
     return v;
 }
 
-void RelativePointPath::StartSubPath::addToPath (Path& path, Expression::EvaluationContext* coordFinder) const
+void RelativePointPath::StartSubPath::addToPath (Path& path, Expression::Scope* scope) const
 {
-    path.startNewSubPath (startPos.resolve (coordFinder));
+    path.startNewSubPath (startPos.resolve (scope));
 }
 
 RelativePoint* RelativePointPath::StartSubPath::getControlPoints (int& numPoints)
@@ -186,7 +186,7 @@ const ValueTree RelativePointPath::CloseSubPath::createTree() const
     return ValueTree (DrawablePath::ValueTreeWrapper::Element::closeSubPathElement);
 }
 
-void RelativePointPath::CloseSubPath::addToPath (Path& path, Expression::EvaluationContext*) const
+void RelativePointPath::CloseSubPath::addToPath (Path& path, Expression::Scope*) const
 {
     path.closeSubPath();
 }
@@ -215,9 +215,9 @@ const ValueTree RelativePointPath::LineTo::createTree() const
     return v;
 }
 
-void RelativePointPath::LineTo::addToPath (Path& path, Expression::EvaluationContext* coordFinder) const
+void RelativePointPath::LineTo::addToPath (Path& path, Expression::Scope* scope) const
 {
-    path.lineTo (endPoint.resolve (coordFinder));
+    path.lineTo (endPoint.resolve (scope));
 }
 
 RelativePoint* RelativePointPath::LineTo::getControlPoints (int& numPoints)
@@ -247,10 +247,10 @@ const ValueTree RelativePointPath::QuadraticTo::createTree() const
     return v;
 }
 
-void RelativePointPath::QuadraticTo::addToPath (Path& path, Expression::EvaluationContext* coordFinder) const
+void RelativePointPath::QuadraticTo::addToPath (Path& path, Expression::Scope* scope) const
 {
-    path.quadraticTo (controlPoints[0].resolve (coordFinder),
-                      controlPoints[1].resolve (coordFinder));
+    path.quadraticTo (controlPoints[0].resolve (scope),
+                      controlPoints[1].resolve (scope));
 }
 
 RelativePoint* RelativePointPath::QuadraticTo::getControlPoints (int& numPoints)
@@ -283,11 +283,11 @@ const ValueTree RelativePointPath::CubicTo::createTree() const
     return v;
 }
 
-void RelativePointPath::CubicTo::addToPath (Path& path, Expression::EvaluationContext* coordFinder) const
+void RelativePointPath::CubicTo::addToPath (Path& path, Expression::Scope* scope) const
 {
-    path.cubicTo (controlPoints[0].resolve (coordFinder),
-                  controlPoints[1].resolve (coordFinder),
-                  controlPoints[2].resolve (coordFinder));
+    path.cubicTo (controlPoints[0].resolve (scope),
+                  controlPoints[1].resolve (scope),
+                  controlPoints[2].resolve (scope));
 }
 
 RelativePoint* RelativePointPath::CubicTo::getControlPoints (int& numPoints)

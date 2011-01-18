@@ -65,10 +65,10 @@ public:
     //==============================================================================
     /** Calculates the absolute position of this rectangle.
 
-        You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+        You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
         be needed to calculate the result.
     */
-    const Rectangle<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+    const Rectangle<float> resolve (const Expression::Scope* scope) const;
 
     /** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
 
@@ -76,7 +76,7 @@ public:
         or relative positions to whatever values are necessary to make the resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+    void moveToAbsolute (const Rectangle<float>& newPos, const Expression::Scope* scope);
 
     /** Returns true if this rectangle depends on any external symbols for its position.
         Coordinates that refer to symbols based on "this" are assumed not to be dynamic.
@@ -91,9 +91,9 @@ public:
     const String toString() const;
 
     /** Renames a symbol if it is used by any of the coordinates.
-        This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
+        This calls Expression::withRenamedSymbol() on the rectangle's coordinates.
     */
-    void renameSymbolIfUsed (const String& oldName, const String& newName);
+    void renameSymbol (const Expression::Symbol& oldSymbol, const String& newName, const Expression::Scope& scope);
 
     /** Creates and sets an appropriate Component::Positioner object for the given component, which will
         keep it positioned with this rectangle.

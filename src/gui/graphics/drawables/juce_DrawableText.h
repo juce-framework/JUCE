@@ -142,7 +142,7 @@ private:
 
     friend class Drawable::Positioner<DrawableText>;
     bool registerCoordinates (RelativeCoordinatePositionerBase&);
-    void recalculateCoordinates (Expression::EvaluationContext*);
+    void recalculateCoordinates (Expression::Scope*);
     void refreshBounds();
     const AffineTransform getArrangementAndTransform (GlyphArrangement& glyphs) const;
 

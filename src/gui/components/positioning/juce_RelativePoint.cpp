@@ -79,27 +79,21 @@ bool RelativePoint::operator!= (const RelativePoint& other) const throw()
     return ! operator== (other);
 }
 
-const Point<float> RelativePoint::resolve (const Expression::EvaluationContext* context) const
+const Point<float> RelativePoint::resolve (const Expression::Scope* scope) const
 {
-    return Point<float> ((float) x.resolve (context),
-                         (float) y.resolve (context));
+    return Point<float> ((float) x.resolve (scope),
+                         (float) y.resolve (scope));
 }
 
-void RelativePoint::moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* context)
+void RelativePoint::moveToAbsolute (const Point<float>& newPos, const Expression::Scope* scope)
 {
-    x.moveToAbsolute (newPos.getX(), context);
-    y.moveToAbsolute (newPos.getY(), context);
+    x.moveToAbsolute (newPos.getX(), scope);
+    y.moveToAbsolute (newPos.getY(), scope);
 }
 
 const String RelativePoint::toString() const
 {
     return x.toString() + ", " + y.toString();
-}
-
-void RelativePoint::renameSymbolIfUsed (const String& oldName, const String& newName)
-{
-    x.renameSymbolIfUsed (oldName, newName);
-    y.renameSymbolIfUsed (oldName, newName);
 }
 
 bool RelativePoint::isDynamic() const

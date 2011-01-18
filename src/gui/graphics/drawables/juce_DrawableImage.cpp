@@ -106,12 +106,12 @@ bool DrawableImage::registerCoordinates (RelativeCoordinatePositionerBase& posit
     return positioner.addPoint (bounds.bottomLeft) && ok;
 }
 
-void DrawableImage::recalculateCoordinates (Expression::EvaluationContext* context)
+void DrawableImage::recalculateCoordinates (Expression::Scope* scope)
 {
     if (image.isValid())
     {
         Point<float> resolved[3];
-        bounds.resolveThreePoints (resolved, context);
+        bounds.resolveThreePoints (resolved, scope);
 
         const Point<float> tr (resolved[0] + (resolved[1] - resolved[0]) / (float) image.getWidth());
         const Point<float> bl (resolved[0] + (resolved[2] - resolved[0]) / (float) image.getHeight());

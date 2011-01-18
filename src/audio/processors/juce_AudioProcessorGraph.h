@@ -57,7 +57,6 @@ public:
     AudioProcessorGraph();
 
     /** Destructor.
-
         Any processor objects that have been added to the graph will also be deleted.
     */
     ~AudioProcessorGraph();
@@ -70,10 +69,6 @@ public:
     class JUCE_API  Node   : public ReferenceCountedObject
     {
     public:
-        /** Destructor.
-        */
-        ~Node();
-
         //==============================================================================
         /** The ID number assigned to this node.
 

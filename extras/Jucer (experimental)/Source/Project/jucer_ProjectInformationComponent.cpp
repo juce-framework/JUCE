@@ -104,21 +104,21 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
       configTabBox (TabbedButtonBar::TabsAtTop)
 {
     addAndMakeVisible (&configTabBox);
-    configTabBox.setBounds (RelativeRectangle ("8, 0, this.left + parent.right - 16, this.top + parent.bottom - 36"));
+    configTabBox.setBounds (RelativeRectangle ("8, 0, this.left + parent.width - 16, this.top + parent.height - 36"));
     addAndMakeVisible (&editConfigsButton);
-    editConfigsButton.setBounds (RelativeRectangle ("8, parent.bottom - 30, this.left + 192, this.top + 22"));
+    editConfigsButton.setBounds (RelativeRectangle ("8, parent.height - 30, this.left + 192, this.top + 22"));
     editConfigsButton.setButtonText ("Add/Remove Configurations...");
     editConfigsButton.addListener (this);
     addAndMakeVisible (&openProjectButton);
-    openProjectButton.setBounds (RelativeRectangle ("608, parent.bottom - 30, this.left + 208, this.top + 22"));
+    openProjectButton.setBounds (RelativeRectangle ("608, parent.height - 30, this.left + 208, this.top + 22"));
     openProjectButton.setButtonText ("Open Project in ");
     openProjectButton.addListener (this);
     addAndMakeVisible (&editExportersButton);
-    editExportersButton.setBounds (RelativeRectangle ("208, parent.bottom - 30, this.left + 160, this.top + 22"));
+    editExportersButton.setBounds (RelativeRectangle ("208, parent.height - 30, this.left + 160, this.top + 22"));
     editExportersButton.setButtonText ("Add/Remove Exporters...");
     editExportersButton.addListener (this);
     addAndMakeVisible (&saveAndOpenButton);
-    saveAndOpenButton.setBounds (RelativeRectangle ("391, parent.bottom - 30, this.left + 208, this.top + 22"));
+    saveAndOpenButton.setBounds (RelativeRectangle ("391, parent.height - 30, this.left + 208, this.top + 22"));
     saveAndOpenButton.setButtonText ("Save And Open in");
     saveAndOpenButton.addListener (this);
 
@@ -354,22 +354,22 @@ JUCER_COMPONENT_METADATA_START
            constructorParams="Project&amp; project_" memberInitialisers="project (project_)">
   <COMPONENTS>
     <TABBEDCOMPONENT id="962c1575c4142253" memberName="configTabBox" focusOrder="0"
-                     position="8, 0, this.left + parent.right - 16, this.top + parent.bottom - 36"/>
+                     position="8, 0, this.left + parent.width - 16, this.top + parent.height - 36"/>
     <TEXTBUTTON id="b6625dfcdb1f4755" memberName="editConfigsButton" focusOrder="0"
                 text="Add/Remove Configurations..." createCallback="1" radioGroup="0"
                 connectedLeft="0" connectedRight="0" connectedTop="0" connectedBottom="0"
                 backgroundColour="" textColour="" backgroundColourOn="" textColourOn=""
-                position="8, parent.bottom - 30, this.left + 192, this.top + 22"/>
+                position="8, parent.height - 30, this.left + 192, this.top + 22"/>
     <TEXTBUTTON id="a550a652e2666ee7" memberName="openProjectButton" focusOrder="0"
                 text="Open Project in " createCallback="1" radioGroup="0" connectedLeft="0"
                 connectedRight="0" connectedTop="0" connectedBottom="0" backgroundColour=""
-                textColour="" backgroundColourOn="" textColourOn="" position="608, parent.bottom - 30, this.left + 208, this.top + 22"/>
+                textColour="" backgroundColourOn="" textColourOn="" position="608, parent.height - 30, this.left + 208, this.top + 22"/>
     <TEXTBUTTON id="c1f6e5f9811b307e" memberName="editExportersButton" focusOrder="0"
                 text="Add/Remove Exporters..." createCallback="1" radioGroup="0"
                 connectedLeft="0" connectedRight="0" connectedTop="0" connectedBottom="0"
                 backgroundColour="" textColour="" backgroundColourOn="" textColourOn=""
-                position="208, parent.bottom - 30, this.left + 160, this.top + 22"/>
-    <TEXTBUTTON id="dRGMyYx" name="" memberName="saveAndOpenButton" position="391, parent.bottom - 30, this.left + 208, this.top + 22"
+                position="208, parent.height - 30, this.left + 160, this.top + 22"/>
+    <TEXTBUTTON id="dRGMyYx" name="" memberName="saveAndOpenButton" position="391, parent.height - 30, this.left + 208, this.top + 22"
                 text="Save And Open in" createCallback="1" radioGroup="0" connectedLeft="0"
                 connectedRight="0" connectedTop="0" connectedBottom="0"/>
   </COMPONENTS>

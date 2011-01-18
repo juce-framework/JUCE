@@ -133,7 +133,7 @@ private:
 
     friend class Drawable::Positioner<DrawableImage>;
     bool registerCoordinates (RelativeCoordinatePositionerBase&);
-    void recalculateCoordinates (Expression::EvaluationContext*);
+    void recalculateCoordinates (Expression::Scope*);
 
     DrawableImage& operator= (const DrawableImage&);
     JUCE_LEAK_DETECTOR (DrawableImage);

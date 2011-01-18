@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	14
+#define JUCE_BUILDNUMBER	15
 
 /** Current Juce version number.
 
@@ -17817,7 +17817,7 @@ private:
 	evaluated.
 
 	Expressions which use identifiers and functions require a subclass of
-	Expression::EvaluationContext to be supplied when evaluating them, and this object
+	Expression::Scope to be supplied when evaluating them, and this object
 	is expected to be able to resolve the symbol names and perform the functions that
 	are used.
 */
@@ -17879,11 +17879,14 @@ public:
 	/** When evaluating an Expression object, this class is used to resolve symbols and
 		perform functions that the expression uses.
 	*/
-	class JUCE_API  EvaluationContext
+	class JUCE_API  Scope
 	{
 	public:
-		EvaluationContext();
-		virtual ~EvaluationContext();
+		Scope();
+		virtual ~Scope();
+
+		/** Returns some kind of globally unique ID that identifies this scope. */
+		virtual const String getScopeUID() const;
 
 		/** Returns the value of a symbol.
 			If the symbol is unknown, this can throw an Expression::EvaluationError exception.
@@ -17891,70 +17894,102 @@ public:
 			one, e.g. for "foo.bar", symbol = "foo" and member = "bar".
 			@throws Expression::EvaluationError
 		*/
-		virtual const Expression getSymbolValue (const String& symbol, const String& member) const;
+		virtual const Expression getSymbolValue (const String& symbol) const;
 
 		/** Executes a named function.
 			If the function name is unknown, this can throw an Expression::EvaluationError exception.
 			@throws Expression::EvaluationError
 		*/
-		virtual double evaluateFunction (const String& functionName, const double* parameters, int numParams) const;
+		virtual double evaluateFunction (const String& functionName,
+										 const double* parameters, int numParameters) const;
+
+		/** Used as a callback by the Scope::visitRelativeScope() method.
+			You should never create an instance of this class yourself, it's used by the
+			expression evaluation code.
+		*/
+		class Visitor
+		{
+		public:
+			virtual ~Visitor() {}
+			virtual void visit (const Scope&) = 0;
+		};
+
+		/** Creates a Scope object for a named scope, and then calls a visitor
+			to do some kind of processing with this new scope.
+
+			If the name is valid, this method must create a suitable (temporary) Scope
+			object to represent it, and must call the Visitor::visit() method with this
+			new scope.
+		*/
+		virtual void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
 	};
 
-	/** Evaluates this expression, without using an EvaluationContext.
-		Without an EvaluationContext, no symbols can be used, and only basic functions such as sin, cos, tan,
+	/** Evaluates this expression, without using a Scope.
+		Without a Scope, no symbols can be used, and only basic functions such as sin, cos, tan,
 		min, max are available.
-		@throws Expression::EvaluationError
+		To find out about any errors during evaluation, use the other version of this method which
+		takes a String parameter.
 	*/
 	double evaluate() const;
 
-	/** Evaluates this expression, providing a context that should be able to evaluate any symbols
+	/** Evaluates this expression, providing a scope that should be able to evaluate any symbols
 		or functions that it uses.
-		@throws Expression::EvaluationError
+		To find out about any errors during evaluation, use the other version of this method which
+		takes a String parameter.
 	*/
-	double evaluate (const EvaluationContext& context) const;
+	double evaluate (const Scope& scope) const;
+
+	/** Evaluates this expression, providing a scope that should be able to evaluate any symbols
+		or functions that it uses.
+	*/
+	double evaluate (const Scope& scope, String& evaluationError) const;
 
 	/** Attempts to return an expression which is a copy of this one, but with a constant adjusted
 		to make the expression resolve to a target value.
 
 		E.g. if the expression is "x + 10" and x is 5, then asking for a target value of 8 will return
 		the expression "x + 3". Obviously some expressions can't be reversed in this way, in which
-		case they might just be adjusted by adding a constant to them.
+		case they might just be adjusted by adding a constant to the original expression.
 
 		@throws Expression::EvaluationError
 	*/
-	const Expression adjustedToGiveNewResult (double targetValue, const EvaluationContext& context) const;
+	const Expression adjustedToGiveNewResult (double targetValue, const Scope& scope) const;
+
+	/** Represents a symbol that is used in an Expression. */
+	struct Symbol
+	{
+		Symbol (const String& scopeUID, const String& symbolName);
+		bool operator== (const Symbol&) const throw();
+		bool operator!= (const Symbol&) const throw();
+
+		String scopeUID;	/**< The unique ID of the Scope that contains this symbol. */
+		String symbolName;  /**< The name of the symbol. */
+	};
 
 	/** Returns a copy of this expression in which all instances of a given symbol have been renamed. */
-	const Expression withRenamedSymbol (const String& oldSymbol, const String& newSymbol) const;
+	const Expression withRenamedSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope) const;
 
 	/** Returns true if this expression makes use of the specified symbol.
-		If a suitable context is supplied, the search will dereference and recursively check
+		If a suitable scope is supplied, the search will dereference and recursively check
 		all symbols, so that it can be determined whether this expression relies on the given
-		symbol at any level in its evaluation. If the context parameter is null, this just checks
+		symbol at any level in its evaluation. If the scope parameter is null, this just checks
 		whether the expression contains any direct references to the symbol.
 
 		@throws Expression::EvaluationError
 	*/
-	bool referencesSymbol (const String& symbol, const EvaluationContext* context) const;
+	bool referencesSymbol (const Symbol& symbol, const Scope& scope) const;
 
 	/** Returns true if this expression contains any symbols. */
 	bool usesAnySymbols() const;
+
+	/** Returns a list of all symbols that may be needed to resolve this expression in the given scope. */
+	void findReferencedSymbols (Array<Symbol>& results, const Scope& scope) const;
 
 	/** An exception that can be thrown by Expression::parse(). */
 	class ParseError  : public std::exception
 	{
 	public:
 		ParseError (const String& message);
-
-		String description;
-	};
-
-	/** An exception that can be thrown by Expression::evaluate(). */
-	class EvaluationError  : public std::exception
-	{
-	public:
-		EvaluationError (const String& message);
-		EvaluationError (const String& symbolName, const String& memberName);
 
 		String description;
 	};
@@ -17973,19 +18008,8 @@ public:
 	/** Returns the type of this expression. */
 	Type getType() const throw();
 
-	/** If this expression is a symbol, this returns its full name. */
-	const String getSymbol() const;
-
-	/** For a symbol that contains a dot, this returns the two */
-	void getSymbolParts (String& objectName, String& memberName) const;
-
-	/** If this expression is a function, this returns its name. */
-	const String getFunction() const;
-
-	/** If this expression is an operator, this returns its name.
-		E.g. "+", "-", "*", "/", etc.
-	*/
-	const String getOperator() const;
+	/** If this expression is a symbol, function or operator, this returns its identifier. */
+	const String getSymbolOrFunction() const;
 
 	/** Returns the number of inputs to this expression.
 		@see getInput
@@ -17999,35 +18023,12 @@ public:
 
 private:
 
+	class Term;
 	class Helpers;
+	friend class Term;
 	friend class Helpers;
-
-	class Term  : public ReferenceCountedObject
-	{
-	public:
-		Term() {}
-		virtual ~Term() {}
-
-		virtual Term* clone() const = 0;
-		virtual double evaluate (const EvaluationContext&, int recursionDepth) const = 0;
-		virtual int getNumInputs() const = 0;
-		virtual Term* getInput (int index) const = 0;
-		virtual int getInputIndexFor (const Term* possibleInput) const;
-		virtual const String toString() const = 0;
-		virtual int getOperatorPrecedence() const;
-		virtual bool referencesSymbol (const String& symbol, const EvaluationContext*, int recursionDepth) const;
-		virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const EvaluationContext&, const Term* inputTerm,
-																				 double overallTarget, Term* topLevelTerm) const;
-		virtual const ReferenceCountedObjectPtr<Term> negated();
-		virtual Type getType() const throw() = 0;
-		virtual void getSymbolParts (String& objectName, String& memberName) const;
-		virtual const String getFunctionName() const;
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Term);
-	};
-
 	friend class ScopedPointer<Term>;
+	friend class ReferenceCountedObjectPtr<Term>;
 	ReferenceCountedObjectPtr<Term> term;
 
 	explicit Expression (Term* term);
@@ -27477,35 +27478,35 @@ public:
 		for more details.
 
 		When using relative expressions, the following symbols are available:
-		 - "this.left", "this.right", "this.top", "this.bottom" refer to the position of those
-		   edges in this component, so e.g. for a component whose width is always 100, you might
-		   set the right edge to the "this.left + 100".
-		 - "parent.left", "parent.right", "parent.top", "parent.bottom" refer to the parent component's
-		   positions, in its own coordinate space, so "parent.left", "parent.right" are always 0, and
-		   "parent.top", "parent.bottom" will actually be the width and height of the parent. So
-		   for example to make your component's right-hand edge always 10 pixels away from its parent's
-		   right-hand edge, you could set it to "parent.right - 10"
-		 - "[id].left", "[id].right", "[id].top", "[id].bottom", where [id] is the identifier of one of
-		   this component's siblings. A component's identifier is set with Component::setComponentID().
-		   So for example if you want your component to always be 50 pixels to the right of the one
-		   called "xyz", you could set your left edge to be "xyz.right + 50"
-		 - The name of a marker that is defined in the parent component. For markers to be used, the parent
-		   component must implement its Component::getMarkers() method, and return at least one
+		 - "left", "right", "top", "bottom" refer to the position of those edges in this component, so
+		   e.g. for a component whose width is always 100, you might set the right edge to the "left + 100".
+		 - "[id].left", "[id].right", "[id].top", "[id].bottom", "[id].width", "[id].height", where [id] is
+		   the identifier of one of this component's siblings. A component's identifier is set with
+		   Component::setComponentID(). So for example if you want your component to always be 50 pixels to the
+		   right of the one called "xyz", you could set your left edge to be "xyz.right + 50".
+		 - Instead of an [id], you can use the name "parent" to refer to this component's parent. Like
+		   any other component, these values are relative to their component's parent, so "parent.right" won't be
+		   very useful for positioning a component because it refers to a position with the parent's parent.. but
+		   "parent.width" can be used for setting positions relative to the parent's size. E.g. to make a 10x10
+		   component which remains 1 pixel away from its parent's bottom-right, you could use
+		   "right - 10, bottom - 10, parent.width - 1, parent.height - 1".
+		 - The name of one of the parent component's markers can also be used as a symbol. For markers to be
+		   used, the parent component must implement its Component::getMarkers() method, and return at least one
 		   valid MarkerList. So if you want your component's top edge to be 10 pixels below the
 		   marker called "foobar", you'd set it to "foobar + 10".
 
 		See the Expression class for details about the operators that are supported, but for example
 		if you wanted to make your component remain centred within its parent with a size of 100, 100,
 		you could express it as:
-		@code myComp.setBounds (RelativeBounds ("parent.right / 2 - 50, parent.bottom / 2 - 50, this.left + 100, this.top + 100"));
+		@code myComp.setBounds (RelativeBounds ("parent.width / 2 - 50, parent.height / 2 - 50, left + 100, top + 100"));
 		@endcode
 		..or an alternative way to achieve the same thing:
-		@code myComp.setBounds (RelativeBounds ("this.right - 100, this.bottom - 100, parent.right / 2 + 50, parent.bottom / 2 + 50"));
+		@code myComp.setBounds (RelativeBounds ("right - 100, bottom - 100, parent.width / 2 + 50, parent.height / 2 + 50"));
 		@endcode
 
 		Or if you wanted a 100x100 component whose top edge is lined up to a marker called "topMarker" and
 		which is positioned 50 pixels to the right of another component called "otherComp", you could write:
-		@code myComp.setBounds (RelativeBounds ("otherComp.right + 50, topMarker, this.left + 100, this.top + 100"));
+		@code myComp.setBounds (RelativeBounds ("otherComp.right + 50, topMarker, left + 100, top + 100"));
 		@endcode
 
 		Be careful not to make your coordinate expressions recursive, though, or exceptions and assertions will
@@ -43481,7 +43482,6 @@ public:
 	AudioProcessorGraph();
 
 	/** Destructor.
-
 		Any processor objects that have been added to the graph will also be deleted.
 	*/
 	~AudioProcessorGraph();
@@ -43493,9 +43493,6 @@ public:
 	class JUCE_API  Node   : public ReferenceCountedObject
 	{
 	public:
-		/** Destructor.
-		*/
-		~Node();
 
 		/** The ID number assigned to this node.
 
@@ -45643,18 +45640,18 @@ public:
 
 	/** Calculates the absolute position of this coordinate.
 
-		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+		You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
 		be needed to calculate the result.
 	*/
-	double resolve (const Expression::EvaluationContext* evaluationContext) const;
+	double resolve (const Expression::Scope* evaluationScope) const;
 
 	/** Returns true if this coordinate uses the specified coord name at any level in its evaluation.
 		This will recursively check any coordinates upon which this one depends.
 	*/
-	bool references (const String& coordName, const Expression::EvaluationContext* evaluationContext) const;
+	bool references (const String& coordName, const Expression::Scope* evaluationScope) const;
 
 	/** Returns true if there's a recursive loop when trying to resolve this coordinate's position. */
-	bool isRecursive (const Expression::EvaluationContext* evaluationContext) const;
+	bool isRecursive (const Expression::Scope* evaluationScope) const;
 
 	/** Returns true if this coordinate depends on any other coordinates for its position. */
 	bool isDynamic() const;
@@ -45665,10 +45662,7 @@ public:
 		or relative position to whatever value is necessary to make its resultant position
 		match the position that is provided.
 	*/
-	void moveToAbsolute (double absoluteTargetPosition, const Expression::EvaluationContext* evaluationContext);
-
-	/** Changes the name of a symbol if it is used as part of the coordinate's expression. */
-	void renameSymbolIfUsed (const String& oldName, const String& newName);
+	void moveToAbsolute (double absoluteTargetPosition, const Expression::Scope* evaluationScope);
 
 	/** Returns the expression that defines this coordinate. */
 	const Expression& getExpression() const	 { return term; }
@@ -45688,15 +45682,27 @@ public:
 	struct Strings
 	{
 		static const String parent;         /**< "parent" */
-		static const String this_;          /**< "this" */
 		static const String left;           /**< "left" */
 		static const String right;          /**< "right" */
 		static const String top;            /**< "top" */
 		static const String bottom;         /**< "bottom" */
-		static const String parentLeft;     /**< "parent.left" */
-		static const String parentTop;      /**< "parent.top" */
-		static const String parentRight;    /**< "parent.right" */
-		static const String parentBottom;   /**< "parent.bottom" */
+		static const String x;              /**< "x" */
+		static const String y;              /**< "y" */
+		static const String width;          /**< "width" */
+		static const String height;         /**< "height" */
+	};
+
+	struct StandardStrings
+	{
+		enum Type
+		{
+			left, right, top, bottom,
+			x, y, width, height,
+			parent,
+			unknown
+		};
+
+		static Type getTypeOf (const String& s) throw();
 	};
 
 private:
@@ -45749,10 +45755,10 @@ public:
 
 	/** Calculates the absolute position of this point.
 
-		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+		You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
 		be needed to calculate the result.
 	*/
-	const Point<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+	const Point<float> resolve (const Expression::Scope* evaluationContext) const;
 
 	/** Changes the values of this point's coordinates to make it resolve to the specified position.
 
@@ -45760,7 +45766,7 @@ public:
 		or relative positions to whatever values are necessary to make the resultant position
 		match the position that is provided.
 	*/
-	void moveToAbsolute (const Point<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+	void moveToAbsolute (const Point<float>& newPos, const Expression::Scope* evaluationContext);
 
 	/** Returns a string which represents this point.
 		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
@@ -45768,11 +45774,6 @@ public:
 		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
 	*/
 	const String toString() const;
-
-	/** Renames a symbol if it is used by any of the coordinates.
-		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
-	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName);
 
 	/** Returns true if this point depends on any other coordinates for its position. */
 	bool isDynamic() const;
@@ -45946,14 +45947,11 @@ private:
 */
 class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
 													public ComponentListener,
-													public MarkerList::Listener,
-													public Expression::EvaluationContext
+													public MarkerList::Listener
 {
 public:
 	RelativeCoordinatePositionerBase (Component& component_);
 	~RelativeCoordinatePositionerBase();
-
-	const Expression getSymbolValue (const String& objectName, const String& member) const;
 
 	void componentMovedOrResized (Component&, bool, bool);
 	void componentParentHierarchyChanged (Component&);
@@ -45966,25 +45964,40 @@ public:
 	bool addCoordinate (const RelativeCoordinate& coord);
 	bool addPoint (const RelativePoint& point);
 
+	/** Used for resolving a RelativeCoordinate expression in the context of a component. */
+	class ComponentScope  : public Expression::Scope
+	{
+	public:
+		ComponentScope (Component& component_);
+
+		const Expression getSymbolValue (const String& symbol) const;
+		void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
+		const String getScopeUID() const;
+
+	protected:
+		Component& component;
+
+		Component* findSiblingComponent (const String& componentID) const;
+		const MarkerList::Marker* findMarker (const String& name, MarkerList*& list) const;
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE (ComponentScope);
+	};
+
 protected:
 	virtual bool registerCoordinates() = 0;
 	virtual void applyToComponentBounds() = 0;
 
 private:
+	class DependencyFinderScope;
+	friend class DependencyFinderScope;
 	Array <Component*> sourceComponents;
 	Array <MarkerList*> sourceMarkerLists;
 	bool registeredOk;
 
-	bool registerListeners (const Expression& e);
-	bool registerComponent (const String& componentID);
-	bool registerMarker (const String markerName);
-	void registerComponentListener (Component* const comp);
+	void registerComponentListener (Component& comp);
 	void registerMarkerListListener (MarkerList* const list);
 	void unregisterListeners();
-	Component* findComponent (const String& componentID) const;
-	Component* getSourceComponent (const String& objectName) const;
-	const Expression xToExpression (const Component* const source, const int x) const;
-	const Expression yToExpression (const Component* const source, const int y) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase);
 };
@@ -46395,7 +46408,11 @@ protected:
 		{}
 
 		bool registerCoordinates()	  { return owner.registerCoordinates (*this); }
-		void applyToComponentBounds()   { owner.recalculateCoordinates (this); }
+		void applyToComponentBounds()
+		{
+			ComponentScope scope (getComponent());
+			owner.recalculateCoordinates (&scope);
+		}
 
 	private:
 		DrawableType& owner;
@@ -57857,11 +57874,11 @@ public:
 	RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
 	~RelativeParallelogram();
 
-	void resolveThreePoints (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
-	void resolveFourCorners (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
-	const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
-	void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-	const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
+	void resolveThreePoints (Point<float>* points, Expression::Scope* scope) const;
+	void resolveFourCorners (Point<float>* points, Expression::Scope* scope) const;
+	const Rectangle<float> getBounds (Expression::Scope* scope) const;
+	void getPath (Path& path, Expression::Scope* scope) const;
+	const AffineTransform resetToPerpendicular (Expression::Scope* scope);
 	bool isDynamic() const;
 
 	bool operator== (const RelativeParallelogram& other) const throw();
@@ -57911,7 +57928,7 @@ public:
 	bool operator!= (const RelativePointPath& other) const throw();
 
 	/** Resolves this points in this path and adds them to a normal Path object. */
-	void createPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+	void createPath (Path& path, Expression::Scope* scope) const;
 
 	/** Returns true if the path contains any non-fixed points. */
 	bool containsAnyDynamicPoints() const;
@@ -57940,7 +57957,7 @@ public:
 		ElementBase (ElementType type);
 		virtual ~ElementBase() {}
 		virtual const ValueTree createTree() const = 0;
-		virtual void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const = 0;
+		virtual void addToPath (Path& path, Expression::Scope*) const = 0;
 		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 		virtual ElementBase* clone() const = 0;
 		bool isDynamic();
@@ -57956,7 +57973,7 @@ public:
 	public:
 		StartSubPath (const RelativePoint& pos);
 		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
 
@@ -57971,7 +57988,7 @@ public:
 	public:
 		CloseSubPath();
 		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
 
@@ -57984,7 +58001,7 @@ public:
 	public:
 		LineTo (const RelativePoint& endPoint);
 		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
 
@@ -57999,7 +58016,7 @@ public:
 	public:
 		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
 		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
 
@@ -58014,7 +58031,7 @@ public:
 	public:
 		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
 		const ValueTree createTree() const;
-		void addToPath (Path& path, Expression::EvaluationContext* coordFinder) const;
+		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
 
@@ -58087,10 +58104,10 @@ public:
 
 	/** Calculates the absolute position of this rectangle.
 
-		You'll need to provide a suitable Expression::EvaluationContext for looking up any coordinates that may
+		You'll need to provide a suitable Expression::Scope for looking up any coordinates that may
 		be needed to calculate the result.
 	*/
-	const Rectangle<float> resolve (const Expression::EvaluationContext* evaluationContext) const;
+	const Rectangle<float> resolve (const Expression::Scope* scope) const;
 
 	/** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
 
@@ -58098,7 +58115,7 @@ public:
 		or relative positions to whatever values are necessary to make the resultant position
 		match the position that is provided.
 	*/
-	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::EvaluationContext* evaluationContext);
+	void moveToAbsolute (const Rectangle<float>& newPos, const Expression::Scope* scope);
 
 	/** Returns true if this rectangle depends on any external symbols for its position.
 		Coordinates that refer to symbols based on "this" are assumed not to be dynamic.
@@ -58113,9 +58130,9 @@ public:
 	const String toString() const;
 
 	/** Renames a symbol if it is used by any of the coordinates.
-		This calls RelativeCoordinate::renameSymbolIfUsed() on the rectangle's coordinates.
+		This calls Expression::withRenamedSymbol() on the rectangle's coordinates.
 	*/
-	void renameSymbolIfUsed (const String& oldName, const String& newName);
+	void renameSymbol (const Expression::Symbol& oldSymbol, const String& newName, const Expression::Scope& scope);
 
 	/** Creates and sets an appropriate Component::Positioner object for the given component, which will
 		keep it positioned with this rectangle.
@@ -61907,7 +61924,7 @@ private:
 
 	friend class Drawable::Positioner<DrawableComposite>;
 	bool registerCoordinates (RelativeCoordinatePositionerBase&);
-	void recalculateCoordinates (Expression::EvaluationContext*);
+	void recalculateCoordinates (Expression::Scope*);
 
 	void updateBoundsToFitChildren();
 
@@ -62024,7 +62041,7 @@ private:
 
 	friend class Drawable::Positioner<DrawableImage>;
 	bool registerCoordinates (RelativeCoordinatePositionerBase&);
-	void recalculateCoordinates (Expression::EvaluationContext*);
+	void recalculateCoordinates (Expression::Scope*);
 
 	DrawableImage& operator= (const DrawableImage&);
 	JUCE_LEAK_DETECTOR (DrawableImage);
@@ -62077,7 +62094,7 @@ public:
 		bool operator!= (const RelativeFillType&) const;
 
 		bool isDynamic() const;
-		bool recalculateCoords (Expression::EvaluationContext* context);
+		bool recalculateCoords (Expression::Scope* scope);
 
 		void writeTo (ValueTree& v, ComponentBuilder::ImageProvider*, UndoManager*) const;
 		bool readFrom (const ValueTree& v, ComponentBuilder::ImageProvider*);
@@ -62260,7 +62277,7 @@ public:
 			const RelativePoint getStartPoint() const;
 			const RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager*);
-			float getLength (Expression::EvaluationContext*) const;
+			float getLength (Expression::Scope*) const;
 
 			ValueTreeWrapper getParent() const;
 			Element getPreviousElement() const;
@@ -62269,11 +62286,11 @@ public:
 			void setModeOfEndPoint (const String& newMode, UndoManager*);
 
 			void convertToLine (UndoManager*);
-			void convertToCubic (Expression::EvaluationContext*, UndoManager*);
+			void convertToCubic (Expression::Scope*, UndoManager*);
 			void convertToPathBreak (UndoManager* undoManager);
-			ValueTree insertPoint (const Point<float>& targetPoint, Expression::EvaluationContext*, UndoManager*);
+			ValueTree insertPoint (const Point<float>& targetPoint, Expression::Scope*, UndoManager*);
 			void removePoint (UndoManager* undoManager);
-			float findProportionAlongLine (const Point<float>& targetPoint, Expression::EvaluationContext*) const;
+			float findProportionAlongLine (const Point<float>& targetPoint, Expression::Scope*) const;
 
 			static const Identifier mode, startSubPathElement, closeSubPathElement,
 									lineToElement, quadraticToElement, cubicToElement;
@@ -62298,7 +62315,7 @@ private:
 
 	class RelativePositioner;
 	friend class RelativePositioner;
-	void applyRelativePath (const RelativePointPath&, Expression::EvaluationContext*);
+	void applyRelativePath (const RelativePointPath&, Expression::Scope*);
 
 	DrawablePath& operator= (const DrawablePath&);
 	JUCE_LEAK_DETECTOR (DrawablePath);
@@ -62377,7 +62394,7 @@ private:
 
 	void rebuildPath();
 	bool registerCoordinates (RelativeCoordinatePositionerBase&);
-	void recalculateCoordinates (Expression::EvaluationContext*);
+	void recalculateCoordinates (Expression::Scope*);
 
 	DrawableRectangle& operator= (const DrawableRectangle&);
 	JUCE_LEAK_DETECTOR (DrawableRectangle);
@@ -62503,7 +62520,7 @@ private:
 
 	friend class Drawable::Positioner<DrawableText>;
 	bool registerCoordinates (RelativeCoordinatePositionerBase&);
-	void recalculateCoordinates (Expression::EvaluationContext*);
+	void recalculateCoordinates (Expression::Scope*);
 	void refreshBounds();
 	const AffineTransform getArrangementAndTransform (GlyphArrangement& glyphs) const;
 

@@ -42,10 +42,6 @@ AudioProcessorGraph::Node::Node (const uint32 id_, AudioProcessor* const process
     jassert (processor_ != 0);
 }
 
-AudioProcessorGraph::Node::~Node()
-{
-}
-
 void AudioProcessorGraph::Node::prepare (const double sampleRate, const int blockSize,
                                          AudioProcessorGraph* const graph)
 {

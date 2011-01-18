@@ -65,7 +65,7 @@ public:
         bool operator!= (const RelativeFillType&) const;
 
         bool isDynamic() const;
-        bool recalculateCoords (Expression::EvaluationContext* context);
+        bool recalculateCoords (Expression::Scope* scope);
 
         void writeTo (ValueTree& v, ComponentBuilder::ImageProvider*, UndoManager*) const;
         bool readFrom (const ValueTree& v, ComponentBuilder::ImageProvider*);

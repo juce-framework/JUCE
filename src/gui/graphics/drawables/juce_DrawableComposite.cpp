@@ -153,12 +153,12 @@ bool DrawableComposite::registerCoordinates (RelativeCoordinatePositionerBase& p
     return positioner.addPoint (bounds.bottomLeft) && ok;
 }
 
-void DrawableComposite::recalculateCoordinates (Expression::EvaluationContext* context)
+void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
 {
     Point<float> resolved[3];
-    bounds.resolveThreePoints (resolved, context);
+    bounds.resolveThreePoints (resolved, scope);
 
-    const Rectangle<float> content (getContentArea().resolve (context));
+    const Rectangle<float> content (getContentArea().resolve (scope));
 
     AffineTransform t (AffineTransform::fromTargetPoints (content.getX(), content.getY(), resolved[0].getX(), resolved[0].getY(),
                                                           content.getRight(), content.getY(), resolved[1].getX(), resolved[1].getY(),

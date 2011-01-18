@@ -53,30 +53,30 @@ RelativeParallelogram::~RelativeParallelogram()
 {
 }
 
-void RelativeParallelogram::resolveThreePoints (Point<float>* points, Expression::EvaluationContext* const coordFinder) const
+void RelativeParallelogram::resolveThreePoints (Point<float>* points, Expression::Scope* const scope) const
 {
-    points[0] = topLeft.resolve (coordFinder);
-    points[1] = topRight.resolve (coordFinder);
-    points[2] = bottomLeft.resolve (coordFinder);
+    points[0] = topLeft.resolve (scope);
+    points[1] = topRight.resolve (scope);
+    points[2] = bottomLeft.resolve (scope);
 }
 
-void RelativeParallelogram::resolveFourCorners (Point<float>* points, Expression::EvaluationContext* const coordFinder) const
+void RelativeParallelogram::resolveFourCorners (Point<float>* points, Expression::Scope* const scope) const
 {
-    resolveThreePoints (points, coordFinder);
+    resolveThreePoints (points, scope);
     points[3] = points[1] + (points[2] - points[0]);
 }
 
-const Rectangle<float> RelativeParallelogram::getBounds (Expression::EvaluationContext* const coordFinder) const
+const Rectangle<float> RelativeParallelogram::getBounds (Expression::Scope* const scope) const
 {
     Point<float> points[4];
-    resolveFourCorners (points, coordFinder);
+    resolveFourCorners (points, scope);
     return Rectangle<float>::findAreaContainingPoints (points, 4);
 }
 
-void RelativeParallelogram::getPath (Path& path, Expression::EvaluationContext* const coordFinder) const
+void RelativeParallelogram::getPath (Path& path, Expression::Scope* const scope) const
 {
     Point<float> points[4];
-    resolveFourCorners (points, coordFinder);
+    resolveFourCorners (points, scope);
 
     path.startNewSubPath (points[0]);
     path.lineTo (points[1]);
@@ -85,18 +85,18 @@ void RelativeParallelogram::getPath (Path& path, Expression::EvaluationContext* 
     path.closeSubPath();
 }
 
-const AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::EvaluationContext* const coordFinder)
+const AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::Scope* const scope)
 {
     Point<float> corners[3];
-    resolveThreePoints (corners, coordFinder);
+    resolveThreePoints (corners, scope);
 
     const Line<float> top (corners[0], corners[1]);
     const Line<float> left (corners[0], corners[2]);
     const Point<float> newTopRight (corners[0] + Point<float> (top.getLength(), 0.0f));
     const Point<float> newBottomLeft (corners[0] + Point<float> (0.0f, left.getLength()));
 
-    topRight.moveToAbsolute (newTopRight, coordFinder);
-    bottomLeft.moveToAbsolute (newBottomLeft, coordFinder);
+    topRight.moveToAbsolute (newTopRight, scope);
+    bottomLeft.moveToAbsolute (newBottomLeft, scope);
 
     return AffineTransform::fromTargetPoints (corners[0].getX(), corners[0].getY(), corners[0].getX(), corners[0].getY(),
                                               corners[1].getX(), corners[1].getY(), newTopRight.getX(), newTopRight.getY(),

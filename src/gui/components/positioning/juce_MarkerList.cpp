@@ -28,7 +28,9 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MarkerList.h"
+#include "juce_RelativeCoordinatePositioner.h"
 #include "../juce_Component.h"
+
 
 //==============================================================================
 MarkerList::MarkerList()
@@ -246,44 +248,17 @@ void MarkerList::ValueTreeWrapper::removeMarker (const ValueTree& marker, UndoMa
     state.removeChild (marker, undoManager);
 }
 
-//==============================================================================
-class MarkerListEvaluator   : public Expression::EvaluationContext
+double MarkerList::getMarkerPosition (const Marker& marker, Component* parentComponent) const
 {
-public:
-    MarkerListEvaluator (const MarkerList& markerList_, Component* const parentComponent_)
-        : markerList (markerList_), parentComponent (parentComponent_)
+    if (parentComponent != 0)
     {
+        RelativeCoordinatePositionerBase::ComponentScope scope (*parentComponent);
+        return marker.position.resolve (&scope);
     }
-
-    const Expression getSymbolValue (const String& objectName, const String& member) const
+    else
     {
-        if (member.isEmpty())
-        {
-            const MarkerList::Marker* const marker = markerList.getMarker (objectName);
-
-            if (marker != 0)
-                return Expression (marker->position.resolve (this));
-        }
-        else if (parentComponent != 0 && objectName == RelativeCoordinate::Strings::parent)
-        {
-            if (member == RelativeCoordinate::Strings::right)  return Expression ((double) parentComponent->getWidth());
-            if (member == RelativeCoordinate::Strings::bottom) return Expression ((double) parentComponent->getHeight());
-        }
-
-        return Expression::EvaluationContext::getSymbolValue (objectName, member);
+        return marker.position.resolve (0);
     }
-
-private:
-    const MarkerList& markerList;
-    Component* parentComponent;
-
-    JUCE_DECLARE_NON_COPYABLE (MarkerListEvaluator);
-};
-
-double MarkerList::getMarkerPosition (const Marker& marker, Component* const parentComponent) const
-{
-    MarkerListEvaluator context (*this, parentComponent);
-    return marker.position.resolve (&context);
 }
 
 //==============================================================================

@@ -888,8 +888,13 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
             Graphics g (snapshot);
             g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);
+
             if (g.reduceClipRegion (rowComp->getLocalBounds()))
+            {
+                g.beginTransparencyLayer (0.6f);
                 rowComp->paintEntireComponent (g, false);
+                g.endTransparencyLayer();
+            }
         }
     }
 
@@ -905,7 +910,6 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescripti
     {
         int x, y;
         Image dragImage (createSnapshotOfSelectedRows (x, y));
-        dragImage.multiplyAllAlphas (0.6f);
 
         MouseEvent e2 (e.getEventRelativeTo (this));
         const Point<int> p (x - e2.x, y - e2.y);

@@ -46,11 +46,11 @@ public:
     ~RelativeParallelogram();
 
     //==============================================================================
-    void resolveThreePoints (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
-    void resolveFourCorners (Point<float>* points, Expression::EvaluationContext* coordFinder) const;
-    const Rectangle<float> getBounds (Expression::EvaluationContext* coordFinder) const;
-    void getPath (Path& path, Expression::EvaluationContext* coordFinder) const;
-    const AffineTransform resetToPerpendicular (Expression::EvaluationContext* coordFinder);
+    void resolveThreePoints (Point<float>* points, Expression::Scope* scope) const;
+    void resolveFourCorners (Point<float>* points, Expression::Scope* scope) const;
+    const Rectangle<float> getBounds (Expression::Scope* scope) const;
+    void getPath (Path& path, Expression::Scope* scope) const;
+    const AffineTransform resetToPerpendicular (Expression::Scope* scope);
     bool isDynamic() const;
 
     bool operator== (const RelativeParallelogram& other) const throw();

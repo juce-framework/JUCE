@@ -37,14 +37,11 @@
 */
 class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner,
                                                     public ComponentListener,
-                                                    public MarkerList::Listener,
-                                                    public Expression::EvaluationContext
+                                                    public MarkerList::Listener
 {
 public:
     RelativeCoordinatePositionerBase (Component& component_);
     ~RelativeCoordinatePositionerBase();
-
-    const Expression getSymbolValue (const String& objectName, const String& member) const;
 
     void componentMovedOrResized (Component&, bool, bool);
     void componentParentHierarchyChanged (Component&);
@@ -57,25 +54,41 @@ public:
     bool addCoordinate (const RelativeCoordinate& coord);
     bool addPoint (const RelativePoint& point);
 
+    //==============================================================================
+    /** Used for resolving a RelativeCoordinate expression in the context of a component. */
+    class ComponentScope  : public Expression::Scope
+    {
+    public:
+        ComponentScope (Component& component_);
+
+        const Expression getSymbolValue (const String& symbol) const;
+        void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
+        const String getScopeUID() const;
+
+    protected:
+        Component& component;
+
+        Component* findSiblingComponent (const String& componentID) const;
+        const MarkerList::Marker* findMarker (const String& name, MarkerList*& list) const;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE (ComponentScope);
+    };
+
 protected:
     virtual bool registerCoordinates() = 0;
     virtual void applyToComponentBounds() = 0;
 
 private:
+    class DependencyFinderScope;
+    friend class DependencyFinderScope;
     Array <Component*> sourceComponents;
     Array <MarkerList*> sourceMarkerLists;
     bool registeredOk;
 
-    bool registerListeners (const Expression& e);
-    bool registerComponent (const String& componentID);
-    bool registerMarker (const String markerName);
-    void registerComponentListener (Component* const comp);
+    void registerComponentListener (Component& comp);
     void registerMarkerListListener (MarkerList* const list);
     void unregisterListeners();
-    Component* findComponent (const String& componentID) const;
-    Component* getSourceComponent (const String& objectName) const;
-    const Expression xToExpression (const Component* const source, const int x) const;
-    const Expression yToExpression (const Component* const source, const int y) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase);
 };

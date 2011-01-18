@@ -71,8 +71,9 @@ public:
 
     void applyToComponentBounds()
     {
-        if (isMainFill ? owner.mainFill.recalculateCoords (this)
-                       : owner.strokeFill.recalculateCoords (this))
+        ComponentScope scope (owner);
+        if (isMainFill ? owner.mainFill.recalculateCoords (&scope)
+                       : owner.strokeFill.recalculateCoords (&scope))
             owner.repaint();
     }
 
@@ -256,19 +257,19 @@ bool DrawableShape::RelativeFillType::operator!= (const RelativeFillType& other)
     return ! operator== (other);
 }
 
-bool DrawableShape::RelativeFillType::recalculateCoords (Expression::EvaluationContext* context)
+bool DrawableShape::RelativeFillType::recalculateCoords (Expression::Scope* scope)
 {
     if (fill.isGradient())
     {
-        const Point<float> g1 (gradientPoint1.resolve (context));
-        const Point<float> g2 (gradientPoint2.resolve (context));
+        const Point<float> g1 (gradientPoint1.resolve (scope));
+        const Point<float> g2 (gradientPoint2.resolve (scope));
         AffineTransform t;
 
         ColourGradient& g = *fill.gradient;
 
         if (g.isRadial)
         {
-            const Point<float> g3 (gradientPoint3.resolve (context));
+            const Point<float> g3 (gradientPoint3.resolve (scope));
             const Point<float> g3Source (g1.getX() + g2.getY() - g1.getY(),
                                          g1.getY() + g1.getX() - g2.getX());
 

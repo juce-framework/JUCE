@@ -370,10 +370,6 @@ public:
         }
     }
 
-    ~WavAudioFormatReader()
-    {
-    }
-
     //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
@@ -532,7 +528,8 @@ private:
         const int bytesPerFrame = numChannels * bitsPerSample / 8;
         output->writeInt (chunkName ("RIFF"));
         output->writeInt ((int) (lengthInSamples * bytesPerFrame
-                                   + ((bwavChunk.getSize() > 0) ? (44 + bwavChunk.getSize()) : 36)));
+                                   + ((bwavChunk.getSize() > 0) ? (44 + bwavChunk.getSize()) : 36)
+                                   + (smplChunk.getSize() > 0 ? smplChunk.getSize() + 8 : 0)));
 
         output->writeInt (chunkName ("WAVE"));
         output->writeInt (chunkName ("fmt "));
