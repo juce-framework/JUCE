@@ -201,7 +201,7 @@ public:
         isRunning = false;
         timeSliceThread.removeTimeSliceClient (this);
 
-        while (useTimeSlice())
+        while (useTimeSlice() == 0)
         {}
     }
 
@@ -229,7 +229,7 @@ public:
         return true;
     }
 
-    bool useTimeSlice()
+    int useTimeSlice()
     {
         const int numToDo = getTotalSize() / 4;
 
@@ -237,7 +237,7 @@ public:
         prepareToRead (numToDo, start1, size1, start2, size2);
 
         if (size1 <= 0)
-            return false;
+            return 10;
 
         writer->writeFromAudioSampleBuffer (buffer, start1, size1);
 
@@ -258,7 +258,7 @@ public:
         }
 
         finishedRead (size1 + size2);
-        return true;
+        return 0;
     }
 
     void setThumbnail (AudioThumbnail* thumb)

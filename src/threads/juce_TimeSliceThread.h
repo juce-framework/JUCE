@@ -28,7 +28,8 @@
 
 #include "juce_Thread.h"
 #include "../containers/juce_Array.h"
-
+#include "../core/juce_Time.h"
+class TimeSliceThread;
 
 //==============================================================================
 /**
@@ -56,13 +57,19 @@ public:
         The implementation of this method should use its time-slice to do something that's
         quick - never block for longer than absolutely necessary.
 
-        @returns    Your method should return true if it needs more time, or false if it's
-                    not too busy and doesn't need calling back urgently. If all the thread's
-                    clients indicate that they're not busy, then it'll save CPU by sleeping for
-                    up to half a second in between callbacks. You can force the TimeSliceThread
-                    to wake up and poll again immediately by calling its notify() method.
+        @returns    Your method should return the number of milliseconds which it would like to wait before being called
+                    again. Returning 0 will make the thread call again as soon as possible (after possibly servicing
+                    other busy clients). If you return a value below zero, your client will be removed from the list of clients,
+                    and won't be called again. The value you specify isn't a guaranteee, and is only used as a hint by the
+                    thread - the actual time before the next callback may be more or less than specified.
+                    You can force the TimeSliceThread to wake up and poll again immediately by calling its notify() method.
     */
-    virtual bool useTimeSlice() = 0;
+    virtual int useTimeSlice() = 0;
+
+
+private:
+    friend class TimeSliceThread;
+    Time nextCallTime;
 };
 
 
@@ -97,10 +104,10 @@ public:
     //==============================================================================
     /** Adds a client to the list.
 
-        The client's callbacks will start immediately (possibly before the method
-        has returned).
+        The client's callbacks will start after the number of milliseconds specified
+        by millisecondsBeforeStarting (and this may happen before this method has returned).
     */
-    void addTimeSliceClient (TimeSliceClient* client);
+    void addTimeSliceClient (TimeSliceClient* client, int millisecondsBeforeStarting = 0);
 
     /** Removes a client from the list.
 
@@ -123,9 +130,9 @@ public:
 private:
     CriticalSection callbackLock, listLock;
     Array <TimeSliceClient*> clients;
-    int index;
     TimeSliceClient* clientBeingCalled;
-    bool clientsChanged;
+
+    TimeSliceClient* getNextClient (int index) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSliceThread);
 };

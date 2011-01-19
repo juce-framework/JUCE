@@ -82,8 +82,7 @@ struct AudioThumbnail::MinMaxValue
 };
 
 //==============================================================================
-class AudioThumbnail::LevelDataSource   : public TimeSliceClient,
-                                          public Timer
+class AudioThumbnail::LevelDataSource   : public TimeSliceClient
 {
 public:
     LevelDataSource (AudioThumbnail& owner_, AudioFormatReader* newReader, int64 hash)
@@ -103,7 +102,7 @@ public:
         owner.cache.removeTimeSliceClient (this);
     }
 
-    enum { timeBeforeDeletingReader = 2000 };
+    enum { timeBeforeDeletingReader = 1000 };
 
     void initialise (int64 numSamplesFinished_)
     {
@@ -119,9 +118,9 @@ public:
             numChannels = reader->numChannels;
             sampleRate = reader->sampleRate;
 
-            if (lengthInSamples <= 0)
+            if (lengthInSamples <= 0 || isFullyLoaded())
                 reader = 0;
-            else if (! isFullyLoaded())
+            else
                 owner.cache.addTimeSliceClient (this);
         }
     }
@@ -129,7 +128,14 @@ public:
     void getLevels (int64 startSample, int numSamples, Array<float>& levels)
     {
         const ScopedLock sl (readerLock);
-        createReader();
+
+        if (reader == 0)
+        {
+            createReader();
+
+            if (reader != 0)
+                owner.cache.addTimeSliceClient (this);
+        }
 
         if (reader != 0)
         {
@@ -147,18 +153,15 @@ public:
         reader = 0;
     }
 
-    bool useTimeSlice()
+    int useTimeSlice()
     {
         if (isFullyLoaded())
         {
             if (reader != 0 && source != 0)
-                startTimer (timeBeforeDeletingReader);
+                releaseResources();
 
-            owner.cache.removeTimeSliceClient (this);
-            return false;
+            return -1;
         }
-
-        stopTimer();
 
         bool justFinished = false;
 
@@ -170,7 +173,7 @@ public:
             if (reader != 0)
             {
                 if (! readNextBlock())
-                    return true;
+                    return 0;
 
                 justFinished = true;
             }
@@ -179,13 +182,7 @@ public:
         if (justFinished)
             owner.cache.storeThumb (owner, hashCode);
 
-        return false;
-    }
-
-    void timerCallback()
-    {
-        stopTimer();
-        releaseResources();
+        return timeBeforeDeletingReader;
     }
 
     bool isFullyLoaded() const throw()

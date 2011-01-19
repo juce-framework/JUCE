@@ -166,7 +166,7 @@
     #endif
   #endif
 
-  #if ! JUCE_VC7_OR_EARLIER
+  #if ! JUCE_VC7_OR_EARLIER && ! defined (__INTEL_COMPILER)
     #define JUCE_USE_INTRINSICS 1
   #endif
 #else

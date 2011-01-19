@@ -173,11 +173,10 @@ public:
         owner.sendSelectionChangeMessage();
     }
 
-    bool useTimeSlice()
+    int useTimeSlice()
     {
         updateIcon (false);
-        thread.removeTimeSliceClient (this);
-        return false;
+        return -1;
     }
 
     void handleAsyncUpdate()

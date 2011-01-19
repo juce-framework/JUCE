@@ -165,10 +165,10 @@ public:
         }
     }
 
-    bool useTimeSlice()
+    int useTimeSlice()
     {
         updateIcon (false);
-        return false;
+        return -1;
     }
 
     void handleAsyncUpdate()

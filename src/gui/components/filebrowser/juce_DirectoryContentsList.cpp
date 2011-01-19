@@ -165,7 +165,7 @@ void DirectoryContentsList::changed()
 }
 
 //==============================================================================
-bool DirectoryContentsList::useTimeSlice()
+int DirectoryContentsList::useTimeSlice()
 {
     const uint32 startTime = Time::getApproximateMillisecondCounter();
     bool hasChanged = false;
@@ -177,7 +177,7 @@ bool DirectoryContentsList::useTimeSlice()
             if (hasChanged)
                 changed();
 
-            return false;
+            return 500;
         }
 
         if (shouldStop || (Time::getApproximateMillisecondCounter() > startTime + 150))
@@ -187,7 +187,7 @@ bool DirectoryContentsList::useTimeSlice()
     if (hasChanged)
         changed();
 
-    return true;
+    return 0;
 }
 
 bool DirectoryContentsList::checkNextFile (bool& hasChanged)

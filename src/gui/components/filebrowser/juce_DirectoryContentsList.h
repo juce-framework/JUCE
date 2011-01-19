@@ -185,7 +185,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool useTimeSlice();
+    int useTimeSlice();
     /** @internal */
     TimeSliceThread& getTimeSliceThread()                   { return thread; }
     /** @internal */

@@ -34,9 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 TimeSliceThread::TimeSliceThread (const String& threadName)
     : Thread (threadName),
-      index (0),
-      clientBeingCalled (0),
-      clientsChanged (false)
+      clientBeingCalled (0)
 {
 }
 
@@ -46,18 +44,20 @@ TimeSliceThread::~TimeSliceThread()
 }
 
 //==============================================================================
-void TimeSliceThread::addTimeSliceClient (TimeSliceClient* const client)
+void TimeSliceThread::addTimeSliceClient (TimeSliceClient* const client, int millisecondsBeforeStarting)
 {
-    const ScopedLock sl (listLock);
-    clients.addIfNotAlreadyThere (client);
-    clientsChanged = true;
-    notify();
+    if (client != 0)
+    {
+        const ScopedLock sl (listLock);
+        client->nextCallTime = Time::getCurrentTime() + RelativeTime::milliseconds (millisecondsBeforeStarting);
+        clients.addIfNotAlreadyThere (client);
+        notify();
+    }
 }
 
 void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
 {
     const ScopedLock sl1 (listLock);
-    clientsChanged = true;
 
     // if there's a chance we're in the middle of calling this client, we need to
     // also lock the outer lock..
@@ -88,52 +88,76 @@ TimeSliceClient* TimeSliceThread::getClient (const int i) const
 }
 
 //==============================================================================
+TimeSliceClient* TimeSliceThread::getNextClient (int index) const
+{
+    Time soonest;
+    TimeSliceClient* client = 0;
+
+    for (int i = clients.size(); --i >= 0;)
+    {
+        TimeSliceClient* const c = clients.getUnchecked ((i + index) % clients.size());
+
+        if (client == 0 || c->nextCallTime < soonest)
+        {
+            client = c;
+            soonest = c->nextCallTime;
+        }
+    }
+
+    return client;
+}
+
 void TimeSliceThread::run()
 {
-    int numCallsSinceBusy = 0;
+    int index = 0;
 
     while (! threadShouldExit())
     {
         int timeToWait = 500;
 
         {
-            const ScopedLock sl (callbackLock);
+            Time nextClientTime;
 
             {
                 const ScopedLock sl2 (listLock);
 
-                if (clients.size() > 0)
-                {
-                    index = (index + 1) % clients.size();
+                index = clients.size() > 0 ? ((index + 1) % clients.size()) : 0;
 
-                    clientBeingCalled = clients [index];
-                }
-                else
-                {
-                    index = 0;
-                    clientBeingCalled = 0;
-                }
-
-                if (clientsChanged)
-                {
-                    clientsChanged = false;
-                    numCallsSinceBusy = 0;
-                }
+                TimeSliceClient* const firstClient = getNextClient (index);
+                if (firstClient != 0)
+                    nextClientTime = firstClient->nextCallTime;
             }
 
-            if (clientBeingCalled != 0)
-            {
-                if (clientBeingCalled->useTimeSlice())
-                    numCallsSinceBusy = 0;
-                else
-                    ++numCallsSinceBusy;
+            const Time now (Time::getCurrentTime());
 
-                if (numCallsSinceBusy >= clients.size())
-                    timeToWait = 500;
-                else if (index == 0)
-                    timeToWait = 1;   // throw in an occasional pause, to stop everything locking up
-                else
-                    timeToWait = 0;
+            if (nextClientTime > now)
+            {
+                timeToWait = (int) jmin ((int64) 500, (nextClientTime - now).inMilliseconds());
+            }
+            else
+            {
+                timeToWait = index == 0 ? 1 : 0;
+
+                const ScopedLock sl (callbackLock);
+
+                {
+                    const ScopedLock sl2 (listLock);
+                    clientBeingCalled = getNextClient (index);
+                }
+
+                if (clientBeingCalled != 0)
+                {
+                    const int msUntilNextCall = clientBeingCalled->useTimeSlice();
+
+                    const ScopedLock sl2 (listLock);
+
+                    if (msUntilNextCall >= 0)
+                        clientBeingCalled->nextCallTime += RelativeTime::milliseconds (msUntilNextCall);
+                    else
+                        clients.removeValue (clientBeingCalled);
+
+                    clientBeingCalled = 0;
+                }
             }
         }
 
