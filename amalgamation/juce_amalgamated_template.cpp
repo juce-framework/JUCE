@@ -398,14 +398,14 @@
  END_JUCE_NAMESPACE
 
  #if JUCE_WINDOWS
-  #include "../src/native/juce_win32_NativeCode.cpp"
+  #include "../src/native/windows/juce_win32_NativeCode.cpp"
  #endif
 
  #if JUCE_LINUX
-  #include "../src/native/juce_linux_NativeCode.cpp"
+  #include "../src/native/linux/juce_linux_NativeCode.cpp"
  #endif
 
  #if JUCE_MAC || JUCE_IPHONE
-  #include "../src/native/juce_mac_NativeCode.mm"
+  #include "../src/native/mac/juce_mac_NativeCode.mm"
  #endif
 #endif

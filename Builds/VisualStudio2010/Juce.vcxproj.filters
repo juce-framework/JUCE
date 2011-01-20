@@ -970,15 +970,6 @@
     <ClCompile Include="..\..\src\memory\juce_MemoryBlock.cpp">
       <Filter>Juce\Source\memory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\juce_linux_NativeCode.cpp">
-      <Filter>Juce\Source\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\native\juce_mac_NativeCode.mm">
-      <Filter>Juce\Source\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\native\juce_win32_NativeCode.cpp">
-      <Filter>Juce\Source\native</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\native\common\juce_posix_NamedPipe.cpp">
       <Filter>Juce\Source\native\common</Filter>
     </ClCompile>
@@ -1009,6 +1000,9 @@
     <ClCompile Include="..\..\src\native\linux\juce_linux_Midi.cpp">
       <Filter>Juce\Source\native\linux</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\native\linux\juce_linux_NativeCode.cpp">
+      <Filter>Juce\Source\native\linux</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Network.cpp">
       <Filter>Juce\Source\native\linux</Filter>
     </ClCompile>
@@ -1024,16 +1018,16 @@
     <ClCompile Include="..\..\src\native\linux\juce_linux_Windowing.cpp">
       <Filter>Juce\Source\native\linux</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_iphone_Audio.cpp">
+    <ClCompile Include="..\..\src\native\mac\juce_ios_Audio.cpp">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_iphone_MessageManager.mm">
+    <ClCompile Include="..\..\src\native\mac\juce_ios_MessageManager.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_iphone_MiscUtilities.mm">
+    <ClCompile Include="..\..\src\native\mac\juce_ios_MiscUtilities.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_iphone_UIViewComponentPeer.mm">
+    <ClCompile Include="..\..\src\native\mac\juce_ios_UIViewComponentPeer.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_AppleRemote.mm">
@@ -1079,6 +1073,9 @@
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_MouseCursor.mm">
+      <Filter>Juce\Source\native\mac</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\mac\juce_mac_NativeCode.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_Network.mm">
@@ -1145,6 +1142,9 @@
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Misc.cpp">
+      <Filter>Juce\Source\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_NativeCode.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Network.cpp">

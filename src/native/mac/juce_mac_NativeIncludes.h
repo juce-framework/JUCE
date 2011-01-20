@@ -26,15 +26,6 @@
 #ifndef __JUCE_MAC_NATIVEINCLUDES_JUCEHEADER__
 #define __JUCE_MAC_NATIVEINCLUDES_JUCEHEADER__
 
-/*
-    This file wraps together all the mac-specific code, so that
-    we can include all the native headers just once, and compile all our
-    platform-specific stuff in one big lump, keeping it out of the way of
-    the rest of the codebase.
-*/
-
-#include "../../core/juce_StandardHeader.h"
-
 #define USE_COREGRAPHICS_RENDERING 1
 
 #if JUCE_IOS

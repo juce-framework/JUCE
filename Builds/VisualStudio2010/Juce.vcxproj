@@ -371,8 +371,6 @@
     <ClCompile Include="..\..\src\maths\juce_Expression.cpp"/>
     <ClCompile Include="..\..\src\maths\juce_Random.cpp"/>
     <ClCompile Include="..\..\src\memory\juce_MemoryBlock.cpp"/>
-    <ClCompile Include="..\..\src\native\juce_linux_NativeCode.cpp"/>
-    <ClCompile Include="..\..\src\native\juce_win32_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\common\juce_posix_NamedPipe.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Audio.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_AudioCDReader.cpp"/>
@@ -383,12 +381,13 @@
     <ClCompile Include="..\..\src\native\linux\juce_linux_JackAudio.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Messaging.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Midi.cpp"/>
+    <ClCompile Include="..\..\src\native\linux\juce_linux_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Network.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_SystemStats.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Threads.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_WebBrowserComponent.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Windowing.cpp"/>
-    <ClCompile Include="..\..\src\native\mac\juce_iphone_Audio.cpp"/>
+    <ClCompile Include="..\..\src\native\mac\juce_ios_Audio.cpp"/>
     <ClCompile Include="..\..\src\native\mac\juce_mac_CoreAudio.cpp"/>
     <ClCompile Include="..\..\src\native\mac\juce_mac_CoreMidi.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_ActiveXComponent.cpp"/>
@@ -404,6 +403,7 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_Messaging.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Midi.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Misc.cpp"/>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Network.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_PlatformUtils.cpp"/>

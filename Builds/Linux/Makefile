@@ -288,8 +288,6 @@ OBJECTS := \
   $(OBJDIR)/juce_Expression_6f910d50.o \
   $(OBJDIR)/juce_Random_a529cb7b.o \
   $(OBJDIR)/juce_MemoryBlock_52f17c52.o \
-  $(OBJDIR)/juce_linux_NativeCode_b464a4a9.o \
-  $(OBJDIR)/juce_win32_NativeCode_2eaaf382.o \
   $(OBJDIR)/juce_posix_NamedPipe_aa308c65.o \
   $(OBJDIR)/juce_linux_Audio_18d7e8b6.o \
   $(OBJDIR)/juce_linux_AudioCDReader_1263363a.o \
@@ -300,12 +298,13 @@ OBJECTS := \
   $(OBJDIR)/juce_linux_JackAudio_15353e17.o \
   $(OBJDIR)/juce_linux_Messaging_daefaf64.o \
   $(OBJDIR)/juce_linux_Midi_4bad86cb.o \
+  $(OBJDIR)/juce_linux_NativeCode_8a61cd0e.o \
   $(OBJDIR)/juce_linux_Network_f47a1c4e.o \
   $(OBJDIR)/juce_linux_SystemStats_9f6d6b50.o \
   $(OBJDIR)/juce_linux_Threads_dc4a4049.o \
   $(OBJDIR)/juce_linux_WebBrowserComponent_358c0a49.o \
   $(OBJDIR)/juce_linux_Windowing_abe04752.o \
-  $(OBJDIR)/juce_iphone_Audio_b1189916.o \
+  $(OBJDIR)/juce_ios_Audio_40e86914.o \
   $(OBJDIR)/juce_mac_CoreAudio_faf8c177.o \
   $(OBJDIR)/juce_mac_CoreMidi_e79e11ea.o \
   $(OBJDIR)/juce_win32_ActiveXComponent_7590131d.o \
@@ -321,6 +320,7 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_Messaging_926ab77c.o \
   $(OBJDIR)/juce_win32_Midi_fac3cfb3.o \
   $(OBJDIR)/juce_win32_Misc_1407f3fe.o \
+  $(OBJDIR)/juce_win32_NativeCode_c247c7f6.o \
   $(OBJDIR)/juce_win32_Network_6c84a66.o \
   $(OBJDIR)/juce_win32_OpenGLComponent_d0d99a46.o \
   $(OBJDIR)/juce_win32_PlatformUtils_73e7e1f6.o \
@@ -1610,16 +1610,6 @@ $(OBJDIR)/juce_MemoryBlock_52f17c52.o: ../../src/memory/juce_MemoryBlock.cpp
 	@echo "Compiling juce_MemoryBlock.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_NativeCode_b464a4a9.o: ../../src/native/juce_linux_NativeCode.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_linux_NativeCode.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_win32_NativeCode_2eaaf382.o: ../../src/native/juce_win32_NativeCode.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_win32_NativeCode.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_posix_NamedPipe_aa308c65.o: ../../src/native/common/juce_posix_NamedPipe.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_posix_NamedPipe.cpp"
@@ -1670,6 +1660,11 @@ $(OBJDIR)/juce_linux_Midi_4bad86cb.o: ../../src/native/linux/juce_linux_Midi.cpp
 	@echo "Compiling juce_linux_Midi.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_linux_NativeCode_8a61cd0e.o: ../../src/native/linux/juce_linux_NativeCode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_linux_NativeCode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_linux_Network_f47a1c4e.o: ../../src/native/linux/juce_linux_Network.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_linux_Network.cpp"
@@ -1695,9 +1690,9 @@ $(OBJDIR)/juce_linux_Windowing_abe04752.o: ../../src/native/linux/juce_linux_Win
 	@echo "Compiling juce_linux_Windowing.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_iphone_Audio_b1189916.o: ../../src/native/mac/juce_iphone_Audio.cpp
+$(OBJDIR)/juce_ios_Audio_40e86914.o: ../../src/native/mac/juce_ios_Audio.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_iphone_Audio.cpp"
+	@echo "Compiling juce_ios_Audio.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_mac_CoreAudio_faf8c177.o: ../../src/native/mac/juce_mac_CoreAudio.cpp
@@ -1773,6 +1768,11 @@ $(OBJDIR)/juce_win32_Midi_fac3cfb3.o: ../../src/native/windows/juce_win32_Midi.c
 $(OBJDIR)/juce_win32_Misc_1407f3fe.o: ../../src/native/windows/juce_win32_Misc.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_win32_Misc.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_win32_NativeCode_c247c7f6.o: ../../src/native/windows/juce_win32_NativeCode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_win32_NativeCode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Network_6c84a66.o: ../../src/native/windows/juce_win32_Network.cpp

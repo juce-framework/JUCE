@@ -1267,12 +1267,6 @@
               file="src/memory/juce_WeakReference.h"/>
       </GROUP>
       <GROUP id="fRwnaei56" name="native">
-        <FILE id="m3AUpRM7f" name="juce_linux_NativeCode.cpp" compile="1" resource="0"
-              file="src/native/juce_linux_NativeCode.cpp"/>
-        <FILE id="Z3odH2NPv" name="juce_mac_NativeCode.mm" compile="1" resource="0"
-              file="src/native/juce_mac_NativeCode.mm"/>
-        <FILE id="z5G75xgix" name="juce_win32_NativeCode.cpp" compile="1" resource="0"
-              file="src/native/juce_win32_NativeCode.cpp"/>
         <GROUP id="yPi7BU95s" name="common">
           <FILE id="2wc3bGX" name="juce_MidiDataConcatenator.h" compile="0" resource="0"
                 file="src/native/common/juce_MidiDataConcatenator.h"/>
@@ -1300,6 +1294,8 @@
                 file="src/native/linux/juce_linux_Messaging.cpp"/>
           <FILE id="fTDp1NJrf" name="juce_linux_Midi.cpp" compile="1" resource="0"
                 file="src/native/linux/juce_linux_Midi.cpp"/>
+          <FILE id="mLB6yP" name="juce_linux_NativeCode.cpp" compile="1" resource="0"
+                file="src/native/linux/juce_linux_NativeCode.cpp"/>
           <FILE id="wsFiYQ9ch" name="juce_linux_NativeIncludes.h" compile="0"
                 resource="0" file="src/native/linux/juce_linux_NativeIncludes.h"/>
           <FILE id="TSc8pcu6K" name="juce_linux_Network.cpp" compile="1" resource="0"
@@ -1314,14 +1310,14 @@
                 file="src/native/linux/juce_linux_Windowing.cpp"/>
         </GROUP>
         <GROUP id="RLR9J7l7a" name="mac">
-          <FILE id="yE8Iony6z" name="juce_iphone_Audio.cpp" compile="1" resource="0"
-                file="src/native/mac/juce_iphone_Audio.cpp"/>
-          <FILE id="XTxdCBen" name="juce_iphone_MessageManager.mm" compile="1"
-                resource="0" file="src/native/mac/juce_iphone_MessageManager.mm"/>
-          <FILE id="kGVgE6vYV" name="juce_iphone_MiscUtilities.mm" compile="1"
-                resource="0" file="src/native/mac/juce_iphone_MiscUtilities.mm"/>
-          <FILE id="SKGkPpvaz" name="juce_iphone_UIViewComponentPeer.mm" compile="1"
-                resource="0" file="src/native/mac/juce_iphone_UIViewComponentPeer.mm"/>
+          <FILE id="yE8Iony6z" name="juce_ios_Audio.cpp" compile="1" resource="0"
+                file="src/native/mac/juce_ios_Audio.cpp"/>
+          <FILE id="XTxdCBen" name="juce_ios_MessageManager.mm" compile="1" resource="0"
+                file="src/native/mac/juce_ios_MessageManager.mm"/>
+          <FILE id="kGVgE6vYV" name="juce_ios_MiscUtilities.mm" compile="1" resource="0"
+                file="src/native/mac/juce_ios_MiscUtilities.mm"/>
+          <FILE id="SKGkPpvaz" name="juce_ios_UIViewComponentPeer.mm" compile="1"
+                resource="0" file="src/native/mac/juce_ios_UIViewComponentPeer.mm"/>
           <FILE id="2cnGnB7g9" name="juce_mac_AppleRemote.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_AppleRemote.mm"/>
           <FILE id="8rKYGEkhh" name="juce_mac_AudioCDBurner.mm" compile="1" resource="0"
@@ -1354,6 +1350,8 @@
                 file="src/native/mac/juce_mac_MiscUtilities.mm"/>
           <FILE id="84ADkew8H" name="juce_mac_MouseCursor.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_MouseCursor.mm"/>
+          <FILE id="FCbPaX" name="juce_mac_NativeCode.mm" compile="1" resource="0"
+                file="src/native/mac/juce_mac_NativeCode.mm"/>
           <FILE id="cOZYRIj0S" name="juce_mac_NativeIncludes.h" compile="0" resource="0"
                 file="src/native/mac/juce_mac_NativeIncludes.h"/>
           <FILE id="6yXpAwe4r" name="juce_mac_Network.mm" compile="1" resource="0"
@@ -1408,6 +1406,8 @@
                 file="src/native/windows/juce_win32_Midi.cpp"/>
           <FILE id="9ucc62F3e" name="juce_win32_Misc.cpp" compile="1" resource="0"
                 file="src/native/windows/juce_win32_Misc.cpp"/>
+          <FILE id="kUKTKh" name="juce_win32_NativeCode.cpp" compile="1" resource="0"
+                file="src/native/windows/juce_win32_NativeCode.cpp"/>
           <FILE id="nI5Yz3BGi" name="juce_win32_NativeIncludes.h" compile="0"
                 resource="0" file="src/native/windows/juce_win32_NativeIncludes.h"/>
           <FILE id="1rT0RTu06" name="juce_win32_Network.cpp" compile="1" resource="0"

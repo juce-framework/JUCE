@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	16
+#define JUCE_BUILDNUMBER	17
 
 /** Current Juce version number.
 
@@ -15086,6 +15086,7 @@ public:
 
 		MacOSX	  = 0x1000,
 		Linux	   = 0x2000,
+		Android	 = 0x3000,
 
 		Win95	   = 0x4001,
 		Win98	   = 0x4002,

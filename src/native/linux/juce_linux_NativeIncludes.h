@@ -33,8 +33,6 @@
     way of the rest of the codebase.
 */
 
-#include "../../../src/core/juce_StandardHeader.h"
-
 #include <sched.h>
 #include <pthread.h>
 #include <sys/time.h>
