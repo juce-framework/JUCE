@@ -133,9 +133,9 @@ public:
     WASAPIDeviceBase (const ComSmartPtr <IMMDevice>& device_, const bool useExclusiveMode_)
         : device (device_),
           sampleRate (0),
+          defaultSampleRate (0),
           numChannels (0),
           actualNumChannels (0),
-          defaultSampleRate (0),
           minBufferSize (0),
           defaultBufferSize (0),
           latencySamples (0),
@@ -548,11 +548,11 @@ public:
                          const bool useExclusiveMode_)
         : AudioIODevice (deviceName, "Windows Audio"),
           Thread ("Juce WASAPI"),
-          isOpen_ (false),
-          isStarted (false),
           outputDeviceId (outputDeviceId_),
           inputDeviceId (inputDeviceId_),
           useExclusiveMode (useExclusiveMode_),
+          isOpen_ (false),
+          isStarted (false),
           currentBufferSizeSamples (0),
           currentSampleRate (0),
           callback (0)

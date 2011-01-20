@@ -35,7 +35,7 @@
  #define STRICT
  #include <windows.h>
  #include <float.h>
- #pragma warning (disable : 4312 4355)
+ #pragma warning (disable : 4312 4355 1899)
 #elif JUCE_LINUX
  #include <float.h>
  #include <sys/time.h>

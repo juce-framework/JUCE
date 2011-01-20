@@ -656,25 +656,17 @@ public:
             text = textString;
         }
 
-        const TermPtr readExpression()
+        const TermPtr readUpToComma()
         {
-            TermPtr lhs (readMultiplyOrDivideExpression());
+            if (textString.isEmpty())
+                return new Constant (0.0, false);
 
-            char opType;
-            while (lhs != 0 && readOperator ("+-", &opType))
-            {
-                TermPtr rhs (readMultiplyOrDivideExpression());
+            const TermPtr e (readExpression());
 
-                if (rhs == 0)
-                    throw ParseError ("Expected expression after \"" + String::charToString (opType) + "\"");
+            if (e == 0 || ((! readOperator (",")) && text [textIndex] != 0))
+                throw ParseError ("Syntax error: \"" + textString.substring (textIndex) + "\"");
 
-                if (opType == '+')
-                    lhs = new Add (lhs, rhs);
-                else
-                    lhs = new Subtract (lhs, rhs);
-            }
-
-            return lhs;
+            return e;
         }
 
     private:
@@ -815,6 +807,27 @@ public:
             const int start = textIndex;
             textIndex = i;
             return new Constant (String (text + start, i - start).getDoubleValue(), isResolutionTarget);
+        }
+
+        const TermPtr readExpression()
+        {
+            TermPtr lhs (readMultiplyOrDivideExpression());
+
+            char opType;
+            while (lhs != 0 && readOperator ("+-", &opType))
+            {
+                TermPtr rhs (readMultiplyOrDivideExpression());
+
+                if (rhs == 0)
+                    throw ParseError ("Expected expression after \"" + String::charToString (opType) + "\"");
+
+                if (opType == '+')
+                    lhs = new Add (lhs, rhs);
+                else
+                    lhs = new Subtract (lhs, rhs);
+            }
+
+            return lhs;
         }
 
         const TermPtr readMultiplyOrDivideExpression()
@@ -981,21 +994,13 @@ Expression::Expression (const String& stringToParse)
 {
     int i = 0;
     Helpers::Parser parser (stringToParse, i);
-    term = parser.readExpression();
-
-    if (term == 0)
-        term = new Helpers::Constant (0, false);
+    term = parser.readUpToComma();
 }
 
 const Expression Expression::parse (const String& stringToParse, int& textIndexToStartFrom)
 {
     Helpers::Parser parser (stringToParse, textIndexToStartFrom);
-    const Helpers::TermPtr term (parser.readExpression());
-
-    if (term != 0)
-        return Expression (term);
-
-    return Expression();
+    return Expression (parser.readUpToComma());
 }
 
 double Expression::evaluate() const

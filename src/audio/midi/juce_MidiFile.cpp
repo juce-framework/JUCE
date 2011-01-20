@@ -309,9 +309,6 @@ bool MidiFile::readFrom (InputStream& sourceStream)
                 if (chunkSize <= 0)
                     break;
 
-                if (size < 0)
-                    return false;
-
                 if (chunkType == (int) ByteOrder::bigEndianInt ("MTrk"))
                 {
                     readNextTrack (d, chunkSize);

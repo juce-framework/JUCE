@@ -75,7 +75,7 @@ void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const
 
 const String RelativeCoordinatePositionerBase::ComponentScope::getScopeUID() const
 {
-    return String::toHexString ((pointer_sized_int) (void*) &component);
+    return String::toHexString ((int) (pointer_sized_int) (void*) &component);
 }
 
 Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponent (const String& componentID) const

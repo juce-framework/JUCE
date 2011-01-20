@@ -37,8 +37,6 @@
 #endif
 
 //==============================================================================
-static HINTERNET sessionHandle = 0;
-
 #ifndef WORKAROUND_TIMEOUT_BUG
  //#define WORKAROUND_TIMEOUT_BUG 1
 #endif
@@ -48,8 +46,8 @@ static HINTERNET sessionHandle = 0;
 class InternetConnectThread  : public Thread
 {
 public:
-    InternetConnectThread (URL_COMPONENTS& uc_, HINTERNET& connection_, const bool isFtp_)
-        : Thread ("Internet"), uc (uc_), connection (connection_), isFtp (isFtp_)
+    InternetConnectThread (URL_COMPONENTS& uc_, HINTERNET sessionHandle_, HINTERNET& connection_, const bool isFtp_)
+        : Thread ("Internet"), uc (uc_), sessionHandle (sessionHandle_), connection (connection_), isFtp (isFtp_)
     {
         startThread();
     }
@@ -71,6 +69,7 @@ public:
 
 private:
     URL_COMPONENTS& uc;
+    HINTERNET sessionHandle;
     HINTERNET& connection;
     const bool isFtp;
 
@@ -254,7 +253,7 @@ private:
                 connection = 0;
 
                 {
-                    InternetConnectThread connectThread (uc, connection, isFtp);
+                    InternetConnectThread connectThread (uc, sessionHandle, connection, isFtp);
                     connectThread.wait (timeOutMs);
 
                     if (connection == 0)

@@ -129,7 +129,7 @@ class FontDCHolder  : private DeletedAtShutdown
 public:
     //==============================================================================
     FontDCHolder()
-        : dc (0), fontH (0), previousFontH (0), numKPs (0), size (0),
+        : fontH (0), previousFontH (0), dc (0), numKPs (0), size (0),
           bold (false), italic (false)
     {
     }

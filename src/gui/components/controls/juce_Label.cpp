@@ -230,18 +230,17 @@ void Label::showEditor()
     }
 }
 
-void Label::editorShown (TextEditor* /*editorComponent*/)
+void Label::editorShown (TextEditor*)
 {
 }
 
-void Label::editorAboutToBeHidden (TextEditor* /*editorComponent*/)
+void Label::editorAboutToBeHidden (TextEditor*)
 {
 }
 
-bool Label::updateFromTextEditorContents()
+bool Label::updateFromTextEditorContents (TextEditor& ed)
 {
-    jassert (editor != 0);
-    const String newText (editor->getText());
+    const String newText (ed.getText());
 
     if (textValue.toString() != newText)
     {
@@ -266,12 +265,13 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
     {
         WeakReference<Component> deletionChecker (this);
 
-        editorAboutToBeHidden (editor);
+        ScopedPointer<TextEditor> outgoingEditor (editor);
+
+        editorAboutToBeHidden (outgoingEditor);
 
         const bool changed = (! discardCurrentEditorContents)
-                               && updateFromTextEditorContents();
-
-        editor = 0;
+                               && updateFromTextEditorContents (*outgoingEditor);
+        outgoingEditor = 0;
         repaint();
 
         if (changed)
@@ -441,9 +441,8 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
     if (editor != 0)
     {
         jassert (&ed == editor);
-        (void) ed;
 
-        const bool changed = updateFromTextEditorContents();
+        const bool changed = updateFromTextEditorContents (ed);
         hideEditor (true);
 
         if (changed)

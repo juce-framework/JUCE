@@ -543,7 +543,7 @@ private:
     SrcPixelType* sourceLineStart;
 
     template <class PixelType1, class PixelType2>
-    forcedinline static void copyRow (PixelType1* dest, PixelType2* src, int width) throw()
+    static forcedinline void copyRow (PixelType1* dest, PixelType2* src, int width) throw()
     {
         do
         {
@@ -551,7 +551,7 @@ private:
         } while (--width > 0);
     }
 
-    forcedinline static void copyRow (PixelRGB* dest, PixelRGB* src, int width) throw()
+    static forcedinline void copyRow (PixelRGB* dest, PixelRGB* src, int width) throw()
     {
         memcpy (dest, src, width * sizeof (PixelRGB));
     }

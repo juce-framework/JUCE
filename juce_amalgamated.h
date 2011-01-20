@@ -35743,7 +35743,7 @@ public:
 		@param noteNumber   the key number, 0 to 127
 		@see isNoteOff
 	*/
-	static const MidiMessage noteOff (int channel, int noteNumber) throw();
+	static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) throw();
 
 	/** Returns true if this message is a 'key-down' or 'key-up' event.
 
@@ -39463,7 +39463,7 @@ private:
 	bool lossOfFocusDiscardsChanges : 1;
 	bool leftOfOwnerComp : 1;
 
-	bool updateFromTextEditorContents();
+	bool updateFromTextEditorContents (TextEditor&);
 	void callChangeListeners();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label);
@@ -62185,7 +62185,7 @@ public:
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
-	bool hitTest (int x, int y) const;
+	bool hitTest (int x, int y);
 
 protected:
 

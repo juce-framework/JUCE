@@ -212,12 +212,6 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const throw()
 
 void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove)
 {
-    if (startByte < 0)
-    {
-        numBytesToRemove += startByte;
-        startByte = 0;
-    }
-
     if (startByte + numBytesToRemove >= size)
     {
         setSize (startByte);

@@ -476,8 +476,8 @@ public:
           constrainerIsResizing (false),
           currentWindowIcon (0),
           dropTarget (0),
-          updateLayeredWindowAlpha (255),
-          parentToAddTo (parentToAddTo_)
+          parentToAddTo (parentToAddTo_),
+          updateLayeredWindowAlpha (255)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
 
@@ -1893,7 +1893,7 @@ private:
 
                 if (pDropFiles->fWide)
                 {
-                    const WCHAR* const fname = (WCHAR*) (((const char*) pDropFiles) + sizeof (DROPFILES));
+                    const WCHAR* const fname = (WCHAR*) addBytesToPointer (pDropFiles, sizeof (DROPFILES));
 
                     for (;;)
                     {
@@ -1910,7 +1910,7 @@ private:
                 }
                 else
                 {
-                    const char* const fname = ((const char*) pDropFiles) + sizeof (DROPFILES);
+                    const char* const fname = (const char*) addBytesToPointer (pDropFiles, sizeof (DROPFILES));
 
                     for (;;)
                     {

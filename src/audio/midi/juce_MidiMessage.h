@@ -245,7 +245,7 @@ public:
         @param noteNumber   the key number, 0 to 127
         @see isNoteOff
     */
-    static const MidiMessage noteOff (int channel, int noteNumber) throw();
+    static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) throw();
 
     /** Returns true if this message is a 'key-down' or 'key-up' event.
 

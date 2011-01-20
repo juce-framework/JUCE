@@ -38,8 +38,8 @@ namespace FlacNamespace
 {
 #if JUCE_INCLUDE_FLAC_CODE
  #if JUCE_MSVC
-   #pragma warning (disable : 4505) // (unreferenced static function removal warning)
- #endif
+   #pragma warning (disable: 4505 181 111)
+#endif
 
  #define FLAC__NO_DLL 1
 

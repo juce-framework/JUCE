@@ -327,7 +327,7 @@ private:
     bool lossOfFocusDiscardsChanges : 1;
     bool leftOfOwnerComp : 1;
 
-    bool updateFromTextEditorContents();
+    bool updateFromTextEditorContents (TextEditor&);
     void callChangeListeners();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label);

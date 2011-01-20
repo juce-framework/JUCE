@@ -337,7 +337,7 @@ void Path::closeSubPath()
 
 const Point<float> Path::getCurrentPosition() const
 {
-    size_t i = numElements - 1;
+    int i = (int) numElements - 1;
 
     if (i > 0 && data.elements[i] == closeSubPathMarker)
     {

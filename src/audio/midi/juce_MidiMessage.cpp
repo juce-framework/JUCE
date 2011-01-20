@@ -28,8 +28,20 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MidiMessage.h"
-#include "../../memory/juce_MemoryBlock.h"
+#include "../../memory/juce_HeapBlock.h"
 
+namespace MidiHelpers
+{
+    inline uint8 initialByte (const int type, const int channel) throw()
+    {
+        return (uint8) (type | jlimit (0, 15, channel - 1));
+    }
+
+    inline uint8 validVelocity (const int v) throw()
+    {
+        return (uint8) jlimit (0, 127, v);
+    }
+}
 
 //==============================================================================
 int MidiMessage::readVariableLengthVal (const uint8* data, int& numBytesUsed) throw()
@@ -336,7 +348,7 @@ int MidiMessage::getNoteNumber() const throw()
 void MidiMessage::setNoteNumber (const int newNoteNumber) throw()
 {
     if (isNoteOnOrOff())
-        data[1] = (uint8) jlimit (0, 127, newNoteNumber);
+        data[1] = newNoteNumber & 127;
 }
 
 uint8 MidiMessage::getVelocity() const throw()
@@ -355,13 +367,13 @@ float MidiMessage::getFloatVelocity() const throw()
 void MidiMessage::setVelocity (const float newVelocity) throw()
 {
     if (isNoteOnOrOff())
-        data[2] = (uint8) jlimit (0, 0x7f, roundToInt (newVelocity * 127.0f));
+        data[2] = MidiHelpers::validVelocity (roundToInt (newVelocity * 127.0f));
 }
 
 void MidiMessage::multiplyVelocity (const float scaleFactor) throw()
 {
     if (isNoteOnOrOff())
-        data[2] = (uint8) jlimit (0, 0x7f, roundToInt (scaleFactor * data[2]));
+        data[2] = MidiHelpers::validVelocity (roundToInt (scaleFactor * data[2]));
 }
 
 bool MidiMessage::isAftertouch() const throw()
@@ -382,7 +394,7 @@ const MidiMessage MidiMessage::aftertouchChange (const int channel,
     jassert (isPositiveAndBelow (noteNum, (int) 128));
     jassert (isPositiveAndBelow (aftertouchValue, (int) 128));
 
-    return MidiMessage (0xa0 | jlimit (0, 15, channel - 1),
+    return MidiMessage (MidiHelpers::initialByte (0xa0, channel),
                         noteNum & 0x7f,
                         aftertouchValue & 0x7f);
 }
@@ -405,8 +417,7 @@ const MidiMessage MidiMessage::channelPressureChange (const int channel,
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
     jassert (isPositiveAndBelow (pressure, (int) 128));
 
-    return MidiMessage (0xd0 | jlimit (0, 15, channel - 1),
-                        pressure & 0x7f);
+    return MidiMessage (MidiHelpers::initialByte (0xd0, channel), pressure & 0x7f);
 }
 
 bool MidiMessage::isProgramChange() const throw()
@@ -424,8 +435,7 @@ const MidiMessage MidiMessage::programChange (const int channel,
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
 
-    return MidiMessage (0xc0 | jlimit (0, 15, channel - 1),
-                        programNumber & 0x7f);
+    return MidiMessage (MidiHelpers::initialByte (0xc0, channel), programNumber & 0x7f);
 }
 
 bool MidiMessage::isPitchWheel() const throw()
@@ -444,9 +454,7 @@ const MidiMessage MidiMessage::pitchWheel (const int channel,
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
     jassert (isPositiveAndBelow (position, (int) 0x4000));
 
-    return MidiMessage (0xe0 | jlimit (0, 15, channel - 1),
-                        position & 127,
-                        (position >> 7) & 127);
+    return MidiMessage (MidiHelpers::initialByte (0xe0, channel), position & 127, (position >> 7) & 127);
 }
 
 bool MidiMessage::isController() const throw()
@@ -468,44 +476,33 @@ int MidiMessage::getControllerValue() const throw()
     return data[2];
 }
 
-const MidiMessage MidiMessage::controllerEvent (const int channel,
-                                                const int controllerType,
-                                                const int value) throw()
+const MidiMessage MidiMessage::controllerEvent (const int channel, const int controllerType, const int value) throw()
 {
     // the channel must be between 1 and 16 inclusive
     jassert (channel > 0 && channel <= 16);
 
-    return MidiMessage (0xb0 | jlimit (0, 15, channel - 1),
-                        controllerType & 127,
-                        value & 127);
+    return MidiMessage (MidiHelpers::initialByte (0xb0, channel), controllerType & 127, value & 127);
 }
 
-const MidiMessage MidiMessage::noteOn (const int channel,
-                                       const int noteNumber,
-                                       const float velocity) throw()
+const MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const float velocity) throw()
 {
     return noteOn (channel, noteNumber, (uint8)(velocity * 127.0f));
 }
 
-const MidiMessage MidiMessage::noteOn (const int channel,
-                                       const int noteNumber,
-                                       const uint8 velocity) throw()
+const MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const uint8 velocity) throw()
 {
     jassert (channel > 0 && channel <= 16);
     jassert (isPositiveAndBelow (noteNumber, (int) 128));
 
-    return MidiMessage (0x90 | jlimit (0, 15, channel - 1),
-                        noteNumber & 127,
-                        jlimit (0, 127, roundToInt (velocity)));
+    return MidiMessage (MidiHelpers::initialByte (0x90, channel), noteNumber & 127, MidiHelpers::validVelocity (velocity));
 }
 
-const MidiMessage MidiMessage::noteOff (const int channel,
-                                        const int noteNumber) throw()
+const MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8 velocity) throw()
 {
     jassert (channel > 0 && channel <= 16);
     jassert (isPositiveAndBelow (noteNumber, (int) 128));
 
-    return MidiMessage (0x80 | jlimit (0, 15, channel - 1), noteNumber & 127, 0);
+    return MidiMessage (MidiHelpers::initialByte (0x80, channel), noteNumber & 127, MidiHelpers::validVelocity (velocity));
 }
 
 const MidiMessage MidiMessage::allNotesOff (const int channel) throw()
@@ -558,8 +555,7 @@ bool MidiMessage::isSysEx() const throw()
 
 const MidiMessage MidiMessage::createSysExMessage (const uint8* sysexData, const int dataSize)
 {
-    MemoryBlock mm (dataSize + 2);
-    uint8* const m = static_cast <uint8*> (mm.getData());
+    HeapBlock<uint8> m (dataSize + 2);
 
     m[0] = 0xf0;
     memcpy (m + 1, sysexData, dataSize);

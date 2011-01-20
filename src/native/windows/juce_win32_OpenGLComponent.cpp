@@ -81,8 +81,8 @@ public:
                        HGLRC contextToShareWith,
                        const OpenGLPixelFormat& pixelFormat)
         : renderContext (0),
-          dc (0),
-          component (component_)
+          component (component_),
+          dc (0)
     {
         jassert (component != 0);
 

@@ -196,7 +196,7 @@ const Rectangle<float> DrawableShape::getDrawableBounds() const
         return path.getBounds();
 }
 
-bool DrawableShape::hitTest (int x, int y) const
+bool DrawableShape::hitTest (int x, int y)
 {
     const float globalX = (float) (x - originRelativeToComponent.getX());
     const float globalY = (float) (y - originRelativeToComponent.getY());
