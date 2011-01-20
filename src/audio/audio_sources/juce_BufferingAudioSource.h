@@ -75,13 +75,13 @@ public:
 
     //==============================================================================
     /** Implements the PositionableAudioSource method. */
-    void setNextReadPosition (int newPosition);
+    void setNextReadPosition (int64 newPosition);
 
     /** Implements the PositionableAudioSource method. */
-    int getNextReadPosition() const;
+    int64 getNextReadPosition() const;
 
     /** Implements the PositionableAudioSource method. */
-    int getTotalLength() const                  { return source->getTotalLength(); }
+    int64 getTotalLength() const                { return source->getTotalLength(); }
 
     /** Implements the PositionableAudioSource method. */
     bool isLooping() const                      { return source->isLooping(); }
@@ -93,13 +93,13 @@ private:
     int numberOfSamplesToBuffer;
     AudioSampleBuffer buffer;
     CriticalSection bufferStartPosLock;
-    int volatile bufferValidStart, bufferValidEnd, nextPlayPos;
+    int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
     bool wasSourceLooping;
     double volatile sampleRate;
 
     friend class SharedBufferingAudioSourceThread;
     bool readNextBufferChunk();
-    void readBufferSection (int start, int length, int bufferOffset);
+    void readBufferSection (int64 start, int length, int bufferOffset);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioSource);
 };

@@ -78,6 +78,12 @@ void OutputStream::writeByte (char byte)
     write (&byte, 1);
 }
 
+void OutputStream::writeRepeatedByte (uint8 byte, int numTimesToRepeat)
+{
+    while (--numTimesToRepeat >= 0)
+        writeByte (byte);
+}
+
 void OutputStream::writeShort (short value)
 {
     const unsigned short v = ByteOrder::swapIfBigEndian ((unsigned short) value);

@@ -5962,6 +5962,9 @@ public:
 	*/
 	virtual void writeDoubleBigEndian (double value);
 
+	/** Writes a byte to the output stream a given number of times. */
+	virtual void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
+
 	/** Writes a condensed binary encoding of a 32-bit integer.
 
 		If you're storing a lot of integers which are unlikely to have very large values,
@@ -32536,7 +32539,7 @@ public:
 	void readFromAudioReader (AudioFormatReader* reader,
 							  int startSample,
 							  int numSamples,
-							  int readerStartSample,
+							  int64 readerStartSample,
 							  bool useReaderLeftChan,
 							  bool useReaderRightChan);
 
@@ -34174,16 +34177,16 @@ public:
 		Note that this may be called on a different thread to getNextAudioBlock(),
 		so the subclass should make sure it's synchronised.
 	*/
-	virtual void setNextReadPosition (int newPosition) = 0;
+	virtual void setNextReadPosition (int64 newPosition) = 0;
 
 	/** Returns the position from which the next block will be returned.
 
 		@see setNextReadPosition
 	*/
-	virtual int getNextReadPosition() const = 0;
+	virtual int64 getNextReadPosition() const = 0;
 
 	/** Returns the total length of the stream (in samples). */
-	virtual int getTotalLength() const = 0;
+	virtual int64 getTotalLength() const = 0;
 
 	/** Returns true if this source is actually playing in a loop. */
 	virtual bool isLooping() const = 0;
@@ -34242,20 +34245,20 @@ public:
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 	/** Implements the PositionableAudioSource method. */
-	void setNextReadPosition (int newPosition);
+	void setNextReadPosition (int64 newPosition);
 
 	/** Implements the PositionableAudioSource method. */
-	int getNextReadPosition() const;
+	int64 getNextReadPosition() const;
 
 	/** Implements the PositionableAudioSource method. */
-	int getTotalLength() const;
+	int64 getTotalLength() const;
 
 private:
 
 	AudioFormatReader* reader;
 	bool deleteReader;
 
-	int volatile nextPlayPos;
+	int64 volatile nextPlayPos;
 	bool volatile looping;
 
 	void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
@@ -34707,13 +34710,13 @@ public:
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 	/** Implements the PositionableAudioSource method. */
-	void setNextReadPosition (int newPosition);
+	void setNextReadPosition (int64 newPosition);
 
 	/** Implements the PositionableAudioSource method. */
-	int getNextReadPosition() const;
+	int64 getNextReadPosition() const;
 
 	/** Implements the PositionableAudioSource method. */
-	int getTotalLength() const		  { return source->getTotalLength(); }
+	int64 getTotalLength() const		{ return source->getTotalLength(); }
 
 	/** Implements the PositionableAudioSource method. */
 	bool isLooping() const			  { return source->isLooping(); }
@@ -34725,13 +34728,13 @@ private:
 	int numberOfSamplesToBuffer;
 	AudioSampleBuffer buffer;
 	CriticalSection bufferStartPosLock;
-	int volatile bufferValidStart, bufferValidEnd, nextPlayPos;
+	int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
 	bool wasSourceLooping;
 	double volatile sampleRate;
 
 	friend class SharedBufferingAudioSourceThread;
 	bool readNextBufferChunk();
-	void readBufferSection (int start, int length, int bufferOffset);
+	void readBufferSection (int64 start, int length, int bufferOffset);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioSource);
 };
@@ -34928,13 +34931,13 @@ public:
 	void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
 	/** Implements the PositionableAudioSource method. */
-	void setNextReadPosition (int newPosition);
+	void setNextReadPosition (int64 newPosition);
 
 	/** Implements the PositionableAudioSource method. */
-	int getNextReadPosition() const;
+	int64 getNextReadPosition() const;
 
 	/** Implements the PositionableAudioSource method. */
-	int getTotalLength() const;
+	int64 getTotalLength() const;
 
 	/** Implements the PositionableAudioSource method. */
 	bool isLooping() const;

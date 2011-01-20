@@ -59,16 +59,16 @@ public:
         Note that this may be called on a different thread to getNextAudioBlock(),
         so the subclass should make sure it's synchronised.
     */
-    virtual void setNextReadPosition (int newPosition) = 0;
+    virtual void setNextReadPosition (int64 newPosition) = 0;
 
     /** Returns the position from which the next block will be returned.
 
         @see setNextReadPosition
     */
-    virtual int getNextReadPosition() const = 0;
+    virtual int64 getNextReadPosition() const = 0;
 
     /** Returns the total length of the stream (in samples). */
-    virtual int getTotalLength() const = 0;
+    virtual int64 getTotalLength() const = 0;
 
     /** Returns true if this source is actually playing in a loop. */
     virtual bool isLooping() const = 0;

@@ -83,20 +83,20 @@ public:
 
     //==============================================================================
     /** Implements the PositionableAudioSource method. */
-    void setNextReadPosition (int newPosition);
+    void setNextReadPosition (int64 newPosition);
 
     /** Implements the PositionableAudioSource method. */
-    int getNextReadPosition() const;
+    int64 getNextReadPosition() const;
 
     /** Implements the PositionableAudioSource method. */
-    int getTotalLength() const;
+    int64 getTotalLength() const;
 
 private:
     //==============================================================================
     AudioFormatReader* reader;
     bool deleteReader;
 
-    int volatile nextPlayPos;
+    int64 volatile nextPlayPos;
     bool volatile looping;
 
     void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);

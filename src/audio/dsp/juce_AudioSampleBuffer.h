@@ -405,7 +405,7 @@ public:
     void readFromAudioReader (AudioFormatReader* reader,
                               int startSample,
                               int numSamples,
-                              int readerStartSample,
+                              int64 readerStartSample,
                               bool useReaderLeftChan,
                               bool useReaderRightChan);
 

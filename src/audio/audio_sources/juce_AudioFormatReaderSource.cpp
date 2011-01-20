@@ -50,7 +50,7 @@ AudioFormatReaderSource::~AudioFormatReaderSource()
         delete reader;
 }
 
-void AudioFormatReaderSource::setNextReadPosition (int newPosition)
+void AudioFormatReaderSource::setNextReadPosition (int64 newPosition)
 {
     nextPlayPos = newPosition;
 }
@@ -60,15 +60,15 @@ void AudioFormatReaderSource::setLooping (bool shouldLoop)
     looping = shouldLoop;
 }
 
-int AudioFormatReaderSource::getNextReadPosition() const
+int64 AudioFormatReaderSource::getNextReadPosition() const
 {
-    return (looping) ? (nextPlayPos % (int) reader->lengthInSamples)
-                     : nextPlayPos;
+    return looping ? nextPlayPos % reader->lengthInSamples
+                   : nextPlayPos;
 }
 
-int AudioFormatReaderSource::getTotalLength() const
+int64 AudioFormatReaderSource::getTotalLength() const
 {
-    return (int) reader->lengthInSamples;
+    return reader->lengthInSamples;
 }
 
 void AudioFormatReaderSource::prepareToPlay (int /*samplesPerBlockExpected*/,
@@ -84,7 +84,7 @@ void AudioFormatReaderSource::getNextAudioBlock (const AudioSourceChannelInfo& i
 {
     if (info.numSamples > 0)
     {
-        const int start = nextPlayPos;
+        const int64 start = nextPlayPos;
 
         if (looping)
         {

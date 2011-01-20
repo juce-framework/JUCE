@@ -69,6 +69,9 @@ const StringPairArray WavAudioFormat::createBWAVMetadata (const String& descript
 
 
 //==============================================================================
+namespace WavFileHelpers
+{
+
 #if JUCE_MSVC
   #pragma pack (push, 1)
   #define PACKED
@@ -246,12 +249,26 @@ struct ExtensibleWavSubFormat
     uint8  data4[8];
 } PACKED;
 
+struct DataSize64Chunk   // chunk ID = 'ds64' if data size > 0xffffffff, 'JUNK' otherwise
+{
+    uint32 riffSizeLow;     // low 4 byte size of RF64 block
+    uint32 riffSizeHigh;    // high 4 byte size of RF64 block
+    uint32 dataSizeLow;     // low 4 byte size of data chunk
+    uint32 dataSizeHigh;    // high 4 byte size of data chunk
+    uint32 sampleCountLow;  // low 4 byte sample count of fact chunk
+    uint32 sampleCountHigh; // high 4 byte sample count of fact chunk
+    uint32 tableLength;     // number of valid entries in array 'table'
+} PACKED;
+
 
 #if JUCE_MSVC
   #pragma pack (pop)
 #endif
 
 #undef PACKED
+
+    inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+}
 
 
 //==============================================================================
@@ -263,109 +280,146 @@ public:
         : AudioFormatReader (in, TRANS (wavFormatName)),
           bwavChunkStart (0),
           bwavSize (0),
-          dataLength (0)
+          dataLength (0),
+          isRF64 (false)
     {
-        if (input->readInt() == chunkName ("RIFF"))
+        using namespace WavFileHelpers;
+        uint64 len = 0;
+        int64 end = 0;
+        bool hasGotType = false;
+        bool hasGotData = false;
+
+        const int firstChunkType = input->readInt();
+
+        if (firstChunkType == chunkName ("RF64"))
         {
-            const uint32 len = (uint32) input->readInt();
-            const int64 end = input->getPosition() + len;
-            bool hasGotType = false;
-            bool hasGotData = false;
+            input->skipNextBytes (4); // size is -1 for RF64
+            isRF64 = true;
+        }
+        else if (firstChunkType == chunkName ("RIFF"))
+        {
+            len = (uint64) input->readInt();
+            end = input->getPosition() + len;
+        }
+        else
+        {
+            return;
+        }
 
-            if (input->readInt() == chunkName ("WAVE"))
+        const int64 startOfRIFFChunk = input->getPosition();
+
+        if (input->readInt() == chunkName ("WAVE"))
+        {
+            if (isRF64 && input->readInt() == chunkName ("ds64"))
             {
-                while (input->getPosition() < end
-                        && ! input->isExhausted())
+                uint32 length = (uint32) input->readInt();
+
+                if (length < 28)
                 {
-                    const int chunkType = input->readInt();
-                    uint32 length = (uint32) input->readInt();
+                    return;
+                }
+                else
+                {
                     const int64 chunkEnd = input->getPosition() + length + (length & 1);
+                    len = input->readInt64();
+                    end = startOfRIFFChunk + len;
+                    dataLength = input->readInt64();
+                    input->setPosition (chunkEnd);
+                }
+            }
 
-                    if (chunkType == chunkName ("fmt "))
+            while (input->getPosition() < end && ! input->isExhausted())
+            {
+                const int chunkType = input->readInt();
+                uint32 length = (uint32) input->readInt();
+                const int64 chunkEnd = input->getPosition() + length + (length & 1);
+
+                if (chunkType == chunkName ("fmt "))
+                {
+                    // read the format chunk
+                    const unsigned short format = input->readShort();
+                    const short numChans = input->readShort();
+                    sampleRate = input->readInt();
+                    const int bytesPerSec = input->readInt();
+
+                    numChannels = numChans;
+                    bytesPerFrame = bytesPerSec / (int)sampleRate;
+                    bitsPerSample = 8 * bytesPerFrame / numChans;
+
+                    if (format == 3)
                     {
-                        // read the format chunk
-                        const unsigned short format = input->readShort();
-                        const short numChans = input->readShort();
-                        sampleRate = input->readInt();
-                        const int bytesPerSec = input->readInt();
-
-                        numChannels = numChans;
-                        bytesPerFrame = bytesPerSec / (int)sampleRate;
-                        bitsPerSample = 8 * bytesPerFrame / numChans;
-
-                        if (format == 3)
-                        {
-                            usesFloatingPointData = true;
-                        }
-                        else if (format == 0xfffe /*WAVE_FORMAT_EXTENSIBLE*/)
-                        {
-                            if (length < 40) // too short
-                            {
-                                bytesPerFrame = 0;
-                            }
-                            else
-                            {
-                                input->skipNextBytes (12); // skip over blockAlign, bitsPerSample and speakerPosition mask
-                                ExtensibleWavSubFormat subFormat;
-                                subFormat.data1 = input->readInt();
-                                subFormat.data2 = input->readShort();
-                                subFormat.data3 = input->readShort();
-                                input->read (subFormat.data4, sizeof (subFormat.data4));
-
-                                const ExtensibleWavSubFormat pcmFormat
-                                    = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
-
-                                if (memcmp (&subFormat, &pcmFormat, sizeof (subFormat)) != 0)
-                                {
-                                    const ExtensibleWavSubFormat ambisonicFormat
-                                        = { 0x00000001, 0x0721, 0x11d3, { 0x86, 0x44, 0xC8, 0xC1, 0xCA, 0x00, 0x00, 0x00 } };
-
-                                    if (memcmp (&subFormat, &ambisonicFormat, sizeof (subFormat)) != 0)
-                                        bytesPerFrame = 0;
-                                }
-                            }
-                        }
-                        else if (format != 1)
+                        usesFloatingPointData = true;
+                    }
+                    else if (format == 0xfffe /*WAVE_FORMAT_EXTENSIBLE*/)
+                    {
+                        if (length < 40) // too short
                         {
                             bytesPerFrame = 0;
                         }
+                        else
+                        {
+                            input->skipNextBytes (12); // skip over blockAlign, bitsPerSample and speakerPosition mask
+                            ExtensibleWavSubFormat subFormat;
+                            subFormat.data1 = input->readInt();
+                            subFormat.data2 = input->readShort();
+                            subFormat.data3 = input->readShort();
+                            input->read (subFormat.data4, sizeof (subFormat.data4));
 
-                        hasGotType = true;
-                    }
-                    else if (chunkType == chunkName ("data"))
-                    {
-                        // get the data chunk's position
-                        dataLength = length;
-                        dataChunkStart = input->getPosition();
-                        lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
+                            const ExtensibleWavSubFormat pcmFormat
+                                = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
 
-                        hasGotData = true;
-                    }
-                    else if (chunkType == chunkName ("bext"))
-                    {
-                        bwavChunkStart = input->getPosition();
-                        bwavSize = length;
+                            if (memcmp (&subFormat, &pcmFormat, sizeof (subFormat)) != 0)
+                            {
+                                const ExtensibleWavSubFormat ambisonicFormat
+                                    = { 0x00000001, 0x0721, 0x11d3, { 0x86, 0x44, 0xC8, 0xC1, 0xCA, 0x00, 0x00, 0x00 } };
 
-                        // Broadcast-wav extension chunk..
-                        HeapBlock <BWAVChunk> bwav;
-                        bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
-                        input->read (bwav, length);
-                        bwav->copyTo (metadataValues);
+                                if (memcmp (&subFormat, &ambisonicFormat, sizeof (subFormat)) != 0)
+                                    bytesPerFrame = 0;
+                            }
+                        }
                     }
-                    else if (chunkType == chunkName ("smpl"))
+                    else if (format != 1)
                     {
-                        HeapBlock <SMPLChunk> smpl;
-                        smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
-                        input->read (smpl, length);
-                        smpl->copyTo (metadataValues, length);
-                    }
-                    else if (chunkEnd <= input->getPosition())
-                    {
-                        break;
+                        bytesPerFrame = 0;
                     }
 
-                    input->setPosition (chunkEnd);
+                    hasGotType = true;
                 }
+                else if (chunkType == chunkName ("data"))
+                {
+                    // get the data chunk's position
+                    if (! isRF64) // data size is expected to be -1, actual data size is in ds64 chunk
+                        dataLength = length;
+
+                    dataChunkStart = input->getPosition();
+                    lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
+
+                    hasGotData = true;
+                }
+                else if (chunkType == chunkName ("bext"))
+                {
+                    bwavChunkStart = input->getPosition();
+                    bwavSize = length;
+
+                    // Broadcast-wav extension chunk..
+                    HeapBlock <BWAVChunk> bwav;
+                    bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
+                    input->read (bwav, length);
+                    bwav->copyTo (metadataValues);
+                }
+                else if (chunkType == chunkName ("smpl"))
+                {
+                    HeapBlock <SMPLChunk> smpl;
+                    smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
+                    input->read (smpl, length);
+                    smpl->copyTo (metadataValues, length);
+                }
+                else if (chunkEnd <= input->getPosition())
+                {
+                    break;
+                }
+
+                input->setPosition (chunkEnd);
             }
         }
     }
@@ -428,8 +482,7 @@ private:
     ScopedPointer<AudioData::Converter> converter;
     int bytesPerFrame;
     int64 dataChunkStart, dataLength;
-
-    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+    bool isRF64;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormatReader);
 };
@@ -439,20 +492,17 @@ class WavAudioFormatWriter  : public AudioFormatWriter
 {
 public:
     //==============================================================================
-    WavAudioFormatWriter (OutputStream* const out,
-                          const double sampleRate_,
-                          const unsigned int numChannels_,
-                          const int bits,
+    WavAudioFormatWriter (OutputStream* const out, const double sampleRate_,
+                          const unsigned int numChannels_, const int bits,
                           const StringPairArray& metadataValues)
-        : AudioFormatWriter (out,
-                             TRANS (wavFormatName),
-                             sampleRate_,
-                             numChannels_,
-                             bits),
+        : AudioFormatWriter (out, TRANS (wavFormatName), sampleRate_, numChannels_, bits),
           lengthInSamples (0),
           bytesWritten (0),
-          writeFailed (false)
+          writeFailed (false),
+          isRF64 (false)
     {
+        using namespace WavFileHelpers;
+
         if (metadataValues.size() > 0)
         {
             bwavChunk = BWAVChunk::createFrom (metadataValues);
@@ -465,6 +515,12 @@ public:
 
     ~WavAudioFormatWriter()
     {
+        if ((bytesWritten & 1) != 0) // pad to an even length
+        {
+            ++bytesWritten;
+            output->writeByte (0);
+        }
+
         writeHeader();
     }
 
@@ -488,8 +544,7 @@ public:
             default:    jassertfalse; break;
         }
 
-        if (bytesWritten + bytes >= (uint32) 0xfff00000
-             || ! output->write (tempBlock.getData(), bytes))
+        if (! output->write (tempBlock.getData(), bytes))
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
@@ -510,14 +565,27 @@ public:
 private:
     ScopedPointer<AudioData::Converter> converter;
     MemoryBlock tempBlock, bwavChunk, smplChunk;
-    uint32 lengthInSamples, bytesWritten;
+    uint64 lengthInSamples, bytesWritten;
     int64 headerPosition;
-    bool writeFailed;
+    bool writeFailed, isRF64;
 
-    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+    static int getChannelMask (const int numChannels) throw()
+    {
+        switch (numChannels)
+        {
+            case 1:   return 0;
+            case 2:   return 1 + 2; // SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT
+            case 5:   return 1 + 2 + 4 + 16 + 32; // SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT
+            case 6:   return 1 + 2 + 4 + 8 + 16 + 32; // SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_FRONT_CENTER | SPEAKER_LOW_FREQUENCY | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT
+            default:  break;
+        }
+
+        return 0;
+    }
 
     void writeHeader()
     {
+        using namespace WavFileHelpers;
         const bool seekedOk = output->setPosition (headerPosition);
         (void) seekedOk;
 
@@ -526,21 +594,62 @@ private:
         jassert (seekedOk);
 
         const int bytesPerFrame = numChannels * bitsPerSample / 8;
-        output->writeInt (chunkName ("RIFF"));
-        output->writeInt ((int) (lengthInSamples * bytesPerFrame
-                                   + ((bwavChunk.getSize() > 0) ? (44 + bwavChunk.getSize()) : 36)
-                                   + (smplChunk.getSize() > 0 ? smplChunk.getSize() + 8 : 0)));
+        int64 audioDataSize = bytesPerFrame * lengthInSamples;
 
+        int64 riffChunkSize = 4 /* 'WAVE' */ + 8 + 40 /* WAVEFORMATEX */
+                               + 8 + audioDataSize + (audioDataSize & 1)
+                               + (bwavChunk.getSize() > 0 ? (8 + bwavChunk.getSize()) : 0)
+                               + (smplChunk.getSize() > 0 ? (8 + smplChunk.getSize()) : 0)
+                               + (8 + 28); // (JUNK chunk)
+
+        riffChunkSize += (riffChunkSize & 0x1);
+        isRF64 = (riffChunkSize > 0xffffffff);
+
+        output->writeInt (chunkName (isRF64 ? "RF64" : "RIFF"));
+        output->writeInt (isRF64 ? -1 : (int) riffChunkSize);
         output->writeInt (chunkName ("WAVE"));
+
+        if (! isRF64)
+        {
+            // write Junk chunk
+            output->writeInt (chunkName ("JUNK"));
+            output->writeInt (28);
+            output->writeRepeatedByte (0, 28);
+        }
+        else
+        {
+            // write ds64 chunk
+            output->writeInt (chunkName ("ds64"));
+            output->writeInt (28);  // chunk size for uncompressed data (no table)
+            output->writeInt64 (riffChunkSize);
+            output->writeInt64 (audioDataSize);
+            output->writeRepeatedByte (0, 12);
+        }
+
         output->writeInt (chunkName ("fmt "));
-        output->writeInt (16);
-        output->writeShort ((bitsPerSample < 32) ? (short) 1 /*WAVE_FORMAT_PCM*/
-                                                 : (short) 3 /*WAVE_FORMAT_IEEE_FLOAT*/);
+        output->writeInt (40); // WAVEFORMATEX chunk size
+        output->writeShort ((short) (uint16) 0xfffe); // WAVE_FORMAT_EXTENSIBLE
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
-        output->writeInt (bytesPerFrame * (int) sampleRate);
-        output->writeShort ((short) bytesPerFrame);
-        output->writeShort ((short) bitsPerSample);
+        output->writeInt ((int) (bytesPerFrame * sampleRate)); // nAvgBytesPerSec
+        output->writeShort ((short) bytesPerFrame); // nBlockAlign
+        output->writeShort ((short) bitsPerSample); // wBitsPerSample
+        output->writeShort (22); // cbSize (size of  the extension)
+        output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
+        output->writeInt (getChannelMask (numChannels));
+
+        const ExtensibleWavSubFormat pcmFormat
+            = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+
+        const ExtensibleWavSubFormat IEEEFloatFormat
+            = { 0x00000003, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+
+        const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
+
+        output->writeInt ((int) subFormat.data1);
+        output->writeShort ((short) subFormat.data2);
+        output->writeShort ((short) subFormat.data3);
+        output->write (subFormat.data4, sizeof (subFormat.data4));
 
         if (bwavChunk.getSize() > 0)
         {
@@ -557,7 +666,7 @@ private:
         }
 
         output->writeInt (chunkName ("data"));
-        output->writeInt (lengthInSamples * bytesPerFrame);
+        output->writeInt (isRF64 ? -1 : (int) (lengthInSamples * bytesPerFrame));
 
         usesFloatingPointData = (bitsPerSample == 32);
     }
@@ -604,28 +713,19 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
     return 0;
 }
 
-AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
-                                                    double sampleRate,
-                                                    unsigned int numChannels,
-                                                    int bitsPerSample,
-                                                    const StringPairArray& metadataValues,
-                                                    int /*qualityOptionIndex*/)
+AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sampleRate,
+                                                    unsigned int numChannels, int bitsPerSample,
+                                                    const StringPairArray& metadataValues, int /*qualityOptionIndex*/)
 {
     if (getPossibleBitDepths().contains (bitsPerSample))
-    {
-        return new WavAudioFormatWriter (out,
-                                         sampleRate,
-                                         numChannels,
-                                         bitsPerSample,
-                                         metadataValues);
-    }
+        return new WavAudioFormatWriter (out, sampleRate, numChannels, bitsPerSample, metadataValues);
 
     return 0;
 }
 
-namespace
+namespace WavFileHelpers
 {
-    bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
+    bool slowCopyWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
     {
         TemporaryFile tempFile (file);
 
@@ -661,7 +761,8 @@ namespace
 
 bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata)
 {
-    ScopedPointer <WavAudioFormatReader> reader ((WavAudioFormatReader*) createReaderFor (wavFile.createInputStream(), true));
+    using namespace WavFileHelpers;
+    ScopedPointer <WavAudioFormatReader> reader (static_cast <WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
 
     if (reader != 0)
     {
@@ -692,7 +793,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
         }
     }
 
-    return juce_slowCopyOfWavFileWithNewMetadata (wavFile, newMetadata);
+    return slowCopyWavFileWithNewMetadata (wavFile, newMetadata);
 }
 
 

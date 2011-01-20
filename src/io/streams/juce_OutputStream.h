@@ -155,6 +155,9 @@ public:
     */
     virtual void writeDoubleBigEndian (double value);
 
+    /** Writes a byte to the output stream a given number of times. */
+    virtual void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
+
     /** Writes a condensed binary encoding of a 32-bit integer.
 
         If you're storing a lot of integers which are unlikely to have very large values,

@@ -148,13 +148,13 @@ public:
 
     //==============================================================================
     /** Implements the PositionableAudioSource method. */
-    void setNextReadPosition (int newPosition);
+    void setNextReadPosition (int64 newPosition);
 
     /** Implements the PositionableAudioSource method. */
-    int getNextReadPosition() const;
+    int64 getNextReadPosition() const;
 
     /** Implements the PositionableAudioSource method. */
-    int getTotalLength() const;
+    int64 getTotalLength() const;
 
     /** Implements the PositionableAudioSource method. */
     bool isLooping() const;

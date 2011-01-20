@@ -144,10 +144,6 @@ public:
         }
     }
 
-    ~AiffAudioFormatReader()
-    {
-    }
-
     //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)

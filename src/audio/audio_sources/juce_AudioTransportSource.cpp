@@ -159,7 +159,7 @@ void AudioTransportSource::stop()
 void AudioTransportSource::setPosition (double newPosition)
 {
     if (sampleRate > 0.0)
-        setNextReadPosition (roundToInt (newPosition * sampleRate));
+        setNextReadPosition ((int64) (newPosition * sampleRate));
 }
 
 double AudioTransportSource::getCurrentPosition() const
@@ -175,30 +175,30 @@ double AudioTransportSource::getLengthInSeconds() const
     return getTotalLength() / sampleRate;
 }
 
-void AudioTransportSource::setNextReadPosition (int newPosition)
+void AudioTransportSource::setNextReadPosition (int64 newPosition)
 {
     if (positionableSource != 0)
     {
         if (sampleRate > 0 && sourceSampleRate > 0)
-            newPosition = roundToInt (newPosition * sourceSampleRate / sampleRate);
+            newPosition = (int64) (newPosition * sourceSampleRate / sampleRate);
 
         positionableSource->setNextReadPosition (newPosition);
     }
 }
 
-int AudioTransportSource::getNextReadPosition() const
+int64 AudioTransportSource::getNextReadPosition() const
 {
     if (positionableSource != 0)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
 
-        return roundToInt (positionableSource->getNextReadPosition() * ratio);
+        return (int64) (positionableSource->getNextReadPosition() * ratio);
     }
 
     return 0;
 }
 
-int AudioTransportSource::getTotalLength() const
+int64 AudioTransportSource::getTotalLength() const
 {
     const ScopedLock sl (callbackLock);
 
@@ -206,7 +206,7 @@ int AudioTransportSource::getTotalLength() const
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
 
-        return roundToInt (positionableSource->getTotalLength() * ratio);
+        return (int64) (positionableSource->getTotalLength() * ratio);
     }
 
     return 0;

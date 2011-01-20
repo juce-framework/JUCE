@@ -547,7 +547,7 @@ float AudioSampleBuffer::getRMSLevel (const int channel,
 void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
                                              const int startSample,
                                              const int numSamples,
-                                             const int readerStartSample,
+                                             const int64 readerStartSample,
                                              const bool useLeftChan,
                                              const bool useRightChan)
 {

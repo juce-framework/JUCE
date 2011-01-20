@@ -187,8 +187,8 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 {
     const ScopedLock sl (bufferStartPosLock);
 
-    const int validStart = jlimit (bufferValidStart, bufferValidEnd, nextPlayPos) - nextPlayPos;
-    const int validEnd   = jlimit (bufferValidStart, bufferValidEnd, nextPlayPos + info.numSamples) - nextPlayPos;
+    const int validStart = (int) (jlimit (bufferValidStart, bufferValidEnd, nextPlayPos) - nextPlayPos);
+    const int validEnd   = (int) (jlimit (bufferValidStart, bufferValidEnd, nextPlayPos + info.numSamples) - nextPlayPos);
 
     if (validStart == validEnd)
     {
@@ -247,14 +247,14 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         thread->notify();
 }
 
-int BufferingAudioSource::getNextReadPosition() const
+int64 BufferingAudioSource::getNextReadPosition() const
 {
     return (source->isLooping() && nextPlayPos > 0)
                     ? nextPlayPos % source->getTotalLength()
                     : nextPlayPos;
 }
 
-void BufferingAudioSource::setNextReadPosition (int newPosition)
+void BufferingAudioSource::setNextReadPosition (int64 newPosition)
 {
     const ScopedLock sl (bufferStartPosLock);
 
@@ -268,7 +268,7 @@ void BufferingAudioSource::setNextReadPosition (int newPosition)
 
 bool BufferingAudioSource::readNextBufferChunk()
 {
-    int newBVS, newBVE, sectionToReadStart, sectionToReadEnd;
+    int64 newBVS, newBVE, sectionToReadStart, sectionToReadEnd;
 
     {
         const ScopedLock sl (bufferStartPosLock);
@@ -280,7 +280,7 @@ bool BufferingAudioSource::readNextBufferChunk()
             bufferValidEnd = 0;
         }
 
-        newBVS = jmax (0, nextPlayPos);
+        newBVS = jmax ((int64) 0, nextPlayPos);
         newBVE = newBVS + buffer.getNumSamples() - 4;
         sectionToReadStart = 0;
         sectionToReadEnd = 0;
@@ -297,8 +297,8 @@ bool BufferingAudioSource::readNextBufferChunk()
             bufferValidStart = 0;
             bufferValidEnd = 0;
         }
-        else if (abs (newBVS - bufferValidStart) > 512
-                    || abs (newBVE - bufferValidEnd) > 512)
+        else if (std::abs ((int) (newBVS - bufferValidStart)) > 512
+                  || std::abs ((int) (newBVE - bufferValidEnd)) > 512)
         {
             newBVE = jmin (newBVE, bufferValidEnd + maxChunkSize);
 
@@ -318,7 +318,7 @@ bool BufferingAudioSource::readNextBufferChunk()
         if (bufferIndexStart < bufferIndexEnd)
         {
             readBufferSection (sectionToReadStart,
-                               sectionToReadEnd - sectionToReadStart,
+                               (int) (sectionToReadEnd - sectionToReadStart),
                                bufferIndexStart);
         }
         else
@@ -330,7 +330,7 @@ bool BufferingAudioSource::readNextBufferChunk()
                                bufferIndexStart);
 
             readBufferSection (sectionToReadStart + initialSize,
-                               (sectionToReadEnd - sectionToReadStart) - initialSize,
+                               (int) (sectionToReadEnd - sectionToReadStart) - initialSize,
                                0);
         }
 
@@ -347,7 +347,7 @@ bool BufferingAudioSource::readNextBufferChunk()
     }
 }
 
-void BufferingAudioSource::readBufferSection (int start, int length, int bufferOffset)
+void BufferingAudioSource::readBufferSection (const int64 start, const int length, const int bufferOffset)
 {
     if (source->getNextReadPosition() != start)
         source->setNextReadPosition (start);
