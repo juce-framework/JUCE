@@ -41,7 +41,13 @@ AbstractFifo::~AbstractFifo() {}
 
 int AbstractFifo::getTotalSize() const throw()            { return bufferSize; }
 int AbstractFifo::getFreeSpace() const throw()            { return bufferSize - getNumReady(); }
-int AbstractFifo::getNumReady() const throw()             { return validEnd.get() - validStart.get(); }
+
+int AbstractFifo::getNumReady() const throw()
+{
+    const int vs = validStart.get();
+    const int ve = validEnd.get();
+    return ve >= vs ? (ve - vs) : (bufferSize - (vs - ve));
+}
 
 void AbstractFifo::reset() throw()
 {
@@ -60,10 +66,10 @@ void AbstractFifo::setTotalSize (int newSize) throw()
 void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw()
 {
     const int vs = validStart.get();
-    const int ve = validEnd.get();
+    const int ve = validEnd.value;
 
-    const int freeSpace = bufferSize - (ve - vs);
-    numToWrite = jmin (numToWrite, freeSpace);
+    const int freeSpace = ve >= vs ? (bufferSize - (ve - vs)) : (vs - ve);
+    numToWrite = jmin (numToWrite, freeSpace - 1);
 
     if (numToWrite <= 0)
     {
@@ -74,26 +80,30 @@ void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockS
     }
     else
     {
-        startIndex1 = (int) (ve % bufferSize);
+        startIndex1 = ve;
         startIndex2 = 0;
-        blockSize1 = jmin (bufferSize - startIndex1, numToWrite);
+        blockSize1 = jmin (bufferSize - ve, numToWrite);
         numToWrite -= blockSize1;
-        blockSize2 = numToWrite <= 0 ? 0 : jmin (numToWrite, (int) (vs % bufferSize));
+        blockSize2 = numToWrite <= 0 ? 0 : jmin (numToWrite, vs);
     }
 }
 
 void AbstractFifo::finishedWrite (int numWritten) throw()
 {
     jassert (numWritten >= 0 && numWritten < bufferSize);
-    validEnd += numWritten;
+    int newEnd = validEnd.value + numWritten;
+    if (newEnd >= bufferSize)
+        newEnd -= bufferSize;
+
+    validEnd = newEnd;
 }
 
 void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw()
 {
-    const int vs = validStart.get();
+    const int vs = validStart.value;
     const int ve = validEnd.get();
 
-    const int numReady = ve - vs;
+    const int numReady = ve >= vs ? (ve - vs) : (bufferSize - (vs - ve));
     numWanted = jmin (numWanted, numReady);
 
     if (numWanted <= 0)
@@ -105,19 +115,132 @@ void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSiz
     }
     else
     {
-        startIndex1 = (int) (vs % bufferSize);
+        startIndex1 = vs;
         startIndex2 = 0;
-        blockSize1 = jmin (bufferSize - startIndex1, numWanted);
+        blockSize1 = jmin (bufferSize - vs, numWanted);
         numWanted -= blockSize1;
-        blockSize2 = numWanted <= 0 ? 0 : jmin (numWanted, (int) (ve % bufferSize));
+        blockSize2 = numWanted <= 0 ? 0 : jmin (numWanted, ve);
     }
 }
 
 void AbstractFifo::finishedRead (int numRead) throw()
 {
-    jassert (numRead >= 0 && numRead < bufferSize);
-    validStart += numRead;
+    jassert (numRead >= 0 && numRead <= bufferSize);
+
+    int newStart = validStart.value + numRead;
+    if (newStart >= bufferSize)
+        newStart -= bufferSize;
+
+    validStart = newStart;
 }
 
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+#include "../utilities/juce_UnitTest.h"
+#include "../maths/juce_Random.h"
+#include "../threads/juce_Thread.h"
+
+
+class AbstractFifoTests  : public UnitTest
+{
+public:
+    AbstractFifoTests() : UnitTest ("Abstract Fifo") {}
+
+    class WriteThread  : public Thread
+    {
+    public:
+        WriteThread (AbstractFifo& fifo_, int* buffer_)
+            : Thread ("fifo writer"), fifo (fifo_), buffer (buffer_)
+        {
+            startThread();
+        }
+
+        ~WriteThread()
+        {
+            stopThread (5000);
+        }
+
+        void run()
+        {
+            int n = 0;
+
+            while (! threadShouldExit())
+            {
+                int num = Random::getSystemRandom().nextInt (2000) + 1;
+
+                int start1, size1, start2, size2;
+                fifo.prepareToWrite (num, start1, size1, start2, size2);
+
+                jassert (size1 >= 0 && size2 >= 0);
+                jassert (size1 == 0 || (start1 >= 0 && start1 < fifo.getTotalSize()));
+                jassert (size2 == 0 || (start2 >= 0 && start2 < fifo.getTotalSize()));
+
+                int i;
+                for (i = 0; i < size1; ++i)
+                    buffer [start1 + i] = n++;
+
+                for (i = 0; i < size2; ++i)
+                    buffer [start2 + i] = n++;
+
+                fifo.finishedWrite (size1 + size2);
+            }
+        }
+
+    private:
+        AbstractFifo& fifo;
+        int* buffer;
+    };
+
+    void runTest()
+    {
+        beginTest ("AbstractFifo");
+
+        int buffer [5000];
+        AbstractFifo fifo (numElementsInArray (buffer));
+
+        WriteThread writer (fifo, buffer);
+
+        int n = 0;
+
+        for (int count = 1000000; --count >= 0;)
+        {
+            int num = Random::getSystemRandom().nextInt (6000) + 1;
+
+            int start1, size1, start2, size2;
+            fifo.prepareToRead (num, start1, size1, start2, size2);
+
+            if (! (size1 >= 0 && size2 >= 0)
+                    && (size1 == 0 || (start1 >= 0 && start1 < fifo.getTotalSize()))
+                    && (size2 == 0 || (start2 >= 0 && start2 < fifo.getTotalSize())))
+            {
+                expect (false, "prepareToRead returned -ve values");
+                break;
+            }
+
+            bool failed = false;
+
+            int i;
+            for (i = 0; i < size1; ++i)
+                failed = (buffer [start1 + i] != n++) || failed;
+
+            for (i = 0; i < size2; ++i)
+                failed = (buffer [start2 + i] != n++) || failed;
+
+            if (failed)
+            {
+                expect (false, "read values were incorrect");
+                break;
+            }
+
+            fifo.finishedRead (size1 + size2);
+        }
+    }
+};
+
+static AbstractFifoTests fifoUnitTests;
+
+#endif
 
 END_JUCE_NAMESPACE

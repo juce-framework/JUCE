@@ -337,7 +337,12 @@ public:
             visitor.useSymbol (Symbol (scope.getScopeUID(), getSymbol()->symbol));
 
             SymbolVisitingVisitor v (right, visitor, recursionDepth + 1);
-            scope.visitRelativeScope (getSymbol()->symbol, v);
+
+            try
+            {
+                scope.visitRelativeScope (getSymbol()->symbol, v);
+            }
+            catch (...) {}
         }
 
         void renameSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope, int recursionDepth)
@@ -346,7 +351,12 @@ public:
             getSymbol()->renameSymbol (oldSymbol, newName, scope, recursionDepth);
 
             SymbolRenamingVisitor visitor (right, oldSymbol, newName, recursionDepth + 1);
-            scope.visitRelativeScope (getSymbol()->symbol, visitor);
+
+            try
+            {
+                scope.visitRelativeScope (getSymbol()->symbol, visitor);
+            }
+            catch (...) {}
         }
 
     private:
@@ -1196,8 +1206,9 @@ double Expression::Scope::evaluateFunction (const String& functionName, const do
     throw Helpers::EvaluationError ("Unknown function: \"" + functionName + "\"");
 }
 
-void Expression::Scope::visitRelativeScope (const String&, Visitor&) const
+void Expression::Scope::visitRelativeScope (const String& scopeName, Visitor&) const
 {
+    throw Helpers::EvaluationError ("Unknown symbol: " + scopeName);
 }
 
 const String Expression::Scope::getScopeUID() const

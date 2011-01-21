@@ -74,7 +74,7 @@ namespace ComponentBuilderHelpers
                                    const ValueTree& state, Component* parent)
     {
         Component* const c = type.addNewComponentFromState (state, parent);
-        jassert (c != 0);
+        jassert (c != 0 && c->getParentComponent() == parent);
         c->setComponentID (getStateId (state));
         return c;
     }

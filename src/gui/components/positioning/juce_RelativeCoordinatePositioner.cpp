@@ -71,6 +71,8 @@ void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const
 
     if (targetComp != 0)
         visitor.visit (ComponentScope (*targetComp));
+    else
+        Expression::Scope::visitRelativeScope (scopeName, visitor);
 }
 
 const String RelativeCoordinatePositionerBase::ComponentScope::getScopeUID() const
@@ -175,6 +177,10 @@ public:
         else
         {
             // The named component doesn't exist, so we'll watch the parent for changes in case it appears later..
+            Component* const parent = component.getParentComponent();
+            if (parent != 0)
+                positioner.registerComponentListener (*parent);
+
             positioner.registerComponentListener (component);
             ok = false;
         }
@@ -208,10 +214,17 @@ void RelativeCoordinatePositionerBase::componentParentHierarchyChanged (Componen
     apply();
 }
 
+void RelativeCoordinatePositionerBase::componentChildrenChanged (Component& changed)
+{
+    if (getComponent().getParentComponent() == &changed && ! registeredOk)
+        apply();
+}
+
 void RelativeCoordinatePositionerBase::componentBeingDeleted (Component& component)
 {
     jassert (sourceComponents.contains (&component));
     sourceComponents.removeValue (&component);
+    registeredOk = false;
 }
 
 void RelativeCoordinatePositionerBase::markersChanged (MarkerList*)
