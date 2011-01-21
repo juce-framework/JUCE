@@ -270,8 +270,7 @@ public:
         For keycode info, see the KeyPress class.
         Returns true if the keystroke was used.
     */
-    bool handleKeyPress (int keyCode,
-                         juce_wchar textCharacter);
+    bool handleKeyPress (int keyCode, juce_wchar textCharacter);
 
     /** Called whenever a key is pressed or released.
         Returns true if the keystroke was used.

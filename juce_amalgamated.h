@@ -3349,6 +3349,9 @@ BEGIN_JUCE_NAMESPACE
   #pragma pack (push, 8)
   #pragma warning (push)
   #pragma warning (disable: 4786) // (old vc6 warning about long class names)
+  #ifdef __INTEL_COMPILER
+   #pragma warning (disable: 1125)
+  #endif
 #endif
 
 // this is where all the class header files get brought in..
@@ -60739,8 +60742,7 @@ public:
 		For keycode info, see the KeyPress class.
 		Returns true if the keystroke was used.
 	*/
-	bool handleKeyPress (int keyCode,
-						 juce_wchar textCharacter);
+	bool handleKeyPress (int keyCode, juce_wchar textCharacter);
 
 	/** Called whenever a key is pressed or released.
 		Returns true if the keystroke was used.

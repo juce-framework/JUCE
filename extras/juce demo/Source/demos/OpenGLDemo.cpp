@@ -38,12 +38,12 @@
  #include <GL/gl.h>
  #include <GL/glut.h>
  #undef KeyPress
-#elif JUCE_IPHONE
+#elif JUCE_IOS
  #include <OpenGLES/ES1/gl.h>
  #include <OpenGLES/ES1/glext.h>
 #elif JUCE_MAC
  #include <GLUT/glut.h>
-#elif JUCE_IPHONE
+#elif JUCE_IOS
  //#include <GL/glut.h>
 #endif
 
@@ -60,7 +60,7 @@ public:
         : rotation (0.0f),
           delta (1.0f)
     {
-#if JUCE_IPHONE
+#if JUCE_IOS
         // (On the iPhone, choose a format without a depth buffer)
         setPixelFormat (OpenGLPixelFormat (8, 8, 0, 0));
 #endif
@@ -109,7 +109,7 @@ public:
     // we'll use the opportunity to create the textures needed.
     void newOpenGLContextCreated()
     {
-#if ! JUCE_IPHONE
+#if ! JUCE_IOS
         // (no need to call makeCurrentContextActive(), as that will have
         // been done for us before the method call).
         glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
@@ -154,7 +154,7 @@ public:
         glMatrixMode (GL_PROJECTION);
         glLoadIdentity();
 
-#if JUCE_IPHONE
+#if JUCE_IOS
         const GLfloat vertices[] = { -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,  0.5f, 0.5f, 0.5f };
         const GLubyte colours[] = { 255, 255, 0, 255, 0, 255, 255, 255, 0, 0, 0, 0, 255, 0, 255, 255 };
 

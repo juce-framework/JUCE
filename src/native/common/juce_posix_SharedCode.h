@@ -347,21 +347,29 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
 
 bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 /*creationTime*/) const
 {
-    struct utimbuf times;
-    times.actime = (time_t) (accessTime / 1000);
-    times.modtime = (time_t) (modificationTime / 1000);
+    juce_statStruct info;
 
-    return utime (fullPath.toUTF8(), &times) == 0;
+    if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
+    {
+        struct utimbuf times;
+        times.actime  = accessTime != 0       ? (time_t) (accessTime / 1000)       : info.st_atime;
+        times.modtime = modificationTime != 0 ? (time_t) (modificationTime / 1000) : info.st_mtime;
+
+        return utime (fullPath.toUTF8(), &times) == 0;
+    }
+
+    return false;
 }
 
 bool File::deleteFile() const
 {
     if (! exists())
         return true;
-    else if (isDirectory())
+
+    if (isDirectory())
         return rmdir (fullPath.toUTF8()) == 0;
-    else
-        return remove (fullPath.toUTF8()) == 0;
+
+    return remove (fullPath.toUTF8()) == 0;
 }
 
 bool File::moveInternal (const File& dest) const

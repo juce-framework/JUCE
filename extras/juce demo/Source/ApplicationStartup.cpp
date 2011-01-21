@@ -43,7 +43,7 @@ public:
     //==============================================================================
     void initialise (const String& /*commandLine*/)
     {
-      #if JUCE_IPHONE
+      #if JUCE_IOS
         theMainWindow.setVisible (true);
         theMainWindow.setFullScreen (true);
       #else

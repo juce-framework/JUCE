@@ -29,7 +29,7 @@
 // include the JUCE headers..
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#if JUCE_IPHONE || JUCE_LINUX
+#if JUCE_IOS || JUCE_LINUX
  #undef JUCE_USE_CAMERA
 #endif
 
