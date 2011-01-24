@@ -133,6 +133,9 @@ public:
     */
     void setItemEnabled (int itemId, bool shouldBeEnabled);
 
+    /** Returns true if the given item is enabled. */
+    bool isItemEnabled (int itemId) const throw();
+
     /** Changes the text for an existing item.
     */
     void changeItemText (int itemId, const String& newText);

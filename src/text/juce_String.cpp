@@ -1880,21 +1880,20 @@ int64 String::getHexValue64() const throw()
 //==============================================================================
 const String String::createStringFromData (const void* const data_, const int size)
 {
-    const char* const data = static_cast <const char*> (data_);
+    const uint8* const data = static_cast <const uint8*> (data_);
 
     if (size <= 0 || data == 0)
     {
         return empty;
     }
-    else if (size < 2)
+    else if (size == 1)
     {
-        return charToString (data[0]);
+        return charToString ((char) data[0]);
     }
-    else if ((data[0] == (char)-2 && data[1] == (char)-1)
-             || (data[0] == (char)-1 && data[1] == (char)-2))
+    else if ((data[0] == (uint8) 0xfe && data[1] == (uint8) 0xff)     // UTF-16 BOM
+              || (data[0] == (uint8) 0xff && data[1] == (uint8) 0xfe))
     {
-        // assume it's 16-bit unicode
-        const bool bigEndian = (data[0] == (char)-2);
+        const bool bigEndian = (data[0] == (uint8) 0xfe);
         const int numChars = size / 2 - 1;
 
         String result;
@@ -1919,7 +1918,10 @@ const String String::createStringFromData (const void* const data_, const int si
     }
     else
     {
-        return String::fromUTF8 (data, size);
+        if (size >= 3 && data[0] == (uint8) 0xef && data[1] == (uint8) 0xbb && data[2] == (uint8) 0xbf)  // UTF-8 BOM
+            return String::fromUTF8 ((const char*) data + 3, size - 3);
+
+        return String::fromUTF8 ((const char*) data, size);
     }
 }
 
@@ -1968,17 +1970,7 @@ int String::copyToUTF8 (char* const buffer, const int maxBufferSizeBytes) const 
                 ++numExtraBytes;
 
                 if (c >= 0x10000)
-                {
                     ++numExtraBytes;
-
-                    if (c >= 0x200000)
-                    {
-                        ++numExtraBytes;
-
-                        if (c >= 0x4000000)
-                            ++numExtraBytes;
-                    }
-                }
             }
 
             if (buffer != 0)
@@ -2040,15 +2032,7 @@ int String::getNumBytesAsUTF8() const throw()
             {
                 ++num;
                 if (c >= 0x10000)
-                {
                     ++num;
-                    if (c >= 0x200000)
-                    {
-                        ++num;
-                        if (c >= 0x4000000)
-                            ++num;
-                    }
-                }
             }
         }
         else if (c == 0)
@@ -2102,7 +2086,10 @@ const String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
                 const char nextByte = buffer[i];
 
                 if ((nextByte & 0xc0) != 0x80)
+                {
+                    n = c; // reset to original value if the input is invalid.
                     break;
+                }
 
                 n <<= 6;
                 n |= (nextByte & 0x3f);
@@ -2451,7 +2438,7 @@ public:
                 zerostruct (wideBuffer);
 
                 for (int i = 0; i < numElementsInArray (wideBuffer) - 1; ++i)
-                    wideBuffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (std::numeric_limits<juce_wchar>::max() - 1));
+                    wideBuffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0x10ffff - 1));
 
                 String wide (wideBuffer);
                 expect (wide == (const juce_wchar*) wideBuffer);

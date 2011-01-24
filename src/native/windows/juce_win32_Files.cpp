@@ -58,8 +58,12 @@ namespace WindowsFileHelpers
 
     const String getDriveFromPath (const String& path)
     {
-        if (path.isNotEmpty() && path[1] == ':')
-            return path.substring (0, 2) + '\\';
+        const int length = path.length();
+        HeapBlock <WCHAR> stringCopy (length + 1);
+        path.copyToUnicode (stringCopy, length);
+
+        if (PathStripToRoot (stringCopy))
+            return String (stringCopy);
 
         return path;
     }

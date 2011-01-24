@@ -41,10 +41,6 @@
 #if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable : 4100 4201 4514 4312 4995)
-
-  #ifdef __INTEL_COMPILER
-   #pragma warning (disable: 1125)
-  #endif
 #endif
 
 #define _WIN32_WINNT 0x0500
@@ -73,6 +69,7 @@
 #include <Exdisp.h>
 #include <exdispid.h>
 #include <shlobj.h>
+#include <shlwapi.h>
 
 #if ! JUCE_MINGW
  #include <crtdbg.h>

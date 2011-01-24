@@ -34,11 +34,13 @@ class SharedD2DFactory  : public DeletedAtShutdown
 public:
     SharedD2DFactory()
     {
-        D2D1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED, &d2dFactory);
-        DWriteCreateFactory (DWRITE_FACTORY_TYPE_SHARED, __uuidof (IDWriteFactory), (IUnknown**) &directWriteFactory);
+        jassertfalse; //xxx Direct2D support isn't ready for use yet!
+
+        D2D1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED, d2dFactory.resetAndGetPointerAddress());
+        DWriteCreateFactory (DWRITE_FACTORY_TYPE_SHARED, __uuidof (IDWriteFactory), (IUnknown**) directWriteFactory.resetAndGetPointerAddress());
 
         if (directWriteFactory != 0)
-            directWriteFactory->GetSystemFontCollection (&systemFonts);
+            directWriteFactory->GetSystemFontCollection (systemFonts.resetAndGetPointerAddress());
     }
 
     ~SharedD2DFactory()
@@ -72,10 +74,10 @@ public:
         D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties();
         D2D1_HWND_RENDER_TARGET_PROPERTIES propsHwnd = D2D1::HwndRenderTargetProperties (hwnd, size);
 
-        HRESULT hr = SharedD2DFactory::getInstance()->d2dFactory->CreateHwndRenderTarget (props, propsHwnd, &renderingTarget);
+        HRESULT hr = SharedD2DFactory::getInstance()->d2dFactory->CreateHwndRenderTarget (props, propsHwnd, renderingTarget.resetAndGetPointerAddress());
         // xxx check for error
 
-        hr = renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), &colourBrush);
+        hr = renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), colourBrush.resetAndGetPointerAddress());
     }
 
     ~Direct2DLowLevelGraphicsContext()
@@ -232,7 +234,7 @@ public:
         const int x = currentState->origin.getX();
         const int y = currentState->origin.getY();
 
-        renderingTarget->SetTransform (transfromToMatrix (transform) * D2D1::Matrix3x2F::Translation (x, y));
+        renderingTarget->SetTransform (transformToMatrix (transform) * D2D1::Matrix3x2F::Translation (x, y));
 
         D2D1_SIZE_U size;
         size.width = image.getWidth();
@@ -247,7 +249,7 @@ public:
 
         {
             ComSmartPtr <ID2D1Bitmap> tempBitmap;
-            renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, &tempBitmap);
+            renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, tempBitmap.resetAndGetPointerAddress());
             if (tempBitmap != 0)
                 renderingTarget->DrawBitmap (tempBitmap);
         }
@@ -315,7 +317,7 @@ public:
         float kerning = currentState->font.getExtraKerningFactor(); // xxx why does removing this line mess up the kerning??
         float hScale = currentState->font.getHorizontalScale();
 
-        renderingTarget->SetTransform (D2D1::Matrix3x2F::Scale (hScale, 1) * transfromToMatrix (transform) * D2D1::Matrix3x2F::Translation (x, y));
+        renderingTarget->SetTransform (D2D1::Matrix3x2F::Scale (hScale, 1) * transformToMatrix (transform) * D2D1::Matrix3x2F::Translation (x, y));
 
         float dpiX = 0, dpiY = 0;
         SharedD2DFactory::getInstance()->d2dFactory->GetDesktopDpi (&dpiX, &dpiY);
@@ -415,7 +417,7 @@ public:
             clearPathClip();
 
             if (complexClipLayer == 0)
-                owner.renderingTarget->CreateLayer (&complexClipLayer);
+                owner.renderingTarget->CreateLayer (complexClipLayer.resetAndGetPointerAddress());
 
             complexClipGeometry = geometry;
             shouldClipComplex = true;
@@ -438,7 +440,7 @@ public:
             clearRectListClip();
 
             if (rectListLayer == 0)
-                owner.renderingTarget->CreateLayer (&rectListLayer);
+                owner.renderingTarget->CreateLayer (rectListLayer.resetAndGetPointerAddress());
 
             rectListGeometry = geometry;
             shouldClipRectList = true;
@@ -462,11 +464,11 @@ public:
             clearImageClip();
 
             if (bitmapMaskLayer == 0)
-                owner.renderingTarget->CreateLayer (&bitmapMaskLayer);
+                owner.renderingTarget->CreateLayer (bitmapMaskLayer.resetAndGetPointerAddress());
 
             D2D1_BRUSH_PROPERTIES brushProps;
             brushProps.opacity = 1;
-            brushProps.transform = transfromToMatrix (transform);
+            brushProps.transform = transformToMatrix (transform);
 
             D2D1_BITMAP_BRUSH_PROPERTIES bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
 
@@ -481,8 +483,8 @@ public:
             bp.pixelFormat = owner.renderingTarget->GetPixelFormat();
             bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
-            HRESULT hr = owner.renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, &maskBitmap);
-            hr = owner.renderingTarget->CreateBitmapBrush (maskBitmap, bmProps, brushProps, &bitmapMaskBrush);
+            HRESULT hr = owner.renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, maskBitmap.resetAndGetPointerAddress());
+            hr = owner.renderingTarget->CreateBitmapBrush (maskBitmap, bmProps, brushProps, bitmapMaskBrush.resetAndGetPointerAddress());
 
             imageMaskLayerParams = D2D1::LayerParameters();
             imageMaskLayerParams.opacityBrush = bitmapMaskBrush;
@@ -596,14 +598,14 @@ public:
                     fontIndex = 0;
 
                 ComSmartPtr <IDWriteFontFamily> fontFam;
-                fonts->GetFontFamily (fontIndex, &fontFam);
+                fonts->GetFontFamily (fontIndex, fontFam.resetAndGetPointerAddress());
 
                 ComSmartPtr <IDWriteFont> font;
                 DWRITE_FONT_WEIGHT weight = this->font.isBold() ? DWRITE_FONT_WEIGHT_BOLD  : DWRITE_FONT_WEIGHT_NORMAL;
                 DWRITE_FONT_STYLE style = this->font.isItalic() ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
-                fontFam->GetFirstMatchingFont (weight, DWRITE_FONT_STRETCH_NORMAL, style, &font);
+                fontFam->GetFirstMatchingFont (weight, DWRITE_FONT_STRETCH_NORMAL, style, font.resetAndGetPointerAddress());
 
-                font->CreateFontFace (&localFontFace);
+                font->CreateFontFace (localFontFace.resetAndGetPointerAddress());
                 currentFontFace = localFontFace;
             }
         }
@@ -643,7 +645,7 @@ public:
                 {
                     D2D1_BRUSH_PROPERTIES brushProps;
                     brushProps.opacity = fillType.getOpacity();
-                    brushProps.transform = transfromToMatrix (fillType.transform);
+                    brushProps.transform = transformToMatrix (fillType.transform);
 
                     D2D1_BITMAP_BRUSH_PROPERTIES bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP,D2D1_EXTEND_MODE_WRAP);
 
@@ -660,8 +662,8 @@ public:
                     bp.pixelFormat = owner.renderingTarget->GetPixelFormat();
                     bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
-                    HRESULT hr = owner.renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, &bitmap);
-                    hr = owner.renderingTarget->CreateBitmapBrush (bitmap, bmProps, brushProps, &bitmapBrush);
+                    HRESULT hr = owner.renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, bitmap.resetAndGetPointerAddress());
+                    hr = owner.renderingTarget->CreateBitmapBrush (bitmap, bmProps, brushProps, bitmapBrush.resetAndGetPointerAddress());
 
                     currentBrush = bitmapBrush;
                 }
@@ -671,7 +673,7 @@ public:
 
                     D2D1_BRUSH_PROPERTIES brushProps;
                     brushProps.opacity = fillType.getOpacity();
-                    brushProps.transform = transfromToMatrix (fillType.transform);
+                    brushProps.transform = transformToMatrix (fillType.transform);
 
                     const int numColors = fillType.gradient->getNumColours();
 
@@ -683,7 +685,7 @@ public:
                         stops[i].position = fillType.gradient->getColourPosition(i);
                     }
 
-                    owner.renderingTarget->CreateGradientStopCollection (stops.getData(), numColors, &gradientStops);
+                    owner.renderingTarget->CreateGradientStopCollection (stops.getData(), numColors, gradientStops.resetAndGetPointerAddress());
 
                     if (fillType.gradient->isRadial)
                     {
@@ -698,7 +700,7 @@ public:
                                                                  D2D1::Point2F (0, 0),
                                                                  r, r);
 
-                        owner.renderingTarget->CreateRadialGradientBrush (props, brushProps, gradientStops, &radialGradient);
+                        owner.renderingTarget->CreateRadialGradientBrush (props, brushProps, gradientStops, radialGradient.resetAndGetPointerAddress());
                         currentBrush = radialGradient;
                     }
                     else
@@ -712,7 +714,7 @@ public:
                             D2D1::LinearGradientBrushProperties (D2D1::Point2F (p1.getX() + x, p1.getY() + y),
                                                                  D2D1::Point2F (p2.getX() + x, p2.getY() + y));
 
-                        owner.renderingTarget->CreateLinearGradientBrush (props, brushProps, gradientStops, &linearGradient);
+                        owner.renderingTarget->CreateLinearGradientBrush (props, brushProps, gradientStops, linearGradient.resetAndGetPointerAddress());
 
                         currentBrush = linearGradient;
                     }
@@ -809,7 +811,7 @@ private:
         SharedD2DFactory::getInstance()->d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr <ID2D1GeometrySink> sink;
-        HRESULT hr = p->Open (&sink); // xxx handle error
+        HRESULT hr = p->Open (sink.resetAndGetPointerAddress()); // xxx handle error
         sink->SetFillMode (D2D1_FILL_MODE_WINDING);
 
         for (int i = clipRegion.getNumRectangles(); --i >= 0;)
@@ -887,7 +889,7 @@ private:
         SharedD2DFactory::getInstance()->d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr <ID2D1GeometrySink> sink;
-        HRESULT hr = p->Open (&sink);
+        HRESULT hr = p->Open (sink.resetAndGetPointerAddress());
         sink->SetFillMode (D2D1_FILL_MODE_WINDING); // xxx need to check Path::isUsingNonZeroWinding()
 
         pathToGeometrySink (path, sink, transform, point.getX(), point.getY());
@@ -896,7 +898,7 @@ private:
         return p;
     }
 
-    static const D2D1::Matrix3x2F transfromToMatrix (const AffineTransform& transform)
+    static const D2D1::Matrix3x2F transformToMatrix (const AffineTransform& transform)
     {
         D2D1::Matrix3x2F matrix;
         matrix._11 = transform.mat00;

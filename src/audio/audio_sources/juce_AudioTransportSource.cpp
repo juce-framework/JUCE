@@ -61,7 +61,8 @@ AudioTransportSource::~AudioTransportSource()
 
 void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
                                       int readAheadBufferSize_,
-                                      double sourceSampleRateToCorrectFor)
+                                      double sourceSampleRateToCorrectFor,
+                                      int maxNumChannels)
 {
     if (source == newSource)
     {
@@ -95,7 +96,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
         if (sourceSampleRateToCorrectFor != 0)
             newMasterSource = newResamplerSource
-                = new ResamplingAudioSource (newPositionableSource, false);
+                = new ResamplingAudioSource (newPositionableSource, false, maxNumChannels);
         else
             newMasterSource = newPositionableSource;
 

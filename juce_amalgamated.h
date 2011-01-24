@@ -845,6 +845,9 @@ namespace JuceDummyNamespace {}
 	#define JUCE_API __declspec (dllimport)
 	#pragma warning (disable: 4251)
   #endif
+  #ifdef __INTEL_COMPILER
+   #pragma warning (disable: 1125) // (virtual override warning)
+  #endif
 #elif defined (__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
   #ifdef JUCE_DLL_BUILD
 	#define JUCE_API __attribute__ ((visibility("default")))
@@ -6163,6 +6166,11 @@ public:
 
 	/** Returns true if this var has the same value as the one supplied. */
 	bool equals (const var& other) const throw();
+
+	/** Returns true if this var has the same value and type as the one supplied.
+		This differs from equals() because e.g. "0" and 0 will be considered different.
+	*/
+	bool equalsWithSameType (const var& other) const throw();
 
 private:
 	class VariantType;
@@ -34867,10 +34875,12 @@ public:
 												rate of the source, and playback will be sample-rate
 												adjusted to maintain playback at the correct pitch. If
 												this is 0, no sample-rate adjustment will be performed
+		@param maxNumChannels		   the maximum number of channels that may need to be played
 	*/
 	void setSource (PositionableAudioSource* newSource,
 					int readAheadBufferSize = 0,
-					double sourceSampleRateToCorrectFor = 0.0);
+					double sourceSampleRateToCorrectFor = 0.0,
+					int maxNumChannels = 2);
 
 	/** Changes the current playback position in the source stream.
 
@@ -39585,6 +39595,9 @@ public:
 		current selection - it just stops the user choosing that item from the list.
 	*/
 	void setItemEnabled (int itemId, bool shouldBeEnabled);
+
+	/** Returns true if the given item is enabled. */
+	bool isItemEnabled (int itemId) const throw();
 
 	/** Changes the text for an existing item.
 	*/
@@ -64022,6 +64035,7 @@ END_JUCE_NAMESPACE
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "version.lib")
+#pragma comment(lib, "shlwapi.lib")
 
 #ifdef _NATIVE_WCHAR_T_DEFINED
  #ifdef _DEBUG

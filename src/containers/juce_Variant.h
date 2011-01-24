@@ -140,6 +140,11 @@ public:
     /** Returns true if this var has the same value as the one supplied. */
     bool equals (const var& other) const throw();
 
+    /** Returns true if this var has the same value and type as the one supplied.
+        This differs from equals() because e.g. "0" and 0 will be considered different.
+    */
+    bool equalsWithSameType (const var& other) const throw();
+
 private:
     class VariantType;
     friend class VariantType;

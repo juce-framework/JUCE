@@ -343,6 +343,11 @@ bool var::equals (const var& other) const throw()
     return type->equals (value, other.value, *other.type);
 }
 
+bool var::equalsWithSameType (const var& other) const throw()
+{
+    return type == other.type && equals (other);
+}
+
 bool operator== (const var& v1, const var& v2) throw()      { return v1.equals (v2); }
 bool operator!= (const var& v1, const var& v2) throw()      { return ! v1.equals (v2); }
 bool operator== (const var& v1, const String& v2) throw()   { return v1.toString() == v2; }

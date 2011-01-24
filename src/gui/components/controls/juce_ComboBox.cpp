@@ -159,6 +159,12 @@ void ComboBox::setItemEnabled (const int itemId, const bool shouldBeEnabled)
         item->isEnabled = shouldBeEnabled;
 }
 
+bool ComboBox::isItemEnabled (int itemId) const throw()
+{
+    const ItemInfo* const item = getItemForId (itemId);
+    return item != 0 && item->isEnabled;
+}
+
 void ComboBox::changeItemText (const int itemId, const String& newText)
 {
     ItemInfo* const item = getItemForId (itemId);

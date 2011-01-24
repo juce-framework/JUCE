@@ -74,10 +74,6 @@ public:
     {
     }
 
-    ~SimpleValueSource()
-    {
-    }
-
     const var getValue() const
     {
         return value;
@@ -85,7 +81,7 @@ public:
 
     void setValue (const var& newValue)
     {
-        if (newValue != value)
+        if (! newValue.equalsWithSameType (value))
         {
             value = newValue;
             sendChangeMessage (false);
