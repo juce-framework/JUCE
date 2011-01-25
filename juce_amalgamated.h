@@ -50025,6 +50025,12 @@ public:
 	/** Returns the header component being used in this table. */
 	TableHeaderComponent& getHeader() const			 { return *header; }
 
+	/** Sets the header component to use for the table.
+		The table will take ownership of the component that you pass in, and will delete it
+		when it's no longer needed.
+	*/
+	void setHeader (TableHeaderComponent* newHeader);
+
 	/** Changes the height of the table header component.
 		@see getHeaderHeight
 	*/
@@ -50780,6 +50786,40 @@ public:
 		@see TreeView::findItemFromIdentifierString, getUniqueName
 	*/
 	const String getItemIdentifierString() const;
+
+	/**
+		This handy class takes a copy of a TreeViewItem's openness when you create it,
+		and restores that openness state when its destructor is called.
+
+		This can very handy when you're refreshing sub-items - e.g.
+		@code
+		void MyTreeViewItem::updateChildItems()
+		{
+			OpennessRestorer openness (*this);  //  saves the openness state here..
+
+			clearSubItems();
+
+			// add a bunch of sub-items here which may or may not be the same as the ones that
+			// were previously there
+			addSubItem (...
+
+			// ..and at this point, the old openness is restored, so any items that haven't
+			// changed will have their old openness retained.
+		}
+		@endcode
+	*/
+	class OpennessRestorer
+	{
+	public:
+		OpennessRestorer (TreeViewItem& treeViewItem);
+		~OpennessRestorer();
+
+	private:
+		TreeViewItem& treeViewItem;
+		ScopedPointer <XmlElement> oldOpenness;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpennessRestorer);
+	};
 
 private:
 

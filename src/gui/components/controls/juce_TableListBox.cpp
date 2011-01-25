@@ -268,16 +268,12 @@ private:
 //==============================================================================
 TableListBox::TableListBox (const String& name, TableListBoxModel* const model_)
     : ListBox (name, 0),
-      model (model_),
+      header (0), model (model_),
       autoSizeOptionsShown (true)
 {
     ListBox::model = this;
 
-    header = new TableListBoxHeader (*this);
-    header->setSize (100, 28);
-    header->addListener (this);
-
-    setHeaderComponent (header);
+    setHeader (new TableListBoxHeader (*this));
 }
 
 TableListBox::~TableListBox()
@@ -292,6 +288,22 @@ void TableListBox::setModel (TableListBoxModel* const newModel)
         model = newModel;
         updateContent();
     }
+}
+
+void TableListBox::setHeader (TableHeaderComponent* newHeader)
+{
+    jassert (newHeader != 0); // you need to supply a real header for a table!
+
+    Rectangle<int> newBounds (0, 0, 100, 28);
+    if (header != 0)
+        newBounds = header->getBounds();
+
+    header = newHeader;
+    header->setBounds (newBounds);
+
+    setHeaderComponent (header);
+
+    header->addListener (this);
 }
 
 int TableListBox::getHeaderHeight() const

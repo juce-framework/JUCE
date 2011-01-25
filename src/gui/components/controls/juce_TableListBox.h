@@ -226,6 +226,12 @@ public:
     /** Returns the header component being used in this table. */
     TableHeaderComponent& getHeader() const                         { return *header; }
 
+    /** Sets the header component to use for the table.
+        The table will take ownership of the component that you pass in, and will delete it
+        when it's no longer needed.
+    */
+    void setHeader (TableHeaderComponent* newHeader);
+
     /** Changes the height of the table header component.
         @see getHeaderHeight
     */

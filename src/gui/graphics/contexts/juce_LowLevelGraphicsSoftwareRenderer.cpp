@@ -37,10 +37,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../core/juce_Singleton.h"
 #include "../../../utilities/juce_DeletedAtShutdown.h"
 
-#if (JUCE_WINDOWS || JUCE_LINUX) && ! JUCE_64BIT
- #define JUCE_USE_SSE_INSTRUCTIONS 1
-#endif
-
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4127) // "expression is constant" warning

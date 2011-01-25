@@ -353,8 +353,7 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster*)
     {
-        const ScopedPointer <XmlElement> oldOpenness (owner.tree.getOpennessState (true));
-
+        const OpennessRestorer openness (*this);
         clearSubItems();
 
         const StringArray categories (owner.getMappings().getCommandManager()->getCommandCategories());
@@ -371,9 +370,6 @@ public:
             if (count > 0)
                 addSubItem (new CategoryItem (owner, categories[i]));
         }
-
-        if (oldOpenness != 0)
-            owner.tree.restoreOpennessState (*oldOpenness);
     }
 
     void buttonClicked (Button*)

@@ -416,13 +416,9 @@ void ProjectTreeViewBase::addSubItems()
 
 void ProjectTreeViewBase::refreshSubItems()
 {
-    ScopedPointer <XmlElement> oldOpenness (getOpennessState());
-
+    OpennessRestorer openness (*this);
     clearSubItems();
     addSubItems();
-
-    if (oldOpenness != 0)
-        restoreOpennessState (*oldOpenness);
 }
 
 void ProjectTreeViewBase::showMultiSelectionPopupMenu()

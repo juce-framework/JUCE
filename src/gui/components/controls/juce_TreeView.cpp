@@ -1800,4 +1800,18 @@ XmlElement* TreeViewItem::getOpennessState() const throw()
     return 0;
 }
 
+//==============================================================================
+TreeViewItem::OpennessRestorer::OpennessRestorer (TreeViewItem& treeViewItem_)
+    : treeViewItem (treeViewItem_),
+      oldOpenness (treeViewItem_.getOpennessState())
+{
+}
+
+TreeViewItem::OpennessRestorer::~OpennessRestorer()
+{
+    if (oldOpenness != 0)
+        treeViewItem.restoreOpennessState (*oldOpenness);
+}
+
+
 END_JUCE_NAMESPACE

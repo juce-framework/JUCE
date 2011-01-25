@@ -333,7 +333,7 @@ const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvi
 
     ValueTree childList (v.getChildListCreating (0));
 
-    for (int i = getNumChildComponents(); --i >= 0;)
+    for (int i = 0; i < getNumChildComponents(); ++i)
     {
         const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
         jassert (d != 0); // You can't save a mix of Drawables and normal components!
