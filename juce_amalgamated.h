@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	17
+#define JUCE_BUILDNUMBER	18
 
 /** Current Juce version number.
 
@@ -107,7 +107,7 @@ namespace JuceDummyNamespace {}
   #define	   JUCE_WINDOWS 1
 #elif defined (LINUX) || defined (__linux__)
   #define	 JUCE_LINUX 1
-#elif defined(__APPLE_CPP__) || defined(__APPLE_CC__)
+#elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
@@ -116,6 +116,9 @@ namespace JuceDummyNamespace {}
   #else
 	#define	 JUCE_MAC 1
   #endif
+#elif defined (JUCE_ANDROID)
+  #undef	JUCE_ANDROID
+  #define	   JUCE_ANDROID 1
 #else
   #error "Unknown platform!"
 #endif
@@ -184,15 +187,19 @@ namespace JuceDummyNamespace {}
 
 #endif
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_ANDROID
 
   #ifdef _DEBUG
 	#define JUCE_DEBUG 1
   #endif
 
   // Allow override for big-endian Linux platforms
-  #ifndef JUCE_BIG_ENDIAN
+  #if defined (__LITTLE_ENDIAN__) || ! defined (JUCE_BIG_ENDIAN)
 	#define JUCE_LITTLE_ENDIAN 1
+	#undef JUCE_BIG_ENDIAN
+  #else
+	#undef JUCE_LITTLE_ENDIAN
+	#define JUCE_BIG_ENDIAN 1
   #endif
 
   #if defined (__LP64__) || defined (_LP64)
@@ -201,7 +208,9 @@ namespace JuceDummyNamespace {}
 	#define JUCE_32BIT 1
   #endif
 
-  #define JUCE_INTEL 1
+  #if __MMX__ || __SSE__ || __amd64__
+	#define JUCE_INTEL 1
+  #endif
 #endif
 
 // Compiler type macros.
@@ -836,6 +845,11 @@ namespace JuceDummyNamespace {}
   #endif
 #endif
 
+#if JUCE_ANDROID
+  #include <sys/atomics.h>
+  #include <byteswap.h>
+#endif
+
 // DLL building settings on Win32
 #if JUCE_MSVC
   #ifdef JUCE_DLL_BUILD
@@ -1089,9 +1103,6 @@ typedef unsigned int		uint32;
   typedef unsigned int		  pointer_sized_uint;
 #endif
 
-/** A platform-independent unicode character type. */
-typedef wchar_t			 juce_wchar;
-
 // Some indispensible min/max functions
 
 /** Returns the larger of two values. */
@@ -1339,6 +1350,8 @@ inline bool juce_isfinite (FloatingPointType value)
 {
 	#if JUCE_WINDOWS
 	  return _finite (value);
+	#elif JUCE_ANDROID
+	  return isfinite (value);
 	#else
 	  return std::isfinite (value);
 	#endif
@@ -1546,18 +1559,22 @@ inline uint32 ByteOrder::swap (uint32 n)
 {
   #if JUCE_MAC || JUCE_IOS
 	return OSSwapInt32 (n);
-  #elif JUCE_GCC
+  #elif JUCE_GCC && JUCE_INTEL
 	asm("bswap %%eax" : "=a"(n) : "a"(n));
 	return n;
   #elif JUCE_USE_INTRINSICS
 	return _byteswap_ulong (n);
-  #else
+  #elif JUCE_MSVC
 	__asm {
 		mov eax, n
 		bswap eax
 		mov n, eax
 	}
 	return n;
+  #elif JUCE_ANDROID
+	return bswap_32 (n);
+  #else
+	return (n << 24) | (n >> 24) | ((n & 0xff00) << 8) | ((n & 0xff0000) >> 8);
   #endif
 }
 
@@ -1621,28 +1638,34 @@ inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destB
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 #define __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 
-#define JUCE_T(stringLiteral)	 (L##stringLiteral)
-typedef juce_wchar		tchar;
-
-#if ! JUCE_DONT_DEFINE_MACROS
-
-/** The 'T' macro allows a literal string to be compiled as unicode.
-
-	If you write your string literals in the form T("xyz"), it will be compiled as L"xyz"
-	or "xyz", depending on which representation is best for the String class to work with.
-
-	Because the 'T' symbol is occasionally used inside 3rd-party library headers which you
-	may need to include after juce.h, you can use the juce_withoutMacros.h file (in
-	the juce/src directory) to avoid defining this macro. See the comments in
-	juce_withoutMacros.h for more info.
-*/
-#define T(stringLiteral)		JUCE_T(stringLiteral)
-
+#if JUCE_ANDROID && ! DOXYGEN
+ typedef uint32			 juce_wchar;
+ #define JUCE_T(stringLiteral)	  CharPointer_UTF8 (stringLiteral)
+#else
+ /** A platform-independent unicode character type. */
+ typedef wchar_t			juce_wchar;
+ #define JUCE_T(stringLiteral)	  (L##stringLiteral)
 #endif
 
+#if ! JUCE_DONT_DEFINE_MACROS
+ /** The 'T' macro allows a literal string to be compiled as unicode.
+
+	 If you write your string literals in the form T("xyz"), it will be compiled as L"xyz"
+	 or "xyz", depending on which representation is best for the String class to work with.
+
+	 Because the 'T' symbol is occasionally used inside 3rd-party library headers which you
+	 may need to include after juce.h, you can use the juce_withoutMacros.h file (in
+	 the juce/src directory) to avoid defining this macro. See the comments in
+	 juce_withoutMacros.h for more info.
+ */
+ #define T(stringLiteral)		JUCE_T(stringLiteral)
+#endif
+
+#undef max
+#undef min
+
 /**
-	A set of methods for manipulating characters and character strings, with
-	duplicate methods to handle 8-bit and unicode characters.
+	A set of methods for manipulating characters and character strings.
 
 	These are defined as wrappers around the basic C string handlers, to provide
 	a clean, cross-platform layer, (because various platforms differ in the
@@ -1653,71 +1676,11 @@ typedef juce_wchar		tchar;
 class JUCE_API  CharacterFunctions
 {
 public:
-	static int length (const char* s) throw();
-	static int length (const juce_wchar* s) throw();
 
-	static void copy (char* dest, const char* src, int maxBytes) throw();
-	static void copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw();
-
-	static void copy (juce_wchar* dest, const char* src, int maxChars) throw();
-	static void copy (char* dest, const juce_wchar* src, int maxBytes) throw();
-	static int bytesRequiredForCopy (const juce_wchar* src) throw();
-
-	static void append (char* dest, const char* src) throw();
-	static void append (juce_wchar* dest, const juce_wchar* src) throw();
-
-	static int compare (const char* s1, const char* s2) throw();
-	static int compare (const juce_wchar* s1, const juce_wchar* s2) throw();
-	static int compare (const juce_wchar* s1, const char* s2) throw();
-	static int compare (const char* s1, const juce_wchar* s2) throw();
-
-	static int compare (const char* s1, const char* s2, int maxChars) throw();
-	static int compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
-
-	static int compareIgnoreCase (const char* s1, const char* s2) throw();
-	static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2) throw();
-	static int compareIgnoreCase (const juce_wchar* s1, const char* s2) throw();
-
-	static int compareIgnoreCase (const char* s1, const char* s2, int maxChars) throw();
-	static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
-
-	static const char* find (const char* haystack, const char* needle) throw();
-	static const juce_wchar* find (const juce_wchar* haystack, const juce_wchar* needle) throw();
-
-	static int indexOfChar (const char* haystack, char needle, bool ignoreCase) throw();
-	static int indexOfChar (const juce_wchar* haystack, juce_wchar needle, bool ignoreCase) throw();
-
-	static int indexOfCharFast (const char* haystack, char needle) throw();
-	static int indexOfCharFast (const juce_wchar* haystack, juce_wchar needle) throw();
-
-	static int getIntialSectionContainingOnly (const char* text, const char* allowedChars) throw();
-	static int getIntialSectionContainingOnly (const juce_wchar* text, const juce_wchar* allowedChars) throw();
-
-	static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
-	static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
-
-	static int getIntValue (const char* s) throw();
-	static int getIntValue (const juce_wchar* s) throw();
-
-	static int64 getInt64Value (const char* s) throw();
-	static int64 getInt64Value (const juce_wchar* s) throw();
-
-	static double getDoubleValue (const char* s) throw();
-	static double getDoubleValue (const juce_wchar* s) throw();
-
-	static char toUpperCase (char character) throw();
 	static juce_wchar toUpperCase (juce_wchar character) throw();
-	static void toUpperCase (char* s) throw();
-
-	static void toUpperCase (juce_wchar* s) throw();
-	static bool isUpperCase (char character) throw();
-	static bool isUpperCase (juce_wchar character) throw();
-
-	static char toLowerCase (char character) throw();
 	static juce_wchar toLowerCase (juce_wchar character) throw();
-	static void toLowerCase (char* s) throw();
-	static void toLowerCase (juce_wchar* s) throw();
-	static bool isLowerCase (char character) throw();
+
+	static bool isUpperCase (juce_wchar character) throw();
 	static bool isLowerCase (juce_wchar character) throw();
 
 	static bool isWhitespace (char character) throw();
@@ -1732,14 +1695,1421 @@ public:
 	static bool isLetterOrDigit (char character) throw();
 	static bool isLetterOrDigit (juce_wchar character) throw();
 
-	/** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legel
-		hex digit.
-	*/
+	/** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legal hex digit. */
 	static int getHexDigitValue (juce_wchar digit) throw();
+
+	template <typename CharPointerType>
+	static double getDoubleValue (const CharPointerType& text) throw()
+	{
+		double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
+		int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
+		int exponent = 0, decPointIndex = 0, digit = 0;
+		int lastDigit = 0, numSignificantDigits = 0;
+		bool isNegative = false, digitsFound = false;
+		const int maxSignificantDigits = 15 + 2;
+
+		CharPointerType s (text.findEndOfWhitespace());
+		juce_wchar c = *s;
+
+		switch (c)
+		{
+			case '-':   isNegative = true; // fall-through..
+			case '+':   c = *++s;
+		}
+
+		switch (c)
+		{
+			case 'n':
+			case 'N':
+				if ((s[1] == 'a' || s[1] == 'A') && (s[2] == 'n' || s[2] == 'N'))
+					return std::numeric_limits<double>::quiet_NaN();
+				break;
+
+			case 'i':
+			case 'I':
+				if ((s[1] == 'n' || s[1] == 'N') && (s[2] == 'f' || s[2] == 'F'))
+					return std::numeric_limits<double>::infinity();
+				break;
+		}
+
+		for (;;)
+		{
+			if (s.isDigit())
+			{
+				lastDigit = digit;
+				digit = s.getAndAdvance() - '0';
+				digitsFound = true;
+
+				if (decPointIndex != 0)
+					exponentAdjustment[1]++;
+
+				if (numSignificantDigits == 0 && digit == 0)
+					continue;
+
+				if (++numSignificantDigits > maxSignificantDigits)
+				{
+					if (digit > 5)
+						++accumulator [decPointIndex];
+					else if (digit == 5 && (lastDigit & 1) != 0)
+						++accumulator [decPointIndex];
+
+					if (decPointIndex > 0)
+						exponentAdjustment[1]--;
+					else
+						exponentAdjustment[0]++;
+
+					while (s.isDigit())
+					{
+						++s;
+						if (decPointIndex == 0)
+							exponentAdjustment[0]++;
+					}
+				}
+				else
+				{
+					const double maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
+					if (accumulator [decPointIndex] > maxAccumulatorValue)
+					{
+						result [decPointIndex] = mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
+													+ accumulator [decPointIndex];
+						accumulator [decPointIndex] = 0;
+						exponentAccumulator [decPointIndex] = 0;
+					}
+
+					accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
+					exponentAccumulator [decPointIndex]++;
+				}
+			}
+			else if (decPointIndex == 0 && *s == '.')
+			{
+				++s;
+				decPointIndex = 1;
+
+				if (numSignificantDigits > maxSignificantDigits)
+				{
+					while (s.isDigit())
+						++s;
+					break;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		result[0] = mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
+
+		if (decPointIndex != 0)
+			result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
+
+		c = *s;
+		if ((c == 'e' || c == 'E') && digitsFound)
+		{
+			bool negativeExponent = false;
+
+			switch (*++s)
+			{
+				case '-':   negativeExponent = true; // fall-through..
+				case '+':   ++s;
+			}
+
+			while (s.isDigit())
+				exponent = (exponent * 10) + (s.getAndAdvance() - '0');
+
+			if (negativeExponent)
+				exponent = -exponent;
+		}
+
+		double r = mulexp10 (result[0], exponent + exponentAdjustment[0]);
+		if (decPointIndex != 0)
+			r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
+
+		return isNegative ? -r : r;
+	}
+
+	template <typename IntType, typename CharPointerType>
+	static IntType getIntValue (const CharPointerType& text) throw()
+	{
+		IntType v = 0;
+		CharPointerType s (text.findEndOfWhitespace());
+
+		const bool isNeg = *s == '-';
+		if (isNeg)
+			++s;
+
+		for (;;)
+		{
+			const juce_wchar c = s.getAndAdvance();
+
+			if (c >= '0' && c <= '9')
+				v = v * 10 + (IntType) (c - '0');
+			else
+				break;
+		}
+
+		return isNeg ? -v : v;
+	}
+
+	static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
+	static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
+
+	template <typename DestCharPointerType, typename SrcCharPointerType>
+	static void copyAndAdvance (DestCharPointerType& dest, SrcCharPointerType src) throw()
+	{
+		juce_wchar c;
+
+		do
+		{
+			c = src.getAndAdvance();
+			dest.write (c);
+		}
+		while (c != 0);
+	}
+
+	template <typename DestCharPointerType, typename SrcCharPointerType>
+	static int copyAndAdvanceUpToBytes (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) throw()
+	{
+		int numBytesDone = 0;
+
+		for (;;)
+		{
+			const juce_wchar c = src.getAndAdvance();
+			const size_t bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
+
+			maxBytes -= bytesNeeded;
+			if (maxBytes < 0)
+				break;
+
+			numBytesDone += bytesNeeded;
+			dest.write (c);
+			if (c == 0)
+				break;
+		}
+
+		return numBytesDone;
+	}
+
+	template <typename DestCharPointerType, typename SrcCharPointerType>
+	static void copyAndAdvanceUpToNumChars (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) throw()
+	{
+		while (--maxChars >= 0)
+		{
+			const juce_wchar c = src.getAndAdvance();
+			dest.write (c);
+			if (c == 0)
+				break;
+		}
+	}
+
+	template <typename CharPointerType1, typename CharPointerType2>
+	static int compare (CharPointerType1 s1, CharPointerType2 s2) throw()
+	{
+		for (;;)
+		{
+			const int c1 = (int) s1.getAndAdvance();
+			const int c2 = (int) s2.getAndAdvance();
+
+			const int diff = c1 - c2;
+			if (diff != 0)
+				return diff < 0 ? -1 : 1;
+			else if (c1 == 0)
+				break;
+		}
+
+		return 0;
+	}
+
+	template <typename CharPointerType1, typename CharPointerType2>
+	static int compareUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) throw()
+	{
+		while (--maxChars >= 0)
+		{
+			const int c1 = (int) s1.getAndAdvance();
+			const int c2 = (int) s2.getAndAdvance();
+
+			const int diff = c1 - c2;
+			if (diff != 0)
+				return diff < 0 ? -1 : 1;
+			else if (c1 == 0)
+				break;
+		}
+
+		return 0;
+	}
+
+	template <typename CharPointerType1, typename CharPointerType2>
+	static int compareIgnoreCase (CharPointerType1 s1, CharPointerType2 s2) throw()
+	{
+		for (;;)
+		{
+			int c1 = s1.toUpperCase();
+			int c2 = s2.toUpperCase();
+			++s1;
+			++s2;
+
+			const int diff = c1 - c2;
+			if (diff != 0)
+				return diff < 0 ? -1 : 1;
+			else if (c1 == 0)
+				break;
+		}
+
+		return 0;
+	}
+
+	template <typename CharPointerType1, typename CharPointerType2>
+	static int compareIgnoreCaseUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) throw()
+	{
+		while (--maxChars >= 0)
+		{
+			int c1 = s1.toUpperCase();
+			int c2 = s2.toUpperCase();
+			++s1;
+			++s2;
+
+			const int diff = c1 - c2;
+			if (diff != 0)
+				return diff < 0 ? -1 : 1;
+			else if (c1 == 0)
+				break;
+		}
+
+		return 0;
+	}
+
+	template <typename CharPointerType1, typename CharPointerType2>
+	static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) throw()
+	{
+		int index = 0;
+		const int needleLength = needle.length();
+
+		for (;;)
+		{
+			if (haystack.compareUpTo (needle, needleLength) == 0)
+				return index;
+
+			if (haystack.getAndAdvance() == 0)
+				return -1;
+
+			++index;
+		}
+	}
+
+	template <typename Type>
+	static int indexOfChar (Type text, const juce_wchar charToFind) throw()
+	{
+		int i = 0;
+
+		while (! text.isEmpty())
+		{
+			if (text.getAndAdvance() == charToFind)
+				return i;
+
+			++i;
+		}
+
+		return -1;
+	}
+
+	template <typename Type>
+	static int indexOfCharIgnoreCase (Type text, juce_wchar charToFind) throw()
+	{
+		charToFind = CharacterFunctions::toLowerCase (charToFind);
+		int i = 0;
+
+		while (! text.isEmpty())
+		{
+			if (text.toLowerCase() == charToFind)
+				return i;
+
+			++text;
+			++i;
+		}
+
+		return -1;
+	}
+
+	template <typename Type>
+	static Type findEndOfWhitespace (const Type& text) throw()
+	{
+		Type p (text);
+
+		while (p.isWhitespace())
+			++p;
+
+		return p;
+	}
+
+private:
+	static double mulexp10 (const double value, int exponent) throw();
 };
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 /*** End of inlined file: juce_CharacterFunctions.h ***/
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4514 4996)
+#endif
+
+
+/*** Start of inlined file: juce_CharPointer_UTF8.h ***/
+#ifndef __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
+#define __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
+
+/**
+	Wraps a pointer to a null-terminated UTF-8 character string, and provides
+	various methods to operate on the data.
+	@see CharPointer_UTF16, CharPointer_UTF32
+*/
+class CharPointer_UTF8
+{
+public:
+	typedef char CharType;
+
+	inline CharPointer_UTF8 (const CharType* const rawPointer) throw()
+		: data (const_cast <CharType*> (rawPointer))
+	{
+	}
+
+	inline CharPointer_UTF8 (const CharPointer_UTF8& other) throw()
+		: data (other.data)
+	{
+	}
+
+	inline CharPointer_UTF8& operator= (const CharPointer_UTF8& other) throw()
+	{
+		data = other.data;
+		return *this;
+	}
+
+	/** Returns the address that this pointer is pointing to. */
+	inline CharType* getAddress() const throw()	 { return data; }
+
+	/** Returns true if this pointer is pointing to a null character. */
+	inline bool isEmpty() const throw()		 { return *data == 0; }
+
+	/** Returns the unicode character that this pointer is pointing to. */
+	juce_wchar operator*() const throw()
+	{
+		const char byte = *data;
+
+		if (byte >= 0)
+			return byte;
+
+		juce_wchar n = byte;
+		juce_wchar mask = 0x7f;
+		juce_wchar bit = 0x40;
+		size_t numExtraValues = 0;
+
+		while ((n & bit) != 0 && bit > 0x10)
+		{
+			mask >>= 1;
+			++numExtraValues;
+			bit >>= 1;
+		}
+
+		n &= mask;
+
+		for (size_t i = 1; i <= numExtraValues; ++i)
+		{
+			const juce_wchar nextByte = data [i];
+
+			if ((nextByte & 0xc0) != 0x80)
+				break;
+
+			n <<= 6;
+			n |= (nextByte & 0x3f);
+		}
+
+		return n;
+	}
+
+	/** Moves this pointer along to the next character in the string. */
+	CharPointer_UTF8& operator++() throw()
+	{
+		const char n = *data++;
+
+		if (n < 0)
+		{
+			juce_wchar bit = 0x40;
+
+			while ((n & bit) != 0 && bit > 0x10)
+			{
+				++data;
+				bit >>= 1;
+			}
+		}
+
+		return *this;
+	}
+
+	/** Returns the character that this pointer is currently pointing to, and then
+		advances the pointer to point to the next character. */
+	juce_wchar getAndAdvance() throw()
+	{
+		const char byte = *data++;
+
+		if (byte >= 0)
+			return byte;
+
+		uint32 n = (uint32) (uint8) byte;
+		uint32 mask = 0x7f;
+		uint32 bit = 0x40;
+		int numExtraValues = 0;
+
+		while ((n & bit) != 0 && bit > 0x10)
+		{
+			mask >>= 1;
+			++numExtraValues;
+			bit >>= 1;
+		}
+
+		n &= mask;
+
+		while (--numExtraValues >= 0)
+		{
+			const uint32 nextByte = (uint32) (uint8) *data++;
+
+			if ((nextByte & 0xc0) != 0x80)
+				break;
+
+			n <<= 6;
+			n |= (nextByte & 0x3f);
+		}
+
+		return (juce_wchar) n;
+	}
+
+	/** Moves this pointer along to the next character in the string. */
+	CharPointer_UTF8 operator++ (int) throw()
+	{
+		CharPointer_UTF8 temp (*this);
+		++*this;
+		return temp;
+	}
+
+	/** Moves this pointer forwards by the specified number of characters. */
+	void operator+= (int numToSkip) throw()
+	{
+		jassert (numToSkip >= 0);
+
+		while (--numToSkip >= 0)
+			++*this;
+	}
+
+	/** Returns the character at a given character index from the start of the string. */
+	juce_wchar operator[] (int characterIndex) const throw()
+	{
+		CharPointer_UTF8 p (*this);
+		p += characterIndex;
+		return *p;
+	}
+
+	/** Returns a pointer which is moved forwards from this one by the specified number of characters. */
+	CharPointer_UTF8 operator+ (int numToSkip) const throw()
+	{
+		CharPointer_UTF8 p (*this);
+		p += numToSkip;
+		return p;
+	}
+
+	/** Writes a unicode character to this string, and advances this pointer to point to the next position. */
+	void write (const juce_wchar charToWrite) throw()
+	{
+		const uint32 c = (uint32) charToWrite;
+
+		if (c >= 0x80)
+		{
+			int numExtraBytes = 1;
+			if (c >= 0x800)
+			{
+				++numExtraBytes;
+				if (c >= 0x10000)
+					++numExtraBytes;
+			}
+
+			*data++ = (CharType) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
+
+			while (--numExtraBytes >= 0)
+				*data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
+		}
+		else
+		{
+			*data++ = (CharType) c;
+		}
+	}
+
+	/** Returns the number of characters in this string. */
+	size_t length() const throw()
+	{
+		const CharType* d = data;
+		size_t count = 0;
+
+		for (;;)
+		{
+			const int n = *d++;
+
+			if ((n & 0x80) != 0)
+			{
+				int bit = 0x40;
+
+				while ((n & bit) != 0)
+				{
+					++d;
+					bit >>= 1;
+
+					if (bit == 0)
+						break; // illegal utf-8 sequence
+				}
+			}
+			else if (n == 0)
+				break;
+
+			++count;
+		}
+
+		return count;
+	}
+
+	/** Returns the number of bytes that are used to represent this string.
+		This includes the terminating null character.
+	*/
+	size_t sizeInBytes() const throw()
+	{
+		return strlen (data) + 1;
+	}
+
+	/** Returns the number of bytes that would be needed to represent the given
+		unicode character in this encoding format.
+	*/
+	static size_t getBytesRequiredFor (const juce_wchar charToWrite) throw()
+	{
+		size_t num = 1;
+		const uint32 c = (uint32) charToWrite;
+
+		if (c >= 0x80)
+		{
+			++num;
+			if (c >= 0x800)
+			{
+				++num;
+				if (c >= 0x10000)
+					++num;
+			}
+		}
+
+		return num;
+	}
+
+	/** Returns the number of bytes that would be needed to represent the given
+		string in this encoding format.
+		The value returned does NOT include the terminating null character.
+	*/
+	template <class CharPointer>
+	static size_t getBytesRequiredFor (CharPointer text) throw()
+	{
+		size_t count = 0;
+		juce_wchar n;
+
+		while ((n = text.getAndAdvance()) != 0)
+			count += getBytesRequiredFor (n);
+
+		return count;
+	}
+
+	/** Returns a pointer to the null character that terminates this string. */
+	CharPointer_UTF8 findTerminatingNull() const throw()
+	{
+		return CharPointer_UTF8 (data + strlen (data));
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	template <typename CharPointer>
+	void copyAndAdvance (const CharPointer& src) throw()
+	{
+		CharacterFunctions::copyAndAdvance (*this, src);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	void copyAndAdvance (const CharPointer_UTF8& src) throw()
+	{
+		data = (CharType*) strcpy ((char*) data, src.data);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes.
+		The maxBytes parameter specifies the maximum number of bytes that can be written
+		to the destination buffer before stopping.
+	*/
+	template <typename CharPointer>
+	int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+	{
+		return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes.
+		The maxChars parameter specifies the maximum number of characters that can be
+		written to the destination buffer before stopping (including the terminating null).
+	*/
+	template <typename CharPointer>
+	void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+	{
+		CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+	}
+
+	/** Compares this string with another one. */
+	template <typename CharPointer>
+	int compare (const CharPointer& other) const throw()
+	{
+		return CharacterFunctions::compare (*this, other);
+	}
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	template <typename CharPointer>
+	int compareUpTo (const CharPointer& other, int maxChars) const throw()
+	{
+		return CharacterFunctions::compareUpTo (*this, other, maxChars);
+	}
+
+	/** Compares this string with another one. */
+	template <typename CharPointer>
+	int compareIgnoreCase (const CharPointer& other) const throw()
+	{
+		return CharacterFunctions::compareIgnoreCase (*this, other);
+	}
+
+	/** Compares this string with another one. */
+	int compareIgnoreCase (const CharPointer_UTF8& other) const throw()
+	{
+	   #if JUCE_WINDOWS
+		return stricmp (data, other.data);
+	   #else
+		return strcasecmp (data, other.data);
+	   #endif
+	}
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	template <typename CharPointer>
+	int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+	{
+		return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
+	}
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, int maxChars) const throw()
+	{
+	   #if JUCE_WINDOWS
+		return strnicmp (data, other.data, maxChars);
+	   #else
+		return strncasecmp (data, other.data, maxChars);
+	   #endif
+	}
+
+	/** Returns the character index of a substring, or -1 if it isn't found. */
+	template <typename CharPointer>
+	int indexOf (const CharPointer& stringToFind) const throw()
+	{
+		return CharacterFunctions::indexOf (*this, stringToFind);
+	}
+
+	/** Returns the character index of a unicode character, or -1 if it isn't found. */
+	int indexOf (const juce_wchar charToFind) const throw()
+	{
+		return CharacterFunctions::indexOfChar (*this, charToFind);
+	}
+
+	/** Returns the character index of a unicode character, or -1 if it isn't found. */
+	int indexOf (const juce_wchar charToFind, const bool ignoreCase) const throw()
+	{
+		return ignoreCase ? CharacterFunctions::indexOfCharIgnoreCase (*this, charToFind)
+						  : CharacterFunctions::indexOfChar (*this, charToFind);
+	}
+
+	/** Returns true if the first character of this string is whitespace. */
+	bool isWhitespace() const throw()	   { return *data == ' ' || (*data <= 13 && *data >= 9); }
+	/** Returns true if the first character of this string is a digit. */
+	bool isDigit() const throw()		{ return *data >= '0' && *data <= '9'; }
+	/** Returns true if the first character of this string is a letter. */
+	bool isLetter() const throw()	   { return CharacterFunctions::isLetter (operator*()) != 0; }
+	/** Returns true if the first character of this string is a letter or digit. */
+	bool isLetterOrDigit() const throw()	{ return CharacterFunctions::isLetterOrDigit (operator*()) != 0; }
+	/** Returns true if the first character of this string is upper-case. */
+	bool isUpperCase() const throw()	{ return CharacterFunctions::isUpperCase (operator*()) != 0; }
+	/** Returns true if the first character of this string is lower-case. */
+	bool isLowerCase() const throw()	{ return CharacterFunctions::isLowerCase (operator*()) != 0; }
+
+	/** Returns an upper-case version of the first character of this string. */
+	juce_wchar toUpperCase() const throw()  { return CharacterFunctions::toUpperCase (operator*()); }
+	/** Returns a lower-case version of the first character of this string. */
+	juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (operator*()); }
+
+	/** Parses this string as a 32-bit integer. */
+	int getIntValue32() const throw()	   { return atoi (data); }
+
+	/** Parses this string as a 64-bit integer. */
+	int64 getIntValue64() const throw()
+	{
+	   #if JUCE_LINUX || JUCE_ANDROID
+		return atoll (data);
+	   #elif JUCE_WINDOWS
+		return _atoi64 (data);
+	   #else
+		return CharacterFunctions::getIntValue <int64, CharPointer_UTF8> (*this);
+	   #endif
+	}
+
+	/** Parses this string as a floating point double. */
+	double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
+
+	/** Returns the first non-whitespace character in the string. */
+	CharPointer_UTF8 findEndOfWhitespace() const throw()	{ return CharacterFunctions::findEndOfWhitespace (*this); }
+
+private:
+	CharType* data;
+};
+
+#endif   // __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
+/*** End of inlined file: juce_CharPointer_UTF8.h ***/
+
+
+/*** Start of inlined file: juce_CharPointer_UTF16.h ***/
+#ifndef __JUCE_CHARPOINTER_UTF16_JUCEHEADER__
+#define __JUCE_CHARPOINTER_UTF16_JUCEHEADER__
+
+/**
+	Wraps a pointer to a null-terminated UTF-16 character string, and provides
+	various methods to operate on the data.
+	@see CharPointer_UTF8, CharPointer_UTF32
+*/
+class CharPointer_UTF16
+{
+public:
+	typedef int16 CharType;
+
+	inline CharPointer_UTF16 (const CharType* const rawPointer) throw()
+		: data (const_cast <CharType*> (rawPointer))
+	{
+	}
+
+	inline CharPointer_UTF16 (const CharPointer_UTF16& other) throw()
+		: data (other.data)
+	{
+	}
+
+	inline CharPointer_UTF16& operator= (const CharPointer_UTF16& other) throw()
+	{
+		data = other.data;
+		return *this;
+	}
+
+	/** Returns the address that this pointer is pointing to. */
+	inline CharType* getAddress() const throw()	 { return data; }
+
+	/** Returns true if this pointer is pointing to a null character. */
+	inline bool isEmpty() const throw()		 { return *data == 0; }
+
+	/** Returns the unicode character that this pointer is pointing to. */
+	juce_wchar operator*() const throw()
+	{
+		uint32 n = (uint32) (uint16) *data;
+
+		if (n >= 0xd800 && n <= 0xdfff)
+			n = 0x10000 + (((n & ~0xd800) << 10) | (data[1] & ~0xdc00));
+
+		return (juce_wchar) n;
+	}
+
+	/** Moves this pointer along to the next character in the string. */
+	CharPointer_UTF16& operator++() throw()
+	{
+		const juce_wchar n = *data++;
+
+		if (n >= 0xd800 && n <= 0xdfff)
+			++data;
+
+		return *this;
+	}
+
+	/** Returns the character that this pointer is currently pointing to, and then
+		advances the pointer to point to the next character. */
+	juce_wchar getAndAdvance() throw()
+	{
+		uint32 n = (uint32) (uint16) *data++;
+
+		if (n >= 0xd800 && n <= 0xdfff)
+		{
+			n = 0x10000 + (((n & ~0xd800) << 10) | (*data & ~0xdc00));
+			++data;
+		}
+
+		return (juce_wchar) n;
+	}
+
+	/** Moves this pointer along to the next character in the string. */
+	CharPointer_UTF16 operator++ (int) throw()
+	{
+		CharPointer_UTF16 temp (*this);
+		++*this;
+		return temp;
+	}
+
+	/** Moves this pointer forwards by the specified number of characters. */
+	void operator+= (int numToSkip) throw()
+	{
+		jassert (numToSkip >= 0);
+
+		while (--numToSkip >= 0)
+			++*this;
+	}
+
+	/** Returns the character at a given character index from the start of the string. */
+	juce_wchar operator[] (int characterIndex) const throw()
+	{
+		CharPointer_UTF16 p (*this);
+		p += characterIndex;
+		return *p;
+	}
+
+	/** Returns a pointer which is moved forwards from this one by the specified number of characters. */
+	CharPointer_UTF16 operator+ (int numToSkip) const throw()
+	{
+		CharPointer_UTF16 p (*this);
+		p += numToSkip;
+		return p;
+	}
+
+	/** Writes a unicode character to this string, and advances this pointer to point to the next position. */
+	void write (const juce_wchar charToWrite) throw()
+	{
+		if (charToWrite < 0xd800 || (charToWrite > 0xdfff && charToWrite <= 0xffff))
+		{
+			*data++ = (CharType) charToWrite;
+		}
+		else
+		{
+			*data++ = (CharType) ((0xd800 - (0x10000 >> 10)) + (charToWrite >> 10));
+			*data++ = (CharType) (0xdc00 + (charToWrite & 0x3ff));
+		}
+	}
+
+	/** Returns the number of characters in this string. */
+	size_t length() const throw()
+	{
+		const CharType* d = data;
+		size_t count = 0;
+
+		for (;;)
+		{
+			const int n = *d++;
+
+			if (n >= 0xd800 && n <= 0xdfff)
+				++d;
+			else if (n == 0)
+				break;
+
+			++count;
+		}
+
+		return count;
+	}
+
+	/** Returns the number of bytes that are used to represent this string.
+		This includes the terminating null character.
+	*/
+	size_t sizeInBytes() const throw()
+	{
+		return sizeof (CharType) * (findNullIndex (data) + 1);
+	}
+
+	/** Returns the number of bytes that would be needed to represent the given
+		unicode character in this encoding format.
+	*/
+	static size_t getBytesRequiredFor (const juce_wchar charToWrite) throw()
+	{
+		return (charToWrite < 0xd800 || (charToWrite > 0xdfff && charToWrite <= 0xffff))
+					? 1 : 2;
+	}
+
+	/** Returns the number of bytes that would be needed to represent the given
+		string in this encoding format.
+		The value returned does NOT include the terminating null character.
+	*/
+	template <class CharPointer>
+	static size_t getBytesRequiredFor (CharPointer text) throw()
+	{
+		size_t count = 0;
+		juce_wchar n;
+
+		while ((n = text.getAndAdvance()) != 0)
+			count += getBytesRequiredFor (n);
+
+		return count;
+	}
+
+	/** Returns a pointer to the null character that terminates this string. */
+	CharPointer_UTF16 findTerminatingNull() const throw()
+	{
+		const CharType* t = data;
+
+		while (*t != 0)
+			++t;
+
+		return CharPointer_UTF16 (t);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	template <typename CharPointer>
+	void copyAndAdvance (const CharPointer& src) throw()
+	{
+		CharacterFunctions::copyAndAdvance (*this, src);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	void copyAndAdvance (const CharPointer_UTF16& src) throw()
+	{
+		const CharType* s = src.data;
+
+		while ((*data = *s) != 0)
+		{
+			++data;
+			++s;
+		}
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes.
+		The maxBytes parameter specifies the maximum number of bytes that can be written
+		to the destination buffer before stopping.
+	*/
+	template <typename CharPointer>
+	int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+	{
+		return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes.
+		The maxChars parameter specifies the maximum number of characters that can be
+		written to the destination buffer before stopping (including the terminating null).
+	*/
+	template <typename CharPointer>
+	void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+	{
+		CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+	}
+
+	/** Compares this string with another one. */
+	template <typename CharPointer>
+	int compare (const CharPointer& other) const throw()
+	{
+		return CharacterFunctions::compare (*this, other);
+	}
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	template <typename CharPointer>
+	int compareUpTo (const CharPointer& other, int maxChars) const throw()
+	{
+		return CharacterFunctions::compareUpTo (*this, other, maxChars);
+	}
+
+	/** Compares this string with another one. */
+	template <typename CharPointer>
+	int compareIgnoreCase (const CharPointer& other) const throw()
+	{
+		return CharacterFunctions::compareIgnoreCase (*this, other);
+	}
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	template <typename CharPointer>
+	int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+	{
+		return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
+	}
+
+	/** Returns the character index of a substring, or -1 if it isn't found. */
+	template <typename CharPointer>
+	int indexOf (const CharPointer& stringToFind) const throw()
+	{
+		return CharacterFunctions::indexOf (*this, stringToFind);
+	}
+
+	/** Returns the character index of a unicode character, or -1 if it isn't found. */
+	int indexOf (const juce_wchar charToFind) const throw()
+	{
+		return CharacterFunctions::indexOfChar (*this, charToFind);
+	}
+
+	/** Returns the character index of a unicode character, or -1 if it isn't found. */
+	int indexOf (const juce_wchar charToFind, const bool ignoreCase) const throw()
+	{
+		return ignoreCase ? CharacterFunctions::indexOfCharIgnoreCase (*this, charToFind)
+						  : CharacterFunctions::indexOfChar (*this, charToFind);
+	}
+
+	/** Returns true if the first character of this string is whitespace. */
+	bool isWhitespace() const throw()	   { return CharacterFunctions::isWhitespace (operator*()) != 0; }
+	/** Returns true if the first character of this string is a digit. */
+	bool isDigit() const throw()		{ return CharacterFunctions::isDigit (operator*()) != 0; }
+	/** Returns true if the first character of this string is a letter. */
+	bool isLetter() const throw()	   { return CharacterFunctions::isLetter (operator*()) != 0; }
+	/** Returns true if the first character of this string is a letter or digit. */
+	bool isLetterOrDigit() const throw()	{ return CharacterFunctions::isLetterOrDigit (operator*()) != 0; }
+	/** Returns true if the first character of this string is upper-case. */
+	bool isUpperCase() const throw()	{ return CharacterFunctions::isUpperCase (operator*()) != 0; }
+	/** Returns true if the first character of this string is lower-case. */
+	bool isLowerCase() const throw()	{ return CharacterFunctions::isLowerCase (operator*()) != 0; }
+
+	/** Returns an upper-case version of the first character of this string. */
+	juce_wchar toUpperCase() const throw()  { return CharacterFunctions::toUpperCase (operator*()); }
+	/** Returns a lower-case version of the first character of this string. */
+	juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (operator*()); }
+
+	/** Parses this string as a 32-bit integer. */
+	int getIntValue32() const throw()	   { return CharacterFunctions::getIntValue <int, CharPointer_UTF16> (*this); }
+	/** Parses this string as a 64-bit integer. */
+	int64 getIntValue64() const throw()	 { return CharacterFunctions::getIntValue <int64, CharPointer_UTF16> (*this); }
+
+	/** Parses this string as a floating point double. */
+	double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
+
+	/** Returns the first non-whitespace character in the string. */
+	CharPointer_UTF16 findEndOfWhitespace() const throw()	{ return CharacterFunctions::findEndOfWhitespace (*this); }
+
+private:
+	CharType* data;
+
+	static int findNullIndex (const CharType* const t) throw()
+	{
+		int n = 0;
+
+		while (t[n] != 0)
+			++n;
+
+		return n;
+	}
+};
+
+#endif   // __JUCE_CHARPOINTER_UTF16_JUCEHEADER__
+/*** End of inlined file: juce_CharPointer_UTF16.h ***/
+
+
+/*** Start of inlined file: juce_CharPointer_UTF32.h ***/
+#ifndef __JUCE_CHARPOINTER_UTF32_JUCEHEADER__
+#define __JUCE_CHARPOINTER_UTF32_JUCEHEADER__
+
+/**
+	Wraps a pointer to a null-terminated UTF-32 character string, and provides
+	various methods to operate on the data.
+	@see CharPointer_UTF8, CharPointer_UTF16
+*/
+class CharPointer_UTF32
+{
+public:
+	typedef juce_wchar CharType;
+
+	inline CharPointer_UTF32 (const CharType* const rawPointer) throw()
+		: data (const_cast <CharType*> (rawPointer))
+	{
+	}
+
+	inline CharPointer_UTF32 (const CharPointer_UTF32& other) throw()
+		: data (other.data)
+	{
+	}
+
+	inline CharPointer_UTF32& operator= (const CharPointer_UTF32& other) throw()
+	{
+		data = other.data;
+		return *this;
+	}
+
+	/** Returns the address that this pointer is pointing to. */
+	inline CharType* getAddress() const throw()	 { return data; }
+
+	/** Returns true if this pointer is pointing to a null character. */
+	inline bool isEmpty() const throw()		 { return *data == 0; }
+
+	/** Returns the unicode character that this pointer is pointing to. */
+	inline juce_wchar operator*() const throw()	 { return *data; }
+
+	/** Moves this pointer along to the next character in the string. */
+	inline CharPointer_UTF32& operator++() throw()
+	{
+		++data;
+		return *this;
+	}
+
+	/** Moves this pointer to the previous character in the string. */
+	inline CharPointer_UTF32& operator--() throw()
+	{
+		--data;
+		return *this;
+	}
+
+	/** Returns the character that this pointer is currently pointing to, and then
+		advances the pointer to point to the next character. */
+	inline juce_wchar getAndAdvance() throw()   { return *data++; }
+
+	/** Moves this pointer along to the next character in the string. */
+	CharPointer_UTF32 operator++ (int) throw()
+	{
+		CharPointer_UTF32 temp (*this);
+		++*this;
+		return temp;
+	}
+
+	/** Moves this pointer forwards by the specified number of characters. */
+	inline void operator+= (int numToSkip) throw()
+	{
+		data += numToSkip;
+	}
+
+	inline void operator-= (int numToSkip) throw()
+	{
+		data -= numToSkip;
+	}
+
+	/** Returns the character at a given character index from the start of the string. */
+	inline juce_wchar operator[] (int characterIndex) const throw()
+	{
+		return data [characterIndex];
+	}
+
+	/** Returns a pointer which is moved forwards from this one by the specified number of characters. */
+	CharPointer_UTF32 operator+ (int numToSkip) const throw()
+	{
+		return CharPointer_UTF32 (data + numToSkip);
+	}
+
+	/** Returns a pointer which is moved backwards from this one by the specified number of characters. */
+	CharPointer_UTF32 operator- (int numToSkip) const throw()
+	{
+		return CharPointer_UTF32 (data - numToSkip);
+	}
+
+	/** Writes a unicode character to this string, and advances this pointer to point to the next position. */
+	inline void write (const juce_wchar charToWrite) throw()
+	{
+		*data++ = charToWrite;
+	}
+
+	/** Returns the number of characters in this string. */
+	size_t length() const throw()
+	{
+	   #if JUCE_ANDROID
+		size_t n = 0;
+		while (data[n] == 0)
+			++n;
+		return n;
+	   #else
+		return wcslen (data);
+	   #endif
+	}
+
+	/** Returns the number of bytes that are used to represent this string.
+		This includes the terminating null character.
+	*/
+	size_t sizeInBytes() const throw()
+	{
+		return sizeof (CharType) * (length() + 1);
+	}
+
+	/** Returns the number of bytes that would be needed to represent the given
+		unicode character in this encoding format.
+	*/
+	static inline size_t getBytesRequiredFor (const juce_wchar) throw()
+	{
+		return sizeof (CharType);
+	}
+
+	/** Returns the number of bytes that would be needed to represent the given
+		string in this encoding format.
+		The value returned does NOT include the terminating null character.
+	*/
+	template <class CharPointer>
+	static size_t getBytesRequiredFor (const CharPointer& text) throw()
+	{
+		return sizeof (CharType) * text.length();
+	}
+
+	/** Returns a pointer to the null character that terminates this string. */
+	CharPointer_UTF32 findTerminatingNull() const throw()
+	{
+		return CharPointer_UTF32 (data + length());
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	template <typename CharPointer>
+	void copyAndAdvance (const CharPointer& src) throw()
+	{
+		CharacterFunctions::copyAndAdvance (*this, src);
+	}
+
+   #if ! JUCE_ANDROID
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	void copyAndAdvance (const CharPointer_UTF32& src) throw()
+	{
+		data = wcscpy (data, src.data);
+	}
+   #endif
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes.
+		The maxBytes parameter specifies the maximum number of bytes that can be written
+		to the destination buffer before stopping.
+	*/
+	template <typename CharPointer>
+	int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+	{
+		return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes.
+		The maxChars parameter specifies the maximum number of characters that can be
+		written to the destination buffer before stopping (including the terminating null).
+	*/
+	template <typename CharPointer>
+	void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+	{
+		CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+	}
+
+	/** Compares this string with another one. */
+	template <typename CharPointer>
+	int compare (const CharPointer& other) const throw()
+	{
+		return CharacterFunctions::compare (*this, other);
+	}
+
+   #if ! JUCE_ANDROID
+	/** Compares this string with another one. */
+	int compare (const CharPointer_UTF32& other) const throw()
+	{
+		return wcscmp (data, other.data);
+	}
+   #endif
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	template <typename CharPointer>
+	int compareUpTo (const CharPointer& other, int maxChars) const throw()
+	{
+		return CharacterFunctions::compareUpTo (*this, other, maxChars);
+	}
+
+	/** Compares this string with another one. */
+	template <typename CharPointer>
+	int compareIgnoreCase (const CharPointer& other) const
+	{
+		return CharacterFunctions::compareIgnoreCase (*this, other);
+	}
+
+	/** Compares this string with another one, up to a specified number of characters. */
+	template <typename CharPointer>
+	int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+	{
+		return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
+	}
+
+	/** Returns the character index of a substring, or -1 if it isn't found. */
+	template <typename CharPointer>
+	int indexOf (const CharPointer& stringToFind) const throw()
+	{
+		return CharacterFunctions::indexOf (*this, stringToFind);
+	}
+
+	/** Returns the character index of a unicode character, or -1 if it isn't found. */
+	int indexOf (const juce_wchar charToFind) const throw()
+	{
+		int i = 0;
+
+		while (data[i] != 0)
+		{
+			if (data[i] == charToFind)
+				return i;
+
+			++i;
+		}
+
+		return -1;
+	}
+
+	/** Returns the character index of a unicode character, or -1 if it isn't found. */
+	int indexOf (const juce_wchar charToFind, const bool ignoreCase) const throw()
+	{
+		return ignoreCase ? CharacterFunctions::indexOfCharIgnoreCase (*this, charToFind)
+						  : CharacterFunctions::indexOfChar (*this, charToFind);
+	}
+
+   #if JUCE_WINDOWS && ! DOXYGEN
+	int compareIgnoreCase (const CharPointer_UTF32& other) const throw()
+	{
+		return _wcsicmp (data, other.data);
+	}
+
+	int compareIgnoreCaseUpTo (const CharPointer_UTF32& other, int maxChars) const throw()
+	{
+		return _wcsnicmp (data, other.data, maxChars);
+	}
+
+	int indexOf (const CharPointer_UTF32& stringToFind) const throw()
+	{
+		const CharType* const t = wcsstr (data, stringToFind.getAddress());
+		return t == 0 ? -1 : (t - data);
+	}
+   #endif
+
+	/** Returns true if the first character of this string is whitespace. */
+	bool isWhitespace() const		   { return CharacterFunctions::isWhitespace (*data) != 0; }
+	/** Returns true if the first character of this string is a digit. */
+	bool isDigit() const			{ return CharacterFunctions::isDigit (*data) != 0; }
+	/** Returns true if the first character of this string is a letter. */
+	bool isLetter() const		   { return CharacterFunctions::isLetter (*data) != 0; }
+	/** Returns true if the first character of this string is a letter or digit. */
+	bool isLetterOrDigit() const		{ return CharacterFunctions::isLetterOrDigit (*data) != 0; }
+	/** Returns true if the first character of this string is upper-case. */
+	bool isUpperCase() const		{ return CharacterFunctions::isUpperCase (*data) != 0; }
+	/** Returns true if the first character of this string is lower-case. */
+	bool isLowerCase() const		{ return CharacterFunctions::isLowerCase (*data) != 0; }
+
+	/** Returns an upper-case version of the first character of this string. */
+	juce_wchar toUpperCase() const throw()  { return CharacterFunctions::toUpperCase (*data); }
+	/** Returns a lower-case version of the first character of this string. */
+	juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (*data); }
+
+	/** Parses this string as a 32-bit integer. */
+	int getIntValue32() const throw()
+	{
+	   #if JUCE_WINDOWS
+		return _wtoi (data);
+	   #else
+		return CharacterFunctions::getIntValue <int, CharPointer_UTF32> (*this);
+	   #endif
+	}
+
+	/** Parses this string as a 64-bit integer. */
+	int64 getIntValue64() const throw()
+	{
+	   #if JUCE_WINDOWS
+		return _wtoi64 (data);
+	   #else
+		return CharacterFunctions::getIntValue <int64, CharPointer_UTF32> (*this);
+	   #endif
+	}
+
+	/** Parses this string as a floating point double. */
+	double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
+
+	/** Returns the first non-whitespace character in the string. */
+	CharPointer_UTF32 findEndOfWhitespace() const throw()	{ return CharacterFunctions::findEndOfWhitespace (*this); }
+
+private:
+	CharType* data;
+};
+
+#endif   // __JUCE_CHARPOINTER_UTF32_JUCEHEADER__
+/*** End of inlined file: juce_CharPointer_UTF32.h ***/
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 class OutputStream;
 
@@ -1824,8 +3194,6 @@ public:
 	String& operator+= (juce_wchar characterToAppend);
 	/** Appends a decimal number at the end of this string. */
 	String& operator+= (int numberToAppend);
-	/** Appends a decimal number at the end of this string. */
-	String& operator+= (unsigned int numberToAppend);
 
 	/** Appends a string at the end of this one.
 
@@ -2655,7 +4023,8 @@ public:
 	*/
 	const char* toCString() const;
 
-	/** Returns the number of bytes
+	/** Returns the number of bytes required to represent this string as C-string.
+		The number returned does NOT include the trailing zero.
 	*/
 	int getNumBytesAsCString() const throw();
 
@@ -2741,6 +4110,7 @@ private:
 
 	void createInternal (const juce_wchar* text, size_t numChars);
 	void appendInternal (const juce_wchar* text, int numExtraChars);
+	void* createSpaceAtEndOfBuffer (size_t numExtraBytes) const;
 
 	// This private cast operator should prevent strings being accidentally cast
 	// to bools (this is possible because the compiler can add an implicit cast
@@ -2784,11 +4154,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
 /** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
-/** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
-/** Appends a decimal number at the end of a string. */
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number at the end of a string. */
@@ -3112,6 +4478,8 @@ inline Type Atomic<Type>::get() const throw()
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
 							  : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
+  #elif JUCE_ANDROID
+	return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (value), castTo32Bit (value), (volatile int*) &value));
   #elif JUCE_ATOMICS_GCC
 	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
 							  : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
@@ -3121,7 +4489,9 @@ inline Type Atomic<Type>::get() const throw()
 template <typename Type>
 inline Type Atomic<Type>::exchange (const Type newValue) throw()
 {
-  #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
+  #if JUCE_ANDROID
+	return castFrom32Bit (__atomic_swap (castTo32Bit (newValue), (volatile int*) &value));
+  #elif JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
 	Type currentVal = value;
 	while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
 	return currentVal;
@@ -3140,6 +4510,14 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
 							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
+  #elif JUCE_ANDROID
+	for (;;)
+	{
+		const Type oldValue (value);
+		const Type newValue (oldValue + amountToAdd);
+		if (compareAndSetBool (newValue, oldValue))
+			return newValue;
+	}
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, amountToAdd);
   #endif
@@ -3160,6 +4538,8 @@ inline Type Atomic<Type>::operator++() throw()
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
+  #elif JUCE_ANDROID
+	return (Type) __atomic_inc (&value);
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, 1);
   #endif
@@ -3174,6 +4554,8 @@ inline Type Atomic<Type>::operator--() throw()
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
+  #elif JUCE_ANDROID
+	return (Type) __atomic_dec (&value);
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, -1);
   #endif
@@ -3185,7 +4567,7 @@ inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type val
   #if JUCE_ATOMICS_MAC
 	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
 							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
+  #elif JUCE_ATOMICS_WINDOWS || JUCE_ANDROID
 	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
   #elif JUCE_ATOMICS_GCC
 	return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
@@ -3210,6 +4592,8 @@ inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type va
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
 							  : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
+  #elif JUCE_ANDROID
+	return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (valueToCompare), castTo32Bit (newValue), (volatile int*) &value));
   #elif JUCE_ATOMICS_GCC
 	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
 							  : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
@@ -12215,11 +13599,6 @@ public:
 	{
 	}
 
-	/** Destructor. */
-	~SparseSet()
-	{
-	}
-
 	/** Clears the set. */
 	void clear()
 	{
@@ -12269,7 +13648,7 @@ public:
 			index -= len;
 		}
 
-		return Type (0);
+		return Type();
 	}
 
 	/** Checks whether a particular value is in the set. */
@@ -18375,6 +19754,15 @@ private:
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_CHARPOINTER_UTF16_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHARPOINTER_UTF32_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
 
 #endif
@@ -18679,7 +20067,7 @@ public:
 
 private:
 	String originalText;
-	const juce_wchar* input;
+	CharPointer_UTF32 input;
 	bool outOfData, errorOccurred;
 
 	String lastError, dtdText;
@@ -40285,7 +41673,7 @@ private:
 	StringArray midiInsFromXml;
 	OwnedArray <MidiInput> enabledMidiInputs;
 	Array <MidiInputCallback*> midiCallbacks;
-	Array <MidiInput*> midiCallbackDevices;
+	StringArray midiCallbackDevices;
 	String defaultMidiOutputName;
 	ScopedPointer <MidiOutput> defaultMidiOutput;
 	CriticalSection audioCallbackLock, midiCallbackLock;

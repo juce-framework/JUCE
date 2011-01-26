@@ -67,11 +67,11 @@ const String SystemClipboard::getTextFromClipboard()
 
         if (bufH != 0)
         {
-            const wchar_t* const data = (const wchar_t*) GlobalLock (bufH);
+            const WCHAR* const data = (const WCHAR*) GlobalLock (bufH);
 
             if (data != 0)
             {
-                result = String (data, (int) (GlobalSize (bufH) / sizeof (wchar_t)));
+                result = String (data, (int) (GlobalSize (bufH) / sizeof (WCHAR)));
 
                 GlobalUnlock (bufH);
             }

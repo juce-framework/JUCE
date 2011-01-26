@@ -67,6 +67,8 @@
   #include "../src/native/linux/juce_linux_NativeIncludes.h"
  #elif JUCE_MAC || JUCE_IOS
   #include "../src/native/mac/juce_mac_NativeIncludes.h"
+ #elif JUCE_ANDROID
+  #include "../src/native/android/juce_android_NativeIncludes.h"
  #else
   #error "Unknown platform!"
  #endif
@@ -399,13 +401,11 @@
 
  #if JUCE_WINDOWS
   #include "../src/native/windows/juce_win32_NativeCode.cpp"
- #endif
-
- #if JUCE_LINUX
+ #elif JUCE_LINUX
   #include "../src/native/linux/juce_linux_NativeCode.cpp"
- #endif
-
- #if JUCE_MAC || JUCE_IOS
+ #elif JUCE_MAC || JUCE_IOS
   #include "../src/native/mac/juce_mac_NativeCode.mm"
+ #elif JUCE_ANDROID
+  #include "../src/native/android/juce_android_NativeCode.cpp"
  #endif
 #endif

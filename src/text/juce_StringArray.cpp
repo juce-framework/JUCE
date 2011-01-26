@@ -470,11 +470,13 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              const juce_wchar* preNumberString,
                                              const juce_wchar* postNumberString)
 {
+    String defaultPre (" ("), defaultPost (")"); // (these aren't literals because of non-unicode literals on Android)
+
     if (preNumberString == 0)
-        preNumberString = L" (";
+        preNumberString = defaultPre;
 
     if (postNumberString == 0)
-        postNumberString = L")";
+        postNumberString = defaultPost;
 
     for (int i = 0; i < size() - 1; ++i)
     {

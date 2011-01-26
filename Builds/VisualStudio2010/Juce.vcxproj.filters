@@ -2202,6 +2202,15 @@
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF8.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF16.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF32.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\text\juce_Identifier.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>

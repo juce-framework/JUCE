@@ -779,7 +779,7 @@ bool XmlElement::isTextElement() const throw()
     return tagName.isEmpty();
 }
 
-static const juce_wchar* const juce_xmltextContentAttributeName = L"text";
+static const String juce_xmltextContentAttributeName ("text");
 
 const String& XmlElement::getText() const throw()
 {

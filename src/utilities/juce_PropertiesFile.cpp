@@ -295,21 +295,17 @@ const File PropertiesFile::getDefaultAppSettingsFile (const String& applicationN
     // mustn't have illegal characters in this name..
     jassert (applicationName == File::createLegalFileName (applicationName));
 
-#if JUCE_MAC || JUCE_IOS
+  #if JUCE_MAC || JUCE_IOS
     File dir (commonToAllUsers ? "/Library/Preferences"
                                : "~/Library/Preferences");
 
     if (folderName.isNotEmpty())
         dir = dir.getChildFile (folderName);
-#endif
-
-#ifdef JUCE_LINUX
+  #elif JUCE_LINUX || JUCE_ANDROID
     const File dir ((commonToAllUsers ? "/var/" : "~/")
                         + (folderName.isNotEmpty() ? folderName
                                                    : ("." + applicationName)));
-#endif
-
-#if JUCE_WINDOWS
+  #elif JUCE_WINDOWS
     File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
                                                          : File::userApplicationDataDirectory));
 
@@ -318,8 +314,7 @@ const File PropertiesFile::getDefaultAppSettingsFile (const String& applicationN
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);
-
-#endif
+  #endif
 
     return dir.getChildFile (applicationName)
               .withFileExtension (fileNameSuffix);

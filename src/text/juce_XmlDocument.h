@@ -153,7 +153,7 @@ public:
     //==============================================================================
 private:
     String originalText;
-    const juce_wchar* input;
+    CharPointer_UTF32 input;
     bool outOfData, errorOccurred;
 
     String lastError, dtdText;

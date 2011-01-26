@@ -36,7 +36,9 @@ CriticalSection::CriticalSection() throw()
     pthread_mutexattr_t atts;
     pthread_mutexattr_init (&atts);
     pthread_mutexattr_settype (&atts, PTHREAD_MUTEX_RECURSIVE);
+   #if ! JUCE_ANDROID
     pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
+   #endif
     pthread_mutex_init (&internal, &atts);
 }
 
@@ -73,7 +75,9 @@ public:
 
         pthread_mutexattr_t atts;
         pthread_mutexattr_init (&atts);
+       #if ! JUCE_ANDROID
         pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
+       #endif
         pthread_mutex_init (&mutex, &atts);
     }
 
@@ -481,9 +485,14 @@ void FileOutputStream::flushInternal()
 //==============================================================================
 const File juce_getExecutableFile()
 {
+  #if JUCE_ANDROID
+    // TODO
+    return File::nonexistent;
+  #else
     Dl_info exeInfo;
-    dladdr ((const void*) juce_getExecutableFile, &exeInfo);
+    dladdr ((void*) juce_getExecutableFile, &exeInfo);  // (can't be a const void* on android)
     return File::getCurrentWorkingDirectory().getChildFile (String::fromUTF8 (exeInfo.dli_fname));
+  #endif
 }
 
 //==============================================================================
@@ -708,7 +717,13 @@ void Thread::closeThreadHandle()
 void Thread::killThread()
 {
     if (threadHandle_ != 0)
+    {
+       #if JUCE_ANDROID
+        jassertfalse; // pthread_cancel not available!
+       #else
         pthread_cancel ((pthread_t) threadHandle_);
+       #endif
+    }
 }
 
 void Thread::setCurrentThreadName (const String& /*name*/)

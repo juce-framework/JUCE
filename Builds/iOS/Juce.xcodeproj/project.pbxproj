@@ -999,6 +999,9 @@
 		8E8BE2F1C182E418BBA6903C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_Windowing.cpp; path = ../../src/native/windows/juce_win32_Windowing.cpp; sourceTree = SOURCE_ROOT; };
 		76E2084D2148068F9138A816 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CharacterFunctions.cpp; path = ../../src/text/juce_CharacterFunctions.cpp; sourceTree = SOURCE_ROOT; };
 		33F16EE4F38C9B76E7FAEF78 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharacterFunctions.h; path = ../../src/text/juce_CharacterFunctions.h; sourceTree = SOURCE_ROOT; };
+		4007410FACA2F865FD8EF769 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_UTF8.h; path = ../../src/text/juce_CharPointer_UTF8.h; sourceTree = SOURCE_ROOT; };
+		663746215E9BA6C761172B85 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_UTF16.h; path = ../../src/text/juce_CharPointer_UTF16.h; sourceTree = SOURCE_ROOT; };
+		C3FD9D93626F80A45F9B6DDE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_UTF32.h; path = ../../src/text/juce_CharPointer_UTF32.h; sourceTree = SOURCE_ROOT; };
 		8273A206FB309671284959DD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Identifier.cpp; path = ../../src/text/juce_Identifier.cpp; sourceTree = SOURCE_ROOT; };
 		BF888BC540B64D5C61E46A34 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Identifier.h; path = ../../src/text/juce_Identifier.h; sourceTree = SOURCE_ROOT; };
 		4A97C8D2FF6454DDD3AF4BE5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_LocalisedStrings.cpp; path = ../../src/text/juce_LocalisedStrings.cpp; sourceTree = SOURCE_ROOT; };
@@ -1803,6 +1806,9 @@
 		C6B52BCD0CB1B809D6DE555A = { isa = PBXGroup; children = (
 				76E2084D2148068F9138A816,
 				33F16EE4F38C9B76E7FAEF78,
+				4007410FACA2F865FD8EF769,
+				663746215E9BA6C761172B85,
+				C3FD9D93626F80A45F9B6DDE,
 				8273A206FB309671284959DD,
 				BF888BC540B64D5C61E46A34,
 				4A97C8D2FF6454DDD3AF4BE5,

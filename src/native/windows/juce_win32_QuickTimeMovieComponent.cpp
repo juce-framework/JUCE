@@ -308,7 +308,7 @@ static Handle createHandleDataRef (Handle dataHandle, const char* fileName)
     {
         Str255 suffix;
 
-        CharacterFunctions::copy ((char*) suffix, fileName, 128);
+        strncpy ((char*) suffix, fileName, 128);
 
         StringPtr name = suffix;
         err = PtrAndHand (name, dataRef, name[0] + 1);

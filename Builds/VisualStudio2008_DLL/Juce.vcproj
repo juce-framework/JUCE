@@ -939,6 +939,9 @@
         <Filter Name="text">
           <File RelativePath="..\..\src\text\juce_CharacterFunctions.cpp"/>
           <File RelativePath="..\..\src\text\juce_CharacterFunctions.h"/>
+          <File RelativePath="..\..\src\text\juce_CharPointer_UTF8.h"/>
+          <File RelativePath="..\..\src\text\juce_CharPointer_UTF16.h"/>
+          <File RelativePath="..\..\src\text\juce_CharPointer_UTF32.h"/>
           <File RelativePath="..\..\src\text\juce_Identifier.cpp"/>
           <File RelativePath="..\..\src\text\juce_Identifier.h"/>
           <File RelativePath="..\..\src\text\juce_LocalisedStrings.cpp"/>

@@ -757,6 +757,9 @@
     <ClInclude Include="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h"/>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF8.h"/>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF16.h"/>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF32.h"/>
     <ClInclude Include="..\..\src\text\juce_Identifier.h"/>
     <ClInclude Include="..\..\src\text\juce_LocalisedStrings.h"/>
     <ClInclude Include="..\..\src\text\juce_NewLine.h"/>

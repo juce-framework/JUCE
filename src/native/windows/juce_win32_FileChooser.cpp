@@ -270,7 +270,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
         while (*filename != 0)
         {
             results.add (File (String (files) + "\\" + String (filename)));
-            filename += CharacterFunctions::length (filename) + 1;
+            filename += wcslen (filename) + 1;
         }
     }
     else if (files[0] != 0)

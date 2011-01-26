@@ -121,7 +121,7 @@ namespace URLHelpers
         int i = 0;
 
         while (CharacterFunctions::isLetterOrDigit (url[i])
-               || CharacterFunctions::indexOfChar (L"+-.", url[i], false) >= 0)
+                || url[i] == '+' || url[i] == '-' || url[i] == '.')
             ++i;
 
         return url[i] == ':' ? i + 1 : 0;
@@ -179,7 +179,7 @@ namespace URLHelpers
 
             // just a short text attachment, so use simple url encoding..
             headers << "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                    << (unsigned int) postData.getSize() << "\r\n";
+                    << (int) postData.getSize() << "\r\n";
         }
     }
 }
@@ -411,8 +411,8 @@ const String URL::removeEscapeChars (const String& s)
 
 const String URL::addEscapeChars (const String& s, const bool isParameter)
 {
-    const char* const legalChars = isParameter ? "_-.*!'()"
-                                               : ",$_-.*!'()";
+    const CharPointer_UTF8 legalChars (isParameter ? "_-.*!'()"
+                                                   : ",$_-.*!'()");
 
     Array<char> utf8 (s.toUTF8(), s.getNumBytesAsUTF8());
 
@@ -421,7 +421,7 @@ const String URL::addEscapeChars (const String& s, const bool isParameter)
         const char c = utf8.getUnchecked(i);
 
         if (! (CharacterFunctions::isLetterOrDigit (c)
-                 || CharacterFunctions::indexOfChar (legalChars, c, false) >= 0))
+                 || legalChars.indexOf ((juce_wchar) c) >= 0))
         {
             if (c == ' ')
             {

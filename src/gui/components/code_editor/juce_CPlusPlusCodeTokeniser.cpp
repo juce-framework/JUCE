@@ -56,33 +56,33 @@ namespace CppTokeniser
 
     bool isReservedKeyword (const juce_wchar* const token, const int tokenLength) throw()
     {
-        static const juce_wchar* const keywords2Char[] =
-            { JUCE_T("if"), JUCE_T("do"), JUCE_T("or"), JUCE_T("id"), 0 };
+        static const char* const keywords2Char[] =
+            { "if", "do", "or", "id", 0 };
 
-        static const juce_wchar* const keywords3Char[] =
-            { JUCE_T("for"), JUCE_T("int"), JUCE_T("new"), JUCE_T("try"), JUCE_T("xor"), JUCE_T("and"), JUCE_T("asm"), JUCE_T("not"), 0 };
+        static const char* const keywords3Char[] =
+            { "for", "int", "new", "try", "xor", "and", "asm", "not", 0 };
 
-        static const juce_wchar* const keywords4Char[] =
-            { JUCE_T("bool"), JUCE_T("void"), JUCE_T("this"), JUCE_T("true"), JUCE_T("long"), JUCE_T("else"), JUCE_T("char"),
-              JUCE_T("enum"), JUCE_T("case"), JUCE_T("goto"), JUCE_T("auto"), 0 };
+        static const char* const keywords4Char[] =
+            { "bool", "void", "this", "true", "long", "else", "char",
+              "enum", "case", "goto", "auto", 0 };
 
-        static const juce_wchar* const keywords5Char[] =
-            {  JUCE_T("while"), JUCE_T("bitor"), JUCE_T("break"), JUCE_T("catch"), JUCE_T("class"), JUCE_T("compl"), JUCE_T("const"), JUCE_T("false"),
-                JUCE_T("float"), JUCE_T("short"), JUCE_T("throw"), JUCE_T("union"), JUCE_T("using"), JUCE_T("or_eq"), 0 };
+        static const char* const keywords5Char[] =
+            {  "while", "bitor", "break", "catch", "class", "compl", "const", "false",
+                "float", "short", "throw", "union", "using", "or_eq", 0 };
 
-        static const juce_wchar* const keywords6Char[] =
-            { JUCE_T("return"), JUCE_T("struct"), JUCE_T("and_eq"), JUCE_T("bitand"), JUCE_T("delete"), JUCE_T("double"), JUCE_T("extern"),
-              JUCE_T("friend"), JUCE_T("inline"), JUCE_T("not_eq"), JUCE_T("public"), JUCE_T("sizeof"), JUCE_T("static"), JUCE_T("signed"),
-              JUCE_T("switch"), JUCE_T("typeid"), JUCE_T("wchar_t"), JUCE_T("xor_eq"), 0};
+        static const char* const keywords6Char[] =
+            { "return", "struct", "and_eq", "bitand", "delete", "double", "extern",
+              "friend", "inline", "not_eq", "public", "sizeof", "static", "signed",
+              "switch", "typeid", "wchar_t", "xor_eq", 0};
 
-        static const juce_wchar* const keywordsOther[] =
-            { JUCE_T("const_cast"), JUCE_T("continue"), JUCE_T("default"), JUCE_T("explicit"), JUCE_T("mutable"), JUCE_T("namespace"),
-              JUCE_T("operator"), JUCE_T("private"), JUCE_T("protected"), JUCE_T("register"), JUCE_T("reinterpret_cast"), JUCE_T("static_cast"),
-              JUCE_T("template"), JUCE_T("typedef"), JUCE_T("typename"), JUCE_T("unsigned"), JUCE_T("virtual"), JUCE_T("volatile"),
-              JUCE_T("@implementation"), JUCE_T("@interface"), JUCE_T("@end"), JUCE_T("@synthesize"), JUCE_T("@dynamic"), JUCE_T("@public"),
-              JUCE_T("@private"), JUCE_T("@property"), JUCE_T("@protected"), JUCE_T("@class"), 0 };
+        static const char* const keywordsOther[] =
+            { "const_cast", "continue", "default", "explicit", "mutable", "namespace",
+              "operator", "private", "protected", "register", "reinterpret_cast", "static_cast",
+              "template", "typedef", "typename", "unsigned", "virtual", "volatile",
+              "@implementation", "@interface", "@end", "@synthesize", "@dynamic", "@public",
+              "@private", "@property", "@protected", "@class", 0 };
 
-        const juce_wchar* const* k;
+        const char* const* k;
 
         switch (tokenLength)
         {
@@ -103,7 +103,7 @@ namespace CppTokeniser
         int i = 0;
         while (k[i] != 0)
         {
-            if (k[i][0] == token[0] && CharacterFunctions::compare (k[i], token) == 0)
+            if (k[i][0] == token[0] && CharPointer_UTF8 (k[i]).compare (CharPointer_UTF32 (token)) == 0)
                 return true;
 
             ++i;

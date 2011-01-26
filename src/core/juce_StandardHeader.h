@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      53
-#define JUCE_BUILDNUMBER        17
+#define JUCE_BUILDNUMBER        18
 
 /** Current Juce version number.
 
@@ -128,6 +128,11 @@
   #if ! JUCE_PUBLIC_INCLUDES
     #pragma warning (4: 4511 4512 4100)  // (enable some warnings that are turned off in VC8)
   #endif
+#endif
+
+#if JUCE_ANDROID
+  #include <sys/atomics.h>
+  #include <byteswap.h>
 #endif
 
 //==============================================================================

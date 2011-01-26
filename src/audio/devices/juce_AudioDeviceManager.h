@@ -464,7 +464,7 @@ private:
     StringArray midiInsFromXml;
     OwnedArray <MidiInput> enabledMidiInputs;
     Array <MidiInputCallback*> midiCallbacks;
-    Array <MidiInput*> midiCallbackDevices;
+    StringArray midiCallbackDevices;
     String defaultMidiOutputName;
     ScopedPointer <MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;

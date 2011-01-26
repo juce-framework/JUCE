@@ -434,7 +434,7 @@ void ListBox::updateContent()
 
     bool selectionChanged = false;
 
-    if (selected [selected.size() - 1] >= totalItems)
+    if (selected.size() > 0 && selected [selected.size() - 1] >= totalItems)
     {
         selected.removeRange (Range <int> (totalItems, std::numeric_limits<int>::max()));
         lastRowSelected = getSelectedRow (0);

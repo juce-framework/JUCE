@@ -34,7 +34,7 @@
   #endif
 
 #else
-  #if JUCE_LINUX
+  #if JUCE_LINUX || JUCE_ANDROID
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <sys/errno.h>
@@ -58,7 +58,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_ScopedLock.h"
 #include "../../threads/juce_Thread.h"
 
-#if defined (JUCE_LINUX) || defined (JUCE_MAC) || defined (JUCE_IOS)
+#if JUCE_LINUX || JUCE_MAC || JUCE_IOS || JUCE_ANDROID
  typedef socklen_t juce_socklen_t;
 #else
  typedef int juce_socklen_t;

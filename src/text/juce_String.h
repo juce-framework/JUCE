@@ -27,6 +27,20 @@
 #define __JUCE_STRING_JUCEHEADER__
 
 #include "juce_CharacterFunctions.h"
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4514 4996)
+#endif
+
+#include "juce_CharPointer_UTF8.h"
+#include "juce_CharPointer_UTF16.h"
+#include "juce_CharPointer_UTF32.h"
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
+
 class OutputStream;
 
 
@@ -115,8 +129,6 @@ public:
     String& operator+= (juce_wchar characterToAppend);
     /** Appends a decimal number at the end of this string. */
     String& operator+= (int numberToAppend);
-    /** Appends a decimal number at the end of this string. */
-    String& operator+= (unsigned int numberToAppend);
 
     /** Appends a string at the end of this one.
 
@@ -963,7 +975,8 @@ public:
     */
     const char* toCString() const;
 
-    /** Returns the number of bytes
+    /** Returns the number of bytes required to represent this string as C-string.
+        The number returned does NOT include the trailing zero.
     */
     int getNumBytesAsCString() const throw();
 
@@ -1054,6 +1067,7 @@ private:
 
     void createInternal (const juce_wchar* text, size_t numChars);
     void appendInternal (const juce_wchar* text, int numExtraChars);
+    void* createSpaceAtEndOfBuffer (size_t numExtraBytes) const;
 
     // This private cast operator should prevent strings being accidentally cast
     // to bools (this is possible because the compiler can add an implicit cast
@@ -1099,11 +1113,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
 /** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
-/** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
-/** Appends a decimal number at the end of a string. */
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number at the end of a string. */

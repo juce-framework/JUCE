@@ -58,11 +58,6 @@ public:
     {
     }
 
-    /** Destructor. */
-    ~SparseSet()
-    {
-    }
-
     //==============================================================================
     /** Clears the set. */
     void clear()
@@ -113,7 +108,7 @@ public:
             index -= len;
         }
 
-        return Type (0);
+        return Type();
     }
 
     /** Checks whether a particular value is in the set. */

@@ -244,6 +244,8 @@ inline Type Atomic<Type>::get() const throw()
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
                               : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
+  #elif JUCE_ANDROID
+    return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (value), castTo32Bit (value), (volatile int*) &value));
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
                               : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
@@ -253,7 +255,9 @@ inline Type Atomic<Type>::get() const throw()
 template <typename Type>
 inline Type Atomic<Type>::exchange (const Type newValue) throw()
 {
-  #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
+  #if JUCE_ANDROID
+    return castFrom32Bit (__atomic_swap (castTo32Bit (newValue), (volatile int*) &value));
+  #elif JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
     Type currentVal = value;
     while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
     return currentVal;
@@ -272,6 +276,14 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
                               : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
+  #elif JUCE_ANDROID
+    for (;;)
+    {
+        const Type oldValue (value);
+        const Type newValue (oldValue + amountToAdd);
+        if (compareAndSetBool (newValue, oldValue))
+            return newValue;
+    }
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, amountToAdd);
   #endif
@@ -292,6 +304,8 @@ inline Type Atomic<Type>::operator++() throw()
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
                               : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
+  #elif JUCE_ANDROID
+    return (Type) __atomic_inc (&value);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, 1);
   #endif
@@ -306,6 +320,8 @@ inline Type Atomic<Type>::operator--() throw()
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
                               : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
+  #elif JUCE_ANDROID
+    return (Type) __atomic_dec (&value);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, -1);
   #endif
@@ -317,7 +333,7 @@ inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type val
   #if JUCE_ATOMICS_MAC
     return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
                               : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
+  #elif JUCE_ATOMICS_WINDOWS || JUCE_ANDROID
     return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
@@ -342,6 +358,8 @@ inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type va
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
                               : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
+  #elif JUCE_ANDROID
+    return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (valueToCompare), castTo32Bit (newValue), (volatile int*) &value));
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
                               : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));

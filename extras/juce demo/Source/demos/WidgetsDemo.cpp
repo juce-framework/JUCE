@@ -630,7 +630,7 @@ static Component* createMiscPage()
     textEditor1->setBounds (10, 25, 200, 24);
     textEditor1->setText ("single-line text box");
 
-    TextEditor* textEditor2 = new TextEditor ("password", (tchar) 0x2022);
+    TextEditor* textEditor2 = new TextEditor ("password", (juce_wchar) 0x2022);
     page->addAndMakeVisible (textEditor2);
     textEditor2->setBounds (10, 55, 200, 24);
     textEditor2->setText ("password");

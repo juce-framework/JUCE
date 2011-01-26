@@ -1435,6 +1435,12 @@
               resource="0" file="src/text/juce_CharacterFunctions.cpp"/>
         <FILE id="McKZNzGvH" name="juce_CharacterFunctions.h" compile="0" resource="0"
               file="src/text/juce_CharacterFunctions.h"/>
+        <FILE id="vCX7K0" name="juce_CharPointer_UTF8.h" compile="0" resource="0"
+              file="src/text/juce_CharPointer_UTF8.h"/>
+        <FILE id="KKhKRD" name="juce_CharPointer_UTF16.h" compile="0" resource="0"
+              file="src/text/juce_CharPointer_UTF16.h"/>
+        <FILE id="rE1hlF" name="juce_CharPointer_UTF32.h" compile="0" resource="0"
+              file="src/text/juce_CharPointer_UTF32.h"/>
         <FILE id="iGtCiI8" name="juce_Identifier.cpp" compile="1" resource="0"
               file="src/text/juce_Identifier.cpp"/>
         <FILE id="CPlhWqs" name="juce_Identifier.h" compile="0" resource="0"

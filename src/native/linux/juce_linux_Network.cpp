@@ -358,7 +358,7 @@ private:
 
         header << "\r\nUser-Agent: JUCE/" << JUCE_MAJOR_VERSION << '.' << JUCE_MINOR_VERSION
                << "\r\nConnection: Close\r\nContent-Length: "
-               << postData.getSize() << "\r\n"
+               << (int) postData.getSize() << "\r\n"
                << headers << "\r\n";
 
         MemoryBlock mb;

@@ -91,10 +91,6 @@ typedef unsigned int                uint32;
   typedef unsigned int              pointer_sized_uint;
 #endif
 
-/** A platform-independent unicode character type. */
-typedef wchar_t                     juce_wchar;
-
-
 //==============================================================================
 // Some indispensible min/max functions
 
@@ -351,6 +347,8 @@ inline bool juce_isfinite (FloatingPointType value)
 {
     #if JUCE_WINDOWS
       return _finite (value);
+    #elif JUCE_ANDROID
+      return isfinite (value);
     #else
       return std::isfinite (value);
     #endif
