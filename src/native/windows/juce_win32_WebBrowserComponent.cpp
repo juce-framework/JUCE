@@ -90,7 +90,7 @@ public:
             if (headers != 0)
             {
                 V_VT (&headersVar) = VT_BSTR;
-                V_BSTR (&headersVar) = SysAllocString ((const OLECHAR*) headers->joinIntoString ("\r\n"));
+                V_BSTR (&headersVar) = SysAllocString ((const OLECHAR*) headers->joinIntoString ("\r\n").toUTF16().getAddress());
             }
 
             if (postData != 0 && postData->getSize() > 0)
@@ -118,7 +118,7 @@ public:
                 }
             }
 
-            browser->Navigate ((BSTR) (const OLECHAR*) url,
+            browser->Navigate ((BSTR) (const OLECHAR*) url.toUTF16().getAddress(),
                                &flags, &frame,
                                &postDataVar, &headersVar);
 

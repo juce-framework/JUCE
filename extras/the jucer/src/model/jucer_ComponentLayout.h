@@ -87,7 +87,7 @@ public:
     //==============================================================================
     SelectedItemSet <Component*>& getSelectedSet()                      { return selected; }
 
-    static const tchar* const clipboardXmlTag;
+    static const char* const clipboardXmlTag;
     void copySelectedToClipboard();
     void paste();
     void deleteSelected();

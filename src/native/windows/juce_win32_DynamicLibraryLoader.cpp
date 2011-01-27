@@ -44,13 +44,13 @@ DynamicLibraryLoader::~DynamicLibraryLoader()
 bool DynamicLibraryLoader::load (const String& name)
 {
     FreeLibrary ((HMODULE) libHandle);
-    libHandle = name.isNotEmpty() ? LoadLibrary (name) : 0;
+    libHandle = name.isNotEmpty() ? LoadLibrary (name.toUTF16()) : 0;
     return libHandle != 0;
 }
 
 void* DynamicLibraryLoader::findProcAddress (const String& functionName)
 {
-    return (void*) GetProcAddress ((HMODULE) libHandle, functionName.toCString()); // (void* cast is required for mingw)
+    return (void*) GetProcAddress ((HMODULE) libHandle, functionName.toUTF8()); // (void* cast is required for mingw)
 }
 
 #endif

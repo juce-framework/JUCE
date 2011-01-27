@@ -389,7 +389,7 @@ const String URL::removeEscapeChars (const String& s)
 
     // We need to operate on the string as raw UTF8 chars, and then recombine them into unicode
     // after all the replacements have been made, so that multi-byte chars are handled.
-    Array<char> utf8 (result.toUTF8(), result.getNumBytesAsUTF8());
+    Array<char> utf8 (result.toUTF8().getAddress(), result.getNumBytesAsUTF8());
 
     for (int i = 0; i < utf8.size(); ++i)
     {
@@ -414,7 +414,7 @@ const String URL::addEscapeChars (const String& s, const bool isParameter)
     const CharPointer_UTF8 legalChars (isParameter ? "_-.*!'()"
                                                    : ",$_-.*!'()");
 
-    Array<char> utf8 (s.toUTF8(), s.getNumBytesAsUTF8());
+    Array<char> utf8 (s.toUTF8().getAddress(), s.getNumBytesAsUTF8());
 
     for (int i = 0; i < utf8.size(); ++i)
     {

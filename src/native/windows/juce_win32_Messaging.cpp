@@ -285,7 +285,7 @@ void MessageManager::doPlatformSpecificInitialisation()
     wc.lpfnWndProc    = (WNDPROC) juce_MessageWndProc;
     wc.cbWndExtra     = 4;
     wc.hInstance      = hmod;
-    wc.lpszClassName  = className;
+    wc.lpszClassName  = className.toUTF16();
 
     RegisterClassEx (&wc);
 
@@ -298,7 +298,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 void MessageManager::doPlatformSpecificShutdown()
 {
     DestroyWindow (juce_messageWindowHandle);
-    UnregisterClass (getMessageWindowClassName(), 0);
+    UnregisterClass (getMessageWindowClassName().toUTF16(), 0);
     OleUninitialize();
 }
 

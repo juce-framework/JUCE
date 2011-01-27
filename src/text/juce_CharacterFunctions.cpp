@@ -44,18 +44,18 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()
 {
-    return towupper (character);
+    return towupper ((wchar_t) character);
 }
 
 juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) throw()
 {
-    return towlower (character);
+    return towlower ((wchar_t) character);
 }
 
 bool CharacterFunctions::isUpperCase (const juce_wchar character) throw()
 {
    #if JUCE_WINDOWS
-    return iswupper (character) != 0;
+    return iswupper ((wchar_t) character) != 0;
    #else
     return toLowerCase (character) != character;
    #endif
@@ -64,7 +64,7 @@ bool CharacterFunctions::isUpperCase (const juce_wchar character) throw()
 bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
 {
    #if JUCE_WINDOWS
-    return iswlower (character) != 0;
+    return iswlower ((wchar_t) character) != 0;
    #else
     return toUpperCase (character) != character;
    #endif
@@ -78,7 +78,7 @@ bool CharacterFunctions::isWhitespace (const char character) throw()
 
 bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()
 {
-    return iswspace (character) != 0;
+    return iswspace ((wchar_t) character) != 0;
 }
 
 bool CharacterFunctions::isDigit (const char character) throw()
@@ -88,7 +88,7 @@ bool CharacterFunctions::isDigit (const char character) throw()
 
 bool CharacterFunctions::isDigit (const juce_wchar character) throw()
 {
-    return iswdigit (character) != 0;
+    return iswdigit ((wchar_t) character) != 0;
 }
 
 bool CharacterFunctions::isLetter (const char character) throw()
@@ -99,7 +99,7 @@ bool CharacterFunctions::isLetter (const char character) throw()
 
 bool CharacterFunctions::isLetter (const juce_wchar character) throw()
 {
-    return iswalpha (character) != 0;
+    return iswalpha ((wchar_t) character) != 0;
 }
 
 bool CharacterFunctions::isLetterOrDigit (const char character) throw()
@@ -111,7 +111,7 @@ bool CharacterFunctions::isLetterOrDigit (const char character) throw()
 
 bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
 {
-    return iswalnum (character) != 0;
+    return iswalnum ((wchar_t) character) != 0;
 }
 
 int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
@@ -138,11 +138,11 @@ int CharacterFunctions::ftime (char* const dest, const int maxChars, const char*
 
 int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
 {
-   #if JUCE_ANDROID
+   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
     HeapBlock <char> tempDest;
     tempDest.calloc (maxChars + 2);
     int result = ftime (tempDest.getData(), maxChars, String (format).toUTF8(), tm);
-    CharPointer_UTF32 (dest).copyAndAdvance (CharPointer_UTF8 (tempDest.getData()));
+    CharPointer_UTF32 (dest).writeAll (CharPointer_UTF8 (tempDest.getData()));
     return result;
    #else
     return (int) wcsftime (dest, maxChars, format, tm);

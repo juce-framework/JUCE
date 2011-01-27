@@ -82,28 +82,28 @@ public:
         {
         case componentX:
             if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
-                s << valueToString (p.getX() * 100.0) << T('%');
+                s << valueToString (p.getX() * 100.0) << '%';
             else
                 s << valueToString (p.getX());
             break;
 
         case componentY:
             if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
-                s << valueToString (p.getY() * 100.0) << T('%');
+                s << valueToString (p.getY() * 100.0) << '%';
             else
                 s << valueToString (p.getY());
             break;
 
         case componentWidth:
             if (p.getWidthMode() == PositionedRectangle::proportionalSize)
-                s << valueToString (p.getWidth() * 100.0) << T('%');
+                s << valueToString (p.getWidth() * 100.0) << '%';
             else
                 s << valueToString (p.getWidth());
             break;
 
         case componentHeight:
             if (p.getHeightMode() == PositionedRectangle::proportionalSize)
-                s << valueToString (p.getHeight() * 100.0) << T('%');
+                s << valueToString (p.getHeight() * 100.0) << '%';
             else
                 s << valueToString (p.getHeight());
             break;
@@ -237,16 +237,16 @@ public:
         {
             const PositionedRectangle::SizeMode sizeMode = (dimension == componentWidth) ? sizeW : sizeH;
 
-            m.addItem (20, (dimension == componentWidth) ? T("Absolute width")
-                                                         : T("Absolute height"),
+            m.addItem (20, (dimension == componentWidth) ? "Absolute width"
+                                                         : "Absolute height",
                        true, sizeMode == PositionedRectangle::absoluteSize);
 
-            m.addItem (21, ((dimension == componentWidth) ? T("Percentage of width of ")
-                                                          : T("Percentage of height of ")) + relCompName,
+            m.addItem (21, ((dimension == componentWidth) ? "Percentage of width of "
+                                                          : "Percentage of height of ") + relCompName,
                        true, sizeMode == PositionedRectangle::proportionalSize);
 
-            m.addItem (22, ((dimension == componentWidth) ? T("Subtracted from width of ")
-                                                          : T("Subtracted from height of ")) + relCompName,
+            m.addItem (22, ((dimension == componentWidth) ? "Subtracted from width of "
+                                                          : "Subtracted from height of ") + relCompName,
                        true, sizeMode == PositionedRectangle::parentSizeMinusAbsolute);
         }
 
@@ -254,7 +254,7 @@ public:
         if (allowRelativeOptions && layout != 0)
         {
             m.addSeparator();
-            m.addSubMenu (T("Relative to"), layout->getRelativeTargetMenu (component, (int) dimension));
+            m.addSubMenu ("Relative to", layout->getRelativeTargetMenu (component, (int) dimension));
         }
 
         const int menuResult = m.showAt (button);

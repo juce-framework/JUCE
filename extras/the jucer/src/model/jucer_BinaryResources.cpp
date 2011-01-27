@@ -243,21 +243,21 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
                                             .fromFirstOccurrenceOf (T("{"), false, false));
 
                 MemoryOutputStream out;
-                const tchar* t = (const tchar*) dataString;
+                const juce_wchar* t = (const juce_wchar*) dataString;
                 int n = 0;
 
                 while (*t != 0)
                 {
-                    const tchar c = *t++;
+                    const juce_wchar c = *t++;
 
-                    if (c >= T('0') && c <= T('9'))
-                        n = n * 10 + (c - T('0'));
-                    else if (c == T(','))
+                    if (c >= '0' && c <= '9')
+                        n = n * 10 + (c - '0');
+                    else if (c == ',')
                     {
                         out.writeByte ((char) n);
                         n = 0;
                     }
-                    else if (c == T('}'))
+                    else if (c == '}')
                         break;
                 }
 
@@ -299,7 +299,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
                 << ", \""
                 << File (resources[i]->originalFilename)
                     .getRelativePathFrom (code.document->getFile())
-                    .replaceCharacter (T('\\'), T('/'))
+                    .replaceCharacter ('\\', '/')
                 << "\"\n";
 
             String line1;

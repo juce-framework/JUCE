@@ -143,7 +143,7 @@ public:
         if (needsCallback (component))
             s << memberVariableName << "->addListener (this);\n";
 
-        s << T('\n');
+        s << '\n';
 
         code.constructorCode += s;
     }
@@ -163,7 +163,7 @@ public:
                 callback << "else ";
 
             const String memberVariableName (code.document->getComponentLayout()->getComponentMemberVariableName (component));
-            const String userCodeComment (T("UserLabelCode_") + memberVariableName);
+            const String userCodeComment ("UserLabelCode_" + memberVariableName);
 
             callback
                 << "if (labelThatHasChanged == " << memberVariableName

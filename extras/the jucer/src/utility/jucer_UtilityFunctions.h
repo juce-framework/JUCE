@@ -637,8 +637,8 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 const String colourToHex (const Colour& col);
 const String colourToCode (const Colour& col);
 
-void setColourXml (XmlElement& xml, const tchar* const attName, const Colour& colour);
-const Colour getColourXml (const XmlElement& xml, const tchar* const attName, const Colour& defaultColour);
+void setColourXml (XmlElement& xml, const char* const attName, const Colour& colour);
+const Colour getColourXml (const XmlElement& xml, const char* const attName, const Colour& defaultColour);
 
 //==============================================================================
 const String positionToString (const RelativePositionedRectangle& pos);

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	18
+#define JUCE_BUILDNUMBER	20
 
 /** Current Juce version number.
 
@@ -1641,6 +1641,11 @@ inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destB
 #if JUCE_ANDROID && ! DOXYGEN
  typedef uint32			 juce_wchar;
  #define JUCE_T(stringLiteral)	  CharPointer_UTF8 (stringLiteral)
+ #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
+#elif JUCE_WINDOWS && ! DOXYGEN
+ typedef uint32			 juce_wchar;
+ #define JUCE_T(stringLiteral)	  L##stringLiteral
+ #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
 #else
  /** A platform-independent unicode character type. */
  typedef wchar_t			juce_wchar;
@@ -1854,52 +1859,70 @@ public:
 	static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
 	static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
 
-	template <typename DestCharPointerType, typename SrcCharPointerType>
-	static void copyAndAdvance (DestCharPointerType& dest, SrcCharPointerType src) throw()
+	template <typename CharPointerType>
+	static size_t lengthUpTo (const CharPointerType& text, const size_t maxCharsToCount) throw()
 	{
-		juce_wchar c;
+		size_t len = 0;
+		CharPointerType t (text);
 
-		do
-		{
-			c = src.getAndAdvance();
-			dest.write (c);
-		}
-		while (c != 0);
+		while (len < maxCharsToCount && t.getAndAdvance() != 0)
+			++len;
+
+		return len;
 	}
 
 	template <typename DestCharPointerType, typename SrcCharPointerType>
-	static int copyAndAdvanceUpToBytes (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) throw()
+	static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) throw()
+	{
+		for (;;)
+		{
+			const juce_wchar c = src.getAndAdvance();
+
+			if (c == 0)
+				break;
+
+			dest.write (c);
+		}
+
+		dest.writeNull();
+	}
+
+	template <typename DestCharPointerType, typename SrcCharPointerType>
+	static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) throw()
 	{
 		int numBytesDone = 0;
+		maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
 		for (;;)
 		{
 			const juce_wchar c = src.getAndAdvance();
-			const size_t bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
+			const int bytesNeeded = (int) DestCharPointerType::getBytesRequiredFor (c);
 
 			maxBytes -= bytesNeeded;
-			if (maxBytes < 0)
+			if (c == 0 || maxBytes < 0)
 				break;
 
 			numBytesDone += bytesNeeded;
 			dest.write (c);
-			if (c == 0)
-				break;
 		}
 
+		dest.writeNull();
 		return numBytesDone;
 	}
 
 	template <typename DestCharPointerType, typename SrcCharPointerType>
-	static void copyAndAdvanceUpToNumChars (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) throw()
+	static void copyWithCharLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) throw()
 	{
-		while (--maxChars >= 0)
+		while (--maxChars > 0)
 		{
 			const juce_wchar c = src.getAndAdvance();
-			dest.write (c);
 			if (c == 0)
 				break;
+
+			dest.write (c);
 		}
+
+		dest.writeNull();
 	}
 
 	template <typename CharPointerType1, typename CharPointerType2>
@@ -1982,7 +2005,7 @@ public:
 	static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) throw()
 	{
 		int index = 0;
-		const int needleLength = needle.length();
+		const int needleLength = (int) needle.length();
 
 		for (;;)
 		{
@@ -2054,6 +2077,362 @@ private:
 #endif
 
 
+/*** Start of inlined file: juce_Atomic.h ***/
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+#define __JUCE_ATOMIC_JUCEHEADER__
+
+/**
+	Simple class to hold a primitive value and perform atomic operations on it.
+
+	The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
+	There are methods to perform most of the basic atomic operations.
+*/
+template <typename Type>
+class Atomic
+{
+public:
+	/** Creates a new value, initialised to zero. */
+	inline Atomic() throw()
+		: value (0)
+	{
+	}
+
+	/** Creates a new value, with a given initial value. */
+	inline Atomic (const Type initialValue) throw()
+		: value (initialValue)
+	{
+	}
+
+	/** Copies another value (atomically). */
+	inline Atomic (const Atomic& other) throw()
+		: value (other.get())
+	{
+	}
+
+	/** Destructor. */
+	inline ~Atomic() throw()
+	{
+		// This class can only be used for types which are 32 or 64 bits in size.
+		static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
+	}
+
+	/** Atomically reads and returns the current value. */
+	Type get() const throw();
+
+	/** Copies another value onto this one (atomically). */
+	inline Atomic& operator= (const Atomic& other) throw()	  { exchange (other.get()); return *this; }
+
+	/** Copies another value onto this one (atomically). */
+	inline Atomic& operator= (const Type newValue) throw()	  { exchange (newValue); return *this; }
+
+	/** Atomically sets the current value. */
+	void set (Type newValue) throw()				{ exchange (newValue); }
+
+	/** Atomically sets the current value, returning the value that was replaced. */
+	Type exchange (Type value) throw();
+
+	/** Atomically adds a number to this value, returning the new value. */
+	Type operator+= (Type amountToAdd) throw();
+
+	/** Atomically subtracts a number from this value, returning the new value. */
+	Type operator-= (Type amountToSubtract) throw();
+
+	/** Atomically increments this value, returning the new value. */
+	Type operator++() throw();
+
+	/** Atomically decrements this value, returning the new value. */
+	Type operator--() throw();
+
+	/** Atomically compares this value with a target value, and if it is equal, sets
+		this to be equal to a new value.
+
+		This operation is the atomic equivalent of doing this:
+		@code
+		bool compareAndSetBool (Type newValue, Type valueToCompare)
+		{
+			if (get() == valueToCompare)
+			{
+				set (newValue);
+				return true;
+			}
+
+			return false;
+		}
+		@endcode
+
+		@returns true if the comparison was true and the value was replaced; false if
+				 the comparison failed and the value was left unchanged.
+		@see compareAndSetValue
+	*/
+	bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
+
+	/** Atomically compares this value with a target value, and if it is equal, sets
+		this to be equal to a new value.
+
+		This operation is the atomic equivalent of doing this:
+		@code
+		Type compareAndSetValue (Type newValue, Type valueToCompare)
+		{
+			Type oldValue = get();
+			if (oldValue == valueToCompare)
+				set (newValue);
+
+			return oldValue;
+		}
+		@endcode
+
+		@returns the old value before it was changed.
+		@see compareAndSetBool
+	*/
+	Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
+
+	/** Implements a memory read/write barrier. */
+	static void memoryBarrier() throw();
+
+	JUCE_ALIGN(8)
+
+	/** The raw value that this class operates on.
+		This is exposed publically in case you need to manipulate it directly
+		for performance reasons.
+	*/
+	volatile Type value;
+
+private:
+	static inline Type castFrom32Bit (int32 value) throw()	{ return *(Type*) &value; }
+	static inline Type castFrom64Bit (int64 value) throw()	{ return *(Type*) &value; }
+	static inline int32 castTo32Bit (Type value) throw()	  { return *(int32*) &value; }
+	static inline int64 castTo64Bit (Type value) throw()	  { return *(int64*) &value; }
+
+	Type operator++ (int); // better to just use pre-increment with atomics..
+	Type operator-- (int);
+};
+
+/*
+	The following code is in the header so that the atomics can be inlined where possible...
+*/
+#if (JUCE_IOS && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
+	  || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
+  #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
+
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+	#define JUCE_MAC_ATOMICS_VOLATILE
+  #else
+	#define JUCE_MAC_ATOMICS_VOLATILE volatile
+  #endif
+
+  #if JUCE_PPC || JUCE_IOS
+	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
+	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()   { jassertfalse; return *a += b; }
+	template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return ++*a; }
+	template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return --*a; }
+	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) throw()
+		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
+  #endif
+
+#elif JUCE_GCC
+  #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
+
+  #if JUCE_IOS
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
+  #endif
+
+#else
+  #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
+
+  #if JUCE_USE_INTRINSICS || JUCE_64BIT
+	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
+					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
+	#define juce_InterlockedIncrement(a)		_InterlockedIncrement(a)
+	#define juce_InterlockedDecrement(a)		_InterlockedDecrement(a)
+	#define juce_InterlockedExchangeAdd(a, b)	   _InterlockedExchangeAdd(a, b)
+	#define juce_InterlockedCompareExchange(a, b, c)	_InterlockedCompareExchange(a, b, c)
+	#define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
+	#define juce_MemoryBarrier _ReadWriteBarrier
+  #else
+	// (these are defined in juce_win32_Threads.cpp)
+	long juce_InterlockedExchange (volatile long* a, long b) throw();
+	long juce_InterlockedIncrement (volatile long* a) throw();
+	long juce_InterlockedDecrement (volatile long* a) throw();
+	long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
+	long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
+	__int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
+	inline void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
+  #endif
+
+  #if JUCE_64BIT
+	#pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+	#define juce_InterlockedExchangeAdd64(a, b)	 _InterlockedExchangeAdd64(a, b)
+	#define juce_InterlockedExchange64(a, b)	_InterlockedExchange64(a, b)
+	#define juce_InterlockedIncrement64(a)	  _InterlockedIncrement64(a)
+	#define juce_InterlockedDecrement64(a)	  _InterlockedDecrement64(a)
+  #else
+	// None of these atomics are available in a 32-bit Windows build!!
+	template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
+	template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()	  { jassertfalse; Type old = *a; *a = b; return old; }
+	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
+	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
+  #endif
+#endif
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4311)  // (truncation warning)
+#endif
+
+template <typename Type>
+inline Type Atomic<Type>::get() const throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
+							  : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value));
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
+							  : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
+  #elif JUCE_ANDROID
+	return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (value), castTo32Bit (value), (volatile int*) &value));
+  #elif JUCE_ATOMICS_GCC
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
+							  : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::exchange (const Type newValue) throw()
+{
+  #if JUCE_ANDROID
+	return castFrom32Bit (__atomic_swap (castTo32Bit (newValue), (volatile int*) &value));
+  #elif JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
+	Type currentVal = value;
+	while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
+	return currentVal;
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchange ((volatile long*) &value, (long) castTo32Bit (newValue)))
+							  : castFrom64Bit ((int64) juce_InterlockedExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue)));
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
+							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
+  #elif JUCE_ANDROID
+	for (;;)
+	{
+		const Type oldValue (value);
+		const Type newValue (oldValue + amountToAdd);
+		if (compareAndSetBool (newValue, oldValue))
+			return newValue;
+	}
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, amountToAdd);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
+{
+	return operator+= (juce_negate (amountToSubtract));
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator++() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicIncrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
+							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
+  #elif JUCE_ANDROID
+	return (Type) __atomic_inc (&value);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, 1);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator--() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : (Type) OSAtomicDecrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
+							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
+  #elif JUCE_ANDROID
+	return (Type) __atomic_dec (&value);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, -1);
+  #endif
+}
+
+template <typename Type>
+inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
+							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS || JUCE_ANDROID
+	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
+  #elif JUCE_ATOMICS_GCC
+	return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
+							  : __sync_bool_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue));
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	for (;;) // Annoying workaround for OSX only having a bool CAS operation..
+	{
+		if (compareAndSetBool (newValue, valueToCompare))
+			return valueToCompare;
+
+		const Type result = value;
+		if (result != valueToCompare)
+			return result;
+	}
+
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
+							  : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
+  #elif JUCE_ANDROID
+	return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (valueToCompare), castTo32Bit (newValue), (volatile int*) &value));
+  #elif JUCE_ATOMICS_GCC
+	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
+							  : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
+  #endif
+}
+
+template <typename Type>
+inline void Atomic<Type>::memoryBarrier() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	OSMemoryBarrier();
+  #elif JUCE_ATOMICS_GCC
+	__sync_synchronize();
+  #elif JUCE_ATOMICS_WINDOWS
+	juce_MemoryBarrier();
+  #endif
+}
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
+
+#endif   // __JUCE_ATOMIC_JUCEHEADER__
+/*** End of inlined file: juce_Atomic.h ***/
+
+
 /*** Start of inlined file: juce_CharPointer_UTF8.h ***/
 #ifndef __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
 #define __JUCE_CHARPOINTER_UTF8_JUCEHEADER__
@@ -2068,7 +2447,7 @@ class CharPointer_UTF8
 public:
 	typedef char CharType;
 
-	inline CharPointer_UTF8 (const CharType* const rawPointer) throw()
+	inline explicit CharPointer_UTF8 (const CharType* const rawPointer) throw()
 		: data (const_cast <CharType*> (rawPointer))
 	{
 	}
@@ -2084,8 +2463,29 @@ public:
 		return *this;
 	}
 
+	inline CharPointer_UTF8& operator= (const CharType* text) throw()
+	{
+		data = const_cast <CharType*> (text);
+		return *this;
+	}
+
+	/** This is a pointer comparison, it doesn't compare the actual text. */
+	inline bool operator== (const CharPointer_UTF8& other) const throw()
+	{
+		return data == other.data;
+	}
+
+	/** This is a pointer comparison, it doesn't compare the actual text. */
+	inline bool operator!= (const CharPointer_UTF8& other) const throw()
+	{
+		return data == other.data;
+	}
+
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
+
+	/** Returns the address that this pointer is pointing to. */
+	inline operator const CharType*() const throw()	 { return data; }
 
 	/** Returns true if this pointer is pointing to a null character. */
 	inline bool isEmpty() const throw()		 { return *data == 0; }
@@ -2135,7 +2535,7 @@ public:
 		{
 			juce_wchar bit = 0x40;
 
-			while ((n & bit) != 0 && bit > 0x10)
+			while ((n & bit) != 0 && bit > 0x8)
 			{
 				++data;
 				bit >>= 1;
@@ -2159,7 +2559,7 @@ public:
 		uint32 bit = 0x40;
 		int numExtraValues = 0;
 
-		while ((n & bit) != 0 && bit > 0x10)
+		while ((n & bit) != 0 && bit > 0x8)
 		{
 			mask >>= 1;
 			++numExtraValues;
@@ -2215,32 +2615,6 @@ public:
 		return p;
 	}
 
-	/** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-	void write (const juce_wchar charToWrite) throw()
-	{
-		const uint32 c = (uint32) charToWrite;
-
-		if (c >= 0x80)
-		{
-			int numExtraBytes = 1;
-			if (c >= 0x800)
-			{
-				++numExtraBytes;
-				if (c >= 0x10000)
-					++numExtraBytes;
-			}
-
-			*data++ = (CharType) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
-
-			while (--numExtraBytes >= 0)
-				*data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
-		}
-		else
-		{
-			*data++ = (CharType) c;
-		}
-	}
-
 	/** Returns the number of characters in this string. */
 	size_t length() const throw()
 	{
@@ -2271,6 +2645,12 @@ public:
 		}
 
 		return count;
+	}
+
+	/** Returns the number of characters in this string, or the given value, whichever is lower. */
+	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -2325,27 +2705,65 @@ public:
 		return CharPointer_UTF8 (data + strlen (data));
 	}
 
-	/** Copies a source string to this pointer, advancing this pointer as it goes. */
-	template <typename CharPointer>
-	void copyAndAdvance (const CharPointer& src) throw()
+	/** Writes a unicode character to this string, and advances this pointer to point to the next position. */
+	void write (const juce_wchar charToWrite) throw()
 	{
-		CharacterFunctions::copyAndAdvance (*this, src);
+		const uint32 c = (uint32) charToWrite;
+
+		if (c >= 0x80)
+		{
+			int numExtraBytes = 1;
+			if (c >= 0x800)
+			{
+				++numExtraBytes;
+				if (c >= 0x10000)
+					++numExtraBytes;
+			}
+
+			*data++ = (CharType) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
+
+			while (--numExtraBytes >= 0)
+				*data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
+		}
+		else
+		{
+			*data++ = (CharType) c;
+		}
+	}
+
+	/** Writes a null character to this string (leaving the pointer's position unchanged). */
+	inline void writeNull() const throw()
+	{
+		*data = 0;
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes. */
-	void copyAndAdvance (const CharPointer_UTF8& src) throw()
+	template <typename CharPointer>
+	void writeAll (const CharPointer& src) throw()
 	{
-		data = (CharType*) strcpy ((char*) data, src.data);
+		CharacterFunctions::copyAll (*this, src);
+	}
+
+	/** Copies a source string to this pointer, advancing this pointer as it goes. */
+	void writeAll (const CharPointer_UTF8& src) throw()
+	{
+		const CharType* s = src.data;
+
+		while ((*data = *s) != 0)
+		{
+			++data;
+			++s;
+		}
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes.
-		The maxBytes parameter specifies the maximum number of bytes that can be written
+		The maxDestBytes parameter specifies the maximum number of bytes that can be written
 		to the destination buffer before stopping.
 	*/
 	template <typename CharPointer>
-	int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+	int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) throw()
 	{
-		return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+		return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes.
@@ -2353,9 +2771,9 @@ public:
 		written to the destination buffer before stopping (including the terminating null).
 	*/
 	template <typename CharPointer>
-	void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+	void writeWithCharLimit (const CharPointer& src, const int maxChars) throw()
 	{
-		CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+		CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
 	}
 
 	/** Compares this string with another one. */
@@ -2367,7 +2785,7 @@ public:
 
 	/** Compares this string with another one, up to a specified number of characters. */
 	template <typename CharPointer>
-	int compareUpTo (const CharPointer& other, int maxChars) const throw()
+	int compareUpTo (const CharPointer& other, const int maxChars) const throw()
 	{
 		return CharacterFunctions::compareUpTo (*this, other, maxChars);
 	}
@@ -2391,13 +2809,13 @@ public:
 
 	/** Compares this string with another one, up to a specified number of characters. */
 	template <typename CharPointer>
-	int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+	int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const throw()
 	{
 		return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
 	}
 
 	/** Compares this string with another one, up to a specified number of characters. */
-	int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, int maxChars) const throw()
+	int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, const int maxChars) const throw()
 	{
 	   #if JUCE_WINDOWS
 		return strnicmp (data, other.data, maxChars);
@@ -2465,6 +2883,14 @@ public:
 	/** Returns the first non-whitespace character in the string. */
 	CharPointer_UTF8 findEndOfWhitespace() const throw()	{ return CharacterFunctions::findEndOfWhitespace (*this); }
 
+	/** These values are the byte-order-mark (BOM) values for a UTF-8 stream. */
+	enum
+	{
+		byteOrderMark1 = 0xef,
+		byteOrderMark2 = 0xbb,
+		byteOrderMark3 = 0xbf
+	};
+
 private:
 	CharType* data;
 };
@@ -2485,9 +2911,13 @@ private:
 class CharPointer_UTF16
 {
 public:
+   #if JUCE_WINDOWS && ! DOXYGEN
+	typedef wchar_t CharType;
+   #else
 	typedef int16 CharType;
+   #endif
 
-	inline CharPointer_UTF16 (const CharType* const rawPointer) throw()
+	inline explicit CharPointer_UTF16 (const CharType* const rawPointer) throw()
 		: data (const_cast <CharType*> (rawPointer))
 	{
 	}
@@ -2503,8 +2933,29 @@ public:
 		return *this;
 	}
 
+	inline CharPointer_UTF16& operator= (const CharType* text) throw()
+	{
+		data = const_cast <CharType*> (text);
+		return *this;
+	}
+
+	/** This is a pointer comparison, it doesn't compare the actual text. */
+	inline bool operator== (const CharPointer_UTF16& other) const throw()
+	{
+		return data == other.data;
+	}
+
+	/** This is a pointer comparison, it doesn't compare the actual text. */
+	inline bool operator!= (const CharPointer_UTF16& other) const throw()
+	{
+		return data == other.data;
+	}
+
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
+
+	/** Returns the address that this pointer is pointing to. */
+	inline operator const CharType*() const throw()	 { return data; }
 
 	/** Returns true if this pointer is pointing to a null character. */
 	inline bool isEmpty() const throw()		 { return *data == 0; }
@@ -2514,8 +2965,8 @@ public:
 	{
 		uint32 n = (uint32) (uint16) *data;
 
-		if (n >= 0xd800 && n <= 0xdfff)
-			n = 0x10000 + (((n & ~0xd800) << 10) | (data[1] & ~0xdc00));
+		if (n >= 0xd800 && n <= 0xdfff && ((uint32) (uint16) data[1]) >= 0xdc00)
+			n = 0x10000 + (((n - 0xd800) << 10) | (((uint32) (uint16) data[1]) - 0xdc00));
 
 		return (juce_wchar) n;
 	}
@@ -2525,7 +2976,7 @@ public:
 	{
 		const juce_wchar n = *data++;
 
-		if (n >= 0xd800 && n <= 0xdfff)
+		if (n >= 0xd800 && n <= 0xdfff && ((uint32) (uint16) *data) >= 0xdc00)
 			++data;
 
 		return *this;
@@ -2537,11 +2988,8 @@ public:
 	{
 		uint32 n = (uint32) (uint16) *data++;
 
-		if (n >= 0xd800 && n <= 0xdfff)
-		{
-			n = 0x10000 + (((n & ~0xd800) << 10) | (*data & ~0xdc00));
-			++data;
-		}
+		if (n >= 0xd800 && n <= 0xdfff && ((uint32) (uint16) *data) >= 0xdc00)
+			n = 0x10000 + ((((n - 0xd800) << 10) | (((uint32) (uint16) *data++) - 0xdc00)));
 
 		return (juce_wchar) n;
 	}
@@ -2564,7 +3012,7 @@ public:
 	}
 
 	/** Returns the character at a given character index from the start of the string. */
-	juce_wchar operator[] (int characterIndex) const throw()
+	juce_wchar operator[] (const int characterIndex) const throw()
 	{
 		CharPointer_UTF16 p (*this);
 		p += characterIndex;
@@ -2572,7 +3020,7 @@ public:
 	}
 
 	/** Returns a pointer which is moved forwards from this one by the specified number of characters. */
-	CharPointer_UTF16 operator+ (int numToSkip) const throw()
+	CharPointer_UTF16 operator+ (const int numToSkip) const throw()
 	{
 		CharPointer_UTF16 p (*this);
 		p += numToSkip;
@@ -2580,17 +3028,24 @@ public:
 	}
 
 	/** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-	void write (const juce_wchar charToWrite) throw()
+	void write (juce_wchar charToWrite) throw()
 	{
-		if (charToWrite < 0xd800 || (charToWrite > 0xdfff && charToWrite <= 0xffff))
+		if (charToWrite >= 0x10000)
 		{
-			*data++ = (CharType) charToWrite;
+			charToWrite -= 0x10000;
+			*data++ = (CharType) (0xd800 + (charToWrite >> 10));
+			*data++ = (CharType) (0xdc00 + (charToWrite & 0x3ff));
 		}
 		else
 		{
-			*data++ = (CharType) ((0xd800 - (0x10000 >> 10)) + (charToWrite >> 10));
-			*data++ = (CharType) (0xdc00 + (charToWrite & 0x3ff));
+			*data++ = (CharType) charToWrite;
 		}
+	}
+
+	/** Writes a null character to this string (leaving the pointer's position unchanged). */
+	inline void writeNull() const throw()
+	{
+		*data = 0;
 	}
 
 	/** Returns the number of characters in this string. */
@@ -2604,7 +3059,10 @@ public:
 			const int n = *d++;
 
 			if (n >= 0xd800 && n <= 0xdfff)
-				++d;
+			{
+				if (*d++ == 0)
+					break;
+			}
 			else if (n == 0)
 				break;
 
@@ -2612,6 +3070,12 @@ public:
 		}
 
 		return count;
+	}
+
+	/** Returns the number of characters in this string, or the given value, whichever is lower. */
+	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -2627,8 +3091,7 @@ public:
 	*/
 	static size_t getBytesRequiredFor (const juce_wchar charToWrite) throw()
 	{
-		return (charToWrite < 0xd800 || (charToWrite > 0xdfff && charToWrite <= 0xffff))
-					? 1 : 2;
+		return (charToWrite >= 0x10000) ? (sizeof (CharType) * 2) : sizeof (CharType);
 	}
 
 	/** Returns the number of bytes that would be needed to represent the given
@@ -2660,13 +3123,13 @@ public:
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes. */
 	template <typename CharPointer>
-	void copyAndAdvance (const CharPointer& src) throw()
+	void writeAll (const CharPointer& src) throw()
 	{
-		CharacterFunctions::copyAndAdvance (*this, src);
+		CharacterFunctions::copyAll (*this, src);
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes. */
-	void copyAndAdvance (const CharPointer_UTF16& src) throw()
+	void writeAll (const CharPointer_UTF16& src) throw()
 	{
 		const CharType* s = src.data;
 
@@ -2678,13 +3141,13 @@ public:
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes.
-		The maxBytes parameter specifies the maximum number of bytes that can be written
+		The maxDestBytes parameter specifies the maximum number of bytes that can be written
 		to the destination buffer before stopping.
 	*/
 	template <typename CharPointer>
-	int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+	int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) throw()
 	{
-		return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+		return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes.
@@ -2692,9 +3155,9 @@ public:
 		written to the destination buffer before stopping (including the terminating null).
 	*/
 	template <typename CharPointer>
-	void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+	void writeWithCharLimit (const CharPointer& src, const int maxChars) throw()
 	{
-		CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+		CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
 	}
 
 	/** Compares this string with another one. */
@@ -2706,7 +3169,7 @@ public:
 
 	/** Compares this string with another one, up to a specified number of characters. */
 	template <typename CharPointer>
-	int compareUpTo (const CharPointer& other, int maxChars) const throw()
+	int compareUpTo (const CharPointer& other, const int maxChars) const throw()
 	{
 		return CharacterFunctions::compareUpTo (*this, other, maxChars);
 	}
@@ -2720,10 +3183,28 @@ public:
 
 	/** Compares this string with another one, up to a specified number of characters. */
 	template <typename CharPointer>
-	int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+	int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const throw()
 	{
 		return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
 	}
+
+   #if JUCE_WINDOWS && ! DOXYGEN
+	int compareIgnoreCase (const CharPointer_UTF16& other) const throw()
+	{
+		return _wcsicmp (data, other.data);
+	}
+
+	int compareIgnoreCaseUpTo (const CharPointer_UTF16& other, int maxChars) const throw()
+	{
+		return _wcsnicmp (data, other.data, maxChars);
+	}
+
+	int indexOf (const CharPointer_UTF16& stringToFind) const throw()
+	{
+		const CharType* const t = wcsstr (data, stringToFind.getAddress());
+		return t == 0 ? -1 : (int) (t - data);
+	}
+   #endif
 
 	/** Returns the character index of a substring, or -1 if it isn't found. */
 	template <typename CharPointer>
@@ -2764,15 +3245,39 @@ public:
 	juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (operator*()); }
 
 	/** Parses this string as a 32-bit integer. */
-	int getIntValue32() const throw()	   { return CharacterFunctions::getIntValue <int, CharPointer_UTF16> (*this); }
+	int getIntValue32() const throw()
+	{
+	   #if JUCE_WINDOWS
+		return _wtoi (data);
+	   #else
+		return CharacterFunctions::getIntValue <int, CharPointer_UTF16> (*this);
+	   #endif
+	}
+
 	/** Parses this string as a 64-bit integer. */
-	int64 getIntValue64() const throw()	 { return CharacterFunctions::getIntValue <int64, CharPointer_UTF16> (*this); }
+	int64 getIntValue64() const throw()
+	{
+	   #if JUCE_WINDOWS
+		return _wtoi64 (data);
+	   #else
+		return CharacterFunctions::getIntValue <int64, CharPointer_UTF16> (*this);
+	   #endif
+	}
 
 	/** Parses this string as a floating point double. */
 	double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
 
 	/** Returns the first non-whitespace character in the string. */
 	CharPointer_UTF16 findEndOfWhitespace() const throw()	{ return CharacterFunctions::findEndOfWhitespace (*this); }
+
+	/** These values are the byte-order-mark (BOM) values for a UTF-16 stream. */
+	enum
+	{
+		byteOrderMarkBE1 = 0xfe,
+		byteOrderMarkBE2 = 0xff,
+		byteOrderMarkLE1 = 0xff,
+		byteOrderMarkLE2 = 0xfe
+	};
 
 private:
 	CharType* data;
@@ -2806,7 +3311,7 @@ class CharPointer_UTF32
 public:
 	typedef juce_wchar CharType;
 
-	inline CharPointer_UTF32 (const CharType* const rawPointer) throw()
+	inline explicit CharPointer_UTF32 (const CharType* const rawPointer) throw()
 		: data (const_cast <CharType*> (rawPointer))
 	{
 	}
@@ -2822,8 +3327,29 @@ public:
 		return *this;
 	}
 
+	inline CharPointer_UTF32& operator= (const CharType* text) throw()
+	{
+		data = const_cast <CharType*> (text);
+		return *this;
+	}
+
+	/** This is a pointer comparison, it doesn't compare the actual text. */
+	inline bool operator== (const CharPointer_UTF32& other) const throw()
+	{
+		return data == other.data;
+	}
+
+	/** This is a pointer comparison, it doesn't compare the actual text. */
+	inline bool operator!= (const CharPointer_UTF32& other) const throw()
+	{
+		return data == other.data;
+	}
+
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
+
+	/** Returns the address that this pointer is pointing to. */
+	inline operator const CharType*() const throw()	 { return data; }
 
 	/** Returns true if this pointer is pointing to a null character. */
 	inline bool isEmpty() const throw()		 { return *data == 0; }
@@ -2858,30 +3384,30 @@ public:
 	}
 
 	/** Moves this pointer forwards by the specified number of characters. */
-	inline void operator+= (int numToSkip) throw()
+	inline void operator+= (const int numToSkip) throw()
 	{
 		data += numToSkip;
 	}
 
-	inline void operator-= (int numToSkip) throw()
+	inline void operator-= (const int numToSkip) throw()
 	{
 		data -= numToSkip;
 	}
 
 	/** Returns the character at a given character index from the start of the string. */
-	inline juce_wchar operator[] (int characterIndex) const throw()
+	inline juce_wchar& operator[] (const int characterIndex) const throw()
 	{
 		return data [characterIndex];
 	}
 
 	/** Returns a pointer which is moved forwards from this one by the specified number of characters. */
-	CharPointer_UTF32 operator+ (int numToSkip) const throw()
+	CharPointer_UTF32 operator+ (const int numToSkip) const throw()
 	{
 		return CharPointer_UTF32 (data + numToSkip);
 	}
 
 	/** Returns a pointer which is moved backwards from this one by the specified number of characters. */
-	CharPointer_UTF32 operator- (int numToSkip) const throw()
+	CharPointer_UTF32 operator- (const int numToSkip) const throw()
 	{
 		return CharPointer_UTF32 (data - numToSkip);
 	}
@@ -2892,17 +3418,34 @@ public:
 		*data++ = charToWrite;
 	}
 
+	inline void replaceChar (const juce_wchar newChar) throw()
+	{
+		*data = newChar;
+	}
+
+	/** Writes a null character to this string (leaving the pointer's position unchanged). */
+	inline void writeNull() const throw()
+	{
+		*data = 0;
+	}
+
 	/** Returns the number of characters in this string. */
 	size_t length() const throw()
 	{
-	   #if JUCE_ANDROID
+	   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
 		size_t n = 0;
-		while (data[n] == 0)
+		while (data[n] != 0)
 			++n;
 		return n;
 	   #else
 		return wcslen (data);
 	   #endif
+	}
+
+	/** Returns the number of characters in this string, or the given value, whichever is lower. */
+	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -2939,27 +3482,31 @@ public:
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes. */
 	template <typename CharPointer>
-	void copyAndAdvance (const CharPointer& src) throw()
+	void writeAll (const CharPointer& src) throw()
 	{
-		CharacterFunctions::copyAndAdvance (*this, src);
+		CharacterFunctions::copyAll (*this, src);
 	}
 
-   #if ! JUCE_ANDROID
 	/** Copies a source string to this pointer, advancing this pointer as it goes. */
-	void copyAndAdvance (const CharPointer_UTF32& src) throw()
+	void writeAll (const CharPointer_UTF32& src) throw()
 	{
-		data = wcscpy (data, src.data);
+		const CharType* s = src.data;
+
+		while ((*data = *s) != 0)
+		{
+			++data;
+			++s;
+		}
 	}
-   #endif
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes.
-		The maxBytes parameter specifies the maximum number of bytes that can be written
+		The maxDestBytes parameter specifies the maximum number of bytes that can be written
 		to the destination buffer before stopping.
 	*/
 	template <typename CharPointer>
-	int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+	int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) throw()
 	{
-		return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+		return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
 	}
 
 	/** Copies a source string to this pointer, advancing this pointer as it goes.
@@ -2967,9 +3514,9 @@ public:
 		written to the destination buffer before stopping (including the terminating null).
 	*/
 	template <typename CharPointer>
-	void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+	void writeWithCharLimit (const CharPointer& src, const int maxChars) throw()
 	{
-		CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+		CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
 	}
 
 	/** Compares this string with another one. */
@@ -2979,7 +3526,7 @@ public:
 		return CharacterFunctions::compare (*this, other);
 	}
 
-   #if ! JUCE_ANDROID
+   #if ! JUCE_NATIVE_WCHAR_IS_NOT_UTF32
 	/** Compares this string with another one. */
 	int compare (const CharPointer_UTF32& other) const throw()
 	{
@@ -2989,7 +3536,7 @@ public:
 
 	/** Compares this string with another one, up to a specified number of characters. */
 	template <typename CharPointer>
-	int compareUpTo (const CharPointer& other, int maxChars) const throw()
+	int compareUpTo (const CharPointer& other, const int maxChars) const throw()
 	{
 		return CharacterFunctions::compareUpTo (*this, other, maxChars);
 	}
@@ -3003,7 +3550,7 @@ public:
 
 	/** Compares this string with another one, up to a specified number of characters. */
 	template <typename CharPointer>
-	int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+	int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const throw()
 	{
 		return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
 	}
@@ -3038,24 +3585,6 @@ public:
 						  : CharacterFunctions::indexOfChar (*this, charToFind);
 	}
 
-   #if JUCE_WINDOWS && ! DOXYGEN
-	int compareIgnoreCase (const CharPointer_UTF32& other) const throw()
-	{
-		return _wcsicmp (data, other.data);
-	}
-
-	int compareIgnoreCaseUpTo (const CharPointer_UTF32& other, int maxChars) const throw()
-	{
-		return _wcsnicmp (data, other.data, maxChars);
-	}
-
-	int indexOf (const CharPointer_UTF32& stringToFind) const throw()
-	{
-		const CharType* const t = wcsstr (data, stringToFind.getAddress());
-		return t == 0 ? -1 : (t - data);
-	}
-   #endif
-
 	/** Returns true if the first character of this string is whitespace. */
 	bool isWhitespace() const		   { return CharacterFunctions::isWhitespace (*data) != 0; }
 	/** Returns true if the first character of this string is a digit. */
@@ -3075,30 +3604,20 @@ public:
 	juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (*data); }
 
 	/** Parses this string as a 32-bit integer. */
-	int getIntValue32() const throw()
-	{
-	   #if JUCE_WINDOWS
-		return _wtoi (data);
-	   #else
-		return CharacterFunctions::getIntValue <int, CharPointer_UTF32> (*this);
-	   #endif
-	}
-
+	int getIntValue32() const throw()	   { return CharacterFunctions::getIntValue <int, CharPointer_UTF32> (*this); }
 	/** Parses this string as a 64-bit integer. */
-	int64 getIntValue64() const throw()
-	{
-	   #if JUCE_WINDOWS
-		return _wtoi64 (data);
-	   #else
-		return CharacterFunctions::getIntValue <int64, CharPointer_UTF32> (*this);
-	   #endif
-	}
+	int64 getIntValue64() const throw()	 { return CharacterFunctions::getIntValue <int64, CharPointer_UTF32> (*this); }
 
 	/** Parses this string as a floating point double. */
 	double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
 
 	/** Returns the first non-whitespace character in the string. */
 	CharPointer_UTF32 findEndOfWhitespace() const throw()	{ return CharacterFunctions::findEndOfWhitespace (*this); }
+
+	CharPointer_UTF32 atomicSwap (const CharPointer_UTF32& newValue)
+	{
+		return CharPointer_UTF32 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
+	}
 
 private:
 	CharType* data;
@@ -3157,6 +3676,26 @@ public:
 	*/
 	String (const juce_wchar* unicodeText, size_t maxChars);
 
+	/** Creates a string from a UTF-8 character string */
+	String (const CharPointer_UTF8& text);
+
+	/** Creates a string from a UTF-16 character string */
+	String (const CharPointer_UTF16& text);
+
+	/** Creates a string from a UTF-32 character string */
+	String (const CharPointer_UTF32& text);
+
+	/** Creates a string from a UTF-32 character string */
+	String (const CharPointer_UTF32& text, size_t maxChars);
+
+   #if JUCE_WINDOWS
+	/** Creates a string from a UTF-16 character string */
+	String (const wchar_t* text);
+
+	/** Creates a string from a UTF-16 character string */
+	String (const wchar_t* text, size_t maxChars);
+   #endif
+
 	/** Creates a string from a single character. */
 	static const String charToString (juce_wchar character);
 
@@ -3169,6 +3708,9 @@ public:
 		and is more efficient.
 	*/
 	static const String empty;
+
+	/** This is the character encoding type used internally to store the string. */
+	typedef CharPointer_UTF32 CharPointerType;
 
 	/** Generates a probably-unique 32-bit hashcode from this string. */
 	int hashCode() const throw();
@@ -3192,15 +3734,63 @@ public:
 	String& operator+= (char characterToAppend);
 	/** Appends a character at the end of this string. */
 	String& operator+= (juce_wchar characterToAppend);
+   #if JUCE_WINDOWS
+	/** Appends a character at the end of this string. */
+	String& operator+= (wchar_t characterToAppend);
+	/** Appends another string at the end of this one. */
+	String& operator+= (const wchar_t* textToAppend);
+   #endif
 	/** Appends a decimal number at the end of this string. */
 	String& operator+= (int numberToAppend);
 
-	/** Appends a string at the end of this one.
+	/** Appends a string to the end of this one.
 
 		@param textToAppend	 the string to add
 		@param maxCharsToTake   the maximum number of characters to take from the string passed in
 	*/
-	void append (const juce_wchar* textToAppend, int maxCharsToTake);
+	void append (const String& textToAppend, size_t maxCharsToTake);
+
+	/** Appends a string to the end of this one.
+
+		@param textToAppend	 the string to add
+		@param maxCharsToTake   the maximum number of characters to take from the string passed in
+	*/
+	template <class CharPointer>
+	void appendCharPointer (const CharPointer& textToAppend, size_t maxCharsToTake)
+	{
+		if (textToAppend.getAddress() != 0)
+		{
+			const size_t numExtraChars = textToAppend.lengthUpTo (maxCharsToTake);
+
+			if (numExtraChars > 0)
+			{
+				const int oldLen = length();
+				preallocateStorage (oldLen + numExtraChars);
+				CharPointerType (text + oldLen).writeWithCharLimit (textToAppend, (int) (numExtraChars + 1));
+			}
+		}
+	}
+
+	/** Appends a string to the end of this one.
+
+		@param textToAppend	 the string to add
+		@param maxCharsToTake   the maximum number of characters to take from the string passed in
+	*/
+	template <class CharPointer>
+	void appendCharPointer (const CharPointer& textToAppend)
+	{
+		if (textToAppend.getAddress() != 0)
+		{
+			const size_t numExtraChars = textToAppend.length();
+
+			if (numExtraChars > 0)
+			{
+				const int oldLen = length();
+				preallocateStorage (oldLen + numExtraChars);
+				CharPointerType (text + oldLen).writeAll (textToAppend);
+			}
+		}
+	}
 
 	// Comparison methods..
 
@@ -3966,7 +4556,7 @@ public:
 		that is returned must not be stored anywhere, as it can become invalid whenever
 		any string methods (even some const ones!) are called.
 	*/
-	inline operator const juce_wchar*() const throw()   { return text; }
+	inline operator const juce_wchar*() const throw()   { return text.getAddress(); }
 
 	/** Returns a unicode version of this string.
 
@@ -3974,7 +4564,15 @@ public:
 		that is returned must not be stored anywhere, as it can become invalid whenever
 		any string methods (even some const ones!) are called.
 	*/
-	inline operator juce_wchar*() throw()		   { return text; }
+	inline operator juce_wchar*() throw()		   { return text.getAddress(); }
+
+	/** Returns the character pointer currently being used to store this string.
+
+		Because it returns a reference to the string's internal data, the pointer
+		that is returned must not be stored anywhere, as it can be deleted whenever the
+		string changes.
+	*/
+	inline const CharPointerType& getCharPointer() const throw()	 { return text; }
 
 	/** Returns a pointer to a UTF-8 version of this string.
 
@@ -3982,12 +4580,37 @@ public:
 		that is returned must not be stored anywhere, as it can be deleted whenever the
 		string changes.
 
-		@see getNumBytesAsUTF8, fromUTF8, copyToUTF8, toCString
+		To find out how many bytes you need to store this string as UTF-8, you can call
+		CharPointer_UTF8::getBytesRequiredFor (myString.getCharPointer())
+
+		@see getCharPointer, toUTF16, toUTF32
 	*/
-	const char* toUTF8() const;
+	const CharPointer_UTF8 toUTF8() const;
+
+	/** Returns a pointer to a UTF-32 version of this string.
+
+		Because it returns a reference to the string's internal data, the pointer
+		that is returned must not be stored anywhere, as it can be deleted whenever the
+		string changes.
+
+		To find out how many bytes you need to store this string as UTF-16, you can call
+		CharPointer_UTF16::getBytesRequiredFor (myString.getCharPointer())
+
+		@see getCharPointer, toUTF8, toUTF32
+	*/
+	CharPointer_UTF16 toUTF16() const;
+
+	/** Returns a pointer to a UTF-32 version of this string.
+
+		Because it returns a reference to the string's internal data, the pointer
+		that is returned must not be stored anywhere, as it can be deleted whenever the
+		string changes.
+
+		@see getCharPointer, toUTF8, toUTF16
+	*/
+	inline CharPointer_UTF32 toUTF32() const throw()	{ return text; }
 
 	/** Creates a String from a UTF-8 encoded buffer.
-
 		If the size is < 0, it'll keep reading until it hits a zero.
 	*/
 	static const String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
@@ -4003,15 +4626,34 @@ public:
 		Returns the number of bytes copied to the buffer, including the terminating null
 		character.
 
-		@param destBuffer	   the place to copy it to; if this is a null pointer,
-								the method just returns the number of bytes required
-								(including the terminating null character).
-		@param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the
-								string won't fit, it'll put in as many as it can while
-								still allowing for a terminating null char at the end, and
-								will return the number of bytes that were actually used.
+		To find out how many bytes you need to store this string as UTF-8, you can call
+		CharPointer_UTF8::getBytesRequiredFor (myString.getCharPointer())
+
+		@param destBuffer	   the place to copy it to; if this is a null pointer, the method just
+								returns the number of bytes required (including the terminating null character).
+		@param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the string won't fit, it'll
+								put in as many as it can while still allowing for a terminating null char at the
+								end, and will return the number of bytes that were actually used.
+		@see CharPointer_UTF8::writeWithDestByteLimit
 	*/
-	int copyToUTF8 (char* destBuffer, int maxBufferSizeBytes) const throw();
+	int copyToUTF8 (CharPointer_UTF8::CharType* destBuffer, int maxBufferSizeBytes) const throw();
+
+	/** Copies the string to a buffer as UTF-16 characters.
+
+		Returns the number of bytes copied to the buffer, including the terminating null
+		character.
+
+		To find out how many bytes you need to store this string as UTF-16, you can call
+		CharPointer_UTF16::getBytesRequiredFor (myString.getCharPointer())
+
+		@param destBuffer	   the place to copy it to; if this is a null pointer, the method just
+								returns the number of bytes required (including the terminating null character).
+		@param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the string won't fit, it'll
+								put in as many as it can while still allowing for a terminating null char at the
+								end, and will return the number of bytes that were actually used.
+		@see CharPointer_UTF16::writeWithDestByteLimit
+	*/
+	int copyToUTF16 (CharPointer_UTF16::CharType* destBuffer, int maxBufferSizeBytes) const throw();
 
 	/** Returns a version of this string using the default 8-bit multi-byte system encoding.
 
@@ -4025,6 +4667,7 @@ public:
 
 	/** Returns the number of bytes required to represent this string as C-string.
 		The number returned does NOT include the trailing zero.
+		Note that you can also get this value by using CharPointer_UTF8::getBytesRequiredFor (myString.getCharPointer())
 	*/
 	int getNumBytesAsCString() const throw();
 
@@ -4039,15 +4682,6 @@ public:
 								will return the number of bytes that were actually used.
 	*/
 	int copyToCString (char* destBuffer, int maxBufferSizeBytes) const throw();
-
-	/** Copies the string to a unicode buffer.
-
-		@param destBuffer	   the place to copy it to
-		@param maxCharsToCopy   the maximum number of characters to copy to the buffer,
-								NOT including the trailing zero, so this shouldn't be
-								larger than the size of your destination buffer - 1
-	*/
-	void copyToUnicode (juce_wchar* destBuffer, int maxCharsToCopy) const throw();
 
 	/** Increases the string's internally allocated storage.
 
@@ -4096,7 +4730,7 @@ public:
 
 private:
 
-	juce_wchar* text;
+	CharPointerType text;
 
 	struct Preallocation
 	{
@@ -4108,8 +4742,9 @@ private:
 	explicit String (const Preallocation&);
 	String (const String& stringToCopy, size_t charsToAllocate);
 
-	void createInternal (const juce_wchar* text, size_t numChars);
-	void appendInternal (const juce_wchar* text, int numExtraChars);
+	void appendFixedLength (const juce_wchar* text, int numExtraChars);
+
+	void enlarge (size_t newTotalNumChars);
 	void* createSpaceAtEndOfBuffer (size_t numExtraBytes) const;
 
 	// This private cast operator should prevent strings being accidentally cast
@@ -4137,6 +4772,14 @@ JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
+#if JUCE_WINDOWS
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, wchar_t characterToAppend);
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const wchar_t* string2);
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+  (const wchar_t* string1, const String& string2);
+#endif
 
 /** Appends a character at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
@@ -4167,11 +4810,23 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8& string2) throw();
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF16& string2) throw();
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF32& string2) throw();
+/** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw();
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8& string2) throw();
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF16& string2) throw();
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF32& string2) throw();
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
@@ -4187,7 +4842,7 @@ JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& str
 template <class charT, class traits>
 JUCE_API std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
-	return stream << stringToWrite.toUTF8();
+	return stream << stringToWrite.toUTF8().getAddress();
 }
 
 /** Writes a string to an OutputStream as UTF8. */
@@ -4262,362 +4917,6 @@ private:
 /*** Start of inlined file: juce_LeakedObjectDetector.h ***/
 #ifndef __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
 #define __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_Atomic.h ***/
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-#define __JUCE_ATOMIC_JUCEHEADER__
-
-/**
-	Simple class to hold a primitive value and perform atomic operations on it.
-
-	The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
-	There are methods to perform most of the basic atomic operations.
-*/
-template <typename Type>
-class Atomic
-{
-public:
-	/** Creates a new value, initialised to zero. */
-	inline Atomic() throw()
-		: value (0)
-	{
-	}
-
-	/** Creates a new value, with a given initial value. */
-	inline Atomic (const Type initialValue) throw()
-		: value (initialValue)
-	{
-	}
-
-	/** Copies another value (atomically). */
-	inline Atomic (const Atomic& other) throw()
-		: value (other.get())
-	{
-	}
-
-	/** Destructor. */
-	inline ~Atomic() throw()
-	{
-		// This class can only be used for types which are 32 or 64 bits in size.
-		static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
-	}
-
-	/** Atomically reads and returns the current value. */
-	Type get() const throw();
-
-	/** Copies another value onto this one (atomically). */
-	inline Atomic& operator= (const Atomic& other) throw()	  { exchange (other.get()); return *this; }
-
-	/** Copies another value onto this one (atomically). */
-	inline Atomic& operator= (const Type newValue) throw()	  { exchange (newValue); return *this; }
-
-	/** Atomically sets the current value. */
-	void set (Type newValue) throw()				{ exchange (newValue); }
-
-	/** Atomically sets the current value, returning the value that was replaced. */
-	Type exchange (Type value) throw();
-
-	/** Atomically adds a number to this value, returning the new value. */
-	Type operator+= (Type amountToAdd) throw();
-
-	/** Atomically subtracts a number from this value, returning the new value. */
-	Type operator-= (Type amountToSubtract) throw();
-
-	/** Atomically increments this value, returning the new value. */
-	Type operator++() throw();
-
-	/** Atomically decrements this value, returning the new value. */
-	Type operator--() throw();
-
-	/** Atomically compares this value with a target value, and if it is equal, sets
-		this to be equal to a new value.
-
-		This operation is the atomic equivalent of doing this:
-		@code
-		bool compareAndSetBool (Type newValue, Type valueToCompare)
-		{
-			if (get() == valueToCompare)
-			{
-				set (newValue);
-				return true;
-			}
-
-			return false;
-		}
-		@endcode
-
-		@returns true if the comparison was true and the value was replaced; false if
-				 the comparison failed and the value was left unchanged.
-		@see compareAndSetValue
-	*/
-	bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
-
-	/** Atomically compares this value with a target value, and if it is equal, sets
-		this to be equal to a new value.
-
-		This operation is the atomic equivalent of doing this:
-		@code
-		Type compareAndSetValue (Type newValue, Type valueToCompare)
-		{
-			Type oldValue = get();
-			if (oldValue == valueToCompare)
-				set (newValue);
-
-			return oldValue;
-		}
-		@endcode
-
-		@returns the old value before it was changed.
-		@see compareAndSetBool
-	*/
-	Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
-
-	/** Implements a memory read/write barrier. */
-	static void memoryBarrier() throw();
-
-	JUCE_ALIGN(8)
-
-	/** The raw value that this class operates on.
-		This is exposed publically in case you need to manipulate it directly
-		for performance reasons.
-	*/
-	volatile Type value;
-
-private:
-	static inline Type castFrom32Bit (int32 value) throw()	{ return *(Type*) &value; }
-	static inline Type castFrom64Bit (int64 value) throw()	{ return *(Type*) &value; }
-	static inline int32 castTo32Bit (Type value) throw()	  { return *(int32*) &value; }
-	static inline int64 castTo64Bit (Type value) throw()	  { return *(int64*) &value; }
-
-	Type operator++ (int); // better to just use pre-increment with atomics..
-	Type operator-- (int);
-};
-
-/*
-	The following code is in the header so that the atomics can be inlined where possible...
-*/
-#if (JUCE_IOS && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
-	  || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
-  #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
-
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-	#define JUCE_MAC_ATOMICS_VOLATILE
-  #else
-	#define JUCE_MAC_ATOMICS_VOLATILE volatile
-  #endif
-
-  #if JUCE_PPC || JUCE_IOS
-	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
-	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()   { jassertfalse; return *a += b; }
-	template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return ++*a; }
-	template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()	 { jassertfalse; return --*a; }
-	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) throw()
-		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
-	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
-  #endif
-
-#elif JUCE_GCC
-  #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
-
-  #if JUCE_IOS
-	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
-  #endif
-
-#else
-  #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
-
-  #if JUCE_USE_INTRINSICS || JUCE_64BIT
-	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
-					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
-	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
-	#define juce_InterlockedIncrement(a)		_InterlockedIncrement(a)
-	#define juce_InterlockedDecrement(a)		_InterlockedDecrement(a)
-	#define juce_InterlockedExchangeAdd(a, b)	   _InterlockedExchangeAdd(a, b)
-	#define juce_InterlockedCompareExchange(a, b, c)	_InterlockedCompareExchange(a, b, c)
-	#define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
-	#define juce_MemoryBarrier _ReadWriteBarrier
-  #else
-	// (these are defined in juce_win32_Threads.cpp)
-	long juce_InterlockedExchange (volatile long* a, long b) throw();
-	long juce_InterlockedIncrement (volatile long* a) throw();
-	long juce_InterlockedDecrement (volatile long* a) throw();
-	long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
-	long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
-	__int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
-	inline void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
-  #endif
-
-  #if JUCE_64BIT
-	#pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
-	#define juce_InterlockedExchangeAdd64(a, b)	 _InterlockedExchangeAdd64(a, b)
-	#define juce_InterlockedExchange64(a, b)	_InterlockedExchange64(a, b)
-	#define juce_InterlockedIncrement64(a)	  _InterlockedIncrement64(a)
-	#define juce_InterlockedDecrement64(a)	  _InterlockedDecrement64(a)
-  #else
-	// None of these atomics are available in a 32-bit Windows build!!
-	template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
-	template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()	  { jassertfalse; Type old = *a; *a = b; return old; }
-	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
-	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
-	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
-  #endif
-#endif
-
-#if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4311)  // (truncation warning)
-#endif
-
-template <typename Type>
-inline Type Atomic<Type>::get() const throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
-							  : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value));
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
-							  : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
-  #elif JUCE_ANDROID
-	return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (value), castTo32Bit (value), (volatile int*) &value));
-  #elif JUCE_ATOMICS_GCC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
-							  : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::exchange (const Type newValue) throw()
-{
-  #if JUCE_ANDROID
-	return castFrom32Bit (__atomic_swap (castTo32Bit (newValue), (volatile int*) &value));
-  #elif JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
-	Type currentVal = value;
-	while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
-	return currentVal;
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchange ((volatile long*) &value, (long) castTo32Bit (newValue)))
-							  : castFrom64Bit ((int64) juce_InterlockedExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue)));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
-							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
-  #elif JUCE_ANDROID
-	for (;;)
-	{
-		const Type oldValue (value);
-		const Type newValue (oldValue + amountToAdd);
-		if (compareAndSetBool (newValue, oldValue))
-			return newValue;
-	}
-  #elif JUCE_ATOMICS_GCC
-	return (Type) __sync_add_and_fetch (&value, amountToAdd);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
-{
-	return operator+= (juce_negate (amountToSubtract));
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator++() throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : (Type) OSAtomicIncrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
-							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
-  #elif JUCE_ANDROID
-	return (Type) __atomic_inc (&value);
-  #elif JUCE_ATOMICS_GCC
-	return (Type) __sync_add_and_fetch (&value, 1);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator--() throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : (Type) OSAtomicDecrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
-							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
-  #elif JUCE_ANDROID
-	return (Type) __atomic_dec (&value);
-  #elif JUCE_ATOMICS_GCC
-	return (Type) __sync_add_and_fetch (&value, -1);
-  #endif
-}
-
-template <typename Type>
-inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
-{
-  #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
-							  : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS || JUCE_ANDROID
-	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
-  #elif JUCE_ATOMICS_GCC
-	return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
-							  : __sync_bool_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) throw()
-{
-  #if JUCE_ATOMICS_MAC
-	for (;;) // Annoying workaround for OSX only having a bool CAS operation..
-	{
-		if (compareAndSetBool (newValue, valueToCompare))
-			return valueToCompare;
-
-		const Type result = value;
-		if (result != valueToCompare)
-			return result;
-	}
-
-  #elif JUCE_ATOMICS_WINDOWS
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
-							  : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
-  #elif JUCE_ANDROID
-	return castFrom32Bit (__atomic_cmpxchg (castTo32Bit (valueToCompare), castTo32Bit (newValue), (volatile int*) &value));
-  #elif JUCE_ATOMICS_GCC
-	return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
-							  : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
-  #endif
-}
-
-template <typename Type>
-inline void Atomic<Type>::memoryBarrier() throw()
-{
-  #if JUCE_ATOMICS_MAC
-	OSMemoryBarrier();
-  #elif JUCE_ATOMICS_GCC
-	__sync_synchronize();
-  #elif JUCE_ATOMICS_WINDOWS
-	juce_MemoryBarrier();
-  #endif
-}
-
-#if JUCE_MSVC
-  #pragma warning (pop)
-#endif
-
-#endif   // __JUCE_ATOMIC_JUCEHEADER__
-/*** End of inlined file: juce_Atomic.h ***/
 
 /**
 	Embedding an instance of this class inside another class can be used as a low-overhead

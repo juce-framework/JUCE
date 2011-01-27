@@ -39,21 +39,21 @@ public:
     {
         if (onlyHorizontalOptions)
         {
-            choices.add (T("centre"));
-            choices.add (T("left"));
-            choices.add (T("right"));
+            choices.add ("centre");
+            choices.add ("left");
+            choices.add ("right");
         }
         else
         {
-            choices.add (T("centred"));
-            choices.add (T("centred left"));
-            choices.add (T("centred right"));
-            choices.add (T("centred top"));
-            choices.add (T("centred bottom"));
-            choices.add (T("top left"));
-            choices.add (T("top right"));
-            choices.add (T("bottom left"));
-            choices.add (T("bottom right"));
+            choices.add ("centred");
+            choices.add ("centred left");
+            choices.add ("centred right");
+            choices.add ("centred top");
+            choices.add ("centred bottom");
+            choices.add ("top left");
+            choices.add ("top right");
+            choices.add ("bottom left");
+            choices.add ("bottom right");
         }
     }
 

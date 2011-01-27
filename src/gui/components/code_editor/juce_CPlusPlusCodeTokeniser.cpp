@@ -103,7 +103,7 @@ namespace CppTokeniser
         int i = 0;
         while (k[i] != 0)
         {
-            if (k[i][0] == token[0] && CharPointer_UTF8 (k[i]).compare (CharPointer_UTF32 (token)) == 0)
+            if (k[i][0] == (char) token[0] && CharPointer_UTF8 (k[i]).compare (CharPointer_UTF32 (token)) == 0)
                 return true;
 
             ++i;

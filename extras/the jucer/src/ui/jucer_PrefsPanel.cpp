@@ -115,9 +115,9 @@ public:
 
 
 //==============================================================================
-static const tchar* miscPage = T("Misc");
-static const tchar* keysPage = T("Keys");
-static const tchar* aboutPage = T("About");
+static const char* miscPage = "Misc";
+static const char* keysPage = "Keys";
+static const char* aboutPage = "About";
 
 class PrefsTabComp  : public PreferencesPanel
 {

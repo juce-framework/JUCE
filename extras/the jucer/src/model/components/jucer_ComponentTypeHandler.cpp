@@ -567,7 +567,7 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
         StringArray lines;
         lines.addLines (params);
 
-        params = lines.joinIntoString (T("\n") + String::repeatedString (T(" "), s.length() + 2));
+        params = lines.joinIntoString ("\n" + String::repeatedString (" ", s.length() + 2));
 
         s << " (" << params << "));\n";
     }

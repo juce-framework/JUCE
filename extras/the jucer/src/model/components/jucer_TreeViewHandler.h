@@ -143,7 +143,7 @@ private:
                 : name (name_)
             {
                 for (int i = 0; i < numItems; ++i)
-                    addSubItem (new DemoTreeViewItem (T("Demo sub-node ") + String (i), numItems - 1));
+                    addSubItem (new DemoTreeViewItem ("Demo sub-node " + String (i), numItems - 1));
             }
 
             ~DemoTreeViewItem()

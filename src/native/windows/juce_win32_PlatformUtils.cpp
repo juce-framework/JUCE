@@ -55,13 +55,13 @@ namespace
 
             if (createForWriting)
             {
-                if (RegCreateKeyEx (rootKey, name, 0, 0, REG_OPTION_NON_VOLATILE,
+                if (RegCreateKeyEx (rootKey, name.toUTF16(), 0, 0, REG_OPTION_NON_VOLATILE,
                                     (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
                     return key;
             }
             else
             {
-                if (RegOpenKeyEx (rootKey, name, 0, KEY_READ, &key) == ERROR_SUCCESS)
+                if (RegOpenKeyEx (rootKey, name.toUTF16(), 0, KEY_READ, &key) == ERROR_SUCCESS)
                     return key;
             }
         }
@@ -82,7 +82,7 @@ const String PlatformUtilities::getRegistryValue (const String& regValuePath,
         unsigned long bufferSize = sizeof (buffer);
         DWORD type = REG_SZ;
 
-        if (RegQueryValueEx (k, valueName, 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
+        if (RegQueryValueEx (k, valueName.toUTF16(), 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
         {
             if (type == REG_SZ)
                 result = buffer;
@@ -104,9 +104,9 @@ void PlatformUtilities::setRegistryValue (const String& regValuePath,
 
     if (k != 0)
     {
-        RegSetValueEx (k, valueName, 0, REG_SZ,
-                       (const BYTE*) (const WCHAR*) value,
-                       sizeof (WCHAR) * (value.length() + 1));
+        RegSetValueEx (k, valueName.toUTF16(), 0, REG_SZ,
+                       (const BYTE*) value.toUTF16().getAddress(),
+                       CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer()));
 
         RegCloseKey (k);
     }
@@ -124,7 +124,7 @@ bool PlatformUtilities::registryValueExists (const String& regValuePath)
         unsigned long bufferSize = sizeof (buffer);
         DWORD type = 0;
 
-        if (RegQueryValueEx (k, valueName, 0, &type, buffer, &bufferSize) == ERROR_SUCCESS)
+        if (RegQueryValueEx (k, valueName.toUTF16(), 0, &type, buffer, &bufferSize) == ERROR_SUCCESS)
             exists = true;
 
         RegCloseKey (k);
@@ -140,7 +140,7 @@ void PlatformUtilities::deleteRegistryValue (const String& regValuePath)
 
     if (k != 0)
     {
-        RegDeleteValue (k, valueName);
+        RegDeleteValue (k, valueName.toUTF16());
         RegCloseKey (k);
     }
 }
@@ -152,7 +152,7 @@ void PlatformUtilities::deleteRegistryKey (const String& regKeyPath)
 
     if (k != 0)
     {
-        RegDeleteKey (k, valueName);
+        RegDeleteKey (k, valueName.toUTF16());
         RegCloseKey (k);
     }
 }

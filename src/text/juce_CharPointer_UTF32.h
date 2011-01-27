@@ -38,7 +38,7 @@ class CharPointer_UTF32
 public:
     typedef juce_wchar CharType;
 
-    inline CharPointer_UTF32 (const CharType* const rawPointer) throw()
+    inline explicit CharPointer_UTF32 (const CharType* const rawPointer) throw()
         : data (const_cast <CharType*> (rawPointer))
     {
     }
@@ -54,14 +54,35 @@ public:
         return *this;
     }
 
+    inline CharPointer_UTF32& operator= (const CharType* text) throw()
+    {
+        data = const_cast <CharType*> (text);
+        return *this;
+    }
+
+    /** This is a pointer comparison, it doesn't compare the actual text. */
+    inline bool operator== (const CharPointer_UTF32& other) const throw()
+    {
+        return data == other.data;
+    }
+
+    /** This is a pointer comparison, it doesn't compare the actual text. */
+    inline bool operator!= (const CharPointer_UTF32& other) const throw()
+    {
+        return data == other.data;
+    }
+
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const throw()     { return data; }
+    inline CharType* getAddress() const throw()         { return data; }
+
+    /** Returns the address that this pointer is pointing to. */
+    inline operator const CharType*() const throw()     { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const throw()             { return *data == 0; }
+    inline bool isEmpty() const throw()                 { return *data == 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
-    inline juce_wchar operator*() const throw()     { return *data; }
+    inline juce_wchar operator*() const throw()         { return *data; }
 
     /** Moves this pointer along to the next character in the string. */
     inline CharPointer_UTF32& operator++() throw()
@@ -90,30 +111,30 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    inline void operator+= (int numToSkip) throw()
+    inline void operator+= (const int numToSkip) throw()
     {
         data += numToSkip;
     }
 
-    inline void operator-= (int numToSkip) throw()
+    inline void operator-= (const int numToSkip) throw()
     {
         data -= numToSkip;
     }
 
     /** Returns the character at a given character index from the start of the string. */
-    inline juce_wchar operator[] (int characterIndex) const throw()
+    inline juce_wchar& operator[] (const int characterIndex) const throw()
     {
         return data [characterIndex];
     }
 
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
-    CharPointer_UTF32 operator+ (int numToSkip) const throw()
+    CharPointer_UTF32 operator+ (const int numToSkip) const throw()
     {
         return CharPointer_UTF32 (data + numToSkip);
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
-    CharPointer_UTF32 operator- (int numToSkip) const throw()
+    CharPointer_UTF32 operator- (const int numToSkip) const throw()
     {
         return CharPointer_UTF32 (data - numToSkip);
     }
@@ -124,17 +145,34 @@ public:
         *data++ = charToWrite;
     }
 
+    inline void replaceChar (const juce_wchar newChar) throw()
+    {
+        *data = newChar;
+    }
+
+    /** Writes a null character to this string (leaving the pointer's position unchanged). */
+    inline void writeNull() const throw()
+    {
+        *data = 0;
+    }
+
     /** Returns the number of characters in this string. */
     size_t length() const throw()
     {
-       #if JUCE_ANDROID
+       #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
         size_t n = 0;
-        while (data[n] == 0)
+        while (data[n] != 0)
             ++n;
         return n;
        #else
         return wcslen (data);
        #endif
+    }
+
+    /** Returns the number of characters in this string, or the given value, whichever is lower. */
+    size_t lengthUpTo (const size_t maxCharsToCount) const throw()
+    {
+        return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
     }
 
     /** Returns the number of bytes that are used to represent this string.
@@ -171,27 +209,31 @@ public:
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
     template <typename CharPointer>
-    void copyAndAdvance (const CharPointer& src) throw()
+    void writeAll (const CharPointer& src) throw()
     {
-        CharacterFunctions::copyAndAdvance (*this, src);
+        CharacterFunctions::copyAll (*this, src);
     }
 
-   #if ! JUCE_ANDROID
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    void copyAndAdvance (const CharPointer_UTF32& src) throw()
+    void writeAll (const CharPointer_UTF32& src) throw()
     {
-        data = wcscpy (data, src.data);
+        const CharType* s = src.data;
+
+        while ((*data = *s) != 0)
+        {
+            ++data;
+            ++s;
+        }
     }
-   #endif
 
     /** Copies a source string to this pointer, advancing this pointer as it goes.
-        The maxBytes parameter specifies the maximum number of bytes that can be written
+        The maxDestBytes parameter specifies the maximum number of bytes that can be written
         to the destination buffer before stopping.
     */
     template <typename CharPointer>
-    int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+    int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) throw()
     {
-        return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+        return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes.
@@ -199,9 +241,9 @@ public:
         written to the destination buffer before stopping (including the terminating null).
     */
     template <typename CharPointer>
-    void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+    void writeWithCharLimit (const CharPointer& src, const int maxChars) throw()
     {
-        CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+        CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
     }
 
     /** Compares this string with another one. */
@@ -211,7 +253,7 @@ public:
         return CharacterFunctions::compare (*this, other);
     }
 
-   #if ! JUCE_ANDROID
+   #if ! JUCE_NATIVE_WCHAR_IS_NOT_UTF32
     /** Compares this string with another one. */
     int compare (const CharPointer_UTF32& other) const throw()
     {
@@ -221,7 +263,7 @@ public:
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareUpTo (const CharPointer& other, int maxChars) const throw()
+    int compareUpTo (const CharPointer& other, const int maxChars) const throw()
     {
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
@@ -235,7 +277,7 @@ public:
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+    int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const throw()
     {
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
@@ -270,24 +312,6 @@ public:
                           : CharacterFunctions::indexOfChar (*this, charToFind);
     }
 
-   #if JUCE_WINDOWS && ! DOXYGEN
-    int compareIgnoreCase (const CharPointer_UTF32& other) const throw()
-    {
-        return _wcsicmp (data, other.data);
-    }
-
-    int compareIgnoreCaseUpTo (const CharPointer_UTF32& other, int maxChars) const throw()
-    {
-        return _wcsnicmp (data, other.data, maxChars);
-    }
-
-    int indexOf (const CharPointer_UTF32& stringToFind) const throw()
-    {
-        const CharType* const t = wcsstr (data, stringToFind.getAddress());
-        return t == 0 ? -1 : (t - data);
-    }
-   #endif
-
     /** Returns true if the first character of this string is whitespace. */
     bool isWhitespace() const               { return CharacterFunctions::isWhitespace (*data) != 0; }
     /** Returns true if the first character of this string is a digit. */
@@ -307,30 +331,20 @@ public:
     juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (*data); }
 
     /** Parses this string as a 32-bit integer. */
-    int getIntValue32() const throw()
-    {
-       #if JUCE_WINDOWS
-        return _wtoi (data);
-       #else
-        return CharacterFunctions::getIntValue <int, CharPointer_UTF32> (*this);
-       #endif
-    }
-
+    int getIntValue32() const throw()       { return CharacterFunctions::getIntValue <int, CharPointer_UTF32> (*this); }
     /** Parses this string as a 64-bit integer. */
-    int64 getIntValue64() const throw()
-    {
-       #if JUCE_WINDOWS
-        return _wtoi64 (data);
-       #else
-        return CharacterFunctions::getIntValue <int64, CharPointer_UTF32> (*this);
-       #endif
-    }
+    int64 getIntValue64() const throw()     { return CharacterFunctions::getIntValue <int64, CharPointer_UTF32> (*this); }
 
     /** Parses this string as a floating point double. */
     double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
 
     /** Returns the first non-whitespace character in the string. */
     CharPointer_UTF32 findEndOfWhitespace() const throw()    { return CharacterFunctions::findEndOfWhitespace (*this); }
+
+    CharPointer_UTF32 atomicSwap (const CharPointer_UTF32& newValue)
+    {
+        return CharPointer_UTF32 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
+    }
 
 private:
     CharType* data;

@@ -63,11 +63,11 @@ ButtonDocument::~ButtonDocument()
         delete paintRoutines [i];
 }
 
-static const tchar* const stateNames[] =
+static const char* const stateNames[] =
 {
-    T("normal"), T("over"), T("down"),
-    T("normal on"), T("over on"), T("down on"),
-    T("common background")
+    "normal", "over", "down",
+    "normal on", "over on", "down on",
+    "common background"
 };
 
 int stateNameToIndex (const String& name)

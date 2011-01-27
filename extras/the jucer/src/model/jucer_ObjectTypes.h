@@ -42,7 +42,7 @@ namespace ObjectTypes
     /**
         Documents.
     */
-    extern const tchar** const documentTypeNames;
+    extern const char** const documentTypeNames;
     extern const int numDocumentTypes;
 
     JucerDocument* createNewDocument (const int index);
@@ -59,7 +59,7 @@ namespace ObjectTypes
     /**
         Elements.
     */
-    extern const tchar** const elementTypeNames;
+    extern const char** const elementTypeNames;
     extern const int numElementTypes;
 
     PaintElement* createNewElement (const int index, PaintRoutine* owner);

@@ -536,7 +536,7 @@ public:
 
     void setTitle (const String& title)
     {
-        SetWindowText (hwnd, title);
+        SetWindowText (hwnd, title.toUTF16());
     }
 
     void setPosition (int x, int y)
@@ -900,7 +900,7 @@ public:
         if (taskBarIcon != 0)
         {
             taskBarIcon->uFlags = NIF_TIP;
-            toolTip.copyToUnicode (taskBarIcon->szTip, sizeof (taskBarIcon->szTip) - 1);
+            toolTip.copyToUTF16 (taskBarIcon->szTip, sizeof (taskBarIcon->szTip) - 1);
             Shell_NotifyIcon (NIM_MODIFY, taskBarIcon);
         }
     }
@@ -1076,7 +1076,7 @@ private:
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
             wcex.lpfnWndProc    = (WNDPROC) windowProc;
-            wcex.lpszClassName  = windowClassName;
+            wcex.lpszClassName  = windowClassName.toUTF16();
             wcex.cbClsExtra     = 0;
             wcex.cbWndExtra     = 32;
             wcex.hInstance      = moduleHandle;
@@ -1093,7 +1093,7 @@ private:
         ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
-                UnregisterClass (windowClassName, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
+                UnregisterClass (windowClassName.toUTF16(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
 
             clearSingletonInstance();
         }
@@ -1159,7 +1159,7 @@ private:
               && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 
-        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0,
+        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName.toUTF16(), L"", type, 0, 0, 0, 0,
                                parentToAddTo, 0, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
 
       #if JUCE_DIRECT2D
@@ -2436,7 +2436,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
 {
-    return MessageBox (0, bodyText, title,
+    return MessageBox (0, bodyText.toUTF16(), title.toUTF16(),
                        MB_SETFOREGROUND | (isOkCancel ? MB_OKCANCEL
                                                       : MB_OK)) == IDOK;
 }
@@ -2587,13 +2587,10 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 const Image juce_createIconForFile (const File& file)
 {
     Image image;
-
-    WCHAR filename [1024];
-    file.getFullPathName().copyToUnicode (filename, 1023);
     WORD iconNum = 0;
 
     HICON icon = ExtractAssociatedIcon ((HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
-                                        filename, &iconNum);
+                                        const_cast <WCHAR*> (file.getFullPathName().toUTF16().getAddress()), &iconNum);
 
     if (icon != 0)
     {
@@ -2908,12 +2905,11 @@ private:
 
 static HDROP createHDrop (const StringArray& fileNames)
 {
-    int totalChars = 0;
+    int totalBytes = 0;
     for (int i = fileNames.size(); --i >= 0;)
-        totalChars += fileNames[i].length() + 1;
+        totalBytes += CharPointer_UTF16::getBytesRequiredFor (fileNames[i].getCharPointer()) + sizeof (WCHAR);
 
-    HDROP hDrop = (HDROP) GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT,
-                                       sizeof (DROPFILES) + sizeof (WCHAR) * (totalChars + 2));
+    HDROP hDrop = (HDROP) GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof (DROPFILES) + totalBytes + 4);
 
     if (hDrop != 0)
     {
@@ -2925,8 +2921,8 @@ static HDROP createHDrop (const StringArray& fileNames)
 
         for (int i = 0; i < fileNames.size(); ++i)
         {
-            fileNames[i].copyToUnicode (fname, 2048);
-            fname += fileNames[i].length() + 1;
+            const int bytesWritten = fileNames[i].copyToUTF16 (fname, 2048);
+            fname = reinterpret_cast<WCHAR*> (addBytesToPointer (fname, bytesWritten));
         }
 
         *fname = 0;
@@ -2967,12 +2963,12 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
     FORMATETC format = { CF_TEXT, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
     STGMEDIUM medium = { TYMED_HGLOBAL, { 0 }, 0 };
 
-    const int numChars = text.length();
+    const int numBytes = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
 
-    medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, (numChars + 2) * sizeof (WCHAR));
+    medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, numBytes + 2);
     WCHAR* const data = static_cast <WCHAR*> (GlobalLock (medium.hGlobal));
 
-    text.copyToUnicode (data, numChars + 1);
+    text.copyToUTF16 (data, numBytes);
     format.cfFormat = CF_UNICODETEXT;
 
     GlobalUnlock (medium.hGlobal);

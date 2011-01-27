@@ -170,7 +170,7 @@ void ComponentOverlayComponent::resizeStart()
     else
         originalAspectRatio = 1.0;
 
-    layout.getDocument()->getUndoManager().beginNewTransaction (T("Resize components"));
+    layout.getDocument()->getUndoManager().beginNewTransaction ("Resize components");
 }
 
 void ComponentOverlayComponent::resizeEnd()

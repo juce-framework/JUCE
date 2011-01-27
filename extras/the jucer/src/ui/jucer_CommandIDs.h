@@ -70,7 +70,7 @@ namespace CommandIDs
 
 namespace CommandCategories
 {
-    static const tchar* const general       = T("General");
-    static const tchar* const editing       = T("Editing");
-    static const tchar* const view          = T("View");
+    static const char* const general       = "General";
+    static const char* const editing       = "Editing";
+    static const char* const view          = "View";
 }

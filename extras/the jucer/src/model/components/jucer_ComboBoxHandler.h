@@ -149,7 +149,7 @@ public:
                 callback << "else ";
 
             const String memberVariableName (code.document->getComponentLayout()->getComponentMemberVariableName (component));
-            const String userCodeComment (T("UserComboBoxCode_") + memberVariableName);
+            const String userCodeComment ("UserComboBoxCode_" + memberVariableName);
 
             callback
                 << "if (comboBoxThatHasChanged == " << memberVariableName

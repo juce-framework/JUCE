@@ -444,7 +444,7 @@ void File::revealToUser() const
 #if ! JUCE_IOS
 bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)
 {
-    return FSPathMakeRef ((const UInt8*) path.toUTF8(), destFSRef, 0) == noErr;
+    return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
 }
 
 const String PlatformUtilities::makePathFromFSRef (FSRef* file)

@@ -35,7 +35,10 @@
  #define STRICT
  #include <windows.h>
  #include <float.h>
- #pragma warning (disable : 4312 4355 1899)
+ #pragma warning (disable : 4312 4355)
+ #ifdef __INTEL_COMPILER
+  #pragma warning (disable : 1899)
+ #endif
 #elif JUCE_LINUX
  #include <float.h>
  #include <sys/time.h>
@@ -2321,7 +2324,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
       #if JUCE_MAC
         return (VstIntPtr) (void*) &module->parentDirFSSpec;
       #else
-        return (VstIntPtr) (pointer_sized_uint) module->fullParentDirectoryPathName.toUTF8();
+        return (VstIntPtr) (pointer_sized_uint) module->fullParentDirectoryPathName.toUTF8().getAddress();
       #endif
 
     case audioMasterGetAutomationState:

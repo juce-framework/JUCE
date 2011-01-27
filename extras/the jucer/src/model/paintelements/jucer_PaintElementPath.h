@@ -116,7 +116,7 @@ public:
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode);
 
     //==============================================================================
-    static const tchar* getTagName() throw()                            { return T("PATH"); }
+    static const char* getTagName() throw()                            { return "PATH"; }
     XmlElement* createXml() const;
     bool loadFromXml (const XmlElement& xml);
 

@@ -38,39 +38,39 @@ const String replaceCEscapeChars (const String& s)
 
     for (int i = 0; i < len; ++i)
     {
-        const tchar c = s[i];
+        const juce_wchar c = s[i];
 
         switch (c)
         {
         case '\t':
-            r << T("\\t");
+            r << "\\t";
             lastWasHexEscapeCode = false;
             break;
         case '\r':
-            r << T("\\r");
+            r << "\\r";
             lastWasHexEscapeCode = false;
             break;
         case '\n':
-            r <<  T("\\n");
+            r <<  "\\n";
             lastWasHexEscapeCode = false;
             break;
         case '\\':
-            r << T("\\\\");
+            r << "\\\\";
             lastWasHexEscapeCode = false;
             break;
         case '\'':
-            r << T("\\\'");
+            r << "\\\'";
             lastWasHexEscapeCode = false;
             break;
         case '\"':
-            r << T("\\\"");
+            r << "\\\"";
             lastWasHexEscapeCode = false;
             break;
 
         default:
             if (c < 128 &&
                  ! (lastWasHexEscapeCode
-                     && String (T("0123456789abcdefABCDEF")).containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
+                     && String ("0123456789abcdefABCDEF").containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
             {
                 r << c;
                 lastWasHexEscapeCode = false;
@@ -78,7 +78,7 @@ const String replaceCEscapeChars (const String& s)
             else
             {
                 lastWasHexEscapeCode = true;
-                r << T("\\x") << String::toHexString ((int) c);
+                r << "\\x" << String::toHexString ((int) c);
             }
 
             break;
@@ -91,9 +91,9 @@ const String replaceCEscapeChars (const String& s)
 const String quotedString (const String& s)
 {
     if (s.isEmpty())
-        return T("String::empty");
+        return "String::empty";
 
-    const int embeddedIndex = s.indexOfIgnoreCase (T("%%"));
+    const int embeddedIndex = s.indexOfIgnoreCase ("%%");
 
     if (embeddedIndex >= 0)
     {
@@ -101,7 +101,7 @@ const String quotedString (const String& s)
         String s2 (s.substring (embeddedIndex + 2));
         String code;
 
-        const int closeIndex = s2.indexOf (T("%%"));
+        const int closeIndex = s2.indexOf ("%%");
 
         if (closeIndex > 0)
         {
@@ -114,41 +114,41 @@ const String quotedString (const String& s)
             String result;
 
             if (s1.isNotEmpty())
-                result << quotedString (s1) << T(" + ");
+                result << quotedString (s1) << " + ";
 
             result << code;
 
             if (s2.isNotEmpty())
-                result << T(" + ") << quotedString (s2);
+                result << " + " << quotedString (s2);
 
             return result;
         }
     }
 
-    return T("T(\"") + replaceCEscapeChars (s) + T("\")");
+    return "T(\"" + replaceCEscapeChars (s) + "\")";
 }
 
 const String replaceStringTranslations (String s, JucerDocument* document)
 {
-    s = s.replace (T("%%getName()%%"), document->getComponentName());
-    s = s.replace (T("%%getButtonText()%%"), document->getComponentName());
+    s = s.replace ("%%getName()%%", document->getComponentName());
+    s = s.replace ("%%getButtonText()%%", document->getComponentName());
 
     return s;
 }
 
 const String castToFloat (const String& expression)
 {
-    if (expression.containsOnly (T("0123456789.f")))
+    if (expression.containsOnly ("0123456789.f"))
     {
         String s (expression.getFloatValue());
 
-        if (s.containsChar (T('.')))
-            return s + T("f");
+        if (s.containsChar ('.'))
+            return s + "f";
 
-        return s + T(".0f");
+        return s + ".0f";
     }
 
-    return T("(float) (") + expression + T(")");
+    return "(float) (" + expression + ")";
 }
 
 const String indentCode (const String& code, const int numSpaces)
@@ -156,7 +156,7 @@ const String indentCode (const String& code, const int numSpaces)
     if (numSpaces == 0)
         return code;
 
-    const String space (String::repeatedString (T(" "), numSpaces));
+    const String space (String::repeatedString (" ", numSpaces));
 
     StringArray lines;
     lines.addLines (code);
@@ -170,7 +170,7 @@ const String indentCode (const String& code, const int numSpaces)
         lines.set (i, s);
     }
 
-    return lines.joinIntoString (T("\n"));
+    return lines.joinIntoString ("\n");
 }
 
 //==============================================================================
@@ -180,9 +180,9 @@ const String makeValidCppIdentifier (String s,
                                      const bool allowTemplates)
 {
     if (removeColons)
-        s = s.replaceCharacters (T(".,;:/@"), T("______"));
+        s = s.replaceCharacters (".,;:/@", "______");
     else
-        s = s.replaceCharacters (T(".,;/@"), T("_____"));
+        s = s.replaceCharacters (".,;/@", "_____");
 
     int i;
     for (i = s.length(); --i > 0;)
@@ -192,12 +192,12 @@ const String makeValidCppIdentifier (String s,
              && ! CharacterFunctions::isUpperCase (s[i - 1]))
             s = s.substring (0, i) + T(" ") + s.substring (i);
 
-    String allowedChars (T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789"));
+    String allowedChars ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789");
     if (allowTemplates)
-        allowedChars += T("<>");
+        allowedChars += "<>";
 
     if (! removeColons)
-        allowedChars += T(":");
+        allowedChars += ":";
 
     StringArray words;
     words.addTokens (s.retainCharacters (allowedChars), false);
@@ -221,21 +221,21 @@ const String makeValidCppIdentifier (String s,
         n = T("_") + n;
 
     // make sure it's not a reserved c++ keyword..
-    static const tchar* const reservedWords[] =
+    static const char* const reservedWords[] =
     {
-        T("auto"), T("const"), T("double"), T("float"), T("int"), T("short"), T("struct"),
-        T("return"), T("static"), T("union"), T("while"), T("asm"), T("dynamic_cast"),
-        T("unsigned"), T("break"), T("continue"), T("else"), T("for"), T("long"), T("signed"),
-        T("switch"), T("void"), T("case"), T("default"), T("enum"), T("goto"), T("register"),
-        T("sizeof"), T("typedef"), T("volatile"), T("char"), T("do"), T("extern"), T("if"),
-        T("namespace"), T("reinterpret_cast"), T("try"), T("bool"), T("explicit"), T("new"),
-        T("static_cast"), T("typeid"), T("catch"), T("false"), T("operator"), T("template"),
-        T("typename"), T("class"), T("friend"), T("private"), T("this"), T("using"), T("const_cast"),
-        T("inline"), T("public"), T("throw"), T("virtual"), T("delete"), T("mutable"), T("protected"),
-        T("true"), T("wchar_t"), T("and"), T("bitand"), T("compl"), T("not_eq"), T("or_eq"),
-        T("xor_eq"), T("and_eq"), T("bitor"), T("not"), T("or"), T("xor"), T("cin"), T("endl"),
-        T("INT_MIN"), T("iomanip"), T("main"), T("npos"), T("std"), T("cout"), T("include"),
-        T("INT_MAX"), T("iostream"), T("MAX_RAND"), T("NULL"), T("string")
+        "auto", "const", "double", "float", "int", "short", "struct",
+        "return", "static", "union", "while", "asm", "dynamic_cast",
+        "unsigned", "break", "continue", "else", "for", "long", "signed",
+        "switch", "void", "case", "default", "enum", "goto", "register",
+        "sizeof", "typedef", "volatile", "char", "do", "extern", "if",
+        "namespace", "reinterpret_cast", "try", "bool", "explicit", "new",
+        "static_cast", "typeid", "catch", "false", "operator", "template",
+        "typename", "class", "friend", "private", "this", "using", "const_cast",
+        "inline", "public", "throw", "virtual", "delete", "mutable", "protected",
+        "true", "wchar_t", "and", "bitand", "compl", "not_eq", "or_eq",
+        "xor_eq", "and_eq", "bitor", "not", "or", "xor", "cin", "endl",
+        "INT_MIN", "iomanip", "main", "npos", "std", "cout", "include",
+        "INT_MAX", "iostream", "MAX_RAND", "NULL", "string"
     };
 
     for (i = 0; i < numElementsInArray (reservedWords); ++i)
@@ -266,7 +266,7 @@ const String valueToFloat (const double v)
 {
     String s ((double) (float) v, 4);
 
-    if (s.containsChar (T('.')))
+    if (s.containsChar ('.'))
         s << 'f';
     else
         s << ".0f";
@@ -276,7 +276,7 @@ const String valueToFloat (const double v)
 
 const String boolToString (const bool b)
 {
-    return b ? T("true") : T("false");
+    return b ? "true" : "false";
 }
 
 //==============================================================================
@@ -307,17 +307,17 @@ const String colourToCode (const Colour& col)
 
     for (int i = 0; i < numElementsInArray (colourNames) - 1; ++i)
         if (col == colours[i])
-            return T("Colours::") + String (colourNames[i]);
+            return "Colours::" + String (colourNames[i]);
 
-    return T("Colour (0x") + colourToHex (col) + T(')');
+    return "Colour (0x" + colourToHex (col) + ")";
 }
 
-void setColourXml (XmlElement& xml, const tchar* const attName, const Colour& colour)
+void setColourXml (XmlElement& xml, const char* const attName, const Colour& colour)
 {
     xml.setAttribute (attName, colourToHex (colour));
 }
 
-const Colour getColourXml (const XmlElement& xml, const tchar* const attName, const Colour& defaultColour)
+const Colour getColourXml (const XmlElement& xml, const char* const attName, const Colour& defaultColour)
 {
     return Colour (xml.getStringAttribute (attName, colourToHex (defaultColour)).getHexValue32());
 }
@@ -563,7 +563,7 @@ const String justificationToCode (const Justification& justification)
         break;
     }
 
-    return T("Justification (") + String (justification.getFlags()) + T(")");
+    return "Justification (" + String (justification.getFlags()) + ")";
 }
 
 //==============================================================================
@@ -737,24 +737,24 @@ void RelativePositionedRectangle::updateFrom (double newX, double newY, double n
 
 void RelativePositionedRectangle::applyToXml (XmlElement& e) const
 {
-    e.setAttribute (T("pos"), rect.toString());
+    e.setAttribute ("pos", rect.toString());
 
     if (relativeToX != 0)
-        e.setAttribute (T("posRelativeX"), String::toHexString (relativeToX));
+        e.setAttribute ("posRelativeX", String::toHexString (relativeToX));
     if (relativeToY != 0)
-        e.setAttribute (T("posRelativeY"), String::toHexString (relativeToY));
+        e.setAttribute ("posRelativeY", String::toHexString (relativeToY));
     if (relativeToW != 0)
-        e.setAttribute (T("posRelativeW"), String::toHexString (relativeToW));
+        e.setAttribute ("posRelativeW", String::toHexString (relativeToW));
     if (relativeToH != 0)
-        e.setAttribute (T("posRelativeH"), String::toHexString (relativeToH));
+        e.setAttribute ("posRelativeH", String::toHexString (relativeToH));
 }
 
 void RelativePositionedRectangle::restoreFromXml (const XmlElement& e,
                                                   const RelativePositionedRectangle& defaultPos)
 {
-    rect = PositionedRectangle (e.getStringAttribute (T("pos"), defaultPos.rect.toString()));
-    relativeToX = e.getStringAttribute (T("posRelativeX"), String::toHexString (defaultPos.relativeToX)).getHexValue64();
-    relativeToY = e.getStringAttribute (T("posRelativeY"), String::toHexString (defaultPos.relativeToY)).getHexValue64();
-    relativeToW = e.getStringAttribute (T("posRelativeW"), String::toHexString (defaultPos.relativeToW)).getHexValue64();
-    relativeToH = e.getStringAttribute (T("posRelativeH"), String::toHexString (defaultPos.relativeToH)).getHexValue64();
+    rect = PositionedRectangle (e.getStringAttribute ("pos", defaultPos.rect.toString()));
+    relativeToX = e.getStringAttribute ("posRelativeX", String::toHexString (defaultPos.relativeToX)).getHexValue64();
+    relativeToY = e.getStringAttribute ("posRelativeY", String::toHexString (defaultPos.relativeToY)).getHexValue64();
+    relativeToW = e.getStringAttribute ("posRelativeW", String::toHexString (defaultPos.relativeToW)).getHexValue64();
+    relativeToH = e.getStringAttribute ("posRelativeH", String::toHexString (defaultPos.relativeToH)).getHexValue64();
 }

@@ -37,7 +37,7 @@ class CharPointer_UTF8
 public:
     typedef char CharType;
 
-    inline CharPointer_UTF8 (const CharType* const rawPointer) throw()
+    inline explicit CharPointer_UTF8 (const CharType* const rawPointer) throw()
         : data (const_cast <CharType*> (rawPointer))
     {
     }
@@ -53,11 +53,32 @@ public:
         return *this;
     }
 
+    inline CharPointer_UTF8& operator= (const CharType* text) throw()
+    {
+        data = const_cast <CharType*> (text);
+        return *this;
+    }
+
+    /** This is a pointer comparison, it doesn't compare the actual text. */
+    inline bool operator== (const CharPointer_UTF8& other) const throw()
+    {
+        return data == other.data;
+    }
+
+    /** This is a pointer comparison, it doesn't compare the actual text. */
+    inline bool operator!= (const CharPointer_UTF8& other) const throw()
+    {
+        return data == other.data;
+    }
+
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const throw()     { return data; }
+    inline CharType* getAddress() const throw()         { return data; }
+
+    /** Returns the address that this pointer is pointing to. */
+    inline operator const CharType*() const throw()     { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const throw()             { return *data == 0; }
+    inline bool isEmpty() const throw()                 { return *data == 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
     juce_wchar operator*() const throw()
@@ -104,7 +125,7 @@ public:
         {
             juce_wchar bit = 0x40;
 
-            while ((n & bit) != 0 && bit > 0x10)
+            while ((n & bit) != 0 && bit > 0x8)
             {
                 ++data;
                 bit >>= 1;
@@ -128,7 +149,7 @@ public:
         uint32 bit = 0x40;
         int numExtraValues = 0;
 
-        while ((n & bit) != 0 && bit > 0x10)
+        while ((n & bit) != 0 && bit > 0x8)
         {
             mask >>= 1;
             ++numExtraValues;
@@ -184,32 +205,6 @@ public:
         return p;
     }
 
-    /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-    void write (const juce_wchar charToWrite) throw()
-    {
-        const uint32 c = (uint32) charToWrite;
-
-        if (c >= 0x80)
-        {
-            int numExtraBytes = 1;
-            if (c >= 0x800)
-            {
-                ++numExtraBytes;
-                if (c >= 0x10000)
-                    ++numExtraBytes;
-            }
-
-            *data++ = (CharType) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
-
-            while (--numExtraBytes >= 0)
-                *data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
-        }
-        else
-        {
-            *data++ = (CharType) c;
-        }
-    }
-
     /** Returns the number of characters in this string. */
     size_t length() const throw()
     {
@@ -240,6 +235,12 @@ public:
         }
 
         return count;
+    }
+
+    /** Returns the number of characters in this string, or the given value, whichever is lower. */
+    size_t lengthUpTo (const size_t maxCharsToCount) const throw()
+    {
+        return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
     }
 
     /** Returns the number of bytes that are used to represent this string.
@@ -294,27 +295,65 @@ public:
         return CharPointer_UTF8 (data + strlen (data));
     }
 
-    /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    template <typename CharPointer>
-    void copyAndAdvance (const CharPointer& src) throw()
+    /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
+    void write (const juce_wchar charToWrite) throw()
     {
-        CharacterFunctions::copyAndAdvance (*this, src);
+        const uint32 c = (uint32) charToWrite;
+
+        if (c >= 0x80)
+        {
+            int numExtraBytes = 1;
+            if (c >= 0x800)
+            {
+                ++numExtraBytes;
+                if (c >= 0x10000)
+                    ++numExtraBytes;
+            }
+
+            *data++ = (CharType) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
+
+            while (--numExtraBytes >= 0)
+                *data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
+        }
+        else
+        {
+            *data++ = (CharType) c;
+        }
+    }
+
+    /** Writes a null character to this string (leaving the pointer's position unchanged). */
+    inline void writeNull() const throw()
+    {
+        *data = 0;
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    void copyAndAdvance (const CharPointer_UTF8& src) throw()
+    template <typename CharPointer>
+    void writeAll (const CharPointer& src) throw()
     {
-        data = (CharType*) strcpy ((char*) data, src.data);
+        CharacterFunctions::copyAll (*this, src);
+    }
+
+    /** Copies a source string to this pointer, advancing this pointer as it goes. */
+    void writeAll (const CharPointer_UTF8& src) throw()
+    {
+        const CharType* s = src.data;
+
+        while ((*data = *s) != 0)
+        {
+            ++data;
+            ++s;
+        }
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes.
-        The maxBytes parameter specifies the maximum number of bytes that can be written
+        The maxDestBytes parameter specifies the maximum number of bytes that can be written
         to the destination buffer before stopping.
     */
     template <typename CharPointer>
-    int copyAndAdvanceUpToBytes (const CharPointer& src, int maxBytes) throw()
+    int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) throw()
     {
-        return CharacterFunctions::copyAndAdvanceUpToBytes (*this, src, maxBytes);
+        return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes.
@@ -322,9 +361,9 @@ public:
         written to the destination buffer before stopping (including the terminating null).
     */
     template <typename CharPointer>
-    void copyAndAdvanceUpToNumChars (const CharPointer& src, int maxChars) throw()
+    void writeWithCharLimit (const CharPointer& src, const int maxChars) throw()
     {
-        CharacterFunctions::copyAndAdvanceUpToNumChars (*this, src, maxChars);
+        CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
     }
 
     /** Compares this string with another one. */
@@ -336,7 +375,7 @@ public:
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareUpTo (const CharPointer& other, int maxChars) const throw()
+    int compareUpTo (const CharPointer& other, const int maxChars) const throw()
     {
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
@@ -360,13 +399,13 @@ public:
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareIgnoreCaseUpTo (const CharPointer& other, int maxChars) const throw()
+    int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const throw()
     {
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
-    int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, int maxChars) const throw()
+    int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, const int maxChars) const throw()
     {
        #if JUCE_WINDOWS
         return strnicmp (data, other.data, maxChars);
@@ -433,6 +472,14 @@ public:
 
     /** Returns the first non-whitespace character in the string. */
     CharPointer_UTF8 findEndOfWhitespace() const throw()    { return CharacterFunctions::findEndOfWhitespace (*this); }
+
+    /** These values are the byte-order-mark (BOM) values for a UTF-8 stream. */
+    enum
+    {
+        byteOrderMark1 = 0xef,
+        byteOrderMark2 = 0xbb,
+        byteOrderMark3 = 0xbf
+    };
 
 private:
     CharType* data;

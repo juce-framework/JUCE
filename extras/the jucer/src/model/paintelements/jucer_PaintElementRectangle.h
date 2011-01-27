@@ -37,7 +37,7 @@ class PaintElementRectangle     : public ColouredElement
 public:
     //==============================================================================
     PaintElementRectangle (PaintRoutine* owner)
-        : ColouredElement (owner, T("Rectangle"), true, false)
+        : ColouredElement (owner, "Rectangle", true, false)
     {
     }
 
@@ -107,7 +107,7 @@ public:
         }
     }
 
-    static const tchar* getTagName() throw()        { return T("RECT"); }
+    static const char* getTagName() throw()        { return "RECT"; }
 
     XmlElement* createXml() const
     {
@@ -154,7 +154,7 @@ private:
     {
     public:
         ShapeToPathProperty (PaintElementRectangle* const element_)
-            : ButtonPropertyComponent (T("path"), false),
+            : ButtonPropertyComponent ("path", false),
               element (element_)
         {
         }
@@ -166,7 +166,7 @@ private:
 
         const String getButtonText() const
         {
-            return T("convert to a path");
+            return "convert to a path";
         }
 
     private:

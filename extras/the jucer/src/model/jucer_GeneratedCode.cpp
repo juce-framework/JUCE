@@ -51,11 +51,11 @@ String& GeneratedCode::getCallbackCode (const String& requiredParentClass,
 {
     String parentClass (requiredParentClass);
     if (parentClass.isNotEmpty()
-         && ! (parentClass.startsWith (T("public "))
-                || parentClass.startsWith (T("private "))
-                || parentClass.startsWith (T("protected "))))
+         && ! (parentClass.startsWith ("public ")
+                || parentClass.startsWith ("private ")
+                || parentClass.startsWith ("protected ")))
     {
-        parentClass = T("public ") + parentClass;
+        parentClass = "public " + parentClass;
     }
 
     for (int i = callbacks.size(); --i >= 0;)
@@ -91,7 +91,7 @@ void GeneratedCode::removeCallback (const String& returnType, const String& prot
 
 void GeneratedCode::addImageResourceLoader (const String& imageMemberName, const String& resourceName)
 {
-    const String initialiser (imageMemberName + T(" (0)"));
+    const String initialiser (imageMemberName + " (0)");
 
     if (! initialisers.contains (initialiser, false))
     {
@@ -144,8 +144,8 @@ const String GeneratedCode::getCallbackDefinitions() const
     {
         CallbackMethod* const cm = callbacks.getUnchecked(i);
 
-        const String userCodeBlockName (T("User")
-            + makeValidCppIdentifier (cm->prototype.upToFirstOccurrenceOf (T("("), false, false),
+        const String userCodeBlockName ("User"
+            + makeValidCppIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
                                       true, true, false).trim());
 
         if (userCodeBlockName.isNotEmpty() && cm->hasPrePostUserSections)
@@ -180,13 +180,13 @@ const String GeneratedCode::getClassDeclaration() const
     parentClassLines.removeEmptyStrings();
     parentClassLines.removeDuplicates (false);
 
-    if (parentClassLines.contains (T("public Button"), false))
-        parentClassLines.removeString (("public Component"), false);
+    if (parentClassLines.contains ("public Button", false))
+        parentClassLines.removeString ("public Component", false);
 
-    String r (T("class "));
-    r << className << T("  : ");
+    String r ("class ");
+    r << className << "  : ";
 
-    r += parentClassLines.joinIntoString (T(",\n") + String::repeatedString (T(" "), r.length()));
+    r += parentClassLines.joinIntoString (",\n" + String::repeatedString (" ", r.length()));
 
     return r;
 }
@@ -213,7 +213,7 @@ const String GeneratedCode::getInitialiserList() const
     {
         String init (inits[i]);
 
-        while (init.endsWithChar (T(',')))
+        while (init.endsWithChar (','))
             init = init.dropLastCharacters (1);
 
         s << init;
@@ -246,7 +246,7 @@ static void replaceTemplate (String& text, const String& itemName, const String&
 {
     for (;;)
     {
-        const int index = text.indexOf (T("%%") + itemName + T("%%"));
+        const int index = text.indexOf ("%%" + itemName + "%%");
 
         if (index < 0)
             break;
@@ -255,7 +255,7 @@ static void replaceTemplate (String& text, const String& itemName, const String&
 
         for (int i = index; --i >= 0;)
         {
-            if (text[i] == T('\n'))
+            if (text[i] == '\n')
                 break;
 
             ++indentLevel;
@@ -269,12 +269,12 @@ static void replaceTemplate (String& text, const String& itemName, const String&
 //==============================================================================
 static bool getUserSection (const StringArray& lines, const String& tag, StringArray& resultLines)
 {
-    const int start = indexOfLineStartingWith (lines, T("//[") + tag + T("]"), 0);
+    const int start = indexOfLineStartingWith (lines, "//[" + tag + "]", 0);
 
     if (start < 0)
         return false;
 
-    const int end = indexOfLineStartingWith (lines, T("//[/") + tag + T("]"), start + 1);
+    const int end = indexOfLineStartingWith (lines, "//[/" + tag + "]", start + 1);
 
     for (int i = start + 1; i < end; ++i)
         resultLines.add (lines [i]);
@@ -290,17 +290,17 @@ static void copyAcrossUserSections (String& dest, const String& src)
 
     for (int i = 0; i < dstLines.size(); ++i)
     {
-        if (dstLines[i].trimStart().startsWith (T("//[")))
+        if (dstLines[i].trimStart().startsWith ("//["))
         {
             String tag (dstLines[i].trimStart().substring (3));
-            tag = tag.upToFirstOccurrenceOf (T("]"), false, false);
+            tag = tag.upToFirstOccurrenceOf ("]", false, false);
 
-            jassert (! tag.startsWithChar (T('/')));
+            jassert (! tag.startsWithChar ('/'));
 
-            if (! tag.startsWithChar (T('/')))
+            if (! tag.startsWithChar ('/'))
             {
                 const int endLine = indexOfLineStartingWith (dstLines,
-                                                             T("//[/") + tag + T("]"),
+                                                             "//[/" + tag + "]",
                                                              i + 1);
 
                 if (endLine > i)
@@ -329,7 +329,7 @@ static void copyAcrossUserSections (String& dest, const String& src)
         dstLines.set (i, dstLines[i].trimEnd());
     }
 
-    dest = dstLines.joinIntoString (T("\n")) + T("\n");
+    dest = dstLines.joinIntoString ("\n") + "\n";
 }
 
 //==============================================================================
@@ -340,8 +340,8 @@ void GeneratedCode::applyToCode (String& code,
 {
     // header guard..
     String headerGuard ("__JUCER_HEADER_");
-    headerGuard << className.toUpperCase().retainCharacters (T("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
-                << "_" << fileNameRoot.toUpperCase().retainCharacters (T("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+    headerGuard << className.toUpperCase().retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                << "_" << fileNameRoot.toUpperCase().retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
                 << "_" << String::toHexString (Random::getSystemRandom().nextInt()).toUpperCase()
                 << "__";
     replaceTemplate (code, "headerGuard", headerGuard);

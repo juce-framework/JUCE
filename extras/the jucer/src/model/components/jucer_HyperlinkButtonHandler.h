@@ -100,7 +100,7 @@ public:
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 
         code.constructorCode << getColourIntialisationCode (component, memberVariableName)
-                             << T('\n');
+                             << '\n';
     }
 
     juce_UseDebuggingNewOperator

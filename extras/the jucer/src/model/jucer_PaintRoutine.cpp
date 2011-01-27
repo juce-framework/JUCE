@@ -146,7 +146,7 @@ PaintElement* PaintRoutine::addElementFromXml (const XmlElement& xml, const int 
     if (undoable)
     {
         AddXmlElementAction* action = new AddXmlElementAction (*this, new XmlElement (xml));
-        perform (action, T("Add new element"));
+        perform (action, "Add new element");
 
         return elements [action->indexAdded];
     }
@@ -291,7 +291,7 @@ void PaintRoutine::elementToFront (PaintElement* element, const bool undoable)
     if (element != 0 && elements.contains (element))
     {
         if (undoable)
-            perform (new FrontOrBackElementAction (element, -1), T("Move elements to front"));
+            perform (new FrontOrBackElementAction (element, -1), "Move elements to front");
         else
             moveElementZOrder (elements.indexOf (element), -1);
     }
@@ -302,14 +302,14 @@ void PaintRoutine::elementToBack (PaintElement* element, const bool undoable)
     if (element != 0 && elements.contains (element))
     {
         if (undoable)
-            perform (new FrontOrBackElementAction (element, 0), T("Move elements to back"));
+            perform (new FrontOrBackElementAction (element, 0), "Move elements to back");
         else
             moveElementZOrder (elements.indexOf (element), 0);
     }
 }
 
 //==============================================================================
-const tchar* const PaintRoutine::clipboardXmlTag = T("PAINTELEMENTS");
+const char* const PaintRoutine::clipboardXmlTag = "PAINTELEMENTS";
 
 void PaintRoutine::copySelectedToClipboard()
 {
@@ -585,7 +585,7 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
 }
 
 //==============================================================================
-const tchar* PaintRoutine::xmlTagName = T("BACKGROUND");
+const char* PaintRoutine::xmlTagName = "BACKGROUND";
 
 XmlElement* PaintRoutine::createXml() const
 {

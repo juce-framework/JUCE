@@ -28,16 +28,16 @@
 #include "jucer_ObjectTypes.h"
 #include "../ui/jucer_TestComponent.h"
 
-const tchar* const defaultClassName = T("NewJucerComponent");
-const tchar* const defaultParentClasses = T("public Component");
+const char* const defaultClassName = "NewJucerComponent";
+const char* const defaultParentClasses = "public Component";
 
 static const int timerInterval = 150;
 
 //==============================================================================
 JucerDocument::JucerDocument()
-    : FileBasedDocument (T(".cpp"), T("*.cpp"),
-                         T("Open a Jucer C++ file..."),
-                         T("Save as a Jucer C++ file...")),
+    : FileBasedDocument (".cpp", "*.cpp",
+                         "Open a Jucer C++ file...",
+                         "Save as a Jucer C++ file..."),
       className (defaultClassName),
       parentClasses (defaultParentClasses),
       fixedSize (false),
@@ -325,7 +325,7 @@ void JucerDocument::addExtraClassProperties (PropertyPanel* panel)
 }
 
 //==============================================================================
-const tchar* const JucerDocument::jucerCompXmlTag = T("JUCER_COMPONENT");
+const char* const JucerDocument::jucerCompXmlTag = "JUCER_COMPONENT";
 
 XmlElement* JucerDocument::createXml() const
 {
@@ -376,21 +376,21 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
         initialWidth = xml.getIntAttribute (T("initialWidth"), 300);
         initialHeight = xml.getIntAttribute (T("initialHeight"), 200);
 
-        snapGridPixels = xml.getIntAttribute (T("snapPixels"), snapGridPixels);
-        snapActive = xml.getBoolAttribute (T("snapActive"), snapActive);
-        snapShown = xml.getBoolAttribute (T("snapShown"), snapShown);
+        snapGridPixels = xml.getIntAttribute ("snapPixels", snapGridPixels);
+        snapActive = xml.getBoolAttribute ("snapActive", snapActive);
+        snapShown = xml.getBoolAttribute ("snapShown", snapShown);
 
-        componentOverlayOpacity = (float) xml.getDoubleAttribute (T("overlayOpacity"), 0.0);
+        componentOverlayOpacity = (float) xml.getDoubleAttribute ("overlayOpacity", 0.0);
 
         activeExtraMethods.clear();
 
-        XmlElement* const methods = xml.getChildByName T("METHODS");
+        XmlElement* const methods = xml.getChildByName ("METHODS");
 
         if (methods != 0)
         {
-            forEachXmlChildElementWithTagName (*methods, e, T("METHOD"))
+            forEachXmlChildElementWithTagName (*methods, e, "METHOD")
             {
-                activeExtraMethods.addIfNotAlreadyThere (e->getStringAttribute (T("name")));
+                activeExtraMethods.addIfNotAlreadyThere (e->getStringAttribute ("name"));
             }
         }
 
@@ -433,8 +433,8 @@ const String JucerDocument::loadDocument (const File& file)
 
 const String JucerDocument::saveDocument (const File& file)
 {
-    const File cppFile (file.withFileExtension (T(".cpp")));
-    const File hFile (file.withFileExtension (T(".h")));
+    const File cppFile (file.withFileExtension (".cpp"));
+    const File hFile (file.withFileExtension (".h"));
 
     String templateH, templateCpp;
 
@@ -498,13 +498,13 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.initialisers.addLines (variableInitialisers);
 
     if (! componentName.isEmpty())
-        code.parentClassInitialiser = T("Component (") + quotedString (code.componentName) + T(")");
+        code.parentClassInitialiser = "Component (" + quotedString (code.componentName) + ")";
 
     // call these now, just to make sure they're the first two methods in the list.
-    code.getCallbackCode (String::empty, T("void"), T("paint (Graphics& g)"), false)
+    code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
         << "//[UserPrePaint] Add your own custom painting code here..\n//[/UserPrePaint]\n\n";
 
-    code.getCallbackCode (String::empty, T("void"), T("resized()"), false);
+    code.getCallbackCode (String::empty, "void", "resized()", false);
 
     if (getComponentLayout() != 0)
         getComponentLayout()->fillInGeneratedCode (code);
@@ -551,8 +551,8 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
                   << "] -- Add your code here...\n"
                   << initialContents[i];
 
-                if (initialContents[i].isNotEmpty() && ! initialContents[i].endsWithChar (T('\n')))
-                    s << T('\n');
+                if (initialContents[i].isNotEmpty() && ! initialContents[i].endsWithChar ('\n'))
+                    s << '\n';
 
                 s << "//[/"
                   << userCommentTag
@@ -585,8 +585,8 @@ bool JucerDocument::findTemplateFiles (String& templateH, String& templateCpp) c
     templateH = hTemplate.loadFileAsString();
     templateCpp = cppTemplate.loadFileAsString();
 
-    const String jucerVersionString (T("Jucer version: ") + String (JUCER_MAJOR_VERSION)
-                                        + T(".") + String (JUCER_MINOR_VERSION));
+    const String jucerVersionString ("Jucer version: " + String (JUCER_MAJOR_VERSION)
+                                        + "." + String (JUCER_MINOR_VERSION));
 
     // This checks the template files to see if they're the ones that shipped with this
     // version of the jucer. If it fails, you're probably using the wrong ones.
@@ -626,7 +626,7 @@ static const String fixNewLines (const String& s)
     while (lines.size() > 0 && lines [lines.size() - 1].trim().isEmpty())
         lines.remove (lines.size() - 1);
 
-    return lines.joinIntoString (T("\r\n")) + T("\r\n");
+    return lines.joinIntoString ("\r\n") + "\r\n";
 }
 
 bool JucerDocument::writeCodeFiles (const File& headerFile,

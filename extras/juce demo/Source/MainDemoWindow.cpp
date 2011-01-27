@@ -191,54 +191,54 @@ public:
         case showRendering:
             result.setInfo ("Graphics Rendering", "Shows the graphics demo", demosCategory, 0);
             result.setTicked (currentDemoId == showRendering);
-            result.addDefaultKeypress (T('1'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('1', ModifierKeys::commandModifier);
             break;
 
         case showFontsAndText:
             result.setInfo ("Fonts and Text", "Shows the fonts & text demo", demosCategory, 0);
             result.setTicked (currentDemoId == showFontsAndText);
-            result.addDefaultKeypress (T('2'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('2', ModifierKeys::commandModifier);
             break;
 
         case showWidgets:
             result.setInfo ("Widgets", "Shows the widgets demo", demosCategory, 0);
             result.setTicked (currentDemoId == showWidgets);
-            result.addDefaultKeypress (T('3'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('3', ModifierKeys::commandModifier);
             break;
 
         case showThreading:
             result.setInfo ("Multithreading", "Shows the threading demo", demosCategory, 0);
             result.setTicked (currentDemoId == showThreading);
-            result.addDefaultKeypress (T('4'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('4', ModifierKeys::commandModifier);
             break;
 
         case showTreeView:
             result.setInfo ("Treeviews", "Shows the treeviews demo", demosCategory, 0);
             result.setTicked (currentDemoId == showTreeView);
-            result.addDefaultKeypress (T('5'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('5', ModifierKeys::commandModifier);
             break;
 
         case showTable:
             result.setInfo ("Table Components", "Shows the table component demo", demosCategory, 0);
             result.setTicked (currentDemoId == showTable);
-            result.addDefaultKeypress (T('6'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('6', ModifierKeys::commandModifier);
             break;
 
         case showAudio:
             result.setInfo ("Audio", "Shows the audio demo", demosCategory, 0);
             result.setTicked (currentDemoId == showAudio);
-            result.addDefaultKeypress (T('7'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('7', ModifierKeys::commandModifier);
             break;
 
         case showDragAndDrop:
             result.setInfo ("Drag-and-drop", "Shows the drag & drop demo", demosCategory, 0);
             result.setTicked (currentDemoId == showDragAndDrop);
-            result.addDefaultKeypress (T('8'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('8', ModifierKeys::commandModifier);
             break;
 
         case showOpenGL:
             result.setInfo ("OpenGL", "Shows the OpenGL demo", demosCategory, 0);
-            result.addDefaultKeypress (T('9'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('9', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showOpenGL);
 #if ! JUCE_OPENGL
             result.setActive (false);
@@ -247,7 +247,7 @@ public:
 
         case showQuicktime:
             result.setInfo ("Quicktime", "Shows the Quicktime demo", demosCategory, 0);
-            result.addDefaultKeypress (T('b'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('b', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showQuicktime);
 #if ! (JUCE_QUICKTIME && ! JUCE_LINUX)
             result.setActive (false);
@@ -256,7 +256,7 @@ public:
 
         case showCamera:
             result.setInfo ("Camera Capture", "Shows the camera demo", demosCategory, 0);
-            result.addDefaultKeypress (T('c'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('c', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showCamera);
 #if ! JUCE_USE_CAMERA
             result.setActive (false);
@@ -265,7 +265,7 @@ public:
 
         case showWebBrowser:
             result.setInfo ("Web Browser", "Shows the web browser demo", demosCategory, 0);
-            result.addDefaultKeypress (T('i'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('i', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showWebBrowser);
 #if (! JUCE_WEB_BROWSER) || JUCE_LINUX
             result.setActive (false);
@@ -274,13 +274,13 @@ public:
 
         case showCodeEditor:
             result.setInfo ("Code Editor", "Shows the code editor demo", demosCategory, 0);
-            result.addDefaultKeypress (T('e'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('e', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showCodeEditor);
             break;
 
         case showInterprocessComms:
             result.setInfo ("Interprocess Comms", "Shows the interprocess communications demo", demosCategory, 0);
-            result.addDefaultKeypress (T('0'), ModifierKeys::commandModifier);
+            result.addDefaultKeypress ('0', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showInterprocessComms);
             break;
 

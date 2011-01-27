@@ -56,7 +56,7 @@ namespace FileChooserHelpers
         FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) lpData;
 
         if (msg == BFFM_INITIALIZED)
-            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) static_cast <const WCHAR*> (info->initialPath));
+            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) info->initialPath.toUTF16().getAddress());
         else if (msg == BFFM_VALIDATEFAILEDW)
             info->returnedString = (LPCWSTR) lParam;
         else if (msg == BFFM_VALIDATEFAILEDA)
@@ -174,7 +174,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
     }
     else
     {
-        currentFileOrDirectory.getFileName().copyToUnicode (files, charsAvailableForResult);
+        currentFileOrDirectory.getFileName().copyToUTF16 (files, charsAvailableForResult * sizeof (WCHAR));
         info.initialPath = currentFileOrDirectory.getParentDirectory().getFullPathName();
     }
 
@@ -185,7 +185,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
 
         bi.hwndOwner = (HWND) parentWindow.getWindowHandle();
         bi.pszDisplayName = files;
-        bi.lpszTitle = title;
+        bi.lpszTitle = title.toUTF16();
         bi.lParam = (LPARAM) &info;
         bi.lpfn = browseCallbackProc;
       #ifdef BIF_USENEWUI
@@ -230,10 +230,11 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
             info.customComponent->enterModalState();
         }
 
-        WCHAR filters [1024];
-        zerostruct (filters);
-        filter.copyToUnicode (filters, 1024);
-        filter.copyToUnicode (filters + filter.length() + 1, 1022 - filter.length());
+        const int filterSpace = 2048;
+        HeapBlock<char> filters;
+        filters.calloc (filterSpace * 2);
+        const int bytesWritten = filter.copyToUTF16 (reinterpret_cast <WCHAR*> (filters.getData()), filterSpace);
+        filter.copyToUTF16 (reinterpret_cast <WCHAR*> (filters + bytesWritten), filterSpace);
 
         OPENFILENAMEW of;
         zerostruct (of);
@@ -244,12 +245,12 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
         of.lStructSize = sizeof (of);
       #endif
         of.hwndOwner = (HWND) parentWindow.getWindowHandle();
-        of.lpstrFilter = filters;
+        of.lpstrFilter = reinterpret_cast <WCHAR*> (filters.getData());
         of.nFilterIndex = 1;
         of.lpstrFile = files;
         of.nMaxFile = charsAvailableForResult;
-        of.lpstrInitialDir = info.initialPath;
-        of.lpstrTitle = title;
+        of.lpstrInitialDir = info.initialPath.toUTF16();
+        of.lpstrTitle = title.toUTF16();
         of.Flags = flags;
         of.lCustData = (LPARAM) &info;
 

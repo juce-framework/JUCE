@@ -56,7 +56,7 @@ public:
         ImageCache::setCacheTimeout (30 * 1000);
 
         if (commandLine.trim().isNotEmpty()
-              && ! commandLine.trim().startsWithChar (T('-')))
+              && ! commandLine.trim().startsWithChar ('-'))
             anotherInstanceStarted (commandLine);
     }
 
@@ -84,12 +84,12 @@ public:
     //==============================================================================
     const String getApplicationName()
     {
-        return T("The Jucer");
+        return "The Jucer";
     }
 
     const String getApplicationVersion()
     {
-        return String (JUCER_MAJOR_VERSION) + T(".") + String (JUCER_MINOR_VERSION);
+        return String (JUCER_MAJOR_VERSION) + "." + String (JUCER_MINOR_VERSION);
     }
 
     bool moreThanOneInstanceAllowed()

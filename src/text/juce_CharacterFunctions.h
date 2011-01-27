@@ -31,6 +31,11 @@
 #if JUCE_ANDROID && ! DOXYGEN
  typedef uint32                     juce_wchar;
  #define JUCE_T(stringLiteral)      CharPointer_UTF8 (stringLiteral)
+ #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
+#elif JUCE_WINDOWS && ! DOXYGEN
+ typedef uint32                     juce_wchar;
+ #define JUCE_T(stringLiteral)      L##stringLiteral
+ #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
 #else
  /** A platform-independent unicode character type. */
  typedef wchar_t                    juce_wchar;
@@ -249,52 +254,71 @@ public:
     static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
 
     //==============================================================================
-    template <typename DestCharPointerType, typename SrcCharPointerType>
-    static void copyAndAdvance (DestCharPointerType& dest, SrcCharPointerType src) throw()
+    template <typename CharPointerType>
+    static size_t lengthUpTo (const CharPointerType& text, const size_t maxCharsToCount) throw()
     {
-        juce_wchar c;
+        size_t len = 0;
+        CharPointerType t (text);
 
-        do
+        while (len < maxCharsToCount && t.getAndAdvance() != 0)
+            ++len;
+
+        return len;
+    }
+
+
+    template <typename DestCharPointerType, typename SrcCharPointerType>
+    static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) throw()
+    {
+        for (;;)
         {
-            c = src.getAndAdvance();
+            const juce_wchar c = src.getAndAdvance();
+
+            if (c == 0)
+                break;
+
             dest.write (c);
         }
-        while (c != 0);
+
+        dest.writeNull();
     }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>
-    static int copyAndAdvanceUpToBytes (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) throw()
+    static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) throw()
     {
         int numBytesDone = 0;
+        maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
         for (;;)
         {
             const juce_wchar c = src.getAndAdvance();
-            const size_t bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
+            const int bytesNeeded = (int) DestCharPointerType::getBytesRequiredFor (c);
 
             maxBytes -= bytesNeeded;
-            if (maxBytes < 0)
+            if (c == 0 || maxBytes < 0)
                 break;
 
             numBytesDone += bytesNeeded;
             dest.write (c);
-            if (c == 0)
-                break;
         }
 
+        dest.writeNull();
         return numBytesDone;
     }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>
-    static void copyAndAdvanceUpToNumChars (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) throw()
+    static void copyWithCharLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) throw()
     {
-        while (--maxChars >= 0)
+        while (--maxChars > 0)
         {
             const juce_wchar c = src.getAndAdvance();
-            dest.write (c);
             if (c == 0)
                 break;
+
+            dest.write (c);
         }
+
+        dest.writeNull();
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
@@ -377,7 +401,7 @@ public:
     static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) throw()
     {
         int index = 0;
-        const int needleLength = needle.length();
+        const int needleLength = (int) needle.length();
 
         for (;;)
         {

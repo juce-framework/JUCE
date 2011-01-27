@@ -105,19 +105,19 @@ public:
         }
     }
 
-    static const tchar* getTagName() throw()        { return T("TEXT"); }
+    static const char* getTagName() throw()        { return "TEXT"; }
 
     XmlElement* createXml() const
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
         addColourAttributes (e);
-        e->setAttribute (T("text"), text);
-        e->setAttribute (T("fontname"), typefaceName);
-        e->setAttribute (T("fontsize"), roundToInt (font.getHeight() * 100.0) / 100.0);
-        e->setAttribute (T("bold"), font.isBold());
-        e->setAttribute (T("italic"), font.isItalic());
-        e->setAttribute (T("justification"), justification.getFlags());
+        e->setAttribute ("text", text);
+        e->setAttribute ("fontname", typefaceName);
+        e->setAttribute ("fontsize", roundToInt (font.getHeight() * 100.0) / 100.0);
+        e->setAttribute ("bold", font.isBold());
+        e->setAttribute ("italic", font.isItalic());
+        e->setAttribute ("justification", justification.getFlags());
 
         return e;
     }
@@ -129,12 +129,12 @@ public:
             position.restoreFromXml (xml, position);
             loadColourAttributes (xml);
 
-            text = xml.getStringAttribute (T("text"), T("Hello World"));
-            typefaceName = xml.getStringAttribute (T("fontname"), FontPropertyComponent::defaultFont);
-            font.setHeight ((float) xml.getDoubleAttribute (T("fontsize"), 15.0));
-            font.setBold (xml.getBoolAttribute (T("bold"), false));
-            font.setItalic (xml.getBoolAttribute (T("italic"), false));
-            justification = Justification (xml.getIntAttribute (T("justification"), Justification::centred));
+            text = xml.getStringAttribute ("text", "Hello World");
+            typefaceName = xml.getStringAttribute ("fontname", FontPropertyComponent::defaultFont);
+            font.setHeight ((float) xml.getDoubleAttribute ("fontsize", 15.0));
+            font.setBold (xml.getBoolAttribute ("bold", false));
+            font.setItalic (xml.getBoolAttribute ("italic", false));
+            justification = Justification (xml.getIntAttribute ("justification", Justification::centred));
 
             return true;
         }
@@ -183,7 +183,7 @@ public:
             if (undoable)
             {
                 perform (new SetTextAction (this, t),
-                         T("Change text element text"));
+                         "Change text element text");
             }
             else
             {
@@ -231,7 +231,7 @@ public:
             if (undoable)
             {
                 perform (new SetFontAction (this, newFont),
-                         T("Change text element font"));
+                         "Change text element font");
             }
             else
             {
@@ -275,7 +275,7 @@ public:
         if (undoable)
         {
             perform (new SetTypefaceAction (this, newFontName),
-                     T("Change text element typeface"));
+                     "Change text element typeface");
         }
         else
         {
@@ -324,7 +324,7 @@ public:
             if (undoable)
             {
                 perform (new SetJustifyAction (this, j),
-                         T("Change text element justification"));
+                         "Change text element justification");
             }
             else
             {
@@ -373,7 +373,7 @@ private:
     {
     public:
         TextProperty (PaintElementText* const element_)
-            : TextPropertyComponent (T("text"), 2048, false),
+            : TextPropertyComponent ("text", 2048, false),
               element (element_)
         {
             element->getDocument()->addChangeListener (this);
@@ -399,7 +399,7 @@ private:
     {
     public:
         FontNameProperty (PaintElementText* const element_)
-            : FontPropertyComponent (T("font")),
+            : FontPropertyComponent ("font"),
               element (element_)
         {
             element->getDocument()->addChangeListener (this);
@@ -425,15 +425,15 @@ private:
     {
     public:
         FontStyleProperty (PaintElementText* const element_)
-            : ChoicePropertyComponent (T("style")),
+            : ChoicePropertyComponent ("style"),
               element (element_)
         {
             element->getDocument()->addChangeListener (this);
 
-            choices.add (T("normal"));
-            choices.add (T("bold"));
-            choices.add (T("italic"));
-            choices.add (T("bold + italic"));
+            choices.add ("normal");
+            choices.add ("bold");
+            choices.add ("italic");
+            choices.add ("bold + italic");
         }
 
         ~FontStyleProperty()
@@ -475,7 +475,7 @@ private:
     {
     public:
         FontSizeProperty (PaintElementText* const element_)
-            : SliderPropertyComponent (T("size"), 1.0, 250.0, 0.1, 0.3),
+            : SliderPropertyComponent ("size", 1.0, 250.0, 0.1, 0.3),
               element (element_)
         {
             element->getDocument()->addChangeListener (this);
@@ -513,7 +513,7 @@ private:
     {
     public:
         TextJustificationProperty (PaintElementText* const element_)
-            : JustificationProperty (T("layout"), false),
+            : JustificationProperty ("layout", false),
               element (element_)
         {
             element->getDocument()->addChangeListener (this);
@@ -545,7 +545,7 @@ private:
     {
     public:
         TextToPathProperty (PaintElementText* const element_)
-            : ButtonPropertyComponent (T("path"), false),
+            : ButtonPropertyComponent ("path", false),
               element (element_)
         {
         }
@@ -557,7 +557,7 @@ private:
 
         const String getButtonText() const
         {
-            return T("convert text to a path");
+            return "convert text to a path";
         }
 
     private:

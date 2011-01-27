@@ -84,21 +84,21 @@ private:
 ResourceEditorPanel::ResourceEditorPanel (JucerDocument& document_)
     : document (document_)
 {
-    addAndMakeVisible (addButton = new TextButton (T("Add new resource...")));
+    addAndMakeVisible (addButton = new TextButton ("Add new resource..."));
     addButton->addListener (this);
 
-    addAndMakeVisible (reloadAllButton = new TextButton (T("Reload all resources")));
+    addAndMakeVisible (reloadAllButton = new TextButton ("Reload all resources"));
     reloadAllButton->addListener (this);
 
-    addAndMakeVisible (delButton = new TextButton (T("Delete selected resources")));
+    addAndMakeVisible (delButton = new TextButton ("Delete selected resources"));
     delButton->addListener (this);
     delButton->setEnabled (false);
 
     addAndMakeVisible (listBox = new TableListBox (String::empty, this));
-    listBox->getHeader().addColumn (T("name"), 1, 150, 80, 400);
-    listBox->getHeader().addColumn (T("original file"), 2, 350, 80, 800);
-    listBox->getHeader().addColumn (T("size"), 3, 100, 40, 150);
-    listBox->getHeader().addColumn (T("reload"), 4, 100, 100, 100, TableHeaderComponent::notResizableOrSortable);
+    listBox->getHeader().addColumn ("name", 1, 150, 80, 400);
+    listBox->getHeader().addColumn ("original file", 2, 350, 80, 800);
+    listBox->getHeader().addColumn ("size", 3, 100, 40, 150);
+    listBox->getHeader().addColumn ("reload", 4, 100, 100, 100, TableHeaderComponent::notResizableOrSortable);
     listBox->getHeader().setStretchToFitActive (true);
 
     listBox->setColour (ListBox::outlineColourId, Colours::darkgrey);
@@ -256,8 +256,8 @@ void ResourceEditorPanel::buttonClicked (Button* b)
     if (b == addButton)
     {
         document.getResources()
-            .browseForResource (T("Select a file to add as a resource"),
-                                T("*"),
+            .browseForResource ("Select a file to add as a resource",
+                                "*",
                                 File::nonexistent,
                                 String::empty);
     }

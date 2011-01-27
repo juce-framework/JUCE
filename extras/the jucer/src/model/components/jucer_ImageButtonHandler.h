@@ -138,7 +138,7 @@ public:
         String s;
 
         s << getColourIntialisationCode (component, memberVariableName)
-          << T('\n');
+          << '\n';
 
         const String indent (String::repeatedString (T(" "), memberVariableName.length() + 13));
 

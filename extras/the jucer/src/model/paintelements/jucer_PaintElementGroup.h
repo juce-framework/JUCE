@@ -193,7 +193,7 @@ public:
             subElements.getUnchecked(i)->fillInGeneratedCode (code, paintMethodCode);
     }
 
-    static const tchar* getTagName() throw()        { return T("GROUP"); }
+    static const char* getTagName() throw()        { return "GROUP"; }
 
     XmlElement* createXml() const
     {

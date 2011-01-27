@@ -201,7 +201,7 @@ bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
     {
         const File f (filenames[i]);
 
-        if (f.hasFileExtension (T(".cpp")))
+        if (f.hasFileExtension (".cpp"))
             return true;
     }
 
@@ -214,7 +214,7 @@ void MainWindow::filesDropped (const StringArray& filenames, int mouseX, int mou
     {
         const File f (filenames[i]);
 
-        if (f.hasFileExtension (T(".cpp")) && openFile (f))
+        if (f.hasFileExtension (".cpp") && openFile (f))
             break;
     }
 }
@@ -230,9 +230,9 @@ void MainWindow::activeWindowStatusChanged()
 //==============================================================================
 const StringArray MainWindow::getMenuBarNames()
 {
-    const tchar* const names[] = { T("File"), T("Edit"), T("View"), 0 };
+    const char* const names[] = { "File", "Edit", "View", 0 };
 
-    return StringArray ((const tchar**) names);
+    return StringArray (names);
 }
 
 const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
@@ -311,11 +311,11 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
         menu.addCommandItem (commandManager, CommandIDs::test);
 
         PopupMenu lookAndFeels;
-        lookAndFeels.addItem (201, T("Default"), true, (typeid (LookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
-        lookAndFeels.addItem (200, T("Old School"), true, (typeid (OldSchoolLookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
+        lookAndFeels.addItem (201, "Default", true, (typeid (LookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
+        lookAndFeels.addItem (200, "Old School", true, (typeid (OldSchoolLookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
 
         menu.addSeparator();
-        menu.addSubMenu (T("Look and Feel"), lookAndFeels);
+        menu.addSubMenu ("Look and Feel", lookAndFeels);
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::showGrid);
@@ -325,9 +325,9 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
 
         PopupMenu m;
         for (int i = 0; i < numElementsInArray (snapSizes); ++i)
-            m.addItem (300 + i, String (snapSizes[i]) + T(" pixels"), true, snapSizes[i] == currentSnapSize);
+            m.addItem (300 + i, String (snapSizes[i]) + " pixels", true, snapSizes[i] == currentSnapSize);
 
-        menu.addSubMenu (T("Grid size"), m, getActiveDocument() != 0);
+        menu.addSubMenu ("Grid size", m, getActiveDocument() != 0);
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::zoomIn);
@@ -340,7 +340,7 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
         overlays.addCommandItem (commandManager, CommandIDs::compOverlay33);
         overlays.addCommandItem (commandManager, CommandIDs::compOverlay66);
         overlays.addCommandItem (commandManager, CommandIDs::compOverlay100);
-        menu.addSubMenu (T("Component Overlay"), overlays,
+        menu.addSubMenu ("Component Overlay", overlays,
                          getActiveDocument() != 0 && getActiveDocument()->getComponentLayout() != 0);
 
         menu.addSeparator();
@@ -409,8 +409,8 @@ void MainWindow::getCommandInfo (const CommandID commandID, ApplicationCommandIn
     {
         const int index = commandID - CommandIDs::newDocumentBase;
 
-        result.setInfo (T("New ") + String (ObjectTypes::documentTypeNames [index]),
-                        T("Creates a new ") + String (ObjectTypes::documentTypeNames[index]),
+        result.setInfo ("New " + String (ObjectTypes::documentTypeNames [index]),
+                        "Creates a new " + String (ObjectTypes::documentTypeNames[index]),
                         CommandCategories::general, 0);
 
         return;
@@ -421,22 +421,22 @@ void MainWindow::getCommandInfo (const CommandID commandID, ApplicationCommandIn
     switch (commandID)
     {
     case CommandIDs::open:
-        result.setInfo (T("Open..."),
-                        T("Opens a Jucer .cpp component file for editing."),
+        result.setInfo ("Open...",
+                        "Opens a Jucer .cpp component file for editing.",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T('o'), cmd, 0));
+        result.defaultKeypresses.add (KeyPress ('o', cmd, 0));
         break;
 
     case CommandIDs::showPrefs:
-        result.setInfo (T("Preferences..."),
-                        T("Shows the preferences panel."),
+        result.setInfo ("Preferences...",
+                        "Shows the preferences panel.",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T(','), cmd, 0));
+        result.defaultKeypresses.add (KeyPress (',', cmd, 0));
         break;
 
     case CommandIDs::useTabbedWindows:
-        result.setInfo (T("Use tabs to show windows"),
-                        T("Flips between a tabbed component and separate windows"),
+        result.setInfo ("Use tabs to show windows",
+                        "Flips between a tabbed component and separate windows",
                         CommandCategories::general, 0);
         result.setTicked (multiDocHolder->getLayoutMode() == MultiDocumentPanel::MaximisedWindowsWithTabs);
         break;

@@ -156,7 +156,7 @@ public:
         }
     }
 
-    static const tchar* getTagName() throw()        { return T("ROUNDRECT"); }
+    static const char* getTagName() throw()        { return "ROUNDRECT"; }
 
     XmlElement* createXml() const
     {

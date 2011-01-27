@@ -88,7 +88,7 @@ public:
         String s;
 
         s << getColourIntialisationCode (component, memberVariableName)
-          << T('\n');
+          << '\n';
 
         code.constructorCode += s;
     }

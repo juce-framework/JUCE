@@ -318,7 +318,7 @@ void* PlatformUtilities::loadDynamicLibrary (const String& name)
 
     JUCE_TRY
     {
-        result = LoadLibrary (name);
+        result = LoadLibrary (name.toUTF16());
     }
     JUCE_CATCH_ALL
 
@@ -348,7 +348,7 @@ public:
     Pimpl (const String& name, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
-        handle = CreateMutex (0, TRUE, "Global\\" + name.replaceCharacter ('\\','/'));
+        handle = CreateMutex (0, TRUE, ("Global\\" + name.replaceCharacter ('\\','/')).toUTF16());
 
         if (handle != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
         {

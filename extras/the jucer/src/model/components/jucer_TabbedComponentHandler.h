@@ -150,7 +150,7 @@ public:
 
             properties.add (new TabMoveProperty (t, document, i, t->getNumTabs()));
 
-            panel.addSection (T("Tab ") + String (i), properties);
+            panel.addSection ("Tab " + String (i), properties);
         }
     }
 
@@ -161,13 +161,13 @@ public:
         switch (t->getOrientation())
         {
         case TabbedButtonBar::TabsAtTop:
-            return T("TabbedButtonBar::TabsAtTop");
+            return "TabbedButtonBar::TabsAtTop";
         case TabbedButtonBar::TabsAtBottom:
-            return T("TabbedButtonBar::TabsAtBottom");
+            return "TabbedButtonBar::TabsAtBottom";
         case TabbedButtonBar::TabsAtLeft:
-            return T("TabbedButtonBar::TabsAtLeft");
+            return "TabbedButtonBar::TabsAtLeft";
         case TabbedButtonBar::TabsAtRight:
-            return T("TabbedButtonBar::TabsAtRight");
+            return "TabbedButtonBar::TabsAtRight";
         default:
             jassertfalse
             break;
@@ -197,7 +197,7 @@ public:
 
                 if (doc != 0)
                 {
-                    code.includeFilesCPP.add (getTabJucerFile (t, i).replace (T(".cpp"), T(".h")));
+                    code.includeFilesCPP.add (getTabJucerFile (t, i).replace (".cpp", ".h"));
 
                     contentClassName = doc->getClassName();
                     delete doc;
@@ -239,16 +239,16 @@ public:
     //==============================================================================
     static void addNewTab (TabbedComponent* tc, const int insertIndex = -1)
     {
-        tc->addTab (T("Tab ") + String (tc->getNumTabs()), Colours::lightgrey,
+        tc->addTab ("Tab " + String (tc->getNumTabs()), Colours::lightgrey,
                     new TabDemoContentComp(), true, insertIndex);
     }
 
     //==============================================================================
     static XmlElement* getTabState (TabbedComponent* tc, int tabIndex)
     {
-        XmlElement* xml = new XmlElement (T("TAB"));
-        xml->setAttribute (T("name"), tc->getTabNames() [tabIndex]);
-        setColourXml (*xml, T("colour"), tc->getTabBackgroundColour (tabIndex));
+        XmlElement* xml = new XmlElement ("TAB");
+        xml->setAttribute ("name", tc->getTabNames() [tabIndex]);
+        setColourXml (*xml, "colour", tc->getTabBackgroundColour (tabIndex));
 
         TabDemoContentComp* const tdc = dynamic_cast <TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != 0);
@@ -266,8 +266,8 @@ public:
 
     static void restoreTabState (TabbedComponent* tc, int tabIndex, const XmlElement& xml)
     {
-        tc->setTabName (tabIndex, xml.getStringAttribute (T("name"), T("Tab")));
-        tc->setTabBackgroundColour (tabIndex, getColourXml (xml, T("colour"), Colours::lightgrey));
+        tc->setTabName (tabIndex, xml.getStringAttribute ("name", "Tab"));
+        tc->setTabBackgroundColour (tabIndex, getColourXml (xml, "colour", Colours::lightgrey));
 
         TabDemoContentComp* const tdc = dynamic_cast <TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != 0);
@@ -524,13 +524,13 @@ private:
             : ComponentChoiceProperty <TabbedComponent> (T("initial tab"), comp, document)
         {
             for (int i = 0; i < comp->getNumTabs(); ++i)
-                choices.add (T("Tab ") + String (i) + T(": \"") + comp->getTabNames() [i] + T("\""));
+                choices.add ("Tab " + String (i) + ": \"" + comp->getTabNames() [i] + "\"");
         }
 
         void setIndex (int newIndex)
         {
             document.perform (new InitialTabChangeAction (component, *document.getComponentLayout(), newIndex),
-                              T("Change initial tab"));
+                              "Change initial tab");
         }
 
         int getIndex() const
@@ -711,8 +711,8 @@ private:
 
             PopupMenu m;
             for (int i = 0; i < component->getNumTabs(); ++i)
-                m.addItem (i + 1, T("Delete tab ") + String (i)
-                                    + T(": \"") + names[i] + T("\""));
+                m.addItem (i + 1, "Delete tab " + String (i)
+                                    + ": \"" + names[i] + "\"");
 
             const int r = m.showAt (this);
 
@@ -993,7 +993,7 @@ private:
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(), tabIndex,
                                                              newFile.getRelativePathFrom (document.getFile().getParentDirectory())
-                                                                    .replaceCharacter (T('\\'), T('/'))),
+                                                                    .replaceCharacter ('\\', '/')),
                               T("Change tab component file"));
         }
 

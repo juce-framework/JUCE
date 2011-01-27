@@ -159,7 +159,7 @@ public:
                 callback << "else ";
 
             const String memberVariableName (code.document->getComponentLayout()->getComponentMemberVariableName (component));
-            const String userCodeComment (T("UserButtonCode_") + memberVariableName);
+            const String userCodeComment ("UserButtonCode_" + memberVariableName);
 
             callback
                 << "if (buttonThatWasClicked == " << memberVariableName

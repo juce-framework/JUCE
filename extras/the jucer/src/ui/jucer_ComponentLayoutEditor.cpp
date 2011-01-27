@@ -354,14 +354,14 @@ bool ComponentLayoutEditor::keyPressed (const KeyPress& key)
 bool ComponentLayoutEditor::isInterestedInFileDrag (const StringArray& filenames)
 {
     const File f (filenames [0]);
-    return f.hasFileExtension (T(".cpp"));
+    return f.hasFileExtension (".cpp");
 }
 
 void ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, int y)
 {
     const File f (filenames [0]);
 
-    if (f.hasFileExtension (T(".cpp")))
+    if (f.hasFileExtension (".cpp"))
     {
         JucerDocument* doc = ObjectTypes::loadDocumentFromFile (f, false);
 

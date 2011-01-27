@@ -807,7 +807,7 @@ public:
     void setTitle (const String& title)
     {
         XTextProperty nameProperty;
-        char* strings[] = { const_cast <char*> (title.toUTF8()) };
+        char* strings[] = { const_cast <char*> (title.toUTF8().getAddress()) };
         ScopedXLock xlock;
 
         if (XStringListToTextProperty (strings, 1, &nameProperty))

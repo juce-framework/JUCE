@@ -153,7 +153,7 @@ public:
             {
                 if (resourceName.isNotEmpty())
                 {
-                    const String imageVariable (T("drawable") + String (code.getUniqueSuffix()));
+                    const String imageVariable (L"drawable" + String (code.getUniqueSuffix()));
 
                     code.privateMemberDeclarations
                         << "Drawable* " << imageVariable << ";\n";
@@ -299,7 +299,7 @@ public:
     double getOpacity() const throw()               { return opacity; }
 
     //==============================================================================
-    static const tchar* getTagName() throw()        { return T("IMAGE"); }
+    static const char* getTagName() throw()         { return "IMAGE"; }
 
     void resetToImageSize()
     {

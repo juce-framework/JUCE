@@ -380,7 +380,7 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
         return;
 
-    const String pathVariable (T("internalPath") + String (code.getUniqueSuffix()));
+    const String pathVariable ("internalPath" + String (code.getUniqueSuffix()));
 
     const ComponentLayout* layout = code.document->getComponentLayout();
 
@@ -1196,14 +1196,14 @@ class PathPointTypeProperty : public ChoicePropertyComponent,
 public:
     PathPointTypeProperty (PaintElementPath* const owner_,
                            const int index_)
-        : ChoicePropertyComponent (T("point type")),
+        : ChoicePropertyComponent ("point type"),
           owner (owner_),
           index (index_)
     {
-        choices.add (T("Start of sub-path"));
-        choices.add (T("Line"));
-        choices.add (T("Quadratic"));
-        choices.add (T("Cubic"));
+        choices.add ("Start of sub-path");
+        choices.add ("Line");
+        choices.add ("Quadratic");
+        choices.add ("Cubic");
 
         owner->getDocument()->addChangeListener (this);
     }
@@ -1330,14 +1330,14 @@ class PathPointClosedProperty   : public ChoicePropertyComponent,
 {
 public:
     PathPointClosedProperty (PaintElementPath* const owner_, const int index_)
-        : ChoicePropertyComponent (T("openness")),
+        : ChoicePropertyComponent ("openness"),
           owner (owner_),
           index (index_)
     {
         owner->getDocument()->addChangeListener (this);
 
-        choices.add (T("Subpath is closed"));
-        choices.add (T("Subpath is open-ended"));
+        choices.add ("Subpath is closed");
+        choices.add ("Subpath is open-ended");
     }
 
     ~PathPointClosedProperty()
@@ -1370,7 +1370,7 @@ class AddNewPointProperty   : public ButtonPropertyComponent
 {
 public:
     AddNewPointProperty (PaintElementPath* const owner_, const int index_)
-        : ButtonPropertyComponent (T("new point"), false),
+        : ButtonPropertyComponent ("new point", false),
           owner (owner_),
           index (index_)
     {
@@ -1383,7 +1383,7 @@ public:
         owner->addPoint (index, true);
     }
 
-    const String getButtonText() const      { return T("Add new point"); }
+    const String getButtonText() const      { return "Add new point"; }
 
 private:
     PaintElementPath* const owner;
@@ -1492,7 +1492,7 @@ void PathPoint::changePointType (const Path::Iterator::PathElementType newType,
         if (undoable)
         {
             owner->perform (new ChangePointAction (this, withChangedPointType (newType, parentArea)),
-                            T("Change path point type"));
+                            "Change path point type");
         }
         else
         {
@@ -1510,8 +1510,8 @@ void PathPoint::getEditableProperties (Array <PropertyComponent*>& properties)
     switch (type)
     {
     case Path::Iterator::startNewSubPath:
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("y"), PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
 
         properties.add (new PathPointClosedProperty (owner, index));
         properties.add (new AddNewPointProperty (owner, index));
@@ -1519,28 +1519,28 @@ void PathPoint::getEditableProperties (Array <PropertyComponent*>& properties)
 
     case Path::Iterator::lineTo:
         properties.add (new PathPointTypeProperty (owner, index));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("y"), PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
         properties.add (new AddNewPointProperty (owner, index));
         break;
 
     case Path::Iterator::quadraticTo:
         properties.add (new PathPointTypeProperty (owner, index));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("control pt x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("control pt y"), PositionPropertyBase::componentY));
-        properties.add (new PathPointPositionProperty (owner, index, 1, T("x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 1, T("y"), PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "control pt x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "control pt y", PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 1, "x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 1, "y", PositionPropertyBase::componentY));
         properties.add (new AddNewPointProperty (owner, index));
         break;
 
     case Path::Iterator::cubicTo:
         properties.add (new PathPointTypeProperty (owner, index));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("control pt1 x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 0, T("control pt1 y"), PositionPropertyBase::componentY));
-        properties.add (new PathPointPositionProperty (owner, index, 1, T("control pt2 x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 1, T("control pt2 y"), PositionPropertyBase::componentY));
-        properties.add (new PathPointPositionProperty (owner, index, 2, T("x"), PositionPropertyBase::componentX));
-        properties.add (new PathPointPositionProperty (owner, index, 2, T("y"), PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "control pt1 x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 0, "control pt1 y", PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 1, "control pt2 x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 1, "control pt2 y", PositionPropertyBase::componentY));
+        properties.add (new PathPointPositionProperty (owner, index, 2, "x", PositionPropertyBase::componentX));
+        properties.add (new PathPointPositionProperty (owner, index, 2, "y", PositionPropertyBase::componentY));
         properties.add (new AddNewPointProperty (owner, index));
         break;
 

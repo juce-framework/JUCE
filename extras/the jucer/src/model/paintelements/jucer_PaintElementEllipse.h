@@ -99,7 +99,7 @@ public:
         }
     }
 
-    static const tchar* getTagName() throw()        { return T("ELLIPSE"); }
+    static const char* getTagName() throw()         { return "ELLIPSE"; }
 
     XmlElement* createXml() const
     {

@@ -317,27 +317,20 @@ const String StringArray::joinIntoString (const String& separator, int start, in
     String result;
     result.preallocateStorage (charsNeeded);
 
-    juce_wchar* dest = result;
+    String::CharPointerType dest (result.getCharPointer());
 
     while (start < last)
     {
         const String& s = strings.getReference (start);
-        const int len = s.length();
 
-        if (len > 0)
-        {
-            s.copyToUnicode (dest, len);
-            dest += len;
-        }
+        if (! s.isEmpty())
+            dest.writeAll (s.getCharPointer());
 
         if (++start < last && separatorLen > 0)
-        {
-            separator.copyToUnicode (dest, separatorLen);
-            dest += separatorLen;
-        }
+            dest.writeAll (separator.getCharPointer());
     }
 
-    *dest = 0;
+    dest.writeNull();
 
     return result;
 }

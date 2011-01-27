@@ -238,7 +238,7 @@ void ComponentLayout::componentToFront (Component* comp, const bool undoable)
     if (comp != 0 && components.contains (comp))
     {
         if (undoable)
-            perform (new FrontBackCompAction (comp, *this, -1), T("Move components to front"));
+            perform (new FrontBackCompAction (comp, *this, -1), "Move components to front");
         else
             moveComponentZOrder (components.indexOf (comp), -1);
     }
@@ -249,7 +249,7 @@ void ComponentLayout::componentToBack (Component* comp, const bool undoable)
     if (comp != 0 && components.contains (comp))
     {
         if (undoable)
-            perform (new FrontBackCompAction (comp, *this, 0), T("Move components to back"));
+            perform (new FrontBackCompAction (comp, *this, 0), "Move components to back");
         else
             moveComponentZOrder (components.indexOf (comp), 0);
     }
@@ -257,7 +257,7 @@ void ComponentLayout::componentToBack (Component* comp, const bool undoable)
 
 
 //==============================================================================
-const tchar* const ComponentLayout::clipboardXmlTag = T("COMPONENTS");
+const char* const ComponentLayout::clipboardXmlTag = "COMPONENTS";
 
 void ComponentLayout::copySelectedToClipboard()
 {
@@ -447,7 +447,7 @@ Component* ComponentLayout::findComponentWithId (const int64 componentId) const
 }
 
 //==============================================================================
-static const tchar* const dimensionSuffixes[] = { T("X"), T("Y"), T("W"), T("H") };
+static const char* const dimensionSuffixes[] = { "X", "Y", "W", "H" };
 
 Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int whichDimension) const
 {
@@ -472,8 +472,7 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
     }
     else
     {
-        return findComponentWithId (comp->getProperties() [String (T("relativeTo"))
-                                                             + dimensionSuffixes [whichDimension]]
+        return findComponentWithId (comp->getProperties() [String ("relativeTo") + dimensionSuffixes [whichDimension]]
                                         .toString().getHexValue64());
     }
 }
@@ -560,8 +559,8 @@ PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDime
         if (c != comp)
         {
             m.addItem (menuIdBase + i + 1,
-                       T("Relative to ") + getComponentMemberVariableName (c)
-                        + T(" (class: ") + ComponentTypeHandler::getHandlerFor (*c)->getClassName (c) + T(")"),
+                       "Relative to " + getComponentMemberVariableName (c)
+                        + " (class: " + ComponentTypeHandler::getHandlerFor (*c)->getClassName (c) + ")",
                        ! dependsOnComponentForRelativePos (c, comp),
                        current == c);
         }

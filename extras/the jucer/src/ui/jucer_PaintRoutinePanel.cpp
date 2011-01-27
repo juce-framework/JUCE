@@ -36,7 +36,7 @@ class ComponentBackgroundColourProperty    : public ColourPropertyComponent,
 public:
     ComponentBackgroundColourProperty (JucerDocument& document_,
                                        PaintRoutine& routine_)
-        : ColourPropertyComponent (T("background"), false),
+        : ColourPropertyComponent ("background", false),
           document (document_),
           routine (routine_)
     {
@@ -120,7 +120,7 @@ public:
             Array <PropertyComponent*> props;
             props.add (new ComponentBackgroundColourProperty (*document, paintRoutine));
 
-            propsPanel->addSection (T("Class Properties"), props);
+            propsPanel->addSection ("Class Properties", props);
         }
 
         if (state != 0)
@@ -151,7 +151,7 @@ public:
                 Array <PropertyComponent*> props;
                 point->getEditableProperties (props);
 
-                propsPanel->addSection (T("Path segment"), props);
+                propsPanel->addSection ("Path segment", props);
             }
         }
     }

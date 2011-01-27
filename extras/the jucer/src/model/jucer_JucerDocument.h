@@ -124,7 +124,7 @@ public:
     float getComponentOverlayOpacity() const throw()                  { return componentOverlayOpacity; }
 
     //==============================================================================
-    static const tchar* const jucerCompXmlTag;
+    static const char* const jucerCompXmlTag;
 
     /** Creates the document's metadata xml section.
 

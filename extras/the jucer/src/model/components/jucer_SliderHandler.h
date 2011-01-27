@@ -125,7 +125,7 @@ public:
         if (s->getSkewFactor() != 1.0)
             r << memberVariableName << "->setSkewFactor (" << s->getSkewFactor() << ");\n";
 
-        r << T('\n');
+        r << '\n';
         code.constructorCode += r;
     }
 
@@ -144,7 +144,7 @@ public:
                 callback << "else ";
 
             const String memberVariableName (code.document->getComponentLayout()->getComponentMemberVariableName (component));
-            const String userCodeComment (T("UserSliderCode_") + memberVariableName);
+            const String userCodeComment ("UserSliderCode_" + memberVariableName);
 
             callback
                 << "if (sliderThatWasMoved == " << memberVariableName

@@ -58,14 +58,14 @@ namespace ObjectTypes
 {
 
 //==============================================================================
-static const tchar* const documentNames[] =
+static const char* const documentNames[] =
 {
-    T("Component"),
-    T("Button"),
+    "Component",
+    "Button",
     0
 };
 
-const tchar** const documentTypeNames = (const tchar**) documentNames;
+const char** const documentTypeNames = (const char**) documentNames;
 const int numDocumentTypes = numElementsInArray (documentNames) - 1;
 
 JucerDocument* createNewDocument (const int index)
@@ -142,18 +142,18 @@ JucerDocument* loadDocumentFromFile (const File& f, const bool showErrorMessage)
 }
 
 //==============================================================================
-static const tchar* const elementNames[] =
+static const char* const elementNames[] =
 {
-    T("Rectangle"),
-    T("Rounded Rectangle"),
-    T("Ellipse"),
-    T("Path"),
-    T("Image"),
-    T("Text"),
+    "Rectangle",
+    "Rounded Rectangle",
+    "Ellipse",
+    "Path",
+    "Image",
+    "Text",
     0
 };
 
-const tchar** const elementTypeNames = (const tchar**) elementNames;
+const char** const elementTypeNames = (const char**) elementNames;
 const int numElementTypes = (sizeof (elementNames) / sizeof (elementNames[0])) - 1;
 
 PaintElement* createNewElement (const int index, PaintRoutine* owner)

@@ -31,7 +31,7 @@
 //==============================================================================
 void Logger::outputDebugString (const String& text)
 {
-    OutputDebugString (text + "\n");
+    OutputDebugString ((text + "\n").toUTF16());
 }
 
 //==============================================================================

@@ -283,7 +283,7 @@ public:
             vorbis_comment_init (&vc);
 
             if (JUCEApplication::getInstance() != 0)
-                vorbis_comment_add_tag (&vc, "ENCODER", const_cast <char*> (JUCEApplication::getInstance()->getApplicationName().toUTF8()));
+                vorbis_comment_add_tag (&vc, "ENCODER", const_cast <char*> (JUCEApplication::getInstance()->getApplicationName().toUTF8().getAddress()));
 
             vorbis_analysis_init (&vd, &vi);
             vorbis_block_init (&vd, &vb);

@@ -154,7 +154,7 @@ public:
                 {
                     code.includeFilesCPP.add (doc->getFile().withFileExtension (T("h"))
                                                 .getRelativePathFrom (code.document->getFile().getParentDirectory())
-                                                .replaceCharacter (T('\\'), T('/')));
+                                                .replaceCharacter ('\\', '/'));
 
                     className = doc->getClassName();
                     delete doc;
@@ -518,7 +518,7 @@ private:
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getFile().getParentDirectory())
-                                                                    .replaceCharacter (T('\\'), T('/'))
+                                                                    .replaceCharacter ('\\', '/')
 ),
                               T("Change Jucer component file"));
         }

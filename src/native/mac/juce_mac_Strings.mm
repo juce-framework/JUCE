@@ -102,34 +102,25 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
     if (CreateUnicodeToTextInfo (&map, &conversionInfo) == noErr)
     {
-        const int len = s.length();
+        const int bytesNeeded = CharPointer_UTF16::getBytesRequiredFor (s.getCharPointer());
 
-        HeapBlock <UniChar> tempIn, tempOut;
-        tempIn.calloc (len + 2);
-        tempOut.calloc (len + 2);
-
-        for (int i = 0; i <= len; ++i)
-            tempIn[i] = s[i];
+        HeapBlock <char> tempOut;
+        tempOut.calloc (bytesNeeded + 4);
 
         ByteCount bytesRead = 0;
         ByteCount outputBufferSize = 0;
 
         if (ConvertFromUnicodeToText (conversionInfo,
-                                      len * sizeof (UniChar), tempIn,
+                                      bytesNeeded, (ConstUniCharArrayPtr) s.toUTF16().getAddress(),
                                       kUnicodeDefaultDirectionMask,
                                       0, 0, 0, 0,
-                                      len * sizeof (UniChar), &bytesRead,
+                                      bytesNeeded, &bytesRead,
                                       &outputBufferSize, tempOut) == noErr)
         {
             result.preallocateStorage (bytesRead / sizeof (UniChar) + 2);
 
-            juce_wchar* t = result;
-
-            unsigned int i;
-            for (i = 0; i < bytesRead / sizeof (UniChar); ++i)
-                t[i] = (juce_wchar) tempOut[i];
-
-            t[i] = 0;
+            CharPointer_UTF32 dest (static_cast <juce_wchar*> (result));
+            dest.writeAll (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.getData()));
         }
 
         DisposeUnicodeToTextInfo (&conversionInfo);

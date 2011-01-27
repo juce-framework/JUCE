@@ -74,7 +74,7 @@ public:
     SelectedItemSet <PaintElement*>& getSelectedElements() throw()          { return selectedElements; }
     SelectedItemSet <PathPoint*>& getSelectedPoints() throw()               { return selectedPoints; }
 
-    static const tchar* const clipboardXmlTag;
+    static const char* const clipboardXmlTag;
     void copySelectedToClipboard();
     void paste();
     void deleteSelected();
@@ -97,7 +97,7 @@ public:
     JucerDocument* getDocument() const throw()                              { return document; }
 
     //==============================================================================
-    static const tchar* xmlTagName;
+    static const char* xmlTagName;
     XmlElement* createXml() const;
     bool loadFromXml (const XmlElement& xml);
 
