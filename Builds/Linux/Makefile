@@ -330,6 +330,22 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_WASAPI_c7c6c3c3.o \
   $(OBJDIR)/juce_win32_WebBrowserComponent_2a4dd461.o \
   $(OBJDIR)/juce_win32_Windowing_635b4f6a.o \
+  $(OBJDIR)/juce_android_Audio_93f83bd6.o \
+  $(OBJDIR)/juce_android_CameraDevice_d2743865.o \
+  $(OBJDIR)/juce_android_FileChooser_205cbb5f.o \
+  $(OBJDIR)/juce_android_Files_3b5721f7.o \
+  $(OBJDIR)/juce_android_Fonts_2e035704.o \
+  $(OBJDIR)/juce_android_GraphicsContext_d0fb27e4.o \
+  $(OBJDIR)/juce_android_Messaging_59717284.o \
+  $(OBJDIR)/juce_android_Midi_4fa64fab.o \
+  $(OBJDIR)/juce_android_Misc_68ea73f6.o \
+  $(OBJDIR)/juce_android_NativeCode_dc186dee.o \
+  $(OBJDIR)/juce_android_Network_28d2276e.o \
+  $(OBJDIR)/juce_android_OpenGLComponent_8fd9ef4e.o \
+  $(OBJDIR)/juce_android_SystemStats_848ae670.o \
+  $(OBJDIR)/juce_android_Threads_10a24b69.o \
+  $(OBJDIR)/juce_android_WebBrowserComponent_178c6569.o \
+  $(OBJDIR)/juce_android_Windowing_2a620a72.o \
   $(OBJDIR)/juce_CharacterFunctions_b1a5ac62.o \
   $(OBJDIR)/juce_Identifier_e99ee619.o \
   $(OBJDIR)/juce_LocalisedStrings_3ddfa55e.o \
@@ -1818,6 +1834,86 @@ $(OBJDIR)/juce_win32_WebBrowserComponent_2a4dd461.o: ../../src/native/windows/ju
 $(OBJDIR)/juce_win32_Windowing_635b4f6a.o: ../../src/native/windows/juce_win32_Windowing.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_win32_Windowing.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Audio_93f83bd6.o: ../../src/native/android/juce_android_Audio.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Audio.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_CameraDevice_d2743865.o: ../../src/native/android/juce_android_CameraDevice.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_CameraDevice.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_FileChooser_205cbb5f.o: ../../src/native/android/juce_android_FileChooser.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_FileChooser.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Files_3b5721f7.o: ../../src/native/android/juce_android_Files.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Files.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Fonts_2e035704.o: ../../src/native/android/juce_android_Fonts.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Fonts.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_GraphicsContext_d0fb27e4.o: ../../src/native/android/juce_android_GraphicsContext.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_GraphicsContext.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Messaging_59717284.o: ../../src/native/android/juce_android_Messaging.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Messaging.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Midi_4fa64fab.o: ../../src/native/android/juce_android_Midi.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Midi.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Misc_68ea73f6.o: ../../src/native/android/juce_android_Misc.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Misc.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_NativeCode_dc186dee.o: ../../src/native/android/juce_android_NativeCode.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_NativeCode.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Network_28d2276e.o: ../../src/native/android/juce_android_Network.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Network.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_OpenGLComponent_8fd9ef4e.o: ../../src/native/android/juce_android_OpenGLComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_OpenGLComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_SystemStats_848ae670.o: ../../src/native/android/juce_android_SystemStats.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_SystemStats.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Threads_10a24b69.o: ../../src/native/android/juce_android_Threads.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Threads.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_WebBrowserComponent_178c6569.o: ../../src/native/android/juce_android_WebBrowserComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_WebBrowserComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_android_Windowing_2a620a72.o: ../../src/native/android/juce_android_Windowing.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_android_Windowing.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_CharacterFunctions_b1a5ac62.o: ../../src/text/juce_CharacterFunctions.cpp

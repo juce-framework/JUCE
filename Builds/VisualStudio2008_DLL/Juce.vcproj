@@ -935,6 +935,25 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_WebBrowserComponent.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Windowing.cpp"/>
           </Filter>
+          <Filter Name="android">
+            <File RelativePath="..\..\src\native\android\juce_android_Audio.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_CameraDevice.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_FileChooser.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Files.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Fonts.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_GraphicsContext.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Messaging.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Midi.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Misc.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_NativeCode.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_NativeIncludes.h"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Network.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_OpenGLComponent.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_SystemStats.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Threads.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_WebBrowserComponent.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_Windowing.cpp"/>
+          </Filter>
         </Filter>
         <Filter Name="text">
           <File RelativePath="..\..\src\text\juce_CharacterFunctions.cpp"/>

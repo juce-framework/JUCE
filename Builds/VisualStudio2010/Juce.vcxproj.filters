@@ -173,6 +173,9 @@
     <Filter Include="Juce\Source\native\windows">
       <UniqueIdentifier>{CFBC5FA1-5A68-B012-A852-1D798CD2CBDF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce\Source\native\android">
+      <UniqueIdentifier>{31BF14BA-F3B3-9EAE-8D43-0972CA67D1CF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce\Source\text">
       <UniqueIdentifier>{56CD7BE1-9B0B-A873-6126-8F47C2268CD3}</UniqueIdentifier>
     </Filter>
@@ -1173,6 +1176,54 @@
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Windowing.cpp">
       <Filter>Juce\Source\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Audio.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_CameraDevice.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_FileChooser.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Files.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Fonts.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_GraphicsContext.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Messaging.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Midi.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Misc.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_NativeCode.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Network.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_OpenGLComponent.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_SystemStats.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Threads.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_WebBrowserComponent.cpp">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\android\juce_android_Windowing.cpp">
+      <Filter>Juce\Source\native\android</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\text\juce_CharacterFunctions.cpp">
       <Filter>Juce\Source\text</Filter>
@@ -2198,6 +2249,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h">
       <Filter>Juce\Source\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\native\android\juce_android_NativeIncludes.h">
+      <Filter>Juce\Source\native\android</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h">
       <Filter>Juce\Source\text</Filter>

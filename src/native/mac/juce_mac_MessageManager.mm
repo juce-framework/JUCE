@@ -72,7 +72,7 @@ public:
     {
         if (JUCEApplication::getInstance() != 0)
         {
-            JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce (filename));
+            JUCEApplication::getInstance()->anotherInstanceStarted (quotedIfContainsSpaces (filename));
             return YES;
         }
 
@@ -83,18 +83,10 @@ public:
     {
         StringArray files;
         for (unsigned int i = 0; i < [filenames count]; ++i)
-        {
-            String filename (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
-            if (filename.containsChar (' '))
-                filename = filename.quoted('"');
-
-            files.add (filename);
-        }
+            files.add (quotedIfContainsSpaces ((NSString*) [filenames objectAtIndex: i]));
 
         if (files.size() > 0 && JUCEApplication::getInstance() != 0)
-        {
             JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (" "));
-        }
     }
 
     virtual void focusChanged()
@@ -130,6 +122,15 @@ private:
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
     MessageQueue messageQueue;
+
+    static const String quotedIfContainsSpaces (NSString* file)
+    {
+        String s (nsStringToJuce (file));
+        if (s.containsChar (' '))
+            s = s.quoted ('"');
+
+        return s;
+    }
 };
 
 
