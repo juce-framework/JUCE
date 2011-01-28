@@ -27,6 +27,68 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+END_JUCE_NAMESPACE
+extern JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
+BEGIN_JUCE_NAMESPACE
+
+//==============================================================================
+class AndroidJavaCallbacks
+{
+public:
+    AndroidJavaCallbacks() : env (0)
+    {
+    }
+
+    void initialise (JNIEnv* env_, jobject activity)
+    {
+        env = env_;
+        activityClass = (jclass) env->NewGlobalRef (env->GetObjectClass (activity));
+
+        printToConsole = env->GetStaticMethodID (activityClass, "printToConsole", "(Ljava/lang/String;)V");
+        jassert (printToConsole != 0);
+    }
+
+    void shutdown()
+    {
+        if (env != 0)
+        {
+            env->DeleteGlobalRef (activityClass);
+        }
+    }
+
+    //==============================================================================
+    JNIEnv* env;
+
+    jclass activityClass;
+    jmethodID printToConsole;
+};
+
+static AndroidJavaCallbacks androidEnv;
+
+//==============================================================================
+#define JUCE_JNI_CALLBACK(className, methodName, returnType, params) \
+  extern "C" __attribute__ ((visibility("default"))) returnType Java_com_juce_launch_ ## className ## _ ## methodName params
+
+//==============================================================================
+JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity))
+{
+    androidEnv.initialise (env, activity);
+
+    JUCEApplication::createInstance = &juce_CreateApplication;
+
+    initialiseJuce_GUI();
+
+    if (! JUCEApplication::createInstance()->initialiseApp (String::empty))
+        exit (0);
+}
+
+JUCE_JNI_CALLBACK (JuceAppActivity, quitApp, void, (JNIEnv* env, jobject activity))
+{
+    JUCEApplication::appWillTerminateByForce();
+
+    androidEnv.shutdown();
+}
+
 //==============================================================================
 void PlatformUtilities::beep()
 {
@@ -36,8 +98,8 @@ void PlatformUtilities::beep()
 //==============================================================================
 void Logger::outputDebugString (const String& text)
 {
-    // TODO
-    std::cerr << text << std::endl;
+    androidEnv.env->CallStaticVoidMethod (androidEnv.activityClass, androidEnv.printToConsole,
+                                          androidEnv.env->NewStringUTF (text.toUTF8()));
 }
 
 //==============================================================================
@@ -61,7 +123,7 @@ bool SystemStats::isOperatingSystem64Bit()
 }
 
 //==============================================================================
-namespace LinuxStatsHelpers
+namespace AndroidStatsHelpers
 {
     // TODO
     const String getCpuInfo (const char* const key)
@@ -79,12 +141,12 @@ namespace LinuxStatsHelpers
 
 const String SystemStats::getCpuVendor()
 {
-    return LinuxStatsHelpers::getCpuInfo ("vendor_id");
+    return AndroidStatsHelpers::getCpuInfo ("vendor_id");
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
 {
-    return roundToInt (LinuxStatsHelpers::getCpuInfo ("cpu MHz").getFloatValue());
+    return roundToInt (AndroidStatsHelpers::getCpuInfo ("cpu MHz").getFloatValue());
 }
 
 int SystemStats::getMemorySizeInMegabytes()
@@ -131,14 +193,14 @@ const String SystemStats::getFullUserName()
 void SystemStats::initialiseStats()
 {
     // TODO
-    const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
+    const String flags (AndroidStatsHelpers::getCpuInfo ("flags"));
     cpuFlags.hasMMX = flags.contains ("mmx");
     cpuFlags.hasSSE = flags.contains ("sse");
     cpuFlags.hasSSE2 = flags.contains ("sse2");
     cpuFlags.has3DNow = flags.contains ("3dnow");
 
     // TODO
-    cpuFlags.numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
+    cpuFlags.numCpus = AndroidStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }
 
 void PlatformUtilities::fpuReset() {}

@@ -98,9 +98,7 @@
     #endif
   #elif JUCE_MAC
     #define juce_breakDebugger              Debugger();
-  #elif JUCE_IOS
-    #define juce_breakDebugger              kill (0, SIGTRAP);
-  #elif JUCE_LINUX
+  #elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
     #define juce_breakDebugger              kill (0, SIGTRAP);
   #endif
 

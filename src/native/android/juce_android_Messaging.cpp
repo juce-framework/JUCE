@@ -110,5 +110,4 @@ void MessageManager::broadcastMessage (const String&)
 {
 }
 
-
 #endif

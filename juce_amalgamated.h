@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	20
+#define JUCE_BUILDNUMBER	21
 
 /** Current Juce version number.
 
@@ -318,7 +318,7 @@ namespace JuceDummyNamespace {}
 	If you're building on Windows, you'll need to have the Apple QuickTime SDK
 	installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IOS || (JUCE_WINDOWS && ! JUCE_MSVC))
+#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IOS || JUCE_ANDROID || (JUCE_WINDOWS && ! JUCE_MSVC))
   #define JUCE_QUICKTIME 0
 #endif
 
@@ -329,7 +329,7 @@ namespace JuceDummyNamespace {}
 /** JUCE_OPENGL: Enables the OpenGLComponent class (available on all platforms).
 	If you're not using OpenGL, you might want to turn this off to reduce your binary's size.
 */
-#ifndef JUCE_OPENGL
+#if ! (defined (JUCE_OPENGL) || JUCE_ANDROID)
   #define JUCE_OPENGL 1
 #endif
 
@@ -597,9 +597,7 @@ namespace JuceDummyNamespace {}
 	#endif
   #elif JUCE_MAC
 	#define juce_breakDebugger		  Debugger();
-  #elif JUCE_IOS
-	#define juce_breakDebugger		  kill (0, SIGTRAP);
-  #elif JUCE_LINUX
+  #elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
 	#define juce_breakDebugger		  kill (0, SIGTRAP);
   #endif
 
@@ -15911,7 +15909,11 @@ public:
 	See the JUCEApplication class documentation (juce_Application.h) for more details.
 
 */
-#if defined (JUCE_GCC) || defined (__MWERKS__)
+#if JUCE_ANDROID
+  #define START_JUCE_APPLICATION(AppClass) \
+	JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication() { return new AppClass(); }
+
+#elif defined (JUCE_GCC) || defined (__MWERKS__)
 
   #define START_JUCE_APPLICATION(AppClass) \
 	static JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication() { return new AppClass(); } \

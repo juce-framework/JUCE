@@ -272,7 +272,7 @@ public:
 
             if (SUCCEEDED (hr))
             {
-                hr = fileSink->SetFileName (file.getFullPathName(), 0);
+                hr = fileSink->SetFileName (file.getFullPathName().toUTF16(), 0);
 
                 if (SUCCEEDED (hr))
                 {
@@ -316,7 +316,7 @@ public:
                                    .replace ("$AVGTIMEPERFRAME", String (10000000 / maxFramesPerSecond));
 
                         ComSmartPtr <IWMProfile> currentProfile;
-                        hr = profileManager->LoadProfileByData ((const WCHAR*) prof, currentProfile.resetAndGetPointerAddress());
+                        hr = profileManager->LoadProfileByData (prof.toUTF16(), currentProfile.resetAndGetPointerAddress());
                         hr = asfConfig->ConfigureFilterUsingProfile (currentProfile);
 
                         if (SUCCEEDED (hr))

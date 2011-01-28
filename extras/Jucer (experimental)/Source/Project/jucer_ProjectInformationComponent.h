@@ -33,7 +33,7 @@
 */
 class ProjectInformationComponent  : public Component,
                                      public ChangeListener,
-                                     public Button::Listener
+                                     public ButtonListener
 {
 public:
     //==============================================================================

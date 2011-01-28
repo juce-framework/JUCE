@@ -234,7 +234,7 @@ public:
     const var getProperty (const Identifier& propertyName) const
     {
         const String nameCopy (propertyName.toString());
-        LPCOLESTR name = (LPCOLESTR) nameCopy;
+        LPCOLESTR name = nameCopy.toUTF16();
         DISPID id = 0;
         if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
@@ -260,7 +260,7 @@ public:
     bool hasProperty (const Identifier& propertyName) const
     {
         const String nameCopy (propertyName.toString());
-        LPCOLESTR name = (LPCOLESTR) nameCopy;
+        LPCOLESTR name = nameCopy.toUTF16();
         DISPID id = 0;
         return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
@@ -268,7 +268,7 @@ public:
     void setProperty (const Identifier& propertyName, const var& newValue)
     {
         const String nameCopy (propertyName.toString());
-        LPCOLESTR name = (LPCOLESTR) nameCopy;
+        LPCOLESTR name = nameCopy.toUTF16();
         DISPID id = 0;
         if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
@@ -305,7 +305,7 @@ public:
     bool hasMethod (const Identifier& methodName) const
     {
         const String nameCopy (methodName.toString());
-        LPCOLESTR name = (LPCOLESTR) nameCopy;
+        LPCOLESTR name = nameCopy.toUTF16();
         DISPID id = 0;
         return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
@@ -314,7 +314,7 @@ public:
     {
         var returnValue;
         const String nameCopy (methodName.toString());
-        LPCOLESTR name = (LPCOLESTR) nameCopy;
+        LPCOLESTR name = nameCopy.toUTF16();
         DISPID id = 0;
         if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
@@ -374,7 +374,7 @@ void juceVarToVariant (const var& v, VARIANT& dest)
     else if (v.isString())
     {
         dest.vt = VT_BSTR;
-        dest.bstrVal = SysAllocString (v.toString());
+        dest.bstrVal = SysAllocString (v.toString().toUTF16());
     }
     else if (v.isObject())
     {
@@ -411,7 +411,7 @@ const var variantTojuceVar (const VARIANT& v)
         case VT_UINT:       return var ((int) v.uintVal);
         case VT_R4:         return var ((double) v.fltVal);
         case VT_R8:         return var ((double) v.dblVal);
-        case VT_BSTR:       return var (v.bstrVal);
+        case VT_BSTR:       return var (String (v.bstrVal));
         case VT_BOOL:       return var (v.boolVal ? true : false);
         case VT_DISPATCH:   return var (new DynamicObjectWrappingIDispatch (v.pdispVal));
         default:
@@ -541,14 +541,14 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
 {
     String resultString;
     DWORD pointlessWin32Variable;
-    DWORD size = GetFileVersionInfoSize (exeFileName, &pointlessWin32Variable);
+    DWORD size = GetFileVersionInfoSize (exeFileName.toUTF16(), &pointlessWin32Variable);
 
     if (size > 0)
     {
         HeapBlock <char> exeInfo;
         exeInfo.calloc (size);
 
-        if (GetFileVersionInfo (exeFileName, 0, size, exeInfo))
+        if (GetFileVersionInfo (exeFileName.toUTF16(), 0, size, exeInfo))
         {
             TCHAR* result = 0;
             unsigned int resultLen = 0;
@@ -556,11 +556,11 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
             // try the 1200 codepage (Unicode)
             String queryStr ("\\StringFileInfo\\040904B0\\" + fieldName);
 
-            if (! VerQueryValue (exeInfo, (LPTSTR) (LPCTSTR) queryStr, (void**) &result, &resultLen))
+            if (! VerQueryValue (exeInfo, (LPTSTR) queryStr.toUTF16().getAddress(), (void**) &result, &resultLen))
             {
                 // try the 1252 codepage (Windows Multilingual)
                 queryStr = "\\StringFileInfo\\040904E4\\" + fieldName;
-                VerQueryValue (exeInfo, (LPTSTR) (LPCTSTR) queryStr, (void**) &result, &resultLen);
+                VerQueryValue (exeInfo, (LPTSTR) queryStr.toUTF16().getAddress(), (void**) &result, &resultLen);
             }
 
             resultString = String (result, resultLen);

@@ -31,6 +31,7 @@
 #include "../../core/juce_TargetPlatform.h"
 #include "../../../juce_Config.h"
 
+#include <jni.h>
 #include <pthread.h>
 #include <sched.h>
 #include <sys/time.h>

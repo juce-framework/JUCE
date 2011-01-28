@@ -134,7 +134,11 @@ public:
     See the JUCEApplication class documentation (juce_Application.h) for more details.
 
 */
-#if defined (JUCE_GCC) || defined (__MWERKS__)
+#if JUCE_ANDROID
+  #define START_JUCE_APPLICATION(AppClass) \
+    JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication() { return new AppClass(); }
+
+#elif defined (JUCE_GCC) || defined (__MWERKS__)
 
   #define START_JUCE_APPLICATION(AppClass) \
     static JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication() { return new AppClass(); } \

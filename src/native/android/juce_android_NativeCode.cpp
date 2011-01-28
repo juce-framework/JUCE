@@ -94,10 +94,10 @@ BEGIN_JUCE_NAMESPACE
 #define JUCE_INCLUDED_FILE 1
 
 // Now include the actual code files..
+#include "juce_android_SystemStats.cpp" // (must be first)
 #include "../common/juce_posix_SharedCode.h"
 #include "juce_android_Files.cpp"
 #include "../common/juce_posix_NamedPipe.cpp"
-#include "juce_android_SystemStats.cpp"
 #include "juce_android_Threads.cpp"
 #include "juce_android_Network.cpp"
 #include "juce_android_Messaging.cpp"
