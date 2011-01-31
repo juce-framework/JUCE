@@ -45,10 +45,6 @@ public:
     {
     }
 
-    ~SVGState()
-    {
-    }
-
     //==============================================================================
     Drawable* parseSVGElement (const XmlElement& xml)
     {
@@ -71,12 +67,12 @@ public:
 
         if (xml.hasAttribute ("viewBox"))
         {
-            const String viewParams (xml.getStringAttribute ("viewBox"));
-            int i = 0;
+            const String viewBoxAtt (xml.getStringAttribute ("viewBox"));
+            String::CharPointerType viewParams (viewBoxAtt.getCharPointer());
             float vx, vy, vw, vh;
 
-            if (parseCoords (viewParams, vx, vy, i, true)
-                 && parseCoords (viewParams, vw, vh, i, true)
+            if (parseCoords (viewParams, vx, vy, true)
+                 && parseCoords (viewParams, vw, vh, true)
                  && vw > 0
                  && vh > 0)
             {
@@ -200,28 +196,28 @@ private:
     //==============================================================================
     Drawable* parsePath (const XmlElement& xml) const
     {
-        const String d (xml.getStringAttribute ("d").trimStart());
+        const String dAttribute (xml.getStringAttribute ("d").trimStart());
+        String::CharPointerType d (dAttribute.getCharPointer());
         Path path;
 
         if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
             path.setUsingNonZeroWinding (false);
 
-        int index = 0;
         float lastX = 0, lastY = 0;
         float lastX2 = 0, lastY2 = 0;
         juce_wchar lastCommandChar = 0;
         bool isRelative = true;
         bool carryOn = true;
 
-        const String validCommandChars ("MmLlHhVvCcSsQqTtAaZz");
+        const CharPointer_ASCII validCommandChars ("MmLlHhVvCcSsQqTtAaZz");
 
-        while (d[index] != 0)
+        while (! d.isEmpty())
         {
             float x, y, x2, y2, x3, y3;
 
-            if (validCommandChars.containsChar (d[index]))
+            if (validCommandChars.indexOf (*d) >= 0)
             {
-                lastCommandChar = d [index++];
+                lastCommandChar = d.getAndAdvance();
                 isRelative = (lastCommandChar >= 'a' && lastCommandChar <= 'z');
             }
 
@@ -231,7 +227,7 @@ private:
             case 'm':
             case 'L':
             case 'l':
-                if (parseCoords (d, x, y, index, false))
+                if (parseCoords (d, x, y, false))
                 {
                     if (isRelative)
                     {
@@ -254,14 +250,14 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
 
                 break;
 
             case 'H':
             case 'h':
-                if (parseCoord (d, x, index, false, true))
+                if (parseCoord (d, x, false, true))
                 {
                     if (isRelative)
                         x += lastX;
@@ -273,13 +269,13 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
                 break;
 
             case 'V':
             case 'v':
-                if (parseCoord (d, y, index, false, false))
+                if (parseCoord (d, y, false, false))
                 {
                     if (isRelative)
                         y += lastY;
@@ -291,15 +287,15 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
                 break;
 
             case 'C':
             case 'c':
-                if (parseCoords (d, x, y, index, false)
-                     && parseCoords (d, x2, y2, index, false)
-                     && parseCoords (d, x3, y3, index, false))
+                if (parseCoords (d, x, y, false)
+                     && parseCoords (d, x2, y2, false)
+                     && parseCoords (d, x3, y3, false))
                 {
                     if (isRelative)
                     {
@@ -320,14 +316,14 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
                 break;
 
             case 'S':
             case 's':
-                if (parseCoords (d, x, y, index, false)
-                     && parseCoords (d, x3, y3, index, false))
+                if (parseCoords (d, x, y, false)
+                     && parseCoords (d, x3, y3, false))
                 {
                     if (isRelative)
                     {
@@ -348,14 +344,14 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
                 break;
 
             case 'Q':
             case 'q':
-                if (parseCoords (d, x, y, index, false)
-                     && parseCoords (d, x2, y2, index, false))
+                if (parseCoords (d, x, y, false)
+                     && parseCoords (d, x2, y2, false))
                 {
                     if (isRelative)
                     {
@@ -374,13 +370,13 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
                 break;
 
             case 'T':
             case 't':
-                if (parseCoords (d, x, y, index, false))
+                if (parseCoords (d, x, y, false))
                 {
                     if (isRelative)
                     {
@@ -399,29 +395,29 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
                 break;
 
             case 'A':
             case 'a':
-                if (parseCoords (d, x, y, index, false))
+                if (parseCoords (d, x, y, false))
                 {
                     String num;
 
-                    if (parseNextNumber (d, num, index, false))
+                    if (parseNextNumber (d, num, false))
                     {
                         const float angle = num.getFloatValue() * (180.0f / float_Pi);
 
-                        if (parseNextNumber (d, num, index, false))
+                        if (parseNextNumber (d, num, false))
                         {
                             const bool largeArc = num.getIntValue() != 0;
 
-                            if (parseNextNumber (d, num, index, false))
+                            if (parseNextNumber (d, num, false))
                             {
                                 const bool sweep = num.getIntValue() != 0;
 
-                                if (parseCoords (d, x2, y2, index, false))
+                                if (parseCoords (d, x2, y2, false))
                                 {
                                     if (isRelative)
                                     {
@@ -458,7 +454,7 @@ private:
                 }
                 else
                 {
-                    ++index;
+                    ++d;
                 }
 
                 break;
@@ -466,9 +462,7 @@ private:
             case 'Z':
             case 'z':
                 path.closeSubPath();
-                while (CharacterFunctions::isWhitespace (d [index]))
-                    ++index;
-
+                d = d.findEndOfWhitespace();
                 break;
 
             default:
@@ -561,13 +555,12 @@ private:
 
     Drawable* parsePolygon (const XmlElement& xml, const bool isPolyline) const
     {
-        const String points (xml.getStringAttribute ("points"));
+        const String pointsAtt (xml.getStringAttribute ("points"));
+        String::CharPointerType points (pointsAtt.getCharPointer());
         Path path;
-
-        int index = 0;
         float x, y;
 
-        if (parseCoords (points, x, y, index, true))
+        if (parseCoords (points, x, y, true))
         {
             float firstX = x;
             float firstY = y;
@@ -575,7 +568,7 @@ private:
 
             path.startNewSubPath (x, y);
 
-            while (parseCoords (points, x, y, index, true))
+            while (parseCoords (points, x, y, true))
             {
                 lastX = x;
                 lastY = y;
@@ -865,12 +858,11 @@ private:
     }
 
     //==============================================================================
-    bool parseCoord (const String& s, float& value, int& index,
-                     const bool allowUnits, const bool isX) const
+    bool parseCoord (String::CharPointerType& s, float& value, const bool allowUnits, const bool isX) const
     {
         String number;
 
-        if (! parseNextNumber (s, number, index, allowUnits))
+        if (! parseNextNumber (s, number, allowUnits))
         {
             value = 0;
             return false;
@@ -880,11 +872,10 @@ private:
         return true;
     }
 
-    bool parseCoords (const String& s, float& x, float& y,
-                      int& index, const bool allowUnits) const
+    bool parseCoords (String::CharPointerType& s, float& x, float& y, const bool allowUnits) const
     {
-        return parseCoord (s, x, index, allowUnits, true)
-            && parseCoord (s, y, index, allowUnits, false);
+        return parseCoord (s, x, allowUnits, true)
+            && parseCoord (s, y, allowUnits, false);
     }
 
     float getCoordLength (const String& s, const float sizeForProportions) const
@@ -917,10 +908,10 @@ private:
     void getCoordList (Array <float>& coords, const String& list,
                        const bool allowUnits, const bool isX) const
     {
-        int index = 0;
+        String::CharPointerType text (list.getCharPointer());
         float value;
 
-        while (parseCoord (list, value, index, allowUnits, isX))
+        while (parseCoord (text, value, allowUnits, isX))
             coords.add (value);
     }
 
@@ -1034,45 +1025,55 @@ private:
     }
 
     //==============================================================================
-    static bool parseNextNumber (const String& source, String& value, int& index, const bool allowUnits)
+    static bool parseNextNumber (String::CharPointerType& s, String& value, const bool allowUnits)
     {
-        const juce_wchar* const s = source;
+        while (s.isWhitespace() || *s == ',')
+            ++s;
 
-        while (CharacterFunctions::isWhitespace (s[index]) || s[index] == ',')
-            ++index;
+        String::CharPointerType start (s);
+        int numChars = 0;
 
-        int start = index;
-
-        if (CharacterFunctions::isDigit (s[index]) || s[index] == '.' || s[index] == '-')
-            ++index;
-
-        while (CharacterFunctions::isDigit (s[index]) || s[index] == '.')
-            ++index;
-
-        if ((s[index] == 'e' || s[index] == 'E')
-             && (CharacterFunctions::isDigit (s[index + 1])
-                  || s[index + 1] == '-'
-                  || s[index + 1] == '+'))
+        if (s.isDigit() || *s == '.' || *s == '-')
         {
-            index += 2;
+            ++numChars;
+            ++s;
+        }
 
-            while (CharacterFunctions::isDigit (s[index]))
-                ++index;
+        while (s.isDigit() || *s == '.')
+        {
+            ++numChars;
+            ++s;
+        }
+
+        if ((*s == 'e' || *s == 'E')
+             && ((s + 1).isDigit() || s[1] == '-' || s[1] == '+'))
+        {
+            s += 2;
+            numChars += 2;
+
+            while (s.isDigit())
+            {
+                ++numChars;
+                ++s;
+            }
         }
 
         if (allowUnits)
         {
-            while (CharacterFunctions::isLetter (s[index]))
-                ++index;
+            while (s.isLetter())
+            {
+                ++numChars;
+                ++s;
+            }
         }
 
-        if (index == start)
+        if (numChars == 0)
             return false;
 
-        value = String (s + start, index - start);
+        value = String (start, numChars);
 
-        while (CharacterFunctions::isWhitespace (s[index]) || s[index] == ',')
-            ++index;
+        while (s.isWhitespace() || *s == ',')
+            ++s;
 
         return true;
     }

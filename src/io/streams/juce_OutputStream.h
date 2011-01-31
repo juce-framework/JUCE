@@ -186,15 +186,15 @@ public:
 
     /** Writes a string of text to the stream.
 
-        It can either write it as UTF8 characters or as unicode, and
-        can also add unicode header bytes (0xff, 0xfe) to indicate the endianness (this
-        should only be done at the start of a file).
+        It can either write the text as UTF-8 or UTF-16, and can also add the UTF-16 byte-order-mark
+        bytes (0xff, 0xfe) to indicate the endianness (these should only be used at the start
+        of a file).
 
         The method also replaces '\\n' characters in the text with '\\r\\n'.
     */
     virtual void writeText (const String& text,
-                            bool asUnicode,
-                            bool writeUnicodeHeaderBytes);
+                            bool asUTF16,
+                            bool writeUTF16ByteOrderMark);
 
     /** Reads data from an input stream and writes it to this stream.
 

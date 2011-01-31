@@ -119,7 +119,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
         {
             result.preallocateStorage (bytesRead / sizeof (UniChar) + 2);
 
-            CharPointer_UTF32 dest (static_cast <juce_wchar*> (result));
+            CharPointer_UTF32 dest (result.getCharPointer());
             dest.writeAll (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.getData()));
         }
 

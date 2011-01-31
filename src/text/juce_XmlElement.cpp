@@ -47,8 +47,8 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_, const Strin
 {
   #if JUCE_DEBUG
     // this checks whether the attribute name string contains any illegal characters..
-    for (const juce_wchar* t = name; *t != 0; ++t)
-        jassert (CharacterFunctions::isLetterOrDigit (*t) || *t == '_' || *t == '-' || *t == ':');
+    for (String::CharPointerType t (name.getCharPointer()); ! t.isEmpty(); ++t)
+        jassert (t.isLetterOrDigit() || *t == '_' || *t == '-' || *t == ':');
   #endif
 }
 
@@ -155,16 +155,16 @@ namespace XmlOutputFunctions
 
     void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
     {
-        const juce_wchar* t = text;
+        String::CharPointerType t (text.getCharPointer());
 
         for (;;)
         {
-            const juce_wchar character = *t++;
+            const uint32 character = (uint32) t.getAndAdvance();
 
             if (character == 0)
                 break;
 
-            if (isLegalXmlChar ((uint32) character))
+            if (isLegalXmlChar (character))
             {
                 outputStream << (char) character;
             }
@@ -186,7 +186,7 @@ namespace XmlOutputFunctions
                     }
                     // Note: deliberate fall-through here!
                 default:
-                    outputStream << "&#" << ((int) (unsigned int) character) << ';';
+                    outputStream << "&#" << ((int) character) << ';';
                     break;
                 }
             }

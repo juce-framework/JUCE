@@ -336,15 +336,14 @@ const String MemoryBlock::toBase64Encoding() const
     const int initialLen = destString.length();
     destString.preallocateStorage (initialLen + 2 + numChars);
 
-    juce_wchar* d = destString;
+    String::CharPointerType d (destString.getCharPointer());
     d += initialLen;
-    *d++ = '.';
+    d.write ('.');
 
     for (size_t i = 0; i < numChars; ++i)
-        *d++ = encodingTable [getBitRange (i * 6, 6)];
+        d.write (encodingTable [getBitRange (i * 6, 6)]);
 
-    *d++ = 0;
-
+    d.writeNull();
     return destString;
 }
 
@@ -360,13 +359,14 @@ bool MemoryBlock::fromBase64Encoding (const String& s)
     setSize (numBytesNeeded, true);
 
     const int numChars = s.length() - startPos;
-    const juce_wchar* srcChars = s;
+
+    String::CharPointerType srcChars (s.getCharPointer());
     srcChars += startPos;
     int pos = 0;
 
     for (int i = 0; i < numChars; ++i)
     {
-        const char c = (char) srcChars[i];
+        const char c = (char) srcChars.getAndAdvance();
 
         for (int j = 0; j < 64; ++j)
         {

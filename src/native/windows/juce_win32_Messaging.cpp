@@ -233,7 +233,7 @@ void MessageManager::broadcastMessage (const String& value)
     COPYDATASTRUCT data;
     data.dwData = broadcastId;
     data.cbData = (localCopy.length() + 1) * sizeof (juce_wchar);
-    data.lpData = (void*) static_cast <const juce_wchar*> (localCopy);
+    data.lpData = (void*) localCopy.toUTF16().getAddress();
 
     for (int i = windows.size(); --i >= 0;)
     {

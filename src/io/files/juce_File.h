@@ -166,7 +166,7 @@ public:
 
     /** Creates a relative path that refers to a file relatively to a given directory.
 
-        e.g. File ("/moose/foo.txt").getRelativePathFrom ("/moose/fish/haddock")
+        e.g. File ("/moose/foo.txt").getRelativePathFrom (File ("/moose/fish/haddock"))
              would return "../../foo.txt".
 
         If it's not possible to navigate from one file to the other, an absolute

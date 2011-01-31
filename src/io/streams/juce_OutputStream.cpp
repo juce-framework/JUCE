@@ -180,24 +180,29 @@ void OutputStream::writeString (const String& text)
     write (temp, numBytes);
 }
 
-void OutputStream::writeText (const String& text, const bool asUnicode,
-                              const bool writeUnicodeHeaderBytes)
+void OutputStream::writeText (const String& text, const bool asUTF16,
+                              const bool writeUTF16ByteOrderMark)
 {
-    if (asUnicode)
+    if (asUTF16)
     {
-        if (writeUnicodeHeaderBytes)
+        if (writeUTF16ByteOrderMark)
             write ("\x0ff\x0fe", 2);
 
-        const juce_wchar* src = text;
+        String::CharPointerType src (text.getCharPointer());
         bool lastCharWasReturn = false;
 
-        while (*src != 0)
+        for (;;)
         {
-            if (*src == L'\n' && ! lastCharWasReturn)
-                writeShort ((short) L'\r');
+            const juce_wchar c = src.getAndAdvance();
 
-            lastCharWasReturn = (*src == L'\r');
-            writeShort ((short) *src++);
+            if (c == 0)
+                break;
+
+            if (c == '\n' && ! lastCharWasReturn)
+                writeShort ((short) '\r');
+
+            lastCharWasReturn = (c == L'\r');
+            writeShort ((short) c);
         }
     }
     else

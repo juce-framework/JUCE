@@ -31,13 +31,12 @@ BEGIN_JUCE_NAMESPACE
 
 namespace RelativePointHelpers
 {
-    void skipComma (const juce_wchar* const s, int& i)
+    inline void skipComma (String::CharPointerType& s)
     {
-        while (CharacterFunctions::isWhitespace (s[i]))
-            ++i;
+        s = s.findEndOfWhitespace();
 
-        if (s[i] == ',')
-            ++i;
+        if (*s == ',')
+            ++s;
     }
 }
 
@@ -63,10 +62,10 @@ RelativePoint::RelativePoint (const RelativeCoordinate& x_, const RelativeCoordi
 
 RelativePoint::RelativePoint (const String& s)
 {
-    int i = 0;
-    x = RelativeCoordinate (Expression::parse (s, i));
-    RelativePointHelpers::skipComma (s, i);
-    y = RelativeCoordinate (Expression::parse (s, i));
+    String::CharPointerType text (s.getCharPointer());
+    x = RelativeCoordinate (Expression::parse (text));
+    RelativePointHelpers::skipComma (text);
+    y = RelativeCoordinate (Expression::parse (text));
 }
 
 bool RelativePoint::operator== (const RelativePoint& other) const throw()

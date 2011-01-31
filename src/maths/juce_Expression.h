@@ -91,15 +91,16 @@ public:
     /** Returns an Expression which is a function call. */
     static const Expression function (const String& functionName, const Array<Expression>& parameters);
 
-    /** Returns an Expression which parses a string from a specified character index.
+    /** Returns an Expression which parses a string from a character pointer, and updates the pointer
+        to indicate where it finished.
 
-        The index value is incremented so that on return, it indicates the character that follows
+        The pointer is incremented so that on return, it indicates the character that follows
         the end of the expression that was parsed.
 
         If there's a syntax error in the string, this will throw a ParseError exception.
         @throws ParseError
     */
-    static const Expression parse (const String& stringToParse, int& textIndexToStartFrom);
+    static const Expression parse (String::CharPointerType& stringToParse);
 
     //==============================================================================
     /** When evaluating an Expression object, this class is used to resolve symbols and

@@ -96,7 +96,7 @@ public:
 
     //==============================================================================
     template <typename CharPointerType>
-    static double getDoubleValue (const CharPointerType& text) throw()
+    static double readDoubleValue (CharPointerType& text) throw()
     {
         double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
         int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
@@ -105,36 +105,36 @@ public:
         bool isNegative = false, digitsFound = false;
         const int maxSignificantDigits = 15 + 2;
 
-        CharPointerType s (text.findEndOfWhitespace());
-        juce_wchar c = *s;
+        text = text.findEndOfWhitespace();
+        juce_wchar c = *text;
 
         switch (c)
         {
             case '-':   isNegative = true; // fall-through..
-            case '+':   c = *++s;
+            case '+':   c = *++text;
         }
 
         switch (c)
         {
             case 'n':
             case 'N':
-                if ((s[1] == 'a' || s[1] == 'A') && (s[2] == 'n' || s[2] == 'N'))
+                if ((text[1] == 'a' || text[1] == 'A') && (text[2] == 'n' || text[2] == 'N'))
                     return std::numeric_limits<double>::quiet_NaN();
                 break;
 
             case 'i':
             case 'I':
-                if ((s[1] == 'n' || s[1] == 'N') && (s[2] == 'f' || s[2] == 'F'))
+                if ((text[1] == 'n' || text[1] == 'N') && (text[2] == 'f' || text[2] == 'F'))
                     return std::numeric_limits<double>::infinity();
                 break;
         }
 
         for (;;)
         {
-            if (s.isDigit())
+            if (text.isDigit())
             {
                 lastDigit = digit;
-                digit = s.getAndAdvance() - '0';
+                digit = text.getAndAdvance() - '0';
                 digitsFound = true;
 
                 if (decPointIndex != 0)
@@ -155,9 +155,9 @@ public:
                     else
                         exponentAdjustment[0]++;
 
-                    while (s.isDigit())
+                    while (text.isDigit())
                     {
-                        ++s;
+                        ++text;
                         if (decPointIndex == 0)
                             exponentAdjustment[0]++;
                     }
@@ -177,15 +177,15 @@ public:
                     exponentAccumulator [decPointIndex]++;
                 }
             }
-            else if (decPointIndex == 0 && *s == '.')
+            else if (decPointIndex == 0 && *text == '.')
             {
-                ++s;
+                ++text;
                 decPointIndex = 1;
 
                 if (numSignificantDigits > maxSignificantDigits)
                 {
-                    while (s.isDigit())
-                        ++s;
+                    while (text.isDigit())
+                        ++text;
                     break;
                 }
             }
@@ -200,19 +200,19 @@ public:
         if (decPointIndex != 0)
             result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
 
-        c = *s;
+        c = *text;
         if ((c == 'e' || c == 'E') && digitsFound)
         {
             bool negativeExponent = false;
 
-            switch (*++s)
+            switch (*++text)
             {
                 case '-':   negativeExponent = true; // fall-through..
-                case '+':   ++s;
+                case '+':   ++text;
             }
 
-            while (s.isDigit())
-                exponent = (exponent * 10) + (s.getAndAdvance() - '0');
+            while (text.isDigit())
+                exponent = (exponent * 10) + (text.getAndAdvance() - '0');
 
             if (negativeExponent)
                 exponent = -exponent;
@@ -223,6 +223,13 @@ public:
             r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
 
         return isNegative ? -r : r;
+    }
+
+    template <typename CharPointerType>
+    static double getDoubleValue (const CharPointerType& text) throw()
+    {
+        CharPointerType t (text);
+        return readDoubleValue (t);
     }
 
     //==============================================================================

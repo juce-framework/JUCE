@@ -273,55 +273,56 @@ private:
     void initialiseAtoms (const String& textToParse,
                           const juce_wchar passwordCharacter)
     {
-        int i = 0;
-        const int len = textToParse.length();
-        const juce_wchar* const text = textToParse;
+        String::CharPointerType text (textToParse.getCharPointer());
 
-        while (i < len)
+        while (! text.isEmpty())
         {
-            int start = i;
+            int numChars = 0;
+            String::CharPointerType start (text);
 
             // create a whitespace atom unless it starts with non-ws
-            if (CharacterFunctions::isWhitespace (text[i])
-                 && text[i] != '\r'
-                 && text[i] != '\n')
+            if (text.isWhitespace() && *text != '\r' && *text != '\n')
             {
-                while (i < len
-                        && CharacterFunctions::isWhitespace (text[i])
-                        && text[i] != '\r'
-                        && text[i] != '\n')
+                do
                 {
-                    ++i;
+                    ++text;
+                    ++numChars;
                 }
+                while (text.isWhitespace() && *text != '\r' && *text != '\n');
             }
             else
             {
-                if (text[i] == '\r')
+                if (*text == '\r')
                 {
-                    ++i;
+                    ++text;
+                    ++numChars;
 
-                    if ((i < len) && (text[i] == '\n'))
+                    if (*text == '\n')
                     {
                         ++start;
-                        ++i;
+                        ++text;
                     }
                 }
-                else if (text[i] == '\n')
+                else if (*text == '\n')
                 {
-                    ++i;
+                    ++text;
+                    ++numChars;
                 }
                 else
                 {
-                    while ((i < len) && ! CharacterFunctions::isWhitespace (text[i]))
-                        ++i;
+                    while (! text.isEmpty() || text.isWhitespace())
+                    {
+                        ++text;
+                        ++numChars;
+                    }
                 }
             }
 
             TextAtom* const atom = new TextAtom();
-            atom->atomText = String (text + start, i - start);
+            atom->atomText = String (start, numChars);
 
             atom->width = font.getStringWidthFloat (atom->getText (passwordCharacter));
-            atom->numChars = (uint16) (i - start);
+            atom->numChars = (uint16) numChars;
 
             atoms.add (atom);
         }

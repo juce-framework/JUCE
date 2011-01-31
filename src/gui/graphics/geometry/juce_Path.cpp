@@ -43,17 +43,20 @@ namespace PathHelpers
 {
     const float ellipseAngularIncrement = 0.05f;
 
-    const String nextToken (const juce_wchar*& t)
+    const String nextToken (String::CharPointerType& t)
     {
-        while (CharacterFunctions::isWhitespace (*t))
+        t = t.findEndOfWhitespace();
+
+        String::CharPointerType start (t);
+        int numChars = 0;
+
+        while (! (t.isEmpty() || t.isWhitespace()))
+        {
             ++t;
+            ++numChars;
+        }
 
-        const juce_wchar* const start = t;
-
-        while (*t != 0 && ! CharacterFunctions::isWhitespace (*t))
-            ++t;
-
-        return String (start, (int) (t - start));
+        return String (start, numChars);
     }
 
     inline double lengthOf (float x1, float y1, float x2, float y2) throw()
@@ -1453,7 +1456,7 @@ void Path::restoreFromString (const String& stringVersion)
     clear();
     setUsingNonZeroWinding (true);
 
-    const juce_wchar* t = stringVersion;
+    String::CharPointerType t (stringVersion.getCharPointer());
     juce_wchar marker = 'm';
     int numValues = 2;
     float values [6];

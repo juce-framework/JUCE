@@ -34,13 +34,12 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace RelativeRectangleHelpers
 {
-    inline void skipComma (const juce_wchar* const s, int& i)
+    inline void skipComma (String::CharPointerType& s)
     {
-        while (CharacterFunctions::isWhitespace (s[i]))
-            ++i;
+        s = s.findEndOfWhitespace();
 
-        if (s[i] == ',')
-            ++i;
+        if (*s == ',')
+            ++s;
     }
 
     bool dependsOnSymbolsOtherThanThis (const Expression& e)
@@ -95,14 +94,14 @@ RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect)
 
 RelativeRectangle::RelativeRectangle (const String& s)
 {
-    int i = 0;
-    left = RelativeCoordinate (Expression::parse (s, i));
-    RelativeRectangleHelpers::skipComma (s, i);
-    top = RelativeCoordinate (Expression::parse (s, i));
-    RelativeRectangleHelpers::skipComma (s, i);
-    right = RelativeCoordinate (Expression::parse (s, i));
-    RelativeRectangleHelpers::skipComma (s, i);
-    bottom = RelativeCoordinate (Expression::parse (s, i));
+    String::CharPointerType text (s.getCharPointer());
+    left = RelativeCoordinate (Expression::parse (text));
+    RelativeRectangleHelpers::skipComma (text);
+    top = RelativeCoordinate (Expression::parse (text));
+    RelativeRectangleHelpers::skipComma (text);
+    right = RelativeCoordinate (Expression::parse (text));
+    RelativeRectangleHelpers::skipComma (text);
+    bottom = RelativeCoordinate (Expression::parse (text));
 }
 
 bool RelativeRectangle::operator== (const RelativeRectangle& other) const throw()

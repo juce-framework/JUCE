@@ -140,13 +140,13 @@ bool TextLayout::isEmpty() const
 
 void TextLayout::appendText (const String& text, const Font& font)
 {
-    const juce_wchar* t = text;
+    String::CharPointerType t (text.getCharPointer());
     String currentString;
     int lastCharType = 0;
 
     for (;;)
     {
-        const juce_wchar c = *t++;
+        const juce_wchar c = t.getAndAdvance();
         if (c == 0)
             break;
 
@@ -175,7 +175,7 @@ void TextLayout::appendText (const String& text, const Font& font)
             currentString = String::charToString (c);
 
             if (c == '\r' && *t == '\n')
-                currentString += *t++;
+                currentString += t.getAndAdvance();
         }
         else
         {

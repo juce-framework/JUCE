@@ -348,7 +348,7 @@ const String Time::formatted (const String& format) const
 
     struct tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
 
-    while (CharacterFunctions::ftime (static_cast <juce_wchar*> (buffer), bufferSize, format, &t) <= 0)
+    while (CharacterFunctions::ftime (buffer.getCharPointer().getAddress(), bufferSize, format.getCharPointer(), &t) <= 0)
     {
         bufferSize += 128;
         buffer.preallocateStorage (bufferSize);

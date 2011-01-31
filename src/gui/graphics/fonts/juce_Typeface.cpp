@@ -331,11 +331,11 @@ float CustomTypeface::getDescent() const
 float CustomTypeface::getStringWidth (const String& text)
 {
     float x = 0;
-    const juce_wchar* t = text;
+    String::CharPointerType t (text.getCharPointer());
 
-    while (*t != 0)
+    while (! t.isEmpty())
     {
-        const GlyphInfo* const glyph = findGlyphSubstituting (*t++);
+        const GlyphInfo* const glyph = findGlyphSubstituting (t.getAndAdvance());
 
         if (glyph == 0 && ! isFallbackFont)
         {
@@ -356,11 +356,11 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultG
 {
     xOffsets.add (0);
     float x = 0;
-    const juce_wchar* t = text;
+    String::CharPointerType t (text.getCharPointer());
 
-    while (*t != 0)
+    while (! t.isEmpty())
     {
-        const juce_wchar c = *t++;
+        const juce_wchar c = t.getAndAdvance();
         const GlyphInfo* const glyph = findGlyph (c, true);
 
         if (glyph == 0 && ! isFallbackFont)

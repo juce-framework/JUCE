@@ -522,6 +522,12 @@ int String::length() const throw()
     return (int) text.length();
 }
 
+const juce_wchar String::operator[] (int index) const throw()
+{
+    jassert (index == 0 || isPositiveAndNotGreaterThan (index, length()));
+    return text [index];
+}
+
 int String::hashCode() const throw()
 {
     const juce_wchar* t = text;
@@ -1449,13 +1455,6 @@ const String String::toLowerCase() const
 }
 
 //==============================================================================
-juce_wchar& String::operator[] (const int index)
-{
-    jassert (isPositiveAndNotGreaterThan (index, length()));
-    text = StringHolder::makeUnique (text);
-    return text [index];
-}
-
 juce_wchar String::getLastCharacter() const throw()
 {
     return isEmpty() ? juce_wchar() : text [length() - 1];
@@ -1564,18 +1563,16 @@ bool String::isQuotedString() const
 
 const String String::unquoted() const
 {
-    String s (*this);
+    const int len = length();
 
-    if (s.text[0] == '"' || s.text[0] == '\'')
-        s = s.substring (1);
+    if (len == 0)
+        return empty;
 
-    const int lastCharIndex = s.length() - 1;
+    const juce_wchar lastChar = text [len - 1];
+    const int dropAtStart = (*text == '"' || *text == '\'') ? 1 : 0;
+    const int dropAtEnd = (lastChar == '"' || lastChar == '\'') ? 1 : 0;
 
-    if (lastCharIndex >= 0
-         && (s [lastCharIndex] == '"' || s[lastCharIndex] == '\''))
-        s [lastCharIndex] = 0;
-
-    return s;
+    return substring (dropAtStart, len - dropAtEnd);
 }
 
 const String String::quoted (const juce_wchar quoteCharacter) const
@@ -1626,15 +1623,12 @@ const String String::trimStart() const
     if (isEmpty())
         return empty;
 
-    CharPointerType t (text);
-
-    while (t.isWhitespace())
-        ++t;
+    CharPointerType t (text.findEndOfWhitespace());
 
     if (t == text)
         return *this;
 
-    return String (t.getAddress());
+    return String (t);
 }
 
 const String String::trimEnd() const
@@ -2011,20 +2005,20 @@ const String String::createStringFromData (const void* const data_, const int si
         result.preallocateStorage (numChars + 2);
 
         const uint16* const src = (const uint16*) (data + 2);
-        juce_wchar* const dst = const_cast <juce_wchar*> (static_cast <const juce_wchar*> (result));
+        CharPointerType dst (result.getCharPointer());
 
         if (bigEndian)
         {
             for (int i = 0; i < numChars; ++i)
-                dst[i] = (juce_wchar) ByteOrder::swapIfLittleEndian (src[i]);
+                dst.write ((juce_wchar) ByteOrder::swapIfLittleEndian (src[i]));
         }
         else
         {
             for (int i = 0; i < numChars; ++i)
-                dst[i] = (juce_wchar) ByteOrder::swapIfBigEndian (src[i]);
+                dst.write ((juce_wchar) ByteOrder::swapIfBigEndian (src[i]));
         }
 
-        dst [numChars] = 0;
+        dst.writeNull();
         return result;
     }
     else

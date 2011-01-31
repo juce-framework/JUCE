@@ -195,7 +195,7 @@ public:
 
         const int length = text.length();
         HeapBlock <CGGlyph> glyphs;
-        createGlyphsForString (text, length, glyphs);
+        createGlyphsForString (text.getCharPointer(), length, glyphs);
 
         float x = 0;
 
@@ -238,7 +238,7 @@ public:
 
         const int length = text.length();
         HeapBlock <CGGlyph> glyphs;
-        createGlyphsForString (text, length, glyphs);
+        createGlyphsForString (text.getCharPointer(), length, glyphs);
 
 #if SUPPORT_ONLY_10_4_FONTS
         HeapBlock <NSSize> advances (length);
@@ -340,7 +340,7 @@ private:
     AffineTransform pathTransform;
 #endif
 
-    void createGlyphsForString (const juce_wchar* const text, const int length, HeapBlock <CGGlyph>& glyphs)
+    void createGlyphsForString (String::CharPointerType text, const int length, HeapBlock <CGGlyph>& glyphs)
     {
 #if SUPPORT_10_4_FONTS
   #if ! SUPPORT_ONLY_10_4_FONTS
@@ -351,7 +351,7 @@ private:
             NSGlyph* const nsGlyphs = reinterpret_cast<NSGlyph*> (glyphs.getData());
 
             for (int i = 0; i < length; ++i)
-                nsGlyphs[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text[i]];
+                nsGlyphs[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text.getAndAdvance()];
 
             return;
         }
@@ -364,7 +364,7 @@ private:
         glyphs.malloc (length);
 
         for (int i = 0; i < length; ++i)
-            glyphs[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text[i]);
+            glyphs[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text.getAndAdvance());
 #endif
     }
 

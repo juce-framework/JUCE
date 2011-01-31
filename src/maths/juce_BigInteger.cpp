@@ -946,7 +946,7 @@ const String BigInteger::toString (const int base, const int minimumNumCharacter
 void BigInteger::parseString (const String& text, const int base)
 {
     clear();
-    const juce_wchar* t = text;
+    String::CharPointerType t (text.getCharPointer());
 
     if (base == 2 || base == 8 || base == 16)
     {
@@ -954,7 +954,7 @@ void BigInteger::parseString (const String& text, const int base)
 
         for (;;)
         {
-            const juce_wchar c = *t++;
+            const juce_wchar c = t.getAndAdvance();
             const int digit = CharacterFunctions::getHexDigitValue (c);
 
             if (((uint32) digit) < (uint32) base)
@@ -974,7 +974,7 @@ void BigInteger::parseString (const String& text, const int base)
 
         for (;;)
         {
-            const juce_wchar c = *t++;
+            const juce_wchar c = t.getAndAdvance();
 
             if (c >= '0' && c <= '9')
             {

@@ -54,7 +54,7 @@ namespace CppTokeniser
                 || c == '_' || c == '@';
     }
 
-    bool isReservedKeyword (const juce_wchar* const token, const int tokenLength) throw()
+    bool isReservedKeyword (String::CharPointerType token, const int tokenLength) throw()
     {
         static const char* const keywords2Char[] =
             { "if", "do", "or", "id", 0 };
@@ -103,7 +103,7 @@ namespace CppTokeniser
         int i = 0;
         while (k[i] != 0)
         {
-            if (k[i][0] == (char) token[0] && CharPointer_UTF8 (k[i]).compare (CharPointer_UTF32 (token)) == 0)
+            if (token.compare (CharPointer_ASCII (k[i])) == 0)
                 return true;
 
             ++i;
@@ -131,7 +131,7 @@ namespace CppTokeniser
         {
             possibleIdentifier [tokenLength] = 0;
 
-            if (isReservedKeyword (possibleIdentifier, tokenLength))
+            if (isReservedKeyword (CharPointer_UTF32 (possibleIdentifier), tokenLength))
                 return CPlusPlusCodeTokeniser::tokenType_builtInKeyword;
         }
 
@@ -612,7 +612,7 @@ const Colour CPlusPlusCodeTokeniser::getDefaultColour (const int tokenType)
 
 bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) throw()
 {
-    return CppTokeniser::isReservedKeyword (token, token.length());
+    return CppTokeniser::isReservedKeyword (token.getCharPointer(), token.length());
 }
 
 END_JUCE_NAMESPACE

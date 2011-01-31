@@ -37,7 +37,7 @@ StringPool::~StringPool()           {}
 namespace StringPoolHelpers
 {
     template <class StringType>
-    const juce_wchar* getPooledStringFromArray (Array<String>& strings, StringType newString)
+    const String::CharPointerType getPooledStringFromArray (Array<String>& strings, StringType newString)
     {
         int start = 0;
         int end = strings.size();
@@ -48,14 +48,14 @@ namespace StringPoolHelpers
             {
                 jassert (start <= end);
                 strings.insert (start, newString);
-                return strings.getReference (start);
+                return strings.getReference (start).getCharPointer();
             }
             else
             {
                 const String& startString = strings.getReference (start);
 
                 if (startString == newString)
-                    return startString;
+                    return startString.getCharPointer();
 
                 const int halfway = (start + end) >> 1;
 
@@ -65,13 +65,13 @@ namespace StringPoolHelpers
                         ++start;
 
                     strings.insert (start, newString);
-                    return strings.getReference (start);
+                    return strings.getReference (start).getCharPointer();
                 }
 
                 const int comp = strings.getReference (halfway).compare (newString);
 
                 if (comp == 0)
-                    return strings.getReference (halfway);
+                    return strings.getReference (halfway).getCharPointer();
                 else if (comp < 0)
                     start = halfway;
                 else
@@ -81,26 +81,26 @@ namespace StringPoolHelpers
     }
 }
 
-const juce_wchar* StringPool::getPooledString (const String& s)
+const String::CharPointerType StringPool::getPooledString (const String& s)
 {
     if (s.isEmpty())
-        return String::empty;
+        return String::empty.getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
-const juce_wchar* StringPool::getPooledString (const char* const s)
+const String::CharPointerType StringPool::getPooledString (const char* const s)
 {
     if (s == 0 || *s == 0)
-        return String::empty;
+        return String::empty.getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
-const juce_wchar* StringPool::getPooledString (const juce_wchar* const s)
+const String::CharPointerType StringPool::getPooledString (const juce_wchar* const s)
 {
     if (s == 0 || *s == 0)
-        return String::empty;
+        return String::empty.getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
@@ -112,7 +112,7 @@ int StringPool::size() const throw()
 
 const juce_wchar* StringPool::operator[] (const int index) const throw()
 {
-    return strings [index];
+    return strings [index].getCharPointer();
 }
 
 END_JUCE_NAMESPACE

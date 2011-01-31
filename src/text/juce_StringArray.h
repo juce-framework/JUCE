@@ -292,8 +292,8 @@ public:
     */
     void appendNumbersToDuplicates (bool ignoreCaseWhenComparing,
                                     bool appendNumberToFirstInstance,
-                                    const juce_wchar* preNumberString = 0,
-                                    const juce_wchar* postNumberString = 0);
+                                    CharPointer_UTF8 preNumberString = CharPointer_UTF8 (0),
+                                    CharPointer_UTF8 postNumberString = CharPointer_UTF8 (0));
 
     //==============================================================================
     /** Joins the strings in the array together into one string.

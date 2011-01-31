@@ -67,15 +67,13 @@ MD5::MD5 (const void* data, const size_t numBytes)
 MD5::MD5 (const String& text)
 {
     ProcessContext context;
+    String::CharPointerType t (text.getCharPointer());
 
-    const int len = text.length();
-    const juce_wchar* const t = text;
-
-    for (int i = 0; i < len; ++i)
+    while (! t.isEmpty())
     {
         // force the string into integer-sized unicode characters, to try to make it
         // get the same results on all platforms + compilers.
-        uint32 unicodeChar = ByteOrder::swapIfBigEndian ((uint32) t[i]);
+        uint32 unicodeChar = ByteOrder::swapIfBigEndian ((uint32) t.getAndAdvance());
 
         context.processBlock (&unicodeChar, sizeof (unicodeChar));
     }

@@ -104,16 +104,15 @@ namespace CodeHelpers
         return n;
     }
 
-    template <class CharType>
-    static void writeEscapeChars (OutputStream& out, const CharType* data, const int numChars,
+    static void writeEscapeChars (OutputStream& out, const char* utf8, const int numBytes,
                                   const int maxCharsOnLine, const bool breakAtNewLines, const bool replaceSingleQuotes)
     {
         int charsOnLine = 0;
         bool lastWasHexEscapeCode = false;
 
-        for (int i = 0; i < numChars || numChars < 0; ++i)
+        for (int i = 0; i < numBytes || numBytes < 0; ++i)
         {
-            const CharType c = data[i];
+            const char c = utf8[i];
             bool startNewLine = false;
 
             switch (c)
@@ -125,7 +124,7 @@ namespace CodeHelpers
                 case '\"':  out << "\\\""; lastWasHexEscapeCode = false; break;
 
                 case 0:
-                    if (numChars < 0)
+                    if (numBytes < 0)
                         return;
 
                     out << "\\0";
@@ -144,9 +143,9 @@ namespace CodeHelpers
 
                 default:
                     if (c >= 32 && c < 127 && ! (lastWasHexEscapeCode  // (have to avoid following a hex escape sequence with a valid hex digit)
-                                                  && ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))))
+                                                   && CharacterFunctions::getHexDigitValue (c) >= 0))
                     {
-                        out << (char) c;
+                        out << c;
                         lastWasHexEscapeCode = false;
                     }
                     else
@@ -159,7 +158,7 @@ namespace CodeHelpers
             }
 
             if ((startNewLine || (maxCharsOnLine > 0 && ++charsOnLine >= maxCharsOnLine))
-                 && (numChars < 0 || i < numChars - 1))
+                 && (numBytes < 0 || i < numBytes - 1))
             {
                 charsOnLine = 0;
                 out << "\"" << newLine << "\"";
@@ -170,7 +169,7 @@ namespace CodeHelpers
     const String addEscapeChars (const String& s)
     {
         MemoryOutputStream out;
-        writeEscapeChars (out, (const juce_wchar*) s, -1, -1, false, true);
+        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true);
         return out.toUTF8();
     }
 
@@ -192,7 +191,10 @@ namespace CodeHelpers
         if (text.isEmpty())
             return "String::empty";
 
-        return CodeHelpers::addEscapeChars (text).quoted();
+        if (CharPointer_ASCII::isValidString (text.toUTF8(), std::numeric_limits<int>::max()))
+            return CodeHelpers::addEscapeChars (text).quoted();
+        else
+            return "CharPointer_UTF8 (" + CodeHelpers::addEscapeChars (text).quoted() + ")";
     }
 
     const String stringLiteralIfNotEmpty (const String& text)
@@ -423,7 +425,7 @@ namespace CodeHelpers
         else
         {
             out << "\"";
-            writeEscapeChars (out, data, (int) mb.getSize(), maxCharsOnLine, true, false);
+            writeEscapeChars (out, (const char*) data, (int) mb.getSize(), maxCharsOnLine, true, false);
             out << "\";";
         }
     }

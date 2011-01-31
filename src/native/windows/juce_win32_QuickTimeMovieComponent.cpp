@@ -334,14 +334,7 @@ static Handle createHandleDataRef (Handle dataHandle, const char* fileName)
 
 static CFStringRef juceStringToCFString (const String& s)
 {
-    const int len = s.length();
-    const juce_wchar* const t = s;
-
-    HeapBlock <UniChar> temp (len + 2);
-    for (int i = 0; i <= len; ++i)
-        temp[i] = t[i];
-
-    return CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
+    return CFStringCreateWithCString (kCFAllocatorDefault, s.toUTF8(), kCFStringEncodingUTF8);
 }
 
 static bool openMovie (QTNewMoviePropertyElement* props, int prop, Movie& movie)

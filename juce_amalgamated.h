@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	23
+#define JUCE_BUILDNUMBER	24
 
 /** Current Juce version number.
 
@@ -1702,7 +1702,7 @@ public:
 	static int getHexDigitValue (juce_wchar digit) throw();
 
 	template <typename CharPointerType>
-	static double getDoubleValue (const CharPointerType& text) throw()
+	static double readDoubleValue (CharPointerType& text) throw()
 	{
 		double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
 		int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
@@ -1711,36 +1711,36 @@ public:
 		bool isNegative = false, digitsFound = false;
 		const int maxSignificantDigits = 15 + 2;
 
-		CharPointerType s (text.findEndOfWhitespace());
-		juce_wchar c = *s;
+		text = text.findEndOfWhitespace();
+		juce_wchar c = *text;
 
 		switch (c)
 		{
 			case '-':   isNegative = true; // fall-through..
-			case '+':   c = *++s;
+			case '+':   c = *++text;
 		}
 
 		switch (c)
 		{
 			case 'n':
 			case 'N':
-				if ((s[1] == 'a' || s[1] == 'A') && (s[2] == 'n' || s[2] == 'N'))
+				if ((text[1] == 'a' || text[1] == 'A') && (text[2] == 'n' || text[2] == 'N'))
 					return std::numeric_limits<double>::quiet_NaN();
 				break;
 
 			case 'i':
 			case 'I':
-				if ((s[1] == 'n' || s[1] == 'N') && (s[2] == 'f' || s[2] == 'F'))
+				if ((text[1] == 'n' || text[1] == 'N') && (text[2] == 'f' || text[2] == 'F'))
 					return std::numeric_limits<double>::infinity();
 				break;
 		}
 
 		for (;;)
 		{
-			if (s.isDigit())
+			if (text.isDigit())
 			{
 				lastDigit = digit;
-				digit = s.getAndAdvance() - '0';
+				digit = text.getAndAdvance() - '0';
 				digitsFound = true;
 
 				if (decPointIndex != 0)
@@ -1761,9 +1761,9 @@ public:
 					else
 						exponentAdjustment[0]++;
 
-					while (s.isDigit())
+					while (text.isDigit())
 					{
-						++s;
+						++text;
 						if (decPointIndex == 0)
 							exponentAdjustment[0]++;
 					}
@@ -1783,15 +1783,15 @@ public:
 					exponentAccumulator [decPointIndex]++;
 				}
 			}
-			else if (decPointIndex == 0 && *s == '.')
+			else if (decPointIndex == 0 && *text == '.')
 			{
-				++s;
+				++text;
 				decPointIndex = 1;
 
 				if (numSignificantDigits > maxSignificantDigits)
 				{
-					while (s.isDigit())
-						++s;
+					while (text.isDigit())
+						++text;
 					break;
 				}
 			}
@@ -1806,19 +1806,19 @@ public:
 		if (decPointIndex != 0)
 			result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
 
-		c = *s;
+		c = *text;
 		if ((c == 'e' || c == 'E') && digitsFound)
 		{
 			bool negativeExponent = false;
 
-			switch (*++s)
+			switch (*++text)
 			{
 				case '-':   negativeExponent = true; // fall-through..
-				case '+':   ++s;
+				case '+':   ++text;
 			}
 
-			while (s.isDigit())
-				exponent = (exponent * 10) + (s.getAndAdvance() - '0');
+			while (text.isDigit())
+				exponent = (exponent * 10) + (text.getAndAdvance() - '0');
 
 			if (negativeExponent)
 				exponent = -exponent;
@@ -1829,6 +1829,13 @@ public:
 			r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
 
 		return isNegative ? -r : r;
+	}
+
+	template <typename CharPointerType>
+	static double getDoubleValue (const CharPointerType& text) throw()
+	{
+		CharPointerType t (text);
+		return readDoubleValue (t);
 	}
 
 	template <typename IntType, typename CharPointerType>
@@ -4585,16 +4592,7 @@ public:
 
 		No checks are made to see if the index is within a valid range, so be careful!
 	*/
-	inline const juce_wchar& operator[] (int index) const throw()  { jassert (isPositiveAndNotGreaterThan (index, length())); return text [index]; }
-
-	/** Returns a character from the string such that it can also be altered.
-
-		This can be used as a way of easily changing characters in the string.
-
-		Note that the index passed-in is not checked to see whether it's in-range, so
-		be careful when using this.
-	*/
-	juce_wchar& operator[] (int index);
+	const juce_wchar operator[] (int index) const throw();
 
 	/** Returns the final character of the string.
 
@@ -5036,15 +5034,7 @@ public:
 		that is returned must not be stored anywhere, as it can become invalid whenever
 		any string methods (even some const ones!) are called.
 	*/
-	inline operator const juce_wchar*() const throw()   { return text.getAddress(); }
-
-	/** Returns a unicode version of this string.
-
-		Because it returns a reference to the string's internal data, the pointer
-		that is returned must not be stored anywhere, as it can become invalid whenever
-		any string methods (even some const ones!) are called.
-	*/
-	inline operator juce_wchar*() throw()		   { return text.getAddress(); }
+	inline operator const juce_wchar*() const throw()	   { return toUTF32().getAddress(); }
 
 	/** Returns the character pointer currently being used to store this string.
 
@@ -7407,7 +7397,7 @@ public:
 		The pool will own all the pointers that it returns, deleting them when the pool itself
 		is deleted.
 	*/
-	const juce_wchar* getPooledString (const String& original);
+	const String::CharPointerType getPooledString (const String& original);
 
 	/** Returns a pointer to a copy of the string that is passed in.
 
@@ -7415,7 +7405,7 @@ public:
 		The pool will own all the pointers that it returns, deleting them when the pool itself
 		is deleted.
 	*/
-	const juce_wchar* getPooledString (const char* original);
+	const String::CharPointerType getPooledString (const char* original);
 
 	/** Returns a pointer to a copy of the string that is passed in.
 
@@ -7423,7 +7413,7 @@ public:
 		The pool will own all the pointers that it returns, deleting them when the pool itself
 		is deleted.
 	*/
-	const juce_wchar* getPooledString (const juce_wchar* original);
+	const String::CharPointerType getPooledString (const juce_wchar* original);
 
 	/** Returns the number of strings in the pool. */
 	int size() const throw();
@@ -8162,15 +8152,15 @@ public:
 
 	/** Writes a string of text to the stream.
 
-		It can either write it as UTF8 characters or as unicode, and
-		can also add unicode header bytes (0xff, 0xfe) to indicate the endianness (this
-		should only be done at the start of a file).
+		It can either write the text as UTF-8 or UTF-16, and can also add the UTF-16 byte-order-mark
+		bytes (0xff, 0xfe) to indicate the endianness (these should only be used at the start
+		of a file).
 
 		The method also replaces '\\n' characters in the text with '\\r\\n'.
 	*/
 	virtual void writeText (const String& text,
-							bool asUnicode,
-							bool writeUnicodeHeaderBytes);
+							bool asUTF16,
+							bool writeUTF16ByteOrderMark);
 
 	/** Reads data from an input stream and writes it to this stream.
 
@@ -10199,8 +10189,8 @@ public:
 	*/
 	void appendNumbersToDuplicates (bool ignoreCaseWhenComparing,
 									bool appendNumberToFirstInstance,
-									const juce_wchar* preNumberString = 0,
-									const juce_wchar* postNumberString = 0);
+									CharPointer_UTF8 preNumberString = CharPointer_UTF8 (0),
+									CharPointer_UTF8 postNumberString = CharPointer_UTF8 (0));
 
 	/** Joins the strings in the array together into one string.
 
@@ -11195,7 +11185,7 @@ public:
 
 	/** Creates a relative path that refers to a file relatively to a given directory.
 
-		e.g. File ("/moose/foo.txt").getRelativePathFrom ("/moose/fish/haddock")
+		e.g. File ("/moose/foo.txt").getRelativePathFrom (File ("/moose/fish/haddock"))
 			 would return "../../foo.txt".
 
 		If it's not possible to navigate from one file to the other, an absolute
@@ -20065,15 +20055,16 @@ public:
 	/** Returns an Expression which is a function call. */
 	static const Expression function (const String& functionName, const Array<Expression>& parameters);
 
-	/** Returns an Expression which parses a string from a specified character index.
+	/** Returns an Expression which parses a string from a character pointer, and updates the pointer
+		to indicate where it finished.
 
-		The index value is incremented so that on return, it indicates the character that follows
+		The pointer is incremented so that on return, it indicates the character that follows
 		the end of the expression that was parsed.
 
 		If there's a syntax error in the string, this will throw a ParseError exception.
 		@throws ParseError
 	*/
-	static const Expression parse (const String& stringToParse, int& textIndexToStartFrom);
+	static const Expression parse (String::CharPointerType& stringToParse);
 
 	/** When evaluating an Expression object, this class is used to resolve symbols and
 		perform functions that the expression uses.

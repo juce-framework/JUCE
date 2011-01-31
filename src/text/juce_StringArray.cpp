@@ -348,12 +348,15 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
     {
         bool insideQuotes = false;
         juce_wchar currentQuoteChar = 0;
-        int i = 0;
-        int tokenStart = 0;
+
+        String::CharPointerType t (text.getCharPointer());
+        String::CharPointerType tokenStart (t);
+        int numChars = 0;
 
         for (;;)
         {
-            const juce_wchar c = text[i];
+            const juce_wchar c = t.getAndAdvance();
+            ++numChars;
 
             const bool isBreak = (c == 0) || ((! insideQuotes) && breakCharacters.containsChar (c));
 
@@ -377,16 +380,14 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
             }
             else
             {
-                add (String (static_cast <const juce_wchar*> (text) + tokenStart, i - tokenStart));
-
+                add (String (tokenStart, numChars - 1));
                 ++num;
-                tokenStart = i + 1;
+                tokenStart = t;
+                numChars = 0;
             }
 
             if (c == 0)
                 break;
-
-            ++i;
         }
     }
 
@@ -396,41 +397,39 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
 int StringArray::addLines (const String& sourceText)
 {
     int numLines = 0;
-    const juce_wchar* text = sourceText;
+    String::CharPointerType text (sourceText.getCharPointer());
+    bool finished = text.isEmpty();
 
-    while (*text != 0)
+    while (! finished)
     {
-        const juce_wchar* const startOfLine = text;
+        String::CharPointerType startOfLine (text);
+        int numChars = 0;
 
-        while (*text != 0)
+        for (;;)
         {
-            if (*text == '\r')
+            const juce_wchar c = text.getAndAdvance();
+
+            if (c == 0)
             {
-                ++text;
+                finished = true;
+                break;
+            }
+
+            if (c == '\n')
+                break;
+
+            if (c == '\r')
+            {
                 if (*text == '\n')
                     ++text;
 
                 break;
             }
 
-            if (*text == '\n')
-            {
-                ++text;
-                break;
-            }
-
-            ++text;
+            ++numChars;
         }
 
-        const juce_wchar* endOfLine = text;
-        if (endOfLine > startOfLine && (*(endOfLine - 1) == '\r' || *(endOfLine - 1) == '\n'))
-            --endOfLine;
-
-        if (endOfLine > startOfLine && (*(endOfLine - 1) == '\r' || *(endOfLine - 1) == '\n'))
-            --endOfLine;
-
-        add (String (startOfLine, jmax (0, (int) (endOfLine - startOfLine))));
-
+        add (String (startOfLine, numChars));
         ++numLines;
     }
 
@@ -460,15 +459,15 @@ void StringArray::removeDuplicates (const bool ignoreCase)
 
 void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              const bool appendNumberToFirstInstance,
-                                             const juce_wchar* preNumberString,
-                                             const juce_wchar* postNumberString)
+                                             CharPointer_UTF8 preNumberString,
+                                             CharPointer_UTF8 postNumberString)
 {
-    String defaultPre (" ("), defaultPost (")"); // (these aren't literals because of non-unicode literals on Android)
+    CharPointer_UTF8 defaultPre (" ("), defaultPost (")");
 
-    if (preNumberString == 0)
+    if (preNumberString.getAddress() == 0)
         preNumberString = defaultPre;
 
-    if (postNumberString == 0)
+    if (postNumberString.getAddress() == 0)
         postNumberString = defaultPost;
 
     for (int i = 0; i < size() - 1; ++i)
@@ -484,13 +483,13 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
             int number = 0;
 
             if (appendNumberToFirstInstance)
-                s = original + preNumberString + String (++number) + postNumberString;
+                s = original + String (preNumberString) + String (++number) + String (postNumberString);
             else
                 ++number;
 
             while (nextIndex >= 0)
             {
-                set (nextIndex, (*this)[nextIndex] + preNumberString + String (++number) + postNumberString);
+                set (nextIndex, (*this)[nextIndex] + String (preNumberString) + String (++number) + String (postNumberString));
                 nextIndex = indexOf (original, ignoreCase, nextIndex + 1);
             }
         }

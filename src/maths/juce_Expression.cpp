@@ -660,29 +660,26 @@ public:
     {
     public:
         //==============================================================================
-        Parser (const String& stringToParse, int& textIndex_)
-            : textString (stringToParse), textIndex (textIndex_)
+        Parser (String::CharPointerType& stringToParse)
+            : text (stringToParse)
         {
-            text = textString;
         }
 
         const TermPtr readUpToComma()
         {
-            if (textString.isEmpty())
+            if (text.isEmpty())
                 return new Constant (0.0, false);
 
             const TermPtr e (readExpression());
 
-            if (e == 0 || ((! readOperator (",")) && text [textIndex] != 0))
-                throw ParseError ("Syntax error: \"" + textString.substring (textIndex) + "\"");
+            if (e == 0 || ((! readOperator (",")) && ! text.isEmpty()))
+                throw ParseError ("Syntax error: \"" + String (text) + "\"");
 
             return e;
         }
 
     private:
-        const String textString;
-        const juce_wchar* text;
-        int& textIndex;
+        String::CharPointerType& text;
 
         //==============================================================================
         static inline bool isDecimalDigit (const juce_wchar c) throw()
@@ -690,17 +687,11 @@ public:
             return c >= '0' && c <= '9';
         }
 
-        void skipWhitespace (int& i) throw()
-        {
-            while (CharacterFunctions::isWhitespace (text [i]))
-                ++i;
-        }
-
         bool readChar (const juce_wchar required) throw()
         {
-            if (text[textIndex] == required)
+            if (*text == required)
             {
-                ++textIndex;
+                ++text;
                 return true;
             }
 
@@ -709,7 +700,7 @@ public:
 
         bool readOperator (const char* ops, char* const opType = 0) throw()
         {
-            skipWhitespace (textIndex);
+            text = text.findEndOfWhitespace();
 
             while (*ops != 0)
             {
@@ -729,21 +720,26 @@ public:
 
         bool readIdentifier (String& identifier) throw()
         {
-            skipWhitespace (textIndex);
-            int i = textIndex;
+            text = text.findEndOfWhitespace();
+            String::CharPointerType t (text);
+            int numChars = 0;
 
-            if (CharacterFunctions::isLetter (text[i]) || text[i] == '_')
+            if (t.isLetter() || *t == '_')
             {
-                ++i;
+                ++t;
+                ++numChars;
 
-                while (CharacterFunctions::isLetterOrDigit (text[i]) || text[i] == '_')
-                    ++i;
+                while (t.isLetterOrDigit() || *t == '_')
+                {
+                    ++t;
+                    ++numChars;
+                }
             }
 
-            if (i > textIndex)
+            if (numChars > 0)
             {
-                identifier = String (text + textIndex, i - textIndex);
-                textIndex = i;
+                identifier = String (text, numChars);
+                text = t;
                 return true;
             }
 
@@ -752,71 +748,27 @@ public:
 
         Term* readNumber() throw()
         {
-            skipWhitespace (textIndex);
-            int i = textIndex;
+            text = text.findEndOfWhitespace();
+            String::CharPointerType t (text);
 
-            const bool isResolutionTarget = (text[i] == '@');
+            const bool isResolutionTarget = (*t == '@');
             if (isResolutionTarget)
             {
-                ++i;
-                skipWhitespace (i);
-                textIndex = i;
+                ++t;
+                t = t.findEndOfWhitespace();
+                text = t;
             }
 
-            if (text[i] == '-')
+            if (*t == '-')
             {
-                ++i;
-                skipWhitespace (i);
+                ++t;
+                t = t.findEndOfWhitespace();
             }
 
-            int numDigits = 0;
+            if (isDecimalDigit (*t) || (*t == '.' && isDecimalDigit (t[1])))
+                return new Constant (CharacterFunctions::readDoubleValue (text), isResolutionTarget);
 
-            while (isDecimalDigit (text[i]))
-            {
-                ++i;
-                ++numDigits;
-            }
-
-            const bool hasPoint = (text[i] == '.');
-
-            if (hasPoint)
-            {
-                ++i;
-
-                while (isDecimalDigit (text[i]))
-                {
-                    ++i;
-                    ++numDigits;
-                }
-            }
-
-            if (numDigits == 0)
-                return 0;
-
-            juce_wchar c = text[i];
-            const bool hasExponent = (c == 'e' || c == 'E');
-
-            if (hasExponent)
-            {
-                ++i;
-                c = text[i];
-                if (c == '+' || c == '-')
-                    ++i;
-
-                int numExpDigits = 0;
-                while (isDecimalDigit (text[i]))
-                {
-                    ++i;
-                    ++numExpDigits;
-                }
-
-                if (numExpDigits == 0)
-                    return 0;
-            }
-
-            const int start = textIndex;
-            textIndex = i;
-            return new Constant (String (text + start, i - start).getDoubleValue(), isResolutionTarget);
+            return 0;
         }
 
         const TermPtr readExpression()
@@ -1002,14 +954,14 @@ Expression& Expression::operator= (const Expression& other)
 
 Expression::Expression (const String& stringToParse)
 {
-    int i = 0;
-    Helpers::Parser parser (stringToParse, i);
+    String::CharPointerType text (stringToParse.getCharPointer());
+    Helpers::Parser parser (text);
     term = parser.readUpToComma();
 }
 
-const Expression Expression::parse (const String& stringToParse, int& textIndexToStartFrom)
+const Expression Expression::parse (String::CharPointerType& stringToParse)
 {
-    Helpers::Parser parser (stringToParse, textIndexToStartFrom);
+    Helpers::Parser parser (stringToParse);
     return Expression (parser.readUpToComma());
 }
 

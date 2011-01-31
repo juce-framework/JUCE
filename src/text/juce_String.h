@@ -550,16 +550,7 @@ public:
 
         No checks are made to see if the index is within a valid range, so be careful!
     */
-    inline const juce_wchar& operator[] (int index) const throw()  { jassert (isPositiveAndNotGreaterThan (index, length())); return text [index]; }
-
-    /** Returns a character from the string such that it can also be altered.
-
-        This can be used as a way of easily changing characters in the string.
-
-        Note that the index passed-in is not checked to see whether it's in-range, so
-        be careful when using this.
-    */
-    juce_wchar& operator[] (int index);
+    const juce_wchar operator[] (int index) const throw();
 
     /** Returns the final character of the string.
 
@@ -1011,16 +1002,7 @@ public:
         that is returned must not be stored anywhere, as it can become invalid whenever
         any string methods (even some const ones!) are called.
     */
-    inline operator const juce_wchar*() const throw()   { return text.getAddress(); }
-
-    //==============================================================================
-    /** Returns a unicode version of this string.
-
-        Because it returns a reference to the string's internal data, the pointer
-        that is returned must not be stored anywhere, as it can become invalid whenever
-        any string methods (even some const ones!) are called.
-    */
-    inline operator juce_wchar*() throw()               { return text.getAddress(); }
+    inline operator const juce_wchar*() const throw()       { return toUTF32().getAddress(); }
 
     //==============================================================================
     /** Returns the character pointer currently being used to store this string.

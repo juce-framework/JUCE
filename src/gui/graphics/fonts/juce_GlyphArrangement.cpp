@@ -198,7 +198,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
         font.getGlyphPositions (text, newGlyphs, xOffsets);
         const int textLen = newGlyphs.size();
 
-        const juce_wchar* const unicodeText = text;
+        String::CharPointerType t (text.getCharPointer());
 
         for (int i = 0; i < textLen; ++i)
         {
@@ -216,7 +216,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
             else
             {
                 glyphs.add (new PositionedGlyph (xOffset + thisX, yOffset, nextX - thisX,
-                                                 font, unicodeText[i], newGlyphs.getUnchecked(i)));
+                                                 font, t.getAndAdvance(), newGlyphs.getUnchecked(i)));
             }
         }
     }

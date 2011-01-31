@@ -852,11 +852,8 @@ const String File::getRelativePathFrom (const File& dir)  const
 {
     String thisPath (fullPath);
 
-    {
-        int len = thisPath.length();
-        while (--len >= 0 && thisPath [len] == File::separator)
-            thisPath [len] = 0;
-    }
+    while (thisPath.endsWithChar (separator))
+        thisPath = thisPath.dropLastCharacters (1);
 
     String dirPath (addTrailingSeparator (dir.existsAsFile() ? dir.getParentDirectory().getFullPathName()
                                                              : dir.fullPath));
@@ -1011,6 +1008,9 @@ public:
         expect (std::abs ((int) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
         expect (tempFile.loadFileAsString() == "0123456789");
         expect (! demoFolder.containsSubDirectories());
+
+        expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::separatorString + tempFile.getFileName());
+        expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), ".." + File::separatorString + ".." + File::separatorString + demoFolder.getParentDirectory().getFileName());
 
         expect (demoFolder.getNumberOfChildFiles (File::findFiles) == 1);
         expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 1);
