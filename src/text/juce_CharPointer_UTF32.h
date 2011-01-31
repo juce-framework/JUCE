@@ -106,7 +106,7 @@ public:
     CharPointer_UTF32 operator++ (int) throw()
     {
         CharPointer_UTF32 temp (*this);
-        ++*this;
+        ++data;
         return temp;
     }
 
@@ -341,6 +341,25 @@ public:
     /** Returns the first non-whitespace character in the string. */
     CharPointer_UTF32 findEndOfWhitespace() const throw()    { return CharacterFunctions::findEndOfWhitespace (*this); }
 
+    /** Returns true if the given unicode character can be represented in this encoding. */
+    static bool canRepresent (juce_wchar character) throw()
+    {
+        return ((unsigned int) character) < (unsigned int) 0x10ffff;
+    }
+
+    /** Returns true if this data contains a valid string in this encoding. */
+    static bool isValidString (const CharType* dataToTest, int maxBytesToRead)
+    {
+        maxBytesToRead /= sizeof (CharType);
+
+        while (--maxBytesToRead >= 0 && *dataToTest != 0)
+            if (! canRepresent (*dataToTest++))
+                return false;
+
+        return true;
+    }
+
+    /** Atomically swaps this pointer for a new value, returning the previous value. */
     CharPointer_UTF32 atomicSwap (const CharPointer_UTF32& newValue)
     {
         return CharPointer_UTF32 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));

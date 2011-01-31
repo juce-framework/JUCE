@@ -217,7 +217,17 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     changed();
 }
 
-void Project::valueTreeChildrenChanged (ValueTree& tree)
+void Project::valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded)
+{
+    changed();
+}
+
+void Project::valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved)
+{
+    changed();
+}
+
+void Project::valueTreeChildOrderChanged (ValueTree& parentTree)
 {
     changed();
 }

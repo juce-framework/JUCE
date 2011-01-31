@@ -368,16 +368,34 @@ public:
         virtual void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
                                                const Identifier& property) = 0;
 
-        /** This method is called when a child sub-tree is added or removed.
-
-            The tree parameter indicates the tree whose child was added or removed.
+        /** This method is called when a child sub-tree is added.
 
             Note that when you register a listener to a tree, it will receive this callback for
-            child changes in that tree, and also in any of its children, (recursively, at any depth).
+            child changes in both that tree and any of its children, (recursively, at any depth).
             If your tree has sub-trees but you only want to know about changes to the top level tree,
-            simply check the tree parameter in this callback to make sure it's the tree you're interested in.
+            just check the parentTree parameter to make sure it's the one that you're interested in.
         */
-        virtual void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged) = 0;
+        virtual void valueTreeChildAdded (ValueTree& parentTree,
+                                          ValueTree& childWhichHasBeenAdded) = 0;
+
+        /** This method is called when a child sub-tree is removed.
+
+            Note that when you register a listener to a tree, it will receive this callback for
+            child changes in both that tree and any of its children, (recursively, at any depth).
+            If your tree has sub-trees but you only want to know about changes to the top level tree,
+            just check the parentTree parameter to make sure it's the one that you're interested in.
+        */
+        virtual void valueTreeChildRemoved (ValueTree& parentTree,
+                                            ValueTree& childWhichHasBeenRemoved) = 0;
+
+        /** This method is called when a tree's children have been re-shuffled.
+
+            Note that when you register a listener to a tree, it will receive this callback for
+            child changes in both that tree and any of its children, (recursively, at any depth).
+            If your tree has sub-trees but you only want to know about changes to the top level tree,
+            just check the parameter to make sure it's the tree that you're interested in.
+        */
+        virtual void valueTreeChildOrderChanged (ValueTree& parentTreeWhoseChildrenHaveMoved) = 0;
 
         /** This method is called when a tree has been added or removed from a parent node.
 
@@ -470,8 +488,12 @@ private:
 
         void sendPropertyChangeMessage (const Identifier& property);
         void sendPropertyChangeMessage (ValueTree& tree, const Identifier& property);
-        void sendChildChangeMessage();
-        void sendChildChangeMessage (ValueTree& tree);
+        void sendChildAddedMessage (ValueTree& parent, ValueTree& child);
+        void sendChildAddedMessage (ValueTree child);
+        void sendChildRemovedMessage (ValueTree& parent, ValueTree& child);
+        void sendChildRemovedMessage (ValueTree child);
+        void sendChildOrderChangedMessage (ValueTree& parent);
+        void sendChildOrderChangedMessage();
         void sendParentChangeMessage();
         const var& getProperty (const Identifier& name) const;
         const var getProperty (const Identifier& name, const var& defaultReturnValue) const;

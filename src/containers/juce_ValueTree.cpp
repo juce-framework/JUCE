@@ -250,24 +250,68 @@ void ValueTree::SharedObject::sendPropertyChangeMessage (const Identifier& prope
     }
 }
 
-void ValueTree::SharedObject::sendChildChangeMessage (ValueTree& tree)
+void ValueTree::SharedObject::sendChildAddedMessage (ValueTree& tree, ValueTree& child)
 {
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
         if (v != 0)
-            v->listeners.call (&ValueTree::Listener::valueTreeChildrenChanged, tree);
+            v->listeners.call (&ValueTree::Listener::valueTreeChildAdded, tree, child);
     }
 }
 
-void ValueTree::SharedObject::sendChildChangeMessage()
+void ValueTree::SharedObject::sendChildAddedMessage (ValueTree child)
 {
     ValueTree tree (this);
     ValueTree::SharedObject* t = this;
 
     while (t != 0)
     {
-        t->sendChildChangeMessage (tree);
+        t->sendChildAddedMessage (tree, child);
+        t = t->parent;
+    }
+}
+
+void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree& tree, ValueTree& child)
+{
+    for (int i = valueTreesWithListeners.size(); --i >= 0;)
+    {
+        ValueTree* const v = valueTreesWithListeners[i];
+        if (v != 0)
+            v->listeners.call (&ValueTree::Listener::valueTreeChildRemoved, tree, child);
+    }
+}
+
+void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree child)
+{
+    ValueTree tree (this);
+    ValueTree::SharedObject* t = this;
+
+    while (t != 0)
+    {
+        t->sendChildRemovedMessage (tree, child);
+        t = t->parent;
+    }
+}
+
+void ValueTree::SharedObject::sendChildOrderChangedMessage (ValueTree& tree)
+{
+    for (int i = valueTreesWithListeners.size(); --i >= 0;)
+    {
+        ValueTree* const v = valueTreesWithListeners[i];
+        if (v != 0)
+            v->listeners.call (&ValueTree::Listener::valueTreeChildOrderChanged, tree);
+    }
+}
+
+void ValueTree::SharedObject::sendChildOrderChangedMessage()
+{
+    ValueTree tree (this);
+    ValueTree::SharedObject* t = this;
+
+    while (t != 0)
+    {
+        t->sendChildOrderChangedMessage (tree);
         t = t->parent;
     }
 }
@@ -434,7 +478,7 @@ void ValueTree::SharedObject::addChild (SharedObject* child, int index, UndoMana
             {
                 children.insert (index, child);
                 child->parent = this;
-                sendChildChangeMessage();
+                sendChildAddedMessage (ValueTree (child));
                 child->sendParentChangeMessage();
             }
             else
@@ -464,7 +508,7 @@ void ValueTree::SharedObject::removeChild (const int childIndex, UndoManager* co
         {
             children.remove (childIndex);
             child->parent = 0;
-            sendChildChangeMessage();
+            sendChildRemovedMessage (ValueTree (child));
             child->sendParentChangeMessage();
         }
         else
@@ -491,7 +535,7 @@ void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoMan
         if (undoManager == 0)
         {
             children.move (currentIndex, newIndex);
-            sendChildChangeMessage();
+            sendChildOrderChangedMessage();
         }
         else
         {
@@ -510,16 +554,19 @@ void ValueTree::SharedObject::reorderChildren (const ReferenceCountedArray <Shar
     if (undoManager == 0)
     {
         children = newOrder;
-        sendChildChangeMessage();
+        sendChildOrderChangedMessage();
     }
     else
     {
         for (int i = 0; i < children.size(); ++i)
         {
-            if (children.getUnchecked(i) != newOrder.getUnchecked(i))
+            const SharedObjectPtr child (newOrder.getUnchecked(i));
+
+            if (children.getUnchecked(i) != child)
             {
-                jassert (children.contains (newOrder.getUnchecked(i)));
-                moveChild (children.indexOf (newOrder.getUnchecked(i)), i, undoManager);
+                const int oldIndex = children.indexOf (child);
+                jassert (oldIndex >= 0);
+                moveChild (oldIndex, i, undoManager);
             }
         }
     }
@@ -719,8 +766,10 @@ public:
             sendChangeMessage (false);
     }
 
-    void valueTreeChildrenChanged (ValueTree&) {}
-    void valueTreeParentChanged (ValueTree&)   {}
+    void valueTreeChildAdded (ValueTree&, ValueTree&) {}
+    void valueTreeChildRemoved (ValueTree&, ValueTree&) {}
+    void valueTreeChildOrderChanged (ValueTree&) {}
+    void valueTreeParentChanged (ValueTree&) {}
 
 private:
     ValueTree tree;

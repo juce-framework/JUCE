@@ -298,7 +298,9 @@ public:
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
-    void valueTreeChildrenChanged (ValueTree& tree);
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);
+    void valueTreeChildOrderChanged (ValueTree& parentTree);
     void valueTreeParentChanged (ValueTree& tree);
 
     //==============================================================================

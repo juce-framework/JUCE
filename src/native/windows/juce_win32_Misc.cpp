@@ -35,7 +35,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     {
         if (EmptyClipboard() != 0)
         {
-            const int bytesNeeded = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer());
+            const int bytesNeeded = CharPointer_UTF16::getBytesRequiredFor (text.getCharPointer()) + 4;
 
             if (bytesNeeded > 0)
             {

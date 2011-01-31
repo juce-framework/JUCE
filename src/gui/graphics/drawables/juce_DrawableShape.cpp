@@ -198,6 +198,12 @@ const Rectangle<float> DrawableShape::getDrawableBounds() const
 
 bool DrawableShape::hitTest (int x, int y)
 {
+    bool allowsClicksOnThisComponent, allowsClicksOnChildComponents;
+    getInterceptsMouseClicks (allowsClicksOnThisComponent, allowsClicksOnChildComponents);
+
+    if (! allowsClicksOnThisComponent)
+        return false;
+
     const float globalX = (float) (x - originRelativeToComponent.getX());
     const float globalY = (float) (y - originRelativeToComponent.getY());
 

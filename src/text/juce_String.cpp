@@ -250,12 +250,50 @@ String::String (const String& stringToCopy, const size_t charsToAllocate)
 }
 
 String::String (const char* const t)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF8 (t)))
+    : text (StringHolder::createFromCharPointer (CharPointer_ASCII (t)))
 {
+    /*  If you get an assertion here, then you're trying to create a string from 8-bit data
+        that contains values greater than 127. These can NOT be correctly converted to unicode
+        because there's no way for the String class to know what encoding was used to
+        create them. The source data could be UTF-8, ASCII or one of many local code-pages.
+
+        To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
+        string to the String class - so for example if your source data is actually UTF-8,
+        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        correctly convert the multi-byte characters to unicode. It's *highly* recommended that
+        you use UTF-8 with escape characters in your source code to represent extended characters,
+        because there's no other way to represent these strings in a way that isn't dependent on
+        the compiler, source code editor and platform.
+    */
+    jassert (CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
+}
+
+String::String (const char* const t, const size_t maxChars)
+    : text (StringHolder::createFromCharPointer (CharPointer_ASCII (t), maxChars))
+{
+    /*  If you get an assertion here, then you're trying to create a string from 8-bit data
+        that contains values greater than 127. These can NOT be correctly converted to unicode
+        because there's no way for the String class to know what encoding was used to
+        create them. The source data could be UTF-8, ASCII or one of many local code-pages.
+
+        To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
+        string to the String class - so for example if your source data is actually UTF-8,
+        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        correctly convert the multi-byte characters to unicode. It's *highly* recommended that
+        you use UTF-8 with escape characters in your source code to represent extended characters,
+        because there's no other way to represent these strings in a way that isn't dependent on
+        the compiler, source code editor and platform.
+    */
+    jassert (CharPointer_ASCII::isValidString (t, (int) maxChars));
 }
 
 String::String (const juce_wchar* const t)
     : text (StringHolder::createFromCharPointer (CharPointer_UTF32 (t)))
+{
+}
+
+String::String (const juce_wchar* const t, const size_t maxChars)
+    : text (StringHolder::createFromCharPointer (CharPointer_UTF32 (t), maxChars))
 {
 }
 
@@ -279,6 +317,11 @@ String::String (const CharPointer_UTF32& t, const size_t maxChars)
 {
 }
 
+String::String (const CharPointer_ASCII& t)
+    : text (StringHolder::createFromCharPointer (t))
+{
+}
+
 #if JUCE_WINDOWS
 String::String (const wchar_t* const t)
     : text (StringHolder::createFromCharPointer (CharPointer_UTF16 (t)))
@@ -290,16 +333,6 @@ String::String (const wchar_t* const t, size_t maxChars)
 {
 }
 #endif
-
-String::String (const char* const t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF8 (t), maxChars))
-{
-}
-
-String::String (const juce_wchar* const t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF32 (t), maxChars))
-{
-}
 
 const String String::charToString (const juce_wchar character)
 {
@@ -679,7 +712,7 @@ String& String::operator+= (const juce_wchar ch)
 }
 
 #if JUCE_WINDOWS
-String& String::operator+= (wchar_t ch)
+String& String::operator+= (const wchar_t ch)
 {
     return operator+= ((juce_wchar) ch);
 }

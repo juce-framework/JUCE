@@ -1035,6 +1035,7 @@
 		4007410FACA2F865FD8EF769 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_UTF8.h; path = ../../src/text/juce_CharPointer_UTF8.h; sourceTree = SOURCE_ROOT; };
 		663746215E9BA6C761172B85 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_UTF16.h; path = ../../src/text/juce_CharPointer_UTF16.h; sourceTree = SOURCE_ROOT; };
 		C3FD9D93626F80A45F9B6DDE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_UTF32.h; path = ../../src/text/juce_CharPointer_UTF32.h; sourceTree = SOURCE_ROOT; };
+		72F5ED2E8B945988C37EA9CF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CharPointer_ASCII.h; path = ../../src/text/juce_CharPointer_ASCII.h; sourceTree = SOURCE_ROOT; };
 		8273A206FB309671284959DD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Identifier.cpp; path = ../../src/text/juce_Identifier.cpp; sourceTree = SOURCE_ROOT; };
 		BF888BC540B64D5C61E46A34 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Identifier.h; path = ../../src/text/juce_Identifier.h; sourceTree = SOURCE_ROOT; };
 		4A97C8D2FF6454DDD3AF4BE5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_LocalisedStrings.cpp; path = ../../src/text/juce_LocalisedStrings.cpp; sourceTree = SOURCE_ROOT; };
@@ -1861,6 +1862,7 @@
 				4007410FACA2F865FD8EF769,
 				663746215E9BA6C761172B85,
 				C3FD9D93626F80A45F9B6DDE,
+				72F5ED2E8B945988C37EA9CF,
 				8273A206FB309671284959DD,
 				BF888BC540B64D5C61E46A34,
 				4A97C8D2FF6454DDD3AF4BE5,

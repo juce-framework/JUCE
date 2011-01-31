@@ -135,17 +135,21 @@ class PopupMenu::ItemComponent  : public Component
 {
 public:
     //==============================================================================
-    ItemComponent (const PopupMenu::Item& itemInfo_, int standardItemHeight)
+    ItemComponent (const PopupMenu::Item& itemInfo_, int standardItemHeight, Component* const parent)
       : itemInfo (itemInfo_),
         isHighlighted (false)
     {
         if (itemInfo.customComp != 0)
             addAndMakeVisible (itemInfo.customComp);
 
+        parent->addAndMakeVisible (this);
+
         int itemW = 80;
         int itemH = 16;
         getIdealSize (itemW, itemH, standardItemHeight);
         setSize (itemW, jlimit (2, 600, itemH));
+
+        addMouseListener (parent, false);
     }
 
     ~ItemComponent()
@@ -277,12 +281,7 @@ public:
         setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque() || ! Desktop::canUseSemiTransparentWindows());
 
         for (int i = 0; i < menu.items.size(); ++i)
-        {
-            PopupMenu::ItemComponent* const itemComp = new PopupMenu::ItemComponent (*menu.items.getUnchecked(i), standardItemHeight);
-            items.add (itemComp);
-            addAndMakeVisible (itemComp);
-            itemComp->addMouseListener (this, false);
-        }
+            items.add (new PopupMenu::ItemComponent (*menu.items.getUnchecked(i), standardItemHeight, this));
 
         calculateWindowPos (target, alignToRectangle);
         setTopLeftPosition (windowPos.getX(), windowPos.getY());

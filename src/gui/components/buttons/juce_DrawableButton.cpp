@@ -180,6 +180,7 @@ void DrawableButton::buttonStateChanged()
 
         if (currentImage != 0)
         {
+            currentImage->setInterceptsMouseClicks (false, false);
             addAndMakeVisible (currentImage);
             DrawableButton::resized();
         }

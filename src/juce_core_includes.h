@@ -233,6 +233,9 @@
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
  #include "text/juce_CharacterFunctions.h"
 #endif
+#ifndef __JUCE_CHARPOINTER_ASCII_JUCEHEADER__
+ #include "text/juce_CharPointer_ASCII.h"
+#endif
 #ifndef __JUCE_CHARPOINTER_UTF16_JUCEHEADER__
  #include "text/juce_CharPointer_UTF16.h"
 #endif

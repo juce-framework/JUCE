@@ -40,6 +40,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_String.h"
+#include "../memory/juce_HeapBlock.h"
 
 //==============================================================================
 juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()

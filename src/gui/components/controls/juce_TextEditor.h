@@ -313,16 +313,16 @@ public:
         virtual ~Listener()  {}
 
         /** Called when the user changes the text in some way. */
-        virtual void textEditorTextChanged (TextEditor& editor) = 0;
+        virtual void textEditorTextChanged (TextEditor& editor);
 
         /** Called when the user presses the return key. */
-        virtual void textEditorReturnKeyPressed (TextEditor& editor) = 0;
+        virtual void textEditorReturnKeyPressed (TextEditor& editor);
 
         /** Called when the user presses the escape key. */
-        virtual void textEditorEscapeKeyPressed (TextEditor& editor) = 0;
+        virtual void textEditorEscapeKeyPressed (TextEditor& editor);
 
         /** Called when the text editor loses focus. */
-        virtual void textEditorFocusLost (TextEditor& editor) = 0;
+        virtual void textEditorFocusLost (TextEditor& editor);
     };
 
     /** Registers a listener to be told when things happen to the text.

@@ -395,6 +395,43 @@ public:
     /** Returns the first non-whitespace character in the string. */
     CharPointer_UTF16 findEndOfWhitespace() const throw()    { return CharacterFunctions::findEndOfWhitespace (*this); }
 
+    /** Returns true if the given unicode character can be represented in this encoding. */
+    static bool canRepresent (juce_wchar character) throw()
+    {
+        return ((unsigned int) character) < (unsigned int) 0x10ffff
+                 && (((unsigned int) character) < 0xd800 || ((unsigned int) character) > 0xdfff);
+    }
+
+    /** Returns true if this data contains a valid string in this encoding. */
+    static bool isValidString (const CharType* dataToTest, int maxBytesToRead)
+    {
+        maxBytesToRead /= sizeof (CharType);
+
+        while (--maxBytesToRead >= 0 && *dataToTest != 0)
+        {
+            const uint32 n = (uint32) (uint16) *dataToTest++;
+
+            if (n >= 0xd800)
+            {
+                if (n > 0x10ffff)
+                    return false;
+
+                if (n <= 0xdfff)
+                {
+                    if (n > 0xdc00)
+                        return false;
+
+                    const uint32 nextChar = (uint32) (uint16) *dataToTest++;
+
+                    if (nextChar < 0xdc00 || nextChar > 0xdfff)
+                        return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     /** These values are the byte-order-mark (BOM) values for a UTF-16 stream. */
     enum
     {

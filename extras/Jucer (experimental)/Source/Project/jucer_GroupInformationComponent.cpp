@@ -62,12 +62,22 @@ void GroupInformationComponent::valueTreePropertyChanged (ValueTree& treeWhosePr
     list.updateContent();
 }
 
-void GroupInformationComponent::valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)
+void GroupInformationComponent::valueTreeChildAdded (ValueTree&, ValueTree&)
 {
     list.updateContent();
 }
 
-void GroupInformationComponent::valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)
+void GroupInformationComponent::valueTreeChildRemoved (ValueTree&, ValueTree&)
+{
+    list.updateContent();
+}
+
+void GroupInformationComponent::valueTreeChildOrderChanged (ValueTree&)
+{
+    list.updateContent();
+}
+
+void GroupInformationComponent::valueTreeParentChanged (ValueTree&)
 {
     list.updateContent();
 }

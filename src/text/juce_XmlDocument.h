@@ -153,7 +153,7 @@ public:
     //==============================================================================
 private:
     String originalText;
-    CharPointer_UTF32 input;
+    String::CharPointerType input;
     bool outOfData, errorOccurred;
 
     String lastError, dtdText;

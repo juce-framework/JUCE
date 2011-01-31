@@ -124,7 +124,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
         }
     }
 
-    input = static_cast <const juce_wchar*> (textToParse);
+    input = textToParse.getCharPointer();
     lastError = String::empty;
     errorOccurred = false;
     outOfData = false;
@@ -235,7 +235,7 @@ void XmlDocument::skipHeader()
         return;
 
     input += docTypeIndex + 9;
-    const CharPointer_UTF32 docType (input);
+    const String::CharPointerType docType (input);
 
     int n = 1;
 
@@ -324,7 +324,7 @@ void XmlDocument::readQuotedString (String& result)
         else
         {
             --input;
-            const CharPointer_UTF32 start (input);
+            const String::CharPointerType start (input);
 
             for (;;)
             {
@@ -332,14 +332,14 @@ void XmlDocument::readQuotedString (String& result)
 
                 if (character == quote)
                 {
-                    result.append (start.getAddress(), (int) (input.getAddress() - start.getAddress()));
+                    result.appendCharPointer (start, (int) (input.getAddress() - start.getAddress()));
                     ++input;
 
                     return;
                 }
                 else if (character == '&')
                 {
-                    result.append (start.getAddress(), (int) (input.getAddress() - start.getAddress()));
+                    result.appendCharPointer (start, (int) (input.getAddress() - start.getAddress()));
                     break;
                 }
                 else if (character == 0)
@@ -419,7 +419,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 
                 if (attNameLen > 0)
                 {
-                    const CharPointer_UTF32 attNameStart (input);
+                    const String::CharPointerType attNameStart (input);
                     input += attNameLen;
 
                     skipNextWhiteSpace();
@@ -462,7 +462,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
 
     for (;;)
     {
-        const CharPointer_UTF32 preWhitespaceInput (input);
+        const String::CharPointerType preWhitespaceInput (input);
         skipNextWhiteSpace();
 
         if (outOfData)
@@ -493,7 +493,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                   && input[8] == '[')
             {
                 input += 9;
-                const CharPointer_UTF32 inputStart (input);
+                const String::CharPointerType inputStart (input);
 
                 int len = 0;
 
@@ -556,10 +556,10 @@ void XmlDocument::readChildElements (XmlElement* parent)
 
                     if (entity.startsWithChar ('<') && entity [1] != 0)
                     {
-                        const CharPointer_UTF32 oldInput (input);
+                        const String::CharPointerType oldInput (input);
                         const bool oldOutOfData = outOfData;
 
-                        input = static_cast <const juce_wchar*> (entity);
+                        input = entity.getCharPointer();
                         outOfData = false;
 
                         for (;;)
@@ -582,7 +582,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 }
                 else
                 {
-                    const CharPointer_UTF32 start (input);
+                    const String::CharPointerType start (input);
                     int len = 0;
 
                     for (;;)
@@ -701,7 +701,7 @@ void XmlDocument::readEntity (String& result)
     }
     else
     {
-        const CharPointer_UTF32 entityNameStart (input);
+        const String::CharPointerType entityNameStart (input);
         const int closingSemiColon = input.indexOf ((juce_wchar) ';');
 
         if (closingSemiColon < 0)

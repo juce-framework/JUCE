@@ -2621,5 +2621,9 @@ void TextEditor::coalesceSimilarSections()
     }
 }
 
+void TextEditor::Listener::textEditorTextChanged (TextEditor&) {}
+void TextEditor::Listener::textEditorReturnKeyPressed (TextEditor&) {}
+void TextEditor::Listener::textEditorEscapeKeyPressed (TextEditor&) {}
+void TextEditor::Listener::textEditorFocusLost (TextEditor&) {}
 
 END_JUCE_NAMESPACE

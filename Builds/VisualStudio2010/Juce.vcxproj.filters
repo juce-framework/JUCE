@@ -2265,6 +2265,9 @@
     <ClInclude Include="..\..\src\text\juce_CharPointer_UTF32.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_ASCII.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\text\juce_Identifier.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>

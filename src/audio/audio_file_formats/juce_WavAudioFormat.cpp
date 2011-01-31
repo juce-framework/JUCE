@@ -498,8 +498,7 @@ public:
         : AudioFormatWriter (out, TRANS (wavFormatName), sampleRate_, numChannels_, bits),
           lengthInSamples (0),
           bytesWritten (0),
-          writeFailed (false),
-          isRF64 (false)
+          writeFailed (false)
     {
         using namespace WavFileHelpers;
 
@@ -567,7 +566,7 @@ private:
     MemoryBlock tempBlock, bwavChunk, smplChunk;
     uint64 lengthInSamples, bytesWritten;
     int64 headerPosition;
-    bool writeFailed, isRF64;
+    bool writeFailed;
 
     static int getChannelMask (const int numChannels) throw()
     {
@@ -596,14 +595,15 @@ private:
         const int bytesPerFrame = numChannels * bitsPerSample / 8;
         int64 audioDataSize = bytesPerFrame * lengthInSamples;
 
-        int64 riffChunkSize = 4 /* 'WAVE' */ + 8 + 40 /* WAVEFORMATEX */
+        const bool isRF64 = (bytesWritten >= literal64bit (0x100000000));
+
+        int64 riffChunkSize = 4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
                                + 8 + audioDataSize + (audioDataSize & 1)
                                + (bwavChunk.getSize() > 0 ? (8 + bwavChunk.getSize()) : 0)
                                + (smplChunk.getSize() > 0 ? (8 + smplChunk.getSize()) : 0)
-                               + (8 + 28); // (JUNK chunk)
+                               + (8 + 28); // (ds64 chunk)
 
         riffChunkSize += (riffChunkSize & 0x1);
-        isRF64 = (riffChunkSize > 0xffffffff);
 
         output->writeInt (chunkName (isRF64 ? "RF64" : "RIFF"));
         output->writeInt (isRF64 ? -1 : (int) riffChunkSize);
@@ -611,10 +611,9 @@ private:
 
         if (! isRF64)
         {
-            // write Junk chunk
             output->writeInt (chunkName ("JUNK"));
-            output->writeInt (28);
-            output->writeRepeatedByte (0, 28);
+            output->writeInt (28 + 24);
+            output->writeRepeatedByte (0, 28 /* ds64 */ + 24 /* extra waveformatex */);
         }
         else
         {
@@ -627,29 +626,44 @@ private:
         }
 
         output->writeInt (chunkName ("fmt "));
-        output->writeInt (40); // WAVEFORMATEX chunk size
-        output->writeShort ((short) (uint16) 0xfffe); // WAVE_FORMAT_EXTENSIBLE
+
+        if (isRF64)
+        {
+            output->writeInt (40); // chunk size
+            output->writeShort ((short) (uint16) 0xfffe); // WAVE_FORMAT_EXTENSIBLE
+        }
+        else
+        {
+            output->writeInt (16); // chunk size
+            output->writeShort (bitsPerSample < 32 ? (short) 1 /*WAVE_FORMAT_PCM*/
+                                                   : (short) 3 /*WAVE_FORMAT_IEEE_FLOAT*/);
+        }
+
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
         output->writeInt ((int) (bytesPerFrame * sampleRate)); // nAvgBytesPerSec
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
-        output->writeShort (22); // cbSize (size of  the extension)
-        output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
-        output->writeInt (getChannelMask (numChannels));
 
-        const ExtensibleWavSubFormat pcmFormat
-            = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+        if (isRF64)
+        {
+            output->writeShort (22); // cbSize (size of  the extension)
+            output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
+            output->writeInt (getChannelMask (numChannels));
 
-        const ExtensibleWavSubFormat IEEEFloatFormat
-            = { 0x00000003, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+            const ExtensibleWavSubFormat pcmFormat
+                = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
 
-        const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
+            const ExtensibleWavSubFormat IEEEFloatFormat
+                = { 0x00000003, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
 
-        output->writeInt ((int) subFormat.data1);
-        output->writeShort ((short) subFormat.data2);
-        output->writeShort ((short) subFormat.data3);
-        output->write (subFormat.data4, sizeof (subFormat.data4));
+            const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
+
+            output->writeInt ((int) subFormat.data1);
+            output->writeShort ((short) subFormat.data2);
+            output->writeShort ((short) subFormat.data3);
+            output->write (subFormat.data4, sizeof (subFormat.data4));
+        }
 
         if (bwavChunk.getSize() > 0)
         {

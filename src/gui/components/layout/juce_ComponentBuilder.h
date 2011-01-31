@@ -229,7 +229,11 @@ public:
     /** @internal */
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
     /** @internal */
-    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
+    /** @internal */
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);
+    /** @internal */
+    void valueTreeChildOrderChanged (ValueTree& parentTree);
     /** @internal */
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 

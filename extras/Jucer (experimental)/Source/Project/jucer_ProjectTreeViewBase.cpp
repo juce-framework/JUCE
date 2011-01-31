@@ -365,20 +365,35 @@ void ProjectTreeViewBase::itemDropped (const String& sourceDescription, Componen
 }
 
 //==============================================================================
+void ProjectTreeViewBase::treeChildrenChanged (const ValueTree& parentTree)
+{
+    if (parentTree == item.getNode())
+    {
+        refreshSubItems();
+        treeHasChanged();
+        setOpen (true);
+    }
+}
+
 void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (tree == item.getNode())
         repaintItem();
 }
 
-void ProjectTreeViewBase::valueTreeChildrenChanged (ValueTree& tree)
+void ProjectTreeViewBase::valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded)
 {
-    if (tree == item.getNode())
-    {
-        refreshSubItems();
-        treeHasChanged();
-        setOpen (true);
-    }
+    treeChildrenChanged (parentTree);
+}
+
+void ProjectTreeViewBase::valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved)
+{
+    treeChildrenChanged (parentTree);
+}
+
+void ProjectTreeViewBase::valueTreeChildOrderChanged (ValueTree& parentTree)
+{
+    treeChildrenChanged (parentTree);
 }
 
 void ProjectTreeViewBase::valueTreeParentChanged (ValueTree& tree)

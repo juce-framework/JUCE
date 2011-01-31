@@ -92,7 +92,7 @@ namespace FileHelpers
         FSRef ref;
         LSItemInfoRecord info;
 
-        return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
+        return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8().getAddress(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
                  && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
                  && (info.flags & kLSItemInfoIsInvisible) != 0;
         #endif

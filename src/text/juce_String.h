@@ -37,6 +37,7 @@
 #include "juce_CharPointer_UTF8.h"
 #include "juce_CharPointer_UTF16.h"
 #include "juce_CharPointer_UTF32.h"
+#include "juce_CharPointer_ASCII.h"
 
 #if JUCE_MSVC
   #pragma warning (pop)
@@ -60,7 +61,6 @@ class JUCE_API  String
 public:
     //==============================================================================
     /** Creates an empty string.
-
         @see empty
     */
     String() throw();
@@ -68,15 +68,36 @@ public:
     /** Creates a copy of another string. */
     String (const String& other) throw();
 
-    /** Creates a string from a zero-terminated text string.
-        The string is assumed to be stored in the default system encoding.
+    /** Creates a string from a zero-terminated ascii text string.
+
+        The string passed-in must not contain any characters with a value above 127, because
+        these can't be converted to unicode without knowing the original encoding that was
+        used to create the string. If you attempt to pass-in values above 127, you'll get an
+        assertion.
+
+        To create strings with extended characters from UTF-8, you should explicitly call
+        String (CharPointer_UTF8 ("my utf8 string..")). It's *highly* recommended that you
+        use UTF-8 with escape characters in your source code to represent extended characters,
+        because there's no other way to represent unicode strings in a way that isn't dependent
+        on the compiler, source code editor and platform.
     */
     String (const char* text);
 
-    /** Creates a string from an string of characters.
+    /** Creates a string from a string of 8-bit ascii characters.
 
-        This will use up the the first maxChars characters of the string (or
-        less if the string is actually shorter)
+        The string passed-in must not contain any characters with a value above 127, because
+        these can't be converted to unicode without knowing the original encoding that was
+        used to create the string. If you attempt to pass-in values above 127, you'll get an
+        assertion.
+
+        To create strings with extended characters from UTF-8, you should explicitly call
+        String (CharPointer_UTF8 ("my utf8 string..")). It's *highly* recommended that you
+        use UTF-8 with escape characters in your source code to represent extended characters,
+        because there's no other way to represent unicode strings in a way that isn't dependent
+        on the compiler, source code editor and platform.
+
+        This will use up the the first maxChars characters of the string (or less if the string
+        is actually shorter).
     */
     String (const char* text, size_t maxChars);
 
@@ -101,6 +122,9 @@ public:
 
     /** Creates a string from a UTF-32 character string */
     String (const CharPointer_UTF32& text, size_t maxChars);
+
+    /** Creates a string from an ASCII character string */
+    String (const CharPointer_ASCII& text);
 
    #if JUCE_WINDOWS
     /** Creates a string from a UTF-16 character string */

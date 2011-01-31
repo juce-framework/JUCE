@@ -70,7 +70,9 @@ public:
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
-    void valueTreeChildrenChanged (ValueTree& tree);
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);
+    void valueTreeChildOrderChanged (ValueTree& parentTree);
     void valueTreeParentChanged (ValueTree& tree);
 
     //==============================================================================
@@ -99,6 +101,7 @@ protected:
     bool isFileMissing;
 
     //==============================================================================
+    void treeChildrenChanged (const ValueTree& parentTree);
     virtual void addSubItems();
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
     const Drawable* getIcon() const         { return item.getIcon(); }
