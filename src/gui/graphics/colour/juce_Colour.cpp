@@ -54,23 +54,19 @@ namespace ColourHelpers
         else
         {
             s = jmin (1.0f, s);
-            h = jlimit (0.0f, 1.0f, h);
             h = (h - std::floor (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
             const float f = h - std::floor (h);
-
             const uint8 x = (uint8) roundToInt (v * (1.0f - s));
-            const float y = v * (1.0f - s * f);
-            const float z = v * (1.0f - (s * (1.0f - f)));
 
             if (h < 1.0f)
             {
                 r = intV;
-                g = (uint8) roundToInt (z);
+                g = (uint8) roundToInt (v * (1.0f - (s * (1.0f - f))));
                 b = x;
             }
             else if (h < 2.0f)
             {
-                r = (uint8) roundToInt (y);
+                r = (uint8) roundToInt (v * (1.0f - s * f));
                 g = intV;
                 b = x;
             }
@@ -78,31 +74,25 @@ namespace ColourHelpers
             {
                 r = x;
                 g = intV;
-                b = (uint8) roundToInt (z);
+                b = (uint8) roundToInt (v * (1.0f - (s * (1.0f - f))));
             }
             else if (h < 4.0f)
             {
                 r = x;
-                g = (uint8) roundToInt (y);
+                g = (uint8) roundToInt (v * (1.0f - s * f));
                 b = intV;
             }
             else if (h < 5.0f)
             {
-                r = (uint8) roundToInt (z);
+                r = (uint8) roundToInt (v * (1.0f - (s * (1.0f - f))));
                 g = x;
                 b = intV;
             }
-            else if (h < 6.0f)
+            else
             {
                 r = intV;
                 g = x;
-                b = (uint8) roundToInt (y);
-            }
-            else
-            {
-                r = 0;
-                g = 0;
-                b = 0;
+                b = (uint8) roundToInt (v * (1.0f - s * f));
             }
         }
     }
@@ -192,7 +182,7 @@ Colour::Colour (const float hue,
                 const float brightness,
                 const float alpha) throw()
 {
-    uint8 r = getRed(), g = getGreen(), b = getBlue();
+    uint8 r, g, b;
     ColourHelpers::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
     argb.setARGB (ColourHelpers::floatAlphaToInt (alpha), r, g, b);
@@ -211,7 +201,7 @@ Colour::Colour (const float hue,
                 const float brightness,
                 const uint8 alpha) throw()
 {
-    uint8 r = getRed(), g = getGreen(), b = getBlue();
+    uint8 r, g, b;
     ColourHelpers::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
     argb.setARGB (alpha, r, g, b);
@@ -404,10 +394,7 @@ const Colour Colour::withRotatedHue (const float amountToRotate) const throw()
     float h, s, b;
     getHSB (h, s, b);
 
-    h += amountToRotate;
-    h -= std::floor (h);
-
-    return Colour (h, s, b, getAlpha());
+    return Colour (h + amountToRotate, s, b, getAlpha());
 }
 
 //==============================================================================

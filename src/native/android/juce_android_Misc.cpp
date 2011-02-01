@@ -27,6 +27,42 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+END_JUCE_NAMESPACE
+extern JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
+BEGIN_JUCE_NAMESPACE
+
+//==============================================================================
+JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity))
+{
+    android.initialise (env, activity);
+
+    JUCEApplication::createInstance = &juce_CreateApplication;
+
+    initialiseJuce_GUI();
+
+    if (! JUCEApplication::createInstance()->initialiseApp (String::empty))
+        exit (0);
+}
+
+JUCE_JNI_CALLBACK (JuceAppActivity, quitApp, void, (JNIEnv* env, jobject activity))
+{
+    JUCEApplication::appWillTerminateByForce();
+
+    android.shutdown();
+}
+
+//==============================================================================
+void PlatformUtilities::beep()
+{
+    // TODO
+}
+
+//==============================================================================
+void Logger::outputDebugString (const String& text)
+{
+    android.env->CallStaticVoidMethod (android.activityClass, android.printToConsole,
+                                       android.javaString (text));
+}
 
 //==============================================================================
 void SystemClipboard::copyTextToClipboard (const String& text)

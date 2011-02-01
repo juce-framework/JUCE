@@ -80,7 +80,19 @@ AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
       allocatedBytes (0)
 {
     jassert (numChannels_ > 0);
-    allocateChannels (dataToReferTo);
+    allocateChannels (dataToReferTo, 0);
+}
+
+AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
+                                      const int numChannels_,
+                                      const int startSample,
+                                      const int numSamples) throw()
+    : numChannels (numChannels_),
+      size (numSamples),
+      allocatedBytes (0)
+{
+    jassert (numChannels_ > 0);
+    allocateChannels (dataToReferTo, startSample);
 }
 
 void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
@@ -95,10 +107,10 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
     numChannels = newNumChannels;
     size = newNumSamples;
 
-    allocateChannels (dataToReferTo);
+    allocateChannels (dataToReferTo, 0);
 }
 
-void AudioSampleBuffer::allocateChannels (float** const dataToReferTo)
+void AudioSampleBuffer::allocateChannels (float** const dataToReferTo, int offset)
 {
     // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
     if (numChannels < numElementsInArray (preallocatedChannelSpace))
@@ -116,7 +128,7 @@ void AudioSampleBuffer::allocateChannels (float** const dataToReferTo)
         // you have to pass in the same number of valid pointers as numChannels
         jassert (dataToReferTo[i] != 0);
 
-        channels[i] = dataToReferTo[i];
+        channels[i] = dataToReferTo[i] + offset;
     }
 
     channels [numChannels] = 0;

@@ -91,10 +91,213 @@ BEGIN_JUCE_NAMESPACE
 #include "../common/juce_MidiDataConcatenator.h"
 
 //==============================================================================
+#define JUCE_JNI_CALLBACK(className, methodName, returnType, params) \
+  extern "C" __attribute__ ((visibility("default"))) returnType Java_com_juce_ ## className ## _ ## methodName params
+
+//==============================================================================
+#define JUCE_JNI_CLASSES(JAVACLASS) \
+ JAVACLASS (activityClass, "com/juce/JuceAppActivity") \
+ JAVACLASS (componentPeerViewClass, "com/juce/ComponentPeerView") \
+ JAVACLASS (fileClass, "java/io/File") \
+ JAVACLASS (contextClass, "android/content/Context") \
+ JAVACLASS (canvasClass, "android/graphics/Canvas") \
+ JAVACLASS (paintClass, "android/graphics/Paint") \
+
+
+//==============================================================================
+#define JUCE_JNI_METHODS(METHOD, STATICMETHOD) \
+\
+ STATICMETHOD (activityClass, printToConsole, "printToConsole", "(Ljava/lang/String;)V") \
+ METHOD (activityClass, createNewView, "createNewView", "()Lcom/juce/ComponentPeerView;") \
+ METHOD (activityClass, deleteView, "deleteView", "(Lcom/juce/ComponentPeerView;)V") \
+\
+ METHOD (fileClass, fileExists, "exists", "()Z") \
+\
+ METHOD (componentPeerViewClass, layout, "layout", "(IIII)V") \
+\
+ METHOD (canvasClass, drawRect, "drawRect", "(FFFFLandroid/graphics/Paint;)V") \
+\
+ METHOD (paintClass, paintClassConstructor, "<init>", "()V") \
+ METHOD (paintClass, setColor, "setColor", "(I)V") \
+
+
+//==============================================================================
+class GlobalRef
+{
+public:
+    GlobalRef()
+        : env (0), obj (0)
+    {
+    }
+
+    GlobalRef (JNIEnv* const env_, jobject obj_)
+        : env (env_),
+          obj (retain (env_, obj_))
+    {
+    }
+
+    GlobalRef (const GlobalRef& other)
+        : env (other.env),
+          obj (retain (other.env, other.obj))
+    {
+    }
+
+    ~GlobalRef()
+    {
+        release();
+    }
+
+    GlobalRef& operator= (const GlobalRef& other)
+    {
+        release();
+        env = other.env;
+        obj = retain (env, other.obj);
+        return *this;
+    }
+
+    GlobalRef& operator= (jobject newObj)
+    {
+        jassert (env != 0 || newObj == 0);
+
+        if (newObj != obj && env != 0)
+        {
+            release();
+            obj = retain (env, newObj);
+        }
+    }
+
+    inline operator jobject() const throw()     { return obj; }
+    inline jobject get() const throw()          { return obj; }
+
+    inline JNIEnv* getEnv() const throw()       { return env; }
+
+    #define DECLARE_CALL_TYPE_METHOD(returnType, typeName) \
+        returnType call##typeName##Method (jmethodID methodID, ... ) \
+        { \
+            returnType result; \
+            va_list args; \
+            va_start (args, methodID); \
+            result = env->Call##typeName##MethodV (obj, methodID, args); \
+            va_end (args); \
+            return result; \
+        }
+
+    DECLARE_CALL_TYPE_METHOD (jobject, Object)
+    DECLARE_CALL_TYPE_METHOD (jboolean, Boolean)
+    DECLARE_CALL_TYPE_METHOD (jbyte, Byte)
+    DECLARE_CALL_TYPE_METHOD (jchar, Char)
+    DECLARE_CALL_TYPE_METHOD (jshort, Short)
+    DECLARE_CALL_TYPE_METHOD (jint, Int)
+    DECLARE_CALL_TYPE_METHOD (jlong, Long)
+    DECLARE_CALL_TYPE_METHOD (jfloat, Float)
+    DECLARE_CALL_TYPE_METHOD (jdouble, Double)
+    #undef DECLARE_CALL_TYPE_METHOD
+
+    void callVoidMethod (jmethodID methodID, ... )
+    {
+        va_list args;
+        va_start (args, methodID);
+        env->CallVoidMethodV (obj, methodID, args);
+        va_end (args);
+    }
+
+private:
+    JNIEnv* env;
+    jobject obj;
+
+    void release()
+    {
+        if (env != 0)
+            env->DeleteGlobalRef (obj);
+    }
+
+    static jobject retain (JNIEnv* const env, jobject obj_)
+    {
+        return env == 0 ? 0 : env->NewGlobalRef (obj_);
+    }
+};
+
+//==============================================================================
+class AndroidJavaCallbacks
+{
+public:
+    AndroidJavaCallbacks() : env (0)
+    {
+    }
+
+    void initialise (JNIEnv* env_, jobject activity_)
+    {
+        env = env_;
+        activity = GlobalRef (env, activity_);
+
+        #define CREATE_JNI_CLASS(className, path) \
+            className = (jclass) env->NewGlobalRef (env->FindClass (path)); \
+            jassert (className != 0);
+        JUCE_JNI_CLASSES (CREATE_JNI_CLASS);
+        #undef CREATE_JNI_CLASS
+
+        #define CREATE_JNI_METHOD(ownerClass, methodID, stringName, params) \
+            methodID = env->GetMethodID (ownerClass, stringName, params); \
+            jassert (methodID != 0);
+        #define CREATE_JNI_STATICMETHOD(ownerClass, methodID, stringName, params) \
+            methodID = env->GetStaticMethodID (ownerClass, stringName, params); \
+            jassert (methodID != 0);
+        JUCE_JNI_METHODS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD);
+        #undef CREATE_JNI_METHOD
+    }
+
+    void shutdown()
+    {
+        if (env != 0)
+        {
+            #define RELEASE_JNI_CLASS(className, path)    env->DeleteGlobalRef (className);
+            JUCE_JNI_CLASSES (RELEASE_JNI_CLASS);
+            #undef RELEASE_JNI_CLASS
+
+            activity = 0;
+            env = 0;
+        }
+    }
+
+    //==============================================================================
+    const String juceString (jstring s) const
+    {
+        jboolean isCopy;
+        const char* const utf8 = env->GetStringUTFChars (s, &isCopy);
+        CharPointer_UTF8 utf8CP (utf8);
+        const String result (utf8CP);
+        env->ReleaseStringUTFChars (s, utf8);
+        return result;
+    }
+
+    jstring javaString (const String& s) const
+    {
+        return env->NewStringUTF (s.toUTF8());
+    }
+
+    //==============================================================================
+    JNIEnv* env;
+    GlobalRef activity;
+
+    //==============================================================================
+    #define DECLARE_JNI_CLASS(className, path) jclass className;
+    JUCE_JNI_CLASSES (DECLARE_JNI_CLASS);
+    #undef DECLARE_JNI_CLASS
+
+    #define DECLARE_JNI_METHOD(ownerClass, methodID, stringName, params) jmethodID methodID;
+    JUCE_JNI_METHODS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD);
+    #undef DECLARE_JNI_METHOD
+};
+
+static AndroidJavaCallbacks android;
+
+
+//==============================================================================
 #define JUCE_INCLUDED_FILE 1
 
 // Now include the actual code files..
-#include "juce_android_SystemStats.cpp" // (must be first)
+#include "juce_android_Misc.cpp"
+#include "juce_android_SystemStats.cpp"
 #include "../common/juce_posix_SharedCode.h"
 #include "juce_android_Files.cpp"
 #include "../common/juce_posix_NamedPipe.cpp"
@@ -105,7 +308,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_android_GraphicsContext.cpp"
 #include "juce_android_Windowing.cpp"
 #include "juce_android_FileChooser.cpp"
-#include "juce_android_Misc.cpp"
 #include "juce_android_WebBrowserComponent.cpp"
 #include "juce_android_OpenGLComponent.cpp"
 #include "juce_android_Midi.cpp"

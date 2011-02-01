@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	24
+#define JUCE_BUILDNUMBER	25
 
 /** Current Juce version number.
 
@@ -105,6 +105,9 @@ namespace JuceDummyNamespace {}
 #if (defined (_WIN32) || defined (_WIN64))
   #define	   JUCE_WIN32 1
   #define	   JUCE_WINDOWS 1
+#elif defined (JUCE_ANDROID)
+  #undef	JUCE_ANDROID
+  #define	   JUCE_ANDROID 1
 #elif defined (LINUX) || defined (__linux__)
   #define	 JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
@@ -116,9 +119,6 @@ namespace JuceDummyNamespace {}
   #else
 	#define	 JUCE_MAC 1
   #endif
-#elif defined (JUCE_ANDROID)
-  #undef	JUCE_ANDROID
-  #define	   JUCE_ANDROID 1
 #else
   #error "Unknown platform!"
 #endif
@@ -34408,6 +34408,27 @@ public:
 					   int numChannels,
 					   int numSamples) throw();
 
+	/** Creates a buffer using a pre-allocated block of memory.
+
+		Note that if the buffer is resized or its number of channels is changed, it
+		will re-allocate memory internally and copy the existing data to this new area,
+		so it will then stop directly addressing this memory.
+
+		@param dataToReferTo	a pre-allocated array containing pointers to the data
+								for each channel that should be used by this buffer. The
+								buffer will only refer to this memory, it won't try to delete
+								it when the buffer is deleted or resized.
+		@param numChannels	  the number of channels to use - this must correspond to the
+								number of elements in the array passed in
+		@param startSample	  the offset within the arrays at which the data begins
+		@param numSamples	   the number of samples to use - this must correspond to the
+								size of the arrays passed in
+	*/
+	AudioSampleBuffer (float** dataToReferTo,
+					   int numChannels,
+					   int startSample,
+					   int numSamples) throw();
+
 	/** Copies another buffer.
 
 		This buffer will make its own copy of the other's data, unless the buffer was created
@@ -34761,7 +34782,7 @@ private:
 	float* preallocatedChannelSpace [32];
 
 	void allocateData();
-	void allocateChannels (float** dataToReferTo);
+	void allocateChannels (float** dataToReferTo, int offset);
 
 	JUCE_LEAK_DETECTOR (AudioSampleBuffer);
 };

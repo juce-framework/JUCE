@@ -33,7 +33,8 @@
 class AndroidLowLevelGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    AndroidLowLevelGraphicsContext()
+    AndroidLowLevelGraphicsContext (const GlobalRef& canvas_)
+        : canvas (canvas_)
     {
     }
 
@@ -59,12 +60,12 @@ public:
 
     bool clipToRectangle (const Rectangle<int>& r)
     {
-        return false;
+        return true;
     }
 
     bool clipToRectangleList (const RectangleList& clipRegion)
     {
-        return false;
+        return true;
     }
 
     void excludeClipRectangle (const Rectangle<int>& r)
@@ -86,7 +87,7 @@ public:
 
     const Rectangle<int> getClipBounds() const
     {
-        return Rectangle<int>();
+        return Rectangle<int> (0, 0, 1000, 1000);
     }
 
     bool isClipEmpty() const
@@ -113,6 +114,8 @@ public:
     //==============================================================================
     void setFill (const FillType& fillType)
     {
+        currentPaint = android.env->NewObject (android.paintClass, android.paintClassConstructor);
+        currentPaint.callVoidMethod (android.setColor, fillType.colour.getARGB());
     }
 
     void setOpacity (float newOpacity)
@@ -126,6 +129,9 @@ public:
     //==============================================================================
     void fillRect (const Rectangle<int>& r, bool replaceExistingContents)
     {
+        canvas.callVoidMethod (android.drawRect,
+                               (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom(),
+                               currentPaint.get());
     }
 
     void fillPath (const Path& path, const AffineTransform& transform)
@@ -162,6 +168,8 @@ public:
     }
 
 private:
+    GlobalRef canvas, currentPaint;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidLowLevelGraphicsContext);
 };
 

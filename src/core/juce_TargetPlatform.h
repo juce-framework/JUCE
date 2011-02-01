@@ -43,6 +43,9 @@
 #if (defined (_WIN32) || defined (_WIN64))
   #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1
+#elif defined (JUCE_ANDROID)
+  #undef        JUCE_ANDROID
+  #define       JUCE_ANDROID 1
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
@@ -54,9 +57,6 @@
   #else
     #define     JUCE_MAC 1
   #endif
-#elif defined (JUCE_ANDROID)
-  #undef        JUCE_ANDROID
-  #define       JUCE_ANDROID 1
 #else
   #error "Unknown platform!"
 #endif

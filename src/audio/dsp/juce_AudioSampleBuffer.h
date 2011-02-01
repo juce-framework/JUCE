@@ -70,6 +70,27 @@ public:
                        int numChannels,
                        int numSamples) throw();
 
+    /** Creates a buffer using a pre-allocated block of memory.
+
+        Note that if the buffer is resized or its number of channels is changed, it
+        will re-allocate memory internally and copy the existing data to this new area,
+        so it will then stop directly addressing this memory.
+
+        @param dataToReferTo    a pre-allocated array containing pointers to the data
+                                for each channel that should be used by this buffer. The
+                                buffer will only refer to this memory, it won't try to delete
+                                it when the buffer is deleted or resized.
+        @param numChannels      the number of channels to use - this must correspond to the
+                                number of elements in the array passed in
+        @param startSample      the offset within the arrays at which the data begins
+        @param numSamples       the number of samples to use - this must correspond to the
+                                size of the arrays passed in
+    */
+    AudioSampleBuffer (float** dataToReferTo,
+                       int numChannels,
+                       int startSample,
+                       int numSamples) throw();
+
     /** Copies another buffer.
 
         This buffer will make its own copy of the other's data, unless the buffer was created
@@ -429,7 +450,7 @@ private:
     float* preallocatedChannelSpace [32];
 
     void allocateData();
-    void allocateChannels (float** dataToReferTo);
+    void allocateChannels (float** dataToReferTo, int offset);
 
     JUCE_LEAK_DETECTOR (AudioSampleBuffer);
 };

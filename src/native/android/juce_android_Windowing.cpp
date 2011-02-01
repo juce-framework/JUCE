@@ -36,11 +36,13 @@ public:
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags)
     {
-        // TODO
+        view = GlobalRef (android.env, android.activity.callObjectMethod (android.createNewView));
     }
 
     ~AndroidComponentPeer()
     {
+        android.activity.callVoidMethod (android.deleteView, view.get());
+        view = 0;
     }
 
     void* getNativeHandle() const
@@ -67,7 +69,8 @@ public:
 
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
     {
-        // TODO
+        DBG ("Window size: " << x << " " << y << " " << w << " " << h);
+        view.callVoidMethod (android.layout, x, y, x + w, y + h);
     }
 
     const Rectangle<int> getBounds() const
@@ -167,6 +170,12 @@ public:
     }
 
     //==============================================================================
+    void handlePaintCallback (JNIEnv* env, jobject canvas)
+    {
+        AndroidLowLevelGraphicsContext g (GlobalRef (env, canvas));
+        handlePaint (g);
+    }
+
     void repaint (const Rectangle<int>& area)
     {
         // TODO
@@ -182,14 +191,42 @@ public:
         // TODO
     }
 
+    //==============================================================================
+    static AndroidComponentPeer* findPeerForJavaView (jobject viewToFind)
+    {
+        for (int i = getNumPeers(); --i >= 0;)
+        {
+            AndroidComponentPeer* const ap = static_cast <AndroidComponentPeer*> (getPeer(i));
+            jassert (dynamic_cast <AndroidComponentPeer*> (getPeer(i)) != 0);
+
+            if (ap->view == viewToFind)
+                return ap;
+        }
+
+        return 0;
+    }
+
 private:
     //==============================================================================
-
+    GlobalRef view;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer);
 };
 
+//==============================================================================
+#define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
+  JUCE_JNI_CALLBACK (ComponentPeerView, javaMethodName, returnType, params) \
+  { \
+      AndroidComponentPeer* const peer = AndroidComponentPeer::findPeerForJavaView (view); \
+      if (peer != 0) \
+          peer->juceMethodInvocation; \
+  }
 
+JUCE_VIEW_CALLBACK (void, handlePaint, (JNIEnv* env, jobject view, jobject canvas),
+                    handlePaintCallback (env, canvas))
+
+
+//==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 {
     return new AndroidComponentPeer (this, styleFlags);
@@ -282,11 +319,17 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
+static int screenWidth = 0, screenHeight = 0;
+
 void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
-    // TODO
+    monitorCoords.add (Rectangle<int> (0, 0, screenWidth, screenHeight));
+}
 
-    monitorCoords.add (Rectangle<int> (0, 0, 640, 480));
+JUCE_JNI_CALLBACK (JuceAppActivity, setScreenSize, void, (JNIEnv* env, jobject activity, int w, int h))
+{
+    screenWidth = w;
+    screenHeight = h;
 }
 
 //==============================================================================

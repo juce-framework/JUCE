@@ -310,7 +310,7 @@ private:
                 }
                 else
                 {
-                    while (! text.isEmpty() || text.isWhitespace())
+                    while (! (text.isEmpty() || text.isWhitespace()))
                     {
                         ++text;
                         ++numChars;

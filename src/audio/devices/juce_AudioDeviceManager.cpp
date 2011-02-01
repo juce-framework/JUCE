@@ -795,34 +795,21 @@ void AudioDeviceManager::addMidiInputCallback (const String& name,
 {
     removeMidiInputCallback (name, callbackToAdd);
 
-    if (name.isEmpty())
+    if (name.isEmpty() || isMidiInputEnabled (name))
     {
+        const ScopedLock sl (midiCallbackLock);
         midiCallbacks.add (callbackToAdd);
-        midiCallbackDevices.add (String::empty);
-    }
-    else
-    {
-        for (int i = enabledMidiInputs.size(); --i >= 0;)
-        {
-            if (enabledMidiInputs[i]->getName() == name)
-            {
-                const ScopedLock sl (midiCallbackLock);
-                midiCallbacks.add (callbackToAdd);
-                midiCallbackDevices.add (enabledMidiInputs[i]->getName());
-                break;
-            }
-        }
+        midiCallbackDevices.add (name);
     }
 }
 
-void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* /*callback*/)
+void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callback)
 {
-    const ScopedLock sl (midiCallbackLock);
-
     for (int i = midiCallbacks.size(); --i >= 0;)
     {
-        if (midiCallbackDevices[i] == name)
+        if (midiCallbackDevices[i] == name && midiCallbacks.getUnchecked(i) == callback)
         {
+            const ScopedLock sl (midiCallbackLock);
             midiCallbacks.remove (i);
             midiCallbackDevices.remove (i);
         }
