@@ -77,46 +77,45 @@ const String createGUID (const String& seed)
     return guid;
 }
 
-//==============================================================================
-static void skipWhitespace (const String& s, int& i)
+const String escapeSpaces (const String& s)
 {
-    while (CharacterFunctions::isWhitespace (s[i]))
-        ++i;
+    return s.replace (" ", "\\ ");
 }
 
-const StringPairArray parsePreprocessorDefs (const String& s)
+//==============================================================================
+const StringPairArray parsePreprocessorDefs (const String& text)
 {
     StringPairArray result;
-    int i = 0;
+    String::CharPointerType s (text.getCharPointer());
 
-    while (s[i] != 0)
+    while (! s.isEmpty())
     {
         String token, value;
-        skipWhitespace (s, i);
+        s = s.findEndOfWhitespace();
 
-        while (s[i] != 0 && s[i] != '=' && ! CharacterFunctions::isWhitespace (s[i]))
-            token << s[i++];
+        while ((! s.isEmpty()) && *s != '=' && ! s.isWhitespace())
+            token << s.getAndAdvance();
 
-        skipWhitespace (s, i);
+        s = s.findEndOfWhitespace();
 
-        if (s[i] == '=')
+        if (*s == '=')
         {
-            ++i;
+            ++s;
 
-            skipWhitespace (s, i);
+            s = s.findEndOfWhitespace();
 
-            while (s[i] != 0 && ! CharacterFunctions::isWhitespace (s[i]))
+            while ((! s.isEmpty()) && ! s.isWhitespace())
             {
-                if (s[i] == ',')
+                if (*s == ',')
                 {
-                    ++i;
+                    ++s;
                     break;
                 }
 
-                if (s[i] == '\\' && (s[i + 1] == ' ' || s[i + 1] == ','))
-                    ++i;
+                if (*s == '\\' && (s[1] == ' ' || s[1] == ','))
+                    ++s;
 
-                value << s[i++];
+                value << s.getAndAdvance();
             }
         }
 
@@ -133,6 +132,23 @@ const StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, cons
         inheritedDefs.set (overridingDefs.getAllKeys()[i], overridingDefs.getAllValues()[i]);
 
     return inheritedDefs;
+}
+
+const String createGCCPreprocessorFlags (const StringPairArray& defs)
+{
+    String s;
+
+    for (int i = 0; i < defs.size(); ++i)
+    {
+        String def (defs.getAllKeys()[i]);
+        const String value (defs.getAllValues()[i]);
+        if (value.isNotEmpty())
+            def << "=" << value;
+
+        s += " -D " + def.quoted();
+    }
+
+    return s;
 }
 
 const String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString)

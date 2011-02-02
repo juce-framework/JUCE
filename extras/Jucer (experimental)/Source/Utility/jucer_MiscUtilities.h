@@ -33,8 +33,11 @@ const String hexString8Digits (int value);
 const String createAlphaNumericUID();
 const String createGUID (const String& seed); // Turns a seed into a windows GUID
 
+const String escapeSpaces (const String& text); // replaces spaces with blackslash-space
+
 const StringPairArray parsePreprocessorDefs (const String& defs);
 const StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);
+const String createGCCPreprocessorFlags (const StringPairArray& defs);
 const String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
 
 //==============================================================================

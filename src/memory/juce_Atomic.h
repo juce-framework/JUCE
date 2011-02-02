@@ -280,7 +280,7 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
     for (;;)
     {
         const Type oldValue (value);
-        const Type newValue (oldValue + amountToAdd);
+        const Type newValue (castFrom32Bit (castTo32Bit (oldValue) + castTo32Bit (amountToAdd)));
         if (compareAndSetBool (newValue, oldValue))
             return newValue;
     }
@@ -305,7 +305,7 @@ inline Type Atomic<Type>::operator++() throw()
     return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
                               : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
   #elif JUCE_ANDROID
-    return (Type) __atomic_inc (&value);
+    return (Type) __atomic_inc ((volatile int*) &value);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, 1);
   #endif
@@ -321,7 +321,7 @@ inline Type Atomic<Type>::operator--() throw()
     return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
                               : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
   #elif JUCE_ANDROID
-    return (Type) __atomic_dec (&value);
+    return (Type) __atomic_dec ((volatile int*) &value);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, -1);
   #endif

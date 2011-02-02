@@ -113,6 +113,8 @@ namespace Ids
     DECLARE_ID (memberName);
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
+    DECLARE_ID (androidSDKPath);
+    DECLARE_ID (androidNDKPath);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

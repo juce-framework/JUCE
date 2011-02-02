@@ -36,7 +36,7 @@
 class CharPointer_UTF16
 {
 public:
-   #if JUCE_WINDOWS && ! DOXYGEN
+   #if JUCE_NATIVE_WCHAR_IS_UTF16
     typedef wchar_t CharType;
    #else
     typedef int16 CharType;

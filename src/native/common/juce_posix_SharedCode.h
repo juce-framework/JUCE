@@ -742,8 +742,13 @@ void Thread::killThread()
     }
 }
 
-void Thread::setCurrentThreadName (const String& /*name*/)
+void Thread::setCurrentThreadName (const String& name)
 {
+   #if JUCE_MAC
+    pthread_setname_np (name.toUTF8());
+   #elif JUCE_LINUX
+    prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);
+   #endif
 }
 
 bool Thread::setThreadPriority (void* handle, int priority)

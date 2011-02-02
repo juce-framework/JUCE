@@ -159,13 +159,13 @@ public:
     /** Returns the number of characters in this string. */
     size_t length() const throw()
     {
-       #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
+       #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
+        return wcslen (data);
+       #else
         size_t n = 0;
         while (data[n] != 0)
             ++n;
         return n;
-       #else
-        return wcslen (data);
        #endif
     }
 
@@ -253,7 +253,7 @@ public:
         return CharacterFunctions::compare (*this, other);
     }
 
-   #if ! JUCE_NATIVE_WCHAR_IS_NOT_UTF32
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
     /** Compares this string with another one. */
     int compare (const CharPointer_UTF32& other) const throw()
     {

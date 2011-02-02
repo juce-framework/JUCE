@@ -28,25 +28,35 @@
 
 
 //==============================================================================
-#if JUCE_ANDROID && ! DOXYGEN
- typedef uint32                     juce_wchar;
- #define JUCE_T(stringLiteral)      CharPointer_UTF8 (stringLiteral)
- #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
-#elif JUCE_WINDOWS && ! DOXYGEN
- typedef uint32                     juce_wchar;
- #define JUCE_T(stringLiteral)      L##stringLiteral
- #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
+#if JUCE_WINDOWS && ! DOXYGEN
+ #define JUCE_NATIVE_WCHAR_IS_UTF8      0
+ #define JUCE_NATIVE_WCHAR_IS_UTF16     1
+ #define JUCE_NATIVE_WCHAR_IS_UTF32     0
 #else
- /** A platform-independent unicode character type. */
- typedef wchar_t                    juce_wchar;
- #define JUCE_T(stringLiteral)      (L##stringLiteral)
+ /** This macro will be set to 1 if the compiler's native wchar_t is an 8-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF8      0
+ /** This macro will be set to 1 if the compiler's native wchar_t is a 16-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF16     0
+ /** This macro will be set to 1 if the compiler's native wchar_t is a 32-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF32     1
 #endif
 
-#if ! JUCE_DONT_DEFINE_MACROS
- /** The 'T' macro allows a literal string to be compiled as unicode.
+#if JUCE_NATIVE_WCHAR_IS_UTF32 || DOXYGEN
+ /** A platform-independent 32-bit unicode character type. */
+ typedef wchar_t        juce_wchar;
+#else
+ typedef uint32         juce_wchar;
+#endif
 
-     If you write your string literals in the form T("xyz"), it will be compiled as L"xyz"
-     or "xyz", depending on which representation is best for the String class to work with.
+/** This macro is deprecated, but preserved for compatibility with old code.*/
+#define JUCE_T(stringLiteral)          (L##stringLiteral)
+
+#if ! JUCE_DONT_DEFINE_MACROS
+ /** The 'T' macro is an alternative for using the "L" prefix in front of a string literal.
+
+     This macro is deprectated, but kept here for compatibility with old code. The best (i.e.
+     most portable) way to encode your string literals is just as standard 8-bit strings, but
+     using escaped utf-8 character codes for extended characters.
 
      Because the 'T' symbol is occasionally used inside 3rd-party library headers which you
      may need to include after juce.h, you can use the juce_withoutMacros.h file (in

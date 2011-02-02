@@ -53,7 +53,7 @@ public:
     virtual bool usesMMFiles() const = 0;
     virtual void createPropertyEditors (Array <PropertyComponent*>& props);
     virtual void launchProject() = 0;
-    virtual const String create() = 0;
+    virtual void create() = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
 
     //==============================================================================
@@ -78,7 +78,11 @@ public:
     Value getExtraLinkerFlags() const       { return getSetting (Ids::extraLinkerFlags); }
 
     Value getExporterPreprocessorDefs() const   { return getSetting (Ids::extraDefs); }
-    const StringPairArray getAllPreprocessorDefs (const Project::BuildConfiguration& config) const;  // includes inherited ones..
+
+    // includes exporter, project + config defs
+    const StringPairArray getAllPreprocessorDefs (const Project::BuildConfiguration& config) const;
+    // includes exporter + project defs..
+    const StringPairArray getAllPreprocessorDefs() const;
 
     const String replacePreprocessorTokens (const Project::BuildConfiguration& config,
                                             const String& sourceString) const;
@@ -95,6 +99,20 @@ public:
     Array<RelativePath> juceWrapperFiles;
     RelativePath juceWrapperFolder;
 
+    // An exception that can be thrown by the create() method.
+    class SaveError
+    {
+    public:
+        SaveError (const String& error) : message (error)
+        {}
+
+        SaveError (const File& fileThatFailedToWrite)
+            : message ("Can't write to the file: " + fileThatFailedToWrite.getFullPathName())
+        {}
+
+        String message;
+    };
+
 protected:
     //==============================================================================
     Project& project;
@@ -103,7 +121,7 @@ protected:
 
     const RelativePath getJucePathFromTargetFolder() const;
 
-    const String getDefaultBuildsRootFolder() const         { return "Builds/"; }
+    static const String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
     const Array<RelativePath> getVSTFilesRequired() const;
 
@@ -117,6 +135,26 @@ protected:
     }
 
     const RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
+
+    //==============================================================================
+    static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)
+    {
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
+            throw SaveError (file);
+    }
+
+    static void createDirectoryOrThrow (const File& dirToCreate)
+    {
+        if (! dirToCreate.createDirectory())
+            throw SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
+    }
+
+    static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding, int maxCharsPerLine)
+    {
+        MemoryOutputStream mo;
+        xml.writeToStream (mo, String::empty, false, true, encoding, maxCharsPerLine);
+        overwriteFileIfDifferentOrThrow (file, mo);
+    }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter);

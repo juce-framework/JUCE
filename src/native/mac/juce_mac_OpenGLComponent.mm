@@ -44,6 +44,8 @@ END_JUCE_NAMESPACE
 - (bool) makeActive;
 - (void) makeInactive;
 - (void) reshape;
+- (void) rightMouseDown: (NSEvent*) ev;
+- (void) rightMouseUp: (NSEvent*) ev;
 @end
 
 @implementation ThreadSafeNSOpenGLView
@@ -110,6 +112,16 @@ END_JUCE_NAMESPACE
 {
     const ScopedLock sl (*contextLock);
     needsUpdate = true;
+}
+
+- (void) rightMouseDown: (NSEvent*) ev
+{
+    [[self superview] rightMouseDown: ev];
+}
+
+- (void) rightMouseUp: (NSEvent*) ev
+{
+    [[self superview] rightMouseUp: ev];
 }
 
 @end

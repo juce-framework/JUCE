@@ -162,6 +162,7 @@
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectExporter.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectExporter.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_Android.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectExport_Make.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectExport_MSVC.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectExport_XCode.h"/>

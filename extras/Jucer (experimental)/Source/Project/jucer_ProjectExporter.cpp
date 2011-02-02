@@ -27,6 +27,7 @@
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_XCode.h"
+#include "jucer_ProjectExport_Android.h"
 
 
 //==============================================================================
@@ -55,6 +56,7 @@ const StringArray ProjectExporter::getExporterNames()
     s.add (MSVCProjectExporterVC2008::getName());
     s.add (MSVCProjectExporterVC2010::getName());
     s.add (MakefileProjectExporter::getNameLinux());
+    //s.add (AndroidProjectExporter::getNameAndroid());
     return s;
 }
 
@@ -71,6 +73,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 4:     exp = new MSVCProjectExporterVC2008 (project, ValueTree (MSVCProjectExporterVC2008::getValueTreeTypeName())); break;
         case 5:     exp = new MSVCProjectExporterVC2010 (project, ValueTree (MSVCProjectExporterVC2010::getValueTreeTypeName())); break;
         case 6:     exp = new MakefileProjectExporter (project, ValueTree (MakefileProjectExporter::getValueTreeTypeName())); break;
+        case 7:     exp = new AndroidProjectExporter (project, ValueTree (AndroidProjectExporter::getValueTreeTypeName())); break;
         default:    jassertfalse; return 0;
     }
 
@@ -93,6 +96,7 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     if (exp == 0)    exp = MSVCProjectExporterVC2010::createForSettings (project, settings);
     if (exp == 0)    exp = XCodeProjectExporter::createForSettings (project, settings);
     if (exp == 0)    exp = MakefileProjectExporter::createForSettings (project, settings);
+    if (exp == 0)    exp = AndroidProjectExporter::createForSettings (project, settings);
 
     jassert (exp != 0);
     return exp;
@@ -203,6 +207,14 @@ const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
 const StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const
 {
     StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
+                                                 parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
+    defs.set (getExporterIdentifierMacro(), "1");
+    return defs;
+}
+
+const StringPairArray ProjectExporter::getAllPreprocessorDefs() const
+{
+    StringPairArray defs (mergePreprocessorDefs (project.getPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
     defs.set (getExporterIdentifierMacro(), "1");
     return defs;

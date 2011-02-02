@@ -166,11 +166,12 @@ public:
         }
     }
 
+    //==============================================================================
     inline operator jobject() const throw()     { return obj; }
     inline jobject get() const throw()          { return obj; }
-
     inline JNIEnv* getEnv() const throw()       { return env; }
 
+    //==============================================================================
     #define DECLARE_CALL_TYPE_METHOD(returnType, typeName) \
         returnType call##typeName##Method (jmethodID methodID, ... ) \
         { \
@@ -202,6 +203,7 @@ public:
     }
 
 private:
+    //==============================================================================
     JNIEnv* env;
     jobject obj;
 

@@ -86,6 +86,7 @@
 		F2F98DA41146390D05A44EAD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectContentComponent.h; path = ../../Source/Project/jucer_ProjectContentComponent.h; sourceTree = SOURCE_ROOT; };
 		296E0498784BF03FA18B164B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ProjectExporter.cpp; path = ../../Source/Project/jucer_ProjectExporter.cpp; sourceTree = SOURCE_ROOT; };
 		5DE419991013E7C0F203E99F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExporter.h; path = ../../Source/Project/jucer_ProjectExporter.h; sourceTree = SOURCE_ROOT; };
+		AB9EE4734D894FBF1CF62C5F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_Android.h; path = ../../Source/Project/jucer_ProjectExport_Android.h; sourceTree = SOURCE_ROOT; };
 		889715B0152919B2EAA1F5F9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_Make.h; path = ../../Source/Project/jucer_ProjectExport_Make.h; sourceTree = SOURCE_ROOT; };
 		907F302BB89308CDB2C5FD0E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_MSVC.h; path = ../../Source/Project/jucer_ProjectExport_MSVC.h; sourceTree = SOURCE_ROOT; };
 		D250274734D729D2E0389A20 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_XCode.h; path = ../../Source/Project/jucer_ProjectExport_XCode.h; sourceTree = SOURCE_ROOT; };
@@ -165,6 +166,7 @@
 				F2F98DA41146390D05A44EAD,
 				296E0498784BF03FA18B164B,
 				5DE419991013E7C0F203E99F,
+				AB9EE4734D894FBF1CF62C5F,
 				889715B0152919B2EAA1F5F9,
 				907F302BB89308CDB2C5FD0E,
 				D250274734D729D2E0389A20,

@@ -139,14 +139,14 @@ int CharacterFunctions::ftime (char* const dest, const int maxChars, const char*
 
 int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
 {
-   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
+    return (int) wcsftime (dest, maxChars, format, tm);
+   #else
     HeapBlock <char> tempDest;
     tempDest.calloc (maxChars + 2);
     int result = ftime (tempDest.getData(), maxChars, String (format).toUTF8(), tm);
     CharPointer_UTF32 (dest).writeAll (CharPointer_UTF8 (tempDest.getData()));
     return result;
-   #else
-    return (int) wcsftime (dest, maxChars, format, tm);
    #endif
 }
 

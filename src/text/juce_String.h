@@ -126,7 +126,7 @@ public:
     /** Creates a string from an ASCII character string */
     String (const CharPointer_ASCII& text);
 
-   #if JUCE_WINDOWS
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
     /** Creates a string from a UTF-16 character string */
     String (const wchar_t* text);
 
@@ -175,7 +175,7 @@ public:
     String& operator+= (char characterToAppend);
     /** Appends a character at the end of this string. */
     String& operator+= (juce_wchar characterToAppend);
-   #if JUCE_WINDOWS
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
     /** Appends a character at the end of this string. */
     String& operator+= (wchar_t characterToAppend);
     /** Appends another string at the end of this one. */
@@ -1219,7 +1219,7 @@ JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
-#if JUCE_WINDOWS
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, wchar_t characterToAppend);
 /** Concatenates two strings. */

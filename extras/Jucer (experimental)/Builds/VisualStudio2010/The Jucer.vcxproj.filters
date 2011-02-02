@@ -183,6 +183,9 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h">
       <Filter>The Jucer\Project</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Android.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Make.h">
       <Filter>The Jucer\Project</Filter>
     </ClInclude>

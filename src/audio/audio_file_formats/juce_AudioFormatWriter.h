@@ -224,7 +224,8 @@ protected:
         typedef AudioData::Pointer <DestSampleType, DestEndianness, AudioData::Interleaved, AudioData::NonConst>                DestType;
         typedef AudioData::Pointer <SourceSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>     SourceType;
 
-        static void write (void* destData, int numDestChannels, const int** source, int numSamples) throw()
+        static void write (void* destData, int numDestChannels, const int** source,
+                           int numSamples, const int sourceOffset = 0) throw()
         {
             for (int i = 0; i < numDestChannels; ++i)
             {
@@ -232,7 +233,7 @@ protected:
 
                 if (*source != 0)
                 {
-                    dest.convertSamples (SourceType (*source), numSamples);
+                    dest.convertSamples (SourceType (*source + sourceOffset), numSamples);
                     ++source;
                 }
                 else

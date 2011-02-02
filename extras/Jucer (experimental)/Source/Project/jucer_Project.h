@@ -109,6 +109,7 @@ public:
     Value getSmallIconImageItemID() const               { return getProjectValue ("smallIcon"); }
     const Image getBigIcon();
     const Image getSmallIcon();
+    const Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
 
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }

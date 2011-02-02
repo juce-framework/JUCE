@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	25
+#define JUCE_BUILDNUMBER	26
 
 /** Current Juce version number.
 
@@ -1636,25 +1636,35 @@ inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destB
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 #define __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 
-#if JUCE_ANDROID && ! DOXYGEN
- typedef uint32			 juce_wchar;
- #define JUCE_T(stringLiteral)	  CharPointer_UTF8 (stringLiteral)
- #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
-#elif JUCE_WINDOWS && ! DOXYGEN
- typedef uint32			 juce_wchar;
- #define JUCE_T(stringLiteral)	  L##stringLiteral
- #define JUCE_NATIVE_WCHAR_IS_NOT_UTF32 1
+#if JUCE_WINDOWS && ! DOXYGEN
+ #define JUCE_NATIVE_WCHAR_IS_UTF8	  0
+ #define JUCE_NATIVE_WCHAR_IS_UTF16	 1
+ #define JUCE_NATIVE_WCHAR_IS_UTF32	 0
 #else
- /** A platform-independent unicode character type. */
- typedef wchar_t			juce_wchar;
- #define JUCE_T(stringLiteral)	  (L##stringLiteral)
+ /** This macro will be set to 1 if the compiler's native wchar_t is an 8-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF8	  0
+ /** This macro will be set to 1 if the compiler's native wchar_t is a 16-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF16	 0
+ /** This macro will be set to 1 if the compiler's native wchar_t is a 32-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF32	 1
 #endif
 
-#if ! JUCE_DONT_DEFINE_MACROS
- /** The 'T' macro allows a literal string to be compiled as unicode.
+#if JUCE_NATIVE_WCHAR_IS_UTF32 || DOXYGEN
+ /** A platform-independent 32-bit unicode character type. */
+ typedef wchar_t	juce_wchar;
+#else
+ typedef uint32	 juce_wchar;
+#endif
 
-	 If you write your string literals in the form T("xyz"), it will be compiled as L"xyz"
-	 or "xyz", depending on which representation is best for the String class to work with.
+/** This macro is deprecated, but preserved for compatibility with old code.*/
+#define JUCE_T(stringLiteral)	  (L##stringLiteral)
+
+#if ! JUCE_DONT_DEFINE_MACROS
+ /** The 'T' macro is an alternative for using the "L" prefix in front of a string literal.
+
+	 This macro is deprectated, but kept here for compatibility with old code. The best (i.e.
+	 most portable) way to encode your string literals is just as standard 8-bit strings, but
+	 using escaped utf-8 character codes for extended characters.
 
 	 Because the 'T' symbol is occasionally used inside 3rd-party library headers which you
 	 may need to include after juce.h, you can use the juce_withoutMacros.h file (in
@@ -2332,7 +2342,7 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 	for (;;)
 	{
 		const Type oldValue (value);
-		const Type newValue (oldValue + amountToAdd);
+		const Type newValue (castFrom32Bit (castTo32Bit (oldValue) + castTo32Bit (amountToAdd)));
 		if (compareAndSetBool (newValue, oldValue))
 			return newValue;
 	}
@@ -2357,7 +2367,7 @@ inline Type Atomic<Type>::operator++() throw()
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
   #elif JUCE_ANDROID
-	return (Type) __atomic_inc (&value);
+	return (Type) __atomic_inc ((volatile int*) &value);
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, 1);
   #endif
@@ -2373,7 +2383,7 @@ inline Type Atomic<Type>::operator--() throw()
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
   #elif JUCE_ANDROID
-	return (Type) __atomic_dec (&value);
+	return (Type) __atomic_dec ((volatile int*) &value);
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, -1);
   #endif
@@ -2961,7 +2971,7 @@ private:
 class CharPointer_UTF16
 {
 public:
-   #if JUCE_WINDOWS && ! DOXYGEN
+   #if JUCE_NATIVE_WCHAR_IS_UTF16
 	typedef wchar_t CharType;
    #else
 	typedef int16 CharType;
@@ -3519,13 +3529,13 @@ public:
 	/** Returns the number of characters in this string. */
 	size_t length() const throw()
 	{
-	   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
+	   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
+		return wcslen (data);
+	   #else
 		size_t n = 0;
 		while (data[n] != 0)
 			++n;
 		return n;
-	   #else
-		return wcslen (data);
 	   #endif
 	}
 
@@ -3613,7 +3623,7 @@ public:
 		return CharacterFunctions::compare (*this, other);
 	}
 
-   #if ! JUCE_NATIVE_WCHAR_IS_NOT_UTF32
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
 	/** Compares this string with another one. */
 	int compare (const CharPointer_UTF32& other) const throw()
 	{
@@ -4175,7 +4185,7 @@ public:
 	/** Creates a string from an ASCII character string */
 	String (const CharPointer_ASCII& text);
 
-   #if JUCE_WINDOWS
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 	/** Creates a string from a UTF-16 character string */
 	String (const wchar_t* text);
 
@@ -4221,7 +4231,7 @@ public:
 	String& operator+= (char characterToAppend);
 	/** Appends a character at the end of this string. */
 	String& operator+= (juce_wchar characterToAppend);
-   #if JUCE_WINDOWS
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 	/** Appends a character at the end of this string. */
 	String& operator+= (wchar_t characterToAppend);
 	/** Appends another string at the end of this one. */
@@ -5242,7 +5252,7 @@ JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
-#if JUCE_WINDOWS
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
 JUCE_API const String JUCE_CALLTYPE operator+  (String string1, wchar_t characterToAppend);
 /** Concatenates two strings. */
@@ -12535,7 +12545,8 @@ public:
 	/** Sets the text in a text element.
 
 		Note that this is only a valid call if this element is a text element. If it's
-		not, then no action will be performed.
+		not, then no action will be performed. If you're trying to add text inside a normal
+		element, you probably want to use addTextElement() instead.
 	*/
 	void setText (const String& newText);
 
@@ -35101,7 +35112,8 @@ protected:
 		typedef AudioData::Pointer <DestSampleType, DestEndianness, AudioData::Interleaved, AudioData::NonConst>		DestType;
 		typedef AudioData::Pointer <SourceSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>	 SourceType;
 
-		static void write (void* destData, int numDestChannels, const int** source, int numSamples) throw()
+		static void write (void* destData, int numDestChannels, const int** source,
+						   int numSamples, const int sourceOffset = 0) throw()
 		{
 			for (int i = 0; i < numDestChannels; ++i)
 			{
@@ -35109,7 +35121,7 @@ protected:
 
 				if (*source != 0)
 				{
-					dest.convertSamples (SourceType (*source), numSamples);
+					dest.convertSamples (SourceType (*source + sourceOffset), numSamples);
 					++source;
 				}
 				else

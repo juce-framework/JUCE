@@ -515,10 +515,14 @@ private:
                 if (project.isAudioPlugin())
                     exporter->juceWrapperFiles.add (RelativePath (pluginCharacteristicsFile, targetFolder, RelativePath::buildTargetFolder));
 
-                String error = exporter->create();
-
-                if (error.isNotEmpty())
-                    errors.add (error);
+                try
+                {
+                    exporter->create();
+                }
+                catch (ProjectExporter::SaveError& error)
+                {
+                    errors.add (error.message);
+                }
             }
             else
             {

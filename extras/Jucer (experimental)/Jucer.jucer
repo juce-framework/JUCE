@@ -90,6 +90,8 @@
             file="Source/Project/jucer_ProjectExporter.cpp"/>
       <FILE id="KFY4Re5" name="jucer_ProjectExporter.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectExporter.h"/>
+      <FILE id="N0uQAr" name="jucer_ProjectExport_Android.h" compile="0"
+            resource="0" file="Source/Project/jucer_ProjectExport_Android.h"/>
       <FILE id="b8ouh7s" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectExport_Make.h"/>
       <FILE id="lbo8KcG" name="jucer_ProjectExport_MSVC.h" compile="0" resource="0"

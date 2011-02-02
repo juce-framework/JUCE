@@ -42,6 +42,14 @@ BEGIN_JUCE_NAMESPACE
  #error "JUCE_STRINGS_ARE_UNICODE is deprecated! All strings are now unicode by default."
 #endif
 
+#if JUCE_NATIVE_WCHAR_IS_UTF8
+ typedef CharPointer_UTF8          CharPointer_wchar_t;
+#elif JUCE_NATIVE_WCHAR_IS_UTF16
+ typedef CharPointer_UTF16         CharPointer_wchar_t;
+#else
+ typedef CharPointer_UTF32         CharPointer_wchar_t;
+#endif
+
 NewLine newLine;
 
 //==============================================================================
@@ -265,7 +273,7 @@ String::String (const char* const t)
         because there's no other way to represent these strings in a way that isn't dependent on
         the compiler, source code editor and platform.
     */
-    jassert (CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
+    jassert (t == 0 || CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
 }
 
 String::String (const char* const t, const size_t maxChars)
@@ -284,7 +292,7 @@ String::String (const char* const t, const size_t maxChars)
         because there's no other way to represent these strings in a way that isn't dependent on
         the compiler, source code editor and platform.
     */
-    jassert (CharPointer_ASCII::isValidString (t, (int) maxChars));
+    jassert (t == 0 || CharPointer_ASCII::isValidString (t, (int) maxChars));
 }
 
 String::String (const juce_wchar* const t)
@@ -322,14 +330,16 @@ String::String (const CharPointer_ASCII& t)
 {
 }
 
-#if JUCE_WINDOWS
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 String::String (const wchar_t* const t)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF16 (t)))
+    : text (StringHolder::createFromCharPointer
+                (CharPointer_wchar_t (reinterpret_cast <const CharPointer_wchar_t::CharType*> (t))))
 {
 }
 
 String::String (const wchar_t* const t, size_t maxChars)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF16 (t), maxChars))
+    : text (StringHolder::createFromCharPointer
+                (CharPointer_wchar_t (reinterpret_cast <const CharPointer_wchar_t::CharType*> (t)), maxChars))
 {
 }
 #endif
@@ -717,7 +727,7 @@ String& String::operator+= (const juce_wchar ch)
     return operator+= (static_cast <const juce_wchar*> (asString));
 }
 
-#if JUCE_WINDOWS
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 String& String::operator+= (const wchar_t ch)
 {
     return operator+= ((juce_wchar) ch);
@@ -786,7 +796,7 @@ JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const juce_wchar 
     return string1 += string2;
 }
 
-#if JUCE_WINDOWS
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 JUCE_API const String JUCE_CALLTYPE operator+ (String string1, wchar_t string2)
 {
     return string1 += string2;
@@ -794,7 +804,7 @@ JUCE_API const String JUCE_CALLTYPE operator+ (String string1, wchar_t string2)
 
 JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2)
 {
-    string1.appendCharPointer (CharPointer_UTF16 (string2));
+    string1.appendCharPointer (CharPointer_wchar_t (reinterpret_cast <const CharPointer_wchar_t::CharType*> (string2)));
     return string1;
 }
 
@@ -2117,9 +2127,7 @@ const String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 //==============================================================================
 const char* String::toCString() const
 {
-   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
-    return toUTF8();
-   #else
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
     if (isEmpty())
         return reinterpret_cast <const char*> (text.getAddress());
 
@@ -2128,29 +2136,31 @@ const char* String::toCString() const
     wcstombs (extraSpace, text, len);
     extraSpace [len] = 0;
     return extraSpace;
+   #else
+    return toUTF8();
    #endif
 }
 
 int String::getNumBytesAsCString() const throw()
 {
-   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
-    return getNumBytesAsUTF8();
-   #else
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
     return (int) wcstombs (0, text, 0);
+   #else
+    return getNumBytesAsUTF8();
    #endif
 }
 
 int String::copyToCString (char* destBuffer, const int maxBufferSizeBytes) const throw()
 {
-   #if JUCE_NATIVE_WCHAR_IS_NOT_UTF32
-    return copyToUTF8 (destBuffer, maxBufferSizeBytes);
-   #else
+   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
     const int numBytes = (int) wcstombs (destBuffer, text, maxBufferSizeBytes);
 
     if (destBuffer != 0 && numBytes >= 0)
         destBuffer [numBytes] = 0;
 
     return numBytes;
+   #else
+    return copyToUTF8 (destBuffer, maxBufferSizeBytes);
    #endif
 }
 

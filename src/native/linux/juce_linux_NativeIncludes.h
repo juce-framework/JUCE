@@ -56,6 +56,7 @@
 #include <net/if.h>
 #include <sys/sysinfo.h>
 #include <sys/file.h>
+#include <sys/prctl.h>
 #include <signal.h>
 
 /* Got a build error here? You'll need to install the freetype library...

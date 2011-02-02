@@ -78,6 +78,16 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_NonGUI()
     static_jassert (sizeof (uint32) == 4);
     static_jassert (sizeof (int64) == 8);
     static_jassert (sizeof (uint64) == 8);
+
+    #if JUCE_NATIVE_WCHAR_IS_UTF8
+      static_jassert (sizeof (wchar_t) == 1);
+    #elif JUCE_NATIVE_WCHAR_IS_UTF16
+      static_jassert (sizeof (wchar_t) == 2);
+    #elif JUCE_NATIVE_WCHAR_IS_UTF32
+      static_jassert (sizeof (wchar_t) == 4);
+    #else
+      #error "native wchar_t size is unknown"
+    #endif
 }
 
 JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
