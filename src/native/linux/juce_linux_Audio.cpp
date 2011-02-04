@@ -1011,7 +1011,7 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_ALSA()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()
 {
     return new ALSAAudioIODeviceType();
 }

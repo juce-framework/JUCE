@@ -102,23 +102,82 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (contextClass, "android/content/Context") \
  JAVACLASS (canvasClass, "android/graphics/Canvas") \
  JAVACLASS (paintClass, "android/graphics/Paint") \
-
+ JAVACLASS (pathClass, "android/graphics/Path") \
+ JAVACLASS (matrixClass, "android/graphics/Matrix") \
+ JAVACLASS (rectClass, "android/graphics/Rect") \
+ JAVACLASS (regionClass, "android/graphics/Region") \
+ JAVACLASS (shaderClass, "android/graphics/Shader") \
+ JAVACLASS (linearGradientClass, "android/graphics/LinearGradient") \
+ JAVACLASS (radialGradientClass, "android/graphics/RadialGradient") \
 
 //==============================================================================
-#define JUCE_JNI_METHODS(METHOD, STATICMETHOD) \
+#define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD) \
 \
  STATICMETHOD (activityClass, printToConsole, "printToConsole", "(Ljava/lang/String;)V") \
  METHOD (activityClass, createNewView, "createNewView", "()Lcom/juce/ComponentPeerView;") \
  METHOD (activityClass, deleteView, "deleteView", "(Lcom/juce/ComponentPeerView;)V") \
+ METHOD (activityClass, postMessage, "postMessage", "(J)V") \
 \
  METHOD (fileClass, fileExists, "exists", "()Z") \
 \
+ METHOD (componentPeerViewClass, setViewName, "setViewName", "(Ljava/lang/String;)V") \
  METHOD (componentPeerViewClass, layout, "layout", "(IIII)V") \
+ METHOD (componentPeerViewClass, getLeft, "getLeft", "()I") \
+ METHOD (componentPeerViewClass, getTop, "getTop", "()I") \
+ METHOD (componentPeerViewClass, getWidth, "getWidth", "()I") \
+ METHOD (componentPeerViewClass, getHeight, "getHeight", "()I") \
+ METHOD (componentPeerViewClass, getLocationOnScreen, "getLocationOnScreen", "([I)V") \
+ METHOD (componentPeerViewClass, bringToFront, "bringToFront", "()V") \
+ METHOD (componentPeerViewClass, requestFocus, "requestFocus", "()Z") \
+ METHOD (componentPeerViewClass, setVisible, "setVisible", "(Z)V") \
+ METHOD (componentPeerViewClass, isVisible, "isVisible", "()Z") \
+ METHOD (componentPeerViewClass, hasFocus, "hasFocus", "()Z") \
+ METHOD (componentPeerViewClass, invalidate, "invalidate", "(IIII)V") \
 \
  METHOD (canvasClass, drawRect, "drawRect", "(FFFFLandroid/graphics/Paint;)V") \
+ METHOD (canvasClass, translate, "translate", "(FF)V") \
+ METHOD (canvasClass, clipPath, "clipPath", "(Landroid/graphics/Path;)Z") \
+ METHOD (canvasClass, clipRect, "clipRect", "(FFFF)Z") \
+ METHOD (canvasClass, clipRegion, "clipRegion", "(Landroid/graphics/Region;)Z") \
+ METHOD (canvasClass, concat, "concat", "(Landroid/graphics/Matrix;)V") \
+ METHOD (canvasClass, drawBitmap, "drawBitmap", "(Landroid/graphics/Bitmap;Landroid/graphics/Matrix;Landroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawLine, "drawLine", "(FFFFLandroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawPath, "drawPath", "(Landroid/graphics/Path;Landroid/graphics/Paint;)V") \
+ METHOD (canvasClass, getClipBounds, "getClipBounds", "(Landroid/graphics/Rect;)Z") \
+ METHOD (canvasClass, getClipBounds2, "getClipBounds", "()Landroid/graphics/Rect;") \
+ METHOD (canvasClass, getMatrix, "getMatrix", "()Landroid/graphics/Matrix;") \
+ METHOD (canvasClass, save, "save", "()I") \
+ METHOD (canvasClass, restore, "restore", "()V") \
+ METHOD (canvasClass, saveLayerAlpha, "saveLayerAlpha", "(FFFFII)I") \
 \
  METHOD (paintClass, paintClassConstructor, "<init>", "()V") \
  METHOD (paintClass, setColor, "setColor", "(I)V") \
+ METHOD (paintClass, setShader, "setShader", "(Landroid/graphics/Shader;)Landroid/graphics/Shader;") \
+\
+ METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
+\
+ METHOD (pathClass, pathClassConstructor, "<init>", "()V") \
+ METHOD (pathClass, moveTo, "moveTo", "(FF)V") \
+ METHOD (pathClass, lineTo, "lineTo", "(FF)V") \
+ METHOD (pathClass, quadTo, "quadTo", "(FFFF)V") \
+ METHOD (pathClass, cubicTo, "cubicTo", "(FFFFFF)V") \
+ METHOD (pathClass, closePath, "close", "()V") \
+\
+ METHOD (matrixClass, matrixClassConstructor, "<init>", "()V") \
+ METHOD (matrixClass, setValues, "setValues", "([F)V") \
+\
+ METHOD (rectClass, rectConstructor, "<init>", "(IIII)V") \
+ FIELD (rectClass, rectLeft, "left", "I") \
+ FIELD (rectClass, rectRight, "right", "I") \
+ FIELD (rectClass, rectTop, "top", "I") \
+ FIELD (rectClass, rectBottom, "bottom", "I") \
+\
+ METHOD (linearGradientClass, linearGradientConstructor, "<init>", "(FFFF[I[FLandroid/graphics/Shader$TileMode;)V") \
+\
+ METHOD (radialGradientClass, radialGradientConstructor, "<init>", "(FFF[I[FLandroid/graphics/Shader$TileMode;)V") \
+\
+ METHOD (regionClass, regionConstructor, "<init>", "()V"); \
+ METHOD (regionClass, regionUnion, "union", "(Landroid/graphics/Rect;)Z"); \
 
 
 //==============================================================================
@@ -144,26 +203,25 @@ public:
 
     ~GlobalRef()
     {
-        release();
+        clear();
+    }
+
+    void clear()
+    {
+        if (env != 0)
+        {
+            env->DeleteGlobalRef (obj);
+            env = 0;
+            obj = 0;
+        }
     }
 
     GlobalRef& operator= (const GlobalRef& other)
     {
-        release();
+        clear();
         env = other.env;
         obj = retain (env, other.obj);
         return *this;
-    }
-
-    GlobalRef& operator= (jobject newObj)
-    {
-        jassert (env != 0 || newObj == 0);
-
-        if (newObj != obj && env != 0)
-        {
-            release();
-            obj = retain (env, newObj);
-        }
     }
 
     //==============================================================================
@@ -173,12 +231,11 @@ public:
 
     //==============================================================================
     #define DECLARE_CALL_TYPE_METHOD(returnType, typeName) \
-        returnType call##typeName##Method (jmethodID methodID, ... ) \
+        returnType call##typeName##Method (jmethodID methodID, ... ) const \
         { \
-            returnType result; \
             va_list args; \
             va_start (args, methodID); \
-            result = env->Call##typeName##MethodV (obj, methodID, args); \
+            returnType result = env->Call##typeName##MethodV (obj, methodID, args); \
             va_end (args); \
             return result; \
         }
@@ -194,7 +251,7 @@ public:
     DECLARE_CALL_TYPE_METHOD (jdouble, Double)
     #undef DECLARE_CALL_TYPE_METHOD
 
-    void callVoidMethod (jmethodID methodID, ... )
+    void callVoidMethod (jmethodID methodID, ... ) const
     {
         va_list args;
         va_start (args, methodID);
@@ -207,12 +264,6 @@ private:
     JNIEnv* env;
     jobject obj;
 
-    void release()
-    {
-        if (env != 0)
-            env->DeleteGlobalRef (obj);
-    }
-
     static jobject retain (JNIEnv* const env, jobject obj_)
     {
         return env == 0 ? 0 : env->NewGlobalRef (obj_);
@@ -223,14 +274,16 @@ private:
 class AndroidJavaCallbacks
 {
 public:
-    AndroidJavaCallbacks() : env (0)
+    AndroidJavaCallbacks() : env (0), screenWidth (0), screenHeight (0)
     {
     }
 
-    void initialise (JNIEnv* env_, jobject activity_)
+    void initialise (JNIEnv* env_, jobject activity_, int screenWidth_, int screenHeight_)
     {
         env = env_;
         activity = GlobalRef (env, activity_);
+        screenWidth = screenWidth_;
+        screenHeight = screenHeight_;
 
         #define CREATE_JNI_CLASS(className, path) \
             className = (jclass) env->NewGlobalRef (env->FindClass (path)); \
@@ -244,7 +297,10 @@ public:
         #define CREATE_JNI_STATICMETHOD(ownerClass, methodID, stringName, params) \
             methodID = env->GetStaticMethodID (ownerClass, stringName, params); \
             jassert (methodID != 0);
-        JUCE_JNI_METHODS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD);
+        #define CREATE_JNI_FIELD(ownerClass, fieldID, stringName, signature) \
+            fieldID = env->GetFieldID (ownerClass, stringName, signature); \
+            jassert (fieldID != 0);
+        JUCE_JNI_METHODS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD);
         #undef CREATE_JNI_METHOD
     }
 
@@ -256,7 +312,7 @@ public:
             JUCE_JNI_CLASSES (RELEASE_JNI_CLASS);
             #undef RELEASE_JNI_CLASS
 
-            activity = 0;
+            activity.clear();
             env = 0;
         }
     }
@@ -280,6 +336,7 @@ public:
     //==============================================================================
     JNIEnv* env;
     GlobalRef activity;
+    int screenWidth, screenHeight;
 
     //==============================================================================
     #define DECLARE_JNI_CLASS(className, path) jclass className;
@@ -287,7 +344,8 @@ public:
     #undef DECLARE_JNI_CLASS
 
     #define DECLARE_JNI_METHOD(ownerClass, methodID, stringName, params) jmethodID methodID;
-    JUCE_JNI_METHODS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD);
+    #define DECLARE_JNI_FIELD(ownerClass, fieldID, stringName, signature) jfieldID fieldID;
+    JUCE_JNI_METHODS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD);
     #undef DECLARE_JNI_METHOD
 };
 

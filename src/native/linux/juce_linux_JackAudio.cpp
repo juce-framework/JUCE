@@ -592,16 +592,10 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_JACK()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()
 {
     return new JackAudioIODeviceType();
 }
-
-
-//==============================================================================
-#else  // if JACK is turned off..
-
-AudioIODeviceType* juce_createAudioIODeviceType_JACK()    { return 0; }
 
 #endif
 #endif

@@ -1386,7 +1386,7 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 }
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_DirectSound()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_DirectSound()
 {
     return new DSoundAudioIODeviceType();
 }

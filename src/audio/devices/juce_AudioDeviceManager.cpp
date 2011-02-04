@@ -101,48 +101,25 @@ const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceType
 }
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_CoreAudio();
-AudioIODeviceType* juce_createAudioIODeviceType_iPhoneAudio();
-AudioIODeviceType* juce_createAudioIODeviceType_WASAPI();
-AudioIODeviceType* juce_createAudioIODeviceType_DirectSound();
-AudioIODeviceType* juce_createAudioIODeviceType_ASIO();
-AudioIODeviceType* juce_createAudioIODeviceType_ALSA();
 AudioIODeviceType* juce_createAudioIODeviceType_JACK();
+
+static void addIfNotNull (OwnedArray <AudioIODeviceType>& list, AudioIODeviceType* const device)
+{
+    if (device != 0)
+        list.add (device);
+}
 
 void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& list)
 {
-    (void) list; // (to avoid 'unused param' warnings)
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_WASAPI());
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_DirectSound());
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ASIO());
 
-    #if JUCE_WINDOWS
-     #if JUCE_WASAPI
-     if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
-         list.add (juce_createAudioIODeviceType_WASAPI());
-     #endif
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_CoreAudio());
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_iOSAudio());
 
-     #if JUCE_DIRECTSOUND
-     list.add (juce_createAudioIODeviceType_DirectSound());
-     #endif
-
-     #if JUCE_ASIO
-     list.add (juce_createAudioIODeviceType_ASIO());
-     #endif
-    #endif
-
-    #if JUCE_MAC
-     list.add (juce_createAudioIODeviceType_CoreAudio());
-    #endif
-
-    #if JUCE_IOS
-     list.add (juce_createAudioIODeviceType_iPhoneAudio());
-    #endif
-
-    #if JUCE_LINUX && JUCE_ALSA
-     list.add (juce_createAudioIODeviceType_ALSA());
-    #endif
-
-    #if JUCE_LINUX && JUCE_JACK
-     list.add (juce_createAudioIODeviceType_JACK());
-    #endif
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ALSA());
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_JACK());
 }
 
 //==============================================================================

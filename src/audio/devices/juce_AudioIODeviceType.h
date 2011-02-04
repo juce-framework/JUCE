@@ -131,6 +131,22 @@ public:
     /** Destructor. */
     virtual ~AudioIODeviceType();
 
+    //==============================================================================
+    /** Creates a CoreAudio device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_CoreAudio();
+    /** Creates an iOS device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_iOSAudio();
+    /** Creates a WASAPI device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_WASAPI();
+    /** Creates a DirectSound device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_DirectSound();
+    /** Creates an ASIO device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_ASIO();
+    /** Creates an ALSA device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_ALSA();
+    /** Creates a JACK device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_JACK();
+
 protected:
     explicit AudioIODeviceType (const String& typeName);
 

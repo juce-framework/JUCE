@@ -40,5 +40,32 @@ AudioIODeviceType::~AudioIODeviceType()
 {
 }
 
+#if ! JUCE_MAC
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()       { return 0; }
+#endif
+
+#if ! JUCE_IOS
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()        { return 0; }
+#endif
+
+#if ! (JUCE_WINDOWS && JUCE_WASAPI)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()          { return 0; }
+#endif
+
+#if ! (JUCE_WINDOWS && JUCE_DIRECTSOUND)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_DirectSound()     { return 0; }
+#endif
+
+#if ! (JUCE_WINDOWS && JUCE_ASIO)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ASIO()            { return 0; }
+#endif
+
+#if ! (JUCE_LINUX && JUCE_ALSA)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()            { return 0; }
+#endif
+
+#if ! (JUCE_LINUX && JUCE_JACK)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()            { return 0; }
+#endif
 
 END_JUCE_NAMESPACE

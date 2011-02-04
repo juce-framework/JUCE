@@ -61,9 +61,14 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
 //==============================================================================
 bool juce_postMessageToSystemQueue (Message* message)
 {
-    // TODO
-
+    android.activity.callVoidMethod (android.postMessage, (jlong) (pointer_sized_uint) message);
     return true;
+}
+
+JUCE_JNI_CALLBACK (JuceAppActivity, deliverMessage, void, (jobject activity, jlong value))
+{
+    Message* m = (Message*) (pointer_sized_uint) value;
+    MessageManager::getInstance()->deliverMessage ((Message*) (pointer_sized_uint) value);
 }
 
 //==============================================================================

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	26
+#define JUCE_BUILDNUMBER	27
 
 /** Current Juce version number.
 
@@ -5320,7 +5320,7 @@ JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& str
 	This is very handy for writing strings to std::cout, std::cerr, etc.
 */
 template <class charT, class traits>
-JUCE_API std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
 	return stream << stringToWrite.toUTF8().getAddress();
 }
@@ -6286,8 +6286,8 @@ public:
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
 #ifndef DOXYGEN
- class JUCE_API  ScopedLock;
- class JUCE_API  ScopedUnlock;
+ class ScopedLock;
+ class ScopedUnlock;
 #endif
 
 /**
@@ -8228,7 +8228,7 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 /*** End of inlined file: juce_OutputStream.h ***/
 
 #ifndef DOXYGEN
- class JUCE_API  DynamicObject;
+ class DynamicObject;
 #endif
 
 /**
@@ -10857,27 +10857,27 @@ private:
 };
 
 /** Adds a RelativeTime to a Time. */
-const Time operator+ (const Time& time, const RelativeTime& delta);
+JUCE_API const Time operator+ (const Time& time, const RelativeTime& delta);
 /** Adds a RelativeTime to a Time. */
-const Time operator+ (const RelativeTime& delta, const Time& time);
+JUCE_API const Time operator+ (const RelativeTime& delta, const Time& time);
 
 /** Subtracts a RelativeTime from a Time. */
-const Time operator- (const Time& time, const RelativeTime& delta);
+JUCE_API const Time operator- (const Time& time, const RelativeTime& delta);
 /** Returns the relative time difference between two times. */
-const RelativeTime operator- (const Time& time1, const Time& time2);
+JUCE_API const RelativeTime operator- (const Time& time1, const Time& time2);
 
 /** Compares two Time objects. */
-bool operator== (const Time& time1, const Time& time2);
+JUCE_API bool operator== (const Time& time1, const Time& time2);
 /** Compares two Time objects. */
-bool operator!= (const Time& time1, const Time& time2);
+JUCE_API bool operator!= (const Time& time1, const Time& time2);
 /** Compares two Time objects. */
-bool operator<  (const Time& time1, const Time& time2);
+JUCE_API bool operator<  (const Time& time1, const Time& time2);
 /** Compares two Time objects. */
-bool operator<= (const Time& time1, const Time& time2);
+JUCE_API bool operator<= (const Time& time1, const Time& time2);
 /** Compares two Time objects. */
-bool operator>  (const Time& time1, const Time& time2);
+JUCE_API bool operator>  (const Time& time1, const Time& time2);
 /** Compares two Time objects. */
-bool operator>= (const Time& time1, const Time& time2);
+JUCE_API bool operator>= (const Time& time1, const Time& time2);
 
 #endif   // __JUCE_TIME_JUCEHEADER__
 /*** End of inlined file: juce_Time.h ***/
@@ -16729,8 +16729,7 @@ private:
 
 #if JUCE_MAC || JUCE_IOS
 
-/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
-	using RAII.
+/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
 */
 class ScopedAutoReleasePool
 {
@@ -16896,7 +16895,7 @@ private:
 
 	@see CriticalSection, ScopedUnlock
 */
-class JUCE_API  ScopedLock
+class ScopedLock
 {
 public:
 
@@ -37747,6 +37746,21 @@ public:
 
 	/** Destructor. */
 	virtual ~AudioIODeviceType();
+
+	/** Creates a CoreAudio device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_CoreAudio();
+	/** Creates an iOS device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_iOSAudio();
+	/** Creates a WASAPI device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_WASAPI();
+	/** Creates a DirectSound device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_DirectSound();
+	/** Creates an ASIO device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_ASIO();
+	/** Creates an ALSA device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_ALSA();
+	/** Creates a JACK device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_JACK();
 
 protected:
 	explicit AudioIODeviceType (const String& typeName);
@@ -66198,8 +66212,8 @@ private:
   #pragma pack (pop)
 #endif
 
-#ifdef JUCE_DLL
-  #undef JUCE_LEAK_DETECTOR(OwnerClass)
+#if defined (JUCE_DLL) && ! (JUCE_AMALGAMATED_TEMPLATE || defined (JUCE_DLL_BUILD))
+  #undef JUCE_LEAK_DETECTOR
   #define JUCE_LEAK_DETECTOR(OwnerClass)
 #endif
 

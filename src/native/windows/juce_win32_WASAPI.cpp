@@ -1052,9 +1052,12 @@ private:
 }
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_WASAPI()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()
 {
-    return new WasapiClasses::WASAPIAudioIODeviceType();
+    if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
+        return new WasapiClasses::WASAPIAudioIODeviceType();
+
+    return 0;
 }
 
 #endif

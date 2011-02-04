@@ -665,7 +665,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 - (NSArray*) getSupportedDragTypes
 {
-    return [NSArray arrayWithObjects: NSFilenamesPboardType, /*NSFilesPromisePboardType, NSStringPboardType,*/ nil];
+    return [NSArray arrayWithObjects: NSFilenamesPboardType, NSFilesPromisePboardType, /* NSStringPboardType,*/ nil];
 }
 
 - (BOOL) sendDragCallback: (int) type sender: (id <NSDraggingInfo>) sender
@@ -1106,9 +1106,26 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
 void NSViewComponentPeer::setAlpha (float newAlpha)
 {
     if (! isSharedWindow)
+    {
         [window setAlphaValue: (CGFloat) newAlpha];
+    }
     else
+    {
+      #if defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5
         [view setAlphaValue: (CGFloat) newAlpha];
+      #else
+        if ([view respondsToSelector: @selector (setAlphaValue:)])
+        {
+            // PITA dynamic invocation for 10.4 builds..
+            NSInvocation* inv = [NSInvocation invocationWithMethodSignature: [view methodSignatureForSelector: @selector (setAlphaValue:)]];
+            [inv setSelector: @selector (setAlphaValue:)];
+            [inv setTarget: view];
+            CGFloat cgNewAlpha = (CGFloat) newAlpha;
+            [inv setArgument: &cgNewAlpha atIndex: 2];
+            [inv invoke];
+        }
+       #endif
+    }
 }
 
 void NSViewComponentPeer::setMinimised (bool shouldBeMinimised)
@@ -1493,7 +1510,7 @@ void NSViewComponentPeer::showArrowCursorIfNeeded()
 }
 
 //==============================================================================
-BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender)
+BOOL NSViewComponentPeer::sendDragCallback (const int type, id <NSDraggingInfo> sender)
 {
     NSString* bestType
         = [[sender draggingPasteboard] availableTypeFromArray: [view getSupportedDragTypes]];
@@ -1504,31 +1521,59 @@ BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender
     NSPoint p = [view convertPoint: [sender draggingLocation] fromView: nil];
     const Point<int> pos ((int) p.x, (int) ([view frame].size.height - p.y));
 
-    id list = [[sender draggingPasteboard] propertyListForType: bestType];
-    if (list == nil)
-        return false;
-
+    NSPasteboard* pasteBoard = [sender draggingPasteboard];
     StringArray files;
 
-    if ([list isKindOfClass: [NSArray class]])
-    {
-        NSArray* items = (NSArray*) list;
+    NSString* iTunesPasteboardType = @"CorePasteboardFlavorType 0x6974756E"; // 'itun'
 
-        for (unsigned int i = 0; i < [items count]; ++i)
-            files.add (nsStringToJuce ((NSString*) [items objectAtIndex: i]));
+    if (bestType == NSFilesPromisePboardType
+         && [[pasteBoard types] containsObject: iTunesPasteboardType])
+    {
+        id list = [pasteBoard propertyListForType: iTunesPasteboardType];
+
+        if ([list isKindOfClass: [NSDictionary class]])
+        {
+            NSDictionary* iTunesDictionary = (NSDictionary*) list;
+            NSArray* tracks = [iTunesDictionary valueForKey: @"Tracks"];
+            NSEnumerator* enumerator = [tracks objectEnumerator];
+            NSDictionary* track;
+
+            while ((track = [enumerator nextObject]) != nil)
+            {
+                NSURL* url = [NSURL URLWithString: [track valueForKey: @"Location"]];
+
+                if ([url isFileURL])
+                    files.add (nsStringToJuce ([url path]));
+            }
+        }
+    }
+    else
+    {
+        id list = [pasteBoard propertyListForType: NSFilenamesPboardType];
+
+        if ([list isKindOfClass: [NSArray class]])
+        {
+            NSArray* items = (NSArray*) [pasteBoard propertyListForType: NSFilenamesPboardType];
+
+            for (unsigned int i = 0; i < [items count]; ++i)
+                files.add (nsStringToJuce ((NSString*) [items objectAtIndex: i]));
+        }
     }
 
-    if (files.size() == 0)
-        return false;
+    if (files.size() > 0)
+    {
+        switch (type)
+        {
+            case 0:   handleFileDragMove (files, pos); break;
+            case 1:   handleFileDragExit (files); break;
+            case 2:   handleFileDragDrop (files, pos); break;
+            default:  jassertfalse; break;
+        }
 
-    if (type == 0)
-        handleFileDragMove (files, pos);
-    else if (type == 1)
-        handleFileDragExit (files);
-    else if (type == 2)
-        handleFileDragDrop (files, pos);
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool NSViewComponentPeer::isOpaque()

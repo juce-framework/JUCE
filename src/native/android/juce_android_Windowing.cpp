@@ -42,58 +42,71 @@ public:
     ~AndroidComponentPeer()
     {
         android.activity.callVoidMethod (android.deleteView, view.get());
-        view = 0;
+        view.clear();
     }
 
     void* getNativeHandle() const
     {
-        return 0;  // TODO
+        return (void*) view.get();
     }
 
     void setVisible (bool shouldBeVisible)
     {
+        view.callVoidMethod (android.setVisible, shouldBeVisible);
     }
 
     void setTitle (const String& title)
     {
+        view.callVoidMethod (android.setViewName, android.javaString (title));
     }
 
     void setPosition (int x, int y)
     {
-        // TODO
+        const Rectangle<int> pos (getBounds());
+        setBounds (x, y, pos.getWidth(), pos.getHeight(), false);
     }
 
     void setSize (int w, int h)
     {
+        const Rectangle<int> pos (getBounds());
+        setBounds (pos.getX(), pos.getY(), w, h, false);
     }
 
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
     {
-        DBG ("Window size: " << x << " " << y << " " << w << " " << h);
         view.callVoidMethod (android.layout, x, y, x + w, y + h);
     }
 
     const Rectangle<int> getBounds() const
     {
-        // TODO
-        return Rectangle<int>();
+        return Rectangle<int> (view.callIntMethod (android.getLeft),
+                               view.callIntMethod (android.getTop),
+                               view.callIntMethod (android.getWidth),
+                               view.callIntMethod (android.getHeight));
     }
 
     const Point<int> getScreenPosition() const
     {
-        // TODO
-        return Point<int>();
+        JNIEnv* const env = view.getEnv();
+
+        jintArray pos = env->NewIntArray (2);
+        view.callVoidMethod (android.getLocationOnScreen, pos);
+
+        jint coords[2];
+        jint i, sum = 0;
+        env->GetIntArrayRegion (pos, 0, 2, coords);
+        env->DeleteLocalRef (pos);
+
+        return Point<int> (coords[0], coords[1]);
     }
 
     const Point<int> localToGlobal (const Point<int>& relativePosition)
     {
-        // TODO
         return relativePosition + getScreenPosition();
     }
 
     const Point<int> globalToLocal (const Point<int>& screenPosition)
     {
-        // TODO
         return screenPosition - getScreenPosition();
     }
 
@@ -104,6 +117,7 @@ public:
 
     bool isMinimised() const
     {
+        return false;
     }
 
     void setFullScreen (bool shouldBeFullScreen)
@@ -144,7 +158,10 @@ public:
 
     void toFront (bool makeActive)
     {
-        // TODO
+        view.callVoidMethod (android.bringToFront);
+
+        if (makeActive)
+            grabFocus();
     }
 
     void toBehind (ComponentPeer* other)
@@ -155,13 +172,12 @@ public:
     //==============================================================================
     bool isFocused() const
     {
-        // TODO
-        return false;
+        return view.callBooleanMethod (android.hasFocus);
     }
 
     void grabFocus()
     {
-        // TODO
+        (void) view.callBooleanMethod (android.requestFocus);
     }
 
     void textInputRequired (const Point<int>& position)
@@ -178,7 +194,7 @@ public:
 
     void repaint (const Rectangle<int>& area)
     {
-        // TODO
+        view.callVoidMethod (android.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
     }
 
     void performAnyPendingRepaintsNow()
@@ -319,17 +335,9 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
-static int screenWidth = 0, screenHeight = 0;
-
 void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
-    monitorCoords.add (Rectangle<int> (0, 0, screenWidth, screenHeight));
-}
-
-JUCE_JNI_CALLBACK (JuceAppActivity, setScreenSize, void, (JNIEnv* env, jobject activity, int w, int h))
-{
-    screenWidth = w;
-    screenHeight = h;
+    monitorCoords.add (Rectangle<int> (0, 0, android.screenWidth, android.screenHeight));
 }
 
 //==============================================================================

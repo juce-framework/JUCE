@@ -52,7 +52,7 @@
 
     @see CriticalSection, ScopedUnlock
 */
-class JUCE_API  ScopedLock
+class ScopedLock
 {
 public:
     //==============================================================================

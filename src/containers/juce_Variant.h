@@ -31,7 +31,7 @@
 #include "../io/streams/juce_InputStream.h"
 
 #ifndef DOXYGEN
- class JUCE_API  DynamicObject;
+ class DynamicObject;
 #endif
 
 //==============================================================================

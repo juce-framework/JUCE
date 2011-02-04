@@ -1290,7 +1290,7 @@ JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& str
     This is very handy for writing strings to std::cout, std::cerr, etc.
 */
 template <class charT, class traits>
-JUCE_API std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
     return stream << stringToWrite.toUTF8().getAddress();
 }

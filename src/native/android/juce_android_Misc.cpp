@@ -32,9 +32,9 @@ extern JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication(); // (from START
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity, int screenWidth, int screenHeight))
 {
-    android.initialise (env, activity);
+    android.initialise (env, activity, screenWidth, screenHeight);
 
     JUCEApplication::createInstance = &juce_CreateApplication;
 

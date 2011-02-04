@@ -574,7 +574,7 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_iPhoneAudio()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()
 {
     return new IPhoneAudioIODeviceType();
 }

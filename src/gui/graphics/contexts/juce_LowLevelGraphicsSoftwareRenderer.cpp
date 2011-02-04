@@ -692,9 +692,9 @@ private:
                         if (! repeatPattern)
                         {
                             if (loResY < 0)
-                                render2PixelAverageX (dest, this->srcData.getPixelPointer (loResX, 0), hiResX & 255, hiResY & 255);
+                                render2PixelAverageX (dest, this->srcData.getPixelPointer (loResX, 0), hiResX & 255);
                             else
-                                render2PixelAverageX (dest, this->srcData.getPixelPointer (loResX, maxY), hiResX & 255, 255 - (hiResY & 255));
+                                render2PixelAverageX (dest, this->srcData.getPixelPointer (loResX, maxY), hiResX & 255);
 
                             ++dest;
                             continue;
@@ -709,9 +709,9 @@ private:
                         if (! repeatPattern)
                         {
                             if (loResX < 0)
-                                render2PixelAverageY (dest, this->srcData.getPixelPointer (0, loResY), hiResY & 255, hiResX & 255);
+                                render2PixelAverageY (dest, this->srcData.getPixelPointer (0, loResY), hiResY & 255);
                             else
-                                render2PixelAverageY (dest, this->srcData.getPixelPointer (maxX, loResY), hiResY & 255, 255 - (hiResX & 255));
+                                render2PixelAverageY (dest, this->srcData.getPixelPointer (maxX, loResY), hiResY & 255);
 
                             ++dest;
                             continue;
@@ -771,33 +771,33 @@ private:
                        (uint8) (c[PixelARGB::indexB] >> 16));
     }
 
-    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const int subPixelX, const int alpha) throw()
+    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const int subPixelX) throw()
     {
-        uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+        uint32 c[4] = { 128, 128, 128, 128 };
 
-        uint32 weight = (256 - subPixelX) * alpha;
+        uint32 weight = 256 - subPixelX;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
         c[3] += weight * src[3];
 
-        weight = subPixelX * alpha;
+        weight = subPixelX;
         c[0] += weight * src[4];
         c[1] += weight * src[5];
         c[2] += weight * src[6];
         c[3] += weight * src[7];
 
-        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
-                       (uint8) (c[PixelARGB::indexR] >> 16),
-                       (uint8) (c[PixelARGB::indexG] >> 16),
-                       (uint8) (c[PixelARGB::indexB] >> 16));
+        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 8),
+                       (uint8) (c[PixelARGB::indexR] >> 8),
+                       (uint8) (c[PixelARGB::indexG] >> 8),
+                       (uint8) (c[PixelARGB::indexB] >> 8));
     }
 
-    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const int subPixelY, const int alpha) throw()
+    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const int subPixelY) throw()
     {
-        uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+        uint32 c[4] = { 128, 128, 128, 128 };
 
-        uint32 weight = (256 - subPixelY) * alpha;
+        uint32 weight = 256 - subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -805,16 +805,16 @@ private:
 
         src += this->srcData.lineStride;
 
-        weight = subPixelY * alpha;
+        weight = subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
         c[3] += weight * src[3];
 
-        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
-                       (uint8) (c[PixelARGB::indexR] >> 16),
-                       (uint8) (c[PixelARGB::indexG] >> 16),
-                       (uint8) (c[PixelARGB::indexB] >> 16));
+        dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 8),
+                       (uint8) (c[PixelARGB::indexR] >> 8),
+                       (uint8) (c[PixelARGB::indexG] >> 8),
+                       (uint8) (c[PixelARGB::indexB] >> 8));
     }
 
     //==============================================================================
@@ -850,11 +850,11 @@ private:
                        (uint8) (c[PixelRGB::indexB] >> 16));
     }
 
-    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const int subPixelX, const int /*alpha*/) throw()
+    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const int subPixelX) throw()
     {
         uint32 c[3] = { 128, 128, 128 };
 
-        uint32 weight = (256 - subPixelX);
+        const uint32 weight = 256 - subPixelX;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -869,11 +869,11 @@ private:
                        (uint8) (c[PixelRGB::indexB] >> 8));
     }
 
-    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const int subPixelY, const int /*alpha*/) throw()
+    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const int subPixelY) throw()
     {
         uint32 c[3] = { 128, 128, 128 };
 
-        uint32 weight = (256 - subPixelY);
+        const uint32 weight = 256 - subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -903,21 +903,21 @@ private:
         *((uint8*) dest) = (uint8) (c >> 16);
     }
 
-    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const int subPixelX, const int alpha) throw()
+    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const int subPixelX) throw()
     {
-        uint32 c = 256 * 128;
-        c += src[0] * (256 - subPixelX) * alpha;
-        c += src[1] * subPixelX * alpha;
-        *((uint8*) dest) = (uint8) (c >> 16);
+        uint32 c = 128;
+        c += src[0] * (256 - subPixelX);
+        c += src[1] * subPixelX;
+        *((uint8*) dest) = (uint8) (c >> 8);
     }
 
-    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const int subPixelY, const int alpha) throw()
+    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const int subPixelY) throw()
     {
-        uint32 c = 256 * 128;
-        c += src[0] * (256 - subPixelY) * alpha;
+        uint32 c = 128;
+        c += src[0] * (256 - subPixelY);
         src += this->srcData.lineStride;
-        c += src[0] * subPixelY * alpha;
-        *((uint8*) dest) = (uint8) (c >> 16);
+        c += src[0] * subPixelY;
+        *((uint8*) dest) = (uint8) (c >> 8);
     }
 
     //==============================================================================

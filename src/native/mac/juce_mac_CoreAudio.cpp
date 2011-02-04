@@ -1292,7 +1292,7 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createAudioIODeviceType_CoreAudio()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
 {
     return new CoreAudioIODeviceType();
 }
