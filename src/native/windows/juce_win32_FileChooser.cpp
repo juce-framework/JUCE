@@ -96,7 +96,7 @@ namespace FileChooserHelpers
             if (ofn->hdr.code == CDN_SELCHANGE)
             {
                 FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) ofn->lpOFN->lCustData;
-                FilePreviewComponent* comp = static_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0));
+                FilePreviewComponent* comp = dynamic_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0));
 
                 if (comp != 0)
                 {
@@ -130,8 +130,9 @@ namespace FileChooserHelpers
 
         void resized()
         {
-            if (getNumChildComponents() > 0)
-                getChildComponent(0)->setBounds (getLocalBounds());
+            Component* const c = getChildComponent(0);
+            if (c != 0)
+                c->setBounds (getLocalBounds());
         }
 
     private:
@@ -140,13 +141,14 @@ namespace FileChooserHelpers
 }
 
 //==============================================================================
-void FileChooser::showPlatformDialog (Array<File>& results, const String& title, const File& currentFileOrDirectory,
+void FileChooser::showPlatformDialog (Array<File>& results, const String& title_, const File& currentFileOrDirectory,
                                       const String& filter, bool selectsDirectory, bool /*selectsFiles*/,
                                       bool isSaveDialogue, bool warnAboutOverwritingExistingFiles,
                                       bool selectMultipleFiles, FilePreviewComponent* extraInfoComponent)
 {
     using namespace FileChooserHelpers;
 
+    const String title (title_);
     HeapBlock<WCHAR> files;
     const int charsAvailableForResult = 32768;
     files.calloc (charsAvailableForResult + 1);
@@ -230,14 +232,17 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
             info.customComponent->enterModalState();
         }
 
-        const int filterSpace = 2048;
-        HeapBlock<char> filters;
-        filters.calloc (filterSpace * 2);
-        const int bytesWritten = filter.copyToUTF16 (reinterpret_cast <WCHAR*> (filters.getData()), filterSpace);
-        filter.copyToUTF16 (reinterpret_cast <WCHAR*> (filters + bytesWritten), filterSpace);
+        const int filterSpaceNumChars = 2048;
+        HeapBlock<WCHAR> filters;
+        filters.calloc (filterSpaceNumChars);
+        const int bytesWritten = filter.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
+        filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)) + 1,
+                            (filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten);
 
         OPENFILENAMEW of;
         zerostruct (of);
+
+        String localPath (info.initialPath);
 
       #ifdef OPENFILENAME_SIZE_VERSION_400W
         of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
@@ -245,11 +250,11 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title,
         of.lStructSize = sizeof (of);
       #endif
         of.hwndOwner = (HWND) parentWindow.getWindowHandle();
-        of.lpstrFilter = reinterpret_cast <WCHAR*> (filters.getData());
+        of.lpstrFilter = filters.getData();
         of.nFilterIndex = 1;
         of.lpstrFile = files;
         of.nMaxFile = charsAvailableForResult;
-        of.lpstrInitialDir = info.initialPath.toUTF16();
+        of.lpstrInitialDir = localPath.toUTF16();
         of.lpstrTitle = title.toUTF16();
         of.Flags = flags;
         of.lCustData = (LPARAM) &info;
