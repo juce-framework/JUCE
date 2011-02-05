@@ -32,9 +32,11 @@ extern JUCE_NAMESPACE::JUCEApplication* juce_CreateApplication(); // (from START
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity, int screenWidth, int screenHeight))
+JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity,
+                                                      jstring appFile, jstring appDataDir,
+                                                      int screenWidth, int screenHeight))
 {
-    android.initialise (env, activity, screenWidth, screenHeight);
+    android.initialise (env, activity, appFile, appDataDir, screenWidth, screenHeight);
 
     JUCEApplication::createInstance = &juce_CreateApplication;
 
@@ -60,8 +62,8 @@ void PlatformUtilities::beep()
 //==============================================================================
 void Logger::outputDebugString (const String& text)
 {
-    android.env->CallStaticVoidMethod (android.activityClass, android.printToConsole,
-                                       android.javaString (text));
+    getEnv()->CallStaticVoidMethod (android.activityClass, android.printToConsole,
+                                    javaString (text).get());
 }
 
 //==============================================================================

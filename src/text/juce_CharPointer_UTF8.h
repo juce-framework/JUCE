@@ -213,11 +213,11 @@ public:
 
         for (;;)
         {
-            const int n = *d++;
+            const uint32 n = (uint32) (uint8) *d++;
 
             if ((n & 0x80) != 0)
             {
-                int bit = 0x40;
+                uint32 bit = 0x40;
 
                 while ((n & bit) != 0)
                 {

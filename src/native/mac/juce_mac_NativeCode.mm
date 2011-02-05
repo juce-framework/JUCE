@@ -95,6 +95,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../common/juce_MidiDataConcatenator.h"
 #undef Point
 
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 namespace
 {
     template <class RectType>
@@ -183,6 +184,7 @@ private:
         static_cast <MessageQueue*> (info)->runLoopCallback();
     }
 };
+#endif
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1

@@ -150,8 +150,6 @@
  #include "../src/threads/juce_Thread.cpp"
  #include "../src/threads/juce_ThreadPool.cpp"
  #include "../src/threads/juce_TimeSliceThread.cpp"
- #include "../src/utilities/juce_DeletedAtShutdown.cpp"
- #include "../src/utilities/juce_UnitTest.cpp"
 #endif
 
 #if JUCE_BUILD_MISC
@@ -166,6 +164,8 @@
  #include "../src/utilities/juce_FileBasedDocument.cpp"
  #include "../src/utilities/juce_RecentlyOpenedFilesList.cpp"
  #include "../src/utilities/juce_UndoManager.cpp"
+ #include "../src/utilities/juce_UnitTest.cpp"
+ #include "../src/utilities/juce_DeletedAtShutdown.cpp"
  #include "../src/audio/audio_file_formats/juce_AiffAudioFormat.cpp"
  #include "../src/audio/audio_file_formats/juce_AudioFormat.cpp"
  #include "../src/audio/audio_file_formats/juce_AudioFormatReader.cpp"

@@ -211,6 +211,7 @@ void JUCEApplication::appWillTerminateByForce()
 }
 
 //==============================================================================
+#if ! JUCE_ANDROID
 int JUCEApplication::main (const String& commandLine)
 {
     ScopedJuceInitialiser_GUI libraryInitialiser;
@@ -263,5 +264,6 @@ int JUCEApplication::main (int argc, const char* argv[])
     return JUCEApplication::main (cmd);
   #endif
 }
+#endif
 
 END_JUCE_NAMESPACE

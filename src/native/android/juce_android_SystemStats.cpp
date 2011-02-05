@@ -77,8 +77,6 @@ int SystemStats::getCpuSpeedInMegaherz()
 
 int SystemStats::getMemorySizeInMegabytes()
 {
-    // TODO
-
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
@@ -125,8 +123,7 @@ void SystemStats::initialiseStats()
     cpuFlags.hasSSE2 = flags.contains ("sse2");
     cpuFlags.has3DNow = flags.contains ("3dnow");
 
-    // TODO
-    cpuFlags.numCpus = AndroidStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
+    cpuFlags.numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
 }
 
 void PlatformUtilities::fpuReset() {}

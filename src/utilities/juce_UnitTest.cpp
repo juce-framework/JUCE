@@ -161,8 +161,8 @@ void UnitTestRunner::endTest()
 
         if (r->failures > 0)
         {
-            String m ("FAILED!!");
-            m << r->failures << (r->failures == 1 ? "test" : "tests")
+            String m ("FAILED!!  ");
+            m << r->failures << (r->failures == 1 ? " test" : " tests")
               << " failed, out of a total of " << (r->passes + r->failures);
 
             logMessage (String::empty);

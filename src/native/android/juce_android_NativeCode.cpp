@@ -107,11 +107,12 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (rectClass, "android/graphics/Rect") \
  JAVACLASS (regionClass, "android/graphics/Region") \
  JAVACLASS (shaderClass, "android/graphics/Shader") \
+ JAVACLASS (shaderTileModeClass, "android/graphics/Shader$TileMode") \
  JAVACLASS (linearGradientClass, "android/graphics/LinearGradient") \
  JAVACLASS (radialGradientClass, "android/graphics/RadialGradient") \
 
 //==============================================================================
-#define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD) \
+#define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
 \
  STATICMETHOD (activityClass, printToConsole, "printToConsole", "(Ljava/lang/String;)V") \
  METHOD (activityClass, createNewView, "createNewView", "()Lcom/juce/ComponentPeerView;") \
@@ -153,8 +154,10 @@ BEGIN_JUCE_NAMESPACE
  METHOD (paintClass, paintClassConstructor, "<init>", "()V") \
  METHOD (paintClass, setColor, "setColor", "(I)V") \
  METHOD (paintClass, setShader, "setShader", "(Landroid/graphics/Shader;)Landroid/graphics/Shader;") \
+ METHOD (paintClass, setAntiAlias, "setAntiAlias", "(Z)V") \
 \
  METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
+ STATICFIELD (shaderTileModeClass, clampMode, "CLAMP", "Landroid/graphics/Shader$TileMode;") \
 \
  METHOD (pathClass, pathClassConstructor, "<init>", "()V") \
  METHOD (pathClass, moveTo, "moveTo", "(FF)V") \
@@ -181,23 +184,115 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+class ThreadLocalJNIEnvHolder
+{
+public:
+    ThreadLocalJNIEnvHolder()
+        : jvm (0)
+    {
+        zeromem (threads, sizeof (threads));
+        zeromem (envs, sizeof (envs));
+    }
+
+    void initialise (JNIEnv* env)
+    {
+        env->GetJavaVM (&jvm);
+        addEnv (env);
+    }
+
+    void attach()
+    {
+        JNIEnv* env = 0;
+        jvm->AttachCurrentThread (&env, 0);
+
+        if (env != 0)
+            addEnv (env);
+    }
+
+    void detach()
+    {
+        jvm->DetachCurrentThread();
+
+        const pthread_t thisThread = pthread_self();
+
+        ScopedLock sl (addRemoveLock);
+        for (int i = 0; i < maxThreads; ++i)
+            if (threads[i] == thisThread)
+                threads[i] = 0;
+    }
+
+    JNIEnv* get() const throw()
+    {
+        const pthread_t thisThread = pthread_self();
+
+        for (int i = 0; i < maxThreads; ++i)
+            if (threads[i] == thisThread)
+                return envs[i];
+
+        return 0;
+    }
+
+    enum { maxThreads = 16 };
+
+private:
+    JavaVM* jvm;
+    pthread_t threads [maxThreads];
+    JNIEnv* envs [maxThreads];
+    CriticalSection addRemoveLock;
+
+    void addEnv (JNIEnv* env)
+    {
+        ScopedLock sl (addRemoveLock);
+
+        if (get() == 0)
+        {
+            const pthread_t thisThread = pthread_self();
+
+            for (int i = 0; i < maxThreads; ++i)
+            {
+                if (threads[i] == 0)
+                {
+                    envs[i] = env;
+                    threads[i] = thisThread;
+                    return;
+                }
+            }
+        }
+
+        jassertfalse; // too many threads!
+    }
+};
+
+static ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
+
+struct AndroidThreadScope
+{
+    AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
+    ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
+};
+
+static inline JNIEnv* getEnv() throw()
+{
+    return threadLocalJNIEnvHolder.get();
+}
+
+
+//==============================================================================
 class GlobalRef
 {
 public:
-    GlobalRef()
-        : env (0), obj (0)
+    inline GlobalRef() throw()
+        : obj (0)
     {
     }
 
-    GlobalRef (JNIEnv* const env_, jobject obj_)
-        : env (env_),
-          obj (retain (env_, obj_))
+    inline explicit GlobalRef (jobject obj_)
+        : obj (retain (obj_))
     {
     }
 
-    GlobalRef (const GlobalRef& other)
-        : env (other.env),
-          obj (retain (other.env, other.obj))
+    inline GlobalRef (const GlobalRef& other)
+        : obj (retain (other.obj))
     {
     }
 
@@ -206,28 +301,22 @@ public:
         clear();
     }
 
-    void clear()
+    inline void clear()
     {
-        if (env != 0)
-        {
-            env->DeleteGlobalRef (obj);
-            env = 0;
-            obj = 0;
-        }
+        if (obj != 0)
+            getEnv()->DeleteGlobalRef (obj);
     }
 
-    GlobalRef& operator= (const GlobalRef& other)
+    inline GlobalRef& operator= (const GlobalRef& other)
     {
         clear();
-        env = other.env;
-        obj = retain (env, other.obj);
+        obj = retain (other.obj);
         return *this;
     }
 
     //==============================================================================
     inline operator jobject() const throw()     { return obj; }
     inline jobject get() const throw()          { return obj; }
-    inline JNIEnv* getEnv() const throw()       { return env; }
 
     //==============================================================================
     #define DECLARE_CALL_TYPE_METHOD(returnType, typeName) \
@@ -235,7 +324,7 @@ public:
         { \
             va_list args; \
             va_start (args, methodID); \
-            returnType result = env->Call##typeName##MethodV (obj, methodID, args); \
+            returnType result = getEnv()->Call##typeName##MethodV (obj, methodID, args); \
             va_end (args); \
             return result; \
         }
@@ -255,33 +344,101 @@ public:
     {
         va_list args;
         va_start (args, methodID);
-        env->CallVoidMethodV (obj, methodID, args);
+        getEnv()->CallVoidMethodV (obj, methodID, args);
         va_end (args);
     }
 
 private:
     //==============================================================================
-    JNIEnv* env;
     jobject obj;
 
-    static jobject retain (JNIEnv* const env, jobject obj_)
+    static inline jobject retain (jobject obj_)
     {
-        return env == 0 ? 0 : env->NewGlobalRef (obj_);
+        return obj_ == 0 ? 0 : getEnv()->NewGlobalRef (obj_);
     }
 };
+
+//==============================================================================
+template <typename JavaType>
+class LocalRef
+{
+public:
+    explicit inline LocalRef (JavaType obj_) throw()
+        : obj (obj_)
+    {
+    }
+
+    inline LocalRef (const LocalRef& other) throw()
+        : obj (retain (other.obj))
+    {
+    }
+
+    ~LocalRef()
+    {
+        if (obj != 0)
+            getEnv()->DeleteLocalRef (obj);
+    }
+
+    LocalRef& operator= (const LocalRef& other)
+    {
+        if (obj != other.obj)
+        {
+            if (obj != 0)
+                getEnv()->DeleteLocalRef (obj);
+
+            obj = retain (other.obj);
+        }
+
+        return *this;
+    }
+
+    inline operator JavaType() const throw()    { return obj; }
+    inline JavaType get() const throw()         { return obj; }
+
+private:
+    JavaType obj;
+
+    static JavaType retain (JavaType obj_)
+    {
+        return obj_ == 0 ? 0 : (JavaType) getEnv()->NewLocalRef (obj_);
+    }
+};
+
+//==============================================================================
+static const String juceString (jstring s)
+{
+    JNIEnv* env = getEnv();
+
+    jboolean isCopy;
+    const char* const utf8 = env->GetStringUTFChars (s, &isCopy);
+    CharPointer_UTF8 utf8CP (utf8);
+    const String result (utf8CP);
+    env->ReleaseStringUTFChars (s, utf8);
+    return result;
+}
+
+static const LocalRef<jstring> javaString (const String& s)
+{
+    return LocalRef<jstring> (getEnv()->NewStringUTF (s.toUTF8()));
+}
+
 
 //==============================================================================
 class AndroidJavaCallbacks
 {
 public:
-    AndroidJavaCallbacks() : env (0), screenWidth (0), screenHeight (0)
+    AndroidJavaCallbacks() : screenWidth (0), screenHeight (0)
     {
     }
 
-    void initialise (JNIEnv* env_, jobject activity_, int screenWidth_, int screenHeight_)
+    void initialise (JNIEnv* env, jobject activity_,
+                     jstring appFile_, jstring appDataDir_,
+                     int screenWidth_, int screenHeight_)
     {
-        env = env_;
-        activity = GlobalRef (env, activity_);
+        threadLocalJNIEnvHolder.initialise (env);
+        activity = GlobalRef (activity_);
+        appFile = juceString (appFile_);
+        appDataDir = juceString (appDataDir_);
         screenWidth = screenWidth_;
         screenHeight = screenHeight_;
 
@@ -300,12 +457,17 @@ public:
         #define CREATE_JNI_FIELD(ownerClass, fieldID, stringName, signature) \
             fieldID = env->GetFieldID (ownerClass, stringName, signature); \
             jassert (fieldID != 0);
-        JUCE_JNI_METHODS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD);
+        #define CREATE_JNI_STATICFIELD(ownerClass, fieldID, stringName, signature) \
+            fieldID = env->GetStaticFieldID (ownerClass, stringName, signature); \
+            jassert (fieldID != 0);
+        JUCE_JNI_METHODS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD);
         #undef CREATE_JNI_METHOD
     }
 
     void shutdown()
     {
+        JNIEnv* env = getEnv();
+
         if (env != 0)
         {
             #define RELEASE_JNI_CLASS(className, path)    env->DeleteGlobalRef (className);
@@ -313,29 +475,12 @@ public:
             #undef RELEASE_JNI_CLASS
 
             activity.clear();
-            env = 0;
         }
     }
 
     //==============================================================================
-    const String juceString (jstring s) const
-    {
-        jboolean isCopy;
-        const char* const utf8 = env->GetStringUTFChars (s, &isCopy);
-        CharPointer_UTF8 utf8CP (utf8);
-        const String result (utf8CP);
-        env->ReleaseStringUTFChars (s, utf8);
-        return result;
-    }
-
-    jstring javaString (const String& s) const
-    {
-        return env->NewStringUTF (s.toUTF8());
-    }
-
-    //==============================================================================
-    JNIEnv* env;
     GlobalRef activity;
+    String appFile, appDataDir;
     int screenWidth, screenHeight;
 
     //==============================================================================
@@ -345,12 +490,11 @@ public:
 
     #define DECLARE_JNI_METHOD(ownerClass, methodID, stringName, params) jmethodID methodID;
     #define DECLARE_JNI_FIELD(ownerClass, fieldID, stringName, signature) jfieldID fieldID;
-    JUCE_JNI_METHODS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD);
+    JUCE_JNI_METHODS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD, DECLARE_JNI_FIELD);
     #undef DECLARE_JNI_METHOD
 };
 
 static AndroidJavaCallbacks android;
-
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1

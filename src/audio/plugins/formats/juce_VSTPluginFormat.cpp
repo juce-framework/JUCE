@@ -539,7 +539,7 @@ public:
         {
             FSRef fn;
 
-            if (FSPathMakeRef ((UInt8*) filename.toUTF8(), &fn, 0) == noErr)
+            if (FSPathMakeRef ((UInt8*) filename.toUTF8().getAddress(), &fn, 0) == noErr)
             {
                 resFileId = FSOpenResFile (&fn, fsRdPerm);
 

@@ -209,11 +209,13 @@ private:
         for (int i = 0; i < files.size(); ++i)
             out << "  ../" << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
+        String cFlags ("-fsigned-char");
+
         out << newLine
             << "ifeq ($(CONFIG),Debug)" << newLine
-            << "  LOCAL_CFLAGS +=" << createPreprocessorDefs (true) << newLine
+            << "  LOCAL_CFLAGS += -g " << cFlags << createPreprocessorDefs (true) << newLine
             << "else" << newLine
-            << "  LOCAL_CFLAGS +=" << createPreprocessorDefs (false) << newLine
+            << "  LOCAL_CFLAGS += " << cFlags << createPreprocessorDefs (false) << newLine
             << "endif" << newLine
             << newLine
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;

@@ -108,73 +108,34 @@ const File File::getLinkedTarget() const
 }
 
 //==============================================================================
-const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp
-
 const File File::getSpecialLocation (const SpecialLocationType type)
 {
-
-
-    // TODO
-
-
-
     switch (type)
     {
     case userHomeDirectory:
-    {
-        const char* homeDir = getenv ("HOME");
-
-        if (homeDir == 0)
-        {
-            struct passwd* const pw = getpwuid (getuid());
-            if (pw != 0)
-                homeDir = pw->pw_dir;
-        }
-
-        return File (String::fromUTF8 (homeDir));
-    }
-
     case userDocumentsDirectory:
     case userMusicDirectory:
     case userMoviesDirectory:
     case userApplicationDataDirectory:
-        return File ("~");
+        return File (android.appDataDir);
 
     case userDesktopDirectory:
         return File ("~/Desktop");
 
     case commonApplicationDataDirectory:
-        return File ("/var");
+        return File (android.appDataDir);
 
     case globalApplicationsDirectory:
         return File ("/usr");
 
     case tempDirectory:
-    {
-        File tmp ("/var/tmp");
-
-        if (! tmp.isDirectory())
-        {
-            tmp = "/tmp";
-
-            if (! tmp.isDirectory())
-                tmp = File::getCurrentWorkingDirectory();
-        }
-
-        return tmp;
-    }
+        return File ("~/.temp");
 
     case invokedExecutableFile:
-        if (juce_Argv0 != 0)
-            return File (String::fromUTF8 (juce_Argv0));
-        // deliberate fall-through...
-
     case currentExecutableFile:
     case currentApplicationFile:
-        return juce_getExecutableFile();
-
     case hostApplicationPath:
-        return juce_readlink ("/proc/self/exe", juce_getExecutableFile());
+        return juce_getExecutableFile();
 
     default:
         jassertfalse; // unknown type?

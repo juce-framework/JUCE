@@ -111,9 +111,7 @@ public:
         int randomInt = Random::getSystemRandom().nextInt();
         int64 randomInt64 = Random::getSystemRandom().nextInt64();
         double randomDouble = Random::getSystemRandom().nextDouble();
-        String randomString;
-        for (int i = 50; --i >= 0;)
-            randomString << (juce_wchar) (Random::getSystemRandom().nextInt() & 0xffff);
+        String randomString (createRandomWideCharString());
 
         MemoryOutputStream mo;
         mo.writeInt (randomInt);
@@ -129,11 +127,33 @@ public:
         expect (mi.readInt() == randomInt);
         expect (mi.readIntBigEndian() == randomInt);
         expect (mi.readCompressedInt() == randomInt);
-        expect (mi.readString() == randomString);
+        expectEquals (mi.readString(), randomString);
         expect (mi.readInt64() == randomInt64);
         expect (mi.readInt64BigEndian() == randomInt64);
         expect (mi.readDouble() == randomDouble);
         expect (mi.readDoubleBigEndian() == randomDouble);
+    }
+
+    static const String createRandomWideCharString()
+    {
+        juce_wchar buffer [50];
+        zerostruct (buffer);
+
+        for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
+        {
+            if (Random::getSystemRandom().nextBool())
+            {
+                do
+                {
+                    buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0x10ffff - 1));
+                }
+                while (! CharPointer_UTF16::canRepresent (buffer[i]));
+            }
+            else
+                buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0xff));
+        }
+
+        return buffer;
     }
 };
 

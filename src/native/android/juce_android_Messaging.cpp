@@ -61,7 +61,7 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
 //==============================================================================
 bool juce_postMessageToSystemQueue (Message* message)
 {
-    android.activity.callVoidMethod (android.postMessage, (jlong) (pointer_sized_uint) message);
+    getEnv()->CallVoidMethod (android.activity, android.postMessage, (jlong) (pointer_sized_uint) message);
     return true;
 }
 

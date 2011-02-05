@@ -29,15 +29,13 @@
 
 
 //==============================================================================
-// TODO
 class AndroidLowLevelGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
     AndroidLowLevelGraphicsContext (const GlobalRef& canvas_)
         : canvas (canvas_),
-          currentState (new SavedState()),
+          currentState (new SavedState())
     {
-        paintStack.add (new GlobalRef());
         setFill (Colours::black);
     }
 
@@ -55,7 +53,7 @@ public:
 
     void addTransform (const AffineTransform& transform)
     {
-        canvas.callVoidMethod (android.concat, createMatrix (canvas.getEnv(), transform));
+        canvas.callVoidMethod (android.concat, createMatrix (getEnv(), transform).get());
     }
 
     float getScaleFactor()
@@ -70,7 +68,7 @@ public:
 
     bool clipToRectangleList (const RectangleList& clipRegion)
     {
-        return canvas.callBooleanMethod (android.clipRegion, createRegion (canvas.getEnv(), clipRegion));
+        return canvas.callBooleanMethod (android.clipRegion, createRegion (getEnv(), clipRegion).get());
     }
 
     void excludeClipRectangle (const Rectangle<int>& r)
@@ -79,7 +77,7 @@ public:
 
     void clipToPath (const Path& path, const AffineTransform& transform)
     {
-        (void) canvas.callBooleanMethod (android.clipPath, createPath (canvas.getEnv(), path, transform));
+        (void) canvas.callBooleanMethod (android.clipPath, createPath (getEnv(), path, transform).get());
     }
 
     void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
@@ -93,20 +91,21 @@ public:
 
     const Rectangle<int> getClipBounds() const
     {
-        jobject rect = canvas.callObjectMethod (android.getClipBounds2);
+        JNIEnv* env = getEnv();
+        const LocalRef<jobject> rect (canvas.callObjectMethod (android.getClipBounds2));
 
-        const int left = canvas.getEnv()->GetIntField (rect, android.rectLeft);
-        const int top = canvas.getEnv()->GetIntField (rect, android.rectTop);
-        const int right = canvas.getEnv()->GetIntField (rect, android.rectRight);
-        const int bottom = canvas.getEnv()->GetIntField (rect, android.rectBottom);
+        const int left = env->GetIntField (rect, android.rectLeft);
+        const int top = env->GetIntField (rect, android.rectTop);
+        const int right = env->GetIntField (rect, android.rectRight);
+        const int bottom = env->GetIntField (rect, android.rectBottom);
 
         return Rectangle<int> (left, top, right - left, bottom - top);
     }
 
     bool isClipEmpty() const
     {
-        return ! canvas.callBooleanMethod (android.getClipBounds,
-                                           canvas.getEnv()->NewObject (android.rectClass, android.rectConstructor, 0, 0, 0, 0));
+        LocalRef<jobject> tempRect (getEnv()->NewObject (android.rectClass, android.rectConstructor, 0, 0, 0, 0));
+        return ! canvas.callBooleanMethod (android.getClipBounds, tempRect.get());
     }
 
     //==============================================================================
@@ -128,13 +127,13 @@ public:
     {
         canvas.callVoidMethod (android.drawRect,
                                (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom(),
-                               getCurrentPaint().get());
+                               getCurrentPaint());
     }
 
     void fillPath (const Path& path, const AffineTransform& transform)
     {
-        canvas.callVoidMethod (android.drawPath, createPath (canvas.getEnv(), path, transform),
-                               getCurrentPaint().get());
+        canvas.callVoidMethod (android.drawPath, createPath (getEnv(), path, transform).get(),
+                               getCurrentPaint());
     }
 
     void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles)
@@ -145,17 +144,17 @@ public:
     {
         canvas.callVoidMethod (android.drawLine, line.getStartX(), line.getStartY(),
                                line.getEndX(), line.getEndY(),
-                               getCurrentPaint().get());
+                               getCurrentPaint());
     }
 
     void drawVerticalLine (int x, float top, float bottom)
     {
-        canvas.callVoidMethod (android.drawRect, (float) x, top, x + 1.0f, bottom, getCurrentPaint().get());
+        canvas.callVoidMethod (android.drawRect, (float) x, top, x + 1.0f, bottom, getCurrentPaint());
     }
 
     void drawHorizontalLine (int y, float left, float right)
     {
-        canvas.callVoidMethod (android.drawRect, left, (float) y, right, y + 1.0f, getCurrentPaint().get());
+        canvas.callVoidMethod (android.drawRect, left, (float) y, right, y + 1.0f, getCurrentPaint());
     }
 
     void setFont (const Font& newFont)
@@ -223,21 +222,26 @@ public:
             fillType = newType;
         }
 
-        jobject getPaint (JNIEnv* env)
+        jobject getPaint()
         {
             if (needsUpdate)
             {
+                JNIEnv* env = getEnv();
+
                 if (paint.get() == 0)
-                    paint = GlobalRef (env, env->NewObject (android.paintClass, android.paintClassConstructor));
+                {
+                    paint = GlobalRef (env->NewObject (android.paintClass, android.paintClassConstructor));
+                    paint.callVoidMethod (android.setAntiAlias, true);
+                }
 
                 if (fillType.isColour())
                 {
-                    paint.callVoidMethod (android.setShader, (jobject) 0);
+                    paint.callObjectMethod (android.setShader, (jobject) 0);
                     paint.callVoidMethod (android.setColor, colourToInt (fillType.colour));
                 }
                 else if (fillType.isGradient())
                 {
-                    const ColourGradient& g = fillType.gradient;
+                    const ColourGradient& g = *fillType.gradient;
                     const Point<float> p1 (g.point1);
                     const Point<float> p2 (g.point2);
 
@@ -251,7 +255,7 @@ public:
 
                         for (int i = 0; i < numColours; ++i)
                         {
-                            colours[i] = g.getColour (i);
+                            colours[i] = colourToInt (g.getColour (i));
                             positions[i] = (float) g.getColourPosition(i);
                         }
 
@@ -259,7 +263,7 @@ public:
                         env->SetFloatArrayRegion (positionsArray, 0, numColours, positions.getData());
                     }
 
-                    jobject tileMode = xxxx
+                    jobject tileMode = env->GetStaticObjectField (android.shaderTileModeClass, android.clampMode);
 
                     jobject shader;
                     if (fillType.gradient->isRadial)
@@ -269,7 +273,7 @@ public:
                                                  p1.getX(), p1.getY(),
                                                  p1.getDistanceFrom (p2),
                                                  coloursArray, positionsArray,
-                                                 tileMode));
+                                                 tileMode);
                     }
                     else
                     {
@@ -277,14 +281,19 @@ public:
                                                  android.linearGradientConstructor,
                                                  p1.getX(), p1.getY(), p2.getX(), p2.getY(),
                                                  coloursArray, positionsArray,
-                                                 tileMode));
+                                                 tileMode);
                     }
 
-                    env->CallVoidMethod (shader, android.setLocalMatrix, createMatrix (fillType.transform));
-                    paint.callVoidMethod (android.setShader, shader);
+                    env->DeleteLocalRef (coloursArray);
+                    env->DeleteLocalRef (positionsArray);
+
+                    env->CallVoidMethod (shader, android.setLocalMatrix, createMatrix (env, fillType.transform).get());
+                    paint.callObjectMethod (android.setShader, shader);
+
+                    env->DeleteLocalRef (shader);
                 }
                 else
-                {x
+                {
                 }
             }
 
@@ -304,9 +313,12 @@ private:
     ScopedPointer <SavedState> currentState;
     OwnedArray <SavedState> stateStack;
 
-    GlobalRef& getCurrentPaint() throw()    { return *paintStack.getUnchecked (paintStack.size() - 1); }
+    jobject getCurrentPaint() const
+    {
+        return currentState->getPaint();
+    }
 
-    static jobject createPath (JNIEnv* env, const Path& path)
+    static const LocalRef<jobject> createPath (JNIEnv* env, const Path& path)
     {
         jobject p = env->NewObject (android.pathClass, android.pathClassConstructor);
 
@@ -325,10 +337,10 @@ private:
             }
         }
 
-        return p;
+        return LocalRef<jobject> (p);
     }
 
-    static jobject createPath (JNIEnv* env, const Path& path, const AffineTransform& transform)
+    static const LocalRef<jobject> createPath (JNIEnv* env, const Path& path, const AffineTransform& transform)
     {
         if (transform.isIdentity())
             return createPath (env, path);
@@ -338,7 +350,7 @@ private:
         return createPath (env, tempPath);
     }
 
-    static jobject createMatrix (JNIEnv* env, const AffineTransform& t)
+    static const LocalRef<jobject> createMatrix (JNIEnv* env, const AffineTransform& t)
     {
         jobject m = env->NewObject (android.matrixClass, android.matrixClassConstructor);
 
@@ -352,25 +364,25 @@ private:
         env->CallVoidMethod (m, android.setValues, javaArray);
         env->DeleteLocalRef (javaArray);
 
-        return m;
+        return LocalRef<jobject> (m);
     }
 
-    static jobject createRect (JNIEnv* env, const Rectangle<int>& r)
+    static const LocalRef<jobject> createRect (JNIEnv* env, const Rectangle<int>& r)
     {
-        return env->NewObject (android.rectClass, android.rectConstructor,
-                               r.getX(), r.getY(), r.getRight(), r.getBottom());
+        return LocalRef<jobject> (env->NewObject (android.rectClass, android.rectConstructor,
+                                                  r.getX(), r.getY(), r.getRight(), r.getBottom()));
     }
 
-    static jobject createRegion (JNIEnv* env, const RectangleList& list)
+    static const LocalRef<jobject> createRegion (JNIEnv* env, const RectangleList& list)
     {
         jobject region = env->NewObject (android.regionClass, android.regionConstructor);
 
         const int numRects = list.getNumRectangles();
 
         for (int i = 0; i < numRects; ++i)
-            env->CallVoidMethod (region, android.regionUnion, createRect (env, list.getRectangle(i)));
+            env->CallVoidMethod (region, android.regionUnion, createRect (env, list.getRectangle(i)).get());
 
-        return region;
+        return LocalRef<jobject> (region);
     }
 
     static int colourToInt (const Colour& col) throw()

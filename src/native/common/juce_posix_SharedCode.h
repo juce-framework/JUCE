@@ -486,8 +486,7 @@ void FileOutputStream::flushInternal()
 const File juce_getExecutableFile()
 {
   #if JUCE_ANDROID
-    // TODO
-    return File::nonexistent;
+    return File (android.appFile);
   #else
     Dl_info exeInfo;
     dladdr ((void*) juce_getExecutableFile, &exeInfo);  // (can't be a const void* on android)
@@ -707,6 +706,11 @@ void JUCE_API juce_threadEntryPoint (void*);
 void* threadEntryProc (void* userData)
 {
     JUCE_AUTORELEASEPOOL
+
+   #if JUCE_ANDROID
+    const AndroidThreadScope androidEnv;
+   #endif
+
     juce_threadEntryPoint (userData);
     return 0;
 }
@@ -744,7 +748,7 @@ void Thread::killThread()
 
 void Thread::setCurrentThreadName (const String& name)
 {
-   #if JUCE_MAC
+   #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
     pthread_setname_np (name.toUTF8());
    #elif JUCE_LINUX
     prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);

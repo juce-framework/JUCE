@@ -27,6 +27,7 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+static ModifierKeys currentModifiers;
 
 //==============================================================================
 class AndroidComponentPeer  : public ComponentPeer
@@ -34,9 +35,9 @@ class AndroidComponentPeer  : public ComponentPeer
 public:
     //==============================================================================
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
-        : ComponentPeer (component, windowStyleFlags)
+        : ComponentPeer (component, windowStyleFlags),
+          view (android.activity.callObjectMethod (android.createNewView))
     {
-        view = GlobalRef (android.env, android.activity.callObjectMethod (android.createNewView));
     }
 
     ~AndroidComponentPeer()
@@ -57,7 +58,7 @@ public:
 
     void setTitle (const String& title)
     {
-        view.callVoidMethod (android.setViewName, android.javaString (title));
+        view.callVoidMethod (android.setViewName, javaString (title).get());
     }
 
     void setPosition (int x, int y)
@@ -87,7 +88,7 @@ public:
 
     const Point<int> getScreenPosition() const
     {
-        JNIEnv* const env = view.getEnv();
+        JNIEnv* const env = getEnv();
 
         jintArray pos = env->NewIntArray (2);
         view.callVoidMethod (android.getLocationOnScreen, pos);
@@ -170,6 +171,26 @@ public:
     }
 
     //==============================================================================
+    void handleMouseDownCallback (float x, float y, int64 time)
+    {
+        currentModifiers = currentModifiers.withoutMouseButtons();
+        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+        currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+    }
+
+    void handleMouseDragCallback (float x, float y, int64 time)
+    {
+        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+    }
+
+    void handleMouseUpCallback (float x, float y, int64 time)
+    {
+        currentModifiers = currentModifiers.withoutMouseButtons();
+        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+    }
+
+    //==============================================================================
     bool isFocused() const
     {
         return view.callBooleanMethod (android.hasFocus);
@@ -188,7 +209,8 @@ public:
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas)
     {
-        AndroidLowLevelGraphicsContext g (GlobalRef (env, canvas));
+        GlobalRef canvasRef (canvas);
+        AndroidLowLevelGraphicsContext g (canvasRef);
         handlePaint (g);
     }
 
@@ -241,6 +263,12 @@ private:
 JUCE_VIEW_CALLBACK (void, handlePaint, (JNIEnv* env, jobject view, jobject canvas),
                     handlePaintCallback (env, canvas))
 
+JUCE_VIEW_CALLBACK (void, handleMouseDown, (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
+                    handleMouseDownCallback ((float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag, (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
+                    handleMouseDragCallback ((float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,   (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
+                    handleMouseUpCallback ((float) x, (float) y, (int64) time))
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -294,8 +322,7 @@ void ModifierKeys::updateCurrentModifiers() throw()
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
-    // TODO
-    return ModifierKeys();
+    return currentModifiers;
 }
 
 //==============================================================================

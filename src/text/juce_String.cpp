@@ -2241,7 +2241,7 @@ public:
                 {
                     buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0x10ffff - 1));
                 }
-                while (buffer[i] >= 0xd800 && buffer[i] <= 0xdfff); // (these code-points are illegal in UTF-16)
+                while (! CharPointer_UTF16::canRepresent (buffer[i]));
             }
             else
                 buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0xff));
