@@ -54,8 +54,6 @@ public class ComponentPeerView extends View
     @Override
     public boolean onTouchEvent (MotionEvent event)
     {
-        System.out.println (event.toString());
-
         switch (event.getAction())
         {
             case MotionEvent.ACTION_DOWN:  handleMouseDown (event.getX(), event.getY(), event.getEventTime()); return true;

@@ -107,6 +107,7 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (rectClass, "android/graphics/Rect") \
  JAVACLASS (regionClass, "android/graphics/Region") \
  JAVACLASS (shaderClass, "android/graphics/Shader") \
+ JAVACLASS (typefaceClass, "android/graphics/Typeface") \
  JAVACLASS (shaderTileModeClass, "android/graphics/Shader$TileMode") \
  JAVACLASS (linearGradientClass, "android/graphics/LinearGradient") \
  JAVACLASS (radialGradientClass, "android/graphics/RadialGradient") \
@@ -118,6 +119,8 @@ BEGIN_JUCE_NAMESPACE
  METHOD (activityClass, createNewView, "createNewView", "()Lcom/juce/ComponentPeerView;") \
  METHOD (activityClass, deleteView, "deleteView", "(Lcom/juce/ComponentPeerView;)V") \
  METHOD (activityClass, postMessage, "postMessage", "(J)V") \
+ METHOD (activityClass, getClipboardContent, "getClipboardContent", "()Ljava/lang/String;") \
+ METHOD (activityClass, setClipboardContent, "setClipboardContent", "(Ljava/lang/String;)V") \
 \
  METHOD (fileClass, fileExists, "exists", "()Z") \
 \
@@ -144,6 +147,7 @@ BEGIN_JUCE_NAMESPACE
  METHOD (canvasClass, drawBitmap, "drawBitmap", "(Landroid/graphics/Bitmap;Landroid/graphics/Matrix;Landroid/graphics/Paint;)V") \
  METHOD (canvasClass, drawLine, "drawLine", "(FFFFLandroid/graphics/Paint;)V") \
  METHOD (canvasClass, drawPath, "drawPath", "(Landroid/graphics/Path;Landroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawText, "drawText", "(Ljava/lang/String;FFLandroid/graphics/Paint;)V") \
  METHOD (canvasClass, getClipBounds, "getClipBounds", "(Landroid/graphics/Rect;)Z") \
  METHOD (canvasClass, getClipBounds2, "getClipBounds", "()Landroid/graphics/Rect;") \
  METHOD (canvasClass, getMatrix, "getMatrix", "()Landroid/graphics/Matrix;") \
@@ -151,10 +155,15 @@ BEGIN_JUCE_NAMESPACE
  METHOD (canvasClass, restore, "restore", "()V") \
  METHOD (canvasClass, saveLayerAlpha, "saveLayerAlpha", "(FFFFII)I") \
 \
- METHOD (paintClass, paintClassConstructor, "<init>", "()V") \
+ METHOD (paintClass, paintClassConstructor, "<init>", "(I)V") \
  METHOD (paintClass, setColor, "setColor", "(I)V") \
  METHOD (paintClass, setShader, "setShader", "(Landroid/graphics/Shader;)Landroid/graphics/Shader;") \
- METHOD (paintClass, setAntiAlias, "setAntiAlias", "(Z)V") \
+ METHOD (paintClass, setTypeface, "setTypeface", "(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;") \
+ METHOD (paintClass, ascent, "ascent", "()F") \
+ METHOD (paintClass, descent, "descent", "()F") \
+ METHOD (paintClass, setTextSize, "setTextSize", "(F)V") \
+ METHOD (paintClass, getTextWidths, "getTextWidths", "(Ljava/lang/String;[F)I") \
+ METHOD (paintClass, getTextPath, "getTextPath", "(Ljava/lang/String;IIFFLandroid/graphics/Path;)V") \
 \
  METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
  STATICFIELD (shaderTileModeClass, clampMode, "CLAMP", "Landroid/graphics/Shader$TileMode;") \
@@ -168,6 +177,8 @@ BEGIN_JUCE_NAMESPACE
 \
  METHOD (matrixClass, matrixClassConstructor, "<init>", "()V") \
  METHOD (matrixClass, setValues, "setValues", "([F)V") \
+\
+ STATICMETHOD (typefaceClass, create, "create", "(Ljava/lang/String;I)Landroid/graphics/Typeface;") \
 \
  METHOD (rectClass, rectConstructor, "<init>", "(IIII)V") \
  FIELD (rectClass, rectLeft, "left", "I") \
@@ -422,6 +433,13 @@ static const LocalRef<jstring> javaString (const String& s)
     return LocalRef<jstring> (getEnv()->NewStringUTF (s.toUTF8()));
 }
 
+static const LocalRef<jstring> javaStringFromChar (const juce_wchar c)
+{
+    char utf8[5] = { 0 };
+    CharPointer_UTF8 (utf8).write (c);
+    return LocalRef<jstring> (getEnv()->NewStringUTF (utf8));
+}
+
 
 //==============================================================================
 class AndroidJavaCallbacks
@@ -482,6 +500,15 @@ public:
     GlobalRef activity;
     String appFile, appDataDir;
     int screenWidth, screenHeight;
+
+    jobject createPaint()
+    {
+        const jint constructorFlags = 1 /*ANTI_ALIAS_FLAG*/
+                                    | 2 /*FILTER_BITMAP_FLAG*/
+                                    | 4 /*DITHER_FLAG*/
+                                    | 128 /*SUBPIXEL_TEXT_FLAG*/;
+        return getEnv()->NewObject (paintClass, paintClassConstructor, constructorFlags);
+    }
 
     //==============================================================================
     #define DECLARE_JNI_CLASS(className, path) jclass className;

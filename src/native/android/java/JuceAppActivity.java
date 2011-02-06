@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.*;
 import android.view.*;
+import android.text.ClipboardManager;
 import com.juce.ComponentPeerView;
 
 //==============================================================================
@@ -127,5 +128,18 @@ public class JuceAppActivity   extends Activity
         protected void onLayout (boolean changed, int left, int top, int right, int bottom)
         {
         }
+    }
+
+    //==============================================================================
+    public String getClipboardContent()
+    {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
+        return clipboard.getText().toString();
+    }
+
+    public void setClipboardContent (String newText)
+    {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
+        clipboard.setText (newText);
     }
 }

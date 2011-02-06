@@ -94,7 +94,6 @@ public:
         view.callVoidMethod (android.getLocationOnScreen, pos);
 
         jint coords[2];
-        jint i, sum = 0;
         env->GetIntArrayRegion (pos, 0, 2, coords);
         env->DeleteLocalRef (pos);
 

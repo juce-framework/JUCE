@@ -207,7 +207,7 @@ private:
 
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
 */
-class ScopedAutoReleasePool
+class JUCE_API  ScopedAutoReleasePool
 {
 public:
     ScopedAutoReleasePool();

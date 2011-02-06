@@ -92,12 +92,13 @@ public:
     const Rectangle<int> getClipBounds() const
     {
         JNIEnv* env = getEnv();
-        const LocalRef<jobject> rect (canvas.callObjectMethod (android.getClipBounds2));
+        jobject rect = canvas.callObjectMethod (android.getClipBounds2);
 
         const int left = env->GetIntField (rect, android.rectLeft);
         const int top = env->GetIntField (rect, android.rectTop);
         const int right = env->GetIntField (rect, android.rectRight);
         const int bottom = env->GetIntField (rect, android.rectBottom);
+        env->DeleteLocalRef (rect);
 
         return Rectangle<int> (left, top, right - left, bottom - top);
     }
@@ -159,15 +160,33 @@ public:
 
     void setFont (const Font& newFont)
     {
+        if (currentState->font != newFont)
+        {
+            currentState->font = newFont;
+            currentState->typefaceNeedsUpdate = true;
+        }
     }
 
     const Font getFont()
     {
-        return Font();
+        return currentState->font;
     }
 
     void drawGlyph (int glyphNumber, const AffineTransform& transform)
     {
+        if (transform.isOnlyTranslation())
+        {
+            canvas.callVoidMethod (android.drawText, javaStringFromChar ((juce_wchar) glyphNumber).get(),
+                                   transform.getTranslationX(), transform.getTranslationY(),
+                                   currentState->getPaintForTypeface());
+        }
+        else
+        {
+            saveState();
+            addTransform (transform);
+            drawGlyph (glyphNumber, AffineTransform::identity);
+            restoreState();
+        }
     }
 
     //==============================================================================
@@ -175,7 +194,6 @@ public:
     {
         (void) canvas.callIntMethod (android.save);
         stateStack.add (new SavedState (*currentState));
-
     }
 
     void restoreState()
@@ -207,36 +225,33 @@ public:
     {
     public:
         SavedState()
-            : font (1.0f), needsUpdate (true)
+            : font (1.0f), fillNeedsUpdate (true), typefaceNeedsUpdate (true)
         {
         }
 
         SavedState (const SavedState& other)
-            : fillType (other.fillType), font (other.font), needsUpdate (true)
+            : fillType (other.fillType), font (other.font), fillNeedsUpdate (true), typefaceNeedsUpdate (true)
         {
         }
 
         void setFillType (const FillType& newType)
         {
-            needsUpdate = true;
+            fillNeedsUpdate = true;
             fillType = newType;
         }
 
         jobject getPaint()
         {
-            if (needsUpdate)
+            if (fillNeedsUpdate)
             {
                 JNIEnv* env = getEnv();
 
                 if (paint.get() == 0)
-                {
-                    paint = GlobalRef (env->NewObject (android.paintClass, android.paintClassConstructor));
-                    paint.callVoidMethod (android.setAntiAlias, true);
-                }
+                    paint = GlobalRef (android.createPaint());
 
                 if (fillType.isColour())
                 {
-                    paint.callObjectMethod (android.setShader, (jobject) 0);
+                    env->DeleteLocalRef (paint.callObjectMethod (android.setShader, (jobject) 0));
                     paint.callVoidMethod (android.setColor, colourToInt (fillType.colour));
                 }
                 else if (fillType.isGradient())
@@ -288,7 +303,7 @@ public:
                     env->DeleteLocalRef (positionsArray);
 
                     env->CallVoidMethod (shader, android.setLocalMatrix, createMatrix (env, fillType.transform).get());
-                    paint.callObjectMethod (android.setShader, shader);
+                    env->DeleteLocalRef (paint.callObjectMethod (android.setShader, shader));
 
                     env->DeleteLocalRef (shader);
                 }
@@ -300,11 +315,30 @@ public:
             return paint.get();
         }
 
-    private:
+        jobject getPaintForTypeface()
+        {
+            jobject p = getPaint();
+
+            if (typefaceNeedsUpdate)
+            {
+                typefaceNeedsUpdate = false;
+                const Typeface::Ptr t (font.getTypeface());
+                AndroidTypeface* atf = dynamic_cast <AndroidTypeface*> (t.getObject());
+
+                if (atf != 0)
+                {
+                    paint.callObjectMethod (android.setTypeface, atf->typeface.get());
+                    paint.callVoidMethod (android.setTextSize, font.getHeight());
+                }
+            }
+
+            return p;
+        }
+
         FillType fillType;
         Font font;
         GlobalRef paint;
-        bool needsUpdate;
+        bool fillNeedsUpdate, typefaceNeedsUpdate;
     };
 
 private:
@@ -380,7 +414,7 @@ private:
         const int numRects = list.getNumRectangles();
 
         for (int i = 0; i < numRects; ++i)
-            env->CallVoidMethod (region, android.regionUnion, createRect (env, list.getRectangle(i)).get());
+            env->CallBooleanMethod (region, android.regionUnion, createRect (env, list.getRectangle(i)).get());
 
         return LocalRef<jobject> (region);
     }

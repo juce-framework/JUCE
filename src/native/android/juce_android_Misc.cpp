@@ -56,7 +56,6 @@ JUCE_JNI_CALLBACK (JuceAppActivity, quitApp, void, (JNIEnv* env, jobject activit
 //==============================================================================
 void PlatformUtilities::beep()
 {
-    // TODO
 }
 
 //==============================================================================
@@ -69,16 +68,14 @@ void Logger::outputDebugString (const String& text)
 //==============================================================================
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
-    // TODO
+    const LocalRef<jstring> t (javaString (text));
+    android.activity.callVoidMethod (android.setClipboardContent, t.get());
 }
 
 const String SystemClipboard::getTextFromClipboard()
 {
-    String result;
-
-    // TODO
-
-    return result;
+    const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (android.getClipboardContent));
+    return juceString (text);
 }
 
 

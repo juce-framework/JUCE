@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	27
+#define JUCE_BUILDNUMBER	28
 
 /** Current Juce version number.
 
@@ -16735,7 +16735,7 @@ private:
 
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
 */
-class ScopedAutoReleasePool
+class JUCE_API  ScopedAutoReleasePool
 {
 public:
 	ScopedAutoReleasePool();
