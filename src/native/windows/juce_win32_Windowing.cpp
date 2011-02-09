@@ -146,13 +146,6 @@ class WindowsBitmapImage  : public Image::SharedImage
 {
 public:
     //==============================================================================
-    HBITMAP hBitmap;
-    HGDIOBJ previousBitmap;
-    BITMAPV4HEADER bitmapInfo;
-    HDC hdc;
-    unsigned char* bitmapData;
-
-    //==============================================================================
     WindowsBitmapImage (const Image::PixelFormat format_,
                         const int w, const int h, const bool clearImage)
         : Image::SharedImage (format_, w, h)
@@ -160,6 +153,7 @@ public:
         jassert (format_ == Image::RGB || format_ == Image::ARGB);
 
         pixelStride = (format_ == Image::RGB) ? 3 : 4;
+        lineStride = -((w * pixelStride + 3) & ~3);
 
         zerostruct (bitmapInfo);
         bitmapInfo.bV4Size = sizeof (BITMAPV4HEADER);
@@ -182,19 +176,14 @@ public:
             bitmapInfo.bV4V4Compression    = BI_RGB;
         }
 
-        lineStride = -((w * pixelStride + 3) & ~3);
-
         HDC dc = GetDC (0);
         hdc = CreateCompatibleDC (dc);
         ReleaseDC (0, dc);
 
         SetMapMode (hdc, MM_TEXT);
 
-        hBitmap = CreateDIBSection (hdc,
-                                    (BITMAPINFO*) &(bitmapInfo),
-                                    DIB_RGB_COLORS,
-                                    (void**) &bitmapData,
-                                    0, 0);
+        hBitmap = CreateDIBSection (hdc, (BITMAPINFO*) &(bitmapInfo), DIB_RGB_COLORS,
+                                    (void**) &bitmapData, 0, 0);
 
         previousBitmap = SelectObject (hdc, hBitmap);
 
@@ -216,6 +205,14 @@ public:
     LowLevelGraphicsContext* createLowLevelContext()
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
+    }
+
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    {
+        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        bitmap.pixelFormat = format;
+        bitmap.lineStride = lineStride;
+        bitmap.pixelStride = pixelStride;
     }
 
     Image::SharedImage* clone()
@@ -318,6 +315,15 @@ public:
         }
     }
 
+    //==============================================================================
+    HBITMAP hBitmap;
+    HGDIOBJ previousBitmap;
+    BITMAPV4HEADER bitmapInfo;
+    HDC hdc;
+    uint8* bitmapData;
+    int pixelStride, lineStride;
+    uint8* imageData;
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage);
 };
@@ -342,7 +348,7 @@ namespace IconConverters
                 SelectObject (dc, bitmap);
 
                 im = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
-                Image::BitmapData imageData (im, true);
+                Image::BitmapData imageData (im, Image::BitmapData::writeOnly);
 
                 for (int y = bm.bmHeight; --y >= 0;)
                 {

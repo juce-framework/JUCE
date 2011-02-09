@@ -212,7 +212,7 @@ public:
             const ScopedLock sl (imageSwapLock);
 
             {
-                const Image::BitmapData destData (loadingImage, 0, 0, width, height, true);
+                const Image::BitmapData destData (loadingImage, 0, 0, width, height, Image::BitmapData::writeOnly);
 
                 for (int i = 0; i < height; ++i)
                     memcpy (destData.getLinePointer ((height - 1) - i),

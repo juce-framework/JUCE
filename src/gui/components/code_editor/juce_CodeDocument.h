@@ -336,7 +336,7 @@ public:
 
         @see CodeDocument, SyntaxAnalyser
     */
-    class Iterator
+    class JUCE_API  Iterator
     {
     public:
         Iterator (CodeDocument* document);

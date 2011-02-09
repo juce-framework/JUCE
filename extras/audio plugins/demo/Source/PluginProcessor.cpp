@@ -222,6 +222,13 @@ void JuceDemoPluginAudioProcessor::releaseResources()
     keyboardState.reset();
 }
 
+void JuceDemoPluginAudioProcessor::reset()
+{
+    // Use this method as the place to clear any delay lines, buffers, etc, as it
+    // means there's been a break in the audio's continuity.
+    delayBuffer.clear();
+}
+
 void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     const int numSamples = buffer.getNumSamples();

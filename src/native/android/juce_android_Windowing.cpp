@@ -27,7 +27,6 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-static ModifierKeys currentModifiers;
 
 //==============================================================================
 class AndroidComponentPeer  : public ComponentPeer
@@ -36,8 +35,10 @@ public:
     //==============================================================================
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
-          view (android.activity.callObjectMethod (android.createNewView))
+          view (android.activity.callObjectMethod (android.createNewView, component->isOpaque()))
     {
+        if (isFocused())
+            handleFocusGain();
     }
 
     ~AndroidComponentPeer()
@@ -88,7 +89,7 @@ public:
 
     const Point<int> getScreenPosition() const
     {
-        JNIEnv* const env = getEnv();
+        /*JNIEnv* const env = getEnv();
 
         jintArray pos = env->NewIntArray (2);
         view.callVoidMethod (android.getLocationOnScreen, pos);
@@ -97,7 +98,10 @@ public:
         env->GetIntArrayRegion (pos, 0, 2, coords);
         env->DeleteLocalRef (pos);
 
-        return Point<int> (coords[0], coords[1]);
+        return Point<int> (coords[0], coords[1]);*/
+
+        return Point<int> (view.callIntMethod (android.getLeft),
+                           view.callIntMethod (android.getTop));
     }
 
     const Point<int> localToGlobal (const Point<int>& relativePosition)
@@ -138,10 +142,9 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        // TODO
-
         return isPositiveAndBelow (position.getX(), component->getWidth())
-            && isPositiveAndBelow (position.getY(), component->getHeight());
+            && isPositiveAndBelow (position.getY(), component->getHeight())
+            && ((! trueIfInAChildWindow) || view.callBooleanMethod (android.containsPoint, position.getX(), position.getY()));
     }
 
     const BorderSize<int> getFrameSize() const
@@ -162,6 +165,8 @@ public:
 
         if (makeActive)
             grabFocus();
+
+        handleBroughtToFront();
     }
 
     void toBehind (ComponentPeer* other)
@@ -172,21 +177,24 @@ public:
     //==============================================================================
     void handleMouseDownCallback (float x, float y, int64 time)
     {
+        lastMousePos.setXY ((int) x, (int) y);
         currentModifiers = currentModifiers.withoutMouseButtons();
-        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+        handleMouseEvent (0, lastMousePos, currentModifiers, time);
         currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+        handleMouseEvent (0, lastMousePos, currentModifiers, time);
     }
 
     void handleMouseDragCallback (float x, float y, int64 time)
     {
-        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+        lastMousePos.setXY ((int) x, (int) y);
+        handleMouseEvent (0, lastMousePos, currentModifiers, time);
     }
 
     void handleMouseUpCallback (float x, float y, int64 time)
     {
+        lastMousePos.setXY ((int) x, (int) y);
         currentModifiers = currentModifiers.withoutMouseButtons();
-        handleMouseEvent (0, Point<int> ((int) x, (int) y), currentModifiers, time);
+        handleMouseEvent (0, lastMousePos, currentModifiers, time);
     }
 
     //==============================================================================
@@ -197,7 +205,15 @@ public:
 
     void grabFocus()
     {
-        (void) view.callBooleanMethod (android.requestFocus);
+        view.callBooleanMethod (android.requestFocus);
+    }
+
+    void handleFocusChangeCallback (bool hasFocus)
+    {
+        if (hasFocus)
+            handleFocusGain();
+        else
+            handleFocusLoss();
     }
 
     void textInputRequired (const Point<int>& position)
@@ -208,8 +224,7 @@ public:
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas)
     {
-        GlobalRef canvasRef (canvas);
-        AndroidLowLevelGraphicsContext g (canvasRef);
+        AndroidLowLevelGraphicsContext g (canvas);
         handlePaint (g);
     }
 
@@ -243,12 +258,18 @@ public:
         return 0;
     }
 
+    static ModifierKeys currentModifiers;
+    static Point<int> lastMousePos;
+
 private:
     //==============================================================================
     GlobalRef view;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer);
 };
+
+ModifierKeys AndroidComponentPeer::currentModifiers = 0;
+Point<int> AndroidComponentPeer::lastMousePos;
 
 //==============================================================================
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
@@ -268,6 +289,12 @@ JUCE_VIEW_CALLBACK (void, handleMouseDrag, (JNIEnv*, jobject view, jfloat x, jfl
                     handleMouseDragCallback ((float) x, (float) y, (int64) time))
 JUCE_VIEW_CALLBACK (void, handleMouseUp,   (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
                     handleMouseUpCallback ((float) x, (float) y, (int64) time))
+
+JUCE_VIEW_CALLBACK (void, viewSizeChanged, (JNIEnv*, jobject view),
+                    handleMovedOrResized())
+
+JUCE_VIEW_CALLBACK (void, focusChanged, (JNIEnv*, jobject view, jboolean hasFocus),
+                    handleFocusChangeCallback (hasFocus))
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -298,8 +325,7 @@ void Desktop::createMouseInputSources()
 
 const Point<int> MouseInputSource::getCurrentMousePosition()
 {
-    // TODO
-    return Point<int>();
+    return AndroidComponentPeer::lastMousePos;
 }
 
 void Desktop::setMousePosition (const Point<int>& newPosition)
@@ -316,12 +342,12 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 
 void ModifierKeys::updateCurrentModifiers() throw()
 {
-    // not needed
+    currentModifiers = AndroidComponentPeer::currentModifiers;
 }
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
-    return currentModifiers;
+    return AndroidComponentPeer::currentModifiers;
 }
 
 //==============================================================================
@@ -340,11 +366,6 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 }
 
 //==============================================================================
-Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
-{
-    return createSoftwareImage (format, width, height, clearImage);
-}
-
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     // TODO

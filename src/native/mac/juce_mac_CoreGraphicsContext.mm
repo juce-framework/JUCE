@@ -38,8 +38,7 @@ public:
         pixelStride = format_ == Image::RGB ? 3 : ((format_ == Image::ARGB) ? 4 : 1);
         lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
 
-        imageDataAllocated.allocate (lineStride * jmax (1, height), clearImage);
-        imageData = imageDataAllocated;
+        imageData.allocate (lineStride * jmax (1, height), clearImage);
 
         CGColorSpaceRef colourSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
                                                                        : CGColorSpaceCreateDeviceRGB();
@@ -57,6 +56,14 @@ public:
 
     Image::ImageType getType() const    { return Image::NativeImage; }
     LowLevelGraphicsContext* createLowLevelContext();
+
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    {
+        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        bitmap.pixelFormat = format;
+        bitmap.lineStride = lineStride;
+        bitmap.pixelStride = pixelStride;
+    }
 
     SharedImage* clone()
     {
@@ -77,7 +84,7 @@ public:
         }
         else
         {
-            const Image::BitmapData srcData (juceImage, false);
+            const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
             CGDataProviderRef provider;
 
             if (mustOutliveSource)
@@ -126,7 +133,8 @@ public:
 
     //==============================================================================
     CGContextRef context;
-    HeapBlock<uint8> imageDataAllocated;
+    HeapBlock<uint8> imageData;
+    int pixelStride, lineStride;
 
 private:
     static CGBitmapInfo getCGImageFlags (const Image::PixelFormat& format)

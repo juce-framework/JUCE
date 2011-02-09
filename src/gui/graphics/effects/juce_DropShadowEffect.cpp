@@ -66,38 +66,40 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g, float alpha)
 
     Image shadowImage (Image::SingleChannel, w, h, false);
 
-    const Image::BitmapData srcData (image, false);
-    const Image::BitmapData destData (shadowImage, true);
-
-    const int filter = roundToInt (63.0f / radius);
-    const int radiusMinus1 = roundToInt ((radius - 1.0f) * 63.0f);
-
-    for (int x = w; --x >= 0;)
     {
-        int shadowAlpha = 0;
+        const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
+        const Image::BitmapData destData (shadowImage, Image::BitmapData::readWrite);
 
-        const PixelARGB* src = ((const PixelARGB*) srcData.data) + x;
-        uint8* shadowPix = destData.data + x;
-
-        for (int y = h; --y >= 0;)
-        {
-            shadowAlpha = ((shadowAlpha * radiusMinus1 + (src->getAlpha() << 6)) * filter) >> 12;
-
-            *shadowPix = (uint8) shadowAlpha;
-            src = (const PixelARGB*) (((const uint8*) src) + srcData.lineStride);
-            shadowPix += destData.lineStride;
-        }
-    }
-
-    for (int y = h; --y >= 0;)
-    {
-        int shadowAlpha = 0;
-        uint8* shadowPix = destData.getLinePointer (y);
+        const int filter = roundToInt (63.0f / radius);
+        const int radiusMinus1 = roundToInt ((radius - 1.0f) * 63.0f);
 
         for (int x = w; --x >= 0;)
         {
-            shadowAlpha = ((shadowAlpha * radiusMinus1 + (*shadowPix << 6)) * filter) >> 12;
-            *shadowPix++ = (uint8) shadowAlpha;
+            int shadowAlpha = 0;
+
+            const PixelARGB* src = ((const PixelARGB*) srcData.data) + x;
+            uint8* shadowPix = destData.data + x;
+
+            for (int y = h; --y >= 0;)
+            {
+                shadowAlpha = ((shadowAlpha * radiusMinus1 + (src->getAlpha() << 6)) * filter) >> 12;
+
+                *shadowPix = (uint8) shadowAlpha;
+                src = addBytesToPointer (src, srcData.lineStride);
+                shadowPix += destData.lineStride;
+            }
+        }
+
+        for (int y = h; --y >= 0;)
+        {
+            int shadowAlpha = 0;
+            uint8* shadowPix = destData.getLinePointer (y);
+
+            for (int x = w; --x >= 0;)
+            {
+                shadowAlpha = ((shadowAlpha * radiusMinus1 + (*shadowPix << 6)) * filter) >> 12;
+                *shadowPix++ = (uint8) shadowAlpha;
+            }
         }
     }
 

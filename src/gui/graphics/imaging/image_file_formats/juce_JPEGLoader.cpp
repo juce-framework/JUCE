@@ -307,7 +307,7 @@ const Image JPEGImageFormat::decodeImage (InputStream& in)
                 image.getProperties()->set ("originalImageHadAlpha", false);
                 const bool hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-                const Image::BitmapData destData (image, true);
+                const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
 
                 for (int y = 0; y < height; ++y)
                 {
@@ -411,7 +411,7 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     JSAMPARRAY buffer = (*jpegCompStruct.mem->alloc_sarray) ((j_common_ptr) &jpegCompStruct,
                                                              JPOOL_IMAGE, strideBytes, 1);
 
-    const Image::BitmapData srcData (image, false);
+    const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
     while (jpegCompStruct.next_scanline < jpegCompStruct.image_height)
     {

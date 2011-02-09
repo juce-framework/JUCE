@@ -31,10 +31,16 @@ import android.graphics.*;
 
 //==============================================================================
 public class ComponentPeerView extends View
+							   implements View.OnFocusChangeListener
 {
-    public ComponentPeerView (Context context)
+    public ComponentPeerView (Context context, boolean opaque_)
     {
         super (context);
+    	opaque = opaque_;
+        setFocusable (true);
+        setFocusableInTouchMode (true);
+        setOnFocusChangeListener (this);
+        requestFocus();
     }
 
     //==============================================================================
@@ -45,6 +51,14 @@ public class ComponentPeerView extends View
     {
         handlePaint (canvas);
     }
+
+    @Override
+    public boolean isOpaque()
+    {
+    	return opaque;
+    }
+
+    private boolean opaque;
 
     //==============================================================================
     private native void handleMouseDown (float x, float y, long time);
@@ -70,6 +84,7 @@ public class ComponentPeerView extends View
     @Override
     protected void onSizeChanged (int w, int h, int oldw, int oldh)
     {
+    	viewSizeChanged();
     }
 
     @Override
@@ -77,16 +92,33 @@ public class ComponentPeerView extends View
     {
     }
 
+    private native void viewSizeChanged();
+
+    @Override
+    public void onFocusChange (View v, boolean hasFocus)
+    {
+    	if (v == this)
+    		focusChanged (hasFocus);
+    }
+
+    private native void focusChanged (boolean hasFocus);
+
     public void setViewName (String newName)
     {
     }
 
     public boolean isVisible()
     {
-        return true;
+        return getVisibility() == VISIBLE;
     }
 
     public void setVisible (boolean b)
     {
+    	setVisibility (b ? VISIBLE : INVISIBLE);
+    }
+
+    public boolean containsPoint (int x, int y)
+    {
+    	return true; //xxx needs to check overlapping views
     }
 }

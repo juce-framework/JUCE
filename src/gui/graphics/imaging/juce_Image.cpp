@@ -46,23 +46,16 @@ Image::SharedImage::~SharedImage()
 {
 }
 
-inline uint8* Image::SharedImage::getPixelData (const int x, const int y) const throw()
-{
-    return imageData + lineStride * y + pixelStride * x;
-}
-
 //==============================================================================
 class SoftwareSharedImage  : public Image::SharedImage
 {
 public:
     SoftwareSharedImage (const Image::PixelFormat format_, const int width_, const int height_, const bool clearImage)
-        : Image::SharedImage (format_, width_, height_)
+        : Image::SharedImage (format_, width_, height_),
+          pixelStride (format_ == Image::RGB ? 3 : ((format_ == Image::ARGB) ? 4 : 1)),
+          lineStride ((pixelStride * jmax (1, width_) + 3) & ~3)
     {
-        pixelStride = format_ == Image::RGB ? 3 : ((format_ == Image::ARGB) ? 4 : 1);
-        lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
-
-        imageDataAllocated.allocate (lineStride * jmax (1, height), clearImage);
-        imageData = imageDataAllocated;
+        imageData.allocate (lineStride * jmax (1, height_), clearImage);
     }
 
     Image::ImageType getType() const
@@ -75,6 +68,14 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    {
+        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        bitmap.pixelFormat = format;
+        bitmap.lineStride = lineStride;
+        bitmap.pixelStride = pixelStride;
+    }
+
     Image::SharedImage* clone()
     {
         SoftwareSharedImage* s = new SoftwareSharedImage (format, width, height, false);
@@ -83,7 +84,8 @@ public:
     }
 
 private:
-    HeapBlock<uint8> imageDataAllocated;
+    HeapBlock<uint8> imageData;
+    const int pixelStride, lineStride;
 
     JUCE_LEAK_DETECTOR (SoftwareSharedImage);
 };
@@ -101,9 +103,6 @@ public:
         : Image::SharedImage (image_->getPixelFormat(), area_.getWidth(), area_.getHeight()),
           image (image_), area (area_)
     {
-        pixelStride = image_->getPixelStride();
-        lineStride = image_->getLineStride();
-        imageData = image_->getPixelData (area_.getX(), area_.getY());
     }
 
     Image::ImageType getType() const
@@ -117,6 +116,11 @@ public:
         g->clipToRectangle (area);
         g->setOrigin (area.getX(), area.getY());
         return g;
+    }
+
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode)
+    {
+        image->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
     }
 
     Image::SharedImage* clone()
@@ -220,7 +224,7 @@ const Image Image::convertedToFormat (PixelFormat newFormat) const
         }
         else
         {
-            const BitmapData destData (newImage, 0, 0, w, h, true);
+            const BitmapData destData (newImage, 0, 0, w, h, BitmapData::writeOnly);
             const BitmapData srcData (*this, 0, 0, w, h);
 
             for (int y = 0; y < h; ++y)
@@ -254,37 +258,39 @@ NamedValueSet* Image::getProperties() const
 }
 
 //==============================================================================
-Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int w, const int h, const bool /*makeWritable*/)
-    : data (image.image == 0 ? 0 : image.image->getPixelData (x, y)),
-      pixelFormat (image.getFormat()),
-      lineStride (image.image == 0 ? 0 : image.image->lineStride),
-      pixelStride (image.image == 0 ? 0 : image.image->pixelStride),
-      width (w),
+Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int w, const int h, BitmapData::ReadWriteMode mode)
+    : width (w),
       height (h)
 {
-    jassert (data != 0);
+    // The BitmapData class must be given a valid image, and a valid rectangle within it!
+    jassert (image.image != 0);
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
+
+    image.image->initialiseBitmapData (*this, x, y, mode);
+    jassert (data != 0 && pixelStride > 0 && lineStride != 0);
 }
 
 Image::BitmapData::BitmapData (const Image& image, const int x, const int y, const int w, const int h)
-    : data (image.image == 0 ? 0 : image.image->getPixelData (x, y)),
-      pixelFormat (image.getFormat()),
-      lineStride (image.image == 0 ? 0 : image.image->lineStride),
-      pixelStride (image.image == 0 ? 0 : image.image->pixelStride),
-      width (w),
+    : width (w),
       height (h)
 {
+    // The BitmapData class must be given a valid image, and a valid rectangle within it!
+    jassert (image.image != 0);
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
+
+    image.image->initialiseBitmapData (*this, x, y, readOnly);
+    jassert (data != 0 && pixelStride > 0 && lineStride != 0);
 }
 
-Image::BitmapData::BitmapData (const Image& image, bool /*needsToBeWritable*/)
-    : data (image.image == 0 ? 0 : image.image->imageData),
-      pixelFormat (image.getFormat()),
-      lineStride (image.image == 0 ? 0 : image.image->lineStride),
-      pixelStride (image.image == 0 ? 0 : image.image->pixelStride),
-      width (image.getWidth()),
+Image::BitmapData::BitmapData (const Image& image, BitmapData::ReadWriteMode mode)
+    : width (image.getWidth()),
       height (image.getHeight())
 {
+    // The BitmapData class must be given a valid image!
+    jassert (image.image != 0);
+
+    image.image->initialiseBitmapData (*this, 0, 0, mode);
+    jassert (data != 0 && pixelStride > 0 && lineStride != 0);
 }
 
 Image::BitmapData::~BitmapData()
@@ -299,21 +305,10 @@ const Colour Image::BitmapData::getPixelColour (const int x, const int y) const 
 
     switch (pixelFormat)
     {
-    case Image::ARGB:
-        {
-            PixelARGB p (*(const PixelARGB*) pixel);
-            p.unpremultiply();
-            return Colour (p.getARGB());
-        }
-    case Image::RGB:
-        return Colour (((const PixelRGB*) pixel)->getARGB());
-
-    case Image::SingleChannel:
-        return Colour ((uint8) 0, (uint8) 0, (uint8) 0, *pixel);
-
-    default:
-        jassertfalse;
-        break;
+        case Image::ARGB:           return Colour (((const PixelARGB*) pixel)->getUnpremultipliedARGB());
+        case Image::RGB:            return Colour (((const PixelRGB*) pixel)->getUnpremultipliedARGB());
+        case Image::SingleChannel:  return Colour (((const PixelAlpha*) pixel)->getUnpremultipliedARGB());
+        default:                    jassertfalse; break;
     }
 
     return Colour();
@@ -342,7 +337,7 @@ void Image::setPixelData (int x, int y, int w, int h,
 
     if (Rectangle<int>::intersectRectangles (x, y, w, h, 0, 0, getWidth(), getHeight()))
     {
-        const BitmapData dest (*this, x, y, w, h, true);
+        const BitmapData dest (*this, x, y, w, h, BitmapData::writeOnly);
 
         for (int i = 0; i < h; ++i)
         {
@@ -362,7 +357,7 @@ void Image::clear (const Rectangle<int>& area, const Colour& colourToClearTo)
     {
         const PixelARGB col (colourToClearTo.getPixelARGB());
 
-        const BitmapData destData (*this, clipped.getX(), clipped.getY(), clipped.getWidth(), clipped.getHeight(), true);
+        const BitmapData destData (*this, clipped.getX(), clipped.getY(), clipped.getWidth(), clipped.getHeight(), BitmapData::writeOnly);
         uint8* dest = destData.data;
         int dh = clipped.getHeight();
 
@@ -415,7 +410,7 @@ void Image::setPixelAt (const int x, const int y, const Colour& colour)
 {
     if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight()))
     {
-        const BitmapData destData (*this, x, y, 1, 1, true);
+        const BitmapData destData (*this, x, y, 1, 1, BitmapData::writeOnly);
         destData.setPixelColour (0, 0, colour);
     }
 }
@@ -425,7 +420,7 @@ void Image::multiplyAlphaAt (const int x, const int y, const float multiplier)
     if (isPositiveAndBelow (x, getWidth()) && isPositiveAndBelow (y, getHeight())
          && hasAlphaChannel())
     {
-        const BitmapData destData (*this, x, y, 1, 1, true);
+        const BitmapData destData (*this, x, y, 1, 1, BitmapData::readWrite);
 
         if (isARGB())
             ((PixelARGB*) destData.data)->multiplyAlpha (multiplier);
@@ -438,7 +433,7 @@ void Image::multiplyAllAlphas (const float amountToMultiplyBy)
 {
     if (hasAlphaChannel())
     {
-        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), true);
+        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
 
         if (isARGB())
         {
@@ -477,7 +472,7 @@ void Image::desaturate()
 {
     if (isARGB() || isRGB())
     {
-        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), true);
+        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
 
         if (isARGB())
         {
@@ -601,7 +596,7 @@ void Image::moveImageSection (int dx, int dy,
         const int maxX = jmax (dx, sx) + w;
         const int maxY = jmax (dy, sy) + h;
 
-        const BitmapData destData (*this, minX, minY, maxX - minX, maxY - minY, true);
+        const BitmapData destData (*this, minX, minY, maxX - minX, maxY - minY, BitmapData::readWrite);
 
         uint8* dst       = destData.getPixelPointer (dx - minX, dy - minY);
         const uint8* src = destData.getPixelPointer (sx - minX, sy - minY);

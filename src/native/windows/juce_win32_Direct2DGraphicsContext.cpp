@@ -243,7 +243,7 @@ public:
         D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties();
 
         Image img (image.convertedToFormat (Image::ARGB));
-        Image::BitmapData bd (img, false);
+        Image::BitmapData bd (img, Image::BitmapData::readOnly);
         bp.pixelFormat = renderingTarget->GetPixelFormat();
         bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
@@ -479,7 +479,7 @@ public:
             D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties();
 
             maskImage = image.convertedToFormat (Image::ARGB);
-            Image::BitmapData bd (this->image, false); // xxx should be maskImage?
+            Image::BitmapData bd (this->image, Image::BitmapData::readOnly); // xxx should be maskImage?
             bp.pixelFormat = owner.renderingTarget->GetPixelFormat();
             bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
@@ -658,7 +658,7 @@ public:
                     D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties();
 
                     this->image = image.convertedToFormat (Image::ARGB);
-                    Image::BitmapData bd (this->image, false);
+                    Image::BitmapData bd (this->image, Image::BitmapData::readOnly);
                     bp.pixelFormat = owner.renderingTarget->GetPixelFormat();
                     bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 

@@ -27,10 +27,15 @@ package com.juce;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.content.*;
-import android.view.*;
+import android.content.Context;
+import android.view.ViewGroup;
+import android.view.Display;
+import android.view.WindowManager;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.text.ClipboardManager;
 import com.juce.ComponentPeerView;
+
 
 //==============================================================================
 public class JuceAppActivity   extends Activity
@@ -106,9 +111,9 @@ public class JuceAppActivity   extends Activity
     //==============================================================================
     private ViewHolder viewHolder;
 
-    public ComponentPeerView createNewView()
+    public ComponentPeerView createNewView (boolean opaque)
     {
-        ComponentPeerView v = new ComponentPeerView (this);
+        ComponentPeerView v = new ComponentPeerView (this, opaque);
         viewHolder.addView (v);
         return v;
     }
@@ -123,11 +128,18 @@ public class JuceAppActivity   extends Activity
         public ViewHolder (Context context)
         {
             super (context);
+            setDescendantFocusability (ViewGroup.FOCUS_AFTER_DESCENDANTS);
+            setFocusable (false);
         }
 
         protected void onLayout (boolean changed, int left, int top, int right, int bottom)
         {
         }
+    }
+
+    public void excludeClipRegion (android.graphics.Canvas canvas, float left, float top, float right, float bottom)
+    {
+        canvas.clipRect (left, top, right, bottom, android.graphics.Region.Op.DIFFERENCE);
     }
 
     //==============================================================================
@@ -141,5 +153,98 @@ public class JuceAppActivity   extends Activity
     {
         ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
         clipboard.setText (newText);
+    }
+
+    //==============================================================================
+    /*class PathGrabber  extends Path
+    {
+        public PathGrabber()
+        {
+            pathString = new StringBuilder();
+        }
+
+        @Override
+        public void addPath (Path src)
+        {
+        }
+
+        @Override
+        public void addPath (Path src, float dx, float dy)
+        {
+        }
+
+        @Override
+        public void close()
+        {
+            pathString.append ('c');
+        }
+
+        @Override
+        public void moveTo (float x, float y)
+        {
+            pathString.append ('m');
+            pathString.append (String.valueOf (x));
+            pathString.append (String.valueOf (y));
+        }
+
+        @Override
+        public void lineTo (float x, float y)
+        {
+            pathString.append ('l');
+            pathString.append (String.valueOf (x));
+            pathString.append (String.valueOf (y));
+        }
+
+        @Override
+        public void quadTo (float x1, float y1, float x2, float y2)
+        {
+            pathString.append ('q');
+            pathString.append (String.valueOf (x1));
+            pathString.append (String.valueOf (y1));
+            pathString.append (String.valueOf (x2));
+            pathString.append (String.valueOf (y2));
+        }
+
+        @Override
+        public void cubicTo (float x1, float y1, float x2, float y2, float x3, float y3)
+        {
+            pathString.append ('b');
+            pathString.append (String.valueOf (x1));
+            pathString.append (String.valueOf (y1));
+            pathString.append (String.valueOf (x2));
+            pathString.append (String.valueOf (y2));
+            pathString.append (String.valueOf (x3));
+            pathString.append (String.valueOf (y3));
+        }
+
+        @Override
+        public void reset()
+        {
+            rewind();
+        }
+
+        @Override
+        public void rewind()
+        {
+            pathString.setLength (0);
+        }
+
+        public String getJucePath()
+        {
+            if (getFillType() == FillType.EVEN_ODD)
+                return "z" + pathString.toString();
+            else
+                return "n" + pathString.toString();
+        }
+
+        private StringBuilder pathString;
+    }*/
+
+    public String createPathForGlyph (Paint paint, char c)
+    {
+        /*PathGrabber pg = new PathGrabber();
+        paint.getTextPath (String.valueOf (c), 0, 1, 0, 0, pg);
+        return pg.getJucePath();*/
+        return "";
     }
 }

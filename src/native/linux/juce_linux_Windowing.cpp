@@ -585,6 +585,14 @@ public:
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    {
+        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        bitmap.pixelFormat = format;
+        bitmap.lineStride = lineStride;
+        bitmap.pixelStride = pixelStride;
+    }
+
     SharedImage* clone()
     {
         jassertfalse;
@@ -622,7 +630,7 @@ public:
             const uint32 bShiftL = jmax (0, getShiftNeeded (bMask));
             const uint32 bShiftR = jmax (0, -getShiftNeeded (bMask));
 
-            const Image::BitmapData srcData (Image (this), false);
+            const Image::BitmapData srcData (Image (this), Image::BitmapData::readOnly);
 
             for (int y = sy; y < sy + dh; ++y)
             {
@@ -656,6 +664,8 @@ private:
     const int imageDepth;
     HeapBlock <uint8> imageDataAllocated;
     HeapBlock <char> imageData16Bit;
+    int pixelStride, lineStride;
+    uint8* imageData;
 
     GC gc;
 

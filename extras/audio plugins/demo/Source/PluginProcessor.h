@@ -28,8 +28,8 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     void releaseResources();
-
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
+    void reset();
 
     //==============================================================================
     bool hasEditor() const                  { return true; }

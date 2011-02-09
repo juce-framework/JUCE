@@ -103,7 +103,7 @@ public:
             const int height = getHeight() / 2;
             colours = Image (Image::RGB, width, height, false);
 
-            Image::BitmapData pixels (colours, true);
+            Image::BitmapData pixels (colours, Image::BitmapData::writeOnly);
 
             for (int y = 0; y < height; ++y)
             {

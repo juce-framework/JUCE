@@ -400,7 +400,7 @@ private:
         int index;
         int xpos = 0, ypos = 0, pass = 0;
 
-        const Image::BitmapData destData (image, true);
+        const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
         uint8* p = destData.data;
         const bool hasAlpha = image.hasAlphaChannel();
 

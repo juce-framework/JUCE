@@ -127,8 +127,14 @@ public:
 
     bool getOutlineForGlyph (int glyphNumber, Path& destPath)
     {
-        // TODO
-        return false;
+        LocalRef<jstring> s ((jstring) android.activity.callObjectMethod (android.createPathForGlyph, paint.get(), (jchar) glyphNumber));
+
+        if (s == 0)
+            return false;
+
+        const String ourString (juceString (s));
+        destPath.restoreFromString (ourString);
+        return ourString.isNotEmpty();
     }
 
     GlobalRef typeface, paint;

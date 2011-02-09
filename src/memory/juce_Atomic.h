@@ -310,7 +310,7 @@ inline Type Atomic<Type>::operator++() throw()
     return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
                               : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
   #elif JUCE_ATOMICS_ANDROID
-    return (Type) __atomic_inc ((volatile int*) &value);
+    return (Type) (__atomic_inc ((volatile int*) &value) + 1);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, 1);
   #endif
@@ -326,7 +326,7 @@ inline Type Atomic<Type>::operator--() throw()
     return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
                               : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
   #elif JUCE_ATOMICS_ANDROID
-    return (Type) __atomic_dec ((volatile int*) &value);
+    return (Type) (__atomic_dec ((volatile int*) &value) - 1);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, -1);
   #endif

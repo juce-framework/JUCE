@@ -292,9 +292,16 @@ public:
     class BitmapData
     {
     public:
-        BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
+        enum ReadWriteMode
+        {
+            readOnly,
+            writeOnly,
+            readWrite
+        };
+
+        BitmapData (Image& image, int x, int y, int w, int h, ReadWriteMode mode);
         BitmapData (const Image& image, int x, int y, int w, int h);
-        BitmapData (const Image& image, bool needsToBeWritable);
+        BitmapData (const Image& image, ReadWriteMode mode);
         ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
@@ -322,8 +329,20 @@ public:
         void setPixelColour (int x, int y, const Colour& colour) const throw();
 
         uint8* data;
-        const PixelFormat pixelFormat;
+        PixelFormat pixelFormat;
         int lineStride, pixelStride, width, height;
+
+        //==============================================================================
+        /** Used internally by custom image types to manage pixel data lifetime. */
+        class BitmapDataReleaser
+        {
+        protected:
+            BitmapDataReleaser() {}
+        public:
+            virtual ~BitmapDataReleaser() {}
+        };
+
+        ScopedPointer<BitmapDataReleaser> dataReleaser;
 
     private:
         JUCE_DECLARE_NON_COPYABLE (BitmapData);
@@ -387,6 +406,7 @@ public:
         virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
         virtual SharedImage* clone() = 0;
         virtual ImageType getType() const = 0;
+        virtual void initialiseBitmapData (BitmapData& bitmapData, int x, int y, BitmapData::ReadWriteMode mode) = 0;
 
         static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
         static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
@@ -394,17 +414,12 @@ public:
         const PixelFormat getPixelFormat() const throw()    { return format; }
         int getWidth() const throw()                        { return width; }
         int getHeight() const throw()                       { return height; }
-        int getPixelStride() const throw()                  { return pixelStride; }
-        int getLineStride() const throw()                   { return lineStride; }
-        uint8* getPixelData (int x, int y) const throw();
 
     protected:
         friend class Image;
         friend class BitmapData;
         const PixelFormat format;
         const int width, height;
-        int pixelStride, lineStride;
-        uint8* imageData;
         NamedValueSet userData;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedImage);

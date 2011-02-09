@@ -214,7 +214,7 @@ public:
 
     //==============================================================================
     /** An iterator for accessing all the rectangles in a RectangleList. */
-    class Iterator
+    class JUCE_API  Iterator
     {
     public:
         //==============================================================================

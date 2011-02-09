@@ -170,7 +170,7 @@ public:
 
         @see MidiBuffer
     */
-    class Iterator
+    class JUCE_API  Iterator
     {
     public:
         //==============================================================================

@@ -291,7 +291,7 @@ public:
             startSampleInFile += samplesReceived;
             numSamples -= samplesReceived;
 
-            if ((outFlags & kQTMovieAudioExtractionComplete) != 0 && numSamples > 0)
+            if (((outFlags & kQTMovieAudioExtractionComplete) != 0 || samplesReceived == 0) && numSamples > 0)
             {
                 for (int j = numDestChannels; --j >= 0;)
                     if (destSamples[j] != 0)

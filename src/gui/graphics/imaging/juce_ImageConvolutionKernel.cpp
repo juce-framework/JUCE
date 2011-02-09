@@ -134,10 +134,11 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
     const int right = area.getRight();
     const int bottom = area.getBottom();
 
-    const Image::BitmapData destData (destImage, area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
+    const Image::BitmapData destData (destImage, area.getX(), area.getY(), area.getWidth(), area.getHeight(),
+                                      Image::BitmapData::writeOnly);
     uint8* line = destData.data;
 
-    const Image::BitmapData srcData (sourceImage, false);
+    const Image::BitmapData srcData (sourceImage, Image::BitmapData::readOnly);
 
     if (destData.pixelStride == 4)
     {

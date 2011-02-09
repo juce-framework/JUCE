@@ -231,7 +231,9 @@ public:
             a.memoryBarrier();
             a -= (Type) 5;
             test.expect (a.get() == (Type) 20);
-            ++a; ++a; --a;
+            test.expect (++a == (Type) 21);
+            ++a;
+            test.expect (--a == (Type) 21);
             test.expect (a.get() == (Type) 21);
             a.memoryBarrier();
 

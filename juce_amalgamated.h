@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	28
+#define JUCE_BUILDNUMBER	29
 
 /** Current Juce version number.
 
@@ -2371,7 +2371,7 @@ inline Type Atomic<Type>::operator++() throw()
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
   #elif JUCE_ATOMICS_ANDROID
-	return (Type) __atomic_inc ((volatile int*) &value);
+	return (Type) (__atomic_inc ((volatile int*) &value) + 1);
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, 1);
   #endif
@@ -2387,7 +2387,7 @@ inline Type Atomic<Type>::operator--() throw()
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
   #elif JUCE_ATOMICS_ANDROID
-	return (Type) __atomic_dec ((volatile int*) &value);
+	return (Type) (__atomic_dec ((volatile int*) &value) - 1);
   #elif JUCE_ATOMICS_GCC
 	return (Type) __sync_add_and_fetch (&value, -1);
   #endif
@@ -26479,7 +26479,9 @@ public:
 	{
 	}
 
-	forcedinline uint32 getARGB() const throw()	 { return argb; }
+	forcedinline uint32 getARGB() const throw()		 { return argb; }
+	forcedinline uint32 getUnpremultipliedARGB() const throw()  { PixelARGB p (argb); p.unpremultiply(); return p.getARGB(); }
+
 	forcedinline uint32 getRB() const throw()	   { return 0x00ff00ff & argb; }
 	forcedinline uint32 getAG() const throw()	   { return 0x00ff00ff & (argb >> 8); }
 
@@ -26710,7 +26712,9 @@ public:
 		b = (uint8) (argb);
 	}
 
-	forcedinline uint32 getARGB() const throw()	 { return 0xff000000 | b | (g << 8) | (r << 16); }
+	forcedinline uint32 getARGB() const throw()		 { return 0xff000000 | b | (g << 8) | (r << 16); }
+	forcedinline uint32 getUnpremultipliedARGB() const throw()  { return getARGB(); }
+
 	forcedinline uint32 getRB() const throw()	   { return b | (uint32) (r << 16); }
 	forcedinline uint32 getAG() const throw()	   { return 0xff0000 | g; }
 
@@ -26872,7 +26876,9 @@ public:
 		a = (uint8) (argb >> 24);
 	}
 
-	forcedinline uint32 getARGB() const throw()	 { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
+	forcedinline uint32 getARGB() const throw()		 { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
+	forcedinline uint32 getUnpremultipliedARGB() const throw()  { return (((uint32) a) << 24) | 0xffffff; }
+
 	forcedinline uint32 getRB() const throw()	   { return (((uint32) a) << 16) | a; }
 	forcedinline uint32 getAG() const throw()	   { return (((uint32) a) << 16) | a; }
 
@@ -28625,9 +28631,16 @@ public:
 	class BitmapData
 	{
 	public:
-		BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
+		enum ReadWriteMode
+		{
+			readOnly,
+			writeOnly,
+			readWrite
+		};
+
+		BitmapData (Image& image, int x, int y, int w, int h, ReadWriteMode mode);
 		BitmapData (const Image& image, int x, int y, int w, int h);
-		BitmapData (const Image& image, bool needsToBeWritable);
+		BitmapData (const Image& image, ReadWriteMode mode);
 		~BitmapData();
 
 		/** Returns a pointer to the start of a line in the image.
@@ -28655,8 +28668,19 @@ public:
 		void setPixelColour (int x, int y, const Colour& colour) const throw();
 
 		uint8* data;
-		const PixelFormat pixelFormat;
+		PixelFormat pixelFormat;
 		int lineStride, pixelStride, width, height;
+
+		/** Used internally by custom image types to manage pixel data lifetime. */
+		class BitmapDataReleaser
+		{
+		protected:
+			BitmapDataReleaser() {}
+		public:
+			virtual ~BitmapDataReleaser() {}
+		};
+
+		ScopedPointer<BitmapDataReleaser> dataReleaser;
 
 	private:
 		JUCE_DECLARE_NON_COPYABLE (BitmapData);
@@ -28717,6 +28741,7 @@ public:
 		virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
 		virtual SharedImage* clone() = 0;
 		virtual ImageType getType() const = 0;
+		virtual void initialiseBitmapData (BitmapData& bitmapData, int x, int y, BitmapData::ReadWriteMode mode) = 0;
 
 		static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
 		static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
@@ -28724,17 +28749,12 @@ public:
 		const PixelFormat getPixelFormat() const throw()	{ return format; }
 		int getWidth() const throw()			{ return width; }
 		int getHeight() const throw()			   { return height; }
-		int getPixelStride() const throw()		  { return pixelStride; }
-		int getLineStride() const throw()		   { return lineStride; }
-		uint8* getPixelData (int x, int y) const throw();
 
 	protected:
 		friend class Image;
 		friend class BitmapData;
 		const PixelFormat format;
 		const int width, height;
-		int pixelStride, lineStride;
-		uint8* imageData;
 		NamedValueSet userData;
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedImage);
@@ -28938,7 +28958,7 @@ public:
 	const Path toPath() const;
 
 	/** An iterator for accessing all the rectangles in a RectangleList. */
-	class Iterator
+	class JUCE_API  Iterator
 	{
 	public:
 
@@ -38944,7 +38964,7 @@ public:
 
 		@see MidiBuffer
 	*/
-	class Iterator
+	class JUCE_API  Iterator
 	{
 	public:
 
@@ -50326,7 +50346,7 @@ public:
 
 		@see CodeDocument, SyntaxAnalyser
 	*/
-	class Iterator
+	class JUCE_API  Iterator
 	{
 	public:
 		Iterator (CodeDocument* document);
@@ -66214,11 +66234,6 @@ private:
 #if JUCE_MSVC
   #pragma warning (pop)
   #pragma pack (pop)
-#endif
-
-#if defined (JUCE_DLL) && ! (JUCE_AMALGAMATED_TEMPLATE || defined (JUCE_DLL_BUILD))
-  #undef JUCE_LEAK_DETECTOR
-  #define JUCE_LEAK_DETECTOR(OwnerClass)
 #endif
 
 END_JUCE_NAMESPACE

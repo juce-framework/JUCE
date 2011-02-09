@@ -234,7 +234,7 @@ const Image PNGImageFormat::decodeImage (InputStream& in)
         image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
         hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-        const Image::BitmapData destData (image, true);
+        const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
         uint8* srcRow = tempBuffer;
         uint8* destRow = destData.data;
 
@@ -313,7 +313,7 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     png_set_shift (pngWriteStruct, &sig_bit);
     png_set_packing (pngWriteStruct);
 
-    const Image::BitmapData srcData (image, false);
+    const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
     for (int y = 0; y < height; ++y)
     {

@@ -29,31 +29,14 @@
 
 
 //==============================================================================
-void MessageManager::doPlatformSpecificInitialisation()
-{
-
-}
-
-void MessageManager::doPlatformSpecificShutdown()
-{
-
-}
+void MessageManager::doPlatformSpecificInitialisation() {}
+void MessageManager::doPlatformSpecificShutdown() {}
 
 //==============================================================================
 bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
 {
-    // TODO
-
-    /*
-        The idea here is that this will check the system message queue, pull off a
-        message if there is one, deliver it, and return true if a message was delivered.
-        If the queue's empty, return false.
-
-        If the message is one of our special ones (i.e. a Message object being delivered,
-        this must call MessageManager::getInstance()->deliverMessage() to deliver it
-
-
-    */
+    Logger::outputDebugString ("*** Modal loops are not possible in Android!! Exiting...");
+    exit (1);
 
     return true;
 }
@@ -61,14 +44,16 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
 //==============================================================================
 bool juce_postMessageToSystemQueue (Message* message)
 {
+    message->incReferenceCount();
     getEnv()->CallVoidMethod (android.activity, android.postMessage, (jlong) (pointer_sized_uint) message);
     return true;
 }
 
 JUCE_JNI_CALLBACK (JuceAppActivity, deliverMessage, void, (jobject activity, jlong value))
 {
-    Message* m = (Message*) (pointer_sized_uint) value;
-    MessageManager::getInstance()->deliverMessage ((Message*) (pointer_sized_uint) value);
+    Message* const message = (Message*) (pointer_sized_uint) value;
+    MessageManager::getInstance()->deliverMessage (message);
+    message->decReferenceCount();
 }
 
 //==============================================================================
@@ -113,6 +98,33 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func
 //==============================================================================
 void MessageManager::broadcastMessage (const String&)
 {
+}
+
+void MessageManager::runDispatchLoop()
+{
+}
+
+class QuitCallback  : public CallbackMessage
+{
+public:
+    QuitCallback() {}
+
+    void messageCallback()
+    {
+        android.activity.callVoidMethod (android.finish);
+    }
+};
+
+void MessageManager::stopDispatchLoop()
+{
+    (new QuitCallback())->post();
+    quitMessagePosted = true;
+}
+
+bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
+{
+    juce_dispatchNextMessageOnSystemQueue (false);
+    return false;
 }
 
 #endif

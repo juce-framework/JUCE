@@ -42,6 +42,7 @@
 class PixelRGB;
 class PixelAlpha;
 
+//==============================================================================
 /**
     Represents a 32-bit ARGB pixel with premultiplied alpha, and can perform compositing
     operations with it.
@@ -64,7 +65,9 @@ public:
     {
     }
 
-    forcedinline uint32 getARGB() const throw()     { return argb; }
+    forcedinline uint32 getARGB() const throw()                 { return argb; }
+    forcedinline uint32 getUnpremultipliedARGB() const throw()  { PixelARGB p (argb); p.unpremultiply(); return p.getARGB(); }
+
     forcedinline uint32 getRB() const throw()       { return 0x00ff00ff & argb; }
     forcedinline uint32 getAG() const throw()       { return 0x00ff00ff & (argb >> 8); }
 
@@ -300,7 +303,9 @@ public:
         b = (uint8) (argb);
     }
 
-    forcedinline uint32 getARGB() const throw()     { return 0xff000000 | b | (g << 8) | (r << 16); }
+    forcedinline uint32 getARGB() const throw()                 { return 0xff000000 | b | (g << 8) | (r << 16); }
+    forcedinline uint32 getUnpremultipliedARGB() const throw()  { return getARGB(); }
+
     forcedinline uint32 getRB() const throw()       { return b | (uint32) (r << 16); }
     forcedinline uint32 getAG() const throw()       { return 0xff0000 | g; }
 
@@ -464,7 +469,9 @@ public:
         a = (uint8) (argb >> 24);
     }
 
-    forcedinline uint32 getARGB() const throw()     { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
+    forcedinline uint32 getARGB() const throw()                 { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
+    forcedinline uint32 getUnpremultipliedARGB() const throw()  { return (((uint32) a) << 24) | 0xffffff; }
+
     forcedinline uint32 getRB() const throw()       { return (((uint32) a) << 16) | a; }
     forcedinline uint32 getAG() const throw()       { return (((uint32) a) << 16) | a; }
 

@@ -103,6 +103,8 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (canvasClass, "android/graphics/Canvas") \
  JAVACLASS (paintClass, "android/graphics/Paint") \
  JAVACLASS (pathClass, "android/graphics/Path") \
+ JAVACLASS (bitmapClass, "android/graphics/Bitmap") \
+ JAVACLASS (bitmapConfigClass, "android/graphics/Bitmap$Config") \
  JAVACLASS (matrixClass, "android/graphics/Matrix") \
  JAVACLASS (rectClass, "android/graphics/Rect") \
  JAVACLASS (regionClass, "android/graphics/Region") \
@@ -116,11 +118,14 @@ BEGIN_JUCE_NAMESPACE
 #define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
 \
  STATICMETHOD (activityClass, printToConsole, "printToConsole", "(Ljava/lang/String;)V") \
- METHOD (activityClass, createNewView, "createNewView", "()Lcom/juce/ComponentPeerView;") \
+ METHOD (activityClass, createNewView, "createNewView", "(Z)Lcom/juce/ComponentPeerView;") \
  METHOD (activityClass, deleteView, "deleteView", "(Lcom/juce/ComponentPeerView;)V") \
  METHOD (activityClass, postMessage, "postMessage", "(J)V") \
+ METHOD (activityClass, finish, "finish", "()V") \
  METHOD (activityClass, getClipboardContent, "getClipboardContent", "()Ljava/lang/String;") \
  METHOD (activityClass, setClipboardContent, "setClipboardContent", "(Ljava/lang/String;)V") \
+ METHOD (activityClass, excludeClipRegion, "excludeClipRegion", "(Landroid/graphics/Canvas;FFFF)V") \
+ METHOD (activityClass, createPathForGlyph, "createPathForGlyph", "(Landroid/graphics/Paint;C)Ljava/lang/String;") \
 \
  METHOD (fileClass, fileExists, "exists", "()Z") \
 \
@@ -137,7 +142,9 @@ BEGIN_JUCE_NAMESPACE
  METHOD (componentPeerViewClass, isVisible, "isVisible", "()Z") \
  METHOD (componentPeerViewClass, hasFocus, "hasFocus", "()Z") \
  METHOD (componentPeerViewClass, invalidate, "invalidate", "(IIII)V") \
+ METHOD (componentPeerViewClass, containsPoint, "containsPoint", "(II)Z") \
 \
+ METHOD (canvasClass, canvasBitmapConstructor, "<init>", "(Landroid/graphics/Bitmap;)V") \
  METHOD (canvasClass, drawRect, "drawRect", "(FFFFLandroid/graphics/Paint;)V") \
  METHOD (canvasClass, translate, "translate", "(FF)V") \
  METHOD (canvasClass, clipPath, "clipPath", "(Landroid/graphics/Path;)Z") \
@@ -145,6 +152,7 @@ BEGIN_JUCE_NAMESPACE
  METHOD (canvasClass, clipRegion, "clipRegion", "(Landroid/graphics/Region;)Z") \
  METHOD (canvasClass, concat, "concat", "(Landroid/graphics/Matrix;)V") \
  METHOD (canvasClass, drawBitmap, "drawBitmap", "(Landroid/graphics/Bitmap;Landroid/graphics/Matrix;Landroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawMemoryBitmap, "drawBitmap", "([IIIFFIIZLandroid/graphics/Paint;)V") \
  METHOD (canvasClass, drawLine, "drawLine", "(FFFFLandroid/graphics/Paint;)V") \
  METHOD (canvasClass, drawPath, "drawPath", "(Landroid/graphics/Path;Landroid/graphics/Paint;)V") \
  METHOD (canvasClass, drawText, "drawText", "(Ljava/lang/String;FFLandroid/graphics/Paint;)V") \
@@ -157,13 +165,13 @@ BEGIN_JUCE_NAMESPACE
 \
  METHOD (paintClass, paintClassConstructor, "<init>", "(I)V") \
  METHOD (paintClass, setColor, "setColor", "(I)V") \
+ METHOD (paintClass, setAlpha, "setAlpha", "(I)V") \
  METHOD (paintClass, setShader, "setShader", "(Landroid/graphics/Shader;)Landroid/graphics/Shader;") \
  METHOD (paintClass, setTypeface, "setTypeface", "(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;") \
  METHOD (paintClass, ascent, "ascent", "()F") \
  METHOD (paintClass, descent, "descent", "()F") \
  METHOD (paintClass, setTextSize, "setTextSize", "(F)V") \
  METHOD (paintClass, getTextWidths, "getTextWidths", "(Ljava/lang/String;[F)I") \
- METHOD (paintClass, getTextPath, "getTextPath", "(Ljava/lang/String;IIFFLandroid/graphics/Path;)V") \
 \
  METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
  STATICFIELD (shaderTileModeClass, clampMode, "CLAMP", "Landroid/graphics/Shader$TileMode;") \
@@ -174,6 +182,13 @@ BEGIN_JUCE_NAMESPACE
  METHOD (pathClass, quadTo, "quadTo", "(FFFF)V") \
  METHOD (pathClass, cubicTo, "cubicTo", "(FFFFFF)V") \
  METHOD (pathClass, closePath, "close", "()V") \
+\
+ STATICMETHOD (bitmapClass, createBitmap, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
+ STATICFIELD (bitmapConfigClass, ARGB_8888, "ARGB_8888", "Landroid/graphics/Bitmap$Config;") \
+ METHOD (bitmapClass, bitmapCopy, "copy", "(Landroid/graphics/Bitmap$Config;Z)Landroid/graphics/Bitmap;") \
+ METHOD (bitmapClass, getPixels, "getPixels", "([IIIIIII)V") \
+ METHOD (bitmapClass, setPixels, "setPixels", "([IIIIIII)V") \
+ METHOD (bitmapClass, recycle, "recycle", "()V") \
 \
  METHOD (matrixClass, matrixClassConstructor, "<init>", "()V") \
  METHOD (matrixClass, setValues, "setValues", "([F)V") \
@@ -315,7 +330,10 @@ public:
     inline void clear()
     {
         if (obj != 0)
+        {
             getEnv()->DeleteGlobalRef (obj);
+            obj = 0;
+        }
     }
 
     inline GlobalRef& operator= (const GlobalRef& other)

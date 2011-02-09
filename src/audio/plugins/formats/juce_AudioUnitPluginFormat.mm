@@ -265,6 +265,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes);
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
 
+    void refreshParameterListFromPlugin();
+
 private:
     //==============================================================================
     friend class AudioUnitPluginWindowCarbon;
@@ -287,7 +289,6 @@ private:
     //==============================================================================
     bool getComponentDescFromFile (const String& fileOrIdentifier);
     void setPluginCallbacks();
-    void getParameterListFromPlugin();
 
     //==============================================================================
     OSStatus renderGetInput (AudioUnitRenderActionFlags* ioActionFlags,
@@ -535,7 +536,7 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIden
 //==============================================================================
 void AudioUnitPluginInstance::initialise()
 {
-    getParameterListFromPlugin();
+    refreshParameterListFromPlugin();
     setPluginCallbacks();
 
     int numIns, numOuts;
@@ -544,7 +545,7 @@ void AudioUnitPluginInstance::initialise()
     setLatencySamples (0);
 }
 
-void AudioUnitPluginInstance::getParameterListFromPlugin()
+void AudioUnitPluginInstance::refreshParameterListFromPlugin()
 {
     parameterIds.clear();
 
@@ -559,7 +560,7 @@ void AudioUnitPluginInstance::getParameterListFromPlugin()
             parameterIds.insertMultiple (0, 0, paramListSize / sizeof (int));
 
             AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                  0, &parameterIds.getReference(0), &paramListSize);
+                                  0, parameterIds.getRawDataPointer(), &paramListSize);
         }
     }
 }

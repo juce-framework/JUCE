@@ -127,7 +127,7 @@ void MessageManager::deliverMessage (Message* const message)
 }
 
 //==============================================================================
-#if ! (JUCE_MAC || JUCE_IOS)
+#if ! (JUCE_MAC || JUCE_IOS || JUCE_ANDROID)
 void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread

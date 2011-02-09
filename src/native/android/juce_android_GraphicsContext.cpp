@@ -27,20 +27,139 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+class AndroidImage  : public Image::SharedImage
+{
+public:
+    //==============================================================================
+    AndroidImage (const int width_, const int height_, const bool clearImage)
+        : Image::SharedImage (Image::ARGB, width_, height_)
+    {
+        JNIEnv* env = getEnv();
+        jobject mode = env->GetStaticObjectField (android.bitmapConfigClass, android.ARGB_8888);
+        bitmap = GlobalRef (env->CallStaticObjectMethod (android.bitmapClass, android.createBitmap, width_, height_, mode));
+        env->DeleteLocalRef (mode);
+    }
+
+    AndroidImage (const int width_, const int height_, const GlobalRef& bitmap_)
+        : Image::SharedImage (Image::ARGB, width_, height_),
+          bitmap (bitmap_)
+    {
+    }
+
+    ~AndroidImage()
+    {
+        bitmap.callVoidMethod (android.recycle);
+    }
+
+    Image::ImageType getType() const    { return Image::NativeImage; }
+    LowLevelGraphicsContext* createLowLevelContext();
+
+    void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
+    {
+        bm.lineStride = width * sizeof (jint);
+        bm.pixelStride = sizeof (jint);
+        bm.pixelFormat = Image::ARGB;
+        bm.dataReleaser = new CopyHandler (*this, bm, x, y, mode);
+    }
+
+    SharedImage* clone()
+    {
+        JNIEnv* env = getEnv();
+        jobject mode = env->GetStaticObjectField (android.bitmapConfigClass, android.ARGB_8888);
+        GlobalRef newCopy (bitmap.callObjectMethod (android.bitmapCopy, mode, true));
+        env->DeleteLocalRef (mode);
+
+        return new AndroidImage (width, height, newCopy);
+    }
+
+    //==============================================================================
+    GlobalRef bitmap;
+
+private:
+    class CopyHandler  : public Image::BitmapData::BitmapDataReleaser
+    {
+    public:
+        CopyHandler (AndroidImage& owner_, Image::BitmapData& bitmapData_,
+                     const int x_, const int y_, const Image::BitmapData::ReadWriteMode mode_)
+            : owner (owner_), bitmapData (bitmapData_), mode (mode_), x (x_), y (y_)
+        {
+            JNIEnv* env = getEnv();
+
+            intArray = env->NewIntArray (bitmapData.width * bitmapData.height);
+
+            if (mode != Image::BitmapData::writeOnly)
+                owner_.bitmap.callVoidMethod (android.getPixels, intArray, 0, bitmapData.width, x_, y_,
+                                              bitmapData.width, bitmapData.height);
+
+            bitmapData.data = (uint8*) env->GetIntArrayElements (intArray, 0);
+
+            if (mode != Image::BitmapData::writeOnly)
+            {
+                for (int yy = 0; yy < bitmapData.height; ++yy)
+                {
+                    PixelARGB* p = (PixelARGB*) bitmapData.getLinePointer (yy);
+
+                    for (int xx = 0; xx < bitmapData.width; ++xx)
+                        p[xx].premultiply();
+                }
+            }
+        }
+
+        ~CopyHandler()
+        {
+            JNIEnv* env = getEnv();
+
+            if (mode != Image::BitmapData::readOnly)
+            {
+                for (int yy = 0; yy < bitmapData.height; ++yy)
+                {
+                    PixelARGB* p = (PixelARGB*) bitmapData.getLinePointer (yy);
+
+                    for (int xx = 0; xx < bitmapData.width; ++xx)
+                        p[xx].unpremultiply();
+                }
+            }
+
+            env->ReleaseIntArrayElements (intArray, (jint*) bitmapData.data, 0);
+
+            if (mode != Image::BitmapData::readOnly)
+                owner.bitmap.callVoidMethod (android.setPixels, intArray, 0, bitmapData.width, x, y,
+                                             bitmapData.width, bitmapData.height);
+
+            env->DeleteLocalRef (intArray);
+        }
+
+    private:
+        AndroidImage& owner;
+        Image::BitmapData& bitmapData;
+        jintArray intArray;
+        const Image::BitmapData::ReadWriteMode mode;
+        const int x, y;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CopyHandler);
+    };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidImage);
+};
+
+Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
+{
+    if (format == Image::SingleChannel)
+        return createSoftwareImage (format, width, height, clearImage);
+    else
+        return new AndroidImage (width, height, clearImage);
+}
 
 //==============================================================================
 class AndroidLowLevelGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    AndroidLowLevelGraphicsContext (const GlobalRef& canvas_)
+    AndroidLowLevelGraphicsContext (jobject canvas_)
         : canvas (canvas_),
           currentState (new SavedState())
     {
         setFill (Colours::black);
-    }
-
-    ~AndroidLowLevelGraphicsContext()
-    {
     }
 
     bool isVectorDevice() const { return false; }
@@ -68,11 +187,19 @@ public:
 
     bool clipToRectangleList (const RectangleList& clipRegion)
     {
-        return canvas.callBooleanMethod (android.clipRegion, createRegion (getEnv(), clipRegion).get());
+        RectangleList excluded (getClipBounds());
+        excluded.subtract (clipRegion);
+
+        const int numRects = excluded.getNumRectangles();
+
+        for (int i = 0; i < numRects; ++i)
+            excludeClipRectangle (excluded.getRectangle(i));
     }
 
     void excludeClipRectangle (const Rectangle<int>& r)
     {
+        android.activity.callVoidMethod (android.excludeClipRegion, canvas.get(),
+                                         (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }
 
     void clipToPath (const Path& path, const AffineTransform& transform)
@@ -82,6 +209,7 @@ public:
 
     void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
     {
+        // TODO xxx
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r)
@@ -117,10 +245,12 @@ public:
 
     void setOpacity (float newOpacity)
     {
+        currentState->setAlpha (newOpacity);
     }
 
     void setInterpolationQuality (Graphics::ResamplingQuality quality)
     {
+        // TODO xxx
     }
 
     //==============================================================================
@@ -139,6 +269,60 @@ public:
 
     void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles)
     {
+        AndroidImage* androidImage = dynamic_cast <AndroidImage*> (sourceImage.getSharedImage());
+
+        if (androidImage != 0)
+        {
+            JNIEnv* env = getEnv();
+            canvas.callVoidMethod (android.drawBitmap, androidImage->bitmap.get(),
+                                   createMatrix (env, transform).get(), getImagePaint());
+        }
+        else
+        {
+            if (transform.isOnlyTranslation())
+            {
+                JNIEnv* env = getEnv();
+
+                Image::BitmapData bm (sourceImage, Image::BitmapData::readOnly);
+
+                jintArray imageData = env->NewIntArray (bm.width * bm.height);
+                jint* dest = env->GetIntArrayElements (imageData, 0);
+
+                if (dest != 0)
+                {
+                    const uint8* srcLine = bm.getLinePointer (0);
+                    jint* dstLine = dest;
+
+                    for (int y = 0; y < bm.height; ++y)
+                    {
+                        switch (bm.pixelFormat)
+                        {
+                            case Image::ARGB:           copyPixels (dstLine, (PixelARGB*) srcLine, bm.width, bm.pixelStride); break;
+                            case Image::RGB:            copyPixels (dstLine, (PixelRGB*) srcLine, bm.width, bm.pixelStride); break;
+                            case Image::SingleChannel:  copyPixels (dstLine, (PixelAlpha*) srcLine, bm.width, bm.pixelStride); break;
+                            default:                    jassertfalse; break;
+                        }
+
+                        srcLine += bm.lineStride;
+                        dstLine += bm.width;
+                    }
+
+                    canvas.callVoidMethod (android.drawMemoryBitmap, imageData, 0, bm.width,
+                                           transform.getTranslationX(), transform.getTranslationY(),
+                                           bm.width, bm.height, true, getImagePaint());
+
+                    env->ReleaseIntArrayElements (imageData, dest, 0);
+                    env->DeleteLocalRef (imageData);
+                }
+            }
+            else
+            {
+                saveState();
+                addTransform (transform);
+                drawImage (sourceImage, AffineTransform::identity, fillEntireClipAsTiles);
+                restoreState();
+            }
+        }
     }
 
     void drawLine (const Line <float>& line)
@@ -215,10 +399,12 @@ public:
 
     void beginTransparencyLayer (float opacity)
     {
+        // TODO xxx
     }
 
     void endTransparencyLayer()
     {
+        // TODO xxx
     }
 
     class SavedState
@@ -238,6 +424,12 @@ public:
         {
             fillNeedsUpdate = true;
             fillType = newType;
+        }
+
+        void setAlpha (float alpha)
+        {
+            fillNeedsUpdate = true;
+            fillType.colour = fillType.colour.withAlpha (alpha);
         }
 
         jobject getPaint()
@@ -299,6 +491,7 @@ public:
                                                  tileMode);
                     }
 
+                    env->DeleteLocalRef (tileMode);
                     env->DeleteLocalRef (coloursArray);
                     env->DeleteLocalRef (positionsArray);
 
@@ -309,6 +502,7 @@ public:
                 }
                 else
                 {
+
                 }
             }
 
@@ -330,8 +524,19 @@ public:
                     paint.callObjectMethod (android.setTypeface, atf->typeface.get());
                     paint.callVoidMethod (android.setTextSize, font.getHeight());
                 }
+
+                fillNeedsUpdate = true;
+                paint.callVoidMethod (android.setAlpha, (jint) fillType.colour.getAlpha());
             }
 
+            return p;
+        }
+
+        jobject getImagePaint()
+        {
+            jobject p = getPaint();
+            paint.callVoidMethod (android.setAlpha, (jint) fillType.colour.getAlpha());
+            fillNeedsUpdate = true;
             return p;
         }
 
@@ -347,10 +552,8 @@ private:
     ScopedPointer <SavedState> currentState;
     OwnedArray <SavedState> stateStack;
 
-    jobject getCurrentPaint() const
-    {
-        return currentState->getPaint();
-    }
+    jobject getCurrentPaint() const     { return currentState->getPaint(); }
+    jobject getImagePaint() const       { return currentState->getImagePaint(); }
 
     static const LocalRef<jobject> createPath (JNIEnv* env, const Path& path)
     {
@@ -424,8 +627,24 @@ private:
         return col.getARGB();
     }
 
+    template <class PixelType>
+    static void copyPixels (jint* const dest, const PixelType* src, const int width, const int pixelStride) throw()
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            dest[x] = src->getUnpremultipliedARGB();
+            src = addBytesToPointer (src, pixelStride);
+        }
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidLowLevelGraphicsContext);
 };
+
+LowLevelGraphicsContext* AndroidImage::createLowLevelContext()
+{
+    jobject canvas = getEnv()->NewObject (android.canvasClass, android.canvasBitmapConstructor, bitmap.get());
+    return new AndroidLowLevelGraphicsContext (canvas);
+}
 
 
 #endif

@@ -1273,7 +1273,7 @@ public:
 
     const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
-        const Image::BitmapData srcData (image, false);
+        const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
         if (transform.isOnlyTranslation())
         {
@@ -2010,7 +2010,7 @@ public:
             {
                 if (fillType.isColour())
                 {
-                    Image::BitmapData destData (image, true);
+                    Image::BitmapData destData (image, Image::BitmapData::readWrite);
                     clip->fillRectWithColour (destData, r.translated (xOffset, yOffset), fillType.colour.getPixelARGB(), replaceContents);
                 }
                 else
@@ -2039,7 +2039,7 @@ public:
             {
                 if (fillType.isColour())
                 {
-                    Image::BitmapData destData (image, true);
+                    Image::BitmapData destData (image, Image::BitmapData::readWrite);
                     clip->fillRectWithColour (destData, r.translated ((float) xOffset, (float) yOffset), fillType.colour.getPixelARGB());
                 }
                 else
@@ -2087,7 +2087,7 @@ public:
 
         if (shapeToFill != 0)
         {
-            Image::BitmapData destData (image, true);
+            Image::BitmapData destData (image, Image::BitmapData::readWrite);
 
             if (fillType.isGradient())
             {
@@ -2125,8 +2125,8 @@ public:
     {
         const AffineTransform transform (getTransformWith (t));
 
-        const Image::BitmapData destData (image, true);
-        const Image::BitmapData srcData (sourceImage, false);
+        const Image::BitmapData destData (image, Image::BitmapData::readWrite);
+        const Image::BitmapData srcData (sourceImage, Image::BitmapData::readOnly);
         const int alpha = fillType.colour.getAlpha();
         const bool betterQuality = (interpolationQuality != Graphics::lowResamplingQuality);
 
