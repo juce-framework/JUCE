@@ -260,7 +260,7 @@ private:
                 data.write (type, 4);
                 data.writeIntBigEndian (8 + 4 * w * h);
 
-                const Image::BitmapData bitmap (image, false);
+                const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
 
                 int y;
                 for (y = 0; y < h; ++y)

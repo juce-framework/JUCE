@@ -312,7 +312,7 @@ protected:
             dataBlock.writeInt (0); // clr used
             dataBlock.writeInt (0); // clr important
 
-            const Image::BitmapData bitmap (image, false);
+            const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
             const int alphaThreshold = 5;
 
             int y;
