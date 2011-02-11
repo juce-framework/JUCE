@@ -27,7 +27,7 @@
 #define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
-#include "../../memory/juce_ScopedPointer.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -80,8 +80,7 @@ public:
 
     //==============================================================================
 private:
-    InputStream* const sourceStream;
-    ScopedPointer <InputStream> streamToDelete;
+    OptionalScopedPointer<InputStream> sourceStream;
     const int64 uncompressedStreamLength;
     const bool noWrap;
     bool isEof;

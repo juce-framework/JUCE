@@ -702,7 +702,16 @@ protected:
             midiTransport->GetCurrentTempo (&bpm);
             midiTransport->IsTransportPlaying (&isPlaying);
             midiTransport->GetCurrentMeter (&num, &denom);
-            midiTransport->GetCurrentTickPosition (&ticks);
+
+            // (The following is a work-around because GetCurrentTickPosition() doesn't work correctly).
+            Cmn_Int64 sampleLocation;
+
+            if (isPlaying)
+                midiTransport->GetCurrentRTASSampleLocation (&sampleLocation);
+            else
+                midiTransport->GetCurrentTDMSampleLocation (&sampleLocation);
+
+            midiTransport->GetCustomTickPosition (&ticks, sampleLocation);
         }
 
         info.bpm = bpm;

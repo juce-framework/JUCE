@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 ResizableWindow::ResizableWindow (const String& name,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
+      ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
       lastNonFullScreenPos (50, 50, 256, 256),
@@ -58,6 +59,7 @@ ResizableWindow::ResizableWindow (const String& name,
                                   const Colour& backgroundColour_,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
+      ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
       lastNonFullScreenPos (50, 50, 256, 256),
@@ -84,7 +86,7 @@ ResizableWindow::~ResizableWindow()
 
     resizableCorner = 0;
     resizableBorder = 0;
-    contentComponent.deleteAndZero();
+    clearContentComponent();
 
     // have you been adding your own components directly to this window..? tut tut tut.
     // Read the instructions for using a ResizableWindow!
@@ -102,29 +104,68 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
 }
 
 //==============================================================================
-void ResizableWindow::setContentComponent (Component* const newContentComponent,
-                                           const bool deleteOldOne,
-                                           const bool resizeToFit)
+void ResizableWindow::clearContentComponent()
 {
-    resizeToFitContent = resizeToFit;
-
-    if (newContentComponent != static_cast <Component*> (contentComponent))
+    if (ownsContentComponent)
     {
-        if (deleteOldOne)
-            contentComponent.deleteAndZero(); // (avoid using a scoped pointer for this, so that it survives
-                                              //  external deletion of the content comp)
-        else
-            removeChildComponent (contentComponent);
+        contentComponent.deleteAndZero();
+    }
+    else
+    {
+        removeChildComponent (contentComponent);
+        contentComponent = 0;
+    }
+}
+
+void ResizableWindow::setContent (Component* newContentComponent,
+                                  const bool takeOwnership,
+                                  const bool resizeToFitWhenContentChangesSize)
+{
+    if (newContentComponent != contentComponent)
+    {
+        clearContentComponent();
 
         contentComponent = newContentComponent;
-
         Component::addAndMakeVisible (contentComponent);
     }
 
-    if (resizeToFit)
+    ownsContentComponent = takeOwnership;
+    resizeToFitContent = resizeToFitWhenContentChangesSize;
+
+    if (resizeToFitWhenContentChangesSize)
         childBoundsChanged (contentComponent);
 
     resized(); // must always be called to position the new content comp
+}
+
+void ResizableWindow::setContentOwned (Component* newContentComponent, const bool resizeToFitWhenContentChangesSize)
+{
+    setContent (newContentComponent, true, resizeToFitWhenContentChangesSize);
+}
+
+void ResizableWindow::setContentNonOwned (Component* newContentComponent, const bool resizeToFitWhenContentChangesSize)
+{
+    setContent (newContentComponent, false, resizeToFitWhenContentChangesSize);
+}
+
+void ResizableWindow::setContentComponent (Component* const newContentComponent,
+                                           const bool deleteOldOne,
+                                           const bool resizeToFitWhenContentChangesSize)
+{
+    if (newContentComponent != contentComponent)
+    {
+        if (deleteOldOne)
+        {
+            contentComponent.deleteAndZero();
+        }
+        else
+        {
+            removeChildComponent (contentComponent);
+            contentComponent = 0;
+        }
+    }
+
+    setContent (newContentComponent, true, resizeToFitWhenContentChangesSize);
 }
 
 void ResizableWindow::setContentComponentSize (int width, int height)

@@ -549,7 +549,7 @@ MainDemoWindow::MainDemoWindow()
 
     // sets the main content component for the window to be this tabbed
     // panel. This will be deleted when the window is deleted.
-    setContentComponent (contentComp);
+    setContentOwned (contentComp, false);
 
     // this tells the DocumentWindow to automatically create and manage a MenuBarComponent
     // which uses our contentComp as its MenuBarModel
@@ -576,13 +576,13 @@ MainDemoWindow::~MainDemoWindow()
     MenuBarModel::setMacMainMenu (0);
   #endif
 
-    // setting our content component to 0 will delete the current one, and
+    // clearing the content component will delete the current one, and
     // that will in turn delete all its child components. You don't always
     // have to do this explicitly, because the base class's destructor will
     // also delete the content component, but in this case we need to
     // make sure our content comp has gone away before deleting our command
     // manager.
-    setContentComponent (0, true);
+    clearContentComponent();
 }
 
 void MainDemoWindow::closeButtonPressed()

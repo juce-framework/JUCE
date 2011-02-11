@@ -27,7 +27,7 @@
 #define __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
-#include "../../memory/juce_ScopedPointer.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -80,8 +80,7 @@ public:
 
 private:
     //==============================================================================
-    InputStream* const source;
-    ScopedPointer <InputStream> sourceToDelete;
+    OptionalScopedPointer<InputStream> source;
     int bufferSize;
     int64 position, lastReadPos, bufferStart, bufferOverlap;
     HeapBlock <char> buffer;

@@ -106,7 +106,8 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     : ResizableWindow (name, backgroundColour, true),
       warnAboutOverwritingExistingFiles (warnAboutOverwritingExistingFiles_)
 {
-    setContentComponent (content = new ContentComponent (name, instructions, chooserComponent));
+    content = new ContentComponent (name, instructions, chooserComponent);
+    setContentOwned (content, false);
 
     setResizable (true, true);
     setResizeLimits (300, 300, 1200, 1000);

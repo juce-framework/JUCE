@@ -1009,13 +1009,9 @@ public:
                         Colours::lightgrey,
                         true)
     {
-        setContentComponent (new ColourSelector());
+        setContentOwned (new ColourSelector(), false);
         centreWithSize (400, 400);
         setResizable (true, true);
-    }
-
-    ~ColourSelectorDialogWindow()
-    {
     }
 
     void closeButtonPressed()

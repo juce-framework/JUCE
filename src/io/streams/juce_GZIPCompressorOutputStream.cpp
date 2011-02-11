@@ -133,8 +133,7 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
                                                         int compressionLevel,
                                                         const bool deleteDestStream,
                                                         const int windowBits)
-  : destStream (destStream_),
-    streamToDelete (deleteDestStream ? destStream_ : 0),
+  : destStream (destStream_, deleteDestStream),
     buffer ((size_t) GZIPCompressorHelper::gzipCompBufferSize)
 {
     if (compressionLevel < 1 || compressionLevel > 9)

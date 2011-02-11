@@ -2214,6 +2214,9 @@
     <ClInclude Include="..\..\src\memory\juce_MemoryBlock.h">
       <Filter>Juce\Source\memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\memory\juce_OptionalScopedPointer.h">
+      <Filter>Juce\Source\memory</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\memory\juce_ReferenceCountedObject.h">
       <Filter>Juce\Source\memory</Filter>
     </ClInclude>

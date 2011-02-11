@@ -161,8 +161,7 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sou
                                                           const bool deleteSourceWhenDestroyed,
                                                           const bool noWrap_,
                                                           const int64 uncompressedStreamLength_)
-  : sourceStream (sourceStream_),
-    streamToDelete (deleteSourceWhenDestroyed ? sourceStream_ : 0),
+  : sourceStream (sourceStream_, deleteSourceWhenDestroyed),
     uncompressedStreamLength (uncompressedStreamLength_),
     noWrap (noWrap_),
     isEof (false),
@@ -175,7 +174,7 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sou
 }
 
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& sourceStream_)
-  : sourceStream (&sourceStream_),
+  : sourceStream (&sourceStream_, false),
     uncompressedStreamLength (-1),
     noWrap (false),
     isEof (false),

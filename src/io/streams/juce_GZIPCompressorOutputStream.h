@@ -27,7 +27,7 @@
 #define __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 
 #include "juce_OutputStream.h"
-#include "../../memory/juce_ScopedPointer.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -79,8 +79,7 @@ public:
 
 private:
     //==============================================================================
-    OutputStream* const destStream;
-    ScopedPointer <OutputStream> streamToDelete;
+    OptionalScopedPointer<OutputStream> destStream;
     HeapBlock <uint8> buffer;
     class GZIPCompressorHelper;
     friend class ScopedPointer <GZIPCompressorHelper>;

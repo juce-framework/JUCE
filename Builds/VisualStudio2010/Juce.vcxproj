@@ -760,6 +760,7 @@
     <ClInclude Include="..\..\src\memory\juce_LeakedObjectDetector.h"/>
     <ClInclude Include="..\..\src\memory\juce_Memory.h"/>
     <ClInclude Include="..\..\src\memory\juce_MemoryBlock.h"/>
+    <ClInclude Include="..\..\src\memory\juce_OptionalScopedPointer.h"/>
     <ClInclude Include="..\..\src\memory\juce_ReferenceCountedObject.h"/>
     <ClInclude Include="..\..\src\memory\juce_ScopedPointer.h"/>
     <ClInclude Include="..\..\src\memory\juce_WeakReference.h"/>

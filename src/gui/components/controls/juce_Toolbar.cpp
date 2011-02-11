@@ -677,7 +677,7 @@ public:
         : DialogWindow (TRANS("Add/remove items from toolbar"), Colours::white, true, true),
           toolbar (toolbar_)
     {
-        setContentComponent (new CustomiserPanel (factory, toolbar, optionFlags), true, true);
+        setContentOwned (new CustomiserPanel (factory, toolbar, optionFlags), true);
         setResizable (true, true);
         setResizeLimits (400, 300, 1500, 1000);
         positionNearBar();
@@ -686,7 +686,6 @@ public:
     ~ToolbarCustomisationDialog()
     {
         toolbar->setEditingActive (false);
-        setContentComponent (0, true);
     }
 
     void closeButtonPressed()

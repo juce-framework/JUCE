@@ -1259,6 +1259,8 @@
               file="src/memory/juce_MemoryBlock.cpp"/>
         <FILE id="IDj7DQ2" name="juce_MemoryBlock.h" compile="0" resource="0"
               file="src/memory/juce_MemoryBlock.h"/>
+        <FILE id="eFXlHM" name="juce_OptionalScopedPointer.h" compile="0" resource="0"
+              file="src/memory/juce_OptionalScopedPointer.h"/>
         <FILE id="0fuAAWP" name="juce_ReferenceCountedObject.h" compile="0"
               resource="0" file="src/memory/juce_ReferenceCountedObject.h"/>
         <FILE id="WElk5bz" name="juce_ScopedPointer.h" compile="0" resource="0"

@@ -221,6 +221,9 @@
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
  #include "memory/juce_MemoryBlock.h"
 #endif
+#ifndef __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
+ #include "memory/juce_OptionalScopedPointer.h"
+#endif
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
  #include "memory/juce_ReferenceCountedObject.h"
 #endif

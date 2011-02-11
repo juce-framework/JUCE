@@ -27,7 +27,7 @@
 #define __JUCE_SUBREGIONSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
-#include "../../memory/juce_ScopedPointer.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -80,8 +80,7 @@ public:
 
     //==============================================================================
 private:
-    InputStream* const source;
-    ScopedPointer <InputStream> sourceToDelete;
+    OptionalScopedPointer<InputStream> source;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream);

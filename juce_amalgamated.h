@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	30
+#define JUCE_BUILDNUMBER	31
 
 /** Current Juce version number.
 
@@ -19537,6 +19537,124 @@ private:
 #ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
 #define __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_OptionalScopedPointer.h ***/
+#ifndef __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
+#define __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
+
+/**
+	Holds a pointer to an object which can optionally be deleted when this pointer
+	goes out of scope.
+
+	This acts in many ways like a ScopedPointer, but allows you to specify whether or
+	not the object is deleted.
+
+	@see ScopedPointer
+*/
+template <class ObjectType>
+class OptionalScopedPointer
+{
+public:
+
+	/** Creates an empty OptionalScopedPointer. */
+	OptionalScopedPointer() : shouldDelete (false) {}
+
+	/** Creates an OptionalScopedPointer to point to a given object, and specifying whether
+		the OptionalScopedPointer will delete it.
+
+		If takeOwnership is true, then the OptionalScopedPointer will act like a ScopedPointer,
+		deleting the object when it is itself deleted. If this parameter is false, then the
+		OptionalScopedPointer just holds a normal pointer to the object, and won't delete it.
+	*/
+	OptionalScopedPointer (ObjectType* objectToHold, bool takeOwnership)
+		: object (objectToHold), shouldDelete (takeOwnership)
+	{
+	}
+
+	/** Takes ownership of the object that another OptionalScopedPointer holds.
+
+		Like a normal ScopedPointer, the objectToTransferFrom object will become null,
+		as ownership of the managed object is transferred to this object.
+
+		The flag to indicate whether or not to delete the managed object is also
+		copied from the source object.
+	*/
+	OptionalScopedPointer (OptionalScopedPointer& objectToTransferFrom)
+		: object (objectToTransferFrom.release()),
+		  shouldDelete (objectToTransferFrom.shouldDelete)
+	{
+	}
+
+	/** Takes ownership of the object that another OptionalScopedPointer holds.
+
+		Like a normal ScopedPointer, the objectToTransferFrom object will become null,
+		as ownership of the managed object is transferred to this object.
+
+		The ownership flag that says whether or not to delete the managed object is also
+		copied from the source object.
+	*/
+	OptionalScopedPointer& operator= (OptionalScopedPointer& objectToTransferFrom)
+	{
+		if (object != objectToTransferFrom.object)
+		{
+			clear();
+			object = objectToTransferFrom.object;
+		}
+
+		shouldDelete = objectToTransferFrom.shouldDelete;
+		return *this;
+	}
+
+	/** The destructor may or may not delete the object that is being held, depending on the
+		takeOwnership flag that was specified when the object was first passed into an
+		OptionalScopedPointer constructor.
+	*/
+	~OptionalScopedPointer()
+	{
+		clear();
+	}
+
+	/** Returns the object that this pointer is managing. */
+	inline operator ObjectType*() const throw()			 { return object; }
+
+	/** Returns the object that this pointer is managing. */
+	inline ObjectType& operator*() const throw()			{ return *object; }
+
+	/** Lets you access methods and properties of the object that this pointer is holding. */
+	inline ObjectType* operator->() const throw()		   { return object; }
+
+	/** Removes the current object from this OptionalScopedPointer without deleting it.
+		This will return the current object, and set this OptionalScopedPointer to a null pointer.
+	*/
+	ObjectType* release() throw()				   { return object.release(); }
+
+	/** Resets this pointer to null, possibly deleting the object that it holds, if it has
+		ownership of it.
+	*/
+	void clear()
+	{
+		if (! shouldDelete)
+			object.release();
+	}
+
+	/** Swaps this object with another OptionalScopedPointer.
+		The two objects simply exchange their states.
+	*/
+	void swapWith (OptionalScopedPointer<ObjectType>& other) throw()
+	{
+		object.swapWith (other.object);
+		swapVariables (shouldDelete, other.shouldDelete);
+	}
+
+private:
+
+	ScopedPointer<ObjectType> object;
+	bool shouldDelete;
+};
+
+#endif   // __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
+/*** End of inlined file: juce_OptionalScopedPointer.h ***/
+
 /** Wraps another input stream, and reads from it using an intermediate buffer
 
 	If you're using an input stream such as a file input stream, and making lots of
@@ -19583,8 +19701,7 @@ public:
 
 private:
 
-	InputStream* const source;
-	ScopedPointer <InputStream> sourceToDelete;
+	OptionalScopedPointer<InputStream> source;
 	int bufferSize;
 	int64 position, lastReadPos, bufferStart, bufferOverlap;
 	HeapBlock <char> buffer;
@@ -19686,8 +19803,7 @@ public:
 
 private:
 
-	OutputStream* const destStream;
-	ScopedPointer <OutputStream> streamToDelete;
+	OptionalScopedPointer<OutputStream> destStream;
 	HeapBlock <uint8> buffer;
 	class GZIPCompressorHelper;
 	friend class ScopedPointer <GZIPCompressorHelper>;
@@ -19754,8 +19870,7 @@ public:
 	int read (void* destBuffer, int maxBytesToRead);
 
 private:
-	InputStream* const sourceStream;
-	ScopedPointer <InputStream> streamToDelete;
+	OptionalScopedPointer<InputStream> sourceStream;
 	const int64 uncompressedStreamLength;
 	const bool noWrap;
 	bool isEof;
@@ -19998,8 +20113,7 @@ public:
 	bool isExhausted();
 
 private:
-	InputStream* const source;
-	ScopedPointer <InputStream> sourceToDelete;
+	OptionalScopedPointer<InputStream> source;
 	const int64 startPositionInSourceStream, lengthOfSourceStream;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream);
@@ -20380,6 +20494,9 @@ private:
 
 #endif
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_OPTIONALSCOPEDPOINTER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
@@ -55356,21 +55473,41 @@ public:
 		You should never add components directly to a ResizableWindow (or any of its subclasses)
 		with addChildComponent(). Instead, add them to the content component.
 
-		@param newContentComponent  the new component to use (or null to not use one) - this
-									component will be deleted either when replaced by another call
-									to this method, or when the ResizableWindow is deleted.
-									To remove a content component without deleting it, use
-									setContentComponent (0, false).
-		@param deleteOldOne	 if true, the previous content component will be deleted; if
-									false, the previous component will just be removed without
-									deleting it.
-		@param resizeToFit	  if true, the ResizableWindow will maintain its size such that
-									it always fits around the size of the content component. If false, the
-									new content will be resized to fit the current space available.
+		@param newContentComponent  the new component to use - this component will be deleted when it's
+									no longer needed (i.e. when the window is deleted or a new content
+									component is set for it). To set a component that this window will not
+									delete, call setContentNonOwned() instead.
+		@param resizeToFitWhenContentChangesSize  if true, then the ResizableWindow will maintain its size
+									such that it always fits around the size of the content component. If false,
+									the new content will be resized to fit the current space available.
 	*/
-	void setContentComponent (Component* newContentComponent,
-							  bool deleteOldOne = true,
-							  bool resizeToFit = false);
+	void setContentOwned (Component* newContentComponent,
+						  bool resizeToFitWhenContentChangesSize);
+
+	/** Changes the current content component.
+
+		This sets a component that will be placed in the centre of the ResizableWindow,
+		(leaving a space around the edge for the border).
+
+		You should never add components directly to a ResizableWindow (or any of its subclasses)
+		with addChildComponent(). Instead, add them to the content component.
+
+		@param newContentComponent  the new component to use - this component will NOT be deleted by this
+									component, so it's the caller's responsibility to manage its lifetime (it's
+									ok to delete it while this window is still using it). To set a content
+									component that the window will delete, call setContentOwned() instead.
+		@param resizeToFitWhenContentChangesSize  if true, then the ResizableWindow will maintain its size
+									such that it always fits around the size of the content component. If false,
+									the new content will be resized to fit the current space available.
+	*/
+	void setContentNonOwned (Component* newContentComponent,
+							 bool resizeToFitWhenContentChangesSize);
+
+	/** Removes the current content component.
+		If the previous content component was added with setContentOwned(), it will also be deleted. If
+		it was added with setContentNonOwned(), it will simply be removed from this component.
+	*/
+	void clearContentComponent();
 
 	/** Changes the window so that the content component ends up with the specified size.
 
@@ -55400,6 +55537,11 @@ public:
 	{
 		backgroundColourId	  = 0x1005700,  /**< A colour to use to fill the window's background. */
 	};
+
+	/** @deprecated - use setContentOwned() and setContentNonOwned() instead. */
+	JUCE_DEPRECATED (void setContentComponent (Component* newContentComponent,
+											   bool deleteOldOne = true,
+											   bool resizeToFit = false));
 
 protected:
 
@@ -55450,7 +55592,7 @@ protected:
 private:
 
 	Component::SafePointer <Component> contentComponent;
-	bool resizeToFitContent, fullscreen;
+	bool ownsContentComponent, resizeToFitContent, fullscreen;
 	ComponentDragger dragger;
 	Rectangle<int> lastNonFullScreenPos;
 	ComponentBoundsConstrainer defaultConstrainer;
@@ -55460,6 +55602,7 @@ private:
 	#endif
 
 	void updateLastPos();
+	void setContent (Component* newComp, bool takeOwnership, bool resizeToFit);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
 	// The parameters for these methods have changed - please update your code!

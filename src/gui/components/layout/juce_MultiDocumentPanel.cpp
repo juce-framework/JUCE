@@ -155,7 +155,7 @@ void MultiDocumentPanel::addWindow (Component* component)
     MultiDocumentPanelWindow* const dw = createNewDocumentWindow();
 
     dw->setResizable (true, false);
-    dw->setContentComponent (component, false, true);
+    dw->setContentNonOwned (component, true);
     dw->setName (component->getName());
 
     const var bkg (component->getProperties() ["mdiDocumentBkg_"]);
@@ -265,8 +265,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
 
                 if (dw != 0 && dw->getContentComponent() == component)
                 {
-                    dw->setContentComponent (0, false);
-                    delete dw;
+                    ScopedPointer<MultiDocumentPanelWindow> (dw)->clearContentComponent();
                     break;
                 }
             }
@@ -280,13 +279,10 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             {
                 for (int i = getNumChildComponents(); --i >= 0;)
                 {
-                    MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
+                    ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)));
 
                     if (dw != 0)
-                    {
-                        dw->setContentComponent (0, false);
-                        delete dw;
-                    }
+                        dw->clearContentComponent();
                 }
 
                 addAndMakeVisible (components.getFirst());
@@ -423,7 +419,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
                 if (dw != 0)
                 {
                     dw->getContentComponent()->getProperties().set ("mdiDocumentPos_", dw->getWindowStateAsString());
-                    dw->setContentComponent (0, false);
+                    dw->clearContentComponent();
                     delete dw;
                 }
             }

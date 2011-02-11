@@ -845,6 +845,7 @@
           <File RelativePath="..\..\src\memory\juce_Memory.h"/>
           <File RelativePath="..\..\src\memory\juce_MemoryBlock.cpp"/>
           <File RelativePath="..\..\src\memory\juce_MemoryBlock.h"/>
+          <File RelativePath="..\..\src\memory\juce_OptionalScopedPointer.h"/>
           <File RelativePath="..\..\src\memory\juce_ReferenceCountedObject.h"/>
           <File RelativePath="..\..\src\memory\juce_ScopedPointer.h"/>
           <File RelativePath="..\..\src\memory\juce_WeakReference.h"/>

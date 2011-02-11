@@ -49,8 +49,7 @@ namespace
 //==============================================================================
 BufferedInputStream::BufferedInputStream (InputStream* const sourceStream, const int bufferSize_,
                                           const bool deleteSourceWhenDestroyed)
-   : source (sourceStream),
-     sourceToDelete (deleteSourceWhenDestroyed ? sourceStream : 0),
+   : source (sourceStream, deleteSourceWhenDestroyed),
      bufferSize (calcBufferStreamBufferSize (bufferSize_, sourceStream)),
      position (sourceStream->getPosition()),
      lastReadPos (0),
@@ -61,7 +60,7 @@ BufferedInputStream::BufferedInputStream (InputStream* const sourceStream, const
 }
 
 BufferedInputStream::BufferedInputStream (InputStream& sourceStream, const int bufferSize_)
-   : source (&sourceStream),
+   : source (&sourceStream, false),
      bufferSize (calcBufferStreamBufferSize (bufferSize_, &sourceStream)),
      position (sourceStream.getPosition()),
      lastReadPos (0),

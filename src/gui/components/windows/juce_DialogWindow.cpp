@@ -76,14 +76,9 @@ public:
         if (! JUCEApplication::isStandaloneApp())
             setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
 
-        setContentComponent (contentComponent, true, true);
+        setContentNonOwned (contentComponent, true);
         centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
         setResizable (shouldBeResizable, useBottomRightCornerResizer);
-    }
-
-    ~TempDialogWindow()
-    {
-        setContentComponent (0, false);
     }
 
     void closeButtonPressed()
