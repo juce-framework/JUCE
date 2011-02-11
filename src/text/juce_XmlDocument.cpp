@@ -604,7 +604,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                         ++len;
                     }
 
-                    textElementContent.append (start.getAddress(), len);
+                    textElementContent.appendCharPointer (start, len);
                 }
             }
 
