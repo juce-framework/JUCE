@@ -225,9 +225,9 @@ public:
         {
             modeSelector.setSelectedId (8);
 
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         "Interprocess Comms Demo",
-                                         "Failed to open the socket or pipe...");
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Interprocess Comms Demo",
+                                              "Failed to open the socket or pipe...");
         }
     }
 

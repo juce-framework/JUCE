@@ -73,7 +73,7 @@ public:
         @param message  a longer, more descriptive message to show underneath the
                         headline
         @param iconType the type of icon to display
-        @param associatedComponent   if this is non-zero, it specifies the component that the
+        @param associatedComponent   if this is non-null, it specifies the component that the
                         alert window should be associated with. Depending on the look
                         and feel, this might be used for positioning of the alert window.
     */
@@ -218,7 +218,7 @@ public:
 
         @param index    a value 0 to (getNumCustomComponents() - 1). Out-of-range indexes
                         will return 0
-        @returns        the component that was removed (or zero)
+        @returns        the component that was removed (or null)
         @see getNumCustomComponents, addCustomComponent
     */
     Component* removeCustomComponent (int index);
@@ -232,8 +232,11 @@ public:
 
     /** Shows a dialog box that just has a message and a single button to get rid of it.
 
-        The box is shown modally, and the method returns after the user
-        has clicked the button (or pressed the escape or return keys).
+        If the callback parameter is null, the box is shown modally, and the method will
+        block until the user has clicked the button (or pressed the escape or return keys).
+        If the callback parameter is non-null, the box will be displayed and placed into a
+        modal state, but this method will return immediately, and the callback will be invoked
+        later when the user dismisses the box.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
@@ -241,20 +244,52 @@ public:
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
                             default string "ok" (or a localised version) will be used.
-        @param associatedComponent   if this is non-zero, it specifies the component that the
+        @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
     */
+   #if JUCE_MODAL_LOOPS_PERMITTED
     static void JUCE_CALLTYPE showMessageBox (AlertIconType iconType,
                                               const String& title,
                                               const String& message,
                                               const String& buttonText = String::empty,
                                               Component* associatedComponent = 0);
+   #endif
+
+    /** Shows a dialog box that just has a message and a single button to get rid of it.
+
+        If the callback parameter is null, the box is shown modally, and the method will
+        block until the user has clicked the button (or pressed the escape or return keys).
+        If the callback parameter is non-null, the box will be displayed and placed into a
+        modal state, but this method will return immediately, and the callback will be invoked
+        later when the user dismisses the box.
+
+        @param iconType     the type of icon to show
+        @param title        the headline to show at the top of the box
+        @param message      a longer, more descriptive message to show underneath the
+                            headline
+        @param buttonText   the text to show in the button - if this string is empty, the
+                            default string "ok" (or a localised version) will be used.
+        @param associatedComponent   if this is non-null, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
+    */
+    static void JUCE_CALLTYPE showMessageBoxAsync (AlertIconType iconType,
+                                                   const String& title,
+                                                   const String& message,
+                                                   const String& buttonText = String::empty,
+                                                   Component* associatedComponent = 0);
 
     /** Shows a dialog box with two buttons.
 
         Ideal for ok/cancel or yes/no choices. The return key can also be used
         to trigger the first button, and the escape key for the second button.
+
+        If the callback parameter is null, the box is shown modally, and the method will
+        block until the user has clicked the button (or pressed the escape or return keys).
+        If the callback parameter is non-null, the box will be displayed and placed into a
+        modal state, but this method will return immediately, and the callback will be invoked
+        later when the user dismisses the box.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
@@ -266,23 +301,46 @@ public:
         @param button2Text  the text to show in the second button - if this string is
                             empty, the default string "cancel" (or a localised version of it)
                             will be used.
-     @param associatedComponent   if this is non-zero, it specifies the component that the
-                             alert window should be associated with. Depending on the look
-                             and feel, this might be used for positioning of the alert window.
-     @returns true if button 1 was clicked, false if it was button 2
+        @param associatedComponent   if this is non-null, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
+        @param callback     if this is non-null, the menu will be launched asynchronously,
+                            returning immediately, and the callback will receive a call to its
+                            modalStateFinished() when the box is dismissed, with its parameter
+                            being 1 if the ok button was pressed, or 0 for cancel, The callback object
+                            will be owned and deleted by the system, so make sure that it works
+                            safely and doesn't keep any references to objects that might be deleted
+                            before it gets called.
+        @returns true if button 1 was clicked, false if it was button 2. If the callback parameter
+                 is not null, the method always returns false, and the user's choice is delivered
+                 later by the callback.
     */
     static bool JUCE_CALLTYPE showOkCancelBox (AlertIconType iconType,
                                                const String& title,
                                                const String& message,
+                                            #if JUCE_MODAL_LOOPS_PERMITTED
                                                const String& button1Text = String::empty,
                                                const String& button2Text = String::empty,
-                                               Component* associatedComponent = 0);
+                                               Component* associatedComponent = 0,
+                                               ModalComponentManager::Callback* callback = 0);
+                                            #else
+                                               const String& button1Text,
+                                               const String& button2Text,
+                                               Component* associatedComponent,
+                                               ModalComponentManager::Callback* callback);
+                                            #endif
 
     /** Shows a dialog box with three buttons.
 
         Ideal for yes/no/cancel boxes.
 
         The escape key can be used to trigger the third button.
+
+        If the callback parameter is null, the box is shown modally, and the method will
+        block until the user has clicked the button (or pressed the escape or return keys).
+        If the callback parameter is non-null, the box will be displayed and placed into a
+        modal state, but this method will return immediately, and the callback will be invoked
+        later when the user dismisses the box.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
@@ -294,11 +352,19 @@ public:
                             "no" will be used (or a localised version of it)
         @param button3Text  the text to show in the first button - if an empty string, then
                             "cancel" will be used (or a localised version of it)
-        @param associatedComponent   if this is non-zero, it specifies the component that the
+        @param associatedComponent   if this is non-null, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
+        @param callback     if this is non-null, the menu will be launched asynchronously,
+                            returning immediately, and the callback will receive a call to its
+                            modalStateFinished() when the box is dismissed, with its parameter
+                            being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
+                            if it was cancelled, The callback object will be owned and deleted by the
+                            system, so make sure that it works safely and doesn't keep any references
+                            to objects that might be deleted before it gets called.
 
-        @returns one of the following values:
+        @returns If the callback parameter has been set, this returns 0. Otherwise, it
+                 returns one of the following values:
                  - 0 if the third button was pressed (normally used for 'cancel')
                  - 1 if the first button was pressed (normally used for 'yes')
                  - 2 if the middle button was pressed (normally used for 'no')
@@ -306,10 +372,19 @@ public:
     static int JUCE_CALLTYPE showYesNoCancelBox (AlertIconType iconType,
                                                  const String& title,
                                                  const String& message,
+                                               #if JUCE_MODAL_LOOPS_PERMITTED
                                                  const String& button1Text = String::empty,
                                                  const String& button2Text = String::empty,
                                                  const String& button3Text = String::empty,
-                                                 Component* associatedComponent = 0);
+                                                 Component* associatedComponent = 0,
+                                                 ModalComponentManager::Callback* callback = 0);
+                                               #else
+                                                 const String& button1Text,
+                                                 const String& button2Text,
+                                                 const String& button3Text,
+                                                 Component* associatedComponent,
+                                                 ModalComponentManager::Callback* callback);
+                                               #endif
 
     //==============================================================================
     /** Shows an operating-system native dialog box.

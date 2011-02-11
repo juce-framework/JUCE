@@ -320,10 +320,14 @@ public:
         m.addItem (1, "Use one thread per ball", true, ! isUsingPool);
         m.addItem (2, "Use a thread pool", true, isUsingPool);
 
-        const int res = m.showAt (&controlButton);
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (&controlButton),
+                         ModalCallbackFunction::forComponent (menuItemChosenCallback, this));
+    }
 
-        if (res != 0)
-            setUsingPool (res == 2);
+    static void menuItemChosenCallback (int result, ThreadingDemo* demoComponent)
+    {
+        if (demoComponent != 0)
+            demoComponent->setUsingPool (result == 2);
     }
 
     // this gets called when a component is added or removed from a parent component.

@@ -300,6 +300,7 @@ private:
     ScopedPointer<Button> extraTabsButton;
 
     void showExtraItemsMenu();
+    static void extraItemsMenuCallback (int, TabbedButtonBar*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar);
 };

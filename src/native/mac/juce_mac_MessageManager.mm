@@ -393,6 +393,7 @@ namespace
     }
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
@@ -419,6 +420,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
     return ! quitMessagePosted;
 }
+#endif
 
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()

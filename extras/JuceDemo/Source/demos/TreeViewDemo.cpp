@@ -212,24 +212,34 @@ public:
                    treeView != 0 ? treeView->areOpenCloseButtonsVisible()
                                  : fileTreeComp->areOpenCloseButtonsVisible());
 
-        const int r = m.showAt (&typeButton);
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (&typeButton),
+                         ModalCallbackFunction::forComponent (menuItemChosenCallback, this));
+    }
 
-        if (r == 1)
+    static void menuItemChosenCallback (int result, TreeViewDemo* demoComponent)
+    {
+        if (demoComponent != 0)
+            demoComponent->menuItemChosenCallback (result);
+    }
+
+    void menuItemChosenCallback (int result)
+    {
+        if (result == 1)
         {
             showCustomTreeView();
         }
-        else if (r == 2)
+        else if (result == 2)
         {
             showFileTreeComp();
         }
-        else if (r == 3)
+        else if (result == 3)
         {
             if (treeView != 0)
                 treeView->setRootItemVisible (! treeView->isRootItemVisible());
             else
                 fileTreeComp->setRootItemVisible (! fileTreeComp->isRootItemVisible());
         }
-        else if (r == 4)
+        else if (result == 4)
         {
             if (treeView != 0)
                 treeView->setOpenCloseButtonsVisible (! treeView->areOpenCloseButtonsVisible());

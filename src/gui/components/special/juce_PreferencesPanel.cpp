@@ -83,7 +83,7 @@ void PreferencesPanel::addSettingsPage (const String& title, const void* imageDa
 void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWidth, int dialogHeight, const Colour& backgroundColour)
 {
     setSize (dialogWidth, dialogHeight);
-    DialogWindow::showModalDialog (dialogTitle, this, 0, backgroundColour, false);
+    DialogWindow::showDialog (dialogTitle, this, 0, backgroundColour, false);
 }
 
 //==============================================================================

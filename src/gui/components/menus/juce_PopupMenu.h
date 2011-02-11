@@ -206,6 +206,38 @@ public:
     bool containsAnyActiveItems() const throw();
 
     //==============================================================================
+    /** Class used to create a set of options to pass to the show() method.
+        You can chain together a series of calls to this class's methods to create
+        a set of whatever options you want to specify.
+        E.g. @code
+        PopupMenu menu;
+        ...
+        menu.showMenu (PopupMenu::Options().withMaximumWidth (100),
+                                           .withMaximumNumColumns (3)
+                                           .withTargetComponent (myComp));
+        @endcode
+    */
+    class JUCE_API  Options
+    {
+    public:
+        Options();
+
+        const Options withTargetComponent (Component* targetComponent) const;
+        const Options withTargetScreenArea (const Rectangle<int>& targetArea) const;
+        const Options withMinimumWidth (int minWidth) const;
+        const Options withMaximumNumColumns (int maxNumColumns) const;
+        const Options withStandardItemHeight (int standardHeight) const;
+        const Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+
+    private:
+        friend class PopupMenu;
+        Rectangle<int> targetArea;
+        Component* targetComponent;
+        int visibleItemID, minWidth, maxColumns, standardHeight;
+    };
+
+    //==============================================================================
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Displays the menu and waits for the user to pick something.
 
         This will display the menu modally, and return the ID of the item that the
@@ -278,6 +310,15 @@ public:
                 int maximumNumColumns = 0,
                 int standardItemHeight = 0,
                 ModalComponentManager::Callback* callback = 0);
+
+    /** Displays and runs the menu modally, with a set of options.
+    */
+    int showMenu (const Options& options);
+   #endif
+
+    /** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
+    void showMenuAsync (const Options& options,
+                        ModalComponentManager::Callback* callback);
 
     //==============================================================================
     /** Closes any menus that are currently open.
@@ -448,10 +489,8 @@ private:
     bool separatorPending;
 
     void addSeparatorIfPending();
-
-    int showMenu (const Rectangle<int>& target, int itemIdThatMustBeVisible,
-                  int minimumWidth, int maximumNumColumns, int standardItemHeight,
-                  Component* componentAttachedTo, ModalComponentManager::Callback* callback);
+    Component* createWindow (const Options&, ApplicationCommandManager**) const;
+    int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
 
     JUCE_LEAK_DETECTOR (PopupMenu);
 };

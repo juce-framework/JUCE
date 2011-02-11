@@ -387,9 +387,6 @@ private:
         bool isEnabled : 1, isHeading : 1;
     };
 
-    class Callback;
-    friend class Callback;
-
     OwnedArray <ItemInfo> items;
     Value currentId;
     int lastCurrentId;
@@ -401,6 +398,7 @@ private:
     ItemInfo* getItemForId (int itemId) const throw();
     ItemInfo* getItemForIndex (int index) const throw();
     bool selectIfEnabled (int index);
+    static void popupMenuFinishedCallback (int, ComboBox*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
 };

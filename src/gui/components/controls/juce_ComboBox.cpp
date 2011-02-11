@@ -503,31 +503,16 @@ void ComboBox::labelTextChanged (Label*)
 
 
 //==============================================================================
-class ComboBox::Callback  : public ModalComponentManager::Callback
+void ComboBox::popupMenuFinishedCallback (int result, ComboBox* box)
 {
-public:
-    Callback (ComboBox* const box_)
-        : box (box_)
+    if (box != 0)
     {
+        box->menuActive = false;
+
+        if (result != 0)
+            box->setSelectedId (result);
     }
-
-    void modalStateFinished (int returnValue)
-    {
-        if (box != 0)
-        {
-            box->menuActive = false;
-
-            if (returnValue != 0)
-                box->setSelectedId (returnValue);
-        }
-    }
-
-private:
-    Component::SafePointer<ComboBox> box;
-
-    JUCE_DECLARE_NON_COPYABLE (Callback);
-};
-
+}
 
 void ComboBox::showPopup()
 {
@@ -555,8 +540,13 @@ void ComboBox::showPopup()
             menu.addItem (1, noChoicesMessage, false);
 
         menuActive = true;
-        menu.showAt (this, selectedId, getWidth(), 1, jlimit (12, 24, getHeight()),
-                     new Callback (this));
+
+        menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                                .withItemThatMustBeVisible (selectedId)
+                                                .withMinimumWidth (getWidth())
+                                                .withMaximumNumColumns (1)
+                                                .withStandardItemHeight (jlimit (12, 24, getHeight())),
+                            ModalCallbackFunction::forComponent (popupMenuFinishedCallback, this));
     }
 }
 

@@ -913,6 +913,12 @@ void TableHeaderComponent::updateColumnUnderMouse (int x, int y)
     }
 }
 
+static void tableHeaderMenuCallback (int result, TableHeaderComponent* tableHeader, int columnIdClicked)
+{
+    if (tableHeader != 0 && result != 0)
+        tableHeader->reactToMenuItem (result, columnIdClicked);
+}
+
 void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
 {
     PopupMenu m;
@@ -922,10 +928,8 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
     {
         m.setLookAndFeel (&getLookAndFeel());
 
-        const int result = m.show();
-
-        if (result != 0)
-            reactToMenuItem (result, columnIdClicked);
+        m.showMenuAsync (PopupMenu::Options(),
+                         ModalCallbackFunction::forComponent (tableHeaderMenuCallback, this, columnIdClicked));
     }
 }
 

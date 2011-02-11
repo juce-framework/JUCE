@@ -154,7 +154,7 @@ void PluginListComponent::buttonClicked (Button* button)
                 menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plugins...");
         }
 
-        const int r = menu.showAt (&optionsButton);
+        const int r = menu.showMenu (PopupMenu::Options().withTargetComponent (&optionsButton));
 
         if (r == 1)
         {
@@ -225,6 +225,7 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
     list.scanAndAddDragAndDroppedFiles (files, typesFound);
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 void PluginListComponent::scanFor (AudioPluginFormat* format)
 {
     if (format == 0)
@@ -300,6 +301,6 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
                                         + shortNames.joinIntoString (", "));
     }
 }
-
+#endif
 
 END_JUCE_NAMESPACE

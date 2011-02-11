@@ -30,6 +30,7 @@
 #include "../windows/juce_ResizableWindow.h"
 #include "../buttons/juce_TextButton.h"
 #include "../../graphics/fonts/juce_GlyphArrangement.h"
+#include "../windows/juce_AlertWindow.h"
 
 
 //==============================================================================
@@ -114,6 +115,11 @@ public:
     */
     bool showAt (int x, int y, int width, int height);
 
+    /** Sets the size of this dialog box to its default and positions it either in the
+        centre of the screen, or centred around a component that is provided.
+    */
+    void centreWithDefaultSize (Component* componentToCentreAround = 0);
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the box.
 
@@ -140,26 +146,16 @@ public:
     void fileDoubleClicked (const File& file);
 
 private:
-    class ContentComponent  : public Component
-    {
-    public:
-        ContentComponent (const String& name, const String& instructions, FileBrowserComponent& chooserComponent);
-
-        void paint (Graphics& g);
-        void resized();
-
-        String instructions;
-        GlyphArrangement text;
-
-        FileBrowserComponent& chooserComponent;
-        TextButton okButton, cancelButton, newFolderButton;
-    };
-
+    class ContentComponent;
     ContentComponent* content;
     const bool warnAboutOverwritingExistingFiles;
 
     void okButtonPressed();
     void createNewFolder();
+    void createNewFolderConfirmed (const String& name);
+
+    static void okToOverwriteFileCallback (int result, FileChooserDialogBox*);
+    static void createNewFolderCallback (int result, FileChooserDialogBox*, Component::SafePointer<AlertWindow>);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
 };

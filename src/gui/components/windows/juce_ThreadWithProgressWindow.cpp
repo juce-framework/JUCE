@@ -56,6 +56,7 @@ ThreadWithProgressWindow::~ThreadWithProgressWindow()
     stopThread (timeOutMsWhenCancelling);
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool ThreadWithProgressWindow::runThread (const int priority)
 {
     startThread (priority);
@@ -74,6 +75,7 @@ bool ThreadWithProgressWindow::runThread (const int priority)
 
     return finishedNaturally;
 }
+#endif
 
 void ThreadWithProgressWindow::setProgress (const double newProgress)
 {

@@ -101,8 +101,6 @@ public:
 
 private:
     //==============================================================================
-    class AsyncCallback;
-    friend class AsyncCallback;
     MenuBarModel* model;
 
     StringArray menuNames;
@@ -117,6 +115,7 @@ private:
     void timerCallback();
     void repaintMenuItem (int index);
     void menuDismissed (int topLevelIndex, int itemId);
+    static void menuBarMenuDismissedCallback (int, MenuBarComponent*, int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
 };

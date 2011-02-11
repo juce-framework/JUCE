@@ -78,6 +78,7 @@ void FileBasedDocument::setFile (const File& newFile)
 }
 
 //==============================================================================
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool FileBasedDocument::loadFrom (const File& newFile,
                                   const bool showMessageOnFailure)
 {
@@ -121,6 +122,7 @@ bool FileBasedDocument::loadFrom (const File& newFile,
 
     return false;
 }
+#endif
 
 bool FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFailure)
 {
@@ -144,6 +146,7 @@ FileBasedDocument::SaveResult FileBasedDocument::save (const bool askUserForFile
                    showMessageOnFailure);
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                                          const bool warnAboutOverwritingExistingFiles,
                                                          const bool askUserForFileIfNotSpecified,
@@ -289,5 +292,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
 
     return userCancelledSave;
 }
+#endif
+
 
 END_JUCE_NAMESPACE

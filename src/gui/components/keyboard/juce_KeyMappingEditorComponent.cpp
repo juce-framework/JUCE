@@ -65,6 +65,19 @@ public:
                                                  keyNum >= 0 ? getName() : String::empty);
     }
 
+    static void menuCallback (int result, ChangeKeyButton* button)
+    {
+        if (button != 0)
+        {
+            switch (result)
+            {
+                case 1: button->assignNewKey(); break;
+                case 2: button->owner.getMappings().removeKeyPress (button->commandID, button->keyNum); break;
+                default: break;
+            }
+        }
+    }
+
     void clicked()
     {
         if (keyNum >= 0)
@@ -75,12 +88,8 @@ public:
             m.addSeparator();
             m.addItem (2, TRANS("remove this key-mapping"));
 
-            switch (m.show())
-            {
-                case 1: assignNewKey(); break;
-                case 2: owner.getMappings().removeKeyPress (commandID, keyNum); break;
-                default: break;
-            }
+            m.showMenuAsync (PopupMenu::Options(),
+                             ModalCallbackFunction::forComponent (menuCallback, this));
         }
         else
         {
@@ -150,42 +159,65 @@ public:
         JUCE_DECLARE_NON_COPYABLE (KeyEntryWindow);
     };
 
-    void assignNewKey()
+    static void assignNewKeyCallback (int result, ChangeKeyButton* button, KeyPress newKey)
     {
-        KeyEntryWindow entryWindow (owner);
+        if (result != 0 && button != 0)
+            button->setNewKey (newKey, true);
+    }
 
-        if (entryWindow.runModalLoop() != 0)
+    void setNewKey (const KeyPress& newKey, bool dontAskUser)
+    {
+        if (newKey.isValid())
         {
-            entryWindow.setVisible (false);
+            const CommandID previousCommand = owner.getMappings().findCommandForKeyPress (newKey);
 
-            if (entryWindow.lastPress.isValid())
+            if (previousCommand == 0 || dontAskUser)
             {
-                const CommandID previousCommand = owner.getMappings().findCommandForKeyPress (entryWindow.lastPress);
+                owner.getMappings().removeKeyPress (newKey);
 
-                if (previousCommand == 0
-                     || AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                                      TRANS("Change key-mapping"),
-                                                      TRANS("This key is already assigned to the command \"")
-                                                        + owner.getMappings().getCommandManager()->getNameOfCommand (previousCommand)
-                                                        + TRANS("\"\n\nDo you want to re-assign it to this new command instead?"),
-                                                      TRANS("Re-assign"),
-                                                      TRANS("Cancel")))
-                {
-                    owner.getMappings().removeKeyPress (entryWindow.lastPress);
+                if (keyNum >= 0)
+                    owner.getMappings().removeKeyPress (commandID, keyNum);
 
-                    if (keyNum >= 0)
-                        owner.getMappings().removeKeyPress (commandID, keyNum);
-
-                    owner.getMappings().addKeyPress (commandID, entryWindow.lastPress, keyNum);
-                }
+                owner.getMappings().addKeyPress (commandID, newKey, keyNum);
+            }
+            else
+            {
+                AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                              TRANS("Change key-mapping"),
+                                              TRANS("This key is already assigned to the command \"")
+                                                + owner.getMappings().getCommandManager()->getNameOfCommand (previousCommand)
+                                                + TRANS("\"\n\nDo you want to re-assign it to this new command instead?"),
+                                              TRANS("Re-assign"),
+                                              TRANS("Cancel"),
+                                              this,
+                                              ModalCallbackFunction::forComponent (assignNewKeyCallback,
+                                                                                   this, KeyPress (newKey)));
             }
         }
+    }
+
+    static void keyChosen (int result, ChangeKeyButton* button)
+    {
+        if (result != 0 && button != 0 && button->currentKeyEntryWindow != 0)
+        {
+            button->currentKeyEntryWindow->setVisible (false);
+            button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
+        }
+
+        button->currentKeyEntryWindow = 0;
+    }
+
+    void assignNewKey()
+    {
+        currentKeyEntryWindow = new KeyEntryWindow (owner);
+        currentKeyEntryWindow->enterModalState (true, ModalCallbackFunction::forComponent (keyChosen, this));
     }
 
 private:
     KeyMappingEditorComponent& owner;
     const CommandID commandID;
     const int keyNum;
+    ScopedPointer<KeyEntryWindow> currentKeyEntryWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeKeyButton);
 };
@@ -372,15 +404,21 @@ public:
         }
     }
 
+    static void resetToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
+    {
+        if (result != 0 && owner != 0)
+            owner->getMappings().resetToDefaultMappings();
+    }
+
     void buttonClicked (Button*)
     {
-        if (AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                          TRANS("Reset to defaults"),
-                                          TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
-                                          TRANS("Reset")))
-        {
-            owner.getMappings().resetToDefaultMappings();
-        }
+        AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+                                      TRANS("Reset to defaults"),
+                                      TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
+                                      TRANS("Reset"),
+                                      String::empty,
+                                      &owner,
+                                      ModalCallbackFunction::forComponent (resetToDefaultsCallback, &owner));
     }
 
 private:

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	29
+#define JUCE_BUILDNUMBER	30
 
 /** Current Juce version number.
 
@@ -771,6 +771,15 @@ namespace JuceDummyNamespace {}
  #define JUCE_DEPRECATED(functionDef)	 functionDef __attribute__ ((deprecated))
 #else
  #define JUCE_DEPRECATED(functionDef)	 functionDef
+#endif
+
+#if JUCE_ANDROID && ! DOXYGEN
+ #define JUCE_MODAL_LOOPS_PERMITTED 0
+#else
+ /** Some operating environments don't provide a modal loop mechanism, so this flag can be
+	 used to disable any functions that try to run a modal loop.
+ */
+ #define JUCE_MODAL_LOOPS_PERMITTED 1
 #endif
 
 #endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
@@ -29190,6 +29199,9 @@ public:
 
 		You can register a callback using Component::enterModalState() or
 		ModalComponentManager::attachCallback().
+
+		For some quick ways of creating callback objects, see the ModalCallbackFunction class.
+		@see ModalCallbackFunction
 	*/
 	class Callback
 	{
@@ -29247,10 +29259,12 @@ public:
 	/** Brings any modal components to the front. */
 	void bringModalComponentsToFront();
 
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	/** Runs the event loop until the currently topmost modal component is dismissed, and
 		returns the exit code for that component.
 	*/
 	int runEventLoopForCurrentComponent();
+   #endif
 
 	juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager);
 
@@ -29267,6 +29281,7 @@ protected:
 	void handleAsyncUpdate();
 
 private:
+
 	class ModalItem;
 	class ReturnValueRetriever;
 
@@ -29274,11 +29289,222 @@ private:
 	friend class OwnedArray <ModalItem>;
 	OwnedArray <ModalItem> stack;
 
-	void startModal (Component* component, Callback* callback);
+	void startModal (Component* component);
 	void endModal (Component* component, int returnValue);
 	void endModal (Component* component);
 
 	JUCE_DECLARE_NON_COPYABLE (ModalComponentManager);
+};
+
+/**
+	This class provides some handy utility methods for creating ModalComponentManager::Callback
+	objects that will invoke a static function with some parameters when a modal component is dismissed.
+*/
+class ModalCallbackFunction
+{
+public:
+
+	/** This is a utility function to create a ModalComponentManager::Callback that will
+		call a static function with a parameter.
+
+		The function that you supply must take two parameters - the first being an int, which is
+		the result code that was used when the modal component was dismissed, and the second
+		can be a custom type. Note that this custom value will be copied and stored, so it must
+		be a primitive type or a class that provides copy-by-value semantics.
+
+		E.g. @code
+		static void myCallbackFunction (int modalResult, double customValue)
+		{
+			if (modalResult == 1)
+				doSomethingWith (customValue);
+		}
+
+		Component* someKindOfComp;
+		...
+		someKindOfComp->enterModalState (ModalCallbackFunction::create (myCallbackFunction, 3.0));
+		@endcode
+		@see ModalComponentManager::Callback
+	*/
+	template <typename ParamType>
+	static ModalComponentManager::Callback* create (void (*functionToCall) (int, ParamType),
+													ParamType parameterValue)
+	{
+		return new FunctionCaller1 <ParamType> (functionToCall, parameterValue);
+	}
+
+	/** This is a utility function to create a ModalComponentManager::Callback that will
+		call a static function with two custom parameters.
+
+		The function that you supply must take three parameters - the first being an int, which is
+		the result code that was used when the modal component was dismissed, and the next two are
+		your custom types. Note that these custom values will be copied and stored, so they must
+		be primitive types or classes that provide copy-by-value semantics.
+
+		E.g. @code
+		static void myCallbackFunction (int modalResult, double customValue1, String customValue2)
+		{
+			if (modalResult == 1)
+				doSomethingWith (customValue1, customValue2);
+		}
+
+		Component* someKindOfComp;
+		...
+		someKindOfComp->enterModalState (ModalCallbackFunction::create (myCallbackFunction, 3.0, String ("xyz")));
+		@endcode
+		@see ModalComponentManager::Callback
+	*/
+	template <typename ParamType1, typename ParamType2>
+	static ModalComponentManager::Callback* withParam (void (*functionToCall) (int, ParamType1, ParamType2),
+													   ParamType1 parameterValue1,
+													   ParamType2 parameterValue2)
+	{
+		return new FunctionCaller2 <ParamType1, ParamType2> (functionToCall, parameterValue1, parameterValue2);
+	}
+
+	/** This is a utility function to create a ModalComponentManager::Callback that will
+		call a static function with a component.
+
+		The function that you supply must take two parameters - the first being an int, which is
+		the result code that was used when the modal component was dismissed, and the second
+		can be a Component class. The component will be stored as a WeakReference, so that if it gets
+		deleted before this callback is invoked, the pointer that is passed to the function will be null.
+
+		E.g. @code
+		static void myCallbackFunction (int modalResult, Slider* mySlider)
+		{
+			if (modalResult == 1 && mySlider != 0) // (must check that mySlider isn't null in case it was deleted..)
+				mySlider->setValue (0.0);
+		}
+
+		Component* someKindOfComp;
+		Slider* mySlider;
+		...
+		someKindOfComp->enterModalState (ModalCallbackFunction::forComponent (myCallbackFunction, mySlider));
+		@endcode
+		@see ModalComponentManager::Callback
+	*/
+	template <class ComponentType>
+	static ModalComponentManager::Callback* forComponent (void (*functionToCall) (int, ComponentType*),
+														  ComponentType* component)
+	{
+		return new ComponentCaller1 <ComponentType> (functionToCall, component);
+	}
+
+	/** Creates a ModalComponentManager::Callback that will call a static function with a component.
+
+		The function that you supply must take three parameters - the first being an int, which is
+		the result code that was used when the modal component was dismissed, the second being a Component
+		class, and the third being a custom type (which must be a primitive type or have copy-by-value semantics).
+		The component will be stored as a WeakReference, so that if it gets deleted before this callback is
+		invoked, the pointer that is passed into the function will be null.
+
+		E.g. @code
+		static void myCallbackFunction (int modalResult, Slider* mySlider, String customParam)
+		{
+			if (modalResult == 1 && mySlider != 0) // (must check that mySlider isn't null in case it was deleted..)
+				mySlider->setName (customParam);
+		}
+
+		Component* someKindOfComp;
+		Slider* mySlider;
+		...
+		someKindOfComp->enterModalState (ModalCallbackFunction::forComponent (myCallbackFunction, mySlider, String ("hello")));
+		@endcode
+		@see ModalComponentManager::Callback
+	*/
+	template <class ComponentType, typename ParamType>
+	static ModalComponentManager::Callback* forComponent (void (*functionToCall) (int, ComponentType*, ParamType),
+														  ComponentType* component,
+														  ParamType param)
+	{
+		return new ComponentCaller2 <ComponentType, ParamType> (functionToCall, component, param);
+	}
+
+private:
+
+	template <typename ParamType>
+	class FunctionCaller1  : public ModalComponentManager::Callback
+	{
+	public:
+		typedef void (*FunctionType) (int, ParamType);
+
+		FunctionCaller1 (FunctionType& function_, ParamType& param_)
+			: function (function_), param (param_) {}
+
+		void modalStateFinished (int returnValue)  { function (returnValue, param); }
+
+	private:
+		const FunctionType function;
+		ParamType param;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FunctionCaller1);
+	};
+
+	template <typename ParamType1, typename ParamType2>
+	class FunctionCaller2  : public ModalComponentManager::Callback
+	{
+	public:
+		typedef void (*FunctionType) (int, ParamType1, ParamType2);
+
+		FunctionCaller2 (FunctionType& function_, ParamType1& param1_, ParamType2& param2_)
+			: function (function_), param1 (param1_), param2 (param2_) {}
+
+		void modalStateFinished (int returnValue)   { function (returnValue, param1, param2); }
+
+	private:
+		const FunctionType function;
+		ParamType1 param1;
+		ParamType2 param2;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FunctionCaller2);
+	};
+
+	template <typename ComponentType>
+	class ComponentCaller1  : public ModalComponentManager::Callback
+	{
+	public:
+		typedef void (*FunctionType) (int, ComponentType*);
+
+		ComponentCaller1 (FunctionType& function_, ComponentType* comp_)
+			: function (function_), comp (comp_) {}
+
+		void modalStateFinished (int returnValue)
+		{
+			function (returnValue, static_cast <ComponentType*> (comp.get()));
+		}
+
+	private:
+		const FunctionType function;
+		WeakReference<Component> comp;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentCaller1);
+	};
+
+	template <typename ComponentType, typename ParamType1>
+	class ComponentCaller2  : public ModalComponentManager::Callback
+	{
+	public:
+		typedef void (*FunctionType) (int, ComponentType*, ParamType1);
+
+		ComponentCaller2 (FunctionType& function_, ComponentType* comp_, ParamType1 param1_)
+			: function (function_), comp (comp_), param1 (param1_) {}
+
+		void modalStateFinished (int returnValue)
+		{
+			function (returnValue, static_cast <ComponentType*> (comp.get()), param1);
+		}
+
+	private:
+		const FunctionType function;
+		WeakReference<Component> comp;
+		ParamType1 param1;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentCaller2);
+	};
+
+	ModalCallbackFunction();
+	~ModalCallbackFunction();
+	JUCE_DECLARE_NON_COPYABLE (ModalCallbackFunction);
 };
 
 #endif   // __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
@@ -31111,7 +31337,9 @@ public:
 		@see enterModalState, exitModalState, isCurrentlyModal, getCurrentlyModalComponent,
 			 isCurrentlyBlockedByAnotherModalComponent, ModalComponentManager
 	*/
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	int runModalLoop();
+   #endif
 
 	/** Puts the component into a modal state.
 
@@ -31128,10 +31356,15 @@ public:
 		is called. If you pass an object in here, the system will take care of deleting it
 		later, after making the callback
 
+		If deleteWhenDismissed is true, then when it is dismissed, the component will be
+		deleted and then the callback will be called. (This will safely handle the situation
+		where the component is deleted before its exitModalState() method is called).
+
 		@see exitModalState, runModalLoop, ModalComponentManager::attachCallback
 	*/
 	void enterModalState (bool takeKeyboardFocus = true,
-						  ModalComponentManager::Callback* callback = 0);
+						  ModalComponentManager::Callback* callback = 0,
+						  bool deleteWhenDismissed = false);
 
 	/** Ends a component's modal state.
 
@@ -40520,6 +40753,37 @@ public:
 	/** Returns true if the menu contains any items that can be used. */
 	bool containsAnyActiveItems() const throw();
 
+	/** Class used to create a set of options to pass to the show() method.
+		You can chain together a series of calls to this class's methods to create
+		a set of whatever options you want to specify.
+		E.g. @code
+		PopupMenu menu;
+		...
+		menu.showMenu (PopupMenu::Options().withMaximumWidth (100),
+										   .withMaximumNumColumns (3)
+										   .withTargetComponent (myComp));
+		@endcode
+	*/
+	class JUCE_API  Options
+	{
+	public:
+		Options();
+
+		const Options withTargetComponent (Component* targetComponent) const;
+		const Options withTargetScreenArea (const Rectangle<int>& targetArea) const;
+		const Options withMinimumWidth (int minWidth) const;
+		const Options withMaximumNumColumns (int maxNumColumns) const;
+		const Options withStandardItemHeight (int standardHeight) const;
+		const Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+
+	private:
+		friend class PopupMenu;
+		Rectangle<int> targetArea;
+		Component* targetComponent;
+		int visibleItemID, minWidth, maxColumns, standardHeight;
+	};
+
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	/** Displays the menu and waits for the user to pick something.
 
 		This will display the menu modally, and return the ID of the item that the
@@ -40591,6 +40855,15 @@ public:
 				int maximumNumColumns = 0,
 				int standardItemHeight = 0,
 				ModalComponentManager::Callback* callback = 0);
+
+	/** Displays and runs the menu modally, with a set of options.
+	*/
+	int showMenu (const Options& options);
+   #endif
+
+	/** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
+	void showMenuAsync (const Options& options,
+						ModalComponentManager::Callback* callback);
 
 	/** Closes any menus that are currently open.
 
@@ -40754,10 +41027,8 @@ private:
 	bool separatorPending;
 
 	void addSeparatorIfPending();
-
-	int showMenu (const Rectangle<int>& target, int itemIdThatMustBeVisible,
-				  int minimumWidth, int maximumNumColumns, int standardItemHeight,
-				  Component* componentAttachedTo, ModalComponentManager::Callback* callback);
+	Component* createWindow (const Options&, ApplicationCommandManager**) const;
+	int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
 
 	JUCE_LEAK_DETECTOR (PopupMenu);
 };
@@ -42098,9 +42369,6 @@ private:
 		bool isEnabled : 1, isHeading : 1;
 	};
 
-	class Callback;
-	friend class Callback;
-
 	OwnedArray <ItemInfo> items;
 	Value currentId;
 	int lastCurrentId;
@@ -42112,6 +42380,7 @@ private:
 	ItemInfo* getItemForId (int itemId) const throw();
 	ItemInfo* getItemForIndex (int index) const throw();
 	bool selectIfEnabled (int index);
+	static void popupMenuFinishedCallback (int, ComboBox*);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
 };
@@ -47421,12 +47690,14 @@ public:
 	*/
 	bool hasStopMessageBeenSent() const throw()	 { return quitMessagePosted; }
 
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	/** Synchronously dispatches messages until a given time has elapsed.
 
 		Returns false if a quit message has been posted by a call to stopDispatchLoop(),
 		otherwise returns true.
 	*/
 	bool runDispatchLoopUntil (int millisecondsToRunFor);
+   #endif
 
 	/** Calls a function using the message-thread.
 
@@ -51334,6 +51605,26 @@ public:
 					  bool sendUpdateMessage = true,
 					  bool sendMessageSynchronously = false,
 					  bool allowNudgingOfOtherValues = false);
+
+	/** For a slider with two or three thumbs, this sets the minimum and maximum thumb positions.
+
+		This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
+		that are registered, and will synchronously call the valueChanged() method in case subclasses
+		want to handle it.
+
+		@param newMinValue		  the new minimum value to set - this will be snapped to the
+										nearest interval if one has been set.
+		@param newMaxValue		  the new minimum value to set - this will be snapped to the
+										nearest interval if one has been set.
+		@param sendUpdateMessage	if false, a change to the value will not trigger a call to
+										any Slider::Listeners or the valueChanged() method
+		@param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
+										synchronously; if false, it will be asynchronous
+		@see setMaxValue, setMinValue, setValue
+	*/
+	void setMinAndMaxValues (double newMinValue, double newMaxValue,
+							 bool sendUpdateMessage = true,
+							 bool sendMessageSynchronously = false);
 
 	/** A class for receiving callbacks from a Slider.
 
@@ -55450,6 +55741,543 @@ private:
 #endif   // __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
 /*** End of inlined file: juce_GlyphArrangement.h ***/
 
+
+/*** Start of inlined file: juce_AlertWindow.h ***/
+#ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
+#define __JUCE_ALERTWINDOW_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_TextLayout.h ***/
+#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
+#define __JUCE_TEXTLAYOUT_JUCEHEADER__
+
+class Graphics;
+
+/**
+	A laid-out arrangement of text.
+
+	You can add text in different fonts to a TextLayout object, then call its
+	layout() method to word-wrap it into lines. The layout can then be drawn
+	using a graphics context.
+
+	It's handy if you've got a message to display, because you can format it,
+	measure the extent of the layout, and then create a suitably-sized window
+	to show it in.
+
+	@see Font, Graphics::drawFittedText, GlyphArrangement
+*/
+class JUCE_API  TextLayout
+{
+public:
+
+	/** Creates an empty text layout.
+
+		Text can then be appended using the appendText() method.
+	*/
+	TextLayout();
+
+	/** Creates a copy of another layout object. */
+	TextLayout (const TextLayout& other);
+
+	/** Creates a text layout from an initial string and font. */
+	TextLayout (const String& text, const Font& font);
+
+	/** Destructor. */
+	~TextLayout();
+
+	/** Copies another layout onto this one. */
+	TextLayout& operator= (const TextLayout& layoutToCopy);
+
+	/** Clears the layout, removing all its text. */
+	void clear();
+
+	/** Adds a string to the end of the arrangement.
+
+		The string will be broken onto new lines wherever it contains
+		carriage-returns or linefeeds. After adding it, you can call layout()
+		to wrap long lines into a paragraph and justify it.
+	*/
+	void appendText (const String& textToAppend,
+					 const Font& fontToUse);
+
+	/** Replaces all the text with a new string.
+
+		This is equivalent to calling clear() followed by appendText().
+	*/
+	void setText (const String& newText,
+				  const Font& fontToUse);
+
+	/** Returns true if the layout has not had any text added yet. */
+	bool isEmpty() const;
+
+	/** Breaks the text up to form a paragraph with the given width.
+
+		@param maximumWidth		 any text wider than this will be split
+											across multiple lines
+		@param justification		how the lines are to be laid-out horizontally
+		@param attemptToBalanceLineLengths  if true, it will try to split the lines at a
+											width that keeps all the lines of text at a
+											similar length - this is good when you're displaying
+											a short message and don't want it to get split
+											onto two lines with only a couple of words on
+											the second line, which looks untidy.
+	*/
+	void layout (int maximumWidth,
+				 const Justification& justification,
+				 bool attemptToBalanceLineLengths);
+
+	/** Returns the overall width of the entire text layout. */
+	int getWidth() const;
+
+	/** Returns the overall height of the entire text layout. */
+	int getHeight() const;
+
+	/** Returns the total number of lines of text. */
+	int getNumLines() const			 { return totalLines; }
+
+	/** Returns the width of a particular line of text.
+
+		@param lineNumber   the line, from 0 to (getNumLines() - 1)
+	*/
+	int getLineWidth (int lineNumber) const;
+
+	/** Renders the text at a specified position using a graphics context.
+	*/
+	void draw (Graphics& g, int topLeftX, int topLeftY) const;
+
+	/** Renders the text within a specified rectangle using a graphics context.
+
+		The justification flags dictate how the block of text should be positioned
+		within the rectangle.
+	*/
+	void drawWithin (Graphics& g,
+					 int x, int y, int w, int h,
+					 const Justification& layoutFlags) const;
+
+private:
+
+	class Token;
+	friend class OwnedArray <Token>;
+	OwnedArray <Token> tokens;
+	int totalLines;
+
+	JUCE_LEAK_DETECTOR (TextLayout);
+};
+
+#endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
+/*** End of inlined file: juce_TextLayout.h ***/
+
+/** A window that displays a message and has buttons for the user to react to it.
+
+	For simple dialog boxes with just a couple of buttons on them, there are
+	some static methods for running these.
+
+	For more complex dialogs, an AlertWindow can be created, then it can have some
+	buttons and components added to it, and its runModalLoop() method is then used to
+	show it. The value returned by runModalLoop() shows which button the
+	user pressed to dismiss the box.
+
+	@see ThreadWithProgressWindow
+*/
+class JUCE_API  AlertWindow  : public TopLevelWindow,
+							   private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+{
+public:
+
+	/** The type of icon to show in the dialog box. */
+	enum AlertIconType
+	{
+		NoIcon,	 /**< No icon will be shown on the dialog box. */
+		QuestionIcon,   /**< A question-mark icon, for dialog boxes that need the
+							 user to answer a question. */
+		WarningIcon,	/**< An exclamation mark to indicate that the dialog is a
+							 warning about something and shouldn't be ignored. */
+		InfoIcon	/**< An icon that indicates that the dialog box is just
+							 giving the user some information, which doesn't require
+							 a response from them. */
+	};
+
+	/** Creates an AlertWindow.
+
+		@param title	the headline to show at the top of the dialog box
+		@param message  a longer, more descriptive message to show underneath the
+						headline
+		@param iconType the type of icon to display
+		@param associatedComponent   if this is non-null, it specifies the component that the
+						alert window should be associated with. Depending on the look
+						and feel, this might be used for positioning of the alert window.
+	*/
+	AlertWindow (const String& title,
+				 const String& message,
+				 AlertIconType iconType,
+				 Component* associatedComponent = 0);
+
+	/** Destroys the AlertWindow */
+	~AlertWindow();
+
+	/** Returns the type of alert icon that was specified when the window
+		was created. */
+	AlertIconType getAlertType() const throw()		  { return alertIconType; }
+
+	/** Changes the dialog box's message.
+
+		This will also resize the window to fit the new message if required.
+	*/
+	void setMessage (const String& message);
+
+	/** Adds a button to the window.
+
+		@param name	 the text to show on the button
+		@param returnValue  the value that should be returned from runModalLoop()
+							if this is the button that the user presses.
+		@param shortcutKey1 an optional key that can be pressed to trigger this button
+		@param shortcutKey2 a second optional key that can be pressed to trigger this button
+	*/
+	void addButton (const String& name,
+					int returnValue,
+					const KeyPress& shortcutKey1 = KeyPress(),
+					const KeyPress& shortcutKey2 = KeyPress());
+
+	/** Returns the number of buttons that the window currently has. */
+	int getNumButtons() const;
+
+	/** Invokes a click of one of the buttons. */
+	void triggerButtonClick (const String& buttonName);
+
+	/** Adds a textbox to the window for entering strings.
+
+		@param name		 an internal name for the text-box. This is the name to pass to
+								the getTextEditorContents() method to find out what the
+								user typed-in.
+		@param initialContents  a string to show in the text box when it's first shown
+		@param onScreenLabel	if this is non-empty, it will be displayed next to the
+								text-box to label it.
+		@param isPasswordBox	if true, the text editor will display asterisks instead of
+								the actual text
+		@see getTextEditorContents
+	*/
+	void addTextEditor (const String& name,
+						const String& initialContents,
+						const String& onScreenLabel = String::empty,
+						bool isPasswordBox = false);
+
+	/** Returns the contents of a named textbox.
+
+		After showing an AlertWindow that contains a text editor, this can be
+		used to find out what the user has typed into it.
+
+		@param nameOfTextEditor	 the name of the text box that you're interested in
+		@see addTextEditor
+	*/
+	const String getTextEditorContents (const String& nameOfTextEditor) const;
+
+	/** Returns a pointer to a textbox that was added with addTextEditor(). */
+	TextEditor* getTextEditor (const String& nameOfTextEditor) const;
+
+	/** Adds a drop-down list of choices to the box.
+
+		After the box has been shown, the getComboBoxComponent() method can
+		be used to find out which item the user picked.
+
+		@param name	 the label to use for the drop-down list
+		@param items	the list of items to show in it
+		@param onScreenLabel	if this is non-empty, it will be displayed next to the
+								combo-box to label it.
+		@see getComboBoxComponent
+	*/
+	void addComboBox (const String& name,
+					  const StringArray& items,
+					  const String& onScreenLabel = String::empty);
+
+	/** Returns a drop-down list that was added to the AlertWindow.
+
+		@param nameOfList   the name that was passed into the addComboBox() method
+							when creating the drop-down
+		@returns the ComboBox component, or 0 if none was found for the given name.
+	*/
+	ComboBox* getComboBoxComponent (const String& nameOfList) const;
+
+	/** Adds a block of text.
+
+		This is handy for adding a multi-line note next to a textbox or combo-box,
+		to provide more details about what's going on.
+	*/
+	void addTextBlock (const String& text);
+
+	/** Adds a progress-bar to the window.
+
+		@param progressValue	a variable that will be repeatedly checked while the
+								dialog box is visible, to see how far the process has
+								got. The value should be in the range 0 to 1.0
+	*/
+	void addProgressBarComponent (double& progressValue);
+
+	/** Adds a user-defined component to the dialog box.
+
+		@param component	the component to add - its size should be set up correctly
+							before it is passed in. The caller is responsible for deleting
+							the component later on - the AlertWindow won't delete it.
+	*/
+	void addCustomComponent (Component* component);
+
+	/** Returns the number of custom components in the dialog box.
+
+		@see getCustomComponent, addCustomComponent
+	*/
+	int getNumCustomComponents() const;
+
+	/** Returns one of the custom components in the dialog box.
+
+		@param index	a value 0 to (getNumCustomComponents() - 1). Out-of-range indexes
+						will return 0
+		@see getNumCustomComponents, addCustomComponent
+	*/
+	Component* getCustomComponent (int index) const;
+
+	/** Removes one of the custom components in the dialog box.
+
+		Note that this won't delete it, it just removes the component from the window
+
+		@param index	a value 0 to (getNumCustomComponents() - 1). Out-of-range indexes
+						will return 0
+		@returns	the component that was removed (or null)
+		@see getNumCustomComponents, addCustomComponent
+	*/
+	Component* removeCustomComponent (int index);
+
+	/** Returns true if the window contains any components other than just buttons.*/
+	bool containsAnyExtraComponents() const;
+
+	// easy-to-use message box functions:
+
+	/** Shows a dialog box that just has a message and a single button to get rid of it.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the
+							headline
+		@param buttonText   the text to show in the button - if this string is empty, the
+							default string "ok" (or a localised version) will be used.
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+	*/
+   #if JUCE_MODAL_LOOPS_PERMITTED
+	static void JUCE_CALLTYPE showMessageBox (AlertIconType iconType,
+											  const String& title,
+											  const String& message,
+											  const String& buttonText = String::empty,
+											  Component* associatedComponent = 0);
+   #endif
+
+	/** Shows a dialog box that just has a message and a single button to get rid of it.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the
+							headline
+		@param buttonText   the text to show in the button - if this string is empty, the
+							default string "ok" (or a localised version) will be used.
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+	*/
+	static void JUCE_CALLTYPE showMessageBoxAsync (AlertIconType iconType,
+												   const String& title,
+												   const String& message,
+												   const String& buttonText = String::empty,
+												   Component* associatedComponent = 0);
+
+	/** Shows a dialog box with two buttons.
+
+		Ideal for ok/cancel or yes/no choices. The return key can also be used
+		to trigger the first button, and the escape key for the second button.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the
+							headline
+		@param button1Text  the text to show in the first button - if this string is
+							empty, the default string "ok" (or a localised version of it)
+							will be used.
+		@param button2Text  the text to show in the second button - if this string is
+							empty, the default string "cancel" (or a localised version of it)
+							will be used.
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+		@param callback	 if this is non-null, the menu will be launched asynchronously,
+							returning immediately, and the callback will receive a call to its
+							modalStateFinished() when the box is dismissed, with its parameter
+							being 1 if the ok button was pressed, or 0 for cancel, The callback object
+							will be owned and deleted by the system, so make sure that it works
+							safely and doesn't keep any references to objects that might be deleted
+							before it gets called.
+		@returns true if button 1 was clicked, false if it was button 2. If the callback parameter
+				 is not null, the method always returns false, and the user's choice is delivered
+				 later by the callback.
+	*/
+	static bool JUCE_CALLTYPE showOkCancelBox (AlertIconType iconType,
+											   const String& title,
+											   const String& message,
+											#if JUCE_MODAL_LOOPS_PERMITTED
+											   const String& button1Text = String::empty,
+											   const String& button2Text = String::empty,
+											   Component* associatedComponent = 0,
+											   ModalComponentManager::Callback* callback = 0);
+											#else
+											   const String& button1Text,
+											   const String& button2Text,
+											   Component* associatedComponent,
+											   ModalComponentManager::Callback* callback);
+											#endif
+
+	/** Shows a dialog box with three buttons.
+
+		Ideal for yes/no/cancel boxes.
+
+		The escape key can be used to trigger the third button.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the
+							headline
+		@param button1Text  the text to show in the first button - if an empty string, then
+							"yes" will be used (or a localised version of it)
+		@param button2Text  the text to show in the first button - if an empty string, then
+							"no" will be used (or a localised version of it)
+		@param button3Text  the text to show in the first button - if an empty string, then
+							"cancel" will be used (or a localised version of it)
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+		@param callback	 if this is non-null, the menu will be launched asynchronously,
+							returning immediately, and the callback will receive a call to its
+							modalStateFinished() when the box is dismissed, with its parameter
+							being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
+							if it was cancelled, The callback object will be owned and deleted by the
+							system, so make sure that it works safely and doesn't keep any references
+							to objects that might be deleted before it gets called.
+
+		@returns If the callback parameter has been set, this returns 0. Otherwise, it
+				 returns one of the following values:
+				 - 0 if the third button was pressed (normally used for 'cancel')
+				 - 1 if the first button was pressed (normally used for 'yes')
+				 - 2 if the middle button was pressed (normally used for 'no')
+	*/
+	static int JUCE_CALLTYPE showYesNoCancelBox (AlertIconType iconType,
+												 const String& title,
+												 const String& message,
+											   #if JUCE_MODAL_LOOPS_PERMITTED
+												 const String& button1Text = String::empty,
+												 const String& button2Text = String::empty,
+												 const String& button3Text = String::empty,
+												 Component* associatedComponent = 0,
+												 ModalComponentManager::Callback* callback = 0);
+											   #else
+												 const String& button1Text,
+												 const String& button2Text,
+												 const String& button3Text,
+												 Component* associatedComponent,
+												 ModalComponentManager::Callback* callback);
+											   #endif
+
+	/** Shows an operating-system native dialog box.
+
+		@param title	the title to use at the top
+		@param bodyText	 the longer message to show
+		@param isOkCancel   if true, this will show an ok/cancel box, if false,
+							it'll show a box with just an ok button
+		@returns true if the ok button was pressed, false if they pressed cancel.
+	*/
+	static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
+												   const String& bodyText,
+												   bool isOkCancel);
+
+	/** A set of colour IDs to use to change the colour of various aspects of the alert box.
+
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId	  = 0x1001800,  /**< The background colour for the window. */
+		textColourId		= 0x1001810,  /**< The colour for the text. */
+		outlineColourId		 = 0x1001820   /**< An optional colour to use to draw a border around the window. */
+	};
+
+protected:
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void mouseDown (const MouseEvent& e);
+	/** @internal */
+	void mouseDrag (const MouseEvent& e);
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+	/** @internal */
+	void buttonClicked (Button* button);
+	/** @internal */
+	void lookAndFeelChanged();
+	/** @internal */
+	void userTriedToCloseWindow();
+	/** @internal */
+	int getDesktopWindowStyleFlags() const;
+
+private:
+
+	String text;
+	TextLayout textLayout;
+	AlertIconType alertIconType;
+	ComponentBoundsConstrainer constrainer;
+	ComponentDragger dragger;
+	Rectangle<int> textArea;
+	OwnedArray<TextButton> buttons;
+	OwnedArray<TextEditor> textBoxes;
+	OwnedArray<ComboBox> comboBoxes;
+	OwnedArray<ProgressBar> progressBars;
+	Array<Component*> customComps;
+	OwnedArray<Component> textBlocks;
+	Array<Component*> allComps;
+	StringArray textboxNames, comboBoxNames;
+	Font font;
+	Component* associatedComponent;
+
+	void updateLayout (bool onlyIncreaseSize);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow);
+};
+
+#endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
+/*** End of inlined file: juce_AlertWindow.h ***/
+
 /**
 	A file open/save dialog box.
 
@@ -55530,6 +56358,11 @@ public:
 	*/
 	bool showAt (int x, int y, int width, int height);
 
+	/** Sets the size of this dialog box to its default and positions it either in the
+		centre of the screen, or centred around a component that is provided.
+	*/
+	void centreWithDefaultSize (Component* componentToCentreAround = 0);
+
 	/** A set of colour IDs to use to change the colour of various aspects of the box.
 
 		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
@@ -55554,26 +56387,16 @@ public:
 	void fileDoubleClicked (const File& file);
 
 private:
-	class ContentComponent  : public Component
-	{
-	public:
-		ContentComponent (const String& name, const String& instructions, FileBrowserComponent& chooserComponent);
-
-		void paint (Graphics& g);
-		void resized();
-
-		String instructions;
-		GlyphArrangement text;
-
-		FileBrowserComponent& chooserComponent;
-		TextButton okButton, cancelButton, newFolderButton;
-	};
-
+	class ContentComponent;
 	ContentComponent* content;
 	const bool warnAboutOverwritingExistingFiles;
 
 	void okButtonPressed();
 	void createNewFolder();
+	void createNewFolderConfirmed (const String& name);
+
+	static void okToOverwriteFileCallback (int result, FileChooserDialogBox*);
+	static void createNewFolderCallback (int result, FileChooserDialogBox*, Component::SafePointer<AlertWindow>);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox);
 };
@@ -56913,6 +57736,7 @@ private:
 	ScopedPointer<Button> extraTabsButton;
 
 	void showExtraItemsMenu();
+	static void extraItemsMenuCallback (int, TabbedButtonBar*);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar);
 };
@@ -58190,468 +59014,6 @@ private:
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
 #define __JUCE_LOOKANDFEEL_JUCEHEADER__
 
-
-/*** Start of inlined file: juce_AlertWindow.h ***/
-#ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
-#define __JUCE_ALERTWINDOW_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_TextLayout.h ***/
-#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
-#define __JUCE_TEXTLAYOUT_JUCEHEADER__
-
-class Graphics;
-
-/**
-	A laid-out arrangement of text.
-
-	You can add text in different fonts to a TextLayout object, then call its
-	layout() method to word-wrap it into lines. The layout can then be drawn
-	using a graphics context.
-
-	It's handy if you've got a message to display, because you can format it,
-	measure the extent of the layout, and then create a suitably-sized window
-	to show it in.
-
-	@see Font, Graphics::drawFittedText, GlyphArrangement
-*/
-class JUCE_API  TextLayout
-{
-public:
-
-	/** Creates an empty text layout.
-
-		Text can then be appended using the appendText() method.
-	*/
-	TextLayout();
-
-	/** Creates a copy of another layout object. */
-	TextLayout (const TextLayout& other);
-
-	/** Creates a text layout from an initial string and font. */
-	TextLayout (const String& text, const Font& font);
-
-	/** Destructor. */
-	~TextLayout();
-
-	/** Copies another layout onto this one. */
-	TextLayout& operator= (const TextLayout& layoutToCopy);
-
-	/** Clears the layout, removing all its text. */
-	void clear();
-
-	/** Adds a string to the end of the arrangement.
-
-		The string will be broken onto new lines wherever it contains
-		carriage-returns or linefeeds. After adding it, you can call layout()
-		to wrap long lines into a paragraph and justify it.
-	*/
-	void appendText (const String& textToAppend,
-					 const Font& fontToUse);
-
-	/** Replaces all the text with a new string.
-
-		This is equivalent to calling clear() followed by appendText().
-	*/
-	void setText (const String& newText,
-				  const Font& fontToUse);
-
-	/** Returns true if the layout has not had any text added yet. */
-	bool isEmpty() const;
-
-	/** Breaks the text up to form a paragraph with the given width.
-
-		@param maximumWidth		 any text wider than this will be split
-											across multiple lines
-		@param justification		how the lines are to be laid-out horizontally
-		@param attemptToBalanceLineLengths  if true, it will try to split the lines at a
-											width that keeps all the lines of text at a
-											similar length - this is good when you're displaying
-											a short message and don't want it to get split
-											onto two lines with only a couple of words on
-											the second line, which looks untidy.
-	*/
-	void layout (int maximumWidth,
-				 const Justification& justification,
-				 bool attemptToBalanceLineLengths);
-
-	/** Returns the overall width of the entire text layout. */
-	int getWidth() const;
-
-	/** Returns the overall height of the entire text layout. */
-	int getHeight() const;
-
-	/** Returns the total number of lines of text. */
-	int getNumLines() const			 { return totalLines; }
-
-	/** Returns the width of a particular line of text.
-
-		@param lineNumber   the line, from 0 to (getNumLines() - 1)
-	*/
-	int getLineWidth (int lineNumber) const;
-
-	/** Renders the text at a specified position using a graphics context.
-	*/
-	void draw (Graphics& g, int topLeftX, int topLeftY) const;
-
-	/** Renders the text within a specified rectangle using a graphics context.
-
-		The justification flags dictate how the block of text should be positioned
-		within the rectangle.
-	*/
-	void drawWithin (Graphics& g,
-					 int x, int y, int w, int h,
-					 const Justification& layoutFlags) const;
-
-private:
-
-	class Token;
-	friend class OwnedArray <Token>;
-	OwnedArray <Token> tokens;
-	int totalLines;
-
-	JUCE_LEAK_DETECTOR (TextLayout);
-};
-
-#endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
-/*** End of inlined file: juce_TextLayout.h ***/
-
-/** A window that displays a message and has buttons for the user to react to it.
-
-	For simple dialog boxes with just a couple of buttons on them, there are
-	some static methods for running these.
-
-	For more complex dialogs, an AlertWindow can be created, then it can have some
-	buttons and components added to it, and its runModalLoop() method is then used to
-	show it. The value returned by runModalLoop() shows which button the
-	user pressed to dismiss the box.
-
-	@see ThreadWithProgressWindow
-*/
-class JUCE_API  AlertWindow  : public TopLevelWindow,
-							   private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
-{
-public:
-
-	/** The type of icon to show in the dialog box. */
-	enum AlertIconType
-	{
-		NoIcon,	 /**< No icon will be shown on the dialog box. */
-		QuestionIcon,   /**< A question-mark icon, for dialog boxes that need the
-							 user to answer a question. */
-		WarningIcon,	/**< An exclamation mark to indicate that the dialog is a
-							 warning about something and shouldn't be ignored. */
-		InfoIcon	/**< An icon that indicates that the dialog box is just
-							 giving the user some information, which doesn't require
-							 a response from them. */
-	};
-
-	/** Creates an AlertWindow.
-
-		@param title	the headline to show at the top of the dialog box
-		@param message  a longer, more descriptive message to show underneath the
-						headline
-		@param iconType the type of icon to display
-		@param associatedComponent   if this is non-zero, it specifies the component that the
-						alert window should be associated with. Depending on the look
-						and feel, this might be used for positioning of the alert window.
-	*/
-	AlertWindow (const String& title,
-				 const String& message,
-				 AlertIconType iconType,
-				 Component* associatedComponent = 0);
-
-	/** Destroys the AlertWindow */
-	~AlertWindow();
-
-	/** Returns the type of alert icon that was specified when the window
-		was created. */
-	AlertIconType getAlertType() const throw()		  { return alertIconType; }
-
-	/** Changes the dialog box's message.
-
-		This will also resize the window to fit the new message if required.
-	*/
-	void setMessage (const String& message);
-
-	/** Adds a button to the window.
-
-		@param name	 the text to show on the button
-		@param returnValue  the value that should be returned from runModalLoop()
-							if this is the button that the user presses.
-		@param shortcutKey1 an optional key that can be pressed to trigger this button
-		@param shortcutKey2 a second optional key that can be pressed to trigger this button
-	*/
-	void addButton (const String& name,
-					int returnValue,
-					const KeyPress& shortcutKey1 = KeyPress(),
-					const KeyPress& shortcutKey2 = KeyPress());
-
-	/** Returns the number of buttons that the window currently has. */
-	int getNumButtons() const;
-
-	/** Invokes a click of one of the buttons. */
-	void triggerButtonClick (const String& buttonName);
-
-	/** Adds a textbox to the window for entering strings.
-
-		@param name		 an internal name for the text-box. This is the name to pass to
-								the getTextEditorContents() method to find out what the
-								user typed-in.
-		@param initialContents  a string to show in the text box when it's first shown
-		@param onScreenLabel	if this is non-empty, it will be displayed next to the
-								text-box to label it.
-		@param isPasswordBox	if true, the text editor will display asterisks instead of
-								the actual text
-		@see getTextEditorContents
-	*/
-	void addTextEditor (const String& name,
-						const String& initialContents,
-						const String& onScreenLabel = String::empty,
-						bool isPasswordBox = false);
-
-	/** Returns the contents of a named textbox.
-
-		After showing an AlertWindow that contains a text editor, this can be
-		used to find out what the user has typed into it.
-
-		@param nameOfTextEditor	 the name of the text box that you're interested in
-		@see addTextEditor
-	*/
-	const String getTextEditorContents (const String& nameOfTextEditor) const;
-
-	/** Returns a pointer to a textbox that was added with addTextEditor(). */
-	TextEditor* getTextEditor (const String& nameOfTextEditor) const;
-
-	/** Adds a drop-down list of choices to the box.
-
-		After the box has been shown, the getComboBoxComponent() method can
-		be used to find out which item the user picked.
-
-		@param name	 the label to use for the drop-down list
-		@param items	the list of items to show in it
-		@param onScreenLabel	if this is non-empty, it will be displayed next to the
-								combo-box to label it.
-		@see getComboBoxComponent
-	*/
-	void addComboBox (const String& name,
-					  const StringArray& items,
-					  const String& onScreenLabel = String::empty);
-
-	/** Returns a drop-down list that was added to the AlertWindow.
-
-		@param nameOfList   the name that was passed into the addComboBox() method
-							when creating the drop-down
-		@returns the ComboBox component, or 0 if none was found for the given name.
-	*/
-	ComboBox* getComboBoxComponent (const String& nameOfList) const;
-
-	/** Adds a block of text.
-
-		This is handy for adding a multi-line note next to a textbox or combo-box,
-		to provide more details about what's going on.
-	*/
-	void addTextBlock (const String& text);
-
-	/** Adds a progress-bar to the window.
-
-		@param progressValue	a variable that will be repeatedly checked while the
-								dialog box is visible, to see how far the process has
-								got. The value should be in the range 0 to 1.0
-	*/
-	void addProgressBarComponent (double& progressValue);
-
-	/** Adds a user-defined component to the dialog box.
-
-		@param component	the component to add - its size should be set up correctly
-							before it is passed in. The caller is responsible for deleting
-							the component later on - the AlertWindow won't delete it.
-	*/
-	void addCustomComponent (Component* component);
-
-	/** Returns the number of custom components in the dialog box.
-
-		@see getCustomComponent, addCustomComponent
-	*/
-	int getNumCustomComponents() const;
-
-	/** Returns one of the custom components in the dialog box.
-
-		@param index	a value 0 to (getNumCustomComponents() - 1). Out-of-range indexes
-						will return 0
-		@see getNumCustomComponents, addCustomComponent
-	*/
-	Component* getCustomComponent (int index) const;
-
-	/** Removes one of the custom components in the dialog box.
-
-		Note that this won't delete it, it just removes the component from the window
-
-		@param index	a value 0 to (getNumCustomComponents() - 1). Out-of-range indexes
-						will return 0
-		@returns	the component that was removed (or zero)
-		@see getNumCustomComponents, addCustomComponent
-	*/
-	Component* removeCustomComponent (int index);
-
-	/** Returns true if the window contains any components other than just buttons.*/
-	bool containsAnyExtraComponents() const;
-
-	// easy-to-use message box functions:
-
-	/** Shows a dialog box that just has a message and a single button to get rid of it.
-
-		The box is shown modally, and the method returns after the user
-		has clicked the button (or pressed the escape or return keys).
-
-		@param iconType	 the type of icon to show
-		@param title	the headline to show at the top of the box
-		@param message	  a longer, more descriptive message to show underneath the
-							headline
-		@param buttonText   the text to show in the button - if this string is empty, the
-							default string "ok" (or a localised version) will be used.
-		@param associatedComponent   if this is non-zero, it specifies the component that the
-							alert window should be associated with. Depending on the look
-							and feel, this might be used for positioning of the alert window.
-	*/
-	static void JUCE_CALLTYPE showMessageBox (AlertIconType iconType,
-											  const String& title,
-											  const String& message,
-											  const String& buttonText = String::empty,
-											  Component* associatedComponent = 0);
-
-	/** Shows a dialog box with two buttons.
-
-		Ideal for ok/cancel or yes/no choices. The return key can also be used
-		to trigger the first button, and the escape key for the second button.
-
-		@param iconType	 the type of icon to show
-		@param title	the headline to show at the top of the box
-		@param message	  a longer, more descriptive message to show underneath the
-							headline
-		@param button1Text  the text to show in the first button - if this string is
-							empty, the default string "ok" (or a localised version of it)
-							will be used.
-		@param button2Text  the text to show in the second button - if this string is
-							empty, the default string "cancel" (or a localised version of it)
-							will be used.
-	 @param associatedComponent   if this is non-zero, it specifies the component that the
-							 alert window should be associated with. Depending on the look
-							 and feel, this might be used for positioning of the alert window.
-	 @returns true if button 1 was clicked, false if it was button 2
-	*/
-	static bool JUCE_CALLTYPE showOkCancelBox (AlertIconType iconType,
-											   const String& title,
-											   const String& message,
-											   const String& button1Text = String::empty,
-											   const String& button2Text = String::empty,
-											   Component* associatedComponent = 0);
-
-	/** Shows a dialog box with three buttons.
-
-		Ideal for yes/no/cancel boxes.
-
-		The escape key can be used to trigger the third button.
-
-		@param iconType	 the type of icon to show
-		@param title	the headline to show at the top of the box
-		@param message	  a longer, more descriptive message to show underneath the
-							headline
-		@param button1Text  the text to show in the first button - if an empty string, then
-							"yes" will be used (or a localised version of it)
-		@param button2Text  the text to show in the first button - if an empty string, then
-							"no" will be used (or a localised version of it)
-		@param button3Text  the text to show in the first button - if an empty string, then
-							"cancel" will be used (or a localised version of it)
-		@param associatedComponent   if this is non-zero, it specifies the component that the
-							alert window should be associated with. Depending on the look
-							and feel, this might be used for positioning of the alert window.
-
-		@returns one of the following values:
-				 - 0 if the third button was pressed (normally used for 'cancel')
-				 - 1 if the first button was pressed (normally used for 'yes')
-				 - 2 if the middle button was pressed (normally used for 'no')
-	*/
-	static int JUCE_CALLTYPE showYesNoCancelBox (AlertIconType iconType,
-												 const String& title,
-												 const String& message,
-												 const String& button1Text = String::empty,
-												 const String& button2Text = String::empty,
-												 const String& button3Text = String::empty,
-												 Component* associatedComponent = 0);
-
-	/** Shows an operating-system native dialog box.
-
-		@param title	the title to use at the top
-		@param bodyText	 the longer message to show
-		@param isOkCancel   if true, this will show an ok/cancel box, if false,
-							it'll show a box with just an ok button
-		@returns true if the ok button was pressed, false if they pressed cancel.
-	*/
-	static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
-												   const String& bodyText,
-												   bool isOkCancel);
-
-	/** A set of colour IDs to use to change the colour of various aspects of the alert box.
-
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId	  = 0x1001800,  /**< The background colour for the window. */
-		textColourId		= 0x1001810,  /**< The colour for the text. */
-		outlineColourId		 = 0x1001820   /**< An optional colour to use to draw a border around the window. */
-	};
-
-protected:
-
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void mouseDown (const MouseEvent& e);
-	/** @internal */
-	void mouseDrag (const MouseEvent& e);
-	/** @internal */
-	bool keyPressed (const KeyPress& key);
-	/** @internal */
-	void buttonClicked (Button* button);
-	/** @internal */
-	void lookAndFeelChanged();
-	/** @internal */
-	void userTriedToCloseWindow();
-	/** @internal */
-	int getDesktopWindowStyleFlags() const;
-
-private:
-
-	String text;
-	TextLayout textLayout;
-	AlertIconType alertIconType;
-	ComponentBoundsConstrainer constrainer;
-	ComponentDragger dragger;
-	Rectangle<int> textArea;
-	OwnedArray<TextButton> buttons;
-	OwnedArray<TextEditor> textBoxes;
-	OwnedArray<ComboBox> comboBoxes;
-	OwnedArray<ProgressBar> progressBars;
-	Array<Component*> customComps;
-	OwnedArray<Component> textBlocks;
-	Array<Component*> allComps;
-	StringArray textboxNames, comboBoxNames;
-	Font font;
-	Component* associatedComponent;
-
-	void updateLayout (bool onlyIncreaseSize);
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow);
-};
-
-#endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
-/*** End of inlined file: juce_AlertWindow.h ***/
-
 class ToggleButton;
 class TextButton;
 class AlertWindow;
@@ -59456,8 +59818,6 @@ public:
 
 private:
 
-	class AsyncCallback;
-	friend class AsyncCallback;
 	MenuBarModel* model;
 
 	StringArray menuNames;
@@ -59472,6 +59832,7 @@ private:
 	void timerCallback();
 	void repaintMenuItem (int index);
 	void menuDismissed (int topLevelIndex, int itemId);
+	static void menuBarMenuDismissedCallback (int, MenuBarComponent*, int);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent);
 };
@@ -63219,6 +63580,49 @@ public:
 
 	/** Easy way of quickly showing a dialog box containing a given component.
 
+		This will open and display a DialogWindow containing a given component, making it
+		modal, but returning immediately to allow the dialog to finish in its own time. If
+		you want to block and run a modal loop until the dialog is dismissed, use showModalDialog()
+		instead.
+
+		To close the dialog programatically, you should call exitModalState (returnValue) on
+		the DialogWindow that is created. To find a pointer to this window from your
+		contentComponent, you can do something like this:
+		@code
+		Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
+
+		if (dw != 0)
+			dw->exitModalState (1234);
+		@endcode
+
+		@param dialogTitle	  the dialog box's title
+		@param contentComponent	 the content component for the dialog box. Make sure
+									that this has been set to the size you want it to
+									be before calling this method. The component won't
+									be deleted by this call, so you can re-use it or delete
+									it afterwards
+		@param componentToCentreAround  if this is non-zero, it indicates a component that
+									you'd like to show this dialog box in front of. See the
+									DocumentWindow::centreAroundComponent() method for more
+									info on this parameter
+		@param backgroundColour	 a colour to use for the dialog box's background colour
+		@param escapeKeyTriggersCloseButton if true, then pressing the escape key will cause the
+											close button to be triggered
+		@param shouldBeResizable	if true, the dialog window has either a resizable border, or
+									a corner resizer
+		@param useBottomRightCornerResizer	 if shouldBeResizable is true, this indicates whether
+									to use a border or corner resizer component. See ResizableWindow::setResizable()
+	*/
+	static void showDialog (const String& dialogTitle,
+							Component* contentComponent,
+							Component* componentToCentreAround,
+							const Colour& backgroundColour,
+							bool escapeKeyTriggersCloseButton,
+							bool shouldBeResizable = false,
+							bool useBottomRightCornerResizer = false);
+
+	/** Easy way of quickly showing a dialog box containing a given component.
+
 		This will open and display a DialogWindow containing a given component, returning
 		when the user clicks its close button.
 
@@ -63252,6 +63656,7 @@ public:
 		@param useBottomRightCornerResizer	 if shouldBeResizable is true, this indicates whether
 									to use a border or corner resizer component. See ResizableWindow::setResizable()
 	*/
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	static int showModalDialog (const String& dialogTitle,
 								Component* contentComponent,
 								Component* componentToCentreAround,
@@ -63259,6 +63664,7 @@ public:
 								bool escapeKeyTriggersCloseButton,
 								bool shouldBeResizable = false,
 								bool useBottomRightCornerResizer = false);
+   #endif
 
 protected:
 	/** @internal */

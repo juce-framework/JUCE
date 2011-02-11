@@ -62,7 +62,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
             deviceManager = new AudioFilterStreamingDeviceManager();
             deviceManager->setFilter (filter);
 
-            XmlElement* savedState = 0;
+            ScopedPointer<XmlElement> savedState;
 
             if (globalSettings != 0)
                 savedState = globalSettings->getXmlValue ("audioSetup");
@@ -71,8 +71,6 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
                                        filter->getNumOutputChannels(),
                                        savedState,
                                        true);
-
-            delete savedState;
 
             if (globalSettings != 0)
             {
@@ -114,9 +112,8 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
 
     if (globalSettings != 0 && deviceManager != 0)
     {
-        XmlElement* const xml = deviceManager->createStateXml();
+        ScopedPointer<XmlElement> xml (deviceManager->createStateXml());
         globalSettings->setValue ("audioSetup", xml);
-        delete xml;
     }
 
     deviceManager = 0;

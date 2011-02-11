@@ -1759,26 +1759,11 @@ void TextEditor::paintOverChildren (Graphics& g)
 }
 
 //==============================================================================
-class TextEditorMenuPerformer  : public ModalComponentManager::Callback
+static void textEditorMenuCallback (int menuResult, TextEditor* editor)
 {
-public:
-    TextEditorMenuPerformer (TextEditor* const editor_)
-        : editor (editor_)
-    {
-    }
-
-    void modalStateFinished (int returnValue)
-    {
-        if (editor != 0 && returnValue != 0)
-            editor->performPopupMenuAction (returnValue);
-    }
-
-private:
-    Component::SafePointer<TextEditor> editor;
-
-    JUCE_DECLARE_NON_COPYABLE (TextEditorMenuPerformer);
-};
-
+    if (editor != 0 && menuResult != 0)
+        editor->performPopupMenuAction (menuResult);
+}
 
 void TextEditor::mouseDown (const MouseEvent& e)
 {
@@ -1798,7 +1783,8 @@ void TextEditor::mouseDown (const MouseEvent& e)
             m.setLookAndFeel (&getLookAndFeel());
             addPopupMenuItems (m, &e);
 
-            m.show (0, 0, 0, 0, new TextEditorMenuPerformer (this));
+            m.showMenuAsync (PopupMenu::Options(),
+                             ModalCallbackFunction::forComponent (textEditorMenuCallback, this));
         }
     }
 }

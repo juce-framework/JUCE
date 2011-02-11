@@ -558,7 +558,7 @@ void Toolbar::buttonClicked (Button*)
     {
         PopupMenu m;
         m.addCustomItem (1, new MissingItemsComponent (*this, getThickness()));
-        m.showAt (missingItemsButton);
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton), 0);
     }
 }
 
@@ -685,6 +685,7 @@ public:
 
     ~ToolbarCustomisationDialog()
     {
+        toolbar->setEditingActive (false);
         setContentComponent (0, true);
     }
 
@@ -841,18 +842,8 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
 {
     setEditingActive (true);
 
-   #if JUCE_DEBUG
-    WeakReference<Component> checker (this);
-   #endif
-
-    ToolbarCustomisationDialog dw (factory, this, optionFlags);
-    dw.runModalLoop();
-
-   #if JUCE_DEBUG
-    jassert (checker != 0); // Don't delete the toolbar while it's being customised!
-   #endif
-
-    setEditingActive (false);
+    (new ToolbarCustomisationDialog (factory, this, optionFlags))
+        ->enterModalState (true, 0, true);
 }
 
 

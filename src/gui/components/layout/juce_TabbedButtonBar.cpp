@@ -474,6 +474,12 @@ void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& 
     }
 }
 
+void TabbedButtonBar::extraItemsMenuCallback (int result, TabbedButtonBar* bar)
+{
+    if (bar != 0 && result > 0)
+        bar->setCurrentTabIndex (result - 1);
+}
+
 void TabbedButtonBar::showExtraItemsMenu()
 {
     PopupMenu m;
@@ -486,10 +492,8 @@ void TabbedButtonBar::showExtraItemsMenu()
             m.addItem (i + 1, tab->name, true, i == currentTabIndex);
     }
 
-    const int res = m.showAt (extraTabsButton);
-
-    if (res != 0)
-        setCurrentTabIndex (res - 1);
+    m.showMenuAsync (PopupMenu::Options().withTargetComponent (extraTabsButton),
+                     ModalCallbackFunction::forComponent (extraItemsMenuCallback, this));
 }
 
 //==============================================================================

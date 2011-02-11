@@ -79,6 +79,49 @@ public:
     //==============================================================================
     /** Easy way of quickly showing a dialog box containing a given component.
 
+        This will open and display a DialogWindow containing a given component, making it
+        modal, but returning immediately to allow the dialog to finish in its own time. If
+        you want to block and run a modal loop until the dialog is dismissed, use showModalDialog()
+        instead.
+
+        To close the dialog programatically, you should call exitModalState (returnValue) on
+        the DialogWindow that is created. To find a pointer to this window from your
+        contentComponent, you can do something like this:
+        @code
+        Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
+
+        if (dw != 0)
+            dw->exitModalState (1234);
+        @endcode
+
+        @param dialogTitle          the dialog box's title
+        @param contentComponent     the content component for the dialog box. Make sure
+                                    that this has been set to the size you want it to
+                                    be before calling this method. The component won't
+                                    be deleted by this call, so you can re-use it or delete
+                                    it afterwards
+        @param componentToCentreAround  if this is non-zero, it indicates a component that
+                                    you'd like to show this dialog box in front of. See the
+                                    DocumentWindow::centreAroundComponent() method for more
+                                    info on this parameter
+        @param backgroundColour     a colour to use for the dialog box's background colour
+        @param escapeKeyTriggersCloseButton if true, then pressing the escape key will cause the
+                                            close button to be triggered
+        @param shouldBeResizable    if true, the dialog window has either a resizable border, or
+                                    a corner resizer
+        @param useBottomRightCornerResizer     if shouldBeResizable is true, this indicates whether
+                                    to use a border or corner resizer component. See ResizableWindow::setResizable()
+    */
+    static void showDialog (const String& dialogTitle,
+                            Component* contentComponent,
+                            Component* componentToCentreAround,
+                            const Colour& backgroundColour,
+                            bool escapeKeyTriggersCloseButton,
+                            bool shouldBeResizable = false,
+                            bool useBottomRightCornerResizer = false);
+
+    /** Easy way of quickly showing a dialog box containing a given component.
+
         This will open and display a DialogWindow containing a given component, returning
         when the user clicks its close button.
 
@@ -112,6 +155,7 @@ public:
         @param useBottomRightCornerResizer     if shouldBeResizable is true, this indicates whether
                                     to use a border or corner resizer component. See ResizableWindow::setResizable()
     */
+   #if JUCE_MODAL_LOOPS_PERMITTED
     static int showModalDialog (const String& dialogTitle,
                                 Component* contentComponent,
                                 Component* componentToCentreAround,
@@ -119,6 +163,7 @@ public:
                                 bool escapeKeyTriggersCloseButton,
                                 bool shouldBeResizable = false,
                                 bool useBottomRightCornerResizer = false);
+   #endif
 
 protected:
     /** @internal */

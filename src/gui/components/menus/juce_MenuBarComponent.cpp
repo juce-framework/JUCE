@@ -172,27 +172,6 @@ void MenuBarComponent::updateItemUnderMouse (int x, int y)
     setItemUnderMouse (getItemAt (x, y));
 }
 
-class MenuBarComponent::AsyncCallback  : public ModalComponentManager::Callback
-{
-public:
-    AsyncCallback (MenuBarComponent* const bar_, const int topLevelIndex_)
-        : bar (bar_), topLevelIndex (topLevelIndex_)
-    {
-    }
-
-    void modalStateFinished (int returnValue)
-    {
-        if (bar != 0)
-            bar->menuDismissed (topLevelIndex, returnValue);
-    }
-
-private:
-    Component::SafePointer<MenuBarComponent> bar;
-    const int topLevelIndex;
-
-    JUCE_DECLARE_NON_COPYABLE (AsyncCallback);
-};
-
 void MenuBarComponent::showMenu (int index)
 {
     if (index != currentPopupIndex)
@@ -213,11 +192,18 @@ void MenuBarComponent::showMenu (int index)
 
             const Rectangle<int> itemPos (xPositions [index], 0, xPositions [index + 1] - xPositions [index], getHeight());
 
-            m.showMenu (localAreaToGlobal (itemPos),
-                        0, itemPos.getWidth(), 0, 0, this,
-                        new AsyncCallback (this, index));
+            m.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                                 .withTargetScreenArea (localAreaToGlobal (itemPos))
+                                                 .withMinimumWidth (itemPos.getWidth()),
+                             ModalCallbackFunction::forComponent (menuBarMenuDismissedCallback, this, index));
         }
     }
+}
+
+void MenuBarComponent::menuBarMenuDismissedCallback (int result, MenuBarComponent* bar, int topLevelIndex)
+{
+    if (bar != 0)
+        bar->menuDismissed (topLevelIndex, result);
 }
 
 void MenuBarComponent::menuDismissed (int topLevelIndex, int itemId)

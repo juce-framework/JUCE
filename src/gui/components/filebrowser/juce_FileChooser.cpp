@@ -95,6 +95,7 @@ const Array<File>& FileChooser::getResults() const
     return results;
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool FileChooser::showDialog (const bool selectsDirectories,
                               const bool selectsFiles,
                               const bool isSave,
@@ -166,6 +167,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
 
     return results.size() > 0;
 }
+#endif
 
 //==============================================================================
 FilePreviewComponent::FilePreviewComponent()

@@ -214,10 +214,12 @@ class Component::ComponentHelpers
 {
 public:
     //==============================================================================
+   #if JUCE_MODAL_LOOPS_PERMITTED
     static void* runModalLoopCallback (void* userData)
     {
         return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
     }
+   #endif
 
     static const Identifier getColourPropertyId (const int colourId)
     {
@@ -1525,6 +1527,7 @@ void Component::internalHierarchyChanged()
 }
 
 //==============================================================================
+#if JUCE_MODAL_LOOPS_PERMITTED
 int Component::runModalLoop()
 {
     if (! MessageManager::getInstance()->isThisTheMessageThread())
@@ -1539,8 +1542,30 @@ int Component::runModalLoop()
 
     return ModalComponentManager::getInstance()->runEventLoopForCurrentComponent();
 }
+#endif
 
-void Component::enterModalState (const bool shouldTakeKeyboardFocus, ModalComponentManager::Callback* const callback)
+//==============================================================================
+class ModalAutoDeleteCallback   : public ModalComponentManager::Callback
+{
+public:
+    ModalAutoDeleteCallback (Component* const comp_)
+        : comp (comp_)
+    {}
+
+    void modalStateFinished (int)
+    {
+        delete comp.get();
+    }
+
+private:
+    WeakReference<Component> comp;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModalAutoDeleteCallback);
+};
+
+void Component::enterModalState (const bool shouldTakeKeyboardFocus,
+                                 ModalComponentManager::Callback* callback,
+                                 const bool deleteWhenDismissed)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -1552,7 +1577,13 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus, ModalCompon
 
     if (! isCurrentlyModal())
     {
-        ModalComponentManager::getInstance()->startModal (this, callback);
+        ModalComponentManager* const mcm = ModalComponentManager::getInstance();
+        mcm->startModal (this);
+        mcm->attachCallback (this, callback);
+
+        if (deleteWhenDismissed)
+            mcm->attachCallback (this, new ModalAutoDeleteCallback (this));
+
         flags.currentlyModalFlag = true;
         setVisible (true);
 

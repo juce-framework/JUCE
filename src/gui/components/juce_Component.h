@@ -1906,7 +1906,9 @@ public:
         @see enterModalState, exitModalState, isCurrentlyModal, getCurrentlyModalComponent,
              isCurrentlyBlockedByAnotherModalComponent, ModalComponentManager
     */
+   #if JUCE_MODAL_LOOPS_PERMITTED
     int runModalLoop();
+   #endif
 
     /** Puts the component into a modal state.
 
@@ -1923,10 +1925,15 @@ public:
         is called. If you pass an object in here, the system will take care of deleting it
         later, after making the callback
 
+        If deleteWhenDismissed is true, then when it is dismissed, the component will be
+        deleted and then the callback will be called. (This will safely handle the situation
+        where the component is deleted before its exitModalState() method is called).
+
         @see exitModalState, runModalLoop, ModalComponentManager::attachCallback
     */
     void enterModalState (bool takeKeyboardFocus = true,
-                          ModalComponentManager::Callback* callback = 0);
+                          ModalComponentManager::Callback* callback = 0,
+                          bool deleteWhenDismissed = false);
 
     /** Ends a component's modal state.
 

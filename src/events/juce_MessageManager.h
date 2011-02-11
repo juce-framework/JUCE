@@ -78,12 +78,14 @@ public:
     */
     bool hasStopMessageBeenSent() const throw()         { return quitMessagePosted; }
 
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Synchronously dispatches messages until a given time has elapsed.
 
         Returns false if a quit message has been posted by a call to stopDispatchLoop(),
         otherwise returns true.
     */
     bool runDispatchLoopUntil (int millisecondsToRunFor);
+   #endif
 
     //==============================================================================
     /** Calls a function using the message-thread.

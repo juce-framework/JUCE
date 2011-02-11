@@ -608,24 +608,29 @@ class AlertWindowInfo
 {
 public:
     AlertWindowInfo (const String& title_, const String& message_, Component* component,
-                     AlertWindow::AlertIconType iconType_, int numButtons_)
+                     AlertWindow::AlertIconType iconType_, int numButtons_,
+                     ModalComponentManager::Callback* callback_, bool modal_)
         : title (title_), message (message_), iconType (iconType_),
-          numButtons (numButtons_), returnValue (0), associatedComponent (component)
+          numButtons (numButtons_), returnValue (0), associatedComponent (component),
+          callback (callback_), modal (modal_)
     {
     }
 
     String title, message, button1, button2, button3;
-    AlertWindow::AlertIconType iconType;
-    int numButtons, returnValue;
-    WeakReference<Component> associatedComponent;
 
-    int showModal() const
+    int invoke() const
     {
         MessageManager::getInstance()->callFunctionOnMessageThread (showCallback, (void*) this);
         return returnValue;
     }
 
 private:
+    AlertWindow::AlertIconType iconType;
+    int numButtons, returnValue;
+    WeakReference<Component> associatedComponent;
+    ModalComponentManager::Callback* callback;
+    bool modal;
+
     void show()
     {
         LookAndFeel& lf = associatedComponent != 0 ? associatedComponent->getLookAndFeel()
@@ -636,7 +641,17 @@ private:
 
         jassert (alertBox != 0); // you have to return one of these!
 
-        returnValue = alertBox->runModalLoop();
+       #if JUCE_MODAL_LOOPS_PERMITTED
+        if (modal)
+        {
+            returnValue = alertBox->runModalLoop();
+        }
+        else
+       #endif
+        {
+            alertBox->enterModalState (true, callback, true);
+            alertBox.release();
+        }
     }
 
     static void* showCallback (void* userData)
@@ -646,16 +661,30 @@ private:
     }
 };
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 void AlertWindow::showMessageBox (AlertIconType iconType,
                                   const String& title,
                                   const String& message,
                                   const String& buttonText,
                                   Component* associatedComponent)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 1);
+    AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, true);
     info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
 
-    info.showModal();
+    info.invoke();
+}
+#endif
+
+void AlertWindow::showMessageBoxAsync (AlertIconType iconType,
+                                       const String& title,
+                                       const String& message,
+                                       const String& buttonText,
+                                       Component* associatedComponent)
+{
+    AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, false);
+    info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
+
+    info.invoke();
 }
 
 bool AlertWindow::showOkCancelBox (AlertIconType iconType,
@@ -663,13 +692,14 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
                                    const String& message,
                                    const String& button1Text,
                                    const String& button2Text,
-                                   Component* associatedComponent)
+                                   Component* associatedComponent,
+                                   ModalComponentManager::Callback* callback)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 2);
+    AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == 0);
     info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
     info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
 
-    return info.showModal() != 0;
+    return info.invoke() != 0;
 }
 
 int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
@@ -678,14 +708,15 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
                                      const String& button1Text,
                                      const String& button2Text,
                                      const String& button3Text,
-                                     Component* associatedComponent)
+                                     Component* associatedComponent,
+                                     ModalComponentManager::Callback* callback)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 3);
+    AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == 0);
     info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
     info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
     info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
 
-    return info.showModal();
+    return info.invoke();
 }
 
 END_JUCE_NAMESPACE

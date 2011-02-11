@@ -121,10 +121,4 @@ void MessageManager::stopDispatchLoop()
     quitMessagePosted = true;
 }
 
-bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
-{
-    juce_dispatchNextMessageOnSystemQueue (false);
-    return false;
-}
-
 #endif

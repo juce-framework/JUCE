@@ -83,7 +83,9 @@ void SplashScreen::show (const String& title,
     addToDesktop (useDropShadow ? ComponentPeer::windowHasDropShadow : 0);
     toFront (false);
 
+   #if JUCE_MODAL_LOOPS_PERMITTED
     MessageManager::getInstance()->runDispatchLoopUntil (300);
+   #endif
 
     repaint();
 

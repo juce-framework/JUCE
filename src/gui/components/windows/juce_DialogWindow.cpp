@@ -60,16 +60,30 @@ void DialogWindow::resized()
     }
 }
 
-// (Sadly, this can't be made a local class inside the showModalDialog function, because the
-// VC compiler complains about the undefined copy constructor)
+//==============================================================================
 class TempDialogWindow : public DialogWindow
 {
 public:
-    TempDialogWindow (const String& title, const Colour& colour, const bool escapeCloses)
-        : DialogWindow (title, colour, escapeCloses, true)
+    TempDialogWindow (const String& title,
+                      Component* contentComponent,
+                      Component* componentToCentreAround,
+                      const Colour& colour,
+                      const bool escapeKeyTriggersCloseButton,
+                      const bool shouldBeResizable,
+                      const bool useBottomRightCornerResizer)
+        : DialogWindow (title, colour, escapeKeyTriggersCloseButton, true)
     {
         if (! JUCEApplication::isStandaloneApp())
             setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
+
+        setContentComponent (contentComponent, true, true);
+        centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
+        setResizable (shouldBeResizable, useBottomRightCornerResizer);
+    }
+
+    ~TempDialogWindow()
+    {
+        setContentComponent (0, false);
     }
 
     void closeButtonPressed()
@@ -83,23 +97,36 @@ private:
 
 
 //==============================================================================
+void DialogWindow::showDialog (const String& dialogTitle,
+                               Component* const contentComponent,
+                               Component* const componentToCentreAround,
+                               const Colour& backgroundColour,
+                               const bool escapeKeyTriggersCloseButton,
+                               const bool shouldBeResizable,
+                               const bool useBottomRightCornerResizer)
+{
+    TempDialogWindow* dw = new TempDialogWindow (dialogTitle, contentComponent, componentToCentreAround,
+                                                 backgroundColour, escapeKeyTriggersCloseButton,
+                                                 shouldBeResizable, useBottomRightCornerResizer);
+
+    dw->enterModalState (true, 0, true);
+}
+
+#if JUCE_MODAL_LOOPS_PERMITTED
 int DialogWindow::showModalDialog (const String& dialogTitle,
-                                   Component* contentComponent,
-                                   Component* componentToCentreAround,
-                                   const Colour& colour,
+                                   Component* const contentComponent,
+                                   Component* const componentToCentreAround,
+                                   const Colour& backgroundColour,
                                    const bool escapeKeyTriggersCloseButton,
                                    const bool shouldBeResizable,
                                    const bool useBottomRightCornerResizer)
 {
-    TempDialogWindow dw (dialogTitle, colour, escapeKeyTriggersCloseButton);
+    TempDialogWindow dw (dialogTitle, contentComponent, componentToCentreAround,
+                         backgroundColour, escapeKeyTriggersCloseButton,
+                         shouldBeResizable, useBottomRightCornerResizer);
 
-    dw.setContentComponent (contentComponent, true, true);
-    dw.centreAroundComponent (componentToCentreAround, dw.getWidth(), dw.getHeight());
-    dw.setResizable (shouldBeResizable, useBottomRightCornerResizer);
-    const int result = dw.runModalLoop();
-    dw.setContentComponent (0, false);
-    return result;
+    return dw.runModalLoop();
 }
-
+#endif
 
 END_JUCE_NAMESPACE

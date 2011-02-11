@@ -48,10 +48,6 @@ public:
         setAlwaysOnTop (true);
     }
 
-    ~SliderPopupDisplayComponent()
-    {
-    }
-
     void paintContent (Graphics& g, int w, int h)
     {
         g.setFont (font);
@@ -609,6 +605,31 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
     }
 }
 
+void Slider::setMinAndMaxValues (double newMinValue, double newMaxValue, bool sendUpdateMessage, bool sendMessageSynchronously)
+{
+    // The maximum value only applies to sliders that are in two- or three-value mode.
+    jassert (style == TwoValueHorizontal || style == TwoValueVertical
+              || style == ThreeValueHorizontal || style == ThreeValueVertical);
+
+    if (newMaxValue < newMinValue)
+        swapVariables (newMaxValue, newMinValue);
+
+    newMinValue = constrainedValue (newMinValue);
+    newMaxValue = constrainedValue (newMaxValue);
+
+    if (lastValueMax != newMaxValue || lastValueMin != newMinValue)
+    {
+        lastValueMax = newMaxValue;
+        lastValueMin = newMinValue;
+        valueMin = newMinValue;
+        valueMax = newMaxValue;
+        repaint();
+
+        if (sendUpdateMessage)
+            triggerChangeMessage (sendMessageSynchronously);
+    }
+}
+
 void Slider::setDoubleClickReturnValue (const bool isDoubleClickEnabled,
                                         const double valueToSetOnDoubleClick)
 {
@@ -993,6 +1014,21 @@ void Slider::focusOfChildComponentChanged (FocusChangeType)
     repaint();
 }
 
+static void sliderMenuCallback (int result, Slider* slider)
+{
+    if (slider != 0)
+    {
+        switch (result)
+        {
+            case 1: slider->setVelocityBasedMode (! slider->getVelocityBasedMode()); break;
+            case 2: slider->setSliderStyle (Slider::Rotary); break;
+            case 3: slider->setSliderStyle (Slider::RotaryHorizontalDrag); break;
+            case 4: slider->setSliderStyle (Slider::RotaryVerticalDrag); break;
+            default: break;
+        }
+    }
+}
+
 void Slider::mouseDown (const MouseEvent& e)
 {
     mouseWasHidden = false;
@@ -1023,24 +1059,8 @@ void Slider::mouseDown (const MouseEvent& e)
                 m.addSubMenu (TRANS ("rotary mode"), rotaryMenu);
             }
 
-            const int r = m.show();
-
-            if (r == 1)
-            {
-                setVelocityBasedMode (! isVelocityBased);
-            }
-            else if (r == 2)
-            {
-                setSliderStyle (Rotary);
-            }
-            else if (r == 3)
-            {
-                setSliderStyle (RotaryHorizontalDrag);
-            }
-            else if (r == 4)
-            {
-                setSliderStyle (RotaryVerticalDrag);
-            }
+            m.showMenuAsync (PopupMenu::Options(),
+                             ModalCallbackFunction::forComponent (sliderMenuCallback, this));
         }
         else if (maximum > minimum)
         {

@@ -86,12 +86,12 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
             if (commonProps != 0 && ! commonOk)
                 filenames << '\n' << commonProps->getFile().getFullPathName();
 
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         appName + TRANS(" - Unable to save settings"),
-                                         TRANS("An error occurred when trying to save the application's settings file...\n\nIn order to save and restore its settings, ")
-                                          + appName + TRANS(" needs to be able to write to the following files:\n")
-                                          + filenames
-                                          + TRANS("\n\nMake sure that these files aren't read-only, and that the disk isn't full."));
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              appName + TRANS(" - Unable to save settings"),
+                                              TRANS("An error occurred when trying to save the application's settings file...\n\nIn order to save and restore its settings, ")
+                                                + appName + TRANS(" needs to be able to write to the following files:\n")
+                                                + filenames
+                                                + TRANS("\n\nMake sure that these files aren't read-only, and that the disk isn't full."));
         }
 
         return false;

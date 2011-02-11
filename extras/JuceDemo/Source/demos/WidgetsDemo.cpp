@@ -1211,196 +1211,203 @@ public:
 
             m.addSubMenu ("File chooser dialogs", fileChoosers);
 
-            int result = m.showAt (&menuButton);
+            m.showMenuAsync (PopupMenu::Options().withTargetComponent (&menuButton),
+                             ModalCallbackFunction::forComponent (menuItemChosenCallback, this));
+        }
+    }
 
-            if (result != 0)
+    //==============================================================================
+    // This gets called when our popup menu has an item selected or is dismissed.
+    static void menuItemChosenCallback (int result, WidgetsDemo* demoComponent)
+    {
+        if (result != 0 && demoComponent != 0)
+            demoComponent->performDemoMenuItem (result);
+    }
+
+    void performDemoMenuItem (int result)
+    {
+        if (result >= 100 && result < 105)
+        {
+            AlertWindow::AlertIconType icon = AlertWindow::NoIcon;
+
+            if (result == 101)
+                icon = AlertWindow::WarningIcon;
+            else if (result == 102)
+                icon = AlertWindow::InfoIcon;
+            else if (result == 103)
+                icon = AlertWindow::QuestionIcon;
+
+            AlertWindow::showMessageBoxAsync (icon,
+                                              "This is an AlertWindow",
+                                              "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
+                                              "ok");
+        }
+        else if (result == 110)
+        {
+            bool userPickedOk
+                = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+                                                "This is an ok/cancel AlertWindow",
+                                                "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
+
+            (void) userPickedOk; // (just avoids a compiler warning about unused variables)
+        }
+        else if (result == 111)
+        {
+            AlertWindow w ("AlertWindow demo..",
+                           "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
+                           AlertWindow::QuestionIcon);
+
+            w.addTextEditor ("text", "enter some text here", "text field:");
+
+            StringArray options;
+            options.add ("option 1");
+            options.add ("option 2");
+            options.add ("option 3");
+            options.add ("option 4");
+            w.addComboBox ("option", options, "some options");
+
+            w.addButton ("ok", 1, KeyPress (KeyPress::returnKey, 0, 0));
+            w.addButton ("cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
+
+            if (w.runModalLoop() != 0) // is they picked 'ok'
             {
-                // user chose something from the menu..
-
-                if (result >= 100 && result < 105)
-                {
-                    AlertWindow::AlertIconType icon = AlertWindow::NoIcon;
-
-                    if (result == 101)
-                        icon = AlertWindow::WarningIcon;
-                    else if (result == 102)
-                        icon = AlertWindow::InfoIcon;
-                    else if (result == 103)
-                        icon = AlertWindow::QuestionIcon;
-
-                    AlertWindow::showMessageBox (icon,
-                                                 "This is an AlertWindow",
-                                                 "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
-                                                 "ok");
-                }
-                else if (result == 110)
-                {
-                    bool userPickedOk
-                        = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                                        "This is an ok/cancel AlertWindow",
-                                                        "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
-
-                    (void) userPickedOk; // (just avoids a compiler warning about unused variables)
-                }
-                else if (result == 111)
-                {
-                    AlertWindow w ("AlertWindow demo..",
-                                   "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
-                                   AlertWindow::QuestionIcon);
-
-                    w.addTextEditor ("text", "enter some text here", "text field:");
-
-                    StringArray options;
-                    options.add ("option 1");
-                    options.add ("option 2");
-                    options.add ("option 3");
-                    options.add ("option 4");
-                    w.addComboBox ("option", options, "some options");
-
-                    w.addButton ("ok", 1, KeyPress (KeyPress::returnKey, 0, 0));
-                    w.addButton ("cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
-
-                    if (w.runModalLoop() != 0) // is they picked 'ok'
-                    {
-                        // this is the item they chose in the drop-down list..
-                        const int optionIndexChosen = w.getComboBoxComponent ("option")->getSelectedItemIndex();
-                        (void) optionIndexChosen; // (just avoids a compiler warning about unused variables)
+                // this is the item they chose in the drop-down list..
+                const int optionIndexChosen = w.getComboBoxComponent ("option")->getSelectedItemIndex();
+                (void) optionIndexChosen; // (just avoids a compiler warning about unused variables)
 
 
-                        // this is the text they entered..
-                        String text = w.getTextEditorContents ("text");
+                // this is the text they entered..
+                String text = w.getTextEditorContents ("text");
 
-                    }
-                }
-                else if (result == 112)
-                {
-                    DemoBackgroundThread demoThread;
+            }
+        }
+        else if (result == 112)
+        {
+            DemoBackgroundThread demoThread;
 
-                    if (demoThread.runThread())
-                    {
-                        // thread finished normally..
-                        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                     "Progress window",
-                                                     "Thread finished ok!");
-                    }
-                    else
-                    {
-                        // user pressed the cancel button..
-                        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                     "Progress window",
-                                                     "You pressed cancel!");
-                    }
-                }
-                else if (result == 120)
-                {
-                    ColourSelectorDialogWindow colourDialog;
+            if (demoThread.runThread())
+            {
+                // thread finished normally..
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  "Progress window",
+                                                  "Thread finished ok!");
+            }
+            else
+            {
+                // user pressed the cancel button..
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  "Progress window",
+                                                  "You pressed cancel!");
+            }
+        }
+        else if (result == 120)
+        {
+            ColourSelectorDialogWindow colourDialog;
 
-                    // this will run an event loop until the dialog's closeButtonPressed()
-                    // method causes the loop to exit.
-                    colourDialog.runModalLoop();
-                }
-                else if (result == 140)
-                {
+            // this will run an event loop until the dialog's closeButtonPressed()
+            // method causes the loop to exit.
+            colourDialog.runModalLoop();
+        }
+        else if (result == 140)
+        {
 #if JUCE_MAC
-                    AppleRemoteTestWindow test;
-                    test.runModalLoop();
+            AppleRemoteTestWindow test;
+            test.runModalLoop();
 #endif
-                }
-                else if (result >= 121 && result < 139)
+        }
+        else if (result >= 121 && result < 139)
+        {
+            const bool useNativeVersion = result < 130;
+            if (result > 130)
+                result -= 10;
+
+            if (result == 121)
+            {
+                FileChooser fc ("Choose a file to open...",
+                                File::getCurrentWorkingDirectory(),
+                                "*",
+                                useNativeVersion);
+
+                if (fc.browseForMultipleFilesToOpen())
                 {
-                    const bool useNativeVersion = result < 130;
-                    if (result > 130)
-                        result -= 10;
+                    String chosen;
+                    for (int i = 0; i < fc.getResults().size(); ++i)
+                        chosen << fc.getResults().getReference(i).getFullPathName() << "\n";
 
-                    if (result == 121)
-                    {
-                        FileChooser fc ("Choose a file to open...",
-                                        File::getCurrentWorkingDirectory(),
-                                        "*",
-                                        useNativeVersion);
-
-                        if (fc.browseForMultipleFilesToOpen())
-                        {
-                            String chosen;
-                            for (int i = 0; i < fc.getResults().size(); ++i)
-                                chosen << fc.getResults().getReference(i).getFullPathName() << "\n";
-
-                            AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         "File Chooser...",
-                                                         "You picked: " + chosen);
-                        }
-                    }
-                    else if (result == 124)
-                    {
-                        ImagePreviewComponent imagePreview;
-                        imagePreview.setSize (200, 200);
-
-                        FileChooser fc ("Choose an image to open...",
-                                        File::getCurrentWorkingDirectory(),
-                                        "*.jpg;*.jpeg;*.png;*.gif",
-                                        useNativeVersion);
-
-                        if (fc.browseForMultipleFilesToOpen (&imagePreview))
-                        {
-                            String chosen;
-                            for (int i = 0; i < fc.getResults().size(); ++i)
-                                chosen << fc.getResults().getReference(i).getFullPathName() << "\n";
-
-                            AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         "File Chooser...",
-                                                         "You picked: " + chosen);
-                        }
-                    }
-                    else if (result == 122)
-                    {
-                        FileChooser fc ("Choose a file to save...",
-                                        File::getCurrentWorkingDirectory(),
-                                        "*",
-                                        useNativeVersion);
-
-                        if (fc.browseForFileToSave (true))
-                        {
-                            File chosenFile = fc.getResult();
-
-                            AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         "File Chooser...",
-                                                         "You picked: " + chosenFile.getFullPathName());
-                        }
-                    }
-                    else if (result == 123)
-                    {
-                        FileChooser fc ("Choose a directory...",
-                                        File::getCurrentWorkingDirectory(),
-                                        "*",
-                                        useNativeVersion);
-
-                        if (fc.browseForDirectory())
-                        {
-                            File chosenDirectory = fc.getResult();
-
-                            AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         "File Chooser...",
-                                                         "You picked: " + chosenDirectory.getFullPathName());
-                        }
-                    }
-                }
-                else if (result == 1001)
-                {
-                    tabs.setOrientation (TabbedButtonBar::TabsAtTop);
-                }
-                else if (result == 1002)
-                {
-                    tabs.setOrientation (TabbedButtonBar::TabsAtBottom);
-                }
-                else if (result == 1003)
-                {
-                    tabs.setOrientation (TabbedButtonBar::TabsAtLeft);
-                }
-                else if (result == 1004)
-                {
-                    tabs.setOrientation (TabbedButtonBar::TabsAtRight);
+                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                      "File Chooser...",
+                                                      "You picked: " + chosen);
                 }
             }
+            else if (result == 124)
+            {
+                ImagePreviewComponent imagePreview;
+                imagePreview.setSize (200, 200);
+
+                FileChooser fc ("Choose an image to open...",
+                                File::getCurrentWorkingDirectory(),
+                                "*.jpg;*.jpeg;*.png;*.gif",
+                                useNativeVersion);
+
+                if (fc.browseForMultipleFilesToOpen (&imagePreview))
+                {
+                    String chosen;
+                    for (int i = 0; i < fc.getResults().size(); ++i)
+                        chosen << fc.getResults().getReference(i).getFullPathName() << "\n";
+
+                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                      "File Chooser...",
+                                                      "You picked: " + chosen);
+                }
+            }
+            else if (result == 122)
+            {
+                FileChooser fc ("Choose a file to save...",
+                                File::getCurrentWorkingDirectory(),
+                                "*",
+                                useNativeVersion);
+
+                if (fc.browseForFileToSave (true))
+                {
+                    File chosenFile = fc.getResult();
+
+                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                      "File Chooser...",
+                                                      "You picked: " + chosenFile.getFullPathName());
+                }
+            }
+            else if (result == 123)
+            {
+                FileChooser fc ("Choose a directory...",
+                                File::getCurrentWorkingDirectory(),
+                                "*",
+                                useNativeVersion);
+
+                if (fc.browseForDirectory())
+                {
+                    File chosenDirectory = fc.getResult();
+
+                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                      "File Chooser...",
+                                                      "You picked: " + chosenDirectory.getFullPathName());
+                }
+            }
+        }
+        else if (result == 1001)
+        {
+            tabs.setOrientation (TabbedButtonBar::TabsAtTop);
+        }
+        else if (result == 1002)
+        {
+            tabs.setOrientation (TabbedButtonBar::TabsAtBottom);
+        }
+        else if (result == 1003)
+        {
+            tabs.setOrientation (TabbedButtonBar::TabsAtLeft);
+        }
+        else if (result == 1004)
+        {
+            tabs.setOrientation (TabbedButtonBar::TabsAtRight);
         }
     }
 

@@ -39,14 +39,11 @@ BEGIN_JUCE_NAMESPACE
 class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
 public:
-    ModalItem (Component* const comp, Callback* const callback)
+    ModalItem (Component* const comp)
         : ComponentMovementWatcher (comp),
           component (comp), returnValue (0), isActive (true)
     {
         jassert (comp != 0);
-
-        if (callback != 0)
-            callbacks.add (callback);
     }
 
     void componentMovedOrResized (bool, bool) {}
@@ -103,10 +100,10 @@ juce_ImplementSingleton_SingleThreaded (ModalComponentManager);
 
 
 //==============================================================================
-void ModalComponentManager::startModal (Component* component, Callback* callback)
+void ModalComponentManager::startModal (Component* component)
 {
     if (component != 0)
-        stack.add (new ModalItem (component, callback));
+        stack.add (new ModalItem (component));
 }
 
 void ModalComponentManager::attachCallback (Component* component, Callback* callback)
@@ -200,17 +197,13 @@ void ModalComponentManager::handleAsyncUpdate()
     for (int i = stack.size(); --i >= 0;)
     {
         const ModalItem* const item = stack.getUnchecked(i);
+
         if (! item->isActive)
         {
+            ScopedPointer<ModalItem> item (stack.removeAndReturn (i));
+
             for (int j = item->callbacks.size(); --j >= 0;)
-            {
                 item->callbacks.getUnchecked(j)->modalStateFinished (item->returnValue);
-
-                if (! stack.contains (item))
-                    break;
-            }
-
-            stack.removeObject (item);
         }
     }
 }
@@ -243,11 +236,11 @@ void ModalComponentManager::bringModalComponentsToFront()
     }
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 class ModalComponentManager::ReturnValueRetriever     : public ModalComponentManager::Callback
 {
 public:
     ReturnValueRetriever (int& value_, bool& finished_) : value (value_), finished (finished_) {}
-    ~ReturnValueRetriever() {}
 
     void modalStateFinished (int returnValue)
     {
@@ -293,6 +286,6 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     return returnValue;
 }
-
+#endif
 
 END_JUCE_NAMESPACE

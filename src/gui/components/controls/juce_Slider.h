@@ -477,6 +477,26 @@ public:
                       bool sendMessageSynchronously = false,
                       bool allowNudgingOfOtherValues = false);
 
+    /** For a slider with two or three thumbs, this sets the minimum and maximum thumb positions.
+
+        This will trigger a callback to Slider::Listener::sliderValueChanged() for any listeners
+        that are registered, and will synchronously call the valueChanged() method in case subclasses
+        want to handle it.
+
+        @param newMinValue              the new minimum value to set - this will be snapped to the
+                                        nearest interval if one has been set.
+        @param newMaxValue              the new minimum value to set - this will be snapped to the
+                                        nearest interval if one has been set.
+        @param sendUpdateMessage        if false, a change to the value will not trigger a call to
+                                        any Slider::Listeners or the valueChanged() method
+        @param sendMessageSynchronously if true, then a call to the Slider::Listeners will be made
+                                        synchronously; if false, it will be asynchronous
+        @see setMaxValue, setMinValue, setValue
+    */
+    void setMinAndMaxValues (double newMinValue, double newMaxValue,
+                             bool sendUpdateMessage = true,
+                             bool sendMessageSynchronously = false);
+
     //==============================================================================
     /** A class for receiving callbacks from a Slider.
 

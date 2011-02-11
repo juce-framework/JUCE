@@ -32,13 +32,12 @@ import android.view.ViewGroup;
 import android.view.Display;
 import android.view.WindowManager;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.text.ClipboardManager;
 import com.juce.ComponentPeerView;
 
 
 //==============================================================================
-public class JuceAppActivity   extends Activity
+public final class JuceAppActivity   extends Activity
 {
     //==============================================================================
     static
@@ -47,11 +46,9 @@ public class JuceAppActivity   extends Activity
     }
 
     @Override
-    public void onCreate (Bundle savedInstanceState)
+    public final void onCreate (Bundle savedInstanceState)
     {
         super.onCreate (savedInstanceState);
-
-        messageHandler = new android.os.Handler();
 
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
@@ -65,7 +62,7 @@ public class JuceAppActivity   extends Activity
     }
 
     @Override
-    protected void onDestroy()
+    protected final void onDestroy()
     {
         quitApp();
         super.onDestroy();
@@ -77,21 +74,21 @@ public class JuceAppActivity   extends Activity
     public native void quitApp();
 
     //==============================================================================
-    public static void printToConsole (String s)
+    public static final void printToConsole (String s)
     {
-        System.out.println (s);
+        android.util.Log.i ("Juce", s);
     }
 
     //==============================================================================
     public native void deliverMessage (long value);
-    private android.os.Handler messageHandler;
+    private android.os.Handler messageHandler = new android.os.Handler();
 
-    public void postMessage (long value)
+    public final void postMessage (long value)
     {
         messageHandler.post (new MessageCallback (this, value));
     }
 
-    class MessageCallback  implements java.lang.Runnable
+    final class MessageCallback  implements Runnable
     {
         public MessageCallback (JuceAppActivity app_, long value_)
         {
@@ -99,7 +96,7 @@ public class JuceAppActivity   extends Activity
             value = value_;
         }
 
-        public void run()
+        public final void run()
         {
             app.deliverMessage (value);
         }
@@ -111,19 +108,19 @@ public class JuceAppActivity   extends Activity
     //==============================================================================
     private ViewHolder viewHolder;
 
-    public ComponentPeerView createNewView (boolean opaque)
+    public final ComponentPeerView createNewView (boolean opaque)
     {
         ComponentPeerView v = new ComponentPeerView (this, opaque);
         viewHolder.addView (v);
         return v;
     }
 
-    public void deleteView (ComponentPeerView view)
+    public final void deleteView (ComponentPeerView view)
     {
         viewHolder.removeView (view);
     }
 
-    class ViewHolder  extends ViewGroup
+    final class ViewHolder  extends ViewGroup
     {
         public ViewHolder (Context context)
         {
@@ -132,24 +129,24 @@ public class JuceAppActivity   extends Activity
             setFocusable (false);
         }
 
-        protected void onLayout (boolean changed, int left, int top, int right, int bottom)
+        protected final void onLayout (boolean changed, int left, int top, int right, int bottom)
         {
         }
     }
 
-    public void excludeClipRegion (android.graphics.Canvas canvas, float left, float top, float right, float bottom)
+    public final void excludeClipRegion (android.graphics.Canvas canvas, float left, float top, float right, float bottom)
     {
         canvas.clipRect (left, top, right, bottom, android.graphics.Region.Op.DIFFERENCE);
     }
 
     //==============================================================================
-    public String getClipboardContent()
+    public final String getClipboardContent()
     {
         ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
         return clipboard.getText().toString();
     }
 
-    public void setClipboardContent (String newText)
+    public final void setClipboardContent (String newText)
     {
         ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
         clipboard.setText (newText);
