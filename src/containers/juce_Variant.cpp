@@ -31,6 +31,15 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_DynamicObject.h"
 #include "../io/streams/juce_MemoryOutputStream.h"
 
+enum VariantStreamMarkers
+{
+    varMarker_Int = 1,
+    varMarker_BoolTrue = 2,
+    varMarker_BoolFalse = 3,
+    varMarker_Double = 4,
+    varMarker_String = 5,
+    varMarker_Int64 = 6
+};
 
 //==============================================================================
 class var::VariantType
@@ -40,6 +49,7 @@ public:
     virtual ~VariantType() {}
 
     virtual int toInt (const ValueUnion&) const                 { return 0; }
+    virtual int64 toInt64 (const ValueUnion&) const             { return 0; }
     virtual double toDouble (const ValueUnion&) const           { return 0; }
     virtual const String toString (const ValueUnion&) const     { return String::empty; }
     virtual bool toBool (const ValueUnion&) const               { return false; }
@@ -47,6 +57,7 @@ public:
 
     virtual bool isVoid() const throw()                         { return false; }
     virtual bool isInt() const throw()                          { return false; }
+    virtual bool isInt64() const throw()                        { return false; }
     virtual bool isBool() const throw()                         { return false; }
     virtual bool isDouble() const throw()                       { return false; }
     virtual bool isString() const throw()                       { return false; }
@@ -79,6 +90,7 @@ public:
     static const VariantType_Int instance;
 
     int toInt (const ValueUnion& data) const                { return data.intValue; };
+    int64 toInt64 (const ValueUnion& data) const            { return (int64) data.intValue; };
     double toDouble (const ValueUnion& data) const          { return (double) data.intValue; }
     const String toString (const ValueUnion& data) const    { return String (data.intValue); }
     bool toBool (const ValueUnion& data) const              { return data.intValue != 0; }
@@ -92,8 +104,35 @@ public:
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
         output.writeCompressedInt (5);
-        output.writeByte (1);
+        output.writeByte (varMarker_Int);
         output.writeInt (data.intValue);
+    }
+};
+
+//==============================================================================
+class var::VariantType_Int64  : public var::VariantType
+{
+public:
+    VariantType_Int64() {}
+    static const VariantType_Int64 instance;
+
+    int toInt (const ValueUnion& data) const                { return (int) data.int64Value; };
+    int64 toInt64 (const ValueUnion& data) const            { return data.int64Value; };
+    double toDouble (const ValueUnion& data) const          { return (double) data.int64Value; }
+    const String toString (const ValueUnion& data) const    { return String (data.int64Value); }
+    bool toBool (const ValueUnion& data) const              { return data.int64Value != 0; }
+    bool isInt64() const throw()                            { return true; }
+
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    {
+        return otherType.toInt64 (otherData) == data.int64Value;
+    }
+
+    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    {
+        output.writeCompressedInt (9);
+        output.writeByte (varMarker_Int64);
+        output.writeInt64 (data.int64Value);
     }
 };
 
@@ -105,6 +144,7 @@ public:
     static const VariantType_Double instance;
 
     int toInt (const ValueUnion& data) const                { return (int) data.doubleValue; };
+    int64 toInt64 (const ValueUnion& data) const            { return (int64) data.doubleValue; };
     double toDouble (const ValueUnion& data) const          { return data.doubleValue; }
     const String toString (const ValueUnion& data) const    { return String (data.doubleValue); }
     bool toBool (const ValueUnion& data) const              { return data.doubleValue != 0; }
@@ -118,7 +158,7 @@ public:
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
         output.writeCompressedInt (9);
-        output.writeByte (4);
+        output.writeByte (varMarker_Double);
         output.writeDouble (data.doubleValue);
     }
 };
@@ -131,6 +171,7 @@ public:
     static const VariantType_Bool instance;
 
     int toInt (const ValueUnion& data) const                { return data.boolValue ? 1 : 0; };
+    int64 toInt64 (const ValueUnion& data) const            { return data.boolValue ? 1 : 0; };
     double toDouble (const ValueUnion& data) const          { return data.boolValue ? 1.0 : 0.0; }
     const String toString (const ValueUnion& data) const    { return String::charToString (data.boolValue ? '1' : '0'); }
     bool toBool (const ValueUnion& data) const              { return data.boolValue; }
@@ -144,7 +185,7 @@ public:
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
         output.writeCompressedInt (1);
-        output.writeByte (data.boolValue ? 2 : 3);
+        output.writeByte (data.boolValue ? varMarker_BoolTrue : varMarker_BoolFalse);
     }
 };
 
@@ -159,6 +200,7 @@ public:
     void createCopy (ValueUnion& dest, const ValueUnion& source) const   { dest.stringValue = new String (*source.stringValue); }
 
     int toInt (const ValueUnion& data) const                { return data.stringValue->getIntValue(); };
+    int64 toInt64 (const ValueUnion& data) const            { return data.stringValue->getLargeIntValue(); };
     double toDouble (const ValueUnion& data) const          { return data.stringValue->getDoubleValue(); }
     const String toString (const ValueUnion& data) const    { return *data.stringValue; }
     bool toBool (const ValueUnion& data) const              { return data.stringValue->getIntValue() != 0
@@ -175,7 +217,7 @@ public:
     {
         const int len = data.stringValue->getNumBytesAsUTF8() + 1;
         output.writeCompressedInt (len + 1);
-        output.writeByte (5);
+        output.writeByte (varMarker_String);
         HeapBlock<char> temp (len);
         data.stringValue->copyToUTF8 (temp, len);
         output.write (temp, len);
@@ -235,6 +277,7 @@ public:
 //==============================================================================
 const var::VariantType_Void    var::VariantType_Void::instance;
 const var::VariantType_Int     var::VariantType_Int::instance;
+const var::VariantType_Int64   var::VariantType_Int64::instance;
 const var::VariantType_Bool    var::VariantType_Bool::instance;
 const var::VariantType_Double  var::VariantType_Double::instance;
 const var::VariantType_String  var::VariantType_String::instance;
@@ -261,6 +304,11 @@ var::var (const var& valueToCopy)  : type (valueToCopy.type)
 }
 
 var::var (const int value_) throw() : type (&VariantType_Int::instance)
+{
+    value.intValue = value_;
+}
+
+var::var (const int64 value_) throw() : type (&VariantType_Int64::instance)
 {
     value.intValue = value_;
 }
@@ -306,6 +354,7 @@ var::var (MethodFunction method_) throw()  : type (&VariantType_Method::instance
 //==============================================================================
 bool var::isVoid() const throw()                { return type->isVoid(); }
 bool var::isInt() const throw()                 { return type->isInt(); }
+bool var::isInt64() const throw()               { return type->isInt64(); }
 bool var::isBool() const throw()                { return type->isBool(); }
 bool var::isDouble() const throw()              { return type->isDouble(); }
 bool var::isString() const throw()              { return type->isString(); }
@@ -313,6 +362,7 @@ bool var::isObject() const throw()              { return type->isObject(); }
 bool var::isMethod() const throw()              { return type->isMethod(); }
 
 var::operator int() const                       { return type->toInt (value); }
+var::operator int64() const                     { return type->toInt64 (value); }
 var::operator bool() const                      { return type->toBool (value); }
 var::operator float() const                     { return (float) type->toDouble (value); }
 var::operator double() const                    { return type->toDouble (value); }
@@ -329,6 +379,7 @@ void var::swapWith (var& other) throw()
 
 var& var::operator= (const var& newValue)         { type->cleanUp (value); type = newValue.type; type->createCopy (value, newValue.value); return *this; }
 var& var::operator= (int newValue)                { var v (newValue); swapWith (v); return *this; }
+var& var::operator= (int64 newValue)              { var v (newValue); swapWith (v); return *this; }
 var& var::operator= (bool newValue)               { var v (newValue); swapWith (v); return *this; }
 var& var::operator= (double newValue)             { var v (newValue); swapWith (v); return *this; }
 var& var::operator= (const char* newValue)        { var v (newValue); swapWith (v); return *this; }
@@ -367,11 +418,12 @@ const var var::readFromStream (InputStream& input)
     {
         switch (input.readByte())
         {
-            case 1:     return var (input.readInt());
-            case 2:     return var (true);
-            case 3:     return var (false);
-            case 4:     return var (input.readDouble());
-            case 5:
+            case varMarker_Int:         return var (input.readInt());
+            case varMarker_Int64:       return var (input.readInt64());
+            case varMarker_BoolTrue:    return var (true);
+            case varMarker_BoolFalse:   return var (false);
+            case varMarker_Double:      return var (input.readDouble());
+            case varMarker_String:
             {
                 MemoryOutputStream mo;
                 mo.writeFromInputStream (input, numBytes - 1);

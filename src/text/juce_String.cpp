@@ -100,6 +100,21 @@ public:
         return dest;
     }
 
+    template <class CharPointer>
+    static const CharPointerType createFromCharPointer (const CharPointer& start, const CharPointer& end)
+    {
+        if (start.getAddress() == 0 || start.isEmpty())
+            return getEmpty();
+
+        size_t numChars = start.lengthUpTo (end);
+        if (numChars == 0)
+            return getEmpty();
+
+        const CharPointerType dest (createUninitialised (numChars));
+        CharPointerType (dest).writeWithCharLimit (start, (int) (numChars + 1));
+        return dest;
+    }
+
     static CharPointerType createFromFixedLength (const juce_wchar* const src, const size_t numChars)
     {
         CharPointerType dest (createUninitialised (numChars));
@@ -325,6 +340,11 @@ String::String (const CharPointer_UTF32& t, const size_t maxChars)
 {
 }
 
+String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end)
+    : text (StringHolder::createFromCharPointer (start, end))
+{
+}
+
 String::String (const CharPointer_ASCII& t)
     : text (StringHolder::createFromCharPointer (t))
 {
@@ -347,8 +367,9 @@ String::String (const wchar_t* const t, size_t maxChars)
 const String String::charToString (const juce_wchar character)
 {
     String result (Preallocation (1));
-    result.text[0] = character;
-    result.text[1] = 0;
+    CharPointerType t (result.text);
+    t.write (character);
+    t.writeNull();
     return result;
 }
 
@@ -540,22 +561,22 @@ const juce_wchar String::operator[] (int index) const throw()
 
 int String::hashCode() const throw()
 {
-    const juce_wchar* t = text;
+    CharPointerType t (text);
     int result = 0;
 
-    while (*t != (juce_wchar) 0)
-        result = 31 * result + *t++;
+    while (! t.isEmpty())
+        result = 31 * result + t.getAndAdvance();
 
     return result;
 }
 
 int64 String::hashCode64() const throw()
 {
-    const juce_wchar* t = text;
+    CharPointerType t (text);
     int64 result = 0;
 
-    while (*t != (juce_wchar) 0)
-        result = 101 * result + *t++;
+    while (! t.isEmpty())
+        result = 101 * result + t.getAndAdvance();
 
     return result;
 }
@@ -703,7 +724,6 @@ void String::append (const String& textToAppend, size_t maxCharsToTake)
 String& String::operator+= (const juce_wchar* const t)
 {
     appendCharPointer (CharPointer_UTF32 (t));
-
     return *this;
 }
 
@@ -884,16 +904,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&)
 //==============================================================================
 int String::indexOfChar (const juce_wchar character) const throw()
 {
-    const juce_wchar* t = text;
-
-    for (;;)
-    {
-        if (*t == character)
-            return (int) (t - text);
-
-        if (*t++ == 0)
-            return -1;
-    }
+    return text.indexOf (character);
 }
 
 int String::lastIndexOfChar (const juce_wchar character) const throw()
@@ -913,21 +924,8 @@ int String::indexOf (const String& t) const throw()
 int String::indexOfChar (const int startIndex,
                          const juce_wchar character) const throw()
 {
-    if (startIndex > 0 && startIndex >= length())
-        return -1;
-
-    const juce_wchar* t = text + jmax (0, startIndex);
-
-    for (;;)
-    {
-        if (*t == character)
-            return (int) (t - text);
-
-        if (*t == 0)
-            return -1;
-
-        ++t;
-    }
+    const int i = (text + startIndex).indexOf (character);
+    return i < 0 ? -1 : (i + startIndex);
 }
 
 int String::indexOfAnyOf (const String& charactersToLookFor,
@@ -1058,18 +1056,7 @@ bool String::contains (const String& other) const throw()
 
 bool String::containsChar (const juce_wchar character) const throw()
 {
-    const juce_wchar* t = text;
-
-    for (;;)
-    {
-        if (*t == 0)
-            return false;
-
-        if (*t == character)
-            return true;
-
-        ++t;
-    }
+    return text.indexOf (character) >= 0;
 }
 
 bool String::containsIgnoreCase (const String& t) const throw()
@@ -1210,15 +1197,11 @@ const String String::repeatedString (const String& stringToRepeat, int numberOfT
     if (numberOfTimesToRepeat <= 0)
         return String::empty;
 
-    const int len = stringToRepeat.length();
-    String result (Preallocation (len * numberOfTimesToRepeat + 1));
+    String result (Preallocation (stringToRepeat.length() * numberOfTimesToRepeat + 1));
     CharPointerType n (result.text);
 
     while (--numberOfTimesToRepeat >= 0)
-    {
-        StringHolder::copyChars (n, stringToRepeat.text, len);
-        n += len;
-    }
+        n.writeAll (stringToRepeat.text);
 
     return result;
 }
@@ -1602,57 +1585,63 @@ const String String::quoted (const juce_wchar quoteCharacter) const
 }
 
 //==============================================================================
+static String::CharPointerType findTrimmedEnd (const String::CharPointerType& start, String::CharPointerType end)
+{
+    while (end > start)
+    {
+        if (! (--end).isWhitespace())
+        {
+            ++end;
+            break;
+        }
+    }
+
+    return end;
+}
+
 const String String::trim() const
 {
-    if (isEmpty())
-        return empty;
+    if (isNotEmpty())
+    {
+        CharPointerType start (text.findEndOfWhitespace());
 
-    int start = 0;
+        const CharPointerType end (start.findTerminatingNull());
+        CharPointerType trimmedEnd (findTrimmedEnd (start, end));
 
-    while ((text + start).isWhitespace())
-        ++start;
-
-    const int len = length();
-    int end = len - 1;
-
-    while ((end >= start) && (text + end).isWhitespace())
-        --end;
-
-    ++end;
-
-    if (end <= start)
-        return empty;
-    else if (start > 0 || end < len)
-        return String (text + start, end - start);
+        if (trimmedEnd <= start)
+            return empty;
+        else if (text < start || trimmedEnd < end)
+            return String (start, trimmedEnd);
+    }
 
     return *this;
 }
 
 const String String::trimStart() const
 {
-    if (isEmpty())
-        return empty;
+    if (isNotEmpty())
+    {
+        const CharPointerType t (text.findEndOfWhitespace());
 
-    CharPointerType t (text.findEndOfWhitespace());
+        if (t != text)
+            return String (t);
+    }
 
-    if (t == text)
-        return *this;
-
-    return String (t);
+    return *this;
 }
 
 const String String::trimEnd() const
 {
-    if (isEmpty())
-        return empty;
+    if (isNotEmpty())
+    {
+        const CharPointerType end (text.findTerminatingNull());
+        CharPointerType trimmedEnd (findTrimmedEnd (text, end));
 
-    CharPointerType endT (text);
-    endT = endT.findTerminatingNull() - 1;
+        if (trimmedEnd < end)
+            return String (text, trimmedEnd);
+    }
 
-    while ((endT.getAddress() >= text) && endT.isWhitespace())
-        --endT;
-
-    return String (text, 1 + (int) (endT.getAddress() - text));
+    return *this;
 }
 
 const String String::trimCharactersAtStart (const String& charactersToTrim) const
@@ -1667,20 +1656,25 @@ const String String::trimCharactersAtStart (const String& charactersToTrim) cons
 
 const String String::trimCharactersAtEnd (const String& charactersToTrim) const
 {
-    if (isEmpty())
-        return empty;
-
-    const int len = length();
-    const juce_wchar* endT = text + (len - 1);
-    int numToRemove = 0;
-
-    while (numToRemove < len && charactersToTrim.containsChar (*endT))
+    if (isNotEmpty())
     {
-        ++numToRemove;
-        --endT;
+        const CharPointerType end (text.findTerminatingNull());
+        CharPointerType trimmedEnd (end);
+
+        while (trimmedEnd > text)
+        {
+            if (! charactersToTrim.containsChar (*--trimmedEnd))
+            {
+                ++trimmedEnd;
+                break;
+            }
+        }
+
+        if (trimmedEnd < end)
+            return String (text, trimmedEnd);
     }
 
-    return numToRemove > 0 ? String (text, len - numToRemove) : *this;
+    return *this;
 }
 
 //==============================================================================
@@ -1734,33 +1728,32 @@ const String String::removeCharacters (const String& charactersToRemove) const
 
 const String String::initialSectionContainingOnly (const String& permittedCharacters) const
 {
-    int i = 0;
+    CharPointerType t (text);
 
-    for (;;)
+    while (! t.isEmpty())
     {
-        if (! permittedCharacters.containsChar (text[i]))
-            break;
+        if (! permittedCharacters.containsChar (*t))
+            return String (text, t);
 
-        ++i;
+        ++t;
     }
 
-    return substring (0, i);
+    return *this;
 }
 
 const String String::initialSectionNotContaining (const String& charactersToStopAt) const
 {
-    const juce_wchar* const t = text;
-    int i = 0;
+    CharPointerType t (text);
 
-    while (t[i] != 0)
+    while (! t.isEmpty())
     {
-        if (charactersToStopAt.containsChar (t[i]))
-            return String (text, i);
+        if (charactersToStopAt.containsChar (*t))
+            return String (text, t);
 
-        ++i;
+        ++t;
     }
 
-    return empty;
+    return *this;
 }
 
 bool String::containsOnly (const String& chars) const throw()
@@ -1776,10 +1769,10 @@ bool String::containsOnly (const String& chars) const throw()
 
 bool String::containsAnyOf (const String& chars) const throw()
 {
-    const juce_wchar* t = text;
+    CharPointerType t (text);
 
-    while (*t != 0)
-        if (chars.containsChar (*t++))
+    while (! t.isEmpty())
+        if (chars.containsChar (t.getAndAdvance()))
             return true;
 
     return false;
@@ -1892,40 +1885,50 @@ double String::getDoubleValue() const throw()
 
 static const char* const hexDigits = "0123456789abcdef";
 
+template <typename Type>
+struct HexConverter
+{
+    static const String hexToString (Type v)
+    {
+        juce_wchar buffer[32];
+        juce_wchar* const end = buffer + 32;
+        juce_wchar* t = end;
+        *--t = 0;
+
+        do
+        {
+            *--t = (juce_wchar) hexDigits [(int) (v & 15)];
+            v >>= 4;
+
+        } while (v != 0);
+
+        return String (t, (int) (end - t) - 1);
+    }
+
+    static Type stringToHex (String::CharPointerType t) throw()
+    {
+        Type result = 0;
+
+        while (! t.isEmpty())
+        {
+            const int hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+
+            if (hexValue >= 0)
+                result = (result << 4) | hexValue;
+        }
+
+        return result;
+    }
+};
+
 const String String::toHexString (const int number)
 {
-    juce_wchar buffer[32];
-    juce_wchar* const end = buffer + 32;
-    juce_wchar* t = end;
-    *--t = 0;
-    unsigned int v = (unsigned int) number;
-
-    do
-    {
-        *--t = (juce_wchar) hexDigits [v & 15];
-        v >>= 4;
-
-    } while (v != 0);
-
-    return String (t, (int) (((char*) end) - (char*) t) - 1);
+    return HexConverter <unsigned int>::hexToString ((unsigned int) number);
 }
 
 const String String::toHexString (const int64 number)
 {
-    juce_wchar buffer[32];
-    juce_wchar* const end = buffer + 32;
-    juce_wchar* t = end;
-    *--t = 0;
-    uint64 v = (uint64) number;
-
-    do
-    {
-        *--t = (juce_wchar) hexDigits [(int) (v & 15)];
-        v >>= 4;
-
-    } while (v != 0);
-
-    return String (t, (int) (((char*) end) - (char*) t));
+    return HexConverter <uint64>::hexToString ((uint64) number);
 }
 
 const String String::toHexString (const short number)
@@ -1962,34 +1965,12 @@ const String String::toHexString (const unsigned char* data, const int size, con
 
 int String::getHexValue32() const throw()
 {
-    int result = 0;
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
-    {
-        const int hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
-
-        if (hexValue >= 0)
-            result = (result << 4) | hexValue;
-    }
-
-    return result;
+    return HexConverter <int>::stringToHex (text);
 }
 
 int64 String::getHexValue64() const throw()
 {
-    int64 result = 0;
-    CharPointerType t (text);
-
-    while (! t.isEmpty())
-    {
-        const int hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
-
-        if (hexValue >= 0)
-            result = (result << 4) | hexValue;
-    }
-
-    return result;
+    return HexConverter <int64>::stringToHex (text);
 }
 
 //==============================================================================
@@ -2005,8 +1986,10 @@ const String String::createStringFromData (const void* const data_, const int si
     {
         return charToString ((char) data[0]);
     }
-    else if ((data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1 && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkBE2)
-          || (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkLE1 && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkLE1))
+    else if ((data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1
+               && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkBE2)
+          || (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkLE1
+               && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkLE1))
     {
         const bool bigEndian = (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1);
         const int numChars = size / 2 - 1;
@@ -2454,7 +2437,9 @@ public:
             expect (s5.removeCharacters ("1wordxya") == " 2 3");
             expectEquals (s5.removeCharacters (String::empty), s5);
             expect (s5.initialSectionContainingOnly ("word") == L"word");
+            expect (String ("word").initialSectionContainingOnly ("word") == L"word");
             expectEquals (s5.initialSectionNotContaining (String ("xyz ")), String ("word"));
+            expectEquals (s5.initialSectionNotContaining (String (";[:'/")), s5);
             expect (! s5.isQuotedString());
             expect (s5.quoted().isQuotedString());
             expect (! s5.quoted().unquoted().isQuotedString());

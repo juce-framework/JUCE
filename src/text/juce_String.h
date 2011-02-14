@@ -123,6 +123,9 @@ public:
     /** Creates a string from a UTF-32 character string */
     String (const CharPointer_UTF32& text, size_t maxChars);
 
+    /** Creates a string from a UTF-32 character string */
+    String (const CharPointer_UTF32& start, const CharPointer_UTF32& end);
+
     /** Creates a string from an ASCII character string */
     String (const CharPointer_ASCII& text);
 
@@ -772,7 +775,8 @@ public:
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
-        first character that occurs in the string passed in.
+        first character that occurs in the string passed in. (If none of the specified
+        characters are found in the string, the return value will just be the original string).
     */
     const String initialSectionNotContaining (const String& charactersToStopAt) const;
 

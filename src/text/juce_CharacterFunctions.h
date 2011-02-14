@@ -272,17 +272,26 @@ public:
 
     //==============================================================================
     template <typename CharPointerType>
-    static size_t lengthUpTo (const CharPointerType& text, const size_t maxCharsToCount) throw()
+    static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) throw()
     {
         size_t len = 0;
-        CharPointerType t (text);
 
-        while (len < maxCharsToCount && t.getAndAdvance() != 0)
+        while (len < maxCharsToCount && text.getAndAdvance() != 0)
             ++len;
 
         return len;
     }
 
+    template <typename CharPointerType>
+    static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) throw()
+    {
+        size_t len = 0;
+
+        while (start < end && start.getAndAdvance() != 0)
+            ++len;
+
+        return len;
+    }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) throw()

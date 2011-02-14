@@ -131,6 +131,74 @@ void PluginListComponent::deleteKeyPressed (int lastRowSelected)
     list.removeType (lastRowSelected);
 }
 
+void PluginListComponent::optionsMenuCallback (int result)
+{
+    switch (result)
+    {
+        case 1:
+            list.clear();
+            break;
+
+        case 2:
+            list.sort (KnownPluginList::sortAlphabetically);
+            break;
+
+        case 3:
+            list.sort (KnownPluginList::sortByCategory);
+            break;
+
+        case 4:
+            list.sort (KnownPluginList::sortByManufacturer);
+            break;
+
+        case 5:
+        {
+            const SparseSet <int> selected (listBox.getSelectedRows());
+
+            for (int i = list.getNumTypes(); --i >= 0;)
+                if (selected.contains (i))
+                    list.removeType (i);
+
+            break;
+        }
+
+        case 6:
+        {
+            const PluginDescription* const desc = list.getType (listBox.getSelectedRow());
+
+            if (desc != 0)
+            {
+                if (File (desc->fileOrIdentifier).existsAsFile())
+                    File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
+            }
+
+            break;
+        }
+
+        case 7:
+            for (int i = list.getNumTypes(); --i >= 0;)
+                if (! AudioPluginFormatManager::getInstance()->doesPluginStillExist (*list.getType (i)))
+                    list.removeType (i);
+
+            break;
+
+        default:
+            if (result != 0)
+            {
+                typeToScan = result - 10;
+                startTimer (1);
+            }
+
+            break;
+    }
+}
+
+void PluginListComponent::optionsMenuStaticCallback (int result, PluginListComponent* pluginList)
+{
+    if (pluginList != 0)
+        pluginList->optionsMenuCallback (result);
+}
+
 void PluginListComponent::buttonClicked (Button* button)
 {
     if (button == &optionsButton)
@@ -154,57 +222,8 @@ void PluginListComponent::buttonClicked (Button* button)
                 menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plugins...");
         }
 
-        const int r = menu.showMenu (PopupMenu::Options().withTargetComponent (&optionsButton));
-
-        if (r == 1)
-        {
-            list.clear();
-        }
-        else if (r == 2)
-        {
-            list.sort (KnownPluginList::sortAlphabetically);
-        }
-        else if (r == 3)
-        {
-            list.sort (KnownPluginList::sortByCategory);
-        }
-        else if (r == 4)
-        {
-            list.sort (KnownPluginList::sortByManufacturer);
-        }
-        else if (r == 5)
-        {
-            const SparseSet <int> selected (listBox.getSelectedRows());
-
-            for (int i = list.getNumTypes(); --i >= 0;)
-                if (selected.contains (i))
-                    list.removeType (i);
-        }
-        else if (r == 6)
-        {
-            const PluginDescription* const desc = list.getType (listBox.getSelectedRow());
-
-            if (desc != 0)
-            {
-                if (File (desc->fileOrIdentifier).existsAsFile())
-                    File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
-            }
-        }
-        else if (r == 7)
-        {
-            for (int i = list.getNumTypes(); --i >= 0;)
-            {
-                if (! AudioPluginFormatManager::getInstance()->doesPluginStillExist (*list.getType (i)))
-                {
-                    list.removeType (i);
-                }
-            }
-        }
-        else if (r != 0)
-        {
-            typeToScan = r - 10;
-            startTimer (1);
-        }
+        menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&optionsButton),
+                            ModalCallbackFunction::forComponent (optionsMenuStaticCallback, this));
     }
 }
 

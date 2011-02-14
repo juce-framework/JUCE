@@ -63,6 +63,7 @@ public:
 
     var (const var& valueToCopy);
     var (int value) throw();
+    var (int64 value) throw();
     var (bool value) throw();
     var (double value) throw();
     var (const char* value);
@@ -73,6 +74,7 @@ public:
 
     var& operator= (const var& valueToCopy);
     var& operator= (int value);
+    var& operator= (int64 value);
     var& operator= (bool value);
     var& operator= (double value);
     var& operator= (const char* value);
@@ -84,6 +86,7 @@ public:
     void swapWith (var& other) throw();
 
     operator int() const;
+    operator int64() const;
     operator bool() const;
     operator float() const;
     operator double() const;
@@ -93,6 +96,7 @@ public:
 
     bool isVoid() const throw();
     bool isInt() const throw();
+    bool isInt64() const throw();
     bool isBool() const throw();
     bool isDouble() const throw();
     bool isString() const throw();
@@ -152,6 +156,8 @@ private:
     friend class VariantType_Void;
     class VariantType_Int;
     friend class VariantType_Int;
+    class VariantType_Int64;
+    friend class VariantType_Int64;
     class VariantType_Double;
     friend class VariantType_Double;
     class VariantType_Float;
@@ -168,6 +174,7 @@ private:
     union ValueUnion
     {
         int intValue;
+        int64 int64Value;
         bool boolValue;
         double doubleValue;
         String* stringValue;

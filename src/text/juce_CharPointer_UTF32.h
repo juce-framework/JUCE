@@ -61,16 +61,12 @@ public:
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (const CharPointer_UTF32& other) const throw()
-    {
-        return data == other.data;
-    }
-
-    /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator!= (const CharPointer_UTF32& other) const throw()
-    {
-        return data == other.data;
-    }
+    inline bool operator== (const CharPointer_UTF32& other) const throw() { return data == other.data; }
+    inline bool operator!= (const CharPointer_UTF32& other) const throw() { return data != other.data; }
+    inline bool operator<= (const CharPointer_UTF32& other) const throw() { return data <= other.data; }
+    inline bool operator<  (const CharPointer_UTF32& other) const throw() { return data < other.data; }
+    inline bool operator>= (const CharPointer_UTF32& other) const throw() { return data >= other.data; }
+    inline bool operator>  (const CharPointer_UTF32& other) const throw() { return data > other.data; }
 
     /** Returns the address that this pointer is pointing to. */
     inline CharType* getAddress() const throw()         { return data; }
@@ -173,6 +169,12 @@ public:
     size_t lengthUpTo (const size_t maxCharsToCount) const throw()
     {
         return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
+    }
+
+    /** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
+    size_t lengthUpTo (const CharPointer_UTF32& end) const throw()
+    {
+        return CharacterFunctions::lengthUpTo (*this, end);
     }
 
     /** Returns the number of bytes that are used to represent this string.

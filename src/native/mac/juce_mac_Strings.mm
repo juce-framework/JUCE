@@ -117,10 +117,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
                                       bytesNeeded, &bytesRead,
                                       &outputBufferSize, tempOut) == noErr)
         {
-            result.preallocateStorage (bytesRead / sizeof (UniChar) + 2);
-
-            CharPointer_UTF32 dest (result.getCharPointer());
-            dest.writeAll (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.getData()));
+            result = String (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.getData()));
         }
 
         DisposeUnicodeToTextInfo (&conversionInfo);

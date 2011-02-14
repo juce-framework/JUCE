@@ -90,6 +90,8 @@ private:
     int typeToScan;
 
     void scanFor (AudioPluginFormat* format);
+    static void optionsMenuStaticCallback (int result, PluginListComponent*);
+    void optionsMenuCallback (int result);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
 };
