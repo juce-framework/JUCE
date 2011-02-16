@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	31
+#define JUCE_BUILDNUMBER	32
 
 /** Current Juce version number.
 
@@ -1324,7 +1324,7 @@ inline int64 abs64 (const int64 n) throw()
 template <typename Type>
 inline Type juce_negate (Type n) throw()
 {
-	return sizeof (Type) == 1 ? (Type) -(char) n
+	return sizeof (Type) == 1 ? (Type) -(signed char) n
 		: (sizeof (Type) == 2 ? (Type) -(short) n
 		: (sizeof (Type) == 4 ? (Type) -(int) n
 		: ((Type) -(int64) n)));
@@ -1884,12 +1884,22 @@ public:
 	static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
 
 	template <typename CharPointerType>
-	static size_t lengthUpTo (const CharPointerType& text, const size_t maxCharsToCount) throw()
+	static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) throw()
 	{
 		size_t len = 0;
-		CharPointerType t (text);
 
-		while (len < maxCharsToCount && t.getAndAdvance() != 0)
+		while (len < maxCharsToCount && text.getAndAdvance() != 0)
+			++len;
+
+		return len;
+	}
+
+	template <typename CharPointerType>
+	static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) throw()
+	{
+		size_t len = 0;
+
+		while (start < end && start.getAndAdvance() != 0)
 			++len;
 
 		return len;
@@ -2498,16 +2508,12 @@ public:
 	}
 
 	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator== (const CharPointer_UTF8& other) const throw()
-	{
-		return data == other.data;
-	}
-
-	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator!= (const CharPointer_UTF8& other) const throw()
-	{
-		return data == other.data;
-	}
+	inline bool operator== (const CharPointer_UTF8& other) const throw() { return data == other.data; }
+	inline bool operator!= (const CharPointer_UTF8& other) const throw() { return data != other.data; }
+	inline bool operator<= (const CharPointer_UTF8& other) const throw() { return data <= other.data; }
+	inline bool operator<  (const CharPointer_UTF8& other) const throw() { return data < other.data; }
+	inline bool operator>= (const CharPointer_UTF8& other) const throw() { return data >= other.data; }
+	inline bool operator>  (const CharPointer_UTF8& other) const throw() { return data > other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -2521,7 +2527,7 @@ public:
 	/** Returns the unicode character that this pointer is pointing to. */
 	juce_wchar operator*() const throw()
 	{
-		const char byte = *data;
+		const signed char byte = (signed char) *data;
 
 		if (byte >= 0)
 			return byte;
@@ -2557,7 +2563,7 @@ public:
 	/** Moves this pointer along to the next character in the string. */
 	CharPointer_UTF8& operator++() throw()
 	{
-		const char n = *data++;
+		const signed char n = (signed char) *data++;
 
 		if (n < 0)
 		{
@@ -2577,7 +2583,7 @@ public:
 		advances the pointer to point to the next character. */
 	juce_wchar getAndAdvance() throw()
 	{
-		const char byte = *data++;
+		const signed char byte = (signed char) *data++;
 
 		if (byte >= 0)
 			return byte;
@@ -2679,6 +2685,12 @@ public:
 	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
 	{
 		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
+	}
+
+	/** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
+	size_t lengthUpTo (const CharPointer_UTF8& end) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, end);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -2922,7 +2934,7 @@ public:
 	{
 		while (--maxBytesToRead >= 0 && *dataToTest != 0)
 		{
-			const char byte = *dataToTest;
+			const signed char byte = (signed char) *dataToTest;
 
 			if (byte < 0)
 			{
@@ -3013,16 +3025,12 @@ public:
 	}
 
 	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator== (const CharPointer_UTF16& other) const throw()
-	{
-		return data == other.data;
-	}
-
-	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator!= (const CharPointer_UTF16& other) const throw()
-	{
-		return data == other.data;
-	}
+	inline bool operator== (const CharPointer_UTF16& other) const throw() { return data == other.data; }
+	inline bool operator!= (const CharPointer_UTF16& other) const throw() { return data != other.data; }
+	inline bool operator<= (const CharPointer_UTF16& other) const throw() { return data <= other.data; }
+	inline bool operator<  (const CharPointer_UTF16& other) const throw() { return data < other.data; }
+	inline bool operator>= (const CharPointer_UTF16& other) const throw() { return data >= other.data; }
+	inline bool operator>  (const CharPointer_UTF16& other) const throw() { return data > other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -3149,6 +3157,12 @@ public:
 	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
 	{
 		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
+	}
+
+	/** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
+	size_t lengthUpTo (const CharPointer_UTF16& end) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, end);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -3444,16 +3458,12 @@ public:
 	}
 
 	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator== (const CharPointer_UTF32& other) const throw()
-	{
-		return data == other.data;
-	}
-
-	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator!= (const CharPointer_UTF32& other) const throw()
-	{
-		return data == other.data;
-	}
+	inline bool operator== (const CharPointer_UTF32& other) const throw() { return data == other.data; }
+	inline bool operator!= (const CharPointer_UTF32& other) const throw() { return data != other.data; }
+	inline bool operator<= (const CharPointer_UTF32& other) const throw() { return data <= other.data; }
+	inline bool operator<  (const CharPointer_UTF32& other) const throw() { return data < other.data; }
+	inline bool operator>= (const CharPointer_UTF32& other) const throw() { return data >= other.data; }
+	inline bool operator>  (const CharPointer_UTF32& other) const throw() { return data > other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -3556,6 +3566,12 @@ public:
 	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
 	{
 		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
+	}
+
+	/** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
+	size_t lengthUpTo (const CharPointer_UTF32& end) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, end);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -3796,16 +3812,12 @@ public:
 	}
 
 	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator== (const CharPointer_ASCII& other) const throw()
-	{
-		return data == other.data;
-	}
-
-	/** This is a pointer comparison, it doesn't compare the actual text. */
-	inline bool operator!= (const CharPointer_ASCII& other) const throw()
-	{
-		return data == other.data;
-	}
+	inline bool operator== (const CharPointer_ASCII& other) const throw() { return data == other.data; }
+	inline bool operator!= (const CharPointer_ASCII& other) const throw() { return data != other.data; }
+	inline bool operator<= (const CharPointer_ASCII& other) const throw() { return data <= other.data; }
+	inline bool operator<  (const CharPointer_ASCII& other) const throw() { return data < other.data; }
+	inline bool operator>= (const CharPointer_ASCII& other) const throw() { return data >= other.data; }
+	inline bool operator>  (const CharPointer_ASCII& other) const throw() { return data > other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -3901,6 +3913,12 @@ public:
 	size_t lengthUpTo (const size_t maxCharsToCount) const throw()
 	{
 		return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
+	}
+
+	/** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
+	size_t lengthUpTo (const CharPointer_ASCII& end) const throw()
+	{
+		return CharacterFunctions::lengthUpTo (*this, end);
 	}
 
 	/** Returns the number of bytes that are used to represent this string.
@@ -4097,7 +4115,7 @@ public:
 	{
 		while (--maxBytesToRead >= 0)
 		{
-			if (*dataToTest <= 0)
+			if (((signed char) *dataToTest) <= 0)
 				return *dataToTest == 0;
 
 			++dataToTest;
@@ -4194,6 +4212,9 @@ public:
 
 	/** Creates a string from a UTF-32 character string */
 	String (const CharPointer_UTF32& text, size_t maxChars);
+
+	/** Creates a string from a UTF-32 character string */
+	String (const CharPointer_UTF32& start, const CharPointer_UTF32& end);
 
 	/** Creates a string from an ASCII character string */
 	String (const CharPointer_ASCII& text);
@@ -4832,7 +4853,8 @@ public:
 	/** Returns a section from the start of the string that only contains a certain set of characters.
 
 		This returns the leftmost section of the string, up to (and not including) the
-		first character that occurs in the string passed in.
+		first character that occurs in the string passed in. (If none of the specified
+		characters are found in the string, the return value will just be the original string).
 	*/
 	const String initialSectionNotContaining (const String& charactersToStopAt) const;
 
@@ -5435,7 +5457,7 @@ public:
 	{
 		if (--(getCounter().numObjects) < 0)
 		{
-			DBG ("*** Dangling pointer deletion! Class: " << String (typeid (OwnerClass).name()));
+			DBG ("*** Dangling pointer deletion! Class: " << OwnerClass::getLeakedObjectClassName());
 
 			/** If you hit this, then you've managed to delete more instances of this class than you've
 				created.. That indicates that you're deleting some dangling pointers.
@@ -5463,7 +5485,7 @@ private:
 		{
 			if (numObjects.value > 0)
 			{
-				DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << String (typeid (OwnerClass).name()));
+				DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << OwnerClass::getLeakedObjectClassName());
 
 				/** If you hit this, then you've leaked one or more objects of the type specified by
 					the 'OwnerClass' template parameter - the name should have been printed by the line above.
@@ -5506,7 +5528,10 @@ private:
 
 	  @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
   */
-  #define JUCE_LEAK_DETECTOR(OwnerClass)	 JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
+  #define JUCE_LEAK_DETECTOR(OwnerClass) \
+		friend class JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass>; \
+		static const char* getLeakedObjectClassName() throw() { return #OwnerClass; } \
+		JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
  #else
   #define JUCE_LEAK_DETECTOR(OwnerClass)
  #endif
@@ -8271,6 +8296,7 @@ public:
 
 	var (const var& valueToCopy);
 	var (int value) throw();
+	var (int64 value) throw();
 	var (bool value) throw();
 	var (double value) throw();
 	var (const char* value);
@@ -8281,6 +8307,7 @@ public:
 
 	var& operator= (const var& valueToCopy);
 	var& operator= (int value);
+	var& operator= (int64 value);
 	var& operator= (bool value);
 	var& operator= (double value);
 	var& operator= (const char* value);
@@ -8292,6 +8319,7 @@ public:
 	void swapWith (var& other) throw();
 
 	operator int() const;
+	operator int64() const;
 	operator bool() const;
 	operator float() const;
 	operator double() const;
@@ -8301,6 +8329,7 @@ public:
 
 	bool isVoid() const throw();
 	bool isInt() const throw();
+	bool isInt64() const throw();
 	bool isBool() const throw();
 	bool isDouble() const throw();
 	bool isString() const throw();
@@ -8355,6 +8384,8 @@ private:
 	friend class VariantType_Void;
 	class VariantType_Int;
 	friend class VariantType_Int;
+	class VariantType_Int64;
+	friend class VariantType_Int64;
 	class VariantType_Double;
 	friend class VariantType_Double;
 	class VariantType_Float;
@@ -8371,6 +8402,7 @@ private:
 	union ValueUnion
 	{
 		int intValue;
+		int64 int64Value;
 		bool boolValue;
 		double doubleValue;
 		String* stringValue;
@@ -46106,6 +46138,8 @@ private:
 	int typeToScan;
 
 	void scanFor (AudioPluginFormat* format);
+	static void optionsMenuStaticCallback (int result, PluginListComponent*);
+	void optionsMenuCallback (int result);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
 };
@@ -56483,6 +56517,7 @@ public:
 	/** Destructor. */
 	~FileChooserDialogBox();
 
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	/** Displays and runs the dialog box modally.
 
 		This will show the box with the specified size, returning true if the user
@@ -56500,6 +56535,7 @@ public:
 		Leave the width or height as 0 to use the default size.
 	*/
 	bool showAt (int x, int y, int width, int height);
+   #endif
 
 	/** Sets the size of this dialog box to its default and positions it either in the
 		centre of the screen, or centred around a component that is provided.

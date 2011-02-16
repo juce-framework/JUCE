@@ -185,7 +185,7 @@ public:
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
         output.writeCompressedInt (1);
-        output.writeByte (data.boolValue ? varMarker_BoolTrue : varMarker_BoolFalse);
+        output.writeByte (data.boolValue ? (char) varMarker_BoolTrue : (char) varMarker_BoolFalse);
     }
 };
 
@@ -310,7 +310,7 @@ var::var (const int value_) throw() : type (&VariantType_Int::instance)
 
 var::var (const int64 value_) throw() : type (&VariantType_Int64::instance)
 {
-    value.intValue = value_;
+    value.int64Value = value_;
 }
 
 var::var (const bool value_) throw()  : type (&VariantType_Bool::instance)
