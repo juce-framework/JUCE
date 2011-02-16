@@ -640,6 +640,9 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableEdgeComponent.cpp">
+      <Filter>Juce\Source\gui\components\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ScrollBar.cpp">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClCompile>
@@ -1819,6 +1822,9 @@
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.h">
+      <Filter>Juce\Source\gui\components\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableEdgeComponent.h">
       <Filter>Juce\Source\gui\components\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ScrollBar.h">

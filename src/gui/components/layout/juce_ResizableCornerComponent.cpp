@@ -82,9 +82,18 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
                                                originalBounds.getHeight() + e.getDistanceFromDragStartY()));
 
     if (constrainer != 0)
+    {
         constrainer->setBoundsForComponent (component, r, false, false, true, true);
+    }
     else
-        component->setBounds (r);
+    {
+        Component::Positioner* const positioner = component->getPositioner();
+
+        if (positioner != 0)
+            positioner->applyNewBounds (r);
+        else
+            component->setBounds (r);
+    }
 }
 
 void ResizableCornerComponent::mouseUp (const MouseEvent&)

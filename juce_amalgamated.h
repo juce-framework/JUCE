@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	32
+#define JUCE_BUILDNUMBER	33
 
 /** Current Juce version number.
 
@@ -31755,6 +31755,13 @@ public:
 		/** Returns the component that this positioner controls. */
 		Component& getComponent() const throw()	 { return component; }
 
+		/** Attempts to set the component's position to the given rectangle.
+			Unlike simply calling Component::setBounds(), this may involve the positioner
+			being smart enough to adjust itself to fit the new bounds, e.g. a RelativeRectangle's
+			positioner may try to reverse the expressions used to make them fit these new coordinates.
+		*/
+		virtual void applyNewBounds (const Rectangle<int>& newBounds) = 0;
+
 	private:
 		Component& component;
 
@@ -49126,6 +49133,11 @@ protected:
 			owner.recalculateCoordinates (&scope);
 		}
 
+		void applyNewBounds (const Rectangle<int>&)
+		{
+			jassertfalse; // drawables can't be resized directly!
+		}
+
 	private:
 		DrawableType& owner;
 
@@ -55072,7 +55084,7 @@ private:
 #define __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
 
 /**
-	A component that resizes its parent window when dragged.
+	A component that resizes its parent component when dragged.
 
 	This component forms a frame around the edge of a component, allowing it to
 	be dragged by the edges or corners to resize it - like the way windows are
@@ -55240,7 +55252,7 @@ private:
 #ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
 #define __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
 
-/** A component that resizes a parent window when dragged.
+/** A component that resizes a parent component when dragged.
 
 	This is the small triangular stripey resizer component you get in the bottom-right
 	of windows (more commonly on the Mac than Windows). Put one in the corner of
@@ -58784,6 +58796,85 @@ private:
 
 #endif
 #ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RESIZABLEEDGECOMPONENT_JUCEHEADER__
+
+/*** Start of inlined file: juce_ResizableEdgeComponent.h ***/
+#ifndef __JUCE_RESIZABLEEDGECOMPONENT_JUCEHEADER__
+#define __JUCE_RESIZABLEEDGECOMPONENT_JUCEHEADER__
+
+/**
+	A component that resizes its parent component when dragged.
+
+	This component forms a bar along one edge of a component, allowing it to
+	be dragged by that edges to resize it.
+
+	To use it, just add it to your component, positioning it along the appropriate
+	edge. Make sure you reposition the resizer component each time the parent's size
+	changes, to keep it in the correct position.
+
+	@see ResizbleBorderComponent, ResizableCornerComponent
+*/
+class JUCE_API  ResizableEdgeComponent  : public Component
+{
+public:
+
+	enum Edge
+	{
+		leftEdge,   /**< Indicates a vertical bar that can be dragged left/right to move the component's left-hand edge. */
+		rightEdge,  /**< Indicates a vertical bar that can be dragged left/right to move the component's right-hand edge. */
+		topEdge,	/**< Indicates a horizontal bar that can be dragged up/down to move the top of the component. */
+		bottomEdge  /**< Indicates a horizontal bar that can be dragged up/down to move the bottom of the component. */
+	};
+
+	/** Creates a resizer bar.
+
+		Pass in the target component which you want to be resized when this one is
+		dragged. The target component will usually be this component's parent, but this
+		isn't mandatory.
+
+		Remember that when the target component is resized, it'll need to move and
+		resize this component to keep it in place, as this won't happen automatically.
+
+		If the constrainer parameter is non-zero, then this object will be used to enforce
+		limits on the size and position that the component can be stretched to. Make sure
+		that the constrainer isn't deleted while still in use by this object.
+
+		@see ComponentBoundsConstrainer
+	*/
+	ResizableEdgeComponent (Component* componentToResize,
+							ComponentBoundsConstrainer* constrainer,
+							Edge edgeToResize);
+
+	/** Destructor. */
+	~ResizableEdgeComponent();
+
+	bool isVertical() const throw();
+
+protected:
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void mouseDown (const MouseEvent& e);
+	/** @internal */
+	void mouseDrag (const MouseEvent& e);
+	/** @internal */
+	void mouseUp (const MouseEvent& e);
+
+private:
+	WeakReference<Component> component;
+	ComponentBoundsConstrainer* constrainer;
+	Rectangle<int> originalBounds;
+	const Edge edge;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableEdgeComponent);
+};
+
+#endif   // __JUCE_RESIZABLEEDGECOMPONENT_JUCEHEADER__
+/*** End of inlined file: juce_ResizableEdgeComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_SCROLLBAR_JUCEHEADER__

@@ -123,6 +123,11 @@ public:
         owner.applyRelativePath (*owner.relativePath, &scope);
     }
 
+    void applyNewBounds (const Rectangle<int>& newBounds)
+    {
+        jassertfalse; // drawables can't be resized directly!
+    }
+
 private:
     DrawablePath& owner;
 

@@ -557,6 +557,8 @@
               <File RelativePath="..\..\src\gui\components\layout\juce_ResizableBorderComponent.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ResizableCornerComponent.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ResizableCornerComponent.h"/>
+              <File RelativePath="..\..\src\gui\components\layout\juce_ResizableEdgeComponent.cpp"/>
+              <File RelativePath="..\..\src\gui\components\layout\juce_ResizableEdgeComponent.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ScrollBar.cpp"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_ScrollBar.h"/>
               <File RelativePath="..\..\src\gui\components\layout\juce_StretchableLayoutManager.cpp"/>

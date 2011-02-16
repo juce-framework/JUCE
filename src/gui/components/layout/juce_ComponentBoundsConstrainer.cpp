@@ -182,7 +182,12 @@ void ComponentBoundsConstrainer::checkComponentBounds (Component* component)
 void ComponentBoundsConstrainer::applyBoundsToComponent (Component* component,
                                                          const Rectangle<int>& bounds)
 {
-    component->setBounds (bounds);
+    Component::Positioner* const positioner = component->getPositioner();
+
+    if (positioner != 0)
+        positioner->applyNewBounds (bounds);
+    else
+        component->setBounds (bounds);
 }
 
 //==============================================================================

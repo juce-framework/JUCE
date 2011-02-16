@@ -742,6 +742,10 @@
                   resource="0" file="src/gui/components/layout/juce_ResizableCornerComponent.cpp"/>
             <FILE id="BNceExpX" name="juce_ResizableCornerComponent.h" compile="0"
                   resource="0" file="src/gui/components/layout/juce_ResizableCornerComponent.h"/>
+            <FILE id="RqXFh" name="juce_ResizableEdgeComponent.cpp" compile="1"
+                  resource="0" file="src/gui/components/layout/juce_ResizableEdgeComponent.cpp"/>
+            <FILE id="yO4Ojb" name="juce_ResizableEdgeComponent.h" compile="0"
+                  resource="0" file="src/gui/components/layout/juce_ResizableEdgeComponent.h"/>
             <FILE id="bz95sXSrm" name="juce_ScrollBar.cpp" compile="1" resource="0"
                   file="src/gui/components/layout/juce_ScrollBar.cpp"/>
             <FILE id="fNljvLwAj" name="juce_ScrollBar.h" compile="0" resource="0"

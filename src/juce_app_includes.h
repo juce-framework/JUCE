@@ -446,6 +446,9 @@
 #ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
  #include "gui/components/layout/juce_ResizableCornerComponent.h"
 #endif
+#ifndef __JUCE_RESIZABLEEDGECOMPONENT_JUCEHEADER__
+ #include "gui/components/layout/juce_ResizableEdgeComponent.h"
+#endif
 #ifndef __JUCE_SCROLLBAR_JUCEHEADER__
  #include "gui/components/layout/juce_ScrollBar.h"
 #endif

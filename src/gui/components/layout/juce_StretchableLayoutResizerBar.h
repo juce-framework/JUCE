@@ -95,5 +95,4 @@ private:
 };
 
 
-
 #endif   // __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__

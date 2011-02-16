@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ResizableBorderComponent.h"
-#include "../juce_Desktop.h"
 #include "../../graphics/geometry/juce_RectangleList.h"
 #include "../../graphics/geometry/juce_Line.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
@@ -154,13 +153,22 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
     const Rectangle<int> bounds (mouseZone.resizeRectangleBy (originalBounds, e.getOffsetFromDragStart()));
 
     if (constrainer != 0)
+    {
         constrainer->setBoundsForComponent (component, bounds,
                                             mouseZone.isDraggingTopEdge(),
                                             mouseZone.isDraggingLeftEdge(),
                                             mouseZone.isDraggingBottomEdge(),
                                             mouseZone.isDraggingRightEdge());
+    }
     else
-        component->setBounds (bounds);
+    {
+        Component::Positioner* const positioner = component->getPositioner();
+
+        if (positioner != 0)
+            positioner->applyNewBounds (bounds);
+        else
+            component->setBounds (bounds);
+    }
 }
 
 void ResizableBorderComponent::mouseUp (const MouseEvent&)

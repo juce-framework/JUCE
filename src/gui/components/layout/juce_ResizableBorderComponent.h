@@ -31,7 +31,7 @@
 
 //==============================================================================
 /**
-    A component that resizes its parent window when dragged.
+    A component that resizes its parent component when dragged.
 
     This component forms a frame around the edge of a component, allowing it to
     be dragged by the edges or corners to resize it - like the way windows are

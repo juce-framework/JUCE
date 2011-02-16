@@ -234,6 +234,11 @@ protected:
             owner.recalculateCoordinates (&scope);
         }
 
+        void applyNewBounds (const Rectangle<int>&)
+        {
+            jassertfalse; // drawables can't be resized directly!
+        }
+
     private:
         DrawableType& owner;
 

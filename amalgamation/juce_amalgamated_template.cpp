@@ -282,6 +282,7 @@
  #include "../src/gui/components/layout/juce_MultiDocumentPanel.cpp"
  #include "../src/gui/components/layout/juce_ResizableBorderComponent.cpp"
  #include "../src/gui/components/layout/juce_ResizableCornerComponent.cpp"
+ #include "../src/gui/components/layout/juce_ResizableEdgeComponent.cpp"
  #include "../src/gui/components/layout/juce_ScrollBar.cpp"
  #include "../src/gui/components/layout/juce_StretchableLayoutManager.cpp"
  #include "../src/gui/components/layout/juce_StretchableLayoutResizerBar.cpp"

@@ -33,15 +33,14 @@
 
 //==============================================================================
 ProjectContentComponent::ProjectContentComponent()
-    : projectTree (0), project (0),
-      currentDocument (0), resizerBar (0)
+    : project (0),
+      currentDocument (0)
 {
-    setItemLayout (0, 100, 500, 300);
-    setItemLayout (1, 4, 4, 4);
-    setItemLayout (2, 100, 10000, 800);
-
     setOpaque (true);
     setWantsKeyboardFocus (true);
+
+    treeSizeConstrainer.setMinimumWidth (100);
+    treeSizeConstrainer.setMaximumWidth (500);
 }
 
 ProjectContentComponent::~ProjectContentComponent()
@@ -56,17 +55,6 @@ void ProjectContentComponent::paint (Graphics& g)
     g.fillAll (Colour::greyLevel (0.8f));
 }
 
-void ProjectContentComponent::hasBeenMoved()
-{
-    resized();
-}
-
-void ProjectContentComponent::resized()
-{
-    Component* comps[] = { projectTree, resizerBar, contentView };
-    layOutComponents (comps, 3, 0, 0, getWidth(), getHeight(), false, true);
-}
-
 void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
@@ -74,30 +62,41 @@ void ProjectContentComponent::setProject (Project* newProject)
         if (project != 0)
             project->removeChangeListener (this);
 
-        if (projectTree != 0)
-            projectTree->deleteRootItem();
-
-        projectTree = 0;
         contentView = 0;
         resizerBar = 0;
+
+        if (projectTree != 0)
+        {
+            StoredSettings::getInstance()->getProps().setValue ("projectTreeviewWidth", projectTree->getWidth());
+            projectTree->deleteRootItem();
+            projectTree = 0;
+        }
 
         project = newProject;
 
         if (project != 0)
         {
             addAndMakeVisible (projectTree = new TreeView());
+            projectTree->setComponentID ("tree");
             projectTree->setRootItemVisible (true);
             projectTree->setMultiSelectEnabled (true);
             projectTree->setDefaultOpenness (true);
             projectTree->setColour (TreeView::backgroundColourId, Colour::greyLevel (0.93f));
             projectTree->setIndentSize (14);
 
-            addAndMakeVisible (resizerBar = new StretchableLayoutResizerBar (this, 1, true));
-
-            resized();
-
             projectTree->setRootItem (new GroupTreeViewItem (project->getMainGroup()));
             projectTree->getRootItem()->setOpen (true);
+
+            String lastTreeWidth (StoredSettings::getInstance()->getProps().getValue ("projectTreeviewWidth"));
+            if (lastTreeWidth.getIntValue() < 150)
+                lastTreeWidth = "250";
+
+            projectTree->setBounds (RelativeRectangle ("0, 0, left + " + lastTreeWidth + ", parent.height"));
+
+            addAndMakeVisible (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer,
+                                                                        ResizableEdgeComponent::rightEdge));
+            resizerBar->setComponentID ("resizer");
+            resizerBar->setBounds (RelativeRectangle ("tree.right, 0, tree.right + 4, parent.height"));
 
             project->addChangeListener (this);
 
@@ -161,7 +160,8 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
         contentView = editor;
         currentDocument = doc;
         addAndMakeVisible (editor);
-        resized();
+        editor->setBounds (RelativeRectangle ("resizer.right, 0, parent.right, parent.height"));
+
         updateMainWindowTitle();
         commandManager->commandStatusChanged();
 

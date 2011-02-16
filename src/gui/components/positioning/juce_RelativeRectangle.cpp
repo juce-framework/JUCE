@@ -232,8 +232,19 @@ public:
         jassertfalse; // must be a recursive reference!
     }
 
+    void applyNewBounds (const Rectangle<int>& newBounds)
+    {
+        if (newBounds != getComponent().getBounds())
+        {
+            ComponentScope scope (getComponent());
+            rectangle.moveToAbsolute (newBounds.toFloat(), &scope);
+
+            applyToComponentBounds();
+        }
+    }
+
 private:
-    const RelativeRectangle rectangle;
+    RelativeRectangle rectangle;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeRectangleComponentPositioner);
 };

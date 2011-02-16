@@ -177,6 +177,7 @@ OBJECTS := \
   $(OBJDIR)/juce_MultiDocumentPanel_50e05aac.o \
   $(OBJDIR)/juce_ResizableBorderComponent_7f4f2182.o \
   $(OBJDIR)/juce_ResizableCornerComponent_1cac2df9.o \
+  $(OBJDIR)/juce_ResizableEdgeComponent_b9c9291.o \
   $(OBJDIR)/juce_ScrollBar_89666ad4.o \
   $(OBJDIR)/juce_StretchableLayoutManager_6bf5d800.o \
   $(OBJDIR)/juce_StretchableLayoutResizerBar_a720084c.o \
@@ -1069,6 +1070,11 @@ $(OBJDIR)/juce_ResizableBorderComponent_7f4f2182.o: ../../src/gui/components/lay
 $(OBJDIR)/juce_ResizableCornerComponent_1cac2df9.o: ../../src/gui/components/layout/juce_ResizableCornerComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ResizableCornerComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ResizableEdgeComponent_b9c9291.o: ../../src/gui/components/layout/juce_ResizableEdgeComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_ResizableEdgeComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ScrollBar_89666ad4.o: ../../src/gui/components/layout/juce_ScrollBar.cpp

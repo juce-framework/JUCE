@@ -77,6 +77,11 @@ public:
             owner.repaint();
     }
 
+    void applyNewBounds (const Rectangle<int>& newBounds)
+    {
+        jassertfalse; // drawables can't be resized directly!
+    }
+
 private:
     DrawableShape& owner;
     const DrawableShape::RelativeFillType fill;

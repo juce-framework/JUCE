@@ -30,7 +30,7 @@
 
 
 //==============================================================================
-/** A component that resizes a parent window when dragged.
+/** A component that resizes a parent component when dragged.
 
     This is the small triangular stripey resizer component you get in the bottom-right
     of windows (more commonly on the Mac than Windows). Put one in the corner of

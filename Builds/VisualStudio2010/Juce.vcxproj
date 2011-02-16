@@ -260,6 +260,7 @@
     <ClCompile Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableBorderComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\layout\juce_ResizableEdgeComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_ScrollBar.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_StretchableLayoutManager.cpp"/>
     <ClCompile Include="..\..\src\gui\components\layout\juce_StretchableLayoutResizerBar.cpp"/>
@@ -629,6 +630,7 @@
     <ClInclude Include="..\..\src\gui\components\layout\juce_MultiDocumentPanel.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableBorderComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableCornerComponent.h"/>
+    <ClInclude Include="..\..\src\gui\components\layout\juce_ResizableEdgeComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ScrollBar.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_StretchableLayoutManager.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_StretchableLayoutResizerBar.h"/>

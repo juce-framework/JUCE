@@ -35,8 +35,7 @@
 */
 class ProjectContentComponent  : public Component,
                                  public ApplicationCommandTarget,
-                                 public ChangeListener,
-                                 public StretchableLayoutManager
+                                 public ChangeListener
 {
 public:
     //==============================================================================
@@ -44,7 +43,6 @@ public:
     ~ProjectContentComponent();
 
     void paint (Graphics& g);
-    void resized();
 
     void setProject (Project* project);
 
@@ -56,7 +54,6 @@ public:
     void updateMissingFileStatuses();
 
     void changeListenerCallback (ChangeBroadcaster*);
-    void hasBeenMoved();
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget();
@@ -66,12 +63,14 @@ public:
     bool perform (const InvocationInfo& info);
 
 private:
-    ScopedPointer<TreeView> projectTree;
     Project* project;
-    ScopedPointer <Component> contentView;
     OpenDocumentManager::Document* currentDocument;
 
-    ScopedPointer<StretchableLayoutResizerBar> resizerBar;
+    ScopedPointer<TreeView> projectTree;
+    ScopedPointer<ResizableEdgeComponent> resizerBar;
+    ScopedPointer<Component> contentView;
+
+    ComponentBoundsConstrainer treeSizeConstrainer;
 
     void updateMainWindowTitle();
 
