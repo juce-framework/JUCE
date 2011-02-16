@@ -83,7 +83,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
                 }
             }
 
-            setContentComponent (filter->createEditorIfNeeded(), true, true);
+            setContentOwned (filter->createEditorIfNeeded(), true);
 
             const int x = globalSettings->getIntValue ("windowX", -100);
             const int y = globalSettings->getIntValue ("windowY", -100);
@@ -138,7 +138,7 @@ void StandaloneFilterWindow::deleteFilter()
     if (filter != 0 && getContentComponent() != 0)
     {
         filter->editorBeingDeleted (dynamic_cast <AudioProcessorEditor*> (getContentComponent()));
-        setContentComponent (0, true);
+        clearContentComponent();
     }
 
     filter = 0;
@@ -155,7 +155,7 @@ void StandaloneFilterWindow::resetFilter()
         if (deviceManager != 0)
             deviceManager->setFilter (filter);
 
-        setContentComponent (filter->createEditorIfNeeded(), true, true);
+        setContentOwned (filter->createEditorIfNeeded(), true);
     }
 
     PropertySet* const globalSettings = getGlobalSettings();

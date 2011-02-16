@@ -40,8 +40,9 @@
     Any of the methods available to a DocumentWindow or ResizableWindow are also
     available to this, so it can be made resizable, have a menu bar, etc.
 
-    To add items to the box, see the ResizableWindow::setContentComponent() method.
-    Don't add components directly to this class - always put them in a content component!
+    To add items to the box, see the ResizableWindow::setContentOwned() or
+    ResizableWindow::setContentNonOwned() methods. Don't add components directly to this
+    class - always put them in a content component!
 
     You'll need to override the DocumentWindow::closeButtonPressed() method to handle
     the user clicking the close button - for more info, see the DocumentWindow
@@ -70,9 +71,7 @@ public:
                   bool addToDesktop = true);
 
     /** Destructor.
-
-        If a content component has been set with setContentComponent(), it
-        will be deleted.
+        If a content component has been set with setContentOwned(), it will be deleted.
     */
     ~DialogWindow();
 

@@ -68,7 +68,7 @@ MainWindow::MainWindow()
     if (oldLook == 0)
         oldLook = new OldSchoolLookAndFeel();
 
-    setContentComponent (multiDocHolder = new MultiDocHolder());
+    setContentOwned (multiDocHolder = new MultiDocHolder(), false);
 
     setApplicationCommandManagerToWatch (commandManager);
 
@@ -131,7 +131,7 @@ MainWindow::~MainWindow()
     StoredSettings::getInstance()->getProps()
         .setValue (T("lastMainWindowPos"), getWindowStateAsString());
 
-    setContentComponent (0);
+    clearContentComponent();
 
     LookAndFeel::setDefaultLookAndFeel (0);
     deleteAndZero (oldLook);

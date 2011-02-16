@@ -41,9 +41,9 @@ public:
         const File deadMansPedalFile (ApplicationProperties::getInstance()->getUserSettings()
                                         ->getFile().getSiblingFile ("RecentlyCrashedPluginsList"));
 
-        setContentComponent (new PluginListComponent (knownPluginList,
-                                                      deadMansPedalFile,
-                                                      ApplicationProperties::getInstance()->getUserSettings()), true, true);
+        setContentOwned (new PluginListComponent (knownPluginList,
+                                                  deadMansPedalFile,
+                                                  ApplicationProperties::getInstance()->getUserSettings()), true);
 
         setResizable (true, false);
         setResizeLimits (300, 400, 800, 1500);
@@ -57,7 +57,7 @@ public:
     {
         ApplicationProperties::getInstance()->getUserSettings()->setValue ("listWindowPos", getWindowStateAsString());
 
-        setContentComponent (0);
+        clearContentComponent();
 
         jassert (currentPluginListWindow == this);
         currentPluginListWindow = 0;
@@ -90,7 +90,7 @@ MainHostWindow::MainHostWindow()
     setResizeLimits (500, 400, 10000, 10000);
     centreWithSize (800, 600);
 
-    setContentComponent (new GraphDocumentComponent (&deviceManager));
+    setContentOwned (new GraphDocumentComponent (&deviceManager), false);
 
     restoreWindowStateFromString (ApplicationProperties::getInstance()->getUserSettings()->getValue ("mainWindowPos"));
 
@@ -138,7 +138,7 @@ MainHostWindow::~MainHostWindow()
     knownPluginList.removeChangeListener (this);
 
     ApplicationProperties::getInstance()->getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
-    setContentComponent (0);
+    clearContentComponent();
 }
 
 void MainHostWindow::closeButtonPressed()

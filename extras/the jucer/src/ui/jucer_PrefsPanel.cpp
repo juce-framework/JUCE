@@ -162,7 +162,7 @@ PrefsPanel::PrefsPanel()
     PrefsTabComp* const p = new PrefsTabComp();
     p->setSize (456, 510);
 
-    setContentComponent (p, true, true);
+    setContentOwned (p, true);
 
     if (! restoreWindowStateFromString (prefsWindowPos))
         centreAroundComponent (0, getWidth(), getHeight());

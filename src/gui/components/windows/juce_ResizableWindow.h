@@ -36,8 +36,8 @@
 /**
     A base class for top-level windows that can be dragged around and resized.
 
-    To add content to the window, use its setContentComponent() method to
-    give it a component that will remain positioned inside it (leaving a gap around
+    To add content to the window, use its setContentOwned() or setContentNonOwned() methods
+    to give it a component that will remain positioned inside it (leaving a gap around
     the edges for a border).
 
     It's not advisable to add child components directly to a ResizableWindow: put them
@@ -80,9 +80,7 @@ public:
                      bool addToDesktop);
 
     /** Destructor.
-
-        If a content component has been set with setContentComponent(), it
-        will be deleted.
+        If a content component has been set with setContentOwned(), it will be deleted.
     */
     ~ResizableWindow();
 
@@ -230,10 +228,10 @@ public:
     //==============================================================================
     /** Returns the current content component.
 
-        This will be the component set by setContentComponent(), or 0 if none
+        This will be the component set by setContentOwned() or setContentNonOwned, or 0 if none
         has yet been specified.
 
-        @see setContentComponent
+        @see setContentOwned, setContentNonOwned
     */
     Component* getContentComponent() const throw()                  { return contentComponent; }
 
@@ -344,20 +342,19 @@ protected:
 
 #if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component
-        instead of using setContentComponent().
+        instead of using setContentOwned().
 
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
     void addChildComponent (Component* child, int zOrder = -1);
     /** Overridden to warn people about adding components directly to this component
-        instead of using setContentComponent().
+        instead of using setContentOwned().
 
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
     void addAndMakeVisible (Component* child, int zOrder = -1);
-
 #endif
 
     ScopedPointer <ResizableCornerComponent> resizableCorner;

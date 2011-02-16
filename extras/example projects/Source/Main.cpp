@@ -21,7 +21,7 @@ class HelloWorldWindow  : public DocumentWindow
 public:
     //==============================================================================
     HelloWorldWindow()
-        : DocumentWindow (T("JUCE Hello World!"),
+        : DocumentWindow ("JUCE Hello World!",
                           Colours::lightgrey,
                           DocumentWindow::allButtons,
                           true)
@@ -31,7 +31,7 @@ public:
 
         MainComponent* const contentComponent = new MainComponent();
 
-        setContentComponent (contentComponent, true, true);
+        setContentOwned (contentComponent, true);
 
         centreWithSize (getWidth(), getHeight());
 

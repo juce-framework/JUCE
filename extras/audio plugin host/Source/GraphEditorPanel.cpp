@@ -43,7 +43,7 @@ PluginWindow::PluginWindow (Component* const uiComp,
 {
     setSize (400, 300);
 
-    setContentComponent (uiComp, true, true);
+    setContentOwned (uiComp, true);
 
     setTopLeftPosition (owner->properties.getWithDefault ("uiLastX", Random::getSystemRandom().nextInt (500)),
                         owner->properties.getWithDefault ("uiLastY", Random::getSystemRandom().nextInt (500)));
@@ -104,7 +104,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
 PluginWindow::~PluginWindow()
 {
     activePluginWindows.removeValue (this);
-    setContentComponent (0);
+    clearContentComponent();
 }
 
 void PluginWindow::moved()

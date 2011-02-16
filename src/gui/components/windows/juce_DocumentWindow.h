@@ -95,9 +95,7 @@ public:
                     bool addToDesktop = true);
 
     /** Destructor.
-
-        If a content component has been set with setContentComponent(), it
-        will be deleted.
+        If a content component has been set with setContentOwned(), it will be deleted.
     */
     ~DocumentWindow();
 

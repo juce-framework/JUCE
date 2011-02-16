@@ -592,7 +592,7 @@ void ResizableWindow::addChildComponent (Component* const child, int zOrder)
 
        If you really know what you're doing and want to avoid this assertion, just call
        Component::addChildComponent directly.
-   */
+    */
     jassertfalse;
 
     Component::addChildComponent (child, zOrder);
@@ -609,7 +609,7 @@ void ResizableWindow::addAndMakeVisible (Component* const child, int zOrder)
 
        If you really know what you're doing and want to avoid this assertion, just call
        Component::addAndMakeVisible directly.
-   */
+    */
     jassertfalse;
 
     Component::addAndMakeVisible (child, zOrder);
