@@ -291,25 +291,38 @@ public:
         m.addSeparator();
         m.addItem (2, TRANS("Set this swatch to the current colour"));
 
-        const int r = m.showAt (this);
-
-        if (r == 1)
-        {
-            owner.setCurrentColour (owner.getSwatchColour (index));
-        }
-        else if (r == 2)
-        {
-            if (owner.getSwatchColour (index) != owner.getCurrentColour())
-            {
-                owner.setSwatchColour (index, owner.getCurrentColour());
-                repaint();
-            }
-        }
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (this),
+                         ModalCallbackFunction::forComponent (menuStaticCallback, this));
     }
 
 private:
     ColourSelector& owner;
     const int index;
+
+    static void menuStaticCallback (int result, SwatchComponent* comp)
+    {
+        if (comp != 0)
+        {
+            if (result == 1)
+                comp->setColourFromSwatch();
+            else if (result == 2)
+                comp->setSwatchFromColour();
+        }
+    }
+
+    void setColourFromSwatch()
+    {
+        owner.setCurrentColour (owner.getSwatchColour (index));
+    }
+
+    void setSwatchFromColour()
+    {
+        if (owner.getSwatchColour (index) != owner.getCurrentColour())
+        {
+            owner.setSwatchColour (index, owner.getCurrentColour());
+            repaint();
+        }
+    }
 
     JUCE_DECLARE_NON_COPYABLE (SwatchComponent);
 };

@@ -56,6 +56,7 @@ FileChooser::~FileChooser()
 {
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool FileChooser::browseForFileToOpen (FilePreviewComponent* previewComponent)
 {
     return showDialog (false, true, false, false, false, previewComponent);
@@ -81,21 +82,6 @@ bool FileChooser::browseForDirectory()
     return showDialog (true, false, false, false, false, 0);
 }
 
-const File FileChooser::getResult() const
-{
-    // if you've used a multiple-file select, you should use the getResults() method
-    // to retrieve all the files that were chosen.
-    jassert (results.size() <= 1);
-
-    return results.getFirst();
-}
-
-const Array<File>& FileChooser::getResults() const
-{
-    return results;
-}
-
-#if JUCE_MODAL_LOOPS_PERMITTED
 bool FileChooser::showDialog (const bool selectsDirectories,
                               const bool selectsFiles,
                               const bool isSave,
@@ -168,6 +154,20 @@ bool FileChooser::showDialog (const bool selectsDirectories,
     return results.size() > 0;
 }
 #endif
+
+const File FileChooser::getResult() const
+{
+    // if you've used a multiple-file select, you should use the getResults() method
+    // to retrieve all the files that were chosen.
+    jassert (results.size() <= 1);
+
+    return results.getFirst();
+}
+
+const Array<File>& FileChooser::getResults() const
+{
+    return results;
+}
 
 //==============================================================================
 FilePreviewComponent::FilePreviewComponent()

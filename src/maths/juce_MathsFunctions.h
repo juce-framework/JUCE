@@ -310,7 +310,7 @@ inline int64 abs64 (const int64 n) throw()
 template <typename Type>
 inline Type juce_negate (Type n) throw()
 {
-    return sizeof (Type) == 1 ? (Type) -(char) n
+    return sizeof (Type) == 1 ? (Type) -(signed char) n
         : (sizeof (Type) == 2 ? (Type) -(short) n
         : (sizeof (Type) == 4 ? (Type) -(int) n
         : ((Type) -(int64) n)));

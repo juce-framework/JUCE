@@ -244,9 +244,9 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
     list.scanAndAddDragAndDroppedFiles (files, typesFound);
 }
 
-#if JUCE_MODAL_LOOPS_PERMITTED
 void PluginListComponent::scanFor (AudioPluginFormat* format)
 {
+#if JUCE_MODAL_LOOPS_PERMITTED
     if (format == 0)
         return;
 
@@ -319,7 +319,9 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
                                      TRANS("Note that the following files appeared to be plugin files, but failed to load correctly:\n\n")
                                         + shortNames.joinIntoString (", "));
     }
-}
+#else
+    jassertfalse; // this method needs refactoring to work without modal loops..
 #endif
+}
 
 END_JUCE_NAMESPACE

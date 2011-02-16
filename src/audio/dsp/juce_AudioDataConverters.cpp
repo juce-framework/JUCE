@@ -644,12 +644,15 @@ public:
 
     void runTest()
     {
-        beginTest ("Round-trip conversion");
-
+        beginTest ("Round-trip conversion: Int8");
         Test1 <AudioData::Int8>::test (*this);
+        beginTest ("Round-trip conversion: Int16");
         Test1 <AudioData::Int16>::test (*this);
+        beginTest ("Round-trip conversion: Int24");
         Test1 <AudioData::Int24>::test (*this);
+        beginTest ("Round-trip conversion: Int32");
         Test1 <AudioData::Int32>::test (*this);
+        beginTest ("Round-trip conversion: Float32");
         Test1 <AudioData::Float32>::test (*this);
     }
 };

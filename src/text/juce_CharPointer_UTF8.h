@@ -79,7 +79,7 @@ public:
     /** Returns the unicode character that this pointer is pointing to. */
     juce_wchar operator*() const throw()
     {
-        const char byte = *data;
+        const signed char byte = (signed char) *data;
 
         if (byte >= 0)
             return byte;
@@ -115,7 +115,7 @@ public:
     /** Moves this pointer along to the next character in the string. */
     CharPointer_UTF8& operator++() throw()
     {
-        const char n = *data++;
+        const signed char n = (signed char) *data++;
 
         if (n < 0)
         {
@@ -135,7 +135,7 @@ public:
         advances the pointer to point to the next character. */
     juce_wchar getAndAdvance() throw()
     {
-        const char byte = *data++;
+        const signed char byte = (signed char) *data++;
 
         if (byte >= 0)
             return byte;
@@ -486,7 +486,7 @@ public:
     {
         while (--maxBytesToRead >= 0 && *dataToTest != 0)
         {
-            const char byte = *dataToTest;
+            const signed char byte = (signed char) *dataToTest;
 
             if (byte < 0)
             {

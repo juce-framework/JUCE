@@ -1512,7 +1512,12 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
     window->toFront (false);  // need to do this after making it modal, or it could
                               // be stuck behind other comps that are already modal..
 
+   #if JUCE_MODAL_LOOPS_PERMITTED
     return (userCallback == 0 && canBeModal) ? window->runModalLoop() : 0;
+   #else
+    jassert (userCallback != 0 && canBeModal);
+    return 0;
+   #endif
 }
 
 //==============================================================================
@@ -1533,6 +1538,7 @@ void PopupMenu::showMenuAsync (const Options& options, ModalComponentManager::Ca
 }
 
 //==============================================================================
+#if JUCE_MODAL_LOOPS_PERMITTED
 int PopupMenu::show (const int itemIdThatMustBeVisible,
                      const int minimumWidth, const int maximumNumColumns,
                      const int standardItemHeight,
@@ -1575,6 +1581,7 @@ int PopupMenu::showAt (Component* componentToAttachTo,
 
     return showWithOptionalCallback (options, callback, true);
 }
+#endif
 
 bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
 {

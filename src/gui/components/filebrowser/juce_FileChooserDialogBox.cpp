@@ -126,6 +126,7 @@ FileChooserDialogBox::~FileChooserDialogBox()
 }
 
 //==============================================================================
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool FileChooserDialogBox::show (int w, int h)
 {
     return showAt (-1, -1, w, h);
@@ -155,6 +156,7 @@ bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
     setVisible (false);
     return ok;
 }
+#endif
 
 void FileChooserDialogBox::centreWithDefaultSize (Component* componentToCentreAround)
 {

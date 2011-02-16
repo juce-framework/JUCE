@@ -286,12 +286,12 @@ public:
 
         case setDefaultLookAndFeel:
             result.setInfo ("Use default look-and-feel", String::empty, generalCategory, 0);
-            result.setTicked ((typeid (LookAndFeel) == typeid (getLookAndFeel())) != 0);
+            result.setTicked (dynamic_cast <OldSchoolLookAndFeel*> (&getLookAndFeel()) == 0);
             break;
 
         case setOldSchoolLookAndFeel:
             result.setInfo ("Use the old, original juce look-and-feel", String::empty, generalCategory, 0);
-            result.setTicked ((typeid (OldSchoolLookAndFeel) == typeid (getLookAndFeel())) != 0);
+            result.setTicked (dynamic_cast <OldSchoolLookAndFeel*> (&getLookAndFeel()) != 0);
             break;
 
         case useNativeTitleBar:

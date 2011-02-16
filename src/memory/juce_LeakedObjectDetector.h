@@ -55,7 +55,7 @@ public:
     {
         if (--(getCounter().numObjects) < 0)
         {
-            DBG ("*** Dangling pointer deletion! Class: " << String (typeid (OwnerClass).name()));
+            DBG ("*** Dangling pointer deletion! Class: " << OwnerClass::getLeakedObjectClassName());
 
             /** If you hit this, then you've managed to delete more instances of this class than you've
                 created.. That indicates that you're deleting some dangling pointers.
@@ -83,7 +83,7 @@ private:
         {
             if (numObjects.value > 0)
             {
-                DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << String (typeid (OwnerClass).name()));
+                DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << OwnerClass::getLeakedObjectClassName());
 
                 /** If you hit this, then you've leaked one or more objects of the type specified by
                     the 'OwnerClass' template parameter - the name should have been printed by the line above.
@@ -127,7 +127,10 @@ private:
 
       @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
   */
-  #define JUCE_LEAK_DETECTOR(OwnerClass)         JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
+  #define JUCE_LEAK_DETECTOR(OwnerClass) \
+        friend class JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass>; \
+        static const char* getLeakedObjectClassName() throw() { return #OwnerClass; } \
+        JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
  #else
   #define JUCE_LEAK_DETECTOR(OwnerClass)
  #endif

@@ -40,7 +40,7 @@ MainWindow::MainWindow()
                       DocumentWindow::allButtons)
 {
     setUsingNativeTitleBar (true);
-    setContentComponent (new ProjectContentComponent());
+    setContentOwned (new ProjectContentComponent(), false);
 
 #if ! JUCE_MAC
     JucerApplication* app = static_cast<JucerApplication*> (JUCEApplication::getInstance());
@@ -91,7 +91,7 @@ MainWindow::~MainWindow()
     StoredSettings::getInstance()->getProps()
         .setValue ("lastMainWindowPos", getWindowStateAsString());
 
-    setContentComponent (0);
+    clearContentComponent();
     currentProject = 0;
 }
 

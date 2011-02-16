@@ -256,8 +256,7 @@ public:
 
     void clicked()
     {
-        // create two colour selector components for our background and
-        // text colour..
+       #if JUCE_MODAL_LOOPS_PERMITTED
         ColourSelector colourSelector;
         colourSelector.setName ("background");
         colourSelector.setCurrentColour (findColour (TextButton::buttonColourId));
@@ -267,6 +266,7 @@ public:
 
         CallOutBox callOut (colourSelector, *this, 0);
         callOut.runModalLoop();
+       #endif
     }
 
     void changeListenerCallback (ChangeBroadcaster* source)
@@ -703,10 +703,6 @@ public:
         customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
     }
 
-    ~ToolbarDemoComp()
-    {
-    }
-
     void resized()
     {
         if (toolbar.isVertical())
@@ -925,10 +921,6 @@ public:
         addTab ("misc widgets",  getRandomBrightColour(), createMiscPage(),         true);
     }
 
-    ~DemoTabbedComponent()
-    {
-    }
-
     void buttonClicked (Button* button)
     {
         BubbleMessageComponent* bmc = new BubbleMessageComponent();
@@ -964,10 +956,6 @@ public:
                                     true)
     {
         setStatusMessage ("Getting ready...");
-    }
-
-    ~DemoBackgroundThread()
-    {
     }
 
     void run()
@@ -1119,10 +1107,6 @@ public:
         transformSlider.addListener (this);
     }
 
-    ~WidgetsDemo()
-    {
-    }
-
     void resized()
     {
         tabs.setBounds (10, 40, getWidth() - 20, getHeight() - 50);
@@ -1220,6 +1204,13 @@ public:
             demoComponent->performDemoMenuItem (result);
     }
 
+    static void alertBoxResultChosen (int result, WidgetsDemo* demoComponent)
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                          "Alert Box",
+                                          "Result code: " + String (result));
+    }
+
     void performDemoMenuItem (int result)
     {
         if (result >= 100 && result < 105)
@@ -1240,15 +1231,17 @@ public:
         }
         else if (result == 110)
         {
-            bool userPickedOk
-                = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                                "This is an ok/cancel AlertWindow",
-                                                "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
-
-            (void) userPickedOk; // (just avoids a compiler warning about unused variables)
+            AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+                                          "This is an ok/cancel AlertWindow",
+                                          "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
+                                          String::empty,
+                                          String::empty,
+                                          0,
+                                          ModalCallbackFunction::forComponent (alertBoxResultChosen, this));
         }
         else if (result == 111)
         {
+           #if JUCE_MODAL_LOOPS_PERMITTED
             AlertWindow w ("AlertWindow demo..",
                            "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
                            AlertWindow::QuestionIcon);
@@ -1276,11 +1269,13 @@ public:
                 String text = w.getTextEditorContents ("text");
 
             }
+           #endif
         }
         else if (result == 112)
         {
             DemoBackgroundThread demoThread;
 
+           #if JUCE_MODAL_LOOPS_PERMITTED
             if (demoThread.runThread())
             {
                 // thread finished normally..
@@ -1295,24 +1290,28 @@ public:
                                                   "Progress window",
                                                   "You pressed cancel!");
             }
+           #endif
         }
         else if (result == 120)
         {
+           #if JUCE_MODAL_LOOPS_PERMITTED
             ColourSelectorDialogWindow colourDialog;
 
             // this will run an event loop until the dialog's closeButtonPressed()
             // method causes the loop to exit.
             colourDialog.runModalLoop();
+           #endif
         }
         else if (result == 140)
         {
-#if JUCE_MAC
+           #if JUCE_MAC
             AppleRemoteTestWindow test;
             test.runModalLoop();
-#endif
+           #endif
         }
         else if (result >= 121 && result < 139)
         {
+           #if JUCE_MODAL_LOOPS_PERMITTED
             const bool useNativeVersion = result < 130;
             if (result > 130)
                 result -= 10;
@@ -1388,6 +1387,7 @@ public:
                                                       "You picked: " + chosenDirectory.getFullPathName());
                 }
             }
+           #endif
         }
         else if (result == 1001)
         {

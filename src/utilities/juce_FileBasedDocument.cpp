@@ -122,7 +122,6 @@ bool FileBasedDocument::loadFrom (const File& newFile,
 
     return false;
 }
-#endif
 
 bool FileBasedDocument::loadFromUserSpecifiedFile (const bool showMessageOnFailure)
 {
@@ -146,7 +145,6 @@ FileBasedDocument::SaveResult FileBasedDocument::save (const bool askUserForFile
                    showMessageOnFailure);
 }
 
-#if JUCE_MODAL_LOOPS_PERMITTED
 FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                                          const bool warnAboutOverwritingExistingFiles,
                                                          const bool askUserForFileIfNotSpecified,

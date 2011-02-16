@@ -68,6 +68,10 @@ public:
         commandManager->registerAllCommandsForTarget (mainWindow);
 
         mainWindow->menuItemsChanged();
+
+        if (commandLine.isNotEmpty() && mainWindow->getGraphEditor() != 0)
+            mainWindow->getGraphEditor()->graph.loadFrom (File::getCurrentWorkingDirectory()
+                                                            .getChildFile (commandLine), true);
     }
 
     void shutdown()

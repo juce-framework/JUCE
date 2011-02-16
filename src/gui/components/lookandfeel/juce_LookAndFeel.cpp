@@ -1729,12 +1729,10 @@ void LookAndFeel::drawTooltip (Graphics& g, const String& text, int width, int h
 {
     g.fillAll (findColour (TooltipWindow::backgroundColourId));
 
-    const Colour textCol (findColour (TooltipWindow::textColourId));
-
-#if ! JUCE_MAC // The mac windows already have a non-optional 1 pix outline, so don't double it here..
+   #if ! JUCE_MAC // The mac windows already have a non-optional 1 pix outline, so don't double it here..
     g.setColour (findColour (TooltipWindow::outlineColourId));
     g.drawRect (0, 0, width, height, 1);
-#endif
+   #endif
 
     const TextLayout tl (LookAndFeelHelpers::layoutTooltipText (text));
 

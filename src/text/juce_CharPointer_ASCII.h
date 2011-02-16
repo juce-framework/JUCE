@@ -367,7 +367,7 @@ public:
     {
         while (--maxBytesToRead >= 0)
         {
-            if (*dataToTest <= 0)
+            if (((signed char) *dataToTest) <= 0)
                 return *dataToTest == 0;
 
             ++dataToTest;

@@ -110,6 +110,7 @@ void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
 
 void FilenameComponent::buttonClicked (Button*)
 {
+   #if JUCE_MODAL_LOOPS_PERMITTED
     FileChooser fc (TRANS("Choose a new file"),
                     getCurrentFile() == File::nonexistent ? defaultBrowseFile
                                                           : getCurrentFile(),
@@ -121,6 +122,9 @@ void FilenameComponent::buttonClicked (Button*)
     {
         setCurrentFile (fc.getResult(), true);
     }
+   #else
+    jassertfalse; // needs rewriting to deal with non-modal environments
+   #endif
 }
 
 void FilenameComponent::comboBoxChanged (ComboBox*)

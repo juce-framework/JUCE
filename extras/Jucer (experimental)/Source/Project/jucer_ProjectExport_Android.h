@@ -112,7 +112,8 @@ public:
             writeXmlOrThrow (*manifest, target.getChildFile ("AndroidManifest.xml"), "utf-8", 100);
         }
 
-        writeJNIMakefile (jniFolder.getChildFile ("Android.mk"));
+        writeApplicationMk (jniFolder.getChildFile ("Application.mk"));
+        writeAndroidMk (jniFolder.getChildFile ("Android.mk"));
 
         {
             ScopedPointer<XmlElement> antBuildXml (createAntBuildXML());
@@ -178,7 +179,20 @@ private:
         }
     }
 
-    void writeJNIMakefile (const File& file)
+    void writeApplicationMk (const File& file)
+    {
+        MemoryOutputStream mo;
+
+        mo << "# Automatically generated makefile, created by the Jucer" << newLine
+           << "# Don't edit this file! Your changes will be overwritten when you re-save the Jucer project!" << newLine
+           << newLine
+           << "APP_STL := stlport_static" << newLine
+           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine;
+
+        overwriteFileIfDifferentOrThrow (file, mo);
+    }
+
+    void writeAndroidMk (const File& file)
     {
         Array<RelativePath> files;
         findAllFilesToCompile (project.getMainGroup(), files);
@@ -188,12 +202,12 @@ private:
                 files.add (juceWrapperFiles.getReference(i));
 
         MemoryOutputStream mo;
-        writeJNIMakefile (mo, files);
+        writeAndroidMk (mo, files);
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
 
-    void writeJNIMakefile (OutputStream& out, const Array<RelativePath>& files)
+    void writeAndroidMk (OutputStream& out, const Array<RelativePath>& files)
     {
         out << "# Automatically generated makefile, created by the Jucer" << newLine
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Jucer project!" << newLine
@@ -209,20 +223,23 @@ private:
         for (int i = 0; i < files.size(); ++i)
             out << "  ../" << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
-        String cFlags ("-fsigned-char");
-
         out << newLine
             << "ifeq ($(CONFIG),Debug)" << newLine
-            << "  LOCAL_CFLAGS += -g " << cFlags << createPreprocessorDefs (true) << newLine
+            << "  LOCAL_CPPFLAGS += " << createCPPFlags (true) << newLine
             << "else" << newLine
-            << "  LOCAL_CFLAGS += " << cFlags << createPreprocessorDefs (false) << newLine
+            << "  LOCAL_CPPFLAGS += " << createCPPFlags (false) << newLine
             << "endif" << newLine
             << newLine
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
     }
 
-    const String createPreprocessorDefs (bool forDebug)
+    const String createCPPFlags (bool forDebug)
     {
+        String flags ("-fsigned-char -fexceptions -frtti");
+
+        if (forDebug)
+            flags << " -g";
+
         StringPairArray defines;
         defines.set ("JUCE_ANDROID", "1");
 
@@ -242,12 +259,14 @@ private:
 
             if (config.isDebug() == forDebug)
             {
+                flags << " -O" << config.getGCCOptimisationFlag();
+
                 defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
                 break;
             }
         }
 
-        return createGCCPreprocessorFlags (defines);
+        return flags + createGCCPreprocessorFlags (defines);
     }
 
     //==============================================================================

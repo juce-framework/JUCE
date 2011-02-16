@@ -97,6 +97,7 @@ public:
     ~FileChooserDialogBox();
 
     //==============================================================================
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Displays and runs the dialog box modally.
 
         This will show the box with the specified size, returning true if the user
@@ -114,6 +115,7 @@ public:
         Leave the width or height as 0 to use the default size.
     */
     bool showAt (int x, int y, int width, int height);
+   #endif
 
     /** Sets the size of this dialog box to its default and positions it either in the
         centre of the screen, or centred around a component that is provided.
