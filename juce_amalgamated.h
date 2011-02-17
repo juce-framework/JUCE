@@ -24103,7 +24103,7 @@ public:
 		const Point<ValueType> delta (end - start);
 		const double length = juce_hypot ((double) delta.getX(),
 										  (double) delta.getY());
-		if (length == 0)
+		if (length <= 0)
 			return start;
 
 		return Point<ValueType> (start.getX() + (ValueType) ((delta.getX() * distanceFromStart - delta.getY() * perpendicularDistance) / length),
@@ -27692,8 +27692,8 @@ private:
 			: position (position_), colour (colour_)
 		{}
 
-		bool operator== (const ColourPoint& other) const throw()   { return position == other.position && colour == other.colour; }
-		bool operator!= (const ColourPoint& other) const throw()   { return position != other.position || colour != other.colour; }
+		bool operator== (const ColourPoint& other) const throw();
+		bool operator!= (const ColourPoint& other) const throw();
 
 		double position;
 		Colour colour;
@@ -65679,8 +65679,7 @@ public:
 	int subPathIndex;
 
 	/** Returns true if the current segment is the last in the current sub-path. */
-	bool isLastInSubpath() const throw()	{ return stackPos == stackBase.getData()
-														   && (index >= path.numElements || points [index] == Path::moveMarker); }
+	bool isLastInSubpath() const throw();
 
 	/** This is the default value that should be used for the tolerance value (see the constructor parameters). */
 	static const float defaultTolerance;

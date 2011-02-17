@@ -60,7 +60,7 @@ void ResizableEdgeComponent::paint (Graphics& g)
                                                       isMouseOver(), isMouseButtonDown());
 }
 
-void ResizableEdgeComponent::mouseDown (const MouseEvent& e)
+void ResizableEdgeComponent::mouseDown (const MouseEvent&)
 {
     if (component == 0)
     {

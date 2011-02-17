@@ -163,8 +163,8 @@ private:
             : position (position_), colour (colour_)
         {}
 
-        bool operator== (const ColourPoint& other) const throw()   { return position == other.position && colour == other.colour; }
-        bool operator!= (const ColourPoint& other) const throw()   { return position != other.position || colour != other.colour; }
+        bool operator== (const ColourPoint& other) const throw();
+        bool operator!= (const ColourPoint& other) const throw();
 
         double position;
         Colour colour;

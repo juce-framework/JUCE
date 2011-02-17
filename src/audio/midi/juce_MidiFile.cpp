@@ -150,7 +150,6 @@ namespace MidiFileHelpers
                         break;
                     }
                 }
-
             }
 
             return correctedTempoTime + (time - tempoTime) * secsPerTick;
@@ -169,19 +168,16 @@ namespace MidiFileHelpers
         {
             const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
 
-            if (diff == 0)
-            {
-                if (first->message.isNoteOff() && second->message.isNoteOn())
-                    return -1;
-                else if (first->message.isNoteOn() && second->message.isNoteOff())
-                    return 1;
-                else
-                    return 0;
-            }
-            else
-            {
-                return (diff > 0) ? 1 : -1;
-            }
+            if (diff > 0)
+                return 1;
+            else if (diff < 0)
+                return -1;
+            else if (first->message.isNoteOff() && second->message.isNoteOn())
+                return -1;
+            else if (first->message.isNoteOn() && second->message.isNoteOff())
+                return 1;
+
+            return 0;
         }
     };
 }

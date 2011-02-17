@@ -426,7 +426,7 @@ AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in,
 {
     ScopedPointer <OggReader> r (new OggReader (in));
 
-    if (r->sampleRate != 0)
+    if (r->sampleRate > 0)
         return r.release();
 
     if (! deleteStreamIfOpeningFails)

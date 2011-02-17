@@ -83,6 +83,8 @@ public:
     void addPluginsToMenu (PopupMenu& m) const;
     const PluginDescription* getChosenType (const int menuID) const;
 
+    GraphDocumentComponent* getGraphEditor() const;
+
 private:
     //==============================================================================
     AudioDeviceManager deviceManager;
@@ -92,7 +94,6 @@ private:
     KnownPluginList::SortMethod pluginSortMethod;
 
     void showAudioSettings();
-    GraphDocumentComponent* getGraphEditor() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainHostWindow);
 };

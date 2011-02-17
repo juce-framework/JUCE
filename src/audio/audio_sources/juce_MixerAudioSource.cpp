@@ -59,7 +59,7 @@ void MixerAudioSource::addInputSource (AudioSource* input, const bool deleteWhen
             localBufferSize = bufferSizeExpected;
         }
 
-        if (localRate != 0.0)
+        if (localRate > 0.0)
             input->prepareToPlay (localBufferSize, localRate);
 
         const ScopedLock sl (lock);

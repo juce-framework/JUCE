@@ -48,7 +48,7 @@ public:
     {
     }
 
-    void initialise (const String& /*commandLine*/)
+    void initialise (const String& commandLine)
     {
         // initialise our settings file..
         ApplicationProperties::getInstance()

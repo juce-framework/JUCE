@@ -339,7 +339,7 @@ void Colour::getHSB (float& h, float& s, float& v) const throw()
     {
         s = (hi - lo) / (float) hi;
 
-        if (s != 0)
+        if (s > 0)
         {
             const float invDiff = 1.0f / (hi - lo);
 

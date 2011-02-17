@@ -280,10 +280,13 @@ public:
             {
                 if (destSamples[j] != 0)
                 {
-                    const short* const src = ((const short*) bufferList->mBuffers[0].mData) + j;
+                    const short* src = ((const short*) bufferList->mBuffers[0].mData) + j;
 
                     for (int i = 0; i < samplesReceived; ++i)
-                        destSamples[j][startOffsetInDestBuffer + i] = src [i << 1] << 16;
+                    {
+                        destSamples[j][startOffsetInDestBuffer + i] = (*src << 16);
+                        src += numChannels;
+                    }
                 }
             }
 

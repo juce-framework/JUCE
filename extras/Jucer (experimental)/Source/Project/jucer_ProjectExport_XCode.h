@@ -98,6 +98,14 @@ public:
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false));
             props.getLast()->setTooltip ("A comma-separated list of file extensions for documents that your app can open.");
         }
+        else if (iPhone)
+        {
+            props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"));
+            props.getLast()->setTooltip ("Enable this to expose your app's files to iTunes.");
+
+            props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"));
+            props.getLast()->setTooltip ("Enable this to disable the status bar in your app.");
+        }
     }
 
     void launchProject()
@@ -326,6 +334,9 @@ private:
         XmlElement plist ("plist");
         XmlElement* dict = plist.createNewChildElement ("dict");
 
+        if (iPhone)
+            addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
         addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String::empty);
         addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
@@ -369,6 +380,12 @@ private:
                 addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
             }
         }
+
+        if (getSetting ("UIFileSharingEnabled").getValue())
+            addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
+
+        if (getSetting ("UIStatusBarHidden").getValue())
+            addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
         MemoryOutputStream mo;
         plist.writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
@@ -728,6 +745,12 @@ private:
     {
         xml->createNewChildElement ("key")->addTextElement (key);
         xml->createNewChildElement ("string")->addTextElement (value);
+    }
+
+    static void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
+    {
+        xml->createNewChildElement ("key")->addTextElement (key);
+        xml->createNewChildElement (value ? "true" : "false");
     }
 
     const String addBuildFile (const RelativePath& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings)

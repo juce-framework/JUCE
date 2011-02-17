@@ -468,7 +468,7 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
     {
         const double sr = currentAudioDevice->getSampleRate (i);
 
-        if (sr >= 44100.0 && (lowestAbove44 == 0 || sr < lowestAbove44))
+        if (sr >= 44100.0 && (lowestAbove44 < 1.0 || sr < lowestAbove44))
             lowestAbove44 = sr;
     }
 

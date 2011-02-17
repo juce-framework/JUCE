@@ -219,5 +219,15 @@ bool ColourGradient::isInvisible() const throw()
     return true;
 }
 
+bool ColourGradient::ColourPoint::operator== (const ColourPoint& other) const throw()
+{
+    return position == other.position && colour == other.colour;
+}
+
+bool ColourGradient::ColourPoint::operator!= (const ColourPoint& other) const throw()
+{
+    return position != other.position || colour != other.colour;
+}
+
 
 END_JUCE_NAMESPACE

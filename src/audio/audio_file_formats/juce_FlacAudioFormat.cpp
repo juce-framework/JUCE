@@ -507,7 +507,7 @@ AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in,
 {
     ScopedPointer<FlacReader> r (new FlacReader (in));
 
-    if (r->sampleRate != 0)
+    if (r->sampleRate > 0)
         return r.release();
 
     if (! deleteStreamIfOpeningFails)

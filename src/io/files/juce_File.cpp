@@ -118,7 +118,13 @@ const String File::parseAbsolutePath (const String& p)
     }
 #else
     // Mac or Linux..
-    String path (p.replaceCharacter ('\\', '/'));
+
+    // Yes, I know it's legal for a unix pathname to contain a backslash, but this assertion is here
+    // to catch anyone who's trying to run code that was written on Windows with hard-coded path names.
+    // If that's why you've ended up here, use File::getChildFile() to build your paths instead.
+    jassert ((! p.containsChar ('\\')) || (p.indexOfChar ('/') >= 0 && p.indexOfChar ('/') < p.indexOfChar ('\\')));
+
+    String path (p);
 
     if (path.startsWithChar ('~'))
     {
@@ -364,11 +370,11 @@ bool File::isAChildOf (const File& potentialParent) const
 bool File::isAbsolutePath (const String& path)
 {
     return path.startsWithChar ('/') || path.startsWithChar ('\\')
-#if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             || (path.isNotEmpty() && path[1] == ':');
-#else
+           #else
             || path.startsWithChar ('~');
-#endif
+           #endif
 }
 
 const File File::getChildFile (String relativePath) const
@@ -385,11 +391,12 @@ const File File::getChildFile (String relativePath) const
 
         if (relativePath[0] == '.')
         {
-#if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             relativePath = relativePath.replaceCharacter ('/', '\\').trimStart();
-#else
-            relativePath = relativePath.replaceCharacter ('\\', '/').trimStart();
-#endif
+           #else
+            relativePath = relativePath.trimStart();
+           #endif
+
             while (relativePath[0] == '.')
             {
                 if (relativePath[1] == '.')

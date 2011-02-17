@@ -77,7 +77,7 @@ public:
             owner.repaint();
     }
 
-    void applyNewBounds (const Rectangle<int>& newBounds)
+    void applyNewBounds (const Rectangle<int>&)
     {
         jassertfalse; // drawables can't be resized directly!
     }

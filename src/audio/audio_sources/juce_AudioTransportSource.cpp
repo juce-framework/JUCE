@@ -94,7 +94,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
         newPositionableSource->setNextReadPosition (0);
 
-        if (sourceSampleRateToCorrectFor != 0)
+        if (sourceSampleRateToCorrectFor > 0)
             newMasterSource = newResamplerSource
                 = new ResamplingAudioSource (newPositionableSource, false, maxNumChannels);
         else
@@ -237,7 +237,7 @@ void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected,
     if (masterSource != 0)
         masterSource->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
-    if (resamplerSource != 0 && sourceSampleRate != 0)
+    if (resamplerSource != 0 && sourceSampleRate > 0)
         resamplerSource->setResamplingRatio (sourceSampleRate / sampleRate);
 
     isPrepared = true;
