@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	33
+#define JUCE_BUILDNUMBER	34
 
 /** Current Juce version number.
 
@@ -30133,6 +30133,13 @@ public:
 		@see setBounds, RelativeRectangle::applyToComponent(), Expression
 	*/
 	void setBounds (const RelativeRectangle& newBounds);
+
+	/** Sets the component's bounds with an expression.
+		The string is parsed as a RelativeRectangle expression - see the notes for
+		Component::setBounds (const RelativeRectangle&) for more information. This method is
+		basically just a shortcut for writing setBounds (RelativeRectangle ("..."))
+	*/
+	void setBounds (const String& newBoundsExpression);
 
 	/** Changes the component's position and size in terms of fractions of its parent's size.
 

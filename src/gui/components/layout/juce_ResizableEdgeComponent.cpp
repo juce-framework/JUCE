@@ -86,10 +86,10 @@ void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
 
     switch (edge)
     {
-        case leftEdge:      bounds.setLeft (bounds.getX() + e.getDistanceFromDragStartX()); break;
-        case rightEdge:     bounds.setWidth (bounds.getWidth() + e.getDistanceFromDragStartX()); break;
-        case topEdge:       bounds.setTop (bounds.getY() + e.getDistanceFromDragStartY()); break;
-        case bottomEdge:    bounds.setHeight (bounds.getHeight() + e.getDistanceFromDragStartY()); break;
+        case leftEdge:      bounds.setLeft (jmin (bounds.getRight(), bounds.getX() + e.getDistanceFromDragStartX())); break;
+        case rightEdge:     bounds.setWidth (jmax (0, bounds.getWidth() + e.getDistanceFromDragStartX())); break;
+        case topEdge:       bounds.setTop (jmin (bounds.getBottom(), bounds.getY() + e.getDistanceFromDragStartY())); break;
+        case bottomEdge:    bounds.setHeight (jmax (0, bounds.getHeight() + e.getDistanceFromDragStartY())); break;
         default:            jassertfalse; break;
     }
 

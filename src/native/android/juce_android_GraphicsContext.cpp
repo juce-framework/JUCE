@@ -250,7 +250,7 @@ public:
 
     void setInterpolationQuality (Graphics::ResamplingQuality quality)
     {
-        // TODO xxx
+        currentState->setInterpolationQuality (quality);
     }
 
     //==============================================================================
@@ -399,24 +399,36 @@ public:
 
     void beginTransparencyLayer (float opacity)
     {
-        // TODO xxx
+        Rectangle<int> clip (getClipBounds());
+
+        (void) canvas.callIntMethod (android.saveLayerAlpha,
+                                     (float) clip.getX(),
+                                     (float) clip.getY(),
+                                     (float) clip.getRight(),
+                                     (float) clip.getBottom(),
+                                     jlimit (0, 255, roundToInt (opacity * 255.0f)),
+                                     31 /*ALL_SAVE_FLAG*/);
+
+        stateStack.add (new SavedState (*currentState));
     }
 
     void endTransparencyLayer()
     {
-        // TODO xxx
+        restoreState();
     }
 
     class SavedState
     {
     public:
         SavedState()
-            : font (1.0f), fillNeedsUpdate (true), typefaceNeedsUpdate (true)
+            : font (1.0f), quality (Graphics::highResamplingQuality),
+              fillNeedsUpdate (true), typefaceNeedsUpdate (true)
         {
         }
 
         SavedState (const SavedState& other)
-            : fillType (other.fillType), font (other.font), fillNeedsUpdate (true), typefaceNeedsUpdate (true)
+            : fillType (other.fillType), font (other.font), quality (other.quality),
+              fillNeedsUpdate (true), typefaceNeedsUpdate (true)
         {
         }
 
@@ -432,6 +444,16 @@ public:
             fillType.colour = fillType.colour.withAlpha (alpha);
         }
 
+        void setInterpolationQuality (Graphics::ResamplingQuality quality_)
+        {
+            if (quality != quality_)
+            {
+                quality = quality_;
+                fillNeedsUpdate = true;
+                paint.clear();
+            }
+        }
+
         jobject getPaint()
         {
             if (fillNeedsUpdate)
@@ -439,7 +461,7 @@ public:
                 JNIEnv* env = getEnv();
 
                 if (paint.get() == 0)
-                    paint = GlobalRef (android.createPaint());
+                    paint = GlobalRef (android.createPaint (quality));
 
                 if (fillType.isColour())
                 {
@@ -523,6 +545,11 @@ public:
                 {
                     paint.callObjectMethod (android.setTypeface, atf->typeface.get());
                     paint.callVoidMethod (android.setTextSize, font.getHeight());
+
+                    const float hScale = font.getHorizontalScale();
+
+                    if (hScale < 0.99f || hScale > 1.01f)
+                        paint.callVoidMethod (android.setTextScaleX, hScale);
                 }
 
                 fillNeedsUpdate = true;
@@ -544,6 +571,7 @@ public:
         Font font;
         GlobalRef paint;
         bool fillNeedsUpdate, typefaceNeedsUpdate;
+        Graphics::ResamplingQuality quality;
     };
 
 private:

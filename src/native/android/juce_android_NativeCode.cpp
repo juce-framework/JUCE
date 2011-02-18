@@ -172,6 +172,7 @@ BEGIN_JUCE_NAMESPACE
  METHOD (paintClass, descent, "descent", "()F") \
  METHOD (paintClass, setTextSize, "setTextSize", "(F)V") \
  METHOD (paintClass, getTextWidths, "getTextWidths", "(Ljava/lang/String;[F)I") \
+ METHOD (paintClass, setTextScaleX, "setTextScaleX", "(F)V") \
 \
  METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
  STATICFIELD (shaderTileModeClass, clampMode, "CLAMP", "Landroid/graphics/Shader$TileMode;") \
@@ -194,6 +195,7 @@ BEGIN_JUCE_NAMESPACE
  METHOD (matrixClass, setValues, "setValues", "([F)V") \
 \
  STATICMETHOD (typefaceClass, create, "create", "(Ljava/lang/String;I)Landroid/graphics/Typeface;") \
+ STATICMETHOD (typefaceClass, createFromFile, "createFromFile", "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
 \
  METHOD (rectClass, rectConstructor, "<init>", "(IIII)V") \
  FIELD (rectClass, rectLeft, "left", "I") \
@@ -519,12 +521,15 @@ public:
     String appFile, appDataDir;
     int screenWidth, screenHeight;
 
-    jobject createPaint()
+    jobject createPaint (Graphics::ResamplingQuality quality)
     {
-        const jint constructorFlags = 1 /*ANTI_ALIAS_FLAG*/
-                                    | 2 /*FILTER_BITMAP_FLAG*/
-                                    | 4 /*DITHER_FLAG*/
-                                    | 128 /*SUBPIXEL_TEXT_FLAG*/;
+        jint constructorFlags = 1 /*ANTI_ALIAS_FLAG*/
+                                | 4 /*DITHER_FLAG*/
+                                | 128 /*SUBPIXEL_TEXT_FLAG*/;
+
+        if (quality > Graphics::lowResamplingQuality)
+            constructorFlags |= 2; /*FILTER_BITMAP_FLAG*/
+
         return getEnv()->NewObject (paintClass, paintClassConstructor, constructorFlags);
     }
 

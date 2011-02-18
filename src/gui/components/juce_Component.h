@@ -526,6 +526,13 @@ public:
     */
     void setBounds (const RelativeRectangle& newBounds);
 
+    /** Sets the component's bounds with an expression.
+        The string is parsed as a RelativeRectangle expression - see the notes for
+        Component::setBounds (const RelativeRectangle&) for more information. This method is
+        basically just a shortcut for writing setBounds (RelativeRectangle ("..."))
+    */
+    void setBounds (const String& newBoundsExpression);
+
     /** Changes the component's position and size in terms of fractions of its parent's size.
 
         The values are factors of the parent's size, so for example

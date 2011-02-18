@@ -1095,6 +1095,11 @@ void Component::setBounds (const RelativeRectangle& newBounds)
     newBounds.applyToComponent (*this);
 }
 
+void Component::setBounds (const String& newBoundsExpression)
+{
+    setBounds (RelativeRectangle (newBoundsExpression));
+}
+
 void Component::setBoundsRelative (const float x, const float y,
                                    const float w, const float h)
 {

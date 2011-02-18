@@ -91,12 +91,12 @@ void ProjectContentComponent::setProject (Project* newProject)
             if (lastTreeWidth.getIntValue() < 150)
                 lastTreeWidth = "250";
 
-            projectTree->setBounds (RelativeRectangle ("0, 0, left + " + lastTreeWidth + ", parent.height"));
+            projectTree->setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
 
             addAndMakeVisible (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer,
                                                                         ResizableEdgeComponent::rightEdge));
             resizerBar->setComponentID ("resizer");
-            resizerBar->setBounds (RelativeRectangle ("tree.right, 0, tree.right + 4, parent.height"));
+            resizerBar->setBounds ("tree.right, 0, tree.right + 4, parent.height");
 
             project->addChangeListener (this);
 
@@ -160,7 +160,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
         contentView = editor;
         currentDocument = doc;
         addAndMakeVisible (editor);
-        editor->setBounds (RelativeRectangle ("resizer.right, 0, parent.right, parent.height"));
+        editor->setBounds ("resizer.right, 0, parent.right, parent.height");
 
         updateMainWindowTitle();
         commandManager->commandStatusChanged();

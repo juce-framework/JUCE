@@ -698,6 +698,7 @@ public:
 
     ~ALSAAudioIODevice()
     {
+        close();
     }
 
     const StringArray getOutputChannelNames()       { return internal.channelNamesOut; }

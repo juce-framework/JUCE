@@ -901,6 +901,8 @@ public:
 
     ~CoreAudioIODevice()
     {
+        close();
+
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioObjectPropertySelectorWildcard;
         pa.mScope = kAudioObjectPropertyScopeWildcard;

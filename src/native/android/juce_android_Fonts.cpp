@@ -63,10 +63,16 @@ public:
         if (font.isBold()) flags = 1;
         if (font.isItalic()) flags += 2;
 
-        typeface = GlobalRef (getEnv()->CallStaticObjectMethod (android.typefaceClass, android.create,
-                                                                javaString (getName()).get(), flags));
+        File fontFile (File ("/system/fonts").getChildFile (name).withFileExtension (".ttf"));
 
-        paint = GlobalRef (android.createPaint());
+        if (fontFile.exists())
+            typeface = GlobalRef (getEnv()->CallStaticObjectMethod (android.typefaceClass, android.createFromFile,
+                                                                    javaString (fontFile.getFullPathName()).get()));
+        else
+            typeface = GlobalRef (getEnv()->CallStaticObjectMethod (android.typefaceClass, android.create,
+                                                                    javaString (getName()).get(), flags));
+
+        paint = GlobalRef (android.createPaint (Graphics::highResamplingQuality));
         const LocalRef<jobject> ignored (paint.callObjectMethod (android.setTypeface, typeface.get()));
 
         const float standardSize = 256.0f;

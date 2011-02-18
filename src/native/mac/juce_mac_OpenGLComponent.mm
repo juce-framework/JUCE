@@ -137,36 +137,28 @@ public:
         : renderContext (0),
           pixelFormat (pixelFormat_)
     {
-        NSOpenGLPixelFormatAttribute attribs [64];
-        int n = 0;
-        attribs[n++] = NSOpenGLPFADoubleBuffer;
-        attribs[n++] = NSOpenGLPFAAccelerated;
-        attribs[n++] = NSOpenGLPFAMPSafe; // NSOpenGLPFAAccelerated, NSOpenGLPFAMultiScreen, NSOpenGLPFASingleRenderer
-        attribs[n++] = NSOpenGLPFAColorSize;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) jmax (pixelFormat.redBits,
-                                                            pixelFormat.greenBits,
-                                                            pixelFormat.blueBits);
-        attribs[n++] = NSOpenGLPFAAlphaSize;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) pixelFormat.alphaBits;
-        attribs[n++] = NSOpenGLPFADepthSize;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) pixelFormat.depthBufferBits;
-        attribs[n++] = NSOpenGLPFAStencilSize;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) pixelFormat.stencilBufferBits;
-        attribs[n++] = NSOpenGLPFAAccumSize;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) jmax (pixelFormat.accumulationBufferRedBits,
-                                                            pixelFormat.accumulationBufferGreenBits,
-                                                            pixelFormat.accumulationBufferBlueBits,
-                                                            pixelFormat.accumulationBufferAlphaBits);
+        NSOpenGLPixelFormatAttribute attribs[] =
+        {
+            NSOpenGLPFADoubleBuffer,
+            NSOpenGLPFAAccelerated,
+            NSOpenGLPFAMPSafe,
+            NSOpenGLPFAClosestPolicy,
+            NSOpenGLPFANoRecovery,
+            NSOpenGLPFAColorSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.redBits
+                                                                        + pixelFormat.greenBits
+                                                                        + pixelFormat.blueBits),
+            NSOpenGLPFAAlphaSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.alphaBits,
+            NSOpenGLPFADepthSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.depthBufferBits,
+            NSOpenGLPFAStencilSize, (NSOpenGLPixelFormatAttribute) pixelFormat.stencilBufferBits,
+            NSOpenGLPFAAccumSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.accumulationBufferRedBits
+                                                                        + pixelFormat.accumulationBufferGreenBits
+                                                                        + pixelFormat.accumulationBufferBlueBits
+                                                                        + pixelFormat.accumulationBufferAlphaBits),
+            NSOpenGLPFASampleBuffers, (NSOpenGLPixelFormatAttribute) 1,
+            0
+        };
 
-        // xxx not sure how to do fullSceneAntiAliasingNumSamples..
-        attribs[n++] = NSOpenGLPFASampleBuffers;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) 1;
-        attribs[n++] = NSOpenGLPFAClosestPolicy;
-        attribs[n++] = NSOpenGLPFANoRecovery;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) 0;
-
-        NSOpenGLPixelFormat* format
-            = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];
+        NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];
 
         view = [[ThreadSafeNSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                                  pixelFormat: format];
@@ -295,39 +287,46 @@ void juce_glViewport (const int w, const int h)
     glViewport (0, 0, w, h);
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
-                                                  OwnedArray <OpenGLPixelFormat>& /*results*/)
+static int getPixelFormatAttribute (NSOpenGLPixelFormat* p, NSOpenGLPixelFormatAttribute att)
 {
-/*    GLint attribs [64];
-    int n = 0;
-    attribs[n++] = AGL_RGBA;
-    attribs[n++] = AGL_DOUBLEBUFFER;
-    attribs[n++] = AGL_ACCELERATED;
-    attribs[n++] = AGL_NO_RECOVERY;
-    attribs[n++] = AGL_NONE;
+    GLint val = 0;
+    [p getValues: &val forAttribute: att forVirtualScreen: 0];
+    return (int) val;
+}
 
-    AGLPixelFormat p = aglChoosePixelFormat (0, 0, attribs);
+void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
+                                                  OwnedArray <OpenGLPixelFormat>& results)
+{
+    NSOpenGLPixelFormatAttribute attributes[] =
+    {
+        NSOpenGLPFAWindow,
+        NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFAAccelerated,
+        NSOpenGLPFANoRecovery,
+        NSOpenGLPFADepthSize,  (NSOpenGLPixelFormatAttribute) 16,
+        NSOpenGLPFAAlphaSize,  (NSOpenGLPixelFormatAttribute) 8,
+        NSOpenGLPFAColorSize,  (NSOpenGLPixelFormatAttribute) 24,
+        NSOpenGLPFAAccumSize,  (NSOpenGLPixelFormatAttribute) 32,
+        0
+    };
 
-    while (p != 0)
+    NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attributes];
+
+    if (format != nil)
     {
         OpenGLPixelFormat* const pf = new OpenGLPixelFormat();
-        pf->redBits = getAGLAttribute (p, AGL_RED_SIZE);
-        pf->greenBits = getAGLAttribute (p, AGL_GREEN_SIZE);
-        pf->blueBits = getAGLAttribute (p, AGL_BLUE_SIZE);
-        pf->alphaBits = getAGLAttribute (p, AGL_ALPHA_SIZE);
-        pf->depthBufferBits = getAGLAttribute (p, AGL_DEPTH_SIZE);
-        pf->stencilBufferBits = getAGLAttribute (p, AGL_STENCIL_SIZE);
-        pf->accumulationBufferRedBits = getAGLAttribute (p, AGL_ACCUM_RED_SIZE);
-        pf->accumulationBufferGreenBits = getAGLAttribute (p, AGL_ACCUM_GREEN_SIZE);
-        pf->accumulationBufferBlueBits = getAGLAttribute (p, AGL_ACCUM_BLUE_SIZE);
-        pf->accumulationBufferAlphaBits = getAGLAttribute (p, AGL_ACCUM_ALPHA_SIZE);
 
+        pf->redBits = pf->greenBits = pf->blueBits = getPixelFormatAttribute (format, NSOpenGLPFAColorSize) / 3;
+        pf->alphaBits = getPixelFormatAttribute (format, NSOpenGLPFAAlphaSize);
+        pf->depthBufferBits = getPixelFormatAttribute (format, NSOpenGLPFADepthSize);
+        pf->stencilBufferBits = getPixelFormatAttribute (format, NSOpenGLPFAStencilSize);
+        pf->accumulationBufferRedBits = pf->accumulationBufferGreenBits
+            = pf->accumulationBufferBlueBits = pf->accumulationBufferAlphaBits
+            = getPixelFormatAttribute (format, NSOpenGLPFAAccumSize) / 4;
+
+        [format release];
         results.add (pf);
-
-        p = aglNextPixelFormat (p);
-    }*/
-
-    //jassertfalse  // can't see how you do this in cocoa!
+    }
 }
 
 #else
