@@ -67,6 +67,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../events/juce_MessageManager.h"
 #include "../../containers/juce_ReferenceCountedArray.h"
 #include "../../gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
+#include "../../gui/graphics/contexts/juce_EdgeTable.h"
 #include "../../gui/graphics/imaging/juce_ImageFileFormat.h"
 #include "../../gui/graphics/imaging/juce_CameraDevice.h"
 #include "../../gui/components/windows/juce_AlertWindow.h"

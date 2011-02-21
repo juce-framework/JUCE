@@ -2405,23 +2405,14 @@ public:
         font = newFont;
         snapToIntegerCoordinate = newFont.getTypeface()->isHinted();
         glyph = glyphNumber;
-        edgeTable = 0;
 
-        Path glyphPath;
-        font.getTypeface()->getOutlineForGlyph (glyphNumber, glyphPath);
-
-        if (! glyphPath.isEmpty())
-        {
-            const float fontHeight = font.getHeight();
-            const AffineTransform transform (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-#if JUCE_MAC || JUCE_IOS
-                                                             .translated (0.0f, -0.5f)
-#endif
-                                             );
-
-            edgeTable = new EdgeTable (glyphPath.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                                       glyphPath, transform);
-        }
+        const float fontHeight = font.getHeight();
+        edgeTable = font.getTypeface()->getEdgeTableForGlyph (glyphNumber,
+                                                              AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                                                            #if JUCE_MAC || JUCE_IOS
+                                                                              .translated (0.0f, -0.5f)
+                                                                            #endif
+                                                              );
     }
 
     Font font;
@@ -2531,9 +2522,12 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
     }
     else
     {
-        Path p;
-        f.getTypeface()->getOutlineForGlyph (glyphNumber, p);
-        fillPath (p, AffineTransform::scale (f.getHeight() * f.getHorizontalScale(), f.getHeight()).followedBy (transform));
+        const float fontHeight = f.getHeight();
+        const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber,
+                                                                                  AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
+                                                                                                  .followedBy (transform)));
+        if (et != 0)
+            currentState->fillEdgeTable (*et, 0.0f, 0);
     }
 }
 

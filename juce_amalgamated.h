@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	34
+#define JUCE_BUILDNUMBER	35
 
 /** Current Juce version number.
 
@@ -10010,20 +10010,7 @@ public:
 								treated as empty strings
 		@param numberOfStrings  how many items there are in the array
 	*/
-	StringArray (const juce_wchar* const* strings, int numberOfStrings);
-
-	/** Creates a copy of an array of string literals.
-		@param strings	  an array of strings to add. Null pointers in the array will be
-								treated as empty strings
-		@param numberOfStrings  how many items there are in the array
-	*/
 	StringArray (const char* const* strings, int numberOfStrings);
-
-	/** Creates a copy of a null-terminated array of string literals.
-		Each item from the array passed-in is added, until it encounters a null pointer,
-		at which point it stops.
-	*/
-	explicit StringArray (const juce_wchar* const* strings);
 
 	/** Creates a copy of a null-terminated array of string literals.
 
@@ -10031,6 +10018,34 @@ public:
 		at which point it stops.
 	*/
 	explicit StringArray (const char* const* strings);
+
+	/** Creates a copy of a null-terminated array of string literals.
+		Each item from the array passed-in is added, until it encounters a null pointer,
+		at which point it stops.
+	*/
+	explicit StringArray (const juce_wchar* const* strings);
+
+	/** Creates a copy of an array of string literals.
+		@param strings	  an array of strings to add. Null pointers in the array will be
+								treated as empty strings
+		@param numberOfStrings  how many items there are in the array
+	*/
+	StringArray (const juce_wchar* const* strings, int numberOfStrings);
+
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
+	/** Creates a copy of a null-terminated array of string literals.
+		Each item from the array passed-in is added, until it encounters a null pointer,
+		at which point it stops.
+	*/
+	explicit StringArray (const wchar_t* const* strings);
+
+	/** Creates a copy of an array of string literals.
+		@param strings	  an array of strings to add. Null pointers in the array will be
+								treated as empty strings
+		@param numberOfStrings  how many items there are in the array
+	*/
+	StringArray (const wchar_t* const* strings, int numberOfStrings);
+   #endif
 
 	/** Destructor. */
 	~StringArray();
@@ -25870,6 +25885,7 @@ private:
 /*** End of inlined file: juce_Path.h ***/
 
 class Font;
+class EdgeTable;
 
 /** A typeface represents a size-independent font.
 
@@ -25943,6 +25959,9 @@ public:
 		The path returned will be normalised to a font height of 1.0.
 	*/
 	virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
+
+	/** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
+	virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 
 	/** Returns true if the typeface uses hinting. */
 	virtual bool isHinted() const			   { return false; }
@@ -26039,6 +26058,7 @@ public:
 	float getStringWidth (const String& text);
 	void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
 	bool getOutlineForGlyph (int glyphNumber, Path& path);
+	EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
 	int getGlyphForCharacter (juce_wchar character);
 
 protected:

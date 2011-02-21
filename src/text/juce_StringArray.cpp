@@ -45,35 +45,55 @@ StringArray::StringArray (const String& firstValue)
     strings.add (firstValue);
 }
 
-StringArray::StringArray (const juce_wchar* const* const initialStrings,
-                          const int numberOfStrings)
+namespace StringArrayHelpers
 {
-    for (int i = 0; i < numberOfStrings; ++i)
-        strings.add (initialStrings [i]);
-}
+    template <typename CharType>
+    void addArray (Array<String>& dest, const CharType* const* strings)
+    {
+        if (strings != 0)
+            while (*strings != 0)
+                dest.add (*strings++);
+    }
 
-StringArray::StringArray (const char* const* const initialStrings,
-                          const int numberOfStrings)
-{
-    for (int i = 0; i < numberOfStrings; ++i)
-        strings.add (initialStrings [i]);
-}
-
-StringArray::StringArray (const juce_wchar* const* const initialStrings)
-{
-    int i = 0;
-
-    while (initialStrings[i] != 0)
-        strings.add (initialStrings [i++]);
+    template <typename CharType>
+    void addArray (Array<String>& dest, const CharType* const* const strings, const int numberOfStrings)
+    {
+        for (int i = 0; i < numberOfStrings; ++i)
+            dest.add (strings [i]);
+    }
 }
 
 StringArray::StringArray (const char* const* const initialStrings)
 {
-    int i = 0;
-
-    while (initialStrings[i] != 0)
-        strings.add (initialStrings [i++]);
+    StringArrayHelpers::addArray (strings, initialStrings);
 }
+
+StringArray::StringArray (const char* const* const initialStrings, const int numberOfStrings)
+{
+    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
+}
+
+StringArray::StringArray (const juce_wchar* const* const initialStrings)
+{
+    StringArrayHelpers::addArray (strings, initialStrings);
+}
+
+StringArray::StringArray (const juce_wchar* const* const initialStrings, const int numberOfStrings)
+{
+    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
+}
+
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
+StringArray::StringArray (const wchar_t* const* const initialStrings)
+{
+    StringArrayHelpers::addArray (strings, initialStrings);
+}
+
+StringArray::StringArray (const wchar_t* const* const initialStrings, const int numberOfStrings)
+{
+    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
+}
+#endif
 
 StringArray& StringArray::operator= (const StringArray& other)
 {

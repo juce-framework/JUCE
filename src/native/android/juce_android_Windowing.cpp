@@ -35,7 +35,8 @@ public:
     //==============================================================================
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
-          view (android.activity.callObjectMethod (android.createNewView, component->isOpaque()))
+          view (android.activity.callObjectMethod (android.createNewView, component->isOpaque())),
+          usingAndroidGraphics (false), sizeAllocated (0)
     {
         if (isFocused())
             handleFocusGain();
@@ -43,7 +44,33 @@ public:
 
     ~AndroidComponentPeer()
     {
-        android.activity.callVoidMethod (android.deleteView, view.get());
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            android.activity.callVoidMethod (android.deleteView, view.get());
+        }
+        else
+        {
+            class ViewDeleter  : public CallbackMessage
+            {
+            public:
+                ViewDeleter (const GlobalRef& view_)
+                    : view (view_)
+                {
+                    post();
+                }
+
+                void messageCallback()
+                {
+                    android.activity.callVoidMethod (android.deleteView, view.get());
+                }
+
+            private:
+                GlobalRef view;
+            };
+
+            new ViewDeleter (view);
+        }
+
         view.clear();
     }
 
@@ -54,7 +81,33 @@ public:
 
     void setVisible (bool shouldBeVisible)
     {
-        view.callVoidMethod (android.setVisible, shouldBeVisible);
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            view.callVoidMethod (android.setVisible, shouldBeVisible);
+        }
+        else
+        {
+            class VisibilityChanger  : public CallbackMessage
+            {
+            public:
+                VisibilityChanger (const GlobalRef& view_, bool shouldBeVisible_)
+                    : view (view_), shouldBeVisible (shouldBeVisible_)
+                {
+                    post();
+                }
+
+                void messageCallback()
+                {
+                    view.callVoidMethod (android.setVisible, shouldBeVisible);
+                }
+
+            private:
+                GlobalRef view;
+                bool shouldBeVisible;
+            };
+
+            new VisibilityChanger (view, shouldBeVisible);
+        }
     }
 
     void setTitle (const String& title)
@@ -76,7 +129,33 @@ public:
 
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
     {
-        view.callVoidMethod (android.layout, x, y, x + w, y + h);
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            view.callVoidMethod (android.layout, x, y, x + w, y + h);
+        }
+        else
+        {
+            class ViewMover  : public CallbackMessage
+            {
+            public:
+                ViewMover (const GlobalRef& view_, int x_, int y_, int w_, int h_)
+                    : view (view_), x (x_), y (y_), w (w_), h (h_)
+                {
+                    post();
+                }
+
+                void messageCallback()
+                {
+                    view.callVoidMethod (android.layout, x, y, x + w, y + h);
+                }
+
+            private:
+                GlobalRef view;
+                int x, y, w, h;
+            };
+
+            new ViewMover (view, x, y, w, h);
+        }
     }
 
     const Rectangle<int> getBounds() const
@@ -89,17 +168,6 @@ public:
 
     const Point<int> getScreenPosition() const
     {
-        /*JNIEnv* const env = getEnv();
-
-        jintArray pos = env->NewIntArray (2);
-        view.callVoidMethod (android.getLocationOnScreen, pos);
-
-        jint coords[2];
-        env->GetIntArrayRegion (pos, 0, 2, coords);
-        env->DeleteLocalRef (pos);
-
-        return Point<int> (coords[0], coords[1]);*/
-
         return Point<int> (view.callIntMethod (android.getLeft),
                            view.callIntMethod (android.getTop));
     }
@@ -224,13 +292,85 @@ public:
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas)
     {
-        AndroidLowLevelGraphicsContext g (canvas);
-        handlePaint (g);
+#if USE_ANDROID_CANVAS
+        if (usingAndroidGraphics)
+        {
+            AndroidLowLevelGraphicsContext g (canvas);
+            handlePaint (g);
+        }
+        else
+#endif
+        {
+            jobject rect = env->CallObjectMethod (canvas, android.getClipBounds2);
+            const int left = env->GetIntField (rect, android.rectLeft);
+            const int top = env->GetIntField (rect, android.rectTop);
+            const int right = env->GetIntField (rect, android.rectRight);
+            const int bottom = env->GetIntField (rect, android.rectBottom);
+            env->DeleteLocalRef (rect);
+
+            const Rectangle<int> clip (left, top, right - left, bottom - top);
+
+            const int sizeNeeded = clip.getWidth() * clip.getHeight();
+            if (sizeAllocated < sizeNeeded)
+            {
+                buffer.clear();
+                sizeAllocated = sizeNeeded;
+                buffer = GlobalRef (env->NewIntArray (sizeNeeded));
+            }
+
+            jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0);
+
+            if (dest != 0)
+            {
+                {
+                    Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
+                                                       dest, ! component->isOpaque()));
+
+                    {
+                        LowLevelGraphicsSoftwareRenderer g (temp);
+                        g.setOrigin (-clip.getX(), -clip.getY());
+                        handlePaint (g);
+                    }
+                }
+
+                env->ReleaseIntArrayElements ((jintArray) buffer.get(), dest, 0);
+
+                env->CallVoidMethod (canvas, android.drawMemoryBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
+                                     (jfloat) clip.getX(), (jfloat) clip.getY(),
+                                     clip.getWidth(), clip.getHeight(), true, (jobject) 0);
+            }
+        }
     }
 
     void repaint (const Rectangle<int>& area)
     {
-        view.callVoidMethod (android.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            view.callVoidMethod (android.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+        }
+        else
+        {
+            class ViewRepainter  : public CallbackMessage
+            {
+            public:
+                ViewRepainter (const GlobalRef& view_, const Rectangle<int>& area_)
+                    : view (view_), area (area_)
+                {
+                    post();
+                }
+
+                void messageCallback()
+                {
+                    view.callVoidMethod (android.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+                }
+
+            private:
+                GlobalRef view;
+                const Rectangle<int>& area;
+            };
+
+            new ViewRepainter (view, area);
+        }
     }
 
     void performAnyPendingRepaintsNow()
@@ -242,6 +382,29 @@ public:
     {
         // TODO
     }
+
+    const StringArray getAvailableRenderingEngines()
+    {
+        StringArray s (ComponentPeer::getAvailableRenderingEngines());
+        s.add ("Android Canvas Renderer");
+        return s;
+    }
+
+#if USE_ANDROID_CANVAS
+    int getCurrentRenderingEngine() throw()
+    {
+        return usingAndroidGraphics ? 1 : 0;
+    }
+
+    void setCurrentRenderingEngine (int index)
+    {
+        if (usingAndroidGraphics != (index > 0))
+        {
+            usingAndroidGraphics = index > 0;
+            component->repaint();
+        }
+    }
+#endif
 
     //==============================================================================
     static AndroidComponentPeer* findPeerForJavaView (jobject viewToFind)
@@ -264,6 +427,63 @@ public:
 private:
     //==============================================================================
     GlobalRef view;
+    GlobalRef buffer;
+    bool usingAndroidGraphics;
+    int sizeAllocated;
+
+    class PreallocatedImage  : public Image::SharedImage
+    {
+    public:
+        //==============================================================================
+        PreallocatedImage (const int width_, const int height_, jint* data_, bool hasAlpha_)
+            : Image::SharedImage (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
+        {
+            if (hasAlpha_)
+                zeromem (data_, width * height * sizeof (jint));
+        }
+
+        ~PreallocatedImage()
+        {
+            if (hasAlpha)
+            {
+                PixelARGB* pix = (PixelARGB*) data;
+
+                for (int i = width * height; --i >= 0;)
+                {
+                    pix->unpremultiply();
+                    ++pix;
+                }
+            }
+        }
+
+        Image::ImageType getType() const                    { return Image::SoftwareImage; }
+        LowLevelGraphicsContext* createLowLevelContext()    { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
+
+        void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
+        {
+            bm.lineStride = width * sizeof (jint);
+            bm.pixelStride = sizeof (jint);
+            bm.pixelFormat = Image::ARGB;
+            bm.data = (uint8*) (data + x + y * width);
+        }
+
+        SharedImage* clone()
+        {
+            PreallocatedImage* s = new PreallocatedImage (width, height, 0, hasAlpha);
+            s->allocatedData.malloc (sizeof (jint) * width * height);
+            s->data = s->allocatedData;
+            memcpy (s->data, data, sizeof (jint) * width * height);
+            return s;
+        }
+
+        //==============================================================================
+    private:
+        jint* data;
+        HeapBlock<jint> allocatedData;
+        bool hasAlpha;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreallocatedImage);
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer);
 };

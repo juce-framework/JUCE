@@ -54,20 +54,7 @@ public:
                                 treated as empty strings
         @param numberOfStrings  how many items there are in the array
     */
-    StringArray (const juce_wchar* const* strings, int numberOfStrings);
-
-    /** Creates a copy of an array of string literals.
-        @param strings          an array of strings to add. Null pointers in the array will be
-                                treated as empty strings
-        @param numberOfStrings  how many items there are in the array
-    */
     StringArray (const char* const* strings, int numberOfStrings);
-
-    /** Creates a copy of a null-terminated array of string literals.
-        Each item from the array passed-in is added, until it encounters a null pointer,
-        at which point it stops.
-    */
-    explicit StringArray (const juce_wchar* const* strings);
 
     /** Creates a copy of a null-terminated array of string literals.
 
@@ -75,6 +62,34 @@ public:
         at which point it stops.
     */
     explicit StringArray (const char* const* strings);
+
+    /** Creates a copy of a null-terminated array of string literals.
+        Each item from the array passed-in is added, until it encounters a null pointer,
+        at which point it stops.
+    */
+    explicit StringArray (const juce_wchar* const* strings);
+
+    /** Creates a copy of an array of string literals.
+        @param strings          an array of strings to add. Null pointers in the array will be
+                                treated as empty strings
+        @param numberOfStrings  how many items there are in the array
+    */
+    StringArray (const juce_wchar* const* strings, int numberOfStrings);
+
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
+    /** Creates a copy of a null-terminated array of string literals.
+        Each item from the array passed-in is added, until it encounters a null pointer,
+        at which point it stops.
+    */
+    explicit StringArray (const wchar_t* const* strings);
+
+    /** Creates a copy of an array of string literals.
+        @param strings          an array of strings to add. Null pointers in the array will be
+                                treated as empty strings
+        @param numberOfStrings  how many items there are in the array
+    */
+    StringArray (const wchar_t* const* strings, int numberOfStrings);
+   #endif
 
     /** Destructor. */
     ~StringArray();

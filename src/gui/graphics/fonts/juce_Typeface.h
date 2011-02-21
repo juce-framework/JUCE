@@ -32,6 +32,7 @@
 #include "../../../io/streams/juce_OutputStream.h"
 #include "../geometry/juce_Path.h"
 class Font;
+class EdgeTable;
 
 
 //==============================================================================
@@ -110,6 +111,9 @@ public:
         The path returned will be normalised to a font height of 1.0.
     */
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
+
+    /** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
+    virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 
     /** Returns true if the typeface uses hinting. */
     virtual bool isHinted() const                           { return false; }
@@ -210,6 +214,7 @@ public:
     float getStringWidth (const String& text);
     void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
     bool getOutlineForGlyph (int glyphNumber, Path& path);
+    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
     int getGlyphForCharacter (juce_wchar character);
 
 protected:

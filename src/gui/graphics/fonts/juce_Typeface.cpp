@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Typeface.h"
 #include "juce_Font.h"
+#include "../contexts/juce_EdgeTable.h"
 #include "../../../io/streams/juce_GZIPDecompressorInputStream.h"
 #include "../../../io/streams/juce_GZIPCompressorOutputStream.h"
 #include "../../../io/streams/juce_BufferedInputStream.h"
@@ -51,6 +52,7 @@ const Typeface::Ptr Typeface::getFallbackTypeface()
     t->isFallbackFont = true;
     return t;
 }
+
 
 //==============================================================================
 class CustomTypeface::GlyphInfo
@@ -411,5 +413,25 @@ bool CustomTypeface::getOutlineForGlyph (int glyphNumber, Path& path)
 
     return false;
 }
+
+EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
+{
+    const GlyphInfo* const glyph = findGlyph ((juce_wchar) glyphNumber, true);
+
+    if (glyph == 0 && ! isFallbackFont)
+    {
+        const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
+
+        if (fallbackTypeface != 0)
+            return fallbackTypeface->getEdgeTableForGlyph (glyphNumber, transform);
+    }
+
+    if (glyph != 0 && ! glyph->path.isEmpty())
+        return new EdgeTable (glyph->path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
+                              glyph->path, transform);
+
+    return 0;
+}
+
 
 END_JUCE_NAMESPACE

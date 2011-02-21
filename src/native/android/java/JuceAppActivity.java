@@ -32,6 +32,12 @@ import android.view.ViewGroup;
 import android.view.Display;
 import android.view.WindowManager;
 import android.graphics.Paint;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.graphics.Rect;
 import android.text.ClipboardManager;
 import com.juce.ComponentPeerView;
 
@@ -153,95 +159,37 @@ public final class JuceAppActivity   extends Activity
     }
 
     //==============================================================================
-    /*class PathGrabber  extends Path
+    public final int[] renderGlyph (char glyph, Paint paint, Matrix matrix, Rect bounds)
     {
-        public PathGrabber()
-        {
-            pathString = new StringBuilder();
-        }
+        Path p = new Path();
+        paint.getTextPath (String.valueOf (glyph), 0, 1, 0.0f, 0.0f, p);
 
-        @Override
-        public void addPath (Path src)
-        {
-        }
+        RectF boundsF = new RectF();
+        p.computeBounds (boundsF, true);
+        matrix.mapRect (boundsF);
 
-        @Override
-        public void addPath (Path src, float dx, float dy)
-        {
-        }
+        boundsF.roundOut (bounds);
+        bounds.left--;
+        bounds.right++;
 
-        @Override
-        public void close()
-        {
-            pathString.append ('c');
-        }
+        final int w = bounds.width();
+        final int h = bounds.height();
 
-        @Override
-        public void moveTo (float x, float y)
-        {
-            pathString.append ('m');
-            pathString.append (String.valueOf (x));
-            pathString.append (String.valueOf (y));
-        }
+        Bitmap bm = Bitmap.createBitmap (w, h, Bitmap.Config.ARGB_8888);
 
-        @Override
-        public void lineTo (float x, float y)
-        {
-            pathString.append ('l');
-            pathString.append (String.valueOf (x));
-            pathString.append (String.valueOf (y));
-        }
+        Canvas c = new Canvas (bm);
+        matrix.postTranslate (-bounds.left, -bounds.top);
+        c.setMatrix (matrix);
+        c.drawPath (p, paint);
 
-        @Override
-        public void quadTo (float x1, float y1, float x2, float y2)
-        {
-            pathString.append ('q');
-            pathString.append (String.valueOf (x1));
-            pathString.append (String.valueOf (y1));
-            pathString.append (String.valueOf (x2));
-            pathString.append (String.valueOf (y2));
-        }
+        int sizeNeeded = w * h;
+        if (cachedRenderArray.length < sizeNeeded)
+            cachedRenderArray = new int [sizeNeeded];
 
-        @Override
-        public void cubicTo (float x1, float y1, float x2, float y2, float x3, float y3)
-        {
-            pathString.append ('b');
-            pathString.append (String.valueOf (x1));
-            pathString.append (String.valueOf (y1));
-            pathString.append (String.valueOf (x2));
-            pathString.append (String.valueOf (y2));
-            pathString.append (String.valueOf (x3));
-            pathString.append (String.valueOf (y3));
-        }
-
-        @Override
-        public void reset()
-        {
-            rewind();
-        }
-
-        @Override
-        public void rewind()
-        {
-            pathString.setLength (0);
-        }
-
-        public String getJucePath()
-        {
-            if (getFillType() == FillType.EVEN_ODD)
-                return "z" + pathString.toString();
-            else
-                return "n" + pathString.toString();
-        }
-
-        private StringBuilder pathString;
-    }*/
-
-    public String createPathForGlyph (Paint paint, char c)
-    {
-        /*PathGrabber pg = new PathGrabber();
-        paint.getTextPath (String.valueOf (c), 0, 1, 0, 0, pg);
-        return pg.getJucePath();*/
-        return "";
+        bm.getPixels (cachedRenderArray, 0, w, 0, 0, w, h);
+        bm.recycle();
+        return cachedRenderArray;
     }
+
+    private int[] cachedRenderArray = new int [256];
 }

@@ -63,14 +63,18 @@ public:
         if (font.isBold()) flags = 1;
         if (font.isItalic()) flags += 2;
 
+        JNIEnv* env = getEnv();
+
         File fontFile (File ("/system/fonts").getChildFile (name).withFileExtension (".ttf"));
 
         if (fontFile.exists())
-            typeface = GlobalRef (getEnv()->CallStaticObjectMethod (android.typefaceClass, android.createFromFile,
-                                                                    javaString (fontFile.getFullPathName()).get()));
+            typeface = GlobalRef (env->CallStaticObjectMethod (android.typefaceClass, android.createFromFile,
+                                                               javaString (fontFile.getFullPathName()).get()));
         else
-            typeface = GlobalRef (getEnv()->CallStaticObjectMethod (android.typefaceClass, android.create,
-                                                                    javaString (getName()).get(), flags));
+            typeface = GlobalRef (env->CallStaticObjectMethod (android.typefaceClass, android.create,
+                                                               javaString (getName()).get(), flags));
+
+        rect = GlobalRef (env->NewObject (android.rectClass, android.rectConstructor, 0, 0, 0, 0));
 
         paint = GlobalRef (android.createPaint (Graphics::highResamplingQuality));
         const LocalRef<jobject> ignored (paint.callObjectMethod (android.setTypeface, typeface.get()));
@@ -81,7 +85,7 @@ public:
         descent = paint.callFloatMethod (android.descent) / standardSize;
 
         const float height = ascent + descent;
-        unitsToHeightScaleFactor = 1.0f / (height * standardSize);
+        unitsToHeightScaleFactor = 1.0f / 256.0f;//(height * standardSize);
     }
 
     float getAscent() const    { return ascent; }
@@ -131,19 +135,54 @@ public:
         }
     }
 
-    bool getOutlineForGlyph (int glyphNumber, Path& destPath)
+    bool getOutlineForGlyph (int /*glyphNumber*/, Path& /*destPath*/)
     {
-        LocalRef<jstring> s ((jstring) android.activity.callObjectMethod (android.createPathForGlyph, paint.get(), (jchar) glyphNumber));
-
-        if (s == 0)
-            return false;
-
-        const String ourString (juceString (s));
-        destPath.restoreFromString (ourString);
-        return ourString.isNotEmpty();
+        return false;
     }
 
-    GlobalRef typeface, paint;
+    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& t)
+    {
+        JNIEnv* env = getEnv();
+
+        jobject matrix = android.createMatrix (env, AffineTransform::scale (unitsToHeightScaleFactor, unitsToHeightScaleFactor).followedBy (t));
+        jintArray maskData = (jintArray) android.activity.callObjectMethod (android.renderGlyph, (jchar) glyphNumber, paint.get(), matrix, rect.get());
+
+        env->DeleteLocalRef (matrix);
+
+        const int left = env->GetIntField (rect.get(), android.rectLeft);
+        const int top = env->GetIntField (rect.get(), android.rectTop);
+        const int right = env->GetIntField (rect.get(), android.rectRight);
+        const int bottom = env->GetIntField (rect.get(), android.rectBottom);
+
+        const Rectangle<int> bounds (left, top, right - left, bottom - top);
+
+        if (bounds.isEmpty())
+            return 0;
+
+        jint* const maskDataElements = env->GetIntArrayElements (maskData, 0);
+
+        EdgeTable* et = new EdgeTable (bounds);
+
+        const jint* mask = maskDataElements;
+
+        for (int y = top; y < bottom; ++y)
+        {
+           #if JUCE_LITTLE_ENDIAN
+            const uint8* const lineBytes = ((const uint8*) mask) + 3;
+           #else
+            const uint8* const lineBytes = (const uint8*) mask;
+           #endif
+
+            et->clipLineToMask (left, y, lineBytes, 4, bounds.getWidth());
+            mask += bounds.getWidth();
+        }
+
+        env->ReleaseIntArrayElements (maskData, maskDataElements, 0);
+        env->DeleteLocalRef (maskData);
+        return et;
+    }
+
+    GlobalRef typeface, paint, rect;
     float ascent, descent, unitsToHeightScaleFactor;
 
 private:

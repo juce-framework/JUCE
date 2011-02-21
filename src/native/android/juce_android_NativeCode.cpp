@@ -90,32 +90,47 @@ BEGIN_JUCE_NAMESPACE
 #include "../../containers/juce_ScopedValueSetter.h"
 #include "../common/juce_MidiDataConcatenator.h"
 
+#define USE_ANDROID_CANVAS 0
+
 //==============================================================================
 #define JUCE_JNI_CALLBACK(className, methodName, returnType, params) \
   extern "C" __attribute__ ((visibility("default"))) returnType Java_com_juce_ ## className ## _ ## methodName params
 
 //==============================================================================
-#define JUCE_JNI_CLASSES(JAVACLASS) \
+// List of basic required classes
+#define JUCE_JNI_CLASSES_ESSENTIAL(JAVACLASS) \
  JAVACLASS (activityClass, "com/juce/JuceAppActivity") \
  JAVACLASS (componentPeerViewClass, "com/juce/ComponentPeerView") \
  JAVACLASS (fileClass, "java/io/File") \
  JAVACLASS (contextClass, "android/content/Context") \
  JAVACLASS (canvasClass, "android/graphics/Canvas") \
  JAVACLASS (paintClass, "android/graphics/Paint") \
- JAVACLASS (pathClass, "android/graphics/Path") \
- JAVACLASS (bitmapClass, "android/graphics/Bitmap") \
- JAVACLASS (bitmapConfigClass, "android/graphics/Bitmap$Config") \
  JAVACLASS (matrixClass, "android/graphics/Matrix") \
  JAVACLASS (rectClass, "android/graphics/Rect") \
- JAVACLASS (regionClass, "android/graphics/Region") \
- JAVACLASS (shaderClass, "android/graphics/Shader") \
  JAVACLASS (typefaceClass, "android/graphics/Typeface") \
+
+//==============================================================================
+// List of extra classes needed when USE_ANDROID_CANVAS is enabled
+#if ! USE_ANDROID_CANVAS
+#define JUCE_JNI_CLASSES(JAVACLASS) JUCE_JNI_CLASSES_ESSENTIAL(JAVACLASS);
+#else
+#define JUCE_JNI_CLASSES(JAVACLASS) JUCE_JNI_CLASSES_ESSENTIAL(JAVACLASS); \
+ JAVACLASS (pathClass, "android/graphics/Path") \
+ JAVACLASS (regionClass, "android/graphics/Region") \
+ JAVACLASS (bitmapClass, "android/graphics/Bitmap") \
+ JAVACLASS (bitmapConfigClass, "android/graphics/Bitmap$Config") \
+ JAVACLASS (bitmapShaderClass, "android/graphics/BitmapShader") \
+ JAVACLASS (shaderClass, "android/graphics/Shader") \
  JAVACLASS (shaderTileModeClass, "android/graphics/Shader$TileMode") \
  JAVACLASS (linearGradientClass, "android/graphics/LinearGradient") \
  JAVACLASS (radialGradientClass, "android/graphics/RadialGradient") \
 
+#endif
+
+
 //==============================================================================
-#define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+// List of required methods
+#define JUCE_JNI_METHODS_ESSENTIAL(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
 \
  STATICMETHOD (activityClass, printToConsole, "printToConsole", "(Ljava/lang/String;)V") \
  METHOD (activityClass, createNewView, "createNewView", "(Z)Lcom/juce/ComponentPeerView;") \
@@ -125,7 +140,7 @@ BEGIN_JUCE_NAMESPACE
  METHOD (activityClass, getClipboardContent, "getClipboardContent", "()Ljava/lang/String;") \
  METHOD (activityClass, setClipboardContent, "setClipboardContent", "(Ljava/lang/String;)V") \
  METHOD (activityClass, excludeClipRegion, "excludeClipRegion", "(Landroid/graphics/Canvas;FFFF)V") \
- METHOD (activityClass, createPathForGlyph, "createPathForGlyph", "(Landroid/graphics/Paint;C)Ljava/lang/String;") \
+ METHOD (activityClass, renderGlyph, "renderGlyph", "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
 \
  METHOD (fileClass, fileExists, "exists", "()Z") \
 \
@@ -144,52 +159,19 @@ BEGIN_JUCE_NAMESPACE
  METHOD (componentPeerViewClass, invalidate, "invalidate", "(IIII)V") \
  METHOD (componentPeerViewClass, containsPoint, "containsPoint", "(II)Z") \
 \
- METHOD (canvasClass, canvasBitmapConstructor, "<init>", "(Landroid/graphics/Bitmap;)V") \
- METHOD (canvasClass, drawRect, "drawRect", "(FFFFLandroid/graphics/Paint;)V") \
- METHOD (canvasClass, translate, "translate", "(FF)V") \
- METHOD (canvasClass, clipPath, "clipPath", "(Landroid/graphics/Path;)Z") \
- METHOD (canvasClass, clipRect, "clipRect", "(FFFF)Z") \
- METHOD (canvasClass, clipRegion, "clipRegion", "(Landroid/graphics/Region;)Z") \
- METHOD (canvasClass, concat, "concat", "(Landroid/graphics/Matrix;)V") \
- METHOD (canvasClass, drawBitmap, "drawBitmap", "(Landroid/graphics/Bitmap;Landroid/graphics/Matrix;Landroid/graphics/Paint;)V") \
  METHOD (canvasClass, drawMemoryBitmap, "drawBitmap", "([IIIFFIIZLandroid/graphics/Paint;)V") \
- METHOD (canvasClass, drawLine, "drawLine", "(FFFFLandroid/graphics/Paint;)V") \
- METHOD (canvasClass, drawPath, "drawPath", "(Landroid/graphics/Path;Landroid/graphics/Paint;)V") \
- METHOD (canvasClass, drawText, "drawText", "(Ljava/lang/String;FFLandroid/graphics/Paint;)V") \
- METHOD (canvasClass, getClipBounds, "getClipBounds", "(Landroid/graphics/Rect;)Z") \
  METHOD (canvasClass, getClipBounds2, "getClipBounds", "()Landroid/graphics/Rect;") \
- METHOD (canvasClass, getMatrix, "getMatrix", "()Landroid/graphics/Matrix;") \
- METHOD (canvasClass, save, "save", "()I") \
- METHOD (canvasClass, restore, "restore", "()V") \
- METHOD (canvasClass, saveLayerAlpha, "saveLayerAlpha", "(FFFFII)I") \
 \
  METHOD (paintClass, paintClassConstructor, "<init>", "(I)V") \
  METHOD (paintClass, setColor, "setColor", "(I)V") \
  METHOD (paintClass, setAlpha, "setAlpha", "(I)V") \
- METHOD (paintClass, setShader, "setShader", "(Landroid/graphics/Shader;)Landroid/graphics/Shader;") \
  METHOD (paintClass, setTypeface, "setTypeface", "(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;") \
  METHOD (paintClass, ascent, "ascent", "()F") \
  METHOD (paintClass, descent, "descent", "()F") \
  METHOD (paintClass, setTextSize, "setTextSize", "(F)V") \
  METHOD (paintClass, getTextWidths, "getTextWidths", "(Ljava/lang/String;[F)I") \
  METHOD (paintClass, setTextScaleX, "setTextScaleX", "(F)V") \
-\
- METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
- STATICFIELD (shaderTileModeClass, clampMode, "CLAMP", "Landroid/graphics/Shader$TileMode;") \
-\
- METHOD (pathClass, pathClassConstructor, "<init>", "()V") \
- METHOD (pathClass, moveTo, "moveTo", "(FF)V") \
- METHOD (pathClass, lineTo, "lineTo", "(FF)V") \
- METHOD (pathClass, quadTo, "quadTo", "(FFFF)V") \
- METHOD (pathClass, cubicTo, "cubicTo", "(FFFFFF)V") \
- METHOD (pathClass, closePath, "close", "()V") \
-\
- STATICMETHOD (bitmapClass, createBitmap, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
- STATICFIELD (bitmapConfigClass, ARGB_8888, "ARGB_8888", "Landroid/graphics/Bitmap$Config;") \
- METHOD (bitmapClass, bitmapCopy, "copy", "(Landroid/graphics/Bitmap$Config;Z)Landroid/graphics/Bitmap;") \
- METHOD (bitmapClass, getPixels, "getPixels", "([IIIIIII)V") \
- METHOD (bitmapClass, setPixels, "setPixels", "([IIIIIII)V") \
- METHOD (bitmapClass, recycle, "recycle", "()V") \
+ METHOD (paintClass, getTextPath, "getTextPath", "(Ljava/lang/String;IIFFLandroid/graphics/Path;)V") \
 \
  METHOD (matrixClass, matrixClassConstructor, "<init>", "()V") \
  METHOD (matrixClass, setValues, "setValues", "([F)V") \
@@ -202,6 +184,54 @@ BEGIN_JUCE_NAMESPACE
  FIELD (rectClass, rectRight, "right", "I") \
  FIELD (rectClass, rectTop, "top", "I") \
  FIELD (rectClass, rectBottom, "bottom", "I") \
+
+
+//==============================================================================
+// List of extra methods needed when USE_ANDROID_CANVAS is enabled
+#if ! USE_ANDROID_CANVAS
+#define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD, STATICFIELD) JUCE_JNI_METHODS_ESSENTIAL(METHOD, STATICMETHOD, FIELD, STATICFIELD)
+#else
+#define JUCE_JNI_METHODS(METHOD, STATICMETHOD, FIELD, STATICFIELD) JUCE_JNI_METHODS_ESSENTIAL(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (pathClass, pathClassConstructor, "<init>", "()V") \
+ METHOD (pathClass, moveTo, "moveTo", "(FF)V") \
+ METHOD (pathClass, lineTo, "lineTo", "(FF)V") \
+ METHOD (pathClass, quadTo, "quadTo", "(FFFF)V") \
+ METHOD (pathClass, cubicTo, "cubicTo", "(FFFFFF)V") \
+ METHOD (pathClass, closePath, "close", "()V") \
+ METHOD (pathClass, computeBounds, "computeBounds", "(Landroid/graphics/RectF;Z)V") \
+\
+ STATICMETHOD (bitmapClass, createBitmap, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
+ STATICFIELD (bitmapConfigClass, ARGB_8888, "ARGB_8888", "Landroid/graphics/Bitmap$Config;") \
+ STATICFIELD (bitmapConfigClass, ALPHA_8, "ALPHA_8", "Landroid/graphics/Bitmap$Config;") \
+ METHOD (bitmapClass, bitmapCopy, "copy", "(Landroid/graphics/Bitmap$Config;Z)Landroid/graphics/Bitmap;") \
+ METHOD (bitmapClass, getPixels, "getPixels", "([IIIIIII)V") \
+ METHOD (bitmapClass, setPixels, "setPixels", "([IIIIIII)V") \
+ METHOD (bitmapClass, recycle, "recycle", "()V") \
+\
+ METHOD (shaderClass, setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V") \
+ STATICFIELD (shaderTileModeClass, clampMode, "CLAMP", "Landroid/graphics/Shader$TileMode;") \
+\
+ METHOD (bitmapShaderClass, bitmapShaderConstructor, "<init>", "(Landroid/graphics/Bitmap;Landroid/graphics/Shader$TileMode;Landroid/graphics/Shader$TileMode;)V") \
+\
+ METHOD (paintClass, setShader, "setShader", "(Landroid/graphics/Shader;)Landroid/graphics/Shader;") \
+\
+ METHOD (canvasClass, canvasBitmapConstructor, "<init>", "(Landroid/graphics/Bitmap;)V") \
+ METHOD (canvasClass, drawRect, "drawRect", "(FFFFLandroid/graphics/Paint;)V") \
+ METHOD (canvasClass, translate, "translate", "(FF)V") \
+ METHOD (canvasClass, clipPath, "clipPath", "(Landroid/graphics/Path;)Z") \
+ METHOD (canvasClass, clipRect, "clipRect", "(FFFF)Z") \
+ METHOD (canvasClass, clipRegion, "clipRegion", "(Landroid/graphics/Region;)Z") \
+ METHOD (canvasClass, concat, "concat", "(Landroid/graphics/Matrix;)V") \
+ METHOD (canvasClass, drawBitmap, "drawBitmap", "(Landroid/graphics/Bitmap;Landroid/graphics/Matrix;Landroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawBitmapAt, "drawBitmap", "(Landroid/graphics/Bitmap;FFLandroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawLine, "drawLine", "(FFFFLandroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawPath, "drawPath", "(Landroid/graphics/Path;Landroid/graphics/Paint;)V") \
+ METHOD (canvasClass, drawText, "drawText", "(Ljava/lang/String;FFLandroid/graphics/Paint;)V") \
+ METHOD (canvasClass, getClipBounds, "getClipBounds", "(Landroid/graphics/Rect;)Z") \
+ METHOD (canvasClass, getMatrix, "getMatrix", "()Landroid/graphics/Matrix;") \
+ METHOD (canvasClass, save, "save", "()I") \
+ METHOD (canvasClass, restore, "restore", "()V") \
+ METHOD (canvasClass, saveLayerAlpha, "saveLayerAlpha", "(FFFFII)I") \
 \
  METHOD (linearGradientClass, linearGradientConstructor, "<init>", "(FFFF[I[FLandroid/graphics/Shader$TileMode;)V") \
 \
@@ -209,6 +239,8 @@ BEGIN_JUCE_NAMESPACE
 \
  METHOD (regionClass, regionConstructor, "<init>", "()V"); \
  METHOD (regionClass, regionUnion, "union", "(Landroid/graphics/Rect;)Z"); \
+
+#endif
 
 
 //==============================================================================
@@ -460,7 +492,6 @@ static const LocalRef<jstring> javaStringFromChar (const juce_wchar c)
     return LocalRef<jstring> (getEnv()->NewStringUTF (utf8));
 }
 
-
 //==============================================================================
 class AndroidJavaCallbacks
 {
@@ -531,6 +562,23 @@ public:
             constructorFlags |= 2; /*FILTER_BITMAP_FLAG*/
 
         return getEnv()->NewObject (paintClass, paintClassConstructor, constructorFlags);
+    }
+
+    const jobject createMatrix (JNIEnv* env, const AffineTransform& t)
+    {
+        jobject m = env->NewObject (matrixClass, matrixClassConstructor);
+
+        jfloat values[9] = { t.mat00, t.mat01, t.mat02,
+                             t.mat10, t.mat11, t.mat12,
+                             0.0f, 0.0f, 1.0f };
+
+        jfloatArray javaArray = env->NewFloatArray (9);
+        env->SetFloatArrayRegion (javaArray, 0, 9, values);
+
+        env->CallVoidMethod (m, setValues, javaArray);
+        env->DeleteLocalRef (javaArray);
+
+        return m;
     }
 
     //==============================================================================

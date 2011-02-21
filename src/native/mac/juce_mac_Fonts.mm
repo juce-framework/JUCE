@@ -287,6 +287,17 @@ public:
 #endif
     }
 
+    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
+    {
+        Path path;
+
+        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
+            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
+                                  path, transform);
+
+        return 0;
+    }
+
     bool getOutlineForGlyph (int glyphNumber, Path& path)
     {
 #if JUCE_IOS
