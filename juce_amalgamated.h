@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	35
+#define JUCE_BUILDNUMBER	36
 
 /** Current Juce version number.
 
@@ -1880,9 +1880,6 @@ public:
 		return isNeg ? -v : v;
 	}
 
-	static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
-	static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
-
 	template <typename CharPointerType>
 	static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) throw()
 	{
@@ -2053,6 +2050,24 @@ public:
 		}
 	}
 
+	template <typename CharPointerType1, typename CharPointerType2>
+	static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) throw()
+	{
+		int index = 0;
+		const int needleLength = (int) needle.length();
+
+		for (;;)
+		{
+			if (haystack.compareIgnoreCaseUpTo (needle, needleLength) == 0)
+				return index;
+
+			if (haystack.getAndAdvance() == 0)
+				return -1;
+
+			++index;
+		}
+	}
+
 	template <typename Type>
 	static int indexOfChar (Type text, const juce_wchar charToFind) throw()
 	{
@@ -2104,6 +2119,10 @@ private:
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 /*** End of inlined file: juce_CharacterFunctions.h ***/
+
+#ifndef JUCE_STRING_UTF_TYPE
+ #define JUCE_STRING_UTF_TYPE 8
+#endif
 
 #if JUCE_MSVC
   #pragma warning (push)
@@ -2579,6 +2598,25 @@ public:
 		return *this;
 	}
 
+	/** Moves this pointer back to the previous character in the string. */
+	CharPointer_UTF8& operator--() throw()
+	{
+		const char n = *--data;
+
+		if ((n & 0xc0) == 0xc0)
+		{
+			int count = 3;
+
+			do
+			{
+				--data;
+			}
+			while ((*data & 0xc0) == 0xc0 && --count >= 0);
+		}
+
+		return *this;
+	}
+
 	/** Returns the character that this pointer is currently pointing to, and then
 		advances the pointer to point to the next character. */
 	juce_wchar getAndAdvance() throw()
@@ -2627,10 +2665,22 @@ public:
 	/** Moves this pointer forwards by the specified number of characters. */
 	void operator+= (int numToSkip) throw()
 	{
-		jassert (numToSkip >= 0);
+		if (numToSkip < 0)
+		{
+			while (++numToSkip <= 0)
+				--*this;
+		}
+		else
+		{
+			while (--numToSkip >= 0)
+				++*this;
+		}
+	}
 
-		while (--numToSkip >= 0)
-			++*this;
+	/** Moves this pointer backwards by the specified number of characters. */
+	void operator-= (int numToSkip) throw()
+	{
+		operator+= (-numToSkip);
 	}
 
 	/** Returns the character at a given character index from the start of the string. */
@@ -2646,6 +2696,14 @@ public:
 	{
 		CharPointer_UTF8 p (*this);
 		p += numToSkip;
+		return p;
+	}
+
+	/** Returns a pointer which is moved backwards from this one by the specified number of characters. */
+	CharPointer_UTF8 operator- (int numToSkip) const throw()
+	{
+		CharPointer_UTF8 p (*this);
+		p += -numToSkip;
 		return p;
 	}
 
@@ -2968,6 +3026,12 @@ public:
 		return true;
 	}
 
+	/** Atomically swaps this pointer for a new value, returning the previous value. */
+	CharPointer_UTF8 atomicSwap (const CharPointer_UTF8& newValue)
+	{
+		return CharPointer_UTF8 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
+	}
+
 	/** These values are the byte-order-mark (BOM) values for a UTF-8 stream. */
 	enum
 	{
@@ -3063,6 +3127,17 @@ public:
 		return *this;
 	}
 
+	/** Moves this pointer back to the previous character in the string. */
+	CharPointer_UTF16& operator--() throw()
+	{
+		const juce_wchar n = *--data;
+
+		if (n >= 0xdc00 && n <= 0xdfff)
+			--data;
+
+		return *this;
+	}
+
 	/** Returns the character that this pointer is currently pointing to, and then
 		advances the pointer to point to the next character. */
 	juce_wchar getAndAdvance() throw()
@@ -3086,10 +3161,22 @@ public:
 	/** Moves this pointer forwards by the specified number of characters. */
 	void operator+= (int numToSkip) throw()
 	{
-		jassert (numToSkip >= 0);
+		if (numToSkip < 0)
+		{
+			while (++numToSkip <= 0)
+				--*this;
+		}
+		else
+		{
+			while (--numToSkip >= 0)
+				++*this;
+		}
+	}
 
-		while (--numToSkip >= 0)
-			++*this;
+	/** Moves this pointer backwards by the specified number of characters. */
+	void operator-= (int numToSkip) throw()
+	{
+		operator+= (-numToSkip);
 	}
 
 	/** Returns the character at a given character index from the start of the string. */
@@ -3105,6 +3192,14 @@ public:
 	{
 		CharPointer_UTF16 p (*this);
 		p += numToSkip;
+		return p;
+	}
+
+	/** Returns a pointer which is moved backwards from this one by the specified number of characters. */
+	CharPointer_UTF16 operator- (const int numToSkip) const throw()
+	{
+		CharPointer_UTF16 p (*this);
+		p += -numToSkip;
 		return p;
 	}
 
@@ -3392,6 +3487,12 @@ public:
 		}
 
 		return true;
+	}
+
+	/** Atomically swaps this pointer for a new value, returning the previous value. */
+	CharPointer_UTF16 atomicSwap (const CharPointer_UTF16& newValue)
+	{
+		return CharPointer_UTF16 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
 	}
 
 	/** These values are the byte-order-mark (BOM) values for a UTF-16 stream. */
@@ -4201,11 +4302,31 @@ public:
 	*/
 	String (const juce_wchar* unicodeText, size_t maxChars);
 
+   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
+	/** Creates a string from a UTF-16 character string */
+	String (const wchar_t* text);
+
+	/** Creates a string from a UTF-16 character string */
+	String (const wchar_t* text, size_t maxChars);
+   #endif
+
 	/** Creates a string from a UTF-8 character string */
 	String (const CharPointer_UTF8& text);
 
+	/** Creates a string from a UTF-8 character string */
+	String (const CharPointer_UTF8& text, size_t maxChars);
+
+	/** Creates a string from a UTF-8 character string */
+	String (const CharPointer_UTF8& start, const CharPointer_UTF8& end);
+
 	/** Creates a string from a UTF-16 character string */
 	String (const CharPointer_UTF16& text);
+
+	/** Creates a string from a UTF-16 character string */
+	String (const CharPointer_UTF16& text, size_t maxChars);
+
+	/** Creates a string from a UTF-16 character string */
+	String (const CharPointer_UTF16& start, const CharPointer_UTF16& end);
 
 	/** Creates a string from a UTF-32 character string */
 	String (const CharPointer_UTF32& text);
@@ -4218,14 +4339,6 @@ public:
 
 	/** Creates a string from an ASCII character string */
 	String (const CharPointer_ASCII& text);
-
-   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-	/** Creates a string from a UTF-16 character string */
-	String (const wchar_t* text);
-
-	/** Creates a string from a UTF-16 character string */
-	String (const wchar_t* text, size_t maxChars);
-   #endif
 
 	/** Creates a string from a single character. */
 	static const String charToString (juce_wchar character);
@@ -4240,8 +4353,27 @@ public:
 	*/
 	static const String empty;
 
-	/** This is the character encoding type used internally to store the string. */
+	/** This is the character encoding type used internally to store the string.
+
+		By setting the value of JUCE_STRING_UTF_TYPE to 8, 16, or 32, you can change the
+		internal storage format of the String class. UTF-8 uses the least space (if your strings
+		contain few extended characters), but call operator[] involves iterating the string to find
+		the required index. UTF-32 provides instant random access to its characters, but uses 4 bytes
+		per character to store them. UTF-16 uses more space than UTF-8 and is also slow to index,
+		but is the native wchar_t format used in Windows.
+
+		It doesn't matter too much which format you pick, because the toUTF8(), toUTF16() and
+		toUTF32() methods let you access the string's content in any of the other formats.
+	*/
+   #if (JUCE_STRING_UTF_TYPE == 32)
 	typedef CharPointer_UTF32 CharPointerType;
+   #elif (JUCE_STRING_UTF_TYPE == 16)
+	typedef CharPointer_UTF16 CharPointerType;
+   #elif (JUCE_STRING_UTF_TYPE == 8)
+	typedef CharPointer_UTF8  CharPointerType;
+   #else
+	#error "You must set the value of JUCE_STRING_UTF_TYPE to be either 8, 16, or 32!"
+   #endif
 
 	/** Generates a probably-unique 32-bit hashcode from this string. */
 	int hashCode() const throw();
@@ -4291,13 +4423,21 @@ public:
 	{
 		if (textToAppend.getAddress() != 0)
 		{
-			const size_t numExtraChars = textToAppend.lengthUpTo (maxCharsToTake);
+			size_t extraBytesNeeded = 0;
+			size_t numChars = 0;
 
-			if (numExtraChars > 0)
+			for (CharPointer t (textToAppend); numChars < maxCharsToTake && ! t.isEmpty();)
 			{
-				const int oldLen = length();
-				preallocateStorage (oldLen + numExtraChars);
-				CharPointerType (text + oldLen).writeWithCharLimit (textToAppend, (int) (numExtraChars + 1));
+				extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
+				++numChars;
+			}
+
+			if (numChars > 0)
+			{
+				const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+
+				preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
+				CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull)).writeWithCharLimit (textToAppend, (int) (numChars + 1));
 			}
 		}
 	}
@@ -4312,13 +4452,17 @@ public:
 	{
 		if (textToAppend.getAddress() != 0)
 		{
-			const size_t numExtraChars = textToAppend.length();
+			size_t extraBytesNeeded = 0;
 
-			if (numExtraChars > 0)
+			for (CharPointer t (textToAppend); ! t.isEmpty();)
+				extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
+
+			if (extraBytesNeeded > 0)
 			{
-				const int oldLen = length();
-				preallocateStorage (oldLen + numExtraChars);
-				CharPointerType (text + oldLen).writeAll (textToAppend);
+				const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+
+				preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
+				CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull)).writeAll (textToAppend);
 			}
 		}
 	}
@@ -4515,18 +4659,14 @@ public:
 	// Substring location methods..
 
 	/** Searches for a character inside this string.
-
 		Uses a case-sensitive comparison.
-
 		@returns	the index of the first occurrence of the character in this
 					string, or -1 if it's not found.
 	*/
 	int indexOfChar (juce_wchar characterToLookFor) const throw();
 
 	/** Searches for a character inside this string.
-
 		Uses a case-sensitive comparison.
-
 		@param startIndex	   the index from which the search should proceed
 		@param characterToLookFor   the character to look for
 		@returns		the index of the first occurrence of the character in this
@@ -4551,67 +4691,54 @@ public:
 					  bool ignoreCase = false) const throw();
 
 	/** Searches for a substring within this string.
-
 		Uses a case-sensitive comparison.
-
 		@returns	the index of the first occurrence of this substring, or -1 if it's not found.
+					If textToLookFor is an empty string, this will always return 0.
 	*/
-	int indexOf (const String& text) const throw();
+	int indexOf (const String& textToLookFor) const throw();
 
 	/** Searches for a substring within this string.
-
 		Uses a case-sensitive comparison.
-
 		@param startIndex	   the index from which the search should proceed
 		@param textToLookFor	the string to search for
 		@returns		the index of the first occurrence of this substring, or -1 if it's not found.
+								If textToLookFor is an empty string, this will always return -1.
 	*/
-	int indexOf (int startIndex,
-				 const String& textToLookFor) const throw();
+	int indexOf (int startIndex, const String& textToLookFor) const throw();
 
 	/** Searches for a substring within this string.
-
 		Uses a case-insensitive comparison.
-
 		@returns	the index of the first occurrence of this substring, or -1 if it's not found.
+					If textToLookFor is an empty string, this will always return 0.
 	*/
 	int indexOfIgnoreCase (const String& textToLookFor) const throw();
 
 	/** Searches for a substring within this string.
-
 		Uses a case-insensitive comparison.
-
 		@param startIndex	   the index from which the search should proceed
 		@param textToLookFor	the string to search for
 		@returns		the index of the first occurrence of this substring, or -1 if it's not found.
+								If textToLookFor is an empty string, this will always return -1.
 	*/
-	int indexOfIgnoreCase (int startIndex,
-						   const String& textToLookFor) const throw();
+	int indexOfIgnoreCase (int startIndex, const String& textToLookFor) const throw();
 
 	/** Searches for a character inside this string (working backwards from the end of the string).
-
 		Uses a case-sensitive comparison.
-
-		@returns		the index of the last occurrence of the character in this
-							string, or -1 if it's not found.
+		@returns	the index of the last occurrence of the character in this string, or -1 if it's not found.
 	*/
 	int lastIndexOfChar (juce_wchar character) const throw();
 
 	/** Searches for a substring inside this string (working backwards from the end of the string).
-
 		Uses a case-sensitive comparison.
-
-		@returns		the index of the start of the last occurrence of the
-							substring within this string, or -1 if it's not found.
+		@returns	the index of the start of the last occurrence of the substring within this string,
+					or -1 if it's not found. If textToLookFor is an empty string, this will always return -1.
 	*/
 	int lastIndexOf (const String& textToLookFor) const throw();
 
 	/** Searches for a substring inside this string (working backwards from the end of the string).
-
 		Uses a case-insensitive comparison.
-
-		@returns		the index of the start of the last occurrence of the
-							substring within this string, or -1 if it's not found.
+		@returns	the index of the start of the last occurrence of the substring within this string, or -1
+					if it's not found. If textToLookFor is an empty string, this will always return -1.
 	*/
 	int lastIndexOfIgnoreCase (const String& textToLookFor) const throw();
 
@@ -4633,8 +4760,15 @@ public:
 	// Substring extraction and manipulation methods..
 
 	/** Returns the character at this index in the string.
+		In a release build, no checks are made to see if the index is within a valid range, so be
+		careful! In a debug build, the index is checked and an assertion fires if it's out-of-range.
 
-		No checks are made to see if the index is within a valid range, so be careful!
+		Also beware that depending on the encoding format that the string is using internally, this
+		method may execute in either O(1) or O(n) time, so be careful when using it in your algorithms.
+		If you're scanning through a string to inspect its characters, you should never use this operator
+		for random access, it's far more efficient to call getCharPointer() to return a pointer, and
+		then to use that to iterate the string.
+		@see getCharPointer
 	*/
 	const juce_wchar operator[] (int index) const throw();
 
@@ -5073,14 +5207,6 @@ public:
 									 int size,
 									 int groupSize = 1);
 
-	/** Returns a unicode version of this string.
-
-		Because it returns a reference to the string's internal data, the pointer
-		that is returned must not be stored anywhere, as it can become invalid whenever
-		any string methods (even some const ones!) are called.
-	*/
-	inline operator const juce_wchar*() const throw()	   { return toUTF32().getAddress(); }
-
 	/** Returns the character pointer currently being used to store this string.
 
 		Because it returns a reference to the string's internal data, the pointer
@@ -5123,7 +5249,7 @@ public:
 
 		@see getCharPointer, toUTF8, toUTF16
 	*/
-	inline CharPointer_UTF32 toUTF32() const throw()	{ return text; }
+	CharPointer_UTF32 toUTF32() const;
 
 	/** Creates a String from a UTF-8 encoded buffer.
 		If the size is < 0, it'll keep reading until it hits a zero.
@@ -5170,33 +5296,22 @@ public:
 	*/
 	int copyToUTF16 (CharPointer_UTF16::CharType* destBuffer, int maxBufferSizeBytes) const throw();
 
-	/** Returns a version of this string using the default 8-bit multi-byte system encoding.
+	/** Copies the string to a buffer as UTF-16 characters.
 
-		Because it returns a reference to the string's internal data, the pointer
-		that is returned must not be stored anywhere, as it can be deleted whenever the
-		string changes.
+		Returns the number of bytes copied to the buffer, including the terminating null
+		character.
 
-		@see getNumBytesAsCString, copyToCString, toUTF8
+		To find out how many bytes you need to store this string as UTF-32, you can call
+		CharPointer_UTF32::getBytesRequiredFor (myString.getCharPointer())
+
+		@param destBuffer	   the place to copy it to; if this is a null pointer, the method just
+								returns the number of bytes required (including the terminating null character).
+		@param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the string won't fit, it'll
+								put in as many as it can while still allowing for a terminating null char at the
+								end, and will return the number of bytes that were actually used.
+		@see CharPointer_UTF32::writeWithDestByteLimit
 	*/
-	const char* toCString() const;
-
-	/** Returns the number of bytes required to represent this string as C-string.
-		The number returned does NOT include the trailing zero.
-		Note that you can also get this value by using CharPointer_UTF8::getBytesRequiredFor (myString.getCharPointer())
-	*/
-	int getNumBytesAsCString() const throw();
-
-	/** Copies the string to a buffer.
-
-		@param destBuffer	   the place to copy it to; if this is a null pointer,
-								the method just returns the number of bytes required
-								(including the terminating null character).
-		@param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the
-								string won't fit, it'll put in as many as it can while
-								still allowing for a terminating null char at the end, and
-								will return the number of bytes that were actually used.
-	*/
-	int copyToCString (char* destBuffer, int maxBufferSizeBytes) const throw();
+	int copyToUTF32 (CharPointer_UTF32::CharType* destBuffer, int maxBufferSizeBytes) const throw();
 
 	/** Increases the string's internally allocated storage.
 
@@ -5208,11 +5323,11 @@ public:
 		beforehand, so that these methods won't have to keep resizing the string
 		to append the extra characters.
 
-		@param numCharsNeeded   the number of characters to allocate storage for. If this
+		@param numBytesNeeded   the number of bytes to allocate storage for. If this
 								value is less than the currently allocated size, it will
 								have no effect.
 	*/
-	void preallocateStorage (size_t numCharsNeeded);
+	void preallocateBytes (size_t numBytesNeeded);
 
 	/** Swaps the contents of this string with another one.
 		This is a very fast operation, as no allocation or copying needs to be done.
@@ -5247,20 +5362,18 @@ private:
 
 	CharPointerType text;
 
-	struct Preallocation
+	struct PreallocationBytes
 	{
-		explicit Preallocation (size_t);
-		size_t numChars;
+		explicit PreallocationBytes (size_t);
+		size_t numBytes;
 	};
 
 	// This constructor preallocates a certain amount of memory
-	explicit String (const Preallocation&);
-	String (const String& stringToCopy, size_t charsToAllocate);
+	explicit String (const PreallocationBytes&);
+	JUCE_DEPRECATED (String (const String& stringToCopy, size_t charsToAllocate));
 
-	void appendFixedLength (const juce_wchar* text, int numExtraChars);
-
-	void enlarge (size_t newTotalNumChars);
-	void* createSpaceAtEndOfBuffer (size_t numExtraBytes) const;
+	void appendFixedLength (const char* text, int numExtraChars);
+	size_t getByteOffsetOfEnd() const throw();
 
 	// This private cast operator should prevent strings being accidentally cast
 	// to bools (this is possible because the compiler can add an implicit cast
@@ -7467,7 +7580,7 @@ public:
 	int size() const throw();
 
 	/** Returns one of the strings in the pool, by index. */
-	const juce_wchar* operator[] (int index) const throw();
+	const String::CharPointerType operator[] (int index) const throw();
 
 private:
 	Array <String> strings;
@@ -7522,11 +7635,11 @@ public:
 	const String toString() const					   { return name; }
 
 	/** Returns this identifier's raw string pointer. */
-	operator const juce_wchar*() const throw()			  { return name; }
+	operator const String::CharPointerType() const throw()		  { return name; }
 
 private:
 
-	const juce_wchar* name;
+	String::CharPointerType name;
 
 	static StringPool& getPool();
 };
@@ -24983,7 +25096,7 @@ public:
 	const String toString() const
 	{
 		String s;
-		s.preallocateStorage (16);
+		s.preallocateBytes (32);
 		s << x << ' ' << y << ' ' << w << ' ' << h;
 		return s;
 	}
@@ -42861,8 +42974,7 @@ public:
 
 		@see addMidiInputCallback, isMidiInputEnabled
 	*/
-	void setMidiInputEnabled (const String& midiInputDeviceName,
-							  bool enabled);
+	void setMidiInputEnabled (const String& midiInputDeviceName, bool enabled);
 
 	/** Returns true if a given midi input device is being used.
 
@@ -43006,33 +43118,22 @@ private:
 							 public MidiInputCallback
 	{
 	public:
-		AudioDeviceManager* owner;
-
-		void audioDeviceIOCallback (const float** inputChannelData,
-									int totalNumInputChannels,
-									float** outputChannelData,
-									int totalNumOutputChannels,
-									int numSamples);
-
+		void audioDeviceIOCallback (const float**, int, float**, int, int);
 		void audioDeviceAboutToStart (AudioIODevice*);
-
 		void audioDeviceStopped();
+		void handleIncomingMidiMessage (MidiInput*, const MidiMessage&);
 
-		void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
+		AudioDeviceManager* owner;
 	};
 
 	CallbackHandler callbackHandler;
 	friend class CallbackHandler;
 
-	void audioDeviceIOCallbackInt (const float** inputChannelData,
-								   int totalNumInputChannels,
-								   float** outputChannelData,
-								   int totalNumOutputChannels,
-								   int numSamples);
-	void audioDeviceAboutToStartInt (AudioIODevice* device);
+	void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,
+								   float** outputChannelData, int totalNumOutputChannels, int numSamples);
+	void audioDeviceAboutToStartInt (AudioIODevice*);
 	void audioDeviceStoppedInt();
-
-	void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);
+	void handleIncomingMidiMessageInt (MidiInput*, const MidiMessage&);
 
 	const String restartDevice (int blockSizeToUse, double sampleRateToUse,
 								const BigInteger& ins, const BigInteger& outs);

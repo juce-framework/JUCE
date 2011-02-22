@@ -44,27 +44,27 @@ namespace OggVorbisNamespace
 
  #include "oggvorbis/bitwise.c"
  #include "oggvorbis/framing.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/analysis.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/bitrate.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/block.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/codebook.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/envelope.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/floor0.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/floor1.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/info.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/lpc.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/lsp.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/mapping0.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/mdct.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/psy.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/registry.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/res0.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/sharedbook.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/smallft.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/synthesis.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/vorbisenc.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/vorbisfile.c"
- #include "oggvorbis/libvorbis-1.1.2/lib/window.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/analysis.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/bitrate.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/block.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/codebook.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/envelope.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/floor0.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/floor1.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/info.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/lpc.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/lsp.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/mapping0.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/mdct.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/psy.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/registry.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/res0.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/sharedbook.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/smallft.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/synthesis.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/vorbisenc.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/vorbisfile.c"
+ #include "oggvorbis/libvorbis-1.3.2/lib/window.c"
 #else
  #include <vorbis/vorbisenc.h>
  #include <vorbis/codec.h>
@@ -265,20 +265,15 @@ public:
                const int numChannels,
                const int bitsPerSample,
                const int qualityIndex)
-        : AudioFormatWriter (out, TRANS (oggFormatName),
-                             sampleRate,
-                             numChannels,
-                             bitsPerSample)
+        : AudioFormatWriter (out, TRANS (oggFormatName), sampleRate, numChannels, bitsPerSample)
     {
         using namespace OggVorbisNamespace;
         ok = false;
 
         vorbis_info_init (&vi);
 
-        if (vorbis_encode_init_vbr (&vi,
-                                    numChannels,
-                                    (int) sampleRate,
-                                    jlimit (0.0f, 1.0f, qualityIndex * 0.5f)) == 0)
+        if (vorbis_encode_init_vbr (&vi, numChannels, (int) sampleRate,
+                                    jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);
 
@@ -407,7 +402,7 @@ OggVorbisAudioFormat::~OggVorbisAudioFormat()
 
 const Array <int> OggVorbisAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 22050, 32000, 44100, 48000, 0 };
+    const int rates[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
     return Array <int> (rates);
 }
 
@@ -453,11 +448,9 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
 
 const StringArray OggVorbisAudioFormat::getQualityOptions()
 {
-    StringArray s;
-    s.add ("Low Quality");
-    s.add ("Medium Quality");
-    s.add ("High Quality");
-    return s;
+    const char* options[] = { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",
+                              "192 kbps", "224 kbps", "256 kbps", "320 kbps", "500 kbps", 0 };
+    return StringArray (options);
 }
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)

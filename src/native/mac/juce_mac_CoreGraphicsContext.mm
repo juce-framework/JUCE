@@ -166,8 +166,7 @@ public:
         : context (context_),
           flipHeight (flipHeight_),
           lastClipRectIsValid (false),
-          state (new SavedState()),
-          numGradientLookupEntries (0)
+          state (new SavedState())
     {
         CGContextRetain (context);
         CGContextSaveGState(context);
@@ -177,7 +176,7 @@ public:
         rgbColourSpace = CGColorSpaceCreateDeviceRGB();
         greyColourSpace = CGColorSpaceCreateDeviceGray();
         gradientCallbacks.version = 0;
-        gradientCallbacks.evaluate = gradientCallback;
+        gradientCallbacks.evaluate = SavedState::gradientCallback;
         gradientCallbacks.releaseInfo = 0;
         setFont (Font());
     }
@@ -368,7 +367,7 @@ public:
     //==============================================================================
     void setFill (const FillType& fillType)
     {
-        state->fillType = fillType;
+        state->setFill (fillType);
 
         if (fillType.isColour())
         {
@@ -663,65 +662,93 @@ private:
     struct SavedState
     {
         SavedState()
-            : font (1.0f), fontRef (0), fontTransform (CGAffineTransformIdentity)
+            : font (1.0f), fontRef (0), fontTransform (CGAffineTransformIdentity),
+              shading (0), numGradientLookupEntries (0)
         {
         }
 
         SavedState (const SavedState& other)
             : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
-              fontTransform (other.fontTransform)
+              fontTransform (other.fontTransform), shading (0),
+              gradientLookupTable (other.numGradientLookupEntries),
+              numGradientLookupEntries (other.numGradientLookupEntries)
         {
+            memcpy (gradientLookupTable, other.gradientLookupTable, sizeof (PixelARGB) * numGradientLookupEntries);
+        }
+
+        ~SavedState()
+        {
+            if (shading != 0)
+                CGShadingRelease (shading);
+        }
+
+        void setFill (const FillType& newFill)
+        {
+            fillType = newFill;
+
+            if (fillType.isGradient() && shading != 0)
+            {
+                CGShadingRelease (shading);
+                shading = 0;
+            }
+        }
+
+        CGShadingRef getShading (CoreGraphicsContext& owner)
+        {
+            if (shading == 0)
+            {
+                ColourGradient& g = *(fillType.gradient);
+                numGradientLookupEntries = g.createLookupTable (fillType.transform, gradientLookupTable) - 1;
+
+                CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &(owner.gradientCallbacks));
+                CGPoint p1 (CGPointMake (g.point1.getX(), g.point1.getY()));
+
+                if (g.isRadial)
+                {
+                    shading = CGShadingCreateRadial (owner.rgbColourSpace, p1, 0,
+                                                     p1, g.point1.getDistanceFrom (g.point2),
+                                                     function, true, true);
+                }
+                else
+                {
+                    shading = CGShadingCreateAxial (owner.rgbColourSpace, p1,
+                                                    CGPointMake (g.point2.getX(), g.point2.getY()),
+                                                    function, true, true);
+                }
+
+                CGFunctionRelease (function);
+            }
+
+            return shading;
+        }
+
+        static void gradientCallback (void* info, const CGFloat* inData, CGFloat* outData)
+        {
+            const SavedState* const s = static_cast <const SavedState*> (info);
+
+            const int index = roundToInt (s->numGradientLookupEntries * inData[0]);
+            PixelARGB colour (s->gradientLookupTable [jlimit (0, s->numGradientLookupEntries, index)]);
+            colour.unpremultiply();
+
+            outData[0] = colour.getRed() / 255.0f;
+            outData[1] = colour.getGreen() / 255.0f;
+            outData[2] = colour.getBlue() / 255.0f;
+            outData[3] = colour.getAlpha() / 255.0f;
         }
 
         FillType fillType;
         Font font;
         CGFontRef fontRef;
         CGAffineTransform fontTransform;
+
+    private:
+        CGShadingRef shading;
+        HeapBlock <PixelARGB> gradientLookupTable;
+        int numGradientLookupEntries;
     };
 
     ScopedPointer <SavedState> state;
     OwnedArray <SavedState> stateStack;
-    HeapBlock <PixelARGB> gradientLookupTable;
-    int numGradientLookupEntries;
-
-    static void gradientCallback (void* info, const CGFloat* inData, CGFloat* outData)
-    {
-        const CoreGraphicsContext* const g = static_cast <const CoreGraphicsContext*> (info);
-
-        const int index = roundToInt (g->numGradientLookupEntries * inData[0]);
-        PixelARGB colour (g->gradientLookupTable [jlimit (0, g->numGradientLookupEntries, index)]);
-        colour.unpremultiply();
-
-        outData[0] = colour.getRed() / 255.0f;
-        outData[1] = colour.getGreen() / 255.0f;
-        outData[2] = colour.getBlue() / 255.0f;
-        outData[3] = colour.getAlpha() / 255.0f;
-    }
-
-    CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient)
-    {
-        numGradientLookupEntries = gradient.createLookupTable (transform, gradientLookupTable) - 1;
-
-        CGShadingRef result = 0;
-        CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &gradientCallbacks);
-        CGPoint p1 (CGPointMake (gradient.point1.getX(), gradient.point1.getY()));
-
-        if (gradient.isRadial)
-        {
-            result = CGShadingCreateRadial (rgbColourSpace, p1, 0,
-                                            p1, gradient.point1.getDistanceFrom (gradient.point2),
-                                            function, true, true);
-        }
-        else
-        {
-            result = CGShadingCreateAxial (rgbColourSpace, p1,
-                                           CGPointMake (gradient.point2.getX(), gradient.point2.getY()),
-                                           function, true, true);
-        }
-
-        CGFunctionRelease (function);
-        return result;
-    }
 
     void drawGradient()
     {
@@ -730,10 +757,8 @@ private:
 
         CGContextSetInterpolationQuality (context, kCGInterpolationDefault); // (This is required for 10.4, where there's a crash if
                                                                              // you draw a gradient with high quality interp enabled).
-        CGShadingRef shading = createGradient (state->fillType.transform, *(state->fillType.gradient));
         CGContextSetAlpha (context, state->fillType.getOpacity());
-        CGContextDrawShading (context, shading);
-        CGShadingRelease (shading);
+        CGContextDrawShading (context, state->getShading (*this));
     }
 
     void createPath (const Path& path) const

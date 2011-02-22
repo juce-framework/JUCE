@@ -327,8 +327,7 @@ public:
 
         @see addMidiInputCallback, isMidiInputEnabled
     */
-    void setMidiInputEnabled (const String& midiInputDeviceName,
-                              bool enabled);
+    void setMidiInputEnabled (const String& midiInputDeviceName, bool enabled);
 
     /** Returns true if a given midi input device is being used.
 
@@ -476,33 +475,22 @@ private:
                              public MidiInputCallback
     {
     public:
-        AudioDeviceManager* owner;
-
-        void audioDeviceIOCallback (const float** inputChannelData,
-                                    int totalNumInputChannels,
-                                    float** outputChannelData,
-                                    int totalNumOutputChannels,
-                                    int numSamples);
-
+        void audioDeviceIOCallback (const float**, int, float**, int, int);
         void audioDeviceAboutToStart (AudioIODevice*);
-
         void audioDeviceStopped();
+        void handleIncomingMidiMessage (MidiInput*, const MidiMessage&);
 
-        void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
+        AudioDeviceManager* owner;
     };
 
     CallbackHandler callbackHandler;
     friend class CallbackHandler;
 
-    void audioDeviceIOCallbackInt (const float** inputChannelData,
-                                   int totalNumInputChannels,
-                                   float** outputChannelData,
-                                   int totalNumOutputChannels,
-                                   int numSamples);
-    void audioDeviceAboutToStartInt (AudioIODevice* device);
+    void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,
+                                   float** outputChannelData, int totalNumOutputChannels, int numSamples);
+    void audioDeviceAboutToStartInt (AudioIODevice*);
     void audioDeviceStoppedInt();
-
-    void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);
+    void handleIncomingMidiMessageInt (MidiInput*, const MidiMessage&);
 
     const String restartDevice (int blockSizeToUse, double sampleRateToUse,
                                 const BigInteger& ins, const BigInteger& outs);

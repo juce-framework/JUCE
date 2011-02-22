@@ -596,6 +596,7 @@ private:
         int64 audioDataSize = bytesPerFrame * lengthInSamples;
 
         const bool isRF64 = (bytesWritten >= literal64bit (0x100000000));
+        const bool isWaveFmtEx = isRF64 || (numChannels > 2);
 
         int64 riffChunkSize = 4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
                                + 8 + audioDataSize + (audioDataSize & 1)
@@ -612,8 +613,8 @@ private:
         if (! isRF64)
         {
             output->writeInt (chunkName ("JUNK"));
-            output->writeInt (28 + 24);
-            output->writeRepeatedByte (0, 28 /* ds64 */ + 24 /* extra waveformatex */);
+            output->writeInt (28 + (isWaveFmtEx? 0 : 24));
+            output->writeRepeatedByte (0, 28 /* ds64 */ + (isWaveFmtEx? 0 : 24));
         }
         else
         {
@@ -627,7 +628,7 @@ private:
 
         output->writeInt (chunkName ("fmt "));
 
-        if (isRF64)
+        if (isWaveFmtEx)
         {
             output->writeInt (40); // chunk size
             output->writeShort ((short) (uint16) 0xfffe); // WAVE_FORMAT_EXTENSIBLE
@@ -645,7 +646,7 @@ private:
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
 
-        if (isRF64)
+        if (isWaveFmtEx)
         {
             output->writeShort (22); // cbSize (size of  the extension)
             output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
