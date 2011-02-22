@@ -115,23 +115,24 @@ namespace CppTokeniser
     int parseIdentifier (CodeDocument::Iterator& source) throw()
     {
         int tokenLength = 0;
-        juce_wchar possibleIdentifier [19];
+        String::CharPointerType::CharType possibleIdentifier [100];
+        String::CharPointerType possible (possibleIdentifier);
 
         while (isIdentifierBody (source.peekNextChar()))
         {
             const juce_wchar c = source.nextChar();
 
-            if (tokenLength < numElementsInArray (possibleIdentifier) - 1)
-                possibleIdentifier [tokenLength] = c;
+            if (tokenLength < 20)
+                possible.write (c);
 
             ++tokenLength;
         }
 
         if (tokenLength > 1 && tokenLength <= 16)
         {
-            possibleIdentifier [tokenLength] = 0;
+            possible.writeNull();
 
-            if (isReservedKeyword (CharPointer_UTF32 (possibleIdentifier), tokenLength))
+            if (isReservedKeyword (String::CharPointerType (possibleIdentifier), tokenLength))
                 return CPlusPlusCodeTokeniser::tokenType_builtInKeyword;
         }
 

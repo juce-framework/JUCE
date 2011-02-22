@@ -268,7 +268,7 @@ namespace LinuxErrorHandling
         char requestStr[64] = { 0 };
 
         XGetErrorText (display, event->error_code, errorStr, 64);
-        XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toCString(), "Unknown", requestStr, 64);
+        XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toUTF8(), "Unknown", requestStr, 64);
         DBG ("ERROR: X returned " + String (errorStr) + " for operation " + String (requestStr));
     #endif
 
@@ -345,7 +345,7 @@ void MessageManager::doPlatformSpecificInitialisation()
     if (displayName.isEmpty())
         displayName = ":0.0";
 
-    display = XOpenDisplay (displayName.toCString());
+    display = XOpenDisplay (displayName.toUTF8());
 
     if (display != 0)  // This is not fatal! we can run headless.
     {

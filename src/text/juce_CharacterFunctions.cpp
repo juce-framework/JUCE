@@ -132,24 +132,6 @@ int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
     return -1;
 }
 
-int CharacterFunctions::ftime (char* const dest, const int maxChars, const char* const format, const struct tm* const tm) throw()
-{
-    return (int) strftime (dest, maxChars, format, tm);
-}
-
-int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
-{
-   #if JUCE_NATIVE_WCHAR_IS_UTF32 && ! JUCE_ANDROID
-    return (int) wcsftime (dest, maxChars, format, tm);
-   #else
-    HeapBlock <char> tempDest;
-    tempDest.calloc (maxChars + 2);
-    int result = ftime (tempDest.getData(), maxChars, String (format).toUTF8(), tm);
-    CharPointer_UTF32 (dest).writeAll (CharPointer_UTF8 (tempDest.getData()));
-    return result;
-   #endif
-}
-
 #if JUCE_MSVC
   #pragma warning (pop)
 #endif

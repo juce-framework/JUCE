@@ -328,14 +328,14 @@ const String StringArray::joinIntoString (const String& separator, int start, in
     if (start == last - 1)
         return strings.getReference (start);
 
-    const int separatorLen = separator.length();
-    int charsNeeded = separatorLen * (last - start - 1);
+    const size_t separatorBytes = separator.getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
+    size_t bytesNeeded = separatorBytes * (last - start - 1);
 
     for (int i = start; i < last; ++i)
-        charsNeeded += strings.getReference(i).length();
+        bytesNeeded += strings.getReference(i).getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
 
     String result;
-    result.preallocateStorage (charsNeeded);
+    result.preallocateBytes (bytesNeeded);
 
     String::CharPointerType dest (result.getCharPointer());
 
@@ -346,7 +346,7 @@ const String StringArray::joinIntoString (const String& separator, int start, in
         if (! s.isEmpty())
             dest.writeAll (s.getCharPointer());
 
-        if (++start < last && separatorLen > 0)
+        if (++start < last && separatorBytes > 0)
             dest.writeAll (separator.getCharPointer());
     }
 

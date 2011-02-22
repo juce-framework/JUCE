@@ -703,7 +703,7 @@ public:
     const String toString() const
     {
         String s;
-        s.preallocateStorage (16);
+        s.preallocateBytes (32);
         s << x << ' ' << y << ' ' << w << ' ' << h;
         return s;
     }

@@ -131,6 +131,25 @@ public:
         return *this;
     }
 
+    /** Moves this pointer back to the previous character in the string. */
+    CharPointer_UTF8& operator--() throw()
+    {
+        const char n = *--data;
+
+        if ((n & 0xc0) == 0xc0)
+        {
+            int count = 3;
+
+            do
+            {
+                --data;
+            }
+            while ((*data & 0xc0) == 0xc0 && --count >= 0);
+        }
+
+        return *this;
+    }
+
     /** Returns the character that this pointer is currently pointing to, and then
         advances the pointer to point to the next character. */
     juce_wchar getAndAdvance() throw()
@@ -179,10 +198,22 @@ public:
     /** Moves this pointer forwards by the specified number of characters. */
     void operator+= (int numToSkip) throw()
     {
-        jassert (numToSkip >= 0);
+        if (numToSkip < 0)
+        {
+            while (++numToSkip <= 0)
+                --*this;
+        }
+        else
+        {
+            while (--numToSkip >= 0)
+                ++*this;
+        }
+    }
 
-        while (--numToSkip >= 0)
-            ++*this;
+    /** Moves this pointer backwards by the specified number of characters. */
+    void operator-= (int numToSkip) throw()
+    {
+        operator+= (-numToSkip);
     }
 
     /** Returns the character at a given character index from the start of the string. */
@@ -198,6 +229,14 @@ public:
     {
         CharPointer_UTF8 p (*this);
         p += numToSkip;
+        return p;
+    }
+
+    /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
+    CharPointer_UTF8 operator- (int numToSkip) const throw()
+    {
+        CharPointer_UTF8 p (*this);
+        p += -numToSkip;
         return p;
     }
 
@@ -518,6 +557,12 @@ public:
         }
 
         return true;
+    }
+
+    /** Atomically swaps this pointer for a new value, returning the previous value. */
+    CharPointer_UTF8 atomicSwap (const CharPointer_UTF8& newValue)
+    {
+        return CharPointer_UTF8 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
     }
 
     /** These values are the byte-order-mark (BOM) values for a UTF-8 stream. */

@@ -92,7 +92,7 @@ public:
 
     const String getExporterIdentifierMacro() const
     {
-        return "JUCER_" + settings.getType() + "_"
+        return "JUCER_" + settings.getType().toString() + "_"
                 + String::toHexString (settings [Ids::targetFolder].toString().hashCode()).toUpperCase();
     }
 

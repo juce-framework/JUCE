@@ -58,6 +58,8 @@ namespace WindowsFileHelpers
 
     const String getDriveFromPath (String path)
     {
+        // (mess with the string to make sure it's not sharing its internal storage)
+        path = (path + " ").dropLastCharacters(1);
         WCHAR* p = const_cast <WCHAR*> (path.toUTF16().getAddress());
 
         if (PathStripToRoot (p))

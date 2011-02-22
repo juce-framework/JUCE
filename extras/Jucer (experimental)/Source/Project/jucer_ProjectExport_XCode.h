@@ -720,7 +720,7 @@ private:
         for (int i = 0; i < objects.size(); ++i)
         {
             ValueTree& o = *objects.getUnchecked(i);
-            output << "\t\t" << static_cast <const juce_wchar*> (o.getType()) << " = { ";
+            output << "\t\t" << o.getType().toString() << " = { ";
 
             for (int j = 0; j < o.getNumProperties(); ++j)
             {

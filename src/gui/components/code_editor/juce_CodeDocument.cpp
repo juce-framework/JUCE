@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_CodeDocument.h"
+#include "../../../io/streams/juce_MemoryOutputStream.h"
 
 
 //==============================================================================
@@ -107,13 +108,19 @@ public:
 
     void updateLength() throw()
     {
-        lineLengthWithoutNewLines = lineLength = line.length();
+        lineLength = 0;
+        lineLengthWithoutNewLines = 0;
 
-        while (lineLengthWithoutNewLines > 0
-                && (line [lineLengthWithoutNewLines - 1] == '\n'
-                    || line [lineLengthWithoutNewLines - 1] == '\r'))
+        String::CharPointerType t (line.getCharPointer());
+
+        while (! t.isEmpty())
         {
-            --lineLengthWithoutNewLines;
+            ++lineLength;
+
+            const juce_wchar c = t.getAndAdvance();
+
+            if (c != '\n' && c != '\r')
+                lineLengthWithoutNewLines = lineLength;
         }
     }
 
@@ -201,7 +208,7 @@ void CodeDocument::Iterator::skipToEndOfLine()
 
 juce_wchar CodeDocument::Iterator::peekNextChar() const
 {
-    if (currentLine == 0)
+    if (currentLine == 0 || currentLine->line.isEmpty())
         return 0;
 
     jassert (currentLine == document->lines.getUnchecked (line));
@@ -481,9 +488,8 @@ const String CodeDocument::getTextBetween (const Position& start, const Position
         return (line == 0) ? String::empty : line->line.substring (start.getIndexInLine(), end.getIndexInLine());
     }
 
-    String result;
-    result.preallocateStorage (end.getPosition() - start.getPosition() + 4);
-    String::Concatenator concatenator (result);
+    MemoryOutputStream mo;
+    mo.preallocate (end.getPosition() - start.getPosition() + 4);
 
     const int maxLine = jmin (lines.size() - 1, endLine);
 
@@ -495,20 +501,20 @@ const String CodeDocument::getTextBetween (const Position& start, const Position
         if (i == startLine)
         {
             const int index = start.getIndexInLine();
-            concatenator.append (line->line.substring (index, len));
+            mo << line->line.substring (index, len);
         }
         else if (i == endLine)
         {
             len = end.getIndexInLine();
-            concatenator.append (line->line.substring (0, len));
+            mo << line->line.substring (0, len);
         }
         else
         {
-            concatenator.append (line->line);
+            mo << line->line;
         }
     }
 
-    return result;
+    return mo.toString();
 }
 
 int CodeDocument::getNumCharacters() const throw()

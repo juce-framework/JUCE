@@ -80,7 +80,7 @@ MainHostWindow::MainHostWindow()
                       DocumentWindow::allButtons)
 {
     XmlElement* const savedAudioState = ApplicationProperties::getInstance()->getUserSettings()
-                                            ->getXmlValue (T("audioDeviceState"));
+                                            ->getXmlValue ("audioDeviceState");
 
     deviceManager.initialise (256, 256, savedAudioState, true);
 
@@ -101,7 +101,7 @@ MainHostWindow::MainHostWindow()
 
     XmlElement* const savedPluginList = ApplicationProperties::getInstance()
                                           ->getUserSettings()
-                                          ->getXmlValue (T("pluginList"));
+                                          ->getXmlValue ("pluginList");
 
     if (savedPluginList != 0)
     {
@@ -110,7 +110,7 @@ MainHostWindow::MainHostWindow()
     }
 
     pluginSortMethod = (KnownPluginList::SortMethod) ApplicationProperties::getInstance()->getUserSettings()
-                            ->getIntValue (T("pluginSortMethod"), KnownPluginList::sortByManufacturer);
+                            ->getIntValue ("pluginSortMethod", KnownPluginList::sortByManufacturer);
 
     knownPluginList.addChangeListener (this);
 
@@ -169,7 +169,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster*)
     if (savedPluginList != 0)
     {
         ApplicationProperties::getInstance()->getUserSettings()
-              ->setValue (T("pluginList"), savedPluginList);
+              ->setValue ("pluginList", savedPluginList);
 
         delete savedPluginList;
 
@@ -199,7 +199,7 @@ const PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const St
 
         PopupMenu recentFilesMenu;
         recentFiles.createPopupMenuItems (recentFilesMenu, 100, true, true);
-        menu.addSubMenu (T("Open recent file"), recentFilesMenu);
+        menu.addSubMenu ("Open recent file", recentFilesMenu);
 
         menu.addCommandItem (commandManager, CommandIDs::save);
         menu.addCommandItem (commandManager, CommandIDs::saveAs);
@@ -211,9 +211,9 @@ const PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const St
         // "Plugins" menu
         PopupMenu pluginsMenu;
         addPluginsToMenu (pluginsMenu);
-        menu.addSubMenu (T("Create plugin"), pluginsMenu);
+        menu.addSubMenu ("Create plugin", pluginsMenu);
         menu.addSeparator();
-        menu.addItem (250, T("Delete all plugins"));
+        menu.addItem (250, "Delete all plugins");
 
     }
     else if (topLevelMenuIndex == 2)
@@ -272,7 +272,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
             pluginSortMethod = KnownPluginList::sortByFileSystemLocation;
 
         ApplicationProperties::getInstance()->getUserSettings()
-           ->setValue (T("pluginSortMethod"), (int) pluginSortMethod);
+           ->setValue ("pluginSortMethod", (int) pluginSortMethod);
     }
     else
     {
@@ -339,34 +339,34 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
     switch (commandID)
     {
     case CommandIDs::open:
-        result.setInfo (T("Open..."),
-                        T("Opens a filter graph file"),
+        result.setInfo ("Open...),
+                        "Opens a filter graph file),
                         category, 0);
-        result.defaultKeypresses.add (KeyPress (T('o'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('o), ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::save:
-        result.setInfo (T("Save"),
-                        T("Saves the current graph to a file"),
+        result.setInfo ("Save",
+                        "Saves the current graph to a file",
                         category, 0);
-        result.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::saveAs:
-        result.setInfo (T("Save As..."),
-                        T("Saves a copy of the current graph to a file"),
+        result.setInfo ("Save As...),
+                        "Saves a copy of the current graph to a file",
                         category, 0);
-        result.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::shiftModifier | ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::shiftModifier | ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::showPluginListEditor:
         result.setInfo ("Edit the list of available plug-Ins...", String::empty, category, 0);
-        result.addDefaultKeypress (T('p'), ModifierKeys::commandModifier);
+        result.addDefaultKeypress ('p', ModifierKeys::commandModifier);
         break;
 
     case CommandIDs::showAudioSettings:
         result.setInfo ("Change the audio device settings", String::empty, category, 0);
-        result.addDefaultKeypress (T('a'), ModifierKeys::commandModifier);
+        result.addDefaultKeypress ('a', ModifierKeys::commandModifier);
         break;
 
     case CommandIDs::aboutBox:

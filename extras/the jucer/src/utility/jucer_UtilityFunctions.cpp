@@ -33,7 +33,7 @@ const String replaceCEscapeChars (const String& s)
     const int len = s.length();
 
     String r;
-    r.preallocateStorage (len + 2);
+    r.preallocateBytes (4 * len + 4);
     bool lastWasHexEscapeCode = false;
 
     for (int i = 0; i < len; ++i)

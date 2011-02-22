@@ -56,7 +56,6 @@ MACAddress::MACAddress (const uint8 bytes[6])
 const String MACAddress::toString() const
 {
     String s;
-    s.preallocateStorage (18);
 
     for (int i = 0; i < numElementsInArray (asBytes); ++i)
     {

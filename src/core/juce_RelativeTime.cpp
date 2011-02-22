@@ -68,7 +68,7 @@ const String RelativeTime::getDescription (const String& returnValueForZeroTime)
         return returnValueForZeroTime;
 
     String result;
-    result.preallocateStorage (16);
+    result.preallocateBytes (32);
 
     if (seconds < 0)
         result << '-';

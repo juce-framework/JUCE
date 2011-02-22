@@ -2079,6 +2079,18 @@ public:
         }
     }
 
+    void drawGlyph (const Font& f, int glyphNumber, const AffineTransform& transform)
+    {
+        const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber, getTransformWith (transform)));
+
+        if (et != 0)
+        {
+            SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (*et);
+            SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);
+            fillShape (shapeToFill, false);
+        }
+    }
+
     void fillShape (SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill, const bool replaceContents)
     {
         jassert (clip != 0);
@@ -2523,11 +2535,8 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
     else
     {
         const float fontHeight = f.getHeight();
-        const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber,
-                                                                                  AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
-                                                                                                  .followedBy (transform)));
-        if (et != 0)
-            currentState->fillEdgeTable (*et, 0.0f, 0);
+        currentState->drawGlyph (f, glyphNumber, AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
+                                                                 .followedBy (transform));
     }
 }
 

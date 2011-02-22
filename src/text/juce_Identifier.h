@@ -76,11 +76,11 @@ public:
     const String toString() const                                       { return name; }
 
     /** Returns this identifier's raw string pointer. */
-    operator const juce_wchar*() const throw()                          { return name; }
+    operator const String::CharPointerType() const throw()              { return name; }
 
 private:
     //==============================================================================
-    const juce_wchar* name;
+    String::CharPointerType name;
 
     static StringPool& getPool();
 };

@@ -267,10 +267,6 @@ public:
     }
 
     //==============================================================================
-    static int ftime (char* dest, int maxChars, const char* format, const struct tm* tm) throw();
-    static int ftime (juce_wchar* dest, int maxChars, const juce_wchar* format, const struct tm* tm) throw();
-
-    //==============================================================================
     template <typename CharPointerType>
     static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) throw()
     {
@@ -432,6 +428,24 @@ public:
         for (;;)
         {
             if (haystack.compareUpTo (needle, needleLength) == 0)
+                return index;
+
+            if (haystack.getAndAdvance() == 0)
+                return -1;
+
+            ++index;
+        }
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) throw()
+    {
+        int index = 0;
+        const int needleLength = (int) needle.length();
+
+        for (;;)
+        {
+            if (haystack.compareIgnoreCaseUpTo (needle, needleLength) == 0)
                 return index;
 
             if (haystack.getAndAdvance() == 0)

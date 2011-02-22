@@ -284,7 +284,7 @@ void MemoryBlock::loadFromHexString (const String& hex)
 {
     ensureSize (hex.length() >> 1);
     char* dest = data;
-    int i = 0;
+    String::CharPointerType t (hex.getCharPointer());
 
     for (;;)
     {
@@ -296,7 +296,7 @@ void MemoryBlock::loadFromHexString (const String& hex)
 
             for (;;)
             {
-                const juce_wchar c = hex [i++];
+                const juce_wchar c = t.getAndAdvance();
 
                 if (c >= '0' && c <= '9')
                 {
@@ -334,7 +334,7 @@ const String MemoryBlock::toBase64Encoding() const
 
     String destString ((unsigned int) size); // store the length, followed by a '.', and then the data.
     const int initialLen = destString.length();
-    destString.preallocateStorage (initialLen + 2 + numChars);
+    destString.preallocateBytes (sizeof (String::CharPointerType::CharType) * (initialLen + 2 + numChars));
 
     String::CharPointerType d (destString.getCharPointer());
     d += initialLen;

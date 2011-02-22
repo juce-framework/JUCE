@@ -33,6 +33,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../utilities/juce_SystemClipboard.h"
 #include "../../../core/juce_Time.h"
 #include "../../../text/juce_LocalisedStrings.h"
+#include "../../../io/streams/juce_MemoryOutputStream.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 
 
@@ -207,14 +208,13 @@ public:
         return section2;
     }
 
-    void appendAllText (String::Concatenator& concatenator) const
+    void appendAllText (MemoryOutputStream& mo) const
     {
         for (int i = 0; i < atoms.size(); ++i)
-            concatenator.append (getAtom(i)->atomText);
+            mo << getAtom(i)->atomText;
     }
 
-    void appendSubstring (String::Concatenator& concatenator,
-                          const Range<int>& range) const
+    void appendSubstring (MemoryOutputStream& mo, const Range<int>& range) const
     {
         int index = 0;
         for (int i = 0; i < atoms.size(); ++i)
@@ -230,7 +230,7 @@ public:
                 const Range<int> r ((range - index).getIntersectionWith (Range<int> (0, (int) atom->numChars)));
 
                 if (! r.isEmpty())
-                    concatenator.append (atom->atomText.substring (r.getStart(), r.getEnd()));
+                    mo << atom->atomText.substring (r.getStart(), r.getEnd());
             }
 
             index = nextIndex;
@@ -1834,7 +1834,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
         while (tokenEnd < totalLength)
         {
             // (note the slight bodge here - it's because iswalnum only checks for alphabetic chars in the current locale)
-            if (CharacterFunctions::isLetterOrDigit (t [tokenEnd]) || t [tokenEnd] > 128)
+            const juce_wchar c = t [tokenEnd];
+            if (CharacterFunctions::isLetterOrDigit (c) || c > 128)
                 ++tokenEnd;
             else
                 break;
@@ -1845,7 +1846,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
         while (tokenStart > 0)
         {
             // (note the slight bodge here - it's because iswalnum only checks for alphabetic chars in the current locale)
-            if (CharacterFunctions::isLetterOrDigit (t [tokenStart - 1]) || t [tokenStart - 1] > 128)
+            const juce_wchar c = t [tokenStart - 1];
+            if (CharacterFunctions::isLetterOrDigit (c) || c > 128)
                 --tokenStart;
             else
                 break;
@@ -1855,7 +1857,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
         {
             while (tokenEnd < totalLength)
             {
-                if (t [tokenEnd] != '\r' && t [tokenEnd] != '\n')
+                const juce_wchar c = t [tokenEnd];
+                if (c != '\r' && c != '\n')
                     ++tokenEnd;
                 else
                     break;
@@ -1863,7 +1866,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
 
             while (tokenStart > 0)
             {
-                if (t [tokenStart - 1] != '\r' && t [tokenStart - 1] != '\n')
+                const juce_wchar c = t [tokenStart - 1];
+                if (c != '\r' && c != '\n')
                     --tokenStart;
                 else
                     break;
@@ -2426,44 +2430,42 @@ void TextEditor::remove (const Range<int>& range,
 //==============================================================================
 const String TextEditor::getText() const
 {
-    String t;
-    t.preallocateStorage (getTotalNumChars());
-    String::Concatenator concatenator (t);
+    MemoryOutputStream mo;
+    mo.preallocate (getTotalNumChars());
 
     for (int i = 0; i < sections.size(); ++i)
-        sections.getUnchecked (i)->appendAllText (concatenator);
+        sections.getUnchecked (i)->appendAllText (mo);
 
-    return t;
+    return mo.toString();
 }
 
 const String TextEditor::getTextInRange (const Range<int>& range) const
 {
-    String t;
+    if (range.isEmpty())
+        return String::empty;
 
-    if (! range.isEmpty())
+    MemoryOutputStream mo;
+    mo.preallocate (jmin (getTotalNumChars(), range.getLength()));
+
+    int index = 0;
+
+    for (int i = 0; i < sections.size(); ++i)
     {
-        t.preallocateStorage (jmin (getTotalNumChars(), range.getLength()));
-        String::Concatenator concatenator (t);
-        int index = 0;
+        const UniformTextSection* const s = sections.getUnchecked (i);
+        const int nextIndex = index + s->getTotalLength();
 
-        for (int i = 0; i < sections.size(); ++i)
+        if (range.getStart() < nextIndex)
         {
-            const UniformTextSection* const s = sections.getUnchecked (i);
-            const int nextIndex = index + s->getTotalLength();
+            if (range.getEnd() <= index)
+                break;
 
-            if (range.getStart() < nextIndex)
-            {
-                if (range.getEnd() <= index)
-                    break;
-
-                s->appendSubstring (concatenator, range - index);
-            }
-
-            index = nextIndex;
+            s->appendSubstring (mo, range - index);
         }
+
+        index = nextIndex;
     }
 
-    return t;
+    return mo.toString();
 }
 
 const String TextEditor::getHighlightedText() const

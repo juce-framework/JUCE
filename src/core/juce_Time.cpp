@@ -56,7 +56,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace TimeHelpers
 {
-    static struct tm  millisToLocal (const int64 millis) throw()
+    struct tm  millisToLocal (const int64 millis) throw()
     {
         struct tm result;
         const int64 seconds = millis / 1000;
@@ -92,28 +92,49 @@ namespace TimeHelpers
         {
             time_t now = static_cast <time_t> (seconds);
 
-    #if JUCE_WINDOWS
-      #ifdef USE_NEW_SECURE_TIME_FNS
+          #if JUCE_WINDOWS
+           #ifdef USE_NEW_SECURE_TIME_FNS
             if (now >= 0 && now <= 0x793406fff)
                 localtime_s (&result, &now);
             else
                 zeromem (&result, sizeof (result));
-      #else
+           #else
             result = *localtime (&now);
-      #endif
-    #else
-            // more thread-safe
-            localtime_r (&now, &result);
-    #endif
+           #endif
+          #else
+
+            localtime_r (&now, &result); // more thread-safe
+          #endif
         }
 
         return result;
     }
 
-    static int extendedModulo (const int64 value, const int modulo) throw()
+    int extendedModulo (const int64 value, const int modulo) throw()
     {
         return (int) (value >= 0 ? (value % modulo)
                                  : (value - ((value / modulo) + 1) * modulo));
+    }
+
+    int doFTime (juce_wchar* const dest, const int maxChars, const String& format, const struct tm* const tm) throw()
+    {
+       #if JUCE_ANDROID
+        HeapBlock <char> tempDest;
+        tempDest.calloc (maxChars + 2);
+        const int result = (int) strftime (tempDest, maxChars, format.toUTF8(), tm);
+        if (result > 0)
+            CharPointer_UTF32 (dest).writeAll (CharPointer_UTF8 (tempDest.getData()));
+        return result;
+       #elif JUCE_WINDOWS
+        HeapBlock <wchar_t> tempDest;
+        tempDest.calloc (maxChars + 2);
+        const int result = (int) wcsftime (tempDest, maxChars, format.toUTF16(), tm);
+        if (result > 0)
+            CharPointer_UTF32 (dest).writeAll (CharPointer_UTF16 (tempDest.getData()));
+        return result;
+       #else
+        return (int) wcsftime (dest, maxChars, format.toUTF32(), tm);
+       #endif
     }
 
     static uint32 lastMSCounterValue = 0;
@@ -342,19 +363,18 @@ const String Time::toString (const bool includeDate,
 
 const String Time::formatted (const String& format) const
 {
-    String buffer;
     int bufferSize = 128;
-    buffer.preallocateStorage (bufferSize);
+    HeapBlock<juce_wchar> buffer (128);
 
     struct tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
 
-    while (CharacterFunctions::ftime (buffer.getCharPointer().getAddress(), bufferSize, format.getCharPointer(), &t) <= 0)
+    while (TimeHelpers::doFTime (buffer.getData(), bufferSize, format, &t) <= 0)
     {
         bufferSize += 128;
-        buffer.preallocateStorage (bufferSize);
+        buffer.malloc (bufferSize);
     }
 
-    return buffer;
+    return String (buffer);
 }
 
 //==============================================================================

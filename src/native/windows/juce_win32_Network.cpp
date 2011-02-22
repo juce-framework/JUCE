@@ -459,8 +459,8 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     {
         MapiMessage message;
         zerostruct (message);
-        message.lpszSubject = (LPSTR) emailSubject.toCString();
-        message.lpszNoteText = (LPSTR) bodyText.toCString();
+        message.lpszSubject = (LPSTR) emailSubject.toUTF8().getAddress();
+        message.lpszNoteText = (LPSTR) bodyText.toUTF8().getAddress();
 
         MapiRecipDesc recip;
         zerostruct (recip);
@@ -468,7 +468,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
         String targetEmailAddress_ (targetEmailAddress);
         if (targetEmailAddress_.isEmpty())
             targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
-        recip.lpszName = (LPSTR) targetEmailAddress_.toCString();
+        recip.lpszName = (LPSTR) targetEmailAddress_.toUTF8().getAddress();
         message.nRecipCount = 1;
         message.lpRecips = &recip;
 
@@ -481,7 +481,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
         for (int i = 0; i < filesToAttach.size(); ++i)
         {
             files[i].nPosition = (ULONG) -1;
-            files[i].lpszPathName = (LPSTR) filesToAttach[i].toCString();
+            files[i].lpszPathName = (LPSTR) filesToAttach[i].toUTF8().getAddress();
         }
 
         ok = (mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS);

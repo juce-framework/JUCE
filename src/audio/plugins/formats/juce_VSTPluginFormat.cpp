@@ -483,7 +483,7 @@ public:
 
         if (file.hasFileExtension (".vst"))
         {
-            const char* const utf8 = filename.toUTF8();
+            const char* const utf8 = filename.toUTF8().getAddress();
             CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
                                                                     strlen (utf8), file.isDirectory());
 
@@ -2014,7 +2014,7 @@ void VSTPluginInstance::setParamsInProgramBlock (fxProgram* const prog)
     prog->fxVersion = vst_swap (getVersionNumber());
     prog->numParams = vst_swap (numParams);
 
-    getCurrentProgramName().copyToCString (prog->prgName, sizeof (prog->prgName) - 1);
+    getCurrentProgramName().copyToUTF8 (prog->prgName, sizeof (prog->prgName) - 1);
 
     for (int i = 0; i < numParams; ++i)
         prog->params[i] = vst_swapFloat (getParameter (i));
@@ -2065,7 +2065,7 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             set->numPrograms = vst_swap (numPrograms);
             set->chunkSize = vst_swap ((long) chunk.getSize());
 
-            getCurrentProgramName().copyToCString (set->name, sizeof (set->name) - 1);
+            getCurrentProgramName().copyToUTF8 (set->name, sizeof (set->name) - 1);
             chunk.copyTo (set->chunk, 0, chunk.getSize());
         }
     }
@@ -2230,7 +2230,7 @@ namespace
                 if (JUCEApplication::getInstance() != 0)
                     hostName = JUCEApplication::getInstance()->getApplicationName();
 
-                hostName.copyToCString ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
+                hostName.copyToUTF8 ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
                 break;
             }
 
@@ -2544,7 +2544,7 @@ void VSTPluginInstance::createTempParameterStore (MemoryBlock& dest)
     dest.setSize (64 + 4 * getNumParameters());
     dest.fillWith (0);
 
-    getCurrentProgramName().copyToCString ((char*) dest.getData(), 63);
+    getCurrentProgramName().copyToUTF8 ((char*) dest.getData(), 63);
 
     float* const p = (float*) (((char*) dest.getData()) + 64);
     for (int i = 0; i < getNumParameters(); ++i)
@@ -2594,7 +2594,7 @@ void VSTPluginInstance::changeProgramName (int index, const String& newName)
     if (index == getCurrentProgram())
     {
         if (getNumPrograms() > 0 && newName != getCurrentProgramName())
-            dispatch (effSetProgramName, 0, 0, (void*) newName.substring (0, 24).toCString(), 0.0f);
+            dispatch (effSetProgramName, 0, 0, (void*) newName.substring (0, 24).toUTF8().getAddress(), 0.0f);
     }
     else
     {

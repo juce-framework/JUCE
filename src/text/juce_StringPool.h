@@ -81,7 +81,7 @@ public:
     int size() const throw();
 
     /** Returns one of the strings in the pool, by index. */
-    const juce_wchar* operator[] (int index) const throw();
+    const String::CharPointerType operator[] (int index) const throw();
 
 private:
     Array <String> strings;

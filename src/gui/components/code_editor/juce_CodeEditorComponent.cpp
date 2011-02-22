@@ -260,10 +260,11 @@ private:
     {
         jassert (index <= line.length());
 
+        String::CharPointerType t (line.getCharPointer());
         int col = 0;
         for (int i = 0; i < index; ++i)
         {
-            if (line[i] != '\t')
+            if (t.getAndAdvance() != '\t')
                 ++col;
             else
                 col += spacesPerTab - (col % spacesPerTab);
@@ -777,11 +778,17 @@ namespace CodeEditorHelpers
 {
     int findFirstNonWhitespaceChar (const String& line) throw()
     {
-        const int len = line.length();
+        String::CharPointerType t (line.getCharPointer());
+        int i = 0;
 
-        for (int i = 0; i < len; ++i)
-            if (! CharacterFunctions::isWhitespace (line [i]))
+        while (! t.isEmpty())
+        {
+            if (! t.isWhitespace())
                 return i;
+
+            ++t;
+            ++i;
+        }
 
         return 0;
     }
@@ -1119,13 +1126,18 @@ void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpac
 
 int CodeEditorComponent::indexToColumn (int lineNum, int index) const throw()
 {
-    const String line (document.getLine (lineNum));
-    jassert (index <= line.length());
+    String::CharPointerType t (document.getLine (lineNum).getCharPointer());
 
     int col = 0;
     for (int i = 0; i < index; ++i)
     {
-        if (line[i] != '\t')
+        if (t.isEmpty())
+        {
+            jassertfalse;
+            break;
+        }
+
+        if (t.getAndAdvance() != '\t')
             ++col;
         else
             col += getTabSize() - (col % getTabSize());
@@ -1136,19 +1148,21 @@ int CodeEditorComponent::indexToColumn (int lineNum, int index) const throw()
 
 int CodeEditorComponent::columnToIndex (int lineNum, int column) const throw()
 {
-    const String line (document.getLine (lineNum));
-    const int lineLength = line.length();
+    String::CharPointerType t (document.getLine (lineNum).getCharPointer());
 
-    int i, col = 0;
-    for (i = 0; i < lineLength; ++i)
+    int i = 0, col = 0;
+
+    while (! t.isEmpty())
     {
-        if (line[i] != '\t')
+        if (t.getAndAdvance() != '\t')
             ++col;
         else
             col += getTabSize() - (col % getTabSize());
 
         if (col > column)
             break;
+
+        ++i;
     }
 
     return i;

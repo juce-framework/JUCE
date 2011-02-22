@@ -868,19 +868,24 @@ const String File::getRelativePathFrom (const File& dir)  const
     const int len = jmin (thisPath.length(), dirPath.length());
     int commonBitLength = 0;
 
-    for (int i = 0; i < len; ++i)
     {
-#if NAMES_ARE_CASE_SENSITIVE
-        if (thisPath[i] != dirPath[i])
-#else
-        if (CharacterFunctions::toLowerCase (thisPath[i])
-             != CharacterFunctions::toLowerCase (dirPath[i]))
-#endif
-        {
-            break;
-        }
+        String::CharPointerType thisPathIter (thisPath.getCharPointer());
+        String::CharPointerType dirPathIter (dirPath.getCharPointer());
 
-        ++commonBitLength;
+        for (int i = 0; i < len; ++i)
+        {
+            const juce_wchar c1 = thisPathIter.getAndAdvance();
+            const juce_wchar c2 = dirPathIter.getAndAdvance();
+
+           #if NAMES_ARE_CASE_SENSITIVE
+            if (c1 != c2)
+           #else
+            if (c1 != c2 && CharacterFunctions::toLowerCase (c1) != CharacterFunctions::toLowerCase (c2))
+           #endif
+                break;
+
+            ++commonBitLength;
+        }
     }
 
     while (commonBitLength > 0 && thisPath [commonBitLength - 1] != File::separator)
@@ -1002,6 +1007,9 @@ public:
         expect (tempFile.hasFileExtension (".txt"));
         expect (tempFile.hasFileExtension ("txt"));
         expect (tempFile.withFileExtension ("xyz").hasFileExtension (".xyz"));
+        expect (tempFile.withFileExtension ("xyz").hasFileExtension ("abc;xyz;foo"));
+        expect (tempFile.withFileExtension ("xyz").hasFileExtension ("xyz;foo"));
+        expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
         expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
         expect (tempFile.hasWriteAccess());
 
@@ -1013,7 +1021,7 @@ public:
         expect (tempFile.exists());
         expect (tempFile.getSize() == 10);
         expect (std::abs ((int) (tempFile.getLastModificationTime().toMilliseconds() - Time::getCurrentTime().toMilliseconds())) < 3000);
-        expect (tempFile.loadFileAsString() == "0123456789");
+        expectEquals (tempFile.loadFileAsString(), String ("0123456789"));
         expect (! demoFolder.containsSubDirectories());
 
         expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::separatorString + tempFile.getFileName());

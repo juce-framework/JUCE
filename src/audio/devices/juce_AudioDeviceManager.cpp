@@ -613,7 +613,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 {
     const ScopedLock sl (audioCallbackLock);
 
-    if (inputLevelMeasurementEnabledCount > 0)
+    if (inputLevelMeasurementEnabledCount > 0 && numInputChannels > 0)
     {
         for (int j = 0; j < numSamples; ++j)
         {
@@ -633,6 +633,10 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
             else
                 inputLevel = 0;
         }
+    }
+    else
+    {
+        inputLevel = 0;
     }
 
     if (callbacks.size() > 0)

@@ -110,7 +110,7 @@ int StringPool::size() const throw()
     return strings.size();
 }
 
-const juce_wchar* StringPool::operator[] (const int index) const throw()
+const String::CharPointerType StringPool::operator[] (const int index) const throw()
 {
     return strings [index].getCharPointer();
 }

@@ -146,15 +146,7 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
 
     if (evt.selection == XA_PRIMARY || evt.selection == ClipboardHelpers::atom_CLIPBOARD)
     {
-        if (evt.target == XA_STRING)
-        {
-            // format data according to system locale
-            numDataItems = ClipboardHelpers::localClipboardContent.getNumBytesAsCString() + 1;
-            data.calloc (numDataItems + 1);
-            ClipboardHelpers::localClipboardContent.copyToCString (data, numDataItems);
-            propertyFormat = 8; // bits/item
-        }
-        else if (evt.target == ClipboardHelpers::atom_UTF8_STRING)
+        if (evt.target == XA_STRING || evt.target == ClipboardHelpers::atom_UTF8_STRING)
         {
             // translate to utf8
             numDataItems = ClipboardHelpers::localClipboardContent.getNumBytesAsUTF8() + 1;

@@ -224,7 +224,7 @@ public:
     static const Identifier getColourPropertyId (const int colourId)
     {
         String s;
-        s.preallocateStorage (18);
+        s.preallocateBytes (32);
         s << "jcclr_" << String::toHexString (colourId);
         return s;
     }

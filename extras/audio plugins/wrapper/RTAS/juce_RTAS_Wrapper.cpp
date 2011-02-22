@@ -885,7 +885,7 @@ private:
 
         void GetNameOfLength (char* name, int maxLength, OSType inControllerType) const
         {
-            juceFilter->getParameterName (index).copyToCString (name, maxLength);
+            juceFilter->getParameterName (index).copyToUTF8 (name, maxLength);
         }
 
         long GetPriority() const        { return kFicCooperativeTaskPriority; }
@@ -900,7 +900,7 @@ private:
 
         void GetValueString (char* valueString, int maxLength, long value) const
         {
-            juceFilter->getParameterText (index).copyToCString (valueString, maxLength);
+            juceFilter->getParameterText (index).copyToUTF8 (valueString, maxLength);
         }
 
         Cmn_Bool IsAutomatable() const
@@ -925,7 +925,7 @@ public:
     JucePlugInGroup()
     {
         DefineManufacturerNamesAndID (JucePlugin_Manufacturer, JucePlugin_RTASManufacturerCode);
-        DefinePlugInNamesAndVersion (createRTASName().toCString(), JucePlugin_VersionCode);
+        DefinePlugInNamesAndVersion (createRTASName().toUTF8(), JucePlugin_VersionCode);
 
 #ifndef JUCE_DEBUG
         AddGestalt (pluginGestalt_IsCacheable);
@@ -955,7 +955,7 @@ public:
                                        JucePlugin_RTASProductId,
                                        JucePlugin_RTASCategory);
 
-            type->DefineTypeNames (createRTASName().toCString());
+            type->DefineTypeNames (createRTASName().toUTF8().getAddress());
             type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
 
             type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),

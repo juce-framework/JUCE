@@ -166,7 +166,7 @@ void Thread::setCurrentThreadName (const String& name)
     } info;
 
     info.dwType = 0x1000;
-    info.szName = name.toCString();
+    info.szName = name.toUTF8();
     info.dwThreadID = GetCurrentThreadId();
     info.dwFlags = 0;
 
@@ -337,7 +337,7 @@ void PlatformUtilities::freeDynamicLibrary (void* h)
 
 void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 {
-    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name.toCString()) : 0; // (void* cast is required for mingw)
+    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name.toUTF8()) : 0; // (void* cast is required for mingw)
 }
 
 
@@ -345,10 +345,11 @@ void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 class InterProcessLock::Pimpl
 {
 public:
-    Pimpl (const String& name, const int timeOutMillisecs)
+    Pimpl (String name, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
-        handle = CreateMutex (0, TRUE, ("Global\\" + name.replaceCharacter ('\\','/')).toUTF16());
+        name = "Local\\" + name.replaceCharacter ('\\', '/');
+        handle = CreateMutexW (0, TRUE, name.toUTF16().getAddress());
 
         if (handle != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
         {

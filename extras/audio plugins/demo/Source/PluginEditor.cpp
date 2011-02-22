@@ -161,7 +161,7 @@ void JuceDemoPluginAudioProcessorEditor::displayPositionInfo (const AudioPlayHea
 {
     lastDisplayedPosition = pos;
     String displayText;
-    displayText.preallocateStorage (64);
+    displayText.preallocateBytes (128);
 
     displayText << String (pos.bpm, 2) << " bpm, "
                 << pos.timeSigNumerator << '/' << pos.timeSigDenominator

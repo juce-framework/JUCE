@@ -125,7 +125,7 @@ void PlatformUtilities::freeDynamicLibrary (void* handle)
 
 void* PlatformUtilities::getProcedureEntryPoint (void* libraryHandle, const String& procedureName)
 {
-    return dlsym (libraryHandle, procedureName.toCString());
+    return dlsym (libraryHandle, procedureName.toUTF8());
 }
 
 #endif

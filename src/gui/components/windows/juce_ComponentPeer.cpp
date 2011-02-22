@@ -497,7 +497,7 @@ public:
 
     void messageCallback()
     {
-        if (target != 0)
+        if (target.get() != 0)
             dropTarget->filesDropped (files, position.getX(), position.getY());
     }
 

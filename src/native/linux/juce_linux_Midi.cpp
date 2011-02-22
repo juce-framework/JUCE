@@ -128,7 +128,7 @@ namespace
                                                           : SND_SEQ_OPEN_OUTPUT, 0) == 0)
         {
             snd_seq_set_client_name (seqHandle,
-                                     (deviceNameToOpen + (forInput ? " Input" : " Output")).toCString());
+                                     (deviceNameToOpen + (forInput ? " Input" : " Output")).toUTF8());
 
             const int portId
                 = snd_seq_create_simple_port (seqHandle,

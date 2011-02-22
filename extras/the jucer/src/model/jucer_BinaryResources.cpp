@@ -243,12 +243,12 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
                                             .fromFirstOccurrenceOf (T("{"), false, false));
 
                 MemoryOutputStream out;
-                const juce_wchar* t = (const juce_wchar*) dataString;
+                String::CharPointerType t (dataString.getCharPointer());
                 int n = 0;
 
-                while (*t != 0)
+                while (! t.isEmpty())
                 {
-                    const juce_wchar c = *t++;
+                    const juce_wchar c = t.getAndAdvance();
 
                     if (c >= '0' && c <= '9')
                         n = n * 10 + (c - '0');

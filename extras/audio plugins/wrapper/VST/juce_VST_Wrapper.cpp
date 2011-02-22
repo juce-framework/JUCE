@@ -410,13 +410,13 @@ public:
     //==============================================================================
     bool getEffectName (char* name)
     {
-        String (JucePlugin_Name).copyToCString (name, 64);
+        String (JucePlugin_Name).copyToUTF8 (name, 64);
         return true;
     }
 
     bool getVendorString (char* text)
     {
-        String (JucePlugin_Manufacturer).copyToCString (text, 64);
+        String (JucePlugin_Manufacturer).copyToUTF8 (text, 64);
         return true;
     }
 
@@ -486,8 +486,8 @@ public:
 
         const String name (filter->getInputChannelName ((int) index));
 
-        name.copyToCString (properties->label, kVstMaxLabelLen - 1);
-        name.copyToCString (properties->shortLabel, kVstMaxShortLabelLen - 1);
+        name.copyToUTF8 (properties->label, kVstMaxLabelLen - 1);
+        name.copyToUTF8 (properties->shortLabel, kVstMaxShortLabelLen - 1);
 
         if (speakerIn != kSpeakerArrEmpty)
         {
@@ -514,8 +514,8 @@ public:
 
         const String name (filter->getOutputChannelName ((int) index));
 
-        name.copyToCString (properties->label, kVstMaxLabelLen - 1);
-        name.copyToCString (properties->shortLabel, kVstMaxShortLabelLen - 1);
+        name.copyToUTF8 (properties->label, kVstMaxLabelLen - 1);
+        name.copyToUTF8 (properties->shortLabel, kVstMaxShortLabelLen - 1);
 
         if (speakerOut != kSpeakerArrEmpty)
         {
@@ -851,14 +851,14 @@ public:
     void getProgramName (char* name)
     {
         if (filter != 0)
-            filter->getProgramName (filter->getCurrentProgram()).copyToCString (name, 24);
+            filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24);
     }
 
     bool getProgramNameIndexed (VstInt32 /*category*/, VstInt32 index, char* text)
     {
         if (filter != 0 && isPositiveAndBelow (index, filter->getNumPrograms()))
         {
-            filter->getProgramName (index).copyToCString (text, 24);
+            filter->getProgramName (index).copyToUTF8 (text, 24);
             return true;
         }
 
@@ -889,7 +889,7 @@ public:
         if (filter != 0)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterText (index).copyToCString (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterText (index).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -898,7 +898,7 @@ public:
         if (filter != 0)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterName (index).copyToCString (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterName (index).copyToUTF8 (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
