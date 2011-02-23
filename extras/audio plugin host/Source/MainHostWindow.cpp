@@ -339,10 +339,10 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
     switch (commandID)
     {
     case CommandIDs::open:
-        result.setInfo ("Open...),
-                        "Opens a filter graph file),
+        result.setInfo ("Open...",
+                        "Opens a filter graph file",
                         category, 0);
-        result.defaultKeypresses.add (KeyPress ('o), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::save:
@@ -353,7 +353,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
         break;
 
     case CommandIDs::saveAs:
-        result.setInfo ("Save As...),
+        result.setInfo ("Save As...",
                         "Saves a copy of the current graph to a file",
                         category, 0);
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::shiftModifier | ModifierKeys::commandModifier, 0));
