@@ -78,8 +78,10 @@ static LRESULT CALLBACK juce_MessageWndProc (HWND h,
             }
             else if (message == WM_COPYDATA && ((const COPYDATASTRUCT*) lParam)->dwData == broadcastId)
             {
-                const String messageString ((const juce_wchar*) ((const COPYDATASTRUCT*) lParam)->lpData,
-                                            ((const COPYDATASTRUCT*) lParam)->cbData / sizeof (juce_wchar));
+                const COPYDATASTRUCT* data = (COPYDATASTRUCT*) lParam;
+
+                const String messageString (CharPointer_UTF32 ((const CharPointer_UTF32::CharType*) data->lpData),
+                                            data->cbData / sizeof (CharPointer_UTF32::CharType));
 
                 PostMessage (juce_messageWindowHandle, broadcastId, 0, (LPARAM) new String (messageString));
                 return 0;
@@ -232,8 +234,8 @@ void MessageManager::broadcastMessage (const String& value)
 
     COPYDATASTRUCT data;
     data.dwData = broadcastId;
-    data.cbData = (localCopy.length() + 1) * sizeof (juce_wchar);
-    data.lpData = (void*) localCopy.toUTF16().getAddress();
+    data.cbData = (localCopy.length() + 1) * sizeof (CharPointer_UTF32::CharType);
+    data.lpData = (void*) localCopy.toUTF32().getAddress();
 
     for (int i = windows.size(); --i >= 0;)
     {
@@ -249,9 +251,7 @@ void MessageManager::broadcastMessage (const String& value)
             SendMessageTimeout (hwnd, WM_COPYDATA,
                                 (WPARAM) juce_messageWindowHandle,
                                 (LPARAM) &data,
-                                SMTO_BLOCK | SMTO_ABORTIFHUNG,
-                                8000,
-                                &result);
+                                SMTO_BLOCK | SMTO_ABORTIFHUNG, 8000, &result);
         }
     }
 }

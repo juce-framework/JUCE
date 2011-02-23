@@ -35,7 +35,6 @@
 #endif
 
 #include <cctype>
-#include <ctime>
 
 BEGIN_JUCE_NAMESPACE
 
@@ -70,6 +69,10 @@ bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
     return toUpperCase (character) != character;
    #endif
 }
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 //==============================================================================
 bool CharacterFunctions::isWhitespace (const char character) throw()
@@ -131,10 +134,6 @@ int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
 
     return -1;
 }
-
-#if JUCE_MSVC
-  #pragma warning (pop)
-#endif
 
 double CharacterFunctions::mulexp10 (const double value, int exponent) throw()
 {

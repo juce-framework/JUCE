@@ -116,24 +116,24 @@ namespace TimeHelpers
                                  : (value - ((value / modulo) + 1) * modulo));
     }
 
-    int doFTime (juce_wchar* const dest, const int maxChars, const String& format, const struct tm* const tm) throw()
+    int doFTime (CharPointer_UTF32 dest, const int maxChars, const String& format, const struct tm* const tm) throw()
     {
        #if JUCE_ANDROID
         HeapBlock <char> tempDest;
         tempDest.calloc (maxChars + 2);
         const int result = (int) strftime (tempDest, maxChars, format.toUTF8(), tm);
         if (result > 0)
-            CharPointer_UTF32 (dest).writeAll (CharPointer_UTF8 (tempDest.getData()));
+            dest.writeAll (CharPointer_UTF8 (tempDest.getData()));
         return result;
        #elif JUCE_WINDOWS
         HeapBlock <wchar_t> tempDest;
         tempDest.calloc (maxChars + 2);
         const int result = (int) wcsftime (tempDest, maxChars, format.toUTF16(), tm);
         if (result > 0)
-            CharPointer_UTF32 (dest).writeAll (CharPointer_UTF16 (tempDest.getData()));
+            dest.writeAll (CharPointer_UTF16 (tempDest.getData()));
         return result;
        #else
-        return (int) wcsftime (dest, maxChars, format.toUTF32(), tm);
+        return (int) wcsftime (dest.getAddress(), maxChars, format.toUTF32(), tm);
        #endif
     }
 
@@ -368,13 +368,13 @@ const String Time::formatted (const String& format) const
 
     struct tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
 
-    while (TimeHelpers::doFTime (buffer.getData(), bufferSize, format, &t) <= 0)
+    while (TimeHelpers::doFTime (CharPointer_UTF32 (buffer.getData()), bufferSize, format, &t) <= 0)
     {
         bufferSize += 128;
         buffer.malloc (bufferSize);
     }
 
-    return String (buffer);
+    return CharPointer_UTF32 (buffer.getData());
 }
 
 //==============================================================================

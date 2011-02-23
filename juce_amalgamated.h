@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	36
+#define JUCE_BUILDNUMBER	37
 
 /** Current Juce version number.
 
@@ -4292,23 +4292,15 @@ public:
 	*/
 	String (const char* text, size_t maxChars);
 
-	/** Creates a string from a zero-terminated unicode text string. */
-	String (const juce_wchar* unicodeText);
-
-	/** Creates a string from a unicode text string.
-
-		This will use up the the first maxChars characters of the string (or
-		less if the string is actually shorter)
+	/** Creates a string from a whcar_t character string.
+		Depending on the platform, this may be treated as either UTF-32 or UTF-16.
 	*/
-	String (const juce_wchar* unicodeText, size_t maxChars);
-
-   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-	/** Creates a string from a UTF-16 character string */
 	String (const wchar_t* text);
 
-	/** Creates a string from a UTF-16 character string */
+	/** Creates a string from a whcar_t character string.
+		Depending on the platform, this may be treated as either UTF-32 or UTF-16.
+	*/
 	String (const wchar_t* text, size_t maxChars);
-   #endif
 
 	/** Creates a string from a UTF-8 character string */
 	String (const CharPointer_UTF8& text);
@@ -4390,21 +4382,21 @@ public:
 	String& operator= (const String& other) throw();
 
 	/** Appends another string at the end of this one. */
-	String& operator+= (const juce_wchar* textToAppend);
-	/** Appends another string at the end of this one. */
 	String& operator+= (const String& stringToAppend);
+	/** Appends another string at the end of this one. */
+	String& operator+= (const char* textToAppend);
+	/** Appends another string at the end of this one. */
+	String& operator+= (const wchar_t* textToAppend);
+	/** Appends a decimal number at the end of this string. */
+	String& operator+= (int numberToAppend);
 	/** Appends a character at the end of this string. */
 	String& operator+= (char characterToAppend);
 	/** Appends a character at the end of this string. */
-	String& operator+= (juce_wchar characterToAppend);
+	String& operator+= (wchar_t characterToAppend);
    #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 	/** Appends a character at the end of this string. */
-	String& operator+= (wchar_t characterToAppend);
-	/** Appends another string at the end of this one. */
-	String& operator+= (const wchar_t* textToAppend);
+	String& operator+= (juce_wchar characterToAppend);
    #endif
-	/** Appends a decimal number at the end of this string. */
-	String& operator+= (int numberToAppend);
 
 	/** Appends a string to the end of this one.
 
@@ -4489,7 +4481,7 @@ public:
 	bool equalsIgnoreCase (const String& other) const throw();
 
 	/** Case-insensitive comparison with another string. */
-	bool equalsIgnoreCase (const juce_wchar* other) const throw();
+	bool equalsIgnoreCase (const wchar_t* other) const throw();
 
 	/** Case-insensitive comparison with another string. */
 	bool equalsIgnoreCase (const char* other) const throw();
@@ -4513,7 +4505,7 @@ public:
 					 comes before the other one alphabetically, or positive if it
 					 comes after it.
 	*/
-	int compare (const juce_wchar* other) const throw();
+	int compare (const wchar_t* other) const throw();
 
 	/** Case-insensitive comparison with another string.
 		@returns	 0 if the two strings are identical; negative if this string
@@ -5062,7 +5054,7 @@ public:
 		If you're really determined to use it, at least make sure that you never, ever,
 		pass any String objects to it as parameters.
 	*/
-	static const String formatted (const juce_wchar* formatString, ... );
+	static const String formatted (const String& formatString, ... );
 
 	// Numeric conversions..
 
@@ -5368,12 +5360,10 @@ private:
 		size_t numBytes;
 	};
 
-	// This constructor preallocates a certain amount of memory
-	explicit String (const PreallocationBytes&);
-	JUCE_DEPRECATED (String (const String& stringToCopy, size_t charsToAllocate));
-
+	explicit String (const PreallocationBytes&); // This constructor preallocates a certain amount of memory
 	void appendFixedLength (const char* text, int numExtraChars);
 	size_t getByteOffsetOfEnd() const throw();
+	JUCE_DEPRECATED (String (const String& stringToCopy, size_t charsToAllocate));
 
 	// This private cast operator should prevent strings being accidentally cast
 	// to bools (this is possible because the compiler can add an implicit cast
@@ -5382,41 +5372,46 @@ private:
 };
 
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (const char* string1,	   const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+ (const char* string1,	 const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (const juce_wchar* string1, const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t* string1,  const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (char string1,		  const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+ (char string1,		const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (juce_wchar string1,	const String& string2);
-
-/** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const String& string2);
-/** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const char* string2);
-/** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar* string2);
-/** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
-/** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
+JUCE_API const String JUCE_CALLTYPE operator+ (wchar_t string1,	 const String& string2);
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, wchar_t characterToAppend);
+JUCE_API const String JUCE_CALLTYPE operator+ (juce_wchar string1,	  const String& string2);
+#endif
+
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (String string1, const wchar_t* string2);
+JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+  (const wchar_t* string1, const String& string2);
+JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const char* string2);
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
+/** Concatenates two strings. */
+JUCE_API const String JUCE_CALLTYPE operator+ (String string1, juce_wchar characterToAppend);
 #endif
 
 /** Appends a character at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
 /** Appends a character at the end of a string. */
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, wchar_t characterToAppend);
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
+/** Appends a character at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, juce_wchar characterToAppend);
+#endif
+
 /** Appends a string to the end of the first one. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const char* string2);
 /** Appends a string to the end of the first one. */
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* string2);
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const wchar_t* string2);
 /** Appends a string to the end of the first one. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 
@@ -5436,7 +5431,7 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const String& str
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* string2) throw();
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8& string2) throw();
 /** Case-sensitive comparison of two strings. */
@@ -5448,7 +5443,7 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& str
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw();
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* string2) throw();
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8& string2) throw();
 /** Case-sensitive comparison of two strings. */
@@ -7574,7 +7569,7 @@ public:
 		The pool will own all the pointers that it returns, deleting them when the pool itself
 		is deleted.
 	*/
-	const String::CharPointerType getPooledString (const juce_wchar* original);
+	const String::CharPointerType getPooledString (const wchar_t* original);
 
 	/** Returns the number of strings in the pool. */
 	int size() const throw();
@@ -8413,7 +8408,7 @@ public:
 	var (bool value) throw();
 	var (double value) throw();
 	var (const char* value);
-	var (const juce_wchar* value);
+	var (const wchar_t* value);
 	var (const String& value);
 	var (DynamicObject* object);
 	var (MethodFunction method) throw();
@@ -8424,7 +8419,7 @@ public:
 	var& operator= (bool value);
 	var& operator= (double value);
 	var& operator= (const char* value);
-	var& operator= (const juce_wchar* value);
+	var& operator= (const wchar_t* value);
 	var& operator= (const String& value);
 	var& operator= (DynamicObject* object);
 	var& operator= (MethodFunction method);
@@ -10136,20 +10131,6 @@ public:
 		Each item from the array passed-in is added, until it encounters a null pointer,
 		at which point it stops.
 	*/
-	explicit StringArray (const juce_wchar* const* strings);
-
-	/** Creates a copy of an array of string literals.
-		@param strings	  an array of strings to add. Null pointers in the array will be
-								treated as empty strings
-		@param numberOfStrings  how many items there are in the array
-	*/
-	StringArray (const juce_wchar* const* strings, int numberOfStrings);
-
-   #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-	/** Creates a copy of a null-terminated array of string literals.
-		Each item from the array passed-in is added, until it encounters a null pointer,
-		at which point it stops.
-	*/
 	explicit StringArray (const wchar_t* const* strings);
 
 	/** Creates a copy of an array of string literals.
@@ -10158,7 +10139,6 @@ public:
 		@param numberOfStrings  how many items there are in the array
 	*/
 	StringArray (const wchar_t* const* strings, int numberOfStrings);
-   #endif
 
 	/** Destructor. */
 	~StringArray();

@@ -73,17 +73,6 @@ StringArray::StringArray (const char* const* const initialStrings, const int num
     StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
 }
 
-StringArray::StringArray (const juce_wchar* const* const initialStrings)
-{
-    StringArrayHelpers::addArray (strings, initialStrings);
-}
-
-StringArray::StringArray (const juce_wchar* const* const initialStrings, const int numberOfStrings)
-{
-    StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
-}
-
-#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 StringArray::StringArray (const wchar_t* const* const initialStrings)
 {
     StringArrayHelpers::addArray (strings, initialStrings);
@@ -93,7 +82,6 @@ StringArray::StringArray (const wchar_t* const* const initialStrings, const int 
 {
     StringArrayHelpers::addArray (strings, initialStrings, numberOfStrings);
 }
-#endif
 
 StringArray& StringArray::operator= (const StringArray& other)
 {

@@ -97,7 +97,7 @@ const String::CharPointerType StringPool::getPooledString (const char* const s)
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
-const String::CharPointerType StringPool::getPooledString (const juce_wchar* const s)
+const String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
 {
     if (s == 0 || *s == 0)
         return String::empty.getCharPointer();

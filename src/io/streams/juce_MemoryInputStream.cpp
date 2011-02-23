@@ -153,7 +153,7 @@ public:
                 buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0xff));
         }
 
-        return buffer;
+        return CharPointer_UTF32 (buffer);
     }
 };
 

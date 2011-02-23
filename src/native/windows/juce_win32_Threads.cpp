@@ -348,8 +348,14 @@ public:
     Pimpl (String name, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
-        name = "Local\\" + name.replaceCharacter ('\\', '/');
-        handle = CreateMutexW (0, TRUE, name.toUTF16().getAddress());
+        name = name.replaceCharacter ('\\', '/');
+        handle = CreateMutexW (0, TRUE, ("Global\\" + name).toUTF16().getAddress());
+
+        // Not 100% sure why a global mutex sometimes can't be allocated, but if it fails, fall back to
+        // a local one. (A local one also sometimes fails on other machines so neither type appears to be
+        // universally reliable)
+        if (handle == 0)
+            handle = CreateMutexW (0, TRUE, ("Local\\" + name).toUTF16().getAddress());
 
         if (handle != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
         {

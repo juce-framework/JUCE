@@ -74,7 +74,7 @@ public:
         The pool will own all the pointers that it returns, deleting them when the pool itself
         is deleted.
     */
-    const String::CharPointerType getPooledString (const juce_wchar* original);
+    const String::CharPointerType getPooledString (const wchar_t* original);
 
     //==============================================================================
     /** Returns the number of strings in the pool. */

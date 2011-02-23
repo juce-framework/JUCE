@@ -38,6 +38,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../memory/juce_Atomic.h"
 #include "../io/streams/juce_OutputStream.h"
 
+NewLine newLine;
+
 #if defined (JUCE_STRINGS_ARE_UNICODE) && ! JUCE_STRINGS_ARE_UNICODE
  #error "JUCE_STRINGS_ARE_UNICODE is deprecated! All strings are now unicode by default."
 #endif
@@ -50,7 +52,10 @@ BEGIN_JUCE_NAMESPACE
  typedef CharPointer_UTF32         CharPointer_wchar_t;
 #endif
 
-NewLine newLine;
+static inline CharPointer_wchar_t castToCharPointer_wchar_t (const void* t) throw()
+{
+    return CharPointer_wchar_t (static_cast <const CharPointer_wchar_t::CharType*> (t));
+}
 
 //==============================================================================
 class StringHolder
@@ -216,20 +221,6 @@ StringHolder StringHolder::empty;
 const String String::empty;
 
 //==============================================================================
-void String::appendFixedLength (const char* const newText, const int numExtraChars)
-{
-    if (numExtraChars > 0)
-    {
-        const size_t byteOffsetOfNull = getByteOffsetOfEnd();
-        const size_t newBytesNeeded = sizeof (CharPointerType::CharType) + byteOffsetOfNull + sizeof (CharPointerType::CharType) * numExtraChars;
-
-        text = StringHolder::makeUniqueWithByteSize (text, newBytesNeeded);
-
-        CharPointerType newEnd (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull));
-        newEnd.writeWithCharLimit (CharPointer_ASCII (newText), numExtraChars);
-    }
-}
-
 void String::preallocateBytes (const size_t numBytesNeeded)
 {
     text = StringHolder::makeUniqueWithByteSize (text, numBytesNeeded + sizeof (CharPointerType::CharType));
@@ -271,14 +262,6 @@ String::String (const PreallocationBytes& preallocationSize)
 {
 }
 
-/*String::String (const String& stringToCopy, const size_t bytesToAllocate)
-    : text (0)
-{
-    const size_t otherSize = StringHolder::getAllocatedNumBytes (stringToCopy.text);
-    text = StringHolder::createUninitialised (jmax (bytesToAllocate, otherSize));
-    StringHolder::copyChars (text, stringToCopy.text, otherSize);
-}*/
-
 String::String (const char* const t)
     : text (StringHolder::createFromCharPointer (CharPointer_ASCII (t)))
 {
@@ -315,16 +298,6 @@ String::String (const char* const t, const size_t maxChars)
         the compiler, source code editor and platform.
     */
     jassert (t == 0 || CharPointer_ASCII::isValidString (t, (int) maxChars));
-}
-
-String::String (const juce_wchar* const t)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF32 (t)))
-{
-}
-
-String::String (const juce_wchar* const t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (CharPointer_UTF32 (t), maxChars))
-{
 }
 
 String::String (const CharPointer_UTF8& t)
@@ -377,19 +350,15 @@ String::String (const CharPointer_ASCII& t)
 {
 }
 
-#if ! JUCE_NATIVE_WCHAR_IS_UTF32
 String::String (const wchar_t* const t)
-    : text (StringHolder::createFromCharPointer
-                (CharPointer_wchar_t (reinterpret_cast <const CharPointer_wchar_t::CharType*> (t))))
+    : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t)))
 {
 }
 
 String::String (const wchar_t* const t, size_t maxChars)
-    : text (StringHolder::createFromCharPointer
-                (CharPointer_wchar_t (reinterpret_cast <const CharPointer_wchar_t::CharType*> (t)), maxChars))
+    : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars))
 {
 }
-#endif
 
 const String String::charToString (const juce_wchar character)
 {
@@ -624,7 +593,7 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* strin
     return string1.compare (string2) == 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw()
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* string2) throw()
 {
     return string1.compare (string2) == 0;
 }
@@ -654,7 +623,7 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* strin
     return string1.compare (string2) != 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw()
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* string2) throw()
 {
     return string1.compare (string2) != 0;
 }
@@ -694,13 +663,13 @@ JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& str
     return string1.compare (string2) <= 0;
 }
 
-bool String::equalsIgnoreCase (const juce_wchar* t) const throw()
+bool String::equalsIgnoreCase (const wchar_t* const t) const throw()
 {
-    return t != 0 ? text.compareIgnoreCase (CharPointer_UTF32 (t)) == 0
+    return t != 0 ? text.compareIgnoreCase (castToCharPointer_wchar_t (t)) == 0
                   : isEmpty();
 }
 
-bool String::equalsIgnoreCase (const char* t) const throw()
+bool String::equalsIgnoreCase (const char* const t) const throw()
 {
     return t != 0 ? text.compareIgnoreCase (CharPointer_UTF8 (t)) == 0
                   : isEmpty();
@@ -717,14 +686,14 @@ int String::compare (const String& other) const throw()
     return (text == other.text) ? 0 : text.compare (other.text);
 }
 
-int String::compare (const char* other) const throw()
+int String::compare (const char* const other) const throw()
 {
     return text.compare (CharPointer_UTF8 (other));
 }
 
-int String::compare (const juce_wchar* other) const throw()
+int String::compare (const wchar_t* const other) const throw()
 {
-    return text.compare (CharPointer_UTF32 (other));
+    return text.compare (castToCharPointer_wchar_t (other));
 }
 
 int String::compareIgnoreCase (const String& other) const throw()
@@ -753,9 +722,30 @@ void String::append (const String& textToAppend, size_t maxCharsToTake)
     appendCharPointer (textToAppend.text, maxCharsToTake);
 }
 
-String& String::operator+= (const juce_wchar* const t)
+String& String::operator+= (const wchar_t* const t)
 {
-    appendCharPointer (CharPointer_UTF32 (t));
+    appendCharPointer (castToCharPointer_wchar_t (t));
+    return *this;
+}
+
+String& String::operator+= (const char* const t)
+{
+    /*  If you get an assertion here, then you're trying to create a string from 8-bit data
+        that contains values greater than 127. These can NOT be correctly converted to unicode
+        because there's no way for the String class to know what encoding was used to
+        create them. The source data could be UTF-8, ASCII or one of many local code-pages.
+
+        To get around this problem, you must be more explicit when you pass an ambiguous 8-bit
+        string to the String class - so for example if your source data is actually UTF-8,
+        you'd call String (CharPointer_UTF8 ("my utf8 string..")), and it would be able to
+        correctly convert the multi-byte characters to unicode. It's *highly* recommended that
+        you use UTF-8 with escape characters in your source code to represent extended characters,
+        because there's no other way to represent these strings in a way that isn't dependent on
+        the compiler, source code editor and platform.
+    */
+    jassert (t == 0 || CharPointer_ASCII::isValidString (t, std::numeric_limits<int>::max()));
+
+    appendCharPointer (CharPointer_ASCII (t));
     return *this;
 }
 
@@ -770,24 +760,22 @@ String& String::operator+= (const String& other)
 
 String& String::operator+= (const char ch)
 {
-    return operator+= ((juce_wchar) ch);
+    const char asString[] = { ch, 0 };
+    return operator+= (asString);
 }
 
-String& String::operator+= (const juce_wchar ch)
+String& String::operator+= (const wchar_t ch)
 {
-    const juce_wchar asString[] = { ch, 0 };
-    return operator+= (static_cast <const juce_wchar*> (asString));
+    const wchar_t asString[] = { ch, 0 };
+    return operator+= (asString);
 }
 
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-String& String::operator+= (const wchar_t ch)
+String& String::operator+= (const juce_wchar ch)
 {
-    return operator+= ((juce_wchar) ch);
-}
-
-String& String::operator+= (const wchar_t* t)
-{
-    return operator+= (String (t));
+    const juce_wchar asString[] = { ch, 0 };
+    appendCharPointer (CharPointer_UTF32 (asString));
+    return *this;
 }
 #endif
 
@@ -796,7 +784,21 @@ String& String::operator+= (const int number)
     char buffer [16];
     char* const end = buffer + numElementsInArray (buffer);
     char* const start = NumberToStringConverters::numberToString (end, number);
-    appendFixedLength (start, (int) (end - start));
+
+    const int numExtraChars = (int) (end - start);
+
+    if (numExtraChars > 0)
+    {
+        const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+        const size_t newBytesNeeded = sizeof (CharPointerType::CharType) + byteOffsetOfNull
+                                        + sizeof (CharPointerType::CharType) * numExtraChars;
+
+        text = StringHolder::makeUniqueWithByteSize (text, newBytesNeeded);
+
+        CharPointerType newEnd (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull));
+        newEnd.writeWithCharLimit (CharPointer_ASCII (start), numExtraChars);
+    }
+
     return *this;
 }
 
@@ -807,7 +809,7 @@ JUCE_API const String JUCE_CALLTYPE operator+ (const char* const string1, const 
     return s += string2;
 }
 
-JUCE_API const String JUCE_CALLTYPE operator+ (const juce_wchar* const string1, const String& string2)
+JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t* const string1, const String& string2)
 {
     String s (string1);
     return s += string2;
@@ -818,104 +820,43 @@ JUCE_API const String JUCE_CALLTYPE operator+ (const char string1, const String&
     return String::charToString (string1) + string2;
 }
 
-JUCE_API const String JUCE_CALLTYPE operator+ (const juce_wchar string1, const String& string2)
+JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t string1, const String& string2)
 {
     return String::charToString (string1) + string2;
 }
 
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const String& string2)
-{
-    return string1 += string2;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const char* const string2)
-{
-    return string1 += string2;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const juce_wchar* const string2)
-{
-    return string1 += string2;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const char string2)
-{
-    return string1 += string2;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const juce_wchar string2)
-{
-    return string1 += string2;
-}
-
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, wchar_t string2)
+JUCE_API const String JUCE_CALLTYPE operator+ (const juce_wchar string1, const String& string2)
 {
-    return string1 += string2;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2)
-{
-    string1.appendCharPointer (CharPointer_wchar_t (reinterpret_cast <const CharPointer_wchar_t::CharType*> (string2)));
-    return string1;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t* string1, const String& string2)
-{
-    String s (string1);
-    return s += string2;
+    return String::charToString (string1) + string2;
 }
 #endif
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const char characterToAppend)
-{
-    return string1 += characterToAppend;
-}
+JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const String& s2)       { return s1 += s2; }
+JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const char* const s2)   { return s1 += s2; }
+JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const wchar_t* s2)      { return s1 += s2; }
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar characterToAppend)
-{
-    return string1 += characterToAppend;
-}
+JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const char s2)          { return s1 += s2; }
+JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const wchar_t s2)       { return s1 += s2; }
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
+JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const juce_wchar s2)    { return s1 += s2; }
+#endif
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const char* const string2)
-{
-    return string1 += string2;
-}
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char s2)             { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t s2)          { return s1 += s2; }
+#if ! JUCE_NATIVE_WCHAR_IS_UTF32
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const juce_wchar s2)       { return s1 += s2; }
+#endif
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* const string2)
-{
-    return string1 += string2;
-}
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char* const s2)      { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t* const s2)   { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const String& s2)          { return s1 += s2; }
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string2)
-{
-    return string1 += string2;
-}
-
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const short number)
-{
-    return string1 += (int) number;
-}
-
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const int number)
-{
-    return string1 += number;
-}
-
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const long number)
-{
-    return string1 += (int) number;
-}
-
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const float number)
-{
-    return string1 += String (number);
-}
-
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const double number)
-{
-    return string1 += String (number);
-}
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const short number)        { return s1 += (int) number; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const int number)          { return s1 += number; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const long number)         { return s1 += (int) number; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const float number)        { return s1 += String (number); }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)       { return s1 += String (number); }
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
@@ -1948,10 +1889,8 @@ bool String::containsNonWhitespaceChars() const throw()
     return false;
 }
 
-const String String::formatted (const juce_wchar* const pf, ... )
+const String String::formatted (const String& pf, ... )
 {
-    jassert (pf != 0);
-
     va_list args;
     va_start (args, pf);
 
@@ -1963,17 +1902,17 @@ const String String::formatted (const juce_wchar* const pf, ... )
         HeapBlock <wchar_t> temp (bufferSize);
         va_list tempArgs;
         va_copy (tempArgs, args);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf, tempArgs);
+        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toUTF32(), tempArgs);
         va_end (tempArgs);
       #elif JUCE_WINDOWS
         HeapBlock <wchar_t> temp (bufferSize);
-        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, String (pf).toUTF16(), args);
+        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toUTF16(), args);
       #elif JUCE_ANDROID
         HeapBlock <char> temp (bufferSize);
-        const int num = (int) vsnprintf (temp.getData(), bufferSize - 1, String (pf).toUTF8(), args);
+        const int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
       #else
         HeapBlock <wchar_t> temp (bufferSize);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf, args);
+        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toUTF32(), args);
       #endif
 
         if (num > 0)
@@ -2039,14 +1978,14 @@ struct HexConverter
 {
     static const String hexToString (Type v)
     {
-        juce_wchar buffer[32];
-        juce_wchar* const end = buffer + 32;
-        juce_wchar* t = end;
+        char buffer[32];
+        char* const end = buffer + 32;
+        char* t = end;
         *--t = 0;
 
         do
         {
-            *--t = (juce_wchar) hexDigits [(int) (v & 15)];
+            *--t = hexDigits [(int) (v & 15)];
             v >>= 4;
 
         } while (v != 0);
@@ -2379,7 +2318,7 @@ public:
                 buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0xff));
         }
 
-        return buffer;
+        return CharPointer_UTF32 (buffer);
     }
 
     void runTest()

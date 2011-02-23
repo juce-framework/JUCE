@@ -103,7 +103,7 @@ public:
 
     void anotherInstanceStarted (const String& commandLine)
     {
-        if (theMainWindow != 0)
+        if (theMainWindow != 0 && commandLine.unquoted().isNotEmpty())
             theMainWindow->openFile (commandLine.unquoted());
     }
 };

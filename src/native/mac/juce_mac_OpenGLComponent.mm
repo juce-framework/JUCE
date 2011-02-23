@@ -155,7 +155,7 @@ public:
                                                                         + pixelFormat.accumulationBufferBlueBits
                                                                         + pixelFormat.accumulationBufferAlphaBits),
             NSOpenGLPFASampleBuffers, (NSOpenGLPixelFormatAttribute) 1,
-            0
+            (NSOpenGLPixelFormatAttribute) 0
         };
 
         NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];
@@ -307,7 +307,7 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
         NSOpenGLPFAAlphaSize,  (NSOpenGLPixelFormatAttribute) 8,
         NSOpenGLPFAColorSize,  (NSOpenGLPixelFormatAttribute) 24,
         NSOpenGLPFAAccumSize,  (NSOpenGLPixelFormatAttribute) 32,
-        0
+        (NSOpenGLPixelFormatAttribute) 0
     };
 
     NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attributes];
