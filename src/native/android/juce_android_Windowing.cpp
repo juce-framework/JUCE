@@ -36,7 +36,9 @@ public:
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
           view (android.activity.callObjectMethod (android.createNewView, component->isOpaque())),
-          usingAndroidGraphics (false), sizeAllocated (0)
+          usingAndroidGraphics (false),
+          fullScreen (false),
+          sizeAllocated (0)
     {
         if (isFocused())
             handleFocusGain();
@@ -131,6 +133,10 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
+            fullScreen = isNowFullScreen;
+            w = jmax (0, w);
+            h = jmax (0, h);
+
             view.callVoidMethod (android.layout, x, y, x + w, y + h);
         }
         else
@@ -184,7 +190,7 @@ public:
 
     void setMinimised (bool shouldBeMinimised)
     {
-        // TODO
+        // n/a
     }
 
     bool isMinimised() const
@@ -194,18 +200,27 @@ public:
 
     void setFullScreen (bool shouldBeFullScreen)
     {
-        // TODO
+        Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getMainMonitorArea()
+                                             : lastNonFullscreenBounds);
+
+        if ((! shouldBeFullScreen) && r.isEmpty())
+            r = getBounds();
+
+        // (can't call the component's setBounds method because that'll reset our fullscreen flag)
+        if (! r.isEmpty())
+            setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+
+        component->repaint();
     }
 
     bool isFullScreen() const
     {
-        // TODO
-        return false;
+        return fullScreen;
     }
 
     void setIcon (const Image& newIcon)
     {
-        // TODO
+        // n/a
     }
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
@@ -428,7 +443,7 @@ private:
     //==============================================================================
     GlobalRef view;
     GlobalRef buffer;
-    bool usingAndroidGraphics;
+    bool usingAndroidGraphics, fullScreen;
     int sizeAllocated;
 
     class PreallocatedImage  : public Image::SharedImage
@@ -526,7 +541,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 //==============================================================================
 bool Desktop::canUseSemiTransparentWindows() throw()
 {
-    return true;  // TODO
+    return true;
 }
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
@@ -605,6 +620,13 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
     monitorCoords.add (Rectangle<int> (0, 0, android.screenWidth, android.screenHeight));
+}
+
+JUCE_JNI_CALLBACK (JuceAppActivity, setScreenSize, void, (JNIEnv* env, jobject activity,
+                                                          jint screenWidth, jint screenHeight))
+{
+    android.screenWidth = screenWidth;
+    android.screenHeight = screenHeight;
 }
 
 //==============================================================================

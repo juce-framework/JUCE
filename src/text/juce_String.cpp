@@ -262,6 +262,7 @@ String::String (const PreallocationBytes& preallocationSize)
 {
 }
 
+//==============================================================================
 String::String (const char* const t)
     : text (StringHolder::createFromCharPointer (CharPointer_ASCII (t)))
 {
@@ -300,65 +301,20 @@ String::String (const char* const t, const size_t maxChars)
     jassert (t == 0 || CharPointer_ASCII::isValidString (t, (int) maxChars));
 }
 
-String::String (const CharPointer_UTF8& t)
-    : text (StringHolder::createFromCharPointer (t))
-{
-}
+String::String (const wchar_t* const t)      : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t))) {}
+String::String (const CharPointer_UTF8& t)   : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF16& t)  : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF32& t)  : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_ASCII& t)  : text (StringHolder::createFromCharPointer (t)) {}
 
-String::String (const CharPointer_UTF8& t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (t, maxChars))
-{
-}
+String::String (const CharPointer_UTF8& t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const CharPointer_UTF16& t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const CharPointer_UTF32& t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const wchar_t* const t, size_t maxChars)            : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
-String::String (const CharPointer_UTF8& start, const CharPointer_UTF8& end)
-    : text (StringHolder::createFromCharPointer (start, end))
-{
-}
-
-String::String (const CharPointer_UTF16& t)
-    : text (StringHolder::createFromCharPointer (t))
-{
-}
-
-String::String (const CharPointer_UTF16& t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (t, maxChars))
-{
-}
-
-String::String (const CharPointer_UTF16& start, const CharPointer_UTF16& end)
-    : text (StringHolder::createFromCharPointer (start, end))
-{
-}
-
-String::String (const CharPointer_UTF32& t)
-    : text (StringHolder::createFromCharPointer (t))
-{
-}
-
-String::String (const CharPointer_UTF32& t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (t, maxChars))
-{
-}
-
-String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end)
-    : text (StringHolder::createFromCharPointer (start, end))
-{
-}
-
-String::String (const CharPointer_ASCII& t)
-    : text (StringHolder::createFromCharPointer (t))
-{
-}
-
-String::String (const wchar_t* const t)
-    : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t)))
-{
-}
-
-String::String (const wchar_t* const t, size_t maxChars)
-    : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars))
-{
-}
+String::String (const CharPointer_UTF8& start, const CharPointer_UTF8& end)   : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (const CharPointer_UTF16& start, const CharPointer_UTF16& end) : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end) : text (StringHolder::createFromCharPointer (start, end)) {}
 
 const String String::charToString (const juce_wchar character)
 {
@@ -442,11 +398,13 @@ namespace NumberToStringConverters
 
     char getDecimalPoint()
     {
-      #if JUCE_VC7_OR_EARLIER
-        static char dp = (char) std::_USE (std::locale(), std::numpunct <char>).decimal_point();
-      #else
-        static char dp = (char) std::use_facet <std::numpunct <char> > (std::locale()).decimal_point();
-      #endif
+        static char dp = (char)
+           #if JUCE_VC7_OR_EARLIER
+            std::_USE (std::locale(), std::numpunct <char>).decimal_point();
+           #else
+            std::use_facet <std::numpunct <char> > (std::locale()).decimal_point();
+           #endif
+
         return dp;
     }
 
@@ -503,45 +461,15 @@ namespace NumberToStringConverters
 }
 
 //==============================================================================
-String::String (const int number)
-    : text (NumberToStringConverters::createFromInteger (number))
-{
-}
+String::String (const int number)            : text (NumberToStringConverters::createFromInteger (number)) {}
+String::String (const unsigned int number)   : text (NumberToStringConverters::createFromInteger (number)) {}
+String::String (const short number)          : text (NumberToStringConverters::createFromInteger ((int) number)) {}
+String::String (const unsigned short number) : text (NumberToStringConverters::createFromInteger ((unsigned int) number)) {}
+String::String (const int64 number)          : text (NumberToStringConverters::createFromInteger (number)) {}
+String::String (const uint64 number)         : text (NumberToStringConverters::createFromInteger (number)) {}
 
-String::String (const unsigned int number)
-    : text (NumberToStringConverters::createFromInteger (number))
-{
-}
-
-String::String (const short number)
-    : text (NumberToStringConverters::createFromInteger ((int) number))
-{
-}
-
-String::String (const unsigned short number)
-    : text (NumberToStringConverters::createFromInteger ((unsigned int) number))
-{
-}
-
-String::String (const int64 number)
-    : text (NumberToStringConverters::createFromInteger (number))
-{
-}
-
-String::String (const uint64 number)
-    : text (NumberToStringConverters::createFromInteger (number))
-{
-}
-
-String::String (const float number, const int numberOfDecimalPlaces)
-    : text (NumberToStringConverters::createFromDouble ((double) number, numberOfDecimalPlaces))
-{
-}
-
-String::String (const double number, const int numberOfDecimalPlaces)
-    : text (NumberToStringConverters::createFromDouble (number, numberOfDecimalPlaces))
-{
-}
+String::String (const float number, const int numberOfDecimalPlaces)   : text (NumberToStringConverters::createFromDouble ((double) number, numberOfDecimalPlaces)) {}
+String::String (const double number, const int numberOfDecimalPlaces)  : text (NumberToStringConverters::createFromDouble (number, numberOfDecimalPlaces)) {}
 
 //==============================================================================
 int String::length() const throw()
@@ -588,12 +516,12 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const String& str
     return string1.compare (string2) == 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw()
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* const string2) throw()
 {
     return string1.compare (string2) == 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* string2) throw()
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* const string2) throw()
 {
     return string1.compare (string2) == 0;
 }
@@ -618,12 +546,12 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& str
     return string1.compare (string2) != 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw()
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* const string2) throw()
 {
     return string1.compare (string2) != 0;
 }
 
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* string2) throw()
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* const string2) throw()
 {
     return string1.compare (string2) != 0;
 }
@@ -860,12 +788,18 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)     
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
+    const int numBytes = text.getNumBytesAsUTF8();
+
+   #if (JUCE_STRING_UTF_TYPE == 8)
+    stream.write (text.getCharPointer().getAddress(), numBytes);
+   #else
     // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
     // if lots of large, persistent strings were to be written to streams).
-    const int numBytes = text.getNumBytesAsUTF8();
     HeapBlock<char> temp (numBytes + 1);
-    text.copyToUTF8 (temp, numBytes + 1);
+    CharPointer_UTF8 (temp).writeAll (text.getCharPointer());
     stream.write (temp, numBytes);
+   #endif
+
     return stream;
 }
 
@@ -1499,7 +1433,7 @@ const String String::toUpperCase() const
 
     for (;;)
     {
-        juce_wchar c = builder.source.toUpperCase();
+        const juce_wchar c = builder.source.toUpperCase();
         ++(builder.source);
         builder.write (c);
 
@@ -1516,7 +1450,7 @@ const String String::toLowerCase() const
 
     for (;;)
     {
-        juce_wchar c = builder.source.toLowerCase();
+        const juce_wchar c = builder.source.toLowerCase();
         ++(builder.source);
         builder.write (c);
 
@@ -1939,7 +1873,7 @@ int String::getTrailingIntValue() const throw()
     int mult = 1;
     CharPointerType t (text.findTerminatingNull());
 
-    while ((--t).getAddress() >= text)
+    while (--t >= text)
     {
         if (! t.isDigit())
         {
@@ -2053,12 +1987,12 @@ const String String::toHexString (const unsigned char* data, const int size, con
 
 int String::getHexValue32() const throw()
 {
-    return HexConverter <int>::stringToHex (text);
+    return HexConverter<int>::stringToHex (text);
 }
 
 int64 String::getHexValue64() const throw()
 {
-    return HexConverter <int64>::stringToHex (text);
+    return HexConverter<int64>::stringToHex (text);
 }
 
 //==============================================================================
@@ -2300,8 +2234,7 @@ public:
 
     static const String createRandomWideCharString()
     {
-        juce_wchar buffer [50];
-        zerostruct (buffer);
+        juce_wchar buffer[50] = { 0 };
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {

@@ -29,8 +29,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
 import android.view.ViewGroup;
-import android.view.Display;
-import android.view.WindowManager;
 import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.graphics.Path;
@@ -58,13 +56,6 @@ public final class JuceAppActivity   extends Activity
 
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
-
-        WindowManager wm = (WindowManager) getSystemService (WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-
-        launchApp (getApplicationInfo().publicSourceDir,
-                   getApplicationInfo().dataDir,
-                   display.getWidth(), display.getHeight());
     }
 
     @Override
@@ -74,10 +65,16 @@ public final class JuceAppActivity   extends Activity
         super.onDestroy();
     }
 
+    private void callAppLauncher()
+    {
+        launchApp (getApplicationInfo().publicSourceDir,
+                   getApplicationInfo().dataDir);
+    }
+
     //==============================================================================
-    public native void launchApp (String appFile, String appDataDir,
-                                  int screenWidth, int screenHeight);
+    public native void launchApp (String appFile, String appDataDir);
     public native void quitApp();
+    public native void setScreenSize (int screenWidth, int screenHeight);
 
     //==============================================================================
     public static final void printToConsole (String s)
@@ -91,23 +88,21 @@ public final class JuceAppActivity   extends Activity
 
     public final void postMessage (long value)
     {
-        messageHandler.post (new MessageCallback (this, value));
+        messageHandler.post (new MessageCallback (value));
     }
 
     final class MessageCallback  implements Runnable
     {
-        public MessageCallback (JuceAppActivity app_, long value_)
+        public MessageCallback (long value_)
         {
-            app = app_;
             value = value_;
         }
 
         public final void run()
         {
-            app.deliverMessage (value);
+            deliverMessage (value);
         }
 
-        private JuceAppActivity app;
         private long value;
     }
 
@@ -137,7 +132,16 @@ public final class JuceAppActivity   extends Activity
 
         protected final void onLayout (boolean changed, int left, int top, int right, int bottom)
         {
+            setScreenSize (getWidth(), getHeight());
+
+            if (isFirstResize)
+            {
+                isFirstResize = false;
+                callAppLauncher();
+            }
         }
+
+        private boolean isFirstResize = true;
     }
 
     public final void excludeClipRegion (android.graphics.Canvas canvas, float left, float top, float right, float bottom)

@@ -136,8 +136,7 @@ public:
 
     static const String createRandomWideCharString()
     {
-        juce_wchar buffer [50];
-        zerostruct (buffer);
+        juce_wchar buffer [50] = { 0 };
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {

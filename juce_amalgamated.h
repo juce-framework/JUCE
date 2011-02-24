@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	38
+#define JUCE_BUILDNUMBER	39
 
 /** Current Juce version number.
 
@@ -11152,19 +11152,16 @@ public:
 		return *this;
 	}
 
-	/** Returns the object that this ScopedPointer refers to.
-	*/
+	/** Returns the object that this ScopedPointer refers to. */
 	inline operator ObjectType*() const throw()					 { return object; }
 
-	/** Returns the object that this ScopedPointer refers to.
-	*/
+	/** Returns the object that this ScopedPointer refers to. */
 	inline ObjectType& operator*() const throw()					{ return *object; }
 
 	/** Lets you access methods and properties of the object that this ScopedPointer refers to. */
 	inline ObjectType* operator->() const throw()				   { return object; }
 
 	/** Removes the current object from this ScopedPointer without deleting it.
-
 		This will return the current object, and set the ScopedPointer to a null pointer.
 	*/
 	ObjectType* release() throw()						   { ObjectType* const o = object; object = 0; return o; }

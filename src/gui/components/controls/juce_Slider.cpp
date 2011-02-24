@@ -1147,14 +1147,14 @@ void Slider::mouseUp (const MouseEvent&)
 
         sendDragEnd();
 
-        popupDisplay = 0;
-
         if (style == IncDecButtons)
         {
             incButton->setState (Button::buttonNormal);
             decButton->setState (Button::buttonNormal);
         }
     }
+
+    popupDisplay = 0;
 }
 
 void Slider::restoreMouseIfHidden()

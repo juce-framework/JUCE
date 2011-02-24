@@ -170,24 +170,15 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
         {
             const juce_wchar lastChar = desc.trimEnd().getLastCharacter();
 
-            if (lastChar >= '0' && lastChar <= '9')
-                key = numberPad0 + lastChar - '0';
-            else if (lastChar == '+')
-                key = numberPadAdd;
-            else if (lastChar == '-')
-                key = numberPadSubtract;
-            else if (lastChar == '*')
-                key = numberPadMultiply;
-            else if (lastChar == '/')
-                key = numberPadDivide;
-            else if (lastChar == '.')
-                key = numberPadDecimalPoint;
-            else if (lastChar == '=')
-                key = numberPadEquals;
-            else if (desc.endsWith ("separator"))
-                key = numberPadSeparator;
-            else if (desc.endsWith ("delete"))
-                key = numberPadDelete;
+            if (lastChar >= '0' && lastChar <= '9') key = numberPad0 + lastChar - '0';
+            else if (lastChar == '+')               key = numberPadAdd;
+            else if (lastChar == '-')               key = numberPadSubtract;
+            else if (lastChar == '*')               key = numberPadMultiply;
+            else if (lastChar == '/')               key = numberPadDivide;
+            else if (lastChar == '.')               key = numberPadDecimalPoint;
+            else if (lastChar == '=')               key = numberPadEquals;
+            else if (desc.endsWith ("separator"))   key = numberPadSeparator;
+            else if (desc.endsWith ("delete"))      key = numberPadDelete;
         }
 
         if (key == 0)
@@ -251,28 +242,17 @@ const String KeyPress::getTextDescription() const
             if (keyCode == KeyPressHelpers::translations[i].code)
                 return desc + KeyPressHelpers::translations[i].name;
 
-        if (keyCode >= F1Key && keyCode <= F16Key)
-            desc << 'F' << (1 + keyCode - F1Key);
-        else if (keyCode >= numberPad0 && keyCode <= numberPad9)
-            desc << KeyPressHelpers::numberPadPrefix() << (keyCode - numberPad0);
-        else if (keyCode >= 33 && keyCode < 176)
-            desc += CharacterFunctions::toUpperCase ((juce_wchar) keyCode);
-        else if (keyCode == numberPadAdd)
-            desc << KeyPressHelpers::numberPadPrefix() << '+';
-        else if (keyCode == numberPadSubtract)
-            desc << KeyPressHelpers::numberPadPrefix() << '-';
-        else if (keyCode == numberPadMultiply)
-            desc << KeyPressHelpers::numberPadPrefix() << '*';
-        else if (keyCode == numberPadDivide)
-            desc << KeyPressHelpers::numberPadPrefix() << '/';
-        else if (keyCode == numberPadSeparator)
-            desc << KeyPressHelpers::numberPadPrefix() << "separator";
-        else if (keyCode == numberPadDecimalPoint)
-            desc << KeyPressHelpers::numberPadPrefix() << '.';
-        else if (keyCode == numberPadDelete)
-            desc << KeyPressHelpers::numberPadPrefix() << "delete";
-        else
-            desc << '#' << String::toHexString (keyCode);
+        if (keyCode >= F1Key && keyCode <= F16Key)                  desc << 'F' << (1 + keyCode - F1Key);
+        else if (keyCode >= numberPad0 && keyCode <= numberPad9)    desc << KeyPressHelpers::numberPadPrefix() << (keyCode - numberPad0);
+        else if (keyCode >= 33 && keyCode < 176)        desc += CharacterFunctions::toUpperCase ((juce_wchar) keyCode);
+        else if (keyCode == numberPadAdd)               desc << KeyPressHelpers::numberPadPrefix() << '+';
+        else if (keyCode == numberPadSubtract)          desc << KeyPressHelpers::numberPadPrefix() << '-';
+        else if (keyCode == numberPadMultiply)          desc << KeyPressHelpers::numberPadPrefix() << '*';
+        else if (keyCode == numberPadDivide)            desc << KeyPressHelpers::numberPadPrefix() << '/';
+        else if (keyCode == numberPadSeparator)         desc << KeyPressHelpers::numberPadPrefix() << "separator";
+        else if (keyCode == numberPadDecimalPoint)      desc << KeyPressHelpers::numberPadPrefix() << '.';
+        else if (keyCode == numberPadDelete)            desc << KeyPressHelpers::numberPadPrefix() << "delete";
+        else                                            desc << '#' << String::toHexString (keyCode);
     }
 
     return desc;
@@ -283,7 +263,15 @@ const String KeyPress::getTextDescriptionWithIcons() const
    #if JUCE_MAC
     return getTextDescription().replace ("shift + ", String::charToString (0x21e7))
                                .replace ("command + ", String::charToString (0x2318))
-                               .replace ("option + ", String::charToString (0x2325));
+                               .replace ("option + ", String::charToString (0x2325))
+                               .replace ("ctrl + ", String::charToString (0x2303))
+                               .replace ("return", String::charToString (0x23ce))
+                               .replace ("cursor left", String::charToString (0x2190))
+                               .replace ("cursor right", String::charToString (0x2192))
+                               .replace ("cursor up", String::charToString (0x2191))
+                               .replace ("cursor down", String::charToString (0x2193))
+                               .replace ("backspace", String::charToString (0x232b))
+                               .replace ("delete", String::charToString (0x2326));
    #else
     return getTextDescription();
    #endif

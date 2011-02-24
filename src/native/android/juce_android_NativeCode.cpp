@@ -501,15 +501,12 @@ public:
     }
 
     void initialise (JNIEnv* env, jobject activity_,
-                     jstring appFile_, jstring appDataDir_,
-                     int screenWidth_, int screenHeight_)
+                     jstring appFile_, jstring appDataDir_)
     {
         threadLocalJNIEnvHolder.initialise (env);
         activity = GlobalRef (activity_);
         appFile = juceString (appFile_);
         appDataDir = juceString (appDataDir_);
-        screenWidth = screenWidth_;
-        screenHeight = screenHeight_;
 
         #define CREATE_JNI_CLASS(className, path) \
             className = (jclass) env->NewGlobalRef (env->FindClass (path)); \
