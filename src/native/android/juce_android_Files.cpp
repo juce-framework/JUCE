@@ -195,7 +195,7 @@ public:
 
                 if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
                 {
-                    filenameFound = String::fromUTF8 (de->d_name);
+                    filenameFound = CharPointer_UTF8 (de->d_name);
 
                     updateStatInfoForFile (parentDir + filenameFound, isDir, fileSize, modTime, creationTime, isReadOnly);
 

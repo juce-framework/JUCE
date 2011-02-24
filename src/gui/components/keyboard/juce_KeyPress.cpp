@@ -234,18 +234,18 @@ const String KeyPress::getTextDescription() const
         if (mods.isShiftDown())
             desc << "shift + ";
 
-#if JUCE_MAC
-          // only do this on the mac, because on Windows ctrl and command are the same,
-          // and this would get confusing
-          if (mods.isCommandDown())
-              desc << "command + ";
-
+       #if JUCE_MAC
         if (mods.isAltDown())
             desc << "option + ";
-#else
+
+        // only do this on the mac, because on Windows ctrl and command are the same,
+        // and this would get confusing
+        if (mods.isCommandDown())
+            desc << "command + ";
+       #else
         if (mods.isAltDown())
             desc << "alt + ";
-#endif
+       #endif
 
         for (int i = 0; i < numElementsInArray (KeyPressHelpers::translations); ++i)
             if (keyCode == KeyPressHelpers::translations[i].code)
@@ -276,6 +276,17 @@ const String KeyPress::getTextDescription() const
     }
 
     return desc;
+}
+
+const String KeyPress::getTextDescriptionWithIcons() const
+{
+   #if JUCE_MAC
+    return getTextDescription().replace ("shift + ", String::charToString (0x21e7))
+                               .replace ("command + ", String::charToString (0x2318))
+                               .replace ("option + ", String::charToString (0x2325));
+   #else
+    return getTextDescription();
+   #endif
 }
 
 

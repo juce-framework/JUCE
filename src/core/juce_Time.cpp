@@ -448,16 +448,12 @@ const String Time::getTimeZone() const throw()
     _tzset();
 
   #ifdef USE_NEW_SECURE_TIME_FNS
+    for (int i = 0; i < 2; ++i)
     {
-        char name [128];
+        char name[128] = { 0 };
         size_t length;
-
-        for (int i = 0; i < 2; ++i)
-        {
-            zeromem (name, sizeof (name));
-            _get_tzname (&length, name, 127, i);
-            zone[i] = name;
-        }
+        _get_tzname (&length, name, 127, i);
+        zone[i] = name;
     }
   #else
     const char** const zonePtr = (const char**) _tzname;

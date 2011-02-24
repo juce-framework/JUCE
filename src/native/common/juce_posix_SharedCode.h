@@ -214,7 +214,7 @@ const File File::getCurrentWorkingDirectory()
         bufferSize += 1024;
     }
 
-    return File (String::fromUTF8 (cwd));
+    return File (CharPointer_UTF8 (cwd));
 }
 
 bool File::setAsCurrentWorkingDirectory() const
@@ -490,7 +490,7 @@ const File juce_getExecutableFile()
   #else
     Dl_info exeInfo;
     dladdr ((void*) juce_getExecutableFile, &exeInfo);  // (can't be a const void* on android)
-    return File::getCurrentWorkingDirectory().getChildFile (String::fromUTF8 (exeInfo.dli_fname));
+    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (exeInfo.dli_fname));
   #endif
 }
 

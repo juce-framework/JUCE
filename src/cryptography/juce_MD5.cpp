@@ -216,9 +216,7 @@ void MD5::ProcessContext::finish (void* const result)
     const int paddingLength = (index < 56) ? (56 - index)
                                            : (120 - index);
 
-    uint8 paddingBuffer [64];
-    zeromem (paddingBuffer, paddingLength);
-    paddingBuffer [0] = 0x80;
+    uint8 paddingBuffer[64] = { 0x80 }; // first byte is 0x80, remaining bytes are zero.
     processBlock (paddingBuffer, paddingLength);
 
     processBlock (encodedLength, 8);

@@ -108,7 +108,7 @@ const String SystemStats::getLogonName()
             user = pw->pw_name;
     }
 
-    return String::fromUTF8 (user);
+    return CharPointer_UTF8 (user);
 }
 
 const String SystemStats::getFullUserName()

@@ -212,7 +212,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
         case invokedExecutableFile:
             if (juce_Argv0 != 0)
-                return File (String::fromUTF8 (juce_Argv0));
+                return File (CharPointer_UTF8 (juce_Argv0));
             // deliberate fall-through...
 
         case currentExecutableFile:
@@ -449,11 +449,10 @@ bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)
 
 const String PlatformUtilities::makePathFromFSRef (FSRef* file)
 {
-    char path [2048];
-    zerostruct (path);
+    char path [2048] = { 0 };
 
     if (FSRefMakePath (file, (UInt8*) path, sizeof (path) - 1) == noErr)
-        return PlatformUtilities::convertToPrecomposedUnicode (String::fromUTF8 (path));
+        return PlatformUtilities::convertToPrecomposedUnicode (CharPointer_UTF8 (path));
 
     return String::empty;
 }

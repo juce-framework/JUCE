@@ -131,7 +131,8 @@ int MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumB
 
 const String MemoryOutputStream::toUTF8() const
 {
-    return String::fromUTF8 (static_cast <const char*> (getData()), (int) getDataSize());
+    const char* const d = static_cast <const char*> (getData());
+    return String (CharPointer_UTF8 (d), CharPointer_UTF8 (d + getDataSize()));
 }
 
 const String MemoryOutputStream::toString() const

@@ -192,7 +192,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             if (avoidReallocating && allocatedBytes >= newTotalBytes)
             {
                 if (clearExtraSpace)
-                    zeromem (allocatedData, newTotalBytes);
+                    allocatedData.clear (newTotalBytes);
             }
             else
             {

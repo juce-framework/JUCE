@@ -369,7 +369,7 @@ bool File::isAChildOf (const File& potentialParent) const
 //==============================================================================
 bool File::isAbsolutePath (const String& path)
 {
-    return path.startsWithChar ('/') || path.startsWithChar ('\\')
+    return path.startsWithChar (separator)
            #if JUCE_WINDOWS
             || (path.isNotEmpty() && path[1] == ':');
            #else

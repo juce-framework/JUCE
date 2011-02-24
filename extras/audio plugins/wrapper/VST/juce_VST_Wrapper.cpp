@@ -180,8 +180,7 @@ namespace
             if (parent == 0)
                 break;
 
-            TCHAR windowType [32];
-            zeromem (windowType, sizeof (windowType));
+            TCHAR windowType[32] = { 0 };
             GetClassName (parent, windowType, 31);
 
             if (String (windowType).equalsIgnoreCase ("MDIClient"))
@@ -1253,8 +1252,7 @@ public:
                     if (parent == 0)
                         break;
 
-                    TCHAR windowType [32];
-                    zeromem (windowType, sizeof (windowType));
+                    TCHAR windowType [32] = { 0 };
                     GetClassName (parent, windowType, 31);
 
                     if (String (windowType).equalsIgnoreCase ("MDIClient"))
@@ -1489,8 +1487,7 @@ private:
 
     const String getHostName()
     {
-        char host[256];
-        zeromem (host, sizeof (host));
+        char host[256] = { 0 };
         getHostProductString (host);
         return host;
     }

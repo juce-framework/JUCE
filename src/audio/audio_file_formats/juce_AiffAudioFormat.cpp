@@ -308,8 +308,7 @@ private:
         output->writeIntBigEndian (lengthInSamples);
         output->writeShortBigEndian ((short) bitsPerSample);
 
-        uint8 sampleRateBytes[10];
-        zeromem (sampleRateBytes, 10);
+        uint8 sampleRateBytes[10] = { 0 };
 
         if (sampleRate <= 1)
         {

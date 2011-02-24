@@ -76,7 +76,7 @@ public:
 
             for (int i = 0; i < keyPresses.size(); ++i)
             {
-                const String key (keyPresses.getReference(i).getTextDescription());
+                const String key (keyPresses.getReference(i).getTextDescriptionWithIcons());
 
                 if (shortcutKey.isNotEmpty())
                     shortcutKey << ", ";

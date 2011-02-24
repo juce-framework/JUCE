@@ -327,8 +327,7 @@ void findCDDevices (Array<CDDeviceDescription>& list)
 
             if (h != INVALID_HANDLE_VALUE)
             {
-                char buffer[100];
-                zeromem (buffer, sizeof (buffer));
+                char buffer[100] = { 0 };
 
                 SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER p;
                 zerostruct (p);
@@ -1688,7 +1687,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
             source->getNextAudioBlock (info);
         }
 
-        zeromem (buffer, bytesPerBlock);
+        buffer.clear (bytesPerBlock);
 
         typedef AudioData::Pointer <AudioData::Int16, AudioData::LittleEndian,
                                     AudioData::Interleaved, AudioData::NonConst> CDSampleFormat;

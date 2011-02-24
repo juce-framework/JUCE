@@ -206,7 +206,7 @@ void BigInteger::clear()
     }
     else
     {
-        zeromem (values, sizeof (uint32) * (numValues + 1));
+        values.clear (numValues + 1);
     }
 
     highestBit = -1;

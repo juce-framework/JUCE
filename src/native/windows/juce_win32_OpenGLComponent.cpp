@@ -430,8 +430,7 @@ private:
             if (availableExtensions.contains ("WGL_ARB_multisample"))
                 attributes[numAttributes++] = WGL_SAMPLES_ARB;
 
-            int values[32];
-            zeromem (values, sizeof (values));
+            int values[32] = { 0 };
 
             if (wglGetPixelFormatAttribivARB (dc, pixelFormatIndex, 0, numAttributes, attributes, values))
             {

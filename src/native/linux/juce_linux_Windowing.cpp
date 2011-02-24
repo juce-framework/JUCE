@@ -507,11 +507,8 @@ public:
         if (! usingXShm)
 #endif
         {
-            imageDataAllocated.malloc (lineStride * h);
+            imageDataAllocated.allocate (lineStride * h, format_ == Image::ARGB && clearImage);
             imageData = imageDataAllocated;
-
-            if (format_ == Image::ARGB && clearImage)
-                zeromem (imageData, h * lineStride);
 
             xImage = (XImage*) juce_calloc (sizeof (XImage));
 

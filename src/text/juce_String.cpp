@@ -2102,13 +2102,17 @@ const String String::createStringFromData (const void* const data_, const int si
     }
     else
     {
+        const uint8* start = data;
+        const uint8* end = data + size;
+
         if (size >= 3
               && data[0] == (uint8) CharPointer_UTF8::byteOrderMark1
               && data[1] == (uint8) CharPointer_UTF8::byteOrderMark2
               && data[2] == (uint8) CharPointer_UTF8::byteOrderMark3)
-            return String::fromUTF8 ((const char*) data + 3, size - 3);
+            start += 3;
 
-        return String::fromUTF8 ((const char*) data, size);
+        return String (CharPointer_UTF8 ((const char*) start),
+                       CharPointer_UTF8 ((const char*) end));
     }
 }
 
@@ -2218,18 +2222,13 @@ int String::getNumBytesAsUTF8() const throw()
 
 const String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 {
-    if (buffer == 0)
-        return empty;
-
-    CharPointer_UTF8 b (buffer);
-
-    if (bufferSizeBytes < 0)
-        return String (b);
-
-    const size_t numChars = b.lengthUpTo (CharPointer_UTF8 (buffer + bufferSizeBytes));
-
-    if (numChars > 0)
-        return String (b, numChars);
+    if (buffer != 0)
+    {
+        if (bufferSizeBytes < 0)
+            return String (CharPointer_UTF8 (buffer));
+        else if (bufferSizeBytes > 0)
+            return String (CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes));
+    }
 
     return String::empty;
 }

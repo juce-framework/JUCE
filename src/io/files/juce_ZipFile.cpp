@@ -343,8 +343,7 @@ int ZipFile::findEndOfZipEntryTable (InputStream& input, int& numEntries)
     int64 pos = in.getPosition();
     const int64 lowestPos = jmax ((int64) 0, pos - 1024);
 
-    char buffer [32];
-    zeromem (buffer, sizeof (buffer));
+    char buffer [32] = { 0 };
 
     while (pos > lowestPos)
     {

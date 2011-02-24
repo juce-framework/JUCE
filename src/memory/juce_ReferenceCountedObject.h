@@ -113,12 +113,16 @@ private:
 
 //==============================================================================
 /**
-    Used to point to an object of type ReferenceCountedObject.
+    A smart-pointer class which points to a reference-counted object.
 
-    It's wise to use a typedef instead of typing out the templated name
-    each time - e.g.
+    The template parameter specifies the class of the object you want to point to - the easiest
+    way to make a class reference-countable is to simply make it inherit from ReferenceCountedObject,
+    but if you need to, you could roll your own reference-countable class by implementing a pair of
+    mathods called incReferenceCount() and decReferenceCount().
 
-    typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;
+    When using this class, you'll probably want to create a typedef to abbreviate the full
+    templated name - e.g.
+    @code typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;@endcode
 
     @see ReferenceCountedObject, ReferenceCountedObjectArray
 */

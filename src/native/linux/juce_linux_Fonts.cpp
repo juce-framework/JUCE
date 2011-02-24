@@ -103,7 +103,7 @@ public:
         }
 
         StringArray fontDirs;
-        fontDirs.addTokens (String::fromUTF8 (getenv ("JUCE_FONT_PATH")), ";,", String::empty);
+        fontDirs.addTokens (CharPointer_UTF8 (getenv ("JUCE_FONT_PATH")), ";,", String::empty);
         fontDirs.removeEmptyStrings (true);
 
         if (fontDirs.size() == 0)

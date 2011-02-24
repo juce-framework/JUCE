@@ -150,7 +150,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
                 homeDir = pw->pw_dir;
         }
 
-        return File (String::fromUTF8 (homeDir));
+        return File (CharPointer_UTF8 (homeDir));
     }
 
     case userDocumentsDirectory:
@@ -185,7 +185,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case invokedExecutableFile:
         if (juce_Argv0 != 0)
-            return File (String::fromUTF8 (juce_Argv0));
+            return File (CharPointer_UTF8 (juce_Argv0));
         // deliberate fall-through...
 
     case currentExecutableFile:
@@ -260,7 +260,7 @@ public:
 
                 if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
                 {
-                    filenameFound = String::fromUTF8 (de->d_name);
+                    filenameFound = CharPointer_UTF8 (de->d_name);
 
                     updateStatInfoForFile (parentDir + filenameFound, isDir, fileSize, modTime, creationTime, isReadOnly);
 

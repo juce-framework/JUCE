@@ -230,6 +230,14 @@ public:
         swapVariables (data, other.data);
     }
 
+    /** This fills the block with zeros, up to the number of elements specified.
+        Since the block has no way of knowing its own size, you must make sure that the number of
+        elements you specify doesn't exceed the allocated size.
+    */
+    void clear (size_t numElements) throw()
+    {
+        zeromem (data, sizeof (ElementType) * numElements);
+    }
 
 private:
     //==============================================================================

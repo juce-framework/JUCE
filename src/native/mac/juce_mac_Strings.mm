@@ -32,7 +32,7 @@ namespace
 {
     const String nsStringToJuce (NSString* s)
     {
-        return String::fromUTF8 ([s UTF8String]);
+        return CharPointer_UTF8 ([s UTF8String]);
     }
 
     NSString* juceStringToNS (const String& s)

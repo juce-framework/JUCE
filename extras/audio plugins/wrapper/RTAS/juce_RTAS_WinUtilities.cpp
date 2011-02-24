@@ -98,8 +98,7 @@ namespace
             if (parent == 0)
                 break;
 
-            TCHAR windowType [32];
-            zeromem (windowType, sizeof (windowType));
+            TCHAR windowType [32] = { 0 };
             GetClassName (parent, windowType, 31);
 
             if (String (windowType).equalsIgnoreCase ("MDIClient"))

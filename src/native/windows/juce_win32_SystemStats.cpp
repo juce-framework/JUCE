@@ -67,8 +67,7 @@ const String SystemStats::getCpuVendor()
 
 static void juce_getCpuVendor (char* const v)
 {
-    int vendor[4];
-    zeromem (vendor, 16);
+    int vendor[4] = { 0 };
 
 #ifdef JUCE_64BIT
 #else

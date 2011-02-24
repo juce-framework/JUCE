@@ -245,9 +245,8 @@ public:
         if (sampleRate == 0)
             sampleRate = 44100;
 
-        long numSources = 32;
-        ASIOClockSource clocks[32];
-        zeromem (clocks, sizeof (clocks));
+        ASIOClockSource clocks[32] = { 0 };
+        long numSources = numElementsInArray (clocks);
         asioObject->getClockSources (clocks, &numSources);
         bool isSourceSet = false;
 
@@ -842,8 +841,7 @@ private:
     {
         if (asioObject != 0)
         {
-            char buffer [256];
-            zeromem (buffer, sizeof (buffer));
+            char buffer [256] = { 0 };
 
             if (! asioObject->init (windowHandle))
             {

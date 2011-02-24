@@ -1083,8 +1083,7 @@ private:
     {
         if (s [index] == '#')
         {
-            uint32 hex [6];
-            zeromem (hex, sizeof (hex));
+            uint32 hex[6] = { 0 };
             int numChars = 0;
 
             for (int i = 6; --i >= 0;)

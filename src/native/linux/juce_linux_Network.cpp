@@ -329,7 +329,7 @@ private:
                 numConsecutiveLFs = 0;
         }
 
-        const String header (String::fromUTF8 ((const char*) buffer.getData()));
+        const String header (CharPointer_UTF8 ((const char*) buffer.getData()));
 
         if (header.startsWithIgnoreCase ("HTTP/"))
             return header.trimEnd();

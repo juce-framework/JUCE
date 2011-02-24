@@ -150,8 +150,7 @@ public:
                         String name;
 
                         {
-                            char channelName [256];
-                            zerostruct (channelName);
+                            char channelName [256] = { 0 };
                             UInt32 nameSize = sizeof (channelName);
                             UInt32 channelNum = chanNum + 1;
                             pa.mSelector = kAudioDevicePropertyChannelName;
