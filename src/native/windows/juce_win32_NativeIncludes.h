@@ -84,7 +84,7 @@
 
 //==============================================================================
 #if JUCE_ASIO && JUCE_BUILD_NATIVE
-/*
+ /*
     This is very frustrating - we only need to use a handful of definitions from
     a couple of the header files in Steinberg's ASIO SDK, and it'd be easy to copy
     about 30 lines of code into this cpp file to create a fully stand-alone ASIO
@@ -98,16 +98,11 @@
     1) Agree to Steinberg's licensing terms and download the ASIO SDK
         (see www.steinberg.net/Steinberg/Developers.asp).
 
-    2) Rebuild the whole of JUCE, setting the global definition JUCE_ASIO (you
-       can un-comment the "#define JUCE_ASIO" line in juce_Config.h
-       if you prefer). Make sure that your header search path will find the
-       iasiodrv.h file that comes with the SDK. (Only about 2-3 of the SDK header
-       files are actually needed - so to simplify things, you could just copy
-       these into your JUCE directory).
+    2) Enable this code with a global definition #define JUCE_ASIO 1.
 
-    If you're compiling and you get an error here because you don't have the
-    ASIO SDK installed, you can disable ASIO support by commenting-out the
-    "#define JUCE_ASIO" line in juce_Config.h, and rebuild your Juce library.
+    3) Make sure that your header search path contains the iasiodrv.h file that
+       comes with the SDK. (Only about a handful of the SDK header files are actually
+       needed - so to simplify things, you could just copy these into your JUCE directory).
  */
  #include <iasiodrv.h>
 #endif

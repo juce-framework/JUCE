@@ -92,7 +92,7 @@
 #ifdef _MSC_VER
   #pragma pack (pop)
 
-  #if JUCE_DEBUG
+  #if JUCE_DEBUGxxx // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
    #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Debug\\lib\\"
   #else
    #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Release\\lib\\"
@@ -102,7 +102,6 @@
   #pragma comment(lib, PT_LIB_PATH "DigiExt.lib")
   #pragma comment(lib, PT_LIB_PATH "DSI.lib")
   #pragma comment(lib, PT_LIB_PATH "PluginLib.lib")
-
 #endif
 
 #undef Component

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	37
+#define JUCE_BUILDNUMBER	38
 
 /** Current Juce version number.
 
@@ -6080,6 +6080,15 @@ public:
 		swapVariables (data, other.data);
 	}
 
+	/** This fills the block with zeros, up to the number of elements specified.
+		Since the block has no way of knowing its own size, you must make sure that the number of
+		elements you specify doesn't exceed the allocated size.
+	*/
+	void clear (size_t numElements) throw()
+	{
+		zeromem (data, sizeof (ElementType) * numElements);
+	}
+
 private:
 
 	ElementType* data;
@@ -9043,12 +9052,16 @@ private:
 };
 
 /**
-	Used to point to an object of type ReferenceCountedObject.
+	A smart-pointer class which points to a reference-counted object.
 
-	It's wise to use a typedef instead of typing out the templated name
-	each time - e.g.
+	The template parameter specifies the class of the object you want to point to - the easiest
+	way to make a class reference-countable is to simply make it inherit from ReferenceCountedObject,
+	but if you need to, you could roll your own reference-countable class by implementing a pair of
+	mathods called incReferenceCount() and decReferenceCount().
 
-	typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;
+	When using this class, you'll probably want to create a typedef to abbreviate the full
+	templated name - e.g.
+	@code typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;@endcode
 
 	@see ReferenceCountedObject, ReferenceCountedObjectArray
 */
@@ -23792,6 +23805,13 @@ public:
 		to retrieve it later.
 	*/
 	const String getTextDescription() const;
+
+	/** Creates a textual description of the key combination, using unicode icon symbols if possible.
+
+		On OSX, this uses the Apple symbols for command, option, shift, etc, instead of the textual
+		modifier key descriptions that are returned by getTextDescription()
+	*/
+	const String getTextDescriptionWithIcons() const;
 
 	/** Checks whether the user is currently holding down the keys that make up this
 		KeyPress.
@@ -65103,7 +65123,7 @@ public:
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
-	bool hitTest (int x, int y) const;
+	bool hitTest (int x, int y);
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */

@@ -42,6 +42,9 @@ void Value::ValueSource::sendChangeMessage (const bool synchronous)
 {
     if (synchronous)
     {
+        // (hold a local reference to this object in case it's freed during the callbacks)
+        const ReferenceCountedObjectPtr<ValueSource> localRef (this);
+
         for (int i = valuesWithListeners.size(); --i >= 0;)
         {
             Value* const v = valuesWithListeners[i];

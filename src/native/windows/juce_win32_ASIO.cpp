@@ -73,7 +73,7 @@ namespace ASIODebugging
 
 //==============================================================================
 class ASIOAudioIODevice;
-static ASIOAudioIODevice* volatile currentASIODev[3] = { 0, 0, 0 };
+static ASIOAudioIODevice* volatile currentASIODev[3] = { 0 };
 
 static const int maxASIOChannels = 160;
 
@@ -1656,10 +1656,6 @@ public:
         CoInitialize (0);
     }
 
-    ~ASIOAudioIODeviceType()
-    {
-    }
-
     //==============================================================================
     void scanForDevices()
     {
@@ -1671,21 +1667,12 @@ public:
         HKEY hk = 0;
         int index = 0;
 
-        if (RegOpenKeyA (HKEY_LOCAL_MACHINE, "software\\asio", &hk) == ERROR_SUCCESS)
+        if (RegOpenKey (HKEY_LOCAL_MACHINE, _T("software\\asio"), &hk) == ERROR_SUCCESS)
         {
-            for (;;)
-            {
-                char name [256];
+            TCHAR name [256];
 
-                if (RegEnumKeyA (hk, index++, name, 256) == ERROR_SUCCESS)
-                {
-                    addDriverInfo (name, hk);
-                }
-                else
-                {
-                    break;
-                }
-            }
+            while (RegEnumKey (hk, index++, name, numElementsInArray (name)) == ERROR_SUCCESS)
+                addDriverInfo (name, hk);
 
             RegCloseKey (hk);
         }
@@ -1772,39 +1759,31 @@ private:
         if (RegOpenKey (HKEY_CLASSES_ROOT, _T("clsid"), &hk) == ERROR_SUCCESS)
         {
             int index = 0;
+            TCHAR name [512];
 
-            for (;;)
+            while (RegEnumKey (hk, index++, name, numElementsInArray (name)) == ERROR_SUCCESS)
             {
-                WCHAR buf [512];
-
-                if (RegEnumKey (hk, index++, buf, 512) == ERROR_SUCCESS)
+                if (classId.equalsIgnoreCase (name))
                 {
-                    if (classId.equalsIgnoreCase (buf))
+                    HKEY subKey, pathKey;
+
+                    if (RegOpenKeyEx (hk, name, 0, KEY_READ, &subKey) == ERROR_SUCCESS)
                     {
-                        HKEY subKey, pathKey;
-
-                        if (RegOpenKeyEx (hk, buf, 0, KEY_READ, &subKey) == ERROR_SUCCESS)
+                        if (RegOpenKeyEx (subKey, _T("InprocServer32"), 0, KEY_READ, &pathKey) == ERROR_SUCCESS)
                         {
-                            if (RegOpenKeyEx (subKey, _T("InprocServer32"), 0, KEY_READ, &pathKey) == ERROR_SUCCESS)
-                            {
-                                WCHAR pathName [1024];
-                                DWORD dtype = REG_SZ;
-                                DWORD dsize = sizeof (pathName);
+                            TCHAR pathName [1024];
+                            DWORD dtype = REG_SZ;
+                            DWORD dsize = sizeof (pathName);
 
-                                if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
-                                    ok = File (pathName).exists();
+                            if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
+                                ok = File (pathName).exists();
 
-                                RegCloseKey (pathKey);
-                            }
-
-                            RegCloseKey (subKey);
+                            RegCloseKey (pathKey);
                         }
 
-                        break;
+                        RegCloseKey (subKey);
                     }
-                }
-                else
-                {
+
                     break;
                 }
             }
@@ -1822,7 +1801,7 @@ private:
 
         if (RegOpenKeyEx (hk, keyName.toUTF16(), 0, KEY_READ, &subKey) == ERROR_SUCCESS)
         {
-            WCHAR buf [256];
+            TCHAR buf [256];
             zerostruct (buf);
             DWORD dtype = REG_SZ;
             DWORD dsize = sizeof (buf);

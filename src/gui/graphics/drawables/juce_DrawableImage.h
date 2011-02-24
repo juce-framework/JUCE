@@ -87,7 +87,7 @@ public:
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
-    bool hitTest (int x, int y) const;
+    bool hitTest (int x, int y);
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
