@@ -81,7 +81,7 @@ public:
                 if (shortcutKey.isNotEmpty())
                     shortcutKey << ", ";
 
-                if (key.length() == 1)
+                if (key.length() == 1 && key[0] < 128)
                     shortcutKey << "shortcut: '" << key << '\'';
                 else
                     shortcutKey << key;

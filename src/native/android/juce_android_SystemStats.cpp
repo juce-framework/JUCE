@@ -27,6 +27,16 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+namespace AndroidStatsHelpers
+{
+    const String getSystemProperty (const String& name)
+    {
+        return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (android.systemClass,
+                                                                                          android.getProperty,
+                                                                                          javaString (name).get())));
+    }
+}
 
 //==============================================================================
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
@@ -36,7 +46,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 
 const String SystemStats::getOperatingSystemName()
 {
-    return "Android";
+    return "Android " + AndroidStatsHelpers::getSystemProperty ("os.version");
 }
 
 bool SystemStats::isOperatingSystem64Bit()
@@ -48,54 +58,36 @@ bool SystemStats::isOperatingSystem64Bit()
   #endif
 }
 
-//==============================================================================
-namespace AndroidStatsHelpers
-{
-    // TODO
-    const String getCpuInfo (const char* const key)
-    {
-        StringArray lines;
-        lines.addLines (File ("/proc/cpuinfo").loadFileAsString());
-
-        for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
-            if (lines[i].startsWithIgnoreCase (key))
-                return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
-
-        return String::empty;
-    }
-}
-
 const String SystemStats::getCpuVendor()
 {
-    return AndroidStatsHelpers::getCpuInfo ("vendor_id");
+    return AndroidStatsHelpers::getSystemProperty ("os.arch");
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
 {
-    return roundToInt (AndroidStatsHelpers::getCpuInfo ("cpu MHz").getFloatValue());
+    return 0; // TODO
 }
 
 int SystemStats::getMemorySizeInMegabytes()
 {
-    struct sysinfo sysi;
+    // xxx they forgot to implement sysinfo in the library, dammit! Should put this stuff back when they fix it.
+/*    struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
         return (sysi.totalram * sysi.mem_unit / (1024 * 1024));
-
+ */
+    DBG ("warning! memory size is unavailable due to an Android bug!");
     return 0;
 }
 
 int SystemStats::getPageSize()
 {
-    // TODO
     return sysconf (_SC_PAGESIZE);
 }
 
 //==============================================================================
 const String SystemStats::getLogonName()
 {
-    // TODO
-
     const char* user = getenv ("USER");
 
     if (user == 0)
@@ -117,11 +109,10 @@ const String SystemStats::getFullUserName()
 void SystemStats::initialiseStats()
 {
     // TODO
-    const String flags (AndroidStatsHelpers::getCpuInfo ("flags"));
-    cpuFlags.hasMMX = flags.contains ("mmx");
-    cpuFlags.hasSSE = flags.contains ("sse");
-    cpuFlags.hasSSE2 = flags.contains ("sse2");
-    cpuFlags.has3DNow = flags.contains ("3dnow");
+    cpuFlags.hasMMX = false;
+    cpuFlags.hasSSE = false;
+    cpuFlags.hasSSE2 = false;
+    cpuFlags.has3DNow = false;
 
     cpuFlags.numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
 }
@@ -131,7 +122,6 @@ void PlatformUtilities::fpuReset() {}
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() throw()
 {
-    // TODO
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
@@ -140,8 +130,6 @@ uint32 juce_millisecondsSinceStartup() throw()
 
 int64 Time::getHighResolutionTicks() throw()
 {
-    // TODO
-
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
@@ -150,8 +138,6 @@ int64 Time::getHighResolutionTicks() throw()
 
 int64 Time::getHighResolutionTicksPerSecond() throw()
 {
-    // TODO
-
     return 1000000;  // (microseconds)
 }
 

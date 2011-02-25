@@ -625,18 +625,18 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 JUCE_JNI_CALLBACK (JuceAppActivity, setScreenSize, void, (JNIEnv* env, jobject activity,
                                                           jint screenWidth, jint screenHeight))
 {
+    const bool isSystemInitialised = android.screenWidth != 0;
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
+
+    if (isSystemInitialised)
+        Desktop::getInstance().refreshMonitorSizes();
 }
 
 //==============================================================================
 const Image juce_createIconForFile (const File& file)
 {
-    Image image;
-
-    // TODO
-
-    return image;
+    return Image::null;
 }
 
 //==============================================================================

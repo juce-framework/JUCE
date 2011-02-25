@@ -236,7 +236,6 @@ public:
           wildCard (wildCard_),
           dir (opendir (directory.getFullPathName().toUTF8()))
     {
-        wildcardUTF8 = wildCard.toUTF8();
     }
 
     ~Pimpl()
@@ -251,12 +250,17 @@ public:
     {
         if (dir != 0)
         {
+            const char* wildcardUTF8 = 0;
+
             for (;;)
             {
                 struct dirent* const de = readdir (dir);
 
                 if (de == 0)
                     break;
+
+                if (wildcardUTF8 == 0)
+                    wildcardUTF8 = wildCard.toUTF8();
 
                 if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
                 {
@@ -277,7 +281,6 @@ public:
 
 private:
     String parentDir, wildCard;
-    const char* wildcardUTF8;
     DIR* dir;
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl);

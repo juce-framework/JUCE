@@ -58,7 +58,7 @@ public:
             getSDKPath() = "${user.home}/SDKs/android-sdk-mac_86";
 
         if (getNDKPath().toString().isEmpty())
-            getNDKPath() = "${user.home}/SDKs/android-ndk-r4-crystax";
+            getNDKPath() = "${user.home}/SDKs/android-ndk-r5";
     }
 
     //==============================================================================
@@ -186,7 +186,7 @@ private:
         mo << "# Automatically generated makefile, created by the Jucer" << newLine
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Jucer project!" << newLine
            << newLine
-           << "APP_STL := stlport_static" << newLine
+           << "APP_STL := gnustl_static" << newLine
            << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);

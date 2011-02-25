@@ -102,6 +102,7 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (activityClass, "com/juce/JuceAppActivity") \
  JAVACLASS (componentPeerViewClass, "com/juce/ComponentPeerView") \
  JAVACLASS (fileClass, "java/io/File") \
+ JAVACLASS (systemClass, "java/lang/System") \
  JAVACLASS (contextClass, "android/content/Context") \
  JAVACLASS (canvasClass, "android/graphics/Canvas") \
  JAVACLASS (paintClass, "android/graphics/Paint") \
@@ -143,6 +144,7 @@ BEGIN_JUCE_NAMESPACE
  METHOD (activityClass, renderGlyph, "renderGlyph", "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
 \
  METHOD (fileClass, fileExists, "exists", "()Z") \
+ STATICMETHOD (systemClass, getProperty, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
 \
  METHOD (componentPeerViewClass, setViewName, "setViewName", "(Ljava/lang/String;)V") \
  METHOD (componentPeerViewClass, layout, "layout", "(IIII)V") \

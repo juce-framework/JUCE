@@ -328,8 +328,6 @@ public:
         const ScopedAutoReleasePool pool;
 
         enumerator = [[[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory.getFullPathName())] retain];
-
-        wildcardUTF8 = wildCard.toUTF8();
     }
 
     ~Pimpl()
@@ -342,6 +340,7 @@ public:
                Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
         const ScopedAutoReleasePool pool;
+        const char* wildcardUTF8 = 0;
 
         for (;;)
         {
@@ -351,6 +350,9 @@ public:
 
             [enumerator skipDescendents];
             filenameFound = nsStringToJuce (file);
+
+            if (wildcardUTF8 == 0)
+                wildcardUTF8 = wildCard.toUTF8();
 
             if (fnmatch (wildcardUTF8, filenameFound.toUTF8(), FNM_CASEFOLD) != 0)
                 continue;
@@ -367,7 +369,6 @@ public:
 
 private:
     String parentDir, wildCard;
-    const char* wildcardUTF8;
     NSDirectoryEnumerator* enumerator;
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl);

@@ -1310,7 +1310,7 @@ void AudioUnitPluginInstance::setCurrentProgram (int newIndex)
     current.presetName = 0;
 
     AudioUnitSetProperty (audioUnit,
-                          kAudioUnitProperty_FactoryPresets,
+                          kAudioUnitProperty_PresentPreset,
                           kAudioUnitScope_Global,
                           0, &current, sizeof (AUPreset));
 }
