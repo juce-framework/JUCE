@@ -135,55 +135,46 @@ public:
 
         //==============================================================================
         /** Indicates that the item should be centred vertically and horizontally.
-
             This is equivalent to (horizontallyCentred | verticallyCentred)
         */
         centred                         = 36,
 
         /** Indicates that the item should be centred vertically but placed on the left hand side.
-
             This is equivalent to (left | verticallyCentred)
         */
         centredLeft                     = 33,
 
         /** Indicates that the item should be centred vertically but placed on the right hand side.
-
             This is equivalent to (right | verticallyCentred)
         */
         centredRight                    = 34,
 
         /** Indicates that the item should be centred horizontally and placed at the top.
-
             This is equivalent to (horizontallyCentred | top)
         */
         centredTop                      = 12,
 
         /** Indicates that the item should be centred horizontally and placed at the bottom.
-
             This is equivalent to (horizontallyCentred | bottom)
         */
         centredBottom                   = 20,
 
         /** Indicates that the item should be placed in the top-left corner.
-
             This is equivalent to (left | top)
         */
         topLeft                         = 9,
 
         /** Indicates that the item should be placed in the top-right corner.
-
             This is equivalent to (right | top)
         */
         topRight                        = 10,
 
         /** Indicates that the item should be placed in the bottom-left corner.
-
             This is equivalent to (left | bottom)
         */
         bottomLeft                      = 17,
 
         /** Indicates that the item should be placed in the bottom-left corner.
-
             This is equivalent to (right | bottom)
         */
         bottomRight                     = 18

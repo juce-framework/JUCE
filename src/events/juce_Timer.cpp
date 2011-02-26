@@ -219,7 +219,7 @@ private:
     //==============================================================================
     void addTimer (Timer* const t) throw()
     {
-#if JUCE_DEBUG
+       #if JUCE_DEBUG
         Timer* tt = firstTimer;
 
         while (tt != 0)
@@ -232,7 +232,7 @@ private:
         }
 
         jassert (t->previous == 0 && t->next == 0);
-#endif
+       #endif
 
         Timer* i = firstTimer;
 
@@ -264,7 +264,7 @@ private:
 
     void removeTimer (Timer* const t) throw()
     {
-#if JUCE_DEBUG
+       #if JUCE_DEBUG
         Timer* tt = firstTimer;
         bool found = false;
 
@@ -282,7 +282,7 @@ private:
         // trying to remove a timer that's not here - shouldn't get to this point,
         // so if you get this assertion, let me know!
         jassert (found);
-#endif
+       #endif
 
         if (t->previous != 0)
         {
@@ -339,9 +339,9 @@ Timer::Timer() throw()
      previous (0),
      next (0)
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     activeTimers.add (this);
-#endif
+   #endif
 }
 
 Timer::Timer (const Timer&) throw()
@@ -350,28 +350,28 @@ Timer::Timer (const Timer&) throw()
      previous (0),
      next (0)
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     activeTimers.add (this);
-#endif
+   #endif
 }
 
 Timer::~Timer()
 {
     stopTimer();
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     activeTimers.removeValue (this);
-#endif
+   #endif
 }
 
 void Timer::startTimer (const int interval) throw()
 {
     const ScopedLock sl (InternalTimerThread::lock);
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
     jassert (activeTimers.contains (this));
-#endif
+   #endif
 
     if (periodMs == 0)
     {
@@ -389,10 +389,10 @@ void Timer::stopTimer() throw()
 {
     const ScopedLock sl (InternalTimerThread::lock);
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
     jassert (activeTimers.contains (this));
-#endif
+   #endif
 
     if (periodMs > 0)
     {

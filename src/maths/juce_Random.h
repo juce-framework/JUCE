@@ -31,7 +31,12 @@
 
 //==============================================================================
 /**
-    A simple pseudo-random number generator.
+    A random number generator.
+
+    You can create a Random object and use it to generate a sequence of random numbers.
+    As a handy shortcut to avoid having to create and seed one yourself, you can call
+    Random::getSystemRandom() to return a global RNG that is seeded randomly when the
+    app launches.
 */
 class JUCE_API  Random
 {

@@ -43,6 +43,7 @@
 class JUCE_API  FillType
 {
 public:
+    //==============================================================================
     /** Creates a default fill type, of solid black. */
     FillType() throw();
 
@@ -71,6 +72,7 @@ public:
     /** Destructor. */
     ~FillType() throw();
 
+    //==============================================================================
     /** Returns true if this is a solid colour fill, and not a gradient or image. */
     bool isColour() const throw()           { return gradient == 0 && image.isNull(); }
 
@@ -106,9 +108,7 @@ public:
     /** Returns true if this fill type is completely transparent. */
     bool isInvisible() const throw();
 
-    bool operator== (const FillType& other) const;
-    bool operator!= (const FillType& other) const;
-
+    //==============================================================================
     /** The solid colour being used.
 
         If the fill type is not a solid colour, the alpha channel of this colour indicates
@@ -129,9 +129,12 @@ public:
     */
     Image image;
 
-    /** The transform that should be applied to the image or gradient that's being drawn.
-    */
+    /** The transform that should be applied to the image or gradient that's being drawn. */
     AffineTransform transform;
+
+    //==============================================================================
+    bool operator== (const FillType& other) const;
+    bool operator!= (const FillType& other) const;
 
 private:
     JUCE_LEAK_DETECTOR (FillType);

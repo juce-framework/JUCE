@@ -37,11 +37,13 @@ class ComponentBoundsConstrainer;
 
 //==============================================================================
 /**
-    The base class for window objects that wrap a component as a real operating
-    system object.
+    The Component class uses a ComponentPeer internally to create and manage a real
+    operating-system window.
 
-    This is an abstract base class - the platform specific code contains default
-    implementations of it that create and manage windows.
+    This is an abstract base class - the platform specific code contains implementations of
+    it for the various platforms.
+
+    User-code should very rarely need to have any involvement with this class.
 
     @see Component::createNewPeer
 */

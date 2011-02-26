@@ -102,7 +102,7 @@ public:
     void setBottom (ValueType newBottomGap) throw()     { bottom = newBottomGap; }
 
     /** Changes the right gap. */
-    void setRight (ValueType newRightGap) throw()        { right = newRightGap; }
+    void setRight (ValueType newRightGap) throw()       { right = newRightGap; }
 
     //==============================================================================
     /** Returns a rectangle with these borders removed from it. */

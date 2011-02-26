@@ -57,16 +57,13 @@ public:
                const Path& pathToAdd,
                const AffineTransform& transform);
 
-    /** Creates an edge table containing a rectangle.
-    */
+    /** Creates an edge table containing a rectangle. */
     EdgeTable (const Rectangle<int>& rectangleToAdd);
 
-    /** Creates an edge table containing a rectangle list.
-    */
+    /** Creates an edge table containing a rectangle list. */
     EdgeTable (const RectangleList& rectanglesToAdd);
 
-    /** Creates an edge table containing a rectangle.
-    */
+    /** Creates an edge table containing a rectangle. */
     EdgeTable (const Rectangle<float>& rectangleToAdd);
 
     /** Creates a copy of another edge table. */

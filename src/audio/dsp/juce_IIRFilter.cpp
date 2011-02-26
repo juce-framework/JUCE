@@ -234,12 +234,8 @@ void IIRFilter::copyCoefficientsFrom (const IIRFilter& other) throw()
 }
 
 //==============================================================================
-void IIRFilter::setCoefficients (double c1,
-                                 double c2,
-                                 double c3,
-                                 double c4,
-                                 double c5,
-                                 double c6) throw()
+void IIRFilter::setCoefficients (double c1, double c2, double c3,
+                                 double c4, double c5, double c6) throw()
 {
     const double a = 1.0 / c4;
 
@@ -260,7 +256,6 @@ void IIRFilter::setCoefficients (double c1,
 
     active = true;
 }
-
 
 
 END_JUCE_NAMESPACE

@@ -890,16 +890,11 @@ private:
             const juce_wchar n1 = s [len - 2];
             const juce_wchar n2 = s [len - 1];
 
-            if (n1 == 'i' && n2 == 'n')
-                n *= dpi;
-            else if (n1 == 'm' && n2 == 'm')
-                n *= dpi / 25.4f;
-            else if (n1 == 'c' && n2 == 'm')
-                n *= dpi / 2.54f;
-            else if (n1 == 'p' && n2 == 'c')
-                n *= 15.0f;
-            else if (n2 == '%')
-                n *= 0.01f * sizeForProportions;
+            if (n1 == 'i' && n2 == 'n')         n *= dpi;
+            else if (n1 == 'm' && n2 == 'm')    n *= dpi / 25.4f;
+            else if (n1 == 'c' && n2 == 'm')    n *= dpi / 2.54f;
+            else if (n1 == 'p' && n2 == 'c')    n *= 15.0f;
+            else if (n2 == '%')                 n *= 0.01f * sizeForProportions;
         }
 
         return n;

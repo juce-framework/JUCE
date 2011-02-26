@@ -190,8 +190,10 @@ private:
 class LinearGradientPixelGenerator
 {
 public:
-    LinearGradientPixelGenerator (const ColourGradient& gradient, const AffineTransform& transform, const PixelARGB* const lookupTable_, const int numEntries_)
-        : lookupTable (lookupTable_), numEntries (numEntries_)
+    LinearGradientPixelGenerator (const ColourGradient& gradient, const AffineTransform& transform,
+                                  const PixelARGB* const lookupTable_, const int numEntries_)
+        : lookupTable (lookupTable_),
+          numEntries (numEntries_)
     {
         jassert (numEntries_ >= 0);
         Point<float> p1 (gradient.point1);

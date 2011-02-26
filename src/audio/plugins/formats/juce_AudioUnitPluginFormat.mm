@@ -705,7 +705,8 @@ OSStatus AudioUnitPluginInstance::renderGetInput (AudioUnitRenderActionFlags* io
             }
             else
             {
-                zeromem (ioData->mBuffers[i].mData, sizeof (float) * inNumberFrames);
+                zeromem (ioData->mBuffers[i].mData,
+                         sizeof (float) * inNumberFrames);
             }
         }
     }
