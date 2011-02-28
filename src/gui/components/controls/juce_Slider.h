@@ -845,7 +845,11 @@ private:
     bool scrollWheelEnabled : 1, snapsToMousePos : 1;
     ScopedPointer<Label> valueBox;
     ScopedPointer<Button> incButton, decButton;
-    ScopedPointer <Component> popupDisplay;
+
+    class PopupDisplayComponent;
+    friend class PopupDisplayComponent;
+    friend class ScopedPointer <PopupDisplayComponent>;
+    ScopedPointer <PopupDisplayComponent> popupDisplay;
     Component* parentForPopupDisplay;
 
     float getLinearSliderPos (double value);

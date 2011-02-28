@@ -37,11 +37,12 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class SliderPopupDisplayComponent  : public BubbleComponent
+class Slider::PopupDisplayComponent  : public BubbleComponent,
+                                       public Timer
 {
 public:
     //==============================================================================
-    SliderPopupDisplayComponent (Slider* const owner_)
+    PopupDisplayComponent (Slider& owner_)
         : owner (owner_),
           font (15.0f, Font::bold)
     {
@@ -70,15 +71,21 @@ public:
             repaint();
         }
 
-        BubbleComponent::setPosition (owner);
+        BubbleComponent::setPosition (&owner);
+        repaint();
+    }
+
+    void timerCallback()
+    {
+        owner.popupDisplay = 0;
     }
 
 private:
-    Slider* owner;
+    Slider& owner;
     Font font;
     String text;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderPopupDisplayComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PopupDisplayComponent);
 };
 
 //==============================================================================
@@ -118,7 +125,6 @@ Slider::Slider (const String& name)
     menuShown (false),
     scrollWheelEnabled (true),
     snapsToMousePos (true),
-    popupDisplay (0),
     parentForPopupDisplay (0)
 {
     setWantsKeyboardFocus (false);
@@ -491,12 +497,7 @@ void Slider::setValue (double newValue,
         repaint();
 
         if (popupDisplay != 0)
-        {
-            static_cast <SliderPopupDisplayComponent*> (static_cast <Component*> (popupDisplay))
-                ->updatePosition (getTextFromValue (newValue));
-
-            popupDisplay->repaint();
-        }
+            popupDisplay->updatePosition (getTextFromValue (newValue));
 
         if (sendUpdateMessage)
             triggerChangeMessage (sendMessageSynchronously);
@@ -551,12 +552,7 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
         repaint();
 
         if (popupDisplay != 0)
-        {
-            static_cast <SliderPopupDisplayComponent*> (static_cast <Component*> (popupDisplay))
-                ->updatePosition (getTextFromValue (newValue));
-
-            popupDisplay->repaint();
-        }
+            popupDisplay->updatePosition (getTextFromValue (newValue));
 
         if (sendUpdateMessage)
             triggerChangeMessage (sendMessageSynchronously);
@@ -593,12 +589,7 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
         repaint();
 
         if (popupDisplay != 0)
-        {
-            static_cast <SliderPopupDisplayComponent*> (static_cast <Component*> (popupDisplay))
-                ->updatePosition (getTextFromValue (valueMax.getValue()));
-
-            popupDisplay->repaint();
-        }
+            popupDisplay->updatePosition (getTextFromValue (valueMax.getValue()));
 
         if (sendUpdateMessage)
             triggerChangeMessage (sendMessageSynchronously);
@@ -1111,17 +1102,13 @@ void Slider::mouseDown (const MouseEvent& e)
 
             if (popupDisplayEnabled)
             {
-                SliderPopupDisplayComponent* const popup = new SliderPopupDisplayComponent (this);
+                PopupDisplayComponent* const popup = new PopupDisplayComponent (*this);
                 popupDisplay = popup;
 
                 if (parentForPopupDisplay != 0)
-                {
                     parentForPopupDisplay->addChildComponent (popup);
-                }
                 else
-                {
                     popup->addToDesktop (0);
-                }
 
                 popup->setVisible (true);
             }
@@ -1146,6 +1133,7 @@ void Slider::mouseUp (const MouseEvent&)
             triggerChangeMessage (false);
 
         sendDragEnd();
+        popupDisplay = 0;
 
         if (style == IncDecButtons)
         {
@@ -1153,8 +1141,10 @@ void Slider::mouseUp (const MouseEvent&)
             decButton->setState (Button::buttonNormal);
         }
     }
-
-    popupDisplay = 0;
+    else if (popupDisplay != 0)
+    {
+        popupDisplay->startTimer (2000);
+    }
 }
 
 void Slider::restoreMouseIfHidden()

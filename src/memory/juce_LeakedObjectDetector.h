@@ -55,7 +55,7 @@ public:
     {
         if (--(getCounter().numObjects) < 0)
         {
-            DBG ("*** Dangling pointer deletion! Class: " << OwnerClass::getLeakedObjectClassName());
+            DBG ("*** Dangling pointer deletion! Class: " << getLeakedObjectClassName());
 
             /** If you hit this, then you've managed to delete more instances of this class than you've
                 created.. That indicates that you're deleting some dangling pointers.
@@ -77,13 +77,13 @@ private:
     class LeakCounter
     {
     public:
-        LeakCounter() {}
+        LeakCounter() throw() {}
 
         ~LeakCounter()
         {
             if (numObjects.value > 0)
             {
-                DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << OwnerClass::getLeakedObjectClassName());
+                DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << getLeakedObjectClassName());
 
                 /** If you hit this, then you've leaked one or more objects of the type specified by
                     the 'OwnerClass' template parameter - the name should have been printed by the line above.
@@ -98,6 +98,11 @@ private:
 
         Atomic<int> numObjects;
     };
+
+    static const char* getLeakedObjectClassName()
+    {
+        return OwnerClass::getLeakedObjectClassName();
+    }
 
     static LeakCounter& getCounter() throw()
     {

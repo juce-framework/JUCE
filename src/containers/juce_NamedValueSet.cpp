@@ -146,7 +146,7 @@ bool NamedValueSet::set (const Identifier& name, const var& newValue)
 
         if (v->name == name)
         {
-            if (v->value == newValue)
+            if (v->value.equalsWithSameType (newValue))
                 return false;
 
             v->value = newValue;

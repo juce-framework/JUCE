@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	40
+#define JUCE_BUILDNUMBER	41
 
 /** Current Juce version number.
 
@@ -95,7 +95,7 @@ namespace JuceDummyNamespace {}
 
 	Macros that will be set here are:
 
-	- One of JUCE_WINDOWS, JUCE_MAC or JUCE_LINUX.
+	- One of JUCE_WINDOWS, JUCE_MAC JUCE_LINUX, JUCE_IOS, JUCE_ANDROID, etc.
 	- Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
 	- Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
 	- Either JUCE_INTEL or JUCE_PPC
@@ -5565,7 +5565,7 @@ public:
 	{
 		if (--(getCounter().numObjects) < 0)
 		{
-			DBG ("*** Dangling pointer deletion! Class: " << OwnerClass::getLeakedObjectClassName());
+			DBG ("*** Dangling pointer deletion! Class: " << getLeakedObjectClassName());
 
 			/** If you hit this, then you've managed to delete more instances of this class than you've
 				created.. That indicates that you're deleting some dangling pointers.
@@ -5587,13 +5587,13 @@ private:
 	class LeakCounter
 	{
 	public:
-		LeakCounter() {}
+		LeakCounter() throw() {}
 
 		~LeakCounter()
 		{
 			if (numObjects.value > 0)
 			{
-				DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << OwnerClass::getLeakedObjectClassName());
+				DBG ("*** Leaked objects detected: " << numObjects.value << " instance(s) of class " << getLeakedObjectClassName());
 
 				/** If you hit this, then you've leaked one or more objects of the type specified by
 					the 'OwnerClass' template parameter - the name should have been printed by the line above.
@@ -5608,6 +5608,11 @@ private:
 
 		Atomic<int> numObjects;
 	};
+
+	static const char* getLeakedObjectClassName()
+	{
+		return OwnerClass::getLeakedObjectClassName();
+	}
 
 	static LeakCounter& getCounter() throw()
 	{
@@ -20526,7 +20531,12 @@ private:
 #define __JUCE_RANDOM_JUCEHEADER__
 
 /**
-	A simple pseudo-random number generator.
+	A random number generator.
+
+	You can create a Random object and use it to generate a sequence of random numbers.
+	As a handy shortcut to avoid having to create and seed one yourself, you can call
+	Random::getSystemRandom() to return a global RNG that is seeded randomly when the
+	app launches.
 */
 class JUCE_API  Random
 {
@@ -25231,55 +25241,46 @@ public:
 		horizontallyJustified	   = 64,
 
 		/** Indicates that the item should be centred vertically and horizontally.
-
 			This is equivalent to (horizontallyCentred | verticallyCentred)
 		*/
 		centred			 = 36,
 
 		/** Indicates that the item should be centred vertically but placed on the left hand side.
-
 			This is equivalent to (left | verticallyCentred)
 		*/
 		centredLeft			 = 33,
 
 		/** Indicates that the item should be centred vertically but placed on the right hand side.
-
 			This is equivalent to (right | verticallyCentred)
 		*/
 		centredRight			= 34,
 
 		/** Indicates that the item should be centred horizontally and placed at the top.
-
 			This is equivalent to (horizontallyCentred | top)
 		*/
 		centredTop			  = 12,
 
 		/** Indicates that the item should be centred horizontally and placed at the bottom.
-
 			This is equivalent to (horizontallyCentred | bottom)
 		*/
 		centredBottom		   = 20,
 
 		/** Indicates that the item should be placed in the top-left corner.
-
 			This is equivalent to (left | top)
 		*/
 		topLeft			 = 9,
 
 		/** Indicates that the item should be placed in the top-right corner.
-
 			This is equivalent to (right | top)
 		*/
 		topRight			= 10,
 
 		/** Indicates that the item should be placed in the bottom-left corner.
-
 			This is equivalent to (left | bottom)
 		*/
 		bottomLeft			  = 17,
 
 		/** Indicates that the item should be placed in the bottom-left corner.
-
 			This is equivalent to (right | bottom)
 		*/
 		bottomRight			 = 18
@@ -29356,7 +29357,7 @@ public:
 	void setBottom (ValueType newBottomGap) throw()	 { bottom = newBottomGap; }
 
 	/** Changes the right gap. */
-	void setRight (ValueType newRightGap) throw()	{ right = newRightGap; }
+	void setRight (ValueType newRightGap) throw()	   { right = newRightGap; }
 
 	/** Returns a rectangle with these borders removed from it. */
 	const Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const throw()
@@ -52249,7 +52250,11 @@ private:
 	bool scrollWheelEnabled : 1, snapsToMousePos : 1;
 	ScopedPointer<Label> valueBox;
 	ScopedPointer<Button> incButton, decButton;
-	ScopedPointer <Component> popupDisplay;
+
+	class PopupDisplayComponent;
+	friend class PopupDisplayComponent;
+	friend class ScopedPointer <PopupDisplayComponent>;
+	ScopedPointer <PopupDisplayComponent> popupDisplay;
 	Component* parentForPopupDisplay;
 
 	float getLinearSliderPos (double value);
@@ -63582,11 +63587,13 @@ private:
 class ComponentBoundsConstrainer;
 
 /**
-	The base class for window objects that wrap a component as a real operating
-	system object.
+	The Component class uses a ComponentPeer internally to create and manage a real
+	operating-system window.
 
-	This is an abstract base class - the platform specific code contains default
-	implementations of it that create and manage windows.
+	This is an abstract base class - the platform specific code contains implementations of
+	it for the various platforms.
+
+	User-code should very rarely need to have any involvement with this class.
 
 	@see Component::createNewPeer
 */
@@ -64384,16 +64391,13 @@ public:
 			   const Path& pathToAdd,
 			   const AffineTransform& transform);
 
-	/** Creates an edge table containing a rectangle.
-	*/
+	/** Creates an edge table containing a rectangle. */
 	EdgeTable (const Rectangle<int>& rectangleToAdd);
 
-	/** Creates an edge table containing a rectangle list.
-	*/
+	/** Creates an edge table containing a rectangle list. */
 	EdgeTable (const RectangleList& rectanglesToAdd);
 
-	/** Creates an edge table containing a rectangle.
-	*/
+	/** Creates an edge table containing a rectangle. */
 	EdgeTable (const Rectangle<float>& rectangleToAdd);
 
 	/** Creates a copy of another edge table. */
@@ -64557,6 +64561,7 @@ private:
 class JUCE_API  FillType
 {
 public:
+
 	/** Creates a default fill type, of solid black. */
 	FillType() throw();
 
@@ -64620,9 +64625,6 @@ public:
 	/** Returns true if this fill type is completely transparent. */
 	bool isInvisible() const throw();
 
-	bool operator== (const FillType& other) const;
-	bool operator!= (const FillType& other) const;
-
 	/** The solid colour being used.
 
 		If the fill type is not a solid colour, the alpha channel of this colour indicates
@@ -64643,9 +64645,11 @@ public:
 	*/
 	Image image;
 
-	/** The transform that should be applied to the image or gradient that's being drawn.
-	*/
+	/** The transform that should be applied to the image or gradient that's being drawn. */
 	AffineTransform transform;
+
+	bool operator== (const FillType& other) const;
+	bool operator!= (const FillType& other) const;
 
 private:
 	JUCE_LEAK_DETECTOR (FillType);
