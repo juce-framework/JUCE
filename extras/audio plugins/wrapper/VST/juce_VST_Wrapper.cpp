@@ -307,8 +307,8 @@ public:
          speakerOut (kSpeakerArrEmpty),
          numInChans (JucePlugin_MaxNumInputChannels),
          numOutChans (JucePlugin_MaxNumOutputChannels),
-         isProcessing (false)
-         hasShutdown (false)
+         isProcessing (false),
+         hasShutdown (false),
          firstProcessCallback (true),
          shouldDeleteEditor (false),
          hostWindow (0)

@@ -258,33 +258,36 @@ namespace SocketHelpers
         zerostruct (hints);
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = isDatagram ? SOCK_DGRAM : SOCK_STREAM;
+        hints.ai_flags = AI_NUMERICSERV;
 
-        struct addrinfo* result = 0;
-        if (getaddrinfo (hostName.toUTF8(), 0, &hints, &result) != 0 || result == 0)
+        struct addrinfo* info = 0;
+        if (getaddrinfo (hostName.toUTF8(), String (portNumber).toUTF8(), &hints, &info) != 0 || info == 0)
             return false;
 
         if (handle < 0)
-            handle = (int) socket (result->ai_family, result->ai_socktype, 0);
+            handle = (int) socket (info->ai_family, info->ai_socktype, 0);
 
         if (handle < 0)
         {
-            freeaddrinfo (result);
+            freeaddrinfo (info);
             return false;
         }
 
         if (isDatagram)
         {
             struct sockaddr* s = new struct sockaddr();
-            *s = *(result->ai_addr);
+            *s = *(info->ai_addr);
             *serverAddress = s;
 
-            freeaddrinfo (result);
+            freeaddrinfo (info);
             return true;
         }
 
-        freeaddrinfo (result);
+        freeaddrinfo (info);
 
         setSocketBlockingState (handle, false);
+
+        const int result = ::connect (handle, info->ai_addr, info->ai_addrlen);
 
         if (result < 0)
         {
