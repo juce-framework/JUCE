@@ -283,11 +283,9 @@ namespace SocketHelpers
             return true;
         }
 
-        freeaddrinfo (info);
-
         setSocketBlockingState (handle, false);
-
         const int result = ::connect (handle, info->ai_addr, info->ai_addrlen);
+        freeaddrinfo (info);
 
         if (result < 0)
         {
