@@ -85,17 +85,15 @@ namespace FileHelpers
         return [[NSURL fileURLWithPath: juceStringToNS (path)]
                     getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
                 && [hidden boolValue];
-      #else
-        #if JUCE_IOS
+      #elif JUCE_IOS
         return File (path).getFileName().startsWithChar ('.');
-        #else
+      #else
         FSRef ref;
         LSItemInfoRecord info;
 
         return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8().getAddress(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
                  && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
                  && (info.flags & kLSItemInfoIsInvisible) != 0;
-        #endif
       #endif
     }
 

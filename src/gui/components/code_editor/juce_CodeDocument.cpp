@@ -50,9 +50,9 @@ public:
     {
         String::CharPointerType t (text.getCharPointer());
         int charNumInFile = 0;
-        bool finished = t.isEmpty();
+        bool finished = false;
 
-        while (! finished)
+        while (! (finished || t.isEmpty()))
         {
             String::CharPointerType startOfLine (t);
             int startOfLineInFile = charNumInFile;
@@ -113,11 +113,14 @@ public:
 
         String::CharPointerType t (line.getCharPointer());
 
-        while (! t.isEmpty())
+        for (;;)
         {
-            ++lineLength;
-
             const juce_wchar c = t.getAndAdvance();
+
+            if (c == 0)
+                break;
+
+            ++lineLength;
 
             if (c != '\n' && c != '\r')
                 lineLengthWithoutNewLines = lineLength;

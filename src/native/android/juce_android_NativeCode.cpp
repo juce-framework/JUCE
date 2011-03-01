@@ -109,6 +109,8 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (matrixClass, "android/graphics/Matrix") \
  JAVACLASS (rectClass, "android/graphics/Rect") \
  JAVACLASS (typefaceClass, "android/graphics/Typeface") \
+ JAVACLASS (audioTrackClass, "android/media/AudioTrack") \
+ JAVACLASS (audioRecordClass, "android/media/AudioRecord") \
 
 //==============================================================================
 // List of extra classes needed when USE_ANDROID_CANVAS is enabled
@@ -186,6 +188,14 @@ BEGIN_JUCE_NAMESPACE
  FIELD (rectClass, rectRight, "right", "I") \
  FIELD (rectClass, rectTop, "top", "I") \
  FIELD (rectClass, rectBottom, "bottom", "I") \
+\
+ METHOD (audioTrackClass, audioTrackConstructor, "<init>", "(IIIIII)V") \
+ METHOD (audioTrackClass, audioTrackPlay, "play", "()V") \
+ METHOD (audioTrackClass, audioTrackStop, "stop", "()V") \
+ METHOD (audioTrackClass, audioTrackRelease, "release", "()V") \
+ METHOD (audioTrackClass, audioTrackFlush, "flush", "()V") \
+ METHOD (audioTrackClass, audioTrackWrite, "write", "([SII)I") \
+ STATICMETHOD (audioTrackClass, getMinBufferSize, "getMinBufferSize", "(III)I") \
 
 
 //==============================================================================
