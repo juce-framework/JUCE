@@ -107,10 +107,8 @@ namespace
                 break;
             }
 
-            RECT windowPos;
+            RECT windowPos, parentPos;
             GetWindowRect (w, &windowPos);
-
-            RECT parentPos;
             GetWindowRect (parent, &parentPos);
 
             int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);

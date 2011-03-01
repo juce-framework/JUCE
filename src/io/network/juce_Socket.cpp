@@ -254,47 +254,45 @@ namespace SocketHelpers
                         const int portNumber,
                         const int timeOutMillisecs) throw()
     {
-        struct hostent* const hostEnt = gethostbyname (hostName.toUTF8());
+        struct addrinfo hints;
+        zerostruct (hints);
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = isDatagram ? SOCK_DGRAM : SOCK_STREAM;
 
-        if (hostEnt == 0)
+        struct addrinfo* result = 0;
+        if (getaddrinfo (hostName.toUTF8(), 0, &hints, &result) != 0 || result == 0)
             return false;
 
-        struct in_addr targetAddress;
-        memcpy (&targetAddress.s_addr,
-                *(hostEnt->h_addr_list),
-                sizeof (targetAddress.s_addr));
-
-        struct sockaddr_in servTmpAddr;
-        zerostruct (servTmpAddr);
-        servTmpAddr.sin_family = PF_INET;
-        servTmpAddr.sin_addr = targetAddress;
-        servTmpAddr.sin_port = htons ((uint16) portNumber);
+        if (handle < 0)
+            handle = (int) socket (result->ai_family, result->ai_socktype, 0);
 
         if (handle < 0)
-            handle = (int) socket (AF_INET, isDatagram ? SOCK_DGRAM : SOCK_STREAM, 0);
-
-        if (handle < 0)
+        {
+            freeaddrinfo (result);
             return false;
+        }
 
         if (isDatagram)
         {
-            *serverAddress = new struct sockaddr_in();
-            *((struct sockaddr_in*) *serverAddress) = servTmpAddr;
+            struct sockaddr* s = new struct sockaddr();
+            *s = *(result->ai_addr);
+            *serverAddress = s;
 
+            freeaddrinfo (result);
             return true;
         }
 
-        setSocketBlockingState (handle, false);
+        freeaddrinfo (result);
 
-        const int result = ::connect (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in));
+        setSocketBlockingState (handle, false);
 
         if (result < 0)
         {
-    #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
-    #else
+           #else
             if (errno == EINPROGRESS)
-    #endif
+           #endif
             {
                 if (waitForReadiness (handle, false, timeOutMillisecs) != 1)
                 {
@@ -545,7 +543,7 @@ DatagramSocket::~DatagramSocket()
 {
     close();
 
-    delete static_cast <struct sockaddr_in*> (serverAddress);
+    delete static_cast <struct sockaddr*> (serverAddress);
     serverAddress = 0;
 }
 

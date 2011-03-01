@@ -38,6 +38,7 @@ import android.graphics.RectF;
 import android.graphics.Rect;
 import android.text.ClipboardManager;
 import com.juce.ComponentPeerView;
+import java.net.URL;
 
 
 //==============================================================================
@@ -196,4 +197,56 @@ public final class JuceAppActivity   extends Activity
     }
 
     private int[] cachedRenderArray = new int [256];
+
+    //==============================================================================
+    public static class HTTPStream
+    {
+        public HTTPStream()
+        {
+        }
+
+        public final void release()
+        {
+        }
+
+        public final int read (byte[] buffer, int numBytes)
+        {
+            return 0;
+        }
+
+        public final long getPosition()
+        {
+            return 0;
+        }
+
+        public final long getTotalLength()
+        {
+            return 0;
+        }
+
+        public final boolean isExhausted()
+        {
+            return false;
+        }
+
+        public final boolean setPosition (long newPos)
+        {
+            return false;
+        }
+    }
+
+    public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,
+                                                     String headers, int timeOutMs, java.lang.StringBuffer responseHeaders)
+    {
+        try
+        {
+            URL u = new URL (address);
+
+            return new HTTPStream ();
+        }
+        catch (java.net.MalformedURLException e)
+        {}
+
+        return null;
+    }
 }

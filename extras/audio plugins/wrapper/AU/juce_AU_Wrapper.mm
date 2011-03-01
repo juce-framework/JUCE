@@ -324,8 +324,7 @@ public:
             CFDictionaryRef dict = (CFDictionaryRef) inData;
             CFDataRef data = 0;
 
-            if (CFDictionaryGetValueIfPresent (dict, CFSTR("jucePluginState"),
-                                               (const void**) &data))
+            if (CFDictionaryGetValueIfPresent (dict, CFSTR("jucePluginState"), (const void**) &data))
             {
                 if (data != 0)
                 {
@@ -452,7 +451,7 @@ public:
     }
 
     //==============================================================================
-  #if BUILD_AU_CARBON_UI
+   #if BUILD_AU_CARBON_UI
     int GetNumCustomUIComponents()              { return 1; }
 
     void GetUIComponentDescs (ComponentDescription* inDescArray)
@@ -463,7 +462,7 @@ public:
         inDescArray[0].componentFlags = 0;
         inDescArray[0].componentFlagsMask = 0;
     }
-  #endif
+   #endif
 
     //==============================================================================
     bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
@@ -478,35 +477,15 @@ public:
 
         switch (lastSMPTETime.mType)
         {
-            case kSMPTETimeType24:
-                info.frameRate = AudioPlayHead::fps24;
-                break;
-
-            case kSMPTETimeType25:
-                info.frameRate = AudioPlayHead::fps25;
-                break;
-
-            case kSMPTETimeType30Drop:
-                info.frameRate = AudioPlayHead::fps30drop;
-                break;
-
-            case kSMPTETimeType30:
-                info.frameRate = AudioPlayHead::fps30;
-                break;
-
-            case kSMPTETimeType2997:
-                info.frameRate = AudioPlayHead::fps2997;
-                break;
-
-            case kSMPTETimeType2997Drop:
-                info.frameRate = AudioPlayHead::fps2997drop;
-                break;
-
+            case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24; break;
+            case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25; break;
+            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop; break;
+            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
+            case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997; break;
+            case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
             //case kSMPTETimeType60:
             //case kSMPTETimeType5994:
-            default:
-                info.frameRate = AudioPlayHead::fpsUnknown;
-                break;
+            default:                        info.frameRate = AudioPlayHead::fpsUnknown; break;
         }
 
         if (CallHostBeatAndTempo (&info.ppqPosition, &info.bpm) != noErr)
@@ -555,7 +534,7 @@ public:
         }
     }
 
-    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float /*newValue*/)
     {
         sendAUEvent (kAudioUnitEvent_ParameterValueChange, index);
     }
@@ -575,7 +554,7 @@ public:
         // xxx is there an AU equivalent?
     }
 
-    bool StreamFormatWritable (AudioUnitScope inScope, AudioUnitElement element)
+    bool StreamFormatWritable (AudioUnitScope, AudioUnitElement)
     {
         return ! IsInitialized();
     }
@@ -588,9 +567,9 @@ public:
     //==============================================================================
     ComponentResult Initialize()
     {
-      #if ! JucePlugin_IsSynth
+       #if ! JucePlugin_IsSynth
         const int numIns = GetInput(0) != 0 ? GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
-      #endif
+       #endif
         const int numOuts = GetOutput(0) != 0 ? GetOutput(0)->GetStreamFormat().mChannelsPerFrame : 0;
 
         bool isValidChannelConfig = false;
@@ -639,20 +618,20 @@ public:
     {
         if (juceFilter != 0)
         {
-          #if ! JucePlugin_IsSynth
-            juceFilter->setPlayConfigDetails (GetInput(0)->GetStreamFormat().mChannelsPerFrame,
-          #else
-            juceFilter->setPlayConfigDetails (0,
-          #endif
-                                              GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
-                                              GetSampleRate(),
-                                              GetMaxFramesPerSlice());
+            juceFilter->setPlayConfigDetails (
+                 #if ! JucePlugin_IsSynth
+                  GetInput(0)->GetStreamFormat().mChannelsPerFrame,
+                 #else
+                  0,
+                 #endif
+                  GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
+                  GetSampleRate(),
+                  GetMaxFramesPerSlice());
 
             bufferSpace.setSize (juceFilter->getNumInputChannels() + juceFilter->getNumOutputChannels(),
                                  GetMaxFramesPerSlice() + 32);
 
-            juceFilter->prepareToPlay (GetSampleRate(),
-                                       GetMaxFramesPerSlice());
+            juceFilter->prepareToPlay (GetSampleRate(), GetMaxFramesPerSlice());
 
             midiEvents.ensureSize (2048);
             midiEvents.clear();
@@ -672,15 +651,15 @@ public:
     {
         lastSMPTETime = inTimeStamp.mSMPTETime;
 
-      #if ! JucePlugin_IsSynth
+       #if ! JucePlugin_IsSynth
         return JuceAUBaseClass::Render (ioActionFlags, inTimeStamp, nFrames);
-      #else
+       #else
         // synths can't have any inputs..
         AudioBufferList inBuffer;
         inBuffer.mNumberBuffers = 0;
 
         return ProcessBufferLists (ioActionFlags, inBuffer, GetOutput(0)->GetBufferList(), nFrames);
-      #endif
+       #endif
     }
 
     OSStatus ProcessBufferLists (AudioUnitRenderActionFlags& ioActionFlags,
@@ -837,44 +816,40 @@ public:
                 }
             }
 
-          #if ! JucePlugin_SilenceInProducesSilenceOut
+           #if ! JucePlugin_SilenceInProducesSilenceOut
             ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
-          #endif
+           #endif
         }
 
         return noErr;
     }
 
 protected:
-    OSStatus HandleMidiEvent (UInt8 nStatus,
-                              UInt8 inChannel,
-                              UInt8 inData1,
-                              UInt8 inData2,
-                            #if defined(MAC_OS_X_VERSION_10_5)
+    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2,
+                             #if defined (MAC_OS_X_VERSION_10_5)
                               UInt32 inStartFrame)
-                            #else
+                             #else
                               long inStartFrame)
-                            #endif
+                             #endif
     {
-      #if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
-        JUCE_NAMESPACE::uint8 data [4];
-        data[0] = nStatus | inChannel;
-        data[1] = inData1;
-        data[2] = inData2;
+        const JUCE_NAMESPACE::uint8 data[] = { (JUCE_NAMESPACE::uint8) (nStatus | inChannel),
+                                               (JUCE_NAMESPACE::uint8) inData1,
+                                               (JUCE_NAMESPACE::uint8) inData2 };
 
         incomingEvents.addEvent (data, 3, inStartFrame);
-      #endif
+       #endif
 
         return noErr;
     }
 
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength)
     {
-      #if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, inLength, 0);
-      #endif
+       #endif
         return noErr;
     }
 
@@ -921,23 +896,20 @@ protected:
         return noErr;
     }
 
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
+    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
     {
-        //if (wasResized)
-        {
-            NSView* view = (NSView*) component.getWindowHandle();
-            NSRect r = [[view superview] frame];
-            r.origin.y = r.origin.y + r.size.height - component.getHeight();
-            r.size.width = component.getWidth();
-            r.size.height = component.getHeight();
-            [[view superview] setFrame: r];
-            [view setFrame: NSMakeRect (0, 0, component.getWidth(), component.getHeight())];
-            [view setNeedsDisplay: YES];
-        }
+        NSView* view = (NSView*) component.getWindowHandle();
+        NSRect r = [[view superview] frame];
+        r.origin.y = r.origin.y + r.size.height - component.getHeight();
+        r.size.width = component.getWidth();
+        r.size.height = component.getHeight();
+        [[view superview] setFrame: r];
+        [view setFrame: NSMakeRect (0, 0, component.getWidth(), component.getHeight())];
+        [view setNeedsDisplay: YES];
     }
 
-    //==============================================================================
 private:
+    //==============================================================================
     ScopedPointer<AudioProcessor> juceFilter;
     AudioSampleBuffer bufferSpace;
     HeapBlock <float*> channels;
@@ -948,6 +920,8 @@ private:
     AudioUnitEvent auEvent;
     mutable MemoryBlock presetsArray;
     CriticalSection incomingMidiLock;
+
+    JUCE_DECLARE_NON_COPYABLE (JuceAU);
 };
 
 //==============================================================================
@@ -1152,9 +1126,6 @@ private:
 //==============================================================================
 class JuceAUView  : public AUCarbonViewBase
 {
-    AudioProcessor* juceFilter;
-    ScopedPointer<Component> windowComp;
-
 public:
     JuceAUView (AudioUnitCarbonView auview)
       : AUCarbonViewBase (auview),
@@ -1206,6 +1177,9 @@ public:
     void* getEventListenerUserData() const                      { return mEventListenerUserData; }
 
 private:
+    //==============================================================================
+    AudioProcessor* juceFilter;
+    ScopedPointer<Component> windowComp;
     FakeMouseMoveGenerator fakeMouseGenerator;
 
     void deleteUI()
@@ -1214,8 +1188,13 @@ private:
         {
             PopupMenu::dismissAllActiveMenus();
 
-            // there's some kind of component currently modal, but the host
-            // is trying to delete our plugin..
+            /* This assertion is triggered when there's some kind of modal component active, and the
+               host is trying to delete our plugin.
+               If you must use modal components, always use them in a non-blocking way, by never
+               calling runModalLoop(), but instead using enterModalState() with a callback that
+               will be performed on completion. (Note that this assertion could actually trigger
+               a false alarm even if you're doing it correctly, but is here to catch people who
+               aren't so careful) */
             jassert (Component::getCurrentlyModalComponent() == 0);
 
             if (windowComp != 0 && windowComp->getChildComponent(0) != 0)
@@ -1319,11 +1298,12 @@ private:
 
         void resized()
         {
-            if (getChildComponent(0) != 0)
-                getChildComponent(0)->setBounds (0, 0, getWidth(), getHeight());
+            Component* const child = getChildComponent (0);
+            if (child != 0)
+                child->setBounds (getLocalBounds());
         }
 
-        void paint (Graphics& g) {}
+        void paint (Graphics&) {}
 
         void childBoundsChanged (Component*)
         {
@@ -1368,6 +1348,7 @@ private:
         }
 
     private:
+        //==============================================================================
         HIViewRef parentView;
         NSWindow* hostWindow;
         EditorCompHolder editor;

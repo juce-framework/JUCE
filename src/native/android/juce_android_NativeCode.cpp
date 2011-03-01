@@ -100,6 +100,7 @@ BEGIN_JUCE_NAMESPACE
 // List of basic required classes
 #define JUCE_JNI_CLASSES_ESSENTIAL(JAVACLASS) \
  JAVACLASS (activityClass, "com/juce/JuceAppActivity") \
+ JAVACLASS (httpStreamClass, "com/juce/JuceAppActivity$HTTPStream") \
  JAVACLASS (componentPeerViewClass, "com/juce/ComponentPeerView") \
  JAVACLASS (fileClass, "java/io/File") \
  JAVACLASS (systemClass, "java/lang/System") \
@@ -144,6 +145,14 @@ BEGIN_JUCE_NAMESPACE
  METHOD (activityClass, setClipboardContent, "setClipboardContent", "(Ljava/lang/String;)V") \
  METHOD (activityClass, excludeClipRegion, "excludeClipRegion", "(Landroid/graphics/Canvas;FFFF)V") \
  METHOD (activityClass, renderGlyph, "renderGlyph", "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
+ STATICMETHOD (activityClass, createHTTPStream, "createHTTPStream", "(Ljava/lang/String;Z[BLjava/lang/String;ILjava/lang/StringBuffer;)Lcom/juce/JuceAppActivity$HTTPStream;") \
+\
+ METHOD (httpStreamClass, httpStreamRelease, "release", "()V") \
+ METHOD (httpStreamClass, httpStreamRead, "read", "([BI)I") \
+ METHOD (httpStreamClass, getPosition, "getPosition", "()J") \
+ METHOD (httpStreamClass, getTotalLength, "getTotalLength", "()J") \
+ METHOD (httpStreamClass, isExhausted, "isExhausted", "()Z") \
+ METHOD (httpStreamClass, setPosition, "setPosition", "(J)Z") \
 \
  METHOD (fileClass, fileExists, "exists", "()Z") \
  STATICMETHOD (systemClass, getProperty, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
