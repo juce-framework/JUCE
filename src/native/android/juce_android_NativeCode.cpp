@@ -104,6 +104,7 @@ BEGIN_JUCE_NAMESPACE
  JAVACLASS (componentPeerViewClass, "com/juce/ComponentPeerView") \
  JAVACLASS (fileClass, "java/io/File") \
  JAVACLASS (systemClass, "java/lang/System") \
+ JAVACLASS (stringBufferClass, "java/lang/StringBuffer") \
  JAVACLASS (contextClass, "android/content/Context") \
  JAVACLASS (canvasClass, "android/graphics/Canvas") \
  JAVACLASS (paintClass, "android/graphics/Paint") \
@@ -146,6 +147,9 @@ BEGIN_JUCE_NAMESPACE
  METHOD (activityClass, excludeClipRegion, "excludeClipRegion", "(Landroid/graphics/Canvas;FFFF)V") \
  METHOD (activityClass, renderGlyph, "renderGlyph", "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
  STATICMETHOD (activityClass, createHTTPStream, "createHTTPStream", "(Ljava/lang/String;Z[BLjava/lang/String;ILjava/lang/StringBuffer;)Lcom/juce/JuceAppActivity$HTTPStream;") \
+\
+ METHOD (stringBufferClass, stringBufferConstructor, "<init>", "()V") \
+ METHOD (stringBufferClass, stringBufferToString, "toString", "()Ljava/lang/String;") \
 \
  METHOD (httpStreamClass, httpStreamRelease, "release", "()V") \
  METHOD (httpStreamClass, httpStreamRead, "read", "([BI)I") \

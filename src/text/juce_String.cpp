@@ -2067,8 +2067,8 @@ struct StringEncodingConverter
 
         CharPointerType_Src text (source.getCharPointer());
         const size_t extraBytesNeeded = CharPointerType_Dest::getBytesRequiredFor (text);
-        const size_t endOffset = text.sizeInBytes();
-
+        const size_t endOffset = (text.sizeInBytes() + 3) & ~3; // the new string must be word-aligned or many win32
+                                                                // functions will fail to read it correctly!
         source.preallocateBytes (endOffset + extraBytesNeeded);
         text = source.getCharPointer();
 

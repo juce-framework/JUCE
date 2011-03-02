@@ -51,48 +51,96 @@ class WebInputStream  : public InputStream
 {
 public:
     //==============================================================================
-    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
+    WebInputStream (const String& address, bool isPost, const MemoryBlock& postData,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
+                    const String& headers, int timeOutMs, StringPairArray* responseHeaders)
     {
-        // TODO
-        openedOk = false;
+        jbyteArray postDataArray = 0;
+
+        if (postData.getSize() > 0)
+        {
+            postDataArray = getEnv()->NewByteArray (postData.getSize());
+            getEnv()->SetByteArrayRegion (postDataArray, 0, postData.getSize(), (const jbyte*) postData.getData());
+        }
+
+        LocalRef<jobject> responseHeaderBuffer (getEnv()->NewObject (android.stringBufferClass, android.stringBufferConstructor));
+
+        stream = GlobalRef (android.activity.callObjectMethod (android.createHTTPStream,
+                                                               javaString (address).get(),
+                                                               (jboolean) isPost,
+                                                               postDataArray,
+                                                               javaString (headers).get(),
+                                                               (jint) timeOutMs,
+                                                               responseHeaderBuffer.get()));
+
+        getEnv()->DeleteLocalRef (postDataArray);
+
+        if (stream != 0)
+        {
+            StringArray headerLines;
+
+            {
+                LocalRef<jstring> headersString ((jstring) getEnv()->CallObjectMethod (responseHeaderBuffer.get(),
+                                                                                       android.stringBufferToString));
+                headerLines.addLines (juceString (headersString));
+            }
+
+            for (int i = 0; i < headerLines.size(); ++i)
+            {
+                const String& header = headerLines[i];
+                const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                const String previousValue ((*responseHeaders) [key]);
+
+                responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+            }
+
+        }
     }
 
     ~WebInputStream()
     {
+        stream.callVoidMethod (android.httpStreamRelease);
     }
 
     //==============================================================================
     bool isExhausted()
     {
-        return true;   // TODO
+        return stream != 0 && stream.callBooleanMethod (android.isExhausted);
     }
 
     int64 getPosition()
     {
-        return 0;    // TODO
+        return stream != 0 ? stream.callLongMethod (android.getPosition) : 0;
     }
 
     int64 getTotalLength()
     {
-        return -1;    // TODO
-    }
-
-    int read (void* buffer, int bytesToRead)
-    {
-        // TODO
-        return 0;
+        return stream != 0 ? stream.callLongMethod (android.getTotalLength) : 0;
     }
 
     bool setPosition (int64 wantedPos)
     {
-        // TODO
-        return false;
+        return stream != 0 && stream.callBooleanMethod (android.setPosition, (jlong) wantedPos);
+    }
+
+    int read (void* buffer, int bytesToRead)
+    {
+        JNIEnv* env = getEnv();
+
+        jbyteArray javaArray = env->NewByteArray (bytesToRead);
+
+        int numBytes = stream.callIntMethod (android.httpStreamRead, javaArray, (jint) bytesToRead);
+
+        if (numBytes > 0)
+            env->GetByteArrayRegion (javaArray, 0, numBytes, (jbyte*) buffer);
+
+        env->DeleteLocalRef (javaArray);
+        return numBytes;
     }
 
     //==============================================================================
-    bool openedOk;
+    GlobalRef stream;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
@@ -106,7 +154,7 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
                                                            progressCallback, progressCallbackContext,
                                                            headers, timeOutMs, responseHeaders));
 
-    return wi->openedOk ? wi.release() : 0;
+    return wi->stream != 0 ? wi.release() : 0;
 }
 
 #endif

@@ -27,6 +27,7 @@
 
 #if JUCE_WINDOWS
   #include <winsock2.h>
+  #include <ws2tcpip.h>
 
   #if JUCE_MSVC
     #pragma warning (push)

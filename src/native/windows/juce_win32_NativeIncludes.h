@@ -54,7 +54,6 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <commdlg.h>
-#include <ws2tcpip.h>
 #include <shellapi.h>
 #include <mmsystem.h>
 #include <vfw.h>
