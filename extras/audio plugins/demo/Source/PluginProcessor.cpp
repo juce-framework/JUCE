@@ -135,11 +135,21 @@ private:
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
     : delayBuffer (2, 12000)
 {
-    // Set up some default values..
-    gain = 1.0f;
-    delay = 0.5f;
+    // Set up parameters and default values..
+    AudioProcessorParameter* gainParam = new AudioProcessorParameter ("gain");
+	gainParam->resetWithDefault (1.0);
+	parameters.add (gainParam);
 
-    lastUIWidth = 400;
+    AudioProcessorParameter* delayParam = new AudioProcessorParameter ("delay");
+	delayParam->resetWithDefault (0.5);
+	parameters.add (delayParam);
+
+    AudioProcessorParameter* cutOffParam = new AudioProcessorParameter ("cutoff", AudioProcessorParameter::hertz);
+	cutOffParam->setRange (Range<double> (20.0, 20000.0));
+	cutOffParam->resetWithDefault (10000.0);
+	parameters.add (cutOffParam);
+
+    lastUIWidth = 600;
     lastUIHeight = 200;
 
     lastPosInfo.resetToDefault();
@@ -150,6 +160,8 @@ JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
         synth.addVoice (new SineWaveVoice());   // These voices will play our custom sine-wave sounds..
 
     synth.addSound (new SineWaveSound());
+
+    zeromem (lastSample, sizeof (lastSample));
 }
 
 JuceDemoPluginAudioProcessor::~JuceDemoPluginAudioProcessor()
@@ -159,7 +171,7 @@ JuceDemoPluginAudioProcessor::~JuceDemoPluginAudioProcessor()
 //==============================================================================
 int JuceDemoPluginAudioProcessor::getNumParameters()
 {
-    return totalNumParams;
+    return parameters.size();
 }
 
 float JuceDemoPluginAudioProcessor::getParameter (int index)
@@ -167,12 +179,8 @@ float JuceDemoPluginAudioProcessor::getParameter (int index)
     // This method will be called by the host, probably on the audio thread, so
     // it's absolutely time-critical. Don't use critical sections or anything
     // UI-related, or anything at all that may block in any way!
-    switch (index)
-    {
-        case gainParam:     return gain;
-        case delayParam:    return delay;
-        default:            return 0.0f;
-    }
+    jassert (parameters [index] != 0);
+	parameters.getUnchecked (index)->getValue();
 }
 
 void JuceDemoPluginAudioProcessor::setParameter (int index, float newValue)
@@ -180,30 +188,40 @@ void JuceDemoPluginAudioProcessor::setParameter (int index, float newValue)
     // This method will be called by the host, probably on the audio thread, so
     // it's absolutely time-critical. Don't use critical sections or anything
     // UI-related, or anything at all that may block in any way!
-    switch (index)
-    {
-        case gainParam:     gain = newValue;  break;
-        case delayParam:    delay = newValue;  break;
-        default:            break;
-    }
+    jassert (parameters [index] != 0);
+	parameters.getUnchecked (index)->setValue (newValue);
 }
 
 const String JuceDemoPluginAudioProcessor::getParameterName (int index)
 {
-    switch (index)
-    {
-        case gainParam:     return "gain";
-        case delayParam:    return "delay";
-        default:            break;
-    }
-
-    return String::empty;
+    jassert (parameters [index] != 0);
+	return parameters.getUnchecked (index)->getName();
 }
 
 const String JuceDemoPluginAudioProcessor::getParameterText (int index)
 {
     return String (getParameter (index), 2);
 }
+
+int JuceDemoPluginAudioProcessor::indexOfParameter (const String& parameterName) const
+{
+	for (int i = parameters.size(); --i >= 0;)
+		if (parameters.getUnchecked(i)->getName() == name)
+			return i;
+
+	return -1;
+}
+
+AudioProcessorParameter* JuceDemoPluginAudioProcessor::getParameterObject (int index) const
+{
+    return parameters [index];
+}
+
+AudioProcessorParameter* JuceDemoPluginAudioProcessor::getParameterWithName (const String& parameterName) const
+{
+    return parameters [indexOfParameter (parameterName)];
+}
+
 
 //==============================================================================
 void JuceDemoPluginAudioProcessor::prepareToPlay (double sampleRate, int /*samplesPerBlock*/)
@@ -233,6 +251,12 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
 {
     const int numSamples = buffer.getNumSamples();
     int channel, dp = 0;
+	float gain = getParameter (0);
+	float delay = getParameter (1);
+	float cutOff = getParameter (2);
+
+	// Get one-pole filter coefficient
+	const float filterCoeff = (float_Pi * cutOff / getSampleRate());
 
     // Go through the incoming data, and apply our gain to it...
     for (channel = 0; channel < getNumInputChannels(); ++channel)
@@ -255,7 +279,12 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
         for (int i = 0; i < numSamples; ++i)
         {
             const float in = channelData[i];
-            channelData[i] += delayData[dp];
+
+			// filter delay data
+			lastSample [channel] += filterCoeff * (delayData[dp] - lastSample [channel]);
+
+			// add to output buffers
+            channelData[i] += lastSample [channel];
             delayData[dp] = (delayData[dp] + in) * delay;
             if (++dp > delayBuffer.getNumSamples())
                 dp = 0;
@@ -303,8 +332,12 @@ void JuceDemoPluginAudioProcessor::getStateInformation (MemoryBlock& destData)
     // add some attributes to it..
     xml.setAttribute ("uiWidth", lastUIWidth);
     xml.setAttribute ("uiHeight", lastUIHeight);
-    xml.setAttribute ("gain", gain);
-    xml.setAttribute ("delay", delay);
+
+	for (int i = 0; i < parameters.size(); ++i)
+	{
+		const AudioProcessorParameter* const p = parameters.getUnchecked(i);
+		xml.setAttribute (p->getName(), p->getValue());
+	}
 
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
@@ -323,12 +356,16 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
         // make sure that it's actually our type of XML object..
         if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
         {
-            // ok, now pull out our parameters..
+            // ok, now pull out our plugin-specific attributes..
             lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
             lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
 
-            gain  = (float) xmlState->getDoubleAttribute ("gain", gain);
-            delay = (float) xmlState->getDoubleAttribute ("delay", delay);
+			// and all the parameters.
+            for (int i = 0; i < parameters.size(); ++i)
+			{
+                const AudioProcessorParameter* const p = parameters.getUnchecked(i);
+				p->setValue (xmlState->getDoubleAttribute (p->getName(), p->getDefault()));
+			}
         }
     }
 }
