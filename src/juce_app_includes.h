@@ -128,12 +128,6 @@
 #ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
  #include "audio/devices/juce_AudioIODeviceType.h"
 #endif
-#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
- #include "audio/devices/juce_MidiInput.h"
-#endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
- #include "audio/devices/juce_MidiOutput.h"
-#endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
  #include "audio/dsp/juce_AudioDataConverters.h"
 #endif
@@ -152,6 +146,9 @@
 #ifndef __JUCE_MIDIFILE_JUCEHEADER__
  #include "audio/midi/juce_MidiFile.h"
 #endif
+#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
+ #include "audio/midi/juce_MidiInput.h"
+#endif
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
  #include "audio/midi/juce_MidiKeyboardState.h"
 #endif
@@ -163,6 +160,9 @@
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
  #include "audio/midi/juce_MidiMessageSequence.h"
+#endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
+ #include "audio/midi/juce_MidiOutput.h"
 #endif
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
  #include "audio/plugins/formats/juce_AudioUnitPluginFormat.h"

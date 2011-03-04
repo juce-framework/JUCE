@@ -173,12 +173,6 @@
                 file="src/audio/devices/juce_AudioIODeviceType.cpp"/>
           <FILE id="3KG3Y3kcE" name="juce_AudioIODeviceType.h" compile="0" resource="0"
                 file="src/audio/devices/juce_AudioIODeviceType.h"/>
-          <FILE id="1MAVwUzyb" name="juce_MidiInput.h" compile="0" resource="0"
-                file="src/audio/devices/juce_MidiInput.h"/>
-          <FILE id="3mOyjl6Dz" name="juce_MidiOutput.cpp" compile="1" resource="0"
-                file="src/audio/devices/juce_MidiOutput.cpp"/>
-          <FILE id="5pzlP77pj" name="juce_MidiOutput.h" compile="0" resource="0"
-                file="src/audio/devices/juce_MidiOutput.h"/>
         </GROUP>
         <GROUP id="JEC3xi6Gk" name="dsp">
           <FILE id="b44zjbiH2" name="juce_AudioDataConverters.cpp" compile="1"
@@ -205,6 +199,8 @@
                 file="src/audio/midi/juce_MidiFile.cpp"/>
           <FILE id="YjJL88613" name="juce_MidiFile.h" compile="0" resource="0"
                 file="src/audio/midi/juce_MidiFile.h"/>
+          <FILE id="YgtuNQ" name="juce_MidiInput.h" compile="0" resource="0"
+                file="src/audio/midi/juce_MidiInput.h"/>
           <FILE id="5J6iavXIB" name="juce_MidiKeyboardState.cpp" compile="1"
                 resource="0" file="src/audio/midi/juce_MidiKeyboardState.cpp"/>
           <FILE id="Vq6VqUSqR" name="juce_MidiKeyboardState.h" compile="0" resource="0"
@@ -221,6 +217,10 @@
                 resource="0" file="src/audio/midi/juce_MidiMessageSequence.cpp"/>
           <FILE id="4hDIb1h50" name="juce_MidiMessageSequence.h" compile="0"
                 resource="0" file="src/audio/midi/juce_MidiMessageSequence.h"/>
+          <FILE id="dhtLL" name="juce_MidiOutput.cpp" compile="1" resource="0"
+                file="src/audio/midi/juce_MidiOutput.cpp"/>
+          <FILE id="EkOemA" name="juce_MidiOutput.h" compile="0" resource="0"
+                file="src/audio/midi/juce_MidiOutput.h"/>
         </GROUP>
         <GROUP id="rWnJUOyOY" name="plugins">
           <GROUP id="2KbZnNZ" name="wrapper code">

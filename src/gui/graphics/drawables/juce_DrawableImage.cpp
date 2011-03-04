@@ -153,7 +153,7 @@ const Rectangle<float> DrawableImage::getDrawableBounds() const
 
 bool DrawableImage::hitTest (int x, int y)
 {
-    return image.isValid() && image.getPixelAt (x, y).getAlpha() >= 127;
+    return Drawable::hitTest (x, y) && image.isValid() && image.getPixelAt (x, y).getAlpha() >= 127;
 }
 
 Drawable* DrawableImage::createCopy() const

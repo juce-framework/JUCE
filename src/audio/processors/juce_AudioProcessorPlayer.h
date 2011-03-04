@@ -28,7 +28,7 @@
 
 #include "juce_AudioProcessor.h"
 #include "../devices/juce_AudioIODevice.h"
-#include "../devices/juce_MidiInput.h"
+#include "../midi/juce_MidiInput.h"
 #include "../midi/juce_MidiMessageCollector.h"
 
 

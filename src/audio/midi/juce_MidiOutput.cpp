@@ -40,9 +40,8 @@ MidiOutput::MidiOutput()
 {
 }
 
-MidiOutput::PendingMessage::PendingMessage (const uint8* const data, const int len,
-                                            const double sampleNumber)
-    : message (data, len, sampleNumber)
+MidiOutput::PendingMessage::PendingMessage (const void* const data, const int len, const double timeStamp)
+    : message (data, len, timeStamp)
 {
 }
 

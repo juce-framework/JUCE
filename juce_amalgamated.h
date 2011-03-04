@@ -39183,7 +39183,7 @@ private:
 class MidiInput;
 
 /**
-	Receives midi messages from a midi input device.
+	Receives incoming messages from a physical MIDI input device.
 
 	This class is overridden to handle incoming midi messages. See the MidiInput
 	class for more details.
@@ -39546,10 +39546,10 @@ private:
 /*** End of inlined file: juce_MidiBuffer.h ***/
 
 /**
-	Represents a midi output device.
+	Controls a physical MIDI output device.
 
-	To create one of these, use the static getDevices() method to find out what
-	outputs are available, then use the openDevice() method to try to open one.
+	To create one of these, use the static getDevices() method to get a list of the
+	available output devices, then use the openDevice() method to try to open one.
 
 	@see MidiInput
 */
@@ -39584,7 +39584,7 @@ public:
 	*/
 	static MidiOutput* openDevice (int deviceIndex);
 
-#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+   #if JUCE_LINUX || JUCE_MAC || DOXYGEN
 	/** This will try to create a new midi output device (Not available on Windows).
 
 		This will attempt to create a new midi output device that other apps can connect
@@ -39595,7 +39595,7 @@ public:
 		@param deviceName   the name to use for the new device
 	*/
 	static MidiOutput* createNewDevice (const String& deviceName);
-#endif
+   #endif
 
 	/** Destructor. */
 	virtual ~MidiOutput();
@@ -39660,7 +39660,7 @@ protected:
 
 	struct PendingMessage
 	{
-		PendingMessage (const uint8* data, int len, double sampleNumber);
+		PendingMessage (const void* data, int len, double timeStamp);
 
 		MidiMessage message;
 		PendingMessage* next;
@@ -43151,12 +43151,6 @@ private:
 #ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
 
 #endif
@@ -43658,6 +43652,9 @@ private:
 
 
 #endif
+#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
 
 /*** Start of inlined file: juce_MidiKeyboardState.h ***/
@@ -43922,6 +43919,9 @@ private:
 
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__

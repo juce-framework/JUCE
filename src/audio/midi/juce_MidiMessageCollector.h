@@ -26,7 +26,7 @@
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 #define __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 
-#include "../devices/juce_MidiInput.h"
+#include "juce_MidiInput.h"
 #include "juce_MidiKeyboardState.h"
 
 //==============================================================================

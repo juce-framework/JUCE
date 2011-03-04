@@ -277,9 +277,6 @@
     <ClCompile Include="..\..\src\audio\devices\juce_AudioIODeviceType.cpp">
       <Filter>Juce\Source\audio\devices</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\audio\devices\juce_MidiOutput.cpp">
-      <Filter>Juce\Source\audio\devices</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\audio\dsp\juce_AudioDataConverters.cpp">
       <Filter>Juce\Source\audio\dsp</Filter>
     </ClCompile>
@@ -305,6 +302,9 @@
       <Filter>Juce\Source\audio\midi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\audio\midi\juce_MidiMessageSequence.cpp">
+      <Filter>Juce\Source\audio\midi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\audio\midi\juce_MidiOutput.cpp">
       <Filter>Juce\Source\audio\midi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\extras\audio plugins\wrapper\AU\juce_AU_Wrapper.mm">
@@ -1389,12 +1389,6 @@
     <ClInclude Include="..\..\src\audio\devices\juce_AudioIODeviceType.h">
       <Filter>Juce\Source\audio\devices</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\audio\devices\juce_MidiInput.h">
-      <Filter>Juce\Source\audio\devices</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\audio\devices\juce_MidiOutput.h">
-      <Filter>Juce\Source\audio\devices</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioDataConverters.h">
       <Filter>Juce\Source\audio\dsp</Filter>
     </ClInclude>
@@ -1413,6 +1407,9 @@
     <ClInclude Include="..\..\src\audio\midi\juce_MidiFile.h">
       <Filter>Juce\Source\audio\midi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\audio\midi\juce_MidiInput.h">
+      <Filter>Juce\Source\audio\midi</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiKeyboardState.h">
       <Filter>Juce\Source\audio\midi</Filter>
     </ClInclude>
@@ -1423,6 +1420,9 @@
       <Filter>Juce\Source\audio\midi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessageSequence.h">
+      <Filter>Juce\Source\audio\midi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\audio\midi\juce_MidiOutput.h">
       <Filter>Juce\Source\audio\midi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode_Header.h">

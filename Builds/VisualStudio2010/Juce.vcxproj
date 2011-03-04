@@ -152,7 +152,6 @@
     <ClCompile Include="..\..\src\audio\devices\juce_AudioDeviceManager.cpp"/>
     <ClCompile Include="..\..\src\audio\devices\juce_AudioIODevice.cpp"/>
     <ClCompile Include="..\..\src\audio\devices\juce_AudioIODeviceType.cpp"/>
-    <ClCompile Include="..\..\src\audio\devices\juce_MidiOutput.cpp"/>
     <ClCompile Include="..\..\src\audio\dsp\juce_AudioDataConverters.cpp"/>
     <ClCompile Include="..\..\src\audio\dsp\juce_AudioSampleBuffer.cpp"/>
     <ClCompile Include="..\..\src\audio\dsp\juce_IIRFilter.cpp"/>
@@ -162,6 +161,7 @@
     <ClCompile Include="..\..\src\audio\midi\juce_MidiMessage.cpp"/>
     <ClCompile Include="..\..\src\audio\midi\juce_MidiMessageCollector.cpp"/>
     <ClCompile Include="..\..\src\audio\midi\juce_MidiMessageSequence.cpp"/>
+    <ClCompile Include="..\..\src\audio\midi\juce_MidiOutput.cpp"/>
     <ClCompile Include="..\..\src\audio\plugins\formats\juce_VSTPluginFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\plugins\juce_AudioPluginFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\plugins\juce_AudioPluginFormatManager.cpp"/>
@@ -485,18 +485,18 @@
     <ClInclude Include="..\..\src\audio\devices\juce_AudioDeviceManager.h"/>
     <ClInclude Include="..\..\src\audio\devices\juce_AudioIODevice.h"/>
     <ClInclude Include="..\..\src\audio\devices\juce_AudioIODeviceType.h"/>
-    <ClInclude Include="..\..\src\audio\devices\juce_MidiInput.h"/>
-    <ClInclude Include="..\..\src\audio\devices\juce_MidiOutput.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioDataConverters.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioSampleBuffer.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_Decibels.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_IIRFilter.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiBuffer.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiFile.h"/>
+    <ClInclude Include="..\..\src\audio\midi\juce_MidiInput.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiKeyboardState.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessage.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessageCollector.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessageSequence.h"/>
+    <ClInclude Include="..\..\src\audio\midi\juce_MidiOutput.h"/>
     <ClInclude Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode_Header.h"/>
     <ClInclude Include="..\..\extras\audio plugins\wrapper\Standalone\juce_AudioFilterStreamer.h"/>
     <ClInclude Include="..\..\extras\audio plugins\wrapper\Standalone\juce_StandaloneFilterWindow.h"/>

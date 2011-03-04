@@ -27,8 +27,8 @@
 #define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
 #include "juce_AudioIODeviceType.h"
-#include "juce_MidiInput.h"
-#include "juce_MidiOutput.h"
+#include "../midi/juce_MidiInput.h"
+#include "../midi/juce_MidiOutput.h"
 #include "../../text/juce_XmlElement.h"
 #include "../../gui/components/controls/juce_ComboBox.h"
 #include "../dsp/juce_AudioSampleBuffer.h"

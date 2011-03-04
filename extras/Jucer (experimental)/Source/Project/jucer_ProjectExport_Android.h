@@ -314,6 +314,7 @@ private:
         executable->setAttribute ("dir", "${basedir}");
         executable->setAttribute ("failonerror", "true");
 
+        executable->createNewChildElement ("arg")->setAttribute ("value", "--jobs=2");
         executable->createNewChildElement ("arg")->setAttribute ("value", arg);
     }
 

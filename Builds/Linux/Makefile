@@ -69,7 +69,6 @@ OBJECTS := \
   $(OBJDIR)/juce_AudioDeviceManager_c24db832.o \
   $(OBJDIR)/juce_AudioIODevice_f7da876b.o \
   $(OBJDIR)/juce_AudioIODeviceType_e5d402c5.o \
-  $(OBJDIR)/juce_MidiOutput_f6dc5af3.o \
   $(OBJDIR)/juce_AudioDataConverters_dc0ece28.o \
   $(OBJDIR)/juce_AudioSampleBuffer_af6ff195.o \
   $(OBJDIR)/juce_IIRFilter_9a31e47f.o \
@@ -79,6 +78,7 @@ OBJECTS := \
   $(OBJDIR)/juce_MidiMessage_5b1f5753.o \
   $(OBJDIR)/juce_MidiMessageCollector_108abdc4.o \
   $(OBJDIR)/juce_MidiMessageSequence_a577dcb4.o \
+  $(OBJDIR)/juce_MidiOutput_3cc0f43f.o \
   $(OBJDIR)/juce_VSTPluginFormat_e4d590ea.o \
   $(OBJDIR)/juce_AudioPluginFormat_a7021cd6.o \
   $(OBJDIR)/juce_AudioPluginFormatManager_259e5a81.o \
@@ -532,11 +532,6 @@ $(OBJDIR)/juce_AudioIODeviceType_e5d402c5.o: ../../src/audio/devices/juce_AudioI
 	@echo "Compiling juce_AudioIODeviceType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MidiOutput_f6dc5af3.o: ../../src/audio/devices/juce_MidiOutput.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_MidiOutput.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_AudioDataConverters_dc0ece28.o: ../../src/audio/dsp/juce_AudioDataConverters.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_AudioDataConverters.cpp"
@@ -580,6 +575,11 @@ $(OBJDIR)/juce_MidiMessageCollector_108abdc4.o: ../../src/audio/midi/juce_MidiMe
 $(OBJDIR)/juce_MidiMessageSequence_a577dcb4.o: ../../src/audio/midi/juce_MidiMessageSequence.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_MidiMessageSequence.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MidiOutput_3cc0f43f.o: ../../src/audio/midi/juce_MidiOutput.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_MidiOutput.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_VSTPluginFormat_e4d590ea.o: ../../src/audio/plugins/formats/juce_VSTPluginFormat.cpp

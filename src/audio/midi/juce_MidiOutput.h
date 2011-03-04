@@ -34,10 +34,10 @@
 
 //==============================================================================
 /**
-    Represents a midi output device.
+    Controls a physical MIDI output device.
 
-    To create one of these, use the static getDevices() method to find out what
-    outputs are available, then use the openDevice() method to try to open one.
+    To create one of these, use the static getDevices() method to get a list of the
+    available output devices, then use the openDevice() method to try to open one.
 
     @see MidiInput
 */
@@ -73,7 +73,7 @@ public:
     static MidiOutput* openDevice (int deviceIndex);
 
 
-#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+   #if JUCE_LINUX || JUCE_MAC || DOXYGEN
     /** This will try to create a new midi output device (Not available on Windows).
 
         This will attempt to create a new midi output device that other apps can connect
@@ -84,7 +84,7 @@ public:
         @param deviceName   the name to use for the new device
     */
     static MidiOutput* createNewDevice (const String& deviceName);
-#endif
+   #endif
 
     //==============================================================================
     /** Destructor. */
@@ -154,7 +154,7 @@ protected:
 
     struct PendingMessage
     {
-        PendingMessage (const uint8* data, int len, double sampleNumber);
+        PendingMessage (const void* data, int len, double timeStamp);
 
         MidiMessage message;
         PendingMessage* next;
