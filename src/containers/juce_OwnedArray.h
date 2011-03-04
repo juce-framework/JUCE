@@ -170,13 +170,9 @@ public:
         ObjectClass* const* e = data.elements.getData();
         ObjectClass* const* const end = e + numUsed;
 
-        while (e != end)
-        {
+        for (; e != end; ++e)
             if (objectToLookFor == *e)
                 return static_cast <int> (e - data.elements.getData());
-
-            ++e;
-        }
 
         return -1;
     }
@@ -192,13 +188,9 @@ public:
         ObjectClass* const* e = data.elements.getData();
         ObjectClass* const* const end = e + numUsed;
 
-        while (e != end)
-        {
+        for (; e != end; ++e)
             if (objectToLookFor == *e)
                 return true;
-
-            ++e;
-        }
 
         return false;
     }
@@ -564,17 +556,15 @@ public:
                        const bool deleteObject = true)
     {
         const ScopedLockType lock (getLock());
-        ObjectClass** e = data.elements.getData();
+        ObjectClass** const e = data.elements.getData();
 
-        for (int i = numUsed; --i >= 0;)
+        for (int i = 0; i < numUsed; ++i)
         {
-            if (objectToRemove == *e)
+            if (objectToRemove == e[i])
             {
-                remove (static_cast <int> (e - data.elements.getData()), deleteObject);
+                remove (i, deleteObject);
                 break;
             }
-
-            ++e;
         }
     }
 

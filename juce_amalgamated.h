@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	43
+#define JUCE_BUILDNUMBER	44
 
 /** Current Juce version number.
 
@@ -4462,17 +4462,13 @@ public:
 	// Comparison methods..
 
 	/** Returns true if the string contains no characters.
-
 		Note that there's also an isNotEmpty() method to help write readable code.
-
 		@see containsNonWhitespaceChars()
 	*/
 	inline bool isEmpty() const throw()			 { return text[0] == 0; }
 
 	/** Returns true if the string contains at least one character.
-
 		Note that there's also an isEmpty() method to help write readable code.
-
 		@see containsNonWhitespaceChars()
 	*/
 	inline bool isNotEmpty() const throw()		  { return text[0] != 0; }
@@ -4487,30 +4483,26 @@ public:
 	bool equalsIgnoreCase (const char* other) const throw();
 
 	/** Case-sensitive comparison with another string.
-		@returns	 0 if the two strings are identical; negative if this string
-					 comes before the other one alphabetically, or positive if it
-					 comes after it.
+		@returns	 0 if the two strings are identical; negative if this string comes before
+					 the other one alphabetically, or positive if it comes after it.
 	*/
 	int compare (const String& other) const throw();
 
 	/** Case-sensitive comparison with another string.
-		@returns	 0 if the two strings are identical; negative if this string
-					 comes before the other one alphabetically, or positive if it
-					 comes after it.
+		@returns	 0 if the two strings are identical; negative if this string comes before
+					 the other one alphabetically, or positive if it comes after it.
 	*/
 	int compare (const char* other) const throw();
 
 	/** Case-sensitive comparison with another string.
-		@returns	 0 if the two strings are identical; negative if this string
-					 comes before the other one alphabetically, or positive if it
-					 comes after it.
+		@returns	 0 if the two strings are identical; negative if this string comes before
+					 the other one alphabetically, or positive if it comes after it.
 	*/
 	int compare (const wchar_t* other) const throw();
 
 	/** Case-insensitive comparison with another string.
-		@returns	 0 if the two strings are identical; negative if this string
-					 comes before the other one alphabetically, or positive if it
-					 comes after it.
+		@returns	 0 if the two strings are identical; negative if this string comes before
+					 the other one alphabetically, or positive if it comes after it.
 	*/
 	int compareIgnoreCase (const String& other) const throw();
 
@@ -4519,9 +4511,8 @@ public:
 		The comparison used here is case-insensitive and ignores leading non-alphanumeric
 		characters, making it good for sorting human-readable strings.
 
-		@returns	 0 if the two strings are identical; negative if this string
-					 comes before the other one alphabetically, or positive if it
-					 comes after it.
+		@returns	 0 if the two strings are identical; negative if this string comes before
+					 the other one alphabetically, or positive if it comes after it.
 	*/
 	int compareLexicographically (const String& other) const throw();
 
@@ -4612,7 +4603,6 @@ public:
 	int indexOfWholeWordIgnoreCase (const String& wordToLookFor) const throw();
 
 	/** Looks for any of a set of characters in the string.
-
 		Uses a case-sensitive comparison.
 
 		@returns	true if the string contains any of the characters from
@@ -4621,7 +4611,6 @@ public:
 	bool containsAnyOf (const String& charactersItMightContain) const throw();
 
 	/** Looks for a set of characters in the string.
-
 		Uses a case-sensitive comparison.
 
 		@returns	Returns false if any of the characters in this string do not occur in
@@ -4765,7 +4754,6 @@ public:
 	const juce_wchar operator[] (int index) const throw();
 
 	/** Returns the final character of the string.
-
 		If the string is empty this will return 0.
 	*/
 	juce_wchar getLastCharacter() const throw();
@@ -4873,8 +4861,10 @@ public:
 
 	/** Returns a copy of this string with any whitespace characters removed from the start and end. */
 	const String trim() const;
+
 	/** Returns a copy of this string with any whitespace characters removed from the start. */
 	const String trimStart() const;
+
 	/** Returns a copy of this string with any whitespace characters removed from the end. */
 	const String trimEnd() const;
 
@@ -5052,7 +5042,9 @@ public:
 		here because of the popular unrest that was stirred-up when I tried to remove it...
 
 		If you're really determined to use it, at least make sure that you never, ever,
-		pass any String objects to it as parameters.
+		pass any String objects to it as parameters. And bear in mind that internally, depending
+		on the platform, it may be using wchar_t or char character types, so that even string
+		literals can't be safely used as parameters if you're writing portable code.
 	*/
 	static const String formatted (const String& formatString, ... );
 
@@ -5242,6 +5234,20 @@ public:
 		@see getCharPointer, toUTF8, toUTF16
 	*/
 	CharPointer_UTF32 toUTF32() const;
+
+	/** Returns a pointer to a wchar_t version of this string.
+
+		Because it returns a reference to the string's internal data, the pointer
+		that is returned must not be stored anywhere, as it can be deleted whenever the
+		string changes.
+
+		Bear in mind that the wchar_t type is different on different platforms, so on
+		Windows, this will be equivalent to calling toUTF16(), on unix it'll be the same
+		as calling toUTF32(), etc.
+
+		@see getCharPointer, toUTF8, toUTF16, toUTF32
+	*/
+	const wchar_t* toWideCharPointer() const;
 
 	/** Creates a String from a UTF-8 encoded buffer.
 		If the size is < 0, it'll keep reading until it hits a zero.
@@ -6828,13 +6834,9 @@ public:
 		const ElementType* e = data.elements.getData();
 		const ElementType* const end = e + numUsed;
 
-		while (e != end)
-		{
+		for (; e != end; ++e)
 			if (elementToLookFor == *e)
 				return static_cast <int> (e - data.elements.getData());
-
-			++e;
-		}
 
 		return -1;
 	}
@@ -6850,13 +6852,9 @@ public:
 		const ElementType* e = data.elements.getData();
 		const ElementType* const end = e + numUsed;
 
-		while (e != end)
-		{
+		for (; e != end; ++e)
 			if (elementToLookFor == *e)
 				return true;
-
-			++e;
-		}
 
 		return false;
 	}
@@ -7239,17 +7237,15 @@ public:
 	void removeValue (ParameterType valueToRemove)
 	{
 		const ScopedLockType lock (getLock());
-		ElementType* e = data.elements;
+		ElementType* const e = data.elements;
 
-		for (int i = numUsed; --i >= 0;)
+		for (int i = 0; i < numUsed; ++i)
 		{
-			if (valueToRemove == *e)
+			if (valueToRemove == e[i])
 			{
-				remove (static_cast <int> (e - data.elements.getData()));
+				remove (i);
 				break;
 			}
-
-			++e;
 		}
 	}
 
@@ -9467,13 +9463,9 @@ public:
 		ObjectClass* const* e = data.elements.getData();
 		ObjectClass* const* const end = e + numUsed;
 
-		while (e != end)
-		{
+		for (; e != end; ++e)
 			if (objectToLookFor == *e)
 				return static_cast <int> (e - data.elements.getData());
-
-			++e;
-		}
 
 		return -1;
 	}
@@ -9489,13 +9481,9 @@ public:
 		ObjectClass* const* e = data.elements.getData();
 		ObjectClass* const* const end = e + numUsed;
 
-		while (e != end)
-		{
+		for (; e != end; ++e)
 			if (objectToLookFor == *e)
 				return true;
-
-			++e;
-		}
 
 		return false;
 	}
@@ -9859,17 +9847,15 @@ public:
 					   const bool deleteObject = true)
 	{
 		const ScopedLockType lock (getLock());
-		ObjectClass** e = data.elements.getData();
+		ObjectClass** const e = data.elements.getData();
 
-		for (int i = numUsed; --i >= 0;)
+		for (int i = 0; i < numUsed; ++i)
 		{
-			if (objectToRemove == *e)
+			if (objectToRemove == e[i])
 			{
-				remove (static_cast <int> (e - data.elements.getData()), deleteObject);
+				remove (i, deleteObject);
 				break;
 			}
-
-			++e;
 		}
 	}
 
@@ -12139,7 +12125,7 @@ private:
 */
 #define forEachXmlChildElement(parentXmlElement, childElementVariableName) \
 \
-	for (XmlElement* childElementVariableName = (parentXmlElement).getFirstChildElement(); \
+	for (JUCE_NAMESPACE::XmlElement* childElementVariableName = (parentXmlElement).getFirstChildElement(); \
 		 childElementVariableName != 0; \
 		 childElementVariableName = childElementVariableName->getNextElement())
 
@@ -12168,7 +12154,7 @@ private:
 */
 #define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
 \
-	for (XmlElement* childElementVariableName = (parentXmlElement).getChildByName (requiredTagName); \
+	for (JUCE_NAMESPACE::XmlElement* childElementVariableName = (parentXmlElement).getChildByName (requiredTagName); \
 		 childElementVariableName != 0; \
 		 childElementVariableName = childElementVariableName->getNextElementWithTagName (requiredTagName))
 
@@ -40661,18 +40647,21 @@ public:
 
 	/** Sets the component that this viewport will contain and scroll around.
 
-		This will add the given component to this Viewport and position it at
-		(0, 0).
+		This will add the given component to this Viewport and position it at (0, 0).
 
 		(Don't add or remove any child components directly using the normal
 		Component::addChildComponent() methods).
 
-		@param newViewedComponent	   the component to add to this viewport (this pointer
-										may be null). The component passed in will be deleted
-										by the Viewport when it's no longer needed
+		@param newViewedComponent   the component to add to this viewport, or null to remove
+									the current component.
+		@param deleteComponentWhenNoLongerNeeded	if true, the component will be deleted
+									automatically when the viewport is deleted or when a different
+									component is added. If false, the caller must manage the lifetime
+									of the component
 		@see getViewedComponent
 	*/
-	void setViewedComponent (Component* newViewedComponent);
+	void setViewedComponent (Component* newViewedComponent,
+							 bool deleteComponentWhenNoLongerNeeded = true);
 
 	/** Returns the component that's currently being used inside the Viewport.
 
@@ -40851,7 +40840,7 @@ private:
 	Rectangle<int> lastVisibleArea;
 	int scrollBarThickness;
 	int singleStepX, singleStepY;
-	bool showHScrollbar, showVScrollbar;
+	bool showHScrollbar, showVScrollbar, deleteContent;
 	Component contentHolder;
 	ScrollBar verticalScrollBar;
 	ScrollBar horizontalScrollBar;
@@ -43210,7 +43199,7 @@ public:
 	static Type gainToDecibels (const Type gain,
 								const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
 	{
-		return gain > Type() ? jmax (minusInfinityDb, (Type) std::log (gain) * (Type) 20.0)
+		return gain > Type() ? jmax (minusInfinityDb, (Type) std::log10 (gain) * (Type) 20.0)
 							 : minusInfinityDb;
 	}
 

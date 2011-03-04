@@ -283,17 +283,13 @@ public:
     // Comparison methods..
 
     /** Returns true if the string contains no characters.
-
         Note that there's also an isNotEmpty() method to help write readable code.
-
         @see containsNonWhitespaceChars()
     */
     inline bool isEmpty() const throw()                     { return text[0] == 0; }
 
     /** Returns true if the string contains at least one character.
-
         Note that there's also an isEmpty() method to help write readable code.
-
         @see containsNonWhitespaceChars()
     */
     inline bool isNotEmpty() const throw()                  { return text[0] != 0; }
@@ -308,30 +304,26 @@ public:
     bool equalsIgnoreCase (const char* other) const throw();
 
     /** Case-sensitive comparison with another string.
-        @returns     0 if the two strings are identical; negative if this string
-                     comes before the other one alphabetically, or positive if it
-                     comes after it.
+        @returns     0 if the two strings are identical; negative if this string comes before
+                     the other one alphabetically, or positive if it comes after it.
     */
     int compare (const String& other) const throw();
 
     /** Case-sensitive comparison with another string.
-        @returns     0 if the two strings are identical; negative if this string
-                     comes before the other one alphabetically, or positive if it
-                     comes after it.
+        @returns     0 if the two strings are identical; negative if this string comes before
+                     the other one alphabetically, or positive if it comes after it.
     */
     int compare (const char* other) const throw();
 
     /** Case-sensitive comparison with another string.
-        @returns     0 if the two strings are identical; negative if this string
-                     comes before the other one alphabetically, or positive if it
-                     comes after it.
+        @returns     0 if the two strings are identical; negative if this string comes before
+                     the other one alphabetically, or positive if it comes after it.
     */
     int compare (const wchar_t* other) const throw();
 
     /** Case-insensitive comparison with another string.
-        @returns     0 if the two strings are identical; negative if this string
-                     comes before the other one alphabetically, or positive if it
-                     comes after it.
+        @returns     0 if the two strings are identical; negative if this string comes before
+                     the other one alphabetically, or positive if it comes after it.
     */
     int compareIgnoreCase (const String& other) const throw();
 
@@ -340,9 +332,8 @@ public:
         The comparison used here is case-insensitive and ignores leading non-alphanumeric
         characters, making it good for sorting human-readable strings.
 
-        @returns     0 if the two strings are identical; negative if this string
-                     comes before the other one alphabetically, or positive if it
-                     comes after it.
+        @returns     0 if the two strings are identical; negative if this string comes before
+                     the other one alphabetically, or positive if it comes after it.
     */
     int compareLexicographically (const String& other) const throw();
 
@@ -433,7 +424,6 @@ public:
     int indexOfWholeWordIgnoreCase (const String& wordToLookFor) const throw();
 
     /** Looks for any of a set of characters in the string.
-
         Uses a case-sensitive comparison.
 
         @returns    true if the string contains any of the characters from
@@ -442,7 +432,6 @@ public:
     bool containsAnyOf (const String& charactersItMightContain) const throw();
 
     /** Looks for a set of characters in the string.
-
         Uses a case-sensitive comparison.
 
         @returns    Returns false if any of the characters in this string do not occur in
@@ -589,7 +578,6 @@ public:
     const juce_wchar operator[] (int index) const throw();
 
     /** Returns the final character of the string.
-
         If the string is empty this will return 0.
     */
     juce_wchar getLastCharacter() const throw();
@@ -700,8 +688,10 @@ public:
     //==============================================================================
     /** Returns a copy of this string with any whitespace characters removed from the start and end. */
     const String trim() const;
+
     /** Returns a copy of this string with any whitespace characters removed from the start. */
     const String trimStart() const;
+
     /** Returns a copy of this string with any whitespace characters removed from the end. */
     const String trimEnd() const;
 
@@ -884,7 +874,9 @@ public:
         here because of the popular unrest that was stirred-up when I tried to remove it...
 
         If you're really determined to use it, at least make sure that you never, ever,
-        pass any String objects to it as parameters.
+        pass any String objects to it as parameters. And bear in mind that internally, depending
+        on the platform, it may be using wchar_t or char character types, so that even string
+        literals can't be safely used as parameters if you're writing portable code.
     */
     static const String formatted (const String& formatString, ... );
 
@@ -1076,6 +1068,20 @@ public:
         @see getCharPointer, toUTF8, toUTF16
     */
     CharPointer_UTF32 toUTF32() const;
+
+    /** Returns a pointer to a wchar_t version of this string.
+
+        Because it returns a reference to the string's internal data, the pointer
+        that is returned must not be stored anywhere, as it can be deleted whenever the
+        string changes.
+
+        Bear in mind that the wchar_t type is different on different platforms, so on
+        Windows, this will be equivalent to calling toUTF16(), on unix it'll be the same
+        as calling toUTF32(), etc.
+
+        @see getCharPointer, toUTF8, toUTF16, toUTF32
+    */
+    const wchar_t* toWideCharPointer() const;
 
     //==============================================================================
     /** Creates a String from a UTF-8 encoded buffer.

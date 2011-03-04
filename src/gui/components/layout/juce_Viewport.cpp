@@ -39,6 +39,7 @@ Viewport::Viewport (const String& componentName)
     singleStepY (16),
     showHScrollbar (true),
     showVScrollbar (true),
+    deleteContent (true),
     verticalScrollBar (true),
     horizontalScrollBar (false)
 {
@@ -69,18 +70,26 @@ void Viewport::visibleAreaChanged (const Rectangle<int>&)
 //==============================================================================
 void Viewport::deleteContentComp()
 {
-    // This sets the content comp to a null pointer before deleting the old one, in case
-    // anything tries to use the old one while it's in mid-deletion..
-    ScopedPointer<Component> oldCompDeleter (contentComp);
-    contentComp = 0;
+    if (deleteContent)
+    {
+        // This sets the content comp to a null pointer before deleting the old one, in case
+        // anything tries to use the old one while it's in mid-deletion..
+        ScopedPointer<Component> oldCompDeleter (contentComp);
+        contentComp = 0;
+    }
+    else
+    {
+        contentComp = 0;
+    }
 }
 
-void Viewport::setViewedComponent (Component* const newViewedComponent)
+void Viewport::setViewedComponent (Component* const newViewedComponent, const bool deleteComponentWhenNoLongerNeeded)
 {
     if (contentComp.get() != newViewedComponent)
     {
         deleteContentComp();
         contentComp = newViewedComponent;
+        deleteContent = deleteComponentWhenNoLongerNeeded;
 
         if (contentComp != 0)
         {

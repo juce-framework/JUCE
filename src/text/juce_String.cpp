@@ -2118,6 +2118,11 @@ CharPointer_UTF32 String::toUTF32() const
     return StringEncodingConverter <CharPointerType, CharPointer_UTF32>::convert (*this);
 }
 
+const wchar_t* String::toWideCharPointer() const
+{
+    return (const wchar_t*) StringEncodingConverter <CharPointerType, CharPointer_wchar_t>::convert (*this).getAddress();
+}
+
 //==============================================================================
 template <class CharPointerType_Src, class CharPointerType_Dest>
 struct StringCopier

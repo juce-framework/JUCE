@@ -303,13 +303,9 @@ public:
         const ElementType* e = data.elements.getData();
         const ElementType* const end = e + numUsed;
 
-        while (e != end)
-        {
+        for (; e != end; ++e)
             if (elementToLookFor == *e)
                 return static_cast <int> (e - data.elements.getData());
-
-            ++e;
-        }
 
         return -1;
     }
@@ -325,13 +321,9 @@ public:
         const ElementType* e = data.elements.getData();
         const ElementType* const end = e + numUsed;
 
-        while (e != end)
-        {
+        for (; e != end; ++e)
             if (elementToLookFor == *e)
                 return true;
-
-            ++e;
-        }
 
         return false;
     }
@@ -716,17 +708,15 @@ public:
     void removeValue (ParameterType valueToRemove)
     {
         const ScopedLockType lock (getLock());
-        ElementType* e = data.elements;
+        ElementType* const e = data.elements;
 
-        for (int i = numUsed; --i >= 0;)
+        for (int i = 0; i < numUsed; ++i)
         {
-            if (valueToRemove == *e)
+            if (valueToRemove == e[i])
             {
-                remove (static_cast <int> (e - data.elements.getData()));
+                remove (i);
                 break;
             }
-
-            ++e;
         }
     }
 

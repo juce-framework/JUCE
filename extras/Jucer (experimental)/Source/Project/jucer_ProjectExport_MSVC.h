@@ -1284,6 +1284,11 @@ protected:
                 link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
             }
 
+            String extraLinkerOptions (getExtraLinkerFlags().toString());
+            if (extraLinkerOptions.isNotEmpty())
+                link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (config, extraLinkerOptions).trim()
+                                                                                     + " %(AdditionalOptions)");
+
             XmlElement* bsc = group->createNewChildElement ("Bscmake");
             bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
             bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));

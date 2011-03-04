@@ -747,25 +747,19 @@ class LinuxComponentPeer  : public ComponentPeer
 {
 public:
     //==============================================================================
-    LinuxComponentPeer (Component* const component, const int windowStyleFlags)
+    LinuxComponentPeer (Component* const component, const int windowStyleFlags, Window parentToAddTo))
         : ComponentPeer (component, windowStyleFlags),
-          windowH (0),
-          parentWindow (0),
-          wx (0),
-          wy (0),
-          ww (0),
-          wh (0),
-          fullScreen (false),
-          mapped (false),
-          visual (0),
-          depth (0)
+          windowH (0), parentWindow (0),
+          wx (0), wy (0), ww (0), wh (0),
+          fullScreen (false), mapped (false),
+          visual (0), depth (0)
     {
         // it's dangerous to create a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         repainter = new LinuxRepaintManager (this);
 
-        createWindow();
+        createWindow (parentToAddTo);
 
         setTitle (component->getName());
     }
@@ -2130,7 +2124,7 @@ private:
                              (unsigned char*) &netHints, numHints);
     }
 
-    void createWindow()
+    void createWindow (Window parentToAddTo)
     {
         ScopedXLock xlock;
         Atoms::initialiseAtoms();
@@ -2160,7 +2154,7 @@ private:
         swa.colormap = colormap;
         swa.event_mask = getAllEventsMask();
 
-        windowH = XCreateWindow (display, root,
+        windowH = XCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
                                  0, 0, 1, 1,
                                  0, depth, InputOutput, visual,
                                  CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask,
@@ -2661,9 +2655,9 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
-ComponentPeer* Component::createNewPeer (int styleFlags, void* /*nativeWindowToAttachTo*/)
+ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {
-    return new LinuxComponentPeer (this, styleFlags);
+    return new LinuxComponentPeer (this, styleFlags, (Window) nativeWindowToAttachTo);
 }
 
 
