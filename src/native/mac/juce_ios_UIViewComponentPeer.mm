@@ -992,7 +992,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return convertToJuceOrientation ([[UIApplication sharedApplication] statusBarOrientation]);
 }
 
-void juce_updateMultiMonitorInfo (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
+void Desktop::getCurrentMonitorPositions (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
 {
     const ScopedAutoReleasePool pool;
     monitorCoords.clear();

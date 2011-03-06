@@ -65,17 +65,14 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance()
 Desktop* Desktop::instance = 0;
 
 //==============================================================================
-extern void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords,
-                                         const bool clipToWorkArea);
-
 void Desktop::refreshMonitorSizes()
 {
     Array <Rectangle<int> > oldClipped, oldUnclipped;
     oldClipped.swapWithArray (monitorCoordsClipped);
     oldUnclipped.swapWithArray (monitorCoordsUnclipped);
 
-    juce_updateMultiMonitorInfo (monitorCoordsClipped, true);
-    juce_updateMultiMonitorInfo (monitorCoordsUnclipped, false);
+    getCurrentMonitorPositions (monitorCoordsClipped, true);
+    getCurrentMonitorPositions (monitorCoordsUnclipped, false);
     jassert (monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
 
     if (oldClipped != monitorCoordsClipped

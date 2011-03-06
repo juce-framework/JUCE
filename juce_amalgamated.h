@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	44
+#define JUCE_BUILDNUMBER	45
 
 /** Current Juce version number.
 
@@ -542,8 +542,8 @@ namespace JuceDummyNamespace {}
 
 /** This macro defines the C calling convention used as the standard for Juce calls. */
 #if JUCE_MSVC
-  #define JUCE_CALLTYPE		 __stdcall
-  #define JUCE_CDECL		__cdecl
+  #define JUCE_CALLTYPE   __stdcall
+  #define JUCE_CDECL	  __cdecl
 #else
   #define JUCE_CALLTYPE
   #define JUCE_CDECL
@@ -560,64 +560,42 @@ namespace JuceDummyNamespace {}
   #define juce_LogCurrentAssertion
 #endif
 
-#if JUCE_DEBUG
-
-  // If debugging is enabled..
-
-  /** Writes a string to the standard error stream.
-
-	This is only compiled in a debug build.
-
-	@see Logger::outputDebugString
+#if JUCE_MAC || DOXYGEN
+  /** This will try to break into the debugger if the app is currently being debugged.
+	  If called by an app that's not being debugged, the behaiour isn't defined - it may crash or not, depending
+	  on the platform.
+	  @see jassert()
   */
-  #define DBG(dbgtext)		{ JUCE_NAMESPACE::String tempDbgBuf; tempDbgBuf << dbgtext; JUCE_NAMESPACE::Logger::outputDebugString (tempDbgBuf); }
+  #define juce_breakDebugger	{ Debugger(); }
+#elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
+  #define juce_breakDebugger	{ kill (0, SIGTRAP); }
+#elif JUCE_USE_INTRINSICS
+  #pragma intrinsic (__debugbreak)
+  #define juce_breakDebugger	{ __debugbreak(); }
+#elif JUCE_GCC
+  #define juce_breakDebugger        { asm("int $3"); }
+#else
+  #define juce_breakDebugger	{ __asm int 3 }
+#endif
 
-  // Assertions..
-
-  #if JUCE_WINDOWS || DOXYGEN
-
-	#if JUCE_USE_INTRINSICS
-	  #pragma intrinsic (__debugbreak)
-
-	  /** This will try to break the debugger if one is currently hosting this app.
-		  @see jassert()
-	  */
-	  #define juce_breakDebugger		__debugbreak();
-
-	#elif JUCE_GCC
-	  /** This will try to break the debugger if one is currently hosting this app.
-		  @see jassert()
-	  */
-	  #define juce_breakDebugger            asm("int $3");
-	#else
-	  /** This will try to break the debugger if one is currently hosting this app.
-		  @see jassert()
-	  */
-	  #define juce_breakDebugger		{ __asm int 3 }
-	#endif
-  #elif JUCE_MAC
-	#define juce_breakDebugger		  Debugger();
-  #elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
-	#define juce_breakDebugger		  kill (0, SIGTRAP);
-  #endif
+#if JUCE_DEBUG || DOXYGEN
+  /** Writes a string to the standard error stream.
+	  This is only compiled in a debug build.
+	  @see Logger::outputDebugString
+  */
+  #define DBG(dbgtext)		  { JUCE_NAMESPACE::String tempDbgBuf; tempDbgBuf << dbgtext; JUCE_NAMESPACE::Logger::outputDebugString (tempDbgBuf); }
 
   /** This will always cause an assertion failure.
-
-	  It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled
-	  in juce_Config.h).
-
-	  @see jassert()
+	  It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
+	  @see jassert
   */
   #define jassertfalse		  { juce_LogCurrentAssertion; if (JUCE_NAMESPACE::juce_isRunningUnderDebugger()) juce_breakDebugger; }
 
   /** Platform-independent assertion macro.
 
-	  This gets optimised out when not being built with debugging turned on.
-
-	  Be careful not to call any functions within its arguments that are vital to
-	  the behaviour of the program, because these won't get called in the release
-	  build.
-
+	  This macro gets turned into a no-op when you're building with debugging turned off, so be
+	  careful that the expression you pass to it doesn't perform any actions that are vital for the
+	  correct behaviour of your program!
 	  @see jassertfalse
   */
   #define jassert(expression)	   { if (! (expression)) jassertfalse; }
@@ -627,13 +605,12 @@ namespace JuceDummyNamespace {}
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
   #define DBG(dbgtext)
-
   #define jassertfalse		  { juce_LogCurrentAssertion }
 
   #if JUCE_LOG_ASSERTIONS
-	#define jassert(expression)	 { if (! (expression)) jassertfalse; }
+   #define jassert(expression)	  { if (! (expression)) jassertfalse; }
   #else
-	#define jassert(a)		  { }
+   #define jassert(a)		   {}
   #endif
 
 #endif
@@ -646,13 +623,13 @@ namespace JuceDummyNamespace {}
 #endif
 
 /** A compile-time assertion macro.
-
-	If the expression parameter is false, the macro will cause a compile error.
+	If the expression parameter is false, the macro will cause a compile error. (The actual error
+	message that the compiler generates may be completely bizarre and seem to have no relation to
+	the place where you put the static_assert though!)
 */
 #define static_jassert(expression)	  JUCE_NAMESPACE::JuceStaticAssert<expression>::dummy();
 
-/** This is a shorthand macro for declaring stubs for a class's copy constructor and
-	operator=.
+/** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
 
 	For example, instead of
 	@code
@@ -691,7 +668,7 @@ namespace JuceDummyNamespace {}
  #define JUCE_JOIN_MACRO_HELPER(a, b)  a ## b
 #endif
 
-/** Good old C macro concatenation helper.
+/** A good old-fashioned C macro concatenation helper.
 	This combines two items (which may themselves be macros) into a single string,
 	avoiding the pitfalls of the ## macro operator.
 */
@@ -730,42 +707,32 @@ namespace JuceDummyNamespace {}
 
 #endif
 
-// Macros for inlining.
-
-#if JUCE_MSVC
+#if JUCE_DEBUG || DOXYGEN
   /** A platform-independent way of forcing an inline function.
-
 	  Use the syntax: @code
 	  forcedinline void myfunction (int x)
 	  @endcode
   */
-  #ifndef JUCE_DEBUG
-	#define forcedinline  __forceinline
-  #else
-	#define forcedinline  inline
-  #endif
-
-  #define JUCE_ALIGN(bytes) __declspec (align (bytes))
-
+  #define forcedinline  inline
 #else
-  /** A platform-independent way of forcing an inline function.
-
-	  Use the syntax: @code
-	  forcedinline void myfunction (int x)
-	  @endcode
-  */
-  #ifndef JUCE_DEBUG
-	#define forcedinline  inline __attribute__((always_inline))
+  #if JUCE_MSVC
+   #define forcedinline	   __forceinline
   #else
-	#define forcedinline  inline
+   #define forcedinline	   inline __attribute__((always_inline))
   #endif
+#endif
 
-  #define JUCE_ALIGN(bytes) __attribute__ ((aligned (bytes)))
-
+#if JUCE_MSVC || DOXYGEN
+  /** This can be placed before a stack or member variable declaration to tell the compiler
+	  to align it to the specified number of bytes. */
+  #define JUCE_ALIGN(bytes)   __declspec (align (bytes))
+#else
+  #define JUCE_ALIGN(bytes)   __attribute__ ((aligned (bytes)))
 #endif
 
 // Cross-compiler deprecation macros..
-#if JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
+#if DOXYGEN || (JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS)
+ /** This can be used to wrap a function which has been deprecated. */
  #define JUCE_DEPRECATED(functionDef)	 __declspec(deprecated) functionDef
 #elif JUCE_GCC  && ! JUCE_NO_DEPRECATION_WARNINGS
  #define JUCE_DEPRECATED(functionDef)	 functionDef __attribute__ ((deprecated))
@@ -777,8 +744,7 @@ namespace JuceDummyNamespace {}
  #define JUCE_MODAL_LOOPS_PERMITTED 0
 #else
  /** Some operating environments don't provide a modal loop mechanism, so this flag can be
-	 used to disable any functions that try to run a modal loop.
- */
+	 used to disable any functions that try to run a modal loop. */
  #define JUCE_MODAL_LOOPS_PERMITTED 1
 #endif
 
@@ -33416,6 +33382,7 @@ private:
 
 	int getNumDisplayMonitors() const throw();
 	const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const throw();
+	static void getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea);
 
 	void addDesktopComponent (Component* c);
 	void removeDesktopComponent (Component* c);

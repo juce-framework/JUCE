@@ -218,13 +218,13 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
     {
         if (screenSaverDisablerID == 0)
         {
-#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             IOPMAssertionCreateWithName (kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
                                          CFSTR ("Juce"), &screenSaverDisablerID);
-#else
+           #else
             IOPMAssertionCreate (kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
                                  &screenSaverDisablerID);
-#endif
+           #endif
         }
     }
 }
@@ -237,9 +237,39 @@ bool Desktop::isScreenSaverEnabled()
 #endif
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
+class DisplaySettingsChangeCallback  : public DeletedAtShutdown
+{
+public:
+    DisplaySettingsChangeCallback()
+    {
+        CGDisplayRegisterReconfigurationCallback (displayReconfigurationCallBack, 0);
+    }
+
+    ~DisplaySettingsChangeCallback()
+    {
+        CGDisplayRemoveReconfigurationCallback (displayReconfigurationCallBack, 0);
+        clearSingletonInstance();
+    }
+
+    static void displayReconfigurationCallBack (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void*)
+    {
+        Desktop::getInstance().refreshMonitorSizes();
+    }
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback);
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback);
+};
+
+juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback);
+
+void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
     const ScopedAutoReleasePool pool;
+
+    DisplaySettingsChangeCallback::getInstance();
+
     monitorCoords.clear();
     NSArray* screens = [NSScreen screens];
     const CGFloat mainScreenBottom = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
@@ -259,7 +289,5 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
     jassert (monitorCoords.size() > 0);
 }
 
-
 #endif
-
 #endif

@@ -42,10 +42,6 @@ BEGIN_JUCE_NAMESPACE
  #include "../gui/components/lookandfeel/juce_LookAndFeel.h"
 #endif
 
-#if JUCE_WINDOWS
- extern void juce_shutdownWin32Sockets();  // (defined in the sockets code)
-#endif
-
 #if JUCE_DEBUG
  extern void juce_CheckForDanglingStreams();  // (in juce_OutputStream.cpp)
 #endif
@@ -100,10 +96,6 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
 
         LocalisedStrings::setCurrentMappings (0);
         Thread::stopAllThreads (3000);
-
-      #if JUCE_WINDOWS
-        juce_shutdownWin32Sockets();
-      #endif
 
       #if JUCE_DEBUG
         juce_CheckForDanglingStreams();

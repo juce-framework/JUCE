@@ -377,6 +377,7 @@ private:
 
     int getNumDisplayMonitors() const throw();
     const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const throw();
+    static void getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea);
 
     void addDesktopComponent (Component* c);
     void removeDesktopComponent (Component* c);

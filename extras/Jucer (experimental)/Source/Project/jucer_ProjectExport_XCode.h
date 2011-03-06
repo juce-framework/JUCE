@@ -164,18 +164,13 @@ private:
             addFrameworks();
 
         const String productName (project.getConfiguration (0).getTargetBinaryName().toString());
-        if (project.isGUIApplication())
-            addBuildProduct ("wrapper.application", productName + ".app");
-        else if (project.isCommandLineApp())
-            addBuildProduct ("compiled.mach-o.executable", productName);
-        else if (project.isLibrary())
-            addBuildProduct ("archive.ar", getLibbedFilename (productName));
-        else if (project.isAudioPlugin())
-            addBuildProduct ("wrapper.cfbundle", productName + "." + getAudioPluginBundleExtension());
-        else if (project.isBrowserPlugin())
-            addBuildProduct ("wrapper.cfbundle", productName + ".plugin");
-        else
-            jassert (productName.isEmpty());
+
+        if (project.isGUIApplication())         addBuildProduct ("wrapper.application", productName + ".app");
+        else if (project.isCommandLineApp())    addBuildProduct ("compiled.mach-o.executable", productName);
+        else if (project.isLibrary())           addBuildProduct ("archive.ar", getLibbedFilename (productName));
+        else if (project.isAudioPlugin())       addBuildProduct ("wrapper.cfbundle", productName + "." + getAudioPluginBundleExtension());
+        else if (project.isBrowserPlugin())     addBuildProduct ("wrapper.cfbundle", productName + ".plugin");
+        else jassert (productName.isEmpty());
 
         if (hasPList())
         {
@@ -604,12 +599,9 @@ private:
                 s.add ("SDKROOT = macosx10.6");
             }
 
-            if (sdkCompat == Project::BuildConfiguration::osxVersion10_4)
-                s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
-            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_5)
-                s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
-            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_6)
-                s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
+            if (sdkCompat == Project::BuildConfiguration::osxVersion10_4)       s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
+            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_5)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
+            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_6)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
         }

@@ -2690,7 +2690,7 @@ void juce_windowMessageReceive (XEvent* event)
 }
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool /*clipToWorkArea*/)
+void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool /*clipToWorkArea*/)
 {
     if (display == 0)
         return;

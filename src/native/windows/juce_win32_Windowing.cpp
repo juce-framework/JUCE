@@ -2556,7 +2556,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
     return TRUE;
 }
 
-void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
+void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
 

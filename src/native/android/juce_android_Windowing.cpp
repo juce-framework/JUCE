@@ -617,7 +617,7 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
+void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
     monitorCoords.add (Rectangle<int> (0, 0, android.screenWidth, android.screenHeight));
 }
