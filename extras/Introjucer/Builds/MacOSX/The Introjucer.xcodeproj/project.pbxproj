@@ -55,7 +55,7 @@
 		23CF69B4C644D1E6E61E5C82 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		2767E1D082874D301D5D5F43 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		D9FB1A5365FEEB854A0FF7BF = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
-		12E1601866B3489844AFD645 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jucer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		12E1601866B3489844AFD645 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Introjucer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4C5CF1AA7EB9298043D89D3 = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		2CB488FB81118B62A06AA82B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Application.h; path = ../../Source/Application/jucer_Application.h; sourceTree = SOURCE_ROOT; };
 		6B373B89AA84EBE5964C7452 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CommandIDs.h; path = ../../Source/Application/jucer_CommandIDs.h; sourceTree = SOURCE_ROOT; };
@@ -289,7 +289,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
-				PRODUCT_NAME = "Jucer"; }; name = Debug; };
+				PRODUCT_NAME = "Introjucer"; }; name = Debug; };
 		4C681DED23FC5056A83C964C = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;
@@ -304,7 +304,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				ZERO_LINK = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
-				PRODUCT_NAME = "Jucer"; }; name = Release; };
+				PRODUCT_NAME = "Introjucer"; }; name = Release; };
 		045AC698C60073CCF5CC6116 = { isa = XCConfigurationList; buildConfigurations = (
 				69D26A715A354ED1735D8438,
 				4C681DED23FC5056A83C964C ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -355,7 +355,7 @@
 		EB946A866C16B958168C9A39 = { isa = PBXNativeTarget; buildConfigurationList = AC9DE3D3A6632D0494CC8609; buildPhases = (
 				87CCE4CB1FAB40B6F21DEACE,
 				5362E03ADF975A126C1F2F7B,
-				08881173C882953BE5F11D6C ); buildRules = ( ); dependencies = ( ); name = "The Jucer"; productName = "The Jucer"; productReference = 12E1601866B3489844AFD645; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+				08881173C882953BE5F11D6C ); buildRules = ( ); dependencies = ( ); name = "The Introjucer"; productName = "The Introjucer"; productReference = 12E1601866B3489844AFD645; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
 		D64DFDDF5D2CD74A8171CF81 = { isa = PBXProject; buildConfigurationList = 045AC698C60073CCF5CC6116; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = B01AA6CC1327A5DBCB35B7BF; projectDirPath = ""; projectRoot = ""; targets = ( EB946A866C16B958168C9A39 ); };
 	};
 	rootObject = D64DFDDF5D2CD74A8171CF81;

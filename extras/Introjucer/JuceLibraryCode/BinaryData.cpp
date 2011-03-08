@@ -39,7 +39,7 @@ const char* BinaryData::getNamedResource (const char* resourceNameUTF8, int& num
 
 
 //================== AudioPluginXCodeScript.txt ==================
-static const unsigned char temp_5985dfa5[] =
+static const unsigned char temp_43731c40[] =
 "\r\n"
 "# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \r\n"
 "# which plugin types you've built\r\n"
@@ -85,10 +85,10 @@ static const unsigned char temp_5985dfa5[] =
 "  cp -r \"$original\" \"$RTAS\"\r\n"
 "fi\r\n";
 
-const char* BinaryData::AudioPluginXCodeScript_txt = (const char*) temp_5985dfa5;
+const char* BinaryData::AudioPluginXCodeScript_txt = (const char*) temp_43731c40;
 
 //================== brushed_aluminium.png ==================
-static const unsigned char temp_31c089f2[] =
+static const unsigned char temp_9aa09877[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,1,84,0,0,0,110,8,2,0,0,0,247,102,124,157,0,0,0,9,112,72,89,115,0,0,11,19,0,0,11,19,1,0,154,156,24,0,0,0,4,103,65,77,65,0,0,177,142,124,251,81,147,0,0,0,32,99,72,82,77,0,0,122,37,0,0,128,131,0,0,249,255,
 0,0,128,233,0,0,117,48,0,0,234,96,0,0,58,152,0,0,23,111,146,95,197,70,0,0,56,250,73,68,65,84,120,218,172,83,71,14,192,32,12,75,248,255,153,231,66,17,81,45,203,97,244,80,31,16,114,246,242,90,171,153,185,187,189,224,127,239,221,8,33,10,178,79,240,135,245,
 197,48,152,48,247,137,80,64,44,72,51,66,196,230,87,125,206,22,177,6,74,41,98,216,90,147,4,144,24,107,242,7,10,97,203,140,148,47,53,230,90,196,231,1,185,88,97,174,221,56,48,255,226,139,127,214,217,181,98,12,75,218,190,172,37,147,60,71,225,151,185,241,
@@ -297,10 +297,10 @@ static const unsigned char temp_31c089f2[] =
 141,20,180,27,72,224,103,149,105,220,112,255,4,89,131,64,4,23,42,115,215,231,245,156,43,234,151,42,11,138,116,121,82,135,79,3,255,178,101,152,75,177,57,53,232,244,11,46,246,251,67,98,174,121,193,110,222,30,8,28,132,216,112,88,219,73,10,62,169,115,60,
 233,137,16,177,58,98,69,178,95,87,93,157,5,174,93,143,182,244,186,210,167,70,131,11,5,88,2,12,0,52,103,80,26,178,200,170,15,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* BinaryData::brushed_aluminium_png = (const char*) temp_31c089f2;
+const char* BinaryData::brushed_aluminium_png = (const char*) temp_9aa09877;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_5f2c944f[] =
+static const unsigned char temp_6eda5614[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -337,10 +337,10 @@ static const unsigned char temp_5f2c944f[] =
 "                      Justification::centred, 1);\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_5f2c944f;
+const char* BinaryData::jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_6eda5614;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_39e7ce14[] =
+static const unsigned char temp_67353d19[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -374,10 +374,10 @@ static const unsigned char temp_39e7ce14[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_AudioPluginEditorTemplate_h = (const char*) temp_39e7ce14;
+const char* BinaryData::jucer_AudioPluginEditorTemplate_h = (const char*) temp_67353d19;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_891b85da[] =
+static const unsigned char temp_98c9479f[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -556,10 +556,10 @@ static const unsigned char temp_891b85da[] =
 "    return new FILTERCLASSNAME();\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_891b85da;
+const char* BinaryData::jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_98c9479f;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_356ba65f[] =
+static const unsigned char temp_62b91564[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -633,10 +633,10 @@ static const unsigned char temp_356ba65f[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_AudioPluginFilterTemplate_h = (const char*) temp_356ba65f;
+const char* BinaryData::jucer_AudioPluginFilterTemplate_h = (const char*) temp_62b91564;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_77cce868[] =
+static const unsigned char temp_794304c3[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -665,10 +665,10 @@ static const unsigned char temp_77cce868[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_MainConsoleAppTemplate_cpp = (const char*) temp_77cce868;
+const char* BinaryData::jucer_MainConsoleAppTemplate_cpp = (const char*) temp_794304c3;
 
 //================== jucer_MainTemplate.cpp ==================
-static const unsigned char temp_760350be[] =
+static const unsigned char temp_292512d9[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -743,10 +743,10 @@ static const unsigned char temp_760350be[] =
 "// This macro generates the main() routine that starts the app.\r\n"
 "START_JUCE_APPLICATION(APPCLASSNAME)\r\n";
 
-const char* BinaryData::jucer_MainTemplate_cpp = (const char*) temp_760350be;
+const char* BinaryData::jucer_MainTemplate_cpp = (const char*) temp_292512d9;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_564e4d84[] =
+static const unsigned char temp_79decf5f[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -758,10 +758,10 @@ static const unsigned char temp_564e4d84[] =
 "*/\r\n"
 "\r\n";
 
-const char* BinaryData::jucer_NewCppFileTemplate_cpp = (const char*) temp_564e4d84;
+const char* BinaryData::jucer_NewCppFileTemplate_cpp = (const char*) temp_79decf5f;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_1d205089[] =
+static const unsigned char temp_70d8d24[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -781,10 +781,10 @@ static const unsigned char temp_1d205089[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_NewCppFileTemplate_h = (const char*) temp_1d205089;
+const char* BinaryData::jucer_NewCppFileTemplate_h = (const char*) temp_70d8d24;
 
 //================== jucer_WindowTemplate.cpp ==================
-static const unsigned char temp_9543d6f5[] =
+static const unsigned char temp_6fd7e50[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -817,10 +817,10 @@ static const unsigned char temp_9543d6f5[] =
 "    JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_WindowTemplate_cpp = (const char*) temp_9543d6f5;
+const char* BinaryData::jucer_WindowTemplate_cpp = (const char*) temp_6fd7e50;
 
 //================== jucer_WindowTemplate.h ==================
-static const unsigned char temp_ae1b823a[] =
+static const unsigned char temp_613d4455[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -863,10 +863,10 @@ static const unsigned char temp_ae1b823a[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_WindowTemplate_h = (const char*) temp_ae1b823a;
+const char* BinaryData::jucer_WindowTemplate_h = (const char*) temp_613d4455;
 
 //================== juce_icon.png ==================
-static const unsigned char temp_cf09a88a[] =
+static const unsigned char temp_ee6f0c0f[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,9,112,72,89,115,0,0,11,19,0,0,11,19,1,0,154,156,24,0,0,0,4,103,65,77,65,0,0,177,142,124,251,81,147,0,0,0,32,99,72,82,77,0,0,122,37,0,0,128,131,0,0,249,255,
 0,0,128,233,0,0,117,48,0,0,234,96,0,0,58,152,0,0,23,111,146,95,197,70,0,0,76,232,73,68,65,84,120,218,98,252,255,255,63,3,35,35,35,195,16,4,140,88,216,76,72,124,70,36,113,70,52,113,108,102,192,192,127,52,246,127,52,241,255,104,226,255,112,232,27,18,0,
 32,128,88,134,120,164,35,99,38,44,52,54,117,216,18,2,182,68,128,45,194,209,241,63,52,250,63,150,200,31,212,137,1,32,128,88,134,88,196,163,71,56,19,82,132,51,99,17,99,194,146,0,112,149,12,248,114,58,174,72,135,225,191,88,196,254,15,133,82,1,32,128,88,
@@ -1144,4 +1144,4 @@ static const unsigned char temp_cf09a88a[] =
 169,9,0,87,15,129,129,1,247,197,140,255,7,123,160,2,4,208,80,74,0,184,18,2,250,200,222,95,34,70,253,24,73,176,3,215,216,5,190,132,57,100,0,64,0,13,197,4,64,76,201,64,40,146,73,77,0,164,202,15,25,0,16,96,0,155,121,235,71,10,157,3,42,0,0,0,0,73,69,78,68,
 174,66,96,130,0,0 };
 
-const char* BinaryData::juce_icon_png = (const char*) temp_cf09a88a;
+const char* BinaryData::juce_icon_png = (const char*) temp_ee6f0c0f;

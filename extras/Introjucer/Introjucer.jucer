@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="M70qfTRRk" name="The Jucer" projectType="guiapp" juceLinkage="amalg_multi"
+<JUCERPROJECT id="M70qfTRRk" name="The Introjucer" projectType="guiapp" juceLinkage="amalg_multi"
               juceFolder="../../juce" jucerVersion="3.0.0" version="3.0.0"
               buildVST="1" buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4"
               vstFolderPC="c:\SDKs\vstsdk2.4" rtasFolderMac="~/SDKs/PT_80_SDK"
-              rtasFolderPC="c:\SDKs\PT_80_SDK" pluginName="The Jucer" pluginDesc="The Jucer"
-              pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
-              pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
-              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
-              pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="TheJucerAU"
-              pluginAUViewClass="TheJucerAU_V1" pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.thejucer">
+              rtasFolderPC="c:\SDKs\PT_80_SDK" pluginName="The Introjucer"
+              pluginDesc="The Introjucer" pluginManufacturer="yourcompany"
+              pluginManufacturerCode="abcd" pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }"
+              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
+              pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="TheIntrojucerAU" pluginAUViewClass="TheIntrojucerAU_V1"
+              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.introjucer">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../.." documentExtensions=".jucer" objCExtraSuffix="zNNCr"/>
@@ -22,12 +23,12 @@
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../.."/>
   </EXPORTFORMATS>
   <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"
+    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                    osxSDK="1" osxCompatibility="1"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Jucer"
+    <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                    osxSDK="1" osxCompatibility="1"/>
   </CONFIGURATIONS>
-  <MAINGROUP name="The Jucer" id="NhrJq66R">
+  <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">
       <FILE id="PXX8Yi" name="jucer_Application.h" compile="0" resource="0"
             file="Source/Application/jucer_Application.h"/>

@@ -768,8 +768,22 @@ bool ListBox::keyStateChanged (const bool isKeyDown)
 
 void ListBox::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
 {
-    getHorizontalScrollBar()->mouseWheelMove (e, wheelIncrementX, 0);
-    getVerticalScrollBar()->mouseWheelMove (e, 0, wheelIncrementY);
+    bool eventWasUsed = false;
+
+    if (viewport->getHorizontalScrollBar()->isVisible() && wheelIncrementX != 0)
+    {
+        eventWasUsed = true;
+        viewport->getHorizontalScrollBar()->mouseWheelMove (e, wheelIncrementX, 0);
+    }
+    
+    if (viewport->getVerticalScrollBar()->isVisible() && wheelIncrementY != 0)
+    {
+        eventWasUsed = true;
+        viewport->getVerticalScrollBar()->mouseWheelMove (e, 0, wheelIncrementY);
+    }
+
+    if (! eventWasUsed)
+        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
 }
 
 void ListBox::mouseMove (const MouseEvent& e)

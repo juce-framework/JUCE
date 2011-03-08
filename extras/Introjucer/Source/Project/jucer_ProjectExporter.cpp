@@ -56,7 +56,7 @@ const StringArray ProjectExporter::getExporterNames()
     s.add (MSVCProjectExporterVC2008::getName());
     s.add (MSVCProjectExporterVC2010::getName());
     s.add (MakefileProjectExporter::getNameLinux());
-    //s.add (AndroidProjectExporter::getNameAndroid());
+    s.add (AndroidProjectExporter::getNameAndroid());
     return s;
 }
 

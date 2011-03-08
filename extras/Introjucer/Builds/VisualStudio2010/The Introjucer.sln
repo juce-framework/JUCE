@@ -1,6 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 8.00
-# Visual C++ Express 2005
-Project("{4E9D0CBA-BFAB-E5E4-0A60-A20FD97F37CA}") = "The Jucer", "The Jucer.vcproj", "{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+Project("{4C35D249-2981-3D26-0C2E-BDE1841F8430}") = "The Introjucer", "The Introjucer.vcxproj", "{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

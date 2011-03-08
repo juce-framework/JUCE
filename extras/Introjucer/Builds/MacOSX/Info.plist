@@ -8,9 +8,9 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.rawmaterialsoftware.thejucer</string>
+    <string>com.rawmaterialsoftware.introjucer</string>
     <key>CFBundleName</key>
-    <string>The Jucer</string>
+    <string>The Introjucer</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleSignature</key>

@@ -2,7 +2,7 @@
 
 <VisualStudioProject ProjectType="Visual C++"
                      Version="8.00"
-                     Name="The Jucer"
+                     Name="The Introjucer"
                      ProjectGUID="{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}"
                      TargetFrameworkVersion="131072">
   <Platforms>
@@ -26,7 +26,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Debug\Jucer.tlb"
+            TypeLibraryName=".\Debug\Introjucer.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="0"
@@ -37,7 +37,7 @@
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Debug\Jucer.pch"
+            PrecompiledHeaderFile=".\Debug\Introjucer.pch"
             AssemblerListingLocation=".\Debug\"
             ObjectFile=".\Debug\"
             ProgramDataBaseFileName=".\Debug\"
@@ -48,11 +48,11 @@
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Debug\Jucer.exe"
+            OutputFile=".\Debug\Introjucer.exe"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
             GenerateDebugInformation="true"
-            ProgramDatabaseFile=".\Debug\Jucer.pdb"
+            ProgramDatabaseFile=".\Debug\Introjucer.pdb"
             SubSystem="2"
             TargetMachine="1"/>
       <Tool Name="VCALinkTool"/>
@@ -60,7 +60,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Debug\Jucer.bsc"/>
+            OutputFile=".\Debug\Introjucer.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -82,7 +82,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Release\Jucer.tlb"
+            TypeLibraryName=".\Release\Introjucer.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="3"
@@ -93,7 +93,7 @@
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Release\Jucer.pch"
+            PrecompiledHeaderFile=".\Release\Introjucer.pch"
             AssemblerListingLocation=".\Release\"
             ObjectFile=".\Release\"
             ProgramDataBaseFileName=".\Release\"
@@ -104,11 +104,11 @@
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Release\Jucer.exe"
+            OutputFile=".\Release\Introjucer.exe"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames=""
             GenerateDebugInformation="false"
-            ProgramDatabaseFile=".\Release\Jucer.pdb"
+            ProgramDatabaseFile=".\Release\Introjucer.pdb"
             SubSystem="2"
             GenerateManifest="false"
             OptimizeReferences="2"
@@ -119,7 +119,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Release\Jucer.bsc"/>
+            OutputFile=".\Release\Introjucer.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -127,7 +127,7 @@
   </Configurations>
   <References/>
   <Files>
-    <Filter Name="The Jucer">
+    <Filter Name="The Introjucer">
       <Filter Name="Application">
         <File RelativePath="..\..\Source\Application\jucer_Application.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandIDs.h"/>

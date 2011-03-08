@@ -10,8 +10,8 @@
 
 */
 
-#ifndef __APPHEADERFILE_347B64F4__
-#define __APPHEADERFILE_347B64F4__
+#ifndef __APPHEADERFILE_BD73378F__
+#define __APPHEADERFILE_BD73378F__
 
 #include "AppConfig.h"
 #include "../../../juce_amalgamated.h"
@@ -19,9 +19,9 @@
 
 namespace ProjectInfo
 {
-    const char* const  projectName    = "The Jucer";
+    const char* const  projectName    = "The Introjucer";
     const char* const  versionString  = "3.0.0";
     const int          versionNumber  = 0x30000;
 }
 
-#endif   // __APPHEADERFILE_347B64F4__
+#endif   // __APPHEADERFILE_BD73378F__
