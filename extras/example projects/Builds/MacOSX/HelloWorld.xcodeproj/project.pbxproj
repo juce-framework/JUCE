@@ -79,7 +79,6 @@
 				C134A2DBF8134BD791778F0F,
 				DC3A70675753A61E8C7CD36B ); name = Source; sourceTree = "<group>"; };
 		91545771DBB516AC857F51FD = { isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = " $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -96,7 +95,6 @@
 				"JUCE_ObjCExtraSuffix=JtTAKTK1s",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		2BF0DFE3F61DBC969BCBD0C4 = { isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = " $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = s;

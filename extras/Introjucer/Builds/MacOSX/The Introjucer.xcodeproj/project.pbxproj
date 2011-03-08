@@ -17,6 +17,7 @@
 		DBE3CE9482B19CF1AE700805 = { isa = PBXBuildFile; fileRef = 23CF69B4C644D1E6E61E5C82; };
 		93C9F3F27602A33DDC9C2250 = { isa = PBXBuildFile; fileRef = 2767E1D082874D301D5D5F43; };
 		2E6836738CE7EB452FDC7E9A = { isa = PBXBuildFile; fileRef = D9FB1A5365FEEB854A0FF7BF; };
+		AADBA9EB828F8C6A5E38593B = { isa = PBXBuildFile; fileRef = 3417A0C1AE7900A7E07C1CA1; };
 		D6D0659F3F3504012246F13D = { isa = PBXBuildFile; fileRef = AA3CBE4A2AC3E9411426F630; };
 		8BAE4D8EA7F247DA0A4D3A5C = { isa = PBXBuildFile; fileRef = F617CE0630ADB0628A34D6BF; };
 		280FE650B3F02AD9E821EA37 = { isa = PBXBuildFile; fileRef = 832701705EC0EC9484F9D9C2; };
@@ -57,6 +58,7 @@
 		D9FB1A5365FEEB854A0FF7BF = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		12E1601866B3489844AFD645 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Introjucer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4C5CF1AA7EB9298043D89D3 = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = SOURCE_ROOT; };
+		3417A0C1AE7900A7E07C1CA1 = { isa = PBXFileReference; lastKnownFileType = file.icns; name = Icon.icns; path = Icon.icns; sourceTree = SOURCE_ROOT; };
 		2CB488FB81118B62A06AA82B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Application.h; path = ../../Source/Application/jucer_Application.h; sourceTree = SOURCE_ROOT; };
 		6B373B89AA84EBE5964C7452 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CommandIDs.h; path = ../../Source/Application/jucer_CommandIDs.h; sourceTree = SOURCE_ROOT; };
 		D759DE26060A86B38AECF753 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CommonHeaders.h; path = ../../Source/Application/jucer_CommonHeaders.h; sourceTree = SOURCE_ROOT; };
@@ -218,7 +220,8 @@
 				268B4FFB1C675B679138545F,
 				60A217F62952DE8A752BD79F ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		EAC5B9DBB227CB2A002EF355 = { isa = PBXGroup; children = (
-				F4C5CF1AA7EB9298043D89D3 ); name = Resources; sourceTree = "<group>"; };
+				F4C5CF1AA7EB9298043D89D3,
+				3417A0C1AE7900A7E07C1CA1 ); name = Resources; sourceTree = "<group>"; };
 		0D737FA088906E13707BAEB7 = { isa = PBXGroup; children = (
 				046FA2877C08618339161EE2,
 				43A5218D223AA21E0A55D986,
@@ -244,7 +247,6 @@
 				0D737FA088906E13707BAEB7,
 				18794C3CE7D0C95A5A70F213 ); name = Source; sourceTree = "<group>"; };
 		DD9313457B3248E7646270A4 = { isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = " $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -267,6 +269,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -311,7 +314,8 @@
 		AC9DE3D3A6632D0494CC8609 = { isa = XCConfigurationList; buildConfigurations = (
 				DD9313457B3248E7646270A4,
 				673FACB8969ADED17ACEFF7C ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		87CCE4CB1FAB40B6F21DEACE = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (  ); runOnlyForDeploymentPostprocessing = 0; };
+		87CCE4CB1FAB40B6F21DEACE = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
+				AADBA9EB828F8C6A5E38593B ); runOnlyForDeploymentPostprocessing = 0; };
 		5362E03ADF975A126C1F2F7B = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 				D6D0659F3F3504012246F13D,
 				8BAE4D8EA7F247DA0A4D3A5C,

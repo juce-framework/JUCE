@@ -775,7 +775,7 @@ void ListBox::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float 
         eventWasUsed = true;
         viewport->getHorizontalScrollBar()->mouseWheelMove (e, wheelIncrementX, 0);
     }
-    
+
     if (viewport->getVerticalScrollBar()->isVisible() && wheelIncrementY != 0)
     {
         eventWasUsed = true;

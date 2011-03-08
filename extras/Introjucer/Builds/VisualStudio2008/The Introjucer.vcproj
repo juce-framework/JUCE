@@ -334,6 +334,8 @@
       <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode2.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode3.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
+      <File RelativePath="icon.ico"/>
+      <File RelativePath="resources.rc"/>
     </Filter>
   </Files>
   <Globals/>

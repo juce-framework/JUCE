@@ -134,7 +134,7 @@ public:
 //==============================================================================
 CodeDocument::Iterator::Iterator (CodeDocument* const document_)
     : document (document_),
-      currentLine (document_->lines[0]),
+      charPointer (0),
       line (0),
       position (0)
 {
@@ -142,7 +142,7 @@ CodeDocument::Iterator::Iterator (CodeDocument* const document_)
 
 CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other)
     : document (other.document),
-      currentLine (other.currentLine),
+      charPointer (other.charPointer),
       line (other.line),
       position (other.position)
 {
@@ -151,7 +151,7 @@ CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other)
 CodeDocument::Iterator& CodeDocument::Iterator::operator= (const CodeDocument::Iterator& other) throw()
 {
     document = other.document;
-    currentLine = other.currentLine;
+    charPointer = other.charPointer;
     line = other.line;
     position = other.position;
 
@@ -164,58 +164,74 @@ CodeDocument::Iterator::~Iterator() throw()
 
 juce_wchar CodeDocument::Iterator::nextChar()
 {
-    if (currentLine == 0)
-        return 0;
-
-    jassert (currentLine == document->lines.getUnchecked (line));
-    const juce_wchar result = currentLine->line [position - currentLine->lineStartInFile];
-
-    if (++position >= currentLine->lineStartInFile + currentLine->lineLength)
+    for (;;)
     {
-        ++line;
-        currentLine = document->lines [line];
-    }
+        if (charPointer.getAddress() == 0)
+        {
+            CodeDocumentLine* const l = document->lines[line];
 
-    return result;
-}
+            if (l == 0)
+                return 0;
 
-void CodeDocument::Iterator::skip()
-{
-    if (currentLine != 0)
-    {
-        jassert (currentLine == document->lines.getUnchecked (line));
+            charPointer = l->line.getCharPointer();
+        }
 
-        if (++position >= currentLine->lineStartInFile + currentLine->lineLength)
+        const juce_wchar result = charPointer.getAndAdvance();
+
+        if (result == 0)
         {
             ++line;
-            currentLine = document->lines [line];
+            charPointer = 0;
+        }
+        else
+        {
+            ++position;
+            return result;
         }
     }
 }
 
+void CodeDocument::Iterator::skip()
+{
+    nextChar();
+}
+
 void CodeDocument::Iterator::skipToEndOfLine()
 {
-    if (currentLine != 0)
+    if (charPointer.getAddress() == 0)
     {
-        jassert (currentLine == document->lines.getUnchecked (line));
+        CodeDocumentLine* const l = document->lines[line];
 
-        ++line;
-        currentLine = document->lines [line];
+        if (l == 0)
+            return;
 
-        if (currentLine != 0)
-            position = currentLine->lineStartInFile;
-        else
-            position = document->getNumCharacters();
+        charPointer = l->line.getCharPointer();
     }
+
+    position += charPointer.length();
+    ++line;
+    charPointer = 0;
 }
 
 juce_wchar CodeDocument::Iterator::peekNextChar() const
 {
-    if (currentLine == 0 || currentLine->line.isEmpty())
-        return 0;
+    if (charPointer.getAddress() == 0)
+    {
+        CodeDocumentLine* const l = document->lines[line];
 
-    jassert (currentLine == document->lines.getUnchecked (line));
-    return const_cast <const String&> (currentLine->line) [position - currentLine->lineStartInFile];
+        if (l == 0)
+            return 0;
+
+        charPointer = l->line.getCharPointer();
+    }
+
+    const juce_wchar c = *charPointer;
+
+    if (c != 0)
+        return c;
+
+    CodeDocumentLine* const l = document->lines [line + 1];
+    return l == 0 ? 0 : l->line[0];
 }
 
 void CodeDocument::Iterator::skipWhitespace()
@@ -226,7 +242,7 @@ void CodeDocument::Iterator::skipWhitespace()
 
 bool CodeDocument::Iterator::isEOF() const throw()
 {
-    return currentLine == 0;
+    return charPointer.getAddress() == 0 && line >= document->lines.size();
 }
 
 //==============================================================================

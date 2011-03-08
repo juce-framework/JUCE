@@ -232,7 +232,6 @@
 				9B041E4036493224CFD075FF,
 				A60AEBCC9579AD6BA9D5CA4B ); name = Source; sourceTree = "<group>"; };
 		6B24C2D519EB1D09B3C748EC = { isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 $(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility $(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -254,7 +253,6 @@
 				"JUCE_ObjCExtraSuffix=JuceDemo",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		F4B05B483343A2F3C923C6B4 = { isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 $(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility $(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = s;

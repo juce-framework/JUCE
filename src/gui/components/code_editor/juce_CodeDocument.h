@@ -374,7 +374,7 @@ public:
 
     private:
         CodeDocument* document;
-        CodeDocumentLine* currentLine;
+        mutable String::CharPointerType charPointer;
         int line, position;
     };
 

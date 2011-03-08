@@ -994,6 +994,12 @@ const char* const Project::BuildConfiguration::osxVersion10_4    = "10.4 SDK";
 const char* const Project::BuildConfiguration::osxVersion10_5    = "10.5 SDK";
 const char* const Project::BuildConfiguration::osxVersion10_6    = "10.6 SDK";
 
+const char* const Project::BuildConfiguration::osxArch_Default        = "default";
+const char* const Project::BuildConfiguration::osxArch_Native         = "Native";
+const char* const Project::BuildConfiguration::osxArch_32BitUniversal = "32BitUniversal";
+const char* const Project::BuildConfiguration::osxArch_64BitUniversal = "64BitUniversal";
+const char* const Project::BuildConfiguration::osxArch_64Bit          = "64BitIntel";
+
 void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponent*>& props)
 {
     props.add (new TextPropertyComponent (getName(), "Name", 96, false));
@@ -1033,6 +1039,15 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
 
     props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)));
     props.getLast()->setTooltip ("The minimum version of OSX that the target binary will be compatible with.");
+
+    const char* osxArch[] = { "Use Default", "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
+    const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal, osxArch_64BitUniversal, osxArch_64Bit, 0 };
+
+    if (getMacArchitecture().toString().isEmpty())
+        getMacArchitecture() = osxArch_Default;
+
+    props.add (new ChoicePropertyComponent (getMacArchitecture(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)));
+    props.getLast()->setTooltip ("The type of OSX binary that will be produced.");
 
     for (int i = props.size(); --i >= 0;)
         props.getUnchecked(i)->setPreferredHeight (22);

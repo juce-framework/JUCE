@@ -10,7 +10,8 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="TheIntrojucerAU" pluginAUViewClass="TheIntrojucerAU_V1"
-              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.introjucer">
+              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.introjucer"
+              bigIcon="rVgowdy">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../.." documentExtensions=".jucer" objCExtraSuffix="zNNCr"/>
@@ -24,9 +25,9 @@
   </EXPORTFORMATS>
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
-                   osxSDK="1" osxCompatibility="1"/>
+                   osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
     <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
-                   osxSDK="1" osxCompatibility="1"/>
+                   osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
   </CONFIGURATIONS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">

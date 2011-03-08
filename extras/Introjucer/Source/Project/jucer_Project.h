@@ -253,6 +253,13 @@ public:
         Value getMacSDKVersion() const                      { return getValue (Ids::osxSDK); }
         Value getMacCompatibilityVersion() const            { return getValue (Ids::osxCompatibility); }
 
+        static const char* const osxArch_Default;
+        static const char* const osxArch_Native;
+        static const char* const osxArch_32BitUniversal;
+        static const char* const osxArch_64BitUniversal;
+        static const char* const osxArch_64Bit;
+        Value getMacArchitecture() const                    { return getValue (Ids::osxArchitecture); }
+
         //==============================================================================
     private:
         friend class Project;

@@ -529,7 +529,13 @@ private:
     const StringArray getTargetSettings (const Project::BuildConfiguration& config)
     {
         StringArray s;
-        s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
+
+        const String arch (config.getMacArchitecture().toString());
+        if (arch == Project::BuildConfiguration::osxArch_Native)                s.add ("ARCHS = \"$(ARCHS_NATIVE)\"");
+        else if (arch == Project::BuildConfiguration::osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
+        else if (arch == Project::BuildConfiguration::osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
+        else if (arch == Project::BuildConfiguration::osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
+
         s.add ("PREBINDING = NO");
         s.add ("HEADER_SEARCH_PATHS = \"" + replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" ")) + " $(inherited)\"");
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());

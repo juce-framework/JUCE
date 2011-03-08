@@ -61,6 +61,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_ScopedLock.h"
 #include "../../threads/juce_Thread.h"
 #include "../../utilities/juce_DeletedAtShutdown.h"
+#include "../../core/juce_Singleton.h"
 
 #if JUCE_WINDOWS
  typedef int       juce_socklen_t;

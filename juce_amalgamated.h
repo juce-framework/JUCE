@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	46
+#define JUCE_BUILDNUMBER	47
 
 /** Current Juce version number.
 
@@ -50900,7 +50900,7 @@ public:
 
 	private:
 		CodeDocument* document;
-		CodeDocumentLine* currentLine;
+		mutable String::CharPointerType charPointer;
 		int line, position;
 	};
 
