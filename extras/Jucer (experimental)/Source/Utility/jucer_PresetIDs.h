@@ -115,6 +115,7 @@ namespace Ids
     DECLARE_ID (hidden);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
+    DECLARE_ID (androidInternetNeeded);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

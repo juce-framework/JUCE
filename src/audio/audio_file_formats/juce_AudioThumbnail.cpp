@@ -720,7 +720,7 @@ int AudioThumbnail::getNumChannels() const throw()
 
 double AudioThumbnail::getTotalLength() const throw()
 {
-    return totalSamples / sampleRate;
+    return sampleRate > 0 ? (totalSamples / sampleRate) : 0;
 }
 
 bool AudioThumbnail::isFullyLoaded() const throw()

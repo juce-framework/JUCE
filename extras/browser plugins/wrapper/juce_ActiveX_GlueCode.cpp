@@ -148,9 +148,9 @@ public:
 private:
     StringPool identifierPool;
 
-    static DISPID getHashFromString (const juce_wchar* s) throw()
+    static DISPID getHashFromString (const String::CharPointerType& s) throw()
     {
-        return (DISPID) (pointer_sized_int) s;
+        return (DISPID) (pointer_sized_int) s.getAddress();
     }
 
     IDispatchHelper (const IDispatchHelper&);

@@ -105,7 +105,7 @@ void PlatformUtilities::setRegistryValue (const String& regValuePath,
     if (k != 0)
     {
         RegSetValueEx (k, valueName.toUTF16(), 0, REG_SZ,
-                       (const BYTE*) value.toUTF16().getAddress(),
+                       (const BYTE*) value.toWideCharPointer(),
                        CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer()));
 
         RegCloseKey (k);

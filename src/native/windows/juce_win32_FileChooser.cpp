@@ -56,7 +56,7 @@ namespace FileChooserHelpers
         FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) lpData;
 
         if (msg == BFFM_INITIALIZED)
-            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) info->initialPath.toUTF16().getAddress());
+            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) info->initialPath.toWideCharPointer());
         else if (msg == BFFM_VALIDATEFAILEDW)
             info->returnedString = (LPCWSTR) lParam;
         else if (msg == BFFM_VALIDATEFAILEDA)

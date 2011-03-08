@@ -59,6 +59,9 @@ public:
 
         if (getNDKPath().toString().isEmpty())
             getNDKPath() = "${user.home}/SDKs/android-ndk-r5";
+
+        if (getInternetNeeded().toString().isEmpty())
+            getInternetNeeded() = true;
     }
 
     //==============================================================================
@@ -87,10 +90,14 @@ public:
 
         props.add (new TextPropertyComponent (getNDKPath(), "Android NDK Path", 1024, false));
         props.getLast()->setTooltip ("The path to the Android NDK folder on the target build machine");
+
+        props.add (new BooleanPropertyComponent (getInternetNeeded(), "Internet Access", "Specify internet access permission in the manifest"));
+        props.getLast()->setTooltip ("If enabled, this will set the android.permission.INTERNET flag in the manifest.");
     }
 
     Value getSDKPath() const                    { return getSetting (Ids::androidSDKPath); }
     Value getNDKPath() const                    { return getSetting (Ids::androidNDKPath); }
+    Value getInternetNeeded() const             { return getSetting (Ids::androidInternetNeeded); }
 
     //==============================================================================
     void create()
@@ -148,6 +155,12 @@ private:
         screens->setAttribute ("android:largeScreens", "true");
         screens->setAttribute ("android:xlargeScreens", "true");
         screens->setAttribute ("android:anyDensity", "true");
+
+        if (getInternetNeeded().getValue())
+        {
+            XmlElement* permission = manifest->createNewChildElement ("uses-permission");
+            permission->setAttribute ("android:name", "android.permission.INTERNET");
+        }
 
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");

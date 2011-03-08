@@ -2596,7 +2596,7 @@ const Image juce_createIconForFile (const File& file)
     WORD iconNum = 0;
 
     HICON icon = ExtractAssociatedIcon ((HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
-                                        const_cast <WCHAR*> (file.getFullPathName().toUTF16().getAddress()), &iconNum);
+                                        const_cast <WCHAR*> (file.getFullPathName().toWideCharPointer()), &iconNum);
 
     if (icon != 0)
     {

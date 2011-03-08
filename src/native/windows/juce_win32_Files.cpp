@@ -60,7 +60,7 @@ namespace WindowsFileHelpers
     {
         // (mess with the string to make sure it's not sharing its internal storage)
         path = (path + " ").dropLastCharacters(1);
-        WCHAR* p = const_cast <WCHAR*> (path.toUTF16().getAddress());
+        WCHAR* p = const_cast <WCHAR*> (path.toWideCharPointer());
 
         if (PathStripToRoot (p))
             return String ((const WCHAR*) p);
@@ -173,7 +173,7 @@ bool File::moveToTrash() const
 
     // The string we pass in must be double null terminated..
     String doubleNullTermPath (getFullPathName() + " ");
-    WCHAR* const p = const_cast <WCHAR*> (doubleNullTermPath.toUTF16().getAddress());
+    WCHAR* const p = const_cast <WCHAR*> (doubleNullTermPath.toWideCharPointer());
     p [getFullPathName().length()] = 0;
 
     fos.wFunc = FO_DELETE;

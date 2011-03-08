@@ -349,13 +349,13 @@ public:
         : handle (0), refCount (1)
     {
         name = name.replaceCharacter ('\\', '/');
-        handle = CreateMutexW (0, TRUE, ("Global\\" + name).toUTF16().getAddress());
+        handle = CreateMutexW (0, TRUE, ("Global\\" + name).toWideCharPointer());
 
         // Not 100% sure why a global mutex sometimes can't be allocated, but if it fails, fall back to
         // a local one. (A local one also sometimes fails on other machines so neither type appears to be
         // universally reliable)
         if (handle == 0)
-            handle = CreateMutexW (0, TRUE, ("Local\\" + name).toUTF16().getAddress());
+            handle = CreateMutexW (0, TRUE, ("Local\\" + name).toWideCharPointer());
 
         if (handle != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
         {

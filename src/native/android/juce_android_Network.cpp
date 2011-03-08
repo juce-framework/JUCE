@@ -51,81 +51,79 @@ class WebInputStream  : public InputStream
 {
 public:
     //==============================================================================
-    WebInputStream (const String& address, bool isPost, const MemoryBlock& postData,
+    WebInputStream (String address, bool isPost, const MemoryBlock& postData,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers, int timeOutMs, StringPairArray* responseHeaders)
     {
+        if (! address.contains ("://"))
+            address = "http://" + address;
+
+        JNIEnv* env = getEnv();
+
         jbyteArray postDataArray = 0;
 
         if (postData.getSize() > 0)
         {
-            postDataArray = getEnv()->NewByteArray (postData.getSize());
-            getEnv()->SetByteArrayRegion (postDataArray, 0, postData.getSize(), (const jbyte*) postData.getData());
+            postDataArray = env->NewByteArray (postData.getSize());
+            env->SetByteArrayRegion (postDataArray, 0, postData.getSize(), (const jbyte*) postData.getData());
         }
 
-        LocalRef<jobject> responseHeaderBuffer (getEnv()->NewObject (android.stringBufferClass, android.stringBufferConstructor));
+        LocalRef<jobject> responseHeaderBuffer (env->NewObject (android.stringBufferClass, android.stringBufferConstructor));
 
-        stream = GlobalRef (android.activity.callObjectMethod (android.createHTTPStream,
-                                                               javaString (address).get(),
-                                                               (jboolean) isPost,
-                                                               postDataArray,
-                                                               javaString (headers).get(),
-                                                               (jint) timeOutMs,
-                                                               responseHeaderBuffer.get()));
+        stream = GlobalRef (env->CallStaticObjectMethod (android.activityClass,
+                                                         android.createHTTPStream,
+                                                         javaString (address).get(),
+                                                         (jboolean) isPost,
+                                                         postDataArray,
+                                                         javaString (headers).get(),
+                                                         (jint) timeOutMs,
+                                                         responseHeaderBuffer.get()));
 
-        getEnv()->DeleteLocalRef (postDataArray);
+        if (postDataArray != 0)
+            env->DeleteLocalRef (postDataArray);
 
         if (stream != 0)
         {
             StringArray headerLines;
 
             {
-                LocalRef<jstring> headersString ((jstring) getEnv()->CallObjectMethod (responseHeaderBuffer.get(),
-                                                                                       android.stringBufferToString));
+                LocalRef<jstring> headersString ((jstring) env->CallObjectMethod (responseHeaderBuffer.get(),
+                                                                                  android.stringBufferToString));
                 headerLines.addLines (juceString (headersString));
             }
 
-            for (int i = 0; i < headerLines.size(); ++i)
+            if (responseHeaders != 0)
             {
-                const String& header = headerLines[i];
-                const String key (header.upToFirstOccurrenceOf (": ", false, false));
-                const String value (header.fromFirstOccurrenceOf (": ", false, false));
-                const String previousValue ((*responseHeaders) [key]);
+                for (int i = 0; i < headerLines.size(); ++i)
+                {
+                    const String& header = headerLines[i];
+                    const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                    const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                    const String previousValue ((*responseHeaders) [key]);
 
-                responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                    responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                }
             }
-
         }
     }
 
     ~WebInputStream()
     {
-        stream.callVoidMethod (android.httpStreamRelease);
+        if (stream != 0)
+            stream.callVoidMethod (android.httpStreamRelease);
     }
 
     //==============================================================================
-    bool isExhausted()
-    {
-        return stream != 0 && stream.callBooleanMethod (android.isExhausted);
-    }
-
-    int64 getPosition()
-    {
-        return stream != 0 ? stream.callLongMethod (android.getPosition) : 0;
-    }
-
-    int64 getTotalLength()
-    {
-        return stream != 0 ? stream.callLongMethod (android.getTotalLength) : 0;
-    }
-
-    bool setPosition (int64 wantedPos)
-    {
-        return stream != 0 && stream.callBooleanMethod (android.setPosition, (jlong) wantedPos);
-    }
+    bool isExhausted()                  { return stream != 0 && stream.callBooleanMethod (android.isExhausted); }
+    int64 getTotalLength()              { return stream != 0 ? stream.callLongMethod (android.getTotalLength) : 0; }
+    int64 getPosition()                 { return stream != 0 ? stream.callLongMethod (android.getPosition) : 0; }
+    bool setPosition (int64 wantedPos)  { return stream != 0 && stream.callBooleanMethod (android.setPosition, (jlong) wantedPos); }
 
     int read (void* buffer, int bytesToRead)
     {
+        if (stream == 0)
+            return 0;
+
         JNIEnv* env = getEnv();
 
         jbyteArray javaArray = env->NewByteArray (bytesToRead);
@@ -133,7 +131,7 @@ public:
         int numBytes = stream.callIntMethod (android.httpStreamRead, javaArray, (jint) bytesToRead);
 
         if (numBytes > 0)
-            env->GetByteArrayRegion (javaArray, 0, numBytes, (jbyte*) buffer);
+            env->GetByteArrayRegion (javaArray, 0, numBytes, static_cast <jbyte*> (buffer));
 
         env->DeleteLocalRef (javaArray);
         return numBytes;

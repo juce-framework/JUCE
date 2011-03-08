@@ -38,8 +38,12 @@ import android.graphics.RectF;
 import android.graphics.Rect;
 import android.text.ClipboardManager;
 import com.juce.ComponentPeerView;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
-
+import java.net.HttpURLConnection;
 
 //==============================================================================
 public final class JuceAppActivity   extends Activity
@@ -201,27 +205,49 @@ public final class JuceAppActivity   extends Activity
     //==============================================================================
     public static class HTTPStream
     {
-        public HTTPStream()
+        public HTTPStream (HttpURLConnection connection_) throws IOException
         {
+            connection = connection_;
+            inputStream = new BufferedInputStream (connection.getInputStream());
         }
 
         public final void release()
         {
+            try
+            {
+                inputStream.close();
+            }
+            catch (IOException e)
+            {}
+
+            connection.disconnect();
         }
 
         public final int read (byte[] buffer, int numBytes)
         {
-            return 0;
+            int num = 0;
+
+            try
+            {
+                num = inputStream.read (buffer, 0, numBytes);
+            }
+            catch (IOException e)
+            {}
+
+            if (num > 0)
+                position += num;
+
+            return num;
         }
 
         public final long getPosition()
         {
-            return 0;
+            return position;
         }
 
         public final long getTotalLength()
         {
-            return 0;
+            return -1;
         }
 
         public final boolean isExhausted()
@@ -233,6 +259,10 @@ public final class JuceAppActivity   extends Activity
         {
             return false;
         }
+
+        private HttpURLConnection connection;
+        private InputStream inputStream;
+        private long position;
     }
 
     public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,
@@ -240,11 +270,32 @@ public final class JuceAppActivity   extends Activity
     {
         try
         {
-            URL u = new URL (address);
+            HttpURLConnection connection = (HttpURLConnection) (new URL (address).openConnection());
 
-            return new HTTPStream ();
+            if (connection != null)
+            {
+                try
+                {
+                    if (isPost)
+                    {
+                        connection.setConnectTimeout (timeOutMs);
+                        connection.setDoOutput (true);
+                        connection.setChunkedStreamingMode (0);
+
+                        OutputStream out = connection.getOutputStream();
+                        out.write (postData);
+                        out.flush();
+                    }
+
+                    return new HTTPStream (connection);
+                }
+                catch (Throwable e)
+                {
+                    connection.disconnect();
+                }
+            }
         }
-        catch (java.net.MalformedURLException e)
+        catch (Throwable e)
         {}
 
         return null;
