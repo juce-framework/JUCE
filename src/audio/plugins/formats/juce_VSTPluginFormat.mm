@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -26,3 +26,4 @@
 // This file just wraps juce_VSTPluginFormat.cpp in an objective-C wrapper
 #define JUCE_MAC_VST_INCLUDED 1
 #include "juce_VSTPluginFormat.cpp"
+
