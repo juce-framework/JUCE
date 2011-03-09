@@ -60,8 +60,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Socket.h"
 #include "../../threads/juce_ScopedLock.h"
 #include "../../threads/juce_Thread.h"
-#include "../../utilities/juce_DeletedAtShutdown.h"
-#include "../../core/juce_Singleton.h"
 
 #if JUCE_WINDOWS
  typedef int       juce_socklen_t;
@@ -72,32 +70,21 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace SocketHelpers
 {
-   #if JUCE_WINDOWS
-    class WinSocketStarter  : public DeletedAtShutdown
+    void initSockets()
     {
-    public:
-        WinSocketStarter()
+       #if JUCE_WINDOWS
+        static bool socketsStarted = false;
+
+        if (! socketsStarted)
         {
+            socketsStarted = true;
+
             WSADATA wsaData;
             const WORD wVersionRequested = MAKEWORD (1, 1);
             WSAStartup (wVersionRequested, &wsaData);
         }
-
-        ~WinSocketStarter()
-        {
-            WSACleanup();
-            clearSingletonInstance();
-        }
-
-        juce_DeclareSingleton (WinSocketStarter, false);
-    };
-
-    juce_ImplementSingleton (WinSocketStarter);
-
-    void initSockets()   { WinSocketStarter::getInstance(); }
-   #else
-    void initSockets()   {}
-   #endif
+       #endif
+    }
 
     bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) throw()
     {

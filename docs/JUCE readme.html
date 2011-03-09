@@ -22,115 +22,85 @@
 
 <p><a href="#intro">Introduction</a> - <a href="#license">License</a> - 
 <a href="#install">Installation</a> -
-<a href="#buildvc2005">Building with VC2005</a> - 
-<a href="#buildvcx">Building with VC Express</a> - 
+<a href="#buildvc">Building with Visual Studio</a> - 
 <a href="#buildvc6">Building with VC6</a> -
-<a href="#buildvc7">Building with VC7</a> -
 <a href="#buildxcode">Building with XCode</a> -
-<a href="#buildcodeblocks">Building with Code::Blocks</a> -
 <a href="#buildlinux">Building on Linux</a> -
+<a href="#buildandroid">Building with Android</a> -
 </p>
 
 <h1>JUCE</h1>
 
 <h2><a name="intro"></a>Introduction</h2>
 
-<p>JUCE is an all-encompassing C++ class
-library for developing cross-platform applications.</p>
+<p>JUCE is an all-encompassing C++ class library for developing cross-platform applications and plugins.</p>
+<p>For lots more help and information, please visit the <a href="http://www.rawmaterialsoftware.com/juce">JUCE website</a>.</p>
+<p>A complete set of class documentation is available <a href="http://www.rawmaterialsoftware.com/juce/api/index.html" target="juce api">here</a>.</p>
 
-<p>A complete doxygen-created API guide is available <a href="http://www.rawmaterialsoftware.com/juce/api/index.html" target="juce api">here</a> 
-as HTML, or can be downloaded as a precompiled Windows help file from the 
-<a href="http://www.rawmaterialsoftware.com/juce/download.php">downloads</a> page.</p>
-
-<p>For more help and information, please visit the <a href="http://www.rawmaterialsoftware.com/juce">JUCE website</a>.</p>
 <h2><a name="license"></a>License</h2>
 
 <p>JUCE is released under the <a href="http://www.gnu.org/copyleft/gpl.html">Gnu Public License</a>, 
 which means it can be freely copied and distributed, and costs nothing to use in open-source applications.</p>
 <p>If you'd like to release a closed-source application that uses JUCE, commercial licenses are available 
-for a fee - click <a href="http://www.rawmaterialsoftware.com/juce/licensing.php">here</a> for more information on pricing and terms.</p>
+for a fee - click <a href="http://www.rawmaterialsoftware.com/jucelicense.php">here</a> for more information 
+on pricing and terms.</p>
 
 <h2><a name="install"></a>Installation</h2>
 
 <h3>Installing the source code</h3>
 
+<p>There are a few ways to install a copy of JUCE:</p>
+<ul>
+<li>You can download a zip file containing the last stable release from <a href="http://sourceforge.net/projects/juce/files/juce/">the JUCE downloads section on SourceForge</a></li>
+<li>Download the GIT repository: To grab the latest bleeding-edge version of the code, you can use the command:
+    <br><code>git clone --depth 1 git://juce.git.sourceforge.net/gitroot/juce/juce</code></li>
+<li>Download via the Introjucer: The Introjucer is JUCE's tool for creating and managing JUCE projects, and it also 
+includes a handy tool which lets you download the latest (bleeding-edge) version of JUCE without needing to install GIT. To use this,
+just download a binary of the Introjucer from <a href="http://sourceforge.net/projects/juce/files/juce/">SourceForge</a>,
+and run it - its 'update' menu contains an option to download JUCE.</li>
+</ul>
 <p>The JUCE source code all lives in a folder called, unsurprisingly, <code>juce</code>, which you can unzip 
 and put somewhere on your system.</p>
 
-<p>To compile the library, there is a subfolder <code>juce/build</code> that contains projects for different 
-operating systems and compilers.</p>
+<h3>Building the demo applications</h3>
 
-<h3>Building the demo application</h3>
+<p>In the <code>juce/extras</code> folder, there are a few demo apps to get you started and to show off JUCE's features. 
+Each one contains a folder called <code>Builds</code>, containing various projects for different compilers and platforms. 
+These should all work straight out-of-the-box if you load them into the appropriate development environment. Some of them 
+(e.g. the audio plugin demo) may require 3rd party libraries or headers to have been installed, but I've made sure that any 
+include statements that may not be present have comments with a detailed explanation of what's going on, so if you hit a compile 
+error, just have a look at the code it's pointing to and everything should become clear.</p>
 
-<p>Inside the <code>juce</code> folder is a demo application that shows off a few of Juce's features. 
-The <code>juce/extras/juce demo/build</code> folder contains projects and workspaces for the various platforms and compilers.</p>
+<h2>Creating a new application with the Introjucer</h2>
 
-<h3>The "amalgamated" version of Juce</h3>
+<p>By far the easiest way to create a new cross-platform JUCE app (or audio plugin) is to let the Introjucer
+do the hard work of creating all your projects with the correct settings.</p>
+<p>You can either build the Introjucer yourself from the source (in <code>juce/extras/Introjucer</code>), or download 
+a pre-built binary from <a href="http://sourceforge.net/projects/juce/files/juce/">SourceForge</a>.
+<p>If you run it and select the 'new project' menu item, it'll walk you through the stages in setting up an app or
+plugin project, and will automatically spit out a collection of project files for all the different platforms and compilers
+that you need.</p>
 
-<p>One of Juce's features is that it can be linked into your project as a monolithic C++ file, instead of a statically linked
-library. This means that you can write a juce application without actually needing to build the
-library beforehand, but instead by just adding <code>juce_amalgamated.cpp</code> to the project, and including 
-<code>juce_amalagamated.h</code> instead of <code>juce.h</code>. The demo apps are designed using this approach, because it means
-there's less setting-up required for a new user to do before getting stuck-in, but some compilers
-and debuggers can struggle with the huge files involved, so you may prefer to build
-your project in the traditional way, using it as a separate library.</p>
-<p>A variation on this approach is to include <code>juce_amalgamated_template.cpp</code> in your app, which has the 
-same effect as the normal amalgamated file, but which actually pulls in all the juce cpp files via #include statements
-rather than by pre-munging them into one file. This makes debugging a lot easier</p>
+<h1>Requirements for building on different platforms</h1>
 
-<h2>Creating a new application with JUCE</h2>
+<h3><a name="buildvc"></a>Microsoft Visual Studio 2005 or later</h3>
 
-<h3>Using the new Jucer</h3>
-<p><strong>NOTE!</strong> By far the easiest way to create a new cross-platform Juce app (or audio plugin) is to use the new and 
-not-yet-finished Jucer to generate all the project files for you... This replacement for the old Jucer is still work-in-progress and 
-at the "experimental" stage, but it has enough project management features to already be extemely useful. To use it, you'll need to build
-and run it - that's pretty easy to do: just open an appropriate project from the <code>juce/extras/Jucer (experimental)/Builds</code> folder,
-and compile/run it. The new Jucer has a wizard that will create a new Juce project for you, sorting out all the messy paths and project set-up,
-and will spit out a collection of project files for the various IDEs that you can simply open and build.</p>
-<p>When complete, the new Jucer will be a big part of future Juce versions, and is already used to auto-generate the makefiles and project 
-files for all the projects in the juce/extras folder.</p>
+<p>JUCE projects should build and run with no extra set-up needed in all versions of Visual Studio from 2005 onwards.</p>
 
-<p>However, if you want to create a Juce project manually (i.e. the hard way), here are some instructions:</p>
-
-<h3><a name="buildvc2005"></a>Compiling with Microsoft Visual Studio</h3>
-
-<p>The quickest way to get started is to try building the demo application - there's a Visual Studio
-soluion in <code>juce/extras/juce demo/build/win32_vc8/jucedemo.sln</code>.</p>
-<p>This should build and run with no extra set-up needed in all versions of Visual Studio from 2005 onwards,
-including the free version of Visual Express 2009.</p>
-<p>One thing to check if you're unfamiliar with Visual Studio is that the <code>jucedemo</code> 
-project needs to be selected as your "startup" project (right-click on the 
-jucedemo project in the solution explorer for this option). Also, the active configuration should be
-set to "Debug" or "Release", (the first time you load a project, VS selects one of the configurations by default 
-and usually picks "Debug DLL", for reasons best known to itself).</p>
-
-<p>To create your own application that links to Juce:</p>
+<p>By far the easiest way to create a new project is by letting the Introjucer do all the hard work, as explained above. But
+if you really insist on creating one manually, here are a few tips:</p>
 <ol>
-<li>Either make a copy of the example project in <code>juce/projects</code> and rename/customise 
-it, or create a new application project as an 'empty' WIN32 application - avoid saying yes to 
-MFC or any of the other rubbish that Visual Studio might offer to pollute your application with.</li>
-<li>Include the header file <code>juce.h</code> in all your source files (it's best to
-put this in a precompiled header).</li>
-<li>Ensure that the linker's search path for libraries includes the the <code>juce/bin</code> directory.
-This path can be set globally, or can be added to your project's linker settings.</li>
-<li>Choose to link to the "Multithreaded" or "Debug Multithreaded" run-time libraries, depending on
-whether you're doing a debug or release build. On VC6, this is set in the Project Settings / C/C++ / Code
-Generation options panel. In Visual Studio, it's in the project properties.</li>
+<li>Create your new application project as an 'empty' WIN32 application - avoid saying yes to 
+MFC or any of the other rubbish that Visual Studio might offer you.</li>
 <li>Make sure that your project has exception handling and run-time type information (RTTI) turned ON.</li>
-<li>Have a look at the 'hello world' projects, demo projects, or the API documentation about the 
+<li>Have a look at the example projects, demo projects, or the API documentation about the 
 <code>JUCEApplication</code> class to find out how to create the application launch code.</li>
 </ol>
 
-<p>Alternatively, you can use the <em>amalgamated</em> form of Juce (see note above). To do this,
-all need to do is to add <code>juce_amalagamated.cpp</code> to your project, and include 
-<code>juce_amalagamated.h</code> instead of <code>juce.h</code>. This pulls the entire library into 
-your project without needing to link to it separately, so you can skip the steps above that involve
-setting up the link paths, etc. Most of the demo apps are written using the amalgamated version,
-so refer to these for an example of how to do this.</p>
+<h3><a name="buildvc6"></a>Microsoft Visual Studio 6</h3>
 
-<h3><a name="buildvc6"></a>Compiling with Microsoft Visual Studio 6</h3>
-
-<p>To compile the JUCE .lib files from the source code:</p>
+<p>JUCE can still be compiled with VC6, although support for this will be dropped at some point in the future... 
+but here are some tips for getting it going:</p>
 
 <ol>
 <li>Install the latest Platform SDK from Microsoft.</li>
@@ -148,10 +118,6 @@ C:\Program Files\Microsoft Platform SDK\lib
 C:\mycode\juce\bin
 ...</pre>
 </li>
-<li>Open the juce.dsp project file in <code>juce/build/win32/vc6</code></li>
-<li>There are several configurations: debug, release, debug-unicode, and release-unicode. 
-You can build all or some of these, and the resultant .lib files should end up in the 
-"juce/bin" folder.</li>
 </ol>
 
 <p>Note that there's a rather lame bug in VC6 that causes an internal compiler error if you include
@@ -159,45 +125,16 @@ filenames that are too long. This can get triggered if you put the juce folder i
 directory (such as your user home directory). Unfortunately I think the only workaround for this 
 is to move the source tree to a shallower directory.</p>
 
-<p>For info on how to create an application that uses Juce, see the VC2005 notes above.</p>
+<h3><a name="buildxcode"></a>XCode on OSX</h3>
 
-<h3><a name="buildvc7"></a>Compiling with Microsoft Visual Studio 7</h3>
+<p>Use XCode 3 or later. You might want to tick the option to install the 10.4 SDK if you want to build binaries
+that are backward-compatible with 10.4 and PPCs. If you're going to build for iOS, you'll obviously need the iOS version of XCode.</p>
 
-<p>For VC7, you can import the VC6 projects and this should work ok. It's also possible to
-tweak the version number in the VC8 projects so that they can be opened in VC7, but that's a 
-less reliable method!</p>
+<p>The easiest way to create a new application is by using the Intojucer, but here are a few tips if you're mad enough
+to want to set one up manually:</p>
 
-<h3><a name="buildxcode"></a>Compiling with XCode on MacOSX</h3>
-
-<p>To compile the JUCE binaries from the source code:</p>
-
-<ol>
-<li>Open the <code>Juce.xcodeproj</code> file in <code>juce/build/macosx</code></li>
-<li>This project has "debug" and "release" configurations, and the library files it creates
-are <code>libjuce.a</code> (release) and <code>libjucedebug.a</code> (debug), which will appear 
-in the <code>juce/bin</code> directory.</li>
-</ol>
-
-<p>Then, to create and build an application:</p>
-
-<ol>
-<li>Either make a copy of the example project in <code>juce/extras/example projects</code> and rename/customise it, or
-create a new "Carbon Application" project.</li>
-<li>Include the header file <code>juce.h</code> in all your source files.</li>
-<li>Get rid of any main() functions that XCode might have generated for you, and instead use the 
-<code>JUCEApplication</code> class as your application launcher - see the API documentation for this 
-class for more details, or have a look at the example projects, or demos.</li>
-<li>Drag-and-drop the <code>juce.xcodeproj</code> file into the project's "External Frameworks and Libraries" 
-list.</li>
-<li>Expand this item in the treeview, and inside there'll be an item "libjuce.a" or "libjucedebug.a" - drag-and-drop
-this into the "link binary with libraries" phase inside the xcode target. When you select either a debug
-or release juce build these entries will (usually) update themselves to show the correct debug or release library
-name. If you want your project to automatically rebuild Juce when you make changes to a juce file, you can 
-also add Juce to your target's "Direct Dependency" list (show information for the target, and this is on the 
-"general" tab).<br/>Alternative ways of linking to juce would be to add the libjuce.a or libjucedebug.a library to
-your "External Frameworks and Libraries" list, or to add switch to the linker's command-line of either "-ljuce" 
-or "-ljucedebug".</li>
-<li>You'll also need to add some or all of the following OSX frameworks to your "External Frameworks and Libraries" list,
+<ul>
+<li>You'll need to add some or all of the following OSX frameworks to your "External Frameworks and Libraries" list,
 depending on what features your application uses:
 <pre>Cocoa.framework
 Carbon.framework
@@ -219,70 +156,57 @@ CoreFoundation.framework</pre>
 In future there may be other frameworks that you'll need to link with to support new JUCE features. 
 (It should be pretty obvious from the link-time error when one of these is missing).
 </li>
-</ol>
+<li>If you need to link to the JUCE static library rather than using the amalgamated files, you'll need to drag-and-drop 
+the <code>juce.xcodeproj</code> file into your project's "External Frameworks and Libraries" list. Then, expand this
+item in the treeview, and inside there'll be an item "libjuce.a" or "libjucedebug.a" - drag-and-drop
+this into the "link binary with libraries" phase inside the xcode target. When you select either a debug
+or release juce build these entries will (usually) update themselves to show the correct debug or release library
+name. If you want your project to automatically rebuild JUCE when you make changes to a JUCE file, you can 
+also add JUCE to your target's "Direct Dependency" list (show information for the target, and this is on the 
+"general" tab).<br/>Alternative ways of linking to JUCE would be to add the libjuce.a or libjucedebug.a library to
+your "External Frameworks and Libraries" list, or to add switch to the linker's command-line of either "-ljuce" 
+or "-ljucedebug".</li>
+</ul>
 
-<p>If all this seems too complicated, you can make things slightly easier by using the <em>amalgamated</em> form of Juce 
-(see earlier note). To do this, all you need to do is to add <code>juce_amalagamated.cpp</code> to your project, and include 
-<code>juce_amalagamated.h</code> instead of <code>juce.h</code>. This pulls the entire library into your project without needing
-to link to it separately, so you can skip the steps above that involve compiling the library, setting up the link paths, etc. 
-Most of the demo apps are written using the amalgamated version, so have a look through their source code for examples of how 
-to do this.</p>
+<h3><a name="buildlinux"></a>Linux with GCC</h3>
 
-<h3><a name="buildcodeblocks"></a>Creating a JUCE application with Code::Blocks and MinGW</h3>
-<ol>
-<li>open the Juce project: <code>juce/build/win32/codeblocks/juce.cbp</code></li>
-<li>open the demo app project: <code>juce/extras/juce demo/build/win32_codeblocks/JuceDemo.cbp</code></li>
-<li>Build first the "Juce Library" project, and then the "Juce Demo App" project. If your
-build environment is set up correctly, these should just work and the demo app should run.
-</ol>
+<p>Most linux distros should come with the tools you need. You may need to install the development packages of
+freetype, X11 and pthreads if they're not already available.</p>
+<p>If you've enabled the <code>JUCE_USE_XINERAMA</code> option, then you'll also need to install the Xinerama package.
+And you'll need the <code>GL</code> and <code>GLU</code> libraries if you've enabled <code>JUCE_OPENGL</code></p>
+<p>The makefiles that are generated by the Introjucer can be run by "<code>make CONFIG=Debug</code>", 
+or "<code>make CONFIG=Release</code>". You can also use "<code>make clean</code>" to delete the 
+intermediate files.</p>
 
-<p>To create your own application:</p>
-<ol>
-<li>Create a new project, as a "win32 GUI".</li>
-<li>Either copy the example main.cpp from the Juce example project, or write your own based
-around the <code>JUCEApplication</code> class</li>
-<li>In your project's build settings, you'll need to make sure the linker uses the following libraries:
-<pre>libjuce.a or libjucedebug.a (these should be created in the juce/bin/codeblocks directory)
-libshell32.a
-libole32.a
-libvfw32.a
-libwinmm.a
-libwininet.a
-libdsound.a
-libwsock32.a
-libopengl32.a
-libglu32.a
-libuuid.a
-librpcrt4.a (these are all in the MinGW libraries folder)</pre>
-</li>
-</ol>
+<h3><a name="buildandroid"></a>Android</h3>
 
-<h3><a name="buildlinux"></a>Creating a JUCE application on Linux with GCC</h3>
-
-<ol>
-<li>Most linux distros should come with the tools you need, although you might want to get hold of 
-<a href="http://premake.sourceforge.net/">premake</a>, which is used to automatically generate the
-juce makefile. (This isn't necessary if you're just going to use the makefile that's provided).</li>
-<li>Get a command prompt and go into <code>/juce/build/linux</code></li>
-<li>To build the debug version, use "<code>make CONFIG=Debug</code>", or use "<code>make CONFIG=Release</code>" 
-to build the release version. You can also use "<code>make clean</code>" to delete the intermediate 
-files.</li>
-</ol>
-
-<p>Then, to create and build an application:</p>
-<ol>
-<li>Building the library will have produced the library files <code>/juce/bin/libjuce.a</code> and
-<code>/juce/bin/libjuce_debug.a</code>. You'll need to link to one of these in your app, and you'll 
-also need to link to these libraries:
-<pre>freetype
-pthread
-X11</pre>
-If you've set the <code>JUCE_USE_XINERAMA</code> flag in juce_Config.h, you'll also need to link to the 
-<code>xinerama</code> library.
-And you'll need the <code>GL</code> and <code>GLU</code> libraries if you've enabled 
-<code>JUCE_OPENGL</code>
-</li>
-</ol>
+<ul>
+<li>First of all, get yourself over to <a href="http://www.android.com">www.android.com</a>, and install the latest 
+Android SDK and NDK. Follow their instructions for installing Eclipse, and get to the point where you can
+build and run some of the Android NDK demo apps in Eclipse before even thinking about trying to do anything with JUCE. The
+Android development environment is a hugely complicated mish-mash of random bits of software, lashed together with scripts, 
+so don't expect a slick installation experience - be prepared to mess about. Once it's installed though, it all more-or-less
+seems to work..</li>
+<li>The only sensible way to create an Android JUCE project is with the Introjucer - doing it with Eclipse is a nightmare and if
+you want to do it manaually, good luck. The Introjucer will produce a folder containing a whole heap of files, and you can open the
+folder in Eclipse as a new project (use the "create project" option in Eclipse).</li>
+<li>Eclipse should be able to automatically build the project and run it, but you can also build it from the command-line,
+by setting your CWD to the Android build folder and using "<code>ant debug</code>" or "<code>ant release</code>"</li>
+<li>Be careful that your project folder doesn't contain any spaces in its path - the Android tools can't handle this (!)</li>
+<li>The structure that a JUCE app uses is to have a couple of boilerplate java classes which load and run a big native
+library containing the juce library and all your app code. JUCE uses JNI internally to call java classes to interact with
+the OS.</li>
+<li>When you change some of your app code and need to recompile and re-test the app, Eclipse will usually (but certainly
+not always) detect the change and re-compile the library. Unfortunately, if there are any errors during compilation, it'll
+ignore them, and carry on trying to run the app, after having cleared the console so you can no longer see the errors that
+occurred. In these cases, you probably want to build it using the command-line 'ant debug' so you can actually see what happened.</li>
+<li>Although Eclipse does manage to rebuild the native library when you change some c++ code, it will fail utterly to re-package the
+new library file or to re-install it on the target device. So far, my way of getting it to do this has been to touch one of the
+java files whenever I change any c++, and this seems to kick it into life. If anyone has ever had the patience to become an
+Eclipse expert and can suggest a proper solution to this, please let me know!!</li>
+<li>Often, Eclipse gets confused and insist that there are "mistakes" in the java which prevent it from running the app. Needless
+to say, there aren't really any mistakes, and usually doing a "clean" sorts it out.</li>
+</ul>
 
 <div class="ad">
 <p class="ad">***</p>
