@@ -186,7 +186,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
         bi.hwndOwner = (HWND) parentWindow.getWindowHandle();
         bi.pszDisplayName = files;
-        bi.lpszTitle = title.toUTF16();
+        bi.lpszTitle = title.toWideCharPointer();
         bi.lParam = (LPARAM) &info;
         bi.lpfn = browseCallbackProc;
       #ifdef BIF_USENEWUI
@@ -253,8 +253,8 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         of.nFilterIndex = 1;
         of.lpstrFile = files;
         of.nMaxFile = charsAvailableForResult;
-        of.lpstrInitialDir = localPath.toUTF16();
-        of.lpstrTitle = title.toUTF16();
+        of.lpstrInitialDir = localPath.toWideCharPointer();
+        of.lpstrTitle = title.toWideCharPointer();
         of.Flags = flags;
         of.lCustData = (LPARAM) &info;
 

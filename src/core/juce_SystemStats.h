@@ -39,8 +39,6 @@ public:
     //==============================================================================
     /** Returns the current version of JUCE,
 
-        (just in case you didn't already know at compile-time.)
-
         See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
     static const String getJUCEVersion();

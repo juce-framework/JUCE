@@ -58,8 +58,6 @@ static bool shouldDeactivateTitleBar = true;
 
 #define WM_TRAYNOTIFY WM_USER + 100
 
-using ::abs;
-
 //==============================================================================
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
 static UpdateLayeredWinFunc updateLayeredWindow = 0;
@@ -188,7 +186,7 @@ public:
         previousBitmap = SelectObject (hdc, hBitmap);
 
         if (format_ == Image::ARGB && clearImage)
-            zeromem (bitmapData, abs (h * lineStride));
+            zeromem (bitmapData, std::abs (h * lineStride));
 
         imageData = bitmapData - (lineStride * (h - 1));
     }
@@ -470,11 +468,7 @@ public:
                         HWND parentToAddTo_)
         : ComponentPeer (component, windowStyleFlags),
           dontRepaint (false),
-      #if JUCE_DIRECT2D
-          currentRenderingEngine (direct2DRenderingEngine),
-      #else
           currentRenderingEngine (softwareRenderingEngine),
-      #endif
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
@@ -542,7 +536,7 @@ public:
 
     void setTitle (const String& title)
     {
-        SetWindowText (hwnd, title.toUTF16());
+        SetWindowText (hwnd, title.toWideCharPointer());
     }
 
     void setPosition (int x, int y)
@@ -1082,7 +1076,7 @@ private:
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
             wcex.lpfnWndProc    = (WNDPROC) windowProc;
-            wcex.lpszClassName  = windowClassName.toUTF16();
+            wcex.lpszClassName  = windowClassName.toWideCharPointer();
             wcex.cbClsExtra     = 0;
             wcex.cbWndExtra     = 32;
             wcex.hInstance      = moduleHandle;
@@ -1099,7 +1093,7 @@ private:
         ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
-                UnregisterClass (windowClassName.toUTF16(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
+                UnregisterClass (windowClassName.toWideCharPointer(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
 
             clearSingletonInstance();
         }
@@ -1165,12 +1159,12 @@ private:
               && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 
-        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName.toUTF16(), L"", type, 0, 0, 0, 0,
+        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName.toWideCharPointer(), L"", type, 0, 0, 0, 0,
                                parentToAddTo, 0, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
 
-      #if JUCE_DIRECT2D
-        updateDirect2DContext();
-      #endif
+       #if JUCE_DIRECT2D
+        setCurrentRenderingEngine (1);
+       #endif
 
         if (hwnd != 0)
         {
@@ -1272,7 +1266,7 @@ private:
     //==============================================================================
     void handlePaintMessage()
     {
-#if JUCE_DIRECT2D
+       #if JUCE_DIRECT2D
         if (direct2DContext != 0)
         {
             RECT r;
@@ -1286,7 +1280,8 @@ private:
             }
         }
         else
-#endif
+       #endif
+
         {
             HRGN rgn = CreateRectRgn (0, 0, 0, 0);
             const int regionType = GetUpdateRgn (hwnd, rgn, false);
@@ -1411,9 +1406,9 @@ private:
             EndPaint (hwnd, &paintStruct);
         }
 
-#ifndef JUCE_GCC  //xxx should add this fn for gcc..
+       #ifndef JUCE_GCC
         _fpreset(); // because some graphics cards can unmask FP exceptions
-#endif
+       #endif
 
         lastPaintTime = Time::getMillisecondCounter();
     }
@@ -1428,15 +1423,11 @@ private:
     {
         StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
-#if JUCE_DIRECT2D
-        // xxx is this correct? Seems to enable it on Vista too??
-        OSVERSIONINFO info;
-        zerostruct (info);
-        info.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-        GetVersionEx (&info);
-        if (info.dwMajorVersion >= 6)
+       #if JUCE_DIRECT2D
+        if (SystemStats::getOperatingSystemType() >= SystemStats::Windows7)
             s.add ("Direct2D");
-#endif
+       #endif
+
         return s;
     }
 
@@ -1445,7 +1436,7 @@ private:
         return currentRenderingEngine;
     }
 
-#if JUCE_DIRECT2D
+   #if JUCE_DIRECT2D
     void updateDirect2DContext()
     {
         if (currentRenderingEngine != direct2DRenderingEngine)
@@ -1453,17 +1444,20 @@ private:
         else if (direct2DContext == 0)
             direct2DContext = new Direct2DLowLevelGraphicsContext (hwnd);
     }
-#endif
+   #endif
 
     void setCurrentRenderingEngine (int index)
     {
         (void) index;
 
-#if JUCE_DIRECT2D
-        currentRenderingEngine = index == 1 ? direct2DRenderingEngine : softwareRenderingEngine;
-        updateDirect2DContext();
-        repaint (component->getLocalBounds());
-#endif
+       #if JUCE_DIRECT2D
+        if (getAvailableRenderingEngines().size() > 1)
+        {
+            currentRenderingEngine = index == 1 ? direct2DRenderingEngine : softwareRenderingEngine;
+            updateDirect2DContext();
+            repaint (component->getLocalBounds());
+        }
+       #endif
     }
 
     void doMouseMove (const Point<int>& position)
@@ -2442,7 +2436,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
 {
-    return MessageBox (0, bodyText.toUTF16(), title.toUTF16(),
+    return MessageBox (0, bodyText.toWideCharPointer(), title.toWideCharPointer(),
                        MB_SETFOREGROUND | (isOkCancel ? MB_OKCANCEL
                                                       : MB_OK)) == IDOK;
 }
@@ -2720,7 +2714,6 @@ class JuceDropSource   : public ComBaseClassHelper <IDropSource>
 {
 public:
     JuceDropSource() {}
-    ~JuceDropSource() {}
 
     HRESULT __stdcall QueryContinueDrag (BOOL escapePressed, DWORD keys)
     {
@@ -2748,8 +2741,6 @@ public:
           index (0)
     {
     }
-
-    ~JuceEnumFormatEtc()  {}
 
     HRESULT __stdcall Clone (IEnumFORMATETC** result)
     {

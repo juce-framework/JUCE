@@ -808,7 +808,7 @@ private:
             // doing a direct load of the COM object (only available via the juce_createASIOAudioIODeviceForGUID function).
             if (optionalDllForDirectLoading.isNotEmpty())
             {
-                HMODULE h = LoadLibrary (optionalDllForDirectLoading.toUTF16());
+                HMODULE h = LoadLibrary (optionalDllForDirectLoading.toWideCharPointer());
 
                 if (h != 0)
                 {
@@ -1799,7 +1799,7 @@ private:
     {
         HKEY subKey;
 
-        if (RegOpenKeyEx (hk, keyName.toUTF16(), 0, KEY_READ, &subKey) == ERROR_SUCCESS)
+        if (RegOpenKeyEx (hk, keyName.toWideCharPointer(), 0, KEY_READ, &subKey) == ERROR_SUCCESS)
         {
             TCHAR buf [256] = { 0 };
             DWORD dtype = REG_SZ;

@@ -303,9 +303,9 @@ void Process::lowerPrivilege()
 
 void Process::terminate()
 {
-  #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+   #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtDumpMemoryLeaks();
-  #endif
+   #endif
 
     // bullet in the head in case there's a problem shutting down..
     ExitProcess (0);
@@ -318,7 +318,7 @@ void* PlatformUtilities::loadDynamicLibrary (const String& name)
 
     JUCE_TRY
     {
-        result = LoadLibrary (name.toUTF16());
+        result = LoadLibrary (name.toWideCharPointer());
     }
     JUCE_CATCH_ALL
 

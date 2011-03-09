@@ -235,7 +235,7 @@ private:
             uc.lpszUrlPath = file;
             uc.lpszHostName = server;
 
-            if (InternetCrackUrl (address.toUTF16(), 0, 0, &uc))
+            if (InternetCrackUrl (address.toWideCharPointer(), 0, 0, &uc))
             {
                 int disable = 1;
                 InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
@@ -295,7 +295,7 @@ private:
                             INTERNET_BUFFERS buffers;
                             zerostruct (buffers);
                             buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
-                            buffers.lpcszHeader = headers.toUTF16();
+                            buffers.lpcszHeader = headers.toWideCharPointer();
                             buffers.dwHeadersLength = headers.length();
                             buffers.dwBufferTotal = (DWORD) postData.getSize();
 

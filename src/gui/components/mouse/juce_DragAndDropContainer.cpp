@@ -240,15 +240,13 @@ public:
                     if (owner->shouldDropFilesWhenDraggedExternally (dragDescLocal, source, files, canMoveFiles)
                          && files.size() > 0)
                     {
-                        WeakReference<Component> cdw (this);
+                        WeakReference<Component> thisWeakRef (this);
                         setVisible (false);
 
                         if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
                             DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles);
 
-                        if (cdw != 0)
-                            delete this;
-
+                        delete thisWeakRef.get();
                         return;
                     }
                 }

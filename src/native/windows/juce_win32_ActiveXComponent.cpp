@@ -34,7 +34,6 @@ namespace ActiveXHelpers
     {
     public:
         JuceIStorage() {}
-        ~JuceIStorage() {}
 
         HRESULT __stdcall CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)           { return E_NOTIMPL; }
         HRESULT __stdcall OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)             { return E_NOTIMPL; }
@@ -60,7 +59,6 @@ namespace ActiveXHelpers
 
     public:
         JuceOleInPlaceFrame (HWND window_)   : window (window_) {}
-        ~JuceOleInPlaceFrame() {}
 
         HRESULT __stdcall GetWindow (HWND* lphwnd)                      { *lphwnd = window; return S_OK; }
         HRESULT __stdcall ContextSensitiveHelp (BOOL)                   { return E_NOTIMPL; }

@@ -44,7 +44,7 @@ DynamicLibraryLoader::~DynamicLibraryLoader()
 bool DynamicLibraryLoader::load (const String& name)
 {
     FreeLibrary ((HMODULE) libHandle);
-    libHandle = name.isNotEmpty() ? LoadLibrary (name.toUTF16()) : 0;
+    libHandle = name.isNotEmpty() ? LoadLibrary (name.toWideCharPointer()) : 0;
     return libHandle != 0;
 }
 

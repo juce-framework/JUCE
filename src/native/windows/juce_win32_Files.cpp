@@ -72,7 +72,7 @@ namespace WindowsFileHelpers
     {
         ULARGE_INTEGER spc, tot, totFree;
 
-        if (GetDiskFreeSpaceEx (getDriveFromPath (path).toUTF16(), &spc, &tot, &totFree))
+        if (GetDiskFreeSpaceEx (getDriveFromPath (path).toWideCharPointer(), &spc, &tot, &totFree))
             return total ? (int64) tot.QuadPart
                          : (int64) spc.QuadPart;
 
@@ -81,7 +81,7 @@ namespace WindowsFileHelpers
 
     unsigned int getWindowsDriveType (const String& path)
     {
-        return GetDriveType (getDriveFromPath (path).toUTF16());
+        return GetDriveType (getDriveFromPath (path).toWideCharPointer());
     }
 
     const File getSpecialFolderPath (int type)
@@ -104,25 +104,25 @@ const String File::separatorString ("\\");
 bool File::exists() const
 {
     return fullPath.isNotEmpty()
-            && GetFileAttributes (fullPath.toUTF16()) != INVALID_FILE_ATTRIBUTES;
+            && GetFileAttributes (fullPath.toWideCharPointer()) != INVALID_FILE_ATTRIBUTES;
 }
 
 bool File::existsAsFile() const
 {
     return fullPath.isNotEmpty()
-            && (GetFileAttributes (fullPath.toUTF16()) & FILE_ATTRIBUTE_DIRECTORY) == 0;
+            && (GetFileAttributes (fullPath.toWideCharPointer()) & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
 bool File::isDirectory() const
 {
-    const DWORD attr = GetFileAttributes (fullPath.toUTF16());
+    const DWORD attr = GetFileAttributes (fullPath.toWideCharPointer());
     return ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) && (attr != INVALID_FILE_ATTRIBUTES);
 }
 
 bool File::hasWriteAccess() const
 {
     if (exists())
-        return (GetFileAttributes (fullPath.toUTF16()) & FILE_ATTRIBUTE_READONLY) == 0;
+        return (GetFileAttributes (fullPath.toWideCharPointer()) & FILE_ATTRIBUTE_READONLY) == 0;
 
     // on windows, it seems that even read-only directories can still be written into,
     // so checking the parent directory's permissions would return the wrong result..
@@ -131,7 +131,7 @@ bool File::hasWriteAccess() const
 
 bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
 {
-    DWORD attr = GetFileAttributes (fullPath.toUTF16());
+    DWORD attr = GetFileAttributes (fullPath.toWideCharPointer());
 
     if (attr == INVALID_FILE_ATTRIBUTES)
         return false;
@@ -144,12 +144,12 @@ bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
     else
         attr &= ~FILE_ATTRIBUTE_READONLY;
 
-    return SetFileAttributes (fullPath.toUTF16(), attr) != FALSE;
+    return SetFileAttributes (fullPath.toWideCharPointer(), attr) != FALSE;
 }
 
 bool File::isHidden() const
 {
-    return (GetFileAttributes (getFullPathName().toUTF16()) & FILE_ATTRIBUTE_HIDDEN) != 0;
+    return (GetFileAttributes (getFullPathName().toWideCharPointer()) & FILE_ATTRIBUTE_HIDDEN) != 0;
 }
 
 //==============================================================================
@@ -157,10 +157,9 @@ bool File::deleteFile() const
 {
     if (! exists())
         return true;
-    else if (isDirectory())
-        return RemoveDirectory (fullPath.toUTF16()) != 0;
-    else
-        return DeleteFile (fullPath.toUTF16()) != 0;
+
+    return isDirectory() ? RemoveDirectory (fullPath.toWideCharPointer()) != 0
+                         : DeleteFile (fullPath.toWideCharPointer()) != 0;
 }
 
 bool File::moveToTrash() const
@@ -186,17 +185,17 @@ bool File::moveToTrash() const
 
 bool File::copyInternal (const File& dest) const
 {
-    return CopyFile (fullPath.toUTF16(), dest.getFullPathName().toUTF16(), false) != 0;
+    return CopyFile (fullPath.toWideCharPointer(), dest.getFullPathName().toWideCharPointer(), false) != 0;
 }
 
 bool File::moveInternal (const File& dest) const
 {
-    return MoveFile (fullPath.toUTF16(), dest.getFullPathName().toUTF16()) != 0;
+    return MoveFile (fullPath.toWideCharPointer(), dest.getFullPathName().toWideCharPointer()) != 0;
 }
 
 void File::createDirectoryInternal (const String& fileName) const
 {
-    CreateDirectory (fileName.toUTF16(), 0);
+    CreateDirectory (fileName.toWideCharPointer(), 0);
 }
 
 //==============================================================================
@@ -212,7 +211,7 @@ void FileInputStream::openHandle()
 {
     totalSize = file.getSize();
 
-    HANDLE h = CreateFile (file.getFullPathName().toUTF16(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
+    HANDLE h = CreateFile (file.getFullPathName().toWideCharPointer(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
 
     if (h != INVALID_HANDLE_VALUE)
@@ -239,7 +238,7 @@ size_t FileInputStream::readInternal (void* buffer, size_t numBytes)
 //==============================================================================
 void FileOutputStream::openHandle()
 {
-    HANDLE h = CreateFile (file.getFullPathName().toUTF16(), GENERIC_WRITE, FILE_SHARE_READ, 0,
+    HANDLE h = CreateFile (file.getFullPathName().toWideCharPointer(), GENERIC_WRITE, FILE_SHARE_READ, 0,
                            OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 
     if (h != INVALID_HANDLE_VALUE)
@@ -284,7 +283,7 @@ int64 File::getSize() const
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
-    if (GetFileAttributesEx (fullPath.toUTF16(), GetFileExInfoStandard, &attributes))
+    if (GetFileAttributesEx (fullPath.toWideCharPointer(), GetFileExInfoStandard, &attributes))
         return (((int64) attributes.nFileSizeHigh) << 32) | attributes.nFileSizeLow;
 
     return 0;
@@ -295,7 +294,7 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     using namespace WindowsFileHelpers;
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
-    if (GetFileAttributesEx (fullPath.toUTF16(), GetFileExInfoStandard, &attributes))
+    if (GetFileAttributesEx (fullPath.toWideCharPointer(), GetFileExInfoStandard, &attributes))
     {
         modificationTime = fileTimeToTime (&attributes.ftLastWriteTime);
         creationTime = fileTimeToTime (&attributes.ftCreationTime);
@@ -312,7 +311,7 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
     using namespace WindowsFileHelpers;
 
     bool ok = false;
-    HANDLE h = CreateFile (fullPath.toUTF16(), GENERIC_WRITE, FILE_SHARE_READ, 0,
+    HANDLE h = CreateFile (fullPath.toWideCharPointer(), GENERIC_WRITE, FILE_SHARE_READ, 0,
                            OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 
     if (h != INVALID_HANDLE_VALUE)
@@ -362,7 +361,7 @@ void File::findFileSystemRoots (Array<File>& destArray)
 const String File::getVolumeLabel() const
 {
     TCHAR dest[64];
-    if (! GetVolumeInformation (WindowsFileHelpers::getDriveFromPath (getFullPathName()).toUTF16(), dest,
+    if (! GetVolumeInformation (WindowsFileHelpers::getDriveFromPath (getFullPathName()).toWideCharPointer(), dest,
                                 numElementsInArray (dest), 0, 0, 0, 0, 0))
         dest[0] = 0;
 
@@ -374,7 +373,7 @@ int File::getVolumeSerialNumber() const
     TCHAR dest[64];
     DWORD serialNum;
 
-    if (! GetVolumeInformation (WindowsFileHelpers::getDriveFromPath (getFullPathName()).toUTF16(), dest,
+    if (! GetVolumeInformation (WindowsFileHelpers::getDriveFromPath (getFullPathName()).toWideCharPointer(), dest,
                                 numElementsInArray (dest), &serialNum, 0, 0, 0, 0))
         return 0;
 
@@ -486,7 +485,7 @@ const File File::getCurrentWorkingDirectory()
 
 bool File::setAsCurrentWorkingDirectory() const
 {
-    return SetCurrentDirectory (getFullPathName().toUTF16()) != FALSE;
+    return SetCurrentDirectory (getFullPathName().toWideCharPointer()) != FALSE;
 }
 
 //==============================================================================
@@ -495,11 +494,11 @@ const String File::getVersion() const
     String result;
 
     DWORD handle = 0;
-    DWORD bufferSize = GetFileVersionInfoSize (getFullPathName().toUTF16(), &handle);
+    DWORD bufferSize = GetFileVersionInfoSize (getFullPathName().toWideCharPointer(), &handle);
     HeapBlock<char> buffer;
     buffer.calloc (bufferSize);
 
-    if (GetFileVersionInfo (getFullPathName().toUTF16(), 0, bufferSize, buffer))
+    if (GetFileVersionInfo (getFullPathName().toWideCharPointer(), 0, bufferSize, buffer))
     {
         VS_FIXEDFILEINFO* vffi;
         UINT len = 0;
@@ -533,7 +532,7 @@ const File File::getLinkedTarget() const
         ComSmartPtr <IPersistFile> persistFile;
         if (SUCCEEDED (shellLink.QueryInterface (IID_IPersistFile, persistFile)))
         {
-            if (SUCCEEDED (persistFile->Load (p.toUTF16(), STGM_READ))
+            if (SUCCEEDED (persistFile->Load (p.toWideCharPointer(), STGM_READ))
                  && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))
             {
                 WIN32_FIND_DATA winFindData;
@@ -574,7 +573,7 @@ public:
 
         if (handle == INVALID_HANDLE_VALUE)
         {
-            handle = FindFirstFile (directoryWithWildCard.toUTF16(), &findData);
+            handle = FindFirstFile (directoryWithWildCard.toWideCharPointer(), &findData);
 
             if (handle == INVALID_HANDLE_VALUE)
                 return false;
@@ -628,7 +627,7 @@ bool PlatformUtilities::openDocument (const String& fileName, const String& para
 
     JUCE_TRY
     {
-        hInstance = ShellExecute (0, 0, fileName.toUTF16(), parameters.toUTF16(), 0, SW_SHOWDEFAULT);
+        hInstance = ShellExecute (0, 0, fileName.toWideCharPointer(), parameters.toWideCharPointer(), 0, SW_SHOWDEFAULT);
     }
     JUCE_CATCH_ALL
 
@@ -655,9 +654,9 @@ public:
     {
         cancelEvent = CreateEvent (0, FALSE, FALSE, 0);
 
-        pipeH = isPipe ? CreateNamedPipe (file.toUTF16(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
+        pipeH = isPipe ? CreateNamedPipe (file.toWideCharPointer(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
                                           PIPE_UNLIMITED_INSTANCES, 4096, 4096, 0, 0)
-                       : CreateFile (file.toUTF16(), GENERIC_READ | GENERIC_WRITE, 0, 0,
+                       : CreateFile (file.toWideCharPointer(), GENERIC_READ | GENERIC_WRITE, 0, 0,
                                      OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
     }
 

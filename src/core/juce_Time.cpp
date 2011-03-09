@@ -128,7 +128,7 @@ namespace TimeHelpers
        #elif JUCE_WINDOWS
         HeapBlock <wchar_t> tempDest;
         tempDest.calloc (maxChars + 2);
-        const int result = (int) wcsftime (tempDest, maxChars, format.toUTF16(), tm);
+        const int result = (int) wcsftime (tempDest, maxChars, format.toWideCharPointer(), tm);
         if (result > 0)
             dest.writeAll (CharPointer_UTF16 (tempDest.getData()));
         return result;
