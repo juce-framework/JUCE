@@ -139,7 +139,8 @@ public:
           minBufferSize (0),
           defaultBufferSize (0),
           latencySamples (0),
-          useExclusiveMode (useExclusiveMode_)
+          useExclusiveMode (useExclusiveMode_),
+          sampleRateHasChanged (false)
     {
         clientEvent = CreateEvent (0, false, false, _T("JuceWASAPI"));
 
@@ -206,6 +207,8 @@ public:
              && (tryInitialisingWithFormat (true, 4) || tryInitialisingWithFormat (false, 4)
                   || tryInitialisingWithFormat (false, 3) || tryInitialisingWithFormat (false, 2)))
         {
+            sampleRateHasChanged = false;
+
             channelMaps.clear();
             for (int i = 0; i <= channels.getHighestBit(); ++i)
                 if (channels[i])
@@ -216,6 +219,8 @@ public:
                 latencySamples = refTimeToSamples (latency, sampleRate);
 
             (void) check (client->GetBufferSize (&actualBufferSize));
+
+            createSessionEventCallback();
 
             return check (client->SetEventHandle (clientEvent));
         }
@@ -228,10 +233,17 @@ public:
         if (client != 0)
             client->Stop();
 
+        deleteSessionEventCallback();
         client = 0;
         ResetEvent (clientEvent);
     }
 
+    void deviceSampleRateChanged()
+    {
+        sampleRateHasChanged = true;
+    }
+
+    //==============================================================================
     ComSmartPtr <IMMDevice> device;
     ComSmartPtr <IAudioClient> client;
     double sampleRate, defaultSampleRate;
@@ -244,10 +256,61 @@ public:
     Array <int> channelMaps;
     UINT32 actualBufferSize;
     int bytesPerSample;
+    bool sampleRateHasChanged;
 
     virtual void updateFormat (bool isFloat) = 0;
 
 private:
+    //==============================================================================
+    class SessionEventCallback  : public ComBaseClassHelper <IAudioSessionEvents>
+    {
+    public:
+        SessionEventCallback (WASAPIDeviceBase& owner_) : owner (owner_) {}
+
+        HRESULT __stdcall OnDisplayNameChanged (LPCWSTR, LPCGUID)                 { return S_OK; }
+        HRESULT __stdcall OnIconPathChanged (LPCWSTR, LPCGUID)                    { return S_OK; }
+        HRESULT __stdcall OnSimpleVolumeChanged (float, BOOL, LPCGUID)            { return S_OK; }
+        HRESULT __stdcall OnChannelVolumeChanged (DWORD, float*, DWORD, LPCGUID)  { return S_OK; }
+        HRESULT __stdcall OnGroupingParamChanged (LPCGUID, LPCGUID)               { return S_OK; }
+        HRESULT __stdcall OnStateChanged (AudioSessionState)                      { return S_OK; }
+
+        HRESULT __stdcall OnSessionDisconnected (AudioSessionDisconnectReason reason)
+        {
+            if (reason == DisconnectReasonFormatChanged)
+                owner.deviceSampleRateChanged();
+
+            return S_OK;
+        }
+
+    private:
+        WASAPIDeviceBase& owner;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SessionEventCallback);
+    };
+
+    ComSmartPtr <IAudioSessionControl> audioSessionControl;
+    ComSmartPtr <SessionEventCallback> sessionEventCallback;
+
+    void createSessionEventCallback()
+    {
+        deleteSessionEventCallback();
+        client->GetService (__uuidof (IAudioSessionControl),
+                            (void**) audioSessionControl.resetAndGetPointerAddress());
+
+        if (audioSessionControl != 0)
+        {
+            sessionEventCallback = new SessionEventCallback (*this);
+            audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
+        }
+    }
+
+    void deleteSessionEventCallback()
+    {
+        audioSessionControl = 0;
+        sessionEventCallback = 0;
+    }
+
+    //==============================================================================
     const ComSmartPtr <IAudioClient> createClient()
     {
         ComSmartPtr <IAudioClient> client;
@@ -777,9 +840,9 @@ public:
         setMMThreadPriority();
 
         const int bufferSize = currentBufferSizeSamples;
-
         const int numInputBuffers = getActiveInputChannels().countNumberOfSetBits();
         const int numOutputBuffers = getActiveOutputChannels().countNumberOfSetBits();
+        bool sampleRateChanged = false;
 
         AudioSampleBuffer ins (jmax (1, numInputBuffers), bufferSize + 32);
         AudioSampleBuffer outs (jmax (1, numOutputBuffers), bufferSize + 32);
@@ -795,6 +858,9 @@ public:
 
                 if (threadShouldExit())
                     break;
+
+                if (inputDevice->sampleRateHasChanged)
+                    sampleRateChanged = true;
             }
 
             JUCE_TRY
@@ -810,7 +876,18 @@ public:
             JUCE_CATCH_EXCEPTION
 
             if (outputDevice != 0)
+            {
                 outputDevice->copyBuffers (const_cast <const float**> (outputBuffers), numOutputBuffers, bufferSize, *this);
+
+                if (outputDevice->sampleRateHasChanged)
+                    sampleRateChanged = true;
+            }
+
+            if (sampleRateChanged)
+            {
+                // xxx one of the devices has had its sample rate changed externally.. not 100% sure how
+                // to handle this..
+            }
         }
     }
 

@@ -147,6 +147,7 @@
  #include <MMReg.h>
  #include <mmdeviceapi.h>
  #include <Audioclient.h>
+ #include <Audiopolicy.h>
  #include <Avrt.h>
  #include <functiondiscoverykeys.h>
 #endif

@@ -30,4 +30,3 @@
 #include <Cocoa/Cocoa.h>
 #define JUCE_NPAPI_WRAPPED_IN_MM 1
 #include "juce_NPAPI_GlueCode.cpp"
-

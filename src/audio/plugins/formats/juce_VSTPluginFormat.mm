@@ -26,4 +26,3 @@
 // This file just wraps juce_VSTPluginFormat.cpp in an objective-C wrapper
 #define JUCE_MAC_VST_INCLUDED 1
 #include "juce_VSTPluginFormat.cpp"
-
