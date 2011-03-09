@@ -132,8 +132,7 @@ namespace XmlOutputFunctions
 
     void generateLegalCharConstants()
     {
-        uint8 n[32];
-        zerostruct (n);
+        uint8 n[32] = { 0 };
         for (int i = 0; i < 256; ++i)
             if (isLegalXmlCharSlow (i))
                 n[i >> 3] |= (1 << (i & 7));

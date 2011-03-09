@@ -878,7 +878,7 @@ public:
         on the platform, it may be using wchar_t or char character types, so that even string
         literals can't be safely used as parameters if you're writing portable code.
     */
-    static const String formatted (const String& formatString, ... );
+    static const String formatted (const String formatString, ... );
 
     //==============================================================================
     // Numeric conversions..

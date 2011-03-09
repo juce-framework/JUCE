@@ -91,8 +91,7 @@ namespace XmlIdentifierChars
 
     /*static void generateIdentifierCharConstants()
     {
-        uint32 n[8];
-        zerostruct (n);
+        uint32 n[8] = { 0 };
         for (int i = 0; i < 256; ++i)
             if (isIdentifierCharSlow (i))
                 n[i >> 5] |= (1 << (i & 31));

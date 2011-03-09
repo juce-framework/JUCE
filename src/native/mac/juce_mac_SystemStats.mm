@@ -124,13 +124,13 @@ int PlatformUtilities::getOSXMinorVersionNumber()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-#if JUCE_IOS
+   #if JUCE_IOS
     return false;
-#elif JUCE_64BIT
+   #elif JUCE_64BIT
     return true;
-#else
+   #else
     return PlatformUtilities::getOSXMinorVersionNumber() >= 6;
-#endif
+   #endif
 }
 
 int SystemStats::getMemorySizeInMegabytes()
@@ -144,17 +144,16 @@ int SystemStats::getMemorySizeInMegabytes()
 
 const String SystemStats::getCpuVendor()
 {
-#if JUCE_INTEL
+   #if JUCE_INTEL
     uint32 dummy = 0;
-    uint32 vendor[4];
-    zerostruct (vendor);
+    uint32 vendor[4] = { 0 };
 
     SystemStatsHelpers::doCPUID (dummy, vendor[0], vendor[2], vendor[1], 0);
 
     return String (reinterpret_cast <const char*> (vendor), 12);
-#else
+   #else
     return String::empty;
-#endif
+   #endif
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
@@ -164,10 +163,11 @@ int SystemStats::getCpuSpeedInMegaherz()
     int mib[] = { CTL_HW, HW_CPU_FREQ };
     sysctl (mib, 2, &speedHz, &speedSize, 0, 0);
 
-#if JUCE_BIG_ENDIAN
+   #if JUCE_BIG_ENDIAN
     if (speedSize == 4)
         speedHz >>= 32;
-#endif
+   #endif
+
     return (int) (speedHz / 1000000);
 }
 

@@ -100,8 +100,7 @@ namespace FileChooserHelpers
 
                 if (comp != 0)
                 {
-                    WCHAR path [MAX_PATH * 2];
-                    zerostruct (path);
+                    WCHAR path [MAX_PATH * 2] = { 0 };
                     CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
 
                     comp->selectedFileChanged (File (path));

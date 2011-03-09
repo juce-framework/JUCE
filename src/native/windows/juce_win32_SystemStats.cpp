@@ -344,9 +344,8 @@ int SystemStats::getPageSize()
 //==============================================================================
 const String SystemStats::getLogonName()
 {
-    TCHAR text [256];
+    TCHAR text [256] = { 0 };
     DWORD len = numElementsInArray (text) - 2;
-    zerostruct (text);
     GetUserName (text, &len);
     return String (text, len);
 }

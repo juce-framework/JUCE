@@ -708,8 +708,7 @@ public:
         desc.name = name;
 
         {
-            char buffer [512];
-            zerostruct (buffer);
+            char buffer [512] = { 0 };
             dispatch (effGetEffectName, 0, 0, buffer, 0);
 
             desc.descriptiveName = String (buffer).trim();
@@ -725,8 +724,7 @@ public:
         desc.category = getCategory();
 
         {
-            char buffer [kVstMaxVendorStrLen + 8];
-            zerostruct (buffer);
+            char buffer [kVstMaxVendorStrLen + 8] = { 0 };
             dispatch (effGetVendorString, 0, 0, buffer, 0);
             desc.manufacturerName = buffer;
         }
@@ -2489,8 +2487,7 @@ const String VSTPluginInstance::getParameterName (int index)
     {
         jassert (index >= 0 && index < effect->numParams);
 
-        char nm [256];
-        zerostruct (nm);
+        char nm [256] = { 0 };
         dispatch (effGetParamName, index, 0, nm, 0);
         return String (nm).trim();
     }
@@ -2504,8 +2501,7 @@ const String VSTPluginInstance::getParameterLabel (int index) const
     {
         jassert (index >= 0 && index < effect->numParams);
 
-        char nm [256];
-        zerostruct (nm);
+        char nm [256] = { 0 };
         dispatch (effGetParamLabel, index, 0, nm, 0);
         return String (nm).trim();
     }
@@ -2519,8 +2515,7 @@ const String VSTPluginInstance::getParameterText (int index)
     {
         jassert (index >= 0 && index < effect->numParams);
 
-        char nm [256];
-        zerostruct (nm);
+        char nm [256] = { 0 };
         dispatch (effGetParamDisplay, index, 0, nm, 0);
         return String (nm).trim();
     }
@@ -2575,8 +2570,7 @@ const String VSTPluginInstance::getProgramName (int index)
     }
     else if (effect != 0)
     {
-        char nm [256];
-        zerostruct (nm);
+        char nm [256] = { 0 };
 
         if (dispatch (effGetProgramNameIndexed,
                       jlimit (0, getNumPrograms(), index),
@@ -2606,8 +2600,7 @@ void VSTPluginInstance::updateStoredProgramNames()
 {
     if (effect != 0 && getNumPrograms() > 0)
     {
-        char nm [256];
-        zerostruct (nm);
+        char nm [256] = { 0 };
 
         // only do this if the plugin can't use indexed names..
         if (dispatch (effGetProgramNameIndexed, 0, -1, nm, 0) == 0)
@@ -2632,8 +2625,7 @@ const String VSTPluginInstance::getCurrentProgramName()
 {
     if (effect != 0)
     {
-        char nm [256];
-        zerostruct (nm);
+        char nm [256] = { 0 };
         dispatch (effGetProgramName, 0, 0, nm, 0);
 
         const int index = getCurrentProgram();
@@ -2778,11 +2770,9 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
         else
         {
             // It's a shell plugin, so iterate all the subtypes...
-            char shellEffectName [64];
-
             for (;;)
             {
-                zerostruct (shellEffectName);
+                char shellEffectName [64] = { 0 };
                 const int uid = instance->dispatch (effShellGetNextPlugin, 0, 0, shellEffectName, 0);
 
                 if (uid == 0)

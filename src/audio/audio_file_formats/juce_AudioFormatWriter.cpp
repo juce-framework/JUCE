@@ -60,8 +60,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     const int bufferSize = 16384;
     AudioSampleBuffer tempBuffer (numChannels, bufferSize);
 
-    int* buffers [128];
-    zerostruct (buffers);
+    int* buffers [128] = { 0 };
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
         buffers[i] = reinterpret_cast<int*> (tempBuffer.getSampleData (i, 0));
@@ -90,7 +89,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                     const double factor = 1.0 / std::numeric_limits<int>::max();
 
                     for (int i = 0; i < numToDo; ++i)
-                        ((float*) b)[i] = (float) (factor * b[i]);
+                        reinterpret_cast<float*> (b)[i] = (float) (factor * b[i]);
                 }
                 else
                 {

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	47
+#define JUCE_BUILDNUMBER	48
 
 /** Current Juce version number.
 
@@ -5012,7 +5012,7 @@ public:
 		on the platform, it may be using wchar_t or char character types, so that even string
 		literals can't be safely used as parameters if you're writing portable code.
 	*/
-	static const String formatted (const String& formatString, ... );
+	static const String formatted (const String formatString, ... );
 
 	// Numeric conversions..
 

@@ -1823,31 +1823,28 @@ bool String::containsNonWhitespaceChars() const throw()
     return false;
 }
 
-const String String::formatted (const String& pf, ... )
+// Note! The format parameter here MUST NOT be a reference, otherwise MS's va_start macro fails to work (but still compiles).
+const String String::formatted (const String pf, ... )
 {
-    va_list args;
-    va_start (args, pf);
-
     size_t bufferSize = 256;
 
     for (;;)
     {
-      #if JUCE_LINUX && JUCE_64BIT
+        va_list args;
+        va_start (args, pf);
+
+       #if JUCE_WINDOWS
         HeapBlock <wchar_t> temp (bufferSize);
-        va_list tempArgs;
-        va_copy (tempArgs, args);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toUTF32(), tempArgs);
-        va_end (tempArgs);
-      #elif JUCE_WINDOWS
-        HeapBlock <wchar_t> temp (bufferSize);
-        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toUTF16(), args);
-      #elif JUCE_ANDROID
+        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
+       #elif JUCE_ANDROID
         HeapBlock <char> temp (bufferSize);
         const int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
-      #else
+       #else
         HeapBlock <wchar_t> temp (bufferSize);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toUTF32(), args);
-      #endif
+        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
+       #endif
+
+        va_end (args);
 
         if (num > 0)
             return String (temp);

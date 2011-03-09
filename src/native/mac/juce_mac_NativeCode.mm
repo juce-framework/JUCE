@@ -124,11 +124,11 @@ class MessageQueue
 public:
     MessageQueue()
     {
-      #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 && ! JUCE_IOS
+       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 && ! JUCE_IOS
         runLoop = CFRunLoopGetMain();
-      #else
+       #else
         runLoop = CFRunLoopGetCurrent();
-      #endif
+       #endif
 
         CFRunLoopSourceContext sourceContext;
         zerostruct (sourceContext);

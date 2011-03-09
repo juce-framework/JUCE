@@ -1801,8 +1801,7 @@ private:
 
         if (RegOpenKeyEx (hk, keyName.toUTF16(), 0, KEY_READ, &subKey) == ERROR_SUCCESS)
         {
-            TCHAR buf [256];
-            zerostruct (buf);
+            TCHAR buf [256] = { 0 };
             DWORD dtype = REG_SZ;
             DWORD dsize = sizeof (buf);
 
