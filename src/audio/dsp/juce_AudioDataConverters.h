@@ -156,8 +156,8 @@ public:
         inline void skip (int numSamples) throw()               { data += numSamples; }
         inline float getAsFloatLE() const throw()               { return (float) ((1.0 / (1.0 + maxValue)) * (int16) ByteOrder::swapIfBigEndian (*data)); }
         inline float getAsFloatBE() const throw()               { return (float) ((1.0 / (1.0 + maxValue)) * (int16) ByteOrder::swapIfLittleEndian (*data)); }
-        inline void setAsFloatLE (float newValue) throw()       { *data = ByteOrder::swapIfBigEndian ((uint16) jlimit ((int16) -maxValue, (int16) maxValue, (int16) roundToInt (newValue * (1.0 + maxValue)))); }
-        inline void setAsFloatBE (float newValue) throw()       { *data = ByteOrder::swapIfLittleEndian ((uint16) jlimit ((int16) -maxValue, (int16) maxValue, (int16) roundToInt (newValue * (1.0 + maxValue)))); }
+        inline void setAsFloatLE (float newValue) throw()       { *data = ByteOrder::swapIfBigEndian ((uint16) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
+        inline void setAsFloatBE (float newValue) throw()       { *data = ByteOrder::swapIfLittleEndian ((uint16) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
         inline int32 getAsInt32LE() const throw()               { return (int32) (ByteOrder::swapIfBigEndian ((uint16) *data) << 16); }
         inline int32 getAsInt32BE() const throw()               { return (int32) (ByteOrder::swapIfLittleEndian ((uint16) *data) << 16); }
         inline void setAsInt32LE (int32 newValue) throw()       { *data = ByteOrder::swapIfBigEndian ((uint16) (newValue >> 16)); }

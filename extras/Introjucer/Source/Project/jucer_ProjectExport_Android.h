@@ -55,7 +55,7 @@ public:
             getTargetLocation() = getDefaultBuildsRootFolder() + "Android";
 
         if (getSDKPath().toString().isEmpty())
-            getSDKPath() = "${user.home}/SDKs/android-sdk-mac_86";
+            getSDKPath() = "${user.home}/SDKs/android-sdk-mac_x86";
 
         if (getNDKPath().toString().isEmpty())
             getNDKPath() = "${user.home}/SDKs/android-ndk-r5";
