@@ -301,11 +301,15 @@ private:
         {
             sessionEventCallback = new SessionEventCallback (*this);
             audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
+            sessionEventCallback->Release(); // (required because ComBaseClassHelper objects are constructed with a ref count of 1)
         }
     }
 
     void deleteSessionEventCallback()
     {
+        if (audioSessionControl != 0 && sessionEventCallback != 0)
+            audioSessionControl->UnregisterAudioSessionNotification (sessionEventCallback);
+
         audioSessionControl = 0;
         sessionEventCallback = 0;
     }

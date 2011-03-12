@@ -277,4 +277,10 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
     return true;
 }
 
+// (This is used as a way for the zip file code to use the crc32 function without including zlib)
+unsigned long juce_crc32 (unsigned long crc, const unsigned char* buf, unsigned len)
+{
+    return zlibNamespace::crc32 (crc, buf, len);
+}
+
 END_JUCE_NAMESPACE

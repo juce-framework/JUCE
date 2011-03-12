@@ -287,7 +287,7 @@ private:
     {
         XmlElement* proj = new XmlElement ("project");
         proj->setAttribute ("name", project.getProjectName().toString());
-        proj->setAttribute ("default", "help");
+        proj->setAttribute ("default", "debug");
 
         proj->createNewChildElement ("property")->setAttribute ("file", "local.properties");
         proj->createNewChildElement ("property")->setAttribute ("file", "build.properties");

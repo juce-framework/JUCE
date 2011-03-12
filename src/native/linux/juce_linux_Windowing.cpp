@@ -747,7 +747,7 @@ class LinuxComponentPeer  : public ComponentPeer
 {
 public:
     //==============================================================================
-    LinuxComponentPeer (Component* const component, const int windowStyleFlags, Window parentToAddTo))
+    LinuxComponentPeer (Component* const component, const int windowStyleFlags, Window parentToAddTo)
         : ComponentPeer (component, windowStyleFlags),
           windowH (0), parentWindow (0),
           wx (0), wy (0), ww (0), wh (0),

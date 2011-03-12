@@ -31,6 +31,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../streams/juce_GZIPDecompressorInputStream.h"
 #include "../streams/juce_BufferedInputStream.h"
 #include "../streams/juce_FileInputSource.h"
+#include "../streams/juce_MemoryOutputStream.h"
+#include "../streams/juce_GZIPCompressorOutputStream.h"
 #include "juce_FileInputStream.h"
 #include "juce_FileOutputStream.h"
 #include "../../threads/juce_ScopedLock.h"
@@ -66,9 +68,9 @@ public:
         }
         else
         {
-#if JUCE_DEBUG
+           #if JUCE_DEBUG
             file_.numOpenStreams++;
-#endif
+           #endif
         }
 
         char buffer [30];
@@ -85,10 +87,10 @@ public:
 
     ~ZipInputStream()
     {
-#if JUCE_DEBUG
+       #if JUCE_DEBUG
         if (inputStream != 0 && inputStream == file.inputStream)
             file.numOpenStreams--;
-#endif
+       #endif
     }
 
     int64 getTotalLength()
@@ -157,9 +159,9 @@ private:
 //==============================================================================
 ZipFile::ZipFile (InputStream* const source_, const bool deleteStreamWhenDestroyed)
    : inputStream (source_)
-#if JUCE_DEBUG
+    #if JUCE_DEBUG
      , numOpenStreams (0)
-#endif
+    #endif
 {
     if (deleteStreamWhenDestroyed)
         streamToDelete = inputStream;
@@ -169,9 +171,9 @@ ZipFile::ZipFile (InputStream* const source_, const bool deleteStreamWhenDestroy
 
 ZipFile::ZipFile (const File& file)
     : inputStream (0)
-#if JUCE_DEBUG
+     #if JUCE_DEBUG
       , numOpenStreams (0)
-#endif
+     #endif
 {
     inputSource = new FileInputSource (file);
     init();
@@ -180,16 +182,16 @@ ZipFile::ZipFile (const File& file)
 ZipFile::ZipFile (InputSource* const inputSource_)
     : inputStream (0),
       inputSource (inputSource_)
-#if JUCE_DEBUG
+     #if JUCE_DEBUG
       , numOpenStreams (0)
-#endif
+     #endif
 {
     init();
 }
 
 ZipFile::~ZipFile()
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     entries.clear();
 
     /* If you hit this assertion, it means you've created a stream to read one of the items in the
@@ -198,7 +200,7 @@ ZipFile::~ZipFile()
        stream that the file uses to read itself.
     */
     jassert (numOpenStreams == 0);
-#endif
+   #endif
 }
 
 //==============================================================================
@@ -424,6 +426,158 @@ bool ZipFile::uncompressEntry (const int index,
     }
 
     return false;
+}
+
+
+//=============================================================================
+extern unsigned long juce_crc32 (unsigned long crc, const unsigned char* buf, unsigned len);
+
+class ZipFile::Builder::Item
+{
+public:
+    Item (const File& file_, const int compressionLevel_, const String& storedPathName_)
+        : file (file_),
+          storedPathname (storedPathName_.isEmpty() ? file_.getFileName() : storedPathName_),
+          compressionLevel (compressionLevel_),
+          compressedSize (0),
+          headerStart (0)
+    {
+    }
+
+    bool writeData (OutputStream& target, const int64 overallStartPosition)
+    {
+        MemoryOutputStream compressedData;
+
+        if (compressionLevel > 0)
+        {
+            GZIPCompressorOutputStream compressor (&compressedData, compressionLevel, false,
+                                                   GZIPCompressorOutputStream::windowBitsRaw);
+            if (! writeSource (compressor))
+                return false;
+        }
+        else
+        {
+            if (! writeSource (compressedData))
+                return false;
+        }
+
+        compressedSize = compressedData.getDataSize();
+        headerStart = (int) (target.getPosition() - overallStartPosition);
+
+        target.writeInt (0x04034b50);
+        writeFlagsAndSizes (target);
+        target << storedPathname
+               << compressedData;
+
+        return true;
+    }
+
+    bool writeDirectoryEntry (OutputStream& target)
+    {
+        target.writeInt (0x02014b50);
+        target.writeShort (20); // version written
+        writeFlagsAndSizes (target);
+        target.writeShort (0); // comment length
+        target.writeShort (0); // start disk num
+        target.writeShort (0); // internal attributes
+        target.writeInt (0); // external attributes
+        target.writeInt (headerStart);
+        target << storedPathname;
+
+        return true;
+    }
+
+private:
+    const File file;
+    String storedPathname;
+    int compressionLevel, compressedSize, headerStart;
+    uint32 checksum;
+
+    void writeTimeAndDate (OutputStream& target) const
+    {
+        const Time t (file.getLastModificationTime());
+        target.writeShort ((short) (t.getSeconds() + (t.getMinutes() << 5) + (t.getHours() << 11)));
+        target.writeShort ((short) (t.getDayOfMonth() + ((t.getMonth() + 1) << 5) + ((t.getYear() - 1980) << 9)));
+    }
+
+    bool writeSource (OutputStream& target)
+    {
+        checksum = 0;
+        ScopedPointer<FileInputStream> input (file.createInputStream());
+
+        if (input == 0)
+            return false;
+
+        const int bufferSize = 2048;
+        HeapBlock<unsigned char> buffer (bufferSize);
+
+        while (! input->isExhausted())
+        {
+            const int bytesRead = input->read (buffer, bufferSize);
+
+            if (bytesRead < 0)
+                return false;
+
+            checksum = juce_crc32 (checksum, buffer, bytesRead);
+            target.write (buffer, bytesRead);
+        }
+
+        return true;
+    }
+
+    void writeFlagsAndSizes (OutputStream& target) const
+    {
+        target.writeShort (10); // version needed
+        target.writeShort (0); // flags
+        target.writeShort (compressionLevel > 0 ? (short) 8 : (short) 0);
+        writeTimeAndDate (target);
+        target.writeInt (checksum);
+        target.writeInt (compressedSize);
+        target.writeInt ((int) file.getSize());
+        target.writeShort ((short) storedPathname.toUTF8().sizeInBytes() - 1);
+        target.writeShort (0); // extra field length
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Item);
+};
+
+//=============================================================================
+ZipFile::Builder::Builder() {}
+ZipFile::Builder::~Builder() {}
+
+void ZipFile::Builder::addFile (const File& fileToAdd, const int compressionLevel, const String& storedPathName)
+{
+    items.add (new Item (fileToAdd, compressionLevel, storedPathName));
+}
+
+bool ZipFile::Builder::writeToStream (OutputStream& target) const
+{
+    const int64 fileStart = target.getPosition();
+
+    int i;
+    for (i = 0; i < items.size(); ++i)
+        if (! items.getUnchecked (i)->writeData (target, fileStart))
+            return false;
+
+    const int64 directoryStart = target.getPosition();
+
+    for (i = 0; i < items.size(); ++i)
+        if (! items.getUnchecked (i)->writeDirectoryEntry (target))
+            return false;
+
+    const int64 directoryEnd = target.getPosition();
+
+    target.writeInt (0x06054b50);
+    target.writeShort (0);
+    target.writeShort (0);
+    target.writeShort ((short) items.size());
+    target.writeShort ((short) items.size());
+    target.writeInt ((int) (directoryEnd - directoryStart));
+    target.writeInt ((int) (directoryStart - fileStart));
+    target.writeShort (0);
+    target.flush();
+
+    return true;
 }
 
 

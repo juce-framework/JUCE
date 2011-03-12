@@ -118,6 +118,11 @@ public:
         messageQueue.post (m);
     }
 
+    static NSString* getBroacastEventName()
+    {
+        return juceStringToNS ("juce_" + String::toHexString (File::getSpecialLocation (File::currentExecutableFile).hashCode64()));
+    }
+
 private:
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
@@ -159,6 +164,7 @@ using namespace JUCE_NAMESPACE;
 - (void) applicationDidResignActive: (NSNotification*) aNotification;
 - (void) applicationWillUnhide: (NSNotification*) aNotification;
 - (void) performCallback: (id) info;
+- (void) broadcastMessageCallback: (NSNotification*) info;
 - (void) dummyMethod;
 @end
 
@@ -176,6 +182,11 @@ using namespace JUCE_NAMESPACE;
     {
         oldDelegate = [NSApp delegate];
         [NSApp setDelegate: self];
+
+        [[NSDistributedNotificationCenter defaultCenter] addObserver: self
+                                                            selector: @selector (broadcastMessageCallback:)
+                                                                name: AppDelegateRedirector::getBroacastEventName()
+                                                              object: nil];
     }
     else
     {
@@ -197,6 +208,10 @@ using namespace JUCE_NAMESPACE;
 {
     if (oldDelegate != 0)
         [NSApp setDelegate: oldDelegate];
+
+    [[NSDistributedNotificationCenter defaultCenter] removeObserver: self
+                                                               name: AppDelegateRedirector::getBroacastEventName()
+                                                             object: nil];
 
     redirector->deleteSelf();
     [super dealloc];
@@ -260,6 +275,13 @@ using namespace JUCE_NAMESPACE;
     }
 }
 
+- (void) broadcastMessageCallback: (NSNotification*) n
+{
+    NSDictionary* dict = (NSDictionary*) [n userInfo];
+    const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: @"message"]));
+    MessageManager::getInstance()->deliverBroadcastMessage (messageString);
+}
+
 - (void) dummyMethod  {}   // (used as a way of running a dummy thread)
 
 @end
@@ -278,7 +300,7 @@ void MessageManager::runDispatchLoop()
         // must only be called by the message thread!
         jassert (isThisTheMessageThread());
 
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
+      #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
         @try
         {
             [NSApp run];
@@ -292,9 +314,9 @@ void MessageManager::runDispatchLoop()
         @finally
         {
         }
-#else
+       #else
         [NSApp run];
-#endif
+       #endif
     }
 }
 
@@ -453,8 +475,14 @@ bool juce_postMessageToSystemQueue (Message* message)
     return true;
 }
 
-void MessageManager::broadcastMessage (const String&)
+void MessageManager::broadcastMessage (const String& message)
 {
+    NSDictionary* info = [NSDictionary dictionaryWithObject: juceStringToNS (message)
+                                                     forKey: @"message"];
+
+    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegateRedirector::getBroacastEventName()
+                                                                   object: nil
+                                                                 userInfo: info];
 }
 
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)

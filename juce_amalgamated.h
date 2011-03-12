@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	49
+#define JUCE_BUILDNUMBER	50
 
 /** Current Juce version number.
 
@@ -19000,6 +19000,42 @@ public:
 	bool uncompressEntry (int index,
 						  const File& targetDirectory,
 						  bool shouldOverwriteFiles = true);
+
+	/** Used to create a new zip file.
+
+		Create a ZipFile::Builder object, and call its addFile() method to add some files,
+		then you can write it to a stream with write().
+
+		Currently this just stores the files with no compression.. That will be added
+		soon!
+	*/
+	class Builder
+	{
+	public:
+		Builder();
+		~Builder();
+
+		/** Adds a file while should be added to the archive.
+			The file isn't read immediately, all the files will be read later when the writeToStream()
+			method is called.
+
+			The compressionLevel can be between 0 (no compression), and 9 (maximum compression).
+			If the storedPathName parameter is specified, you can customise the partial pathname that
+			will be stored for this file.
+		*/
+		void addFile (const File& fileToAdd, int compressionLevel,
+					  const String& storedPathName = String::empty);
+
+		/** Generates the zip file, writing it to the specified stream. */
+		bool writeToStream (OutputStream& target) const;
+
+	private:
+		class Item;
+		friend class OwnedArray<Item>;
+		OwnedArray<Item> items;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Builder);
+	};
 
 private:
 
@@ -59899,7 +59935,7 @@ public:
 
 	virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
-	void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path);
+	virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path);
 
 	virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
 
@@ -63522,7 +63558,6 @@ private:
 	Image background;
 
 	void refreshPath();
-	void drawCallOutBoxBackground (Graphics& g, const Path& outline, int width, int height);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox);
 };

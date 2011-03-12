@@ -47,10 +47,10 @@
  #include <netdb.h>
  #include <arpa/inet.h>
  #include <netinet/tcp.h>
+#endif
 
- #ifndef AI_NUMERICSERV  // (missing in older Mac SDKs)
-  #define AI_NUMERICSERV 0x1000
- #endif
+#ifndef AI_NUMERICSERV  // (missing in older Mac SDKs)
+ #define AI_NUMERICSERV 0x1000
 #endif
 
 #include "../../core/juce_StandardHeader.h"

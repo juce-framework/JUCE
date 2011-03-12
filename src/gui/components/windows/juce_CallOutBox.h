@@ -119,7 +119,6 @@ private:
     Image background;
 
     void refreshPath();
-    void drawCallOutBoxBackground (Graphics& g, const Path& outline, int width, int height);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox);
 };

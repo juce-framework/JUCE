@@ -138,6 +138,9 @@ public:
         {
             component->setAlpha ((float) destAlpha);
             component->setBounds (destination);
+
+            if (proxy != 0)
+                component->setVisible (destAlpha > 0);
         }
     }
 

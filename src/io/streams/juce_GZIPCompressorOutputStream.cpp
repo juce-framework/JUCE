@@ -41,7 +41,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_GZIPCompressorOutputStream.h"
 
-
 //==============================================================================
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
