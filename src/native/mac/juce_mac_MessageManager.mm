@@ -469,7 +469,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool juce_postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (Message* message)
 {
     juceAppDelegate->redirector->postMessage (message);
     return true;

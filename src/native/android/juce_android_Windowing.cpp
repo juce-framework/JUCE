@@ -405,8 +405,8 @@ public:
         return s;
     }
 
-#if USE_ANDROID_CANVAS
-    int getCurrentRenderingEngine() throw()
+   #if USE_ANDROID_CANVAS
+    int getCurrentRenderingEngine() const
     {
         return usingAndroidGraphics ? 1 : 0;
     }
@@ -419,7 +419,7 @@ public:
             component->repaint();
         }
     }
-#endif
+   #endif
 
     //==============================================================================
     static AndroidComponentPeer* findPeerForJavaView (jobject viewToFind)
@@ -612,8 +612,9 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
+void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
+    // TODO
 }
 
 //==============================================================================
@@ -640,19 +641,9 @@ const Image juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
-void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
-{
-    return 0;
-}
-
-void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)
-{
-}
-
-void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType type)
-{
-    return 0;
-}
+void* MouseCursor::createMouseCursorFromImage (const Image&, int, int)                          { return 0; }
+void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType)            { return 0; }
+void MouseCursor::deleteMouseCursor (void* const /*cursorHandle*/, const bool /*isStandard*/)   {}
 
 //==============================================================================
 void MouseCursor::showInWindow (ComponentPeer*) const   {}

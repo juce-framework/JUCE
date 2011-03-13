@@ -381,7 +381,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool juce_postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (Message* message)
 {
     if (LinuxErrorHandling::errorOccurred)
         return false;
@@ -439,7 +439,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func
 }
 
 // this function expects that it will NEVER be called simultaneously for two concurrent threads
-bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {
     while (! LinuxErrorHandling::errorOccurred)
     {

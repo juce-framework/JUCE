@@ -1008,9 +1008,9 @@ private:
     HWND hwnd, parentToAddTo;
     ScopedPointer<DropShadower> shadower;
     RenderingEngineType currentRenderingEngine;
-  #if JUCE_DIRECT2D
+   #if JUCE_DIRECT2D
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
-  #endif
+   #endif
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
     BorderSize<int> windowBorder;
     HICON currentWindowIcon;
@@ -1022,11 +1022,8 @@ private:
     class TemporaryImage    : public Timer
     {
     public:
-        //==============================================================================
         TemporaryImage() {}
-        ~TemporaryImage() {}
 
-        //==============================================================================
         const Image& getImage (const bool transparent, const int w, const int h)
         {
             const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
@@ -1038,7 +1035,6 @@ private:
             return image;
         }
 
-        //==============================================================================
         void timerCallback()
         {
             stopTimer();
@@ -1058,49 +1054,50 @@ private:
     {
     public:
         WindowClassHolder()
-            : windowClassName ("JUCE_")
         {
-            // this name has to be different for each app/dll instance because otherwise
-            // poor old Win32 can get a bit confused (even despite it not being a process-global
-            // window class).
+            // this name has to be different for each app/dll instance because otherwise poor old Win32 can
+            // get a bit confused (even despite it not being a process-global window class).
+            String windowClassName ("JUCE_");
             windowClassName << (int) (Time::currentTimeMillis() & 0x7fffffff);
 
             HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
 
-            TCHAR moduleFile [1024];
-            moduleFile[0] = 0;
+            TCHAR moduleFile [1024] = { 0 };
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
             WNDCLASSEX wcex;
+            zerostruct (wcex);
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
             wcex.lpfnWndProc    = (WNDPROC) windowProc;
             wcex.lpszClassName  = windowClassName.toWideCharPointer();
-            wcex.cbClsExtra     = 0;
             wcex.cbWndExtra     = 32;
             wcex.hInstance      = moduleHandle;
             wcex.hIcon          = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
             iconNum = 1;
             wcex.hIconSm        = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
-            wcex.hCursor        = 0;
-            wcex.hbrBackground  = 0;
-            wcex.lpszMenuName   = 0;
 
-            RegisterClassEx (&wcex);
+            atom = RegisterClassEx (&wcex);
+            jassert (atom != 0);
         }
 
         ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
-                UnregisterClass (windowClassName.toWideCharPointer(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
+                UnregisterClass (getWindowClassName(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
 
             clearSingletonInstance();
         }
 
-        String windowClassName;
+        LPCTSTR getWindowClassName() const throw()      { return (LPCTSTR) MAKELONG (atom, 0); }
 
         juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder);
+
+    private:
+        ATOM atom;
+
+        JUCE_DECLARE_NON_COPYABLE (WindowClassHolder);
     };
 
     //==============================================================================
@@ -1155,12 +1152,12 @@ private:
         if ((styleFlags & windowIgnoresMouseClicks) != 0)
             exstyle |= WS_EX_TRANSPARENT;
 
-        if ((styleFlags & windowIsSemiTransparent) != 0
-              && Desktop::canUseSemiTransparentWindows())
+        if ((styleFlags & windowIsSemiTransparent) != 0 && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 
-        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName.toWideCharPointer(), L"", type, 0, 0, 0, 0,
-                               parentToAddTo, 0, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
+        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
+                               L"", type, 0, 0, 0, 0, parentToAddTo, 0,
+                               (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
 
        #if JUCE_DIRECT2D
         setCurrentRenderingEngine (1);
@@ -1431,10 +1428,7 @@ private:
         return s;
     }
 
-    int getCurrentRenderingEngine() throw()
-    {
-        return currentRenderingEngine;
-    }
+    int getCurrentRenderingEngine() const    { return currentRenderingEngine; }
 
    #if JUCE_DIRECT2D
     void updateDirect2DContext()
@@ -2477,8 +2471,6 @@ public:
         timerCallback();
     }
 
-    ~ScreenSaverDefeater() {}
-
     void timerCallback()
     {
         if (Process::isForegroundProcess())
@@ -2534,7 +2526,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 */
 
 //==============================================================================
-void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
+void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     if (enableOrDisable)
         kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));

@@ -181,16 +181,16 @@ private:
     bool quitMessagePosted, quitMessageReceived;
     Thread::ThreadID messageThreadId;
 
-    static void* exitModalLoopCallback (void*);
-
-    void postMessageToQueue (Message* message);
-
-    static void doPlatformSpecificInitialisation();
-    static void doPlatformSpecificShutdown();
-
     friend class MessageManagerLock;
     Thread::ThreadID volatile threadWithLock;
     CriticalSection lockingLock;
+
+    void postMessageToQueue (Message* message);
+    static bool postMessageToSystemQueue (Message*);
+    static void* exitModalLoopCallback (void*);
+    static void doPlatformSpecificInitialisation();
+    static void doPlatformSpecificShutdown();
+    static bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager);
 };

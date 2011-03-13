@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	50
+#define JUCE_BUILDNUMBER	51
 
 /** Current Juce version number.
 
@@ -33422,6 +33422,8 @@ private:
 	void removeDesktopComponent (Component* c);
 	void componentBroughtToFront (Component* c);
 
+	static void setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars);
+
 	void triggerFocusCallback();
 	void handleAsyncUpdate();
 
@@ -48064,16 +48066,16 @@ private:
 	bool quitMessagePosted, quitMessageReceived;
 	Thread::ThreadID messageThreadId;
 
-	static void* exitModalLoopCallback (void*);
-
-	void postMessageToQueue (Message* message);
-
-	static void doPlatformSpecificInitialisation();
-	static void doPlatformSpecificShutdown();
-
 	friend class MessageManagerLock;
 	Thread::ThreadID volatile threadWithLock;
 	CriticalSection lockingLock;
+
+	void postMessageToQueue (Message* message);
+	static bool postMessageToSystemQueue (Message*);
+	static void* exitModalLoopCallback (void*);
+	static void doPlatformSpecificInitialisation();
+	static void doPlatformSpecificShutdown();
+	static bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager);
 };
@@ -63879,7 +63881,7 @@ public:
 	static bool isValidPeer (const ComponentPeer* peer) throw();
 
 	virtual const StringArray getAvailableRenderingEngines();
-	virtual int getCurrentRenderingEngine() throw();
+	virtual int getCurrentRenderingEngine() const;
 	virtual void setCurrentRenderingEngine (int index);
 
 protected:

@@ -565,7 +565,7 @@ const StringArray ComponentPeer::getAvailableRenderingEngines()
     return s;
 }
 
-int ComponentPeer::getCurrentRenderingEngine() throw()
+int ComponentPeer::getCurrentRenderingEngine() const
 {
     return 0;
 }

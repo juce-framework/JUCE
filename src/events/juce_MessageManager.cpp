@@ -35,12 +35,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../threads/juce_ScopedLock.h"
 #include "../core/juce_Time.h"
 
-
-//==============================================================================
-// platform-specific functions..
-bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
-bool juce_postMessageToSystemQueue (Message* message);
-
 //==============================================================================
 MessageManager* MessageManager::instance = 0;
 
@@ -83,7 +77,7 @@ MessageManager* MessageManager::getInstance() throw()
 
 void MessageManager::postMessageToQueue (Message* const message)
 {
-    if (quitMessagePosted || ! juce_postMessageToSystemQueue (message))
+    if (quitMessagePosted || ! postMessageToSystemQueue (message))
         Message::Ptr deleter (message); // (this will delete messages that were just created with a 0 ref count)
 }
 
@@ -152,7 +146,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     {
         JUCE_TRY
         {
-            if (! juce_dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
+            if (! dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
             {
                 const int msToWait = (int) (endTime - Time::currentTimeMillis());
 

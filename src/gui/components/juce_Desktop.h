@@ -383,6 +383,8 @@ private:
     void removeDesktopComponent (Component* c);
     void componentBroughtToFront (Component* c);
 
+    static void setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars);
+
     void triggerFocusCallback();
     void handleAsyncUpdate();
 

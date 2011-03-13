@@ -33,7 +33,7 @@ void MessageManager::doPlatformSpecificInitialisation() {}
 void MessageManager::doPlatformSpecificShutdown() {}
 
 //==============================================================================
-bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
+bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
 {
     Logger::outputDebugString ("*** Modal loops are not possible in Android!! Exiting...");
     exit (1);
@@ -42,7 +42,7 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
 }
 
 //==============================================================================
-bool juce_postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (Message* message)
 {
     message->incReferenceCount();
     getEnv()->CallVoidMethod (android.activity, android.postMessage, (jlong) (pointer_sized_uint) message);

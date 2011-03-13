@@ -138,7 +138,7 @@ void MessageManager::doPlatformSpecificShutdown()
     deleteAndZero (dispatcher);
 }
 
-bool juce_postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (Message* message)
 {
     if (dispatcher != 0)
         dispatcher->messageQueue.post (message);

@@ -2648,7 +2648,7 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 
 
 //==============================================================================
-void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
     if (enableOrDisable)
         kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));

@@ -353,7 +353,7 @@ public:
 
     //==============================================================================
     virtual const StringArray getAvailableRenderingEngines();
-    virtual int getCurrentRenderingEngine() throw();
+    virtual int getCurrentRenderingEngine() const;
     virtual void setCurrentRenderingEngine (int index);
 
 protected:

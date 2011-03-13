@@ -916,8 +916,9 @@ void UIViewComponentPeer::redirectMovedOrResized()
 }
 
 //==============================================================================
-void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
+    // TODO
 }
 
 //==============================================================================
