@@ -172,9 +172,7 @@ void PlatformUtilities::registerFileAssociation (const String& fileExtension,
                           targetExecutable.getFullPathName() + "," + String (-iconResourceNumber));
 
     setRegistryValue (key + "\\", fullDescription);
-
-    setRegistryValue (key + "\\shell\\open\\command\\",
-                      targetExecutable.getFullPathName() + " %1");
+    setRegistryValue (key + "\\shell\\open\\command\\", targetExecutable.getFullPathName() + " %1");
 }
 
 
@@ -194,12 +192,10 @@ bool juce_IsRunningInWine()
 //==============================================================================
 const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams()
 {
-    String s (::GetCommandLineW());
-
-    StringArray tokens;
-    tokens.addTokens (s, true); // tokenise so that we can remove the initial filename argument
-
-    return tokens.joinIntoString (" ", 1);
+    const String commandLine (GetCommandLineW());
+    return String (CharacterFunctions::findEndOfToken (commandLine.getCharPointer(),
+                                                       String (" ").getCharPointer(),
+                                                       String ("\"").getCharPointer())).trimStart();
 }
 
 //==============================================================================

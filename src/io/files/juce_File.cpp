@@ -173,25 +173,25 @@ const String File::addTrailingSeparator (const String& path)
 
 //==============================================================================
 #if JUCE_LINUX
-  #define NAMES_ARE_CASE_SENSITIVE 1
+ #define NAMES_ARE_CASE_SENSITIVE 1
 #endif
 
 bool File::areFileNamesCaseSensitive()
 {
-#if NAMES_ARE_CASE_SENSITIVE
+   #if NAMES_ARE_CASE_SENSITIVE
     return true;
-#else
+   #else
     return false;
-#endif
+   #endif
 }
 
 bool File::operator== (const File& other) const
 {
-#if NAMES_ARE_CASE_SENSITIVE
+   #if NAMES_ARE_CASE_SENSITIVE
     return fullPath == other.fullPath;
-#else
+   #else
     return fullPath.equalsIgnoreCase (other.fullPath);
-#endif
+   #endif
 }
 
 bool File::operator!= (const File& other) const
@@ -201,20 +201,20 @@ bool File::operator!= (const File& other) const
 
 bool File::operator< (const File& other) const
 {
-#if NAMES_ARE_CASE_SENSITIVE
+   #if NAMES_ARE_CASE_SENSITIVE
     return fullPath < other.fullPath;
-#else
+   #else
     return fullPath.compareIgnoreCase (other.fullPath) < 0;
-#endif
+   #endif
 }
 
 bool File::operator> (const File& other) const
 {
-#if NAMES_ARE_CASE_SENSITIVE
+   #if NAMES_ARE_CASE_SENSITIVE
     return fullPath > other.fullPath;
-#else
+   #else
     return fullPath.compareIgnoreCase (other.fullPath) > 0;
-#endif
+   #endif
 }
 
 //==============================================================================
@@ -256,9 +256,9 @@ bool File::moveFileTo (const File& newFile) const
     if (newFile.fullPath == fullPath)
         return true;
 
-#if ! NAMES_ARE_CASE_SENSITIVE
+   #if ! NAMES_ARE_CASE_SENSITIVE
     if (*this != newFile)
-#endif
+   #endif
         if (! newFile.deleteFile())
             return false;
 
@@ -348,11 +348,11 @@ bool File::isAChildOf (const File& potentialParent) const
 
     const String ourPath (getPathUpToLastSlash());
 
-#if NAMES_ARE_CASE_SENSITIVE
+   #if NAMES_ARE_CASE_SENSITIVE
     if (potentialParent.fullPath == ourPath)
-#else
+   #else
     if (potentialParent.fullPath.equalsIgnoreCase (ourPath))
-#endif
+   #endif
     {
         return true;
     }
@@ -437,26 +437,11 @@ const File File::getSiblingFile (const String& fileName) const
 //==============================================================================
 const String File::descriptionOfSizeInBytes (const int64 bytes)
 {
-    if (bytes == 1)
-    {
-        return "1 byte";
-    }
-    else if (bytes < 1024)
-    {
-        return String ((int) bytes) + " bytes";
-    }
-    else if (bytes < 1024 * 1024)
-    {
-        return String (bytes / 1024.0, 1) + " KB";
-    }
-    else if (bytes < 1024 * 1024 * 1024)
-    {
-        return String (bytes / (1024.0 * 1024.0), 1) + " MB";
-    }
-    else
-    {
-        return String (bytes / (1024.0 * 1024.0 * 1024.0), 1) + " GB";
-    }
+    if (bytes == 1)                       return "1 byte";
+    else if (bytes < 1024)                return String (bytes) + " bytes";
+    else if (bytes < 1024 * 1024)         return String (bytes / 1024.0, 1) + " KB";
+    else if (bytes < 1024 * 1024 * 1024)  return String (bytes / (1024.0 * 1024.0), 1) + " MB";
+    else                                  return String (bytes / (1024.0 * 1024.0 * 1024.0), 1) + " GB";
 }
 
 //==============================================================================
@@ -494,26 +479,9 @@ bool File::createDirectory() const
 }
 
 //==============================================================================
-const Time File::getCreationTime() const
-{
-    int64 m, a, c;
-    getFileTimesInternal (m, a, c);
-    return Time (c);
-}
-
-const Time File::getLastModificationTime() const
-{
-    int64 m, a, c;
-    getFileTimesInternal (m, a, c);
-    return Time (m);
-}
-
-const Time File::getLastAccessTime() const
-{
-    int64 m, a, c;
-    getFileTimesInternal (m, a, c);
-    return Time (a);
-}
+const Time File::getLastModificationTime() const            { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (m); }
+const Time File::getLastAccessTime() const                  { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (a); }
+const Time File::getCreationTime() const                    { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (c); }
 
 bool File::setLastModificationTime (const Time& t) const    { return setFileTimesInternal (t.toMilliseconds(), 0, 0); }
 bool File::setLastAccessTime (const Time& t) const          { return setFileTimesInternal (0, t.toMilliseconds(), 0); }
@@ -595,7 +563,7 @@ const File File::getNonexistentChildFile (const String& prefix_,
         {
             putNumbersInBrackets = true;
 
-            const int openBracks = prefix.lastIndexOfChar ('(');
+            const int openBracks  = prefix.lastIndexOfChar ('(');
             const int closeBracks = prefix.lastIndexOfChar (')');
 
             if (openBracks > 0
@@ -613,10 +581,14 @@ const File File::getNonexistentChildFile (const String& prefix_,
 
         do
         {
+            String newName (prefix);
+
             if (putNumbersInBrackets)
-                f = getChildFile (prefix + '(' + String (num++) + ')' + suffix);
+                newName << '(' << num++ << ')';
             else
-                f = getChildFile (prefix + String (num++) + suffix);
+                newName << num++;
+
+            f = getChildFile (newName + suffix);
 
         } while (f.exists());
     }
@@ -627,16 +599,11 @@ const File File::getNonexistentChildFile (const String& prefix_,
 const File File::getNonexistentSibling (const bool putNumbersInBrackets) const
 {
     if (exists())
-    {
         return getParentDirectory()
                 .getNonexistentChildFile (getFileNameWithoutExtension(),
                                           getFileExtension(),
                                           putNumbersInBrackets);
-    }
-    else
-    {
-        return *this;
-    }
+    return *this;
 }
 
 //==============================================================================
@@ -790,9 +757,7 @@ bool File::hasIdenticalContentTo (const File& other) const
         FileInputStream in1 (*this), in2 (other);
 
         const int bufferSize = 4096;
-        HeapBlock <char> buffer1, buffer2;
-        buffer1.malloc (bufferSize);
-        buffer2.malloc (bufferSize);
+        HeapBlock <char> buffer1 (bufferSize), buffer2 (bufferSize);
 
         for (;;)
         {
@@ -901,11 +866,11 @@ const String File::getRelativePathFrom (const File& dir)  const
 
     while (dirPath.isNotEmpty())
     {
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         thisPath = "..\\" + thisPath;
-#else
+       #else
         thisPath = "../" + thisPath;
-#endif
+       #endif
 
         const int sep = dirPath.indexOfChar (separator);
 
@@ -927,10 +892,12 @@ const File File::createTempFile (const String& fileNameEnding)
 
     if (tempFile.exists())
         return createTempFile (fileNameEnding);
-    else
-        return tempFile;
+
+    return tempFile;
 }
 
+
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"

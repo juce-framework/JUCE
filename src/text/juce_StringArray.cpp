@@ -354,48 +354,25 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
 
     if (text.isNotEmpty())
     {
-        bool insideQuotes = false;
-        juce_wchar currentQuoteChar = 0;
-
         String::CharPointerType t (text.getCharPointer());
-        String::CharPointerType tokenStart (t);
-        int numChars = 0;
 
         for (;;)
         {
-            const juce_wchar c = t.getAndAdvance();
-            ++numChars;
+            String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
+                                                                                  breakCharacters.getCharPointer(),
+                                                                                  quoteCharacters.getCharPointer()));
 
-            const bool isBreak = (c == 0) || ((! insideQuotes) && breakCharacters.containsChar (c));
-
-            if (! isBreak)
-            {
-                if (quoteCharacters.containsChar (c))
-                {
-                    if (insideQuotes)
-                    {
-                        // only break out of quotes-mode if we find a matching quote to the
-                        // one that we opened with..
-                        if (currentQuoteChar == c)
-                            insideQuotes = false;
-                    }
-                    else
-                    {
-                        insideQuotes = true;
-                        currentQuoteChar = c;
-                    }
-                }
-            }
-            else
-            {
-                add (String (tokenStart, numChars - 1));
-                ++num;
-                tokenStart = t;
-                numChars = 0;
-            }
-
-            if (c == 0)
+            if (tokenEnd == t)
                 break;
+
+            add (String (t, tokenEnd));
+            ++num;
+            t = tokenEnd;
+
+            if (t.isEmpty())
+                break;
+
+            ++t;
         }
     }
 

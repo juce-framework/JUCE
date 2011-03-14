@@ -500,6 +500,34 @@ public:
         return p;
     }
 
+    template <typename Type>
+    static Type findEndOfToken (const Type& text, const Type& breakCharacters, const Type& quoteCharacters)
+    {
+        Type t (text);
+        juce_wchar currentQuoteChar = 0;
+
+        while (! t.isEmpty())
+        {
+            const juce_wchar c = t.getAndAdvance();
+
+            if (currentQuoteChar == 0 && breakCharacters.indexOf (c) >= 0)
+            {
+                --t;
+                break;
+            }
+
+            if (quoteCharacters.indexOf (c) >= 0)
+            {
+                if (currentQuoteChar == 0)
+                    currentQuoteChar = c;
+                else if (currentQuoteChar == c)
+                    currentQuoteChar = 0;
+            }
+        }
+
+        return t;
+    }
+
 private:
     static double mulexp10 (const double value, int exponent) throw();
 };
