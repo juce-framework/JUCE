@@ -2005,10 +2005,8 @@ const String String::createStringFromData (const void* const data_, const int si
     {
         return charToString ((char) data[0]);
     }
-    else if ((data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1
-               && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkBE2)
-          || (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkLE1
-               && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkLE1))
+    else if ((data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1 && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkBE2)
+          || (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkLE1 && data[1] == (uint8) CharPointer_UTF16::byteOrderMarkLE2))
     {
         const bool bigEndian = (data[0] == (uint8) CharPointer_UTF16::byteOrderMarkBE1);
         const int numChars = size / 2 - 1;

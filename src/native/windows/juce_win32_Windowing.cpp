@@ -2536,9 +2536,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 {
     Array <Rectangle<int> >* const monitorCoords = (Array <Rectangle<int> >*) userInfo;
-
     monitorCoords->add (Rectangle<int> (r->left, r->top, r->right - r->left, r->bottom - r->top));
-
     return TRUE;
 }
 

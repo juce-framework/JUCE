@@ -371,17 +371,19 @@ public:
         should go. If the array isn't sorted, the behaviour of this
         method will be unpredictable.
 
-        @param comparator       the comparator object to use to compare the elements - see the
-                                sort() method for details about this object's form
-        @param newObject        the new object to insert to the array
+        @param comparator   the comparator object to use to compare the elements - see the
+                            sort() method for details about this object's form
+        @param newObject    the new object to insert to the array
+        @returns the index at which the new object was added
         @see add, sort
     */
     template <class ElementComparator>
-    void addSorted (ElementComparator& comparator,
-                    ObjectClass* newObject) throw()
+    int addSorted (ElementComparator& comparator, ObjectClass* newObject) throw()
     {
         const ScopedLockType lock (getLock());
-        insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
+        const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
+        insert (index, newObject);
+        return index;
     }
 
     /** Inserts or replaces an object in the array, assuming it is sorted.

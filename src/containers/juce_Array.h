@@ -589,13 +589,16 @@ public:
         @param comparator   the comparator to use to compare the elements - see the sort()
                             method for details about the form this object should take
         @param newElement   the new element to insert to the array
+        @returns the index at which the new item was added
         @see addUsingDefaultSort, add, sort
     */
     template <class ElementComparator>
-    void addSorted (ElementComparator& comparator, ParameterType newElement)
+    int addSorted (ElementComparator& comparator, ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
-        insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
+        const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed);
+        insert (index, newElement);
+        return index;
     }
 
     /** Inserts a new element into the array, assuming that the array is sorted.

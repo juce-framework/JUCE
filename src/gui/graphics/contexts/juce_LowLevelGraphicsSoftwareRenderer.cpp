@@ -1225,7 +1225,6 @@ public:
     ClipRegion_EdgeTable (const RectangleList& r) : edgeTable (r) {}
     ClipRegion_EdgeTable (const Rectangle<int>& bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
     ClipRegion_EdgeTable (const ClipRegion_EdgeTable& other) : edgeTable (other.edgeTable) {}
-    ~ClipRegion_EdgeTable() {}
 
     const Ptr clone() const
     {
@@ -1431,7 +1430,6 @@ public:
     ClipRegion_RectangleList (const Rectangle<int>& r) : clip (r) {}
     ClipRegion_RectangleList (const RectangleList& r) : clip (r) {}
     ClipRegion_RectangleList (const ClipRegion_RectangleList& other) : clip (other.clip) {}
-    ~ClipRegion_RectangleList() {}
 
     const Ptr clone() const
     {
@@ -1730,14 +1728,9 @@ private:
                         {
                             r.setEdgeTableYPos (totalTop);
 
-                            if (doLeftAlpha)
-                                r.handleEdgeTablePixel (totalLeft, (leftAlpha * topAlpha) >> 8);
-
-                            if (clippedWidth > 0)
-                                r.handleEdgeTableLine (clippedLeft, clippedWidth, topAlpha);
-
-                            if (doRightAlpha)
-                                r.handleEdgeTablePixel (right, (rightAlpha * topAlpha) >> 8);
+                            if (doLeftAlpha)        r.handleEdgeTablePixel (totalLeft, (leftAlpha * topAlpha) >> 8);
+                            if (clippedWidth > 0)   r.handleEdgeTableLine (clippedLeft, clippedWidth, topAlpha);
+                            if (doRightAlpha)       r.handleEdgeTablePixel (right, (rightAlpha * topAlpha) >> 8);
                         }
 
                         const int endY = jmin (bottom, clipBottom);
@@ -1745,28 +1738,18 @@ private:
                         {
                             r.setEdgeTableYPos (y);
 
-                            if (doLeftAlpha)
-                                r.handleEdgeTablePixel (totalLeft, leftAlpha);
-
-                            if (clippedWidth > 0)
-                                r.handleEdgeTableLineFull (clippedLeft, clippedWidth);
-
-                            if (doRightAlpha)
-                                r.handleEdgeTablePixel (right, rightAlpha);
+                            if (doLeftAlpha)        r.handleEdgeTablePixel (totalLeft, leftAlpha);
+                            if (clippedWidth > 0)   r.handleEdgeTableLineFull (clippedLeft, clippedWidth);
+                            if (doRightAlpha)       r.handleEdgeTablePixel (right, rightAlpha);
                         }
 
                         if (bottomAlpha != 0 && bottom < clipBottom)
                         {
                             r.setEdgeTableYPos (bottom);
 
-                            if (doLeftAlpha)
-                                r.handleEdgeTablePixel (totalLeft, (leftAlpha * bottomAlpha) >> 8);
-
-                            if (clippedWidth > 0)
-                                r.handleEdgeTableLine (clippedLeft, clippedWidth, bottomAlpha);
-
-                            if (doRightAlpha)
-                                r.handleEdgeTablePixel (right, (rightAlpha * bottomAlpha) >> 8);
+                            if (doLeftAlpha)        r.handleEdgeTablePixel (totalLeft, (leftAlpha * bottomAlpha) >> 8);
+                            if (clippedWidth > 0)   r.handleEdgeTableLine (clippedLeft, clippedWidth, bottomAlpha);
+                            if (doRightAlpha)       r.handleEdgeTablePixel (right, (rightAlpha * bottomAlpha) >> 8);
                         }
                     }
                 }

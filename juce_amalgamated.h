@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	51
+#define JUCE_BUILDNUMBER	52
 
 /** Current Juce version number.
 
@@ -7113,13 +7113,16 @@ public:
 		@param comparator   the comparator to use to compare the elements - see the sort()
 							method for details about the form this object should take
 		@param newElement   the new element to insert to the array
+		@returns the index at which the new item was added
 		@see addUsingDefaultSort, add, sort
 	*/
 	template <class ElementComparator>
-	void addSorted (ElementComparator& comparator, ParameterType newElement)
+	int addSorted (ElementComparator& comparator, ParameterType newElement)
 	{
 		const ScopedLockType lock (getLock());
-		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
+		const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed);
+		insert (index, newElement);
+		return index;
 	}
 
 	/** Inserts a new element into the array, assuming that the array is sorted.
@@ -9697,16 +9700,18 @@ public:
 		@param comparator   the comparator to use to compare the elements - see the sort method
 							for details about this object's structure
 		@param newObject	the new object to insert to the array
+		@returns the index at which the new object was added
 		@see add, sort, indexOfSorted
 	*/
 	template <class ElementComparator>
-	void addSorted (ElementComparator& comparator,
-					ObjectClass* const newObject) throw()
+	int addSorted (ElementComparator& comparator, ObjectClass* const newObject) throw()
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
 		const ScopedLockType lock (getLock());
-		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
+		const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
+		insert (index, newObject);
+		return index;
 	}
 
 	/** Finds the index of an object in the array, assuming that the array is sorted.
@@ -13302,17 +13307,19 @@ public:
 		should go. If the array isn't sorted, the behaviour of this
 		method will be unpredictable.
 
-		@param comparator	   the comparator object to use to compare the elements - see the
-								sort() method for details about this object's form
+		@param comparator   the comparator object to use to compare the elements - see the
+							sort() method for details about this object's form
 		@param newObject	the new object to insert to the array
+		@returns the index at which the new object was added
 		@see add, sort
 	*/
 	template <class ElementComparator>
-	void addSorted (ElementComparator& comparator,
-					ObjectClass* newObject) throw()
+	int addSorted (ElementComparator& comparator, ObjectClass* newObject) throw()
 	{
 		const ScopedLockType lock (getLock());
-		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
+		const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
+		insert (index, newObject);
+		return index;
 	}
 
 	/** Inserts or replaces an object in the array, assuming it is sorted.
