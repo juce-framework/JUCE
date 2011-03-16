@@ -74,6 +74,11 @@ void RecentlyOpenedFilesList::addFile (const File& file)
     setMaxNumberOfItems (maxNumberOfItems);
 }
 
+void RecentlyOpenedFilesList::removeFile (const File& file)
+{
+    files.removeString (file.getFullPathName());
+}
+
 void RecentlyOpenedFilesList::removeNonExistentFiles()
 {
     for (int i = getNumFiles(); --i >= 0;)
@@ -83,10 +88,10 @@ void RecentlyOpenedFilesList::removeNonExistentFiles()
 
 //==============================================================================
 int RecentlyOpenedFilesList::createPopupMenuItems (PopupMenu& menuToAddTo,
-                                                    const int baseItemId,
-                                                    const bool showFullPaths,
-                                                    const bool dontAddNonExistentFiles,
-                                                    const File** filesToAvoid)
+                                                   const int baseItemId,
+                                                   const bool showFullPaths,
+                                                   const bool dontAddNonExistentFiles,
+                                                   const File** filesToAvoid)
 {
     int num = 0;
 
@@ -100,17 +105,13 @@ int RecentlyOpenedFilesList::createPopupMenuItems (PopupMenu& menuToAddTo,
 
             if (filesToAvoid != 0)
             {
-                const File** avoid = filesToAvoid;
-
-                while (*avoid != 0)
+                for (const File** avoid = filesToAvoid; *avoid != 0; ++avoid)
                 {
                     if (f == **avoid)
                     {
                         needsAvoiding = true;
                         break;
                     }
-
-                    ++avoid;
                 }
             }
 

@@ -203,12 +203,20 @@ BEGIN_JUCE_NAMESPACE
  FIELD (rectClass, rectBottom, "bottom", "I") \
 \
  METHOD (audioTrackClass, audioTrackConstructor, "<init>", "(IIIIII)V") \
+ STATICMETHOD (audioTrackClass, getMinBufferSize, "getMinBufferSize", "(III)I") \
+ STATICMETHOD (audioTrackClass, getNativeOutputSampleRate, "getNativeOutputSampleRate", "(I)I") \
  METHOD (audioTrackClass, audioTrackPlay, "play", "()V") \
  METHOD (audioTrackClass, audioTrackStop, "stop", "()V") \
  METHOD (audioTrackClass, audioTrackRelease, "release", "()V") \
  METHOD (audioTrackClass, audioTrackFlush, "flush", "()V") \
  METHOD (audioTrackClass, audioTrackWrite, "write", "([SII)I") \
- STATICMETHOD (audioTrackClass, getMinBufferSize, "getMinBufferSize", "(III)I") \
+\
+ METHOD (audioRecordClass, audioRecordConstructor, "<init>", "(IIIII)V"); \
+ STATICMETHOD (audioRecordClass, getMinRecordBufferSize, "getMinBufferSize", "(III)I") \
+ METHOD (audioRecordClass, startRecording, "startRecording", "()V"); \
+ METHOD (audioRecordClass, stopRecording, "stop", "()V"); \
+ METHOD (audioRecordClass, audioRecordRead, "read", "([SII)I"); \
+ METHOD (audioRecordClass, audioRecordRelease, "release", "()V"); \
 
 
 //==============================================================================

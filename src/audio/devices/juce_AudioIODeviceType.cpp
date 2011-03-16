@@ -68,4 +68,9 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()            
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()            { return 0; }
 #endif
 
+#if ! JUCE_ANDROID
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         { return 0; }
+#endif
+
+
 END_JUCE_NAMESPACE

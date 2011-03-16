@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	52
+#define JUCE_BUILDNUMBER	53
 
 /** Current Juce version number.
 
@@ -38336,6 +38336,8 @@ public:
 	static AudioIODeviceType* createAudioIODeviceType_ALSA();
 	/** Creates a JACK device type if it's available on this platform, or returns null. */
 	static AudioIODeviceType* createAudioIODeviceType_JACK();
+	/** Creates an Android device type if it's available on this platform, or returns null. */
+	static AudioIODeviceType* createAudioIODeviceType_Android();
 
 protected:
 	explicit AudioIODeviceType (const String& typeName);
@@ -66706,6 +66708,9 @@ public:
 		least-recently added file will be dropped from the end.
 	*/
 	void addFile (const File& file);
+
+	/** Removes a file from the list. */
+	void removeFile (const File& file);
 
 	/** Checks each of the files in the list, removing any that don't exist.
 
