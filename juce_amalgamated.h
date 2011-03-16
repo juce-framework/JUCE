@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	53
+#define JUCE_BUILDNUMBER	54
 
 /** Current Juce version number.
 
@@ -1399,7 +1399,7 @@ inline int roundFloatToInt (const float value) throw()
 namespace TypeHelpers
 {
   #if JUCE_VC8_OR_EARLIER
-	#define PARAMETER_TYPE(a) a
+	#define PARAMETER_TYPE(type) const type&
   #else
 	/** The ParameterType struct is used to find the best type to use when passing some kind
 		of object as a parameter.
@@ -6589,11 +6589,7 @@ template <typename ElementType,
 class Array
 {
 private:
-  #if JUCE_VC8_OR_EARLIER
-	typedef const ElementType& ParameterType;
-  #else
 	typedef PARAMETER_TYPE (ElementType) ParameterType;
-  #endif
 
 public:
 
@@ -9313,13 +9309,12 @@ private:
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+#ifndef __JUCE_HASHMAP_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
+/*** Start of inlined file: juce_HashMap.h ***/
+#ifndef __JUCE_HASHMAP_JUCEHEADER__
+#define __JUCE_HASHMAP_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
 
 /*** Start of inlined file: juce_OwnedArray.h ***/
 #ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
@@ -10080,6 +10075,604 @@ private:
 #endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
 /*** End of inlined file: juce_OwnedArray.h ***/
 
+
+/*** Start of inlined file: juce_ScopedPointer.h ***/
+#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
+#define __JUCE_SCOPEDPOINTER_JUCEHEADER__
+
+/**
+	This class holds a pointer which is automatically deleted when this object goes
+	out of scope.
+
+	Once a pointer has been passed to a ScopedPointer, it will make sure that the pointer
+	gets deleted when the ScopedPointer is deleted. Using the ScopedPointer on the stack or
+	as member variables is a good way to use RAII to avoid accidentally leaking dynamically
+	created objects.
+
+	A ScopedPointer can be used in pretty much the same way that you'd use a normal pointer
+	to an object. If you use the assignment operator to assign a different object to a
+	ScopedPointer, the old one will be automatically deleted.
+
+	A const ScopedPointer is guaranteed not to lose ownership of its object or change the
+	object to which it points during its lifetime. This means that making a copy of a const
+	ScopedPointer is impossible, as that would involve the new copy taking ownership from the
+	old one.
+
+	If you need to get a pointer out of a ScopedPointer without it being deleted, you
+	can use the release() method.
+*/
+template <class ObjectType>
+class ScopedPointer
+{
+public:
+
+	/** Creates a ScopedPointer containing a null pointer. */
+	inline ScopedPointer() throw()  : object (0)
+	{
+	}
+
+	/** Creates a ScopedPointer that owns the specified object. */
+	inline ScopedPointer (ObjectType* const objectToTakePossessionOf) throw()
+		: object (objectToTakePossessionOf)
+	{
+	}
+
+	/** Creates a ScopedPointer that takes its pointer from another ScopedPointer.
+
+		Because a pointer can only belong to one ScopedPointer, this transfers
+		the pointer from the other object to this one, and the other object is reset to
+		be a null pointer.
+	*/
+	ScopedPointer (ScopedPointer& objectToTransferFrom) throw()
+		: object (objectToTransferFrom.object)
+	{
+		objectToTransferFrom.object = 0;
+	}
+
+	/** Destructor.
+		This will delete the object that this ScopedPointer currently refers to.
+	*/
+	inline ~ScopedPointer()							 { delete object; }
+
+	/** Changes this ScopedPointer to point to a new object.
+
+		Because a pointer can only belong to one ScopedPointer, this transfers
+		the pointer from the other object to this one, and the other object is reset to
+		be a null pointer.
+
+		If this ScopedPointer already points to an object, that object
+		will first be deleted.
+	*/
+	ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
+	{
+		if (this != objectToTransferFrom.getAddress())
+		{
+			// Two ScopedPointers should never be able to refer to the same object - if
+			// this happens, you must have done something dodgy!
+			jassert (object == 0 || object != objectToTransferFrom.object);
+
+			ObjectType* const oldObject = object;
+			object = objectToTransferFrom.object;
+			objectToTransferFrom.object = 0;
+			delete oldObject;
+		}
+
+		return *this;
+	}
+
+	/** Changes this ScopedPointer to point to a new object.
+
+		If this ScopedPointer already points to an object, that object
+		will first be deleted.
+
+		The pointer that you pass is may be null.
+	*/
+	ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
+	{
+		if (object != newObjectToTakePossessionOf)
+		{
+			ObjectType* const oldObject = object;
+			object = newObjectToTakePossessionOf;
+			delete oldObject;
+		}
+
+		return *this;
+	}
+
+	/** Returns the object that this ScopedPointer refers to. */
+	inline operator ObjectType*() const throw()					 { return object; }
+
+	/** Returns the object that this ScopedPointer refers to. */
+	inline ObjectType& operator*() const throw()					{ return *object; }
+
+	/** Lets you access methods and properties of the object that this ScopedPointer refers to. */
+	inline ObjectType* operator->() const throw()				   { return object; }
+
+	/** Removes the current object from this ScopedPointer without deleting it.
+		This will return the current object, and set the ScopedPointer to a null pointer.
+	*/
+	ObjectType* release() throw()						   { ObjectType* const o = object; object = 0; return o; }
+
+	/** Swaps this object with that of another ScopedPointer.
+		The two objects simply exchange their pointers.
+	*/
+	void swapWith (ScopedPointer <ObjectType>& other) throw()
+	{
+		// Two ScopedPointers should never be able to refer to the same object - if
+		// this happens, you must have done something dodgy!
+		jassert (object != other.object);
+
+		swapVariables (object, other.object);
+	}
+
+private:
+
+	ObjectType* object;
+
+	// (Required as an alternative to the overloaded & operator).
+	const ScopedPointer* getAddress() const throw()				 { return this; }
+
+  #if ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
+	/* This is private to stop people accidentally copying a const ScopedPointer (the compiler
+	   would let you do so by implicitly casting the source to its raw object pointer).
+
+	   A side effect of this is that you may hit a puzzling compiler error when you write something
+	   like this:
+
+		  ScopedPointer<MyClass> m = new MyClass();  // Compile error: copy constructor is private.
+
+	   Even though the compiler would normally ignore the assignment here, it can't do so when the
+	   copy constructor is private. It's very easy to fis though - just write it like this:
+
+		  ScopedPointer<MyClass> m (new MyClass());  // Compiles OK
+
+	   It's good practice to always use the latter form when writing your object declarations anyway,
+	   rather than writing them as assignments and assuming (or hoping) that the compiler will be
+	   smart enough to replace your construction + assignment with a single constructor.
+	*/
+	ScopedPointer (const ScopedPointer&);
+  #endif
+};
+
+/** Compares a ScopedPointer with another pointer.
+	This can be handy for checking whether this is a null pointer.
+*/
+template <class ObjectType>
+bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
+{
+	return static_cast <ObjectType*> (pointer1) == pointer2;
+}
+
+/** Compares a ScopedPointer with another pointer.
+	This can be handy for checking whether this is a null pointer.
+*/
+template <class ObjectType>
+bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
+{
+	return static_cast <ObjectType*> (pointer1) != pointer2;
+}
+
+#endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
+/*** End of inlined file: juce_ScopedPointer.h ***/
+
+/**
+	A simple class to generate hash functions for some primitive types, intended for
+	use with the HashMap class.
+	@see HashMap
+*/
+class DefaultHashFunctions
+{
+public:
+	/** Generates a simple hash from an integer. */
+	static int generateHash (const int key, const int upperLimit) throw()	 { return std::abs (key) % upperLimit; }
+	/** Generates a simple hash from a string. */
+	static int generateHash (const String& key, const int upperLimit) throw()	 { return key.hashCode() % upperLimit; }
+	/** Generates a simple hash from a variant. */
+	static int generateHash (const var& key, const int upperLimit) throw()	{ return generateHash (key.toString(), upperLimit); }
+};
+
+/**
+	Holds a set of mappings between some key/value pairs.
+
+	The types of the key and value objects are set as template parameters.
+	You can also specify a class to supply a hash function that converts a key value
+	into an hashed integer. This class must have the form:
+
+	@code
+	struct MyHashGenerator
+	{
+		static int generateHash (MyKeyType key, int upperLimit)
+		{
+			// The function must return a value 0 <= x < upperLimit
+			return someFunctionOfMyKeyType (key) % upperLimit;
+		}
+	};
+	@endcode
+
+	Like the Array class, the key and value types are expected to be copy-by-value types, so
+	if you define them to be pointer types, this class won't delete the objects that they
+	point to.
+
+	If you don't supply a class for the HashFunctionToUse template parameter, the
+	default one provides some simple mappings for strings and ints.
+
+	@code
+	HashMap<int, String> hash;
+	hash.set (1, "item1");
+	hash.set (2, "item2");
+
+	DBG (hash [1]); // prints "item1"
+	DBG (hash [2]); // prints "item2"
+
+	// This iterates the map, printing all of its key -> value pairs..
+	for (HashMap<int, String>::Iterator i (hash); i.next();)
+		DBG (i.getKey() << " -> " << i.getValue());
+	@endcode
+
+	@see CriticalSection, DefaultHashFunctions, NamedValueSet, SortedSet
+*/
+template <typename KeyType,
+		  typename ValueType,
+		  class HashFunctionToUse = DefaultHashFunctions,
+		  class TypeOfCriticalSectionToUse = DummyCriticalSection>
+class HashMap
+{
+private:
+	typedef PARAMETER_TYPE (KeyType)   KeyTypeParameter;
+	typedef PARAMETER_TYPE (ValueType) ValueTypeParameter;
+
+public:
+
+	/** Creates an empty hash-map.
+
+		The numberOfSlots parameter specifies the number of hash entries the map will use. This
+		will be the "upperLimit" parameter that is passed to your generateHash() function. The number
+		of hash slots will grow automatically if necessary, or it can be remapped manually using remapTable().
+	*/
+	HashMap (const int numberOfSlots = defaultHashTableSize)
+	   : totalNumItems (0)
+	{
+		slots.insertMultiple (0, 0, numberOfSlots);
+	}
+
+	/** Destructor. */
+	~HashMap()
+	{
+		clear();
+	}
+
+	/** Removes all values from the map.
+		Note that this will clear the content, but won't affect the number of slots (see
+		remapTable and getNumSlots).
+	*/
+	void clear()
+	{
+		const ScopedLockType sl (getLock());
+
+		for (int i = slots.size(); --i >= 0;)
+		{
+			HashEntry* h = slots.getUnchecked(i);
+
+			while (h != 0)
+			{
+				const ScopedPointer<HashEntry> deleter (h);
+				h = h->nextEntry;
+			}
+
+			slots.set (i, 0);
+		}
+
+		totalNumItems = 0;
+	}
+
+	/** Returns the current number of items in the map. */
+	inline int size() const throw()
+	{
+		return totalNumItems;
+	}
+
+	/** Returns the value corresponding to a given key.
+		If the map doesn't contain the key, a default instance of the value type is returned.
+		@param keyToLookFor	the key of the item being requested
+	*/
+	inline const ValueType operator[] (KeyTypeParameter keyToLookFor) const
+	{
+		const ScopedLockType sl (getLock());
+
+		for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != 0; entry = entry->nextEntry)
+			if (entry->key == keyToLookFor)
+				return entry->value;
+
+		return ValueType();
+	}
+
+	/** Returns true if the map contains an item with the specied key. */
+	bool contains (KeyTypeParameter keyToLookFor) const
+	{
+		const ScopedLockType sl (getLock());
+
+		for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != 0; entry = entry->nextEntry)
+			if (entry->key == keyToLookFor)
+				return true;
+
+		return false;
+	}
+
+	/** Returns true if the hash contains at least one occurrence of a given value. */
+	bool containsValue (ValueTypeParameter valueToLookFor) const
+	{
+		const ScopedLockType sl (getLock());
+
+		for (int i = getNumSlots(); --i >= 0;)
+			for (const HashEntry* entry = slots.getUnchecked(i); entry != 0; entry = entry->nextEntry)
+				if (entry->value == valueToLookFor)
+					return true;
+
+		return false;
+	}
+
+	/** Adds or replaces an element in the hash-map.
+		If there's already an item with the given key, this will replace its value. Otherwise, a new item
+		will be added to the map.
+	*/
+	void set (KeyTypeParameter newKey, ValueTypeParameter newValue)
+	{
+		const ScopedLockType sl (getLock());
+		const int hashIndex = generateHashFor (newKey);
+
+		if (isPositiveAndBelow (hashIndex, getNumSlots()))
+		{
+			HashEntry* const firstEntry = slots.getUnchecked (hashIndex);
+
+			for (HashEntry* entry = firstEntry; entry != 0; entry = entry->nextEntry)
+			{
+				if (entry->key == newKey)
+				{
+					entry->value = newValue;
+					return;
+				}
+			}
+
+			slots.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
+			++totalNumItems;
+
+			if (totalNumItems > (getNumSlots() * 3) / 2)
+				remapTable (getNumSlots() * 2);
+		}
+	}
+
+	/** Removes an item with the given key. */
+	void remove (KeyTypeParameter keyToRemove)
+	{
+		const ScopedLockType sl (getLock());
+		const int hashIndex = generateHashFor (keyToRemove);
+		HashEntry* entry = slots [hashIndex];
+		HashEntry* previous = 0;
+
+		while (entry != 0)
+		{
+			if (entry->key == keyToRemove)
+			{
+				const ScopedPointer<HashEntry> deleter (entry);
+
+				entry = entry->nextEntry;
+
+				if (previous != 0)
+					previous->nextEntry = entry;
+				else
+					slots.set (hashIndex, entry);
+
+				--totalNumItems;
+			}
+			else
+			{
+				previous = entry;
+				entry = entry->nextEntry;
+			}
+		}
+	}
+
+	/** Removes all items with the given value. */
+	void removeValue (ValueTypeParameter valueToRemove)
+	{
+		const ScopedLockType sl (getLock());
+
+		for (int i = getNumSlots(); --i >= 0;)
+		{
+			HashEntry* entry = slots.getUnchecked(i);
+			HashEntry* previous = 0;
+
+			while (entry != 0)
+			{
+				if (entry->value == valueToRemove)
+				{
+					const ScopedPointer<HashEntry> deleter (entry);
+
+					entry = entry->nextEntry;
+
+					if (previous != 0)
+						previous->nextEntry = entry;
+					else
+						slots.set (i, entry);
+
+					--totalNumItems;
+				}
+				else
+				{
+					previous = entry;
+					entry = entry->nextEntry;
+				}
+			}
+		}
+	}
+
+	/** Remaps the hash-map to use a different number of slots for its hash function.
+		Each slot corresponds to a single hash-code, and each one can contain multiple items.
+		@see getNumSlots()
+	*/
+	void remapTable (int newNumberOfSlots)
+	{
+		HashMap newTable (newNumberOfSlots);
+
+		for (int i = getNumSlots(); --i >= 0;)
+			for (const HashEntry* entry = slots.getUnchecked(i); entry != 0; entry = entry->nextEntry)
+				newTable.set (entry->key, entry->value);
+
+		swapWith (newTable);
+	}
+
+	/** Returns the number of slots which are available for hashing.
+		Each slot corresponds to a single hash-code, and each one can contain multiple items.
+		@see getNumSlots()
+	*/
+	inline int getNumSlots() const throw()
+	{
+		return slots.size();
+	}
+
+	/** Efficiently swaps the contents of two hash-maps. */
+	void swapWith (HashMap& otherHashMap) throw()
+	{
+		const ScopedLockType lock1 (getLock());
+		const ScopedLockType lock2 (otherHashMap.getLock());
+
+		slots.swapWithArray (otherHashMap.slots);
+		swapVariables (totalNumItems, otherHashMap.totalNumItems);
+	}
+
+	/** Returns the CriticalSection that locks this structure.
+		To lock, you can call getLock().enter() and getLock().exit(), or preferably use
+		an object of ScopedLockType as an RAII lock for it.
+	*/
+	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return lock; }
+
+	/** Returns the type of scoped lock to use for locking this array */
+	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
+
+private:
+
+	class HashEntry
+	{
+	public:
+		HashEntry (KeyTypeParameter key_, ValueTypeParameter value_, HashEntry* const nextEntry_)
+			: key (key_), value (value_), nextEntry (nextEntry_)
+		{}
+
+		const KeyType key;
+		ValueType value;
+		HashEntry* nextEntry;
+
+		JUCE_DECLARE_NON_COPYABLE (HashEntry);
+	};
+
+public:
+
+	/** Iterates over the items in a HashMap.
+
+		To use it, repeatedly call next() until it returns false, e.g.
+		@code
+		HashMap <String, String> myMap;
+
+		HashMap<String, String>::Iterator i (myMap);
+
+		while (i.next())
+		{
+			DBG (i.getKey() << " -> " << i.getValue());
+		}
+		@endcode
+
+		The order in which items are iterated bears no resemblence to the order in which
+		they were originally added!
+
+		Obviously as soon as you call any non-const methods on the original hash-map, any
+		iterators that were created beforehand will cease to be valid, and should not be used.
+
+		@see HashMap
+	*/
+	class Iterator
+	{
+	public:
+
+		Iterator (const HashMap& hashMapToIterate)
+			: hashMap (hashMapToIterate), entry (0), index (0)
+		{}
+
+		/** Moves to the next item, if one is available.
+			When this returns true, you can get the item's key and value using getKey() and
+			getValue(). If it returns false, the iteration has finished and you should stop.
+		*/
+		bool next()
+		{
+			if (entry != 0)
+				entry = entry->nextEntry;
+
+			while (entry == 0)
+			{
+				if (index >= hashMap.getNumSlots())
+					return false;
+
+				entry = hashMap.slots.getUnchecked (index++);
+			}
+
+			return true;
+		}
+
+		/** Returns the current item's key.
+			This should only be called when a call to next() has just returned true.
+		*/
+		const KeyType getKey() const
+		{
+			return entry != 0 ? entry->key : KeyType();
+		}
+
+		/** Returns the current item's value.
+			This should only be called when a call to next() has just returned true.
+		*/
+		const ValueType getValue() const
+		{
+			return entry != 0 ? entry->value : ValueType();
+		}
+
+	private:
+
+		const HashMap& hashMap;
+		HashEntry* entry;
+		int index;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Iterator);
+	};
+
+private:
+
+	enum { defaultHashTableSize = 101 };
+	friend class Iterator;
+
+	Array <HashEntry*> slots;
+	int totalNumItems;
+	TypeOfCriticalSectionToUse lock;
+
+	int generateHashFor (KeyTypeParameter key) const
+	{
+		const int hash = HashFunctionToUse::generateHash (key, getNumSlots());
+		jassert (isPositiveAndBelow (hash, getNumSlots())); // your hash function is generating out-of-range numbers!
+		return hash;
+	}
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashMap);
+};
+
+#endif   // __JUCE_HASHMAP_JUCEHEADER__
+/*** End of inlined file: juce_HashMap.h ***/
+
+
+#endif
+#ifndef __JUCE_LINKEDLISTPOINTER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
@@ -11037,186 +11630,6 @@ JUCE_API bool operator>= (const Time& time1, const Time& time2);
 
 #endif   // __JUCE_TIME_JUCEHEADER__
 /*** End of inlined file: juce_Time.h ***/
-
-
-/*** Start of inlined file: juce_ScopedPointer.h ***/
-#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
-#define __JUCE_SCOPEDPOINTER_JUCEHEADER__
-
-/**
-	This class holds a pointer which is automatically deleted when this object goes
-	out of scope.
-
-	Once a pointer has been passed to a ScopedPointer, it will make sure that the pointer
-	gets deleted when the ScopedPointer is deleted. Using the ScopedPointer on the stack or
-	as member variables is a good way to use RAII to avoid accidentally leaking dynamically
-	created objects.
-
-	A ScopedPointer can be used in pretty much the same way that you'd use a normal pointer
-	to an object. If you use the assignment operator to assign a different object to a
-	ScopedPointer, the old one will be automatically deleted.
-
-	A const ScopedPointer is guaranteed not to lose ownership of its object or change the
-	object to which it points during its lifetime. This means that making a copy of a const
-	ScopedPointer is impossible, as that would involve the new copy taking ownership from the
-	old one.
-
-	If you need to get a pointer out of a ScopedPointer without it being deleted, you
-	can use the release() method.
-*/
-template <class ObjectType>
-class ScopedPointer
-{
-public:
-
-	/** Creates a ScopedPointer containing a null pointer. */
-	inline ScopedPointer() throw()  : object (0)
-	{
-	}
-
-	/** Creates a ScopedPointer that owns the specified object. */
-	inline ScopedPointer (ObjectType* const objectToTakePossessionOf) throw()
-		: object (objectToTakePossessionOf)
-	{
-	}
-
-	/** Creates a ScopedPointer that takes its pointer from another ScopedPointer.
-
-		Because a pointer can only belong to one ScopedPointer, this transfers
-		the pointer from the other object to this one, and the other object is reset to
-		be a null pointer.
-	*/
-	ScopedPointer (ScopedPointer& objectToTransferFrom) throw()
-		: object (objectToTransferFrom.object)
-	{
-		objectToTransferFrom.object = 0;
-	}
-
-	/** Destructor.
-		This will delete the object that this ScopedPointer currently refers to.
-	*/
-	inline ~ScopedPointer()							 { delete object; }
-
-	/** Changes this ScopedPointer to point to a new object.
-
-		Because a pointer can only belong to one ScopedPointer, this transfers
-		the pointer from the other object to this one, and the other object is reset to
-		be a null pointer.
-
-		If this ScopedPointer already points to an object, that object
-		will first be deleted.
-	*/
-	ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
-	{
-		if (this != objectToTransferFrom.getAddress())
-		{
-			// Two ScopedPointers should never be able to refer to the same object - if
-			// this happens, you must have done something dodgy!
-			jassert (object == 0 || object != objectToTransferFrom.object);
-
-			ObjectType* const oldObject = object;
-			object = objectToTransferFrom.object;
-			objectToTransferFrom.object = 0;
-			delete oldObject;
-		}
-
-		return *this;
-	}
-
-	/** Changes this ScopedPointer to point to a new object.
-
-		If this ScopedPointer already points to an object, that object
-		will first be deleted.
-
-		The pointer that you pass is may be null.
-	*/
-	ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
-	{
-		if (object != newObjectToTakePossessionOf)
-		{
-			ObjectType* const oldObject = object;
-			object = newObjectToTakePossessionOf;
-			delete oldObject;
-		}
-
-		return *this;
-	}
-
-	/** Returns the object that this ScopedPointer refers to. */
-	inline operator ObjectType*() const throw()					 { return object; }
-
-	/** Returns the object that this ScopedPointer refers to. */
-	inline ObjectType& operator*() const throw()					{ return *object; }
-
-	/** Lets you access methods and properties of the object that this ScopedPointer refers to. */
-	inline ObjectType* operator->() const throw()				   { return object; }
-
-	/** Removes the current object from this ScopedPointer without deleting it.
-		This will return the current object, and set the ScopedPointer to a null pointer.
-	*/
-	ObjectType* release() throw()						   { ObjectType* const o = object; object = 0; return o; }
-
-	/** Swaps this object with that of another ScopedPointer.
-		The two objects simply exchange their pointers.
-	*/
-	void swapWith (ScopedPointer <ObjectType>& other) throw()
-	{
-		// Two ScopedPointers should never be able to refer to the same object - if
-		// this happens, you must have done something dodgy!
-		jassert (object != other.object);
-
-		swapVariables (object, other.object);
-	}
-
-private:
-
-	ObjectType* object;
-
-	// (Required as an alternative to the overloaded & operator).
-	const ScopedPointer* getAddress() const throw()				 { return this; }
-
-  #if ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
-	/* This is private to stop people accidentally copying a const ScopedPointer (the compiler
-	   would let you do so by implicitly casting the source to its raw object pointer).
-
-	   A side effect of this is that you may hit a puzzling compiler error when you write something
-	   like this:
-
-		  ScopedPointer<MyClass> m = new MyClass();  // Compile error: copy constructor is private.
-
-	   Even though the compiler would normally ignore the assignment here, it can't do so when the
-	   copy constructor is private. It's very easy to fis though - just write it like this:
-
-		  ScopedPointer<MyClass> m (new MyClass());  // Compiles OK
-
-	   It's good practice to always use the latter form when writing your object declarations anyway,
-	   rather than writing them as assignments and assuming (or hoping) that the compiler will be
-	   smart enough to replace your construction + assignment with a single constructor.
-	*/
-	ScopedPointer (const ScopedPointer&);
-  #endif
-};
-
-/** Compares a ScopedPointer with another pointer.
-	This can be handy for checking whether this is a null pointer.
-*/
-template <class ObjectType>
-bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
-{
-	return static_cast <ObjectType*> (pointer1) == pointer2;
-}
-
-/** Compares a ScopedPointer with another pointer.
-	This can be handy for checking whether this is a null pointer.
-*/
-template <class ObjectType>
-bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) throw()
-{
-	return static_cast <ObjectType*> (pointer1) != pointer2;
-}
-
-#endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
-/*** End of inlined file: juce_ScopedPointer.h ***/
 
 class FileInputStream;
 class FileOutputStream;

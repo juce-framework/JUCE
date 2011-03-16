@@ -60,11 +60,7 @@ template <typename ElementType,
 class Array
 {
 private:
-  #if JUCE_VC8_OR_EARLIER
-    typedef const ElementType& ParameterType;
-  #else
     typedef PARAMETER_TYPE (ElementType) ParameterType;
-  #endif
 
 public:
     //==============================================================================

@@ -365,6 +365,7 @@
               file="src/containers/juce_DynamicObject.h"/>
         <FILE id="RNHQjBFmS" name="juce_ElementComparator.h" compile="0" resource="0"
               file="src/containers/juce_ElementComparator.h"/>
+        <FILE id="KG5Z3O" name="juce_HashMap.h" compile="0" resource="0" file="src/containers/juce_HashMap.h"/>
         <FILE id="pnNXeAf" name="juce_LinkedListPointer.h" compile="0" resource="0"
               file="src/containers/juce_LinkedListPointer.h"/>
         <FILE id="zy1yAvLC1" name="juce_NamedValueSet.cpp" compile="1" resource="0"

@@ -529,6 +529,7 @@
     <ClInclude Include="..\..\src\containers\juce_ArrayAllocationBase.h"/>
     <ClInclude Include="..\..\src\containers\juce_DynamicObject.h"/>
     <ClInclude Include="..\..\src\containers\juce_ElementComparator.h"/>
+    <ClInclude Include="..\..\src\containers\juce_HashMap.h"/>
     <ClInclude Include="..\..\src\containers\juce_LinkedListPointer.h"/>
     <ClInclude Include="..\..\src\containers\juce_NamedValueSet.h"/>
     <ClInclude Include="..\..\src\containers\juce_OwnedArray.h"/>

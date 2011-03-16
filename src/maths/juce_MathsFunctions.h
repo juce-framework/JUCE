@@ -425,7 +425,7 @@ inline int roundFloatToInt (const float value) throw()
 namespace TypeHelpers
 {
   #if JUCE_VC8_OR_EARLIER
-    #define PARAMETER_TYPE(a) a
+    #define PARAMETER_TYPE(type) const type&
   #else
     /** The ParameterType struct is used to find the best type to use when passing some kind
         of object as a parameter.
