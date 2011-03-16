@@ -318,7 +318,7 @@ String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end) : 
 
 const String String::charToString (const juce_wchar character)
 {
-    String result (PreallocationBytes (sizeof (CharPointerType::CharType)));
+    String result (PreallocationBytes (CharPointerType::getBytesRequiredFor (character)));
     CharPointerType t (result.text);
     t.write (character);
     t.writeNull();
