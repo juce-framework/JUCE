@@ -51,9 +51,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
 {
     if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
     {
-        LOGFONTW lf;
-        zerostruct (lf);
-
+        LOGFONTW lf = { 0 };
         lf.lfWeight = FW_DONTCARE;
         lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
         lf.lfQuality = DEFAULT_QUALITY;
@@ -80,9 +78,7 @@ const StringArray Font::findAllTypefaceNames()
     HDC dc = CreateCompatibleDC (0);
 
     {
-        LOGFONTW lf;
-        zerostruct (lf);
-
+        LOGFONTW lf = { 0 };
         lf.lfWeight = FW_DONTCARE;
         lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
         lf.lfQuality = DEFAULT_QUALITY;
@@ -158,9 +154,7 @@ public:
             SetMapperFlags (dc, 0);
             SetMapMode (dc, MM_TEXT);
 
-            LOGFONTW lfw;
-            zerostruct (lfw);
-
+            LOGFONTW lfw = { 0 };
             lfw.lfCharSet = DEFAULT_CHARSET;
             lfw.lfClipPrecision = CLIP_DEFAULT_PRECIS;
             lfw.lfOutPrecision = OUT_OUTLINE_PRECIS;

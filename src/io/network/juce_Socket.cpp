@@ -104,8 +104,7 @@ namespace SocketHelpers
         if (handle <= 0 || port <= 0)
             return false;
 
-        struct sockaddr_in servTmpAddr;
-        zerostruct (servTmpAddr);
+        struct sockaddr_in servTmpAddr = { 0 };
         servTmpAddr.sin_family = PF_INET;
         servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
         servTmpAddr.sin_port = htons ((uint16) port);
@@ -231,8 +230,7 @@ namespace SocketHelpers
                         const int portNumber,
                         const int timeOutMillisecs) throw()
     {
-        struct addrinfo hints;
-        zerostruct (hints);
+        struct addrinfo hints = { 0 };
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = isDatagram ? SOCK_DGRAM : SOCK_STREAM;
         hints.ai_flags = AI_NUMERICSERV;
@@ -424,8 +422,7 @@ bool StreamingSocket::createListener (const int newPortNumber, const String& loc
     portNumber = newPortNumber;
     isListener = true;
 
-    struct sockaddr_in servTmpAddr;
-    zerostruct (servTmpAddr);
+    struct sockaddr_in servTmpAddr = { 0 };
     servTmpAddr.sin_family = PF_INET;
     servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
 

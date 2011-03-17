@@ -99,12 +99,13 @@ public:
         if (FAILED (hr))
             return;
 
-        AM_MEDIA_TYPE mt;
-        zerostruct (mt);
-        mt.majortype = MEDIATYPE_Video;
-        mt.subtype = MEDIASUBTYPE_RGB24;
-        mt.formattype = FORMAT_VideoInfo;
-        sampleGrabber->SetMediaType (&mt);
+        {
+            AM_MEDIA_TYPE mt = { 0 };
+            mt.majortype = MEDIATYPE_Video;
+            mt.subtype = MEDIASUBTYPE_RGB24;
+            mt.formattype = FORMAT_VideoInfo;
+            sampleGrabber->SetMediaType (&mt);
+        }
 
         callback = new GrabberCallback (*this);
         hr = sampleGrabber->SetCallback (callback, 1);
@@ -123,7 +124,7 @@ public:
         if (FAILED (hr))
             return;
 
-        zerostruct (mt);
+        AM_MEDIA_TYPE mt = { 0 };
         hr = sampleGrabber->GetConnectedMediaType (&mt);
         VIDEOINFOHEADER* pVih = (VIDEOINFOHEADER*) (mt.pbFormat);
         width = pVih->bmiHeader.biWidth;
@@ -601,8 +602,7 @@ private:
 
             if (wantedDirection == dir)
             {
-                PIN_INFO info;
-                zerostruct (info);
+                PIN_INFO info = { 0 };
                 pin->QueryPinInfo (&info);
 
                 if (pinName == 0 || String (pinName).equalsIgnoreCase (String (info.achName)))

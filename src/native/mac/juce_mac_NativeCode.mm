@@ -130,8 +130,7 @@ public:
         runLoop = CFRunLoopGetCurrent();
        #endif
 
-        CFRunLoopSourceContext sourceContext;
-        zerostruct (sourceContext);
+        CFRunLoopSourceContext sourceContext = { 0 };
         sourceContext.info = this;
         sourceContext.perform = runLoopSourceCallback;
         runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);

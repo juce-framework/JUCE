@@ -584,7 +584,7 @@ public:
             conv = new AudioData::ConverterInstance <AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::Const>,
                                                      AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> >();
             if (! inPlace)
-                zerostruct (reversed);
+                zeromem (reversed, sizeof (reversed));
 
             conv->convertSamples (reversed, inPlace ? reversed : converted, numSamples);
 

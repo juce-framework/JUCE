@@ -1041,8 +1041,7 @@ private:
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
-            WNDCLASSEX wcex;
-            zerostruct (wcex);
+            WNDCLASSEX wcex = { 0 };
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
             wcex.lpfnWndProc    = (WNDPROC) windowProc;

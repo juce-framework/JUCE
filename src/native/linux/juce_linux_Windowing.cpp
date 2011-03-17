@@ -178,8 +178,7 @@ namespace XSHMHelpers
                 trappedErrorCode = 0;
                 XErrorHandler oldHandler = XSetErrorHandler (errorTrapHandler);
 
-                XShmSegmentInfo segmentInfo;
-                zerostruct (segmentInfo);
+                XShmSegmentInfo segmentInfo = { 0 };
                 XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
                                                   24, ZPixmap, 0, &segmentInfo, 50, 50);
 
@@ -1684,8 +1683,7 @@ public:
 
         if (managerWin != None)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xclient.type = ClientMessage;
             ev.xclient.window = managerWin;
             ev.xclient.message_type = XInternAtom (display, "_NET_SYSTEM_TRAY_OPCODE", False);
@@ -2000,8 +1998,7 @@ private:
 
         if (hints != None)
         {
-            MotifWmHints motifHints;
-            zerostruct (motifHints);
+            MotifWmHints motifHints = { 0 };
             motifHints.flags = 2; /* MWM_HINTS_DECORATIONS */
             motifHints.decorations = 0;
 
@@ -2040,9 +2037,7 @@ private:
 
         if (hints != None)
         {
-            MotifWmHints motifHints;
-            zerostruct (motifHints);
-
+            MotifWmHints motifHints = { 0 };
             motifHints.flags = 1 | 2; /* MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS */
             motifHints.decorations = 2 /* MWM_DECOR_BORDER */ | 8 /* MWM_DECOR_TITLE */ | 16; /* MWM_DECOR_MENU */
 
@@ -2368,8 +2363,7 @@ private:
 
     void sendDragAndDropStatus (const bool acceptDrop, Atom dropAction)
     {
-        XClientMessageEvent msg;
-        zerostruct (msg);
+        XClientMessageEvent msg = { 0 };
         msg.message_type = Atoms::XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
         msg.data.l[4] = dropAction;
@@ -2379,16 +2373,14 @@ private:
 
     void sendDragAndDropLeave()
     {
-        XClientMessageEvent msg;
-        zerostruct (msg);
+        XClientMessageEvent msg = { 0 };
         msg.message_type = Atoms::XdndLeave;
         sendDragAndDropMessage (msg);
     }
 
     void sendDragAndDropFinish()
     {
-        XClientMessageEvent msg;
-        zerostruct (msg);
+        XClientMessageEvent msg = { 0 };
         msg.message_type = Atoms::XdndFinished;
         sendDragAndDropMessage (msg);
     }

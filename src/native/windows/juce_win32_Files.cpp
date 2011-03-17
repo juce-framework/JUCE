@@ -167,8 +167,7 @@ bool File::moveToTrash() const
     if (! exists())
         return true;
 
-    SHFILEOPSTRUCT fos;
-    zerostruct (fos);
+    SHFILEOPSTRUCT fos = { 0 };
 
     // The string we pass in must be double null terminated..
     String doubleNullTermPath (getFullPathName() + " ");
@@ -677,8 +676,7 @@ public:
 
         if (! connected)
         {
-            OVERLAPPED over;
-            zerostruct (over);
+            OVERLAPPED over = { 0 };
 
             over.hEvent = CreateEvent (0, TRUE, FALSE, 0);
 
@@ -765,8 +763,7 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMillisecon
         if (maxBytesToRead <= 0)
             return 0;
 
-        OVERLAPPED over;
-        zerostruct (over);
+        OVERLAPPED over = { 0 };
         over.hEvent = CreateEvent (0, TRUE, FALSE, 0);
 
         unsigned long numRead;
@@ -820,9 +817,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
         if (numBytesToWrite <= 0)
             return 0;
 
-        OVERLAPPED over;
-        zerostruct (over);
-
+        OVERLAPPED over = { 0 };
         over.hEvent = CreateEvent (0, TRUE, FALSE, 0);
 
         unsigned long numWritten;

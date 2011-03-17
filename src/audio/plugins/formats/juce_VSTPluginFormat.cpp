@@ -1267,8 +1267,7 @@ public:
                 {
                     const Rectangle<int> clip (g.getClipBounds());
 
-                    XEvent ev;
-                    zerostruct (ev);
+                    XEvent ev = { 0 };
                     ev.xexpose.type = Expose;
                     ev.xexpose.display = display;
                     ev.xexpose.window = pluginWindow;
@@ -1325,8 +1324,7 @@ public:
 
         toFront (true);
 
-        XEvent ev;
-        zerostruct (ev);
+        XEvent ev = { 0 };
         ev.xbutton.display = display;
         ev.xbutton.type = ButtonPress;
         ev.xbutton.window = pluginWindow;
@@ -1646,8 +1644,7 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xcrossing.display = display;
             ev.xcrossing.type = EnterNotify;
             ev.xcrossing.window = pluginWindow;
@@ -1670,8 +1667,7 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xcrossing.display = display;
             ev.xcrossing.type = LeaveNotify;
             ev.xcrossing.window = pluginWindow;
@@ -1695,8 +1691,7 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xmotion.display = display;
             ev.xmotion.type = MotionNotify;
             ev.xmotion.window = pluginWindow;
@@ -1716,8 +1711,7 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xmotion.display = display;
             ev.xmotion.type = MotionNotify;
             ev.xmotion.window = pluginWindow;
@@ -1738,8 +1732,7 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xbutton.display = display;
             ev.xbutton.type = ButtonRelease;
             ev.xbutton.window = pluginWindow;
@@ -1761,8 +1754,7 @@ private:
     {
         if (pluginWindow != 0)
         {
-            XEvent ev;
-            zerostruct (ev);
+            XEvent ev = { 0 };
             ev.xbutton.display = display;
             ev.xbutton.type = ButtonPress;
             ev.xbutton.window = pluginWindow;

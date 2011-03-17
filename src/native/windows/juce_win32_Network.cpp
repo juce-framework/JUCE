@@ -227,8 +227,7 @@ private:
             // break up the url..
             TCHAR file[1024], server[1024];
 
-            URL_COMPONENTS uc;
-            zerostruct (uc);
+            URL_COMPONENTS uc = { 0 };
             uc.dwStructSize = sizeof (uc);
             uc.dwUrlPathLength = sizeof (file);
             uc.dwHostNameLength = sizeof (server);
@@ -292,8 +291,7 @@ private:
 
                         if (request != 0)
                         {
-                            INTERNET_BUFFERS buffers;
-                            zerostruct (buffers);
+                            INTERNET_BUFFERS buffers = { 0 };
                             buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
                             buffers.lpcszHeader = headers.toWideCharPointer();
                             buffers.dwHeadersLength = headers.length();
@@ -392,39 +390,36 @@ namespace MACAddressHelpers
 
         if (NetbiosCall != 0)
         {
-            NCB ncb;
-            zerostruct (ncb);
+            LANA_ENUM enums = { 0 };
 
-            struct ASTAT
             {
-                ADAPTER_STATUS adapt;
-                NAME_BUFFER    NameBuff [30];
-            };
-
-            ASTAT astat;
-            zeromem (&astat, sizeof (astat));  // (can't use zerostruct here in VC6)
-
-            LANA_ENUM enums;
-            zerostruct (enums);
-
-            ncb.ncb_command = NCBENUM;
-            ncb.ncb_buffer = (unsigned char*) &enums;
-            ncb.ncb_length = sizeof (LANA_ENUM);
-            NetbiosCall (&ncb);
+                NCB ncb = { 0 };
+                ncb.ncb_command = NCBENUM;
+                ncb.ncb_buffer = (unsigned char*) &enums;
+                ncb.ncb_length = sizeof (LANA_ENUM);
+                NetbiosCall (&ncb);
+            }
 
             for (int i = 0; i < enums.length; ++i)
             {
-                zerostruct (ncb);
-                ncb.ncb_command = NCBRESET;
-                ncb.ncb_lana_num = enums.lana[i];
+                NCB ncb2 = { 0 };
+                ncb2.ncb_command = NCBRESET;
+                ncb2.ncb_lana_num = enums.lana[i];
 
-                if (NetbiosCall (&ncb) == 0)
+                if (NetbiosCall (&ncb2) == 0)
                 {
-                    zerostruct (ncb);
+                    NCB ncb = { 0 };
                     memcpy (ncb.ncb_callname, "*                   ", NCBNAMSZ);
                     ncb.ncb_command = NCBASTAT;
                     ncb.ncb_lana_num = enums.lana[i];
 
+                    struct ASTAT
+                    {
+                        ADAPTER_STATUS adapt;
+                        NAME_BUFFER    NameBuff [30];
+                    };
+
+                    ASTAT astat = { 0 };
                     ncb.ncb_buffer = (unsigned char*) &astat;
                     ncb.ncb_length = sizeof (ASTAT);
 
@@ -457,13 +452,11 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
 
     if (mapiSendMail != 0)
     {
-        MapiMessage message;
-        zerostruct (message);
+        MapiMessage message = { 0 };
         message.lpszSubject = (LPSTR) emailSubject.toUTF8().getAddress();
         message.lpszNoteText = (LPSTR) bodyText.toUTF8().getAddress();
 
-        MapiRecipDesc recip;
-        zerostruct (recip);
+        MapiRecipDesc recip = { 0 };
         recip.ulRecipClass = MAPI_TO;
         String targetEmailAddress_ (targetEmailAddress);
         if (targetEmailAddress_.isEmpty())

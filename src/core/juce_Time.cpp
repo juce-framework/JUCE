@@ -97,7 +97,7 @@ namespace TimeHelpers
             if (now >= 0 && now <= 0x793406fff)
                 localtime_s (&result, &now);
             else
-                zeromem (&result, sizeof (result));
+                zerostruct (result);
            #else
             result = *localtime (&now);
            #endif

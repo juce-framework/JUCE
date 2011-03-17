@@ -233,8 +233,7 @@ const StringArray MidiInput::getDevices()
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIINCAPS mc;
-        zerostruct (mc);
+        MIDIINCAPS mc = { 0 };
 
         if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
             s.add (String (mc.szPname, sizeof (mc.szPname)));
@@ -261,8 +260,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIINCAPS mc;
-        zerostruct (mc);
+        MIDIINCAPS mc = { 0 };
 
         if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
         {
@@ -341,8 +339,7 @@ const StringArray MidiOutput::getDevices()
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIOUTCAPS mc;
-        zerostruct (mc);
+        MIDIOUTCAPS mc = { 0 };
 
         if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
             s.add (String (mc.szPname, sizeof (mc.szPname)));
@@ -358,8 +355,7 @@ int MidiOutput::getDefaultDeviceIndex()
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIOUTCAPS mc;
-        zerostruct (mc);
+        MIDIOUTCAPS mc = { 0 };
 
         if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
         {
@@ -381,8 +377,7 @@ MidiOutput* MidiOutput::openDevice (int index)
 
     for (i = 0; i < num; ++i)
     {
-        MIDIOUTCAPS mc;
-        zerostruct (mc);
+        MIDIOUTCAPS mc = { 0 };
 
         if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
         {
@@ -502,8 +497,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     if (message.getRawDataSize() > 3
          || message.isSysEx())
     {
-        MIDIHDR h;
-        zerostruct (h);
+        MIDIHDR h = { 0 };
 
         h.lpData = (char*) message.getRawData();
         h.dwBufferLength = message.getRawDataSize();

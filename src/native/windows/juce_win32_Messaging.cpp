@@ -272,8 +272,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
     HMODULE moduleHandle = (HMODULE) PlatformUtilities::getCurrentModuleInstanceHandle();
 
-    WNDCLASSEX wc;
-    zerostruct (wc);
+    WNDCLASSEX wc = { 0 };
     wc.cbSize         = sizeof (wc);
     wc.lpfnWndProc    = (WNDPROC) juce_MessageWndProc;
     wc.cbWndExtra     = 4;

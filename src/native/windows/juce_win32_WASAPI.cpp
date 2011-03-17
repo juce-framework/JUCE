@@ -330,8 +330,7 @@ private:
 
     bool tryInitialisingWithFormat (const bool useFloat, const int bytesPerSampleToTry)
     {
-        WAVEFORMATEXTENSIBLE format;
-        zerostruct (format);
+        WAVEFORMATEXTENSIBLE format = { 0 };
 
         if (numChannels <= 2 && bytesPerSampleToTry <= 2)
         {

@@ -439,9 +439,7 @@ public:
                     {
                         inBuffers[n] = tempBuffer + (currentBlockSizeSamples * n);
 
-                        ASIOChannelInfo channelInfo;
-                        zerostruct (channelInfo);
-
+                        ASIOChannelInfo channelInfo = { 0 };
                         channelInfo.channel = i;
                         channelInfo.isInput = 1;
                         asioObject->getChannelInfo (&channelInfo);
@@ -468,9 +466,7 @@ public:
                     {
                         outBuffers[n] = tempBuffer + (currentBlockSizeSamples * (numActiveInputChans + n));
 
-                        ASIOChannelInfo channelInfo;
-                        zerostruct (channelInfo);
-
+                        ASIOChannelInfo channelInfo = { 0 };
                         channelInfo.channel = i;
                         channelInfo.isInput = 0;
                         asioObject->getChannelInfo (&channelInfo);
@@ -1040,12 +1036,9 @@ private:
 
                         updateSampleRates();
 
-                        ASIOChannelInfo channelInfo;
-                        channelInfo.type = 0;
-
                         for (i = 0; i < totalNumInputChans; ++i)
                         {
-                            zerostruct (channelInfo);
+                            ASIOChannelInfo channelInfo = { 0 };
                             channelInfo.channel = i;
                             channelInfo.isInput = 1;
                             asioObject->getChannelInfo (&channelInfo);
@@ -1055,7 +1048,7 @@ private:
 
                         for (i = 0; i < totalNumOutputChans; ++i)
                         {
-                            zerostruct (channelInfo);
+                            ASIOChannelInfo channelInfo = { 0 };
                             channelInfo.channel = i;
                             channelInfo.isInput = 0;
                             asioObject->getChannelInfo (&channelInfo);

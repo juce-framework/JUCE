@@ -375,8 +375,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
     dataHandle = 0;
     bool ok = false;
 
-    QTNewMoviePropertyElement props[5];
-    zeromem (props, sizeof (props));
+    QTNewMoviePropertyElement props[5] = { 0 };
     int prop = 0;
 
     DataReferenceRecord dr;

@@ -181,9 +181,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
     if (selectsDirectory)
     {
-        BROWSEINFO bi;
-        zerostruct (bi);
-
+        BROWSEINFO bi = { 0 };
         bi.hwndOwner = (HWND) parentWindow.getWindowHandle();
         bi.pszDisplayName = files;
         bi.lpszTitle = title.toWideCharPointer();
@@ -238,16 +236,14 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)) + 1,
                             (filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten);
 
-        OPENFILENAMEW of;
-        zerostruct (of);
-
+        OPENFILENAMEW of = { 0 };
         String localPath (info.initialPath);
 
-      #ifdef OPENFILENAME_SIZE_VERSION_400W
+       #ifdef OPENFILENAME_SIZE_VERSION_400W
         of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
-      #else
+       #else
         of.lStructSize = sizeof (of);
-      #endif
+       #endif
         of.hwndOwner = (HWND) parentWindow.getWindowHandle();
         of.lpstrFilter = filters.getData();
         of.nFilterIndex = 1;

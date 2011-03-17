@@ -292,9 +292,7 @@ public:
             {
                 IDirectSoundBuffer* pPrimaryBuffer;
 
-                DSBUFFERDESC primaryDesc;
-                zerostruct (primaryDesc);
-
+                DSBUFFERDESC primaryDesc = { 0 };
                 primaryDesc.dwSize = sizeof (DSBUFFERDESC);
                 primaryDesc.dwFlags = 1 /* DSBCAPS_PRIMARYBUFFER */;
                 primaryDesc.dwBufferBytes = 0;
@@ -320,9 +318,7 @@ public:
 
                     if (hr == S_OK)
                     {
-                        DSBUFFERDESC secondaryDesc;
-                        zerostruct (secondaryDesc);
-
+                        DSBUFFERDESC secondaryDesc = { 0 };
                         secondaryDesc.dwSize = sizeof (DSBUFFERDESC);
                         secondaryDesc.dwFlags =  0x8000 /* DSBCAPS_GLOBALFOCUS */
                                                   | 0x10000 /* DSBCAPS_GETCURRENTPOSITION2 */;
@@ -620,9 +616,7 @@ public:
             wfFormat.nAvgBytesPerSec = wfFormat.nSamplesPerSec * wfFormat.nBlockAlign;
             wfFormat.cbSize = 0;
 
-            DSCBUFFERDESC captureDesc;
-            zerostruct (captureDesc);
-
+            DSCBUFFERDESC captureDesc = { 0 };
             captureDesc.dwSize = sizeof (DSCBUFFERDESC);
             captureDesc.dwFlags = 0;
             captureDesc.dwBufferBytes = totalBytesPerBuffer;

@@ -570,8 +570,7 @@ void AudioUnitPluginInstance::setPluginCallbacks()
     if (audioUnit != 0)
     {
         {
-            AURenderCallbackStruct info;
-            zerostruct (info);
+            AURenderCallbackStruct info = { 0 };
             info.inputProcRefCon = this;
             info.inputProc = renderGetInputCallback;
 
@@ -580,8 +579,7 @@ void AudioUnitPluginInstance::setPluginCallbacks()
         }
 
         {
-            HostCallbackInfo info;
-            zerostruct (info);
+            HostCallbackInfo info = { 0 };
             info.hostUserData = this;
             info.beatAndTempoProc = getBeatAndTempoCallback;
             info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
@@ -630,8 +628,7 @@ void AudioUnitPluginInstance::prepareToPlay (double sampleRate_,
         AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
 
         {
-            AudioStreamBasicDescription stream;
-            zerostruct (stream);
+            AudioStreamBasicDescription stream = { 0 };
             stream.mSampleRate = sampleRate_;
             stream.mFormatID = kAudioFormatLinearPCM;
             stream.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
@@ -1230,8 +1227,7 @@ void AudioUnitPluginInstance::setParameter (int index, float newValue)
 
 const String AudioUnitPluginInstance::getParameterName (int index)
 {
-    AudioUnitParameterInfo info;
-    zerostruct (info);
+    AudioUnitParameterInfo info = { 0 };
     UInt32 sz = sizeof (info);
 
     String name;
@@ -1503,12 +1499,10 @@ const StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearch
 {
     StringArray result;
     ComponentRecord* comp = 0;
-    ComponentDescription desc;
-    zerostruct (desc);
 
     for (;;)
     {
-        zerostruct (desc);
+        ComponentDescription desc = { 0 };
         comp = FindNextComponent (comp, &desc);
 
         if (comp == 0)

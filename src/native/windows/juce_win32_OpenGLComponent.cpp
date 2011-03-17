@@ -89,8 +89,7 @@ public:
         createNativeWindow();
 
         // Use a default pixel format that should be supported everywhere
-        PIXELFORMATDESCRIPTOR pfd;
-        zerostruct (pfd);
+        PIXELFORMATDESCRIPTOR pfd = { 0 };
         pfd.nSize = sizeof (pfd);
         pfd.nVersion = 1;
         pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
@@ -167,8 +166,7 @@ public:
     {
         makeActive();
 
-        PIXELFORMATDESCRIPTOR pfd;
-        zerostruct (pfd);
+        PIXELFORMATDESCRIPTOR pfd = { 0 };
         pfd.nSize = sizeof (pfd);
         pfd.nVersion = 1;
         pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;

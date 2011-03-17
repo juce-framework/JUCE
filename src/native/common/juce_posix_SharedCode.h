@@ -523,8 +523,7 @@ const String File::getVolumeLabel() const
         char            mountPointSpace [MAXPATHLEN];
     } attrBuf;
 
-    struct attrlist attrList;
-    zerostruct (attrList);
+    struct attrlist attrList = { 0 };
     attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
     attrList.volattr = ATTR_VOL_INFO | ATTR_VOL_NAME;
 
@@ -608,8 +607,7 @@ public:
 
         if (handle != 0)
         {
-            struct flock fl;
-            zerostruct (fl);
+            struct flock fl = { 0 };
             fl.l_whence = SEEK_SET;
             fl.l_type = F_WRLCK;
 
@@ -645,8 +643,7 @@ public:
     {
         if (handle != 0)
         {
-            struct flock fl;
-            zerostruct (fl);
+            struct flock fl = { 0 };
             fl.l_whence = SEEK_SET;
             fl.l_type = F_UNLCK;
 
