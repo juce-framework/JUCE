@@ -426,33 +426,6 @@ long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
 
 
 //==============================================================================
-bool KeyPress::isKeyCurrentlyDown (const int keyCode)
-{
-    SHORT k = (SHORT) keyCode;
-
-    if ((keyCode & extendedKeyModifier) == 0
-         && (k >= (SHORT) 'a' && k <= (SHORT) 'z'))
-        k += (SHORT) 'A' - (SHORT) 'a';
-
-    const SHORT translatedValues[] = { (SHORT) ',', VK_OEM_COMMA,
-                                       (SHORT) '+', VK_OEM_PLUS,
-                                       (SHORT) '-', VK_OEM_MINUS,
-                                       (SHORT) '.', VK_OEM_PERIOD,
-                                       (SHORT) ';', VK_OEM_1,
-                                       (SHORT) ':', VK_OEM_1,
-                                       (SHORT) '/', VK_OEM_2,
-                                       (SHORT) '?', VK_OEM_2,
-                                       (SHORT) '[', VK_OEM_4,
-                                       (SHORT) ']', VK_OEM_6 };
-
-    for (int i = 0; i < numElementsInArray (translatedValues); i += 2)
-        if (k == translatedValues [i])
-            k = translatedValues [i + 1];
-
-    return (GetKeyState (k) & 0x8000) != 0;
-}
-
-//==============================================================================
 class Win32ComponentPeer  : public ComponentPeer
 {
 public:
@@ -955,19 +928,21 @@ public:
     }
 
     //==============================================================================
-    bool isInside (HWND h) const
+    bool isInside (HWND h) const throw()
     {
         return GetAncestor (hwnd, GA_ROOT) == h;
     }
 
     //==============================================================================
+    static bool isKeyDown (const int key) throw()   { return (GetAsyncKeyState (key) & 0x8000) != 0; }
+
     static void updateKeyModifiers() throw()
     {
         int keyMods = 0;
-        if (GetKeyState (VK_SHIFT) & 0x8000)    keyMods |= ModifierKeys::shiftModifier;
-        if (GetKeyState (VK_CONTROL) & 0x8000)  keyMods |= ModifierKeys::ctrlModifier;
-        if (GetKeyState (VK_MENU) & 0x8000)     keyMods |= ModifierKeys::altModifier;
-        if (GetKeyState (VK_RMENU) & 0x8000)    keyMods &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
+        if (isKeyDown (VK_SHIFT))   keyMods |= ModifierKeys::shiftModifier;
+        if (isKeyDown (VK_CONTROL)) keyMods |= ModifierKeys::ctrlModifier;
+        if (isKeyDown (VK_MENU))    keyMods |= ModifierKeys::altModifier;
+        if (isKeyDown (VK_RMENU))   keyMods &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
 
         currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
     }
@@ -2357,14 +2332,41 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
     Win32ComponentPeer::updateKeyModifiers();
 
     int mouseMods = 0;
-    if ((GetKeyState (VK_LBUTTON) & 0x8000) != 0)   mouseMods |= ModifierKeys::leftButtonModifier;
-    if ((GetKeyState (VK_RBUTTON) & 0x8000) != 0)   mouseMods |= ModifierKeys::rightButtonModifier;
-    if ((GetKeyState (VK_MBUTTON) & 0x8000) != 0)   mouseMods |= ModifierKeys::middleButtonModifier;
+    if (Win32ComponentPeer::isKeyDown (VK_LBUTTON))  mouseMods |= ModifierKeys::leftButtonModifier;
+    if (Win32ComponentPeer::isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
+    if (Win32ComponentPeer::isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
 
     Win32ComponentPeer::currentModifiers
         = Win32ComponentPeer::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
 
     return Win32ComponentPeer::currentModifiers;
+}
+
+//==============================================================================
+bool KeyPress::isKeyCurrentlyDown (const int keyCode)
+{
+    SHORT k = (SHORT) keyCode;
+
+    if ((keyCode & extendedKeyModifier) == 0
+         && (k >= (SHORT) 'a' && k <= (SHORT) 'z'))
+        k += (SHORT) 'A' - (SHORT) 'a';
+
+    const SHORT translatedValues[] = { (SHORT) ',', VK_OEM_COMMA,
+                                       (SHORT) '+', VK_OEM_PLUS,
+                                       (SHORT) '-', VK_OEM_MINUS,
+                                       (SHORT) '.', VK_OEM_PERIOD,
+                                       (SHORT) ';', VK_OEM_1,
+                                       (SHORT) ':', VK_OEM_1,
+                                       (SHORT) '/', VK_OEM_2,
+                                       (SHORT) '?', VK_OEM_2,
+                                       (SHORT) '[', VK_OEM_4,
+                                       (SHORT) ']', VK_OEM_6 };
+
+    for (int i = 0; i < numElementsInArray (translatedValues); i += 2)
+        if (k == translatedValues [i])
+            k = translatedValues [i + 1];
+
+    return Win32ComponentPeer::isKeyDown (k);
 }
 
 //==============================================================================

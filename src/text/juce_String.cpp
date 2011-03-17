@@ -511,85 +511,22 @@ int64 String::hashCode64() const throw()
 }
 
 //==============================================================================
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw()
-{
-    return string1.compare (string2) == 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* const string2) throw()
-{
-    return string1.compare (string2) == 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* const string2) throw()
-{
-    return string1.compare (string2) == 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8& string2) throw()
-{
-    return string1.getCharPointer().compare (string2) == 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF16& string2) throw()
-{
-    return string1.getCharPointer().compare (string2) == 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF32& string2) throw()
-{
-    return string1.getCharPointer().compare (string2) == 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw()
-{
-    return string1.compare (string2) != 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* const string2) throw()
-{
-    return string1.compare (string2) != 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* const string2) throw()
-{
-    return string1.compare (string2) != 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8& string2) throw()
-{
-    return string1.getCharPointer().compare (string2) != 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF16& string2) throw()
-{
-    return string1.getCharPointer().compare (string2) != 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF32& string2) throw()
-{
-    return string1.getCharPointer().compare (string2) != 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw()
-{
-    return string1.compare (string2) > 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) throw()
-{
-    return string1.compare (string2) < 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) throw()
-{
-    return string1.compare (string2) >= 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw()
-{
-    return string1.compare (string2) <= 0;
-}
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const String& s2) throw()             { return s1.compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const char* const s2) throw()         { return s1.compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const wchar_t* const s2) throw()      { return s1.compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF8& s2) throw()   { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF16& s2) throw()  { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator== (const String& s1, const CharPointer_UTF32& s2) throw()  { return s1.getCharPointer().compare (s2) == 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const String& s2) throw()             { return s1.compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const char* const s2) throw()         { return s1.compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const wchar_t* const s2) throw()      { return s1.compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF8& s2) throw()   { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF16& s2) throw()  { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& s1, const CharPointer_UTF32& s2) throw()  { return s1.getCharPointer().compare (s2) != 0; }
+JUCE_API bool JUCE_CALLTYPE operator>  (const String& s1, const String& s2) throw()             { return s1.compare (s2) > 0; }
+JUCE_API bool JUCE_CALLTYPE operator<  (const String& s1, const String& s2) throw()             { return s1.compare (s2) < 0; }
+JUCE_API bool JUCE_CALLTYPE operator>= (const String& s1, const String& s2) throw()             { return s1.compare (s2) >= 0; }
+JUCE_API bool JUCE_CALLTYPE operator<= (const String& s1, const String& s2) throw()             { return s1.compare (s2) <= 0; }
 
 bool String::equalsIgnoreCase (const wchar_t* const t) const throw()
 {
@@ -609,25 +546,10 @@ bool String::equalsIgnoreCase (const String& other) const throw()
             || text.compareIgnoreCase (other.text) == 0;
 }
 
-int String::compare (const String& other) const throw()
-{
-    return (text == other.text) ? 0 : text.compare (other.text);
-}
-
-int String::compare (const char* const other) const throw()
-{
-    return text.compare (CharPointer_UTF8 (other));
-}
-
-int String::compare (const wchar_t* const other) const throw()
-{
-    return text.compare (castToCharPointer_wchar_t (other));
-}
-
-int String::compareIgnoreCase (const String& other) const throw()
-{
-    return (text == other.text) ? 0 : text.compareIgnoreCase (other.text);
-}
+int String::compare (const String& other) const throw()            { return (text == other.text) ? 0 : text.compare (other.text); }
+int String::compare (const char* const other) const throw()        { return text.compare (CharPointer_UTF8 (other)); }
+int String::compare (const wchar_t* const other) const throw()     { return text.compare (castToCharPointer_wchar_t (other)); }
+int String::compareIgnoreCase (const String& other) const throw()  { return (text == other.text) ? 0 : text.compareIgnoreCase (other.text); }
 
 int String::compareLexicographically (const String& other) const throw()
 {
@@ -743,21 +665,10 @@ JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t* const string1, con
     return s += string2;
 }
 
-JUCE_API const String JUCE_CALLTYPE operator+ (const char string1, const String& string2)
-{
-    return String::charToString (string1) + string2;
-}
-
-JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t string1, const String& string2)
-{
-    return String::charToString (string1) + string2;
-}
-
+JUCE_API const String JUCE_CALLTYPE operator+ (const char s1, const String& s2)       { return String::charToString (s1) + s2; }
+JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t s1, const String& s2)    { return String::charToString (s1) + s2; }
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
-JUCE_API const String JUCE_CALLTYPE operator+ (const juce_wchar string1, const String& string2)
-{
-    return String::charToString (string1) + string2;
-}
+JUCE_API const String JUCE_CALLTYPE operator+ (const juce_wchar s1, const String& s2) { return String::charToString (s1) + s2; }
 #endif
 
 JUCE_API const String JUCE_CALLTYPE operator+ (String s1, const String& s2)       { return s1 += s2; }
