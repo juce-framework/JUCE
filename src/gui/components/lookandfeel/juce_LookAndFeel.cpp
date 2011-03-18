@@ -52,6 +52,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_ProgressBar.h"
 #include "../controls/juce_TreeView.h"
 #include "../keyboard/juce_KeyMappingEditorComponent.h"
+#include "../keyboard/juce_CaretComponent.h"
 #include "../code_editor/juce_CodeEditorComponent.h"
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
@@ -191,10 +192,11 @@ LookAndFeel::LookAndFeel()
         TextEditor::textColourId,                   0xff000000,
         TextEditor::highlightColourId,              textHighlightColour,
         TextEditor::highlightedTextColourId,        0xff000000,
-        TextEditor::caretColourId,                  0xff000000,
         TextEditor::outlineColourId,                0x00000000,
         TextEditor::focusedOutlineColourId,         textButtonColour,
         TextEditor::shadowColourId,                 0x38000000,
+
+        CaretComponent::caretColourId,              0xff000000,
 
         Label::backgroundColourId,                  0x00000000,
         Label::textColourId,                        0xff000000,
@@ -278,7 +280,6 @@ LookAndFeel::LookAndFeel()
         MidiKeyboardComponent::upDownButtonArrowColourId,       0xff000000,
 
         CodeEditorComponent::backgroundColourId,                0xffffffff,
-        CodeEditorComponent::caretColourId,                     0xff000000,
         CodeEditorComponent::highlightColourId,                 textHighlightColour,
         CodeEditorComponent::defaultTextColourId,               0xff000000,
 
@@ -1323,6 +1324,11 @@ void LookAndFeel::drawTextEditorOutline (Graphics& g, int width, int height, Tex
             g.drawBevel (0, 0, width, height + 2, 3, shadowColour, shadowColour);
         }
     }
+}
+
+CaretComponent* LookAndFeel::createCaretComponent (Component* keyFocusOwner)
+{
+    return new CaretComponent (keyFocusOwner);
 }
 
 //==============================================================================

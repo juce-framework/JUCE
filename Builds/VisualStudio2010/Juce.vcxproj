@@ -246,6 +246,7 @@
     <ClCompile Include="..\..\src\gui\components\filebrowser\juce_FileTreeComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\filebrowser\juce_ImagePreviewComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\keyboard\juce_CaretComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.cpp"/>
     <ClCompile Include="..\..\src\gui\components\keyboard\juce_KeyListener.cpp"/>
     <ClCompile Include="..\..\src\gui\components\keyboard\juce_KeyMappingEditorComponent.cpp"/>
@@ -616,6 +617,7 @@
     <ClInclude Include="..\..\src\gui\components\filebrowser\juce_FileTreeComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\filebrowser\juce_ImagePreviewComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.h"/>
+    <ClInclude Include="..\..\src\gui\components\keyboard\juce_CaretComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.h"/>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_KeyListener.h"/>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_KeyMappingEditorComponent.h"/>

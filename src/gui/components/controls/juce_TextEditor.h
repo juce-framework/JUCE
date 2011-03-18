@@ -34,6 +34,7 @@
 #include "../menus/juce_PopupMenu.h"
 #include "../../../containers/juce_Value.h"
 #include "../keyboard/juce_TextInputTarget.h"
+#include "../keyboard/juce_CaretComponent.h"
 
 
 //==============================================================================
@@ -133,9 +134,7 @@ public:
 
     //==============================================================================
     /** Makes the caret visible or invisible.
-
         By default the caret is visible.
-
         @see setCaretColour, setCaretPosition
     */
     void setCaretVisible (bool shouldBeVisible);
@@ -143,7 +142,7 @@ public:
     /** Returns true if the caret is enabled.
         @see setCaretVisible
     */
-    bool isCaretVisible() const                                 { return caretVisible; }
+    bool isCaretVisible() const                                 { return caret != 0; }
 
     //==============================================================================
     /** Enables/disables a vertical scrollbar.
@@ -221,8 +220,6 @@ public:
                                                    highlighting.*/
 
         highlightedTextColourId  = 0x1000203, /**< The colour with which to draw the text in highlighted sections. */
-
-        caretColourId            = 0x1000204, /**< The colour with which to draw the caret. */
 
         outlineColourId          = 0x1000205, /**< If this is non-transparent, it will be used to draw a box around
                                                    the edge of the component. */
@@ -622,19 +619,17 @@ private:
     bool multiline                  : 1;
     bool wordWrap                   : 1;
     bool returnKeyStartsNewLine     : 1;
-    bool caretVisible               : 1;
     bool popupMenuEnabled           : 1;
     bool selectAllTextWhenFocused   : 1;
     bool scrollbarVisible           : 1;
     bool wasFocused                 : 1;
-    bool caretFlashState            : 1;
     bool keepCursorOnScreen         : 1;
     bool tabKeyUsed                 : 1;
     bool menuActive                 : 1;
     bool valueTextNeedsUpdating     : 1;
 
     UndoManager undoManager;
-    float cursorX, cursorY, cursorHeight;
+    ScopedPointer<CaretComponent> caret;
     int maxTextLength;
     Range<int> selection;
     int leftIndent, topIndent;
@@ -678,7 +673,6 @@ private:
     void updateTextHolderSize();
     float getWordWrapWidth() const;
     void timerCallbackInt();
-    void repaintCaret();
     void repaintText (const Range<int>& range);
     UndoManager* getUndoManager() throw();
 

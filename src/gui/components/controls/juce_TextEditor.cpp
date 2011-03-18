@@ -884,6 +884,11 @@ public:
         owner.drawContent (g);
     }
 
+    void restartTimer()
+    {
+        startTimer (350);
+    }
+
     void timerCallback()
     {
         owner.timerCallbackInt();
@@ -943,8 +948,6 @@ private:
 //==============================================================================
 namespace TextEditorDefs
 {
-    const int flashSpeedIntervalMs = 380;
-
     const int textChangeMessageId = 0x10003001;
     const int returnKeyMessageId  = 0x10003002;
     const int escapeKeyMessageId  = 0x10003003;
@@ -968,19 +971,14 @@ TextEditor::TextEditor (const String& name,
       multiline (false),
       wordWrap (false),
       returnKeyStartsNewLine (false),
-      caretVisible (true),
       popupMenuEnabled (true),
       selectAllTextWhenFocused (false),
       scrollbarVisible (true),
       wasFocused (false),
-      caretFlashState (true),
       keepCursorOnScreen (true),
       tabKeyUsed (false),
       menuActive (false),
       valueTextNeedsUpdating (false),
-      cursorX (0),
-      cursorY (0),
-      cursorHeight (0),
       maxTextLength (0),
       leftIndent (4),
       topIndent (4),
@@ -998,8 +996,8 @@ TextEditor::TextEditor (const String& name,
     viewport->setWantsKeyboardFocus (false);
     viewport->setScrollBarsShown (false, false);
 
-    setMouseCursor (MouseCursor::IBeamCursor);
     setWantsKeyboardFocus (true);
+    setCaretVisible (true);
 }
 
 TextEditor::~TextEditor()
@@ -1142,13 +1140,24 @@ void TextEditor::colourChanged()
 
 void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
 {
-    caretVisible = shouldCaretBeVisible;
-
-    if (shouldCaretBeVisible)
-        textHolder->startTimer (TextEditorDefs::flashSpeedIntervalMs);
+    if (shouldCaretBeVisible && ! isReadOnly())
+    {
+        if (caret == 0)
+            textHolder->addChildComponent (caret = getLookAndFeel().createCaretComponent (this));
+    }
+    else
+    {
+        caret = 0;
+    }
 
     setMouseCursor (shouldCaretBeVisible ? MouseCursor::IBeamCursor
                                          : MouseCursor::NormalCursor);
+}
+
+void TextEditor::updateCaretPosition()
+{
+    if (caret != 0)
+        caret->setCaretPosition (getCaretRectangle().translated (leftIndent, topIndent));
 }
 
 void TextEditor::setInputRestrictions (const int maxLen,
@@ -1279,36 +1288,13 @@ void TextEditor::removeListener (TextEditorListener* const listenerToRemove)
 //==============================================================================
 void TextEditor::timerCallbackInt()
 {
-    const bool newState = (! caretFlashState) && ! isCurrentlyBlockedByAnotherModalComponent();
-
-    if (caretFlashState != newState)
-    {
-        caretFlashState = newState;
-
-        if (caretFlashState)
-            wasFocused = true;
-
-        if (caretVisible
-             && hasKeyboardFocus (false)
-             && ! isReadOnly())
-        {
-            repaintCaret();
-        }
-    }
+    if (hasKeyboardFocus (false) && ! isCurrentlyBlockedByAnotherModalComponent())
+        wasFocused = true;
 
     const unsigned int now = Time::getApproximateMillisecondCounter();
 
     if (now > lastTransactionTime + 200)
         newTransaction();
-}
-
-void TextEditor::repaintCaret()
-{
-    if (! findColour (caretColourId).isTransparent())
-        repaint (borderSize.getLeft() + textHolder->getX() + leftIndent + roundToInt (cursorX) - 1,
-                 borderSize.getTop() + textHolder->getY() + topIndent + roundToInt (cursorY) - 1,
-                 4,
-                 roundToInt (cursorHeight) + 2);
 }
 
 void TextEditor::repaintText (const Range<int>& range)
@@ -1353,12 +1339,10 @@ void TextEditor::moveCaret (int newCaretPos)
 
     if (newCaretPos != getCaretPosition())
     {
-        repaintCaret();
-        caretFlashState = true;
         caretPosition = newCaretPos;
-        textHolder->startTimer (TextEditorDefs::flashSpeedIntervalMs);
+        textHolder->restartTimer();
         scrollToMakeSureCursorIsVisible();
-        repaintCaret();
+        updateCaretPosition();
     }
 }
 
@@ -1378,17 +1362,15 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
 {
     updateCaretPosition();
 
-    int vx = roundToInt (cursorX) - desiredCaretX;
-    int vy = roundToInt (cursorY) - desiredCaretY;
+    const Rectangle<int> caretPos (getCaretRectangle());
+
+    int vx = caretPos.getX() - desiredCaretX;
+    int vy = caretPos.getY() - desiredCaretY;
 
     if (desiredCaretX < jmax (1, proportionOfWidth (0.05f)))
-    {
         vx += desiredCaretX - proportionOfWidth (0.2f);
-    }
     else if (desiredCaretX > jmax (0, viewport->getMaximumVisibleWidth() - (wordWrap ? 2 : 10)))
-    {
         vx += desiredCaretX + (isMultiLine() ? proportionOfWidth (0.2f) : 10) - viewport->getMaximumVisibleWidth();
-    }
 
     vx = jlimit (0, jmax (0, textHolder->getWidth() + 8 - viewport->getMaximumVisibleWidth()), vx);
 
@@ -1400,16 +1382,10 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
     {
         vy = jlimit (0, jmax (0, textHolder->getHeight() - viewport->getMaximumVisibleHeight()), vy);
 
-        const int curH = roundToInt (cursorHeight);
-
         if (desiredCaretY < 0)
-        {
             vy = jmax (0, desiredCaretY + vy);
-        }
-        else if (desiredCaretY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - curH))
-        {
-            vy += desiredCaretY + 2 + curH + topIndent - viewport->getMaximumVisibleHeight();
-        }
+        else if (desiredCaretY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - caretPos.getHeight()))
+            vy += desiredCaretY + 2 + caretPos.getHeight() + topIndent - viewport->getMaximumVisibleHeight();
     }
 
     viewport->setViewPosition (vx, vy);
@@ -1417,18 +1393,18 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
 
 const Rectangle<int> TextEditor::getCaretRectangle()
 {
-    updateCaretPosition();
+    float cursorX, cursorY;
+    float cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
+    getCharPosition (caretPosition, cursorX, cursorY, cursorHeight);
 
-    return Rectangle<int> (roundToInt (cursorX) - viewport->getX(),
-                           roundToInt (cursorY) - viewport->getY(),
-                           1, roundToInt (cursorHeight));
+    return Rectangle<int> (roundToInt (cursorX), roundToInt (cursorY), 2, roundToInt (cursorHeight));
 }
 
 //==============================================================================
 float TextEditor::getWordWrapWidth() const
 {
-    return (wordWrap) ? (float) (viewport->getMaximumVisibleWidth() - leftIndent - leftIndent / 2)
-                      : 1.0e10f;
+    return wordWrap ? (float) (viewport->getMaximumVisibleWidth() - leftIndent - leftIndent / 2)
+                    : std::numeric_limits<float>::max();
 }
 
 void TextEditor::updateTextHolderSize()
@@ -1448,7 +1424,7 @@ void TextEditor::updateTextHolderSize()
         const int h = topIndent + roundToInt (jmax (i.lineY + i.lineHeight,
                                                     currentFont.getHeight()));
 
-        textHolder->setSize (w + 1, h + 1);
+        textHolder->setSize (w + 2, h + 1); // (the +2 allows a bit of space for the cursor to be at the right-hand-edge)
     }
 }
 
@@ -1485,12 +1461,6 @@ void TextEditor::setScrollToShowCursor (const bool shouldScrollToShowCursor)
     keepCursorOnScreen = shouldScrollToShowCursor;
 }
 
-void TextEditor::updateCaretPosition()
-{
-    cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
-    getCharPosition (caretPosition, cursorX, cursorY, cursorHeight);
-}
-
 void TextEditor::scrollToMakeSureCursorIsVisible()
 {
     updateCaretPosition();
@@ -1500,8 +1470,10 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
         int x = viewport->getViewPositionX();
         int y = viewport->getViewPositionY();
 
-        const int relativeCursorX = roundToInt (cursorX) - x;
-        const int relativeCursorY = roundToInt (cursorY) - y;
+        const Rectangle<int> caretPos (getCaretRectangle());
+
+        const int relativeCursorX = caretPos.getX() - x;
+        const int relativeCursorY = caretPos.getY() - y;
 
         if (relativeCursorX < jmax (1, proportionOfWidth (0.05f)))
         {
@@ -1520,15 +1492,13 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
         }
         else
         {
-            const int curH = roundToInt (cursorHeight);
-
             if (relativeCursorY < 0)
             {
                 y = jmax (0, relativeCursorY + y);
             }
-            else if (relativeCursorY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - curH))
+            else if (relativeCursorY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - caretPos.getHeight()))
             {
-                y += relativeCursorY + 2 + curH + topIndent - viewport->getMaximumVisibleHeight();
+                y += relativeCursorY + 2 + caretPos.getHeight() + topIndent - viewport->getMaximumVisibleHeight();
             }
         }
 
@@ -1720,18 +1690,6 @@ void TextEditor::paint (Graphics& g)
 
 void TextEditor::paintOverChildren (Graphics& g)
 {
-    if (caretFlashState
-         && hasKeyboardFocus (false)
-         && caretVisible
-         && ! isReadOnly())
-    {
-        g.setColour (findColour (caretColourId));
-
-        g.fillRect (borderSize.getLeft() + textHolder->getX() + leftIndent + cursorX,
-                    borderSize.getTop() + textHolder->getY() + topIndent + cursorY,
-                    2.0f, cursorHeight);
-    }
-
     if (textToShowWhenEmpty.isNotEmpty()
          && (! hasKeyboardFocus (false))
          && getTotalNumChars() == 0)
@@ -1803,7 +1761,7 @@ void TextEditor::mouseDrag (const MouseEvent& e)
 void TextEditor::mouseUp (const MouseEvent& e)
 {
     newTransaction();
-    textHolder->startTimer (TextEditorDefs::flashSpeedIntervalMs);
+    textHolder->restartTimer();
 
     if (wasFocused || ! selectAllTextWhenFocused)
     {
@@ -1892,6 +1850,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         return false;
 
     const bool moveInWholeWordSteps = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
 
     if (key.isKeyCode (KeyPress::leftKey)
          || key.isKeyCode (KeyPress::upKey))
@@ -1901,7 +1860,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         int newPos;
 
         if (isMultiLine() && key.isKeyCode (KeyPress::upKey))
-            newPos = indexAtPosition (cursorX, cursorY - 1);
+            newPos = indexAtPosition (caretPos.getX(), caretPos.getY() - 1.0f);
         else if (moveInWholeWordSteps)
             newPos = findWordBreakBefore (getCaretPosition());
         else
@@ -1917,7 +1876,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         int newPos;
 
         if (isMultiLine() && key.isKeyCode (KeyPress::downKey))
-            newPos = indexAtPosition (cursorX, cursorY + cursorHeight + 1);
+            newPos = indexAtPosition (caretPos.getX(), caretPos.getBottom() + 1.0f);
         else if (moveInWholeWordSteps)
             newPos = findWordBreakAfter (getCaretPosition());
         else
@@ -1929,14 +1888,14 @@ bool TextEditor::keyPressed (const KeyPress& key)
     {
         newTransaction();
 
-        moveCursorTo (indexAtPosition (cursorX, cursorY + cursorHeight + viewport->getViewHeight()),
+        moveCursorTo (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()),
                       key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::pageUpKey) && isMultiLine())
     {
         newTransaction();
 
-        moveCursorTo (indexAtPosition (cursorX, cursorY - viewport->getViewHeight()),
+        moveCursorTo (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()),
                       key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::homeKey))
@@ -1944,7 +1903,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         newTransaction();
 
         if (isMultiLine() && ! moveInWholeWordSteps)
-            moveCursorTo (indexAtPosition (0.0f, cursorY),
+            moveCursorTo (indexAtPosition (0.0f, caretPos.getY()),
                           key.getModifiers().isShiftDown());
         else
             moveCursorTo (0, key.getModifiers().isShiftDown());
@@ -1954,7 +1913,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         newTransaction();
 
         if (isMultiLine() && ! moveInWholeWordSteps)
-            moveCursorTo (indexAtPosition ((float) textHolder->getWidth(), cursorY),
+            moveCursorTo (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()),
                           key.getModifiers().isShiftDown());
         else
             moveCursorTo (getTotalNumChars(), key.getModifiers().isShiftDown());
@@ -2131,8 +2090,6 @@ void TextEditor::focusGained (FocusChangeType)
 {
     newTransaction();
 
-    caretFlashState = true;
-
     if (selectAllTextWhenFocused)
     {
         moveCursorTo (0, false);
@@ -2140,9 +2097,7 @@ void TextEditor::focusGained (FocusChangeType)
     }
 
     repaint();
-
-    if (caretVisible)
-        textHolder->startTimer (TextEditorDefs::flashSpeedIntervalMs);
+    updateCaretPosition();
 
     ComponentPeer* const peer = getPeer();
     if (peer != 0 && ! isReadOnly())
@@ -2155,7 +2110,7 @@ void TextEditor::focusLost (FocusChangeType)
 
     wasFocused = false;
     textHolder->stopTimer();
-    caretFlashState = false;
+    updateCaretPosition();
 
     postCommandMessage (TextEditorDefs::focusLossMessageId);
     repaint();

@@ -29,6 +29,7 @@
 #include "../juce_Component.h"
 #include "../layout/juce_ScrollBar.h"
 #include "../keyboard/juce_TextInputTarget.h"
+#include "../keyboard/juce_CaretComponent.h"
 #include "juce_CodeDocument.h"
 #include "juce_CodeTokeniser.h"
 
@@ -208,7 +209,6 @@ public:
     enum ColourIds
     {
         backgroundColourId          = 0x1004500,  /**< A colour to use to fill the editor's background. */
-        caretColourId               = 0x1004501,  /**< The colour to draw the caret. */
         highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under
                                                        selected text. */
         defaultTextColourId         = 0x1004503   /**< The colour to use for text when no syntax colouring is
@@ -270,8 +270,6 @@ private:
     CodeDocument::Position caretPos;
     CodeDocument::Position selectionStart, selectionEnd;
 
-    class CaretComponent;
-    friend class ScopedPointer <CaretComponent>;
     ScopedPointer<CaretComponent> caret;
     ScrollBar verticalScrollBar, horizontalScrollBar;
 
@@ -299,6 +297,7 @@ private:
     void moveLineDelta (int delta, bool selecting);
 
     //==============================================================================
+    void updateCaretPosition();
     void updateScrollBars();
     void scrollToLineInternal (int line);
     void scrollToColumnInternal (double column);

@@ -598,6 +598,9 @@
     <ClCompile Include="..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.cpp">
       <Filter>Juce\Source\gui\components\filebrowser</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\keyboard\juce_CaretComponent.cpp">
+      <Filter>Juce\Source\gui\components\keyboard</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.cpp">
       <Filter>Juce\Source\gui\components\keyboard</Filter>
     </ClCompile>
@@ -1781,6 +1784,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.h">
       <Filter>Juce\Source\gui\components\filebrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\keyboard\juce_CaretComponent.h">
+      <Filter>Juce\Source\gui\components\keyboard</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.h">
       <Filter>Juce\Source\gui\components\keyboard</Filter>

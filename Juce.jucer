@@ -683,6 +683,10 @@
                   file="src/gui/components/filebrowser/juce_WildcardFileFilter.h"/>
           </GROUP>
           <GROUP id="PAM9sn3Rp" name="keyboard">
+            <FILE id="KAEiwD" name="juce_CaretComponent.cpp" compile="1" resource="0"
+                  file="src/gui/components/keyboard/juce_CaretComponent.cpp"/>
+            <FILE id="UpJwqg" name="juce_CaretComponent.h" compile="0" resource="0"
+                  file="src/gui/components/keyboard/juce_CaretComponent.h"/>
             <FILE id="mUtddLtZX" name="juce_KeyboardFocusTraverser.cpp" compile="1"
                   resource="0" file="src/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp"/>
             <FILE id="edrEUIDT" name="juce_KeyboardFocusTraverser.h" compile="0"

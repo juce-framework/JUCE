@@ -163,6 +163,7 @@ OBJECTS := \
   $(OBJDIR)/juce_FileTreeComponent_8cb2d3a3.o \
   $(OBJDIR)/juce_ImagePreviewComponent_a108ea50.o \
   $(OBJDIR)/juce_WildcardFileFilter_9337b18.o \
+  $(OBJDIR)/juce_CaretComponent_26bf4433.o \
   $(OBJDIR)/juce_KeyboardFocusTraverser_6325fc08.o \
   $(OBJDIR)/juce_KeyListener_631ada24.o \
   $(OBJDIR)/juce_KeyMappingEditorComponent_a0183a92.o \
@@ -1000,6 +1001,11 @@ $(OBJDIR)/juce_ImagePreviewComponent_a108ea50.o: ../../src/gui/components/filebr
 $(OBJDIR)/juce_WildcardFileFilter_9337b18.o: ../../src/gui/components/filebrowser/juce_WildcardFileFilter.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_WildcardFileFilter.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_CaretComponent_26bf4433.o: ../../src/gui/components/keyboard/juce_CaretComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_CaretComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KeyboardFocusTraverser_6325fc08.o: ../../src/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp

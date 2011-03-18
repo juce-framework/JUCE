@@ -59,6 +59,7 @@ class FilePreviewComponent;
 class ImageButton;
 class CallOutBox;
 class Drawable;
+class CaretComponent;
 
 //==============================================================================
 /**
@@ -293,6 +294,8 @@ public:
     //==============================================================================
     virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
     virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
+
+    virtual CaretComponent* createCaretComponent (Component* keyFocusOwner);
 
     //==============================================================================
     // These return a pointer to an internally cached drawable - make sure you don't keep

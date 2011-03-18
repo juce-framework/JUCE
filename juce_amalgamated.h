@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	55
+#define JUCE_BUILDNUMBER	56
 
 /** Current Juce version number.
 
@@ -41819,6 +41819,61 @@ public:
 #endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 /*** End of inlined file: juce_TextInputTarget.h ***/
 
+
+/*** Start of inlined file: juce_CaretComponent.h ***/
+#ifndef __JUCE_CARETCOMPONENT_JUCEHEADER__
+#define __JUCE_CARETCOMPONENT_JUCEHEADER__
+
+/**
+*/
+class JUCE_API  CaretComponent   : public Component,
+								   public Timer
+{
+public:
+
+	/** Creates the caret component.
+		The keyFocusOwner is an optional component which the caret will check, making
+		itself visible only when the keyFocusOwner has keyboard focus.
+	*/
+	CaretComponent (Component* keyFocusOwner);
+
+	/** Destructor. */
+	~CaretComponent();
+
+	/** Sets the caret's position to place it next to the given character.
+		The area is the rectangle containing the entire character that the caret is
+		positioned on, so by default a vertical-line caret may choose to just show itself
+		at the left of this area. You can override this method to customise its size.
+		This method will also force the caret to reset its timer and become visible (if
+		appropriate), so that as it moves, you can see where it is.
+	*/
+	virtual void setCaretPosition (const Rectangle<int>& characterArea);
+
+	/** A set of colour IDs to use to change the colour of various aspects of the caret.
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		caretColourId	= 0x1000204, /**< The colour with which to draw the caret. */
+	};
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void timerCallback();
+
+private:
+	Component* owner;
+	bool shouldBeShown() const;
+
+	JUCE_DECLARE_NON_COPYABLE (CaretComponent);
+};
+
+#endif   // __JUCE_CARETCOMPONENT_JUCEHEADER__
+/*** End of inlined file: juce_CaretComponent.h ***/
+
 /**
 	A component containing text that can be edited.
 
@@ -41910,9 +41965,7 @@ public:
 	bool isReadOnly() const;
 
 	/** Makes the caret visible or invisible.
-
 		By default the caret is visible.
-
 		@see setCaretColour, setCaretPosition
 	*/
 	void setCaretVisible (bool shouldBeVisible);
@@ -41920,7 +41973,7 @@ public:
 	/** Returns true if the caret is enabled.
 		@see setCaretVisible
 	*/
-	bool isCaretVisible() const				 { return caretVisible; }
+	bool isCaretVisible() const				 { return caret != 0; }
 
 	/** Enables/disables a vertical scrollbar.
 
@@ -41993,8 +42046,6 @@ public:
 												   highlighting.*/
 
 		highlightedTextColourId  = 0x1000203, /**< The colour with which to draw the text in highlighted sections. */
-
-		caretColourId		= 0x1000204, /**< The colour with which to draw the caret. */
 
 		outlineColourId	  = 0x1000205, /**< If this is non-transparent, it will be used to draw a box around
 												   the edge of the component. */
@@ -42385,19 +42436,17 @@ private:
 	bool multiline		  : 1;
 	bool wordWrap		   : 1;
 	bool returnKeyStartsNewLine	 : 1;
-	bool caretVisible		   : 1;
 	bool popupMenuEnabled	   : 1;
 	bool selectAllTextWhenFocused   : 1;
 	bool scrollbarVisible	   : 1;
 	bool wasFocused		 : 1;
-	bool caretFlashState		: 1;
 	bool keepCursorOnScreen	 : 1;
 	bool tabKeyUsed		 : 1;
 	bool menuActive		 : 1;
 	bool valueTextNeedsUpdating	 : 1;
 
 	UndoManager undoManager;
-	float cursorX, cursorY, cursorHeight;
+	ScopedPointer<CaretComponent> caret;
 	int maxTextLength;
 	Range<int> selection;
 	int leftIndent, topIndent;
@@ -42441,7 +42490,6 @@ private:
 	void updateTextHolderSize();
 	float getWordWrapWidth() const;
 	void timerCallbackInt();
-	void repaintCaret();
 	void repaintText (const Range<int>& range);
 	UndoManager* getUndoManager() throw();
 
@@ -51637,7 +51685,6 @@ public:
 	enum ColourIds
 	{
 		backgroundColourId	  = 0x1004500,  /**< A colour to use to fill the editor's background. */
-		caretColourId		   = 0x1004501,  /**< The colour to draw the caret. */
 		highlightColourId	   = 0x1004502,  /**< The colour to use for the highlighted background under
 													   selected text. */
 		defaultTextColourId	 = 0x1004503   /**< The colour to use for text when no syntax colouring is
@@ -51697,8 +51744,6 @@ private:
 	CodeDocument::Position caretPos;
 	CodeDocument::Position selectionStart, selectionEnd;
 
-	class CaretComponent;
-	friend class ScopedPointer <CaretComponent>;
 	ScopedPointer<CaretComponent> caret;
 	ScrollBar verticalScrollBar, horizontalScrollBar;
 
@@ -51724,6 +51769,7 @@ private:
 	void getIteratorForPosition (int position, CodeDocument::Iterator& result);
 	void moveLineDelta (int delta, bool selecting);
 
+	void updateCaretPosition();
 	void updateScrollBars();
 	void scrollToLineInternal (int line);
 	void scrollToColumnInternal (double column);
@@ -57711,6 +57757,9 @@ private:
 #ifndef __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_CARETCOMPONENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
 
 #endif
@@ -59878,6 +59927,7 @@ class FilePreviewComponent;
 class ImageButton;
 class CallOutBox;
 class Drawable;
+class CaretComponent;
 
 /**
 	LookAndFeel objects define the appearance of all the JUCE widgets, and subclasses
@@ -60098,6 +60148,8 @@ public:
 
 	virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
 	virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
+
+	virtual CaretComponent* createCaretComponent (Component* keyFocusOwner);
 
 	// These return a pointer to an internally cached drawable - make sure you don't keep
 	// a copy of this pointer anywhere, as it may become invalid in the future.

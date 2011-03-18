@@ -33,44 +33,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class CodeEditorComponent::CaretComponent   : public Component,
-                                              public Timer
-{
-public:
-    CaretComponent (CodeEditorComponent& owner_)
-        : owner (owner_)
-    {
-        setAlwaysOnTop (true);
-        setInterceptsMouseClicks (false, false);
-    }
-
-    void paint (Graphics& g)
-    {
-        g.fillAll (findColour (CodeEditorComponent::caretColourId));
-    }
-
-    void timerCallback()
-    {
-        setVisible (shouldBeShown() && ! isVisible());
-    }
-
-    void updatePosition()
-    {
-        startTimer (400);
-        setVisible (shouldBeShown());
-
-        setBounds (owner.getCharacterBounds (owner.getCaretPos()).withWidth (2));
-    }
-
-private:
-    CodeEditorComponent& owner;
-
-    bool shouldBeShown() const      { return owner.hasKeyboardFocus (true); }
-
-    JUCE_DECLARE_NON_COPYABLE (CaretComponent);
-};
-
-//==============================================================================
 class CodeEditorComponent::CodeEditorLine
 {
 public:
@@ -311,7 +273,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
     addAndMakeVisible (&horizontalScrollBar);
     horizontalScrollBar.setSingleStepSize (1.0);
 
-    addAndMakeVisible (caret = new CaretComponent (*this));
+    addAndMakeVisible (caret = getLookAndFeel().createCaretComponent (this));
 
     Font f (12.0f);
     f.setTypefaceName (Font::getDefaultMonospacedFontName());
@@ -354,7 +316,7 @@ void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& aff
 
     triggerAsyncUpdate();
 
-    caret->updatePosition();
+    updateCaretPosition();
     columnToTryToMaintain = -1;
 
     if (affectedTextEnd.getPosition() >= selectionStart.getPosition()
@@ -374,7 +336,7 @@ void CodeEditorComponent::resized()
     columnsOnScreen = (int) ((getWidth() - scrollbarThickness) / charWidth);
     lines.clear();
     rebuildLineTokens();
-    caret->updatePosition();
+    updateCaretPosition();
 
     verticalScrollBar.setBounds (getWidth() - scrollbarThickness, 0, scrollbarThickness, getHeight() - scrollbarThickness);
     horizontalScrollBar.setBounds (gutter, getHeight() - scrollbarThickness, getWidth() - scrollbarThickness - gutter, scrollbarThickness);
@@ -467,6 +429,11 @@ void CodeEditorComponent::rebuildLineTokens()
 }
 
 //==============================================================================
+void CodeEditorComponent::updateCaretPosition()
+{
+    caret->setCaretPosition (getCharacterBounds (getCaretPos()));
+}
+
 void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, const bool highlighting)
 {
     caretPos = newPos;
@@ -517,7 +484,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
         deselectAll();
     }
 
-    caret->updatePosition();
+    updateCaretPosition();
     scrollToKeepCaretOnScreen();
     updateScrollBars();
 }
@@ -548,7 +515,7 @@ void CodeEditorComponent::scrollToLineInternal (int newFirstLineOnScreen)
     if (newFirstLineOnScreen != firstLineOnScreen)
     {
         firstLineOnScreen = newFirstLineOnScreen;
-        caret->updatePosition();
+        updateCaretPosition();
 
         updateCachedIterators (firstLineOnScreen);
         triggerAsyncUpdate();
@@ -562,7 +529,7 @@ void CodeEditorComponent::scrollToColumnInternal (double column)
     if (xOffset != newOffset)
     {
         xOffset = newOffset;
-        caret->updatePosition();
+        updateCaretPosition();
         repaint();
     }
 }
@@ -1104,12 +1071,12 @@ void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, doub
 //==============================================================================
 void CodeEditorComponent::focusGained (FocusChangeType)
 {
-    caret->updatePosition();
+    updateCaretPosition();
 }
 
 void CodeEditorComponent::focusLost (FocusChangeType)
 {
-    caret->updatePosition();
+    updateCaretPosition();
 }
 
 //==============================================================================

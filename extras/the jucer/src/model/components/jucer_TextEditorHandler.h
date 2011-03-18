@@ -42,7 +42,7 @@ public:
         registerColour (TextEditor::highlightColourId, "highlight", "hilitecol");
         registerColour (TextEditor::outlineColourId, "outline", "outlinecol");
         registerColour (TextEditor::shadowColourId, "shadow", "shadowcol");
-        registerColour (TextEditor::caretColourId, "caret", "caretcol");
+        registerColour (CaretComponent::caretColourId, "caret", "caretcol");
     }
 
     //==============================================================================

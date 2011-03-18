@@ -132,6 +132,7 @@
 		0D91D36C2195315FE534F304 = { isa = PBXBuildFile; fileRef = A418FC3BDDBF1CE9F2903490; };
 		A1E82F70796B8611D7323247 = { isa = PBXBuildFile; fileRef = 949854EDE6B5B16CEFB6108F; };
 		BC1856E0B20406DDCE5EBF94 = { isa = PBXBuildFile; fileRef = 8A67B45A2BA1D19D1AC43315; };
+		FF3A28F88174E10CB478931E = { isa = PBXBuildFile; fileRef = 912C419859C9C56BC96AA6FB; };
 		C39AE37828718E9A45589A24 = { isa = PBXBuildFile; fileRef = 5ABC6616473BA4791AA8101E; };
 		4400B0595B35F919291C1A01 = { isa = PBXBuildFile; fileRef = 29A79478AE8567250972ED43; };
 		BB1DAC0CA8D7B3DEEDEE76C6 = { isa = PBXBuildFile; fileRef = 7F5A271EAB78C7CF8B2341DE; };
@@ -664,6 +665,8 @@
 		F39059E72B927A700010851B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ImagePreviewComponent.h; path = ../../src/gui/components/filebrowser/juce_ImagePreviewComponent.h; sourceTree = SOURCE_ROOT; };
 		8A67B45A2BA1D19D1AC43315 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_WildcardFileFilter.cpp; path = ../../src/gui/components/filebrowser/juce_WildcardFileFilter.cpp; sourceTree = SOURCE_ROOT; };
 		ECDD0F8397F3EE4E7FA7ACCC = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_WildcardFileFilter.h; path = ../../src/gui/components/filebrowser/juce_WildcardFileFilter.h; sourceTree = SOURCE_ROOT; };
+		912C419859C9C56BC96AA6FB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CaretComponent.cpp; path = ../../src/gui/components/keyboard/juce_CaretComponent.cpp; sourceTree = SOURCE_ROOT; };
+		717295136FD426125079F78C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CaretComponent.h; path = ../../src/gui/components/keyboard/juce_CaretComponent.h; sourceTree = SOURCE_ROOT; };
 		5ABC6616473BA4791AA8101E = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_KeyboardFocusTraverser.cpp; path = ../../src/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp; sourceTree = SOURCE_ROOT; };
 		F61C34EE417006881D0869F4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_KeyboardFocusTraverser.h; path = ../../src/gui/components/keyboard/juce_KeyboardFocusTraverser.h; sourceTree = SOURCE_ROOT; };
 		29A79478AE8567250972ED43 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_KeyListener.cpp; path = ../../src/gui/components/keyboard/juce_KeyListener.cpp; sourceTree = SOURCE_ROOT; };
@@ -1424,6 +1427,8 @@
 				8A67B45A2BA1D19D1AC43315,
 				ECDD0F8397F3EE4E7FA7ACCC ); name = filebrowser; sourceTree = "<group>"; };
 		558A664D5D1ECEC607F4775D = { isa = PBXGroup; children = (
+				912C419859C9C56BC96AA6FB,
+				717295136FD426125079F78C,
 				5ABC6616473BA4791AA8101E,
 				F61C34EE417006881D0869F4,
 				29A79478AE8567250972ED43,
@@ -2153,6 +2158,7 @@
 				0D91D36C2195315FE534F304,
 				A1E82F70796B8611D7323247,
 				BC1856E0B20406DDCE5EBF94,
+				FF3A28F88174E10CB478931E,
 				C39AE37828718E9A45589A24,
 				4400B0595B35F919291C1A01,
 				BB1DAC0CA8D7B3DEEDEE76C6,

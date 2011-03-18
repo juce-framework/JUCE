@@ -401,6 +401,9 @@
 #ifndef __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
  #include "gui/components/juce_ModalComponentManager.h"
 #endif
+#ifndef __JUCE_CARETCOMPONENT_JUCEHEADER__
+ #include "gui/components/keyboard/juce_CaretComponent.h"
+#endif
 #ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
  #include "gui/components/keyboard/juce_KeyboardFocusTraverser.h"
 #endif

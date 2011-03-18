@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Label.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../windows/juce_ComponentPeer.h"
+#include "../keyboard/juce_CaretComponent.h"
 
 
 //==============================================================================
@@ -311,10 +312,10 @@ TextEditor* Label::createEditorComponent()
                          TextEditor::textColourId,
                          TextEditor::highlightColourId,
                          TextEditor::highlightedTextColourId,
-                         TextEditor::caretColourId,
                          TextEditor::outlineColourId,
                          TextEditor::focusedOutlineColourId,
-                         TextEditor::shadowColourId };
+                         TextEditor::shadowColourId,
+                         CaretComponent::caretColourId };
 
     for (int i = 0; i < numElementsInArray (cols); ++i)
         ed->setColour (cols[i], findColour (cols[i]));

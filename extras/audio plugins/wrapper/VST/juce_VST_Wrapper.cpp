@@ -210,6 +210,19 @@ namespace
 
     LRESULT CALLBACK mouseWheelHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
     {
+        #ifndef WM_MOUSEWHEEL
+         #define WM_MOUSEWHEEL 0x20a
+
+         struct MSLLHOOKSTRUCT
+         {
+            POINT pt;
+            DWORD mouseData;
+            DWORD flags;
+            DWORD time;
+            ULONG_PTR dwExtraInfo;
+         };
+        #endif
+
         if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
         {
             const MSLLHOOKSTRUCT& hs = *(MSLLHOOKSTRUCT*) lParam;
@@ -226,6 +239,10 @@ namespace
 
     void registerMouseWheelHook()
     {
+        #ifndef WH_MOUSE_LL
+         #define WH_MOUSE_LL 14
+        #endif
+
         if (mouseHookUsers++ == 0)
             mouseWheelHook = SetWindowsHookEx (WH_MOUSE_LL, mouseWheelHookCallback,
                                                (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);

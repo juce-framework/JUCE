@@ -525,6 +525,8 @@
               <File RelativePath="..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.h"/>
             </Filter>
             <Filter Name="keyboard">
+              <File RelativePath="..\..\src\gui\components\keyboard\juce_CaretComponent.cpp"/>
+              <File RelativePath="..\..\src\gui\components\keyboard\juce_CaretComponent.h"/>
               <File RelativePath="..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.cpp"/>
               <File RelativePath="..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.h"/>
               <File RelativePath="..\..\src\gui\components\keyboard\juce_KeyListener.cpp"/>
