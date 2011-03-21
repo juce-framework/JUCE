@@ -814,8 +814,9 @@ public:
     void performAnyPendingRepaintsNow()
     {
         MSG m;
-        if (component->isVisible() && PeekMessage (&m, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE))
-            DispatchMessage (&m);
+        if (component->isVisible()
+             && (PeekMessage (&m, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE) || isUsingUpdateLayeredWindow()))
+            handlePaintMessage();
     }
 
     //==============================================================================

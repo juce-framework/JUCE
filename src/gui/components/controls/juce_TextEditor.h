@@ -385,20 +385,18 @@ public:
     /** Deletes all the text from the editor. */
     void clear();
 
-    /** Deletes the currently selected region, and puts it on the clipboard.
-
+    /** Deletes the currently selected region.
+        This doesn't copy the deleted section to the clipboard - if you need to do that, call copy() first.
         @see copy, paste, SystemClipboard
     */
     void cut();
 
-    /** Copies any currently selected region to the clipboard.
-
+    /** Copies the currently selected region to the clipboard.
         @see cut, paste, SystemClipboard
     */
     void copy();
 
     /** Pastes the contents of the clipboard into the editor at the cursor position.
-
         @see cut, copy, SystemClipboard
     */
     void paste();
@@ -530,6 +528,8 @@ public:
     /** @internal */
     void colourChanged();
     /** @internal */
+    void lookAndFeelChanged();
+    /** @internal */
     bool isTextInputActive() const;
 
     //==============================================================================
@@ -585,8 +585,7 @@ protected:
     /** Used internally to dispatch a text-change message. */
     void textChanged();
 
-    /** Begins a new transaction in the UndoManager.
-    */
+    /** Begins a new transaction in the UndoManager. */
     void newTransaction();
 
     /** Used internally to trigger an undo or redo. */

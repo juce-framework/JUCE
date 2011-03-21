@@ -1138,6 +1138,15 @@ void TextEditor::colourChanged()
     repaint();
 }
 
+void TextEditor::lookAndFeelChanged()
+{
+    if (isCaretVisible())
+    {
+        setCaretVisible (false);
+        setCaretVisible (true);
+    }
+}
+
 void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
 {
     if (shouldCaretBeVisible && ! isReadOnly())
