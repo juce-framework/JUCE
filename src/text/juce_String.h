@@ -254,11 +254,7 @@ public:
         }
     }
 
-    /** Appends a string to the end of this one.
-
-        @param textToAppend     the string to add
-        @param maxCharsToTake   the maximum number of characters to take from the string passed in
-    */
+    /** Appends a string to the end of this one. */
     template <class CharPointer>
     void appendCharPointer (const CharPointer& textToAppend)
     {

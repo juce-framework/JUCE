@@ -154,7 +154,7 @@ public:
         @param useBottomRightCornerResizer     if shouldBeResizable is true, this indicates whether
                                     to use a border or corner resizer component. See ResizableWindow::setResizable()
     */
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     static int showModalDialog (const String& dialogTitle,
                                 Component* contentComponent,
                                 Component* componentToCentreAround,

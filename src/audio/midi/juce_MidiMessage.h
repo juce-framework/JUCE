@@ -243,6 +243,7 @@ public:
 
         @param channel      the midi channel, in the range 1 to 16
         @param noteNumber   the key number, 0 to 127
+        @param velocity     in the range 0 to 127
         @see isNoteOff
     */
     static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) throw();

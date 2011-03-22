@@ -448,9 +448,9 @@ public:
         */
         bool isItemHighlighted() const throw()                  { return isHighlighted; }
 
-        /** @internal. */
+        /** @internal */
         bool isTriggeredAutomatically() const throw()           { return triggeredAutomatically; }
-        /** @internal. */
+        /** @internal */
         void setHighlighted (bool shouldBeHighlighted);
 
     private:

@@ -67,9 +67,9 @@ public:
     inline bool operator== (const CharPointer_ASCII& other) const throw() { return data == other.data; }
     inline bool operator!= (const CharPointer_ASCII& other) const throw() { return data != other.data; }
     inline bool operator<= (const CharPointer_ASCII& other) const throw() { return data <= other.data; }
-    inline bool operator<  (const CharPointer_ASCII& other) const throw() { return data < other.data; }
+    inline bool operator<  (const CharPointer_ASCII& other) const throw() { return data <  other.data; }
     inline bool operator>= (const CharPointer_ASCII& other) const throw() { return data >= other.data; }
-    inline bool operator>  (const CharPointer_ASCII& other) const throw() { return data > other.data; }
+    inline bool operator>  (const CharPointer_ASCII& other) const throw() { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
     inline CharType* getAddress() const throw()         { return data; }
