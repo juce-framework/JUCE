@@ -614,14 +614,15 @@ public:
         g.fillRect (startX, y, endX - startX, nextY - y);
     }
 
-    void drawUnderline (Graphics& g, const Range<int>& underline) const
+    void drawUnderline (Graphics& g, const Range<int>& underline, const Colour& colour) const
     {
-        const float startX    = indexToX (underline.getStart());
-        const float endX      = indexToX (underline.getEnd());
-        const float baselineY = lineY + currentSection->font.getAscent();
-        const float dashes[]  = { 4.0f, 4.0f };
+        const int startX    = roundToInt (indexToX (underline.getStart()));
+        const int endX      = roundToInt (indexToX (underline.getEnd()));
+        const int baselineY = roundToInt (lineY + currentSection->font.getAscent() + 0.5f);
 
-        g.drawDashedLine (Line<float> (startX, baselineY, endX, baselineY), dashes, 2, 1.0f, 0);
+        Graphics::ScopedSaveState state (g);
+        g.reduceClipRegion (Rectangle<int> (startX, baselineY, endX - startX, 1));
+        g.fillCheckerBoard (Rectangle<int> (0, 0, endX, baselineY + 1), 3, 1, colour, Colours::transparentBlack);
     }
 
     void drawSelectedText (Graphics& g,
@@ -1011,6 +1012,13 @@ TextEditor::TextEditor (const String& name,
 
 TextEditor::~TextEditor()
 {
+    if (wasFocused)
+    {
+        ComponentPeer* const peer = getPeer();
+        if (peer != 0)
+            peer->dismissPendingTextInput();
+    }
+
     textValue.referTo (Value());
     clearInternal (0);
     viewport = 0;
@@ -1664,8 +1672,7 @@ void TextEditor::drawContent (Graphics& g)
 
         if (! selection.isEmpty())
         {
-            g.setColour (findColour (highlightColourId)
-                            .withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
+            g.setColour (findColour (highlightColourId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
 
             selectedTextColour = findColour (highlightedTextColourId);
 
@@ -1703,8 +1710,6 @@ void TextEditor::drawContent (Graphics& g)
         {
             const Range<int>& underlinedSection = underlinedSections.getReference (i);
 
-            g.setColour (findColour (highlightColourId));
-
             Iterator i2 (sections, wordWrapWidth, passwordCharacter);
 
             while (i2.next() && i2.lineY < clip.getBottom())
@@ -1712,7 +1717,7 @@ void TextEditor::drawContent (Graphics& g)
                 if (i2.lineY + i2.lineHeight >= clip.getY()
                      && underlinedSection.intersects (Range<int> (i2.indexInText, i2.indexInText + i2.atom->numChars)))
                 {
-                    i2.drawUnderline (g, underlinedSection);
+                    i2.drawUnderline (g, underlinedSection, findColour (textColourId));
                 }
             }
         }
@@ -2151,7 +2156,7 @@ void TextEditor::focusLost (FocusChangeType)
 
     ComponentPeer* const peer = getPeer();
     if (peer != 0)
-        peer->cancelPendingTextInput();
+        peer->dismissPendingTextInput();
 
     updateCaretPosition();
 

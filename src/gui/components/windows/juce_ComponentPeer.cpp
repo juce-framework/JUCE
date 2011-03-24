@@ -286,7 +286,7 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
     return 0;
 }
 
-void ComponentPeer::cancelPendingTextInput()
+void ComponentPeer::dismissPendingTextInput()
 {
 }
 

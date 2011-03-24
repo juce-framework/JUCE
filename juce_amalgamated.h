@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	58
+#define JUCE_BUILDNUMBER	59
 
 /** Current Juce version number.
 
@@ -64328,8 +64328,8 @@ public:
 	*/
 	virtual void textInputRequired (const Point<int>& position) = 0;
 
-	/** If there's some kind of OS input-method in progress, this should cancel it. */
-	virtual void cancelPendingTextInput();
+	/** If there's some kind of OS input-method in progress, this should dismiss it. */
+	virtual void dismissPendingTextInput();
 
 	/** Returns the currently focused TextInputTarget, or null if none is found. */
 	TextInputTarget* findCurrentTextInputTarget();

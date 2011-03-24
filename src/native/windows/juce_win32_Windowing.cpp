@@ -805,7 +805,7 @@ public:
         SetCaretPos (0, 0);
     }
 
-    void cancelPendingTextInput()
+    void dismissPendingTextInput()
     {
         imeHandler.handleSetContext (hwnd, false);
     }
@@ -1700,6 +1700,13 @@ private:
         return handleKeyPress (key, textChar);
     }
 
+    void forwardMessageToParent (UINT message, WPARAM wParam, LPARAM lParam) const
+    {
+        HWND parentH = GetParent (hwnd);
+        if (parentH != 0)
+            PostMessage (parentH, message, wParam, lParam);
+    }
+
     bool doAppCommand (const LPARAM lParam)
     {
         int key = 0;
@@ -1807,6 +1814,34 @@ private:
 
             if (component->isCurrentlyBlockedByAnotherModalComponent())
                 Component::getCurrentlyModalComponent()->toFront (true);
+        }
+    }
+
+    void handleLeftClickInNCArea (WPARAM wParam)
+    {
+        if (! sendInputAttemptWhenModalMessage())
+        {
+            switch (wParam)
+            {
+            case HTBOTTOM:
+            case HTBOTTOMLEFT:
+            case HTBOTTOMRIGHT:
+            case HTGROWBOX:
+            case HTLEFT:
+            case HTRIGHT:
+            case HTTOP:
+            case HTTOPLEFT:
+            case HTTOPRIGHT:
+                if (isConstrainedNativeWindow())
+                {
+                    constrainerIsResizing = true;
+                    constrainer->resizeStart();
+                }
+                break;
+
+            default:
+                break;
+            }
         }
     }
 
@@ -2055,6 +2090,8 @@ private:
             case WM_SYSKEYDOWN:
                 if (doKeyDown (wParam))
                     return 0;
+                else
+                    forwardMessageToParent (message, wParam, lParam);
 
                 break;
 
@@ -2062,12 +2099,16 @@ private:
             case WM_SYSKEYUP:
                 if (doKeyUp (wParam))
                     return 0;
+                else
+                    forwardMessageToParent (message, wParam, lParam);
 
                 break;
 
             case WM_CHAR:
                 if (doKeyChar ((int) wParam, lParam))
                     return 0;
+                else
+                    forwardMessageToParent (message, wParam, lParam);
 
                 break;
 
@@ -2243,30 +2284,7 @@ private:
                 break;
 
             case WM_NCLBUTTONDOWN:
-                if (! sendInputAttemptWhenModalMessage())
-                {
-                    switch (wParam)
-                    {
-                    case HTBOTTOM:
-                    case HTBOTTOMLEFT:
-                    case HTBOTTOMRIGHT:
-                    case HTGROWBOX:
-                    case HTLEFT:
-                    case HTRIGHT:
-                    case HTTOP:
-                    case HTTOPLEFT:
-                    case HTTOPRIGHT:
-                        if (isConstrainedNativeWindow())
-                        {
-                            constrainerIsResizing = true;
-                            constrainer->resizeStart();
-                        }
-                        break;
-
-                    default:
-                        break;
-                    };
-                }
+                handleLeftClickInNCArea (wParam);
                 break;
 
             case WM_NCRBUTTONDOWN:
