@@ -30,8 +30,9 @@
 
 
 //==============================================================================
-/** An abstract base class that is implemented by components that wish to be used
-    as text editors.
+/**
+    An abstract base class which can be implemented by components that function as
+    text editors.
 
     This class allows different types of text editor component to provide a uniform
     interface, which can be used by things like OS-specific input methods, on-screen
@@ -57,16 +58,22 @@ public:
     */
     virtual const Range<int> getHighlightedRegion() const = 0;
 
-    /** Sets the currently-selected text region.
-    */
+    /** Sets the currently-selected text region. */
     virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
 
-    /** Returns a specified sub-section of the text.
+    /** Sets a number of temporarily underlined sections.
+        This is needed by MS Windows input method UI.
     */
+    virtual void setTemporaryUnderlining (const Array <Range<int> >& underlinedRegions) = 0;
+
+    /** Returns a specified sub-section of the text. */
     virtual const String getTextInRange (const Range<int>& range) const = 0;
 
     /** Inserts some text, overwriting the selected text region, if there is one. */
     virtual void insertTextAtCaret (const String& textToInsert) = 0;
+
+    /** Returns the position of the caret, relative to the component's origin. */
+    virtual const Rectangle<int> getCaretRectangle() = 0;
 };
 
 

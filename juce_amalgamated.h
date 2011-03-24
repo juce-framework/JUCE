@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	57
+#define JUCE_BUILDNUMBER	58
 
 /** Current Juce version number.
 
@@ -2524,9 +2524,9 @@ public:
 	inline bool operator== (const CharPointer_UTF8& other) const throw() { return data == other.data; }
 	inline bool operator!= (const CharPointer_UTF8& other) const throw() { return data != other.data; }
 	inline bool operator<= (const CharPointer_UTF8& other) const throw() { return data <= other.data; }
-	inline bool operator<  (const CharPointer_UTF8& other) const throw() { return data < other.data; }
+	inline bool operator<  (const CharPointer_UTF8& other) const throw() { return data <  other.data; }
 	inline bool operator>= (const CharPointer_UTF8& other) const throw() { return data >= other.data; }
-	inline bool operator>  (const CharPointer_UTF8& other) const throw() { return data > other.data; }
+	inline bool operator>  (const CharPointer_UTF8& other) const throw() { return data >  other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -3086,9 +3086,9 @@ public:
 	inline bool operator== (const CharPointer_UTF16& other) const throw() { return data == other.data; }
 	inline bool operator!= (const CharPointer_UTF16& other) const throw() { return data != other.data; }
 	inline bool operator<= (const CharPointer_UTF16& other) const throw() { return data <= other.data; }
-	inline bool operator<  (const CharPointer_UTF16& other) const throw() { return data < other.data; }
+	inline bool operator<  (const CharPointer_UTF16& other) const throw() { return data <  other.data; }
 	inline bool operator>= (const CharPointer_UTF16& other) const throw() { return data >= other.data; }
-	inline bool operator>  (const CharPointer_UTF16& other) const throw() { return data > other.data; }
+	inline bool operator>  (const CharPointer_UTF16& other) const throw() { return data >  other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -3556,9 +3556,9 @@ public:
 	inline bool operator== (const CharPointer_UTF32& other) const throw() { return data == other.data; }
 	inline bool operator!= (const CharPointer_UTF32& other) const throw() { return data != other.data; }
 	inline bool operator<= (const CharPointer_UTF32& other) const throw() { return data <= other.data; }
-	inline bool operator<  (const CharPointer_UTF32& other) const throw() { return data < other.data; }
+	inline bool operator<  (const CharPointer_UTF32& other) const throw() { return data <  other.data; }
 	inline bool operator>= (const CharPointer_UTF32& other) const throw() { return data >= other.data; }
-	inline bool operator>  (const CharPointer_UTF32& other) const throw() { return data > other.data; }
+	inline bool operator>  (const CharPointer_UTF32& other) const throw() { return data >  other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -3910,9 +3910,9 @@ public:
 	inline bool operator== (const CharPointer_ASCII& other) const throw() { return data == other.data; }
 	inline bool operator!= (const CharPointer_ASCII& other) const throw() { return data != other.data; }
 	inline bool operator<= (const CharPointer_ASCII& other) const throw() { return data <= other.data; }
-	inline bool operator<  (const CharPointer_ASCII& other) const throw() { return data < other.data; }
+	inline bool operator<  (const CharPointer_ASCII& other) const throw() { return data <  other.data; }
 	inline bool operator>= (const CharPointer_ASCII& other) const throw() { return data >= other.data; }
-	inline bool operator>  (const CharPointer_ASCII& other) const throw() { return data > other.data; }
+	inline bool operator>  (const CharPointer_ASCII& other) const throw() { return data >  other.data; }
 
 	/** Returns the address that this pointer is pointing to. */
 	inline CharType* getAddress() const throw()	 { return data; }
@@ -4428,11 +4428,7 @@ public:
 		}
 	}
 
-	/** Appends a string to the end of this one.
-
-		@param textToAppend	 the string to add
-		@param maxCharsToTake   the maximum number of characters to take from the string passed in
-	*/
+	/** Appends a string to the end of this one. */
 	template <class CharPointer>
 	void appendCharPointer (const CharPointer& textToAppend)
 	{
@@ -38982,6 +38978,7 @@ public:
 
 		@param channel	  the midi channel, in the range 1 to 16
 		@param noteNumber   the key number, 0 to 127
+		@param velocity	 in the range 0 to 127
 		@see isNoteOff
 	*/
 	static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) throw();
@@ -41722,9 +41719,9 @@ public:
 		*/
 		bool isItemHighlighted() const throw()		  { return isHighlighted; }
 
-		/** @internal. */
+		/** @internal */
 		bool isTriggeredAutomatically() const throw()	   { return triggeredAutomatically; }
-		/** @internal. */
+		/** @internal */
 		void setHighlighted (bool shouldBeHighlighted);
 
 	private:
@@ -41777,8 +41774,9 @@ private:
 #ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 #define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 
-/** An abstract base class that is implemented by components that wish to be used
-	as text editors.
+/**
+	An abstract base class which can be implemented by components that function as
+	text editors.
 
 	This class allows different types of text editor component to provide a uniform
 	interface, which can be used by things like OS-specific input methods, on-screen
@@ -41804,16 +41802,22 @@ public:
 	*/
 	virtual const Range<int> getHighlightedRegion() const = 0;
 
-	/** Sets the currently-selected text region.
-	*/
+	/** Sets the currently-selected text region. */
 	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
 
-	/** Returns a specified sub-section of the text.
+	/** Sets a number of temporarily underlined sections.
+		This is needed by MS Windows input method UI.
 	*/
+	virtual void setTemporaryUnderlining (const Array <Range<int> >& underlinedRegions) = 0;
+
+	/** Returns a specified sub-section of the text. */
 	virtual const String getTextInRange (const Range<int>& range) const = 0;
 
 	/** Inserts some text, overwriting the selected text region, if there is one. */
 	virtual void insertTextAtCaret (const String& textToInsert) = 0;
+
+	/** Returns the position of the caret, relative to the component's origin. */
+	virtual const Rectangle<int> getCaretRectangle() = 0;
 };
 
 #endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
@@ -42191,7 +42195,7 @@ public:
 	*/
 	Value& getTextValue();
 
-	/** Inserts some text at the current cursor position.
+	/** Inserts some text at the current caret position.
 
 		If a section of the text is highlighted, it will be replaced by
 		this string, otherwise it will be inserted.
@@ -42217,7 +42221,7 @@ public:
 	*/
 	void copy();
 
-	/** Pastes the contents of the clipboard into the editor at the cursor position.
+	/** Pastes the contents of the clipboard into the editor at the caret position.
 		@see cut, copy, SystemClipboard
 	*/
 	void paste();
@@ -42311,12 +42315,12 @@ public:
 	*/
 	const BorderSize<int> getBorder() const;
 
-	/** Used to disable the auto-scrolling which keeps the cursor visible.
+	/** Used to disable the auto-scrolling which keeps the caret visible.
 
-		If true (the default), the editor will scroll when the cursor moves offscreen. If
+		If true (the default), the editor will scroll when the caret moves offscreen. If
 		set to false, it won't.
 	*/
-	void setScrollToShowCursor (bool shouldScrollToShowCursor);
+	void setScrollToShowCursor (bool shouldScrollToShowCaret);
 
 	/** @internal */
 	void paint (Graphics& g);
@@ -42350,6 +42354,8 @@ public:
 	void lookAndFeelChanged();
 	/** @internal */
 	bool isTextInputActive() const;
+	/** @internal */
+	void setTemporaryUnderlining (const Array <Range<int> >&);
 
 	/** This adds the items to the popup menu.
 
@@ -42397,7 +42403,7 @@ protected:
 	void moveCaret (int newCaretPos);
 
 	/** @internal */
-	void moveCursorTo (int newPosition, bool isSelecting);
+	void moveCaretTo (int newPosition, bool isSelecting);
 
 	/** Used internally to dispatch a text-change message. */
 	void textChanged();
@@ -42439,7 +42445,7 @@ private:
 	bool selectAllTextWhenFocused   : 1;
 	bool scrollbarVisible	   : 1;
 	bool wasFocused		 : 1;
-	bool keepCursorOnScreen	 : 1;
+	bool keepCaretOnScreen	  : 1;
 	bool tabKeyUsed		 : 1;
 	bool menuActive		 : 1;
 	bool valueTextNeedsUpdating	 : 1;
@@ -42468,6 +42474,7 @@ private:
 
 	String allowedCharacters;
 	ListenerList <Listener> listeners;
+	Array <Range<int> > underlinedSections;
 
 	void coalesceSimilarSections();
 	void splitSection (int sectionIndex, int charToSplitAt);
@@ -51574,6 +51581,9 @@ public:
 	/** Returns the current caret position. */
 	const CodeDocument::Position getCaretPos() const		{ return caretPos; }
 
+	/** Returns the position of the caret, relative to the editor's origin. */
+	const Rectangle<int> getCaretRectangle();
+
 	/** Moves the caret.
 		If selecting is true, the section of the document between the current
 		caret position and the new one will become selected. If false, any currently
@@ -51727,6 +51737,8 @@ public:
 							  const CodeDocument::Position& affectedTextEnd);
 	/** @internal */
 	bool isTextInputActive() const;
+	/** @internal */
+	void setTemporaryUnderlining (const Array <Range<int> >&);
 
 private:
 
@@ -64288,13 +64300,6 @@ public:
 	/** Tries to give the window keyboard focus. */
 	virtual void grabFocus() = 0;
 
-	/** Tells the window that text input may be required at the given position.
-
-		This may cause things like a virtual on-screen keyboard to appear, depending
-		on the OS.
-	*/
-	virtual void textInputRequired (const Point<int>& position) = 0;
-
 	/** Called when the window gains keyboard focus. */
 	void handleFocusGain();
 	/** Called when the window loses keyboard focus. */
@@ -64316,6 +64321,15 @@ public:
 
 	/** Called whenever a modifier key is pressed or released. */
 	void handleModifierKeysChange();
+
+	/** Tells the window that text input may be required at the given position.
+		This may cause things like a virtual on-screen keyboard to appear, depending
+		on the OS.
+	*/
+	virtual void textInputRequired (const Point<int>& position) = 0;
+
+	/** If there's some kind of OS input-method in progress, this should cancel it. */
+	virtual void cancelPendingTextInput();
 
 	/** Returns the currently focused TextInputTarget, or null if none is found. */
 	TextInputTarget* findCurrentTextInputTarget();
@@ -64544,7 +64558,7 @@ public:
 		@param useBottomRightCornerResizer	 if shouldBeResizable is true, this indicates whether
 									to use a border or corner resizer component. See ResizableWindow::setResizable()
 	*/
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
 	static int showModalDialog (const String& dialogTitle,
 								Component* contentComponent,
 								Component* componentToCentreAround,
@@ -67626,6 +67640,7 @@ END_JUCE_NAMESPACE
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "imm32.lib")
 
 #ifdef _NATIVE_WCHAR_T_DEFINED
  #ifdef _DEBUG

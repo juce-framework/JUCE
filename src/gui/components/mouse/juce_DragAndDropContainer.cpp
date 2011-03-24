@@ -397,7 +397,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         static_cast <DragImageComponent*> (static_cast <Component*> (dragImageComponent))->updateLocation (false, lastMouseDown);
         dragImageComponent->setVisible (true);
 
-       #if JUCE_WIN32
+       #if JUCE_WINDOWS
         // Under heavy load, the layered window's paint callback can often be lost by the OS,
         // so forcing a repaint at least once makes sure that the window becomes visible..
         ComponentPeer* const peer = dragImageComponent->getPeer();

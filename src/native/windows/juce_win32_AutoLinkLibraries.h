@@ -14,6 +14,7 @@
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "imm32.lib")
 
 #ifdef _NATIVE_WCHAR_T_DEFINED
  #ifdef _DEBUG

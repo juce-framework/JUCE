@@ -288,7 +288,7 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
     if (c == 0)
         c = TopLevelWindow::getActiveTopLevelWindow();
 
-    if (c == 0)
+    if (c == 0 || c->getBounds().isEmpty())
     {
         centreWithSize (width, height);
     }

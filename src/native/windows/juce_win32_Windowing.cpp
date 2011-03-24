@@ -805,6 +805,11 @@ public:
         SetCaretPos (0, 0);
     }
 
+    void cancelPendingTextInput()
+    {
+        imeHandler.handleSetContext (hwnd, false);
+    }
+
     void repaint (const Rectangle<int>& area)
     {
         const RECT r = { area.getX(), area.getY(), area.getRight(), area.getBottom() };
@@ -1973,10 +1978,11 @@ private:
                 return 0;
 
             case WM_NCPAINT:
+                if (wParam != 1) // (1 = a repaint of the entire NC region)
+                    handlePaintMessage(); // this must be done, even with native titlebars, or there are rendering artifacts.
+
                 if (hasTitleBar())
-                    break;
-                else if (wParam != 1)
-                    handlePaintMessage();
+                    break; // let the DefWindowProc handle drawing the frame.
 
                 return 0;
 
@@ -2268,8 +2274,14 @@ private:
                 sendInputAttemptWhenModalMessage();
                 break;
 
-            //case WM_IME_STARTCOMPOSITION;
-              //  return 0;
+            case WM_IME_SETCONTEXT:
+                imeHandler.handleSetContext (h, wParam == TRUE);
+                lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
+                break;
+
+            case WM_IME_STARTCOMPOSITION:  imeHandler.handleStartComposition (*this); return 0;
+            case WM_IME_ENDCOMPOSITION:    imeHandler.handleEndComposition (*this, h); break;
+            case WM_IME_COMPOSITION:       imeHandler.handleComposition (*this, h, lParam); return 0;
 
             case WM_GETDLGCODE:
                 return DLGC_WANTALLKEYS;
@@ -2307,6 +2319,233 @@ private:
         return false;
     }
 
+    //==============================================================================
+    class IMEHandler
+    {
+    public:
+        IMEHandler()
+        {
+            reset();
+        }
+
+        void handleSetContext (HWND hWnd, const bool windowIsActive)
+        {
+            if (compositionInProgress && ! windowIsActive)
+            {
+                compositionInProgress = false;
+
+                HIMC hImc = ImmGetContext (hWnd);
+                if (hImc != 0)
+                {
+                    ImmNotifyIME (hImc, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
+                    ImmReleaseContext (hWnd, hImc);
+                }
+            }
+        }
+
+        void handleStartComposition (ComponentPeer& owner)
+        {
+            reset();
+            TextInputTarget* const target = owner.findCurrentTextInputTarget();
+
+            if (target != 0)
+                target->insertTextAtCaret (String::empty);
+        }
+
+        void handleEndComposition (ComponentPeer& owner, HWND hWnd)
+        {
+            if (compositionInProgress)
+            {
+                // If this occurs, the user has cancelled the composition, so clear their changes..
+                TextInputTarget* const target = owner.findCurrentTextInputTarget();
+
+                if (target != 0)
+                {
+                    target->setHighlightedRegion (compositionRange);
+                    target->insertTextAtCaret (String::empty);
+                    compositionRange.setLength (0);
+
+                    target->setHighlightedRegion (Range<int>::emptyRange (compositionRange.getEnd()));
+                    target->setTemporaryUnderlining (Array<Range<int> >());
+                }
+
+                HIMC hImc = ImmGetContext (hWnd);
+
+                if (hImc != 0)
+                {
+                    ImmNotifyIME (hImc, NI_CLOSECANDIDATE, 0, 0);
+                    ImmReleaseContext (hWnd, hImc);
+                }
+            }
+
+            reset();
+        }
+
+        void handleComposition (ComponentPeer& owner, HWND hWnd, const LPARAM lParam)
+        {
+            TextInputTarget* const target = owner.findCurrentTextInputTarget();
+            HIMC hImc = ImmGetContext (hWnd);
+
+            if (target == 0 || hImc == 0)
+                return;
+
+            if (compositionRange.getStart() < 0)
+                compositionRange = Range<int>::emptyRange (target->getHighlightedRegion().getStart());
+
+            if ((lParam & GCS_RESULTSTR) != 0) // (composition has finished)
+            {
+                replaceCurrentSelection (target, getCompositionString (hImc, GCS_RESULTSTR),
+                                         Range<int>::emptyRange (compositionRange.getEnd()));
+
+                target->setTemporaryUnderlining (Array<Range<int> >());
+
+                compositionInProgress = false;
+            }
+            else if ((lParam & GCS_COMPSTR) != 0) // (composition is still in-progress)
+            {
+                const String newContent (getCompositionString (hImc, GCS_COMPSTR));
+                const Range<int> selection (getCompositionSelection (hImc, lParam));
+
+                replaceCurrentSelection (target, newContent, selection);
+
+                target->setTemporaryUnderlining (getCompositionUnderlines (hImc, lParam));
+                compositionInProgress = true;
+            }
+
+            moveCandidateWindowToLeftAlignWithSelection (hImc, owner, target);
+            ImmReleaseContext (hWnd, hImc);
+        }
+
+    private:
+        //==============================================================================
+        Range<int> compositionRange; // The range being modified in the TextInputTarget
+        bool compositionInProgress;
+
+        //==============================================================================
+        void reset()
+        {
+            compositionRange = Range<int>::emptyRange (-1);
+            compositionInProgress = false;
+        }
+
+        const String getCompositionString (HIMC hImc, const DWORD type) const
+        {
+            jassert (hImc != 0);
+
+            const int stringSizeBytes = ImmGetCompositionString (hImc, type, 0, 0);
+
+            if (stringSizeBytes > 0)
+            {
+                HeapBlock<TCHAR> buffer;
+                buffer.calloc (stringSizeBytes / sizeof (TCHAR) + 1);
+                ImmGetCompositionString (hImc, type, buffer, stringSizeBytes);
+                return String (buffer);
+            }
+
+            return String::empty;
+        }
+
+        int getCompositionCaretPos (HIMC hImc, LPARAM lParam, const String& currentIMEString) const
+        {
+            jassert (hImc != 0);
+
+            if ((lParam & CS_NOMOVECARET) != 0)
+                return compositionRange.getStart();
+
+            if ((lParam & GCS_CURSORPOS) != 0)
+            {
+                const int localCaretPos = ImmGetCompositionString (hImc, GCS_CURSORPOS, 0, 0);
+                return compositionRange.getStart() + jmax (0, localCaretPos);
+            }
+
+            return compositionRange.getStart() + currentIMEString.length();
+        }
+
+        // Get selected/highlighted range while doing composition:
+        // returned range is relative to beginning of TextInputTarget, not composition string
+        const Range<int> getCompositionSelection (HIMC hImc, LPARAM lParam) const
+        {
+            jassert (hImc != 0);
+            int selectionStart = 0;
+            int selectionEnd = 0;
+
+            if ((lParam & GCS_COMPATTR) != 0)
+            {
+                // Get size of attributes array:
+                const int attributeSizeBytes = ImmGetCompositionString (hImc, GCS_COMPATTR, 0, 0);
+
+                if (attributeSizeBytes > 0)
+                {
+                    // Get attributes (8 bit flag per character):
+                    HeapBlock<char> attributes (attributeSizeBytes);
+                    ImmGetCompositionString (hImc, GCS_COMPATTR, attributes, attributeSizeBytes);
+
+                    selectionStart = 0;
+
+                    for (selectionStart = 0; selectionStart < attributeSizeBytes; ++selectionStart)
+                        if (attributes[selectionStart] == ATTR_TARGET_CONVERTED || attributes[selectionStart] == ATTR_TARGET_NOTCONVERTED)
+                            break;
+
+                    for (selectionEnd = selectionStart; selectionEnd < attributeSizeBytes; ++selectionEnd)
+                        if (attributes [selectionEnd] != ATTR_TARGET_CONVERTED && attributes[selectionEnd] != ATTR_TARGET_NOTCONVERTED)
+                            break;
+                }
+            }
+
+            return Range<int> (selectionStart, selectionEnd) + compositionRange.getStart();
+        }
+
+        void replaceCurrentSelection (TextInputTarget* const target, const String& newContent, const Range<int>& newSelection)
+        {
+            target->setHighlightedRegion (compositionRange);
+            target->insertTextAtCaret (newContent);
+            compositionRange.setLength (newContent.length());
+
+            target->setHighlightedRegion (newSelection);
+        }
+
+        const Array<Range<int> > getCompositionUnderlines (HIMC hImc, LPARAM lParam) const
+        {
+            Array<Range<int> > result;
+
+            if (hImc != 0 && (lParam & GCS_COMPCLAUSE) != 0)
+            {
+                const int clauseDataSizeBytes = ImmGetCompositionString (hImc, GCS_COMPCLAUSE, 0, 0);
+
+                if (clauseDataSizeBytes > 0)
+                {
+                    const int numItems = clauseDataSizeBytes / sizeof (uint32);
+                    HeapBlock<uint32> clauseData (numItems);
+
+                    if (ImmGetCompositionString (hImc, GCS_COMPCLAUSE, clauseData, clauseDataSizeBytes) > 0)
+                        for (int i = 0; i < numItems - 1; ++i)
+                            result.add (Range<int> (clauseData [i], clauseData [i + 1]) + compositionRange.getStart());
+                }
+            }
+
+            return result;
+        }
+
+        void moveCandidateWindowToLeftAlignWithSelection (HIMC hImc, ComponentPeer& peer, TextInputTarget* target) const
+        {
+            Component* const targetComp = dynamic_cast <Component*> (target);
+
+            if (targetComp != 0)
+            {
+                const Rectangle<int> area (peer.getComponent()
+                                              ->getLocalArea (targetComp, target->getCaretRectangle()));
+
+                CANDIDATEFORM pos = { 0, CFS_CANDIDATEPOS, { area.getX(), area.getBottom() }, { 0, 0, 0, 0 } };
+                ImmSetCandidateWindow (hImc, &pos);
+            }
+        }
+
+        JUCE_DECLARE_NON_COPYABLE (IMEHandler);
+    };
+
+    IMEHandler imeHandler;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32ComponentPeer);
 };
 
@@ -2964,6 +3203,5 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 
     return performDragDrop (&format, &medium, DROPEFFECT_COPY | DROPEFFECT_MOVE);
 }
-
 
 #endif

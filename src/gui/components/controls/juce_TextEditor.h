@@ -370,7 +370,7 @@ public:
     */
     Value& getTextValue();
 
-    /** Inserts some text at the current cursor position.
+    /** Inserts some text at the current caret position.
 
         If a section of the text is highlighted, it will be replaced by
         this string, otherwise it will be inserted.
@@ -396,7 +396,7 @@ public:
     */
     void copy();
 
-    /** Pastes the contents of the clipboard into the editor at the cursor position.
+    /** Pastes the contents of the clipboard into the editor at the caret position.
         @see cut, copy, SystemClipboard
     */
     void paste();
@@ -491,12 +491,12 @@ public:
     */
     const BorderSize<int> getBorder() const;
 
-    /** Used to disable the auto-scrolling which keeps the cursor visible.
+    /** Used to disable the auto-scrolling which keeps the caret visible.
 
-        If true (the default), the editor will scroll when the cursor moves offscreen. If
+        If true (the default), the editor will scroll when the caret moves offscreen. If
         set to false, it won't.
     */
-    void setScrollToShowCursor (bool shouldScrollToShowCursor);
+    void setScrollToShowCursor (bool shouldScrollToShowCaret);
 
     //==============================================================================
     /** @internal */
@@ -531,6 +531,8 @@ public:
     void lookAndFeelChanged();
     /** @internal */
     bool isTextInputActive() const;
+    /** @internal */
+    void setTemporaryUnderlining (const Array <Range<int> >&);
 
     //==============================================================================
     /** This adds the items to the popup menu.
@@ -580,7 +582,7 @@ protected:
     void moveCaret (int newCaretPos);
 
     /** @internal */
-    void moveCursorTo (int newPosition, bool isSelecting);
+    void moveCaretTo (int newPosition, bool isSelecting);
 
     /** Used internally to dispatch a text-change message. */
     void textChanged();
@@ -622,7 +624,7 @@ private:
     bool selectAllTextWhenFocused   : 1;
     bool scrollbarVisible           : 1;
     bool wasFocused                 : 1;
-    bool keepCursorOnScreen         : 1;
+    bool keepCaretOnScreen          : 1;
     bool tabKeyUsed                 : 1;
     bool menuActive                 : 1;
     bool valueTextNeedsUpdating     : 1;
@@ -651,6 +653,7 @@ private:
 
     String allowedCharacters;
     ListenerList <Listener> listeners;
+    Array <Range<int> > underlinedSections;
 
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);

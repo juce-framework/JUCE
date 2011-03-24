@@ -253,13 +253,6 @@ public:
     /** Tries to give the window keyboard focus. */
     virtual void grabFocus() = 0;
 
-    /** Tells the window that text input may be required at the given position.
-
-        This may cause things like a virtual on-screen keyboard to appear, depending
-        on the OS.
-    */
-    virtual void textInputRequired (const Point<int>& position) = 0;
-
     /** Called when the window gains keyboard focus. */
     void handleFocusGain();
     /** Called when the window loses keyboard focus. */
@@ -281,6 +274,16 @@ public:
 
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();
+
+    //==============================================================================
+    /** Tells the window that text input may be required at the given position.
+        This may cause things like a virtual on-screen keyboard to appear, depending
+        on the OS.
+    */
+    virtual void textInputRequired (const Point<int>& position) = 0;
+
+    /** If there's some kind of OS input-method in progress, this should cancel it. */
+    virtual void cancelPendingTextInput();
 
     /** Returns the currently focused TextInputTarget, or null if none is found. */
     TextInputTarget* findCurrentTextInputTarget();

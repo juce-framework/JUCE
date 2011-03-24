@@ -603,8 +603,7 @@ public:
         }
     }
 
-    void drawSelection (Graphics& g,
-                        const Range<int>& selection) const
+    void drawSelection (Graphics& g, const Range<int>& selection) const
     {
         const int startX = roundToInt (indexToX (selection.getStart()));
         const int endX   = roundToInt (indexToX (selection.getEnd()));
@@ -613,6 +612,16 @@ public:
         const int nextY = roundToInt (lineY + lineHeight);
 
         g.fillRect (startX, y, endX - startX, nextY - y);
+    }
+
+    void drawUnderline (Graphics& g, const Range<int>& underline) const
+    {
+        const float startX    = indexToX (underline.getStart());
+        const float endX      = indexToX (underline.getEnd());
+        const float baselineY = lineY + currentSection->font.getAscent();
+        const float dashes[]  = { 4.0f, 4.0f };
+
+        g.drawDashedLine (Line<float> (startX, baselineY, endX, baselineY), dashes, 2, 1.0f, 0);
     }
 
     void drawSelectedText (Graphics& g,
@@ -836,7 +845,7 @@ public:
     bool undo()
     {
         owner.reinsert (range.getStart(), removedSections);
-        owner.moveCursorTo (oldCaretPos, false);
+        owner.moveCaretTo (oldCaretPos, false);
         return true;
     }
 
@@ -975,7 +984,7 @@ TextEditor::TextEditor (const String& name,
       selectAllTextWhenFocused (false),
       scrollbarVisible (true),
       wasFocused (false),
-      keepCursorOnScreen (true),
+      keepCaretOnScreen (true),
       tabKeyUsed (false),
       menuActive (false),
       valueTextNeedsUpdating (false),
@@ -1228,9 +1237,9 @@ void TextEditor::setText (const String& newText,
         jassert (multiline || ! newText.containsAnyOf ("\r\n"));
 
         if (cursorWasAtEnd && ! isMultiLine())
-            moveCursorTo (getTotalNumChars(), false);
+            moveCaretTo (getTotalNumChars(), false);
         else
-            moveCursorTo (oldCursorPos, false);
+            moveCaretTo (oldCursorPos, false);
 
         if (sendTextChangeMessage)
             textChanged();
@@ -1357,7 +1366,7 @@ void TextEditor::moveCaret (int newCaretPos)
 
 void TextEditor::setCaretPosition (const int newIndex)
 {
-    moveCursorTo (newIndex, false);
+    moveCaretTo (newIndex, false);
 }
 
 int TextEditor::getCaretPosition() const
@@ -1467,14 +1476,14 @@ const BorderSize<int> TextEditor::getBorder() const
 
 void TextEditor::setScrollToShowCursor (const bool shouldScrollToShowCursor)
 {
-    keepCursorOnScreen = shouldScrollToShowCursor;
+    keepCaretOnScreen = shouldScrollToShowCursor;
 }
 
 void TextEditor::scrollToMakeSureCursorIsVisible()
 {
     updateCaretPosition();
 
-    if (keepCursorOnScreen)
+    if (keepCaretOnScreen)
     {
         int x = viewport->getViewPositionX();
         int y = viewport->getViewPositionY();
@@ -1515,8 +1524,8 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
     }
 }
 
-void TextEditor::moveCursorTo (const int newPosition,
-                               const bool isSelecting)
+void TextEditor::moveCaretTo (const int newPosition,
+                              const bool isSelecting)
 {
     if (isSelecting)
     {
@@ -1601,8 +1610,8 @@ void TextEditor::insertTextAtCaret (const String& newText_)
 
 void TextEditor::setHighlightedRegion (const Range<int>& newSelection)
 {
-    moveCursorTo (newSelection.getStart(), false);
-    moveCursorTo (newSelection.getEnd(), true);
+    moveCaretTo (newSelection.getStart(), false);
+    moveCaretTo (newSelection.getEnd(), true);
 }
 
 //==============================================================================
@@ -1689,6 +1698,24 @@ void TextEditor::drawContent (Graphics& g)
                 }
             }
         }
+
+        for (int i = underlinedSections.size(); --i >= 0;)
+        {
+            const Range<int>& underlinedSection = underlinedSections.getReference (i);
+
+            g.setColour (findColour (highlightColourId));
+
+            Iterator i2 (sections, wordWrapWidth, passwordCharacter);
+
+            while (i2.next() && i2.lineY < clip.getBottom())
+            {
+                if (i2.lineY + i2.lineHeight >= clip.getY()
+                     && underlinedSection.intersects (Range<int> (i2.indexInText, i2.indexInText + i2.atom->numChars)))
+                {
+                    i2.drawUnderline (g, underlinedSection);
+                }
+            }
+        }
     }
 }
 
@@ -1741,8 +1768,8 @@ void TextEditor::mouseDown (const MouseEvent& e)
     {
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
         {
-            moveCursorTo (getTextIndexAt (e.x, e.y),
-                          e.mods.isShiftDown());
+            moveCaretTo (getTextIndexAt (e.x, e.y),
+                         e.mods.isShiftDown());
         }
         else
         {
@@ -1762,7 +1789,7 @@ void TextEditor::mouseDrag (const MouseEvent& e)
     {
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
         {
-            moveCursorTo (getTextIndexAt (e.x, e.y), true);
+            moveCaretTo (getTextIndexAt (e.x, e.y), true);
         }
     }
 }
@@ -1842,8 +1869,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
         }
     }
 
-    moveCursorTo (tokenEnd, false);
-    moveCursorTo (tokenStart, true);
+    moveCaretTo (tokenEnd, false);
+    moveCaretTo (tokenStart, true);
 }
 
 void TextEditor::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
@@ -1875,7 +1902,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         else
             newPos = getCaretPosition() - 1;
 
-        moveCursorTo (newPos, key.getModifiers().isShiftDown());
+        moveCaretTo (newPos, key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::rightKey)
               || key.isKeyCode (KeyPress::downKey))
@@ -1891,47 +1918,47 @@ bool TextEditor::keyPressed (const KeyPress& key)
         else
             newPos = getCaretPosition() + 1;
 
-        moveCursorTo (newPos, key.getModifiers().isShiftDown());
+        moveCaretTo (newPos, key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::pageDownKey) && isMultiLine())
     {
         newTransaction();
 
-        moveCursorTo (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()),
-                      key.getModifiers().isShiftDown());
+        moveCaretTo (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()),
+                     key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::pageUpKey) && isMultiLine())
     {
         newTransaction();
 
-        moveCursorTo (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()),
-                      key.getModifiers().isShiftDown());
+        moveCaretTo (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()),
+                     key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::homeKey))
     {
         newTransaction();
 
         if (isMultiLine() && ! moveInWholeWordSteps)
-            moveCursorTo (indexAtPosition (0.0f, caretPos.getY()),
-                          key.getModifiers().isShiftDown());
+            moveCaretTo (indexAtPosition (0.0f, caretPos.getY()),
+                         key.getModifiers().isShiftDown());
         else
-            moveCursorTo (0, key.getModifiers().isShiftDown());
+            moveCaretTo (0, key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::endKey))
     {
         newTransaction();
 
         if (isMultiLine() && ! moveInWholeWordSteps)
-            moveCursorTo (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()),
-                          key.getModifiers().isShiftDown());
+            moveCaretTo (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()),
+                         key.getModifiers().isShiftDown());
         else
-            moveCursorTo (getTotalNumChars(), key.getModifiers().isShiftDown());
+            moveCaretTo (getTotalNumChars(), key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::backspaceKey))
     {
         if (moveInWholeWordSteps)
         {
-            moveCursorTo (findWordBreakBefore (getCaretPosition()), true);
+            moveCaretTo (findWordBreakBefore (getCaretPosition()), true);
         }
         else
         {
@@ -1982,8 +2009,8 @@ bool TextEditor::keyPressed (const KeyPress& key)
     else if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
     {
         newTransaction();
-        moveCursorTo (getTotalNumChars(), false);
-        moveCursorTo (0, true);
+        moveCaretTo (getTotalNumChars(), false);
+        moveCaretTo (0, true);
     }
     else if (key == KeyPress::returnKey)
     {
@@ -1997,7 +2024,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
     else if (key.isKeyCode (KeyPress::escapeKey))
     {
         newTransaction();
-        moveCursorTo (getCaretPosition(), false);
+        moveCaretTo (getCaretPosition(), false);
         escapePressed();
     }
     else if (key.getTextCharacter() >= ' '
@@ -2077,8 +2104,8 @@ void TextEditor::performPopupMenuAction (const int menuItemID)
         break;
 
     case baseMenuItemID + 5:
-        moveCursorTo (getTotalNumChars(), false);
-        moveCursorTo (0, true);
+        moveCaretTo (getTotalNumChars(), false);
+        moveCaretTo (0, true);
         break;
 
     case baseMenuItemID + 6:
@@ -2101,8 +2128,8 @@ void TextEditor::focusGained (FocusChangeType)
 
     if (selectAllTextWhenFocused)
     {
-        moveCursorTo (0, false);
-        moveCursorTo (getTotalNumChars(), true);
+        moveCaretTo (0, false);
+        moveCaretTo (getTotalNumChars(), true);
     }
 
     repaint();
@@ -2119,6 +2146,13 @@ void TextEditor::focusLost (FocusChangeType)
 
     wasFocused = false;
     textHolder->stopTimer();
+
+    underlinedSections.clear();
+
+    ComponentPeer* const peer = getPeer();
+    if (peer != 0)
+        peer->cancelPendingTextInput();
+
     updateCaretPosition();
 
     postCommandMessage (TextEditorDefs::focusLossMessageId);
@@ -2175,6 +2209,12 @@ void TextEditor::enablementChanged()
 {
     setMouseCursor (isReadOnly() ? MouseCursor::NormalCursor
                                  : MouseCursor::IBeamCursor);
+    repaint();
+}
+
+void TextEditor::setTemporaryUnderlining (const Array <Range<int> >& newUnderlinedSections)
+{
+    underlinedSections = newUnderlinedSections;
     repaint();
 }
 
@@ -2246,7 +2286,7 @@ void TextEditor::insert (const String& text,
             totalNumChars = -1;
             valueTextNeedsUpdating = true;
 
-            moveCursorTo (caretPositionToMoveTo, false);
+            moveCaretTo (caretPositionToMoveTo, false);
 
             repaintText (Range<int> (insertIndex, getTotalNumChars()));
         }
@@ -2384,7 +2424,7 @@ void TextEditor::remove (const Range<int>& range,
             totalNumChars = -1;
             valueTextNeedsUpdating = true;
 
-            moveCursorTo (caretPositionToMoveTo, false);
+            moveCaretTo (caretPositionToMoveTo, false);
 
             repaintText (Range<int> (range.getStart(), getTotalNumChars()));
         }

@@ -308,6 +308,16 @@ bool CodeEditorComponent::isTextInputActive() const
     return true;
 }
 
+void CodeEditorComponent::setTemporaryUnderlining (const Array <Range<int> >&)
+{
+    jassertfalse; // TODO Windows IME not yet supported for this comp..
+}
+
+const Rectangle<int> CodeEditorComponent::getCaretRectangle()
+{
+    return getLocalArea (caret, caret->getLocalBounds());
+}
+
 //==============================================================================
 void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
                                                const CodeDocument::Position& affectedTextEnd)

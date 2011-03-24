@@ -95,6 +95,9 @@ public:
     /** Returns the current caret position. */
     const CodeDocument::Position getCaretPos() const            { return caretPos; }
 
+    /** Returns the position of the caret, relative to the editor's origin. */
+    const Rectangle<int> getCaretRectangle();
+
     /** Moves the caret.
         If selecting is true, the section of the document between the current
         caret position and the new one will become selected. If false, any currently
@@ -254,6 +257,8 @@ public:
                               const CodeDocument::Position& affectedTextEnd);
     /** @internal */
     bool isTextInputActive() const;
+    /** @internal */
+    void setTemporaryUnderlining (const Array <Range<int> >&);
 
 private:
     //==============================================================================

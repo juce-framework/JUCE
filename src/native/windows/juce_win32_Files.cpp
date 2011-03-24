@@ -772,33 +772,41 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMillisecon
         {
             bytesRead = (int) numRead;
         }
-        else if (GetLastError() == ERROR_IO_PENDING)
-        {
-            HANDLE handles[] = { over.hEvent, intern->cancelEvent };
-            DWORD waitResult = WaitForMultipleObjects (2, handles, FALSE,
-                                                       timeOutMilliseconds >= 0 ? timeOutMilliseconds
-                                                                                : INFINITE);
-            if (waitResult != WAIT_OBJECT_0)
-            {
-                // if the operation timed out, let's cancel it...
-                CancelIo (intern->pipeH);
-                WaitForSingleObject (over.hEvent, INFINITE);  // makes sure cancel is complete
-            }
-
-            if (GetOverlappedResult (intern->pipeH, &over, &numRead, FALSE))
-            {
-                bytesRead = (int) numRead;
-            }
-            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->isPipe)
-            {
-                intern->disconnectPipe();
-                waitAgain = true;
-            }
-        }
         else
         {
-            waitAgain = internal != 0;
-            Sleep (5);
+            const DWORD lastError = GetLastError();
+
+            if (lastError == ERROR_IO_PENDING)
+            {
+                HANDLE handles[] = { over.hEvent, intern->cancelEvent };
+                DWORD waitResult = WaitForMultipleObjects (2, handles, FALSE,
+                                                           timeOutMilliseconds >= 0 ? timeOutMilliseconds
+                                                                                    : INFINITE);
+                if (waitResult != WAIT_OBJECT_0)
+                {
+                    // if the operation timed out, let's cancel it...
+                    CancelIo (intern->pipeH);
+                    WaitForSingleObject (over.hEvent, INFINITE);  // makes sure cancel is complete
+                }
+
+                if (GetOverlappedResult (intern->pipeH, &over, &numRead, FALSE))
+                {
+                    bytesRead = (int) numRead;
+                }
+                else if (GetLastError() == ERROR_BROKEN_PIPE && intern->isPipe)
+                {
+                    intern->disconnectPipe();
+                }
+            }
+            else if (lastError == ERROR_BROKEN_PIPE && intern->isPipe)
+            {
+                intern->disconnectPipe();
+            }
+            else
+            {
+                waitAgain = true;
+                Sleep (5);
+            }
         }
 
         CloseHandle (over.hEvent);
@@ -862,6 +870,5 @@ void NamedPipe::cancelPendingReads()
     if (internal != 0)
         SetEvent (static_cast<NamedPipeInternal*> (internal)->cancelEvent);
 }
-
 
 #endif
