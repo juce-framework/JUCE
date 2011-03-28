@@ -241,13 +241,9 @@ void ValueTree::SharedObject::sendPropertyChangeMessage (ValueTree& tree, const 
 void ValueTree::SharedObject::sendPropertyChangeMessage (const Identifier& property)
 {
     ValueTree tree (this);
-    ValueTree::SharedObject* t = this;
 
-    while (t != 0)
-    {
+    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
         t->sendPropertyChangeMessage (tree, property);
-        t = t->parent;
-    }
 }
 
 void ValueTree::SharedObject::sendChildAddedMessage (ValueTree& tree, ValueTree& child)
@@ -263,13 +259,9 @@ void ValueTree::SharedObject::sendChildAddedMessage (ValueTree& tree, ValueTree&
 void ValueTree::SharedObject::sendChildAddedMessage (ValueTree child)
 {
     ValueTree tree (this);
-    ValueTree::SharedObject* t = this;
 
-    while (t != 0)
-    {
+    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
         t->sendChildAddedMessage (tree, child);
-        t = t->parent;
-    }
 }
 
 void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree& tree, ValueTree& child)
@@ -285,13 +277,9 @@ void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree& tree, ValueTre
 void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree child)
 {
     ValueTree tree (this);
-    ValueTree::SharedObject* t = this;
 
-    while (t != 0)
-    {
+    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
         t->sendChildRemovedMessage (tree, child);
-        t = t->parent;
-    }
 }
 
 void ValueTree::SharedObject::sendChildOrderChangedMessage (ValueTree& tree)
@@ -307,13 +295,9 @@ void ValueTree::SharedObject::sendChildOrderChangedMessage (ValueTree& tree)
 void ValueTree::SharedObject::sendChildOrderChangedMessage()
 {
     ValueTree tree (this);
-    ValueTree::SharedObject* t = this;
 
-    while (t != 0)
-    {
+    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
         t->sendChildOrderChangedMessage (tree);
-        t = t->parent;
-    }
 }
 
 void ValueTree::SharedObject::sendParentChangeMessage()

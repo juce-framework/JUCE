@@ -43,6 +43,17 @@ PreferencesPanel::~PreferencesPanel()
 {
 }
 
+int PreferencesPanel::getButtonSize() const throw()
+{
+    return buttonSize;
+}
+
+void PreferencesPanel::setButtonSize (int newSize)
+{
+    buttonSize = newSize;
+    resized();
+}
+
 //==============================================================================
 void PreferencesPanel::addSettingsPage (const String& title,
                                         const Drawable* icon,

@@ -137,7 +137,11 @@ public:
     static void memoryBarrier() throw();
 
     //==============================================================================
-    JUCE_ALIGN(8)
+   #if JUCE_64BIT
+    JUCE_ALIGN (8)
+   #else
+    JUCE_ALIGN (4)
+   #endif
 
     /** The raw value that this class operates on.
         This is exposed publically in case you need to manipulate it directly

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	59
+#define JUCE_BUILDNUMBER	60
 
 /** Current Juce version number.
 
@@ -2236,7 +2236,11 @@ public:
 	/** Implements a memory read/write barrier. */
 	static void memoryBarrier() throw();
 
-	JUCE_ALIGN(8)
+   #if JUCE_64BIT
+	JUCE_ALIGN (8)
+   #else
+	JUCE_ALIGN (4)
+   #endif
 
 	/** The raw value that this class operates on.
 		This is exposed publically in case you need to manipulate it directly
@@ -5455,13 +5459,22 @@ JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, const String& str
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw();
 
-/** This streaming override allows you to pass a juce String directly into std output streams.
-	This is very handy for writing strings to std::cout, std::cerr, etc.
+/** This operator allows you to write a juce String directly to std output streams.
+	This is handy for writing strings to std::cout, std::cerr, etc.
 */
-template <class charT, class traits>
-std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+template <class traits>
+std::basic_ostream <char, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <char, traits>& stream, const String& stringToWrite)
 {
 	return stream << stringToWrite.toUTF8().getAddress();
+}
+
+/** This operator allows you to write a juce String directly to std output streams.
+	This is handy for writing strings to std::wcout, std::wcerr, etc.
+*/
+template <class traits>
+std::basic_ostream <wchar_t, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <wchar_t, traits>& stream, const String& stringToWrite)
+{
+	return stream << stringToWrite.toWideCharPointer();
 }
 
 /** Writes a string to an OutputStream as UTF8. */
@@ -34702,8 +34715,8 @@ public:
 		inline void skip (int numSamples) throw()		   { data += numSamples; }
 		inline float getAsFloatLE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfBigEndian (*data)); }
 		inline float getAsFloatBE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfLittleEndian (*data)); }
-		inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
-		inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) jlimit ((int) -maxValue, (int) maxValue, roundToInt (newValue * (1.0 + maxValue)))); }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) (maxValue * jlimit (-1.0f, 1.0f, newValue))); }
+		inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) (maxValue * jlimit (-1.0f, 1.0f, newValue))); }
 		inline int32 getAsInt32LE() const throw()		   { return (int32) ByteOrder::swapIfBigEndian (*data); }
 		inline int32 getAsInt32BE() const throw()		   { return (int32) ByteOrder::swapIfLittleEndian (*data); }
 		inline void setAsInt32LE (int32 newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) newValue); }
@@ -63587,6 +63600,12 @@ public:
 
 	/** Changes the current page being displayed. */
 	void setCurrentPage (const String& pageName);
+
+	/** Returns the size of the buttons shown along the top. */
+	int getButtonSize() const throw();
+
+	/** Changes the size of the buttons shown along the top. */
+	void setButtonSize (int newSize);
 
 	/** @internal */
 	void resized();

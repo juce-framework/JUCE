@@ -242,7 +242,8 @@ const File Project::resolveFilename (String filename) const
     if (filename.isEmpty())
         return File::nonexistent;
 
-    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
+    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename)
+                .replaceCharacter ('\\', '/');
 
     if (File::isAbsolutePath (filename))
         return File (filename);

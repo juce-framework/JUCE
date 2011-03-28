@@ -1304,13 +1304,22 @@ JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, const String& str
 JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw();
 
 //==============================================================================
-/** This streaming override allows you to pass a juce String directly into std output streams.
-    This is very handy for writing strings to std::cout, std::cerr, etc.
+/** This operator allows you to write a juce String directly to std output streams.
+    This is handy for writing strings to std::cout, std::cerr, etc.
 */
-template <class charT, class traits>
-std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+template <class traits>
+std::basic_ostream <char, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <char, traits>& stream, const String& stringToWrite)
 {
     return stream << stringToWrite.toUTF8().getAddress();
+}
+
+/** This operator allows you to write a juce String directly to std output streams.
+    This is handy for writing strings to std::wcout, std::wcerr, etc.
+*/
+template <class traits>
+std::basic_ostream <wchar_t, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <wchar_t, traits>& stream, const String& stringToWrite)
+{
+    return stream << stringToWrite.toWideCharPointer();
 }
 
 /** Writes a string to an OutputStream as UTF8. */

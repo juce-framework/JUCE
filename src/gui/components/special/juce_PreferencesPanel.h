@@ -124,6 +124,12 @@ public:
     /** Changes the current page being displayed. */
     void setCurrentPage (const String& pageName);
 
+    /** Returns the size of the buttons shown along the top. */
+    int getButtonSize() const throw();
+
+    /** Changes the size of the buttons shown along the top. */
+    void setButtonSize (int newSize);
+
     //==============================================================================
     /** @internal */
     void resized();
