@@ -1012,6 +1012,10 @@ void Component::setBounds (const int x, const int y, int w, int h)
             else if (! flags.hasHeavyweightPeerFlag)
                 repaintParent();
         }
+        else
+        {
+            bufferedImage = Image::null;
+        }
 
         if (flags.hasHeavyweightPeerFlag)
         {
@@ -1642,10 +1646,8 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const
 {
     Component* const mc = getCurrentlyModalComponent();
 
-    return mc != 0
-            && mc != this
-            && (! mc->isParentOf (this))
-            && ! mc->canModalEventBeSentToComponent (this);
+    return ! (mc == 0 || mc == this || mc->isParentOf (this)
+               || mc->canModalEventBeSentToComponent (this));
 }
 
 int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() throw()
@@ -2630,7 +2632,9 @@ void Component::internalBroughtToFront()
     Component* const cm = getCurrentlyModalComponent();
 
     if (cm != 0 && cm->getTopLevelComponent() != getTopLevelComponent())
-        ModalComponentManager::getInstance()->bringModalComponentsToFront();
+        ModalComponentManager::getInstance()->bringModalComponentsToFront (false); // very important that this is false, otherwise in win32,
+                                                                                   // non-front components can't get focus when another modal comp is
+                                                                                   // active, and therefore can't receive mouse-clicks
 }
 
 void Component::focusGained (FocusChangeType)

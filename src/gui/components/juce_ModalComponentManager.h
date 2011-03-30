@@ -110,7 +110,7 @@ public:
     void attachCallback (Component* component, Callback* callback);
 
     /** Brings any modal components to the front. */
-    void bringModalComponentsToFront();
+    void bringModalComponentsToFront (bool topOneShouldGrabFocus = true);
 
    #if JUCE_MODAL_LOOPS_PERMITTED
     /** Runs the event loop until the currently topmost modal component is dismissed, and

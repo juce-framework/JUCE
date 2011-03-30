@@ -208,7 +208,7 @@ void ModalComponentManager::handleAsyncUpdate()
     }
 }
 
-void ModalComponentManager::bringModalComponentsToFront()
+void ModalComponentManager::bringModalComponentsToFront (bool topOneShouldGrabFocus)
 {
     ComponentPeer* lastOne = 0;
 
@@ -225,8 +225,10 @@ void ModalComponentManager::bringModalComponentsToFront()
         {
             if (lastOne == 0)
             {
-                peer->toFront (true);
-                peer->grabFocus();
+                peer->toFront (topOneShouldGrabFocus);
+
+                if (topOneShouldGrabFocus)
+                    peer->grabFocus();
             }
             else
                 peer->toBehind (lastOne);

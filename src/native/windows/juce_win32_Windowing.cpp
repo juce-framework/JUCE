@@ -1801,19 +1801,21 @@ private:
                 return;
         }
 
-        if (LOWORD (wParam) == WA_CLICKACTIVE && component->isCurrentlyBlockedByAnotherModalComponent())
-        {
-            Component* const underMouse = component->getComponentAt (component->getMouseXYRelative());
+        Component* underMouse = component->getComponentAt (component->getMouseXYRelative());
 
-            if (underMouse != 0 && underMouse->isCurrentlyBlockedByAnotherModalComponent())
+        if (underMouse == 0)
+            underMouse = component;
+
+        if (underMouse->isCurrentlyBlockedByAnotherModalComponent())
+        {
+            if (LOWORD (wParam) == WA_CLICKACTIVE)
                 Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+            else
+                ModalComponentManager::getInstance()->bringModalComponentsToFront();
         }
         else
         {
             handleBroughtToFront();
-
-            if (component->isCurrentlyBlockedByAnotherModalComponent())
-                Component::getCurrentlyModalComponent()->toFront (true);
         }
     }
 
