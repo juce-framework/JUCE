@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="Juce Demo" default="help">
+<project name="Juce Demo" default="debug">
   <property file="local.properties"/>
   <property file="build.properties"/>
   <property file="default.properties"/>

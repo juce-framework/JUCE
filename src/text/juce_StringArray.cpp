@@ -351,29 +351,20 @@ int StringArray::addTokens (const String& text, const bool preserveQuotedStrings
 int StringArray::addTokens (const String& text, const String& breakCharacters, const String& quoteCharacters)
 {
     int num = 0;
+    String::CharPointerType t (text.getCharPointer());
 
-    if (text.isNotEmpty())
+    while (! t.isEmpty())
     {
-        String::CharPointerType t (text.getCharPointer());
+        String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
+                                                                              breakCharacters.getCharPointer(),
+                                                                              quoteCharacters.getCharPointer()));
+        add (String (t, tokenEnd));
+        ++num;
 
-        for (;;)
-        {
-            String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
-                                                                                  breakCharacters.getCharPointer(),
-                                                                                  quoteCharacters.getCharPointer()));
+        if (tokenEnd.isEmpty())
+            break;
 
-            if (tokenEnd == t)
-                break;
-
-            add (String (t, tokenEnd));
-            ++num;
-            t = tokenEnd;
-
-            if (t.isEmpty())
-                break;
-
-            ++t;
-        }
+        t = ++tokenEnd;
     }
 
     return num;
