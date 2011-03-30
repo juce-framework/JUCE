@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	62
+#define JUCE_BUILDNUMBER	63
 
 /** Current Juce version number.
 
@@ -34776,8 +34776,8 @@ public:
 		inline void skip (int numSamples) throw()		   { data += numSamples; }
 		inline float getAsFloatLE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfBigEndian (*data)); }
 		inline float getAsFloatBE() const throw()		   { return (float) ((1.0 / (1.0 + maxValue)) * (int32) ByteOrder::swapIfLittleEndian (*data)); }
-		inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) (maxValue * jlimit (-1.0f, 1.0f, newValue))); }
-		inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) (maxValue * jlimit (-1.0f, 1.0f, newValue))); }
+		inline void setAsFloatLE (float newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
+		inline void setAsFloatBE (float newValue) throw()	   { *data = ByteOrder::swapIfLittleEndian ((uint32) (maxValue * jlimit (-1.0, 1.0, (double) newValue))); }
 		inline int32 getAsInt32LE() const throw()		   { return (int32) ByteOrder::swapIfBigEndian (*data); }
 		inline int32 getAsInt32BE() const throw()		   { return (int32) ByteOrder::swapIfLittleEndian (*data); }
 		inline void setAsInt32LE (int32 newValue) throw()	   { *data = ByteOrder::swapIfBigEndian ((uint32) newValue); }
@@ -34810,8 +34810,8 @@ public:
 		inline float getAsFloatBE() const throw()		   { union { uint32 asInt; float asFloat; } n; n.asInt = ByteOrder::swap (*(uint32*) data); return n.asFloat; }
 		inline void setAsFloatBE (float newValue) throw()	   { union { uint32 asInt; float asFloat; } n; n.asFloat = newValue; *(uint32*) data = ByteOrder::swap (n.asInt); }
 	   #endif
-		inline int32 getAsInt32LE() const throw()		   { return (int32) roundToInt (jlimit (-1.0f, 1.0f, getAsFloatLE()) * (1.0 + maxValue)); }
-		inline int32 getAsInt32BE() const throw()		   { return (int32) roundToInt (jlimit (-1.0f, 1.0f, getAsFloatBE()) * (1.0 + maxValue)); }
+		inline int32 getAsInt32LE() const throw()		   { return (int32) roundToInt (jlimit (-1.0, 1.0, (double) getAsFloatLE()) * (double) maxValue); }
+		inline int32 getAsInt32BE() const throw()		   { return (int32) roundToInt (jlimit (-1.0, 1.0, (double) getAsFloatBE()) * (double) maxValue); }
 		inline void setAsInt32LE (int32 newValue) throw()	   { setAsFloatLE ((float) (newValue * (1.0 / (1.0 + maxValue)))); }
 		inline void setAsInt32BE (int32 newValue) throw()	   { setAsFloatBE ((float) (newValue * (1.0 / (1.0 + maxValue)))); }
 		inline void clear() throw()				 { *data = 0; }
