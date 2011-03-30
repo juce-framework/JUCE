@@ -337,14 +337,15 @@ float CustomTypeface::getStringWidth (const String& text)
 
     while (! t.isEmpty())
     {
-        const GlyphInfo* const glyph = findGlyphSubstituting (t.getAndAdvance());
+        const juce_wchar c = t.getAndAdvance();
+        const GlyphInfo* const glyph = findGlyphSubstituting (c);
 
         if (glyph == 0 && ! isFallbackFont)
         {
             const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
 
             if (fallbackTypeface != 0)
-                x += fallbackTypeface->getStringWidth (String::charToString (*t));
+                x += fallbackTypeface->getStringWidth (String::charToString (c));
         }
 
         if (glyph != 0)
