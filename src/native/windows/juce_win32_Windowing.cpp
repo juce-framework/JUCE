@@ -2687,15 +2687,108 @@ bool Process::isForegroundProcess()
 }
 
 //==============================================================================
-bool AlertWindow::showNativeDialogBox (const String& title,
-                                       const String& bodyText,
-                                       bool isOkCancel)
+class Win32MessageBox  : public AsyncUpdater
 {
-    return MessageBox (0, bodyText.toWideCharPointer(), title.toWideCharPointer(),
-                       MB_SETFOREGROUND | (isOkCancel ? MB_OKCANCEL
-                                                      : MB_OK)) == IDOK;
+public:
+    Win32MessageBox (AlertWindow::AlertIconType iconType,
+                     const String& title_, const String& message_,
+                     Component* associatedComponent,
+                     UINT extraFlags,
+                     ModalComponentManager::Callback* callback_,
+                     const bool runAsync)
+        : flags (extraFlags | getMessageBoxFlags (iconType)),
+          owner (getWindowForMessageBox (associatedComponent)),
+          title (title_), message (message_), callback (callback_)
+    {
+        if (runAsync)
+            triggerAsyncUpdate();
+    }
+
+    int getResult() const
+    {
+        const int r = MessageBox (owner, message.toWideCharPointer(), title.toWideCharPointer(), flags);
+        return (r == IDYES || r == IDOK) ? 1 : (r == IDNO ? 2 : 0);
+    }
+
+    void handleAsyncUpdate()
+    {
+        const int result = getResult();
+
+        if (callback != 0)
+            callback->modalStateFinished (result);
+
+        delete this;
+    }
+
+private:
+    UINT flags;
+    HWND owner;
+    String title, message;
+    ModalComponentManager::Callback* callback;
+
+    static UINT getMessageBoxFlags (AlertWindow::AlertIconType iconType) throw()
+    {
+        UINT flags = MB_TASKMODAL | MB_SETFOREGROUND;
+
+        switch (iconType)
+        {
+            case AlertWindow::QuestionIcon:  flags |= MB_ICONQUESTION; break;
+            case AlertWindow::WarningIcon:   flags |= MB_ICONWARNING; break;
+            case AlertWindow::InfoIcon:      flags |= MB_ICONINFORMATION; break;
+            default: break;
+        }
+
+        return flags;
+    }
+
+    static HWND getWindowForMessageBox (Component* associatedComponent)
+    {
+        return associatedComponent != 0 ? (HWND) associatedComponent->getWindowHandle() : 0;
+    }
+};
+
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+                                                     const String& title, const String& message,
+                                                     Component* associatedComponent)
+{
+    Win32MessageBox box (iconType, title, message, associatedComponent, MB_OK, 0, false);
+    (void) box.getResult();
 }
 
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+                                                          const String& title, const String& message,
+                                                          Component* associatedComponent)
+{
+    new Win32MessageBox (iconType, title, message, associatedComponent, MB_OK, 0, true);
+}
+
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+                                                      const String& title, const String& message,
+                                                      Component* associatedComponent,
+                                                      ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<Win32MessageBox> mb (new Win32MessageBox (iconType, title, message, associatedComponent,
+                                                            MB_OKCANCEL, callback, callback != 0));
+    if (callback == 0)
+        return mb->getResult() != 0;
+
+    mb.release();
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+                                                        const String& title, const String& message,
+                                                        Component* associatedComponent,
+                                                        ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<Win32MessageBox> mb (new Win32MessageBox (iconType, title, message, associatedComponent,
+                                                            MB_YESNOCANCEL, callback, callback != 0));
+    if (callback == 0)
+        return mb->getResult();
+
+    mb.release();
+    return 0;
+}
 
 //==============================================================================
 void Desktop::createMouseInputSources()

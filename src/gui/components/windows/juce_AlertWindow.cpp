@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../events/juce_MessageManager.h"
 #include "../../../application/juce_Application.h"
 #include "../../../memory/juce_ScopedPointer.h"
+#include "juce_NativeMessageBox.h"
 
 
 //==============================================================================
@@ -668,10 +669,17 @@ void AlertWindow::showMessageBox (AlertIconType iconType,
                                   const String& buttonText,
                                   Component* associatedComponent)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, true);
-    info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
+    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
+    {
+        NativeMessageBox::showMessageBox (iconType, title, message, associatedComponent);
+    }
+    else
+    {
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, true);
+        info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
 
-    info.invoke();
+        info.invoke();
+    }
 }
 #endif
 
@@ -681,10 +689,17 @@ void AlertWindow::showMessageBoxAsync (AlertIconType iconType,
                                        const String& buttonText,
                                        Component* associatedComponent)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, false);
-    info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
+    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
+    {
+        return NativeMessageBox::showMessageBoxAsync (iconType, title, message, associatedComponent);
+    }
+    else
+    {
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 1, 0, false);
+        info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
 
-    info.invoke();
+        info.invoke();
+    }
 }
 
 bool AlertWindow::showOkCancelBox (AlertIconType iconType,
@@ -695,11 +710,18 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
                                    Component* associatedComponent,
                                    ModalComponentManager::Callback* callback)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == 0);
-    info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
-    info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
+    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
+    {
+        return NativeMessageBox::showOkCancelBox (iconType, title, message, associatedComponent, callback);
+    }
+    else
+    {
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == 0);
+        info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
+        info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
 
-    return info.invoke() != 0;
+        return info.invoke() != 0;
+    }
 }
 
 int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
@@ -711,12 +733,36 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
                                      Component* associatedComponent,
                                      ModalComponentManager::Callback* callback)
 {
-    AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == 0);
-    info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
-    info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
-    info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
+    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
+    {
+        return NativeMessageBox::showYesNoCancelBox (iconType, title, message, associatedComponent, callback);
+    }
+    else
+    {
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == 0);
+        info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
+        info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
+        info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
 
-    return info.invoke();
+        return info.invoke();
+    }
 }
+
+#if JUCE_MODAL_LOOPS_PERMITTED
+bool AlertWindow::showNativeDialogBox (const String& title,
+                                       const String& bodyText,
+                                       bool isOkCancel)
+{
+    if (isOkCancel)
+    {
+        return NativeMessageBox::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
+    }
+    else
+    {
+        NativeMessageBox::showMessageBox (AlertWindow::NoIcon, title, bodyText);
+        return true;
+    }
+}
+#endif
 
 END_JUCE_NAMESPACE

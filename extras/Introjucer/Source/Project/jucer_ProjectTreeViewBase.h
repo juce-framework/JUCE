@@ -65,6 +65,7 @@ public:
     virtual void addFiles (const StringArray& files, int insertIndex);
     virtual void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
     virtual void showMultiSelectionPopupMenu();
+    void invokeShowDocument();
 
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
 
@@ -94,11 +95,14 @@ public:
     bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
     void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex);
 
+    static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes);
+
     //==============================================================================
     Project::Item item;
 
 protected:
     bool isFileMissing;
+    ScopedPointer<Timer> delayedSelectionTimer;
 
     //==============================================================================
     void treeChildrenChanged (const ValueTree& parentTree);

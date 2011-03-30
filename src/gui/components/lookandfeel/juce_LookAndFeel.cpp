@@ -163,6 +163,7 @@ namespace LookAndFeelHelpers
 
 //==============================================================================
 LookAndFeel::LookAndFeel()
+    : useNativeAlertWindows (false)
 {
     /* if this fails it means you're trying to create a LookAndFeel object before
        the static Colours have been initialised. That ain't gonna work. It probably
@@ -694,6 +695,20 @@ const Font LookAndFeel::getAlertWindowMessageFont()
 const Font LookAndFeel::getAlertWindowFont()
 {
     return Font (12.0f);
+}
+
+void LookAndFeel::setUsingNativeAlertWindows (bool shouldUseNativeAlerts)
+{
+    useNativeAlertWindows = shouldUseNativeAlerts;
+}
+
+bool LookAndFeel::isUsingNativeAlertWindows()
+{
+   #if JUCE_LINUX
+    return false; // not available currently..
+   #else
+    return useNativeAlertWindows;
+   #endif
 }
 
 //==============================================================================
@@ -1688,7 +1703,6 @@ class SliderLabelComp : public Label
 {
 public:
     SliderLabelComp() : Label (String::empty, String::empty) {}
-    ~SliderLabelComp()    {}
 
     void mouseWheelMove (const MouseEvent&, float, float) {}
 };

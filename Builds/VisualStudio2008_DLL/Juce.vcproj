@@ -676,6 +676,7 @@
               <File RelativePath="..\..\src\gui\components\windows\juce_DialogWindow.h"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_DocumentWindow.cpp"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_DocumentWindow.h"/>
+              <File RelativePath="..\..\src\gui\components\windows\juce_NativeMessageBox.h"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_ResizableWindow.cpp"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_ResizableWindow.h"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_SplashScreen.cpp"/>

@@ -965,6 +965,8 @@
                   file="src/gui/components/windows/juce_DocumentWindow.cpp"/>
             <FILE id="hKM9A0HPm" name="juce_DocumentWindow.h" compile="0" resource="0"
                   file="src/gui/components/windows/juce_DocumentWindow.h"/>
+            <FILE id="p01Trf" name="juce_NativeMessageBox.h" compile="0" resource="0"
+                  file="src/gui/components/windows/juce_NativeMessageBox.h"/>
             <FILE id="jpK2YGSu7" name="juce_ResizableWindow.cpp" compile="1" resource="0"
                   file="src/gui/components/windows/juce_ResizableWindow.cpp"/>
             <FILE id="M6UTdqVNd" name="juce_ResizableWindow.h" compile="0" resource="0"

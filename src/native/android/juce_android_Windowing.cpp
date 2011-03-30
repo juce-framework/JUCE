@@ -592,12 +592,44 @@ bool Process::isForegroundProcess()
 }
 
 //==============================================================================
-bool AlertWindow::showNativeDialogBox (const String& title,
-                                       const String& bodyText,
-                                       bool isOkCancel)
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+                                                          const String& title, const String& message,
+                                                          Component* associatedComponent)
 {
-    // TODO
+    android.activity.callVoidMethod (android.showMessageBox, javaString (title).get(), javaString (message).get(), (jlong) 0);
+}
 
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+                                                      const String& title, const String& message,
+                                                      Component* associatedComponent,
+                                                      ModalComponentManager::Callback* callback)
+{
+    jassert (callback != 0); // on android, all alerts must be non-modal!!
+
+    android.activity.callVoidMethod (android.showOkCancelBox, javaString (title).get(), javaString (message).get(),
+                                     (jlong) (pointer_sized_int) callback);
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+                                                        const String& title, const String& message,
+                                                        Component* associatedComponent,
+                                                        ModalComponentManager::Callback* callback)
+{
+    jassert (callback != 0); // on android, all alerts must be non-modal!!
+
+    android.activity.callVoidMethod (android.showYesNoCancelBox, javaString (title).get(), javaString (message).get(),
+                                     (jlong) (pointer_sized_int) callback);
+    return 0;
+}
+
+JUCE_JNI_CALLBACK (JuceAppActivity, alertDismissed, void, (JNIEnv* env, jobject activity,
+                                                           jlong callbackAsLong, jint result))
+{
+    ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong;
+
+    if (callback != 0)
+        callback->modalStateFinished (result);
 }
 
 //==============================================================================

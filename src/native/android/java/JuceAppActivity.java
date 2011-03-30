@@ -26,6 +26,8 @@
 package com.juce;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.content.Context;
 import android.view.ViewGroup;
@@ -166,6 +168,87 @@ public final class JuceAppActivity   extends Activity
         ClipboardManager clipboard = (ClipboardManager) getSystemService (CLIPBOARD_SERVICE);
         clipboard.setText (newText);
     }
+
+    //==============================================================================
+    public final void showMessageBox (String title, String message, final long callback)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder (this);
+        builder.setTitle (title)
+               .setMessage (message)
+               .setCancelable (true)
+               .setPositiveButton ("OK", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick (DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            JuceAppActivity.this.alertDismissed (callback, 0);
+                        }
+                    });
+
+        builder.create().show();
+    }
+
+    public final void showOkCancelBox (String title, String message, final long callback)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder (this);
+        builder.setTitle (title)
+               .setMessage (message)
+               .setCancelable (true)
+               .setPositiveButton ("OK", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick (DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            JuceAppActivity.this.alertDismissed (callback, 1);
+                        }
+                    })
+               .setNegativeButton ("Cancel", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick (DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            JuceAppActivity.this.alertDismissed (callback, 0);
+                        }
+                    });
+
+        builder.create().show();
+    }
+
+    public final void showYesNoCancelBox (String title, String message, final long callback)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder (this);
+        builder.setTitle (title)
+               .setMessage (message)
+               .setCancelable (true)
+               .setPositiveButton ("Yes", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick (DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            JuceAppActivity.this.alertDismissed (callback, 1);
+                        }
+                    })
+               .setNegativeButton ("No", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick (DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            JuceAppActivity.this.alertDismissed (callback, 2);
+                        }
+                    })
+               .setNeutralButton ("Cancel", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick (DialogInterface dialog, int id)
+                        {
+                            dialog.cancel();
+                            JuceAppActivity.this.alertDismissed (callback, 0);
+                        }
+                    });
+
+        builder.create().show();
+    }
+
+    public native void alertDismissed (long callback, int id);
 
     //==============================================================================
     public final int[] renderGlyph (char glyph, Paint paint, Matrix matrix, Rect bounds)

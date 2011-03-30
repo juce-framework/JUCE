@@ -91,65 +91,140 @@ void PlatformUtilities::addItemToDock (const File& file)
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
+//==============================================================================
+class iOSMessageBox;
+
 END_JUCE_NAMESPACE
 
 @interface JuceAlertBoxDelegate  : NSObject
 {
 @public
-    bool clickedOk;
+    iOSMessageBox* owner;
 }
 
 - (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex;
 
 @end
 
+BEGIN_JUCE_NAMESPACE
+
+class iOSMessageBox
+{
+public:
+    iOSMessageBox (const String& title, const String& message,
+                   NSString* button1, NSString* button2, NSString* button3,
+                   ModalComponentManager::Callback* callback_, const bool isAsync_)
+        : result (0), delegate (nil), alert (nil),
+          callback (callback_), isYesNo (button3 != nil), isAsync (isAsync_)
+    {
+        delegate = [[JuceAlertBoxDelegate alloc] init];
+        delegate->owner = this;
+
+        alert = [[UIAlertView alloc] initWithTitle: juceStringToNS (title)
+                                           message: juceStringToNS (message)
+                                          delegate: delegate
+                                 cancelButtonTitle: button1
+                                 otherButtonTitles: button2, button3, nil];
+        [alert retain];
+        [alert show];
+    }
+
+    ~iOSMessageBox()
+    {
+        [alert release];
+        [delegate release];
+    }
+
+    int getResult()
+    {
+        jassert (callback == 0);
+        const ScopedAutoReleasePool pool;
+
+        while (! alert.hidden && alert.superview != nil)
+            [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
+
+        return result;
+    }
+
+    void buttonClicked (const int buttonIndex) throw()
+    {
+        result = buttonIndex;
+
+        if (callback != 0)
+            callback->modalStateFinished (result);
+
+        if (isAsync)
+            delete this;
+    }
+
+private:
+    int result;
+    JuceAlertBoxDelegate* delegate;
+    UIAlertView* alert;
+    ModalComponentManager::Callback* callback;
+    const bool isYesNo, isAsync;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox);
+};
+
+END_JUCE_NAMESPACE
+
 @implementation JuceAlertBoxDelegate
 
 - (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex
 {
-    clickedOk = (buttonIndex == 0);
+    owner->buttonClicked (buttonIndex);
     alertView.hidden = true;
 }
 
 @end
-
 BEGIN_JUCE_NAMESPACE
 
-// (This function is used directly by other bits of code)
-bool juce_iPhoneShowModalAlert (const String& title,
-                                const String& bodyText,
-                                NSString* okButtonText,
-                                NSString* cancelButtonText)
+
+//==============================================================================
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+                                                     const String& title, const String& message,
+                                                     Component* associatedComponent)
 {
     const ScopedAutoReleasePool pool;
-
-    JuceAlertBoxDelegate* callback = [[JuceAlertBoxDelegate alloc] init];
-
-    UIAlertView* alert = [[UIAlertView alloc] initWithTitle: juceStringToNS (title)
-                                                    message: juceStringToNS (bodyText)
-                                                   delegate: callback
-                                          cancelButtonTitle: okButtonText
-                                          otherButtonTitles: cancelButtonText, nil];
-    [alert retain];
-    [alert show];
-
-    while (! alert.hidden && alert.superview != nil)
-        [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
-
-    const bool result = callback->clickedOk;
-    [alert release];
-    [callback release];
-
-    return result;
+    iOSMessageBox mb (title, message, @"OK", nil, nil, 0, false);
+    (void) mb.getResult();
 }
 
-bool AlertWindow::showNativeDialogBox (const String& title,
-                                       const String& bodyText,
-                                       bool isOkCancel)
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+                                                          const String& title, const String& message,
+                                                          Component* associatedComponent)
 {
-    return juce_iPhoneShowModalAlert (title, bodyText,
-                                      @"OK",
-                                      isOkCancel ? @"Cancel" : nil);
+    const ScopedAutoReleasePool pool;
+    new iOSMessageBox (title, message, @"OK", nil, nil, 0, true);
+}
+
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+                                                      const String& title, const String& message,
+                                                      Component* associatedComponent,
+                                                      ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK", nil, callback, callback != 0));
+
+    if (callback == 0)
+        return mb->getResult() == 1;
+
+    mb.release();
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+                                                        const String& title, const String& message,
+                                                        Component* associatedComponent,
+                                                        ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != 0));
+
+    if (callback == 0)
+        return mb->getResult();
+
+    mb.release();
+    return 0;
 }
 
 //==============================================================================

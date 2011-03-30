@@ -688,6 +688,7 @@
     <ClInclude Include="..\..\src\gui\components\windows\juce_ComponentPeer.h"/>
     <ClInclude Include="..\..\src\gui\components\windows\juce_DialogWindow.h"/>
     <ClInclude Include="..\..\src\gui\components\windows\juce_DocumentWindow.h"/>
+    <ClInclude Include="..\..\src\gui\components\windows\juce_NativeMessageBox.h"/>
     <ClInclude Include="..\..\src\gui\components\windows\juce_ResizableWindow.h"/>
     <ClInclude Include="..\..\src\gui\components\windows\juce_SplashScreen.h"/>
     <ClInclude Include="..\..\src\gui\components\windows\juce_ThreadWithProgressWindow.h"/>

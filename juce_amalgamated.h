@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	60
+#define JUCE_BUILDNUMBER	61
 
 /** Current Juce version number.
 
@@ -232,7 +232,7 @@ namespace JuceDummyNamespace {}
 	#endif
   #endif
 
-  #if ! JUCE_VC7_OR_EARLIER && ! defined (__INTEL_COMPILER)
+  #if ! JUCE_VC7_OR_EARLIER
 	#define JUCE_USE_INTRINSICS 1
   #endif
 #else
@@ -5478,7 +5478,7 @@ std::basic_ostream <wchar_t, traits>& JUCE_CALLTYPE operator<< (std::basic_ostre
 }
 
 /** Writes a string to an OutputStream as UTF8. */
-JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& stringToWrite);
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -29980,7 +29980,7 @@ public:
 	void attachCallback (Component* component, Callback* callback);
 
 	/** Brings any modal components to the front. */
-	void bringModalComponentsToFront();
+	void bringModalComponentsToFront (bool topOneShouldGrabFocus = true);
 
    #if JUCE_MODAL_LOOPS_PERMITTED
 	/** Runs the event loop until the currently topmost modal component is dismissed, and
@@ -57042,9 +57042,11 @@ public:
 							it'll show a box with just an ok button
 		@returns true if the ok button was pressed, false if they pressed cancel.
 	*/
+   #if JUCE_MODAL_LOOPS_PERMITTED
 	static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
 												   const String& bodyText,
 												   bool isOkCancel);
+   #endif
 
 	/** A set of colour IDs to use to change the colour of various aspects of the alert box.
 
@@ -60086,6 +60088,9 @@ public:
 	virtual const Font getAlertWindowMessageFont();
 	virtual const Font getAlertWindowFont();
 
+	void setUsingNativeAlertWindows (bool shouldUseNativeAlerts);
+	bool isUsingNativeAlertWindows();
+
 	/** Draws a progress bar.
 
 		If the progress value is less than 0 or greater than 1.0, this should draw a spinning
@@ -60510,6 +60515,8 @@ private:
 	String defaultSans, defaultSerif, defaultFixed;
 
 	ScopedPointer<Drawable> folderImage, documentImage;
+
+	bool useNativeAlertWindows;
 
 	void drawShinyButtonShape (Graphics& g,
 							   float x, float y, float w, float h, float maxCornerSize,
@@ -64604,6 +64611,145 @@ private:
 
 #endif
 #ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_NATIVEMESSAGEBOX_JUCEHEADER__
+
+/*** Start of inlined file: juce_NativeMessageBox.h ***/
+#ifndef __JUCE_NATIVEMESSAGEBOX_JUCEHEADER__
+#define __JUCE_NATIVEMESSAGEBOX_JUCEHEADER__
+
+class NativeMessageBox
+{
+public:
+	/** Shows a dialog box that just has a message and a single 'ok' button to close it.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the title
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+	*/
+   #if JUCE_MODAL_LOOPS_PERMITTED
+	static void JUCE_CALLTYPE showMessageBox (AlertWindow::AlertIconType iconType,
+											  const String& title,
+											  const String& message,
+											  Component* associatedComponent = 0);
+   #endif
+
+	/** Shows a dialog box that just has a message and a single 'ok' button to close it.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the title
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+	*/
+	static void JUCE_CALLTYPE showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+												   const String& title,
+												   const String& message,
+												   Component* associatedComponent = 0);
+
+	/** Shows a dialog box with two buttons.
+
+		Ideal for ok/cancel or yes/no choices. The return key can also be used
+		to trigger the first button, and the escape key for the second button.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the title
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+		@param callback	 if this is non-null, the menu will be launched asynchronously,
+							returning immediately, and the callback will receive a call to its
+							modalStateFinished() when the box is dismissed, with its parameter
+							being 1 if the ok button was pressed, or 0 for cancel, The callback object
+							will be owned and deleted by the system, so make sure that it works
+							safely and doesn't keep any references to objects that might be deleted
+							before it gets called.
+		@returns true if button 1 was clicked, false if it was button 2. If the callback parameter
+				 is not null, the method always returns false, and the user's choice is delivered
+				 later by the callback.
+	*/
+	static bool JUCE_CALLTYPE showOkCancelBox (AlertWindow::AlertIconType iconType,
+											   const String& title,
+											   const String& message,
+											#if JUCE_MODAL_LOOPS_PERMITTED
+											   Component* associatedComponent = 0,
+											   ModalComponentManager::Callback* callback = 0);
+											#else
+											   Component* associatedComponent,
+											   ModalComponentManager::Callback* callback);
+											#endif
+
+	/** Shows a dialog box with three buttons.
+
+		Ideal for yes/no/cancel boxes.
+
+		The escape key can be used to trigger the third button.
+
+		If the callback parameter is null, the box is shown modally, and the method will
+		block until the user has clicked the button (or pressed the escape or return keys).
+		If the callback parameter is non-null, the box will be displayed and placed into a
+		modal state, but this method will return immediately, and the callback will be invoked
+		later when the user dismisses the box.
+
+		@param iconType	 the type of icon to show
+		@param title	the headline to show at the top of the box
+		@param message	  a longer, more descriptive message to show underneath the title
+		@param associatedComponent   if this is non-null, it specifies the component that the
+							alert window should be associated with. Depending on the look
+							and feel, this might be used for positioning of the alert window.
+		@param callback	 if this is non-null, the menu will be launched asynchronously,
+							returning immediately, and the callback will receive a call to its
+							modalStateFinished() when the box is dismissed, with its parameter
+							being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
+							if it was cancelled, The callback object will be owned and deleted by the
+							system, so make sure that it works safely and doesn't keep any references
+							to objects that might be deleted before it gets called.
+
+		@returns If the callback parameter has been set, this returns 0. Otherwise, it returns one
+				 of the following values:
+				 - 0 if 'cancel' was pressed
+				 - 1 if 'yes' was pressed
+				 - 2 if 'no' was pressed
+	*/
+	static int JUCE_CALLTYPE showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+												 const String& title,
+												 const String& message,
+											   #if JUCE_MODAL_LOOPS_PERMITTED
+												 Component* associatedComponent = 0,
+												 ModalComponentManager::Callback* callback = 0);
+											   #else
+												 Component* associatedComponent,
+												 ModalComponentManager::Callback* callback);
+											   #endif
+};
+
+#endif   // __JUCE_NATIVEMESSAGEBOX_JUCEHEADER__
+/*** End of inlined file: juce_NativeMessageBox.h ***/
+
 
 #endif
 #ifndef __JUCE_RESIZABLEWINDOW_JUCEHEADER__

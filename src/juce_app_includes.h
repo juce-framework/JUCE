@@ -614,6 +614,9 @@
 #ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
  #include "gui/components/windows/juce_DocumentWindow.h"
 #endif
+#ifndef __JUCE_NATIVEMESSAGEBOX_JUCEHEADER__
+ #include "gui/components/windows/juce_NativeMessageBox.h"
+#endif
 #ifndef __JUCE_RESIZABLEWINDOW_JUCEHEADER__
  #include "gui/components/windows/juce_ResizableWindow.h"
 #endif

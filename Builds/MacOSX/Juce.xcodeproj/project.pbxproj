@@ -798,6 +798,7 @@
 		C286C779DD52C29F86E3DBE9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DialogWindow.h; path = ../../src/gui/components/windows/juce_DialogWindow.h; sourceTree = SOURCE_ROOT; };
 		090907E4FE95EE2B11C1A0E1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DocumentWindow.cpp; path = ../../src/gui/components/windows/juce_DocumentWindow.cpp; sourceTree = SOURCE_ROOT; };
 		6E522DF13EC47755234A5D57 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_DocumentWindow.h; path = ../../src/gui/components/windows/juce_DocumentWindow.h; sourceTree = SOURCE_ROOT; };
+		3FC6FC331B4E104D1DC223D6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_NativeMessageBox.h; path = ../../src/gui/components/windows/juce_NativeMessageBox.h; sourceTree = SOURCE_ROOT; };
 		2E4A5F7128313C23AD0356F7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ResizableWindow.cpp; path = ../../src/gui/components/windows/juce_ResizableWindow.cpp; sourceTree = SOURCE_ROOT; };
 		207CDD87107EAC8ED17DD601 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ResizableWindow.h; path = ../../src/gui/components/windows/juce_ResizableWindow.h; sourceTree = SOURCE_ROOT; };
 		87E57C8F3448D615271CD9F6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_SplashScreen.cpp; path = ../../src/gui/components/windows/juce_SplashScreen.cpp; sourceTree = SOURCE_ROOT; };
@@ -1568,6 +1569,7 @@
 				C286C779DD52C29F86E3DBE9,
 				090907E4FE95EE2B11C1A0E1,
 				6E522DF13EC47755234A5D57,
+				3FC6FC331B4E104D1DC223D6,
 				2E4A5F7128313C23AD0356F7,
 				207CDD87107EAC8ED17DD601,
 				87E57C8F3448D615271CD9F6,

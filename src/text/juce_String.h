@@ -1323,7 +1323,7 @@ std::basic_ostream <wchar_t, traits>& JUCE_CALLTYPE operator<< (std::basic_ostre
 }
 
 /** Writes a string to an OutputStream as UTF8. */
-JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
+JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& stringToWrite);
 
 
 #endif   // __JUCE_STRING_JUCEHEADER__

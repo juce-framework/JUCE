@@ -315,7 +315,7 @@ void ProjectTreeViewBase::filesDropped (const StringArray& files, int insertInde
     addFiles (files, insertIndex);
 }
 
-static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes)
+void ProjectTreeViewBase::getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes)
 {
     TreeView* tree = dynamic_cast <TreeView*> (componentInTree);
 
@@ -450,13 +450,41 @@ void ProjectTreeViewBase::showMultiSelectionPopupMenu()
 
 void ProjectTreeViewBase::itemDoubleClicked (const MouseEvent& e)
 {
-    showDocument();
+    invokeShowDocument();
 }
+
+class TreeviewItemSelectionTimer  : public Timer
+{
+public:
+    TreeviewItemSelectionTimer (ProjectTreeViewBase& owner_)
+        : owner (owner_)
+    {}
+
+    void timerCallback()
+    {
+        owner.invokeShowDocument();
+    }
+
+private:
+    ProjectTreeViewBase& owner;
+
+    JUCE_DECLARE_NON_COPYABLE (TreeviewItemSelectionTimer);
+};
 
 void ProjectTreeViewBase::itemSelectionChanged (bool isNowSelected)
 {
     if (isNowSelected)
-        showDocument();
+    {
+        delayedSelectionTimer = new TreeviewItemSelectionTimer (*this);
+
+        // for images, give the user longer to start dragging before assuming they're
+        // clicking to select it for previewing..
+        delayedSelectionTimer->startTimer (item.isImageFile() ? 250 : 120);
+    }
+    else
+    {
+        delayedSelectionTimer = 0;
+    }
 }
 
 const String ProjectTreeViewBase::getTooltip()
@@ -466,7 +494,14 @@ const String ProjectTreeViewBase::getTooltip()
 
 const String ProjectTreeViewBase::getDragSourceDescription()
 {
+    delayedSelectionTimer = 0;
     return projectItemDragType;
+}
+
+void ProjectTreeViewBase::invokeShowDocument()
+{
+    delayedSelectionTimer = 0;
+    showDocument();
 }
 
 //==============================================================================

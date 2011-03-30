@@ -3342,18 +3342,39 @@ void PlatformUtilities::beep()
 
 
 //==============================================================================
-bool AlertWindow::showNativeDialogBox (const String& title,
-                                       const String& bodyText,
-                                       bool isOkCancel)
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+                                                     const String& title, const String& message,
+                                                     Component* associatedComponent)
 {
-    // use a non-native one for the time being..
-    if (isOkCancel)
-        return AlertWindow::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
-    else
-        AlertWindow::showMessageBox (AlertWindow::NoIcon, title, bodyText);
-
-    return true;
+    AlertWindow::showMessageBox (AlertWindow::NoIcon, title, message);
 }
+
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+                                                          const String& title, const String& message,
+                                                          Component* associatedComponent)
+{
+    AlertWindow::showMessageBoxAsync (AlertWindow::NoIcon, title, message);
+}
+
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+                                                      const String& title, const String& message,
+                                                      Component* associatedComponent,
+                                                      ModalComponentManager::Callback* callback)
+{
+    return AlertWindow::showOkCancelBox (iconType, title, message, String::empty, String::empty,
+                                         associatedComponent, callback);
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+                                                        const String& title, const String& message,
+                                                        Component* associatedComponent,
+                                                        ModalComponentManager::Callback* callback)
+{
+    return AlertWindow::showYesNoCancelBox (iconType, title, message,
+                                            String::empty, String::empty, String::empty,
+                                            associatedComponent, callback);
+}
+
 
 //==============================================================================
 const int KeyPress::spaceKey                = XK_space & 0xff;

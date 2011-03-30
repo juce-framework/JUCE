@@ -203,6 +203,9 @@ public:
     virtual const Font getAlertWindowMessageFont();
     virtual const Font getAlertWindowFont();
 
+    void setUsingNativeAlertWindows (bool shouldUseNativeAlerts);
+    bool isUsingNativeAlertWindows();
+
     /** Draws a progress bar.
 
         If the progress value is less than 0 or greater than 1.0, this should draw a spinning
@@ -657,6 +660,7 @@ private:
 
     ScopedPointer<Drawable> folderImage, documentImage;
 
+    bool useNativeAlertWindows;
 
     void drawShinyButtonShape (Graphics& g,
                                float x, float y, float w, float h, float maxCornerSize,

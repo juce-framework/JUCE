@@ -66,6 +66,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../gui/graphics/imaging/juce_CameraDevice.h"
 #include "../../gui/components/windows/juce_ComponentPeer.h"
 #include "../../gui/components/windows/juce_AlertWindow.h"
+#include "../../gui/components/windows/juce_NativeMessageBox.h"
 #include "../../gui/components/juce_Desktop.h"
 #include "../../gui/components/menus/juce_MenuBarModel.h"
 #include "../../gui/components/special/juce_OpenGLComponent.h"
@@ -147,6 +148,9 @@ BEGIN_JUCE_NAMESPACE
  METHOD (activityClass, excludeClipRegion, "excludeClipRegion", "(Landroid/graphics/Canvas;FFFF)V") \
  METHOD (activityClass, renderGlyph, "renderGlyph", "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
  STATICMETHOD (activityClass, createHTTPStream, "createHTTPStream", "(Ljava/lang/String;Z[BLjava/lang/String;ILjava/lang/StringBuffer;)Lcom/juce/JuceAppActivity$HTTPStream;") \
+ METHOD (activityClass, showMessageBox, "showMessageBox", "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ METHOD (activityClass, showOkCancelBox, "showOkCancelBox", "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ METHOD (activityClass, showYesNoCancelBox, "showYesNoCancelBox", "(Ljava/lang/String;Ljava/lang/String;J)V") \
 \
  METHOD (stringBufferClass, stringBufferConstructor, "<init>", "()V") \
  METHOD (stringBufferClass, stringBufferToString, "toString", "()Ljava/lang/String;") \

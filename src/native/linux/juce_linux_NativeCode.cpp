@@ -88,6 +88,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../gui/components/keyboard/juce_KeyPress.h"
 #include "../../gui/components/windows/juce_ComponentPeer.h"
 #include "../../gui/components/windows/juce_AlertWindow.h"
+#include "../../gui/components/windows/juce_NativeMessageBox.h"
 #include "../../gui/components/filebrowser/juce_FileChooser.h"
 #include "../../gui/components/special/juce_WebBrowserComponent.h"
 #include "../../gui/components/special/juce_OpenGLComponent.h"

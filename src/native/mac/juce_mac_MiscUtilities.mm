@@ -63,17 +63,115 @@ void PlatformUtilities::addItemToDock (const File& file)
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
-bool AlertWindow::showNativeDialogBox (const String& title,
-                                       const String& bodyText,
-                                       bool isOkCancel)
+//==============================================================================
+class OSXMessageBox  : public AsyncUpdater
 {
-    const ScopedAutoReleasePool pool;
-    return NSRunAlertPanel (juceStringToNS (title),
-                            juceStringToNS (bodyText),
-                            @"Ok",
-                            isOkCancel ? @"Cancel" : nil,
-                            nil) == NSAlertDefaultReturn;
+public:
+    OSXMessageBox (AlertWindow::AlertIconType iconType_,
+                   const String& title_, const String& message_,
+                   NSString* button1_, NSString* button2_, NSString* button3_,
+                   ModalComponentManager::Callback* callback_,
+                   const bool runAsync)
+        : iconType (iconType_), title (title_),
+          message (message_), callback (callback_),
+          button1 ([button1_ retain]),
+          button2 ([button2_ retain]),
+          button3 ([button3_ retain])
+    {
+        if (runAsync)
+            triggerAsyncUpdate();
+    }
+
+    ~OSXMessageBox()
+    {
+        [button1 release];
+        [button2 release];
+        [button3 release];
+    }
+
+    int getResult() const
+    {
+        const ScopedAutoReleasePool pool;
+        NSInteger r = getRawResult();
+        return r == NSAlertDefaultReturn ? 1 : (r == NSAlertOtherReturn ? 2 : 0);
+    }
+
+    void handleAsyncUpdate()
+    {
+        const int result = getResult();
+
+        if (callback != 0)
+            callback->modalStateFinished (result);
+
+        delete this;
+    }
+
+private:
+    AlertWindow::AlertIconType iconType;
+    String title, message;
+    ModalComponentManager::Callback* callback;
+    NSString* button1;
+    NSString* button2;
+    NSString* button3;
+
+    NSInteger getRawResult() const
+    {
+        NSString* messageString = juceStringToNS (message);
+        NSString* titleString = juceStringToNS (title);
+
+        switch (iconType)
+        {
+            case AlertWindow::InfoIcon:     return NSRunInformationalAlertPanel (titleString, messageString, button1, button2, button3);
+            case AlertWindow::WarningIcon:  return NSRunCriticalAlertPanel      (titleString, messageString, button1, button2, button3);
+            default:                        return NSRunAlertPanel              (titleString, messageString, button1, button2, button3);
+        }
+    }
+};
+
+
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+                                                     const String& title, const String& message,
+                                                     Component* associatedComponent)
+{
+    OSXMessageBox box (iconType, title, message, @"OK", nil, nil, 0, false);
+    (void) box.getResult();
 }
+
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+                                                          const String& title, const String& message,
+                                                          Component* associatedComponent)
+{
+    new OSXMessageBox (iconType, title, message, @"OK", nil, nil, 0, true);
+}
+
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+                                                      const String& title, const String& message,
+                                                      Component* associatedComponent,
+                                                      ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message,
+                                                        @"OK", @"Cancel", nil, callback, callback != 0));
+    if (callback == 0)
+        return mb->getResult() == 1;
+
+    mb.release();
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+                                                        const String& title, const String& message,
+                                                        Component* associatedComponent,
+                                                        ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message,
+                                                        @"Yes", @"Cancel", @"No", callback, callback != 0));
+    if (callback == 0)
+        return mb->getResult();
+
+    mb.release();
+    return 0;
+}
+
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool /*canMoveFiles*/)
