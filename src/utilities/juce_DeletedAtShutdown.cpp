@@ -34,15 +34,17 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+static SpinLock deletedAtShutdownLock;
+
 DeletedAtShutdown::DeletedAtShutdown()
 {
-    const ScopedLock sl (getLock());
+    const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
     getObjects().add (this);
 }
 
 DeletedAtShutdown::~DeletedAtShutdown()
 {
-    const ScopedLock sl (getLock());
+    const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
     getObjects().removeValue (this);
 }
 
@@ -53,7 +55,7 @@ void DeletedAtShutdown::deleteAll()
     Array <DeletedAtShutdown*> localCopy;
 
     {
-        const ScopedLock sl (getLock());
+        const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
         localCopy = getObjects();
     }
 
@@ -65,7 +67,7 @@ void DeletedAtShutdown::deleteAll()
 
             // double-check that it's not already been deleted during another object's destructor.
             {
-                const ScopedLock sl (getLock());
+                const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
                 if (! getObjects().contains (deletee))
                     deletee = 0;
             }
@@ -80,12 +82,6 @@ void DeletedAtShutdown::deleteAll()
     jassert (getObjects().size() == 0);
 
     getObjects().clear(); // just to make sure the array doesn't have any memory still allocated
-}
-
-CriticalSection& DeletedAtShutdown::getLock()
-{
-    static CriticalSection lock;
-    return lock;
 }
 
 Array <DeletedAtShutdown*>& DeletedAtShutdown::getObjects()

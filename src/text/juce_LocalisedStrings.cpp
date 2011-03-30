@@ -53,8 +53,8 @@ const String LocalisedStrings::translate (const String& text) const
 
 namespace
 {
-    CriticalSection currentMappingsLock;
-    LocalisedStrings* currentMappings = 0;
+    SpinLock currentMappingsLock;
+    ScopedPointer<LocalisedStrings> currentMappings;
 
     int findCloseQuote (const String& text, int startPos)
     {
@@ -132,9 +132,7 @@ void LocalisedStrings::setIgnoresCase (const bool shouldIgnoreCase)
 //==============================================================================
 void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations)
 {
-    const ScopedLock sl (currentMappingsLock);
-
-    delete currentMappings;
+    const SpinLock::ScopedLockType sl (currentMappingsLock);
     currentMappings = newTranslations;
 }
 
@@ -145,7 +143,7 @@ LocalisedStrings* LocalisedStrings::getCurrentMappings()
 
 const String LocalisedStrings::translateWithCurrentMappings (const String& text)
 {
-    const ScopedLock sl (currentMappingsLock);
+    const SpinLock::ScopedLockType sl (currentMappingsLock);
 
     if (currentMappings != 0)
         return currentMappings->translate (text);

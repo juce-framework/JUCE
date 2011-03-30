@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_MultiTimer.h"
 #include "juce_Timer.h"
-#include "../threads/juce_ScopedLock.h"
 
 
 //==============================================================================
@@ -39,10 +38,6 @@ public:
     MultiTimerCallback (const int timerId_, MultiTimer& owner_)
         : timerId (timerId_),
           owner (owner_)
-    {
-    }
-
-    ~MultiTimerCallback()
     {
     }
 
@@ -68,14 +63,14 @@ MultiTimer::MultiTimer (const MultiTimer&) throw()
 
 MultiTimer::~MultiTimer()
 {
-    const ScopedLock sl (timerListLock);
+    const SpinLock::ScopedLockType sl (timerListLock);
     timers.clear();
 }
 
 //==============================================================================
 void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds) throw()
 {
-    const ScopedLock sl (timerListLock);
+    const SpinLock::ScopedLockType sl (timerListLock);
 
     for (int i = timers.size(); --i >= 0;)
     {
@@ -95,7 +90,7 @@ void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds
 
 void MultiTimer::stopTimer (const int timerId) throw()
 {
-    const ScopedLock sl (timerListLock);
+    const SpinLock::ScopedLockType sl (timerListLock);
 
     for (int i = timers.size(); --i >= 0;)
     {
@@ -108,7 +103,7 @@ void MultiTimer::stopTimer (const int timerId) throw()
 
 bool MultiTimer::isTimerRunning (const int timerId) const throw()
 {
-    const ScopedLock sl (timerListLock);
+    const SpinLock::ScopedLockType sl (timerListLock);
 
     for (int i = timers.size(); --i >= 0;)
     {
@@ -122,7 +117,7 @@ bool MultiTimer::isTimerRunning (const int timerId) const throw()
 
 int MultiTimer::getTimerInterval (const int timerId) const throw()
 {
-    const ScopedLock sl (timerListLock);
+    const SpinLock::ScopedLockType sl (timerListLock);
 
     for (int i = timers.size(); --i >= 0;)
     {

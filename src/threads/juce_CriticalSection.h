@@ -34,35 +34,36 @@
 
 //==============================================================================
 /**
-    Prevents multiple threads from accessing shared objects at the same time.
+    A mutex class.
 
-    @see ScopedLock, Thread, InterProcessLock
+    A CriticalSection acts as a re-entrant mutex lock. The best way to lock and unlock
+    one of these is by using RAII in the form of a local ScopedLock object - have a look
+    through the codebase for many examples of how to do this.
+
+    @see ScopedLock, SpinLock, Thread, InterProcessLock
 */
 class JUCE_API  CriticalSection
 {
 public:
     //==============================================================================
-    /**
-        Creates a CriticalSection object
-    */
+    /** Creates a CriticalSection object. */
     CriticalSection() throw();
 
-    /** Destroys a CriticalSection object.
-
-        If the critical section is deleted whilst locked, its subsequent behaviour
+    /** Destructor.
+        If the critical section is deleted whilst locked, any subsequent behaviour
         is unpredictable.
     */
     ~CriticalSection() throw();
 
     //==============================================================================
-    /** Locks this critical section.
-
-        If the lock is currently held by another thread, this will wait until it
-        becomes free.
+    /** Acquires the lock.
 
         If the lock is already held by the caller thread, the method returns immediately.
+        If the lock is currently held by another thread, this will wait until it becomes free.
+        Remember that it's highly recommended that you never use this method, but use a ScopedLock
+        to manage the locking instead.
 
-        @see exit, ScopedLock
+        @see exit, tryEnter, ScopedLock
     */
     void enter() const throw();
 
@@ -99,18 +100,18 @@ public:
 
 private:
     //==============================================================================
-#if JUCE_WINDOWS
-  #if JUCE_64BIT
-    // To avoid including windows.h in the public Juce includes, we'll just allocate a
+   #if JUCE_WINDOWS
+    // To avoid including windows.h in the public JUCE headers, we'll just allocate a
     // block of memory here that's big enough to be used internally as a windows critical
-    // section object.
-    uint8 internal [44];
-  #else
-    uint8 internal [24];
-  #endif
-#else
+    // section structure.
+    #if JUCE_64BIT
+     uint8 internal [44];
+    #else
+     uint8 internal [24];
+    #endif
+   #else
     mutable pthread_mutex_t internal;
-#endif
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE (CriticalSection);
 };
@@ -118,21 +119,23 @@ private:
 
 //==============================================================================
 /**
-    A class that can be used in place of a real CriticalSection object.
+    A class that can be used in place of a real CriticalSection object, but which
+    doesn't perform any locking.
 
-    This is currently used by some templated classes, and should get
-    optimised out by the compiler.
+    This is currently used by some templated classes, and most compilers should
+    manage to optimise it out of existence.
 
-    @see Array, OwnedArray, ReferenceCountedArray
+    @see CriticalSection, Array, OwnedArray, ReferenceCountedArray
 */
 class JUCE_API  DummyCriticalSection
 {
 public:
-    inline DummyCriticalSection() throw()         {}
-    inline ~DummyCriticalSection() throw()        {}
+    inline DummyCriticalSection() throw()       {}
+    inline ~DummyCriticalSection() throw()      {}
 
-    inline void enter() const throw()             {}
-    inline void exit() const throw()              {}
+    inline void enter() const throw()           {}
+    inline bool tryEnter() const throw()        { return true; }
+    inline void exit() const throw()            {}
 
     //==============================================================================
     /** A dummy scoped-lock type to use with a dummy critical section. */
@@ -146,6 +149,69 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection);
+};
+
+
+//==============================================================================
+/**
+    A simple spin-lock class that can be used as a simple, low-overhead mutex for
+    uncontended situations.
+
+    Note that unlike a CriticalSection, this type of lock is not re-entrant, and may
+    be less efficient when used it a highly contended situation, but it's very small and
+    requires almost no initialisation.
+    It's most appropriate for simple situations where you're only going to hold the
+    lock for a very brief time.
+
+    @see CriticalSection
+*/
+class JUCE_API  SpinLock
+{
+public:
+    inline SpinLock() throw() {}
+    inline ~SpinLock() throw() {}
+
+    void enter() const throw();
+    bool tryEnter() const throw();
+
+    inline void exit() const throw()
+    {
+        jassert (lock.value == 1); // Agh! Releasing a lock that isn't currently held!
+        lock = 0;
+    }
+
+    //==============================================================================
+    /** A scoped-lock type to use with a SpinLock. */
+    class ScopedLockType
+    {
+    public:
+        inline explicit ScopedLockType (const SpinLock& lock_) throw() : lock (lock_)   { lock_.enter(); }
+        inline ~ScopedLockType() throw()                                                { lock.exit(); }
+
+    private:
+        //==============================================================================
+        const SpinLock& lock;
+        JUCE_DECLARE_NON_COPYABLE (ScopedLockType);
+    };
+
+    //==============================================================================
+    /** A scoped-unlocker type to use with a SpinLock. */
+    class ScopedUnlockType
+    {
+    public:
+        inline explicit ScopedUnlockType (const SpinLock& lock_) throw() : lock (lock_) { lock_.exit(); }
+        inline ~ScopedUnlockType() throw()                                              { lock.enter(); }
+
+    private:
+        //==============================================================================
+        const SpinLock& lock;
+        JUCE_DECLARE_NON_COPYABLE (ScopedUnlockType);
+    };
+
+private:
+    //==============================================================================
+    mutable Atomic<int> lock;
+    JUCE_DECLARE_NON_COPYABLE (SpinLock);
 };
 
 

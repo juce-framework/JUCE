@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ResamplingAudioSource.h"
-#include "../../threads/juce_ScopedLock.h"
 
 
 //==============================================================================
@@ -56,14 +55,14 @@ void ResamplingAudioSource::setResamplingRatio (const double samplesInPerOutputS
 {
     jassert (samplesInPerOutputSample > 0);
 
-    const ScopedLock sl (ratioLock);
+    const SpinLock::ScopedLockType sl (ratioLock);
     ratio = jmax (0.0, samplesInPerOutputSample);
 }
 
 void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected,
                                            double sampleRate)
 {
-    const ScopedLock sl (ratioLock);
+    const SpinLock::ScopedLockType sl (ratioLock);
 
     input->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
@@ -91,7 +90,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     double localRatio;
 
     {
-        const ScopedLock sl (ratioLock);
+        const SpinLock::ScopedLockType sl (ratioLock);
         localRatio = ratio;
     }
 

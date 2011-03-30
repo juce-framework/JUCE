@@ -31,7 +31,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Component.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../mouse/juce_MouseInputSource.h"
-#include "../../../threads/juce_ScopedLock.h"
 
 
 //==============================================================================
@@ -61,7 +60,7 @@ public:
 
     static SharedCursorHandle* createStandard (const MouseCursor::StandardCursorType type)
     {
-        const ScopedLock sl (getLock());
+        const SpinLock::ScopedLockType sl (lock);
 
         for (int i = 0; i < getCursors().size(); ++i)
         {
@@ -88,7 +87,7 @@ public:
         {
             if (isStandard)
             {
-                const ScopedLock sl (getLock());
+                const SpinLock::ScopedLockType sl (lock);
                 getCursors().removeValue (this);
             }
 
@@ -105,12 +104,7 @@ private:
     Atomic <int> refCount;
     const MouseCursor::StandardCursorType standardType;
     const bool isStandard;
-
-    static CriticalSection& getLock()
-    {
-        static CriticalSection lock;
-        return lock;
-    }
+    static SpinLock lock;
 
     static Array <SharedCursorHandle*>& getCursors()
     {
@@ -120,6 +114,8 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedCursorHandle);
 };
+
+SpinLock MouseCursor::SharedCursorHandle::lock;
 
 //==============================================================================
 MouseCursor::MouseCursor()

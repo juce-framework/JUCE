@@ -124,7 +124,7 @@ public:
 
 private:
     //==============================================================================
-    CriticalSection accessLock;
+    SpinLock accessLock;
     WaitableEvent waitEvent;
     mutable int numWaitingWriters, numWriters;
     mutable Thread::ThreadID writerThreadId;

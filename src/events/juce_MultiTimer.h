@@ -123,7 +123,7 @@ public:
     //==============================================================================
 private:
     class MultiTimerCallback;
-    CriticalSection timerListLock;
+    SpinLock timerListLock;
     OwnedArray <MultiTimerCallback> timers;
 
     MultiTimer& operator= (const MultiTimer&);

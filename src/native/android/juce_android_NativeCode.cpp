@@ -312,7 +312,7 @@ public:
 
         const pthread_t thisThread = pthread_self();
 
-        ScopedLock sl (addRemoveLock);
+        SpinLock::ScopedLockType sl (addRemoveLock);
         for (int i = 0; i < maxThreads; ++i)
             if (threads[i] == thisThread)
                 threads[i] = 0;
@@ -335,11 +335,11 @@ private:
     JavaVM* jvm;
     pthread_t threads [maxThreads];
     JNIEnv* envs [maxThreads];
-    CriticalSection addRemoveLock;
+    SpinLock addRemoveLock;
 
     void addEnv (JNIEnv* env)
     {
-        ScopedLock sl (addRemoveLock);
+        SpinLock::ScopedLockType sl (addRemoveLock);
 
         if (get() == 0)
         {

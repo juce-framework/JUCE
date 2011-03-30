@@ -84,7 +84,7 @@ private:
     int bufferPos, sampsInBuffer;
     double subSampleOffset;
     double coefficients[6];
-    CriticalSection ratioLock;
+    SpinLock ratioLock;
     const int numChannels;
     HeapBlock<float*> destBuffers, srcBuffers;
 

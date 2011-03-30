@@ -42,14 +42,14 @@ public:
 
     void add (Thread* const thread)
     {
-        const ScopedLock sl (lock);
+        const SpinLock::ScopedLockType sl (lock);
         jassert (! threads.contains (thread));
         threads.add (thread);
     }
 
     void remove (Thread* const thread)
     {
-        const ScopedLock sl (lock);
+        const SpinLock::ScopedLockType sl (lock);
         jassert (threads.contains (thread));
         threads.removeValue (thread);
     }
@@ -61,7 +61,7 @@ public:
 
     Thread* getThreadWithID (const Thread::ThreadID targetID) const throw()
     {
-        const ScopedLock sl (lock);
+        const SpinLock::ScopedLockType sl (lock);
 
         for (int i = threads.size(); --i >= 0;)
         {
@@ -97,11 +97,11 @@ public:
 
 private:
     Array<Thread*> threads;
-    CriticalSection lock;
+    SpinLock lock;
 
     void signalAllThreadsToStop()
     {
-        const ScopedLock sl (lock);
+        const SpinLock::ScopedLockType sl (lock);
 
         for (int i = threads.size(); --i >= 0;)
             threads.getUnchecked(i)->signalThreadShouldExit();
@@ -109,7 +109,7 @@ private:
 
     Thread* getFirstThread() const
     {
-        const ScopedLock sl (lock);
+        const SpinLock::ScopedLockType sl (lock);
         return threads.getFirst();
     }
 };
@@ -314,6 +314,25 @@ Thread* Thread::getCurrentThread()
 void Thread::stopAllThreads (const int timeOutMilliseconds)
 {
     RunningThreadsList::getInstance().stopAll (timeOutMilliseconds);
+}
+
+//==============================================================================
+void SpinLock::enter() const throw()
+{
+    if (! lock.compareAndSetBool (1, 0))
+    {
+        for (int i = 20; --i >= 0;)
+            if (lock.compareAndSetBool (1, 0))
+                return;
+
+        while (! lock.compareAndSetBool (1, 0))
+            Thread::yield();
+    }
+}
+
+bool SpinLock::tryEnter() const throw()
+{
+    return lock.compareAndSetBool (1, 0);
 }
 
 

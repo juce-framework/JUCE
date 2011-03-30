@@ -63,7 +63,6 @@ public:
     static void deleteAll();
 
 private:
-    static CriticalSection& getLock();
     static Array <DeletedAtShutdown*>& getObjects();
 
     JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown);
