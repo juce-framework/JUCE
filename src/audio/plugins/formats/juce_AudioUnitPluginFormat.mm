@@ -43,7 +43,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioUnitPluginFormat.h"
 #include "../juce_PluginDescription.h"
-#include "../../../threads/juce_ScopedLock.h"
+#include "../../../threads/juce_CriticalSection.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../core/juce_PlatformUtilities.h"
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"

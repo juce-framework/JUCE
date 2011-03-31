@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../utilities/juce_DeletedAtShutdown.h"
 #include "../core/juce_Time.h"
 #include "../threads/juce_Thread.h"
-#include "../threads/juce_ScopedLock.h"
+#include "../threads/juce_SpinLock.h"
 
 
 //==============================================================================

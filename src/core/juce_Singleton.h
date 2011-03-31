@@ -26,8 +26,6 @@
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
 #define __JUCE_SINGLETON_JUCEHEADER__
 
-#include "../threads/juce_ScopedLock.h"
-
 
 //==============================================================================
 /**

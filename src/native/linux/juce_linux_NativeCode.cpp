@@ -56,7 +56,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../text/juce_XmlDocument.h"
 #include "../../threads/juce_CriticalSection.h"
 #include "../../threads/juce_Thread.h"
-#include "../../threads/juce_ScopedLock.h"
 #include "../../threads/juce_InterProcessLock.h"
 #include "../../threads/juce_WaitableEvent.h"
 #include "../../threads/juce_Process.h"

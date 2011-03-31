@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_BufferingAudioSource.h"
-#include "../../threads/juce_ScopedLock.h"
 #include "../../core/juce_Singleton.h"
 #include "../../containers/juce_Array.h"
 #include "../../utilities/juce_DeletedAtShutdown.h"

@@ -993,8 +993,8 @@
           <File RelativePath="..\..\src\threads\juce_ReadWriteLock.h"/>
           <File RelativePath="..\..\src\threads\juce_ScopedLock.h"/>
           <File RelativePath="..\..\src\threads\juce_ScopedReadLock.h"/>
-          <File RelativePath="..\..\src\threads\juce_ScopedTryLock.h"/>
           <File RelativePath="..\..\src\threads\juce_ScopedWriteLock.h"/>
+          <File RelativePath="..\..\src\threads\juce_SpinLock.h"/>
           <File RelativePath="..\..\src\threads\juce_Thread.cpp"/>
           <File RelativePath="..\..\src\threads\juce_Thread.h"/>
           <File RelativePath="..\..\src\threads\juce_ThreadPool.cpp"/>

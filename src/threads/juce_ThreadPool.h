@@ -27,7 +27,6 @@
 #define __JUCE_THREADPOOL_JUCEHEADER__
 
 #include "juce_Thread.h"
-#include "juce_ScopedLock.h"
 #include "../text/juce_StringArray.h"
 #include "../containers/juce_Array.h"
 #include "../containers/juce_OwnedArray.h"

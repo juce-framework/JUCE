@@ -27,6 +27,7 @@
 #define __JUCE_READWRITELOCK_JUCEHEADER__
 
 #include "juce_CriticalSection.h"
+#include "juce_SpinLock.h"
 #include "juce_WaitableEvent.h"
 #include "juce_Thread.h"
 #include "../containers/juce_Array.h"

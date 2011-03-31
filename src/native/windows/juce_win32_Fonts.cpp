@@ -29,10 +29,7 @@
 
 
 //==============================================================================
-static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe,
-                                NEWTEXTMETRICEXW*,
-                                int type,
-                                LPARAM lParam)
+static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
 {
     if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
     {
@@ -44,10 +41,7 @@ static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe,
     return 1;
 }
 
-static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
-                                NEWTEXTMETRICEXW*,
-                                int type,
-                                LPARAM lParam)
+static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
 {
     if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
     {
@@ -60,7 +54,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
         lf.lfPitchAndFamily = FF_DONTCARE;
 
         const String fontName (lpelfe->elfLogFont.lfFaceName);
-        fontName.copyToUTF16 (lf.lfFaceName, LF_FACESIZE - 1);
+        fontName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
 
         HDC dc = CreateCompatibleDC (0);
         EnumFontFamiliesEx (dc, &lf,
@@ -85,7 +79,6 @@ const StringArray Font::findAllTypefaceNames()
         lf.lfCharSet = DEFAULT_CHARSET;
         lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
         lf.lfPitchAndFamily = FF_DONTCARE;
-        lf.lfFaceName[0] = 0;
 
         EnumFontFamiliesEx (dc, &lf,
                             (FONTENUMPROCW) &wfontEnum1,
@@ -154,18 +147,18 @@ public:
             SetMapperFlags (dc, 0);
             SetMapMode (dc, MM_TEXT);
 
-            LOGFONTW lfw = { 0 };
-            lfw.lfCharSet = DEFAULT_CHARSET;
-            lfw.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-            lfw.lfOutPrecision = OUT_OUTLINE_PRECIS;
-            lfw.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-            lfw.lfQuality = PROOF_QUALITY;
-            lfw.lfItalic = (BYTE) (italic ? TRUE : FALSE);
-            lfw.lfWeight = bold ? FW_BOLD : FW_NORMAL;
-            fontName.copyToUTF16 (lfw.lfFaceName, LF_FACESIZE - 1);
+            LOGFONTW lf = { 0 };
+            lf.lfCharSet = DEFAULT_CHARSET;
+            lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+            lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
+            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+            lf.lfQuality = PROOF_QUALITY;
+            lf.lfItalic = (BYTE) (italic ? TRUE : FALSE);
+            lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
+            lf.lfHeight = size > 0 ? size : -256;
+            fontName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
 
-            lfw.lfHeight = size > 0 ? size : -256;
-            HFONT standardSizedFont = CreateFontIndirect (&lfw);
+            HFONT standardSizedFont = CreateFontIndirect (&lf);
 
             if (standardSizedFont != 0)
             {
@@ -178,8 +171,8 @@ public:
                         OUTLINETEXTMETRIC otm;
                         if (GetOutlineTextMetrics (dc, sizeof (otm), &otm) != 0)
                         {
-                            lfw.lfHeight = -(int) otm.otmEMSquare;
-                            fontH = CreateFontIndirect (&lfw);
+                            lf.lfHeight = -(int) otm.otmEMSquare;
+                            fontH = CreateFontIndirect (&lf);
 
                             SelectObject (dc, fontH);
                             DeleteObject (standardSizedFont);

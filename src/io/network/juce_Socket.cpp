@@ -58,7 +58,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Socket.h"
-#include "../../threads/juce_ScopedLock.h"
 #include "../../threads/juce_Thread.h"
 
 #if JUCE_WINDOWS

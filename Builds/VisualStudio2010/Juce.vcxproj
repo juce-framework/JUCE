@@ -800,8 +800,8 @@
     <ClInclude Include="..\..\src\threads\juce_ReadWriteLock.h"/>
     <ClInclude Include="..\..\src\threads\juce_ScopedLock.h"/>
     <ClInclude Include="..\..\src\threads\juce_ScopedReadLock.h"/>
-    <ClInclude Include="..\..\src\threads\juce_ScopedTryLock.h"/>
     <ClInclude Include="..\..\src\threads\juce_ScopedWriteLock.h"/>
+    <ClInclude Include="..\..\src\threads\juce_SpinLock.h"/>
     <ClInclude Include="..\..\src\threads\juce_Thread.h"/>
     <ClInclude Include="..\..\src\threads\juce_ThreadPool.h"/>
     <ClInclude Include="..\..\src\threads\juce_TimeSliceThread.h"/>

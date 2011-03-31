@@ -27,7 +27,7 @@
 #define __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
 
 #include "juce_AudioSource.h"
-#include "../../threads/juce_CriticalSection.h"
+#include "../../threads/juce_SpinLock.h"
 
 
 //==============================================================================

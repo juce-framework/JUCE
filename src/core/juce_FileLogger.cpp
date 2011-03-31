@@ -30,7 +30,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_FileLogger.h"
 #include "../io/files/juce_FileOutputStream.h"
 #include "../io/files/juce_FileInputStream.h"
-#include "../threads/juce_ScopedLock.h"
 #include "../memory/juce_ScopedPointer.h"
 #include "juce_SystemStats.h"
 

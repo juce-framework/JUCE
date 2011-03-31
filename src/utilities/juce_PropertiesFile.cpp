@@ -38,7 +38,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../memory/juce_ScopedPointer.h"
 #include "../core/juce_SystemStats.h"
 #include "../threads/juce_InterProcessLock.h"
-#include "../threads/juce_ScopedLock.h"
 #include "../text/juce_XmlDocument.h"
 
 

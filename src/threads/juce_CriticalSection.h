@@ -26,10 +26,7 @@
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
-#ifndef DOXYGEN
- class ScopedLock;
- class ScopedUnlock;
-#endif
+#include "juce_ScopedLock.h"
 
 
 //==============================================================================
@@ -40,7 +37,7 @@
     one of these is by using RAII in the form of a local ScopedLock object - have a look
     through the codebase for many examples of how to do this.
 
-    @see ScopedLock, SpinLock, Thread, InterProcessLock
+    @see ScopedLock, ScopedTryLock, ScopedUnlock, SpinLock, ReadWriteLock, Thread, InterProcessLock
 */
 class JUCE_API  CriticalSection
 {
@@ -60,8 +57,9 @@ public:
 
         If the lock is already held by the caller thread, the method returns immediately.
         If the lock is currently held by another thread, this will wait until it becomes free.
-        Remember that it's highly recommended that you never use this method, but use a ScopedLock
-        to manage the locking instead.
+
+        It's strongly recommended that you never call this method directly - instead use the
+        ScopedLock class to manage the locking using an RAII pattern instead.
 
         @see exit, tryEnter, ScopedLock
     */
@@ -91,11 +89,14 @@ public:
 
 
     //==============================================================================
-    /** Provides the type of scoped lock to use with this type of critical section object. */
-    typedef ScopedLock      ScopedLockType;
+    /** Provides the type of scoped lock to use with a CriticalSection. */
+    typedef GenericScopedLock <CriticalSection>       ScopedLockType;
 
-    /** Provides the type of scoped unlocker to use with this type of critical section object. */
-    typedef ScopedUnlock    ScopedUnlockType;
+    /** Provides the type of scoped unlocker to use with a CriticalSection. */
+    typedef GenericScopedUnlock <CriticalSection>     ScopedUnlockType;
+
+    /** Provides the type of scoped try-locker to use with a CriticalSection. */
+    typedef GenericScopedTryLock <CriticalSection>    ScopedTryLockType;
 
 
 private:
@@ -151,68 +152,103 @@ private:
     JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection);
 };
 
+//==============================================================================
+/**
+    Automatically locks and unlocks a CriticalSection object.
+
+    Use one of these as a local variable to provide RAII-based locking of a CriticalSection.
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ...do some stuff...
+
+        // myCriticalSection gets unlocked here.
+    }
+    @endcode
+
+    @see CriticalSection, ScopedUnlock
+*/
+typedef CriticalSection::ScopedLockType  ScopedLock;
 
 //==============================================================================
 /**
-    A simple spin-lock class that can be used as a simple, low-overhead mutex for
-    uncontended situations.
+    Automatically unlocks and re-locks a CriticalSection object.
 
-    Note that unlike a CriticalSection, this type of lock is not re-entrant, and may
-    be less efficient when used it a highly contended situation, but it's very small and
-    requires almost no initialisation.
-    It's most appropriate for simple situations where you're only going to hold the
-    lock for a very brief time.
+    This is the reverse of a ScopedLock object - instead of locking the critical
+    section for the lifetime of this object, it unlocks it.
 
-    @see CriticalSection
-*/
-class JUCE_API  SpinLock
-{
-public:
-    inline SpinLock() throw() {}
-    inline ~SpinLock() throw() {}
+    Make sure you don't try to unlock critical sections that aren't actually locked!
 
-    void enter() const throw();
-    bool tryEnter() const throw();
+    e.g. @code
 
-    inline void exit() const throw()
+    CriticalSection myCriticalSection;
+
+    for (;;)
     {
-        jassert (lock.value == 1); // Agh! Releasing a lock that isn't currently held!
-        lock = 0;
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ... do some stuff with it locked ..
+
+        while (xyz)
+        {
+            ... do some stuff with it locked ..
+
+            const ScopedUnlock unlocker (myCriticalSection);
+
+            // myCriticalSection is now unlocked for the remainder of this block,
+            // and re-locked at the end.
+
+            ...do some stuff with it unlocked ...
+        }
+
+        // myCriticalSection gets unlocked here.
     }
+    @endcode
 
-    //==============================================================================
-    /** A scoped-lock type to use with a SpinLock. */
-    class ScopedLockType
+    @see CriticalSection, ScopedLock
+*/
+typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
+
+//==============================================================================
+/**
+    Automatically tries to lock and unlock a CriticalSection object.
+
+    Use one of these as a local variable to control access to a CriticalSection.
+
+    e.g. @code
+    CriticalSection myCriticalSection;
+
+    for (;;)
     {
-    public:
-        inline explicit ScopedLockType (const SpinLock& lock_) throw() : lock (lock_)   { lock_.enter(); }
-        inline ~ScopedLockType() throw()                                                { lock.exit(); }
+        const ScopedTryLock myScopedTryLock (myCriticalSection);
 
-    private:
-        //==============================================================================
-        const SpinLock& lock;
-        JUCE_DECLARE_NON_COPYABLE (ScopedLockType);
-    };
+        // Unlike using a ScopedLock, this may fail to actually get the lock, so you
+        // should test this with the isLocked() method before doing your thread-unsafe
+        // action..
+        if (myScopedTryLock.isLocked())
+        {
+           ...do some stuff...
+        }
+        else
+        {
+            ..our attempt at locking failed because another thread had already locked it..
+        }
 
-    //==============================================================================
-    /** A scoped-unlocker type to use with a SpinLock. */
-    class ScopedUnlockType
-    {
-    public:
-        inline explicit ScopedUnlockType (const SpinLock& lock_) throw() : lock (lock_) { lock_.exit(); }
-        inline ~ScopedUnlockType() throw()                                              { lock.enter(); }
+        // myCriticalSection gets unlocked here (if it was locked)
+    }
+    @endcode
 
-    private:
-        //==============================================================================
-        const SpinLock& lock;
-        JUCE_DECLARE_NON_COPYABLE (ScopedUnlockType);
-    };
-
-private:
-    //==============================================================================
-    mutable Atomic<int> lock;
-    JUCE_DECLARE_NON_COPYABLE (SpinLock);
-};
+    @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
+*/
+typedef CriticalSection::ScopedTryLockType  ScopedTryLock;
 
 
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__

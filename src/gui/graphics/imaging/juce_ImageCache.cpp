@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ImageCache.h"
 #include "juce_ImageFileFormat.h"
-#include "../../../threads/juce_ScopedLock.h"
 #include "../../../utilities/juce_DeletedAtShutdown.h"
 #include "../../../containers/juce_OwnedArray.h"
 #include "../../../events/juce_Timer.h"

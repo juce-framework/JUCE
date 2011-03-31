@@ -1069,8 +1069,8 @@
 		9E622C38E4BD511B6ABBF7AA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ReadWriteLock.h; path = ../../src/threads/juce_ReadWriteLock.h; sourceTree = SOURCE_ROOT; };
 		6734838B47EF0D9ACEE571CD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ScopedLock.h; path = ../../src/threads/juce_ScopedLock.h; sourceTree = SOURCE_ROOT; };
 		F00BDEF5CE2B281CBE2E89A2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ScopedReadLock.h; path = ../../src/threads/juce_ScopedReadLock.h; sourceTree = SOURCE_ROOT; };
-		18AD809DE191E1CF42D0BF53 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ScopedTryLock.h; path = ../../src/threads/juce_ScopedTryLock.h; sourceTree = SOURCE_ROOT; };
 		C5F20B02D7843F3C5ABEDFD4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ScopedWriteLock.h; path = ../../src/threads/juce_ScopedWriteLock.h; sourceTree = SOURCE_ROOT; };
+		1FD1C9A3D2DB64C825FDAC8B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_SpinLock.h; path = ../../src/threads/juce_SpinLock.h; sourceTree = SOURCE_ROOT; };
 		4D60F7F748CF6702D1E45960 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Thread.cpp; path = ../../src/threads/juce_Thread.cpp; sourceTree = SOURCE_ROOT; };
 		EFE26D4E1E2B92828DBA3A99 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Thread.h; path = ../../src/threads/juce_Thread.h; sourceTree = SOURCE_ROOT; };
 		EF06213027EA3F7C54EE0F18 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ThreadPool.cpp; path = ../../src/threads/juce_ThreadPool.cpp; sourceTree = SOURCE_ROOT; };
@@ -1904,8 +1904,8 @@
 				9E622C38E4BD511B6ABBF7AA,
 				6734838B47EF0D9ACEE571CD,
 				F00BDEF5CE2B281CBE2E89A2,
-				18AD809DE191E1CF42D0BF53,
 				C5F20B02D7843F3C5ABEDFD4,
+				1FD1C9A3D2DB64C825FDAC8B,
 				4D60F7F748CF6702D1E45960,
 				EFE26D4E1E2B92828DBA3A99,
 				EF06213027EA3F7C54EE0F18,

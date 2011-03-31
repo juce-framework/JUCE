@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MidiMessageCollector.h"
-#include "../../threads/juce_ScopedLock.h"
 #include "../../core/juce_Time.h"
 
 

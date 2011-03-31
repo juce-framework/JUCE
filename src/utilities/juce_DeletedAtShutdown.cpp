@@ -29,8 +29,8 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_DeletedAtShutdown.h"
 #include "../containers/juce_Array.h"
-#include "../threads/juce_ScopedLock.h"
 #include "../application/juce_Application.h"
+#include "../threads/juce_SpinLock.h"
 
 
 //==============================================================================

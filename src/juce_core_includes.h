@@ -296,11 +296,11 @@
 #ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
  #include "threads/juce_ScopedReadLock.h"
 #endif
-#ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
- #include "threads/juce_ScopedTryLock.h"
-#endif
 #ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
  #include "threads/juce_ScopedWriteLock.h"
+#endif
+#ifndef __JUCE_SPINLOCK_JUCEHEADER__
+ #include "threads/juce_SpinLock.h"
 #endif
 #ifndef __JUCE_THREAD_JUCEHEADER__
  #include "threads/juce_Thread.h"

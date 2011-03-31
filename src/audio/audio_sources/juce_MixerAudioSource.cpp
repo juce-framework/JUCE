@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MixerAudioSource.h"
-#include "../../threads/juce_ScopedLock.h"
 #include "../../containers/juce_OwnedArray.h"
 
 

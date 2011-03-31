@@ -1541,10 +1541,9 @@
               file="src/threads/juce_ScopedLock.h"/>
         <FILE id="4fVPnhFxo" name="juce_ScopedReadLock.h" compile="0" resource="0"
               file="src/threads/juce_ScopedReadLock.h"/>
-        <FILE id="3YrDBGCt7" name="juce_ScopedTryLock.h" compile="0" resource="0"
-              file="src/threads/juce_ScopedTryLock.h"/>
         <FILE id="ZzfHTAct1" name="juce_ScopedWriteLock.h" compile="0" resource="0"
               file="src/threads/juce_ScopedWriteLock.h"/>
+        <FILE id="B67j1G" name="juce_SpinLock.h" compile="0" resource="0" file="src/threads/juce_SpinLock.h"/>
         <FILE id="91WC4L0ai" name="juce_Thread.cpp" compile="1" resource="0"
               file="src/threads/juce_Thread.cpp"/>
         <FILE id="g4jLEfRco" name="juce_Thread.h" compile="0" resource="0"

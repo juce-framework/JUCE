@@ -2334,10 +2334,10 @@
     <ClInclude Include="..\..\src\threads\juce_ScopedReadLock.h">
       <Filter>Juce\Source\threads</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\threads\juce_ScopedTryLock.h">
+    <ClInclude Include="..\..\src\threads\juce_ScopedWriteLock.h">
       <Filter>Juce\Source\threads</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\threads\juce_ScopedWriteLock.h">
+    <ClInclude Include="..\..\src\threads\juce_SpinLock.h">
       <Filter>Juce\Source\threads</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\threads\juce_Thread.h">

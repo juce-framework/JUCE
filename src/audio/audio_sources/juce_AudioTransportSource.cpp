@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioTransportSource.h"
-#include "../../threads/juce_ScopedLock.h"
 #include "../../memory/juce_ScopedPointer.h"
 
 

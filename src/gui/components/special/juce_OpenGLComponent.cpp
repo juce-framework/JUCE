@@ -32,7 +32,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_OpenGLComponent.h"
 #include "../windows/juce_ComponentPeer.h"
 #include "../layout/juce_ComponentMovementWatcher.h"
-#include "../../../threads/juce_ScopedLock.h"
 
 
 //==============================================================================

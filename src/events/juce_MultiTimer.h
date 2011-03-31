@@ -28,6 +28,7 @@
 
 #include "juce_Timer.h"
 #include "../containers/juce_OwnedArray.h"
+#include "../threads/juce_SpinLock.h"
 
 
 //==============================================================================

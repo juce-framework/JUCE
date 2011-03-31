@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_LocalisedStrings.h"
+#include "../threads/juce_SpinLock.h"
 
 
 //==============================================================================

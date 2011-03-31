@@ -28,7 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Thread.h"
-#include "juce_ScopedLock.h"
+#include "juce_SpinLock.h"
 #include "../core/juce_Time.h"
 
 

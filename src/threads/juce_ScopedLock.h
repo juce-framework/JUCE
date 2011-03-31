@@ -26,22 +26,22 @@
 #ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
 #define __JUCE_SCOPEDLOCK_JUCEHEADER__
 
-#include "juce_CriticalSection.h"
-
 
 //==============================================================================
 /**
-    Automatically locks and unlocks a CriticalSection object.
+    Automatically locks and unlocks a mutex object.
 
-    Use one of these as a local variable to control access to a CriticalSection.
+    Use one of these as a local variable to provide RAII-based locking of a mutex.
+
+    The templated class could be a CriticalSection, SpinLock, or anything else that
+    provides enter() and exit() methods.
 
     e.g. @code
-
     CriticalSection myCriticalSection;
 
     for (;;)
     {
-        const ScopedLock myScopedLock (myCriticalSection);
+        const GenericScopedLock<CriticalSection> myScopedLock (myCriticalSection);
         // myCriticalSection is now locked
 
         ...do some stuff...
@@ -50,50 +50,47 @@
     }
     @endcode
 
-    @see CriticalSection, ScopedUnlock
+    @see GenericScopedUnlock, CriticalSection, SpinLock, ScopedLock, ScopedUnlock
 */
-class ScopedLock
+template <class LockType>
+class GenericScopedLock
 {
 public:
     //==============================================================================
-    /** Creates a ScopedLock.
+    /** Creates a GenericScopedLock.
 
-        As soon as it is created, this will lock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be unlocked.
+        As soon as it is created, this will acquire the lock, and when the GenericScopedLock
+        object is deleted, the lock will be released.
 
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedLock (const CriticalSection& lock) throw()    : lock_ (lock) { lock.enter(); }
+    inline explicit GenericScopedLock (const LockType& lock) throw() : lock_ (lock)     { lock.enter(); }
 
     /** Destructor.
-
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
+        The lock will be released when the destructor is called.
+        Make sure this object is created and deleted by the same thread, otherwise there are
+        no guarantees what will happen!
     */
-    inline ~ScopedLock() throw()                                        { lock_.exit(); }
-
+    inline ~GenericScopedLock() throw()                                                 { lock_.exit(); }
 
 private:
     //==============================================================================
-    const CriticalSection& lock_;
+    const LockType& lock_;
 
-    JUCE_DECLARE_NON_COPYABLE (ScopedLock);
+    JUCE_DECLARE_NON_COPYABLE (GenericScopedLock);
 };
 
 
 //==============================================================================
 /**
-    Automatically unlocks and re-locks a CriticalSection object.
+    Automatically unlocks and re-locks a mutex object.
 
-    This is the reverse of a ScopedLock object - instead of locking the critical
-    section for the lifetime of this object, it unlocks it.
+    This is the reverse of a GenericScopedLock object - instead of locking the mutex
+    for the lifetime of this object, it unlocks it.
 
-    Make sure you don't try to unlock critical sections that aren't actually locked!
+    Make sure you don't try to unlock mutexes that aren't actually locked!
 
     e.g. @code
 
@@ -101,7 +98,7 @@ private:
 
     for (;;)
     {
-        const ScopedLock myScopedLock (myCriticalSection);
+        const GenericScopedLock<CriticalSection> myScopedLock (myCriticalSection);
         // myCriticalSection is now locked
 
         ... do some stuff with it locked ..
@@ -110,7 +107,7 @@ private:
         {
             ... do some stuff with it locked ..
 
-            const ScopedUnlock unlocker (myCriticalSection);
+            const GenericScopedUnlock<CriticalSection> unlocker (myCriticalSection);
 
             // myCriticalSection is now unlocked for the remainder of this block,
             // and re-locked at the end.
@@ -122,13 +119,14 @@ private:
     }
     @endcode
 
-    @see CriticalSection, ScopedLock
+    @see GenericScopedLock, CriticalSection, ScopedLock, ScopedUnlock
 */
-class ScopedUnlock
+template <class LockType>
+class GenericScopedUnlock
 {
 public:
     //==============================================================================
-    /** Creates a ScopedUnlock.
+    /** Creates a GenericScopedUnlock.
 
         As soon as it is created, this will unlock the CriticalSection, and
         when the ScopedLock object is deleted, the CriticalSection will
@@ -138,7 +136,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedUnlock (const CriticalSection& lock) throw()    : lock_ (lock) { lock.exit(); }
+    inline explicit GenericScopedUnlock (const LockType& lock) throw() : lock_ (lock)   { lock.exit(); }
 
     /** Destructor.
 
@@ -147,16 +145,90 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedUnlock() throw()                                        { lock_.enter(); }
+    inline ~GenericScopedUnlock() throw()                                               { lock_.enter(); }
 
 
 private:
     //==============================================================================
-    const CriticalSection& lock_;
+    const LockType& lock_;
 
-    JUCE_DECLARE_NON_COPYABLE (ScopedUnlock);
+    JUCE_DECLARE_NON_COPYABLE (GenericScopedUnlock);
 };
 
+
+//==============================================================================
+/**
+    Automatically locks and unlocks a mutex object.
+
+    Use one of these as a local variable to provide RAII-based locking of a mutex.
+
+    The templated class could be a CriticalSection, SpinLock, or anything else that
+    provides enter() and exit() methods.
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const GenericScopedTryLock<CriticalSection> myScopedTryLock (myCriticalSection);
+
+        // Unlike using a ScopedLock, this may fail to actually get the lock, so you
+        // should test this with the isLocked() method before doing your thread-unsafe
+        // action..
+        if (myScopedTryLock.isLocked())
+        {
+           ...do some stuff...
+        }
+        else
+        {
+            ..our attempt at locking failed because another thread had already locked it..
+        }
+
+        // myCriticalSection gets unlocked here (if it was locked)
+    }
+    @endcode
+
+    @see CriticalSection::tryEnter, GenericScopedLock, GenericScopedUnlock
+*/
+template <class LockType>
+class GenericScopedTryLock
+{
+public:
+    //==============================================================================
+    /** Creates a GenericScopedTryLock.
+
+        As soon as it is created, this will attempt to acquire the lock, and when the
+        GenericScopedTryLock is deleted, the lock will be released (if the lock was
+        successfully acquired).
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline explicit GenericScopedTryLock (const LockType& lock) throw()
+        : lock_ (lock), lockWasSuccessful (lock.tryEnter()) {}
+
+    /** Destructor.
+
+        The mutex will be unlocked (if it had been successfully locked) when the
+        destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~GenericScopedTryLock() throw()          { if (lockWasSuccessful) lock_.exit(); }
+
+    /** Returns true if the mutex was successfully locked. */
+    bool isLocked() const throw()                   { return lockWasSuccessful; }
+
+private:
+    //==============================================================================
+    const LockType& lock_;
+    const bool lockWasSuccessful;
+
+    JUCE_DECLARE_NON_COPYABLE (GenericScopedTryLock);
+};
 
 
 #endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__

@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ActionBroadcaster.h"
 #include "juce_MessageManager.h"
-#include "../threads/juce_ScopedLock.h"
 
 
 //==============================================================================

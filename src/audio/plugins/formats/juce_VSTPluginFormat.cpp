@@ -63,7 +63,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_VSTPluginFormat.h"
 #include "../../../threads/juce_Process.h"
-#include "../../../threads/juce_ScopedLock.h"
+#include "../../../threads/juce_CriticalSection.h"
 #include "../../../maths/juce_Random.h"
 #include "../../../io/files/juce_DirectoryIterator.h"
 #include "../../../events/juce_Timer.h"

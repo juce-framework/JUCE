@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ReadWriteLock.h"
-#include "juce_ScopedLock.h"
 #include "juce_Thread.h"
 
 

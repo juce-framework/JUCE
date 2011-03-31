@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Component.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../mouse/juce_MouseInputSource.h"
+#include "../../../threads/juce_SpinLock.h"
 
 
 //==============================================================================

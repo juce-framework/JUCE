@@ -35,7 +35,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../streams/juce_GZIPCompressorOutputStream.h"
 #include "juce_FileInputStream.h"
 #include "juce_FileOutputStream.h"
-#include "../../threads/juce_ScopedLock.h"
 
 
 //==============================================================================
