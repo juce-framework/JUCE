@@ -529,6 +529,9 @@
     <ClCompile Include="..\..\src\gui\components\controls\juce_ComboBox.cpp">
       <Filter>Juce\Source\gui\components\controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\controls\juce_ImageComponent.cpp">
+      <Filter>Juce\Source\gui\components\controls</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\controls\juce_Label.cpp">
       <Filter>Juce\Source\gui\components\controls</Filter>
     </ClCompile>
@@ -1705,6 +1708,9 @@
       <Filter>Juce\Source\gui\components\code_editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\controls\juce_ComboBox.h">
+      <Filter>Juce\Source\gui\components\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\controls\juce_ImageComponent.h">
       <Filter>Juce\Source\gui\components\controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\controls\juce_Label.h">

@@ -50,7 +50,7 @@ typedef struct {
  * ov_open() to avoid problems with incompatible crt.o version linking
  * issues. */
 
-static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
+/*static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
   if(f==NULL)return(-1);
 
 #ifdef __MINGW32__
@@ -60,7 +60,7 @@ static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
 #else
   return fseek(f,off,whence);
 #endif
-}
+}*/
 
 /* These structs below (OV_CALLBACKS_DEFAULT etc) are defined here as
  * static data. That means that every file which includes this header

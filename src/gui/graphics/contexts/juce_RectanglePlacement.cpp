@@ -42,6 +42,16 @@ RectanglePlacement& RectanglePlacement::operator= (const RectanglePlacement& oth
     return *this;
 }
 
+bool RectanglePlacement::operator== (const RectanglePlacement& other) const throw()
+{
+    return flags == other.flags;
+}
+
+bool RectanglePlacement::operator!= (const RectanglePlacement& other) const throw()
+{
+    return flags != other.flags;
+}
+
 void RectanglePlacement::applyTo (double& x, double& y, double& w, double& h,
                                   const double dx, const double dy, const double dw, const double dh) const throw()
 {

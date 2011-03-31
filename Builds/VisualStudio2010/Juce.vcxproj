@@ -223,6 +223,7 @@
     <ClCompile Include="..\..\src\gui\components\code_editor\juce_CodeEditorComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\code_editor\juce_CPlusPlusCodeTokeniser.cpp"/>
     <ClCompile Include="..\..\src\gui\components\controls\juce_ComboBox.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\controls\juce_ImageComponent.cpp"/>
     <ClCompile Include="..\..\src\gui\components\controls\juce_Label.cpp"/>
     <ClCompile Include="..\..\src\gui\components\controls\juce_ListBox.cpp"/>
     <ClCompile Include="..\..\src\gui\components\controls\juce_ProgressBar.cpp"/>
@@ -591,6 +592,7 @@
     <ClInclude Include="..\..\src\gui\components\code_editor\juce_CodeTokeniser.h"/>
     <ClInclude Include="..\..\src\gui\components\code_editor\juce_CPlusPlusCodeTokeniser.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_ComboBox.h"/>
+    <ClInclude Include="..\..\src\gui\components\controls\juce_ImageComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_Label.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_ListBox.h"/>
     <ClInclude Include="..\..\src\gui\components\controls\juce_ProgressBar.h"/>

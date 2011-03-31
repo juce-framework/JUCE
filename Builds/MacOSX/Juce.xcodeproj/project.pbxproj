@@ -109,6 +109,7 @@
 		DA5DA96B9D1A26342D9278B6 = { isa = PBXBuildFile; fileRef = 04F48B09426293224576DA9A; };
 		CA49EF43B1478B146ADBBF62 = { isa = PBXBuildFile; fileRef = 346CC505FAFEE9451040108D; };
 		FE6F6A4946B7E4F6C9F44C4A = { isa = PBXBuildFile; fileRef = ADC16C18C8237A7F8E35E37A; };
+		28254F1E6E686CF6F29AE56A = { isa = PBXBuildFile; fileRef = 0D3FA24FF38399E0EDA80860; };
 		9EA7FEF4CAD2BF46DD3596DA = { isa = PBXBuildFile; fileRef = 7330A9643F50DE8BEACDBB61; };
 		D1400B3D9D07FA9E8BAA21CB = { isa = PBXBuildFile; fileRef = 1BC6C010045A06BDB4C684F6; };
 		716823F3B5437A20FCADA50E = { isa = PBXBuildFile; fileRef = 71B6CE03D6DB07BB293C8206; };
@@ -616,6 +617,8 @@
 		3384A91143018ED9346E4118 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CPlusPlusCodeTokeniser.h; path = ../../src/gui/components/code_editor/juce_CPlusPlusCodeTokeniser.h; sourceTree = SOURCE_ROOT; };
 		ADC16C18C8237A7F8E35E37A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ComboBox.cpp; path = ../../src/gui/components/controls/juce_ComboBox.cpp; sourceTree = SOURCE_ROOT; };
 		D8EB3EA456D9FCC211CD1ED5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ComboBox.h; path = ../../src/gui/components/controls/juce_ComboBox.h; sourceTree = SOURCE_ROOT; };
+		0D3FA24FF38399E0EDA80860 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ImageComponent.cpp; path = ../../src/gui/components/controls/juce_ImageComponent.cpp; sourceTree = SOURCE_ROOT; };
+		CA3454A9B6F80A2F4735C37E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ImageComponent.h; path = ../../src/gui/components/controls/juce_ImageComponent.h; sourceTree = SOURCE_ROOT; };
 		7330A9643F50DE8BEACDBB61 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Label.cpp; path = ../../src/gui/components/controls/juce_Label.cpp; sourceTree = SOURCE_ROOT; };
 		C0CC0FA84A4F7AA76C1611CB = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Label.h; path = ../../src/gui/components/controls/juce_Label.h; sourceTree = SOURCE_ROOT; };
 		1BC6C010045A06BDB4C684F6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ListBox.cpp; path = ../../src/gui/components/controls/juce_ListBox.cpp; sourceTree = SOURCE_ROOT; };
@@ -1377,6 +1380,8 @@
 		BCB2FFE7C2A4084A267F57F2 = { isa = PBXGroup; children = (
 				ADC16C18C8237A7F8E35E37A,
 				D8EB3EA456D9FCC211CD1ED5,
+				0D3FA24FF38399E0EDA80860,
+				CA3454A9B6F80A2F4735C37E,
 				7330A9643F50DE8BEACDBB61,
 				C0CC0FA84A4F7AA76C1611CB,
 				1BC6C010045A06BDB4C684F6,
@@ -2133,6 +2138,7 @@
 				DA5DA96B9D1A26342D9278B6,
 				CA49EF43B1478B146ADBBF62,
 				FE6F6A4946B7E4F6C9F44C4A,
+				28254F1E6E686CF6F29AE56A,
 				9EA7FEF4CAD2BF46DD3596DA,
 				D1400B3D9D07FA9E8BAA21CB,
 				716823F3B5437A20FCADA50E,

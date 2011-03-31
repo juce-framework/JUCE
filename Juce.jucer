@@ -582,6 +582,10 @@
                   file="src/gui/components/controls/juce_ComboBox.cpp"/>
             <FILE id="Uo2wIjaGP" name="juce_ComboBox.h" compile="0" resource="0"
                   file="src/gui/components/controls/juce_ComboBox.h"/>
+            <FILE id="R1Ygsn" name="juce_ImageComponent.cpp" compile="1" resource="0"
+                  file="src/gui/components/controls/juce_ImageComponent.cpp"/>
+            <FILE id="kRFEoL" name="juce_ImageComponent.h" compile="0" resource="0"
+                  file="src/gui/components/controls/juce_ImageComponent.h"/>
             <FILE id="fDsSSPSQy" name="juce_Label.cpp" compile="1" resource="0"
                   file="src/gui/components/controls/juce_Label.cpp"/>
             <FILE id="LkZfmqaQt" name="juce_Label.h" compile="0" resource="0" file="src/gui/components/controls/juce_Label.h"/>

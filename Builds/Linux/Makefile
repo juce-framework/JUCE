@@ -140,6 +140,7 @@ OBJECTS := \
   $(OBJDIR)/juce_CodeEditorComponent_6fe4a170.o \
   $(OBJDIR)/juce_CPlusPlusCodeTokeniser_6b8548a9.o \
   $(OBJDIR)/juce_ComboBox_bcb5e365.o \
+  $(OBJDIR)/juce_ImageComponent_1f90572a.o \
   $(OBJDIR)/juce_Label_7af0aab6.o \
   $(OBJDIR)/juce_ListBox_d4a8704f.o \
   $(OBJDIR)/juce_ProgressBar_38bc3ba8.o \
@@ -886,6 +887,11 @@ $(OBJDIR)/juce_CPlusPlusCodeTokeniser_6b8548a9.o: ../../src/gui/components/code_
 $(OBJDIR)/juce_ComboBox_bcb5e365.o: ../../src/gui/components/controls/juce_ComboBox.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ComboBox.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ImageComponent_1f90572a.o: ../../src/gui/components/controls/juce_ImageComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_ImageComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Label_7af0aab6.o: ../../src/gui/components/controls/juce_Label.cpp

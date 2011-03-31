@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	64
+#define JUCE_BUILDNUMBER	65
 
 /** Current Juce version number.
 
@@ -28462,6 +28462,9 @@ public:
 	/** Copies another RectanglePlacement object. */
 	RectanglePlacement& operator= (const RectanglePlacement& other) throw();
 
+	bool operator== (const RectanglePlacement& other) const throw();
+	bool operator!= (const RectanglePlacement& other) const throw();
+
 	/** Flag values that can be combined and used in the constructor. */
 	enum
 	{
@@ -52019,6 +52022,62 @@ private:
 
 #endif
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_IMAGECOMPONENT_JUCEHEADER__
+
+/*** Start of inlined file: juce_ImageComponent.h ***/
+#ifndef __JUCE_IMAGECOMPONENT_JUCEHEADER__
+#define __JUCE_IMAGECOMPONENT_JUCEHEADER__
+
+/**
+	A component that simply displays an image.
+
+	Use setImage to give it an image, and it'll display it - simple as that!
+*/
+class JUCE_API  ImageComponent  : public Component,
+								  public SettableTooltipClient
+{
+public:
+
+	/** Creates an ImageComponent. */
+	ImageComponent (const String& componentName = String::empty);
+
+	/** Destructor. */
+	~ImageComponent();
+
+	/** Sets the image that should be displayed. */
+	void setImage (const Image& newImage);
+
+	/** Sets the image that should be displayed, and its placement within the component. */
+	void setImage (const Image& newImage,
+				   const RectanglePlacement& placementToUse);
+
+	/** Returns the current image. */
+	const Image getImage() const;
+
+	/** Sets the method of positioning that will be used to fit the image within the component's bounds.
+		By default the positioning is centred, and will fit the image inside the component's bounds
+		whilst keeping its aspect ratio correct, but you can change it to whatever layout you need.
+	*/
+	void setImagePlacement (const RectanglePlacement& newPlacement);
+
+	/** Returns the current image placement. */
+	const RectanglePlacement getImagePlacement() const;
+
+	/** @internal */
+	void paint (Graphics& g);
+
+private:
+	Image image;
+	RectanglePlacement placement;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageComponent);
+};
+
+#endif   // __JUCE_IMAGECOMPONENT_JUCEHEADER__
+/*** End of inlined file: juce_ImageComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_LABEL_JUCEHEADER__

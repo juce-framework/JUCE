@@ -311,6 +311,9 @@
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
  #include "gui/components/controls/juce_ComboBox.h"
 #endif
+#ifndef __JUCE_IMAGECOMPONENT_JUCEHEADER__
+ #include "gui/components/controls/juce_ImageComponent.h"
+#endif
 #ifndef __JUCE_LABEL_JUCEHEADER__
  #include "gui/components/controls/juce_Label.h"
 #endif

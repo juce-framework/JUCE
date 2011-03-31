@@ -245,6 +245,7 @@
  #include "../src/gui/components/code_editor/juce_CodeEditorComponent.cpp"
  #include "../src/gui/components/code_editor/juce_CPlusPlusCodeTokeniser.cpp"
  #include "../src/gui/components/controls/juce_ComboBox.cpp"
+ #include "../src/gui/components/controls/juce_ImageComponent.cpp"
  #include "../src/gui/components/controls/juce_Label.cpp"
  #include "../src/gui/components/controls/juce_ListBox.cpp"
  #include "../src/gui/components/controls/juce_ProgressBar.cpp"

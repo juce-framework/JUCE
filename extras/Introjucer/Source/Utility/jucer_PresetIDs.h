@@ -44,6 +44,7 @@ namespace Ids
     DECLARE_ID (readOnly);
     DECLARE_ID (editMode);
     DECLARE_ID (justification);
+    DECLARE_ID (placement);
     DECLARE_ID (items);
     DECLARE_ID (editable);
     DECLARE_ID (textJustification);
@@ -110,6 +111,7 @@ namespace Ids
     DECLARE_ID (rootItemVisible);
     DECLARE_ID (openByDefault);
     DECLARE_ID (locked);
+    DECLARE_ID (image);
     DECLARE_ID (tooltip);
     DECLARE_ID (memberName);
     DECLARE_ID (focusOrder);

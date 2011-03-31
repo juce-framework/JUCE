@@ -51,6 +51,9 @@ public:
     /** Copies another RectanglePlacement object. */
     RectanglePlacement& operator= (const RectanglePlacement& other) throw();
 
+    bool operator== (const RectanglePlacement& other) const throw();
+    bool operator!= (const RectanglePlacement& other) const throw();
+
     //==============================================================================
     /** Flag values that can be combined and used in the constructor. */
     enum

@@ -472,6 +472,8 @@
             <Filter Name="controls">
               <File RelativePath="..\..\src\gui\components\controls\juce_ComboBox.cpp"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_ComboBox.h"/>
+              <File RelativePath="..\..\src\gui\components\controls\juce_ImageComponent.cpp"/>
+              <File RelativePath="..\..\src\gui\components\controls\juce_ImageComponent.h"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_Label.cpp"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_Label.h"/>
               <File RelativePath="..\..\src\gui\components\controls\juce_ListBox.cpp"/>
