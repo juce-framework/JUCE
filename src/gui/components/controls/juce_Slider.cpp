@@ -603,7 +603,7 @@ void Slider::setMinAndMaxValues (double newMinValue, double newMaxValue, bool se
               || style == ThreeValueHorizontal || style == ThreeValueVertical);
 
     if (newMaxValue < newMinValue)
-        swapVariables (newMaxValue, newMinValue);
+        std::swap (newMaxValue, newMinValue);
 
     newMinValue = constrainedValue (newMinValue);
     newMaxValue = constrainedValue (newMaxValue);

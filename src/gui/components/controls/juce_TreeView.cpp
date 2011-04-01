@@ -363,13 +363,13 @@ private:
             int rowStart = firstSelected->getRowNumberInTree();
             int rowEnd = lastSelected->getRowNumberInTree();
             if (rowStart > rowEnd)
-                swapVariables (rowStart, rowEnd);
+                std::swap (rowStart, rowEnd);
 
             int ourRow = item->getRowNumberInTree();
             int otherEnd = ourRow < rowEnd ? rowStart : rowEnd;
 
             if (ourRow > otherEnd)
-                swapVariables (ourRow, otherEnd);
+                std::swap (ourRow, otherEnd);
 
             for (int i = ourRow; i <= otherEnd; ++i)
                 owner.getItemOnRow (i)->setSelected (true, false);

@@ -153,7 +153,7 @@ public:
         // this happens, you must have done something dodgy!
         jassert (object != other.object);
 
-        swapVariables (object, other.object);
+        std::swap (object, other.object);
     }
 
 private:

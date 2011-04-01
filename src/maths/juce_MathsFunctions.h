@@ -254,14 +254,11 @@ inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperL
 #endif
 
 //==============================================================================
-/** Handy function to swap two values over.
-*/
+/** Handy function to swap two values. */
 template <typename Type>
 inline void swapVariables (Type& variable1, Type& variable2)
 {
-    const Type tempVal = variable1;
-    variable1 = variable2;
-    variable2 = tempVal;
+    std::swap (variable1, variable2);
 }
 
 #if JUCE_VC6

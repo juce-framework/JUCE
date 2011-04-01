@@ -245,7 +245,7 @@ String::String (const String& other) throw()
 
 void String::swapWith (String& other) throw()
 {
-    swapVariables (text, other.text);
+    std::swap (text, other.text);
 }
 
 String& String::operator= (const String& other) throw()

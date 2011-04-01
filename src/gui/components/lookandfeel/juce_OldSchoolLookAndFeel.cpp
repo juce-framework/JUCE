@@ -604,7 +604,7 @@ void OldSchoolLookAndFeel::positionDocumentWindowButtons (DocumentWindow&,
     }
 
     if (positionTitleBarButtonsOnLeft)
-        swapVariables (minimiseButton, maximiseButton);
+        std::swap (minimiseButton, maximiseButton);
 
     if (maximiseButton != 0)
     {

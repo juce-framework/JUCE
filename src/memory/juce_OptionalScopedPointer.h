@@ -134,7 +134,7 @@ public:
     void swapWith (OptionalScopedPointer<ObjectType>& other) throw()
     {
         object.swapWith (other.object);
-        swapVariables (shouldDelete, other.shouldDelete);
+        std::swap (shouldDelete, other.shouldDelete);
     }
 
 private:

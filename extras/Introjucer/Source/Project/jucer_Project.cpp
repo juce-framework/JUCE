@@ -535,13 +535,20 @@ void Project::findAllImageItems (OwnedArray<Project::Item>& items)
 
 //==============================================================================
 Project::Item::Item (Project& project_, const ValueTree& node_)
-    : project (project_), node (node_)
+    : project (&project_), node (node_)
 {
 }
 
 Project::Item::Item (const Item& other)
     : project (other.project), node (other.node)
 {
+}
+
+Project::Item& Project::Item::operator= (const Project::Item& other)
+{
+    project = other.project;
+    node = other.node;
+    return *this;
 }
 
 Project::Item::~Item()
@@ -571,7 +578,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
         }
     }
 
-    return Item (project, ValueTree::invalid);
+    return Item (*project, ValueTree::invalid);
 }
 
 bool Project::Item::canContain (const Item& child) const
@@ -614,7 +621,7 @@ Value Project::Item::getShouldAddToResourceValue() const
 const File Project::Item::getFile() const
 {
     if (isFile())
-        return project.resolveFilename (node [Ids::file].toString());
+        return project->resolveFilename (node [Ids::file].toString());
     else
         return File::nonexistent;
 }
@@ -622,7 +629,7 @@ const File Project::Item::getFile() const
 void Project::Item::setFile (const File& file)
 {
     jassert (isFile());
-    node.setProperty (Ids::file, project.getRelativePathForFile (file), getUndoManager());
+    node.setProperty (Ids::file, project->getRelativePathForFile (file), getUndoManager());
     node.setProperty (Ids::name, file.getFileName(), getUndoManager());
 
     jassert (getFile() == file);
@@ -658,7 +665,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
         }
     }
 
-    return Item (project, ValueTree::invalid);
+    return Item (*project, ValueTree::invalid);
 }
 
 const File Project::Item::determineGroupFolder() const
@@ -684,7 +691,7 @@ const File Project::Item::determineGroupFolder() const
     }
     else
     {
-        f = project.getFile().getParentDirectory();
+        f = project->getFile().getParentDirectory();
 
         if (f.getChildFile ("Source").isDirectory())
             f = f.getChildFile ("Source");
@@ -729,7 +736,7 @@ Project::Item Project::Item::getParent() const
     if (isMainGroup() || ! isGroup())
         return *this;
 
-    return Item (project, node.getParent());
+    return Item (*project, node.getParent());
 }
 
 struct ItemSorter
@@ -753,7 +760,7 @@ bool Project::Item::addFile (const File& file, int insertIndex)
 
     if (file.isDirectory())
     {
-        Item group (project.createNewGroup());
+        Item group (project->createNewGroup());
         group.getName() = file.getFileNameWithoutExtension();
 
         jassert (canContain (group));
@@ -764,7 +771,7 @@ bool Project::Item::addFile (const File& file, int insertIndex)
         DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories);
         while (iter.next())
         {
-            if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
+            if (! project->getMainGroup().findItemForFile (iter.getFile()).isValid())
                 group.addFile (iter.getFile(), -1);
         }
 
@@ -772,9 +779,9 @@ bool Project::Item::addFile (const File& file, int insertIndex)
     }
     else if (file.existsAsFile())
     {
-        if (! project.getMainGroup().findItemForFile (file).isValid())
+        if (! project->getMainGroup().findItemForFile (file).isValid())
         {
-            Item item (project.createNewItem (file));
+            Item item (project->createNewItem (file));
 
             if (canContain (item))
             {

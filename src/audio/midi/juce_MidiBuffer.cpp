@@ -59,7 +59,7 @@ MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
 void MidiBuffer::swapWith (MidiBuffer& other) throw()
 {
     data.swapWith (other.data);
-    swapVariables <int> (bytesUsed, other.bytesUsed);
+    std::swap (bytesUsed, other.bytesUsed);
 }
 
 MidiBuffer::~MidiBuffer()

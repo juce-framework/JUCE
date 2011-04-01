@@ -105,8 +105,8 @@ bool RelativePointPath::operator!= (const RelativePointPath& other) const throw(
 void RelativePointPath::swapWith (RelativePointPath& other) throw()
 {
     elements.swapWithArray (other.elements);
-    swapVariables (usesNonZeroWinding, other.usesNonZeroWinding);
-    swapVariables (containsDynamicPoints, other.containsDynamicPoints);
+    std::swap (usesNonZeroWinding, other.usesNonZeroWinding);
+    std::swap (containsDynamicPoints, other.containsDynamicPoints);
 }
 
 void RelativePointPath::createPath (Path& path, Expression::Scope* scope) const

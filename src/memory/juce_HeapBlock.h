@@ -227,7 +227,7 @@ public:
     */
     void swapWith (HeapBlock <ElementType>& other) throw()
     {
-        swapVariables (data, other.data);
+        std::swap (data, other.data);
     }
 
     /** This fills the block with zeros, up to the number of elements specified.

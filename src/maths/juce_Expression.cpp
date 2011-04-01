@@ -28,7 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Expression.h"
-#include "../containers/juce_ReferenceCountedArray.h"
+#include "../memory/juce_HeapBlock.h"
 
 
 //==============================================================================

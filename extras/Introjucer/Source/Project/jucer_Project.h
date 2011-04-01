@@ -156,6 +156,7 @@ public:
         //==============================================================================
         Item (Project& project, const ValueTree& itemNode);
         Item (const Item& other);
+        Item& operator= (const Item& other);
         ~Item();
 
         void initialiseNodeValues();
@@ -164,8 +165,8 @@ public:
         bool isValid() const                            { return node.isValid(); }
         const ValueTree& getNode() const throw()        { return node; }
         ValueTree& getNode() throw()                    { return node; }
-        Project& getProject() const throw()             { return project; }
-        bool operator== (const Item& other) const       { return node == other.node && &project == &other.project; }
+        Project& getProject() const throw()             { return *project; }
+        bool operator== (const Item& other) const       { return node == other.node && project == other.project; }
         bool operator!= (const Item& other) const       { return ! operator== (other); }
 
         //==============================================================================
@@ -194,7 +195,7 @@ public:
         //==============================================================================
         bool canContain (const Item& child) const;
         int getNumChildren() const                      { return node.getNumChildren(); }
-        Item getChild (int index) const                 { return Item (project, node.getChild (index)); }
+        Item getChild (int index) const                 { return Item (*project, node.getChild (index)); }
         void addChild (const Item& newChild, int insertIndex);
         bool addFile (const File& file, int insertIndex);
         void removeItemFromProject();
@@ -207,11 +208,10 @@ public:
 
     private:
         //==============================================================================
-        Project& project;
+        Project* project;
         ValueTree node;
 
-        UndoManager* getUndoManager() const              { return project.getUndoManagerFor (node); }
-        Item& operator= (const Item&);
+        UndoManager* getUndoManager() const              { return project->getUndoManagerFor (node); }
     };
 
     Item getMainGroup();

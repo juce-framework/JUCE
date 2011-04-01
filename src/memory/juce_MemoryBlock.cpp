@@ -148,7 +148,7 @@ void MemoryBlock::ensureSize (const size_t minimumSize, const bool initialiseToZ
 
 void MemoryBlock::swapWith (MemoryBlock& other) throw()
 {
-    swapVariables (size, other.size);
+    std::swap (size, other.size);
     data.swapWith (other.data);
 }
 

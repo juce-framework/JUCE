@@ -105,7 +105,7 @@ public:
     void swapWith (ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse>& other) throw()
     {
         elements.swapWith (other.elements);
-        swapVariables (numAllocated, other.numAllocated);
+        std::swap (numAllocated, other.numAllocated);
     }
 
     //==============================================================================

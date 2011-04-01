@@ -339,7 +339,7 @@ void TabbedButtonBar::resized()
     int length = getHeight();
 
     if (orientation == TabsAtTop || orientation == TabsAtBottom)
-        swapVariables (depth, length);
+        std::swap (depth, length);
 
     const int overlap = getLookAndFeel().getTabButtonOverlap (depth)
                             + getLookAndFeel().getTabButtonSpaceAroundImage() * 2;

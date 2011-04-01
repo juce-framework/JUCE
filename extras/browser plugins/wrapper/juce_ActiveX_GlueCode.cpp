@@ -114,7 +114,7 @@ public:
                 for (int j = numArgs; --j >= 0;)
                     args.add (variantTojuceVar (pDispParams->rgvarg[j]));
 
-                result = v.invoke (memberId, args.getRawDataPointer(), numArgs);
+                result = v.invoke (memberId, numArgs == 0 ? 0 : args.getRawDataPointer(), numArgs);
             }
 
             if (pVarResult != 0)

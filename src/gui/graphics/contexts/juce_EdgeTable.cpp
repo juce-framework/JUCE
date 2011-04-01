@@ -73,7 +73,7 @@ EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
 
             if (y1 > y2)
             {
-                swapVariables (y1, y2);
+                std::swap (y1, y2);
                 direction = 1;
             }
 

@@ -321,7 +321,7 @@ public:
         const ScopedLockType lock2 (otherHashMap.getLock());
 
         slots.swapWithArray (otherHashMap.slots);
-        swapVariables (totalNumItems, otherHashMap.totalNumItems);
+        std::swap (totalNumItems, otherHashMap.totalNumItems);
     }
 
     //==============================================================================

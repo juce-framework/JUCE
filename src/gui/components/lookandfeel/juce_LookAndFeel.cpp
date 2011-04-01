@@ -2053,7 +2053,7 @@ void LookAndFeel::positionDocumentWindowButtons (DocumentWindow&,
     }
 
     if (positionTitleBarButtonsOnLeft)
-        swapVariables (minimiseButton, maximiseButton);
+        std::swap (minimiseButton, maximiseButton);
 
     if (maximiseButton != 0)
     {
@@ -2194,7 +2194,7 @@ void LookAndFeel::createTabButtonShape (Path& p,
     if (orientation == TabbedButtonBar::TabsAtLeft
          || orientation == TabbedButtonBar::TabsAtRight)
     {
-        swapVariables (length, depth);
+        std::swap (length, depth);
     }
 
     const float indent = (float) getTabButtonOverlap ((int) depth);
@@ -2282,7 +2282,7 @@ void LookAndFeel::drawTabButtonText (Graphics& g,
     if (orientation == TabbedButtonBar::TabsAtLeft
          || orientation == TabbedButtonBar::TabsAtRight)
     {
-        swapVariables (length, depth);
+        std::swap (length, depth);
     }
 
     Font font (depth * 0.6f);
@@ -2353,7 +2353,7 @@ void LookAndFeel::drawTabButton (Graphics& g,
     if (orientation == TabbedButtonBar::TabsAtLeft
             || orientation == TabbedButtonBar::TabsAtRight)
     {
-        swapVariables (length, depth);
+        std::swap (length, depth);
     }
 
     Path tabShape;

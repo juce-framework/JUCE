@@ -373,8 +373,8 @@ DynamicObject* var::getObject() const           { return type->toObject (value);
 //==============================================================================
 void var::swapWith (var& other) throw()
 {
-    swapVariables (type, other.type);
-    swapVariables (value, other.value);
+    std::swap (type, other.type);
+    std::swap (value, other.value);
 }
 
 var& var::operator= (const var& newValue)         { type->cleanUp (value); type = newValue.type; type->createCopy (value, newValue.value); return *this; }

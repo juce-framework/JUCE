@@ -258,7 +258,7 @@ void BlowFish::encrypt (uint32& data1, uint32& data2) const throw()
     {
         l ^= p[i];
         r ^= F(l);
-        swapVariables (l, r);
+        std::swap (l, r);
     }
 
     data1 = r ^ p[17];
@@ -274,7 +274,7 @@ void BlowFish::decrypt (uint32& data1, uint32& data2) const throw()
     {
         l ^= p[i];
         r ^= F(l);
-        swapVariables (l, r);
+        std::swap (l, r);
     }
 
     data1 = r ^ p[0];

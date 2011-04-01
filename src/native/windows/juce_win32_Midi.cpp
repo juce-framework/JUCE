@@ -400,7 +400,7 @@ MidiOutput* MidiOutput::openDevice (int index)
     {
         MidiOutHandle* const han = MidiOutHandle::activeHandles.getUnchecked(i);
 
-        if (han != 0 && han->deviceId == deviceId)
+        if (han->deviceId == deviceId)
         {
             han->refCount++;
 

@@ -580,7 +580,7 @@ void MidiKeyboardComponent::resized()
     if (w > 0 && h > 0)
     {
         if (orientation != horizontalKeyboard)
-            swapVariables (w, h);
+            std::swap (w, h);
 
         blackNoteLength = roundToInt (h * 0.7f);
 

@@ -73,7 +73,7 @@ static void sortArray (ElementComparator& comparator,
             {
                 if (comparator.compareElements (array[i], array [i + 1]) > 0)
                 {
-                    swapVariables (array[i], array[i + 1]);
+                    std::swap (array[i], array[i + 1]);
 
                     if (i > firstElement)
                         i -= 2;
@@ -101,14 +101,14 @@ static void sortArray (ElementComparator& comparator,
                             if (comparator.compareElements (array[k], array [maxIndex]) > 0)
                                 maxIndex = k;
 
-                        swapVariables (array[j], array[maxIndex]);
+                        std::swap (array[j], array[maxIndex]);
                         --j;
                     }
                 }
                 else
                 {
                     const int mid = firstElement + (size >> 1);
-                    swapVariables (array[mid], array[firstElement]);
+                    std::swap (array[mid], array[firstElement]);
 
                     int i = firstElement;
                     int j = lastElement + 1;
@@ -126,10 +126,10 @@ static void sortArray (ElementComparator& comparator,
                         if (j < i)
                             break;
 
-                        swapVariables (array[i], array[j]);
+                        std::swap (array[i], array[j]);
                     }
 
-                    swapVariables (array[j], array[firstElement]);
+                    std::swap (array[j], array[firstElement]);
 
                     if (j - 1 - firstElement >= lastElement - i)
                     {

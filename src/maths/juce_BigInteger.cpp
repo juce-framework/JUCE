@@ -92,9 +92,9 @@ BigInteger::~BigInteger()
 void BigInteger::swapWith (BigInteger& other) throw()
 {
     values.swapWith (other.values);
-    swapVariables (numValues, other.numValues);
-    swapVariables (highestBit, other.highestBit);
-    swapVariables (negative, other.negative);
+    std::swap (numValues, other.numValues);
+    std::swap (highestBit, other.highestBit);
+    std::swap (negative, other.negative);
 }
 
 BigInteger& BigInteger::operator= (const BigInteger& other)
@@ -786,7 +786,7 @@ const BigInteger BigInteger::simpleGCD (BigInteger* m, BigInteger* n)
     while (! m->isZero())
     {
         if (n->compareAbsolute (*m) > 0)
-            swapVariables (m, n);
+            std::swap (m, n);
 
         *m -= *n;
     }
