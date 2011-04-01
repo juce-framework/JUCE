@@ -141,6 +141,7 @@ public:
     bool operator== (const OtherArrayType& other) const
     {
         const ScopedLockType lock (getLock());
+        const typename OtherArrayType::ScopedLockType lock2 (other.getLock());
 
         if (numUsed != other.numUsed)
             return false;
@@ -282,6 +283,23 @@ public:
     inline ElementType* getRawDataPointer() throw()
     {
         return data.elements;
+    }
+
+    //==============================================================================
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ElementType* begin() const throw()
+    {
+        return data.elements;
+    }
+
+    /** Returns a pointer to the element which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ElementType* end() const throw()
+    {
+        return data.elements + numUsed;
     }
 
     //==============================================================================

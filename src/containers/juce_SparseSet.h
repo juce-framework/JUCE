@@ -26,7 +26,6 @@
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
 #define __JUCE_SPARSESET_JUCEHEADER__
 
-#include "juce_ArrayAllocationBase.h"
 #include "../maths/juce_Range.h"
 #include "../threads/juce_CriticalSection.h"
 

@@ -225,6 +225,23 @@ public:
     }
 
     //==============================================================================
+    /** Returns a pointer to the first element in the set.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ElementType* begin() const throw()
+    {
+        return data.elements;
+    }
+
+    /** Returns a pointer to the element which follows the last element in the set.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ElementType* end() const throw()
+    {
+        return data.elements + numUsed;
+    }
+
+    //==============================================================================
     /** Finds the index of the first element which matches the value passed in.
 
         This will search the set for the given object, and return the index

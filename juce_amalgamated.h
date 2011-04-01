@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	65
+#define JUCE_BUILDNUMBER	66
 
 /** Current Juce version number.
 
@@ -784,6 +784,7 @@ namespace JuceDummyNamespace {}
 #include <cstring>
 #include <cstdio>
 #include <iostream>
+#include <vector>
 
 #if JUCE_USE_INTRINSICS
   #include <intrin.h>
@@ -1235,14 +1236,11 @@ inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperL
 }
 #endif
 
-/** Handy function to swap two values over.
-*/
+/** Handy function to swap two values. */
 template <typename Type>
 inline void swapVariables (Type& variable1, Type& variable2)
 {
-	const Type tempVal = variable1;
-	variable1 = variable2;
-	variable2 = tempVal;
+	std::swap (variable1, variable2);
 }
 
 #if JUCE_VC6
@@ -6091,7 +6089,7 @@ public:
 	*/
 	void swapWith (HeapBlock <ElementType>& other) throw()
 	{
-		swapVariables (data, other.data);
+		std::swap (data, other.data);
 	}
 
 	/** This fills the block with zeros, up to the number of elements specified.
@@ -6187,7 +6185,7 @@ public:
 	void swapWith (ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse>& other) throw()
 	{
 		elements.swapWith (other.elements);
-		swapVariables (numAllocated, other.numAllocated);
+		std::swap (numAllocated, other.numAllocated);
 	}
 
 	HeapBlock <ElementType> elements;
@@ -6250,7 +6248,7 @@ static void sortArray (ElementComparator& comparator,
 			{
 				if (comparator.compareElements (array[i], array [i + 1]) > 0)
 				{
-					swapVariables (array[i], array[i + 1]);
+					std::swap (array[i], array[i + 1]);
 
 					if (i > firstElement)
 						i -= 2;
@@ -6278,14 +6276,14 @@ static void sortArray (ElementComparator& comparator,
 							if (comparator.compareElements (array[k], array [maxIndex]) > 0)
 								maxIndex = k;
 
-						swapVariables (array[j], array[maxIndex]);
+						std::swap (array[j], array[maxIndex]);
 						--j;
 					}
 				}
 				else
 				{
 					const int mid = firstElement + (size >> 1);
-					swapVariables (array[mid], array[firstElement]);
+					std::swap (array[mid], array[firstElement]);
 
 					int i = firstElement;
 					int j = lastElement + 1;
@@ -6303,10 +6301,10 @@ static void sortArray (ElementComparator& comparator,
 						if (j < i)
 							break;
 
-						swapVariables (array[i], array[j]);
+						std::swap (array[i], array[j]);
 					}
 
-					swapVariables (array[j], array[firstElement]);
+					std::swap (array[j], array[firstElement]);
 
 					if (j - 1 - firstElement >= lastElement - i)
 					{
@@ -6980,6 +6978,7 @@ public:
 	bool operator== (const OtherArrayType& other) const
 	{
 		const ScopedLockType lock (getLock());
+		const typename OtherArrayType::ScopedLockType lock2 (other.getLock());
 
 		if (numUsed != other.numUsed)
 			return false;
@@ -7119,6 +7118,22 @@ public:
 	inline ElementType* getRawDataPointer() throw()
 	{
 		return data.elements;
+	}
+
+	/** Returns a pointer to the first element in the array.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ElementType* begin() const throw()
+	{
+		return data.elements;
+	}
+
+	/** Returns a pointer to the element which follows the last element in the array.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ElementType* end() const throw()
+	{
+		return data.elements + numUsed;
 	}
 
 	/** Finds the index of the first element which matches the value passed in.
@@ -9755,6 +9770,22 @@ public:
 		return data.elements;
 	}
 
+	/** Returns a pointer to the first element in the array.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ObjectClass** begin() const throw()
+	{
+		return data.elements;
+	}
+
+	/** Returns a pointer to the element which follows the last element in the array.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ObjectClass** end() const throw()
+	{
+		return data.elements + numUsed;
+	}
+
 	/** Finds the index of an object which might be in the array.
 
 		@param objectToLookFor	the object to look for
@@ -10513,7 +10544,7 @@ public:
 		// this happens, you must have done something dodgy!
 		jassert (object != other.object);
 
-		swapVariables (object, other.object);
+		std::swap (object, other.object);
 	}
 
 private:
@@ -10848,7 +10879,7 @@ public:
 		const ScopedLockType lock2 (otherHashMap.getLock());
 
 		slots.swapWithArray (otherHashMap.slots);
-		swapVariables (totalNumItems, otherHashMap.totalNumItems);
+		std::swap (totalNumItems, otherHashMap.totalNumItems);
 	}
 
 	/** Returns the CriticalSection that locks this structure.
@@ -13832,6 +13863,22 @@ public:
 						   : static_cast <ObjectClass*> (0);
 	}
 
+	/** Returns a pointer to the first element in the array.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ObjectClass** begin() const throw()
+	{
+		return data.elements;
+	}
+
+	/** Returns a pointer to the element which follows the last element in the array.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ObjectClass** end() const throw()
+	{
+		return data.elements + numUsed;
+	}
+
 	/** Finds the index of the first occurrence of an object in the array.
 
 		@param objectToLookFor	the object to look for
@@ -14233,8 +14280,8 @@ public:
 		if (isPositiveAndBelow (index1, numUsed)
 			 && isPositiveAndBelow (index2, numUsed))
 		{
-			swapVariables (data.elements [index1],
-						   data.elements [index2]);
+			std::swap (data.elements [index1],
+					   data.elements [index2]);
 		}
 	}
 
@@ -14294,7 +14341,7 @@ public:
 		const ScopedLockType lock2 (otherArray.getLock());
 
 		data.swapWith (otherArray.data);
-		swapVariables (numUsed, otherArray.numUsed);
+		std::swap (numUsed, otherArray.numUsed);
 	}
 
 	/** Compares this array to another one.
@@ -14664,6 +14711,22 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [numUsed - 1] : ElementType();
+	}
+
+	/** Returns a pointer to the first element in the set.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ElementType* begin() const throw()
+	{
+		return data.elements;
+	}
+
+	/** Returns a pointer to the element which follows the last element in the set.
+		This method is provided for compatibility with standard C++ iteration mechanisms.
+	*/
+	inline ElementType* end() const throw()
+	{
+		return data.elements + numUsed;
 	}
 
 	/** Finds the index of the first element which matches the value passed in.
@@ -20412,7 +20475,7 @@ public:
 	void swapWith (OptionalScopedPointer<ObjectType>& other) throw()
 	{
 		object.swapWith (other.object);
-		swapVariables (shouldDelete, other.shouldDelete);
+		std::swap (shouldDelete, other.shouldDelete);
 	}
 
 private:
@@ -21490,8 +21553,8 @@ private:
 
 	@see LocalisedStrings
 */
-#define TRANS(stringLiteral)	 \
-	LocalisedStrings::translateWithCurrentMappings (stringLiteral)
+#define TRANS(stringLiteral) \
+	JUCE_NAMESPACE::LocalisedStrings::translateWithCurrentMappings (stringLiteral)
 
 /**
 	Used to convert strings to localised foreign-language versions.

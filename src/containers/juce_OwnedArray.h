@@ -159,6 +159,23 @@ public:
     }
 
     //==============================================================================
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass** begin() const throw()
+    {
+        return data.elements;
+    }
+
+    /** Returns a pointer to the element which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass** end() const throw()
+    {
+        return data.elements + numUsed;
+    }
+
+    //==============================================================================
     /** Finds the index of an object which might be in the array.
 
         @param objectToLookFor    the object to look for

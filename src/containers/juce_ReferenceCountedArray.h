@@ -172,6 +172,23 @@ public:
     }
 
     //==============================================================================
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass** begin() const throw()
+    {
+        return data.elements;
+    }
+
+    /** Returns a pointer to the element which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass** end() const throw()
+    {
+        return data.elements + numUsed;
+    }
+
+    //==============================================================================
     /** Finds the index of the first occurrence of an object in the array.
 
         @param objectToLookFor    the object to look for
@@ -574,8 +591,8 @@ public:
         if (isPositiveAndBelow (index1, numUsed)
              && isPositiveAndBelow (index2, numUsed))
         {
-            swapVariables (data.elements [index1],
-                           data.elements [index2]);
+            std::swap (data.elements [index1],
+                       data.elements [index2]);
         }
     }
 
@@ -636,7 +653,7 @@ public:
         const ScopedLockType lock2 (otherArray.getLock());
 
         data.swapWith (otherArray.data);
-        swapVariables (numUsed, otherArray.numUsed);
+        std::swap (numUsed, otherArray.numUsed);
     }
 
     //==============================================================================

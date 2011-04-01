@@ -30,7 +30,7 @@
 #include "juce_Line.h"
 #include "juce_Rectangle.h"
 #include "../contexts/juce_Justification.h"
-#include "../../../containers/juce_Array.h"
+#include "../../../containers/juce_ArrayAllocationBase.h"
 #include "../../../io/streams/juce_InputStream.h"
 #include "../../../io/streams/juce_OutputStream.h"
 class Image;
