@@ -2068,7 +2068,7 @@ public:
     {
         const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber, getTransformWith (transform)));
 
-        if (et != 0)
+        if (et != 0 && clip != 0)
         {
             SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (*et);
             SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);

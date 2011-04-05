@@ -492,7 +492,12 @@ void Slider::setValue (double newValue,
             valueBox->hideEditor (true);
 
         lastCurrentValue = newValue;
-        currentValue = newValue;
+
+        // (need to do this comparison because the Value will use equalsWithSameType to compare
+        // the new and old values, so will generate unwanted change events if the type changes)
+        if (currentValue != newValue)
+            currentValue = newValue;
+
         updateText();
         repaint();
 

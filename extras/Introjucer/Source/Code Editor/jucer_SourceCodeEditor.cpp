@@ -36,13 +36,13 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
 {
     addAndMakeVisible (&editor);
 
-#if JUCE_MAC
+   #if JUCE_MAC
     Font font (10.6f);
-    font.setTypefaceName ("Andale Mono");
-#else
+    font.setTypefaceName ("Menlo Regular");
+   #else
     Font font (10.0f);
     font.setTypefaceName (Font::getDefaultMonospacedFontName());
-#endif
+   #endif
     editor.setFont (font);
 }
 

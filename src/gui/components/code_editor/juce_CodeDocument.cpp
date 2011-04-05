@@ -579,7 +579,8 @@ void CodeDocument::replaceAllContent (const String& newContent)
 
 bool CodeDocument::loadFromStream (InputStream& stream)
 {
-    replaceAllContent (stream.readEntireStreamAsString());
+    remove (0, getNumCharacters(), false);
+    insert (stream.readEntireStreamAsString(), 0, false);
     setSavePoint();
     clearUndoHistory();
     return true;

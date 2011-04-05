@@ -251,8 +251,8 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
     if (hostView != 0)
     {
         // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
-        [hostView setSize: NSMakeSize ([hostView size].width + (newWidth - component->getWidth()),
-                                       [hostView size].height + (newHeight - component->getHeight()))];
+        [hostView setFrameSize: NSMakeSize ([hostView frame].size.width + (newWidth - component->getWidth()),
+                                            [hostView frame].size.height + (newHeight - component->getHeight()))];
     }
    #else
     NSWindow* hostWindow = (NSWindow*) nsWindow;
@@ -273,12 +273,9 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
 
 void checkWindowVisibility (void* nsWindow, Component* comp)
 {
-   #if JUCE_64BIT
-    NSView* hostWindow = (NSView*) nsWindow;
-   #else
-    NSWindow* hostWindow = (NSWindow*) nsWindow;
+   #if ! JUCE_64BIT
+    comp->setVisible ([((NSWindow*) nsWindow) isVisible]);
    #endif
-    comp->setVisible ([hostWindow isVisible]);
 }
 
 void forwardCurrentKeyEventToHost (Component* comp)
