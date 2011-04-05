@@ -45,7 +45,9 @@
 //==============================================================================
 void initialiseMacRTAS()
 {
+   #if ! JUCE_64BIT
     NSApplicationLoad();
+   #endif
 }
 
 void* attachSubWindow (void* hostWindowRef, Component* comp)

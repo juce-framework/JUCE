@@ -33,12 +33,12 @@ BEGIN_JUCE_NAMESPACE
 
 enum VariantStreamMarkers
 {
-    varMarker_Int = 1,
-    varMarker_BoolTrue = 2,
+    varMarker_Int       = 1,
+    varMarker_BoolTrue  = 2,
     varMarker_BoolFalse = 3,
-    varMarker_Double = 4,
-    varMarker_String = 5,
-    varMarker_Int64 = 6
+    varMarker_Double    = 4,
+    varMarker_String    = 5,
+    varMarker_Int64     = 6
 };
 
 //==============================================================================

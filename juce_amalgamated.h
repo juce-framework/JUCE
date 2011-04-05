@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	66
+#define JUCE_BUILDNUMBER	67
 
 /** Current Juce version number.
 
@@ -15630,7 +15630,9 @@ private:
 	friend class MessageManager;
 	MessageListener* messageRecipient;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Message);
+	// Avoid the leak-detector because for plugins, the host can unload our DLL with undelivered
+	// messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
+	JUCE_DECLARE_NON_COPYABLE (Message);
 };
 
 #endif   // __JUCE_MESSAGE_JUCEHEADER__
@@ -15681,7 +15683,9 @@ public:
 
 private:
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackMessage);
+	// Avoid the leak-detector because for plugins, the host can unload our DLL with undelivered
+	// messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
+	JUCE_DECLARE_NON_COPYABLE (CallbackMessage);
 };
 
 #endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__

@@ -35,6 +35,7 @@ namespace CodeHelpers
     const String addEscapeChars (const String& text);
     const String createIncludeStatement (const File& includeFile, const File& targetFile);
     const String makeHeaderGuardName (const File& file);
+    const String makeBinaryDataIdentifierName (const File& file);
 
     const String stringLiteral (const String& text);
     const String stringLiteralIfNotEmpty (const String& text); // if the string's empty, this returns an empty string

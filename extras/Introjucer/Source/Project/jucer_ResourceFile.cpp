@@ -87,7 +87,28 @@ void ResourceFile::setClassName (const String& className_)
 
 void ResourceFile::addFile (const File& file)
 {
-    files.add (new File (file));
+    files.add (file);
+
+    const String variableNameRoot (CodeHelpers::makeBinaryDataIdentifierName (file));
+    String variableName (variableNameRoot);
+
+    int suffix = 2;
+    while (variableNames.contains (variableName))
+        variableName = variableNameRoot + String (suffix++);
+
+    variableNames.add (variableName);
+}
+
+const String ResourceFile::getDataVariableFor (const File& file) const
+{
+    jassert (files.indexOf (file) >= 0);
+    return variableNames [files.indexOf (file)];
+}
+
+const String ResourceFile::getSizeVariableFor (const File& file) const
+{
+    jassert (files.indexOf (file) >= 0);
+    return variableNames [files.indexOf (file)] + "Size";
 }
 
 int64 ResourceFile::getTotalDataSize() const
@@ -95,7 +116,7 @@ int64 ResourceFile::getTotalDataSize() const
     int64 total = 0;
 
     for (int i = 0; i < files.size(); ++i)
-        total += files.getUnchecked(i)->getSize();
+        total += files.getReference(i).getSize();
 
     return total;
 }
@@ -118,25 +139,12 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         header << CodeHelpers::createIncludeStatement (juceHeader, cppFile) << newLine;
 
     const String namespaceName (className);
-    StringArray variableNames, returnCodes;
+    StringArray returnCodes;
 
     int i;
     for (i = 0; i < files.size(); ++i)
-    {
-        String variableNameRoot (CodeHelpers::makeValidIdentifier (files.getUnchecked(i)->getFileName()
-                                                                       .replaceCharacters (" .", "__")
-                                                                       .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
-                                                                      false, true, false));
-        String variableName (variableNameRoot);
-
-        int suffix = 2;
-        while (variableNames.contains (variableName))
-            variableName = variableNameRoot + String (suffix++);
-
-        variableNames.add (variableName);
-        returnCodes.add ("numBytes = " + namespaceName + "::" + variableName + "Size; return "
-                            + namespaceName + "::" + variableName + ";");
-    }
+        returnCodes.add ("numBytes = " + namespaceName + "::" + variableNames[i] + "Size; return "
+                            + namespaceName + "::" + variableNames[i] + ";");
 
     cpp << CodeHelpers::createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
         << newLine
@@ -155,7 +163,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
     for (i = 0; i < files.size(); ++i)
     {
-        const File file (*files.getUnchecked(i));
+        const File& file = files.getReference(i);
         const int64 dataSize = file.getSize();
 
         ScopedPointer <InputStream> fileStream (file.createInputStream());

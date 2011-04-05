@@ -229,20 +229,20 @@ int64 Time::currentTimeMillis() throw()
         {
             // get the time once using normal library calls, and store the difference needed to
             // turn the millisecond counter into a real time.
-#if JUCE_WINDOWS
+          #if JUCE_WINDOWS
             struct _timeb t;
-  #ifdef USE_NEW_SECURE_TIME_FNS
+           #ifdef USE_NEW_SECURE_TIME_FNS
             _ftime_s (&t);
-  #else
+           #else
             _ftime (&t);
-  #endif
+           #endif
             correction = (((int64) t.time) * 1000 + t.millitm) - now;
-#else
+          #else
             struct timeval tv;
             struct timezone tz;
             gettimeofday (&tv, &tz);
             correction = (((int64) tv.tv_sec) * 1000 + tv.tv_usec / 1000) - now;
-#endif
+          #endif
         }
     }
 
@@ -378,30 +378,14 @@ const String Time::formatted (const String& format) const
 }
 
 //==============================================================================
-int Time::getYear() const throw()
-{
-    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_year + 1900;
-}
-
-int Time::getMonth() const throw()
-{
-    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mon;
-}
-
-int Time::getDayOfMonth() const throw()
-{
-    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mday;
-}
-
-int Time::getDayOfWeek() const throw()
-{
-    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_wday;
-}
-
-int Time::getHours() const throw()
-{
-    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_hour;
-}
+int Time::getYear() const throw()           { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_year + 1900; }
+int Time::getMonth() const throw()          { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mon; }
+int Time::getDayOfMonth() const throw()     { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mday; }
+int Time::getDayOfWeek() const throw()      { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_wday; }
+int Time::getHours() const throw()          { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_hour; }
+int Time::getMinutes() const throw()        { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_min; }
+int Time::getSeconds() const throw()        { return TimeHelpers::extendedModulo (millisSinceEpoch / 1000, 60); }
+int Time::getMilliseconds() const throw()   { return TimeHelpers::extendedModulo (millisSinceEpoch, 1000); }
 
 int Time::getHoursInAmPmFormat() const throw()
 {
@@ -420,21 +404,6 @@ bool Time::isAfternoon() const throw()
     return getHours() >= 12;
 }
 
-int Time::getMinutes() const throw()
-{
-    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_min;
-}
-
-int Time::getSeconds() const throw()
-{
-    return TimeHelpers::extendedModulo (millisSinceEpoch / 1000, 60);
-}
-
-int Time::getMilliseconds() const throw()
-{
-    return TimeHelpers::extendedModulo (millisSinceEpoch, 1000);
-}
-
 bool Time::isDaylightSavingTime() const throw()
 {
     return TimeHelpers::millisToLocal (millisSinceEpoch).tm_isdst != 0;
@@ -444,10 +413,10 @@ const String Time::getTimeZone() const throw()
 {
     String zone[2];
 
-#if JUCE_WINDOWS
+  #if JUCE_WINDOWS
     _tzset();
 
-  #ifdef USE_NEW_SECURE_TIME_FNS
+   #ifdef USE_NEW_SECURE_TIME_FNS
     for (int i = 0; i < 2; ++i)
     {
         char name[128] = { 0 };
@@ -455,17 +424,17 @@ const String Time::getTimeZone() const throw()
         _get_tzname (&length, name, 127, i);
         zone[i] = name;
     }
-  #else
+   #else
     const char** const zonePtr = (const char**) _tzname;
     zone[0] = zonePtr[0];
     zone[1] = zonePtr[1];
-  #endif
-#else
+   #endif
+  #else
     tzset();
     const char** const zonePtr = (const char**) tzname;
     zone[0] = zonePtr[0];
     zone[1] = zonePtr[1];
-#endif
+  #endif
 
     if (isDaylightSavingTime())
     {

@@ -34,7 +34,9 @@
 #include "../juce_PluginHeaders.h"
 #include "../juce_PluginHostType.h"
 
-#define ADD_CARBON_BODGE 1   // see note below..
+#if ! (JUCE_64BIT || defined (ADD_CARBON_BODGE))
+ #define ADD_CARBON_BODGE 1   // see note below..
+#endif
 
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
@@ -93,13 +95,27 @@ static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, vo
 //==============================================================================
 void initialiseMac()
 {
+   #if ! JUCE_64BIT
     NSApplicationLoad();
+   #endif
 }
 
 void* attachComponentToWindowRef (Component* comp, void* windowRef)
 {
     JUCE_AUTORELEASEPOOL
 
+  #if JUCE_64BIT
+    NSView* parentView = (NSView*) windowRef;
+
+   #if JucePlugin_EditorRequiresKeyboardFocus
+    comp->addToDesktop (0, parentView);
+   #else
+    comp->addToDesktop (ComponentPeer::windowIgnoresKeyPresses, parentView);
+   #endif
+
+    [[parentView window] setAcceptsMouseMovedEvents: YES];
+    return parentView;
+  #else
     NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
     [hostWindow retain];
     [hostWindow setCanHide: YES];
@@ -141,11 +157,11 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
 
     updateComponentPos (comp);
 
-#if ! JucePlugin_EditorRequiresKeyboardFocus
+   #if ! JucePlugin_EditorRequiresKeyboardFocus
     comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-#else
+   #else
     comp->addToDesktop (ComponentPeer::windowIsTemporary);
-#endif
+   #endif
 
     comp->setVisible (true);
     comp->toFront (false);
@@ -160,7 +176,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     [hostWindow orderFront: nil];
     [pluginWindow orderFront: nil];
 
-#if ADD_CARBON_BODGE
+   #if ADD_CARBON_BODGE
     {
         // Adds a callback bodge to work around some problems with wrapped
         // carbon windows..
@@ -176,14 +192,17 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
                                    (void*) hostWindow, &ref);
         comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
     }
-
-#endif
+   #endif
 
     return hostWindow;
+  #endif
 }
 
 void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 {
+   #if JUCE_64BIT
+    comp->removeFromDesktop();
+   #else
     {
         JUCE_AUTORELEASEPOOL
 
@@ -191,11 +210,11 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
                                     comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
         RemoveEventHandler (ref);
 
-#if ADD_CARBON_BODGE
+       #if ADD_CARBON_BODGE
         ref = (EventHandlerRef) (void*) (pointer_sized_int)
                   comp->getProperties() ["carbonEventRef"].toString().getHexValue64();
         RemoveEventHandler (ref);
-#endif
+       #endif
 
         HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                                 comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
@@ -220,15 +239,25 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
     // how many messages will be dispatched, which seems to be vital in Reaper)
     for (int i = 20; --i >= 0;)
         MessageManager::getInstance()->runDispatchLoopUntil (1);
+   #endif
 }
 
 void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host)
 {
+    JUCE_AUTORELEASEPOOL
+
+   #if JUCE_64BIT
+    NSView* hostView = (NSView*) nsWindow;
+    if (hostView != 0)
+    {
+        // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
+        [hostView setSize: NSMakeSize ([hostView size].width + (newWidth - component->getWidth()),
+                                       [hostView size].height + (newHeight - component->getHeight()))];
+    }
+   #else
     NSWindow* hostWindow = (NSWindow*) nsWindow;
     if (hostWindow != 0)
     {
-        JUCE_AUTORELEASEPOOL
-
         // Can't use the cocoa NSWindow resizing code, or it messes up in Live.
         Rect r;
         GetWindowBounds ((WindowRef) [hostWindow windowRef], kWindowContentRgn, &r);
@@ -239,19 +268,26 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
         r.left = r.top = 0;
         InvalWindowRect ((WindowRef) [hostWindow windowRef], &r);
     }
+   #endif
 }
 
 void checkWindowVisibility (void* nsWindow, Component* comp)
 {
+   #if JUCE_64BIT
+    NSView* hostWindow = (NSView*) nsWindow;
+   #else
     NSWindow* hostWindow = (NSWindow*) nsWindow;
+   #endif
     comp->setVisible ([hostWindow isVisible]);
 }
 
 void forwardCurrentKeyEventToHost (Component* comp)
 {
+   #if ! JUCE_64BIT
     NSWindow* win = [(NSView*) comp->getWindowHandle() window];
     [[win parentWindow] makeKeyWindow];
     [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+   #endif
 }
 
 

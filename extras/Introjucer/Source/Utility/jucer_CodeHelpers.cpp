@@ -186,6 +186,14 @@ namespace CodeHelpers
                 + "_" + String::toHexString (file.hashCode()).toUpperCase() + "__";
     }
 
+    const String makeBinaryDataIdentifierName (const File& file)
+    {
+        return makeValidIdentifier (file.getFileName()
+                                        .replaceCharacters (" .", "__")
+                                        .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
+                                    false, true, false);
+    }
+
     const String stringLiteral (const String& text)
     {
         if (text.isEmpty())
@@ -344,6 +352,8 @@ namespace CodeHelpers
             s << ", Font::bold";
         else if (font.isItalic())
             s << ", Font::italic";
+        else if (name != Font::getDefaultSansSerifFontName()) // need this param if we're using the typeface name constructor
+            s << ", Font::plain";
 
         return s + ")";
     }
