@@ -538,7 +538,7 @@ public:
                                                         // move rather than a real timer callback
 
         const Point<int> globalMousePos (Desktop::getMousePosition());
-        const Point<int> localMousePos (getLocalPoint (0, globalMousePos));
+        const Point<int> localMousePos (getLocalPoint (nullptr, globalMousePos));
 
         const uint32 now = Time::getMillisecondCounter();
 
@@ -701,7 +701,7 @@ private:
 
     void updateMouseOverStatus (const Point<int>& globalMousePos)
     {
-        const Point<int> relPos (getLocalPoint (0, globalMousePos));
+        const Point<int> relPos (getLocalPoint (nullptr, globalMousePos));
         isOver = reallyContains (relPos, true);
 
         if (activeSubMenu != nullptr)

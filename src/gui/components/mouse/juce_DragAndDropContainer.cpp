@@ -110,7 +110,7 @@ public:
         }
         else
         {
-            const Point<int> relPos (hit->getLocalPoint (0, screenPos));
+            const Point<int> relPos (hit->getLocalPoint (nullptr, screenPos));
             hit = hit->getComponentAt (relPos.getX(), relPos.getY());
         }
 
@@ -124,7 +124,7 @@ public:
 
             if (ddt != nullptr && ddt->isInterestedInDragSource (dragDescLocal, source))
             {
-                relativePos = hit->getLocalPoint (0, screenPos);
+                relativePos = hit->getLocalPoint (nullptr, screenPos);
                 return ddt;
             }
 
@@ -199,7 +199,7 @@ public:
         Point<int> newPos (screenPos + imageOffset);
 
         if (getParentComponent() != nullptr)
-            newPos = getParentComponent()->getLocalPoint (0, newPos);
+            newPos = getParentComponent()->getLocalPoint (nullptr, newPos);
 
         //if (newX != getX() || newY != getY())
         {
@@ -344,7 +344,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             const int lo = 150;
             const int hi = 400;
 
-            Point<int> relPos (sourceComponent->getLocalPoint (0, lastMouseDown));
+            Point<int> relPos (sourceComponent->getLocalPoint (nullptr, lastMouseDown));
             Point<int> clipped (dragImage.getBounds().getConstrainedPoint (relPos));
 
             for (int y = dragImage.getHeight(); --y >= 0;)

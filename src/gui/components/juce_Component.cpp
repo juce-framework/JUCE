@@ -947,12 +947,12 @@ const Rectangle<int> Component::getLocalArea (const Component* source, const Rec
 
 const Point<int> Component::localPointToGlobal (const Point<int>& point) const
 {
-    return ComponentHelpers::convertCoordinate (0, this, point);
+    return ComponentHelpers::convertCoordinate (nullptr, this, point);
 }
 
 const Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
 {
-    return ComponentHelpers::convertCoordinate (0, this, area);
+    return ComponentHelpers::convertCoordinate (nullptr, this, area);
 }
 
 /* Deprecated methods... */
@@ -963,7 +963,7 @@ const Point<int> Component::relativePositionToGlobal (const Point<int>& relative
 
 const Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
 {
-    return getLocalPoint (0, screenPosition);
+    return getLocalPoint (nullptr, screenPosition);
 }
 
 const Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
@@ -2473,7 +2473,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
         const MouseEvent me (source, relativePos,
                              oldModifiers, this, this, time,
-                             getLocalPoint (0, source.getLastMouseDownPosition()),
+                             getLocalPoint (nullptr, source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
                              source.hasMouseMovedSignificantlySincePressed());
@@ -2516,7 +2516,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
         const MouseEvent me (source, relativePos,
                              source.getCurrentModifiers(), this, this, time,
-                             getLocalPoint (0, source.getLastMouseDownPosition()),
+                             getLocalPoint (nullptr, source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
                              source.hasMouseMovedSignificantlySincePressed());
@@ -2967,7 +2967,7 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() noexcept
 
 const Point<int> Component::getMouseXYRelative() const
 {
-    return getLocalPoint (0, Desktop::getMousePosition());
+    return getLocalPoint (nullptr, Desktop::getMousePosition());
 }
 
 //==============================================================================

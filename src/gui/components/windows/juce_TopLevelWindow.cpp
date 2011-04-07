@@ -298,7 +298,7 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
 
         if (getParentComponent() != nullptr)
         {
-            targetCentre = getParentComponent()->getLocalPoint (0, targetCentre);
+            targetCentre = getParentComponent()->getLocalPoint (nullptr, targetCentre);
             parentArea = getParentComponent()->getLocalBounds();
         }
 

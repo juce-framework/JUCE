@@ -45,11 +45,11 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_, const Strin
     : name (name_),
       value (value_)
 {
-  #if JUCE_DEBUG
+   #if JUCE_DEBUG
     // this checks whether the attribute name string contains any illegal characters..
     for (String::CharPointerType t (name.getCharPointer()); ! t.isEmpty(); ++t)
         jassert (t.isLetterOrDigit() || *t == '_' || *t == '-' || *t == ':');
-  #endif
+   #endif
 }
 
 inline bool XmlElement::XmlAttributeNode::hasName (const String& nameToMatch) const noexcept
@@ -365,7 +365,7 @@ bool XmlElement::writeToFile (const File& file,
 //==============================================================================
 bool XmlElement::hasTagName (const String& tagNameWanted) const noexcept
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // if debugging, check that the case is actually the same, because
     // valid xml is case-sensitive, and although this lets it pass, it's
     // better not to..
@@ -378,9 +378,9 @@ bool XmlElement::hasTagName (const String& tagNameWanted) const noexcept
     {
         return false;
     }
-#else
+   #else
     return tagName.equalsIgnoreCase (tagNameWanted);
-#endif
+   #endif
 }
 
 XmlElement* XmlElement::getNextElementWithTagName (const String& requiredTagName) const

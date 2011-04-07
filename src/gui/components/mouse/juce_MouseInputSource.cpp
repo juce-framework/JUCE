@@ -79,7 +79,7 @@ public:
         if (peer != nullptr)
         {
             Component* const comp = peer->getComponent();
-            const Point<int> relativePos (comp->getLocalPoint (0, screenPos));
+            const Point<int> relativePos (comp->getLocalPoint (nullptr, screenPos));
 
             // (the contains() call is needed to test for overlapping desktop windows)
             if (comp->contains (relativePos))
@@ -100,44 +100,44 @@ public:
     //==============================================================================
     void sendMouseEnter (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " enter: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseEnter (source, comp->getLocalPoint (0, screenPos), time);
+        //DBG ("Mouse " + String (source.getIndex()) + " enter: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseEnter (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseExit (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " exit: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseExit (source, comp->getLocalPoint (0, screenPos), time);
+        //DBG ("Mouse " + String (source.getIndex()) + " exit: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseExit (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseMove (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " move: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseMove (source, comp->getLocalPoint (0, screenPos), time);
+        //DBG ("Mouse " + String (source.getIndex()) + " move: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseMove (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseDown (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " down: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseDown (source, comp->getLocalPoint (0, screenPos), time);
+        //DBG ("Mouse " + String (source.getIndex()) + " down: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseDown (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseDrag (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " drag: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseDrag (source, comp->getLocalPoint (0, screenPos), time);
+        //DBG ("Mouse " + String (source.getIndex()) + " drag: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseDrag (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
     void sendMouseUp (Component* const comp, const Point<int>& screenPos, const Time& time)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " up: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseUp (source, comp->getLocalPoint (0, screenPos), time, getCurrentModifiers());
+        //DBG ("Mouse " + String (source.getIndex()) + " up: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseUp (source, comp->getLocalPoint (nullptr, screenPos), time, getCurrentModifiers());
     }
 
     void sendMouseWheel (Component* const comp, const Point<int>& screenPos, const Time& time, float x, float y)
     {
-        //DBG ("Mouse " + String (source.getIndex()) + " wheel: " + comp->getLocalPoint (0, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseWheel (source, comp->getLocalPoint (0, screenPos), time, x, y);
+        //DBG ("Mouse " + String (source.getIndex()) + " wheel: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseWheel (source, comp->getLocalPoint (nullptr, screenPos), time, x, y);
     }
 
     //==============================================================================
@@ -219,7 +219,7 @@ public:
 
         if (newPeer != lastPeer)
         {
-            setComponentUnderMouse (0, screenPos, time);
+            setComponentUnderMouse (nullptr, screenPos, time);
             lastPeer = newPeer;
             setComponentUnderMouse (findComponentAt (screenPos), screenPos, time);
         }

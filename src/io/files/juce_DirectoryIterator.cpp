@@ -55,7 +55,7 @@ DirectoryIterator::~DirectoryIterator()
 
 bool DirectoryIterator::next()
 {
-    return next (0, 0, 0, 0, 0, 0);
+    return next (nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
 bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResult, int64* const fileSize,

@@ -55,7 +55,7 @@ public:
     //==============================================================================
     /** Changes the model object to use to control the bar.
 
-        This can be 0, in which case the bar will be empty. Don't delete the object
+        This can be a null pointer, in which case the bar will be empty. Don't delete the object
         that is passed-in while it's still being used by this MenuBar.
     */
     void setModel (MenuBarModel* newModel);

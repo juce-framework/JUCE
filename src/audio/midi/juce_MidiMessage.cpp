@@ -1059,7 +1059,7 @@ const String MidiMessage::getRhythmInstrumentName (const int n)
         "Mute Triangle", "Open Triangle"
     };
 
-    return (n >= 35 && n <= 81) ? names [n - 35] : (const char*) 0;
+    return (n >= 35 && n <= 81) ? names [n - 35] : (const char*) nullptr;
 }
 
 const String MidiMessage::getControllerName (const int n)
@@ -1090,7 +1090,7 @@ const String MidiMessage::getControllerName (const int n)
         "Poly Operation"
     };
 
-    return isPositiveAndBelow (n, (int) 128) ? names[n] : (const char*) 0;
+    return isPositiveAndBelow (n, (int) 128) ? names[n] : (const char*) nullptr;
 }
 
 END_JUCE_NAMESPACE

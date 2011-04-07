@@ -95,8 +95,12 @@ public:
                     false if there are no more matching files. If it returns false, then none of the
                     parameters will be filled-in.
     */
-    bool next (bool* isDirectory, bool* isHidden, int64* fileSize,
-               Time* modTime, Time* creationTime, bool* isReadOnly);
+    bool next (bool* isDirectory,
+               bool* isHidden,
+               int64* fileSize,
+               Time* modTime,
+               Time* creationTime,
+               bool* isReadOnly);
 
     /** Returns the file that the iterator is currently pointing at.
 

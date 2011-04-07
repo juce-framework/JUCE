@@ -156,7 +156,7 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
 
         if (c->isVisible())
         {
-            const Point<int> relative (c->getLocalPoint (0, screenPosition));
+            const Point<int> relative (c->getLocalPoint (nullptr, screenPosition));
 
             if (c->contains (relative))
                 return c->getComponentAt (relative);
@@ -353,7 +353,7 @@ void Desktop::sendMouseMove()
         if (target != nullptr)
         {
             Component::BailOutChecker checker (target);
-            const Point<int> pos (target->getLocalPoint (0, lastFakeMouseMove));
+            const Point<int> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
             const Time now (Time::getCurrentTime());
 
             const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),

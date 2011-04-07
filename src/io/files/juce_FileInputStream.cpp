@@ -37,7 +37,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos);
 //==============================================================================
 FileInputStream::FileInputStream (const File& f)
     : file (f),
-      fileHandle (0),
+      fileHandle (nullptr),
       currentPosition (0),
       totalSize (0),
       needToSeek (true)

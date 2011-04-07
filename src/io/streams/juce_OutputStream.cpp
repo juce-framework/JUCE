@@ -53,16 +53,16 @@ void juce_CheckForDanglingStreams()
 OutputStream::OutputStream()
     : newLineString (NewLine::getDefault())
 {
-  #if JUCE_DEBUG
+   #if JUCE_DEBUG
     activeStreams.add (this);
-  #endif
+   #endif
 }
 
 OutputStream::~OutputStream()
 {
-  #if JUCE_DEBUG
+   #if JUCE_DEBUG
     activeStreams.removeValue (this);
-  #endif
+   #endif
 }
 
 //==============================================================================

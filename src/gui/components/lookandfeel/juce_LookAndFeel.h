@@ -88,7 +88,7 @@ public:
     /** Changes the default look-and-feel.
 
         @param newDefaultLookAndFeel    the new look-and-feel object to use - if this is
-                                        set to 0, it will revert to using the default one. The
+                                        set to null, it will revert to using the default one. The
                                         object passed-in must be deleted by the caller when
                                         it's no longer needed.
         @see getDefaultLookAndFeel

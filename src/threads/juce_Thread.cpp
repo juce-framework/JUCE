@@ -180,7 +180,7 @@ void Thread::startThread()
 
     threadShouldExit_ = false;
 
-    if (threadHandle_ == 0)
+    if (threadHandle_ == nullptr)
     {
         launchThread();
         setThreadPriority (threadHandle_, threadPriority_);
@@ -192,7 +192,7 @@ void Thread::startThread (const int priority)
 {
     const ScopedLock sl (startStopLock);
 
-    if (threadHandle_ == 0)
+    if (threadHandle_ == nullptr)
     {
         threadPriority_ = priority;
         startThread();
@@ -205,7 +205,7 @@ void Thread::startThread (const int priority)
 
 bool Thread::isThreadRunning() const
 {
-    return threadHandle_ != 0;
+    return threadHandle_ != nullptr;
 }
 
 //==============================================================================
@@ -259,7 +259,7 @@ void Thread::stopThread (const int timeOutMilliseconds)
             killThread();
 
             RunningThreadsList::getInstance().remove (this);
-            threadHandle_ = 0;
+            threadHandle_ = nullptr;
             threadId_ = 0;
         }
     }

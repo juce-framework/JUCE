@@ -18986,8 +18986,12 @@ public:
 					false if there are no more matching files. If it returns false, then none of the
 					parameters will be filled-in.
 	*/
-	bool next (bool* isDirectory, bool* isHidden, int64* fileSize,
-			   Time* modTime, Time* creationTime, bool* isReadOnly);
+	bool next (bool* isDirectory,
+			   bool* isHidden,
+			   int64* fileSize,
+			   Time* modTime,
+			   Time* creationTime,
+			   bool* isReadOnly);
 
 	/** Returns the file that the iterator is currently pointing at.
 
@@ -60278,7 +60282,7 @@ public:
 	/** Changes the default look-and-feel.
 
 		@param newDefaultLookAndFeel	the new look-and-feel object to use - if this is
-										set to 0, it will revert to using the default one. The
+										set to null, it will revert to using the default one. The
 										object passed-in must be deleted by the caller when
 										it's no longer needed.
 		@see getDefaultLookAndFeel
@@ -60992,7 +60996,7 @@ public:
 
 	/** Changes the model object to use to control the bar.
 
-		This can be 0, in which case the bar will be empty. Don't delete the object
+		This can be a null pointer, in which case the bar will be empty. Don't delete the object
 		that is passed-in while it's still being used by this MenuBar.
 	*/
 	void setModel (MenuBarModel* newModel);
