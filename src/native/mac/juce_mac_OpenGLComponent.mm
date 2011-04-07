@@ -273,13 +273,13 @@ OpenGLContext* OpenGLComponent::createContext()
     ScopedPointer<WindowedGLContext> c (new WindowedGLContext (*this, preferredPixelFormat,
                                                                contextToShareListsWith != nullptr ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : 0));
 
-    return (c->renderContext != nil) ? c.release() : 0;
+    return (c->renderContext != nil) ? c.release() : nullptr;
 }
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
     return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle()
-                              : 0;
+                              : nullptr;
 }
 
 void juce_glViewport (const int w, const int h)
@@ -533,7 +533,7 @@ OpenGLContext* OpenGLComponent::createContext()
                                 dynamic_cast <const GLESContext*> (contextToShareListsWith),
                                 type == openGLES2 ? kEAGLRenderingAPIOpenGLES2 : kEAGLRenderingAPIOpenGLES1);
 
-    return 0;
+    return nullptr;
 }
 
 void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,

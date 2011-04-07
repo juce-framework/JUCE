@@ -43,7 +43,7 @@ int MidiOutput::getDefaultDeviceIndex()
 
 MidiOutput* MidiOutput::openDevice (int index)
 {
-    return 0;
+    return nullptr;
 }
 
 MidiOutput::~MidiOutput()
@@ -100,7 +100,7 @@ const StringArray MidiInput::getDevices()
 
 MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 {
-    return 0;
+    return nullptr;
 }
 
 

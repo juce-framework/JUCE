@@ -565,7 +565,7 @@ void* Component::getWindowHandle() const
     if (peer != nullptr)
         return peer->getNativeHandle();
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================
@@ -1309,7 +1309,7 @@ Component* Component::getComponentAt (const Point<int>& position)
         return this;
     }
 
-    return 0;
+    return nullptr;
 }
 
 Component* Component::getComponentAt (const int x, const int y)
@@ -2087,7 +2087,7 @@ void Component::colourChanged()
 //==============================================================================
 MarkerList* Component::getMarkers (bool /*xAxis*/)
 {
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================
@@ -3020,7 +3020,7 @@ ComponentPeer* Component::getPeer() const
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);
     else if (parentComponent == nullptr)
-        return 0;
+        return nullptr;
 
     return parentComponent->getPeer();
 }

@@ -35,7 +35,7 @@ static void* juce_libjack_handle = nullptr;
 void* juce_load_jack_function (const char* const name)
 {
     if (juce_libjack_handle == 0)
-        return 0;
+        return nullptr;
 
     return dlsym (juce_libjack_handle, name);
 }
@@ -580,7 +580,7 @@ public:
                                           inputIds [inputIndex],
                                           outputIds [outputIndex]);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================

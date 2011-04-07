@@ -133,7 +133,7 @@ var* NamedValueSet::getVarPointer (const Identifier& name) const
         if (i->name == name)
             return &(i->value);
 
-    return 0;
+    return nullptr;
 }
 
 bool NamedValueSet::set (const Identifier& name, const var& newValue)

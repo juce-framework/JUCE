@@ -145,7 +145,7 @@ public:
                 return faces[i];
 
         if (! create)
-            return 0;
+            return nullptr;
 
         FreeTypeFontFace* newFace = new FreeTypeFontFace (familyName);
         faces.add (newFace);

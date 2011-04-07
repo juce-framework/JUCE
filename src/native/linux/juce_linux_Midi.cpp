@@ -432,8 +432,8 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
 const StringArray MidiOutput::getDevices()                          { return StringArray(); }
 int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
-MidiOutput* MidiOutput::openDevice (int)                            { return 0; }
-MidiOutput* MidiOutput::createNewDevice (const String&)             { return 0; }
+MidiOutput* MidiOutput::openDevice (int)                            { return nullptr; }
+MidiOutput* MidiOutput::createNewDevice (const String&)             { return nullptr; }
 MidiOutput::~MidiOutput()   {}
 void MidiOutput::reset()    {}
 bool MidiOutput::getVolume (float&, float&)     { return false; }
@@ -446,8 +446,8 @@ void MidiInput::start() {}
 void MidiInput::stop()  {}
 int MidiInput::getDefaultDeviceIndex()      { return 0; }
 const StringArray MidiInput::getDevices()   { return StringArray(); }
-MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { return 0; }
-MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return 0; }
+MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { return nullptr; }
+MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 
 #endif
 #endif

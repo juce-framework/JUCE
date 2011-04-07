@@ -53,7 +53,7 @@ namespace MouseCursorHelpers
             return createFromImage (im, hx * im.getWidth(), hy * im.getHeight());
 
         jassertfalse;
-        return 0;
+        return nullptr;
     }
 }
 
@@ -128,8 +128,8 @@ void MouseCursor::showInWindow (ComponentPeer*) const
 
 #else
 
-void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)  { return 0; }
-void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)             { return 0; }
+void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)  { return nullptr; }
+void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)             { return nullptr; }
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)           {}
 void MouseCursor::showInAllWindows() const                                                      {}
 void MouseCursor::showInWindow (ComponentPeer*) const                                           {}

@@ -321,7 +321,7 @@ private:
             }
         }
 
-        return 0;
+        return nil;
     }
 
     static void flashMenuBar (NSMenu* menu)
@@ -550,7 +550,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
 MenuBarModel* MenuBarModel::getMacMainMenu()
 {
     return JuceMainMenuHandler::instance != nullptr
-             ? JuceMainMenuHandler::instance->currentModel : 0;
+             ? JuceMainMenuHandler::instance->currentModel : nullptr;
 }
 
 void juce_initialiseMacMainMenu()

@@ -85,7 +85,7 @@ ComponentPeer* ComponentPeer::getPeerFor (const Component* const component) noex
             return peer;
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
@@ -283,7 +283,7 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
             return ti;
     }
 
-    return 0;
+    return nullptr;
 }
 
 void ComponentPeer::dismissPendingTextInput()
@@ -431,7 +431,7 @@ namespace ComponentPeerHelpers
             c = c->getParentComponent();
         }
 
-        return 0;
+        return nullptr;
     }
 }
 

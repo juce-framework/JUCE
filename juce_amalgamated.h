@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	69
+#define JUCE_BUILDNUMBER	70
 
 /** Current Juce version number.
 
@@ -9139,7 +9139,7 @@ public:
 			l = &(l->item->nextListItem);
 		}
 
-		return 0;
+		return nullptr;
 	}
 
 	/** Copies the items in the list to an array.
@@ -14947,7 +14947,7 @@ public:
 			return removed;
 		}
 
-		return 0;
+		return ElementType();
 	}
 
 	/** Removes an item from the set.
@@ -16484,7 +16484,7 @@ public:
 
 		If it's not possible to merge the two actions, the method should return zero.
 	*/
-	virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { (void) nextAction; return 0; }
+	virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { (void) nextAction; return nullptr; }
 };
 
 #endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
@@ -31206,7 +31206,7 @@ public:
 			p = p->parentComponent;
 		}
 
-		return 0;
+		return nullptr;
 	}
 
 	/** Returns the highest-level component which contains this one or its parents.
@@ -47375,7 +47375,7 @@ public:
 	bool producesMidi() const;
 
 	bool hasEditor() const			  { return false; }
-	AudioProcessorEditor* createEditor()		{ return 0; }
+	AudioProcessorEditor* createEditor()		{ return nullptr; }
 
 	int getNumParameters()			  { return 0; }
 	const String getParameterName (int)		 { return String::empty; }
@@ -54259,7 +54259,7 @@ public:
 		component you like. It's most useful if you're doing things like drag-and-drop
 		of items, or want to use a Label component to edit item names, etc.
 	*/
-	virtual Component* createItemComponent()			{ return 0; }
+	virtual Component* createItemComponent()			{ return nullptr; }
 
 	/** Draws the item's contents.
 

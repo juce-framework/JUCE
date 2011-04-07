@@ -1470,7 +1470,7 @@ namespace
         catch (...)
         {}
 
-        return 0;
+        return nullptr;
     }
 }
 

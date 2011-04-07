@@ -296,7 +296,7 @@ public:
             return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
                                   path, transform);
 
-        return 0;
+        return nullptr;
     }
 
     bool getOutlineForGlyph (int glyphNumber, Path& path)

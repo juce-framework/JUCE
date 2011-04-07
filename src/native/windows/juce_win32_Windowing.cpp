@@ -830,7 +830,7 @@ public:
         if (h != 0 && GetWindowLongPtr (h, GWLP_USERDATA) == improbableWindowNumber)
             return (Win32ComponentPeer*) (pointer_sized_int) GetWindowLongPtr (h, 8);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -1084,7 +1084,7 @@ private:
     static void* createWindowCallback (void* userData)
     {
         static_cast <Win32ComponentPeer*> (userData)->createWindow();
-        return 0;
+        return nullptr;
     }
 
     void createWindow()
@@ -1174,25 +1174,25 @@ private:
     {
         RevokeDragDrop ((HWND) handle);
         DestroyWindow ((HWND) handle);
-        return 0;
+        return nullptr;
     }
 
     static void* toFrontCallback1 (void* h)
     {
         SetForegroundWindow ((HWND) h);
-        return 0;
+        return nullptr;
     }
 
     static void* toFrontCallback2 (void* h)
     {
         SetWindowPos ((HWND) h, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-        return 0;
+        return nullptr;
     }
 
     static void* setFocusCallback (void* h)
     {
         SetFocus ((HWND) h);
-        return 0;
+        return nullptr;
     }
 
     static void* getFocusCallback (void*)
@@ -2773,7 +2773,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
         return mb->getResult() != 0;
 
     mb.release();
-    return 0;
+    return false;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,

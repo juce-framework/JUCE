@@ -105,7 +105,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (const uint32 nodeI
         if (nodes.getUnchecked(i)->id == nodeId)
             return nodes.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const newProcessor,
@@ -114,7 +114,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
     if (newProcessor == nullptr)
     {
         jassertfalse;
-        return 0;
+        return nullptr;
     }
 
     if (nodeId == 0)
@@ -186,7 +186,7 @@ const AudioProcessorGraph::Connection* AudioProcessorGraph::getConnectionBetween
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool AudioProcessorGraph::isConnected (const uint32 possibleSourceNodeId,
@@ -1252,7 +1252,7 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::isOutput() const
 }
 
 bool AudioProcessorGraph::AudioGraphIOProcessor::hasEditor() const                  { return false; }
-AudioProcessorEditor* AudioProcessorGraph::AudioGraphIOProcessor::createEditor()    { return 0; }
+AudioProcessorEditor* AudioProcessorGraph::AudioGraphIOProcessor::createEditor()    { return nullptr; }
 
 int AudioProcessorGraph::AudioGraphIOProcessor::getNumParameters()                  { return 0; }
 const String AudioProcessorGraph::AudioGraphIOProcessor::getParameterName (int)     { return String::empty; }

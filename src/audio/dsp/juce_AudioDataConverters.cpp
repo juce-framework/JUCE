@@ -191,9 +191,9 @@ void AudioDataConverters::convertFloatToFloat32LE (const float* source, void* de
     {
         *(float*) d = source[i];
 
-#if JUCE_BIG_ENDIAN
+       #if JUCE_BIG_ENDIAN
         *(uint32*) d = ByteOrder::swap (*(uint32*) d);
-#endif
+       #endif
 
         d += destBytesPerSample;
     }
@@ -209,9 +209,9 @@ void AudioDataConverters::convertFloatToFloat32BE (const float* source, void* de
     {
         *(float*) d = source[i];
 
-#if JUCE_LITTLE_ENDIAN
+       #if JUCE_LITTLE_ENDIAN
         *(uint32*) d = ByteOrder::swap (*(uint32*) d);
-#endif
+       #endif
 
         d += destBytesPerSample;
     }
@@ -376,10 +376,10 @@ void AudioDataConverters::convertFloat32LEToFloat (const void* const source, flo
     {
         dest[i] = *(float*)s;
 
-#if JUCE_BIG_ENDIAN
+       #if JUCE_BIG_ENDIAN
         uint32* const d = (uint32*) (dest + i);
         *d = ByteOrder::swap (*d);
-#endif
+       #endif
 
         s += srcBytesPerSample;
     }
@@ -393,10 +393,10 @@ void AudioDataConverters::convertFloat32BEToFloat (const void* const source, flo
     {
         dest[i] = *(float*)s;
 
-#if JUCE_LITTLE_ENDIAN
+       #if JUCE_LITTLE_ENDIAN
         uint32* const d = (uint32*) (dest + i);
         *d = ByteOrder::swap (*d);
-#endif
+       #endif
 
         s += srcBytesPerSample;
     }
@@ -411,41 +411,15 @@ void AudioDataConverters::convertFloatToFormat (const DataFormat destFormat,
 {
     switch (destFormat)
     {
-    case int16LE:
-        convertFloatToInt16LE (source, dest, numSamples);
-        break;
-
-    case int16BE:
-        convertFloatToInt16BE (source, dest, numSamples);
-        break;
-
-    case int24LE:
-        convertFloatToInt24LE (source, dest, numSamples);
-        break;
-
-    case int24BE:
-        convertFloatToInt24BE (source, dest, numSamples);
-        break;
-
-    case int32LE:
-        convertFloatToInt32LE (source, dest, numSamples);
-        break;
-
-    case int32BE:
-        convertFloatToInt32BE (source, dest, numSamples);
-        break;
-
-    case float32LE:
-        convertFloatToFloat32LE (source, dest, numSamples);
-        break;
-
-    case float32BE:
-        convertFloatToFloat32BE (source, dest, numSamples);
-        break;
-
-    default:
-        jassertfalse;
-        break;
+        case int16LE:       convertFloatToInt16LE   (source, dest, numSamples); break;
+        case int16BE:       convertFloatToInt16BE   (source, dest, numSamples); break;
+        case int24LE:       convertFloatToInt24LE   (source, dest, numSamples); break;
+        case int24BE:       convertFloatToInt24BE   (source, dest, numSamples); break;
+        case int32LE:       convertFloatToInt32LE   (source, dest, numSamples); break;
+        case int32BE:       convertFloatToInt32BE   (source, dest, numSamples); break;
+        case float32LE:     convertFloatToFloat32LE (source, dest, numSamples); break;
+        case float32BE:     convertFloatToFloat32BE (source, dest, numSamples); break;
+        default:            jassertfalse; break;
     }
 }
 
@@ -456,41 +430,15 @@ void AudioDataConverters::convertFormatToFloat (const DataFormat sourceFormat,
 {
     switch (sourceFormat)
     {
-    case int16LE:
-        convertInt16LEToFloat (source, dest, numSamples);
-        break;
-
-    case int16BE:
-        convertInt16BEToFloat (source, dest, numSamples);
-        break;
-
-    case int24LE:
-        convertInt24LEToFloat (source, dest, numSamples);
-        break;
-
-    case int24BE:
-        convertInt24BEToFloat (source, dest, numSamples);
-        break;
-
-    case int32LE:
-        convertInt32LEToFloat (source, dest, numSamples);
-        break;
-
-    case int32BE:
-        convertInt32BEToFloat (source, dest, numSamples);
-        break;
-
-    case float32LE:
-        convertFloat32LEToFloat (source, dest, numSamples);
-        break;
-
-    case float32BE:
-        convertFloat32BEToFloat (source, dest, numSamples);
-        break;
-
-    default:
-        jassertfalse;
-        break;
+        case int16LE:       convertInt16LEToFloat   (source, dest, numSamples); break;
+        case int16BE:       convertInt16BEToFloat   (source, dest, numSamples); break;
+        case int24LE:       convertInt24LEToFloat   (source, dest, numSamples); break;
+        case int24BE:       convertInt24BEToFloat   (source, dest, numSamples); break;
+        case int32LE:       convertInt32LEToFloat   (source, dest, numSamples); break;
+        case int32BE:       convertInt32BEToFloat   (source, dest, numSamples); break;
+        case float32LE:     convertFloat32LEToFloat (source, dest, numSamples); break;
+        case float32BE:     convertFloat32BEToFloat (source, dest, numSamples); break;
+        default:            jassertfalse; break;
     }
 }
 
@@ -532,6 +480,7 @@ void AudioDataConverters::deinterleaveSamples (const float* const source,
 }
 
 
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"

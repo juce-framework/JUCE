@@ -423,7 +423,7 @@ CameraDevice* CameraDevice::openDevice (int index,
     if (static_cast <QTCameraDeviceInteral*> (d->internal)->openingError.isEmpty())
         return d.release();
 
-    return 0;
+    return nullptr;
 }
 
 #endif

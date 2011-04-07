@@ -573,9 +573,9 @@ bool MidiOutput::getVolume (float& /*leftVol*/, float& /*rightVol*/)        { re
 void MidiOutput::setVolume (float /*leftVol*/, float /*rightVol*/)          {}
 void MidiOutput::sendMessageNow (const MidiMessage& message)                {}
 const StringArray MidiOutput::getDevices()                                  { return StringArray(); }
-MidiOutput* MidiOutput::openDevice (int index)                              { return 0; }
+MidiOutput* MidiOutput::openDevice (int index)                              { return nullptr; }
 const StringArray MidiInput::getDevices()                                   { return StringArray(); }
-MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)   { return 0; }
+MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)   { return nullptr; }
 
 #endif
 

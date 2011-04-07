@@ -592,7 +592,7 @@ public:
     SharedImage* clone()
     {
         jassertfalse;
-        return 0;
+        return nullptr;
     }
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
@@ -2928,7 +2928,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
     Window root = RootWindow (display, DefaultScreen (display));
     unsigned int cursorW, cursorH;
     if (! XQueryBestCursor (display, root, imageW, imageH, &cursorW, &cursorH))
-        return 0;
+        return nullptr;
 
     Image im (Image::ARGB, cursorW, cursorH, true);
 
@@ -3268,7 +3268,7 @@ OpenGLContext* OpenGLComponent::createContext()
     ScopedPointer<WindowedGLContext> c (new WindowedGLContext (this, preferredPixelFormat,
                                                                contextToShareListsWith != 0 ? (GLXContext) contextToShareListsWith->getRawContext() : 0));
 
-    return (c->renderContext != 0) ? c.release() : 0;
+    return (c->renderContext != 0) ? c.release() : nullptr;
 }
 
 void juce_glViewport (const int w, const int h)

@@ -60,7 +60,7 @@ ThumbnailCacheEntry* AudioThumbnailCache::findThumbFor (const int64 hash) const
         if (thumbs.getUnchecked(i)->hash == hash)
             return thumbs.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode)

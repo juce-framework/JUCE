@@ -943,7 +943,7 @@ void LookAndFeel::drawScrollbar (Graphics& g,
 
 ImageEffectFilter* LookAndFeel::getScrollbarEffect()
 {
-    return 0;
+    return nullptr;
 }
 
 int LookAndFeel::getMinimumScrollbarThumbSize (ScrollBar& scrollbar)
@@ -1733,7 +1733,7 @@ Label* LookAndFeel::createSliderTextBox (Slider& slider)
 
 ImageEffectFilter* LookAndFeel::getSliderEffect()
 {
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================
@@ -2028,7 +2028,7 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
     }
 
     jassertfalse;
-    return 0;
+    return nullptr;
 }
 
 void LookAndFeel::positionDocumentWindowButtons (DocumentWindow&,

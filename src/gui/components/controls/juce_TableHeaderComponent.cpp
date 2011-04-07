@@ -808,7 +808,7 @@ TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (const int 
         if (columns.getUnchecked(i)->id == id)
             return columns.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 int TableHeaderComponent::visibleIndexToTotalIndex (const int visibleIndex) const

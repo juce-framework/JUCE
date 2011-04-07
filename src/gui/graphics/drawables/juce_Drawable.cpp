@@ -168,7 +168,7 @@ Drawable* Drawable::createFromImageFile (const File& file)
 {
     const ScopedPointer <FileInputStream> fin (file.createInputStream());
 
-    return fin != nullptr ? createFromImageDataStream (*fin) : 0;
+    return fin != nullptr ? createFromImageDataStream (*fin) : nullptr;
 }
 
 //==============================================================================

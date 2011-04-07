@@ -32,12 +32,12 @@
 // TODO
 OpenGLContext* OpenGLComponent::createContext()
 {
-    return 0;
+    return nullptr;
 }
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return 0;
+    return nullptr;
 }
 
 void juce_glViewport (const int w, const int h)

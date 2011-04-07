@@ -374,7 +374,7 @@ AudioFormatReader* QuickTimeAudioFormat::createReaderFor (InputStream* sourceStr
     if (! deleteStreamIfOpeningFails)
         r->input = 0;
 
-    return 0;
+    return nullptr;
 }
 
 AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*streamToWriteTo*/,
@@ -385,7 +385,7 @@ AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*stream
                                                           int /*qualityOptionIndex*/)
 {
     jassertfalse; // not yet implemented!
-    return 0;
+    return nullptr;
 }
 
 END_JUCE_NAMESPACE

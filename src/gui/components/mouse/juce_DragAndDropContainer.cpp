@@ -131,7 +131,7 @@ public:
             hit = hit->getParentComponent();
         }
 
-        return 0;
+        return nullptr;
     }
 
     void mouseUp (const MouseEvent& e)

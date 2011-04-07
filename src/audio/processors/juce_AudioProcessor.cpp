@@ -285,7 +285,7 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
                                                          jmin ((sizeInBytes - 8), stringLength)));
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

@@ -104,7 +104,7 @@ const MarkerList::Marker* MarkerList::getMarker (const String& name) const noexc
             return m;
     }
 
-    return 0;
+    return nullptr;
 }
 
 void MarkerList::setMarker (const String& name, const RelativeCoordinate& position)

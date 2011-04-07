@@ -864,7 +864,7 @@ CameraDevice* CameraDevice::openDevice (int index,
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 

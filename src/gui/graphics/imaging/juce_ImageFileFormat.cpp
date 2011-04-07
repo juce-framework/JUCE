@@ -58,7 +58,7 @@ ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
             return formats[i];
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

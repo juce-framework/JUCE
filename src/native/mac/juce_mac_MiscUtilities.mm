@@ -155,7 +155,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
         return mb->getResult() == 1;
 
     mb.release();
-    return 0;
+    return false;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,

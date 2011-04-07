@@ -386,7 +386,7 @@ ToolbarItemComponent* Toolbar::getNextActiveComponent (int index, const int delt
             return tc;
     }
 
-    return 0;
+    return nullptr;
 }
 
 void Toolbar::setStyle (const ToolbarItemStyle& newStyle)

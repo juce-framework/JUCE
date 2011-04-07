@@ -451,7 +451,7 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
                                                            progressCallback, progressCallbackContext,
                                                            headers, timeOutMs, responseHeaders));
 
-    return wi->isError() ? 0 : wi.release();
+    return wi->isError() ? nullptr : wi.release();
 }
 
 

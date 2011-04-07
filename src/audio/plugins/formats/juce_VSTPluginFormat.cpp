@@ -648,7 +648,7 @@ public:
     static void* newMachOFromCFM (void* cfmfp)
     {
         if (cfmfp == 0)
-            return 0;
+            return nullptr;
 
         UInt32* const mfp = new UInt32[6];
 
@@ -1874,7 +1874,7 @@ AudioProcessorEditor* VSTPluginInstance::createEditor()
     if (hasEditor())
         return new VSTPluginWindow (*this);
 
-    return 0;
+    return nullptr;
 }
 
 

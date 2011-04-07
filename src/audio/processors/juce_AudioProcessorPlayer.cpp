@@ -64,7 +64,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
 
         {
             const ScopedLock sl (lock);
-            oldOne = isPrepared ? processor : 0;
+            oldOne = isPrepared ? processor : nullptr;
             processor = processorToPlay;
             isPrepared = true;
         }

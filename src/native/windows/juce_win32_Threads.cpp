@@ -337,7 +337,7 @@ void PlatformUtilities::freeDynamicLibrary (void* h)
 
 void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 {
-    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name.toUTF8()) : 0; // (void* cast is required for mingw)
+    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name.toUTF8()) : nullptr; // (void* cast is required for mingw)
 }
 
 

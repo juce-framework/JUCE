@@ -76,7 +76,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::findFirstTargetParentCompone
         // (unable to use the syntax findParentComponentOfClass <ApplicationCommandTarget> () because of a VC6 compiler bug)
         return c->findParentComponentOfClass ((ApplicationCommandTarget*) 0);
 
-    return 0;
+    return nullptr;
 }
 
 ApplicationCommandTarget* ApplicationCommandTarget::getTargetForCommand (const CommandID commandID)
@@ -116,7 +116,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::getTargetForCommand (const C
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool ApplicationCommandTarget::isCommandActive (const CommandID commandID)

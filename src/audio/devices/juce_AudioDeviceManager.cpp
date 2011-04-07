@@ -249,7 +249,7 @@ void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) cons
 
 XmlElement* AudioDeviceManager::createStateXml() const
 {
-    return lastExplicitSettings != nullptr ? new XmlElement (*lastExplicitSettings) : 0;
+    return lastExplicitSettings != nullptr ? new XmlElement (*lastExplicitSettings) : nullptr;
 }
 
 //==============================================================================
@@ -281,7 +281,7 @@ AudioIODeviceType* AudioDeviceManager::findType (const String& inputName, const 
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup)

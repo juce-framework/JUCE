@@ -372,7 +372,7 @@ public:
     bool producesMidi() const;
 
     bool hasEditor() const                          { return false; }
-    AudioProcessorEditor* createEditor()            { return 0; }
+    AudioProcessorEditor* createEditor()            { return nullptr; }
 
     int getNumParameters()                          { return 0; }
     const String getParameterName (int)             { return String::empty; }

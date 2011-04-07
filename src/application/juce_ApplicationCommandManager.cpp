@@ -136,7 +136,7 @@ const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const 
         if (commands.getUnchecked(i)->commandID == commandID)
             return commands.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 const String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept

@@ -485,13 +485,13 @@ void FileOutputStream::flushInternal()
 //==============================================================================
 const File juce_getExecutableFile()
 {
-  #if JUCE_ANDROID
+   #if JUCE_ANDROID
     return File (android.appFile);
-  #else
+   #else
     Dl_info exeInfo;
     dladdr ((void*) juce_getExecutableFile, &exeInfo);  // (can't be a const void* on android)
     return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (exeInfo.dli_fname));
-  #endif
+   #endif
 }
 
 //==============================================================================
@@ -515,7 +515,7 @@ int64 File::getVolumeTotalSize() const
 
 const String File::getVolumeLabel() const
 {
-#if JUCE_MAC
+   #if JUCE_MAC
     struct VolAttrBuf
     {
         u_int32_t       length;
@@ -542,7 +542,7 @@ const String File::getVolumeLabel() const
 
         f = parent;
     }
-#endif
+   #endif
 
     return String::empty;
 }
@@ -709,7 +709,7 @@ void* threadEntryProc (void* userData)
    #endif
 
     juce_threadEntryPoint (userData);
-    return 0;
+    return nullptr;
 }
 
 void Thread::launchThread()

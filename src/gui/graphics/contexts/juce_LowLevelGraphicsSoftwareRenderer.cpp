@@ -1239,7 +1239,7 @@ public:
     const Ptr clipToRectangle (const Rectangle<int>& r)
     {
         edgeTable.clipToRectangle (r);
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     const Ptr clipToRectangleList (const RectangleList& r)
@@ -1250,26 +1250,26 @@ public:
             for (RectangleList::Iterator iter (inverse); iter.next();)
                 edgeTable.excludeRectangle (*iter.getRectangle());
 
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     const Ptr excludeClipRectangle (const Rectangle<int>& r)
     {
         edgeTable.excludeRectangle (r);
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     const Ptr clipToPath (const Path& p, const AffineTransform& transform)
     {
         EdgeTable et (edgeTable.getMaximumBounds(), p, transform);
         edgeTable.clipToEdgeTable (et);
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     const Ptr clipToEdgeTable (const EdgeTable& et)
     {
         edgeTable.clipToEdgeTable (et);
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
@@ -1292,12 +1292,12 @@ public:
                 else
                     straightClipImage (srcData, imageX, imageY, (PixelAlpha*) 0);
 
-                return edgeTable.isEmpty() ? 0 : this;
+                return edgeTable.isEmpty() ? nullptr : this;
             }
         }
 
         if (transform.isSingularity())
-            return 0;
+            return nullptr;
 
         {
             Path p;
@@ -1314,13 +1314,13 @@ public:
                 transformedClipImage (srcData, transform, betterQuality, (PixelAlpha*) 0);
         }
 
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     const Ptr translated (const Point<int>& delta)
     {
         edgeTable.translate ((float) delta.getX(), delta.getY());
-        return edgeTable.isEmpty() ? 0 : this;
+        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -1444,19 +1444,19 @@ public:
     const Ptr clipToRectangle (const Rectangle<int>& r)
     {
         clip.clipTo (r);
-        return clip.isEmpty() ? 0 : this;
+        return clip.isEmpty() ? nullptr : this;
     }
 
     const Ptr clipToRectangleList (const RectangleList& r)
     {
         clip.clipTo (r);
-        return clip.isEmpty() ? 0 : this;
+        return clip.isEmpty() ? nullptr : this;
     }
 
     const Ptr excludeClipRectangle (const Rectangle<int>& r)
     {
         clip.subtract (r);
-        return clip.isEmpty() ? 0 : this;
+        return clip.isEmpty() ? nullptr : this;
     }
 
     const Ptr clipToPath (const Path& p, const AffineTransform& transform)
@@ -1477,7 +1477,7 @@ public:
     const Ptr translated (const Point<int>& delta)
     {
         clip.offsetAll (delta.getX(), delta.getY());
-        return clip.isEmpty() ? 0 : this;
+        return clip.isEmpty() ? nullptr : this;
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const

@@ -496,7 +496,7 @@ Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component
 {
     (void) existingComponentToUpdate;
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
-    return 0;
+    return nullptr;
 }
 
 

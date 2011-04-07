@@ -36,7 +36,7 @@ namespace CDReaderHelpers
             if (child->getAllSubText().trim() == key)
                 return child->getNextElement();
 
-        return 0;
+        return nullptr;
     }
 
     static int getIntValueForKey (const XmlElement& xml, const String& key, int defaultValue = -1)
@@ -83,7 +83,7 @@ namespace CDReaderHelpers
         }
 
         offsets.add (leadOut * AudioCDReader::samplesPerFrame - 88200);
-        return 0;
+        return nullptr;
     }
 
     static void findDevices (Array<File>& cds)
@@ -137,7 +137,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int index)
     if (cds[index].exists())
         return new AudioCDReader (cds[index]);
 
-    return 0;
+    return nullptr;
 }
 
 AudioCDReader::AudioCDReader (const File& volume)

@@ -725,7 +725,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
     if (! deleteStreamIfOpeningFails)
         r->input = nullptr;
 
-    return 0;
+    return nullptr;
 }
 
 AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sampleRate,
@@ -735,7 +735,7 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sa
     if (getPossibleBitDepths().contains (bitsPerSample))
         return new WavAudioFormatWriter (out, sampleRate, numChannels, bitsPerSample, metadataValues);
 
-    return 0;
+    return nullptr;
 }
 
 namespace WavFileHelpers

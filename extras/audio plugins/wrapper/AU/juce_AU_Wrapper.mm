@@ -1101,18 +1101,18 @@ private:
                               0,
                               pointers,
                               &propertySize) != noErr)
-        return 0;
+        return nil;
 
     AudioProcessor* filter = (AudioProcessor*) pointers[0];
     JuceAU* au = (JuceAU*) pointers[1];
 
     if (filter == nullptr)
-        return 0;
+        return nil;
 
     AudioProcessorEditor* editorComp = filter->createEditorIfNeeded();
 
     if (editorComp == nullptr)
-        return 0;
+        return nil;
 
     return [[[JuceUIViewClass alloc] initWithFilter: filter
                                              withAU: au

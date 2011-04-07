@@ -427,7 +427,7 @@ AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in,
     if (! deleteStreamIfOpeningFails)
         r->input = nullptr;
 
-    return 0;
+    return nullptr;
 }
 
 AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
@@ -443,7 +443,7 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
                                                 bitsPerSample,
                                                 qualityOptionIndex));
 
-    return w->ok ? w.release() : 0;
+    return w->ok ? w.release() : nullptr;
 }
 
 const StringArray OggVorbisAudioFormat::getQualityOptions()

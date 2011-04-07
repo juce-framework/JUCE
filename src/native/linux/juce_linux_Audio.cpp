@@ -366,7 +366,7 @@ private:
             default:    jassertfalse; break; // unsupported format!
         }
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -973,7 +973,7 @@ public:
                                           inputIds [inputIndex],
                                           outputIds [outputIndex]);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================

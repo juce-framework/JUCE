@@ -446,7 +446,7 @@ public:
             return removed;
         }
 
-        return 0;
+        return ElementType();
     }
 
     /** Removes an item from the set.

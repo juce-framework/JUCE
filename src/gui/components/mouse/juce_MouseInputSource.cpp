@@ -86,7 +86,7 @@ public:
                 return comp->getComponentAt (relativePos);
         }
 
-        return 0;
+        return nullptr;
     }
 
     const Point<int> getScreenPosition() const

@@ -433,7 +433,7 @@ public:
                 return ap;
         }
 
-        return 0;
+        return nullptr;
     }
 
     static ModifierKeys currentModifiers;
@@ -608,7 +608,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
 
     android.activity.callVoidMethod (android.showOkCancelBox, javaString (title).get(), javaString (message).get(),
                                      (jlong) (pointer_sized_int) callback);
-    return 0;
+    return false;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
@@ -673,8 +673,8 @@ const Image juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
-void* MouseCursor::createMouseCursorFromImage (const Image&, int, int)                          { return 0; }
-void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType)            { return 0; }
+void* MouseCursor::createMouseCursorFromImage (const Image&, int, int)                          { return nullptr; }
+void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType)            { return nullptr; }
 void MouseCursor::deleteMouseCursor (void* const /*cursorHandle*/, const bool /*isStandard*/)   {}
 
 //==============================================================================

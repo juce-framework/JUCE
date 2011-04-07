@@ -575,7 +575,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
     }
 
     jassertfalse;
-    return 0;
+    return nullptr;
 }
 
 void OldSchoolLookAndFeel::positionDocumentWindowButtons (DocumentWindow&,

@@ -680,7 +680,7 @@ FileInputStream* File::createInputStream() const
     if (existsAsFile())
         return new FileInputStream (*this);
 
-    return 0;
+    return nullptr;
 }
 
 FileOutputStream* File::createOutputStream (const int bufferSize) const
@@ -688,7 +688,7 @@ FileOutputStream* File::createOutputStream (const int bufferSize) const
     ScopedPointer <FileOutputStream> out (new FileOutputStream (*this, bufferSize));
 
     if (out->failedToOpen())
-        return 0;
+        return nullptr;
 
     return out.release();
 }

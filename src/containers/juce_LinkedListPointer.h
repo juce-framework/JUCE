@@ -288,7 +288,7 @@ public:
             l = &(l->item->nextListItem);
         }
 
-        return 0;
+        return nullptr;
     }
 
     /** Copies the items in the list to an array.

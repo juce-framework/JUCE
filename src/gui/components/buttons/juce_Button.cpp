@@ -469,7 +469,7 @@ void Button::visibilityChanged()
 
 void Button::parentHierarchyChanged()
 {
-    Component* const newKeySource = (shortcuts.size() == 0) ? 0 : getTopLevelComponent();
+    Component* const newKeySource = (shortcuts.size() == 0) ? nullptr : getTopLevelComponent();
 
     if (newKeySource != keySource.get())
     {

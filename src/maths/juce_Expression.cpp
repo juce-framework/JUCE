@@ -46,14 +46,14 @@ public:
     virtual int getInputIndexFor (const Term*) const                         { return -1; }
     virtual int getOperatorPrecedence() const                                { return 0; }
     virtual int getNumInputs() const                                         { return 0; }
-    virtual Term* getInput (int) const                                       { return 0; }
+    virtual Term* getInput (int) const                                       { return nullptr; }
     virtual const ReferenceCountedObjectPtr<Term> negated();
 
     virtual const ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const Scope&, const Term* /*inputTerm*/,
                                                                              double /*overallTarget*/, Term* /*topLevelTerm*/) const
     {
         jassertfalse;
-        return 0;
+        return nullptr;
     }
 
     virtual const String getName() const
@@ -197,7 +197,7 @@ public:
         {
             jassert (input == left || input == right);
             if (input != left && input != right)
-                return 0;
+                return nullptr;
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
@@ -427,7 +427,7 @@ public:
         Type getType() const noexcept                           { return operatorType; }
         int getInputIndexFor (const Term* possibleInput) const  { return possibleInput == input ? 0 : -1; }
         int getNumInputs() const                                { return 1; }
-        Term* getInput (int index) const                        { return index == 0 ? input.getObject() : 0; }
+        Term* getInput (int index) const                        { return index == 0 ? input.getObject() : nullptr; }
         Term* clone() const                                     { return new Negate (input->clone()); }
 
         const TermPtr resolve (const Scope& scope, int recursionDepth)
@@ -477,7 +477,7 @@ public:
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return 0;
+                return nullptr;
 
             return new Subtract (newDest, (input == left ? right : left)->clone());
         }
@@ -502,7 +502,7 @@ public:
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return 0;
+                return nullptr;
 
             if (input == left)
                 return new Add (newDest, right->clone());
@@ -530,7 +530,7 @@ public:
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return 0;
+                return nullptr;
 
             return new Divide (newDest, (input == left ? right : left)->clone());
         }
@@ -555,7 +555,7 @@ public:
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return 0;
+                return nullptr;
 
             if (input == left)
                 return new Multiply (newDest, right->clone());
@@ -582,7 +582,7 @@ public:
                 return t;
         }
 
-        return 0;
+        return nullptr;
     }
 
     static Constant* findTermToAdjust (Term* const term, const bool mustBeFlagged)
@@ -594,7 +594,7 @@ public:
         }
 
         if (dynamic_cast<Function*> (term) != nullptr)
-            return 0;
+            return nullptr;
 
         int i;
         const int numIns = term->getNumInputs();
@@ -612,7 +612,7 @@ public:
                 return c;
         }
 
-        return 0;
+        return nullptr;
     }
 
     static bool containsAnySymbols (const Term* const t)
@@ -768,7 +768,7 @@ public:
             if (isDecimalDigit (*t) || (*t == '.' && isDecimalDigit (t[1])))
                 return new Constant (CharacterFunctions::readDoubleValue (text), isResolutionTarget);
 
-            return 0;
+            return nullptr;
         }
 
         const TermPtr readExpression()
@@ -901,17 +901,17 @@ public:
                 }
             }
 
-            return 0;
+            return nullptr;
         }
 
         const TermPtr readParenthesisedExpression()
         {
             if (! readOperator ("("))
-                return 0;
+                return nullptr;
 
             const TermPtr e (readExpression());
             if (e == nullptr || ! readOperator (")"))
-                return 0;
+                return nullptr;
 
             return e;
         }

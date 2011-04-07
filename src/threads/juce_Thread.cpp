@@ -71,7 +71,7 @@ public:
                 return t;
         }
 
-        return 0;
+        return nullptr;
     }
 
     void stopAll (const int timeOutMilliseconds)

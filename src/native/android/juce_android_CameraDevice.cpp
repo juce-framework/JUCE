@@ -66,7 +66,7 @@ Component* CameraDevice::createViewerComponent()
 {
     // TODO
 
-    return 0;
+    return nullptr;
 }
 
 const String CameraDevice::getFileExtension()
@@ -115,7 +115,7 @@ CameraDevice* CameraDevice::openDevice (int index,
 {
     // TODO
 
-    return 0;
+    return nullptr;
 }
 
 

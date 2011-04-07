@@ -326,7 +326,7 @@ public:
             if (threads[i] == thisThread)
                 return envs[i];
 
-        return 0;
+        return nullptr;
     }
 
     enum { maxThreads = 16 };

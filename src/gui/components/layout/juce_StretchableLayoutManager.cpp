@@ -231,7 +231,7 @@ StretchableLayoutManager::ItemLayoutProperties* StretchableLayoutManager::getInf
         if (items.getUnchecked(i)->itemIndex == itemIndex)
             return items.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,

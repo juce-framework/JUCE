@@ -150,7 +150,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 const String& XmlDocument::getLastParseError() const noexcept
@@ -360,7 +360,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 
     skipNextWhiteSpace();
     if (outOfData)
-        return 0;
+        return nullptr;
 
     const int openBracket = input.indexOf ((juce_wchar) '<');
 

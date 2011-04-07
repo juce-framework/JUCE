@@ -734,7 +734,7 @@ bool XmlElement::containsChildElement (const XmlElement* const possibleChild) co
 XmlElement* XmlElement::findParentElementOf (const XmlElement* const elementToLookFor) noexcept
 {
     if (this == elementToLookFor || elementToLookFor == nullptr)
-        return 0;
+        return nullptr;
 
     XmlElement* child = firstChildElement;
 
@@ -751,7 +751,7 @@ XmlElement* XmlElement::findParentElementOf (const XmlElement* const elementToLo
         child = child->nextListItem;
     }
 
-    return 0;
+    return nullptr;
 }
 
 void XmlElement::getChildElementsAsArray (XmlElement** elems) const noexcept

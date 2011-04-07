@@ -177,7 +177,7 @@ public:
     ListBoxRowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
     {
         return (row >= firstIndex && row < firstIndex + rows.size())
-                 ? getComponentForRow (row) : 0;
+                 ? getComponentForRow (row) : nullptr;
     }
 
     int getRowNumberOfComponent (Component* const rowComponent) const noexcept
@@ -631,7 +631,7 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
     ListBoxRowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
-    return listRowComp != nullptr ? static_cast <Component*> (listRowComp->customComponent) : 0;
+    return listRowComp != nullptr ? static_cast <Component*> (listRowComp->customComponent) : nullptr;
 }
 
 int ListBox::getRowNumberOfComponent (Component* const rowComponent) const noexcept
@@ -942,7 +942,7 @@ Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingC
 {
     (void) existingComponentToUpdate;
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
-    return 0;
+    return nullptr;
 }
 
 void ListBoxModel::listBoxItemClicked (int, const MouseEvent&) {}

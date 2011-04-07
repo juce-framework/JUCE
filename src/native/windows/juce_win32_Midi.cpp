@@ -250,7 +250,7 @@ int MidiInput::getDefaultDeviceIndex()
 MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const callback)
 {
     if (callback == nullptr)
-        return 0;
+        return nullptr;
 
     UINT deviceId = MIDI_MAPPER;
     int n = 0;
@@ -291,7 +291,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
         return in.release();
     }
 
-    return 0;
+    return nullptr;
 }
 
 MidiInput::MidiInput (const String& name_)
@@ -437,7 +437,7 @@ MidiOutput* MidiOutput::openDevice (int index)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 MidiOutput::~MidiOutput()

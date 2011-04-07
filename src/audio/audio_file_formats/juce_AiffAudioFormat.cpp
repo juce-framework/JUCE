@@ -409,7 +409,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
     if (! deleteStreamIfOpeningFails)
         w->input = nullptr;
 
-    return 0;
+    return nullptr;
 }
 
 AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
@@ -422,7 +422,7 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
     if (getPossibleBitDepths().contains (bitsPerSample))
         return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels, bitsPerSample);
 
-    return 0;
+    return nullptr;
 }
 
 END_JUCE_NAMESPACE

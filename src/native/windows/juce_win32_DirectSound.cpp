@@ -1164,7 +1164,7 @@ public:
                                                                           : inputDeviceName,
                                             outputIndex, inputIndex);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================

@@ -1248,7 +1248,7 @@ public:
                                           outputIds [outputIndex],
                                           outputIndex);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================

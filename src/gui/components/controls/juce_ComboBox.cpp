@@ -194,7 +194,7 @@ ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const noexcept
                 return items.getUnchecked(i);
     }
 
-    return 0;
+    return nullptr;
 }
 
 ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const noexcept
@@ -208,7 +208,7 @@ ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const noexcept
                 return item;
     }
 
-    return 0;
+    return nullptr;
 }
 
 int ComboBox::getNumItems() const noexcept

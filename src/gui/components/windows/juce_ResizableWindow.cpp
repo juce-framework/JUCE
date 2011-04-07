@@ -538,7 +538,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     const Rectangle<int> screen (Desktop::getInstance().getMonitorAreaContaining (newPos.getCentre()));
 
-    ComponentPeer* const peer = isOnDesktop() ? getPeer() : 0;
+    ComponentPeer* const peer = isOnDesktop() ? getPeer() : nullptr;
     if (peer != nullptr)
         peer->getFrameSize().addTo (newPos);
 

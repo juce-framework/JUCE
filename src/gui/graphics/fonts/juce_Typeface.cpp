@@ -238,7 +238,7 @@ CustomTypeface::GlyphInfo* CustomTypeface::findGlyph (const juce_wchar character
     if (loadIfNeeded && loadGlyphIfPossible (character))
         return findGlyph (character, false);
 
-    return 0;
+    return nullptr;
 }
 
 CustomTypeface::GlyphInfo* CustomTypeface::findGlyphSubstituting (const juce_wchar character) noexcept
@@ -464,7 +464,7 @@ EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTr
         return new EdgeTable (glyph->path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
                               glyph->path, transform);
 
-    return 0;
+    return nullptr;
 }
 
 

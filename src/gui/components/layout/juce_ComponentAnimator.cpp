@@ -218,7 +218,7 @@ ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* con
         if (component == tasks.getUnchecked(i)->component.get())
             return tasks.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 void ComponentAnimator::animateComponent (Component* const component,

@@ -49,7 +49,7 @@ public:
     Drawable* parseSVGElement (const XmlElement& xml)
     {
         if (! xml.hasTagName ("svg"))
-            return 0;
+            return nullptr;
 
         DrawableComposite* const drawable = new DrawableComposite();
 
@@ -168,7 +168,7 @@ private:
         if (group != nullptr)
             return parseGroupElement (*group);
 
-        return 0;
+        return nullptr;
     }
 
     DrawableComposite* parseGroupElement (const XmlElement& xml)
@@ -640,7 +640,7 @@ private:
         const String id (e->getStringAttribute ("xlink:href"));
 
         if (! id.startsWithChar ('#'))
-            return 0;
+            return nullptr;
 
         return findElementForId (topLevelXml, id.substring (1));
     }
@@ -847,7 +847,7 @@ private:
             }
         }
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -1288,7 +1288,7 @@ private:
                 return found;
         }
 
-        return 0;
+        return nullptr;
     }
 
     SVGState& operator= (const SVGState&);

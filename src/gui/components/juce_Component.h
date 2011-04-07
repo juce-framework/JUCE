@@ -785,7 +785,7 @@ public:
             p = p->parentComponent;
         }
 
-        return 0;
+        return nullptr;
     }
 
     /** Returns the highest-level component which contains this one or its parents.

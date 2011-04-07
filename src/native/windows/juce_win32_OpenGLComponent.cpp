@@ -373,7 +373,7 @@ public:
 
     void* getNativeWindowHandle() const
     {
-        return nativeWindow != nullptr ? nativeWindow->getNativeHandle() : 0;
+        return nativeWindow != nullptr ? nativeWindow->getNativeHandle() : nullptr;
     }
 
     //==============================================================================
@@ -496,12 +496,12 @@ OpenGLContext* OpenGLComponent::createContext()
                                                                contextToShareListsWith != nullptr ? (HGLRC) contextToShareListsWith->getRawContext() : 0,
                                                                preferredPixelFormat));
 
-    return (c->renderContext != 0) ? c.release() : 0;
+    return (c->renderContext != 0) ? c.release() : nullptr;
 }
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle() : 0;
+    return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle() : nullptr;
 }
 
 void juce_glViewport (const int w, const int h)

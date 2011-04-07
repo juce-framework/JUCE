@@ -112,7 +112,7 @@ void JUCEApplication::sendUnhandledException (const std::exception* const e,
 //==============================================================================
 ApplicationCommandTarget* JUCEApplication::getNextCommandTarget()
 {
-    return 0;
+    return nullptr;
 }
 
 void JUCEApplication::getAllCommands (Array <CommandID>& commands)

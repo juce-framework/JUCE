@@ -268,7 +268,7 @@ public:
         component you like. It's most useful if you're doing things like drag-and-drop
         of items, or want to use a Label component to edit item names, etc.
     */
-    virtual Component* createItemComponent()                        { return 0; }
+    virtual Component* createItemComponent()                        { return nullptr; }
 
     //==============================================================================
     /** Draws the item's contents.

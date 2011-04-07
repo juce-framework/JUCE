@@ -50,7 +50,7 @@ namespace ComponentBuilderHelpers
                 return components.removeAndReturn (i);
         }
 
-        return 0;
+        return nullptr;
     }
 
     Component* findComponentWithID (Component* const c, const String& compId)
@@ -67,7 +67,7 @@ namespace ComponentBuilderHelpers
                 return child;
         }
 
-        return 0;
+        return nullptr;
     }
 
     Component* createNewComponent (ComponentBuilder::TypeHandler& type,
@@ -173,7 +173,7 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandlerForState (const Value
             return t;
     }
 
-    return 0;
+    return nullptr;
 }
 
 int ComponentBuilder::getNumHandlers() const noexcept

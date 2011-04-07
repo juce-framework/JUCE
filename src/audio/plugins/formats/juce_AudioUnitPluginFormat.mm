@@ -1491,7 +1491,7 @@ AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 const StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& /*directoriesToSearch*/,

@@ -191,7 +191,7 @@ public:
             return ti;
         }
 
-        return 0;
+        return nullptr;
     }
 
     void updateComponents()
@@ -399,7 +399,7 @@ private:
                 return ri;
         }
 
-        return 0;
+        return nullptr;
     }
 
     static bool isMouseDraggingInChildCompOf (Component* const comp)
@@ -607,7 +607,7 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
     if (rootItem != nullptr && index >= 0)
         return rootItem->getItemOnRow (index);
 
-    return 0;
+    return nullptr;
 }
 
 TreeViewItem* TreeView::getItemAt (int y) const noexcept
@@ -620,7 +620,7 @@ TreeViewItem* TreeView::getItemAt (int y) const noexcept
 TreeViewItem* TreeView::findItemFromIdentifierString (const String& identifierString) const
 {
     if (rootItem == nullptr)
-        return 0;
+        return nullptr;
 
     return rootItem->findItemFromIdentifierString (identifierString);
 }
@@ -950,7 +950,7 @@ TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
     TreeViewItem* item = getItemAt (y);
 
     if (item == nullptr)
-        return 0;
+        return nullptr;
 
     Rectangle<int> itemPos (item->getItemPosition (true));
     insertIndex = item->getIndexInParent();
@@ -1583,7 +1583,7 @@ TreeViewItem* TreeViewItem::getItemOnRow (int index) noexcept
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 TreeViewItem* TreeViewItem::findItemRecursively (int targetY) noexcept
@@ -1611,7 +1611,7 @@ TreeViewItem* TreeViewItem::findItemRecursively (int targetY) noexcept
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 int TreeViewItem::countSelectedItemsRecursively (int depth) const noexcept
@@ -1650,7 +1650,7 @@ TreeViewItem* TreeViewItem::getSelectedItemWithIndex (int index) noexcept
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 int TreeViewItem::getRowNumberInTree() const noexcept
@@ -1697,7 +1697,7 @@ TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const noexce
         return parentItem->subItems [nextIndex];
     }
 
-    return 0;
+    return nullptr;
 }
 
 const String TreeViewItem::getItemIdentifierString() const
@@ -1735,7 +1735,7 @@ TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifi
         setOpen (wasOpen);
     }
 
-    return 0;
+    return nullptr;
 }
 
 void TreeViewItem::restoreOpennessState (const XmlElement& e) noexcept
@@ -1797,7 +1797,7 @@ XmlElement* TreeViewItem::getOpennessState() const noexcept
         jassertfalse;
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

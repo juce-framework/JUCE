@@ -120,7 +120,7 @@ AudioFormat* AudioFormatManager::findFormatForFileExtension (const String& fileE
         if (getKnownFormat(i)->getFileExtensions().contains (e, true))
             return getKnownFormat(i);
 
-    return 0;
+    return nullptr;
 }
 
 const String AudioFormatManager::getWildcardForAllFormats() const
@@ -176,7 +176,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (const File& file)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileStream)
@@ -209,7 +209,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 

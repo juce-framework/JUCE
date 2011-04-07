@@ -53,7 +53,7 @@ public:
     virtual double toDouble (const ValueUnion&) const           { return 0; }
     virtual const String toString (const ValueUnion&) const     { return String::empty; }
     virtual bool toBool (const ValueUnion&) const               { return false; }
-    virtual DynamicObject* toObject (const ValueUnion&) const   { return 0; }
+    virtual DynamicObject* toObject (const ValueUnion&) const   { return nullptr; }
 
     virtual bool isVoid() const noexcept                        { return false; }
     virtual bool isInt() const noexcept                         { return false; }

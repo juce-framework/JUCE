@@ -95,7 +95,7 @@ Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponen
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 const MarkerList::Marker* RelativeCoordinatePositionerBase::ComponentScope::findMarker (const String& name, MarkerList*& list) const

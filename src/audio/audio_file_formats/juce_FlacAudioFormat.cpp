@@ -513,7 +513,7 @@ AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in,
     if (! deleteStreamIfOpeningFails)
         r->input = nullptr;
 
-    return 0;
+    return nullptr;
 }
 
 AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
@@ -531,7 +531,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
             return w.release();
     }
 
-    return 0;
+    return nullptr;
 }
 
 END_JUCE_NAMESPACE

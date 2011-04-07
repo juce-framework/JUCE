@@ -212,7 +212,7 @@ TextEditor* AlertWindow::getTextEditor (const String& nameOfTextEditor) const
         if (textBoxes.getUnchecked(i)->getName() == nameOfTextEditor)
             return textBoxes.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 const String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
@@ -247,7 +247,7 @@ ComboBox* AlertWindow::getComboBoxComponent (const String& nameOfList) const
         if (comboBoxes.getUnchecked(i)->getName() == nameOfList)
             return comboBoxes.getUnchecked(i);
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================
@@ -657,7 +657,7 @@ private:
     static void* showCallback (void* userData)
     {
         static_cast <AlertWindowInfo*> (userData)->show();
-        return 0;
+        return nullptr;
     }
 };
 

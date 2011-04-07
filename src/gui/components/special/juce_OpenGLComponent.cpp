@@ -126,7 +126,7 @@ OpenGLContext* OpenGLContext::getCurrentContext()
             return oglc;
     }
 
-    return 0;
+    return nullptr;
 }
 
 

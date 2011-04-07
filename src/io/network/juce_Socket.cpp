@@ -171,8 +171,8 @@ namespace SocketHelpers
         FD_ZERO (&wset);
         FD_SET (handle, &wset);
 
-        fd_set* const prset = forReading ? &rset : 0;
-        fd_set* const pwset = forReading ? 0 : &wset;
+        fd_set* const prset = forReading ? &rset : nullptr;
+        fd_set* const pwset = forReading ? nullptr : &wset;
 
        #if JUCE_WINDOWS
         if (select (handle + 1, prset, pwset, 0, timeoutp) < 0)
@@ -465,7 +465,7 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
                                         portNumber, newSocket);
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool StreamingSocket::isLocal() const noexcept
@@ -572,7 +572,7 @@ DatagramSocket* DatagramSocket::waitForNextConnection() const
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

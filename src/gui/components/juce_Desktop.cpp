@@ -163,7 +163,7 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================
@@ -249,7 +249,7 @@ MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

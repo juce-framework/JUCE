@@ -394,7 +394,7 @@ void* ActiveXControlComponent::queryInterface (const void* iid) const
          && SUCCEEDED (control->control->QueryInterface (*(const IID*) iid, &result)))
         return result;
 
-    return 0;
+    return nullptr;
 }
 
 void ActiveXControlComponent::setControlBounds (const Rectangle<int>& newBounds) const

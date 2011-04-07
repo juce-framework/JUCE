@@ -124,7 +124,7 @@ namespace KeyboardFocusHelpers
             }
         }
 
-        return 0;
+        return nullptr;
     }
 }
 

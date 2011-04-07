@@ -194,7 +194,7 @@ void RelativePointPath::CloseSubPath::addToPath (Path& path, Expression::Scope*)
 RelativePoint* RelativePointPath::CloseSubPath::getControlPoints (int& numPoints)
 {
     numPoints = 0;
-    return 0;
+    return nullptr;
 }
 
 RelativePointPath::ElementBase* RelativePointPath::CloseSubPath::clone() const

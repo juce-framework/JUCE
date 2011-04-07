@@ -329,7 +329,7 @@ public:
                                minimumWidth, maximumNumColumns, standardItemHeight, dismissOnMouseUp,
                                managerOfChosenCommand, componentAttachedTo);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================

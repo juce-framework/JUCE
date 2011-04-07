@@ -566,7 +566,7 @@ public:
                                                                           : inputDeviceName);
         }
 
-        return 0;
+        return nullptr;
     }
 
 private:

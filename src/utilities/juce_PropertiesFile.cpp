@@ -156,7 +156,7 @@ PropertiesFile::~PropertiesFile()
 
 InterProcessLock::ScopedLockType* PropertiesFile::createProcessLock() const
 {
-    return processLock != nullptr ? new InterProcessLock::ScopedLockType (*processLock) : 0;
+    return processLock != nullptr ? new InterProcessLock::ScopedLockType (*processLock) : nullptr;
 }
 
 bool PropertiesFile::saveIfNeeded()
@@ -335,7 +335,7 @@ PropertiesFile* PropertiesFile::createDefaultAppPropertiesFile (const String& ap
     jassert (file != File::nonexistent);
 
     if (file == File::nonexistent)
-        return 0;
+        return nullptr;
 
     return new PropertiesFile (file, millisecondsBeforeSaving, propertiesFileOptions,processLock_);
 }

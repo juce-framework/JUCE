@@ -263,14 +263,14 @@ namespace LinuxErrorHandling
     // A protocol error has occurred
     static int juce_XErrorHandler (Display* display, XErrorEvent* event)
     {
-    #if JUCE_DEBUG_XERRORS
+       #if JUCE_DEBUG_XERRORS
         char errorStr[64] = { 0 };
         char requestStr[64] = { 0 };
 
         XGetErrorText (display, event->error_code, errorStr, 64);
         XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toUTF8(), "Unknown", requestStr, 64);
         DBG ("ERROR: X returned " + String (errorStr) + " for operation " + String (requestStr));
-    #endif
+       #endif
 
         return 0;
     }
@@ -433,7 +433,7 @@ private:
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func, void* parameter)
 {
     if (LinuxErrorHandling::errorOccurred)
-        return 0;
+        return nullptr;
 
     return AsyncFunctionCaller::call (func, parameter);
 }

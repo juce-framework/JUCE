@@ -172,7 +172,7 @@ Component* ModalComponentManager::getModalComponent (const int index) const
                 return item->component;
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool ModalComponentManager::isModal (Component* const comp) const

@@ -157,7 +157,7 @@ public:
         const Rectangle<int> bounds (left, top, right - left, bottom - top);
 
         if (bounds.isEmpty())
-            return 0;
+            return nullptr;
 
         jint* const maskDataElements = env->GetIntArrayElements (maskData, 0);
 

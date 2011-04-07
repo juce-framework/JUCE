@@ -1002,7 +1002,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int deviceIndex)
             return new AudioCDReader (new CDDeviceWrapper (list [deviceIndex], h));
     }
 
-    return 0;
+    return nullptr;
 }
 
 AudioCDReader::AudioCDReader (void* handle_)
@@ -1052,7 +1052,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
             const int toDo = (int) jmin ((int64) numSamples, bufferEndSample - startSampleInFile);
 
             int* const l = destSamples[0] + startOffsetInDestBuffer;
-            int* const r = numDestChannels > 1 ? (destSamples[1] + startOffsetInDestBuffer) : 0;
+            int* const r = numDestChannels > 1 ? (destSamples[1] + startOffsetInDestBuffer) : nullptr;
             const short* src = (const short*) buffer.getData();
             src += 2 * (startSampleInFile - bufferStartSample);
 
@@ -1108,7 +1108,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
             else
             {
                 int* l = destSamples[0] + startOffsetInDestBuffer;
-                int* r = numDestChannels > 1 ? (destSamples[1] + startOffsetInDestBuffer) : 0;
+                int* r = numDestChannels > 1 ? (destSamples[1] + startOffsetInDestBuffer) : nullptr;
 
                 while (--numSamples >= 0)
                 {

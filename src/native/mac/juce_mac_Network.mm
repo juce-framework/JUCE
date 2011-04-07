@@ -428,7 +428,7 @@ private:
                                                         timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
 
         if (req == nil)
-            return 0;
+            return nil;
 
         [req setHTTPMethod: isPost ? @"POST" : @"GET"];
         //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
@@ -458,7 +458,7 @@ private:
             return s;
 
         [s release];
-        return 0;
+        return nil;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
@@ -472,7 +472,7 @@ InputStream* URL::createNativeStream (const String& address, bool isPost, const 
                                                            progressCallback, progressCallbackContext,
                                                            headers, timeOutMs, responseHeaders));
 
-    return wi->isError() ? 0 : wi.release();
+    return wi->isError() ? nullptr : wi.release();
 }
 
 

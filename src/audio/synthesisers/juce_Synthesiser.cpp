@@ -359,7 +359,7 @@ SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
         return oldest;
     }
 
-    return 0;
+    return nullptr;
 }
 
 

@@ -1269,7 +1269,7 @@ private:
         if (currentASIODev[0] != nullptr)
             currentASIODev[0]->callback (index);
 
-        return 0;
+        return nullptr;
     }
 
     static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback1 (ASIOTime*, long index, long)
@@ -1277,7 +1277,7 @@ private:
         if (currentASIODev[1] != nullptr)
             currentASIODev[1]->callback (index);
 
-        return 0;
+        return nullptr;
     }
 
     static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback2 (ASIOTime*, long index, long)
@@ -1285,7 +1285,7 @@ private:
         if (currentASIODev[2] != nullptr)
             currentASIODev[2]->callback (index);
 
-        return 0;
+        return nullptr;
     }
 
     static void JUCE_ASIOCALLBACK bufferSwitchCallback0 (long index, long)
@@ -1682,11 +1682,11 @@ public:
             if (deviceNames[i].containsIgnoreCase ("asio4all"))
                 return i; // asio4all is a safe choice for a default..
 
-#if JUCE_DEBUG
+       #if JUCE_DEBUG
         if (deviceNames.size() > 1 && deviceNames[0].containsIgnoreCase ("digidesign"))
             return 1; // (the digi m-box driver crashes the app when you run
                       // it in the debugger, which can be a bit annoying)
-#endif
+       #endif
 
         return 0;
     }
@@ -1729,7 +1729,7 @@ public:
                 return new ASIOAudioIODevice (outputDeviceName, *(classIds [index]), freeSlot, String::empty);
         }
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -1836,7 +1836,7 @@ AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name,
     const int freeSlot = ASIOAudioIODeviceType::findFreeSlot();
 
     if (freeSlot < 0)
-        return 0;
+        return nullptr;
 
     return new ASIOAudioIODevice (name, *(CLSID*) guid, freeSlot, optionalDllForDirectLoading);
 }

@@ -209,7 +209,7 @@ int ZipFile::getNumEntries() const noexcept
 const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const noexcept
 {
     ZipEntryInfo* const zei = entries [index];
-    return zei != nullptr ? &(zei->entry) : 0;
+    return zei != nullptr ? &(zei->entry) : nullptr;
 }
 
 int ZipFile::getIndexOfFileName (const String& fileName) const noexcept

@@ -363,7 +363,7 @@ private:
         WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
 
         HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                (WAVEFORMATEX*) &format, useExclusiveMode ? 0 : (WAVEFORMATEX**) &nearestFormat);
+                                                (WAVEFORMATEX*) &format, useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
@@ -1137,7 +1137,7 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()
     if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
         return new WasapiClasses::WASAPIAudioIODeviceType();
 
-    return 0;
+    return nullptr;
 }
 
 #endif

@@ -566,7 +566,7 @@ const MidiMessage MidiMessage::createSysExMessage (const uint8* sysexData, const
 
 const uint8* MidiMessage::getSysExData() const noexcept
 {
-    return isSysEx() ? getRawData() + 1 : 0;
+    return isSysEx() ? getRawData() + 1 : nullptr;
 }
 
 int MidiMessage::getSysExDataSize() const noexcept
