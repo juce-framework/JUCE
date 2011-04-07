@@ -2137,7 +2137,7 @@ void Component::getVisibleArea (RectangleList& result, const bool includeSibling
                                                        c->getLocalBounds(), this);
         }
 
-        ComponentHelpers::subtractObscuredRegions (*this, result, Point<int>(), unclipped, 0);
+        ComponentHelpers::subtractObscuredRegions (*this, result, Point<int>(), unclipped, nullptr);
         result.consolidate();
     }
 }

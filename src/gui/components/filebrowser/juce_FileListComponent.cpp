@@ -37,7 +37,7 @@ const Image juce_createIconForFile (const File& file);
 
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
-    : ListBox (String::empty, 0),
+    : ListBox (String::empty, nullptr),
       DirectoryContentsDisplayComponent (listToShow)
 {
     setModel (this);
@@ -237,7 +237,7 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
     if (fileList.getFileInfo (row, fileInfo))
         comp->update (fileList.getDirectory(), &fileInfo, row, isSelected);
     else
-        comp->update (fileList.getDirectory(), 0, row, isSelected);
+        comp->update (fileList.getDirectory(), nullptr, row, isSelected);
 
     return comp;
 }

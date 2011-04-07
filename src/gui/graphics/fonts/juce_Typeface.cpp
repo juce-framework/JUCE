@@ -100,6 +100,39 @@ private:
 };
 
 //==============================================================================
+namespace CustomTypefaceHelpers
+{
+    juce_wchar readChar (InputStream& in)
+    {
+        uint32 n = (uint32) (uint16) in.readShort();
+
+        if (n >= 0xd800 && n <= 0xdfff)
+        {
+            const uint32 nextWord = (uint32) (uint16) in.readShort();
+            jassert (nextWord >= 0xdc00); // illegal unicode character!
+
+            n = 0x10000 + (((n - 0xd800) << 10) | (nextWord - 0xdc00));
+        }
+
+        return (juce_wchar) n;
+    }
+
+    void writeChar (OutputStream& out, juce_wchar charToWrite)
+    {
+        if (charToWrite >= 0x10000)
+        {
+            charToWrite -= 0x10000;
+            out.writeShort ((short) (uint16) (0xd800 + (charToWrite >> 10)));
+            out.writeShort ((short) (uint16) (0xdc00 + (charToWrite & 0x3ff)));
+        }
+        else
+        {
+            out.writeShort ((short) (uint16) charToWrite);
+        }
+    }
+}
+
+//==============================================================================
 CustomTypeface::CustomTypeface()
     : Typeface (String::empty)
 {
@@ -118,13 +151,13 @@ CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
     isBold = in.readBool();
     isItalic = in.readBool();
     ascent = in.readFloat();
-    defaultCharacter = (juce_wchar) in.readShort();
+    defaultCharacter = CustomTypefaceHelpers::readChar (in);
 
     int i, numChars = in.readInt();
 
     for (i = 0; i < numChars; ++i)
     {
-        const juce_wchar c = (juce_wchar) in.readShort();
+        const juce_wchar c = CustomTypefaceHelpers::readChar (in);
         const float width = in.readFloat();
 
         Path p;
@@ -136,8 +169,8 @@ CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
 
     for (i = 0; i < numKerningPairs; ++i)
     {
-        const juce_wchar char1 = (juce_wchar) in.readShort();
-        const juce_wchar char2 = (juce_wchar) in.readShort();
+        const juce_wchar char1 = CustomTypefaceHelpers::readChar (in);
+        const juce_wchar char2 = CustomTypefaceHelpers::readChar (in);
 
         addKerningPair (char1, char2, in.readFloat());
     }
@@ -286,7 +319,7 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
     out.writeBool (isBold);
     out.writeBool (isItalic);
     out.writeFloat (ascent);
-    out.writeShort ((short) (unsigned short) defaultCharacter);
+    CustomTypefaceHelpers::writeChar (out, defaultCharacter);
     out.writeInt (glyphs.size());
 
     int i, numKerningPairs = 0;
@@ -294,7 +327,7 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
     for (i = 0; i < glyphs.size(); ++i)
     {
         const GlyphInfo* const g = glyphs.getUnchecked (i);
-        out.writeShort ((short) (unsigned short) g->character);
+        CustomTypefaceHelpers::writeChar (out, g->character);
         out.writeFloat (g->width);
         g->path.writePathToStream (out);
 
@@ -310,8 +343,8 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
         for (int j = 0; j < g->kerningPairs.size(); ++j)
         {
             const GlyphInfo::KerningPair& p = g->kerningPairs.getReference (j);
-            out.writeShort ((short) (unsigned short) g->character);
-            out.writeShort ((short) (unsigned short) p.character2);
+            CustomTypefaceHelpers::writeChar (out, g->character);
+            CustomTypefaceHelpers::writeChar (out, p.character2);
             out.writeFloat (p.kerningAmount);
         }
     }

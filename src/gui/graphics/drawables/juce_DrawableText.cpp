@@ -313,12 +313,12 @@ const ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*)
     ValueTreeWrapper v (tree);
 
     v.setID (getComponentID());
-    v.setText (text, 0);
-    v.setFont (font, 0);
-    v.setJustification (justification, 0);
-    v.setColour (colour, 0);
-    v.setBoundingBox (bounds, 0);
-    v.setFontSizeControlPoint (fontSizeControlPoint, 0);
+    v.setText (text, nullptr);
+    v.setFont (font, nullptr);
+    v.setJustification (justification, nullptr);
+    v.setColour (colour, nullptr);
+    v.setBoundingBox (bounds, nullptr);
+    v.setFontSizeControlPoint (fontSizeControlPoint, nullptr);
 
     return tree;
 }

@@ -88,7 +88,7 @@ public:
                                        const String& noItemsMessage_,
                                        const int minNumber_,
                                        const int maxNumber_)
-        : ListBox (String::empty, 0),
+        : ListBox (String::empty, nullptr),
           deviceManager (deviceManager_),
           noItemsMessage (noItemsMessage_),
           minNumber (minNumber_),
@@ -650,7 +650,7 @@ public:
         ChannelSelectorListBox (const AudioIODeviceType::DeviceSetupDetails& setup_,
                                 const BoxType type_,
                                 const String& noItemsMessage_)
-            : ListBox (String::empty, 0),
+            : ListBox (String::empty, nullptr),
               setup (setup_),
               type (type_),
               noItemsMessage (noItemsMessage_)

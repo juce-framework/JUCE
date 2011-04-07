@@ -290,8 +290,8 @@ const RelativeRectangle DrawableComposite::ValueTreeWrapper::getContentArea() co
 
 void DrawableComposite::ValueTreeWrapper::setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager)
 {
-    MarkerList::ValueTreeWrapper markersX (getMarkerListCreating (true, 0));
-    MarkerList::ValueTreeWrapper markersY (getMarkerListCreating (false, 0));
+    MarkerList::ValueTreeWrapper markersX (getMarkerListCreating (true, nullptr));
+    MarkerList::ValueTreeWrapper markersY (getMarkerListCreating (false, nullptr));
 
     markersX.setMarker (MarkerList::Marker (contentLeftMarkerName, newArea.left), undoManager);
     markersX.setMarker (MarkerList::Marker (contentRightMarkerName, newArea.right), undoManager);
@@ -329,7 +329,7 @@ const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvi
     ValueTreeWrapper v (tree);
 
     v.setID (getComponentID());
-    v.setBoundingBox (bounds, 0);
+    v.setBoundingBox (bounds, nullptr);
 
     ValueTree childList (v.getChildListCreating (nullptr));
 
@@ -338,11 +338,11 @@ const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvi
         const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
         jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
-        childList.addChild (d->createValueTree (imageProvider), -1, 0);
+        childList.addChild (d->createValueTree (imageProvider), -1, nullptr);
     }
 
-    v.getMarkerListCreating (true, 0).readFrom (markersX, 0);
-    v.getMarkerListCreating (false, 0).readFrom (markersY, 0);
+    v.getMarkerListCreating (true, nullptr).readFrom (markersX, nullptr);
+    v.getMarkerListCreating (false, nullptr).readFrom (markersY, nullptr);
 
     return tree;
 }

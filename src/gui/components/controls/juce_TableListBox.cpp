@@ -98,7 +98,7 @@ public:
 
                 if (comp != nullptr && columnId != (int) comp->getProperties() [columnProperty])
                 {
-                    columnComponents.set (i, 0);
+                    columnComponents.set (i, nullptr);
                     comp = nullptr;
                 }
 
@@ -267,7 +267,7 @@ private:
 
 //==============================================================================
 TableListBox::TableListBox (const String& name, TableListBoxModel* const model_)
-    : ListBox (name, 0),
+    : ListBox (name, nullptr),
       header (nullptr),
       model (model_),
       autoSizeOptionsShown (true)

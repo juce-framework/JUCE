@@ -111,7 +111,7 @@ public:
     HashMap (const int numberOfSlots = defaultHashTableSize)
        : totalNumItems (0)
     {
-        slots.insertMultiple (0, 0, numberOfSlots);
+        slots.insertMultiple (0, nullptr, numberOfSlots);
     }
 
     /** Destructor. */
@@ -139,7 +139,7 @@ public:
                 h = h->nextEntry;
             }
 
-            slots.set (i, 0);
+            slots.set (i, nullptr);
         }
 
         totalNumItems = 0;

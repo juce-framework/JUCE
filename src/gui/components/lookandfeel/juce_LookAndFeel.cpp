@@ -2479,7 +2479,7 @@ Button* LookAndFeel::createTabBarExtrasButton()
     overImage.addAndMakeVisible (dp.createCopy());
 
     DrawableButton* db = new DrawableButton ("tabs", DrawableButton::ImageFitted);
-    db->setImages (&normalImage, &overImage, 0);
+    db->setImages (&normalImage, &overImage, nullptr);
     return db;
 }
 
@@ -2790,7 +2790,7 @@ Drawable* LookAndFeel::loadDrawableFromData (const void* data, size_t numBytes)
     MemoryInputStream m (data, numBytes, false);
     GZIPDecompressorInputStream gz (m);
     ValueTree drawable (ValueTree::readFromStream (gz));
-    return Drawable::createFromValueTree (drawable.getChild (0), 0);
+    return Drawable::createFromValueTree (drawable.getChild (0), nullptr);
 }
 
 const Drawable* LookAndFeel::getDefaultFolderImage()

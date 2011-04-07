@@ -155,7 +155,7 @@ RelativePointPath::StartSubPath::StartSubPath (const RelativePoint& pos)
 const ValueTree RelativePointPath::StartSubPath::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::startSubPathElement);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point1, startPos.toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, startPos.toString(), nullptr);
     return v;
 }
 
@@ -211,7 +211,7 @@ RelativePointPath::LineTo::LineTo (const RelativePoint& endPoint_)
 const ValueTree RelativePointPath::LineTo::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::lineToElement);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point1, endPoint.toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, endPoint.toString(), nullptr);
     return v;
 }
 
@@ -242,8 +242,8 @@ RelativePointPath::QuadraticTo::QuadraticTo (const RelativePoint& controlPoint, 
 const ValueTree RelativePointPath::QuadraticTo::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::quadraticToElement);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), 0);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point2, controlPoints[1].toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), nullptr);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point2, controlPoints[1].toString(), nullptr);
     return v;
 }
 
@@ -277,9 +277,9 @@ RelativePointPath::CubicTo::CubicTo (const RelativePoint& controlPoint1, const R
 const ValueTree RelativePointPath::CubicTo::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::cubicToElement);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), 0);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point2, controlPoints[1].toString(), 0);
-    v.setProperty (DrawablePath::ValueTreeWrapper::point3, controlPoints[2].toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), nullptr);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point2, controlPoints[1].toString(), nullptr);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point3, controlPoints[2].toString(), nullptr);
     return v;
 }
 

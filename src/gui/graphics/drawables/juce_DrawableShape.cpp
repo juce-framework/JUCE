@@ -428,7 +428,7 @@ ValueTree DrawableShape::FillAndStrokeState::getFillState (const Identifier& fil
     if (v.isValid())
         return v;
 
-    setFill (fillOrStrokeType, FillType (Colours::black), 0, 0);
+    setFill (fillOrStrokeType, FillType (Colours::black), nullptr, nullptr);
     return getFillState (fillOrStrokeType);
 }
 

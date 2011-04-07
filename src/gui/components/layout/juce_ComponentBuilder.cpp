@@ -146,7 +146,7 @@ Component* ComponentBuilder::createComponent()
     TypeHandler* const type = getHandlerForState (state);
     jassert (type != nullptr); // trying to create a component from an unknown type of ValueTree
 
-    return type != nullptr ? ComponentBuilderHelpers::createNewComponent (*type, state, 0) : 0;
+    return type != nullptr ? ComponentBuilderHelpers::createNewComponent (*type, state, nullptr) : nullptr;
 }
 
 void ComponentBuilder::registerTypeHandler (ComponentBuilder::TypeHandler* const type)

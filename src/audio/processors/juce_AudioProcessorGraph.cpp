@@ -359,8 +359,6 @@ public:
         : channelNum (channelNum_)
     {}
 
-    ~ClearChannelOp()        {}
-
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
         sharedBufferChans.clear (channelNum, 0, numSamples);
@@ -380,8 +378,6 @@ public:
         : srcChannelNum (srcChannelNum_),
           dstChannelNum (dstChannelNum_)
     {}
-
-    ~CopyChannelOp()        {}
 
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
@@ -403,8 +399,6 @@ public:
           dstChannelNum (dstChannelNum_)
     {}
 
-    ~AddChannelOp()        {}
-
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
         sharedBufferChans.addFrom (dstChannelNum, 0, sharedBufferChans, srcChannelNum, 0, numSamples);
@@ -423,8 +417,6 @@ public:
     ClearMidiBufferOp (const int bufferNum_)
         : bufferNum (bufferNum_)
     {}
-
-    ~ClearMidiBufferOp()        {}
 
     void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int)
     {
@@ -446,8 +438,6 @@ public:
           dstBufferNum (dstBufferNum_)
     {}
 
-    ~CopyMidiBufferOp()        {}
-
     void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int)
     {
         *sharedMidiBuffers.getUnchecked (dstBufferNum) = *sharedMidiBuffers.getUnchecked (srcBufferNum);
@@ -467,8 +457,6 @@ public:
         : srcBufferNum (srcBufferNum_),
           dstBufferNum (dstBufferNum_)
     {}
-
-    ~AddMidiBufferOp()        {}
 
     void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples)
     {
@@ -500,10 +488,6 @@ public:
 
         while (audioChannelsToUse.size() < totalChans)
             audioChannelsToUse.add (0);
-    }
-
-    ~ProcessBufferOp()
-    {
     }
 
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples)

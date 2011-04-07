@@ -150,7 +150,7 @@ void DrawablePath::setPath (const RelativePointPath& newRelativePath)
     else
     {
         relativePath = nullptr;
-        applyRelativePath (newRelativePath, 0);
+        applyRelativePath (newRelativePath, nullptr);
     }
 }
 
@@ -171,7 +171,7 @@ DrawablePath::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
 
 ValueTree DrawablePath::ValueTreeWrapper::getPathState()
 {
-    return state.getOrCreateChildWithName (path, 0);
+    return state.getOrCreateChildWithName (path, nullptr);
 }
 
 bool DrawablePath::ValueTreeWrapper::usesNonZeroWinding() const
@@ -498,9 +498,9 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
         setModeOfEndPoint (roundedMode, undoManager);
 
         Element newElement (newTree = ValueTree (cubicToElement));
-        newElement.setControlPoint (0, newCp2, 0);
-        newElement.setControlPoint (1, mid3, 0);
-        newElement.setControlPoint (2, rp4, 0);
+        newElement.setControlPoint (0, newCp2, nullptr);
+        newElement.setControlPoint (1, mid3, nullptr);
+        newElement.setControlPoint (2, rp4, nullptr);
 
         state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
     }
@@ -521,8 +521,8 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
         setModeOfEndPoint (roundedMode, undoManager);
 
         Element newElement (newTree = ValueTree (quadraticToElement));
-        newElement.setControlPoint (0, mid2, 0);
-        newElement.setControlPoint (1, rp3, 0);
+        newElement.setControlPoint (0, mid2, nullptr);
+        newElement.setControlPoint (1, rp3, nullptr);
 
         state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
     }
@@ -535,7 +535,7 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
         setControlPoint (0, newPoint, undoManager);
 
         Element newElement (newTree = ValueTree (lineToElement));
-        newElement.setControlPoint (0, rp2, 0);
+        newElement.setControlPoint (0, rp2, nullptr);
 
         state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
     }
@@ -571,12 +571,12 @@ const ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* 
     ValueTreeWrapper v (tree);
 
     v.setID (getComponentID());
-    writeTo (v, imageProvider, 0);
+    writeTo (v, imageProvider, nullptr);
 
     if (relativePath != nullptr)
-        v.readFrom (*relativePath, 0);
+        v.readFrom (*relativePath, nullptr);
     else
-        v.readFrom (RelativePointPath (path), 0);
+        v.readFrom (RelativePointPath (path), nullptr);
 
     return tree;
 }

@@ -10691,7 +10691,7 @@ public:
 	HashMap (const int numberOfSlots = defaultHashTableSize)
 	   : totalNumItems (0)
 	{
-		slots.insertMultiple (0, 0, numberOfSlots);
+		slots.insertMultiple (0, nullptr, numberOfSlots);
 	}
 
 	/** Destructor. */
@@ -10718,7 +10718,7 @@ public:
 				h = h->nextEntry;
 			}
 
-			slots.set (i, 0);
+			slots.set (i, nullptr);
 		}
 
 		totalNumItems = 0;
@@ -55966,7 +55966,7 @@ private:
 
 		void mouseDrag (const MouseEvent& e)
 		{
-			myDragger.dragComponent (this, e, 0);
+			myDragger.dragComponent (this, e, nullptr);
 		}
 	};
 	@endcode
@@ -64326,7 +64326,7 @@ private:
 		MyContentComponent content;
 		content.setSize (300, 300);
 
-		CallOutBox callOut (content, *this, 0);
+		CallOutBox callOut (content, *this, nullptr);
 		callOut.runModalLoop();
 	}
 	@endcode

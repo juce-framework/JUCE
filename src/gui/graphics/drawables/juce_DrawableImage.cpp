@@ -283,16 +283,16 @@ const ValueTree DrawableImage::createValueTree (ComponentBuilder::ImageProvider*
     ValueTreeWrapper v (tree);
 
     v.setID (getComponentID());
-    v.setOpacity (opacity, 0);
-    v.setOverlayColour (overlayColour, 0);
-    v.setBoundingBox (bounds, 0);
+    v.setOpacity (opacity, nullptr);
+    v.setOverlayColour (overlayColour, nullptr);
+    v.setBoundingBox (bounds, nullptr);
 
     if (image.isValid())
     {
         jassert (imageProvider != nullptr); // if you're using images, you need to provide something that can load and save them!
 
         if (imageProvider != nullptr)
-            v.setImageIdentifier (imageProvider->getIdentifierForImage (image), 0);
+            v.setImageIdentifier (imageProvider->getIdentifierForImage (image), nullptr);
     }
 
     return tree;

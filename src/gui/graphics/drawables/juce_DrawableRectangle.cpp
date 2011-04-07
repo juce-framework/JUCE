@@ -185,9 +185,9 @@ const ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvi
     ValueTreeWrapper v (tree);
 
     v.setID (getComponentID());
-    writeTo (v, imageProvider, 0);
-    v.setRectangle (bounds, 0);
-    v.setCornerSize (cornerSize, 0);
+    writeTo (v, imageProvider, nullptr);
+    v.setRectangle (bounds, nullptr);
+    v.setCornerSize (cornerSize, nullptr);
 
     return tree;
 }

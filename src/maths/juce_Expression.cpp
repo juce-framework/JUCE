@@ -272,7 +272,7 @@ public:
             }
             else
             {
-                result = scope.evaluateFunction (functionName, 0, 0);
+                result = scope.evaluateFunction (functionName, nullptr, 0);
             }
 
             return new Constant (result, false);

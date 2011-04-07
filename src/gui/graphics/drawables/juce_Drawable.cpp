@@ -238,9 +238,9 @@ const String Drawable::ValueTreeWrapperBase::getID() const
 void Drawable::ValueTreeWrapperBase::setID (const String& newID)
 {
     if (newID.isEmpty())
-        state.removeProperty (ComponentBuilder::idProperty, 0);
+        state.removeProperty (ComponentBuilder::idProperty, nullptr);
     else
-        state.setProperty (ComponentBuilder::idProperty, newID, 0);
+        state.setProperty (ComponentBuilder::idProperty, newID, nullptr);
 }
 
 

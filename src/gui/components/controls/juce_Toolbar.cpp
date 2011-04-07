@@ -558,7 +558,7 @@ void Toolbar::buttonClicked (Button*)
     {
         PopupMenu m;
         m.addCustomItem (1, new MissingItemsComponent (*this, getThickness()));
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton), 0);
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton), nullptr);
     }
 }
 

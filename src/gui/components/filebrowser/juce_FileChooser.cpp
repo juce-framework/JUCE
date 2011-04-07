@@ -74,12 +74,12 @@ bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* pre
 
 bool FileChooser::browseForFileToSave (const bool warnAboutOverwritingExistingFiles)
 {
-    return showDialog (false, true, true, warnAboutOverwritingExistingFiles, false, 0);
+    return showDialog (false, true, true, warnAboutOverwritingExistingFiles, false, nullptr);
 }
 
 bool FileChooser::browseForDirectory()
 {
-    return showDialog (true, false, false, false, false, 0);
+    return showDialog (true, false, false, false, false, nullptr);
 }
 
 bool FileChooser::showDialog (const bool selectsDirectories,
@@ -97,13 +97,13 @@ bool FileChooser::showDialog (const bool selectsDirectories,
     jassert (previewComponent == nullptr || (previewComponent->getWidth() > 10
                                                && previewComponent->getHeight() > 10));
 
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
-#elif JUCE_MAC
+   #elif JUCE_MAC
     if (useNativeDialogBox && (previewComponent == nullptr))
-#else
+   #else
     if (false)
-#endif
+   #endif
     {
         showPlatformDialog (results, title, startingFile, filters,
                             selectsDirectories, selectsFiles, isSave,

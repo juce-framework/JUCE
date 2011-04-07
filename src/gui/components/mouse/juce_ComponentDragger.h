@@ -52,7 +52,7 @@
 
         void mouseDrag (const MouseEvent& e)
         {
-            myDragger.dragComponent (this, e, 0);
+            myDragger.dragComponent (this, e, nullptr);
         }
     };
     @endcode

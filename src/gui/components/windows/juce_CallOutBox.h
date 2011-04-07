@@ -46,7 +46,7 @@
         MyContentComponent content;
         content.setSize (300, 300);
 
-        CallOutBox callOut (content, *this, 0);
+        CallOutBox callOut (content, *this, nullptr);
         callOut.runModalLoop();
     }
     @endcode

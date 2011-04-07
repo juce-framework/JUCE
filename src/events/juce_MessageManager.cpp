@@ -130,7 +130,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    postMessageToQueue (new Message (quitMessageId, 0, 0, 0));
+    postMessageToQueue (new Message (quitMessageId, 0, 0, nullptr));
     quitMessagePosted = true;
 }
 
@@ -240,13 +240,13 @@ private:
 MessageManagerLock::MessageManagerLock (Thread* const threadToCheck)
     : locked (false)
 {
-    init (threadToCheck, 0);
+    init (threadToCheck, nullptr);
 }
 
 MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal)
     : locked (false)
 {
-    init (0, jobToCheckForExitSignal);
+    init (nullptr, jobToCheckForExitSignal);
 }
 
 void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const job)
