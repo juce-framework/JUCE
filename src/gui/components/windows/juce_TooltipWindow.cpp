@@ -43,7 +43,7 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
       mouseClicks (0),
       lastHideTime (0),
-      lastComponentUnderMouse (0),
+      lastComponentUnderMouse (nullptr),
       changedCompsSinceShown (true)
 {
     if (Desktop::getInstance().getMainMouseSource().canHover())
@@ -52,7 +52,7 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
     setAlwaysOnTop (true);
     setOpaque (true);
 
-    if (parentComponent != 0)
+    if (parentComponent != nullptr)
         parentComponent->addChildComponent (this);
 }
 
@@ -61,7 +61,7 @@ TooltipWindow::~TooltipWindow()
     hide();
 }
 
-void TooltipWindow::setMillisecondsBeforeTipAppears (const int newTimeMs) throw()
+void TooltipWindow::setMillisecondsBeforeTipAppears (const int newTimeMs) noexcept
 {
     millisecondsBeforeTipAppears = newTimeMs;
 }
@@ -86,7 +86,7 @@ void TooltipWindow::showFor (const String& tip)
 
     Point<int> mousePos (Desktop::getMousePosition());
 
-    if (getParentComponent() != 0)
+    if (getParentComponent() != nullptr)
         mousePos = getParentComponent()->getLocalPoint (0, mousePos);
 
     int x, y, w, h;
@@ -105,7 +105,7 @@ void TooltipWindow::showFor (const String& tip)
     setBounds (x, y, w, h);
     setVisible (true);
 
-    if (getParentComponent() == 0)
+    if (getParentComponent() == nullptr)
     {
         addToDesktop (ComponentPeer::windowHasDropShadow
                         | ComponentPeer::windowIsTemporary
@@ -117,13 +117,13 @@ void TooltipWindow::showFor (const String& tip)
 
 const String TooltipWindow::getTipFor (Component* const c)
 {
-    if (c != 0
+    if (c != nullptr
          && Process::isForegroundProcess()
          && ! Component::isMouseButtonDownAnywhere())
     {
         TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
 
-        if (ttc != 0 && ! c->isCurrentlyBlockedByAnotherModalComponent())
+        if (ttc != nullptr && ! c->isCurrentlyBlockedByAnotherModalComponent())
             return ttc->getTooltip();
     }
 
@@ -162,7 +162,7 @@ void TooltipWindow::timerCallback()
     {
         // if a tip is currently visible (or has just disappeared), update to a new one
         // immediately if needed..
-        if (newComp == 0 || mouseWasClicked || newTip.isEmpty())
+        if (newComp == nullptr || mouseWasClicked || newTip.isEmpty())
         {
             if (isVisible())
             {

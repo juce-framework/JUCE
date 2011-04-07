@@ -94,7 +94,7 @@ public:
 
         @see setBackgroundColour
     */
-    const Colour getBackgroundColour() const throw();
+    const Colour getBackgroundColour() const noexcept;
 
     /** Changes the colour currently being used for the window's background.
 
@@ -129,7 +129,7 @@ public:
 
         @see setResizable
     */
-    bool isResizable() const throw();
+    bool isResizable() const noexcept;
 
     /** This sets the maximum and minimum sizes for the window.
 
@@ -144,13 +144,13 @@ public:
     void setResizeLimits (int newMinimumWidth,
                           int newMinimumHeight,
                           int newMaximumWidth,
-                          int newMaximumHeight) throw();
+                          int newMaximumHeight) noexcept;
 
     /** Returns the bounds constrainer object that this window is using.
 
         You can access this to change its properties.
     */
-    ComponentBoundsConstrainer* getConstrainer() throw()            { return constrainer; }
+    ComponentBoundsConstrainer* getConstrainer() noexcept           { return constrainer; }
 
     /** Sets the bounds-constrainer object to use for resizing and dragging this window.
 
@@ -233,7 +233,7 @@ public:
 
         @see setContentOwned, setContentNonOwned
     */
-    Component* getContentComponent() const throw()                  { return contentComponent; }
+    Component* getContentComponent() const noexcept                 { return contentComponent; }
 
     /** Changes the current content component.
 

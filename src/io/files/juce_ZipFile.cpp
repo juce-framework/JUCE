@@ -57,11 +57,9 @@ public:
           zipEntryInfo (zei),
           pos (0),
           headerSize (0),
-          inputStream (0)
+          inputStream (file_.inputStream)
     {
-        inputStream = file_.inputStream;
-
-        if (file_.inputSource != 0)
+        if (file_.inputSource != nullptr)
         {
             inputStream = streamToDelete = file.inputSource->createInputStream();
         }
@@ -74,7 +72,7 @@ public:
 
         char buffer [30];
 
-        if (inputStream != 0
+        if (inputStream != nullptr
              && inputStream->setPosition (zei.streamOffset)
              && inputStream->read (buffer, 30) == 30
              && ByteOrder::littleEndianInt (buffer) == 0x04034b50)
@@ -87,7 +85,7 @@ public:
     ~ZipInputStream()
     {
        #if JUCE_DEBUG
-        if (inputStream != 0 && inputStream == file.inputStream)
+        if (inputStream != nullptr && inputStream == file.inputStream)
             file.numOpenStreams--;
        #endif
     }
@@ -104,7 +102,7 @@ public:
 
         howMany = (int) jmin ((int64) howMany, zipEntryInfo.compressedSize - pos);
 
-        if (inputStream == 0)
+        if (inputStream == nullptr)
             return 0;
 
         int num;
@@ -169,7 +167,7 @@ ZipFile::ZipFile (InputStream* const source_, const bool deleteStreamWhenDestroy
 }
 
 ZipFile::ZipFile (const File& file)
-    : inputStream (0)
+    : inputStream (nullptr)
      #if JUCE_DEBUG
       , numOpenStreams (0)
      #endif
@@ -179,7 +177,7 @@ ZipFile::ZipFile (const File& file)
 }
 
 ZipFile::ZipFile (InputSource* const inputSource_)
-    : inputStream (0),
+    : inputStream (nullptr),
       inputSource (inputSource_)
      #if JUCE_DEBUG
       , numOpenStreams (0)
@@ -203,18 +201,18 @@ ZipFile::~ZipFile()
 }
 
 //==============================================================================
-int ZipFile::getNumEntries() const throw()
+int ZipFile::getNumEntries() const noexcept
 {
     return entries.size();
 }
 
-const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const throw()
+const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const noexcept
 {
     ZipEntryInfo* const zei = entries [index];
-    return zei != 0 ? &(zei->entry) : 0;
+    return zei != nullptr ? &(zei->entry) : 0;
 }
 
-int ZipFile::getIndexOfFileName (const String& fileName) const throw()
+int ZipFile::getIndexOfFileName (const String& fileName) const noexcept
 {
     for (int i = 0; i < entries.size(); ++i)
         if (entries.getUnchecked (i)->entry.filename == fileName)
@@ -223,7 +221,7 @@ int ZipFile::getIndexOfFileName (const String& fileName) const throw()
     return -1;
 }
 
-const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const throw()
+const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const noexcept
 {
     return getEntry (getIndexOfFileName (fileName));
 }
@@ -231,9 +229,9 @@ const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const throw(
 InputStream* ZipFile::createStreamForEntry (const int index)
 {
     ZipEntryInfo* const zei = entries[index];
-    InputStream* stream = 0;
+    InputStream* stream = nullptr;
 
-    if (zei != 0)
+    if (zei != nullptr)
     {
         stream = new ZipInputStream (*this, *zei);
 
@@ -271,13 +269,13 @@ void ZipFile::init()
     ScopedPointer <InputStream> toDelete;
     InputStream* in = inputStream;
 
-    if (inputSource != 0)
+    if (inputSource != nullptr)
     {
         in = inputSource->createInputStream();
         toDelete = in;
     }
 
-    if (in != 0)
+    if (in != nullptr)
     {
         int numEntries = 0;
         int pos = findEndOfZipEntryTable (*in, numEntries);
@@ -387,7 +385,7 @@ bool ZipFile::uncompressEntry (const int index,
 {
     const ZipEntryInfo* zei = entries [index];
 
-    if (zei != 0)
+    if (zei != nullptr)
     {
         const File targetFile (targetDirectory.getChildFile (zei->entry.filename));
 
@@ -399,7 +397,7 @@ bool ZipFile::uncompressEntry (const int index,
         {
             ScopedPointer<InputStream> in (createStreamForEntry (index));
 
-            if (in != 0)
+            if (in != nullptr)
             {
                 if (shouldOverwriteFiles && ! targetFile.deleteFile())
                     return false;
@@ -408,10 +406,10 @@ bool ZipFile::uncompressEntry (const int index,
                 {
                     ScopedPointer<FileOutputStream> out (targetFile.createOutputStream());
 
-                    if (out != 0)
+                    if (out != nullptr)
                     {
                         out->writeFromInputStream (*in, -1);
-                        out = 0;
+                        out = nullptr;
 
                         targetFile.setCreationTime (zei->entry.fileTime);
                         targetFile.setLastModificationTime (zei->entry.fileTime);
@@ -504,7 +502,7 @@ private:
         checksum = 0;
         ScopedPointer<FileInputStream> input (file.createInputStream());
 
-        if (input == 0)
+        if (input == nullptr)
             return false;
 
         const int bufferSize = 2048;

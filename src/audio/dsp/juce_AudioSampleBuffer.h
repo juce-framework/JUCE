@@ -49,7 +49,7 @@ public:
         when the buffer is deleted.
     */
     AudioSampleBuffer (int numChannels,
-                       int numSamples) throw();
+                       int numSamples) noexcept;
 
     /** Creates a buffer using a pre-allocated block of memory.
 
@@ -68,7 +68,7 @@ public:
     */
     AudioSampleBuffer (float** dataToReferTo,
                        int numChannels,
-                       int numSamples) throw();
+                       int numSamples) noexcept;
 
     /** Creates a buffer using a pre-allocated block of memory.
 
@@ -89,7 +89,7 @@ public:
     AudioSampleBuffer (float** dataToReferTo,
                        int numChannels,
                        int startSample,
-                       int numSamples) throw();
+                       int numSamples) noexcept;
 
     /** Copies another buffer.
 
@@ -97,39 +97,39 @@ public:
         using an external data buffer, in which case boths buffers will just point to the same
         shared block of data.
     */
-    AudioSampleBuffer (const AudioSampleBuffer& other) throw();
+    AudioSampleBuffer (const AudioSampleBuffer& other) noexcept;
 
     /** Copies another buffer onto this one.
 
         This buffer's size will be changed to that of the other buffer.
     */
-    AudioSampleBuffer& operator= (const AudioSampleBuffer& other) throw();
+    AudioSampleBuffer& operator= (const AudioSampleBuffer& other) noexcept;
 
     /** Destructor.
 
         This will free any memory allocated by the buffer.
     */
-    virtual ~AudioSampleBuffer() throw();
+    virtual ~AudioSampleBuffer() noexcept;
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
 
         @see getSampleData
     */
-    int getNumChannels() const throw()      { return numChannels; }
+    int getNumChannels() const noexcept     { return numChannels; }
 
     /** Returns the number of samples allocated in each of the buffer's channels.
 
         @see getSampleData
     */
-    int getNumSamples() const throw()       { return size; }
+    int getNumSamples() const noexcept      { return size; }
 
     /** Returns a pointer one of the buffer's channels.
 
         For speed, this doesn't check whether the channel number is out of range,
         so be careful when using it!
     */
-    float* getSampleData (const int channelNumber) const throw()
+    float* getSampleData (const int channelNumber) const noexcept
     {
         jassert (isPositiveAndBelow (channelNumber, numChannels));
         return channels [channelNumber];
@@ -141,7 +141,7 @@ public:
         are out-of-range, so be careful when using it!
     */
     float* getSampleData (const int channelNumber,
-                          const int sampleOffset) const throw()
+                          const int sampleOffset) const noexcept
     {
         jassert (isPositiveAndBelow (channelNumber, numChannels));
         jassert (isPositiveAndBelow (sampleOffset, size));
@@ -153,7 +153,7 @@ public:
         Don't modify any of the pointers that are returned, and bear in mind that
         these will become invalid if the buffer is resized.
     */
-    float** getArrayOfChannels() const throw()          { return channels; }
+    float** getArrayOfChannels() const noexcept         { return channels; }
 
     //==============================================================================
     /** Changes the buffer's size or number of channels.
@@ -177,7 +177,7 @@ public:
                   int newNumSamples,
                   bool keepExistingContent = false,
                   bool clearExtraSpace = false,
-                  bool avoidReallocating = false) throw();
+                  bool avoidReallocating = false) noexcept;
 
 
     /** Makes this buffer point to a pre-allocated set of channel data arrays.
@@ -200,11 +200,11 @@ public:
     */
     void setDataToReferTo (float** dataToReferTo,
                            int numChannels,
-                           int numSamples) throw();
+                           int numSamples) noexcept;
 
     //==============================================================================
     /** Clears all the samples in all channels. */
-    void clear() throw();
+    void clear() noexcept;
 
     /** Clears a specified region of all the channels.
 
@@ -212,7 +212,7 @@ public:
         are in-range, so be careful!
     */
     void clear (int startSample,
-                int numSamples) throw();
+                int numSamples) noexcept;
 
     /** Clears a specified region of just one channel.
 
@@ -221,7 +221,7 @@ public:
     */
     void clear (int channel,
                 int startSample,
-                int numSamples) throw();
+                int numSamples) noexcept;
 
     /** Applies a gain multiple to a region of one channel.
 
@@ -231,7 +231,7 @@ public:
     void applyGain (int channel,
                     int startSample,
                     int numSamples,
-                    float gain) throw();
+                    float gain) noexcept;
 
     /** Applies a gain multiple to a region of all the channels.
 
@@ -240,7 +240,7 @@ public:
     */
     void applyGain (int startSample,
                     int numSamples,
-                    float gain) throw();
+                    float gain) noexcept;
 
     /** Applies a range of gains to a region of a channel.
 
@@ -255,7 +255,7 @@ public:
                         int startSample,
                         int numSamples,
                         float startGain,
-                        float endGain) throw();
+                        float endGain) noexcept;
 
     /** Adds samples from another buffer to this one.
 
@@ -276,7 +276,7 @@ public:
                   int sourceChannel,
                   int sourceStartSample,
                   int numSamples,
-                  float gainToApplyToSource = 1.0f) throw();
+                  float gainToApplyToSource = 1.0f) noexcept;
 
     /** Adds samples from an array of floats to one of the channels.
 
@@ -293,7 +293,7 @@ public:
                   int destStartSample,
                   const float* source,
                   int numSamples,
-                  float gainToApplyToSource = 1.0f) throw();
+                  float gainToApplyToSource = 1.0f) noexcept;
 
     /** Adds samples from an array of floats, applying a gain ramp to them.
 
@@ -311,7 +311,7 @@ public:
                           const float* source,
                           int numSamples,
                           float startGain,
-                          float endGain) throw();
+                          float endGain) noexcept;
 
     /** Copies samples from another buffer to this one.
 
@@ -329,7 +329,7 @@ public:
                    const AudioSampleBuffer& source,
                    int sourceChannel,
                    int sourceStartSample,
-                   int numSamples) throw();
+                   int numSamples) noexcept;
 
     /** Copies samples from an array of floats into one of the channels.
 
@@ -343,7 +343,7 @@ public:
     void copyFrom (int destChannel,
                    int destStartSample,
                    const float* source,
-                   int numSamples) throw();
+                   int numSamples) noexcept;
 
     /** Copies samples from an array of floats into one of the channels, applying a gain to it.
 
@@ -359,7 +359,7 @@ public:
                    int destStartSample,
                    const float* source,
                    int numSamples,
-                   float gain) throw();
+                   float gain) noexcept;
 
     /** Copies samples from an array of floats into one of the channels, applying a gain ramp.
 
@@ -379,7 +379,7 @@ public:
                            const float* source,
                            int numSamples,
                            float startGain,
-                           float endGain) throw();
+                           float endGain) noexcept;
 
 
     /** Finds the highest and lowest sample values in a given range.
@@ -394,24 +394,24 @@ public:
                      int startSample,
                      int numSamples,
                      float& minVal,
-                     float& maxVal) const throw();
+                     float& maxVal) const noexcept;
 
     /** Finds the highest absolute sample value within a region of a channel.
     */
     float getMagnitude (int channel,
                         int startSample,
-                        int numSamples) const throw();
+                        int numSamples) const noexcept;
 
     /** Finds the highest absolute sample value within a region on all channels.
     */
     float getMagnitude (int startSample,
-                        int numSamples) const throw();
+                        int numSamples) const noexcept;
 
     /** Returns the root mean squared level for a region of a channel.
     */
     float getRMSLevel (int channel,
                        int startSample,
-                       int numSamples) const throw();
+                       int numSamples) const noexcept;
 
     //==============================================================================
     /** Fills a section of the buffer using an AudioReader as its source.

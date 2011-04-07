@@ -66,7 +66,7 @@ public:
             hr = captureGraphBuilder->FindInterface (&PIN_CATEGORY_CAPTURE, 0, filter,
                                                      IID_IAMStreamConfig, (void**) streamConfig.resetAndGetPointerAddress());
 
-            if (streamConfig != 0)
+            if (streamConfig != nullptr)
             {
                 getVideoSizes (streamConfig);
 
@@ -146,7 +146,7 @@ public:
 
     ~DShowCameraDeviceInteral()
     {
-        if (mediaControl != 0)
+        if (mediaControl != nullptr)
             mediaControl->Stop();
 
         removeGraphFromRot();
@@ -154,16 +154,16 @@ public:
         for (int i = viewerComps.size(); --i >= 0;)
             viewerComps.getUnchecked(i)->ownerDeleted();
 
-        callback = 0;
-        graphBuilder = 0;
-        sampleGrabber = 0;
-        mediaControl = 0;
-        filter = 0;
-        captureGraphBuilder = 0;
-        smartTee = 0;
-        smartTeePreviewOutputPin = 0;
-        smartTeeCaptureOutputPin = 0;
-        asfWriter = 0;
+        callback = nullptr;
+        graphBuilder = nullptr;
+        sampleGrabber = nullptr;
+        mediaControl = nullptr;
+        filter = nullptr;
+        captureGraphBuilder = nullptr;
+        smartTee = nullptr;
+        smartTeePreviewOutputPin = nullptr;
+        smartTeeCaptureOutputPin = nullptr;
+        asfWriter = nullptr;
     }
 
     void addUser()
@@ -198,7 +198,7 @@ public:
                 ComSmartPtr <IAMPushSource> pushSource;
                 HRESULT hr = pin.QueryInterface (IID_IAMPushSource, pushSource);
 
-                if (pushSource != 0)
+                if (pushSource != nullptr)
                 {
                     REFERENCE_TIME latency = 0;
                     hr = pushSource->GetLatency (&latency);
@@ -357,10 +357,10 @@ public:
     {
         mediaControl->Stop();
 
-        if (asfWriter != 0)
+        if (asfWriter != nullptr)
         {
             graphBuilder->RemoveFilter (asfWriter);
-            asfWriter = 0;
+            asfWriter = nullptr;
         }
 
         if (ok && activeUsers > 0)
@@ -397,7 +397,7 @@ public:
         {
             CameraDevice::Listener* const l = listeners[i];
 
-            if (l != 0)
+            if (l != nullptr)
                 l->imageReceived (image);
         }
     }
@@ -420,7 +420,7 @@ public:
 
         ~DShowCaptureViewerComp()
         {
-            if (owner != 0)
+            if (owner != nullptr)
             {
                 owner->viewerComps.removeValue (this);
                 owner->removeUser();
@@ -430,7 +430,7 @@ public:
 
         void ownerDeleted()
         {
-            owner = 0;
+            owner = nullptr;
         }
 
         void paint (Graphics& g)
@@ -438,7 +438,7 @@ public:
             g.setColour (Colours::black);
             g.setImageResamplingQuality (Graphics::lowResamplingQuality);
 
-            if (owner != 0)
+            if (owner != nullptr)
                 owner->drawCurrentImage (g, 0, 0, getWidth(), getHeight());
             else
                 g.fillAll (Colours::black);
@@ -453,7 +453,7 @@ public:
                 lastRepaintTime = now;
                 repaint();
 
-                if (owner != 0)
+                if (owner != nullptr)
                     maxFPS = owner->getPreviewMaxFPS();
             }
         }
@@ -588,7 +588,8 @@ private:
         return false;
     }
 
-    static bool getPin (IBaseFilter* filter, const PIN_DIRECTION wantedDirection, ComSmartPtr<IPin>& result, const char* pinName = 0)
+    static bool getPin (IBaseFilter* filter, const PIN_DIRECTION wantedDirection,
+                        ComSmartPtr<IPin>& result, const char* pinName = nullptr)
     {
         ComSmartPtr <IEnumPins> enumerator;
         ComSmartPtr <IPin> pin;
@@ -605,7 +606,7 @@ private:
                 PIN_INFO info = { 0 };
                 pin->QueryPinInfo (&info);
 
-                if (pinName == 0 || String (pinName).equalsIgnoreCase (String (info.achName)))
+                if (pinName == nullptr || String (pinName).equalsIgnoreCase (String (info.achName)))
                 {
                     result = pin;
                     return true;
@@ -654,7 +655,7 @@ private:
         if (pmt->cbFormat != 0)
             CoTaskMemFree ((PVOID) pmt->pbFormat);
 
-        if (pmt->pUnk != 0)
+        if (pmt->pUnk != nullptr)
             pmt->pUnk->Release();
 
         CoTaskMemFree (pmt);
@@ -708,7 +709,7 @@ CameraDevice::~CameraDevice()
 {
     stopRecording();
     delete static_cast <DShowCameraDeviceInteral*> (internal);
-    internal = 0;
+    internal = nullptr;
 }
 
 Component* CameraDevice::createViewerComponent()
@@ -751,7 +752,7 @@ void CameraDevice::addListener (Listener* listenerToAdd)
 {
     DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
 
-    if (listenerToAdd != 0)
+    if (listenerToAdd != nullptr)
         d->addListener (listenerToAdd);
 }
 
@@ -759,7 +760,7 @@ void CameraDevice::removeListener (Listener* listenerToRemove)
 {
     DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
 
-    if (listenerToRemove != 0)
+    if (listenerToRemove != nullptr)
         d->removeListener (listenerToRemove);
 }
 
@@ -782,7 +783,7 @@ namespace
             ComSmartPtr <IEnumMoniker> enumerator;
             hr = pDevEnum->CreateClassEnumerator (CLSID_VideoInputDeviceCategory, enumerator.resetAndGetPointerAddress(), 0);
 
-            if (SUCCEEDED (hr) && enumerator != 0)
+            if (SUCCEEDED (hr) && enumerator != nullptr)
             {
                 ComSmartPtr <IMoniker> moniker;
                 ULONG fetched;
@@ -803,11 +804,11 @@ namespace
                             var.vt = VT_BSTR;
 
                             hr = propertyBag->Read (_T("FriendlyName"), &var, 0);
-                            propertyBag = 0;
+                            propertyBag = nullptr;
 
                             if (SUCCEEDED (hr))
                             {
-                                if (names != 0)
+                                if (names != nullptr)
                                     names->add (var.bstrVal);
 
                                 if (index == deviceIndexToOpen)
@@ -849,7 +850,7 @@ CameraDevice* CameraDevice::openDevice (int index,
         String name;
         const ComSmartPtr <IBaseFilter> filter (enumerateCameras (0, index, name));
 
-        if (filter != 0)
+        if (filter != nullptr)
         {
             ScopedPointer <CameraDevice> cam (new CameraDevice (name, index));
 

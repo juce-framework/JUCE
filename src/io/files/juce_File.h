@@ -147,7 +147,7 @@ public:
 
         @see getFileName, getRelativePathFrom
     */
-    const String& getFullPathName() const throw()           { return fullPath; }
+    const String& getFullPathName() const noexcept          { return fullPath; }
 
     /** Returns the last section of the pathname.
 

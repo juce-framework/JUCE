@@ -56,7 +56,7 @@ public:
 
     //==============================================================================
     /** Returns the path as it is currently shown. */
-    const FileSearchPath& getPath() const throw()                   { return path; }
+    const FileSearchPath& getPath() const noexcept                  { return path; }
 
     /** Changes the current path. */
     void setPath (const FileSearchPath& newPath);

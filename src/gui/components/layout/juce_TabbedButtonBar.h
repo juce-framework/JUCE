@@ -142,7 +142,7 @@ public:
 
         @see setOrientation
     */
-    Orientation getOrientation() const throw()                      { return orientation; }
+    Orientation getOrientation() const noexcept                     { return orientation; }
 
     /** Changes the minimum scale factor to which the tabs can be compressed when trying to
         fit a lot of tabs on-screen.
@@ -205,7 +205,7 @@ public:
 
         This could return -1 if none are selected.
     */
-    int getCurrentTabIndex() const throw()                              { return currentTabIndex; }
+    int getCurrentTabIndex() const noexcept                             { return currentTabIndex; }
 
     /** Returns the button for a specific tab.
 

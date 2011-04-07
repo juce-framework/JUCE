@@ -43,16 +43,16 @@ class JUCE_API  RectanglePlacement
 public:
     //==============================================================================
     /** Creates a RectanglePlacement object using a combination of flags. */
-    inline RectanglePlacement (int flags_) throw()  : flags (flags_) {}
+    inline RectanglePlacement (int flags_) noexcept : flags (flags_) {}
 
     /** Creates a copy of another RectanglePlacement object. */
-    RectanglePlacement (const RectanglePlacement& other) throw();
+    RectanglePlacement (const RectanglePlacement& other) noexcept;
 
     /** Copies another RectanglePlacement object. */
-    RectanglePlacement& operator= (const RectanglePlacement& other) throw();
+    RectanglePlacement& operator= (const RectanglePlacement& other) noexcept;
 
-    bool operator== (const RectanglePlacement& other) const throw();
-    bool operator!= (const RectanglePlacement& other) const throw();
+    bool operator== (const RectanglePlacement& other) const noexcept;
+    bool operator!= (const RectanglePlacement& other) const noexcept;
 
     //==============================================================================
     /** Flag values that can be combined and used in the constructor. */
@@ -120,13 +120,13 @@ public:
 
     //==============================================================================
     /** Returns the raw flags that are set for this object. */
-    inline int getFlags() const throw()                             { return flags; }
+    inline int getFlags() const noexcept                            { return flags; }
 
     /** Tests a set of flags for this object.
 
         @returns true if any of the flags passed in are set on this object.
     */
-    inline bool testFlags (int flagsToTest) const throw()           { return (flags & flagsToTest) != 0; }
+    inline bool testFlags (int flagsToTest) const noexcept          { return (flags & flagsToTest) != 0; }
 
 
     //==============================================================================
@@ -142,14 +142,14 @@ public:
                   double destinationX,
                   double destinationY,
                   double destinationW,
-                  double destinationH) const throw();
+                  double destinationH) const noexcept;
 
     /** Returns the transform that should be applied to these source co-ordinates to fit them
         into the destination rectangle using the current flags.
     */
     template <typename ValueType>
     const Rectangle<ValueType> appliedTo (const Rectangle<ValueType>& source,
-                                          const Rectangle<ValueType>& destination) const throw()
+                                          const Rectangle<ValueType>& destination) const noexcept
     {
         double x = source.getX(), y = source.getY(), w = source.getWidth(), h = source.getHeight();
         applyTo (x, y, w, h, static_cast <double> (destination.getX()), static_cast <double> (destination.getY()),
@@ -162,7 +162,7 @@ public:
         into the destination rectangle using the current flags.
     */
     const AffineTransform getTransformToFit (const Rectangle<float>& source,
-                                             const Rectangle<float>& destination) const throw();
+                                             const Rectangle<float>& destination) const noexcept;
 
 
 private:

@@ -45,7 +45,7 @@ class JUCE_API  RectangleList
 public:
     //==============================================================================
     /** Creates an empty RectangleList */
-    RectangleList() throw();
+    RectangleList() noexcept;
 
     /** Creates a copy of another list */
     RectangleList (const RectangleList& other);
@@ -61,17 +61,17 @@ public:
 
     //==============================================================================
     /** Returns true if the region is empty. */
-    bool isEmpty() const throw();
+    bool isEmpty() const noexcept;
 
     /** Returns the number of rectangles in the list. */
-    int getNumRectangles() const throw()                        { return rects.size(); }
+    int getNumRectangles() const noexcept                       { return rects.size(); }
 
     /** Returns one of the rectangles at a particular index.
 
         @returns    the rectangle at the index, or an empty rectangle if the
                     index is out-of-range.
     */
-    const Rectangle<int> getRectangle (int index) const throw();
+    const Rectangle<int> getRectangle (int index) const noexcept;
 
 
     //==============================================================================
@@ -161,14 +161,14 @@ public:
         This swaps their internal pointers, so is hugely faster than using copy-by-value
         to swap them.
     */
-    void swapWith (RectangleList& otherList) throw();
+    void swapWith (RectangleList& otherList) noexcept;
 
     //==============================================================================
     /** Checks whether the region contains a given point.
 
         @returns true if the point lies within one of the rectangles in the list
     */
-    bool containsPoint (int x, int y) const throw();
+    bool containsPoint (int x, int y) const noexcept;
 
     /** Checks whether the region contains the whole of a given rectangle.
 
@@ -184,17 +184,17 @@ public:
                     defined by this object
         @see containsRectangle
     */
-    bool intersectsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
+    bool intersectsRectangle (const Rectangle<int>& rectangleToCheck) const noexcept;
 
     /** Checks whether this region intersects any part of another one.
 
         @see intersectsRectangle
     */
-    bool intersects (const RectangleList& other) const throw();
+    bool intersects (const RectangleList& other) const noexcept;
 
     //==============================================================================
     /** Returns the smallest rectangle that can enclose the whole of this region. */
-    const Rectangle<int> getBounds() const throw();
+    const Rectangle<int> getBounds() const noexcept;
 
     /** Optimises the list into a minimum number of constituent rectangles.
 
@@ -205,7 +205,7 @@ public:
     void consolidate();
 
     /** Adds an x and y value to all the co-ordinates. */
-    void offsetAll (int dx, int dy) throw();
+    void offsetAll (int dx, int dy) noexcept;
 
     //==============================================================================
     /** Creates a Path object to represent this region. */
@@ -218,7 +218,7 @@ public:
     {
     public:
         //==============================================================================
-        Iterator (const RectangleList& list) throw();
+        Iterator (const RectangleList& list) noexcept;
         ~Iterator();
 
         //==============================================================================
@@ -226,10 +226,10 @@ public:
 
             Call this before using getRectangle() to find the rectangle that was returned.
         */
-        bool next() throw();
+        bool next() noexcept;
 
         /** Returns the current rectangle. */
-        const Rectangle<int>* getRectangle() const throw()       { return current; }
+        const Rectangle<int>* getRectangle() const noexcept      { return current; }
 
     private:
         const Rectangle<int>* current;

@@ -60,19 +60,19 @@ class LinkedListPointer
 public:
     //==============================================================================
     /** Creates a null pointer to an empty list. */
-    LinkedListPointer() throw()
-        : item (0)
+    LinkedListPointer() noexcept
+        : item (nullptr)
     {
     }
 
     /** Creates a pointer to a list whose head is the item provided. */
-    explicit LinkedListPointer (ObjectType* const headItem) throw()
+    explicit LinkedListPointer (ObjectType* const headItem) noexcept
         : item (headItem)
     {
     }
 
     /** Sets this pointer to point to a new list. */
-    LinkedListPointer& operator= (ObjectType* const newItem) throw()
+    LinkedListPointer& operator= (ObjectType* const newItem) noexcept
     {
         item = newItem;
         return *this;
@@ -80,13 +80,13 @@ public:
 
     //==============================================================================
     /** Returns the item which this pointer points to. */
-    inline operator ObjectType*() const throw()
+    inline operator ObjectType*() const noexcept
     {
         return item;
     }
 
     /** Returns the item which this pointer points to. */
-    inline ObjectType* get() const throw()
+    inline ObjectType* get() const noexcept
     {
         return item;
     }
@@ -98,11 +98,11 @@ public:
         If you're planning on appending a number of items to your list, it's much more
         efficient to use the Appender class than to repeatedly call getLast() to find the end.
     */
-    LinkedListPointer& getLast() throw()
+    LinkedListPointer& getLast() noexcept
     {
         LinkedListPointer* l = this;
 
-        while (l->item != 0)
+        while (l->item != nullptr)
             l = &(l->item->nextListItem);
 
         return *l;
@@ -112,11 +112,11 @@ public:
         Obviously with a simple linked list, getting the size involves iterating the list, so
         this can be a lengthy operation - be careful when using this method in your code.
     */
-    int size() const throw()
+    int size() const noexcept
     {
         int total = 0;
 
-        for (ObjectType* i = item; i != 0; i = i->nextListItem)
+        for (ObjectType* i = item; i != nullptr; i = i->nextListItem)
             ++total;
 
         return total;
@@ -126,11 +126,11 @@ public:
         Since the only way to find an item is to iterate the list, this operation can obviously
         be slow, depending on its size, so you should be careful when using this in algorithms.
     */
-    LinkedListPointer& operator[] (int index) throw()
+    LinkedListPointer& operator[] (int index) noexcept
     {
         LinkedListPointer* l = this;
 
-        while (--index >= 0 && l->item != 0)
+        while (--index >= 0 && l->item != nullptr)
             l = &(l->item->nextListItem);
 
         return *l;
@@ -140,20 +140,20 @@ public:
         Since the only way to find an item is to iterate the list, this operation can obviously
         be slow, depending on its size, so you should be careful when using this in algorithms.
     */
-    const LinkedListPointer& operator[] (int index) const throw()
+    const LinkedListPointer& operator[] (int index) const noexcept
     {
         const LinkedListPointer* l = this;
 
-        while (--index >= 0 && l->item != 0)
+        while (--index >= 0 && l->item != nullptr)
             l = &(l->item->nextListItem);
 
         return *l;
     }
 
     /** Returns true if the list contains the given item. */
-    bool contains (const ObjectType* const itemToLookFor) const throw()
+    bool contains (const ObjectType* const itemToLookFor) const noexcept
     {
-        for (ObjectType* i = item; i != 0; i = i->nextListItem)
+        for (ObjectType* i = item; i != nullptr; i = i->nextListItem)
             if (itemToLookFor == i)
                 return true;
 
@@ -166,8 +166,8 @@ public:
     */
     void insertNext (ObjectType* const newItem)
     {
-        jassert (newItem != 0);
-        jassert (newItem->nextListItem == 0);
+        jassert (newItem != nullptr);
+        jassert (newItem->nextListItem == nullptr);
         newItem->nextListItem = item;
         item = newItem;
     }
@@ -178,10 +178,10 @@ public:
     */
     void insertAtIndex (int index, ObjectType* newItem)
     {
-        jassert (newItem != 0);
+        jassert (newItem != nullptr);
         LinkedListPointer* l = this;
 
-        while (index != 0 && l->item != 0)
+        while (index != 0 && l->item != nullptr)
         {
             l = &(l->item->nextListItem);
             --index;
@@ -193,10 +193,10 @@ public:
     /** Replaces the object that this pointer points to, appending the rest of the list to
         the new object, and returning the old one.
     */
-    ObjectType* replaceNext (ObjectType* const newItem) throw()
+    ObjectType* replaceNext (ObjectType* const newItem) noexcept
     {
-        jassert (newItem != 0);
-        jassert (newItem->nextListItem == 0);
+        jassert (newItem != nullptr);
+        jassert (newItem->nextListItem == nullptr);
 
         ObjectType* const oldItem = item;
         item = newItem;
@@ -224,7 +224,7 @@ public:
     {
         LinkedListPointer* insertPoint = this;
 
-        for (ObjectType* i = other.item; i != 0; i = i->nextListItem)
+        for (ObjectType* i = other.item; i != nullptr; i = i->nextListItem)
         {
             insertPoint->insertNext (new ObjectType (*i));
             insertPoint = &(insertPoint->item->nextListItem);
@@ -235,11 +235,11 @@ public:
         This won't delete the object that is removed, but returns it, so the caller can
         delete it if necessary.
     */
-    ObjectType* removeNext() throw()
+    ObjectType* removeNext() noexcept
     {
         ObjectType* const oldItem = item;
 
-        if (oldItem != 0)
+        if (oldItem != nullptr)
         {
             item = oldItem->nextListItem;
             oldItem->nextListItem = (ObjectType*) 0;
@@ -255,7 +255,7 @@ public:
     {
         LinkedListPointer* const l = findPointerTo (itemToRemove);
 
-        if (l != 0)
+        if (l != nullptr)
             l->removeNext();
     }
 
@@ -264,7 +264,7 @@ public:
     */
     void deleteAll()
     {
-        while (item != 0)
+        while (item != nullptr)
         {
             ObjectType* const oldItem = item;
             item = oldItem->nextListItem;
@@ -276,11 +276,11 @@ public:
         If the item is found in the list, this returns the pointer that points to it. If
         the item isn't found, this returns null.
     */
-    LinkedListPointer* findPointerTo (ObjectType* const itemToLookFor) throw()
+    LinkedListPointer* findPointerTo (ObjectType* const itemToLookFor) noexcept
     {
         LinkedListPointer* l = this;
 
-        while (l->item != 0)
+        while (l->item != nullptr)
         {
             if (l->item == itemToLookFor)
                 return l;
@@ -295,11 +295,11 @@ public:
         The destArray must contain enough elements to hold the entire list - no checks are
         made for this!
     */
-    void copyToArray (ObjectType** destArray) const throw()
+    void copyToArray (ObjectType** destArray) const noexcept
     {
-        jassert (destArray != 0);
+        jassert (destArray != nullptr);
 
-        for (ObjectType* i = item; i != 0; i = i->nextListItem)
+        for (ObjectType* i = item; i != nullptr; i = i->nextListItem)
             *destArray++ = i;
     }
 
@@ -316,15 +316,15 @@ public:
     public:
         /** Creates an appender which will add items to the given list.
         */
-        Appender (LinkedListPointer& endOfListPointer) throw()
+        Appender (LinkedListPointer& endOfListPointer) noexcept
             : endOfList (&endOfListPointer)
         {
             // This can only be used to add to the end of a list.
-            jassert (endOfListPointer.item == 0);
+            jassert (endOfListPointer.item == nullptr);
         }
 
         /** Appends an item to the list. */
-        void append (ObjectType* const newItem) throw()
+        void append (ObjectType* const newItem) noexcept
         {
             *endOfList = newItem;
             endOfList = &(newItem->nextListItem);

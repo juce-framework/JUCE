@@ -150,7 +150,7 @@ END_JUCE_NAMESPACE
         JUCE_NAMESPACE::Thread::sleep (300);
         float progress = [[[burn status] objectForKey: DRStatusPercentCompleteKey] floatValue];
 
-        if (listener != 0 && listener->audioCDBurnProgress (progress))
+        if (listener != nullptr && listener->audioCDBurnProgress (progress))
         {
             [burn abort];
             *error = "User cancelled the write operation";
@@ -219,7 +219,7 @@ END_JUCE_NAMESPACE
 
 - (void) dealloc
 {
-    if (source != 0)
+    if (source != nullptr)
     {
         source->releaseResources();
         delete source;
@@ -250,7 +250,7 @@ END_JUCE_NAMESPACE
 {
     (void) track; (void) burn; (void) mediaInfo;
 
-    if (source != 0)
+    if (source != nullptr)
         source->prepareToPlay (44100 / 75, 44100);
 
     readPosition = 0;
@@ -260,7 +260,7 @@ END_JUCE_NAMESPACE
 - (BOOL) prepareTrackForVerification: (DRTrack*) track
 {
     (void) track;
-    if (source != 0)
+    if (source != nullptr)
         source->prepareToPlay (44100 / 75, 44100);
 
     return true;
@@ -272,7 +272,7 @@ END_JUCE_NAMESPACE
 {
     (void) track; (void) address; (void) blockSize; (void) flags;
 
-    if (source != 0)
+    if (source != nullptr)
     {
         const int numSamples = JUCE_NAMESPACE::jmin ((int) bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
 
@@ -341,7 +341,7 @@ public:
         : device (0), owner (owner_)
     {
         DRDevice* dev = [[DRDevice devices] objectAtIndex: deviceIndex];
-        if (dev != 0)
+        if (dev != nil)
         {
             device = [[OpenDiskDevice alloc] initWithDRDevice: dev];
             lastState = getDiskState();
@@ -451,7 +451,7 @@ AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
     ScopedPointer <AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
-    if (b->pimpl->device == 0)
+    if (b->pimpl->device == nil)
         b = 0;
 
     return b.release();

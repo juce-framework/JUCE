@@ -31,23 +31,23 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Justification::Justification (const Justification& other) throw()
+Justification::Justification (const Justification& other) noexcept
     : flags (other.flags)
 {
 }
 
-Justification& Justification::operator= (const Justification& other) throw()
+Justification& Justification::operator= (const Justification& other) noexcept
 {
     flags = other.flags;
     return *this;
 }
 
-int Justification::getOnlyVerticalFlags() const throw()
+int Justification::getOnlyVerticalFlags() const noexcept
 {
     return flags & (top | bottom | verticallyCentred);
 }
 
-int Justification::getOnlyHorizontalFlags() const throw()
+int Justification::getOnlyHorizontalFlags() const noexcept
 {
     return flags & (left | right | horizontallyCentred | horizontallyJustified);
 }

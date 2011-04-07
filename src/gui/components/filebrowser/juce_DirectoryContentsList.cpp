@@ -37,7 +37,6 @@ DirectoryContentsList::DirectoryContentsList (const FileFilter* const fileFilter
    : fileFilter (fileFilter_),
      thread (thread_),
      fileTypeFlags (File::ignoreHiddenFiles | File::findFiles),
-     fileFindHandle (0),
      shouldStop (true)
 {
 }
@@ -100,7 +99,7 @@ void DirectoryContentsList::clear()
     shouldStop = true;
     thread.removeTimeSliceClient (this);
 
-    fileFindHandle = 0;
+    fileFindHandle = nullptr;
 
     if (files.size() > 0)
     {
@@ -133,7 +132,7 @@ bool DirectoryContentsList::getFileInfo (const int index,
     const ScopedLock sl (fileListLock);
     const FileInfo* const info = files [index];
 
-    if (info != 0)
+    if (info != nullptr)
     {
         result = *info;
         return true;
@@ -147,7 +146,7 @@ const File DirectoryContentsList::getFile (const int index) const
     const ScopedLock sl (fileListLock);
     const FileInfo* const info = files [index];
 
-    if (info != 0)
+    if (info != nullptr)
         return root.getChildFile (info->filename);
 
     return File::nonexistent;
@@ -155,7 +154,7 @@ const File DirectoryContentsList::getFile (const int index) const
 
 bool DirectoryContentsList::isStillLoading() const
 {
-    return fileFindHandle != 0;
+    return fileFindHandle != nullptr;
 }
 
 void DirectoryContentsList::changed()
@@ -191,7 +190,7 @@ int DirectoryContentsList::useTimeSlice()
 
 bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 {
-    if (fileFindHandle != 0)
+    if (fileFindHandle != nullptr)
     {
         bool fileFoundIsDir, isHidden, isReadOnly;
         int64 fileSize;
@@ -210,7 +209,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
         }
         else
         {
-            fileFindHandle = 0;
+            fileFindHandle = nullptr;
         }
     }
 
@@ -220,10 +219,10 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 int DirectoryContentsList::compareElements (const DirectoryContentsList::FileInfo* const first,
                                             const DirectoryContentsList::FileInfo* const second)
 {
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     if (first->isDirectory != second->isDirectory)
         return first->isDirectory ? -1 : 1;
-#endif
+   #endif
 
     return first->filename.compareIgnoreCase (second->filename);
 }
@@ -235,7 +234,7 @@ bool DirectoryContentsList::addFile (const File& file,
                                      const Time& creationTime,
                                      const bool isReadOnly)
 {
-    if (fileFilter == 0
+    if (fileFilter == nullptr
          || ((! isDir) && fileFilter->isFileSuitable (file))
          || (isDir && fileFilter->isDirectorySuitable (file)))
     {

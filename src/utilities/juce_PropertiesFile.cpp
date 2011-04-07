@@ -71,12 +71,12 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
 
     ProcessScopedLock pl (createProcessLock());
 
-    if (pl != 0 && ! pl->isLocked())
+    if (pl != nullptr && ! pl->isLocked())
         return; // locking failure..
 
     ScopedPointer<InputStream> fileStream (f.createInputStream());
 
-    if (fileStream != 0)
+    if (fileStream != nullptr)
     {
         int magicNumber = fileStream->readInt();
 
@@ -106,16 +106,16 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
         else
         {
             // Not a binary props file - let's see if it's XML..
-            fileStream = 0;
+            fileStream = nullptr;
 
             XmlDocument parser (f);
             ScopedPointer<XmlElement> doc (parser.getDocumentElement (true));
 
-            if (doc != 0 && doc->hasTagName (PropertyFileConstants::fileTag))
+            if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
             {
                 doc = parser.getDocumentElement();
 
-                if (doc != 0)
+                if (doc != nullptr)
                 {
                     loadedOk = true;
 
@@ -126,7 +126,7 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
                         if (name.isNotEmpty())
                         {
                             getAllProperties().set (name,
-                                                    e->getFirstChildElement() != 0
+                                                    e->getFirstChildElement() != nullptr
                                                         ? e->getFirstChildElement()->createDocument (String::empty, true)
                                                         : e->getStringAttribute (PropertyFileConstants::valueAttribute));
                         }
@@ -156,7 +156,7 @@ PropertiesFile::~PropertiesFile()
 
 InterProcessLock::ScopedLockType* PropertiesFile::createProcessLock() const
 {
-    return processLock != 0 ? new InterProcessLock::ScopedLockType (*processLock) : 0;
+    return processLock != nullptr ? new InterProcessLock::ScopedLockType (*processLock) : 0;
 }
 
 bool PropertiesFile::saveIfNeeded()
@@ -200,7 +200,7 @@ bool PropertiesFile::save()
             // if the value seems to contain xml, store it as such..
             XmlElement* const childElement = XmlDocument::parse (getAllProperties().getAllValues() [i]);
 
-            if (childElement != 0)
+            if (childElement != nullptr)
                 e->addChildElement (childElement);
             else
                 e->setAttribute (PropertyFileConstants::valueAttribute,
@@ -209,7 +209,7 @@ bool PropertiesFile::save()
 
         ProcessScopedLock pl (createProcessLock());
 
-        if (pl != 0 && ! pl->isLocked())
+        if (pl != nullptr && ! pl->isLocked())
             return false; // locking failure..
 
         if (doc.writeToFile (file, String::empty))
@@ -222,13 +222,13 @@ bool PropertiesFile::save()
     {
         ProcessScopedLock pl (createProcessLock());
 
-        if (pl != 0 && ! pl->isLocked())
+        if (pl != nullptr && ! pl->isLocked())
             return false; // locking failure..
 
         TemporaryFile tempFile (file);
         ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());
 
-        if (out != 0)
+        if (out != nullptr)
         {
             if ((options & storeAsCompressedBinary) != 0)
             {
@@ -255,7 +255,7 @@ bool PropertiesFile::save()
                 out->writeString (getAllProperties().getAllValues() [i]);
             }
 
-            out = 0;
+            out = nullptr;
 
             if (tempFile.overwriteTargetFileWithTemporary())
             {

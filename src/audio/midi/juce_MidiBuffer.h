@@ -44,23 +44,23 @@ class JUCE_API  MidiBuffer
 public:
     //==============================================================================
     /** Creates an empty MidiBuffer. */
-    MidiBuffer() throw();
+    MidiBuffer() noexcept;
 
     /** Creates a MidiBuffer containing a single midi message. */
-    explicit MidiBuffer (const MidiMessage& message) throw();
+    explicit MidiBuffer (const MidiMessage& message) noexcept;
 
     /** Creates a copy of another MidiBuffer. */
-    MidiBuffer (const MidiBuffer& other) throw();
+    MidiBuffer (const MidiBuffer& other) noexcept;
 
     /** Makes a copy of another MidiBuffer. */
-    MidiBuffer& operator= (const MidiBuffer& other) throw();
+    MidiBuffer& operator= (const MidiBuffer& other) noexcept;
 
     /** Destructor */
     ~MidiBuffer();
 
     //==============================================================================
     /** Removes all events from the buffer. */
-    void clear() throw();
+    void clear() noexcept;
 
     /** Removes all events between two times from the buffer.
 
@@ -73,7 +73,7 @@ public:
 
         To actually retrieve the events, use a MidiBuffer::Iterator object
     */
-    bool isEmpty() const throw();
+    bool isEmpty() const noexcept;
 
     /** Counts the number of events in the buffer.
 
@@ -81,7 +81,7 @@ public:
         the events, so you might prefer to call isEmpty() if that's all you need
         to know.
     */
-    int getNumEvents() const throw();
+    int getNumEvents() const noexcept;
 
     /** Adds an event to the buffer.
 
@@ -139,13 +139,13 @@ public:
 
         If the buffer's empty, this will just return 0.
     */
-    int getFirstEventTime() const throw();
+    int getFirstEventTime() const noexcept;
 
     /** Returns the sample number of the last event in the buffer.
 
         If the buffer's empty, this will just return 0.
     */
-    int getLastEventTime() const throw();
+    int getLastEventTime() const noexcept;
 
     //==============================================================================
     /** Exchanges the contents of this buffer with another one.
@@ -153,7 +153,7 @@ public:
         This is a quick operation, because no memory allocating or copying is done, it
         just swaps the internal state of the two buffers.
     */
-    void swapWith (MidiBuffer& other) throw();
+    void swapWith (MidiBuffer& other) noexcept;
 
     /** Preallocates some memory for the buffer to use.
         This helps to avoid needing to reallocate space when the buffer has messages
@@ -175,16 +175,16 @@ public:
     public:
         //==============================================================================
         /** Creates an Iterator for this MidiBuffer. */
-        Iterator (const MidiBuffer& buffer) throw();
+        Iterator (const MidiBuffer& buffer) noexcept;
 
         /** Destructor. */
-        ~Iterator() throw();
+        ~Iterator() noexcept;
 
         //==============================================================================
         /** Repositions the iterator so that the next event retrieved will be the first
             one whose sample position is at greater than or equal to the given position.
         */
-        void setNextSamplePosition (int samplePosition) throw();
+        void setNextSamplePosition (int samplePosition) noexcept;
 
         /** Retrieves a copy of the next event from the buffer.
 
@@ -195,7 +195,7 @@ public:
                             the end of the buffer
         */
         bool getNextEvent (MidiMessage& result,
-                           int& samplePosition) throw();
+                           int& samplePosition) noexcept;
 
         /** Retrieves the next event from the buffer.
 
@@ -211,7 +211,7 @@ public:
         */
         bool getNextEvent (const uint8* &midiData,
                            int& numBytesOfMidiData,
-                           int& samplePosition) throw();
+                           int& samplePosition) noexcept;
 
     private:
         //==============================================================================
@@ -227,11 +227,11 @@ private:
     MemoryBlock data;
     int bytesUsed;
 
-    uint8* getData() const throw();
-    uint8* findEventAfter (uint8* d, int samplePosition) const throw();
-    static int getEventTime (const void* d) throw();
-    static uint16 getEventDataSize (const void* d) throw();
-    static uint16 getEventTotalSize (const void* d) throw();
+    uint8* getData() const noexcept;
+    uint8* findEventAfter (uint8* d, int samplePosition) const noexcept;
+    static int getEventTime (const void* d) noexcept;
+    static uint16 getEventDataSize (const void* d) noexcept;
+    static uint16 getEventTotalSize (const void* d) noexcept;
 
     JUCE_LEAK_DETECTOR (MidiBuffer);
 };

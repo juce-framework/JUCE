@@ -107,8 +107,8 @@ public:
         bool isRecording;
 
         //==============================================================================
-        bool operator== (const CurrentPositionInfo& other) const throw();
-        bool operator!= (const CurrentPositionInfo& other) const throw();
+        bool operator== (const CurrentPositionInfo& other) const noexcept;
+        bool operator!= (const CurrentPositionInfo& other) const noexcept;
 
         void resetToDefault();
     };

@@ -54,10 +54,10 @@ void StretchableObjectResizer::addItem (const double size,
     items.add (item);
 }
 
-double StretchableObjectResizer::getItemSize (const int index) const throw()
+double StretchableObjectResizer::getItemSize (const int index) const noexcept
 {
     const Item* const it = items [index];
-    return it != 0 ? it->size : 0;
+    return it != nullptr ? it->size : 0;
 }
 
 void StretchableObjectResizer::resizeToFit (const double targetSize)

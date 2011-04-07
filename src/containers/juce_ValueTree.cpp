@@ -48,9 +48,9 @@ public:
         jassert (! (isAddingNewProperty && target->hasProperty (name)));
 
         if (isDeletingProperty)
-            target->removeProperty (name, 0);
+            target->removeProperty (name, nullptr);
         else
-            target->setProperty (name, newValue, 0);
+            target->setProperty (name, newValue, nullptr);
 
         return true;
     }
@@ -58,9 +58,9 @@ public:
     bool undo()
     {
         if (isAddingNewProperty)
-            target->removeProperty (name, 0);
+            target->removeProperty (name, nullptr);
         else
-            target->setProperty (name, oldValue, 0);
+            target->setProperty (name, oldValue, nullptr);
 
         return true;
     }
@@ -76,14 +76,14 @@ public:
         {
             SetPropertyAction* next = dynamic_cast <SetPropertyAction*> (nextAction);
 
-            if (next != 0 && next->target == target && next->name == name
+            if (next != nullptr && next->target == target && next->name == name
                  && ! (next->isAddingNewProperty || next->isDeletingProperty))
             {
                 return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
             }
         }
 
-        return 0;
+        return nullptr;
     }
 
 private:
@@ -103,19 +103,19 @@ public:
     AddOrRemoveChildAction (const SharedObjectPtr& target_, const int childIndex_,
                             const SharedObjectPtr& newChild_)
         : target (target_),
-          child (newChild_ != 0 ? newChild_ : target_->children [childIndex_]),
+          child (newChild_ != nullptr ? newChild_ : target_->children [childIndex_]),
           childIndex (childIndex_),
-          isDeleting (newChild_ == 0)
+          isDeleting (newChild_ == nullptr)
     {
-        jassert (child != 0);
+        jassert (child != nullptr);
     }
 
     bool perform()
     {
         if (isDeleting)
-            target->removeChild (childIndex, 0);
+            target->removeChild (childIndex, nullptr);
         else
-            target->addChild (child, childIndex, 0);
+            target->addChild (child, childIndex, nullptr);
 
         return true;
     }
@@ -124,14 +124,14 @@ public:
     {
         if (isDeleting)
         {
-            target->addChild (child, childIndex, 0);
+            target->addChild (child, childIndex, nullptr);
         }
         else
         {
             // If you hit this, it seems that your object's state is getting confused - probably
             // because you've interleaved some undoable and non-undoable operations?
             jassert (childIndex < target->children.size());
-            target->removeChild (childIndex, 0);
+            target->removeChild (childIndex, nullptr);
         }
 
         return true;
@@ -164,13 +164,13 @@ public:
 
     bool perform()
     {
-        parent->moveChild (startIndex, endIndex, 0);
+        parent->moveChild (startIndex, endIndex, nullptr);
         return true;
     }
 
     bool undo()
     {
-        parent->moveChild (endIndex, startIndex, 0);
+        parent->moveChild (endIndex, startIndex, nullptr);
         return true;
     }
 
@@ -183,10 +183,10 @@ public:
     {
         MoveChildAction* next = dynamic_cast <MoveChildAction*> (nextAction);
 
-        if (next != 0 && next->parent == parent && next->startIndex == endIndex)
+        if (next != nullptr && next->parent == parent && next->startIndex == endIndex)
             return new MoveChildAction (parent, startIndex, next->endIndex);
 
-        return 0;
+        return nullptr;
     }
 
 private:
@@ -199,12 +199,12 @@ private:
 
 //==============================================================================
 ValueTree::SharedObject::SharedObject (const Identifier& type_)
-    : type (type_), parent (0)
+    : type (type_), parent (nullptr)
 {
 }
 
 ValueTree::SharedObject::SharedObject (const SharedObject& other)
-    : type (other.type), properties (other.properties), parent (0)
+    : type (other.type), properties (other.properties), parent (nullptr)
 {
     for (int i = 0; i < other.children.size(); ++i)
     {
@@ -216,12 +216,12 @@ ValueTree::SharedObject::SharedObject (const SharedObject& other)
 
 ValueTree::SharedObject::~SharedObject()
 {
-    jassert (parent == 0); // this should never happen unless something isn't obeying the ref-counting!
+    jassert (parent == nullptr); // this should never happen unless something isn't obeying the ref-counting!
 
     for (int i = children.size(); --i >= 0;)
     {
         const SharedObjectPtr c (children.getUnchecked(i));
-        c->parent = 0;
+        c->parent = nullptr;
         children.remove (i);
         c->sendParentChangeMessage();
     }
@@ -233,7 +233,7 @@ void ValueTree::SharedObject::sendPropertyChangeMessage (ValueTree& tree, const 
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
+        if (v != nullptr)
             v->listeners.call (&ValueTree::Listener::valueTreePropertyChanged, tree, property);
     }
 }
@@ -242,7 +242,7 @@ void ValueTree::SharedObject::sendPropertyChangeMessage (const Identifier& prope
 {
     ValueTree tree (this);
 
-    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
+    for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
         t->sendPropertyChangeMessage (tree, property);
 }
 
@@ -251,7 +251,7 @@ void ValueTree::SharedObject::sendChildAddedMessage (ValueTree& tree, ValueTree&
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
+        if (v != nullptr)
             v->listeners.call (&ValueTree::Listener::valueTreeChildAdded, tree, child);
     }
 }
@@ -260,7 +260,7 @@ void ValueTree::SharedObject::sendChildAddedMessage (ValueTree child)
 {
     ValueTree tree (this);
 
-    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
+    for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
         t->sendChildAddedMessage (tree, child);
 }
 
@@ -269,7 +269,7 @@ void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree& tree, ValueTre
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
+        if (v != nullptr)
             v->listeners.call (&ValueTree::Listener::valueTreeChildRemoved, tree, child);
     }
 }
@@ -278,7 +278,7 @@ void ValueTree::SharedObject::sendChildRemovedMessage (ValueTree child)
 {
     ValueTree tree (this);
 
-    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
+    for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
         t->sendChildRemovedMessage (tree, child);
 }
 
@@ -287,7 +287,7 @@ void ValueTree::SharedObject::sendChildOrderChangedMessage (ValueTree& tree)
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
+        if (v != nullptr)
             v->listeners.call (&ValueTree::Listener::valueTreeChildOrderChanged, tree);
     }
 }
@@ -296,7 +296,7 @@ void ValueTree::SharedObject::sendChildOrderChangedMessage()
 {
     ValueTree tree (this);
 
-    for (ValueTree::SharedObject* t = this; t != 0; t = t->parent)
+    for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
         t->sendChildOrderChangedMessage (tree);
 }
 
@@ -308,14 +308,14 @@ void ValueTree::SharedObject::sendParentChangeMessage()
     for (i = children.size(); --i >= 0;)
     {
         SharedObject* const t = children[i];
-        if (t != 0)
+        if (t != nullptr)
             t->sendParentChangeMessage();
     }
 
     for (i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
+        if (v != nullptr)
             v->listeners.call (&ValueTree::Listener::valueTreeParentChanged, tree);
     }
 }
@@ -333,7 +333,7 @@ const var ValueTree::SharedObject::getProperty (const Identifier& name, const va
 
 void ValueTree::SharedObject::setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager)
 {
-    if (undoManager == 0)
+    if (undoManager == nullptr)
     {
         if (properties.set (name, newValue))
             sendPropertyChangeMessage (name);
@@ -342,7 +342,7 @@ void ValueTree::SharedObject::setProperty (const Identifier& name, const var& ne
     {
         var* const existingValue = properties.getVarPointer (name);
 
-        if (existingValue != 0)
+        if (existingValue != nullptr)
         {
             if (*existingValue != newValue)
                 undoManager->perform (new SetPropertyAction (this, name, newValue, properties [name], false, false));
@@ -361,7 +361,7 @@ bool ValueTree::SharedObject::hasProperty (const Identifier& name) const
 
 void ValueTree::SharedObject::removeProperty (const Identifier& name, UndoManager* const undoManager)
 {
-    if (undoManager == 0)
+    if (undoManager == nullptr)
     {
         if (properties.remove (name))
             sendPropertyChangeMessage (name);
@@ -375,7 +375,7 @@ void ValueTree::SharedObject::removeProperty (const Identifier& name, UndoManage
 
 void ValueTree::SharedObject::removeAllProperties (UndoManager* const undoManager)
 {
-    if (undoManager == 0)
+    if (undoManager == nullptr)
     {
         while (properties.size() > 0)
         {
@@ -425,7 +425,7 @@ bool ValueTree::SharedObject::isAChildOf (const SharedObject* const possiblePare
 {
     const SharedObject* p = parent;
 
-    while (p != 0)
+    while (p != nullptr)
     {
         if (p == possibleParent)
             return true;
@@ -443,22 +443,22 @@ int ValueTree::SharedObject::indexOf (const ValueTree& child) const
 
 void ValueTree::SharedObject::addChild (SharedObject* child, int index, UndoManager* const undoManager)
 {
-    if (child != 0 && child->parent != this)
+    if (child != nullptr && child->parent != this)
     {
         if (child != this && ! isAChildOf (child))
         {
             // You should always make sure that a child is removed from its previous parent before
             // adding it somewhere else - otherwise, it's ambiguous as to whether a different
             // undomanager should be used when removing it from its current parent..
-            jassert (child->parent == 0);
+            jassert (child->parent == nullptr);
 
-            if (child->parent != 0)
+            if (child->parent != nullptr)
             {
                 jassert (child->parent->children.indexOf (child) >= 0);
                 child->parent->removeChild (child->parent->children.indexOf (child), undoManager);
             }
 
-            if (undoManager == 0)
+            if (undoManager == nullptr)
             {
                 children.insert (index, child);
                 child->parent = this;
@@ -486,18 +486,18 @@ void ValueTree::SharedObject::removeChild (const int childIndex, UndoManager* co
 {
     const SharedObjectPtr child (children [childIndex]);
 
-    if (child != 0)
+    if (child != nullptr)
     {
-        if (undoManager == 0)
+        if (undoManager == nullptr)
         {
             children.remove (childIndex);
-            child->parent = 0;
+            child->parent = nullptr;
             sendChildRemovedMessage (ValueTree (child));
             child->sendParentChangeMessage();
         }
         else
         {
-            undoManager->perform (new AddOrRemoveChildAction (this, childIndex, 0));
+            undoManager->perform (new AddOrRemoveChildAction (this, childIndex, nullptr));
         }
     }
 }
@@ -516,7 +516,7 @@ void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoMan
     if (currentIndex != newIndex
          && isPositiveAndBelow (currentIndex, children.size()))
     {
-        if (undoManager == 0)
+        if (undoManager == nullptr)
         {
             children.move (currentIndex, newIndex);
             sendChildOrderChangedMessage();
@@ -535,7 +535,7 @@ void ValueTree::SharedObject::reorderChildren (const ReferenceCountedArray <Shar
 {
     jassert (newOrder.size() == children.size());
 
-    if (undoManager == 0)
+    if (undoManager == nullptr)
     {
         children = newOrder;
         sendChildOrderChangedMessage();
@@ -573,8 +573,7 @@ bool ValueTree::SharedObject::isEquivalentTo (const SharedObject& other) const
 
 
 //==============================================================================
-ValueTree::ValueTree() throw()
-    : object (0)
+ValueTree::ValueTree() noexcept
 {
 }
 
@@ -600,10 +599,10 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 {
     if (listeners.size() > 0)
     {
-        if (object != 0)
+        if (object != nullptr)
             object->valueTreesWithListeners.removeValue (this);
 
-        if (other.object != 0)
+        if (other.object != nullptr)
             other.object->valueTreesWithListeners.add (this);
     }
 
@@ -614,16 +613,16 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 
 ValueTree::~ValueTree()
 {
-    if (listeners.size() > 0 && object != 0)
+    if (listeners.size() > 0 && object != nullptr)
         object->valueTreesWithListeners.removeValue (this);
 }
 
-bool ValueTree::operator== (const ValueTree& other) const throw()
+bool ValueTree::operator== (const ValueTree& other) const noexcept
 {
     return object == other.object;
 }
 
-bool ValueTree::operator!= (const ValueTree& other) const throw()
+bool ValueTree::operator!= (const ValueTree& other) const noexcept
 {
     return object != other.object;
 }
@@ -631,32 +630,32 @@ bool ValueTree::operator!= (const ValueTree& other) const throw()
 bool ValueTree::isEquivalentTo (const ValueTree& other) const
 {
     return object == other.object
-            || (object != 0 && other.object != 0 && object->isEquivalentTo (*other.object));
+            || (object != nullptr && other.object != nullptr && object->isEquivalentTo (*other.object));
 }
 
 ValueTree ValueTree::createCopy() const
 {
-    return ValueTree (object != 0 ? new SharedObject (*object) : 0);
+    return ValueTree (object != nullptr ? new SharedObject (*object) : nullptr);
 }
 
 bool ValueTree::hasType (const Identifier& typeName) const
 {
-    return object != 0 && object->type == typeName;
+    return object != nullptr && object->type == typeName;
 }
 
 const Identifier ValueTree::getType() const
 {
-    return object != 0 ? object->type : Identifier();
+    return object != nullptr ? object->type : Identifier();
 }
 
 ValueTree ValueTree::getParent() const
 {
-    return ValueTree (object != 0 ? object->parent : (SharedObject*) 0);
+    return ValueTree (object != nullptr ? object->parent : (SharedObject*) nullptr);
 }
 
 ValueTree ValueTree::getSibling (const int delta) const
 {
-    if (object == 0 || object->parent == 0)
+    if (object == nullptr || object->parent == nullptr)
         return invalid;
 
     const int index = object->parent->indexOf (*this) + delta;
@@ -665,53 +664,53 @@ ValueTree ValueTree::getSibling (const int delta) const
 
 const var& ValueTree::operator[] (const Identifier& name) const
 {
-    return object == 0 ? var::null : object->getProperty (name);
+    return object == nullptr ? var::null : object->getProperty (name);
 }
 
 const var& ValueTree::getProperty (const Identifier& name) const
 {
-    return object == 0 ? var::null : object->getProperty (name);
+    return object == nullptr ? var::null : object->getProperty (name);
 }
 
 const var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValue) const
 {
-    return object == 0 ? defaultReturnValue : object->getProperty (name, defaultReturnValue);
+    return object == nullptr ? defaultReturnValue : object->getProperty (name, defaultReturnValue);
 }
 
 void ValueTree::setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager)
 {
     jassert (name.toString().isNotEmpty());
 
-    if (object != 0 && name.toString().isNotEmpty())
+    if (object != nullptr && name.toString().isNotEmpty())
         object->setProperty (name, newValue, undoManager);
 }
 
 bool ValueTree::hasProperty (const Identifier& name) const
 {
-    return object != 0 && object->hasProperty (name);
+    return object != nullptr && object->hasProperty (name);
 }
 
 void ValueTree::removeProperty (const Identifier& name, UndoManager* const undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->removeProperty (name, undoManager);
 }
 
 void ValueTree::removeAllProperties (UndoManager* const undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->removeAllProperties (undoManager);
 }
 
 int ValueTree::getNumProperties() const
 {
-    return object == 0 ? 0 : object->properties.size();
+    return object == nullptr ? 0 : object->properties.size();
 }
 
 const Identifier ValueTree::getPropertyName (const int index) const
 {
-    return object == 0 ? Identifier()
-                       : object->properties.getName (index);
+    return object == nullptr ? Identifier()
+                             : object->properties.getName (index);
 }
 
 //==============================================================================
@@ -771,75 +770,75 @@ Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const 
 //==============================================================================
 int ValueTree::getNumChildren() const
 {
-    return object == 0 ? 0 : object->children.size();
+    return object == nullptr ? 0 : object->children.size();
 }
 
 ValueTree ValueTree::getChild (int index) const
 {
-    return ValueTree (object != 0 ? (SharedObject*) object->children [index] : (SharedObject*) 0);
+    return ValueTree (object != nullptr ? (SharedObject*) object->children [index] : (SharedObject*) nullptr);
 }
 
 ValueTree ValueTree::getChildWithName (const Identifier& type) const
 {
-    return object != 0 ? object->getChildWithName (type) : ValueTree::invalid;
+    return object != nullptr ? object->getChildWithName (type) : ValueTree::invalid;
 }
 
 ValueTree ValueTree::getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager)
 {
-    return object != 0 ? object->getOrCreateChildWithName (type, undoManager) : ValueTree::invalid;
+    return object != nullptr ? object->getOrCreateChildWithName (type, undoManager) : ValueTree::invalid;
 }
 
 ValueTree ValueTree::getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const
 {
-    return object != 0 ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree::invalid;
+    return object != nullptr ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree::invalid;
 }
 
 bool ValueTree::isAChildOf (const ValueTree& possibleParent) const
 {
-    return object != 0 && object->isAChildOf (possibleParent.object);
+    return object != nullptr && object->isAChildOf (possibleParent.object);
 }
 
 int ValueTree::indexOf (const ValueTree& child) const
 {
-    return object != 0 ? object->indexOf (child) : -1;
+    return object != nullptr ? object->indexOf (child) : -1;
 }
 
 void ValueTree::addChild (const ValueTree& child, int index, UndoManager* const undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->addChild (child.object, index, undoManager);
 }
 
 void ValueTree::removeChild (const int childIndex, UndoManager* const undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->removeChild (childIndex, undoManager);
 }
 
 void ValueTree::removeChild (const ValueTree& child, UndoManager* const undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->removeChild (object->children.indexOf (child.object), undoManager);
 }
 
 void ValueTree::removeAllChildren (UndoManager* const undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->removeAllChildren (undoManager);
 }
 
 void ValueTree::moveChild (int currentIndex, int newIndex, UndoManager* undoManager)
 {
-    if (object != 0)
+    if (object != nullptr)
         object->moveChild (currentIndex, newIndex, undoManager);
 }
 
 //==============================================================================
 void ValueTree::addListener (Listener* listener)
 {
-    if (listener != 0)
+    if (listener != nullptr)
     {
-        if (listeners.size() == 0 && object != 0)
+        if (listeners.size() == 0 && object != nullptr)
             object->valueTreesWithListeners.add (this);
 
         listeners.add (listener);
@@ -850,7 +849,7 @@ void ValueTree::removeListener (Listener* listener)
 {
     listeners.remove (listener);
 
-    if (listeners.size() == 0 && object != 0)
+    if (listeners.size() == 0 && object != nullptr)
         object->valueTreesWithListeners.removeValue (this);
 }
 
@@ -868,7 +867,7 @@ XmlElement* ValueTree::SharedObject::createXml() const
 
 XmlElement* ValueTree::createXml() const
 {
-    return object != 0 ? object->createXml() : 0;
+    return object != nullptr ? object->createXml() : nullptr;
 }
 
 ValueTree ValueTree::fromXml (const XmlElement& xml)
@@ -877,7 +876,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
     v.object->properties.setFromXmlAttributes (xml);
 
     forEachXmlChildElement (xml, e)
-        v.addChild (fromXml (*e), -1, 0);
+        v.addChild (fromXml (*e), -1, nullptr);
 
     return v;
 }

@@ -61,30 +61,30 @@ public:
         its coefficients aren't changed. To put a filter into an inactive state, use
         the makeInactive() method.
     */
-    void reset() throw();
+    void reset() noexcept;
 
     /** Performs the filter operation on the given set of samples.
     */
     void processSamples (float* samples,
-                         int numSamples) throw();
+                         int numSamples) noexcept;
 
     /** Processes a single sample, without any locking or checking.
 
         Use this if you need fast processing of a single value, but be aware that
         this isn't thread-safe in the way that processSamples() is.
     */
-    float processSingleSampleRaw (float sample) throw();
+    float processSingleSampleRaw (float sample) noexcept;
 
     //==============================================================================
     /** Sets the filter up to act as a low-pass filter.
     */
     void makeLowPass (double sampleRate,
-                      double frequency) throw();
+                      double frequency) noexcept;
 
     /** Sets the filter up to act as a high-pass filter.
     */
     void makeHighPass (double sampleRate,
-                       double frequency) throw();
+                       double frequency) noexcept;
 
     //==============================================================================
     /** Sets the filter up to act as a low-pass shelf filter with variable Q and gain.
@@ -96,7 +96,7 @@ public:
     void makeLowShelf (double sampleRate,
                        double cutOffFrequency,
                        double Q,
-                       float gainFactor) throw();
+                       float gainFactor) noexcept;
 
     /** Sets the filter up to act as a high-pass shelf filter with variable Q and gain.
 
@@ -107,7 +107,7 @@ public:
     void makeHighShelf (double sampleRate,
                         double cutOffFrequency,
                         double Q,
-                        float gainFactor) throw();
+                        float gainFactor) noexcept;
 
     /** Sets the filter up to act as a band pass filter centred around a
         frequency, with a variable Q and gain.
@@ -119,16 +119,16 @@ public:
     void makeBandPass (double sampleRate,
                        double centreFrequency,
                        double Q,
-                       float gainFactor) throw();
+                       float gainFactor) noexcept;
 
     /** Clears the filter's coefficients so that it becomes inactive.
     */
-    void makeInactive() throw();
+    void makeInactive() noexcept;
 
     //==============================================================================
     /** Makes this filter duplicate the set-up of another one.
     */
-    void copyCoefficientsFrom (const IIRFilter& other) throw();
+    void copyCoefficientsFrom (const IIRFilter& other) noexcept;
 
 
 protected:
@@ -136,7 +136,7 @@ protected:
     CriticalSection processLock;
 
     void setCoefficients (double c1, double c2, double c3,
-                          double c4, double c5, double c6) throw();
+                          double c4, double c5, double c6) noexcept;
 
     bool active;
     float coefficients[6];

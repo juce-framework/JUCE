@@ -71,7 +71,7 @@ public:
 
         This will be something like "DirectSound", "ASIO", "CoreAudio", "ALSA", etc.
     */
-    const String& getTypeName() const throw()                       { return typeName; }
+    const String& getTypeName() const noexcept                      { return typeName; }
 
     //==============================================================================
     /** Refreshes the object's cached list of known devices.

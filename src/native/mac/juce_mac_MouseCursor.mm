@@ -65,7 +65,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
 void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
     const ScopedAutoReleasePool pool;
-    NSCursor* c = 0;
+    NSCursor* c = nil;
 
     switch (type)
     {
@@ -113,14 +113,14 @@ void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool /*isSt
 
 void MouseCursor::showInAllWindows() const
 {
-    showInWindow (0);
+    showInWindow (nullptr);
 }
 
 void MouseCursor::showInWindow (ComponentPeer*) const
 {
     NSCursor* c = (NSCursor*) getHandle();
 
-    if (c == 0)
+    if (c == nil)
         c = [NSCursor arrowCursor];
 
     [c set];

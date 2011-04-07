@@ -64,7 +64,7 @@ bool AudioFormatReader::read (int* const* destSamples,
         const int silence = (int) jmin (-startSampleInSource, (int64) numSamplesToRead);
 
         for (int i = numDestChannels; --i >= 0;)
-            if (destSamples[i] != 0)
+            if (destSamples[i] != nullptr)
                 zeromem (destSamples[i], sizeof (int) * silence);
 
         startOffsetInDestBuffer += silence;
@@ -88,22 +88,22 @@ bool AudioFormatReader::read (int* const* destSamples,
 
             for (int i = (int) numChannels; --i > 0;)
             {
-                if (destSamples[i] != 0)
+                if (destSamples[i] != nullptr)
                 {
                     lastFullChannel = destSamples[i];
                     break;
                 }
             }
 
-            if (lastFullChannel != 0)
+            if (lastFullChannel != nullptr)
                 for (int i = numChannels; i < numDestChannels; ++i)
-                    if (destSamples[i] != 0)
+                    if (destSamples[i] != nullptr)
                         memcpy (destSamples[i], lastFullChannel, sizeof (int) * numSamplesToRead);
         }
         else
         {
             for (int i = numChannels; i < numDestChannels; ++i)
-                if (destSamples[i] != 0)
+                if (destSamples[i] != nullptr)
                     zeromem (destSamples[i], sizeof (int) * numSamplesToRead);
         }
     }

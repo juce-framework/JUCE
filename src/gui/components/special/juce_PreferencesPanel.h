@@ -125,7 +125,7 @@ public:
     void setCurrentPage (const String& pageName);
 
     /** Returns the size of the buttons shown along the top. */
-    int getButtonSize() const throw();
+    int getButtonSize() const noexcept;
 
     /** Changes the size of the buttons shown along the top. */
     void setButtonSize (int newSize);

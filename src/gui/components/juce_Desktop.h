@@ -80,14 +80,14 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const throw();
+    const RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const;
 
     /** Returns the position and size of the main monitor.
 
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const throw();
+    const Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const noexcept;
 
     /** Returns the position and size of the monitor which contains this co-ordinate.
 
@@ -191,7 +191,7 @@ public:
         be resized to completely fill the screen and any extraneous taskbars, menu bars,
         etc will be hidden.
 
-        To exit kiosk mode, just call setKioskModeComponent (0). When this is called,
+        To exit kiosk mode, just call setKioskModeComponent (nullptr). When this is called,
         the component that's currently being used will be resized back to the size
         and position it was in before being put into this mode.
 
@@ -207,7 +207,7 @@ public:
         This is the component that was last set by setKioskModeComponent(). If none
         has been set, this returns 0.
     */
-    Component* getKioskModeComponent() const throw()                { return kioskModeComponent; }
+    Component* getKioskModeComponent() const noexcept               { return kioskModeComponent; }
 
     //==============================================================================
     /** Returns the number of components that are currently active as top-level
@@ -215,7 +215,7 @@ public:
 
         @see getComponent, Component::addToDesktop
     */
-    int getNumComponents() const throw();
+    int getNumComponents() const noexcept;
 
     /** Returns one of the top-level desktop window components.
 
@@ -224,7 +224,7 @@ public:
 
         @see getNumComponents, Component::addToDesktop
     */
-    Component* getComponent (int index) const throw();
+    Component* getComponent (int index) const noexcept;
 
     /** Finds the component at a given screen location.
 
@@ -244,7 +244,7 @@ public:
 
         @see ComponentAnimator
     */
-    ComponentAnimator& getAnimator() throw()                        { return animator; }
+    ComponentAnimator& getAnimator() noexcept                       { return animator; }
 
     //==============================================================================
     /** Returns the number of MouseInputSource objects the system has at its disposal.
@@ -253,7 +253,7 @@ public:
         To find out how many mouse events are currently happening, use getNumDraggingMouseSources().
         @see getMouseSource
     */
-    int getNumMouseSources() const throw()                          { return mouseSources.size(); }
+    int getNumMouseSources() const noexcept                         { return mouseSources.size(); }
 
     /** Returns one of the system's MouseInputSource objects.
         The index should be from 0 to getNumMouseSources() - 1. Out-of-range indexes will return
@@ -261,25 +261,25 @@ public:
         In a traditional single-mouse system, there might be only one object. On a multi-touch
         system, there could be one input source per potential finger.
     */
-    MouseInputSource* getMouseSource (int index) const throw()      { return mouseSources [index]; }
+    MouseInputSource* getMouseSource (int index) const noexcept     { return mouseSources [index]; }
 
     /** Returns the main mouse input device that the system is using.
         @see getNumMouseSources()
     */
-    MouseInputSource& getMainMouseSource() const throw()            { return *mouseSources.getUnchecked(0); }
+    MouseInputSource& getMainMouseSource() const noexcept           { return *mouseSources.getUnchecked(0); }
 
     /** Returns the number of mouse-sources that are currently being dragged.
         In a traditional single-mouse system, this will be 0 or 1, depending on whether a
         juce component has the button down on it. In a multi-touch system, this could
         be any number from 0 to the number of simultaneous touches that can be detected.
     */
-    int getNumDraggingMouseSources() const throw();
+    int getNumDraggingMouseSources() const noexcept;
 
     /** Returns one of the mouse sources that's currently being dragged.
         The index should be between 0 and getNumDraggingMouseSources() - 1. If the index is
         out of range, or if no mice or fingers are down, this will return a null pointer.
     */
-    MouseInputSource* getDraggingMouseSource (int index) const throw();
+    MouseInputSource* getDraggingMouseSource (int index) const noexcept;
 
     /** Ensures that a non-stop stream of mouse-drag events will be sent during the
         current mouse-drag operation.
@@ -325,7 +325,7 @@ public:
     /** Returns whether the display is allowed to auto-rotate to the given orientation.
         Each orientation can be enabled using setOrientationEnabled(). By default, all orientations are allowed.
     */
-    bool isOrientationEnabled (DisplayOrientation orientation) const throw();
+    bool isOrientationEnabled (DisplayOrientation orientation) const noexcept;
 
     //==============================================================================
     /** Tells this object to refresh its idea of what the screen resolution is.
@@ -335,7 +335,7 @@ public:
     void refreshMonitorSizes();
 
     /** True if the OS supports semitransparent windows */
-    static bool canUseSemiTransparentWindows() throw();
+    static bool canUseSemiTransparentWindows() noexcept;
 
 private:
     //==============================================================================
@@ -361,7 +361,7 @@ private:
     void sendMouseMove();
 
     int mouseClickCounter;
-    void incrementMouseClickCounter() throw();
+    void incrementMouseClickCounter() noexcept;
 
     ScopedPointer<Timer> dragRepeater;
 
@@ -375,8 +375,8 @@ private:
     void timerCallback();
     void resetTimer();
 
-    int getNumDisplayMonitors() const throw();
-    const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const throw();
+    int getNumDisplayMonitors() const noexcept;
+    const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;
     static void getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea);
 
     void addDesktopComponent (Component* c);

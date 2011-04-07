@@ -40,7 +40,7 @@ struct NamedPipeInternal
 
 void NamedPipe::cancelPendingReads()
 {
-    while (internal != 0 && static_cast <NamedPipeInternal*> (internal)->blocked)
+    while (internal != nullptr && static_cast <NamedPipeInternal*> (internal)->blocked)
     {
         NamedPipeInternal* const intern = static_cast <NamedPipeInternal*> (internal);
 
@@ -62,9 +62,9 @@ void NamedPipe::close()
 {
     NamedPipeInternal* const intern = static_cast <NamedPipeInternal*> (internal);
 
-    if (intern != 0)
+    if (intern != nullptr)
     {
-        internal = 0;
+        internal = nullptr;
 
         if (intern->pipeIn != -1)
             ::close (intern->pipeIn);
@@ -108,7 +108,7 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
             || (mkfifo (intern->pipeOutName.toUTF8(), 0666) && errno != EEXIST))
         {
             delete intern;
-            internal = 0;
+            internal = nullptr;
 
             return false;
         }
@@ -122,7 +122,7 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int /*timeOutMillisec
     int bytesRead = -1;
     NamedPipeInternal* const intern = static_cast <NamedPipeInternal*> (internal);
 
-    if (intern != 0)
+    if (intern != nullptr)
     {
         intern->blocked = true;
 
@@ -170,7 +170,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
     int bytesWritten = -1;
     NamedPipeInternal* const intern = static_cast <NamedPipeInternal*> (internal);
 
-    if (intern != 0)
+    if (intern != nullptr)
     {
         if (intern->pipeOut == -1)
         {

@@ -199,17 +199,17 @@ const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams()
 }
 
 //==============================================================================
-static void* currentModuleHandle = 0;
+static void* currentModuleHandle = nullptr;
 
-void* PlatformUtilities::getCurrentModuleInstanceHandle() throw()
+void* PlatformUtilities::getCurrentModuleInstanceHandle() noexcept
 {
-    if (currentModuleHandle == 0)
+    if (currentModuleHandle == nullptr)
         currentModuleHandle = GetModuleHandle (0);
 
     return currentModuleHandle;
 }
 
-void PlatformUtilities::setCurrentModuleInstanceHandle (void* const newHandle) throw()
+void PlatformUtilities::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
 {
     currentModuleHandle = newHandle;
 }

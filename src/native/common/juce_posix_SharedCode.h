@@ -31,7 +31,7 @@
 
 
 //==============================================================================
-CriticalSection::CriticalSection() throw()
+CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;
     pthread_mutexattr_init (&atts);
@@ -42,22 +42,22 @@ CriticalSection::CriticalSection() throw()
     pthread_mutex_init (&internal, &atts);
 }
 
-CriticalSection::~CriticalSection() throw()
+CriticalSection::~CriticalSection() noexcept
 {
     pthread_mutex_destroy (&internal);
 }
 
-void CriticalSection::enter() const throw()
+void CriticalSection::enter() const noexcept
 {
     pthread_mutex_lock (&internal);
 }
 
-bool CriticalSection::tryEnter() const throw()
+bool CriticalSection::tryEnter() const noexcept
 {
     return pthread_mutex_trylock (&internal) == 0;
 }
 
-void CriticalSection::exit() const throw()
+void CriticalSection::exit() const noexcept
 {
     pthread_mutex_unlock (&internal);
 }
@@ -87,7 +87,7 @@ public:
         pthread_mutex_destroy (&mutex);
     }
 
-    bool wait (const int timeOutMillisecs) throw()
+    bool wait (const int timeOutMillisecs) noexcept
     {
         pthread_mutex_lock (&mutex);
 
@@ -135,7 +135,7 @@ public:
         return true;
     }
 
-    void signal() throw()
+    void signal() noexcept
     {
         pthread_mutex_lock (&mutex);
         triggered = true;
@@ -143,7 +143,7 @@ public:
         pthread_mutex_unlock (&mutex);
     }
 
-    void reset() throw()
+    void reset() noexcept
     {
         pthread_mutex_lock (&mutex);
         triggered = false;
@@ -159,27 +159,27 @@ private:
     JUCE_DECLARE_NON_COPYABLE (WaitableEventImpl);
 };
 
-WaitableEvent::WaitableEvent (const bool manualReset) throw()
+WaitableEvent::WaitableEvent (const bool manualReset) noexcept
     : internal (new WaitableEventImpl (manualReset))
 {
 }
 
-WaitableEvent::~WaitableEvent() throw()
+WaitableEvent::~WaitableEvent() noexcept
 {
     delete static_cast <WaitableEventImpl*> (internal);
 }
 
-bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
+bool WaitableEvent::wait (const int timeOutMillisecs) const noexcept
 {
     return static_cast <WaitableEventImpl*> (internal)->wait (timeOutMillisecs);
 }
 
-void WaitableEvent::signal() const throw()
+void WaitableEvent::signal() const noexcept
 {
     static_cast <WaitableEventImpl*> (internal)->signal();
 }
 
-void WaitableEvent::reset() const throw()
+void WaitableEvent::reset() const noexcept
 {
     static_cast <WaitableEventImpl*> (internal)->reset();
 }
@@ -207,7 +207,7 @@ const File File::getCurrentWorkingDirectory()
     char* cwd = getcwd (localBuffer, sizeof (localBuffer) - 1);
     int bufferSize = 4096;
 
-    while (cwd == 0 && errno == ERANGE)
+    while (cwd == nullptr && errno == ERANGE)
     {
         heapBuffer.malloc (bufferSize);
         cwd = getcwd (heapBuffer, bufferSize - 1);
@@ -263,13 +263,13 @@ namespace
             juce_statStruct info;
             const bool statOk = juce_stat (path, info);
 
-            if (isDir != 0)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
-            if (fileSize != 0)      *fileSize = statOk ? info.st_size : 0;
-            if (modTime != 0)       *modTime = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
-            if (creationTime != 0)  *creationTime = Time (statOk ? (int64) info.st_ctime * 1000 : 0);
+            if (isDir != nullptr)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+            if (fileSize != nullptr)      *fileSize = statOk ? info.st_size : 0;
+            if (modTime != nullptr)       *modTime = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
+            if (creationTime != nullptr)  *creationTime = Time (statOk ? (int64) info.st_ctime * 1000 : 0);
         }
 
-        if (isReadOnly != 0)
+        if (isReadOnly != nullptr)
             *isReadOnly = access (path.toUTF8(), W_OK) != 0;
     }
 }
@@ -671,7 +671,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
 {
     const ScopedLock sl (lock);
 
-    if (pimpl == 0)
+    if (pimpl == nullptr)
     {
         pimpl = new Pimpl (name, timeOutMillisecs);
 
@@ -683,7 +683,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
         pimpl->refCount++;
     }
 
-    return pimpl != 0;
+    return pimpl != nullptr;
 }
 
 void InterProcessLock::exit()
@@ -691,9 +691,9 @@ void InterProcessLock::exit()
     const ScopedLock sl (lock);
 
     // Trying to release the lock too many times!
-    jassert (pimpl != 0);
+    jassert (pimpl != nullptr);
 
-    if (pimpl != 0 && --(pimpl->refCount) == 0)
+    if (pimpl != nullptr && --(pimpl->refCount) == 0)
         pimpl = 0;
 }
 

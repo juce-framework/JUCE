@@ -35,13 +35,13 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 XmlDocument::XmlDocument (const String& documentText)
     : originalText (documentText),
-      input (0),
+      input (nullptr),
       ignoreEmptyTextElements (true)
 {
 }
 
 XmlDocument::XmlDocument (const File& file)
-    : input (0),
+    : input (nullptr),
       ignoreEmptyTextElements (true),
       inputSource (new FileInputSource (file))
 {
@@ -63,25 +63,25 @@ XmlElement* XmlDocument::parse (const String& xmlData)
     return doc.getDocumentElement();
 }
 
-void XmlDocument::setInputSource (InputSource* const newSource) throw()
+void XmlDocument::setInputSource (InputSource* const newSource) noexcept
 {
     inputSource = newSource;
 }
 
-void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw()
+void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) noexcept
 {
     ignoreEmptyTextElements = shouldBeIgnored;
 }
 
 namespace XmlIdentifierChars
 {
-    bool isIdentifierCharSlow (const juce_wchar c) throw()
+    bool isIdentifierCharSlow (const juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetterOrDigit (c)
                  || c == '_' || c == '-' || c == ':' || c == '.';
     }
 
-    bool isIdentifierChar (const juce_wchar c) throw()
+    bool isIdentifierChar (const juce_wchar c) noexcept
     {
         static const uint32 legalChars[] = { 0, 0x7ff6000, 0x87fffffe, 0x7fffffe, 0 };
 
@@ -108,11 +108,11 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
 {
     String textToParse (originalText);
 
-    if (textToParse.isEmpty() && inputSource != 0)
+    if (textToParse.isEmpty() && inputSource != nullptr)
     {
         ScopedPointer <InputStream> in (inputSource->createInputStream());
 
-        if (in != 0)
+        if (in != nullptr)
         {
             MemoryOutputStream data;
             data.writeFromInputStream (*in, onlyReadOuterDocumentElement ? 8192 : -1);
@@ -137,7 +137,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
     {
         skipHeader();
 
-        if (input.getAddress() != 0)
+        if (input.getAddress() != nullptr)
         {
             ScopedPointer <XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
 
@@ -153,7 +153,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
     return 0;
 }
 
-const String& XmlDocument::getLastParseError() const throw()
+const String& XmlDocument::getLastParseError() const noexcept
 {
     return lastError;
 }
@@ -166,18 +166,18 @@ void XmlDocument::setLastError (const String& desc, const bool carryOn)
 
 const String XmlDocument::getFileContents (const String& filename) const
 {
-    if (inputSource != 0)
+    if (inputSource != nullptr)
     {
         const ScopedPointer <InputStream> in (inputSource->createInputStreamFor (filename.trim().unquoted()));
 
-        if (in != 0)
+        if (in != nullptr)
             return in->readEntireStreamAsString();
     }
 
     return String::empty;
 }
 
-juce_wchar XmlDocument::readNextChar() throw()
+juce_wchar XmlDocument::readNextChar() noexcept
 {
     if (*input != 0)
         return *input++;
@@ -186,7 +186,7 @@ juce_wchar XmlDocument::readNextChar() throw()
     return 0;
 }
 
-int XmlDocument::findNextTokenLength() throw()
+int XmlDocument::findNextTokenLength() noexcept
 {
     int len = 0;
     juce_wchar c = *input;
@@ -356,7 +356,7 @@ void XmlDocument::readQuotedString (String& result)
 
 XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 {
-    XmlElement* node = 0;
+    XmlElement* node = nullptr;
 
     skipNextWhiteSpace();
     if (outOfData)
@@ -523,7 +523,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 // this is some other element, so parse and add it..
                 XmlElement* const n = readNextElement (true);
 
-                if (n != 0)
+                if (n != nullptr)
                     childAppender.append (n);
                 else
                     return;
@@ -565,7 +565,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                         {
                             XmlElement* const n = readNextElement (true);
 
-                            if (n == 0)
+                            if (n == nullptr)
                                 break;
 
                             childAppender.append (n);

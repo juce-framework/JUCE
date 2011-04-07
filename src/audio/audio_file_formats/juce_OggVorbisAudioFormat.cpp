@@ -147,7 +147,7 @@ public:
                 const int numToUse = jmin (numSamples, numAvailable);
 
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
-                    if (destSamples[i] != 0)
+                    if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
                                 reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
                                 sizeof (float) * numToUse);
@@ -177,7 +177,7 @@ public:
 
                 while (numToRead > 0)
                 {
-                    float** dataIn = 0;
+                    float** dataIn = nullptr;
 
                     const int samps = OggVorbisNamespace::ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
                     if (samps <= 0)
@@ -204,7 +204,7 @@ public:
         if (numSamples > 0)
         {
             for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != 0)
+                if (destSamples[i] != nullptr)
                     zeromem (destSamples[i] + startOffsetInDestBuffer,
                              sizeof (int) * numSamples);
         }
@@ -277,7 +277,7 @@ public:
         {
             vorbis_comment_init (&vc);
 
-            if (JUCEApplication::getInstance() != 0)
+            if (JUCEApplication::getInstance() != nullptr)
                 vorbis_comment_add_tag (&vc, "ENCODER", const_cast <char*> (JUCEApplication::getInstance()->getApplicationName().toUTF8().getAddress()));
 
             vorbis_analysis_init (&vd, &vi);
@@ -327,8 +327,8 @@ public:
         else
         {
             vorbis_info_clear (&vi);
-            output = 0; // to stop the base class deleting this, as it needs to be returned
-                        // to the caller of createWriter()
+            output = nullptr; // to stop the base class deleting this, as it needs to be returned
+                              // to the caller of createWriter()
         }
     }
 
@@ -349,7 +349,7 @@ public:
                 float* const dst = vorbisBuffer[i];
                 const int* const src = samplesToWrite [i];
 
-                if (src != 0 && dst != 0)
+                if (src != nullptr && dst != nullptr)
                 {
                     for (int j = 0; j < numSamples; ++j)
                         dst[j] = (float) (src[j] * gain);
@@ -425,7 +425,7 @@ AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in,
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
-        r->input = 0;
+        r->input = nullptr;
 
     return 0;
 }
@@ -457,14 +457,14 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
     FileInputStream* const in = source.createInputStream();
 
-    if (in != 0)
+    if (in != nullptr)
     {
         ScopedPointer <AudioFormatReader> r (createReaderFor (in, true));
 
-        if (r != 0)
+        if (r != nullptr)
         {
             const int64 numSamps = r->lengthInSamples;
-            r = 0;
+            r = nullptr;
 
             const int64 fileNumSamps = source.getSize() / 4;
             const double ratio = numSamps / (double) fileNumSamps;

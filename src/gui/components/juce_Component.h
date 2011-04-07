@@ -98,7 +98,7 @@ public:
 
         @see setName
     */
-    const String& getName() const throw()                   { return componentName; }
+    const String& getName() const noexcept                  { return componentName; }
 
     /** Sets the name of this component.
 
@@ -112,7 +112,7 @@ public:
     /** Returns the ID string that was set by setComponentID().
         @see setComponentID
     */
-    const String& getComponentID() const throw()            { return componentID; }
+    const String& getComponentID() const noexcept           { return componentID; }
 
     /** Sets the component's ID string.
         You can retrieve the ID using getComponentID().
@@ -144,7 +144,7 @@ public:
 
         @see isShowing, setVisible
     */
-    bool isVisible() const throw()                          { return flags.visibleFlag; }
+    bool isVisible() const noexcept                         { return flags.visibleFlag; }
 
     /** Called when this component's visiblility changes.
 
@@ -184,7 +184,7 @@ public:
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen
     */
     virtual void addToDesktop (int windowStyleFlags,
-                               void* nativeWindowToAttachTo = 0);
+                               void* nativeWindowToAttachTo = nullptr);
 
     /** If the component is currently showing on the desktop, this will hide it.
 
@@ -199,7 +199,7 @@ public:
 
         @see addToDesktop, removeFromDesktop
     */
-    bool isOnDesktop() const throw();
+    bool isOnDesktop() const noexcept;
 
     /** Returns the heavyweight window that contains this component.
 
@@ -268,7 +268,7 @@ public:
 
         @see setAlwaysOnTop
     */
-    bool isAlwaysOnTop() const throw();
+    bool isAlwaysOnTop() const noexcept;
 
     //==============================================================================
     /** Returns the x coordinate of the component's left edge.
@@ -278,7 +278,7 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    inline int getX() const throw()                         { return bounds.getX(); }
+    inline int getX() const noexcept                        { return bounds.getX(); }
 
     /** Returns the y coordinate of the top of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -287,13 +287,13 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    inline int getY() const throw()                         { return bounds.getY(); }
+    inline int getY() const noexcept                        { return bounds.getY(); }
 
     /** Returns the component's width in pixels. */
-    inline int getWidth() const throw()                     { return bounds.getWidth(); }
+    inline int getWidth() const noexcept                    { return bounds.getWidth(); }
 
     /** Returns the component's height in pixels. */
-    inline int getHeight() const throw()                    { return bounds.getHeight(); }
+    inline int getHeight() const noexcept                   { return bounds.getHeight(); }
 
     /** Returns the x coordinate of the component's right-hand edge.
         This is a distance in pixels from the left edge of the component's parent.
@@ -302,10 +302,10 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    int getRight() const throw()                            { return bounds.getRight(); }
+    int getRight() const noexcept                           { return bounds.getRight(); }
 
     /** Returns the component's top-left position as a Point. */
-    const Point<int> getPosition() const throw()            { return bounds.getPosition(); }
+    const Point<int> getPosition() const noexcept           { return bounds.getPosition(); }
 
     /** Returns the y coordinate of the bottom edge of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -314,7 +314,7 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    int getBottom() const throw()                           { return bounds.getBottom(); }
+    int getBottom() const noexcept                          { return bounds.getBottom(); }
 
     /** Returns this component's bounding box.
         The rectangle returned is relative to the top-left of the component's parent.
@@ -323,13 +323,13 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    const Rectangle<int>& getBounds() const throw()         { return bounds; }
+    const Rectangle<int>& getBounds() const noexcept        { return bounds; }
 
     /** Returns the component's bounds, relative to its own origin.
         This is like getBounds(), but returns the rectangle in local coordinates, In practice, it'll
         return a rectangle with position (0, 0), and the same size as this component.
     */
-    const Rectangle<int> getLocalBounds() const throw();
+    const Rectangle<int> getLocalBounds() const noexcept;
 
     /** Returns the area of this component's parent which this component covers.
 
@@ -338,7 +338,7 @@ public:
         the smallest rectangle that fully covers the component's transformed bounding box.
         If this component has no parent, the return value will simply be the same as getBounds().
     */
-    const Rectangle<int> getBoundsInParent() const throw();
+    const Rectangle<int> getBoundsInParent() const noexcept;
 
     /** Returns the region of this component that's not obscured by other, opaque components.
 
@@ -627,34 +627,34 @@ public:
         For more details about transforms, see setTransform().
         @see setTransform
     */
-    bool isTransformed() const throw();
+    bool isTransformed() const noexcept;
 
     //==============================================================================
     /** Returns a proportion of the component's width.
 
         This is a handy equivalent of (getWidth() * proportion).
     */
-    int proportionOfWidth (float proportion) const throw();
+    int proportionOfWidth (float proportion) const noexcept;
 
     /** Returns a proportion of the component's height.
 
         This is a handy equivalent of (getHeight() * proportion).
     */
-    int proportionOfHeight (float proportion) const throw();
+    int proportionOfHeight (float proportion) const noexcept;
 
     /** Returns the width of the component's parent.
 
         If the component has no parent (i.e. if it's on the desktop), this will return
         the width of the screen.
     */
-    int getParentWidth() const throw();
+    int getParentWidth() const noexcept;
 
     /** Returns the height of the component's parent.
 
         If the component has no parent (i.e. if it's on the desktop), this will return
         the height of the screen.
     */
-    int getParentHeight() const throw();
+    int getParentHeight() const noexcept;
 
     /** Returns the screen coordinates of the monitor that contains this component.
 
@@ -669,7 +669,7 @@ public:
 
         @see getChildComponent, getIndexOfChildComponent
     */
-    int getNumChildComponents() const throw();
+    int getNumChildComponents() const noexcept;
 
     /** Returns one of this component's child components, by it index.
 
@@ -680,7 +680,7 @@ public:
 
         @see getNumChildComponents, getIndexOfChildComponent
     */
-    Component* getChildComponent (int index) const throw();
+    Component* getChildComponent (int index) const noexcept;
 
     /** Returns the index of this component in the list of child components.
 
@@ -691,7 +691,7 @@ public:
 
         @see getNumChildComponents, getChildComponent, addChildComponent, toFront, toBack, toBehind
     */
-    int getIndexOfChildComponent (const Component* child) const throw();
+    int getIndexOfChildComponent (const Component* child) const noexcept;
 
     /** Adds a child component to this one.
 
@@ -761,7 +761,7 @@ public:
         If this is the highest-level component or hasn't yet been added to
         a parent, this will return null.
     */
-    Component* getParentComponent() const throw()                   { return parentComponent; }
+    Component* getParentComponent() const noexcept                  { return parentComponent; }
 
     /** Searches the parent components for a component of a specified class.
 
@@ -772,14 +772,14 @@ public:
         N.B. The dummy parameter is needed to work around a VC6 compiler bug.
     */
     template <class TargetClass>
-    TargetClass* findParentComponentOfClass (TargetClass* const dummyParameter = 0) const
+    TargetClass* findParentComponentOfClass (TargetClass* const dummyParameter = nullptr) const
     {
         (void) dummyParameter;
         Component* p = parentComponent;
-        while (p != 0)
+        while (p != nullptr)
         {
             TargetClass* target = dynamic_cast <TargetClass*> (p);
-            if (target != 0)
+            if (target != nullptr)
                 return target;
 
             p = p->parentComponent;
@@ -794,14 +794,14 @@ public:
         finds the highest one that doesn't have a parent (i.e. is on the desktop or
         not yet added to a parent), and will return that.
     */
-    Component* getTopLevelComponent() const throw();
+    Component* getTopLevelComponent() const noexcept;
 
     /** Checks whether a component is anywhere inside this component or its children.
 
         This will recursively check through this component's children to see if the
         given component is anywhere inside.
     */
-    bool isParentOf (const Component* possibleChild) const throw();
+    bool isParentOf (const Component* possibleChild) const noexcept;
 
     //==============================================================================
     /** Called to indicate that the component's parents have changed.
@@ -879,7 +879,7 @@ public:
         @see hitTest, getInterceptsMouseClicks
     */
     void setInterceptsMouseClicks (bool allowClicksOnThisComponent,
-                                   bool allowClicksOnChildComponents) throw();
+                                   bool allowClicksOnChildComponents) noexcept;
 
     /** Retrieves the current state of the mouse-click interception flags.
 
@@ -889,7 +889,7 @@ public:
         @see setInterceptsMouseClicks
     */
     void getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
-                                   bool& allowsClicksOnChildComponents) const throw();
+                                   bool& allowsClicksOnChildComponents) const noexcept;
 
 
     /** Returns true if a given point lies within this component or one of its children.
@@ -1056,7 +1056,7 @@ public:
         artifacts. Your component also can't have any child components that may be placed beyond its
         bounds.
     */
-    void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) throw();
+    void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
     //==============================================================================
     /** Adds an effect filter to alter the component's appearance.
@@ -1078,7 +1078,7 @@ public:
 
         @see setComponentEffect
     */
-    ImageEffectFilter* getComponentEffect() const throw()               { return effect; }
+    ImageEffectFilter* getComponentEffect() const noexcept              { return effect; }
 
     //==============================================================================
     /** Finds the appropriate look-and-feel to use for this component.
@@ -1089,7 +1089,7 @@ public:
 
         @see setLookAndFeel, lookAndFeelChanged
     */
-    LookAndFeel& getLookAndFeel() const throw();
+    LookAndFeel& getLookAndFeel() const noexcept;
 
     /** Sets the look and feel to use for this component.
 
@@ -1149,7 +1149,7 @@ public:
         @returns the value that was set by setOpaque, (the default being false)
         @see setOpaque
     */
-    bool isOpaque() const throw();
+    bool isOpaque() const noexcept;
 
     //==============================================================================
     /** Indicates whether the component should be brought to the front when clicked.
@@ -1164,13 +1164,13 @@ public:
 
         @see setMouseClickGrabsKeyboardFocus
     */
-    void setBroughtToFrontOnMouseClick (bool shouldBeBroughtToFront) throw();
+    void setBroughtToFrontOnMouseClick (bool shouldBeBroughtToFront) noexcept;
 
     /** Indicates whether the component should be brought to the front when clicked-on.
 
         @see setBroughtToFrontOnMouseClick
     */
-    bool isBroughtToFrontOnMouseClick() const throw();
+    bool isBroughtToFrontOnMouseClick() const noexcept;
 
     //==============================================================================
     // Keyboard focus methods
@@ -1185,7 +1185,7 @@ public:
 
         @see grabKeyboardFocus, getWantsKeyboardFocus
     */
-    void setWantsKeyboardFocus (bool wantsFocus) throw();
+    void setWantsKeyboardFocus (bool wantsFocus) noexcept;
 
     /** Returns true if the component is interested in getting keyboard focus.
 
@@ -1194,7 +1194,7 @@ public:
 
         @see setWantsKeyboardFocus
     */
-    bool getWantsKeyboardFocus() const throw();
+    bool getWantsKeyboardFocus() const noexcept;
 
     //==============================================================================
     /** Chooses whether a click on this component automatically grabs the focus.
@@ -1209,7 +1209,7 @@ public:
 
         See setMouseClickGrabsKeyboardFocus() for more info.
     */
-    bool getMouseClickGrabsKeyboardFocus() const throw();
+    bool getMouseClickGrabsKeyboardFocus() const noexcept;
 
     //==============================================================================
     /** Tries to give keyboard focus to this component.
@@ -1249,7 +1249,7 @@ public:
 
         @returns the focused component, or null if nothing is focused.
     */
-    static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() throw();
+    static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() noexcept;
 
     //==============================================================================
     /** Tries to move the keyboard focus to one of this component's siblings.
@@ -1320,7 +1320,7 @@ public:
 
         @see isFocusContainer, createFocusTraverser, moveKeyboardFocusToSibling
     */
-    void setFocusContainer (bool shouldBeFocusContainer) throw();
+    void setFocusContainer (bool shouldBeFocusContainer) noexcept;
 
     /** Returns true if this component has been marked as a focus container.
 
@@ -1328,7 +1328,7 @@ public:
 
         @see setFocusContainer, moveKeyboardFocusToSibling, createFocusTraverser
     */
-    bool isFocusContainer() const throw();
+    bool isFocusContainer() const noexcept;
 
     //==============================================================================
     /** Returns true if the component (and all its parents) are enabled.
@@ -1342,7 +1342,7 @@ public:
 
         @see setEnabled, enablementChanged
     */
-    bool isEnabled() const throw();
+    bool isEnabled() const noexcept;
 
     /** Enables or disables this component.
 
@@ -1609,7 +1609,7 @@ public:
 
         @see mouseEnter, mouseExit, mouseDown, mouseUp
     */
-    void setRepaintsOnMouseActivity (bool shouldRepaint) throw();
+    void setRepaintsOnMouseActivity (bool shouldRepaint) noexcept;
 
     /** Registers a listener to be told when mouse events occur in this component.
 
@@ -1769,7 +1769,7 @@ public:
 
         @see isMouseButtonDownAnywhere, isMouseOver, isMouseOverOrDragging
     */
-    bool isMouseButtonDown() const throw();
+    bool isMouseButtonDown() const noexcept;
 
     /** True if the mouse is over this component, or if it's being dragged in this component.
 
@@ -1777,7 +1777,7 @@ public:
 
         @see isMouseOver, isMouseButtonDown, isMouseButtonDownAnywhere
     */
-    bool isMouseOverOrDragging() const throw();
+    bool isMouseOverOrDragging() const noexcept;
 
     /** Returns true if a mouse button is currently down.
 
@@ -1787,7 +1787,7 @@ public:
 
         @see isMouseButtonDown, ModifierKeys
     */
-    static bool JUCE_CALLTYPE isMouseButtonDownAnywhere() throw();
+    static bool JUCE_CALLTYPE isMouseButtonDownAnywhere() noexcept;
 
     /** Returns the mouse's current position, relative to this component.
         The return value is relative to the component's top-left corner.
@@ -1939,7 +1939,7 @@ public:
         @see exitModalState, runModalLoop, ModalComponentManager::attachCallback
     */
     void enterModalState (bool takeKeyboardFocus = true,
-                          ModalComponentManager::Callback* callback = 0,
+                          ModalComponentManager::Callback* callback = nullptr,
                           bool deleteWhenDismissed = false);
 
     /** Ends a component's modal state.
@@ -1959,12 +1959,12 @@ public:
 
         @see getCurrentlyModalComponent
     */
-    bool isCurrentlyModal() const throw();
+    bool isCurrentlyModal() const noexcept;
 
     /** Returns the number of components that are currently in a modal state.
         @see getCurrentlyModalComponent
      */
-    static int JUCE_CALLTYPE getNumCurrentlyModalComponents() throw();
+    static int JUCE_CALLTYPE getNumCurrentlyModalComponents() noexcept;
 
     /** Returns one of the components that are currently modal.
 
@@ -1977,7 +1977,7 @@ public:
                 index is out of range)
         @see getNumCurrentlyModalComponents, runModalLoop, isCurrentlyModal
     */
-    static Component* JUCE_CALLTYPE getCurrentlyModalComponent (int index = 0) throw();
+    static Component* JUCE_CALLTYPE getCurrentlyModalComponent (int index = 0) noexcept;
 
     /** Checks whether there's a modal component somewhere that's stopping this one
         from receiving messages.
@@ -2021,13 +2021,13 @@ public:
         Each component has a NamedValueSet object which you can use to attach arbitrary
         items of data to it.
     */
-    NamedValueSet& getProperties() throw()                              { return properties; }
+    NamedValueSet& getProperties() noexcept                             { return properties; }
 
     /** Returns the set of properties that belong to this component.
         Each component has a NamedValueSet object which you can use to attach arbitrary
         items of data to it.
     */
-    const NamedValueSet& getProperties() const throw()                  { return properties; }
+    const NamedValueSet& getProperties() const noexcept                 { return properties; }
 
     //==============================================================================
     /** Looks for a colour that has been registered with the given colour ID number.
@@ -2112,13 +2112,13 @@ public:
     {
     public:
         /** Creates a null SafePointer. */
-        SafePointer() throw() {}
+        SafePointer() noexcept {}
 
         /** Creates a SafePointer that points at the given component. */
         SafePointer (ComponentType* const component)        : weakRef (component) {}
 
         /** Creates a copy of another SafePointer. */
-        SafePointer (const SafePointer& other) throw()      : weakRef (other.weakRef) {}
+        SafePointer (const SafePointer& other) noexcept     : weakRef (other.weakRef) {}
 
         /** Copies another pointer to this one. */
         SafePointer& operator= (const SafePointer& other)           { weakRef = other.weakRef; return *this; }
@@ -2127,22 +2127,22 @@ public:
         SafePointer& operator= (ComponentType* const newComponent)  { weakRef = newComponent; return *this; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* getComponent() const throw()         { return dynamic_cast <ComponentType*> (weakRef.get()); }
+        ComponentType* getComponent() const noexcept        { return dynamic_cast <ComponentType*> (weakRef.get()); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        operator ComponentType*() const throw()             { return getComponent(); }
+        operator ComponentType*() const noexcept            { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* operator->() throw()                 { return getComponent(); }
+        ComponentType* operator->() noexcept                { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        const ComponentType* operator->() const throw()     { return getComponent(); }
+        const ComponentType* operator->() const noexcept    { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
-        void deleteAndZero()                                { delete getComponent(); jassert (getComponent() == 0); }
+        void deleteAndZero()                                { delete getComponent(); jassert (getComponent() == nullptr); }
 
-        bool operator== (ComponentType* component) const throw()    { return weakRef == component; }
-        bool operator!= (ComponentType* component) const throw()    { return weakRef != component; }
+        bool operator== (ComponentType* component) const noexcept   { return weakRef == component; }
+        bool operator!= (ComponentType* component) const noexcept   { return weakRef != component; }
 
     private:
         WeakReference<Component> weakRef;
@@ -2162,7 +2162,7 @@ public:
         BailOutChecker (Component* component);
 
         /** Returns true if either of the two components have been deleted since this object was created. */
-        bool shouldBailOut() const throw();
+        bool shouldBailOut() const noexcept;
 
     private:
         const WeakReference<Component> safePointer;
@@ -2183,12 +2183,12 @@ public:
     {
     public:
         /** Creates a Positioner which can control the specified component. */
-        explicit Positioner (Component& component) throw();
+        explicit Positioner (Component& component) noexcept;
         /** Destructor. */
         virtual ~Positioner() {}
 
         /** Returns the component that this positioner controls. */
-        Component& getComponent() const throw()     { return component; }
+        Component& getComponent() const noexcept    { return component; }
 
         /** Attempts to set the component's position to the given rectangle.
             Unlike simply calling Component::setBounds(), this may involve the positioner
@@ -2206,7 +2206,7 @@ public:
     /** Returns the Positioner object that has been set for this component.
         @see setPositioner()
     */
-    Positioner* getPositioner() const throw();
+    Positioner* getPositioner() const noexcept;
 
     /** Sets a new Positioner object for this component.
         If there's currently another positioner set, it will be deleted. The object that is passed in

@@ -65,7 +65,7 @@ public:
                      const Colour& textColour);
 
     /** Returns the KeyPressMappingSet that this component is acting upon. */
-    KeyPressMappingSet& getMappings() const throw()                 { return mappings; }
+    KeyPressMappingSet& getMappings() const noexcept                { return mappings; }
 
 
     //==============================================================================

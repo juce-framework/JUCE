@@ -38,7 +38,7 @@ AudioFormatReaderSource::AudioFormatReaderSource (AudioFormatReader* const reade
       nextPlayPos (0),
       looping (false)
 {
-    jassert (reader != 0);
+    jassert (reader != nullptr);
 }
 
 AudioFormatReaderSource::~AudioFormatReaderSource()

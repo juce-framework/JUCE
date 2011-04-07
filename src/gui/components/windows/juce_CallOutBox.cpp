@@ -41,7 +41,7 @@ CallOutBox::CallOutBox (Component& contentComponent,
 {
     addAndMakeVisible (&content);
 
-    if (parentComponent != 0)
+    if (parentComponent != nullptr)
     {
         parentComponent->addChildComponent (this);
 

@@ -103,9 +103,9 @@ public:
     void add (ListenerClass* const listenerToAdd)
     {
         // Listeners can't be null pointers!
-        jassert (listenerToAdd != 0);
+        jassert (listenerToAdd != nullptr);
 
-        if (listenerToAdd != 0)
+        if (listenerToAdd != nullptr)
             listeners.addIfNotAlreadyThere (listenerToAdd);
     }
 
@@ -115,19 +115,19 @@ public:
     void remove (ListenerClass* const listenerToRemove)
     {
         // Listeners can't be null pointers!
-        jassert (listenerToRemove != 0);
+        jassert (listenerToRemove != nullptr);
 
         listeners.removeValue (listenerToRemove);
     }
 
     /** Returns the number of registered listeners. */
-    int size() const throw()
+    int size() const noexcept
     {
         return listeners.size();
     }
 
     /** Returns true if any listeners are registered. */
-    bool isEmpty() const throw()
+    bool isEmpty() const noexcept
     {
         return listeners.size() == 0;
     }
@@ -139,7 +139,7 @@ public:
     }
 
     /** Returns true if the specified listener has been added to the list. */
-    bool contains (ListenerClass* const listener) const throw()
+    bool contains (ListenerClass* const listener) const noexcept
     {
         return listeners.contains (listener);
     }
@@ -273,7 +273,7 @@ public:
     class DummyBailOutChecker
     {
     public:
-        inline bool shouldBailOut() const throw()      { return false; }
+        inline bool shouldBailOut() const noexcept     { return false; }
     };
 
     //==============================================================================
@@ -309,7 +309,7 @@ public:
             return (! bailOutChecker.shouldBailOut()) && next();
         }
 
-        typename ListType::ListenerType* getListener() const throw()
+        typename ListType::ListenerType* getListener() const noexcept
         {
             return list.getListeners().getUnchecked (index);
         }
@@ -325,7 +325,7 @@ public:
     typedef ListenerList<ListenerClass, ArrayType> ThisType;
     typedef ListenerClass ListenerType;
 
-    const ArrayType& getListeners() const throw()           { return listeners; }
+    const ArrayType& getListeners() const noexcept          { return listeners; }
 
 private:
     //==============================================================================

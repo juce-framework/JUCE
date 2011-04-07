@@ -183,22 +183,22 @@ const String SystemStats::getFullUserName()
 }
 
 //==============================================================================
-uint32 juce_millisecondsSinceStartup() throw()
+uint32 juce_millisecondsSinceStartup() noexcept
 {
     return (uint32) (mach_absolute_time() * SystemStatsHelpers::highResTimerToMillisecRatio);
 }
 
-double Time::getMillisecondCounterHiRes() throw()
+double Time::getMillisecondCounterHiRes() noexcept
 {
     return mach_absolute_time() * SystemStatsHelpers::highResTimerToMillisecRatio;
 }
 
-int64 Time::getHighResolutionTicks() throw()
+int64 Time::getHighResolutionTicks() noexcept
 {
     return (int64) mach_absolute_time();
 }
 
-int64 Time::getHighResolutionTicksPerSecond() throw()
+int64 Time::getHighResolutionTicksPerSecond() noexcept
 {
     return SystemStatsHelpers::highResTimerFrequency;
 }

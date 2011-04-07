@@ -37,47 +37,47 @@ class CharPointer_UTF8
 public:
     typedef char CharType;
 
-    inline explicit CharPointer_UTF8 (const CharType* const rawPointer) throw()
+    inline explicit CharPointer_UTF8 (const CharType* const rawPointer) noexcept
         : data (const_cast <CharType*> (rawPointer))
     {
     }
 
-    inline CharPointer_UTF8 (const CharPointer_UTF8& other) throw()
+    inline CharPointer_UTF8 (const CharPointer_UTF8& other) noexcept
         : data (other.data)
     {
     }
 
-    inline CharPointer_UTF8& operator= (const CharPointer_UTF8& other) throw()
+    inline CharPointer_UTF8& operator= (const CharPointer_UTF8& other) noexcept
     {
         data = other.data;
         return *this;
     }
 
-    inline CharPointer_UTF8& operator= (const CharType* text) throw()
+    inline CharPointer_UTF8& operator= (const CharType* text) noexcept
     {
         data = const_cast <CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (const CharPointer_UTF8& other) const throw() { return data == other.data; }
-    inline bool operator!= (const CharPointer_UTF8& other) const throw() { return data != other.data; }
-    inline bool operator<= (const CharPointer_UTF8& other) const throw() { return data <= other.data; }
-    inline bool operator<  (const CharPointer_UTF8& other) const throw() { return data <  other.data; }
-    inline bool operator>= (const CharPointer_UTF8& other) const throw() { return data >= other.data; }
-    inline bool operator>  (const CharPointer_UTF8& other) const throw() { return data >  other.data; }
+    inline bool operator== (const CharPointer_UTF8& other) const noexcept { return data == other.data; }
+    inline bool operator!= (const CharPointer_UTF8& other) const noexcept { return data != other.data; }
+    inline bool operator<= (const CharPointer_UTF8& other) const noexcept { return data <= other.data; }
+    inline bool operator<  (const CharPointer_UTF8& other) const noexcept { return data <  other.data; }
+    inline bool operator>= (const CharPointer_UTF8& other) const noexcept { return data >= other.data; }
+    inline bool operator>  (const CharPointer_UTF8& other) const noexcept { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const throw()         { return data; }
+    inline CharType* getAddress() const noexcept        { return data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline operator const CharType*() const throw()     { return data; }
+    inline operator const CharType*() const noexcept    { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const throw()                 { return *data == 0; }
+    inline bool isEmpty() const noexcept                { return *data == 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
-    juce_wchar operator*() const throw()
+    juce_wchar operator*() const noexcept
     {
         const signed char byte = (signed char) *data;
 
@@ -113,7 +113,7 @@ public:
     }
 
     /** Moves this pointer along to the next character in the string. */
-    CharPointer_UTF8& operator++() throw()
+    CharPointer_UTF8& operator++() noexcept
     {
         const signed char n = (signed char) *data++;
 
@@ -132,7 +132,7 @@ public:
     }
 
     /** Moves this pointer back to the previous character in the string. */
-    CharPointer_UTF8& operator--() throw()
+    CharPointer_UTF8& operator--() noexcept
     {
         const char n = *--data;
 
@@ -152,7 +152,7 @@ public:
 
     /** Returns the character that this pointer is currently pointing to, and then
         advances the pointer to point to the next character. */
-    juce_wchar getAndAdvance() throw()
+    juce_wchar getAndAdvance() noexcept
     {
         const signed char byte = (signed char) *data++;
 
@@ -188,7 +188,7 @@ public:
     }
 
     /** Moves this pointer along to the next character in the string. */
-    CharPointer_UTF8 operator++ (int) throw()
+    CharPointer_UTF8 operator++ (int) noexcept
     {
         CharPointer_UTF8 temp (*this);
         ++*this;
@@ -196,7 +196,7 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    void operator+= (int numToSkip) throw()
+    void operator+= (int numToSkip) noexcept
     {
         if (numToSkip < 0)
         {
@@ -211,13 +211,13 @@ public:
     }
 
     /** Moves this pointer backwards by the specified number of characters. */
-    void operator-= (int numToSkip) throw()
+    void operator-= (int numToSkip) noexcept
     {
         operator+= (-numToSkip);
     }
 
     /** Returns the character at a given character index from the start of the string. */
-    juce_wchar operator[] (int characterIndex) const throw()
+    juce_wchar operator[] (int characterIndex) const noexcept
     {
         CharPointer_UTF8 p (*this);
         p += characterIndex;
@@ -225,7 +225,7 @@ public:
     }
 
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
-    CharPointer_UTF8 operator+ (int numToSkip) const throw()
+    CharPointer_UTF8 operator+ (int numToSkip) const noexcept
     {
         CharPointer_UTF8 p (*this);
         p += numToSkip;
@@ -233,7 +233,7 @@ public:
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
-    CharPointer_UTF8 operator- (int numToSkip) const throw()
+    CharPointer_UTF8 operator- (int numToSkip) const noexcept
     {
         CharPointer_UTF8 p (*this);
         p += -numToSkip;
@@ -241,7 +241,7 @@ public:
     }
 
     /** Returns the number of characters in this string. */
-    size_t length() const throw()
+    size_t length() const noexcept
     {
         const CharType* d = data;
         size_t count = 0;
@@ -273,13 +273,13 @@ public:
     }
 
     /** Returns the number of characters in this string, or the given value, whichever is lower. */
-    size_t lengthUpTo (const size_t maxCharsToCount) const throw()
+    size_t lengthUpTo (const size_t maxCharsToCount) const noexcept
     {
         return CharacterFunctions::lengthUpTo (*this, maxCharsToCount);
     }
 
     /** Returns the number of characters in this string, or up to the given end pointer, whichever is lower. */
-    size_t lengthUpTo (const CharPointer_UTF8& end) const throw()
+    size_t lengthUpTo (const CharPointer_UTF8& end) const noexcept
     {
         return CharacterFunctions::lengthUpTo (*this, end);
     }
@@ -287,7 +287,7 @@ public:
     /** Returns the number of bytes that are used to represent this string.
         This includes the terminating null character.
     */
-    size_t sizeInBytes() const throw()
+    size_t sizeInBytes() const noexcept
     {
         return strlen (data) + 1;
     }
@@ -295,7 +295,7 @@ public:
     /** Returns the number of bytes that would be needed to represent the given
         unicode character in this encoding format.
     */
-    static size_t getBytesRequiredFor (const juce_wchar charToWrite) throw()
+    static size_t getBytesRequiredFor (const juce_wchar charToWrite) noexcept
     {
         size_t num = 1;
         const uint32 c = (uint32) charToWrite;
@@ -319,7 +319,7 @@ public:
         The value returned does NOT include the terminating null character.
     */
     template <class CharPointer>
-    static size_t getBytesRequiredFor (CharPointer text) throw()
+    static size_t getBytesRequiredFor (CharPointer text) noexcept
     {
         size_t count = 0;
         juce_wchar n;
@@ -331,13 +331,13 @@ public:
     }
 
     /** Returns a pointer to the null character that terminates this string. */
-    CharPointer_UTF8 findTerminatingNull() const throw()
+    CharPointer_UTF8 findTerminatingNull() const noexcept
     {
         return CharPointer_UTF8 (data + strlen (data));
     }
 
     /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-    void write (const juce_wchar charToWrite) throw()
+    void write (const juce_wchar charToWrite) noexcept
     {
         const uint32 c = (uint32) charToWrite;
 
@@ -363,20 +363,20 @@ public:
     }
 
     /** Writes a null character to this string (leaving the pointer's position unchanged). */
-    inline void writeNull() const throw()
+    inline void writeNull() const noexcept
     {
         *data = 0;
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
     template <typename CharPointer>
-    void writeAll (const CharPointer& src) throw()
+    void writeAll (const CharPointer& src) noexcept
     {
         CharacterFunctions::copyAll (*this, src);
     }
 
     /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    void writeAll (const CharPointer_UTF8& src) throw()
+    void writeAll (const CharPointer_UTF8& src) noexcept
     {
         const CharType* s = src.data;
 
@@ -392,7 +392,7 @@ public:
         to the destination buffer before stopping.
     */
     template <typename CharPointer>
-    int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) throw()
+    int writeWithDestByteLimit (const CharPointer& src, const int maxDestBytes) noexcept
     {
         return CharacterFunctions::copyWithDestByteLimit (*this, src, maxDestBytes);
     }
@@ -402,34 +402,34 @@ public:
         written to the destination buffer before stopping (including the terminating null).
     */
     template <typename CharPointer>
-    void writeWithCharLimit (const CharPointer& src, const int maxChars) throw()
+    void writeWithCharLimit (const CharPointer& src, const int maxChars) noexcept
     {
         CharacterFunctions::copyWithCharLimit (*this, src, maxChars);
     }
 
     /** Compares this string with another one. */
     template <typename CharPointer>
-    int compare (const CharPointer& other) const throw()
+    int compare (const CharPointer& other) const noexcept
     {
         return CharacterFunctions::compare (*this, other);
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareUpTo (const CharPointer& other, const int maxChars) const throw()
+    int compareUpTo (const CharPointer& other, const int maxChars) const noexcept
     {
         return CharacterFunctions::compareUpTo (*this, other, maxChars);
     }
 
     /** Compares this string with another one. */
     template <typename CharPointer>
-    int compareIgnoreCase (const CharPointer& other) const throw()
+    int compareIgnoreCase (const CharPointer& other) const noexcept
     {
         return CharacterFunctions::compareIgnoreCase (*this, other);
     }
 
     /** Compares this string with another one. */
-    int compareIgnoreCase (const CharPointer_UTF8& other) const throw()
+    int compareIgnoreCase (const CharPointer_UTF8& other) const noexcept
     {
        #if JUCE_WINDOWS
         return stricmp (data, other.data);
@@ -440,13 +440,13 @@ public:
 
     /** Compares this string with another one, up to a specified number of characters. */
     template <typename CharPointer>
-    int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const throw()
+    int compareIgnoreCaseUpTo (const CharPointer& other, const int maxChars) const noexcept
     {
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
-    int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, const int maxChars) const throw()
+    int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, const int maxChars) const noexcept
     {
        #if JUCE_WINDOWS
         return strnicmp (data, other.data, maxChars);
@@ -457,47 +457,47 @@ public:
 
     /** Returns the character index of a substring, or -1 if it isn't found. */
     template <typename CharPointer>
-    int indexOf (const CharPointer& stringToFind) const throw()
+    int indexOf (const CharPointer& stringToFind) const noexcept
     {
         return CharacterFunctions::indexOf (*this, stringToFind);
     }
 
     /** Returns the character index of a unicode character, or -1 if it isn't found. */
-    int indexOf (const juce_wchar charToFind) const throw()
+    int indexOf (const juce_wchar charToFind) const noexcept
     {
         return CharacterFunctions::indexOfChar (*this, charToFind);
     }
 
     /** Returns the character index of a unicode character, or -1 if it isn't found. */
-    int indexOf (const juce_wchar charToFind, const bool ignoreCase) const throw()
+    int indexOf (const juce_wchar charToFind, const bool ignoreCase) const noexcept
     {
         return ignoreCase ? CharacterFunctions::indexOfCharIgnoreCase (*this, charToFind)
                           : CharacterFunctions::indexOfChar (*this, charToFind);
     }
 
     /** Returns true if the first character of this string is whitespace. */
-    bool isWhitespace() const throw()       { return *data == ' ' || (*data <= 13 && *data >= 9); }
+    bool isWhitespace() const noexcept      { return *data == ' ' || (*data <= 13 && *data >= 9); }
     /** Returns true if the first character of this string is a digit. */
-    bool isDigit() const throw()            { return *data >= '0' && *data <= '9'; }
+    bool isDigit() const noexcept           { return *data >= '0' && *data <= '9'; }
     /** Returns true if the first character of this string is a letter. */
-    bool isLetter() const throw()           { return CharacterFunctions::isLetter (operator*()) != 0; }
+    bool isLetter() const noexcept          { return CharacterFunctions::isLetter (operator*()) != 0; }
     /** Returns true if the first character of this string is a letter or digit. */
-    bool isLetterOrDigit() const throw()    { return CharacterFunctions::isLetterOrDigit (operator*()) != 0; }
+    bool isLetterOrDigit() const noexcept   { return CharacterFunctions::isLetterOrDigit (operator*()) != 0; }
     /** Returns true if the first character of this string is upper-case. */
-    bool isUpperCase() const throw()        { return CharacterFunctions::isUpperCase (operator*()) != 0; }
+    bool isUpperCase() const noexcept       { return CharacterFunctions::isUpperCase (operator*()) != 0; }
     /** Returns true if the first character of this string is lower-case. */
-    bool isLowerCase() const throw()        { return CharacterFunctions::isLowerCase (operator*()) != 0; }
+    bool isLowerCase() const noexcept       { return CharacterFunctions::isLowerCase (operator*()) != 0; }
 
     /** Returns an upper-case version of the first character of this string. */
-    juce_wchar toUpperCase() const throw()  { return CharacterFunctions::toUpperCase (operator*()); }
+    juce_wchar toUpperCase() const noexcept { return CharacterFunctions::toUpperCase (operator*()); }
     /** Returns a lower-case version of the first character of this string. */
-    juce_wchar toLowerCase() const throw()  { return CharacterFunctions::toLowerCase (operator*()); }
+    juce_wchar toLowerCase() const noexcept { return CharacterFunctions::toLowerCase (operator*()); }
 
     /** Parses this string as a 32-bit integer. */
-    int getIntValue32() const throw()       { return atoi (data); }
+    int getIntValue32() const noexcept      { return atoi (data); }
 
     /** Parses this string as a 64-bit integer. */
-    int64 getIntValue64() const throw()
+    int64 getIntValue64() const noexcept
     {
        #if JUCE_LINUX || JUCE_ANDROID
         return atoll (data);
@@ -509,13 +509,13 @@ public:
     }
 
     /** Parses this string as a floating point double. */
-    double getDoubleValue() const throw()   { return CharacterFunctions::getDoubleValue (*this); }
+    double getDoubleValue() const noexcept  { return CharacterFunctions::getDoubleValue (*this); }
 
     /** Returns the first non-whitespace character in the string. */
-    CharPointer_UTF8 findEndOfWhitespace() const throw()    { return CharacterFunctions::findEndOfWhitespace (*this); }
+    CharPointer_UTF8 findEndOfWhitespace() const noexcept   { return CharacterFunctions::findEndOfWhitespace (*this); }
 
     /** Returns true if the given unicode character can be represented in this encoding. */
-    static bool canRepresent (juce_wchar character) throw()
+    static bool canRepresent (juce_wchar character) noexcept
     {
         return ((unsigned int) character) < (unsigned int) 0x10ffff;
     }

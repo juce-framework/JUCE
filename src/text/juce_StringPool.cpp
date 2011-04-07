@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-StringPool::StringPool() throw()    {}
+StringPool::StringPool() noexcept   {}
 StringPool::~StringPool()           {}
 
 namespace StringPoolHelpers
@@ -91,7 +91,7 @@ const String::CharPointerType StringPool::getPooledString (const String& s)
 
 const String::CharPointerType StringPool::getPooledString (const char* const s)
 {
-    if (s == 0 || *s == 0)
+    if (s == nullptr || *s == 0)
         return String::empty.getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
@@ -99,18 +99,18 @@ const String::CharPointerType StringPool::getPooledString (const char* const s)
 
 const String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
 {
-    if (s == 0 || *s == 0)
+    if (s == nullptr || *s == 0)
         return String::empty.getCharPointer();
 
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
-int StringPool::size() const throw()
+int StringPool::size() const noexcept
 {
     return strings.size();
 }
 
-const String::CharPointerType StringPool::operator[] (const int index) const throw()
+const String::CharPointerType StringPool::operator[] (const int index) const noexcept
 {
     return strings [index].getCharPointer();
 }

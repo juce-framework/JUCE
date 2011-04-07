@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ComponentBoundsConstrainer::ComponentBoundsConstrainer() throw()
+ComponentBoundsConstrainer::ComponentBoundsConstrainer() noexcept
     : minW (0),
       maxW (0x3fffffff),
       minH (0),
@@ -51,27 +51,27 @@ ComponentBoundsConstrainer::~ComponentBoundsConstrainer()
 }
 
 //==============================================================================
-void ComponentBoundsConstrainer::setMinimumWidth (const int minimumWidth) throw()
+void ComponentBoundsConstrainer::setMinimumWidth (const int minimumWidth) noexcept
 {
     minW = minimumWidth;
 }
 
-void ComponentBoundsConstrainer::setMaximumWidth (const int maximumWidth) throw()
+void ComponentBoundsConstrainer::setMaximumWidth (const int maximumWidth) noexcept
 {
     maxW = maximumWidth;
 }
 
-void ComponentBoundsConstrainer::setMinimumHeight (const int minimumHeight) throw()
+void ComponentBoundsConstrainer::setMinimumHeight (const int minimumHeight) noexcept
 {
     minH = minimumHeight;
 }
 
-void ComponentBoundsConstrainer::setMaximumHeight (const int maximumHeight) throw()
+void ComponentBoundsConstrainer::setMaximumHeight (const int maximumHeight) noexcept
 {
     maxH = maximumHeight;
 }
 
-void ComponentBoundsConstrainer::setMinimumSize (const int minimumWidth, const int minimumHeight) throw()
+void ComponentBoundsConstrainer::setMinimumSize (const int minimumWidth, const int minimumHeight) noexcept
 {
     jassert (maxW >= minimumWidth);
     jassert (maxH >= minimumHeight);
@@ -87,7 +87,7 @@ void ComponentBoundsConstrainer::setMinimumSize (const int minimumWidth, const i
         maxH = minH;
 }
 
-void ComponentBoundsConstrainer::setMaximumSize (const int maximumWidth, const int maximumHeight) throw()
+void ComponentBoundsConstrainer::setMaximumSize (const int maximumWidth, const int maximumHeight) noexcept
 {
     jassert (maximumWidth >= minW);
     jassert (maximumHeight >= minH);
@@ -100,7 +100,7 @@ void ComponentBoundsConstrainer::setMaximumSize (const int maximumWidth, const i
 void ComponentBoundsConstrainer::setSizeLimits (const int minimumWidth,
                                                 const int minimumHeight,
                                                 const int maximumWidth,
-                                                const int maximumHeight) throw()
+                                                const int maximumHeight) noexcept
 {
     jassert (maximumWidth >= minimumWidth);
     jassert (maximumHeight >= minimumHeight);
@@ -116,7 +116,7 @@ void ComponentBoundsConstrainer::setSizeLimits (const int minimumWidth,
 void ComponentBoundsConstrainer::setMinimumOnscreenAmounts (const int minimumWhenOffTheTop,
                                                             const int minimumWhenOffTheLeft,
                                                             const int minimumWhenOffTheBottom,
-                                                            const int minimumWhenOffTheRight) throw()
+                                                            const int minimumWhenOffTheRight) noexcept
 {
     minOffTop = minimumWhenOffTheTop;
     minOffLeft = minimumWhenOffTheLeft;
@@ -124,12 +124,12 @@ void ComponentBoundsConstrainer::setMinimumOnscreenAmounts (const int minimumWhe
     minOffRight = minimumWhenOffTheRight;
 }
 
-void ComponentBoundsConstrainer::setFixedAspectRatio (const double widthOverHeight) throw()
+void ComponentBoundsConstrainer::setFixedAspectRatio (const double widthOverHeight) noexcept
 {
     aspectRatio = jmax (0.0, widthOverHeight);
 }
 
-double ComponentBoundsConstrainer::getFixedAspectRatio() const throw()
+double ComponentBoundsConstrainer::getFixedAspectRatio() const noexcept
 {
     return aspectRatio;
 }
@@ -141,17 +141,17 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* const compone
                                                         const bool isStretchingBottom,
                                                         const bool isStretchingRight)
 {
-    jassert (component != 0);
+    jassert (component != nullptr);
 
     Rectangle<int> limits, bounds (targetBounds);
     BorderSize<int> border;
 
     Component* const parent = component->getParentComponent();
 
-    if (parent == 0)
+    if (parent == nullptr)
     {
         ComponentPeer* peer = component->getPeer();
-        if (peer != 0)
+        if (peer != nullptr)
             border = peer->getFrameSize();
 
         limits = Desktop::getInstance().getMonitorAreaContaining (bounds.getCentre());
@@ -184,7 +184,7 @@ void ComponentBoundsConstrainer::applyBoundsToComponent (Component* component,
 {
     Component::Positioner* const positioner = component->getPositioner();
 
-    if (positioner != 0)
+    if (positioner != nullptr)
         positioner->applyNewBounds (bounds);
     else
         component->setBounds (bounds);

@@ -55,13 +55,13 @@ public:
     /** Creates an empty array.
         @see ReferenceCountedObject, Array, OwnedArray
     */
-    ReferenceCountedArray() throw()
+    ReferenceCountedArray() noexcept
         : numUsed (0)
     {
     }
 
     /** Creates a copy of another array */
-    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
+    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
     {
         const ScopedLockType lock (other.getLock());
         numUsed = other.numUsed;
@@ -69,7 +69,7 @@ public:
         memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
-            if (data.elements[i] != 0)
+            if (data.elements[i] != nullptr)
                 data.elements[i]->incReferenceCount();
     }
 
@@ -77,7 +77,7 @@ public:
 
         Any existing objects in this array will first be released.
     */
-    ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
+    ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
     {
         if (this != &other)
         {
@@ -107,7 +107,7 @@ public:
         const ScopedLockType lock (getLock());
 
         while (numUsed > 0)
-            if (data.elements [--numUsed] != 0)
+            if (data.elements [--numUsed] != nullptr)
                 data.elements [numUsed]->decReferenceCount();
 
         jassert (numUsed == 0);
@@ -115,7 +115,7 @@ public:
     }
 
     /** Returns the current number of objects in the array. */
-    inline int size() const throw()
+    inline int size() const noexcept
     {
         return numUsed;
     }
@@ -128,11 +128,11 @@ public:
 
         @see getUnchecked
     */
-    inline const ObjectClassPtr operator[] (const int index) const throw()
+    inline const ObjectClassPtr operator[] (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         return isPositiveAndBelow (index, numUsed) ? data.elements [index]
-                                                   : static_cast <ObjectClass*> (0);
+                                                   : static_cast <ObjectClass*> (nullptr);
     }
 
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -140,7 +140,7 @@ public:
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
         it can be used when you're sure the index if always going to be legal.
     */
-    inline const ObjectClassPtr getUnchecked (const int index) const throw()
+    inline const ObjectClassPtr getUnchecked (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         jassert (isPositiveAndBelow (index, numUsed));
@@ -152,11 +152,11 @@ public:
         This will return a null pointer if the array's empty.
         @see getLast
     */
-    inline const ObjectClassPtr getFirst() const throw()
+    inline const ObjectClassPtr getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [0]
-                           : static_cast <ObjectClass*> (0);
+                           : static_cast <ObjectClass*> (nullptr);
     }
 
     /** Returns a pointer to the last object in the array.
@@ -164,18 +164,18 @@ public:
         This will return a null pointer if the array's empty.
         @see getFirst
     */
-    inline const ObjectClassPtr getLast() const throw()
+    inline const ObjectClassPtr getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
-                           : static_cast <ObjectClass*> (0);
+                           : static_cast <ObjectClass*> (nullptr);
     }
 
     //==============================================================================
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ObjectClass** begin() const throw()
+    inline ObjectClass** begin() const noexcept
     {
         return data.elements;
     }
@@ -183,7 +183,7 @@ public:
     /** Returns a pointer to the element which follows the last element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ObjectClass** end() const throw()
+    inline ObjectClass** end() const noexcept
     {
         return data.elements + numUsed;
     }
@@ -194,7 +194,7 @@ public:
         @param objectToLookFor    the object to look for
         @returns                  the index at which the object was found, or -1 if it's not found
     */
-    int indexOf (const ObjectClass* const objectToLookFor) const throw()
+    int indexOf (const ObjectClass* const objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
         ObjectClass** e = data.elements.getData();
@@ -216,7 +216,7 @@ public:
         @param objectToLookFor      the object to look for
         @returns                    true if the object is in the array
     */
-    bool contains (const ObjectClass* const objectToLookFor) const throw()
+    bool contains (const ObjectClass* const objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
         ObjectClass** e = data.elements.getData();
@@ -240,13 +240,13 @@ public:
         @param newObject       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addArray
     */
-    void add (ObjectClass* const newObject) throw()
+    void add (ObjectClass* const newObject) noexcept
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
         data.elements [numUsed++] = newObject;
 
-        if (newObject != 0)
+        if (newObject != nullptr)
             newObject->incReferenceCount();
     }
 
@@ -264,7 +264,7 @@ public:
         @see add, addSorted, addIfNotAlreadyThere, set
     */
     void insert (int indexToInsertAt,
-                 ObjectClass* const newObject) throw()
+                 ObjectClass* const newObject) noexcept
     {
         if (indexToInsertAt >= 0)
         {
@@ -283,7 +283,7 @@ public:
 
             *e = newObject;
 
-            if (newObject != 0)
+            if (newObject != nullptr)
                 newObject->incReferenceCount();
 
             ++numUsed;
@@ -301,7 +301,7 @@ public:
 
         @param newObject   the new object to add to the array
     */
-    void addIfNotAlreadyThere (ObjectClass* const newObject) throw()
+    void addIfNotAlreadyThere (ObjectClass* const newObject) noexcept
     {
         const ScopedLockType lock (getLock());
         if (! contains (newObject))
@@ -327,12 +327,12 @@ public:
         {
             const ScopedLockType lock (getLock());
 
-            if (newObject != 0)
+            if (newObject != nullptr)
                 newObject->incReferenceCount();
 
             if (indexToChange < numUsed)
             {
-                if (data.elements [indexToChange] != 0)
+                if (data.elements [indexToChange] != nullptr)
                     data.elements [indexToChange]->decReferenceCount();
 
                 data.elements [indexToChange] = newObject;
@@ -356,7 +356,7 @@ public:
     */
     void addArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& arrayToAddFrom,
                    int startIndex = 0,
-                   int numElementsToAdd = -1) throw()
+                   int numElementsToAdd = -1) noexcept
     {
         const ScopedLockType lock1 (arrayToAddFrom.getLock());
 
@@ -395,7 +395,7 @@ public:
         @see add, sort
     */
     template <class ElementComparator>
-    int addSorted (ElementComparator& comparator, ObjectClass* newObject) throw()
+    int addSorted (ElementComparator& comparator, ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
         const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
@@ -410,7 +410,7 @@ public:
     */
     template <class ElementComparator>
     void addOrReplaceSorted (ElementComparator& comparator,
-                             ObjectClass* newObject) throw()
+                             ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
         const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
@@ -443,7 +443,7 @@ public:
         {
             ObjectClass** const e = data.elements + indexToRemove;
 
-            if (*e != 0)
+            if (*e != nullptr)
                 (*e)->decReferenceCount();
 
             --numUsed;
@@ -475,7 +475,7 @@ public:
         {
             ObjectClass** const e = data.elements + indexToRemove;
 
-            if (*e != 0)
+            if (*e != nullptr)
             {
                 removedItem = *e;
                 (*e)->decReferenceCount();
@@ -536,10 +536,10 @@ public:
             int i;
             for (i = start; i < end; ++i)
             {
-                if (data.elements[i] != 0)
+                if (data.elements[i] != nullptr)
                 {
                     data.elements[i]->decReferenceCount();
-                    data.elements[i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                    data.elements[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
 
@@ -584,7 +584,7 @@ public:
         otherwise the two objects at these positions will be exchanged.
     */
     void swap (const int index1,
-               const int index2) throw()
+               const int index2) noexcept
     {
         const ScopedLockType lock (getLock());
 
@@ -610,7 +610,7 @@ public:
                                 is less than zero, it will be moved to the end of the array
     */
     void move (const int currentIndex,
-               int newIndex) throw()
+               int newIndex) noexcept
     {
         if (currentIndex != newIndex)
         {
@@ -647,7 +647,7 @@ public:
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    void swapWithArray (ReferenceCountedArray& otherArray) throw()
+    void swapWithArray (ReferenceCountedArray& otherArray) noexcept
     {
         const ScopedLockType lock1 (getLock());
         const ScopedLockType lock2 (otherArray.getLock());
@@ -661,7 +661,7 @@ public:
 
         @returns true only if the other array contains the same objects in the same order
     */
-    bool operator== (const ReferenceCountedArray& other) const throw()
+    bool operator== (const ReferenceCountedArray& other) const noexcept
     {
         const ScopedLockType lock2 (other.getLock());
         const ScopedLockType lock1 (getLock());
@@ -680,7 +680,7 @@ public:
 
         @see operator==
     */
-    bool operator!= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
+    bool operator!= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const noexcept
     {
         return ! operator== (other);
     }
@@ -714,7 +714,7 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const throw()
+               const bool retainOrderOfEquivalentItems = false) const noexcept
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
@@ -730,7 +730,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads() throw()
+    void minimiseStorageOverheads() noexcept
     {
         const ScopedLockType lock (getLock());
         data.shrinkToNoMoreThan (numUsed);
@@ -741,7 +741,7 @@ public:
         To lock, you can call getLock().enter() and getLock().exit(), or preferably use
         an object of ScopedLockType as an RAII lock for it.
     */
-    inline const TypeOfCriticalSectionToUse& getLock() const throw()       { return data; }
+    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return data; }
 
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;

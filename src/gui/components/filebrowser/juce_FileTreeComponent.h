@@ -81,7 +81,7 @@ public:
 
     /** Returns the last value that was set by setDragAndDropDescription().
     */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+    const String& getDragAndDropDescription() const noexcept     { return dragAndDropDescription; }
 
 private:
     //==============================================================================

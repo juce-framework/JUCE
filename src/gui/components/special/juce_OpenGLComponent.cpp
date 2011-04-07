@@ -106,7 +106,7 @@ bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const
 //==============================================================================
 static Array<OpenGLContext*> knownContexts;
 
-OpenGLContext::OpenGLContext() throw()
+OpenGLContext::OpenGLContext() noexcept
 {
     knownContexts.add (this);
 }
@@ -172,7 +172,7 @@ private:
 //==============================================================================
 OpenGLComponent::OpenGLComponent (const OpenGLType type_)
     : type (type_),
-      contextToShareListsWith (0),
+      contextToShareListsWith (nullptr),
       needToUpdateViewport (true)
 {
     setOpaque (true);
@@ -182,13 +182,13 @@ OpenGLComponent::OpenGLComponent (const OpenGLType type_)
 OpenGLComponent::~OpenGLComponent()
 {
     deleteContext();
-    componentWatcher = 0;
+    componentWatcher = nullptr;
 }
 
 void OpenGLComponent::deleteContext()
 {
     const ScopedLock sl (contextLock);
-    context = 0;
+    context = nullptr;
 }
 
 void OpenGLComponent::updateContextPosition()
@@ -199,11 +199,11 @@ void OpenGLComponent::updateContextPosition()
     {
         Component* const topComp = getTopLevelComponent();
 
-        if (topComp->getPeer() != 0)
+        if (topComp->getPeer() != nullptr)
         {
             const ScopedLock sl (contextLock);
 
-            if (context != 0)
+            if (context != nullptr)
                 context->updateWindowPosition (getScreenX() - topComp->getScreenX(),
                                                getScreenY() - topComp->getScreenY(),
                                                getWidth(),
@@ -218,7 +218,7 @@ const OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
     OpenGLPixelFormat pf;
 
     const ScopedLock sl (contextLock);
-    if (context != 0)
+    if (context != nullptr)
         pf = context->getPixelFormat();
 
     return pf;
@@ -246,15 +246,15 @@ void OpenGLComponent::shareWith (OpenGLContext* c)
 
 bool OpenGLComponent::makeCurrentContextActive()
 {
-    if (context == 0)
+    if (context == nullptr)
     {
         const ScopedLock sl (contextLock);
 
-        if (isShowing() && getTopLevelComponent()->getPeer() != 0)
+        if (isShowing() && getTopLevelComponent()->getPeer() != nullptr)
         {
             context = createContext();
 
-            if (context != 0)
+            if (context != nullptr)
             {
                 updateContextPosition();
 
@@ -264,23 +264,23 @@ bool OpenGLComponent::makeCurrentContextActive()
         }
     }
 
-    return context != 0 && context->makeActive();
+    return context != nullptr && context->makeActive();
 }
 
 void OpenGLComponent::makeCurrentContextInactive()
 {
-    if (context != 0)
+    if (context != nullptr)
         context->makeInactive();
 }
 
-bool OpenGLComponent::isActiveContext() const throw()
+bool OpenGLComponent::isActiveContext() const noexcept
 {
-    return context != 0 && context->isActive();
+    return context != nullptr && context->isActive();
 }
 
 void OpenGLComponent::swapBuffers()
 {
-    if (context != 0)
+    if (context != nullptr)
         context->swapBuffers();
 }
 
@@ -290,7 +290,7 @@ void OpenGLComponent::paint (Graphics&)
     {
         ComponentPeer* const peer = getPeer();
 
-        if (peer != 0)
+        if (peer != nullptr)
         {
             const Point<int> topLeft (getScreenPosition() - peer->getScreenPosition());
             peer->addMaskedRegion (topLeft.getX(), topLeft.getY(), getWidth(), getHeight());
@@ -321,7 +321,7 @@ void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
     Component::internalRepaint (x, y, w, h);
 
-    if (context != 0)
+    if (context != nullptr)
         context->repaint();
 }
 

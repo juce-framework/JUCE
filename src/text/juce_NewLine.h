@@ -44,7 +44,7 @@ public:
     /** Returns the default new-line sequence that the library uses.
         @see OutputStream::setNewLineString()
     */
-    static const char* getDefault() throw()         { return "\r\n"; }
+    static const char* getDefault() noexcept        { return "\r\n"; }
 
     /** Returns the default new-line sequence that the library uses.
         @see getDefault()

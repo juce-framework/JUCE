@@ -260,6 +260,22 @@
  #define JUCE_MODAL_LOOPS_PERMITTED 1
 #endif
 
+//==============================================================================
+// Here, we'll check for C++2011 compiler support, and if it's not available, define
+// a few workarounds, so that we can still use a few of the newer language features.
+#if defined (__GXX_EXPERIMENTAL_CXX0X__) && defined (__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+ #define JUCE_COMPILER_SUPPORTS_CXX2011 1
+#endif
 
+#if defined (__clang__) && defined (__has_feature)
+ #if __has_feature (cxx_noexcept) // (NB: do not add this test to the previous line)
+  #define JUCE_COMPILER_SUPPORTS_CXX2011 1
+ #endif
+#endif
+
+#if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_CXX2011)
+ #define noexcept  throw()  // for c++98 compilers, we can fake these newer language features.
+ #define nullptr   (0)
+#endif
 
 #endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__

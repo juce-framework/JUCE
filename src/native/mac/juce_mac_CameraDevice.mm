@@ -74,33 +74,33 @@ public:
 
         NSArray* devs = [QTCaptureDevice inputDevicesWithMediaType: QTMediaTypeVideo];
         device = (QTCaptureDevice*) [devs objectAtIndex: index];
-        input = 0;
-        audioInput = 0;
-        audioDevice = 0;
-        fileOutput = 0;
-        imageOutput = 0;
+        input = nil;
+        audioInput = nil;
+        audioDevice = nil;
+        fileOutput = nil;
+        imageOutput = nil;
         callbackDelegate = [[QTCaptureCallbackDelegate alloc] initWithOwner: owner
                                                                 internalDev: this];
 
-        NSError* err = 0;
+        NSError* err = nil;
         [device retain];
         [device open: &err];
 
-        if (err == 0)
+        if (err == nil)
         {
             input = [[QTCaptureDeviceInput alloc] initWithDevice: device];
             audioInput = [[QTCaptureDeviceInput alloc] initWithDevice: device];
 
             [session addInput: input error: &err];
 
-            if (err == 0)
+            if (err == nil)
             {
                 resetFile();
 
                 imageOutput = [[QTCaptureDecompressedVideoOutput alloc] init];
                 [imageOutput setDelegate: callbackDelegate];
 
-                if (err == 0)
+                if (err == nil)
                 {
                     [session startRunning];
                     return;
@@ -136,9 +136,9 @@ public:
 
         [session removeInput: audioInput];
         [audioInput release];
-        audioInput = 0;
+        audioInput = nil;
         [audioDevice release];
-        audioDevice = 0;
+        audioDevice = nil;
 
         [fileOutput setDelegate: callbackDelegate];
     }
@@ -153,7 +153,7 @@ public:
         else
             audioDevice = nil;
 
-        if (audioDevice != 0)
+        if (audioDevice != nil)
         {
             audioInput = [[QTCaptureDeviceInput alloc] initWithDevice: audioDevice];
             [session addInput: audioInput error: &err];
@@ -194,7 +194,7 @@ public:
         {
             CameraDevice::Listener* const l = listeners[i];
 
-            if (l != 0)
+            if (l != nullptr)
                 l->imageReceived (image);
         }
     }
@@ -315,7 +315,7 @@ CameraDevice::~CameraDevice()
 {
     stopRecording();
     delete static_cast <QTCameraDeviceInteral*> (internal);
-    internal = 0;
+    internal = nullptr;
 }
 
 Component* CameraDevice::createViewerComponent()
@@ -347,10 +347,10 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
     for (;;)
     {
         QTCaptureConnection* connection = [connectionEnumerator nextObject];
-        if (connection == 0)
+        if (connection == nil)
             break;
 
-        QTCompressionOptions* options = 0;
+        QTCompressionOptions* options = nil;
         NSString* mediaType = [connection mediaType];
 
         if ([mediaType isEqualToString: QTMediaTypeVideo])
@@ -387,13 +387,13 @@ void CameraDevice::stopRecording()
 
 void CameraDevice::addListener (Listener* listenerToAdd)
 {
-    if (listenerToAdd != 0)
+    if (listenerToAdd != nullptr)
         static_cast <QTCameraDeviceInteral*> (internal)->addListener (listenerToAdd);
 }
 
 void CameraDevice::removeListener (Listener* listenerToRemove)
 {
-    if (listenerToRemove != 0)
+    if (listenerToRemove != nullptr)
         static_cast <QTCameraDeviceInteral*> (internal)->removeListener (listenerToRemove);
 }
 

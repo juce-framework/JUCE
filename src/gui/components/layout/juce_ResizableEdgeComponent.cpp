@@ -49,7 +49,7 @@ ResizableEdgeComponent::~ResizableEdgeComponent()
 }
 
 //==============================================================================
-bool ResizableEdgeComponent::isVertical() const throw()
+bool ResizableEdgeComponent::isVertical() const noexcept
 {
     return edge == leftEdge || edge == rightEdge;
 }
@@ -62,7 +62,7 @@ void ResizableEdgeComponent::paint (Graphics& g)
 
 void ResizableEdgeComponent::mouseDown (const MouseEvent&)
 {
-    if (component == 0)
+    if (component == nullptr)
     {
         jassertfalse; // You've deleted the component that this resizer was supposed to be using!
         return;
@@ -70,13 +70,13 @@ void ResizableEdgeComponent::mouseDown (const MouseEvent&)
 
     originalBounds = component->getBounds();
 
-    if (constrainer != 0)
+    if (constrainer != nullptr)
         constrainer->resizeStart();
 }
 
 void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
 {
-    if (component == 0)
+    if (component == nullptr)
     {
         jassertfalse; // You've deleted the component that this resizer was supposed to be using!
         return;
@@ -93,7 +93,7 @@ void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
         default:            jassertfalse; break;
     }
 
-    if (constrainer != 0)
+    if (constrainer != nullptr)
     {
         constrainer->setBoundsForComponent (component, bounds,
                                             edge == topEdge,
@@ -105,7 +105,7 @@ void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
     {
         Component::Positioner* const positioner = component->getPositioner();
 
-        if (positioner != 0)
+        if (positioner != nullptr)
             positioner->applyNewBounds (bounds);
         else
             component->setBounds (bounds);
@@ -114,7 +114,7 @@ void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
 
 void ResizableEdgeComponent::mouseUp (const MouseEvent&)
 {
-    if (constrainer != 0)
+    if (constrainer != nullptr)
         constrainer->resizeEnd();
 }
 

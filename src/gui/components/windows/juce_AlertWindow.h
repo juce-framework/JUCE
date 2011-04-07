@@ -80,7 +80,7 @@ public:
     AlertWindow (const String& title,
                  const String& message,
                  AlertIconType iconType,
-                 Component* associatedComponent = 0);
+                 Component* associatedComponent = nullptr);
 
     /** Destroys the AlertWindow */
     ~AlertWindow();
@@ -88,7 +88,7 @@ public:
     //==============================================================================
     /** Returns the type of alert icon that was specified when the window
         was created. */
-    AlertIconType getAlertType() const throw()              { return alertIconType; }
+    AlertIconType getAlertType() const noexcept             { return alertIconType; }
 
     //==============================================================================
     /** Changes the dialog box's message.
@@ -253,7 +253,7 @@ public:
                                               const String& title,
                                               const String& message,
                                               const String& buttonText = String::empty,
-                                              Component* associatedComponent = 0);
+                                              Component* associatedComponent = nullptr);
    #endif
 
     /** Shows a dialog box that just has a message and a single button to get rid of it.
@@ -278,7 +278,7 @@ public:
                                                    const String& title,
                                                    const String& message,
                                                    const String& buttonText = String::empty,
-                                                   Component* associatedComponent = 0);
+                                                   Component* associatedComponent = nullptr);
 
     /** Shows a dialog box with two buttons.
 
@@ -321,8 +321,8 @@ public:
                                             #if JUCE_MODAL_LOOPS_PERMITTED
                                                const String& button1Text = String::empty,
                                                const String& button2Text = String::empty,
-                                               Component* associatedComponent = 0,
-                                               ModalComponentManager::Callback* callback = 0);
+                                               Component* associatedComponent = nullptr,
+                                               ModalComponentManager::Callback* callback = nullptr);
                                             #else
                                                const String& button1Text,
                                                const String& button2Text,
@@ -376,8 +376,8 @@ public:
                                                  const String& button1Text = String::empty,
                                                  const String& button2Text = String::empty,
                                                  const String& button3Text = String::empty,
-                                                 Component* associatedComponent = 0,
-                                                 ModalComponentManager::Callback* callback = 0);
+                                                 Component* associatedComponent = nullptr,
+                                                 ModalComponentManager::Callback* callback = nullptr);
                                                #else
                                                  const String& button1Text,
                                                  const String& button2Text,

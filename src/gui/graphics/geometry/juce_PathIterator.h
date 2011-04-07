@@ -91,7 +91,7 @@ public:
     int subPathIndex;
 
     /** Returns true if the current segment is the last in the current sub-path. */
-    bool isLastInSubpath() const throw();
+    bool isLastInSubpath() const noexcept;
 
     /** This is the default value that should be used for the tolerance value (see the constructor parameters). */
     static const float defaultTolerance;

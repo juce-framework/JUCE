@@ -299,7 +299,7 @@ public:
 
     void attach()
     {
-        JNIEnv* env = 0;
+        JNIEnv* env = nullptr;
         jvm->AttachCurrentThread (&env, 0);
 
         if (env != 0)
@@ -318,7 +318,7 @@ public:
                 threads[i] = 0;
     }
 
-    JNIEnv* get() const throw()
+    JNIEnv* get() const noexcept
     {
         const pthread_t thisThread = pthread_self();
 
@@ -368,7 +368,7 @@ struct AndroidThreadScope
     ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
 };
 
-static inline JNIEnv* getEnv() throw()
+static inline JNIEnv* getEnv() noexcept
 {
     return threadLocalJNIEnvHolder.get();
 }
@@ -378,7 +378,7 @@ static inline JNIEnv* getEnv() throw()
 class GlobalRef
 {
 public:
-    inline GlobalRef() throw()
+    inline GlobalRef() noexcept
         : obj (0)
     {
     }
@@ -415,8 +415,8 @@ public:
     }
 
     //==============================================================================
-    inline operator jobject() const throw()     { return obj; }
-    inline jobject get() const throw()          { return obj; }
+    inline operator jobject() const noexcept    { return obj; }
+    inline jobject get() const noexcept         { return obj; }
 
     //==============================================================================
     #define DECLARE_CALL_TYPE_METHOD(returnType, typeName) \
@@ -463,12 +463,12 @@ template <typename JavaType>
 class LocalRef
 {
 public:
-    explicit inline LocalRef (JavaType obj_) throw()
+    explicit inline LocalRef (JavaType obj_) noexcept
         : obj (obj_)
     {
     }
 
-    inline LocalRef (const LocalRef& other) throw()
+    inline LocalRef (const LocalRef& other) noexcept
         : obj (retain (other.obj))
     {
     }
@@ -492,8 +492,8 @@ public:
         return *this;
     }
 
-    inline operator JavaType() const throw()    { return obj; }
-    inline JavaType get() const throw()         { return obj; }
+    inline operator JavaType() const noexcept   { return obj; }
+    inline JavaType get() const noexcept        { return obj; }
 
 private:
     JavaType obj;

@@ -106,7 +106,7 @@ public:
         recognised as the same, only MouseCursor objects that have been
         copied from the same object.
     */
-    bool operator== (const MouseCursor& other) const throw();
+    bool operator== (const MouseCursor& other) const noexcept;
 
     /** Checks whether two mouse cursors are the same.
 
@@ -114,7 +114,7 @@ public:
         recognised as the same, only MouseCursor objects that have been
         copied from the same object.
     */
-    bool operator!= (const MouseCursor& other) const throw();
+    bool operator!= (const MouseCursor& other) const noexcept;
 
     //==============================================================================
     /** Makes the system show its default 'busy' cursor.
@@ -149,7 +149,7 @@ private:
     friend class MouseInputSourceInternal;
     void showInWindow (ComponentPeer* window) const;
     void showInAllWindows() const;
-    void* getHandle() const throw();
+    void* getHandle() const noexcept;
 
     static void* createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
     static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);

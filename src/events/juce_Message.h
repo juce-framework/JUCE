@@ -48,7 +48,7 @@ public:
 
         The class's variables will also be left uninitialised.
     */
-    Message() throw();
+    Message() noexcept;
 
     /** Creates a message object, filling in the member variables.
 
@@ -58,7 +58,7 @@ public:
     Message (int intParameter1,
              int intParameter2,
              int intParameter3,
-             void* pointerParameter) throw();
+             void* pointerParameter) noexcept;
 
     /** Destructor. */
     virtual ~Message();

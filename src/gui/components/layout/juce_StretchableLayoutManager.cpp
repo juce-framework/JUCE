@@ -54,7 +54,7 @@ void StretchableLayoutManager::setItemLayout (const int itemIndex,
 {
     ItemLayoutProperties* layout = getInfoFor (itemIndex);
 
-    if (layout == 0)
+    if (layout == nullptr)
     {
         layout = new ItemLayoutProperties();
         layout->itemIndex = itemIndex;
@@ -80,7 +80,7 @@ bool StretchableLayoutManager::getItemLayout (const int itemIndex,
 {
     const ItemLayoutProperties* const layout = getInfoFor (itemIndex);
 
-    if (layout != 0)
+    if (layout != nullptr)
     {
         minimumSize = layout->minSize;
         maximumSize = layout->maxSize;
@@ -107,7 +107,7 @@ int StretchableLayoutManager::getItemCurrentPosition (const int itemIndex) const
     {
         const ItemLayoutProperties* const layout = getInfoFor (i);
 
-        if (layout != 0)
+        if (layout != nullptr)
             pos += layout->currentSize;
     }
 
@@ -118,7 +118,7 @@ int StretchableLayoutManager::getItemCurrentAbsoluteSize (const int itemIndex) c
 {
     const ItemLayoutProperties* const layout = getInfoFor (itemIndex);
 
-    if (layout != 0)
+    if (layout != nullptr)
         return layout->currentSize;
 
     return 0;
@@ -128,7 +128,7 @@ double StretchableLayoutManager::getItemCurrentRelativeSize (const int itemIndex
 {
     const ItemLayoutProperties* const layout = getInfoFor (itemIndex);
 
-    if (layout != 0)
+    if (layout != nullptr)
         return -layout->currentSize / (double) totalSize;
 
     return 0;
@@ -175,11 +175,11 @@ void StretchableLayoutManager::layOutComponents (Component** const components,
     {
         const ItemLayoutProperties* const layout = getInfoFor (i);
 
-        if (layout != 0)
+        if (layout != nullptr)
         {
             Component* const c = components[i];
 
-            if (c != 0)
+            if (c != nullptr)
             {
                 if (i == numComponents - 1)
                 {

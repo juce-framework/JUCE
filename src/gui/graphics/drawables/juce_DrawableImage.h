@@ -58,7 +58,7 @@ public:
     void setOpacity (float newOpacity);
 
     /** Returns the image's opacity. */
-    float getOpacity() const throw()                            { return opacity; }
+    float getOpacity() const noexcept                           { return opacity; }
 
     /** Sets a colour to draw over the image's alpha channel.
 
@@ -72,7 +72,7 @@ public:
     void setOverlayColour (const Colour& newOverlayColour);
 
     /** Returns the overlay colour. */
-    const Colour& getOverlayColour() const throw()              { return overlayColour; }
+    const Colour& getOverlayColour() const noexcept             { return overlayColour; }
 
     /** Sets the bounding box within which the image should be displayed. */
     void setBoundingBox (const RelativeParallelogram& newBounds);
@@ -81,7 +81,7 @@ public:
         coordinate space when rendering this object.
         @see setTransform
     */
-    const RelativeParallelogram& getBoundingBox() const throw()         { return bounds; }
+    const RelativeParallelogram& getBoundingBox() const noexcept        { return bounds; }
 
     //==============================================================================
     /** @internal */

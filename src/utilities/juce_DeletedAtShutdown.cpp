@@ -69,7 +69,7 @@ void DeletedAtShutdown::deleteAll()
             {
                 const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
                 if (! getObjects().contains (deletee))
-                    deletee = 0;
+                    deletee = nullptr;
             }
 
             delete deletee;

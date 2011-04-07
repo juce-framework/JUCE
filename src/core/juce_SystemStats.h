@@ -116,19 +116,19 @@ public:
     static const String getCpuVendor();
 
     /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX() throw()                { return cpuFlags.hasMMX; }
+    static bool hasMMX() noexcept               { return cpuFlags.hasMMX; }
 
     /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE() throw()                { return cpuFlags.hasSSE; }
+    static bool hasSSE() noexcept               { return cpuFlags.hasSSE; }
 
     /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2() throw()               { return cpuFlags.hasSSE2; }
+    static bool hasSSE2() noexcept              { return cpuFlags.hasSSE2; }
 
     /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow() throw()              { return cpuFlags.has3DNow; }
+    static bool has3DNow() noexcept             { return cpuFlags.has3DNow; }
 
     /** Returns the number of CPUs. */
-    static int getNumCpus() throw()             { return cpuFlags.numCpus; }
+    static int getNumCpus() noexcept            { return cpuFlags.numCpus; }
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.

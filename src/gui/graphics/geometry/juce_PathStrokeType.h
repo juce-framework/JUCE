@@ -74,16 +74,16 @@ public:
     */
     PathStrokeType (float strokeThickness,
                     JointStyle jointStyle = mitered,
-                    EndCapStyle endStyle = butt) throw();
+                    EndCapStyle endStyle = butt) noexcept;
 
     /** Createes a copy of another stroke type. */
-    PathStrokeType (const PathStrokeType& other) throw();
+    PathStrokeType (const PathStrokeType& other) noexcept;
 
     /** Copies another stroke onto this one. */
-    PathStrokeType& operator= (const PathStrokeType& other) throw();
+    PathStrokeType& operator= (const PathStrokeType& other) noexcept;
 
     /** Destructor. */
-    ~PathStrokeType() throw();
+    ~PathStrokeType() noexcept;
 
     //==============================================================================
     /** Applies this stroke type to a path and returns the resultant stroke as another Path.
@@ -168,29 +168,29 @@ public:
 
     //==============================================================================
     /** Returns the stroke thickness. */
-    float getStrokeThickness() const throw()                    { return thickness; }
+    float getStrokeThickness() const noexcept                   { return thickness; }
 
     /** Sets the stroke thickness. */
-    void setStrokeThickness (float newThickness) throw()        { thickness = newThickness; }
+    void setStrokeThickness (float newThickness) noexcept       { thickness = newThickness; }
 
     /** Returns the joint style. */
-    JointStyle getJointStyle() const throw()                    { return jointStyle; }
+    JointStyle getJointStyle() const noexcept                   { return jointStyle; }
 
     /** Sets the joint style. */
-    void setJointStyle (JointStyle newStyle) throw()            { jointStyle = newStyle; }
+    void setJointStyle (JointStyle newStyle) noexcept           { jointStyle = newStyle; }
 
     /** Returns the end-cap style. */
-    EndCapStyle getEndStyle() const throw()                     { return endStyle; }
+    EndCapStyle getEndStyle() const noexcept                    { return endStyle; }
 
     /** Sets the end-cap style. */
-    void setEndStyle (EndCapStyle newStyle) throw()             { endStyle = newStyle; }
+    void setEndStyle (EndCapStyle newStyle) noexcept            { endStyle = newStyle; }
 
     //==============================================================================
     /** Compares the stroke thickness, joint and end styles of two stroke types. */
-    bool operator== (const PathStrokeType& other) const throw();
+    bool operator== (const PathStrokeType& other) const noexcept;
 
     /** Compares the stroke thickness, joint and end styles of two stroke types. */
-    bool operator!= (const PathStrokeType& other) const throw();
+    bool operator!= (const PathStrokeType& other) const noexcept;
 
 private:
     //==============================================================================

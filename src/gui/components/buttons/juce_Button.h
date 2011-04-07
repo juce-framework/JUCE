@@ -85,7 +85,7 @@ public:
 
         @see isOver
     */
-    bool isDown() const throw();
+    bool isDown() const noexcept;
 
     /** Returns true if the mouse is currently over the button.
 
@@ -93,7 +93,7 @@ public:
 
         @see isDown
     */
-    bool isOver() const throw();
+    bool isOver() const noexcept;
 
     //==============================================================================
     /** A button has an on/off state associated with it, and this changes that.
@@ -122,7 +122,7 @@ public:
 
         @see setToggleState
     */
-    bool getToggleState() const throw()                         { return isOn.getValue(); }
+    bool getToggleState() const noexcept                        { return isOn.getValue(); }
 
     /** Returns the Value object that represents the botton's toggle state.
         You can use this Value object to connect the button's state to external values or setters,
@@ -138,13 +138,13 @@ public:
         If set to true, then before the clicked() callback occurs, the toggle-state
         of the button is flipped.
     */
-    void setClickingTogglesState (bool shouldToggle) throw();
+    void setClickingTogglesState (bool shouldToggle) noexcept;
 
     /** Returns true if this button is set to be an automatic toggle-button.
 
         This returns the last value that was passed to setClickingTogglesState().
     */
-    bool getClickingTogglesState() const throw();
+    bool getClickingTogglesState() const noexcept;
 
     //==============================================================================
     /** Enables the button to act as a member of a mutually-exclusive group
@@ -170,7 +170,7 @@ public:
 
         (See setRadioGroupId() for an explanation of this).
     */
-    int getRadioGroupId() const throw()                         { return radioGroupId; }
+    int getRadioGroupId() const noexcept                        { return radioGroupId; }
 
     //==============================================================================
     /**
@@ -233,7 +233,7 @@ public:
 
     /** Returns the command ID that was set by setCommandToTrigger().
     */
-    int getCommandID() const throw()                { return commandID; }
+    int getCommandID() const noexcept               { return commandID; }
 
     //==============================================================================
     /** Assigns a shortcut key to trigger the button.
@@ -275,7 +275,7 @@ public:
     */
     void setRepeatSpeed (int initialDelayInMillisecs,
                          int repeatDelayInMillisecs,
-                         int minimumDelayInMillisecs = -1) throw();
+                         int minimumDelayInMillisecs = -1) noexcept;
 
     /** Sets whether the button click should happen when the mouse is pressed or released.
 
@@ -286,12 +286,12 @@ public:
         This is useful if the button is being used to show a pop-up menu, as it allows
         the click to be used as a drag onto the menu.
     */
-    void setTriggeredOnMouseDown (bool isTriggeredOnMouseDown) throw();
+    void setTriggeredOnMouseDown (bool isTriggeredOnMouseDown) noexcept;
 
     /** Returns the number of milliseconds since the last time the button
         went into the 'down' state.
     */
-    uint32 getMillisecondsSinceButtonDown() const throw();
+    uint32 getMillisecondsSinceButtonDown() const noexcept;
 
     //==============================================================================
     /** Sets the tooltip for this button.
@@ -329,27 +329,27 @@ public:
     void setConnectedEdges (int connectedEdgeFlags);
 
     /** Returns the set of flags passed into setConnectedEdges(). */
-    int getConnectedEdgeFlags() const throw()                   { return connectedEdgeFlags; }
+    int getConnectedEdgeFlags() const noexcept                  { return connectedEdgeFlags; }
 
     /** Indicates whether the button adjoins another one on its left edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnLeft() const throw()                      { return (connectedEdgeFlags & ConnectedOnLeft) != 0; }
+    bool isConnectedOnLeft() const noexcept                     { return (connectedEdgeFlags & ConnectedOnLeft) != 0; }
 
     /** Indicates whether the button adjoins another one on its right edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnRight() const throw()                     { return (connectedEdgeFlags & ConnectedOnRight) != 0; }
+    bool isConnectedOnRight() const noexcept                    { return (connectedEdgeFlags & ConnectedOnRight) != 0; }
 
     /** Indicates whether the button adjoins another one on its top edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnTop() const throw()                       { return (connectedEdgeFlags & ConnectedOnTop) != 0; }
+    bool isConnectedOnTop() const noexcept                      { return (connectedEdgeFlags & ConnectedOnTop) != 0; }
 
     /** Indicates whether the button adjoins another one on its bottom edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnBottom() const throw()                    { return (connectedEdgeFlags & ConnectedOnBottom) != 0; }
+    bool isConnectedOnBottom() const noexcept                   { return (connectedEdgeFlags & ConnectedOnBottom) != 0; }
 
 
     //==============================================================================

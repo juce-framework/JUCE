@@ -77,7 +77,7 @@ public:
         const uint32 id;
 
         /** The actual processor object that this node represents. */
-        AudioProcessor* getProcessor() const throw()            { return processor; }
+        AudioProcessor* getProcessor() const noexcept           { return processor; }
 
         /** A set of user-definable properties that are associated with this node.
 

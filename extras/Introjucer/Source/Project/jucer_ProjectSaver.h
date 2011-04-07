@@ -102,9 +102,9 @@ private:
     void writeMainProjectFile()
     {
         ScopedPointer <XmlElement> xml (project.getProjectRoot().createXml());
-        jassert (xml != 0);
+        jassert (xml != nullptr);
 
-        if (xml != 0)
+        if (xml != nullptr)
         {
             #if JUCE_DEBUG
             {
@@ -249,7 +249,7 @@ private:
         {
             ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
 
-            if (exporter != 0)
+            if (exporter != nullptr)
             {
                 paths.add (exporter->getIncludePathForFileInJuceFolder (pathFromJuceFolder, juceHeaderFile));
                 guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");

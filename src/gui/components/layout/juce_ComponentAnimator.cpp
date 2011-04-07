@@ -70,17 +70,17 @@ public:
         if (useProxyComponent)
             proxy = new ProxyComponent (*component);
         else
-            proxy = 0;
+            proxy = nullptr;
 
         component->setVisible (! useProxyComponent);
     }
 
     bool useTimeslice (const int elapsed)
     {
-        Component* const c = proxy != 0 ? static_cast <Component*> (proxy)
-                                        : static_cast <Component*> (component);
+        Component* const c = proxy != nullptr ? static_cast <Component*> (proxy)
+                                              : static_cast <Component*> (component);
 
-        if (c != 0)
+        if (c != nullptr)
         {
             msElapsed += elapsed;
             double newProgress = msElapsed / (double) msTotal;
@@ -134,12 +134,12 @@ public:
 
     void moveToFinalDestination()
     {
-        if (component != 0)
+        if (component != nullptr)
         {
             component->setAlpha ((float) destAlpha);
             component->setBounds (destination);
 
-            if (proxy != 0)
+            if (proxy != nullptr)
                 component->setVisible (destAlpha > 0);
         }
     }
@@ -157,9 +157,9 @@ public:
 
             Component* const parent = component.getParentComponent();
 
-            if (parent != 0)
+            if (parent != nullptr)
                 parent->addAndMakeVisible (this);
-            else if (component.isOnDesktop() && component.getPeer() != 0)
+            else if (component.isOnDesktop() && component.getPeer() != nullptr)
                 addToDesktop (component.getPeer()->getStyleFlags());
             else
                 jassertfalse; // seem to be trying to animate a component that's not visible..
@@ -193,7 +193,7 @@ public:
     bool isMoving, isChangingAlpha;
 
 private:
-    double timeToDistance (const double time) const throw()
+    double timeToDistance (const double time) const noexcept
     {
         return (time < 0.5) ? time * (startSpeed + time * (midSpeed - startSpeed))
                             : 0.5 * (startSpeed + 0.5 * (midSpeed - startSpeed))
@@ -232,11 +232,11 @@ void ComponentAnimator::animateComponent (Component* const component,
     // the speeds must be 0 or greater!
     jassert (startSpeed >= 0 && endSpeed >= 0)
 
-    if (component != 0)
+    if (component != nullptr)
     {
         AnimationTask* at = findTaskFor (component);
 
-        if (at == 0)
+        if (at == nullptr)
         {
             at = new AnimationTask (component);
             tasks.add (at);
@@ -256,7 +256,7 @@ void ComponentAnimator::animateComponent (Component* const component,
 
 void ComponentAnimator::fadeOut (Component* component, int millisecondsToTake)
 {
-    if (component != 0)
+    if (component != nullptr)
     {
         if (component->isShowing() && millisecondsToTake > 0)
             animateComponent (component, component->getBounds(), 0.0f, millisecondsToTake, true, 1.0, 1.0);
@@ -267,7 +267,7 @@ void ComponentAnimator::fadeOut (Component* component, int millisecondsToTake)
 
 void ComponentAnimator::fadeIn (Component* component, int millisecondsToTake)
 {
-    if (component != 0 && ! (component->isVisible() && component->getAlpha() == 1.0f))
+    if (component != nullptr && ! (component->isVisible() && component->getAlpha() == 1.0f))
     {
         component->setAlpha (0.0f);
         component->setVisible (true);
@@ -293,7 +293,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
 {
     AnimationTask* const at = findTaskFor (component);
 
-    if (at != 0)
+    if (at != nullptr)
     {
         if (moveComponentToItsFinalPosition)
             at->moveToFinalDestination();
@@ -305,10 +305,10 @@ void ComponentAnimator::cancelAnimation (Component* const component,
 
 const Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
 {
-    jassert (component != 0);
+    jassert (component != nullptr);
     AnimationTask* const at = findTaskFor (component);
 
-    if (at != 0)
+    if (at != nullptr)
         return at->destination;
 
     return component->getBounds();
@@ -316,7 +316,7 @@ const Rectangle<int> ComponentAnimator::getComponentDestination (Component* cons
 
 bool ComponentAnimator::isAnimating (Component* component) const
 {
-    return findTaskFor (component) != 0;
+    return findTaskFor (component) != nullptr;
 }
 
 void ComponentAnimator::timerCallback()

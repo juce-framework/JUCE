@@ -39,7 +39,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ApplicationCommandManager::ApplicationCommandManager()
-    : firstTarget (0)
+    : firstTarget (nullptr)
 {
     keyMappings = new KeyPressMappingSet (this);
 
@@ -49,7 +49,7 @@ ApplicationCommandManager::ApplicationCommandManager()
 ApplicationCommandManager::~ApplicationCommandManager()
 {
     Desktop::getInstance().removeFocusChangeListener (this);
-    keyMappings = 0;
+    keyMappings = nullptr;
 }
 
 //==============================================================================
@@ -92,7 +92,7 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
 
 void ApplicationCommandManager::registerAllCommandsForTarget (ApplicationCommandTarget* target)
 {
-    if (target != 0)
+    if (target != nullptr)
     {
         Array <CommandID> commandIDs;
         target->getAllCommands (commandIDs);
@@ -130,7 +130,7 @@ void ApplicationCommandManager::commandStatusChanged()
 }
 
 //==============================================================================
-const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const CommandID commandID) const throw()
+const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const CommandID commandID) const noexcept
 {
     for (int i = commands.size(); --i >= 0;)
         if (commands.getUnchecked(i)->commandID == commandID)
@@ -139,19 +139,19 @@ const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const 
     return 0;
 }
 
-const String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const throw()
+const String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept
 {
     const ApplicationCommandInfo* const ci = getCommandForID (commandID);
 
-    return (ci != 0) ? ci->shortName : String::empty;
+    return ci != nullptr ? ci->shortName : String::empty;
 }
 
-const String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const throw()
+const String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const noexcept
 {
     const ApplicationCommandInfo* const ci = getCommandForID (commandID);
 
-    return (ci != 0) ? (ci->description.isNotEmpty() ? ci->description : ci->shortName)
-                     : String::empty;
+    return ci != nullptr ? (ci->description.isNotEmpty() ? ci->description : ci->shortName)
+                         : String::empty;
 }
 
 const StringArray ApplicationCommandManager::getCommandCategories() const
@@ -193,7 +193,7 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
     ApplicationCommandInfo commandInfo (0);
     ApplicationCommandTarget* const target = getTargetForCommand (info_.commandID, commandInfo);
 
-    if (target == 0)
+    if (target == nullptr)
         return false;
 
     ApplicationCommandTarget::InvocationInfo info (info_);
@@ -211,11 +211,11 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
 //==============================================================================
 ApplicationCommandTarget* ApplicationCommandManager::getFirstCommandTarget (const CommandID)
 {
-    return firstTarget != 0 ? firstTarget
-                            : findDefaultComponentTarget();
+    return firstTarget != nullptr ? firstTarget
+                                  : findDefaultComponentTarget();
 }
 
-void ApplicationCommandManager::setFirstCommandTarget (ApplicationCommandTarget* const newTarget) throw()
+void ApplicationCommandManager::setFirstCommandTarget (ApplicationCommandTarget* const newTarget) noexcept
 {
     firstTarget = newTarget;
 }
@@ -225,13 +225,13 @@ ApplicationCommandTarget* ApplicationCommandManager::getTargetForCommand (const 
 {
     ApplicationCommandTarget* target = getFirstCommandTarget (commandID);
 
-    if (target == 0)
+    if (target == nullptr)
         target = JUCEApplication::getInstance();
 
-    if (target != 0)
+    if (target != nullptr)
         target = target->getTargetForCommand (commandID);
 
-    if (target != 0)
+    if (target != nullptr)
         target->getCommandInfo (commandID, upToDateInfo);
 
     return target;
@@ -242,7 +242,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findTargetForComponent (Com
 {
     ApplicationCommandTarget* target = dynamic_cast <ApplicationCommandTarget*> (c);
 
-    if (target == 0 && c != 0)
+    if (target == nullptr && c != nullptr)
         // (unable to use the syntax findParentComponentOfClass <ApplicationCommandTarget> () because of a VC6 compiler bug)
         target = c->findParentComponentOfClass ((ApplicationCommandTarget*) 0);
 
@@ -253,20 +253,20 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 {
     Component* c = Component::getCurrentlyFocusedComponent();
 
-    if (c == 0)
+    if (c == nullptr)
     {
         TopLevelWindow* const activeWindow = TopLevelWindow::getActiveTopLevelWindow();
 
-        if (activeWindow != 0)
+        if (activeWindow != nullptr)
         {
             c = activeWindow->getPeer()->getLastFocusedSubcomponent();
 
-            if (c == 0)
+            if (c == nullptr)
                 c = activeWindow;
         }
     }
 
-    if (c == 0 && Process::isForegroundProcess())
+    if (c == nullptr && Process::isForegroundProcess())
     {
         // getting a bit desperate now - try all desktop comps..
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -275,12 +275,12 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
                 = findTargetForComponent (Desktop::getInstance().getComponent (i)
                                               ->getPeer()->getLastFocusedSubcomponent());
 
-            if (target != 0)
+            if (target != nullptr)
                 return target;
         }
     }
 
-    if (c != 0)
+    if (c != nullptr)
     {
         ResizableWindow* const resizableWindow = dynamic_cast <ResizableWindow*> (c);
 
@@ -288,12 +288,12 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         // component that really should get the event. And if not, the event will
         // still be passed up to the top level window anyway, so let's send it to the
         // content comp.
-        if (resizableWindow != 0 && resizableWindow->getContentComponent() != 0)
+        if (resizableWindow != nullptr && resizableWindow->getContentComponent() != nullptr)
             c = resizableWindow->getContentComponent();
 
         ApplicationCommandTarget* const target = findTargetForComponent (c);
 
-        if (target != 0)
+        if (target != nullptr)
             return target;
     }
 

@@ -63,8 +63,8 @@ public:
     /** Destructor. */
     ~RelativeCoordinate();
 
-    bool operator== (const RelativeCoordinate& other) const throw();
-    bool operator!= (const RelativeCoordinate& other) const throw();
+    bool operator== (const RelativeCoordinate& other) const noexcept;
+    bool operator!= (const RelativeCoordinate& other) const noexcept;
 
     //==============================================================================
     /** Calculates the absolute position of this coordinate.
@@ -135,7 +135,7 @@ public:
             unknown
         };
 
-        static Type getTypeOf (const String& s) throw();
+        static Type getTypeOf (const String& s) noexcept;
     };
 
 private:

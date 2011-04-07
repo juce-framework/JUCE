@@ -77,7 +77,7 @@ public:
 
         E.g. "AIFF file"
     */
-    const String getFormatName() const throw()      { return formatName; }
+    const String getFormatName() const noexcept     { return formatName; }
 
     //==============================================================================
     /** Writes a set of samples to the audio stream.
@@ -138,16 +138,16 @@ public:
 
     //==============================================================================
     /** Returns the sample rate being used. */
-    double getSampleRate() const throw()        { return sampleRate; }
+    double getSampleRate() const noexcept       { return sampleRate; }
 
     /** Returns the number of channels being written. */
-    int getNumChannels() const throw()          { return numChannels; }
+    int getNumChannels() const noexcept         { return numChannels; }
 
     /** Returns the bit-depth of the data being written. */
-    int getBitsPerSample() const throw()        { return bitsPerSample; }
+    int getBitsPerSample() const noexcept       { return bitsPerSample; }
 
     /** Returns true if it's a floating-point format, false if it's fixed-point. */
-    bool isFloatingPoint() const throw()        { return usesFloatingPointData; }
+    bool isFloatingPoint() const noexcept       { return usesFloatingPointData; }
 
     //==============================================================================
     /**
@@ -225,13 +225,13 @@ protected:
         typedef AudioData::Pointer <SourceSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>     SourceType;
 
         static void write (void* destData, int numDestChannels, const int** source,
-                           int numSamples, const int sourceOffset = 0) throw()
+                           int numSamples, const int sourceOffset = 0) noexcept
         {
             for (int i = 0; i < numDestChannels; ++i)
             {
                 const DestType dest (addBytesToPointer (destData, i * DestType::getBytesPerSample()), numDestChannels);
 
-                if (*source != 0)
+                if (*source != nullptr)
                 {
                     dest.convertSamples (SourceType (*source + sourceOffset), numSamples);
                     ++source;

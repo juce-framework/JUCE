@@ -116,7 +116,7 @@ public:
     ~KeyPressMappingSet();
 
     //==============================================================================
-    ApplicationCommandManager* getCommandManager() const throw()        { return commandManager; }
+    ApplicationCommandManager* getCommandManager() const noexcept       { return commandManager; }
 
     //==============================================================================
     /** Returns a list of keypresses that are assigned to a particular command.
@@ -172,14 +172,14 @@ public:
     void removeKeyPress (const KeyPress& keypress);
 
     /** Returns true if the given command is linked to this key. */
-    bool containsMapping (CommandID commandID, const KeyPress& keyPress) const throw();
+    bool containsMapping (CommandID commandID, const KeyPress& keyPress) const noexcept;
 
     //==============================================================================
     /** Looks for a command that corresponds to a keypress.
 
         @returns the UID of the command or 0 if none was found
     */
-    CommandID findCommandForKeyPress (const KeyPress& keyPress) const throw();
+    CommandID findCommandForKeyPress (const KeyPress& keyPress) const noexcept;
 
     //==============================================================================
     /** Tries to recreate the mappings from a previously stored state.

@@ -53,7 +53,7 @@ void DialogWindow::resized()
     const KeyPress esc (KeyPress::escapeKey, 0, 0);
 
     if (escapeKeyTriggersCloseButton
-         && getCloseButton() != 0
+         && getCloseButton() != nullptr
          && ! getCloseButton()->isRegisteredForShortcut (esc))
     {
         getCloseButton()->addShortcut (esc);

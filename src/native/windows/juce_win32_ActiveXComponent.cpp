@@ -102,8 +102,8 @@ namespace ActiveXHelpers
             /* Note: if you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
                If you don't call AddRef then others crash (e.g. QuickTime).. Bit of a catch-22, so letting it leak is probably preferable.
             */
-            if (lplpFrame != 0) { frame->AddRef(); *lplpFrame = frame; }
-            if (lplpDoc != 0)   *lplpDoc = 0;
+            if (lplpFrame != nullptr) { frame->AddRef(); *lplpFrame = frame; }
+            if (lplpDoc != nullptr)   *lplpDoc = 0;
             lpFrameInfo->fMDIApp = FALSE;
             lpFrameInfo->hwndFrame = window;
             lpFrameInfo->haccel = 0;
@@ -164,7 +164,7 @@ namespace ActiveXHelpers
         const IID iid = IID_IOleWindow;
         IOleWindow* const window = (IOleWindow*) component->queryInterface (&iid);
 
-        if (window != 0)
+        if (window != nullptr)
         {
             window->GetWindow (&hwnd);
             window->Release();
@@ -220,7 +220,7 @@ public:
 
     ~Pimpl()
     {
-        if (control != 0)
+        if (control != nullptr)
         {
             control->Close (OLECLOSE_NOSAVE);
             control->Release();
@@ -235,7 +235,7 @@ public:
     {
         Component* const topComp = owner.getTopLevelComponent();
 
-        if (topComp->getPeer() != 0)
+        if (topComp->getPeer() != nullptr)
         {
             const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
             owner.setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), owner.getWidth(), owner.getHeight()));
@@ -260,7 +260,7 @@ public:
         {
             const ActiveXControlComponent* const ax = ActiveXHelpers::activeXComps.getUnchecked(i);
 
-            if (ax->control != 0 && ax->control->controlHWND == hwnd)
+            if (ax->control != nullptr && ax->control->controlHWND == hwnd)
             {
                 switch (message)
                 {
@@ -278,7 +278,7 @@ public:
                     {
                         ComponentPeer* const peer = ax->getPeer();
 
-                        if (peer != 0)
+                        if (peer != nullptr)
                         {
                             ActiveXHelpers::offerActiveXMouseEventToPeer (peer, hwnd, message, lParam);
 
@@ -324,7 +324,7 @@ ActiveXControlComponent::~ActiveXControlComponent()
 
 void ActiveXControlComponent::paint (Graphics& g)
 {
-    if (control == 0)
+    if (control == nullptr)
         g.fillAll (Colours::lightgrey);
 }
 
@@ -334,9 +334,9 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
     ComponentPeer* const peer = getPeer();
 
     // the component must have already been added to a real window when you call this!
-    jassert (dynamic_cast <Win32ComponentPeer*> (peer) != 0);
+    jassert (dynamic_cast <Win32ComponentPeer*> (peer) != nullptr);
 
-    if (dynamic_cast <Win32ComponentPeer*> (peer) != 0)
+    if (dynamic_cast <Win32ComponentPeer*> (peer) != nullptr)
     {
         const Point<int> pos (getTopLevelComponent()->getLocalPoint (this, Point<int>()));
         HWND hwnd = (HWND) peer->getNativeHandle();
@@ -382,15 +382,15 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
 void ActiveXControlComponent::deleteControl()
 {
-    control = 0;
+    control = nullptr;
     originalWndProc = 0;
 }
 
 void* ActiveXControlComponent::queryInterface (const void* iid) const
 {
-    void* result = 0;
+    void* result = nullptr;
 
-    if (control != 0 && control->control != 0
+    if (control != nullptr && control->control != nullptr
          && SUCCEEDED (control->control->QueryInterface (*(const IID*) iid, &result)))
         return result;
 

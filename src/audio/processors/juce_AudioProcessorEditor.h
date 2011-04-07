@@ -54,7 +54,7 @@ public:
 
     //==============================================================================
     /** Returns a pointer to the processor that this editor represents. */
-    AudioProcessor* getAudioProcessor() const throw()         { return owner; }
+    AudioProcessor* getAudioProcessor() const noexcept        { return owner; }
 
 
 private:

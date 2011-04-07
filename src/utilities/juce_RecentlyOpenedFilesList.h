@@ -64,7 +64,7 @@ public:
     /** Returns the number of items that this list will store.
         @see setMaxNumberOfItems
     */
-    int getMaxNumberOfItems() const throw()                             { return maxNumberOfItems; }
+    int getMaxNumberOfItems() const noexcept                            { return maxNumberOfItems; }
 
     /** Returns the number of files in the list.
 
@@ -80,7 +80,7 @@ public:
 
     /** Returns an array of all the absolute pathnames in the list.
     */
-    const StringArray& getAllFilenames() const throw()                  { return files; }
+    const StringArray& getAllFilenames() const noexcept                 { return files; }
 
     /** Clears all the files from the list. */
     void clear();
@@ -127,7 +127,7 @@ public:
                               int baseItemId,
                               bool showFullPaths,
                               bool dontAddNonExistentFiles,
-                              const File** filesToAvoid = 0);
+                              const File** filesToAvoid = nullptr);
 
     //==============================================================================
     /** Returns a string that encapsulates all the files in the list.

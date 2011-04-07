@@ -142,7 +142,7 @@ public:
     /** Returns true if the caret is enabled.
         @see setCaretVisible
     */
-    bool isCaretVisible() const                                 { return caret != 0; }
+    bool isCaretVisible() const                                 { return caret != nullptr; }
 
     //==============================================================================
     /** Enables/disables a vertical scrollbar.
@@ -676,7 +676,7 @@ private:
     float getWordWrapWidth() const;
     void timerCallbackInt();
     void repaintText (const Range<int>& range);
-    UndoManager* getUndoManager() throw();
+    UndoManager* getUndoManager() noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
 };

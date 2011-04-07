@@ -43,10 +43,10 @@ class JUCE_API  AffineTransform
 public:
     //==============================================================================
     /** Creates an identity transform. */
-    AffineTransform() throw();
+    AffineTransform() noexcept;
 
     /** Creates a copy of another transform. */
-    AffineTransform (const AffineTransform& other) throw();
+    AffineTransform (const AffineTransform& other) noexcept;
 
     /** Creates a transform from a set of raw matrix values.
 
@@ -57,16 +57,16 @@ public:
             (  0     0     1  )
     */
     AffineTransform (float mat00, float mat01, float mat02,
-                     float mat10, float mat11, float mat12) throw();
+                     float mat10, float mat11, float mat12) noexcept;
 
     /** Copies from another AffineTransform object */
-    AffineTransform& operator= (const AffineTransform& other) throw();
+    AffineTransform& operator= (const AffineTransform& other) noexcept;
 
     /** Compares two transforms. */
-    bool operator== (const AffineTransform& other) const throw();
+    bool operator== (const AffineTransform& other) const noexcept;
 
     /** Compares two transforms. */
-    bool operator!= (const AffineTransform& other) const throw();
+    bool operator!= (const AffineTransform& other) const noexcept;
 
     /** A ready-to-use identity transform, which you can use to append other
         transformations to.
@@ -82,7 +82,7 @@ public:
     //==============================================================================
     /** Transforms a 2D co-ordinate using this matrix. */
     template <typename ValueType>
-    void transformPoint (ValueType& x, ValueType& y) const throw()
+    void transformPoint (ValueType& x, ValueType& y) const noexcept
     {
         const ValueType oldX = x;
         x = static_cast <ValueType> (mat00 * oldX + mat01 * y + mat02);
@@ -96,7 +96,7 @@ public:
     */
     template <typename ValueType>
     void transformPoints (ValueType& x1, ValueType& y1,
-                          ValueType& x2, ValueType& y2) const throw()
+                          ValueType& x2, ValueType& y2) const noexcept
     {
         const ValueType oldX1 = x1, oldX2 = x2;
         x1 = static_cast <ValueType> (mat00 * oldX1 + mat01 * y1 + mat02);
@@ -113,7 +113,7 @@ public:
     template <typename ValueType>
     void transformPoints (ValueType& x1, ValueType& y1,
                           ValueType& x2, ValueType& y2,
-                          ValueType& x3, ValueType& y3) const throw()
+                          ValueType& x3, ValueType& y3) const noexcept
     {
         const ValueType oldX1 = x1, oldX2 = x2, oldX3 = x3;
         x1 = static_cast <ValueType> (mat00 * oldX1 + mat01 * y1 + mat02);
@@ -127,18 +127,18 @@ public:
     //==============================================================================
     /** Returns a new transform which is the same as this one followed by a translation. */
     const AffineTransform translated (float deltaX,
-                                      float deltaY) const throw();
+                                      float deltaY) const noexcept;
 
     /** Returns a new transform which is a translation. */
     static const AffineTransform translation (float deltaX,
-                                              float deltaY) throw();
+                                              float deltaY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a rotation.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around
         the origin (0, 0).
     */
-    const AffineTransform rotated (float angleInRadians) const throw();
+    const AffineTransform rotated (float angleInRadians) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a rotation about a given point.
 
@@ -147,50 +147,50 @@ public:
     */
     const AffineTransform rotated (float angleInRadians,
                                    float pivotX,
-                                   float pivotY) const throw();
+                                   float pivotY) const noexcept;
 
     /** Returns a new transform which is a rotation about (0, 0). */
-    static const AffineTransform rotation (float angleInRadians) throw();
+    static const AffineTransform rotation (float angleInRadians) noexcept;
 
     /** Returns a new transform which is a rotation about a given point. */
     static const AffineTransform rotation (float angleInRadians,
                                            float pivotX,
-                                           float pivotY) throw();
+                                           float pivotY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
         The scaling is centred around the origin (0, 0).
     */
     const AffineTransform scaled (float factorX,
-                                  float factorY) const throw();
+                                  float factorY) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
         The scaling is centred around the origin provided.
     */
     const AffineTransform scaled (float factorX, float factorY,
-                                  float pivotX, float pivotY) const throw();
+                                  float pivotX, float pivotY) const noexcept;
 
     /** Returns a new transform which is a re-scale about the origin. */
     static const AffineTransform scale (float factorX,
-                                        float factorY) throw();
+                                        float factorY) noexcept;
 
     /** Returns a new transform which is a re-scale centred around the point provided. */
     static const AffineTransform scale (float factorX, float factorY,
-                                        float pivotX, float pivotY) throw();
+                                        float pivotX, float pivotY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a shear.
         The shear is centred around the origin (0, 0).
     */
-    const AffineTransform sheared (float shearX, float shearY) const throw();
+    const AffineTransform sheared (float shearX, float shearY) const noexcept;
 
     /** Returns a shear transform, centred around the origin (0, 0). */
-    static const AffineTransform shear (float shearX, float shearY) throw();
+    static const AffineTransform shear (float shearX, float shearY) noexcept;
 
     /** Returns a matrix which is the inverse operation of this one.
 
         Some matrices don't have an inverse - in this case, the method will just return
         an identity transform.
     */
-    const AffineTransform inverted() const throw();
+    const AffineTransform inverted() const noexcept;
 
     /** Returns the transform that will map three known points onto three coordinates
         that are supplied.
@@ -200,43 +200,43 @@ public:
     */
     static const AffineTransform fromTargetPoints (float x00, float y00,
                                                    float x10, float y10,
-                                                   float x01, float y01) throw();
+                                                   float x01, float y01) noexcept;
 
     /** Returns the transform that will map three specified points onto three target points.
     */
     static const AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
                                                    float sourceX2, float sourceY2, float targetX2, float targetY2,
-                                                   float sourceX3, float sourceY3, float targetX3, float targetY3) throw();
+                                                   float sourceX3, float sourceY3, float targetX3, float targetY3) noexcept;
 
     //==============================================================================
     /** Returns the result of concatenating another transformation after this one. */
-    const AffineTransform followedBy (const AffineTransform& other) const throw();
+    const AffineTransform followedBy (const AffineTransform& other) const noexcept;
 
     /** Returns true if this transform has no effect on points. */
-    bool isIdentity() const throw();
+    bool isIdentity() const noexcept;
 
     /** Returns true if this transform maps to a singularity - i.e. if it has no inverse. */
-    bool isSingularity() const throw();
+    bool isSingularity() const noexcept;
 
     /** Returns true if the transform only translates, and doesn't scale or rotate the
         points. */
-    bool isOnlyTranslation() const throw();
+    bool isOnlyTranslation() const noexcept;
 
     /** If this transform is only a translation, this returns the X offset.
         @see isOnlyTranslation
     */
-    float getTranslationX() const throw()                   { return mat02; }
+    float getTranslationX() const noexcept                  { return mat02; }
 
     /** If this transform is only a translation, this returns the X offset.
         @see isOnlyTranslation
     */
-    float getTranslationY() const throw()                   { return mat12; }
+    float getTranslationY() const noexcept                  { return mat12; }
 
     /** Returns the approximate scale factor by which lengths will be transformed.
         Obviously a length may be scaled by entirely different amounts depending on its
         direction, so this is only appropriate as a rough guide.
     */
-    float getScaleFactor() const throw();
+    float getScaleFactor() const noexcept;
 
     //==============================================================================
     /* The transform matrix is:

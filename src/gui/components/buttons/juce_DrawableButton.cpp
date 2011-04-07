@@ -36,7 +36,7 @@ DrawableButton::DrawableButton (const String& name,
                                 const DrawableButton::ButtonStyle buttonStyle)
     : Button (name),
       style (buttonStyle),
-      currentImage (0),
+      currentImage (nullptr),
       edgeIndent (3)
 {
     if (buttonStyle == ImageOnButtonBackground)
@@ -65,16 +65,16 @@ void DrawableButton::setImages (const Drawable* normal,
                                 const Drawable* downOn,
                                 const Drawable* disabledOn)
 {
-    jassert (normal != 0); // you really need to give it at least a normal image..
+    jassert (normal != nullptr); // you really need to give it at least a normal image..
 
-    if (normal != 0)        normalImage = normal->createCopy();
-    if (over != 0)          overImage = over->createCopy();
-    if (down != 0)          downImage = down->createCopy();
-    if (disabled != 0)      disabledImage = disabled->createCopy();
-    if (normalOn != 0)      normalImageOn = normalOn->createCopy();
-    if (overOn != 0)        overImageOn = overOn->createCopy();
-    if (downOn != 0)        downImageOn = downOn->createCopy();
-    if (disabledOn != 0)    disabledImageOn = disabledOn->createCopy();
+    if (normal != nullptr)        normalImage = normal->createCopy();
+    if (over != nullptr)          overImage = over->createCopy();
+    if (down != nullptr)          downImage = down->createCopy();
+    if (disabled != nullptr)      disabledImage = disabled->createCopy();
+    if (normalOn != nullptr)      normalImageOn = normalOn->createCopy();
+    if (overOn != nullptr)        overImageOn = overOn->createCopy();
+    if (downOn != nullptr)        downImageOn = downOn->createCopy();
+    if (disabledOn != nullptr)    disabledImageOn = disabledOn->createCopy();
 
     buttonStateChanged();
 }
@@ -102,7 +102,7 @@ void DrawableButton::setBackgroundColours (const Colour& toggledOffColour,
     }
 }
 
-const Colour& DrawableButton::getBackgroundColour() const throw()
+const Colour& DrawableButton::getBackgroundColour() const noexcept
 {
     return getToggleState() ? backgroundOn
                             : backgroundOff;
@@ -119,7 +119,7 @@ void DrawableButton::resized()
 {
     Button::resized();
 
-    if (currentImage != 0)
+    if (currentImage != nullptr)
     {
         if (style == ImageRaw)
         {
@@ -154,7 +154,7 @@ void DrawableButton::buttonStateChanged()
 {
     repaint();
 
-    Drawable* imageToDraw = 0;
+    Drawable* imageToDraw = nullptr;
     float opacity = 1.0f;
 
     if (isEnabled())
@@ -166,7 +166,7 @@ void DrawableButton::buttonStateChanged()
         imageToDraw = getToggleState() ? disabledImageOn
                                        : disabledImage;
 
-        if (imageToDraw == 0)
+        if (imageToDraw == nullptr)
         {
             opacity = 0.4f;
             imageToDraw = getNormalImage();
@@ -178,7 +178,7 @@ void DrawableButton::buttonStateChanged()
         removeChildComponent (currentImage);
         currentImage = imageToDraw;
 
-        if (currentImage != 0)
+        if (currentImage != nullptr)
         {
             currentImage->setInterceptsMouseClicks (false, false);
             addAndMakeVisible (currentImage);
@@ -186,7 +186,7 @@ void DrawableButton::buttonStateChanged()
         }
     }
 
-    if (currentImage != 0)
+    if (currentImage != nullptr)
         currentImage->setAlpha (opacity);
 }
 
@@ -225,7 +225,7 @@ void DrawableButton::paintButton (Graphics& g,
 }
 
 //==============================================================================
-Drawable* DrawableButton::getCurrentImage() const throw()
+Drawable* DrawableButton::getCurrentImage() const noexcept
 {
     if (isDown())
         return getDownImage();
@@ -236,54 +236,54 @@ Drawable* DrawableButton::getCurrentImage() const throw()
     return getNormalImage();
 }
 
-Drawable* DrawableButton::getNormalImage() const throw()
+Drawable* DrawableButton::getNormalImage() const noexcept
 {
-    return (getToggleState() && normalImageOn != 0) ? normalImageOn
-                                                    : normalImage;
+    return (getToggleState() && normalImageOn != nullptr) ? normalImageOn
+                                                          : normalImage;
 }
 
-Drawable* DrawableButton::getOverImage() const throw()
+Drawable* DrawableButton::getOverImage() const noexcept
 {
     Drawable* d = normalImage;
 
     if (getToggleState())
     {
-        if (overImageOn != 0)
+        if (overImageOn != nullptr)
             d = overImageOn;
-        else if (normalImageOn != 0)
+        else if (normalImageOn != nullptr)
             d = normalImageOn;
-        else if (overImage != 0)
+        else if (overImage != nullptr)
             d = overImage;
     }
     else
     {
-        if (overImage != 0)
+        if (overImage != nullptr)
             d = overImage;
     }
 
     return d;
 }
 
-Drawable* DrawableButton::getDownImage() const throw()
+Drawable* DrawableButton::getDownImage() const noexcept
 {
     Drawable* d = normalImage;
 
     if (getToggleState())
     {
-        if (downImageOn != 0)
+        if (downImageOn != nullptr)
             d = downImageOn;
-        else if (overImageOn != 0)
+        else if (overImageOn != nullptr)
             d = overImageOn;
-        else if (normalImageOn != 0)
+        else if (normalImageOn != nullptr)
             d = normalImageOn;
-        else if (downImage != 0)
+        else if (downImage != nullptr)
             d = downImage;
         else
             d = getOverImage();
     }
     else
     {
-        if (downImage != 0)
+        if (downImage != nullptr)
             d = downImage;
         else
             d = getOverImage();

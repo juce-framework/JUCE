@@ -63,7 +63,7 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE (AlertWindowTextEditor);
 
-    static juce_wchar getDefaultPasswordChar() throw()
+    static juce_wchar getDefaultPasswordChar() noexcept
     {
       #if JUCE_LINUX
         return 0x2022;
@@ -92,7 +92,7 @@ AlertWindow::AlertWindow (const String& title,
     {
         Component* const c = Desktop::getInstance().getComponent (i);
 
-        if (c != 0 && c->isAlwaysOnTop() && c->isShowing())
+        if (c != nullptr && c->isAlwaysOnTop() && c->isShowing())
         {
             setAlwaysOnTop (true);
             break;
@@ -141,7 +141,7 @@ void AlertWindow::setMessage (const String& message)
 //==============================================================================
 void AlertWindow::buttonClicked (Button* button)
 {
-    if (button->getParentComponent() != 0)
+    if (button->getParentComponent() != nullptr)
         button->getParentComponent()->exitModalState (button->getCommandID());
 }
 
@@ -218,7 +218,7 @@ TextEditor* AlertWindow::getTextEditor (const String& nameOfTextEditor) const
 const String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
 {
     TextEditor* const t = getTextEditor (nameOfTextEditor);
-    return t != 0 ? t->getText() : String::empty;
+    return t != nullptr ? t->getText() : String::empty;
 }
 
 
@@ -278,7 +278,7 @@ public:
     {
     }
 
-    int getPreferredWidth() const throw()    { return bestWidth; }
+    int getPreferredWidth() const noexcept   { return bestWidth; }
 
     void updateLayout (const int width)
     {
@@ -342,7 +342,7 @@ Component* AlertWindow::removeCustomComponent (const int index)
 {
     Component* const c = getCustomComponent (index);
 
-    if (c != 0)
+    if (c != nullptr)
     {
         customComps.removeValue (c);
         allComps.removeValue (c);
@@ -406,12 +406,11 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     int w = jmin (300 + sw * 2, (int) (getParentWidth() * 0.7f));
     const int edgeGap = 10;
     const int labelHeight = 18;
-    int iconSpace;
+    int iconSpace = 0;
 
     if (alertIconType == NoIcon)
     {
         textLayout.layout (w, Justification::horizontallyCentred, true);
-        iconSpace = 0;
     }
     else
     {
@@ -634,13 +633,13 @@ private:
 
     void show()
     {
-        LookAndFeel& lf = associatedComponent != 0 ? associatedComponent->getLookAndFeel()
-                                                   : LookAndFeel::getDefaultLookAndFeel();
+        LookAndFeel& lf = associatedComponent != nullptr ? associatedComponent->getLookAndFeel()
+                                                         : LookAndFeel::getDefaultLookAndFeel();
 
         ScopedPointer <Component> alertBox (lf.createAlertWindow (title, message, button1, button2, button3,
                                                                   iconType, numButtons, associatedComponent));
 
-        jassert (alertBox != 0); // you have to return one of these!
+        jassert (alertBox != nullptr); // you have to return one of these!
 
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (modal)
@@ -716,7 +715,7 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
     }
     else
     {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == 0);
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == nullptr);
         info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
         info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
 
@@ -739,7 +738,7 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
     }
     else
     {
-        AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == 0);
+        AlertWindowInfo info (title, message, associatedComponent, iconType, 3, callback, callback == nullptr);
         info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
         info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
         info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;

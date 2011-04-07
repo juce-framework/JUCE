@@ -50,7 +50,7 @@ public:
 
         @see getCurrentTime
     */
-    Time() throw();
+    Time() noexcept;
 
     /** Creates a time based on a number of milliseconds.
 
@@ -61,7 +61,7 @@ public:
                                         'epoch' (midnight Jan 1st 1970).
         @see getCurrentTime, currentTimeMillis
     */
-    explicit Time (int64 millisecondsSinceEpoch) throw();
+    explicit Time (int64 millisecondsSinceEpoch) noexcept;
 
     /** Creates a time from a set of date components.
 
@@ -84,23 +84,23 @@ public:
           int minutes,
           int seconds = 0,
           int milliseconds = 0,
-          bool useLocalTime = true) throw();
+          bool useLocalTime = true) noexcept;
 
     /** Creates a copy of another Time object. */
-    Time (const Time& other) throw();
+    Time (const Time& other) noexcept;
 
     /** Destructor. */
-    ~Time() throw();
+    ~Time() noexcept;
 
     /** Copies this time from another one. */
-    Time& operator= (const Time& other) throw();
+    Time& operator= (const Time& other) noexcept;
 
     //==============================================================================
     /** Returns a Time object that is set to the current system time.
 
         @see currentTimeMillis
     */
-    static const Time JUCE_CALLTYPE getCurrentTime() throw();
+    static const Time JUCE_CALLTYPE getCurrentTime() noexcept;
 
     /** Returns the time as a number of milliseconds.
 
@@ -108,20 +108,20 @@ public:
                     midnight jan 1st 1970.
         @see getMilliseconds
     */
-    int64 toMilliseconds() const throw()                            { return millisSinceEpoch; }
+    int64 toMilliseconds() const noexcept                           { return millisSinceEpoch; }
 
     /** Returns the year.
 
         A 4-digit format is used, e.g. 2004.
     */
-    int getYear() const throw();
+    int getYear() const noexcept;
 
     /** Returns the number of the month.
 
         The value returned is in the range 0 to 11.
         @see getMonthName
     */
-    int getMonth() const throw();
+    int getMonth() const noexcept;
 
     /** Returns the name of the month.
 
@@ -135,13 +135,13 @@ public:
 
         The value returned is in the range 1 to 31.
     */
-    int getDayOfMonth() const throw();
+    int getDayOfMonth() const noexcept;
 
     /** Returns the number of the day of the week.
 
         The value returned is in the range 0 to 6 (0 = sunday, 1 = monday, etc).
     */
-    int getDayOfWeek() const throw();
+    int getDayOfWeek() const noexcept;
 
     /** Returns the name of the weekday.
 
@@ -156,7 +156,7 @@ public:
 
         @see getHoursInAmPmFormat, isAfternoon
     */
-    int getHours() const throw();
+    int getHours() const noexcept;
 
     /** Returns true if the time is in the afternoon.
 
@@ -164,7 +164,7 @@ public:
 
         @see getHoursInAmPmFormat, getHours
     */
-    bool isAfternoon() const throw();
+    bool isAfternoon() const noexcept;
 
     /** Returns the hours in 12-hour clock format.
 
@@ -173,13 +173,13 @@ public:
 
         @see getHours, isAfternoon
     */
-    int getHoursInAmPmFormat() const throw();
+    int getHoursInAmPmFormat() const noexcept;
 
     /** Returns the number of minutes, 0 to 59. */
-    int getMinutes() const throw();
+    int getMinutes() const noexcept;
 
     /** Returns the number of seconds, 0 to 59. */
-    int getSeconds() const throw();
+    int getSeconds() const noexcept;
 
     /** Returns the number of milliseconds, 0 to 999.
 
@@ -188,13 +188,13 @@ public:
 
         @see toMilliseconds
     */
-    int getMilliseconds() const throw();
+    int getMilliseconds() const noexcept;
 
     /** Returns true if the local timezone uses a daylight saving correction. */
-    bool isDaylightSavingTime() const throw();
+    bool isDaylightSavingTime() const noexcept;
 
     /** Returns a 3-character string to indicate the local timezone. */
-    const String getTimeZone() const throw();
+    const String getTimeZone() const noexcept;
 
     //==============================================================================
     /** Quick way of getting a string version of a date and time.
@@ -212,7 +212,7 @@ public:
     const String toString (bool includeDate,
                            bool includeTime,
                            bool includeSeconds = true,
-                           bool use24HourClock = false) const throw();
+                           bool use24HourClock = false) const noexcept;
 
     /** Converts this date/time to a string with a user-defined format.
 
@@ -290,7 +290,7 @@ public:
         Should be accurate to within a few millisecs, depending on platform,
         hardware, etc.
     */
-    static int64 currentTimeMillis() throw();
+    static int64 currentTimeMillis() noexcept;
 
     /** Returns the number of millisecs since a fixed event (usually system startup).
 
@@ -300,7 +300,7 @@ public:
 
         @see getApproximateMillisecondCounter
     */
-    static uint32 getMillisecondCounter() throw();
+    static uint32 getMillisecondCounter() noexcept;
 
     /** Returns the number of millisecs since a fixed event (usually system startup).
 
@@ -309,13 +309,13 @@ public:
 
         @see getMillisecondCounter
     */
-    static double getMillisecondCounterHiRes() throw();
+    static double getMillisecondCounterHiRes() noexcept;
 
     /** Waits until the getMillisecondCounter() reaches a given value.
 
         This will make the thread sleep as efficiently as it can while it's waiting.
     */
-    static void waitForMillisecondCounter (uint32 targetTime) throw();
+    static void waitForMillisecondCounter (uint32 targetTime) noexcept;
 
     /** Less-accurate but faster version of getMillisecondCounter().
 
@@ -326,7 +326,7 @@ public:
 
         @see getMillisecondCounter
     */
-    static uint32 getApproximateMillisecondCounter() throw();
+    static uint32 getApproximateMillisecondCounter() noexcept;
 
     //==============================================================================
     // High-resolution timers..
@@ -339,28 +339,28 @@ public:
         @see getHighResolutionTicksPerSecond, highResolutionTicksToSeconds,
              secondsToHighResolutionTicks
     */
-    static int64 getHighResolutionTicks() throw();
+    static int64 getHighResolutionTicks() noexcept;
 
     /** Returns the resolution of the high-resolution counter in ticks per second.
 
         @see getHighResolutionTicks, highResolutionTicksToSeconds,
              secondsToHighResolutionTicks
     */
-    static int64 getHighResolutionTicksPerSecond() throw();
+    static int64 getHighResolutionTicksPerSecond() noexcept;
 
     /** Converts a number of high-resolution ticks into seconds.
 
         @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
              secondsToHighResolutionTicks
     */
-    static double highResolutionTicksToSeconds (int64 ticks) throw();
+    static double highResolutionTicksToSeconds (int64 ticks) noexcept;
 
     /** Converts a number seconds into high-resolution ticks.
 
         @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
              highResolutionTicksToSeconds
     */
-    static int64 secondsToHighResolutionTicks (double seconds) throw();
+    static int64 secondsToHighResolutionTicks (double seconds) noexcept;
 
 
 private:

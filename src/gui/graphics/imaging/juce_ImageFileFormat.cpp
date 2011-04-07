@@ -66,7 +66,7 @@ const Image ImageFileFormat::loadFrom (InputStream& input)
 {
     ImageFileFormat* const format = findImageFormatForStream (input);
 
-    if (format != 0)
+    if (format != nullptr)
         return format->decodeImage (input);
 
     return Image::null;
@@ -76,7 +76,7 @@ const Image ImageFileFormat::loadFrom (const File& file)
 {
     InputStream* const in = file.createInputStream();
 
-    if (in != 0)
+    if (in != nullptr)
     {
         BufferedInputStream b (in, 8192, true);
         return loadFrom (b);
@@ -87,7 +87,7 @@ const Image ImageFileFormat::loadFrom (const File& file)
 
 const Image ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
 {
-    if (rawData != 0 && numBytes > 4)
+    if (rawData != nullptr && numBytes > 4)
     {
         MemoryInputStream stream (rawData, numBytes, false);
         return loadFrom (stream);

@@ -78,7 +78,7 @@ public:
     {
         const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (juceImage.getSharedImage());
 
-        if (nativeImage != 0 && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
+        if (nativeImage != nullptr && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
         {
             return CGBitmapContextCreateImage (nativeImage->context);
         }
@@ -339,7 +339,7 @@ public:
 
         SavedState* const top = stateStack.getLast();
 
-        if (top != 0)
+        if (top != nullptr)
         {
             state = top;
             stateStack.removeLast (1, false);
@@ -594,7 +594,7 @@ public:
 
             MacTypeface* mf = dynamic_cast <MacTypeface*> (state->font.getTypeface());
 
-            if (mf != 0)
+            if (mf != nullptr)
             {
                 state->fontRef = mf->fontRef;
                 CGContextSetFont (context, state->fontRef);
@@ -879,7 +879,7 @@ const Image juce_loadWithCoreImage (InputStream& input)
                          hasAlphaChan, Image::NativeImage);
 
             CoreGraphicsImage* const cgImage = dynamic_cast<CoreGraphicsImage*> (image.getSharedImage());
-            jassert (cgImage != 0); // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsImage class should have been used.
+            jassert (cgImage != nullptr); // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsImage class should have been used.
 
             CGContextDrawImage (cgImage->context, CGRectMake (0, 0, image.getWidth(), image.getHeight()), loadedImage);
             CGContextFlush (cgImage->context);

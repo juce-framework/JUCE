@@ -35,7 +35,7 @@ IIRFilterAudioSource::IIRFilterAudioSource (AudioSource* const inputSource,
     : input (inputSource),
       deleteInputWhenDeleted (deleteInputWhenDeleted_)
 {
-    jassert (inputSource != 0);
+    jassert (inputSource != nullptr);
 
     for (int i = 2; --i >= 0;)
         iirFilters.add (new IIRFilter());

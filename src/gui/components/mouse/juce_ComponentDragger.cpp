@@ -43,20 +43,20 @@ ComponentDragger::~ComponentDragger()
 //==============================================================================
 void ComponentDragger::startDraggingComponent (Component* const componentToDrag, const MouseEvent& e)
 {
-    jassert (componentToDrag != 0);
+    jassert (componentToDrag != nullptr);
     jassert (e.mods.isAnyMouseButtonDown()); // The event has to be a drag event!
 
-    if (componentToDrag != 0)
+    if (componentToDrag != nullptr)
         mouseDownWithinTarget = e.getEventRelativeTo (componentToDrag).getMouseDownPosition();
 }
 
 void ComponentDragger::dragComponent (Component* const componentToDrag, const MouseEvent& e,
                                       ComponentBoundsConstrainer* const constrainer)
 {
-    jassert (componentToDrag != 0);
+    jassert (componentToDrag != nullptr);
     jassert (e.mods.isAnyMouseButtonDown()); // The event has to be a drag event!
 
-    if (componentToDrag != 0)
+    if (componentToDrag != nullptr)
     {
         Rectangle<int> bounds (componentToDrag->getBounds());
 
@@ -68,7 +68,7 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
         else
             bounds += e.getEventRelativeTo (componentToDrag).getPosition() - mouseDownWithinTarget;
 
-        if (constrainer != 0)
+        if (constrainer != nullptr)
             constrainer->setBoundsForComponent (componentToDrag, bounds, false, false, false, false);
         else
             componentToDrag->setBounds (bounds);

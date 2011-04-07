@@ -103,7 +103,7 @@ namespace
         return Time();
     }
 
-    bool timesAreDifferent (const Time& t1, const Time& t2) throw()
+    bool timesAreDifferent (const Time& t1, const Time& t2) noexcept
     {
         return t1 != t2 || t1 == Time();
     }
@@ -136,7 +136,7 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
     bool addedOne = false;
 
     if (dontRescanIfAlreadyInList
-         && getTypeForFile (fileOrIdentifier) != 0)
+         && getTypeForFile (fileOrIdentifier) != nullptr)
     {
         bool needsRescanning = false;
 
@@ -163,7 +163,7 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
     for (int i = 0; i < found.size(); ++i)
     {
         PluginDescription* const desc = found.getUnchecked(i);
-        jassert (desc != 0);
+        jassert (desc != nullptr);
 
         if (addType (*desc))
             addedOne = true;
@@ -217,7 +217,7 @@ class PluginSorter
 public:
     KnownPluginList::SortMethod method;
 
-    PluginSorter() throw() {}
+    PluginSorter() noexcept {}
 
     int compareElements (const PluginDescription* const first,
                          const PluginDescription* const second) const

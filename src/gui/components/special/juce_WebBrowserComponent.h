@@ -72,8 +72,8 @@ public:
                         POST request
     */
     void goToURL (const String& url,
-                  const StringArray* headers = 0,
-                  const MemoryBlock* postData = 0);
+                  const StringArray* headers = nullptr,
+                  const MemoryBlock* postData = nullptr);
 
     /** Stops the current page loading.
     */

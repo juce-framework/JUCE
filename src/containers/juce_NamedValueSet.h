@@ -41,7 +41,7 @@ class JUCE_API  NamedValueSet
 {
 public:
     /** Creates an empty set. */
-    NamedValueSet() throw();
+    NamedValueSet() noexcept;
 
     /** Creates a copy of another set. */
     NamedValueSet (const NamedValueSet& other);
@@ -57,7 +57,7 @@ public:
 
     //==============================================================================
     /** Returns the total number of values that the set contains. */
-    int size() const throw();
+    int size() const noexcept;
 
     /** Returns the value of a named item.
         If the name isn't found, this will return a void variant.
@@ -121,11 +121,11 @@ private:
     class NamedValue
     {
     public:
-        NamedValue() throw();
+        NamedValue() noexcept;
         NamedValue (const NamedValue&);
         NamedValue (const Identifier& name, const var& value);
         NamedValue& operator= (const NamedValue&);
-        bool operator== (const NamedValue& other) const throw();
+        bool operator== (const NamedValue& other) const noexcept;
 
         LinkedListPointer<NamedValue> nextListItem;
         Identifier name;

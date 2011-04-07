@@ -31,7 +31,7 @@
 //==============================================================================
 static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
 {
-    if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
+    if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
     {
         const String fontName (lpelfe->elfLogFont.lfFaceName);
 
@@ -43,7 +43,7 @@ static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int t
 
 static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
 {
-    if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
+    if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
     {
         LOGFONTW lf = { 0 };
         lf.lfWeight = FW_DONTCARE;
@@ -188,7 +188,7 @@ public:
     //==============================================================================
     KERNINGPAIR* getKerningPairs (int& numKPs_)
     {
-        if (kps == 0)
+        if (kps == nullptr)
         {
             numKPs = GetKerningPairs (dc, 0, 0);
             kps.calloc (numKPs);

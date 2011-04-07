@@ -51,7 +51,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
     {
         filter = createPluginFilter();
 
-        if (filter != 0)
+        if (filter != nullptr)
         {
             filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
                                           JucePlugin_MaxNumOutputChannels,
@@ -64,7 +64,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
             ScopedPointer<XmlElement> savedState;
 
-            if (globalSettings != 0)
+            if (globalSettings != nullptr)
                 savedState = globalSettings->getXmlValue ("audioSetup");
 
             deviceManager->initialise (filter->getNumInputChannels(),
@@ -72,7 +72,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
                                        savedState,
                                        true);
 
-            if (globalSettings != 0)
+            if (globalSettings != nullptr)
             {
                 MemoryBlock data;
 
@@ -96,7 +96,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
     }
     JUCE_CATCH_ALL
 
-    if (deviceManager == 0)
+    if (deviceManager == nullptr)
     {
         jassertfalse    // Your filter didn't create correctly! In a standalone app that's not too great.
         JUCEApplication::quit();
@@ -107,18 +107,21 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
 {
     PropertySet* const globalSettings = getGlobalSettings();
 
-    globalSettings->setValue ("windowX", getX());
-    globalSettings->setValue ("windowY", getY());
-
-    if (globalSettings != 0 && deviceManager != 0)
+    if (globalSettings != nullptr)
     {
-        ScopedPointer<XmlElement> xml (deviceManager->createStateXml());
-        globalSettings->setValue ("audioSetup", xml);
+        globalSettings->setValue ("windowX", getX());
+        globalSettings->setValue ("windowY", getY());
+
+        if (deviceManager != nullptr)
+        {
+            ScopedPointer<XmlElement> xml (deviceManager->createStateXml());
+            globalSettings->setValue ("audioSetup", xml);
+        }
     }
 
-    deviceManager = 0;
+    deviceManager = nullptr;
 
-    if (globalSettings != 0 && filter != 0)
+    if (globalSettings != nullptr && filter != nullptr)
     {
         MemoryBlock data;
         filter->getStateInformation (data);
@@ -132,16 +135,16 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
 //==============================================================================
 void StandaloneFilterWindow::deleteFilter()
 {
-    if (deviceManager != 0)
-        deviceManager->setFilter (0);
+    if (deviceManager != nullptr)
+        deviceManager->setFilter (nullptr);
 
-    if (filter != 0 && getContentComponent() != 0)
+    if (filter != nullptr && getContentComponent() != nullptr)
     {
         filter->editorBeingDeleted (dynamic_cast <AudioProcessorEditor*> (getContentComponent()));
         clearContentComponent();
     }
 
-    filter = 0;
+    filter = nullptr;
 }
 
 void StandaloneFilterWindow::resetFilter()
@@ -150,9 +153,9 @@ void StandaloneFilterWindow::resetFilter()
 
     filter = createPluginFilter();
 
-    if (filter != 0)
+    if (filter != nullptr)
     {
-        if (deviceManager != 0)
+        if (deviceManager != nullptr)
             deviceManager->setFilter (filter);
 
         setContentOwned (filter->createEditorIfNeeded(), true);
@@ -160,7 +163,7 @@ void StandaloneFilterWindow::resetFilter()
 
     PropertySet* const globalSettings = getGlobalSettings();
 
-    if (globalSettings != 0)
+    if (globalSettings != nullptr)
         globalSettings->removeValue ("filterState");
 }
 
@@ -170,8 +173,8 @@ void StandaloneFilterWindow::saveState()
     PropertySet* const globalSettings = getGlobalSettings();
 
     FileChooser fc (TRANS("Save current state"),
-                    globalSettings != 0 ? File (globalSettings->getValue ("lastStateFile"))
-                                        : File::nonexistent);
+                    globalSettings != nullptr ? File (globalSettings->getValue ("lastStateFile"))
+                                              : File::nonexistent);
 
     if (fc.browseForFileToSave (true))
     {
@@ -192,8 +195,8 @@ void StandaloneFilterWindow::loadState()
     PropertySet* const globalSettings = getGlobalSettings();
 
     FileChooser fc (TRANS("Load a saved state"),
-                    globalSettings != 0 ? File (globalSettings->getValue ("lastStateFile"))
-                                        : File::nonexistent);
+                    globalSettings != nullptr ? File (globalSettings->getValue ("lastStateFile"))
+                                              : File::nonexistent);
 
     if (fc.browseForFileToOpen())
     {
@@ -255,7 +258,7 @@ void StandaloneFilterWindow::resized()
 
 void StandaloneFilterWindow::buttonClicked (Button*)
 {
-    if (filter == 0)
+    if (filter == nullptr)
         return;
 
     PopupMenu m;

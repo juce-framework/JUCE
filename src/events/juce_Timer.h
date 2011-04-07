@@ -60,14 +60,14 @@ protected:
 
         When created, the timer is stopped, so use startTimer() to get it going.
     */
-    Timer() throw();
+    Timer() noexcept;
 
     /** Creates a copy of another timer.
 
         Note that this timer won't be started, even if the one you're copying
         is running.
     */
-    Timer (const Timer& other) throw();
+    Timer (const Timer& other) noexcept;
 
 public:
     //==============================================================================
@@ -92,7 +92,7 @@ public:
         @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
                                         rounded up to 1)
     */
-    void startTimer (int intervalInMilliseconds) throw();
+    void startTimer (int intervalInMilliseconds) noexcept;
 
     /** Stops the timer.
 
@@ -102,20 +102,20 @@ public:
         be currently executing may be allowed to finish before the method
         returns.
     */
-    void stopTimer() throw();
+    void stopTimer() noexcept;
 
     //==============================================================================
     /** Checks if the timer has been started.
 
         @returns true if the timer is running.
     */
-    bool isTimerRunning() const throw()                     { return periodMs > 0; }
+    bool isTimerRunning() const noexcept                    { return periodMs > 0; }
 
     /** Returns the timer's interval.
 
         @returns the timer's interval in milliseconds if it's running, or 0 if it's not.
     */
-    int getTimerInterval() const throw()                    { return periodMs; }
+    int getTimerInterval() const noexcept                   { return periodMs; }
 
 
     //==============================================================================

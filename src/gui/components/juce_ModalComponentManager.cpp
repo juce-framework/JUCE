@@ -43,7 +43,7 @@ public:
         : ComponentMovementWatcher (comp),
           component (comp), returnValue (0), isActive (true)
     {
-        jassert (comp != 0);
+        jassert (comp != nullptr);
     }
 
     void componentMovedOrResized (bool, bool) {}
@@ -102,13 +102,13 @@ juce_ImplementSingleton_SingleThreaded (ModalComponentManager);
 //==============================================================================
 void ModalComponentManager::startModal (Component* component)
 {
-    if (component != 0)
+    if (component != nullptr)
         stack.add (new ModalItem (component));
 }
 
 void ModalComponentManager::attachCallback (Component* component, Callback* callback)
 {
-    if (callback != 0)
+    if (callback != nullptr)
     {
         ScopedPointer<Callback> callbackDeleter (callback);
 
@@ -210,20 +210,20 @@ void ModalComponentManager::handleAsyncUpdate()
 
 void ModalComponentManager::bringModalComponentsToFront (bool topOneShouldGrabFocus)
 {
-    ComponentPeer* lastOne = 0;
+    ComponentPeer* lastOne = nullptr;
 
     for (int i = 0; i < getNumModalComponents(); ++i)
     {
         Component* const c = getModalComponent (i);
 
-        if (c == 0)
+        if (c == nullptr)
             break;
 
         ComponentPeer* peer = c->getPeer();
 
-        if (peer != 0 && peer != lastOne)
+        if (peer != nullptr && peer != lastOne)
         {
-            if (lastOne == 0)
+            if (lastOne == nullptr)
             {
                 peer->toFront (topOneShouldGrabFocus);
 
@@ -264,7 +264,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     Component* currentlyModal = getModalComponent (0);
 
-    if (currentlyModal == 0)
+    if (currentlyModal == nullptr)
         return 0;
 
     WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
@@ -283,7 +283,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
     }
     JUCE_CATCH_EXCEPTION
 
-    if (prevFocused != 0)
+    if (prevFocused != nullptr)
         prevFocused->grabKeyboardFocus();
 
     return returnValue;

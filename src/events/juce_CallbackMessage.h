@@ -49,7 +49,7 @@ class JUCE_API  CallbackMessage   : public Message
 {
 public:
     //==============================================================================
-    CallbackMessage() throw();
+    CallbackMessage() noexcept;
 
     /** Destructor. */
     ~CallbackMessage();

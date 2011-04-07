@@ -46,7 +46,7 @@ class JUCE_API  StringPool
 public:
     //==============================================================================
     /** Creates an empty pool. */
-    StringPool() throw();
+    StringPool() noexcept;
 
     /** Destructor */
     ~StringPool();
@@ -78,10 +78,10 @@ public:
 
     //==============================================================================
     /** Returns the number of strings in the pool. */
-    int size() const throw();
+    int size() const noexcept;
 
     /** Returns one of the strings in the pool, by index. */
-    const String::CharPointerType operator[] (int index) const throw();
+    const String::CharPointerType operator[] (int index) const noexcept;
 
 private:
     Array <String> strings;

@@ -46,7 +46,7 @@ public:
 
     void paint (Graphics& g)
     {
-        if (owner.getModel() != 0)
+        if (owner.getModel() != nullptr)
             owner.getModel()->paintListBoxItem (row, g, getWidth(), getHeight(), selected);
     }
 
@@ -59,11 +59,11 @@ public:
             selected = selected_;
         }
 
-        if (owner.getModel() != 0)
+        if (owner.getModel() != nullptr)
         {
             customComponent = owner.getModel()->refreshComponentForRow (row_, selected_, customComponent.release());
 
-            if (customComponent != 0)
+            if (customComponent != nullptr)
             {
                 addAndMakeVisible (customComponent);
                 customComponent->setBounds (getLocalBounds());
@@ -82,7 +82,7 @@ public:
             {
                 owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
-                if (owner.getModel() != 0)
+                if (owner.getModel() != nullptr)
                     owner.getModel()->listBoxItemClicked (row, e);
             }
             else
@@ -98,20 +98,20 @@ public:
         {
             owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
 
-            if (owner.getModel() != 0)
+            if (owner.getModel() != nullptr)
                 owner.getModel()->listBoxItemClicked (row, e);
         }
     }
 
     void mouseDoubleClick (const MouseEvent& e)
     {
-        if (owner.getModel() != 0 && isEnabled())
+        if (owner.getModel() != nullptr && isEnabled())
             owner.getModel()->listBoxItemDoubleClicked (row, e);
     }
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (isEnabled() && owner.getModel() != 0 && ! (e.mouseWasClicked() || isDragging))
+        if (isEnabled() && owner.getModel() != nullptr && ! (e.mouseWasClicked() || isDragging))
         {
             const SparseSet<int> selectedRows (owner.getSelectedRows());
 
@@ -130,13 +130,13 @@ public:
 
     void resized()
     {
-        if (customComponent != 0)
+        if (customComponent != nullptr)
             customComponent->setBounds (getLocalBounds());
     }
 
     const String getTooltip()
     {
-        if (owner.getModel() != 0)
+        if (owner.getModel() != nullptr)
             return owner.getModel()->getTooltipForRow (row);
 
         return String::empty;
@@ -169,18 +169,18 @@ public:
         content->setWantsKeyboardFocus (false);
     }
 
-    ListBoxRowComponent* getComponentForRow (const int row) const throw()
+    ListBoxRowComponent* getComponentForRow (const int row) const noexcept
     {
         return rows [row % jmax (1, rows.size())];
     }
 
-    ListBoxRowComponent* getComponentForRowIfOnscreen (const int row) const throw()
+    ListBoxRowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
     {
         return (row >= firstIndex && row < firstIndex + rows.size())
                  ? getComponentForRow (row) : 0;
     }
 
-    int getRowNumberOfComponent (Component* const rowComponent) const throw()
+    int getRowNumberOfComponent (Component* const rowComponent) const noexcept
     {
         const int index = getIndexOfChildComponent (rowComponent);
         const int num = rows.size();
@@ -196,7 +196,7 @@ public:
     {
         updateVisibleArea (true);
 
-        if (owner.getModel() != 0)
+        if (owner.getModel() != nullptr)
             owner.getModel()->listWasScrolled();
     }
 
@@ -247,7 +247,7 @@ public:
                 const int row = i + firstIndex;
                 ListBoxRowComponent* const rowComp = getComponentForRow (row);
 
-                if (rowComp != 0)
+                if (rowComp != nullptr)
                 {
                     rowComp->setBounds (0, row * rowHeight, w, rowHeight);
                     rowComp->update (row, owner.isRowSelected (row));
@@ -255,7 +255,7 @@ public:
             }
         }
 
-        if (owner.headerComponent != 0)
+        if (owner.headerComponent != nullptr)
             owner.headerComponent->setBounds (owner.outlineThickness + getViewedComponent()->getX(),
                                               owner.outlineThickness,
                                               jmax (owner.getWidth() - owner.outlineThickness * 2,
@@ -361,8 +361,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const model_)
 
 ListBox::~ListBox()
 {
-    headerComponent = 0;
-    viewport = 0;
+    headerComponent = nullptr;
+    viewport = nullptr;
 }
 
 void ListBox::setModel (ListBoxModel* const newModel)
@@ -408,7 +408,7 @@ void ListBox::paintOverChildren (Graphics& g)
 
 void ListBox::resized()
 {
-    viewport->setBoundsInset (BorderSize<int> (outlineThickness + ((headerComponent != 0) ? headerComponent->getHeight() : 0),
+    viewport->setBoundsInset (BorderSize<int> (outlineThickness + ((headerComponent != nullptr) ? headerComponent->getHeight() : 0),
                                                outlineThickness, outlineThickness, outlineThickness));
 
     viewport->setSingleStepSizes (20, getRowHeight());
@@ -421,7 +421,7 @@ void ListBox::visibilityChanged()
     viewport->updateVisibleArea (true);
 }
 
-Viewport* ListBox::getViewport() const throw()
+Viewport* ListBox::getViewport() const noexcept
 {
     return viewport;
 }
@@ -430,7 +430,7 @@ Viewport* ListBox::getViewport() const throw()
 void ListBox::updateContent()
 {
     hasDoneInitialUpdate = true;
-    totalItems = (model != 0) ? model->getNumRows() : 0;
+    totalItems = (model != nullptr) ? model->getNumRows() : 0;
 
     bool selectionChanged = false;
 
@@ -444,7 +444,7 @@ void ListBox::updateContent()
     viewport->updateVisibleArea (isVisible());
     viewport->resized();
 
-    if (selectionChanged && model != 0)
+    if (selectionChanged && model != nullptr)
         model->selectedRowsChanged (lastRowSelected);
 }
 
@@ -516,7 +516,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
 
     viewport->updateContents();
 
-    if ((model != 0) && sendNotificationEventToModel)
+    if ((model != nullptr) && sendNotificationEventToModel)
         model->selectedRowsChanged (lastRowSelected);
 }
 
@@ -559,7 +559,7 @@ void ListBox::deselectAllRows()
 
         viewport->updateContents();
 
-        if (model != 0)
+        if (model != nullptr)
             model->selectedRowsChanged (lastRowSelected);
     }
 }
@@ -604,7 +604,7 @@ int ListBox::getLastRowSelected() const
 }
 
 //==============================================================================
-int ListBox::getRowContainingPosition (const int x, const int y) const throw()
+int ListBox::getRowContainingPosition (const int x, const int y) const noexcept
 {
     if (isPositiveAndBelow (x, getWidth()))
     {
@@ -617,7 +617,7 @@ int ListBox::getRowContainingPosition (const int x, const int y) const throw()
     return -1;
 }
 
-int ListBox::getInsertionIndexForPosition (const int x, const int y) const throw()
+int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexcept
 {
     if (isPositiveAndBelow (x, getWidth()))
     {
@@ -628,19 +628,19 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const throw
     return -1;
 }
 
-Component* ListBox::getComponentForRowNumber (const int row) const throw()
+Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
     ListBoxRowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
-    return listRowComp != 0 ? static_cast <Component*> (listRowComp->customComponent) : 0;
+    return listRowComp != nullptr ? static_cast <Component*> (listRowComp->customComponent) : 0;
 }
 
-int ListBox::getRowNumberOfComponent (Component* const rowComponent) const throw()
+int ListBox::getRowNumberOfComponent (Component* const rowComponent) const noexcept
 {
     return viewport->getRowNumberOfComponent (rowComponent);
 }
 
 const Rectangle<int> ListBox::getRowPosition (const int rowNumber,
-                                              const bool relativeToComponentTopLeft) const throw()
+                                              const bool relativeToComponentTopLeft) const noexcept
 {
     int y = viewport->getY() + rowHeight * rowNumber;
 
@@ -667,7 +667,7 @@ double ListBox::getVerticalPosition() const
                            : 0;
 }
 
-int ListBox::getVisibleRowWidth() const throw()
+int ListBox::getVisibleRowWidth() const noexcept
 {
     return viewport->getViewWidth();
 }
@@ -698,7 +698,7 @@ bool ListBox::keyPressed (const KeyPress& key)
     else if (key.isKeyCode (KeyPress::returnKey)
               && isRowSelected (lastRowSelected))
     {
-        if (model != 0)
+        if (model != nullptr)
             model->returnKeyPressed (lastRowSelected);
     }
     else if (key.isKeyCode (KeyPress::pageUpKey))
@@ -739,7 +739,7 @@ bool ListBox::keyPressed (const KeyPress& key)
     else if ((key.isKeyCode (KeyPress::deleteKey) || key.isKeyCode (KeyPress::backspaceKey))
                && isRowSelected (lastRowSelected))
     {
-        if (model != 0)
+        if (model != nullptr)
             model->deleteKeyPressed (lastRowSelected);
     }
     else if (multiple && key == KeyPress ('a', ModifierKeys::commandModifier, 0))
@@ -802,7 +802,7 @@ void ListBox::mouseExit (const MouseEvent& e)
 
 void ListBox::mouseUp (const MouseEvent& e)
 {
-    if (e.mouseWasClicked() && model != 0)
+    if (e.mouseWasClicked() && model != nullptr)
         model->backgroundClicked();
 }
 
@@ -814,7 +814,7 @@ void ListBox::setRowHeight (const int newHeight)
     updateContent();
 }
 
-int ListBox::getNumRowsOnScreen() const throw()
+int ListBox::getNumRowsOnScreen() const noexcept
 {
     return viewport->getMaximumVisibleHeight() / rowHeight;
 }
@@ -825,17 +825,17 @@ void ListBox::setMinimumContentWidth (const int newMinimumWidth)
     updateContent();
 }
 
-int ListBox::getVisibleContentWidth() const throw()
+int ListBox::getVisibleContentWidth() const noexcept
 {
     return viewport->getMaximumVisibleWidth();
 }
 
-ScrollBar* ListBox::getVerticalScrollBar() const throw()
+ScrollBar* ListBox::getVerticalScrollBar() const noexcept
 {
     return viewport->getVerticalScrollBar();
 }
 
-ScrollBar* ListBox::getHorizontalScrollBar() const throw()
+ScrollBar* ListBox::getHorizontalScrollBar() const noexcept
 {
     return viewport->getHorizontalScrollBar();
 }
@@ -864,7 +864,7 @@ void ListBox::setHeaderComponent (Component* const newHeaderComponent)
     }
 }
 
-void ListBox::repaintRow (const int rowNumber) throw()
+void ListBox::repaintRow (const int rowNumber) noexcept
 {
     repaint (getRowPosition (rowNumber, true));
 }
@@ -879,7 +879,7 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 
-        if (rowComp != 0 && isRowSelected (firstRow + i))
+        if (rowComp != nullptr && isRowSelected (firstRow + i))
         {
             const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
             const Rectangle<int> rowRect (pos.getX(), pos.getY(), rowComp->getWidth(), rowComp->getHeight());
@@ -896,7 +896,7 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 
-        if (rowComp != 0 && isRowSelected (firstRow + i))
+        if (rowComp != nullptr && isRowSelected (firstRow + i))
         {
             const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
 
@@ -920,7 +920,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescripti
     DragAndDropContainer* const dragContainer
         = DragAndDropContainer::findParentDragContainerFor (this);
 
-    if (dragContainer != 0)
+    if (dragContainer != nullptr)
     {
         int x, y;
         Image dragImage (createSnapshotOfSelectedRows (x, y));
@@ -941,7 +941,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescripti
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)
 {
     (void) existingComponentToUpdate;
-    jassert (existingComponentToUpdate == 0); // indicates a failure in the code the recycles the components
+    jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
     return 0;
 }
 

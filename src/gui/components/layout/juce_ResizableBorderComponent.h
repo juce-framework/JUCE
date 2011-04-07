@@ -106,12 +106,12 @@ public:
 
         //==============================================================================
         /** Creates a Zone from a combination of the flags in \enum Zones. */
-        explicit Zone (int zoneFlags = 0) throw();
-        Zone (const Zone& other) throw();
-        Zone& operator= (const Zone& other) throw();
+        explicit Zone (int zoneFlags = 0) noexcept;
+        Zone (const Zone& other) noexcept;
+        Zone& operator= (const Zone& other) noexcept;
 
-        bool operator== (const Zone& other) const throw();
-        bool operator!= (const Zone& other) const throw();
+        bool operator== (const Zone& other) const noexcept;
+        bool operator!= (const Zone& other) const noexcept;
 
         //==============================================================================
         /** Given a point within a rectangle with a resizable border, this returns the
@@ -122,25 +122,25 @@ public:
                                                 const Point<int>& position);
 
         /** Returns an appropriate mouse-cursor for this resize zone. */
-        const MouseCursor getMouseCursor() const throw();
+        const MouseCursor getMouseCursor() const noexcept;
 
         /** Returns true if dragging this zone will move the enire object without resizing it. */
-        bool isDraggingWholeObject() const throw()      { return zone == centre; }
+        bool isDraggingWholeObject() const noexcept     { return zone == centre; }
         /** Returns true if dragging this zone will move the object's left edge. */
-        bool isDraggingLeftEdge() const throw()         { return (zone & left) != 0; }
+        bool isDraggingLeftEdge() const noexcept        { return (zone & left) != 0; }
         /** Returns true if dragging this zone will move the object's right edge. */
-        bool isDraggingRightEdge() const throw()        { return (zone & right) != 0; }
+        bool isDraggingRightEdge() const noexcept       { return (zone & right) != 0; }
         /** Returns true if dragging this zone will move the object's top edge. */
-        bool isDraggingTopEdge() const throw()          { return (zone & top) != 0; }
+        bool isDraggingTopEdge() const noexcept         { return (zone & top) != 0; }
         /** Returns true if dragging this zone will move the object's bottom edge. */
-        bool isDraggingBottomEdge() const throw()       { return (zone & bottom) != 0; }
+        bool isDraggingBottomEdge() const noexcept      { return (zone & bottom) != 0; }
 
         /** Resizes this rectangle by the given amount, moving just the edges that this zone
             applies to.
         */
         template <typename ValueType>
         const Rectangle<ValueType> resizeRectangleBy (Rectangle<ValueType> original,
-                                                      const Point<ValueType>& distance) const throw()
+                                                      const Point<ValueType>& distance) const noexcept
         {
             if (isDraggingWholeObject())
                 return original + distance;
@@ -161,7 +161,7 @@ public:
         }
 
         /** Returns the raw flags for this zone. */
-        int getZoneFlags() const throw()                { return zone; }
+        int getZoneFlags() const noexcept               { return zone; }
 
     private:
         //==============================================================================

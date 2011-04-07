@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-AudioPluginFormat::AudioPluginFormat() throw()
+AudioPluginFormat::AudioPluginFormat() noexcept
 {
 }
 

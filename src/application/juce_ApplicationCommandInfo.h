@@ -48,7 +48,7 @@
 struct JUCE_API  ApplicationCommandInfo
 {
     //==============================================================================
-    explicit ApplicationCommandInfo (CommandID commandID) throw();
+    explicit ApplicationCommandInfo (CommandID commandID) noexcept;
 
     //==============================================================================
     /** Sets a number of the structures values at once.
@@ -59,18 +59,18 @@ struct JUCE_API  ApplicationCommandInfo
     void setInfo (const String& shortName,
                   const String& description,
                   const String& categoryName,
-                  int flags) throw();
+                  int flags) noexcept;
 
     /** An easy way to set or remove the isDisabled bit in the structure's flags field.
 
         If isActive is true, the flags member has the isDisabled bit cleared; if isActive
         is false, the bit is set.
     */
-    void setActive (bool isActive) throw();
+    void setActive (bool isActive) noexcept;
 
     /** An easy way to set or remove the isTicked bit in the structure's flags field.
     */
-    void setTicked (bool isTicked) throw();
+    void setTicked (bool isTicked) noexcept;
 
     /** Handy method for adding a keypress to the defaultKeypresses array.
 
@@ -84,7 +84,7 @@ struct JUCE_API  ApplicationCommandInfo
         @endcode
     */
     void addDefaultKeypress (int keyCode,
-                             const ModifierKeys& modifiers) throw();
+                             const ModifierKeys& modifiers) noexcept;
 
     //==============================================================================
     /** The command's unique ID number.

@@ -159,7 +159,7 @@ const String Project::loadDocument (const File& file)
 {
     ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
 
-    if (xml == 0 || ! xml->hasTagName (Tags::projectRoot.toString()))
+    if (xml == nullptr || ! xml->hasTagName (Tags::projectRoot.toString()))
         return "Not a valid Jucer project!";
 
     ValueTree newTree (ValueTree::fromXml (*xml));
@@ -304,7 +304,7 @@ const File Project::getLocalJuceFolder()
 {
     ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*this));
 
-    if (exp != 0)
+    if (exp != nullptr)
     {
         File f (resolveFilename (exp->getJuceFolder().toString()));
 
@@ -925,8 +925,8 @@ const String Project::getUniqueConfigName (String name) const
 
 void Project::addNewConfiguration (BuildConfiguration* configToCopy)
 {
-    const String configName (getUniqueConfigName (configToCopy != 0 ? configToCopy->config [Ids::name].toString()
-                                                                    : "New Build Configuration"));
+    const String configName (getUniqueConfigName (configToCopy != nullptr ? configToCopy->config [Ids::name].toString()
+                                                                          : "New Build Configuration"));
 
     ValueTree configs (getConfigurations());
 
@@ -937,7 +937,7 @@ void Project::addNewConfiguration (BuildConfiguration* configToCopy)
     }
 
     ValueTree newConfig (Tags::configuration);
-    if (configToCopy != 0)
+    if (configToCopy != nullptr)
         newConfig = configToCopy->config.createCopy();
 
     newConfig.setProperty (Ids::name, configName, 0);
@@ -955,7 +955,7 @@ void Project::createDefaultConfigs()
 {
     for (int i = 0; i < 2; ++i)
     {
-        addNewConfiguration (0);
+        addNewConfiguration (nullptr);
         BuildConfiguration config = getConfiguration (i);
 
         const bool debugConfig = i == 0;
@@ -1128,7 +1128,7 @@ const String Project::getFileTemplate (const String& templateName)
     int dataSize;
     const char* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize);
 
-    if (data == 0)
+    if (data == nullptr)
     {
         jassertfalse;
         return String::empty;

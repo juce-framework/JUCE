@@ -43,7 +43,7 @@ class JUCE_API  Identifier
 {
 public:
     /** Creates a null identifier. */
-    Identifier() throw();
+    Identifier() noexcept;
 
     /** Creates an identifier with a specified name.
         Because this name may need to be used in contexts such as script variables or XML
@@ -58,25 +58,25 @@ public:
     Identifier (const String& name);
 
     /** Creates a copy of another identifier. */
-    Identifier (const Identifier& other) throw();
+    Identifier (const Identifier& other) noexcept;
 
     /** Creates a copy of another identifier. */
-    Identifier& operator= (const Identifier& other) throw();
+    Identifier& operator= (const Identifier& other) noexcept;
 
     /** Destructor */
     ~Identifier();
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator== (const Identifier& other) const throw()      { return name == other.name; }
+    inline bool operator== (const Identifier& other) const noexcept     { return name == other.name; }
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator!= (const Identifier& other) const throw()      { return name != other.name; }
+    inline bool operator!= (const Identifier& other) const noexcept     { return name != other.name; }
 
     /** Returns this identifier as a string. */
     const String toString() const                                       { return name; }
 
     /** Returns this identifier's raw string pointer. */
-    operator const String::CharPointerType() const throw()              { return name; }
+    operator const String::CharPointerType() const noexcept             { return name; }
 
 private:
     //==============================================================================

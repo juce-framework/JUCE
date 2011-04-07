@@ -87,7 +87,7 @@ public:
     PropertiesFile (const File& file,
                     int millisecondsBeforeSaving,
                     int optionFlags,
-                    InterProcessLock* processLock = 0);
+                    InterProcessLock* processLock = nullptr);
 
     /** Destructor.
 
@@ -100,7 +100,7 @@ public:
         If the file failed to load correctly because it was corrupt or had insufficient
         access, this will be false.
     */
-    bool isValidFile() const throw()                { return loadedOk; }
+    bool isValidFile() const noexcept               { return loadedOk; }
 
     //==============================================================================
     /** This will flush all the values to disk if they've changed since the last
@@ -155,7 +155,7 @@ public:
                                                            bool commonToAllUsers,
                                                            int millisecondsBeforeSaving,
                                                            int propertiesFileOptions,
-                                                           InterProcessLock* processLock = 0);
+                                                           InterProcessLock* processLock = nullptr);
 
     /** Handy utility to choose a file in the standard OS-dependent location for application
         settings files.

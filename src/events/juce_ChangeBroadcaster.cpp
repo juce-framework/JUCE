@@ -32,10 +32,10 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ChangeBroadcaster::ChangeBroadcaster() throw()
+ChangeBroadcaster::ChangeBroadcaster() noexcept
 {
     // are you trying to create this object before or after juce has been intialised??
-    jassert (MessageManager::instance != 0);
+    jassert (MessageManager::instance != nullptr);
 
     callback.owner = this;
 }
@@ -43,7 +43,7 @@ ChangeBroadcaster::ChangeBroadcaster() throw()
 ChangeBroadcaster::~ChangeBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
-    jassert (MessageManager::instance != 0);
+    jassert (MessageManager::instance != nullptr);
 }
 
 void ChangeBroadcaster::addChangeListener (ChangeListener* const listener)
@@ -100,13 +100,13 @@ void ChangeBroadcaster::callListeners()
 
 //==============================================================================
 ChangeBroadcaster::ChangeBroadcasterCallback::ChangeBroadcasterCallback()
-    : owner (0)
+    : owner (nullptr)
 {
 }
 
 void ChangeBroadcaster::ChangeBroadcasterCallback::handleAsyncUpdate()
 {
-    jassert (owner != 0);
+    jassert (owner != nullptr);
     owner->callListeners();
 }
 

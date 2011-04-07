@@ -53,7 +53,7 @@ public:
 
     //==============================================================================
     /** Returns the description that the filter was created with. */
-    const String& getDescription() const throw();
+    const String& getDescription() const noexcept;
 
     //==============================================================================
     /** Should return true if this file is suitable for inclusion in whatever context

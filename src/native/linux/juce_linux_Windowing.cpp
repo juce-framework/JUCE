@@ -160,7 +160,7 @@ namespace XSHMHelpers
         return 0;
     }
 
-    static bool isShmAvailable() throw()
+    static bool isShmAvailable() noexcept
     {
         static bool isChecked = false;
         static bool isAvailable = false;
@@ -275,7 +275,7 @@ namespace XRender
     {
         ScopedXLock xlock;
 
-        XRenderPictFormat* pictFormat = 0;
+        XRenderPictFormat* pictFormat = nullptr;
 
         if (isAvailable())
         {
@@ -316,11 +316,11 @@ namespace XRender
 //==============================================================================
 namespace Visuals
 {
-    static Visual* findVisualWithDepth (const int desiredDepth) throw()
+    static Visual* findVisualWithDepth (const int desiredDepth) noexcept
     {
         ScopedXLock xlock;
 
-        Visual* visual = 0;
+        Visual* visual = nullptr;
         int numVisuals = 0;
         long desiredMask = VisualNoMask;
         XVisualInfo desiredVisual;
@@ -367,9 +367,9 @@ namespace Visuals
         return visual;
     }
 
-    static Visual* findVisualFormat (const int desiredDepth, int& matchedDepth) throw()
+    static Visual* findVisualFormat (const int desiredDepth, int& matchedDepth) noexcept
     {
-        Visual* visual = 0;
+        Visual* visual = nullptr;
 
         if (desiredDepth == 32)
         {
@@ -569,7 +569,7 @@ public:
         else
 #endif
         {
-            xImage->data = 0;
+            xImage->data = nullptr;
             XDestroyImage (xImage);
         }
     }
@@ -670,7 +670,7 @@ private:
     bool usingXShm;
 #endif
 
-    static int getShiftNeeded (const uint32 mask) throw()
+    static int getShiftNeeded (const uint32 mask) noexcept
     {
         for (int i = 32; --i >= 0;)
             if (((mask >> i) & 1) != 0)
@@ -781,14 +781,14 @@ public:
         return (void*) windowH;
     }
 
-    static LinuxComponentPeer* getPeerFor (Window windowHandle) throw()
+    static LinuxComponentPeer* getPeerFor (Window windowHandle) noexcept
     {
         XPointer peer = 0;
 
         ScopedXLock xlock;
         if (! XFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
         {
-            if (peer != 0 && ! ComponentPeer::isValidPeer ((LinuxComponentPeer*) peer))
+            if (peer != nullptr && ! ComponentPeer::isValidPeer ((LinuxComponentPeer*) peer))
                 peer = 0;
         }
 
@@ -958,7 +958,7 @@ public:
 
     bool isChildWindowOf (Window possibleParent) const
     {
-        Window* windowList = 0;
+        Window* windowList = nullptr;
         uint32 windowListSize = 0;
         Window parent, root;
 
@@ -976,7 +976,7 @@ public:
 
     bool isFrontWindow() const
     {
-        Window* windowList = 0;
+        Window* windowList = nullptr;
         uint32 windowListSize = 0;
         bool result = false;
 
@@ -1438,14 +1438,14 @@ public:
         {
             lastMousePos = mousePos;
 
-            if (parentWindow != 0 && (styleFlags & windowHasTitleBar) == 0)
+            if (parentWindow != nullptr && (styleFlags & windowHasTitleBar) == 0)
             {
                 Window wRoot = 0, wParent = 0;
 
                 {
                     ScopedXLock xlock;
                     unsigned int numChildren;
-                    Window* wChild = 0;
+                    Window* wChild = nullptr;
                     XQueryTree (display, windowH, &wRoot, &wParent, &wChild, &numChildren);
                 }
 
@@ -1562,7 +1562,7 @@ public:
     {
         parentWindow = 0;
         Window wRoot = 0;
-        Window* wChild = 0;
+        Window* wChild = nullptr;
         unsigned int numChildren;
 
         {
@@ -1653,7 +1653,7 @@ public:
     }
 
     //==============================================================================
-    void showMouseCursor (Cursor cursor) throw()
+    void showMouseCursor (Cursor cursor) noexcept
     {
         ScopedXLock xlock;
         XDefineCursor (display, windowH, cursor);
@@ -1716,7 +1716,7 @@ public:
         XFree (hints);
     }
 
-    const Image& getTaskbarIcon() const throw()           { return taskbarImage; }
+    const Image& getTaskbarIcon() const noexcept          { return taskbarImage; }
 
     //==============================================================================
     bool dontRepaint;
@@ -1886,7 +1886,7 @@ private:
         unsigned long status;
     };
 
-    static void updateKeyStates (const int keycode, const bool press) throw()
+    static void updateKeyStates (const int keycode, const bool press) noexcept
     {
         const int keybyte = keycode >> 3;
         const int keybit = (1 << (keycode & 7));
@@ -1897,7 +1897,7 @@ private:
             Keys::keyStates [keybyte] &= ~keybit;
     }
 
-    static void updateKeyModifiers (const int status) throw()
+    static void updateKeyModifiers (const int status) noexcept
     {
         int keyMods = 0;
 
@@ -1911,7 +1911,7 @@ private:
         Keys::capsLock = ((status & LockMask) != 0);
     }
 
-    static bool updateKeyModifiersFromSym (KeySym sym, const bool press) throw()
+    static bool updateKeyModifiersFromSym (KeySym sym, const bool press) noexcept
     {
         int modifier = 0;
         bool isModifier = true;
@@ -1966,7 +1966,7 @@ private:
 
     // Alt and Num lock are not defined by standard X
     // modifier constants: check what they're mapped to
-    static void updateModifierMappings() throw()
+    static void updateModifierMappings() noexcept
     {
         ScopedXLock xlock;
         const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
@@ -2265,7 +2265,7 @@ private:
         {}
     }
 
-    static int getAllEventsMask() throw()
+    static int getAllEventsMask() noexcept
     {
         return NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
                  | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
@@ -2296,7 +2296,7 @@ private:
 
             if (hints != None)
             {
-                unsigned char* data = 0;
+                unsigned char* data = nullptr;
                 unsigned long nitems, bytesLeft;
                 Atom actualType;
                 int actualFormat;
@@ -2592,7 +2592,7 @@ private:
     static int pointerMap[5];
     static Point<int> lastMousePos;
 
-    static void clearLastMousePos() throw()
+    static void clearLastMousePos() noexcept
     {
         lastMousePos = Point<int> (0x100000, 0x100000);
     }
@@ -2612,12 +2612,12 @@ bool Process::isForegroundProcess()
 }
 
 //==============================================================================
-void ModifierKeys::updateCurrentModifiers() throw()
+void ModifierKeys::updateCurrentModifiers() noexcept
 {
     currentModifiers = LinuxComponentPeer::currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     Window root, child;
     int x, y, winx, winy;
@@ -2759,7 +2759,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
                 unsigned long nitems, bytesLeft;
                 Atom actualType;
                 int actualFormat;
-                unsigned char* data = 0;
+                unsigned char* data = nullptr;
 
                 if (XGetWindowProperty (display, root, hints, 0, 4, False,
                                         XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
@@ -2790,7 +2790,7 @@ void Desktop::createMouseInputSources()
     mouseSources.add (new MouseInputSource (0, true));
 }
 
-bool Desktop::canUseSemiTransparentWindows() throw()
+bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     int matchedDepth = 0;
     const int desiredDepth = 32;
@@ -3093,9 +3093,9 @@ public:
           pixelFormat (pixelFormat_),
           swapInterval (0)
     {
-        jassert (component != 0);
+        jassert (component != nullptr);
         LinuxComponentPeer* const peer = dynamic_cast <LinuxComponentPeer*> (component->getTopLevelComponent()->getPeer());
-        if (peer == 0)
+        if (peer == nullptr)
             return;
 
         ScopedXLock xlock;
@@ -3179,11 +3179,11 @@ public:
         {
             ScopedXLock xlock;
             glXDestroyContext (display, renderContext);
-            renderContext = 0;
+            renderContext = nullptr;
         }
     }
 
-    bool makeActive() const throw()
+    bool makeActive() const noexcept
     {
         jassert (renderContext != 0);
 
@@ -3192,13 +3192,13 @@ public:
                 && XSync (display, False);
     }
 
-    bool makeInactive() const throw()
+    bool makeInactive() const noexcept
     {
         ScopedXLock xlock;
         return (! isActive()) || glXMakeCurrent (display, None, 0);
     }
 
-    bool isActive() const throw()
+    bool isActive() const noexcept
     {
         ScopedXLock xlock;
         return glXGetCurrentContext() == renderContext;
@@ -3209,7 +3209,7 @@ public:
         return pixelFormat;
     }
 
-    void* getRawContext() const throw()
+    void* getRawContext() const noexcept
     {
         return renderContext;
     }

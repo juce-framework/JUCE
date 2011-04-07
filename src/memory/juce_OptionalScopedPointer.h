@@ -104,19 +104,19 @@ public:
 
     //==============================================================================
     /** Returns the object that this pointer is managing. */
-    inline operator ObjectType*() const throw()                     { return object; }
+    inline operator ObjectType*() const noexcept                    { return object; }
 
     /** Returns the object that this pointer is managing. */
-    inline ObjectType& operator*() const throw()                    { return *object; }
+    inline ObjectType& operator*() const noexcept                   { return *object; }
 
     /** Lets you access methods and properties of the object that this pointer is holding. */
-    inline ObjectType* operator->() const throw()                   { return object; }
+    inline ObjectType* operator->() const noexcept                  { return object; }
 
     //==============================================================================
     /** Removes the current object from this OptionalScopedPointer without deleting it.
         This will return the current object, and set this OptionalScopedPointer to a null pointer.
     */
-    ObjectType* release() throw()                                   { return object.release(); }
+    ObjectType* release() noexcept                                  { return object.release(); }
 
     /** Resets this pointer to null, possibly deleting the object that it holds, if it has
         ownership of it.
@@ -131,7 +131,7 @@ public:
     /** Swaps this object with another OptionalScopedPointer.
         The two objects simply exchange their states.
     */
-    void swapWith (OptionalScopedPointer<ObjectType>& other) throw()
+    void swapWith (OptionalScopedPointer<ObjectType>& other) noexcept
     {
         object.swapWith (other.object);
         std::swap (shouldDelete, other.shouldDelete);

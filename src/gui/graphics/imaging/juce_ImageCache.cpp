@@ -131,7 +131,7 @@ juce_ImplementSingleton_SingleThreaded (ImageCache::Pimpl);
 //==============================================================================
 const Image ImageCache::getFromHashCode (const int64 hashCode)
 {
-    if (Pimpl::getInstanceWithoutCreating() != 0)
+    if (Pimpl::getInstanceWithoutCreating() != nullptr)
         return Pimpl::getInstanceWithoutCreating()->getFromHashCode (hashCode);
 
     return Image::null;

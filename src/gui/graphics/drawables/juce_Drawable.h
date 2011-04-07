@@ -187,7 +187,7 @@ public:
     public:
         ValueTreeWrapperBase (const ValueTree& state);
 
-        ValueTree& getState() throw()           { return state; }
+        ValueTree& getState() noexcept          { return state; }
 
         const String getID() const;
         void setID (const String& newID);

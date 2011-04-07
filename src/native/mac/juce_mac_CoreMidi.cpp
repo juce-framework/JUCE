@@ -185,7 +185,7 @@ namespace CoreMidiHelpers
         {
             String name ("JUCE");
 
-            if (JUCEApplication::getInstance() != 0)
+            if (JUCEApplication::getInstance() != nullptr)
                 name = JUCEApplication::getInstance()->getApplicationName();
 
             CFStringRef appName = PlatformUtilities::juceStringToCFString (name);
@@ -235,7 +235,7 @@ namespace CoreMidiHelpers
     {
     public:
         MidiPortAndCallback (MidiInputCallback& callback_)
-            : input (0), active (false), callback (callback_), concatenator (2048)
+            : input (nullptr), active (false), callback (callback_), concatenator (2048)
         {
         }
 
@@ -248,7 +248,7 @@ namespace CoreMidiHelpers
                 activeCallbacks.removeValue (this);
             }
 
-            if (portAndEndpoint != 0 && portAndEndpoint->port != 0)
+            if (portAndEndpoint != nullptr && portAndEndpoint->port != 0)
                 CHECK_ERROR (MIDIPortDisconnectSource (portAndEndpoint->port, portAndEndpoint->endPoint));
         }
 
@@ -321,7 +321,7 @@ int MidiOutput::getDefaultDeviceIndex()
 
 MidiOutput* MidiOutput::openDevice (int index)
 {
-    MidiOutput* mo = 0;
+    MidiOutput* mo = nullptr;
 
     if (isPositiveAndBelow (index, (int) MIDIGetNumberOfDestinations()))
     {
@@ -348,7 +348,7 @@ MidiOutput* MidiOutput::openDevice (int index)
 
 MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 {
-    MidiOutput* mo = 0;
+    MidiOutput* mo = nullptr;
     MIDIClientRef client = CoreMidiHelpers::getGlobalMidiClient();
 
     MIDIEndpointRef endPoint;
@@ -459,7 +459,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
     jassert (callback != 0);
 
     using namespace CoreMidiHelpers;
-    MidiInput* newInput = 0;
+    MidiInput* newInput = nullptr;
 
     if (isPositiveAndBelow (index, (int) MIDIGetNumberOfSources()))
     {
@@ -508,10 +508,10 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 
 MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
 {
-    jassert (callback != 0);
+    jassert (callback != nullptr);
 
     using namespace CoreMidiHelpers;
-    MidiInput* mi = 0;
+    MidiInput* mi = nullptr;
     MIDIClientRef client = getGlobalMidiClient();
 
     if (client != 0)

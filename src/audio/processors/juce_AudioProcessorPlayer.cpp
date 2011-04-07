@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 AudioProcessorPlayer::AudioProcessorPlayer()
-    : processor (0),
+    : processor (nullptr),
       sampleRate (0),
       blockSize (0),
       isPrepared (false),
@@ -44,7 +44,7 @@ AudioProcessorPlayer::AudioProcessorPlayer()
 
 AudioProcessorPlayer::~AudioProcessorPlayer()
 {
-    setProcessor (0);
+    setProcessor (nullptr);
 }
 
 //==============================================================================
@@ -52,7 +52,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
 {
     if (processor != processorToPlay)
     {
-        if (processorToPlay != 0 && sampleRate > 0 && blockSize > 0)
+        if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
         {
             processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans,
                                                    sampleRate, blockSize);
@@ -69,7 +69,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
             isPrepared = true;
         }
 
-        if (oldOne != 0)
+        if (oldOne != nullptr)
             oldOne->releaseResources();
     }
 }
@@ -131,7 +131,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
     const ScopedLock sl (lock);
 
-    if (processor != 0)
+    if (processor != nullptr)
     {
         const ScopedLock sl2 (processor->getCallbackLock());
 
@@ -159,13 +159,13 @@ void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* device)
     messageCollector.reset (sampleRate);
     zeromem (channels, sizeof (channels));
 
-    if (processor != 0)
+    if (processor != nullptr)
     {
         if (isPrepared)
             processor->releaseResources();
 
         AudioProcessor* const oldProcessor = processor;
-        setProcessor (0);
+        setProcessor (nullptr);
         setProcessor (oldProcessor);
     }
 }
@@ -174,7 +174,7 @@ void AudioProcessorPlayer::audioDeviceStopped()
 {
     const ScopedLock sl (lock);
 
-    if (processor != 0 && isPrepared)
+    if (processor != nullptr && isPrepared)
         processor->releaseResources();
 
     sampleRate = 0.0;

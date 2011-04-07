@@ -136,7 +136,7 @@ public:
         File newFile;
         String newFileSize, newModTime;
 
-        if (fileInfo != 0)
+        if (fileInfo != nullptr)
         {
             newFile = root.getChildFile (fileInfo->filename);
             newFileSize = File::descriptionOfSizeInBytes (fileInfo->fileSize);
@@ -151,7 +151,7 @@ public:
             fileSize = newFileSize;
             modTime = newModTime;
             icon = Image::null;
-            isDirectory = fileInfo != 0 && fileInfo->isDirectory;
+            isDirectory = fileInfo != nullptr && fileInfo->isDirectory;
 
             repaint();
         }
@@ -226,7 +226,7 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
 {
     FileListItemComponent* comp = dynamic_cast <FileListItemComponent*> (existingComponentToUpdate);
 
-    if (comp == 0)
+    if (comp == nullptr)
     {
         delete existingComponentToUpdate;
         comp = new FileListItemComponent (*this, fileList.getTimeSliceThread());

@@ -31,11 +31,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Message::Message() throw()
+Message::Message() noexcept
     : intParameter1 (0),
       intParameter2 (0),
       intParameter3 (0),
-      pointerParameter (0),
+      pointerParameter (nullptr),
       messageRecipient (0)
 {
 }
@@ -43,7 +43,7 @@ Message::Message() throw()
 Message::Message (const int intParameter1_,
                   const int intParameter2_,
                   const int intParameter3_,
-                  void* const pointerParameter_) throw()
+                  void* const pointerParameter_) noexcept
     : intParameter1 (intParameter1_),
       intParameter2 (intParameter2_),
       intParameter3 (intParameter3_),

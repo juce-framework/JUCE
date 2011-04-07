@@ -80,9 +80,9 @@ public:
     void excludeRectangle (const Rectangle<int>& r);
     void clipToEdgeTable (const EdgeTable& other);
     void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels);
-    bool isEmpty() throw();
-    const Rectangle<int>& getMaximumBounds() const throw()       { return bounds; }
-    void translate (float dx, int dy) throw();
+    bool isEmpty() noexcept;
+    const Rectangle<int>& getMaximumBounds() const noexcept      { return bounds; }
+    void translate (float dx, int dy) noexcept;
 
     /** Reduces the amount of space the table has allocated.
 
@@ -109,7 +109,7 @@ public:
                                         (these don't necessarily have to be 'const', but it might help it go faster)
     */
     template <class EdgeTableIterationCallback>
-    void iterate (EdgeTableIterationCallback& iterationCallback) const throw()
+    void iterate (EdgeTableIterationCallback& iterationCallback) const noexcept
     {
         const int* lineStart = table;
 
@@ -201,9 +201,9 @@ private:
     void addEdgePoint (int x, int y, int winding);
     void remapTableForNumEdges (int newNumEdgesPerLine);
     void intersectWithEdgeTableLine (int y, const int* otherLine);
-    void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
-    void sanitiseLevels (bool useNonZeroWinding) throw();
-    static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
+    void clipEdgeTableLineToRange (int* line, int x1, int x2) noexcept;
+    void sanitiseLevels (bool useNonZeroWinding) noexcept;
+    static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) noexcept;
 
     JUCE_LEAK_DETECTOR (EdgeTable);
 };

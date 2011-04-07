@@ -33,8 +33,8 @@
 
 //==============================================================================
 ProjectContentComponent::ProjectContentComponent()
-    : project (0),
-      currentDocument (0)
+    : project (nullptr),
+      currentDocument (nullptr)
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -45,8 +45,8 @@ ProjectContentComponent::ProjectContentComponent()
 
 ProjectContentComponent::~ProjectContentComponent()
 {
-    setProject (0);
-    contentView = 0;
+    setProject (nullptr);
+    contentView = nullptr;
     jassert (getNumChildComponents() == 0);
 }
 
@@ -59,22 +59,22 @@ void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
-        if (project != 0)
+        if (project != nullptr)
             project->removeChangeListener (this);
 
-        contentView = 0;
-        resizerBar = 0;
+        contentView = nullptr;
+        resizerBar = nullptr;
 
-        if (projectTree != 0)
+        if (projectTree != nullptr)
         {
             StoredSettings::getInstance()->getProps().setValue ("projectTreeviewWidth", projectTree->getWidth());
             projectTree->deleteRootItem();
-            projectTree = 0;
+            projectTree = nullptr;
         }
 
         project = newProject;
 
-        if (project != 0)
+        if (project != nullptr)
         {
             addAndMakeVisible (projectTree = new TreeView());
             projectTree->setComponentID ("tree");
@@ -100,7 +100,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
             project->addChangeListener (this);
 
-            if (currentDocument == 0)
+            if (currentDocument == nullptr)
                 invokeDirectly (CommandIDs::showProjectSettings, true);
 
             updateMissingFileStatuses();
@@ -115,10 +115,10 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    if (projectTree != 0)
+    if (projectTree != nullptr)
     {
         ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (projectTree->getRootItem());
-        if (p != 0)
+        if (p != nullptr)
             p->checkFileStatus();
     }
 }
@@ -131,7 +131,7 @@ bool ProjectContentComponent::showEditorForFile (const File& f)
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
 {
-    if (doc == 0)
+    if (doc == nullptr)
         return false;
 
     OpenDocumentManager::getInstance()->moveDocumentToTopOfStack (doc);
@@ -146,8 +146,8 @@ void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == currentDocument)
     {
-        currentDocument = 0;
-        contentView = 0;
+        currentDocument = nullptr;
+        contentView = nullptr;
         updateMainWindowTitle();
         commandManager->commandStatusChanged();
     }
@@ -155,7 +155,7 @@ void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 
 bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumentManager::Document* doc)
 {
-    if (editor != 0)
+    if (editor != nullptr)
     {
         contentView = editor;
         currentDocument = doc;
@@ -176,8 +176,8 @@ void ProjectContentComponent::updateMainWindowTitle()
 {
     MainWindow* mw = Component::findParentComponentOfClass ((MainWindow*) 0);
 
-    if (mw != 0)
-        mw->updateTitle (currentDocument != 0 ? currentDocument->getName() : String::empty);
+    if (mw != nullptr)
+        mw->updateTitle (currentDocument != nullptr ? currentDocument->getName() : String::empty);
 }
 
 ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
@@ -206,7 +206,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save Project",
                         "Saves the current project",
                         CommandCategories::general, 0);
-        result.setActive (project != 0);
+        result.setActive (project != nullptr);
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
         break;
 
@@ -214,7 +214,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save Project As...",
                         "Saves the current project to a different filename",
                         CommandCategories::general, 0);
-        result.setActive (project != 0);
+        result.setActive (project != nullptr);
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
@@ -222,7 +222,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Close Project",
                         "Closes the current project",
                         CommandCategories::general, 0);
-        result.setActive (project != 0);
+        result.setActive (project != nullptr);
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
@@ -236,7 +236,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
        #endif
                         "Launches the project in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (project != 0);
+        result.setActive (project != nullptr);
         break;
 
     case CommandIDs::saveAndOpenInIDE:
@@ -249,7 +249,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
        #endif
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (project != 0);
+        result.setActive (project != nullptr);
         result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier, 0));
         break;
 
@@ -257,7 +257,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Show Project Build Settings",
                         "Shows the build options for the project",
                         CommandCategories::general, 0);
-        result.setActive (project != 0);
+        result.setActive (project != nullptr);
         result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
@@ -265,7 +265,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
         result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
-        result.setActive (projectTree != 0);
+        result.setActive (projectTree != nullptr);
         break;
 
     default:
@@ -275,7 +275,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
 
 bool ProjectContentComponent::isCommandActive (const CommandID commandID)
 {
-    return project != 0;
+    return project != nullptr;
 }
 
 bool ProjectContentComponent::perform (const InvocationInfo& info)
@@ -283,13 +283,13 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::saveProject:
-        if (project != 0)
+        if (project != nullptr)
             project->save (true, true);
 
         break;
 
     case CommandIDs::saveProjectAs:
-        if (project != 0)
+        if (project != nullptr)
             project->saveAsInteractive (true);
 
         break;
@@ -298,14 +298,14 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         {
             MainWindow* mw = Component::findParentComponentOfClass ((MainWindow*) 0);
 
-            if (mw != 0)
+            if (mw != nullptr)
                 mw->closeCurrentProject();
         }
 
         break;
 
     case CommandIDs::openInIDE:
-        if (project != 0)
+        if (project != nullptr)
         {
             ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
             exporter->launchProject();
@@ -313,7 +313,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::saveAndOpenInIDE:
-        if (project != 0 && project->save (true, true) == FileBasedDocument::savedOk)
+        if (project != nullptr && project->save (true, true) == FileBasedDocument::savedOk)
         {
             ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
             exporter->launchProject();
@@ -321,16 +321,16 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::showProjectSettings:
-        if (projectTree != 0)
+        if (projectTree != nullptr)
             projectTree->getRootItem()->setSelected (true, true);
 
         break;
 
     case StandardApplicationCommandIDs::del:
-        if (projectTree != 0)
+        if (projectTree != nullptr)
         {
             ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (projectTree->getRootItem());
-            if (p != 0)
+            if (p != nullptr)
                 p->deleteAllSelectedItems();
         }
 

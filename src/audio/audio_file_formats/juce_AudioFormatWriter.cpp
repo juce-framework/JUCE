@@ -79,7 +79,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
         {
             int** bufferChan = buffers;
 
-            while (*bufferChan != 0)
+            while (*bufferChan != nullptr)
             {
                 int* b = *bufferChan++;
 
@@ -188,7 +188,7 @@ public:
           buffer (numChannels, bufferSize_),
           timeSliceThread (timeSliceThread_),
           writer (writer_),
-          thumbnailToUpdate (0),
+          thumbnailToUpdate (nullptr),
           samplesWritten (0),
           isRunning (true)
     {
@@ -241,7 +241,7 @@ public:
         writer->writeFromAudioSampleBuffer (buffer, start1, size1);
 
         const ScopedLock sl (thumbnailLock);
-        if (thumbnailToUpdate != 0)
+        if (thumbnailToUpdate != nullptr)
             thumbnailToUpdate->addBlock (samplesWritten, buffer, start1, size1);
 
         samplesWritten += size1;
@@ -250,7 +250,7 @@ public:
         {
             writer->writeFromAudioSampleBuffer (buffer, start2, size2);
 
-            if (thumbnailToUpdate != 0)
+            if (thumbnailToUpdate != nullptr)
                 thumbnailToUpdate->addBlock (samplesWritten, buffer, start2, size2);
 
             samplesWritten += size2;
@@ -262,7 +262,7 @@ public:
 
     void setThumbnail (AudioThumbnail* thumb)
     {
-        if (thumb != 0)
+        if (thumb != nullptr)
             thumb->reset (buffer.getNumChannels(), writer->getSampleRate(), 0);
 
         const ScopedLock sl (thumbnailLock);

@@ -149,7 +149,7 @@ public:
 
         If the host hasn't supplied a playhead object, this will return 0.
     */
-    AudioPlayHead* getPlayHead() const throw()                { return playHead; }
+    AudioPlayHead* getPlayHead() const noexcept               { return playHead; }
 
 
     //==============================================================================
@@ -158,7 +158,7 @@ public:
         This can be called from your processBlock() method - it's not guaranteed
         to be valid at any other time, and may return 0 if it's unknown.
     */
-    double getSampleRate() const throw()                      { return sampleRate; }
+    double getSampleRate() const noexcept                     { return sampleRate; }
 
     /** Returns the current typical block size that is being used.
 
@@ -169,7 +169,7 @@ public:
         processBlock, it's just the normal one. The actual block sizes used may be
         larger or smaller than this, and will vary between successive calls.
     */
-    int getBlockSize() const throw()                          { return blockSize; }
+    int getBlockSize() const noexcept                         { return blockSize; }
 
     //==============================================================================
     /** Returns the number of input channels that the host will be sending the filter.
@@ -181,7 +181,7 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumInputChannels() const throw()                   { return numInputChannels; }
+    int getNumInputChannels() const noexcept                  { return numInputChannels; }
 
     /** Returns the number of output channels that the host will be sending the filter.
 
@@ -192,7 +192,7 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumOutputChannels() const throw()                  { return numOutputChannels; }
+    int getNumOutputChannels() const noexcept                 { return numOutputChannels; }
 
     /** Returns the name of one of the input channels, as returned by the host.
 
@@ -220,7 +220,7 @@ public:
         The host will call this to find the latency - the filter itself should set this value
         by calling setLatencySamples() as soon as it can during its initialisation.
     */
-    int getLatencySamples() const throw()                             { return latencySamples; }
+    int getLatencySamples() const noexcept                            { return latencySamples; }
 
     /** The filter should call this to set the number of samples delay that it introduces.
 
@@ -247,7 +247,7 @@ public:
 
         @see suspendProcessing
     */
-    const CriticalSection& getCallbackLock() const throw()              { return callbackLock; }
+    const CriticalSection& getCallbackLock() const noexcept             { return callbackLock; }
 
     /** Enables and disables the processing callback.
 
@@ -282,7 +282,7 @@ public:
     /** Returns true if processing is currently suspended.
         @see suspendProcessing
     */
-    bool isSuspended() const throw()                                    { return suspended; }
+    bool isSuspended() const noexcept                                   { return suspended; }
 
     /** A plugin can override this to be told when it should reset any playing voices.
 
@@ -302,14 +302,14 @@ public:
 
         @see setNonRealtime()
     */
-    bool isNonRealtime() const throw()                                  { return nonRealtime; }
+    bool isNonRealtime() const noexcept                                 { return nonRealtime; }
 
     /** Called by the host to tell this processor whether it's being used in a non-realime
         capacity for offline rendering or bouncing.
 
         Whatever value is passed-in will be
     */
-    void setNonRealtime (bool isNonRealtime) throw();
+    void setNonRealtime (bool isNonRealtime) noexcept;
 
     //==============================================================================
     /** Creates the filter's UI.
@@ -352,7 +352,7 @@ public:
         Bear in mind this can return 0, even if an editor has previously been
         opened.
     */
-    AudioProcessorEditor* getActiveEditor() const throw()              { return activeEditor; }
+    AudioProcessorEditor* getActiveEditor() const noexcept             { return activeEditor; }
 
     /** Returns the active editor, or if there isn't one, it will create one.
 
@@ -541,16 +541,16 @@ public:
         The processor will not take ownership of the object, so the caller must delete it when
         it is no longer being used.
     */
-    void setPlayHead (AudioPlayHead* newPlayHead) throw();
+    void setPlayHead (AudioPlayHead* newPlayHead) noexcept;
 
     //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
-    void editorBeingDeleted (AudioProcessorEditor* editor) throw();
+    void editorBeingDeleted (AudioProcessorEditor* editor) noexcept;
 
     /** Not for public use - this is called to initialise the processor before playing. */
     void setPlayConfigDetails (int numIns, int numOuts,
                                double sampleRate,
-                               int blockSize) throw();
+                               int blockSize) noexcept;
 
 protected:
     //==============================================================================
@@ -586,9 +586,9 @@ private:
     bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     BigInteger changingParams;
-#endif
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor);
 };

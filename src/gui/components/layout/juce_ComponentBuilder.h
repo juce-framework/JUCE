@@ -61,10 +61,10 @@ public:
 
     //==============================================================================
     /** Returns the ValueTree that this builder is working with. */
-    ValueTree& getState() throw()               { return state; }
+    ValueTree& getState() noexcept              { return state; }
 
     /** Returns the ValueTree that this builder is working with. */
-    const ValueTree& getState() const throw()   { return state; }
+    const ValueTree& getState() const noexcept  { return state; }
 
     /** Returns the builder's component (creating it if necessary).
 
@@ -112,10 +112,10 @@ public:
         virtual ~TypeHandler();
 
         /** Returns the type of the ValueTrees that this handler can parse. */
-        const Identifier& getType() const throw()           { return valueTreeType; }
+        const Identifier& getType() const noexcept          { return valueTreeType; }
 
         /** Returns the builder that this type is registered with. */
-        ComponentBuilder* getBuilder() const throw();
+        ComponentBuilder* getBuilder() const noexcept;
 
         //==============================================================================
         /** This method must create a new component from the given state, add it to the specified
@@ -162,12 +162,12 @@ public:
     /** Returns the number of registered type handlers.
         @see getHandler, registerTypeHandler
     */
-    int getNumHandlers() const throw();
+    int getNumHandlers() const noexcept;
 
     /** Returns one of the registered type handlers.
         @see getNumHandlers, registerTypeHandler
     */
-    TypeHandler* getHandler (int index) const throw();
+    TypeHandler* getHandler (int index) const noexcept;
 
     //=============================================================================
     /** This class is used when references to images need to be stored in ValueTrees.
@@ -208,12 +208,12 @@ public:
 
         The object that is passed in is not owned by the builder, so the caller must delete
         it when it is no longer needed, but not while the builder may still be using it. To
-        clear the image provider, just call setImageProvider (0).
+        clear the image provider, just call setImageProvider (nullptr).
     */
-    void setImageProvider (ImageProvider* newImageProvider) throw();
+    void setImageProvider (ImageProvider* newImageProvider) noexcept;
 
     /** Returns the current image provider that this builder is using, or 0 if none has been set. */
-    ImageProvider* getImageProvider() const throw();
+    ImageProvider* getImageProvider() const noexcept;
 
     //=============================================================================
     /** Updates the children of a parent component by updating them from the children of

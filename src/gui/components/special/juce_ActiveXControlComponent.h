@@ -70,7 +70,7 @@ public:
     void deleteControl();
 
     /** Returns true if a control is currently in use. */
-    bool isControlOpen() const throw()                  { return control != 0; }
+    bool isControlOpen() const noexcept                 { return control != nullptr; }
 
     /** Does a QueryInterface call on the embedded control object.
 
@@ -86,7 +86,7 @@ public:
 
         IOleWindow* oleWindow = (IOleWindow*) myControlComp->queryInterface (&iid);
 
-        if (oleWindow != 0)
+        if (oleWindow != nullptr)
         {
             HWND hwnd;
             oleWindow->GetWindow (&hwnd);
@@ -105,7 +105,7 @@ public:
 
     /** Returns true if mouse events are allowed to get through to the control.
     */
-    bool areMouseEventsAllowed() const throw()                  { return mouseEventsAllowed; }
+    bool areMouseEventsAllowed() const noexcept                 { return mouseEventsAllowed; }
 
     //==============================================================================
     /** @internal */

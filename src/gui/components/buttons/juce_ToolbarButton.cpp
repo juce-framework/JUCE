@@ -39,9 +39,9 @@ ToolbarButton::ToolbarButton (const int itemId_, const String& buttonText,
    : ToolbarItemComponent (itemId_, buttonText, true),
      normalImage (normalImage_),
      toggledOnImage (toggledOnImage_),
-     currentImage (0)
+     currentImage (nullptr)
 {
-    jassert (normalImage_ != 0);
+    jassert (normalImage_ != nullptr);
 }
 
 ToolbarButton::~ToolbarButton()
@@ -66,7 +66,7 @@ void ToolbarButton::contentAreaChanged (const Rectangle<int>&)
 
 void ToolbarButton::updateDrawable()
 {
-    if (currentImage != 0)
+    if (currentImage != nullptr)
     {
         currentImage->setTransformToFit (getContentArea().toFloat(), RectanglePlacement::centred);
         currentImage->setAlpha (isEnabled() ? 1.0f : 0.5f);
@@ -89,7 +89,7 @@ void ToolbarButton::buttonStateChanged()
 {
     Drawable* d = normalImage;
 
-    if (getToggleState() && toggledOnImage != 0)
+    if (getToggleState() && toggledOnImage != nullptr)
         d = toggledOnImage;
 
     if (d != currentImage)
@@ -97,7 +97,7 @@ void ToolbarButton::buttonStateChanged()
         removeChildComponent (currentImage);
         currentImage = d;
 
-        if (d != 0)
+        if (d != nullptr)
         {
             enablementChanged();
             addAndMakeVisible (d);

@@ -103,7 +103,7 @@ public:
     /** This returns a list of all the filenames of things that looked like being
         a plugin file, but which failed to open for some reason.
     */
-    const StringArray& getFailedFiles() const throw()               { return failedFiles; }
+    const StringArray& getFailedFiles() const noexcept              { return failedFiles; }
 
 private:
     //==============================================================================

@@ -47,7 +47,7 @@ public:
     Uuid();
 
     /** Destructor. */
-    ~Uuid() throw();
+    ~Uuid() noexcept;
 
     /** Creates a copy of another UUID. */
     Uuid (const Uuid& other);
@@ -56,7 +56,7 @@ public:
     Uuid& operator= (const Uuid& other);
 
     /** Returns true if the ID is zero. */
-    bool isNull() const throw();
+    bool isNull() const noexcept;
 
     //==============================================================================
     /** Compares two UUIDs. */
@@ -94,7 +94,7 @@ public:
         This is an array of 16 bytes. To reconstruct a Uuid from its data, use
         the constructor or operator= method that takes an array of uint8s.
     */
-    const uint8* getRawData() const throw()                 { return value.asBytes; }
+    const uint8* getRawData() const noexcept                { return value.asBytes; }
 
     /** Creates a UUID from a 16-byte array.
 

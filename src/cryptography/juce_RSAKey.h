@@ -55,8 +55,8 @@ public:
     /** Destructor. */
     ~RSAKey();
 
-    bool operator== (const RSAKey& other) const throw();
-    bool operator!= (const RSAKey& other) const throw();
+    bool operator== (const RSAKey& other) const noexcept;
+    bool operator!= (const RSAKey& other) const noexcept;
 
     //==============================================================================
     /** Turns the key into a string representation.
@@ -98,7 +98,7 @@ public:
     static void createKeyPair (RSAKey& publicKey,
                                RSAKey& privateKey,
                                int numBits,
-                               const int* randomSeeds = 0,
+                               const int* randomSeeds = nullptr,
                                int numRandomSeeds = 0);
 
 

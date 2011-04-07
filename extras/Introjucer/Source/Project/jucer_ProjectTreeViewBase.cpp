@@ -79,7 +79,7 @@ void ProjectTreeViewBase::addFiles (const StringArray& files, int insertIndex)
 {
     ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (getParentItem());
 
-    if (p != 0)
+    if (p != nullptr)
         p->addFiles (files, insertIndex);
 }
 
@@ -104,11 +104,11 @@ ProjectTreeViewBase* ProjectTreeViewBase::findTreeViewItem (const Project::Item&
         {
             ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
 
-            if (pg != 0)
+            if (pg != nullptr)
             {
                 pg = pg->findTreeViewItem (itemToFind);
 
-                if (pg != 0)
+                if (pg != nullptr)
                     return pg;
             }
         }
@@ -130,15 +130,15 @@ void ProjectTreeViewBase::triggerAsyncRename (const Project::Item& itemToRename)
 
         void messageCallback()
         {
-            if (tree != 0)
+            if (tree != nullptr)
             {
                 ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem());
 
-                if (pg != 0)
+                if (pg != nullptr)
                 {
                     pg = pg->findTreeViewItem (itemToRename);
 
-                    if (pg != 0)
+                    if (pg != nullptr)
                         pg->showRenameBox();
                 }
             }
@@ -187,7 +187,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
     {
         const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i));
 
-        if (p != 0)
+        if (p != nullptr)
         {
             itemsToRemove.add (new Project::Item (p->item));
 
@@ -222,9 +222,9 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
     }
 
     ProjectTreeViewBase* treeRootItem = dynamic_cast <ProjectTreeViewBase*> (tree->getRootItem());
-    jassert (treeRootItem != 0);
+    jassert (treeRootItem != nullptr);
 
-    if (treeRootItem != 0)
+    if (treeRootItem != nullptr)
     {
         for (i = filesToTrash.size(); --i >= 0;)
         {
@@ -242,7 +242,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
         {
             ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
 
-            if (itemToRemove != 0)
+            if (itemToRemove != nullptr)
             {
                 OpenDocumentManager::getInstance()->closeFile (itemToRemove->getFile(), false);
                 itemToRemove->deleteItem();
@@ -319,10 +319,10 @@ void ProjectTreeViewBase::getAllSelectedNodesInTree (Component* componentInTree,
 {
     TreeView* tree = dynamic_cast <TreeView*> (componentInTree);
 
-    if (tree == 0)
+    if (tree == nullptr)
         tree = componentInTree->findParentComponentOfClass ((TreeView*) 0);
 
-    if (tree != 0)
+    if (tree != nullptr)
     {
         const int numSelected = tree->getNumSelectedItems();
 
@@ -330,7 +330,7 @@ void ProjectTreeViewBase::getAllSelectedNodesInTree (Component* componentInTree,
         {
             const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i));
 
-            if (p != 0)
+            if (p != nullptr)
                 selectedNodes.add (new Project::Item (p->item));
         }
     }
@@ -359,7 +359,7 @@ void ProjectTreeViewBase::itemDropped (const String& sourceDescription, Componen
 
         moveSelectedItemsTo (selectedNodes, insertIndex);
 
-        if (oldOpenness != 0)
+        if (oldOpenness != nullptr)
             tree->restoreOpennessState (*oldOpenness);
     }
 }
@@ -424,7 +424,7 @@ void ProjectTreeViewBase::addSubItems()
     {
         ProjectTreeViewBase* p = createSubItem (item.getChild(i));
 
-        if (p != 0)
+        if (p != nullptr)
             addSubItem (p);
     }
 }
@@ -483,7 +483,7 @@ void ProjectTreeViewBase::itemSelectionChanged (bool isNowSelected)
     }
     else
     {
-        delayedSelectionTimer = 0;
+        delayedSelectionTimer = nullptr;
     }
 }
 
@@ -494,13 +494,13 @@ const String ProjectTreeViewBase::getTooltip()
 
 const String ProjectTreeViewBase::getDragSourceDescription()
 {
-    delayedSelectionTimer = 0;
+    delayedSelectionTimer = nullptr;
     return projectItemDragType;
 }
 
 void ProjectTreeViewBase::invokeShowDocument()
 {
-    delayedSelectionTimer = 0;
+    delayedSelectionTimer = nullptr;
     showDocument();
 }
 
@@ -514,11 +514,11 @@ ProjectContentComponent* ProjectTreeViewBase::getProjectContentComponent() const
 {
     Component* c = getOwnerView();
 
-    while (c != 0)
+    while (c != nullptr)
     {
         ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c);
 
-        if (pcc != 0)
+        if (pcc != nullptr)
             return pcc;
 
         c = c->getParentComponent();

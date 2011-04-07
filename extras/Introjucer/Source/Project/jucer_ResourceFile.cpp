@@ -48,7 +48,7 @@ bool ResourceFile::isResourceFile (const File& file)
     {
         ScopedPointer <InputStream> in (file.createInputStream());
 
-        if (in != 0)
+        if (in != nullptr)
         {
             MemoryBlock mb;
             in->readIntoMemoryBlock (mb, 256);
@@ -167,9 +167,9 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         const int64 dataSize = file.getSize();
 
         ScopedPointer <InputStream> fileStream (file.createInputStream());
-        jassert (fileStream != 0);
+        jassert (fileStream != nullptr);
 
-        if (fileStream != 0)
+        if (fileStream != nullptr)
         {
             const String variableName (variableNames[i]);
             const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
@@ -209,12 +209,12 @@ bool ResourceFile::write (const File& cppFile)
     ScopedPointer <FileOutputStream> cppOut (tempCpp.getFile().createOutputStream (32768));
     ScopedPointer <FileOutputStream> hppOut (tempH.getFile().createOutputStream (32768));
 
-    if (cppOut != 0 && hppOut != 0)
+    if (cppOut != nullptr && hppOut != nullptr)
     {
         if (write (cppFile, *cppOut, *hppOut))
         {
-            cppOut = 0;
-            hppOut = 0;
+            cppOut = nullptr;
+            hppOut = nullptr;
 
             return (tempCpp.getFile().hasIdenticalContentTo (tempCpp.getTargetFile()) || tempCpp.overwriteTargetFileWithTemporary())
                 && (tempH.getFile().hasIdenticalContentTo (tempH.getTargetFile()) || tempH.overwriteTargetFileWithTemporary());

@@ -104,7 +104,7 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
     int w = getWidth();
     int h = getHeight();
 
-    if (getComponentEffect() != 0)
+    if (getComponentEffect() != nullptr)
     {
         w -= 4;
         h -= 4;

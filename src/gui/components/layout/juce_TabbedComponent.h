@@ -66,7 +66,7 @@ public:
 
         @see setOrientation, TabbedButtonBar::getOrientation
     */
-    TabbedButtonBar::Orientation getOrientation() const throw();
+    TabbedButtonBar::Orientation getOrientation() const noexcept;
 
     /** Specifies how many pixels wide or high the tab-bar should be.
 
@@ -80,7 +80,7 @@ public:
 
         @see setTabBarDepth
     */
-    int getTabBarDepth() const throw()                          { return tabDepth; }
+    int getTabBarDepth() const noexcept                         { return tabDepth; }
 
     /** Specifies the thickness of an outline that should be drawn around the content component.
 
@@ -135,10 +135,10 @@ public:
         Be sure not to use or delete the components that are returned, as this may interfere
         with the TabbedComponent's use of them.
     */
-    Component* getTabContentComponent (int tabIndex) const throw();
+    Component* getTabContentComponent (int tabIndex) const noexcept;
 
     /** Returns the colour of one of the tabs. */
-    const Colour getTabBackgroundColour (int tabIndex) const throw();
+    const Colour getTabBackgroundColour (int tabIndex) const noexcept;
 
     /** Changes the background colour of one of the tabs. */
     void setTabBackgroundColour (int tabIndex, const Colour& newColour);
@@ -168,7 +168,7 @@ public:
 
         This will return 0 if there isn't one.
     */
-    Component* getCurrentContentComponent() const throw()           { return panelComponent; }
+    Component* getCurrentContentComponent() const noexcept          { return panelComponent; }
 
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.
@@ -187,7 +187,7 @@ public:
 
     /** Returns the tab button bar component that is being used.
     */
-    TabbedButtonBar& getTabbedButtonBar() const throw()             { return *tabs; }
+    TabbedButtonBar& getTabbedButtonBar() const noexcept            { return *tabs; }
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.

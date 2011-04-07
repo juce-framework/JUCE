@@ -108,17 +108,17 @@ bool RelativeParallelogram::isDynamic() const
     return topLeft.isDynamic() || topRight.isDynamic() || bottomLeft.isDynamic();
 }
 
-bool RelativeParallelogram::operator== (const RelativeParallelogram& other) const throw()
+bool RelativeParallelogram::operator== (const RelativeParallelogram& other) const noexcept
 {
     return topLeft == other.topLeft && topRight == other.topRight && bottomLeft == other.bottomLeft;
 }
 
-bool RelativeParallelogram::operator!= (const RelativeParallelogram& other) const throw()
+bool RelativeParallelogram::operator!= (const RelativeParallelogram& other) const noexcept
 {
     return ! operator== (other);
 }
 
-const Point<float> RelativeParallelogram::getInternalCoordForPoint (const Point<float>* const corners, Point<float> target) throw()
+const Point<float> RelativeParallelogram::getInternalCoordForPoint (const Point<float>* const corners, Point<float> target) noexcept
 {
     const Point<float> tr (corners[1] - corners[0]);
     const Point<float> bl (corners[2] - corners[0]);
@@ -128,14 +128,14 @@ const Point<float> RelativeParallelogram::getInternalCoordForPoint (const Point<
                          Line<float> (Point<float>(), bl).getIntersection (Line<float> (target, target - tr)).getDistanceFromOrigin());
 }
 
-const Point<float> RelativeParallelogram::getPointForInternalCoord (const Point<float>* const corners, const Point<float>& point) throw()
+const Point<float> RelativeParallelogram::getPointForInternalCoord (const Point<float>* const corners, const Point<float>& point) noexcept
 {
     return corners[0]
             + Line<float> (Point<float>(), corners[1] - corners[0]).getPointAlongLine (point.getX())
             + Line<float> (Point<float>(), corners[2] - corners[0]).getPointAlongLine (point.getY());
 }
 
-const Rectangle<float> RelativeParallelogram::getBoundingBox (const Point<float>* const p) throw()
+const Rectangle<float> RelativeParallelogram::getBoundingBox (const Point<float>* const p) noexcept
 {
     const Point<float> points[] = { p[0], p[1], p[2], p[1] + (p[2] - p[0]) };
     return Rectangle<float>::findAreaContainingPoints (points, 4);

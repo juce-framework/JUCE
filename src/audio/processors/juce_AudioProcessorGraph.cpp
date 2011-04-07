@@ -39,7 +39,7 @@ AudioProcessorGraph::Node::Node (const uint32 id_, AudioProcessor* const process
       processor (processor_),
       isPrepared (false)
 {
-    jassert (processor_ != 0);
+    jassert (processor_ != nullptr);
 }
 
 void AudioProcessorGraph::Node::prepare (const double sampleRate, const int blockSize,
@@ -52,7 +52,7 @@ void AudioProcessorGraph::Node::prepare (const double sampleRate, const int bloc
         AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
             = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (static_cast<AudioProcessor*> (processor));
 
-        if (ioProc != 0)
+        if (ioProc != nullptr)
             ioProc->setParentGraph (graph);
 
         processor->setPlayConfigDetails (processor->getNumInputChannels(),
@@ -111,7 +111,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (const uint32 nodeI
 AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const newProcessor,
                                                          uint32 nodeId)
 {
-    if (newProcessor == 0)
+    if (newProcessor == nullptr)
     {
         jassertfalse;
         return 0;
@@ -124,7 +124,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
     else
     {
         // you can't add a node with an id that already exists in the graph..
-        jassert (getNodeForId (nodeId) == 0);
+        jassert (getNodeForId (nodeId) == nullptr);
         removeNode (nodeId);
     }
 
@@ -137,7 +137,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
     AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
         = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (static_cast<AudioProcessor*> (n->processor));
 
-    if (ioProc != 0)
+    if (ioProc != nullptr)
         ioProc->setParentGraph (this);
 
     return n;
@@ -154,8 +154,8 @@ bool AudioProcessorGraph::removeNode (const uint32 nodeId)
             AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
                 = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (static_cast<AudioProcessor*> (nodes.getUnchecked(i)->processor));
 
-            if (ioProc != 0)
-                ioProc->setParentGraph (0);
+            if (ioProc != nullptr)
+                ioProc->setParentGraph (nullptr);
 
             nodes.remove (i);
             triggerAsyncUpdate();
@@ -219,20 +219,20 @@ bool AudioProcessorGraph::canConnect (const uint32 sourceNodeId,
 
     const Node* const source = getNodeForId (sourceNodeId);
 
-    if (source == 0
+    if (source == nullptr
          || (sourceChannelIndex != midiChannelIndex && sourceChannelIndex >= source->processor->getNumOutputChannels())
          || (sourceChannelIndex == midiChannelIndex && ! source->processor->producesMidi()))
         return false;
 
     const Node* const dest = getNodeForId (destNodeId);
 
-    if (dest == 0
+    if (dest == nullptr
          || (destChannelIndex != midiChannelIndex && destChannelIndex >= dest->processor->getNumInputChannels())
          || (destChannelIndex == midiChannelIndex && ! dest->processor->acceptsMidi()))
         return false;
 
     return getConnectionBetween (sourceNodeId, sourceChannelIndex,
-                                 destNodeId, destChannelIndex) == 0;
+                                 destNodeId, destChannelIndex) == nullptr;
 }
 
 bool AudioProcessorGraph::addConnection (const uint32 sourceNodeId,
@@ -314,7 +314,7 @@ bool AudioProcessorGraph::removeIllegalConnections()
         const Node* const source = getNodeForId (c->sourceNodeId);
         const Node* const dest = getNodeForId (c->destNodeId);
 
-        if (source == 0 || dest == 0
+        if (source == nullptr || dest == nullptr
              || (c->sourceChannelIndex != midiChannelIndex
                   && ! isPositiveAndBelow (c->sourceChannelIndex, source->processor->getNumOutputChannels()))
              || (c->sourceChannelIndex == midiChannelIndex
@@ -568,7 +568,7 @@ private:
 
     enum { freeNodeID = 0xffffffff, zeroNodeID = 0xfffffffe };
 
-    static bool isNodeBusy (uint32 nodeID) throw()  { return nodeID != freeNodeID && nodeID != zeroNodeID; }
+    static bool isNodeBusy (uint32 nodeID) noexcept { return nodeID != freeNodeID && nodeID != zeroNodeID; }
 
     //==============================================================================
     void createRenderingOpsForNode (AudioProcessorGraph::Node* const node,
@@ -909,7 +909,7 @@ private:
             {
                 if (inputChannelOfIndexToIgnore != AudioProcessorGraph::midiChannelIndex
                      && graph.getConnectionBetween (nodeId, AudioProcessorGraph::midiChannelIndex,
-                                                    node->id, AudioProcessorGraph::midiChannelIndex) != 0)
+                                                    node->id, AudioProcessorGraph::midiChannelIndex) != nullptr)
                     return true;
             }
             else
@@ -917,7 +917,7 @@ private:
                 for (int i = 0; i < node->getProcessor()->getNumInputChannels(); ++i)
                     if (i != inputChannelOfIndexToIgnore
                          && graph.getConnectionBetween (nodeId, outputChanIndex,
-                                                        node->id, i) != 0)
+                                                        node->id, i) != nullptr)
                         return true;
             }
 
@@ -1049,9 +1049,9 @@ void AudioProcessorGraph::handleAsyncUpdate()
 //==============================================================================
 void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSamplesPerBlock)
 {
-    currentAudioInputBuffer = 0;
+    currentAudioInputBuffer = nullptr;
     currentAudioOutputBuffer.setSize (jmax (1, getNumOutputChannels()), estimatedSamplesPerBlock);
-    currentMidiInputBuffer = 0;
+    currentMidiInputBuffer = nullptr;
     currentMidiOutputBuffer.clear();
 
     clearRenderingSequence();
@@ -1066,9 +1066,9 @@ void AudioProcessorGraph::releaseResources()
     renderingBuffers.setSize (1, 1);
     midiBuffers.clear();
 
-    currentAudioInputBuffer = 0;
+    currentAudioInputBuffer = nullptr;
     currentAudioOutputBuffer.setSize (1, 1);
-    currentMidiInputBuffer = 0;
+    currentMidiInputBuffer = nullptr;
     currentMidiOutputBuffer.clear();
 }
 
@@ -1121,7 +1121,7 @@ void AudioProcessorGraph::setStateInformation (const void* /*data*/, int /*sizeI
 //==============================================================================
 AudioProcessorGraph::AudioGraphIOProcessor::AudioGraphIOProcessor (const IODeviceType type_)
     : type (type_),
-      graph (0)
+      graph (nullptr)
 {
 }
 
@@ -1154,17 +1154,17 @@ void AudioProcessorGraph::AudioGraphIOProcessor::fillInPluginDescription (Plugin
     d.isInstrument = false;
 
     d.numInputChannels = getNumInputChannels();
-    if (type == audioOutputNode && graph != 0)
+    if (type == audioOutputNode && graph != nullptr)
         d.numInputChannels = graph->getNumInputChannels();
 
     d.numOutputChannels = getNumOutputChannels();
-    if (type == audioInputNode && graph != 0)
+    if (type == audioInputNode && graph != nullptr)
         d.numOutputChannels = graph->getNumOutputChannels();
 }
 
 void AudioProcessorGraph::AudioGraphIOProcessor::prepareToPlay (double, int)
 {
-    jassert (graph != 0);
+    jassert (graph != nullptr);
 }
 
 void AudioProcessorGraph::AudioGraphIOProcessor::releaseResources()
@@ -1174,7 +1174,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::releaseResources()
 void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer& buffer,
                                                                MidiBuffer& midiMessages)
 {
-    jassert (graph != 0);
+    jassert (graph != nullptr);
 
     switch (type)
     {
@@ -1296,7 +1296,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
 {
     graph = newGraph;
 
-    if (graph != 0)
+    if (graph != nullptr)
     {
         setPlayConfigDetails (type == audioOutputNode ? graph->getNumOutputChannels() : 0,
                               type == audioInputNode ? graph->getNumInputChannels() : 0,

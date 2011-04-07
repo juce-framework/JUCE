@@ -42,7 +42,7 @@ class JUCE_API  ChangeBroadcaster
 public:
     //==============================================================================
     /** Creates an ChangeBroadcaster. */
-    ChangeBroadcaster() throw();
+    ChangeBroadcaster() noexcept;
 
     /** Destructor. */
     virtual ~ChangeBroadcaster();

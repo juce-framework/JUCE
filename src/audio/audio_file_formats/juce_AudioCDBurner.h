@@ -125,7 +125,7 @@ public:
     class BurnProgressListener
     {
     public:
-        BurnProgressListener() throw() {}
+        BurnProgressListener() noexcept {}
         virtual ~BurnProgressListener() {}
 
         /** Called at intervals to report on the progress of the AudioCDBurner.

@@ -229,7 +229,7 @@ namespace
 
             Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x,
                                                                                         hs.pt.y));
-            if (comp != 0 && comp->getWindowHandle() != 0)
+            if (comp != nullptr && comp->getWindowHandle() != 0)
                 return PostMessage ((HWND) comp->getWindowHandle(), WM_MOUSEWHEEL,
                                     hs.mouseData & 0xffff0000, (hs.pt.x & 0xffff) | (hs.pt.y << 16));
         }
@@ -472,7 +472,7 @@ public:
 
     bool getInputProperties (VstInt32 index, VstPinProperties* properties)
     {
-        if (filter == 0 || index >= JucePlugin_MaxNumInputChannels)
+        if (filter == nullptr || index >= JucePlugin_MaxNumInputChannels)
             return false;
 
         setPinProperties (*properties, filter->getInputChannelName ((int) index),
@@ -482,7 +482,7 @@ public:
 
     bool getOutputProperties (VstInt32 index, VstPinProperties* properties)
     {
-        if (filter == 0 || index >= JucePlugin_MaxNumOutputChannels)
+        if (filter == nullptr || index >= JucePlugin_MaxNumOutputChannels)
             return false;
 
         setPinProperties (*properties, filter->getOutputChannelName ((int) index),
@@ -668,7 +668,7 @@ public:
 
     void resume()
     {
-        if (filter != 0)
+        if (filter != nullptr)
         {
             isProcessing = true;
             channels.calloc (numInChans + numOutChans);
@@ -709,7 +709,7 @@ public:
 
     void suspend()
     {
-        if (filter != 0)
+        if (filter != nullptr)
         {
             AudioEffectX::suspend();
 
@@ -728,7 +728,7 @@ public:
         const VstTimeInfo* const ti = getTimeInfo (kVstPpqPosValid | kVstTempoValid | kVstBarsValid //| kVstCyclePosValid
                                                    | kVstTimeSigValid | kVstSmpteValid | kVstClockValid);
 
-        if (ti == 0 || ti->sampleRate <= 0)
+        if (ti == nullptr || ti->sampleRate <= 0)
             return false;
 
         info.bpm = (ti->flags & kVstTempoValid) != 0 ? ti->tempo : 0.0;
@@ -791,30 +791,30 @@ public:
     //==============================================================================
     VstInt32 getProgram()
     {
-        return filter != 0 ? filter->getCurrentProgram() : 0;
+        return filter != nullptr ? filter->getCurrentProgram() : 0;
     }
 
     void setProgram (VstInt32 program)
     {
-        if (filter != 0)
+        if (filter != nullptr)
             filter->setCurrentProgram (program);
     }
 
     void setProgramName (char* name)
     {
-        if (filter != 0)
+        if (filter != nullptr)
             filter->changeProgramName (filter->getCurrentProgram(), name);
     }
 
     void getProgramName (char* name)
     {
-        if (filter != 0)
+        if (filter != nullptr)
             filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24);
     }
 
     bool getProgramNameIndexed (VstInt32 /*category*/, VstInt32 index, char* text)
     {
-        if (filter != 0 && isPositiveAndBelow (index, filter->getNumPrograms()))
+        if (filter != nullptr && isPositiveAndBelow (index, filter->getNumPrograms()))
         {
             filter->getProgramName (index).copyToUTF8 (text, 24);
             return true;
@@ -826,7 +826,7 @@ public:
     //==============================================================================
     float getParameter (VstInt32 index)
     {
-        if (filter == 0)
+        if (filter == nullptr)
             return 0.0f;
 
         jassert (isPositiveAndBelow (index, filter->getNumParameters()));
@@ -835,7 +835,7 @@ public:
 
     void setParameter (VstInt32 index, float value)
     {
-        if (filter != 0)
+        if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
             filter->setParameter (index, value);
@@ -844,7 +844,7 @@ public:
 
     void getParameterDisplay (VstInt32 index, char* text)
     {
-        if (filter != 0)
+        if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
             filter->getParameterText (index).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
@@ -853,7 +853,7 @@ public:
 
     void getParameterName (VstInt32 index, char* text)
     {
-        if (filter != 0)
+        if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
             filter->getParameterName (index).copyToUTF8 (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
@@ -875,13 +875,13 @@ public:
 
     bool canParameterBeAutomated (VstInt32 index)
     {
-        return filter != 0 && filter->isParameterAutomatable ((int) index);
+        return filter != nullptr && filter->isParameterAutomatable ((int) index);
     }
 
     class ChannelConfigComparator
     {
     public:
-        static int compareElements (const short* const first, const short* const second) throw()
+        static int compareElements (const short* const first, const short* const second) noexcept
         {
             if (first[0] < second[0])       return -1;
             else if (first[0] > second[0])  return 1;
@@ -929,7 +929,7 @@ public:
     //==============================================================================
     VstInt32 getChunk (void** data, bool onlyStoreCurrentProgramData)
     {
-        if (filter == 0)
+        if (filter == nullptr)
             return 0;
 
         chunkMemory.setSize (0);
@@ -949,13 +949,13 @@ public:
 
     VstInt32 setChunk (void* data, VstInt32 byteSize, bool onlyRestoreCurrentProgramData)
     {
-        if (filter == 0)
+        if (filter == nullptr)
             return 0;
 
         chunkMemory.setSize (0);
         chunkMemoryTime = 0;
 
-        if (byteSize > 0 && data != 0)
+        if (byteSize > 0 && data != nullptr)
         {
             if (onlyRestoreCurrentProgramData)
                 filter->setCurrentProgramStateInformation (data, byteSize);
@@ -996,7 +996,7 @@ public:
         {
             const JUCE_NAMESPACE::uint32 now = JUCE_NAMESPACE::Time::getMillisecondCounter();
 
-            if (now > lastMasterIdleCall + 20 && editorComp != 0)
+            if (now > lastMasterIdleCall + 20 && editorComp != nullptr)
             {
                 lastMasterIdleCall = now;
 
@@ -1027,14 +1027,14 @@ public:
 
     void createEditorComp()
     {
-        if (hasShutdown || filter == 0)
+        if (hasShutdown || filter == nullptr)
             return;
 
-        if (editorComp == 0)
+        if (editorComp == nullptr)
         {
             AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
-            if (ed != 0)
+            if (ed != nullptr)
             {
                 cEffect.flags |= effFlagsHasEditor;
                 ed->setOpaque (true);
@@ -1059,10 +1059,10 @@ public:
         jassert (! recursionCheck);
         recursionCheck = true;
 
-        if (editorComp != 0)
+        if (editorComp != nullptr)
         {
             Component* const modalComponent = Component::getCurrentlyModalComponent();
-            if (modalComponent != 0)
+            if (modalComponent != nullptr)
             {
                 modalComponent->exitModalState (0);
 
@@ -1084,11 +1084,11 @@ public:
 
             filter->editorBeingDeleted (editorComp->getEditorComp());
 
-            editorComp = 0;
+            editorComp = nullptr;
 
             // there's some kind of component currently modal, but the host
             // is trying to delete our plugin. You should try to avoid this happening..
-            jassert (Component::getCurrentlyModalComponent() == 0);
+            jassert (Component::getCurrentlyModalComponent() == nullptr);
         }
 
        #if JUCE_LINUX
@@ -1119,7 +1119,7 @@ public:
             deleteEditor (true);
             createEditorComp();
 
-            if (editorComp != 0)
+            if (editorComp != nullptr)
             {
                 editorComp->setOpaque (true);
                 editorComp->setVisible (false);
@@ -1153,7 +1153,7 @@ public:
             const MessageManagerLock mmLock;
             createEditorComp();
 
-            if (editorComp != 0)
+            if (editorComp != nullptr)
             {
                 editorSize.left = 0;
                 editorSize.top = 0;
@@ -1175,7 +1175,7 @@ public:
 
     void resizeHostWindow (int newWidth, int newHeight)
     {
-        if (editorComp != 0)
+        if (editorComp != nullptr)
         {
             if (! (canHostDo (const_cast <char*> ("sizeWindow")) && sizeWindow (newWidth, newHeight)))
             {
@@ -1232,7 +1232,7 @@ public:
                #endif
             }
 
-            if (editorComp->getPeer() != 0)
+            if (editorComp->getPeer() != nullptr)
                 editorComp->getPeer()->handleMovedOrResized();
         }
     }
@@ -1308,7 +1308,7 @@ public:
         {
             Component* const editor = getChildComponent(0);
 
-            if (editor != 0)
+            if (editor != nullptr)
                 editor->setBounds (getLocalBounds());
         }
 
@@ -1428,7 +1428,7 @@ private:
 
         tempChannels.clear();
 
-        if (filter != 0)
+        if (filter != nullptr)
             tempChannels.insertMultiple (0, 0, filter->getNumInputChannels() + filter->getNumOutputChannels());
     }
 
@@ -1460,7 +1460,7 @@ namespace
 
                 AudioProcessor* const filter = createPluginFilter();
 
-                if (filter != 0)
+                if (filter != nullptr)
                 {
                     JuceVSTWrapper* const wrapper = new JuceVSTWrapper (audioMaster, filter);
                     return wrapper->getAeffect();

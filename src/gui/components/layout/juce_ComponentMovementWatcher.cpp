@@ -34,11 +34,11 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
     : component (component_),
-      lastPeer (0),
+      lastPeer (nullptr),
       reentrant (false),
       wasShowing (component_->isShowing())
 {
-    jassert (component != 0); // can't use this with a null pointer..
+    jassert (component != nullptr); // can't use this with a null pointer..
 
     component->addComponentListener (this);
 
@@ -47,7 +47,7 @@ ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
 
 ComponentMovementWatcher::~ComponentMovementWatcher()
 {
-    if (component != 0)
+    if (component != nullptr)
         component->removeComponentListener (this);
 
     unregister();
@@ -56,7 +56,7 @@ ComponentMovementWatcher::~ComponentMovementWatcher()
 //==============================================================================
 void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 {
-    if (component != 0 && ! reentrant)
+    if (component != nullptr && ! reentrant)
     {
         const ScopedValueSetter<bool> setter (reentrant, true);
 
@@ -66,7 +66,7 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
         {
             componentPeerChanged();
 
-            if (component == 0)
+            if (component == nullptr)
                 return;
 
             lastPeer = peer;
@@ -77,14 +77,14 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 
         componentMovedOrResized (*component, true, true);
 
-        if (component != 0)
+        if (component != nullptr)
             componentVisibilityChanged (*component);
     }
 }
 
 void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMoved, bool wasResized)
 {
-    if (component != 0)
+    if (component != nullptr)
     {
         if (wasMoved)
         {
@@ -112,7 +112,7 @@ void ComponentMovementWatcher::componentBeingDeleted (Component& comp)
 
 void ComponentMovementWatcher::componentVisibilityChanged (Component&)
 {
-    if (component != 0)
+    if (component != nullptr)
     {
         const bool isShowingNow = component->isShowing();
 
@@ -128,7 +128,7 @@ void ComponentMovementWatcher::registerWithParentComps()
 {
     Component* p = component->getParentComponent();
 
-    while (p != 0)
+    while (p != nullptr)
     {
         p->addComponentListener (this);
         registeredParentComps.add (p);

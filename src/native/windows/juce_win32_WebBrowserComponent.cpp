@@ -34,18 +34,18 @@ class WebBrowserComponentInternal   : public ActiveXControlComponent
 public:
     //==============================================================================
     WebBrowserComponentInternal()
-        : browser (0),
-          connectionPoint (0),
+        : browser (nullptr),
+          connectionPoint (nullptr),
           adviseCookie (0)
     {
     }
 
     ~WebBrowserComponentInternal()
     {
-        if (connectionPoint != 0)
+        if (connectionPoint != nullptr)
             connectionPoint->Unadvise (adviseCookie);
 
-        if (browser != 0)
+        if (browser != nullptr)
             browser->Release();
     }
 
@@ -56,15 +56,15 @@ public:
 
         IConnectionPointContainer* connectionPointContainer = (IConnectionPointContainer*) queryInterface (&IID_IConnectionPointContainer);
 
-        if (connectionPointContainer != 0)
+        if (connectionPointContainer != nullptr)
         {
             connectionPointContainer->FindConnectionPoint (DIID_DWebBrowserEvents2,
                                                            &connectionPoint);
 
-            if (connectionPoint != 0)
+            if (connectionPoint != nullptr)
             {
                 WebBrowserComponent* const owner = dynamic_cast <WebBrowserComponent*> (getParentComponent());
-                jassert (owner != 0);
+                jassert (owner != nullptr);
 
                 EventHandler* handler = new EventHandler (*owner);
                 connectionPoint->Advise (handler, &adviseCookie);
@@ -77,9 +77,9 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        if (browser != 0)
+        if (browser != nullptr)
         {
-            LPSAFEARRAY sa = 0;
+            LPSAFEARRAY sa = nullptr;
 
             VARIANT flags, frame, postDataVar, headersVar;  // (_variant_t isn't available in all compilers)
             VariantInit (&flags);
@@ -87,23 +87,23 @@ public:
             VariantInit (&postDataVar);
             VariantInit (&headersVar);
 
-            if (headers != 0)
+            if (headers != nullptr)
             {
                 V_VT (&headersVar) = VT_BSTR;
                 V_BSTR (&headersVar) = SysAllocString ((const OLECHAR*) headers->joinIntoString ("\r\n").toWideCharPointer());
             }
 
-            if (postData != 0 && postData->getSize() > 0)
+            if (postData != nullptr && postData->getSize() > 0)
             {
                 LPSAFEARRAY sa = SafeArrayCreateVector (VT_UI1, 0, postData->getSize());
 
                 if (sa != 0)
                 {
-                    void* data = 0;
+                    void* data = nullptr;
                     SafeArrayAccessData (sa, &data);
-                    jassert (data != 0);
+                    jassert (data != nullptr);
 
-                    if (data != 0)
+                    if (data != nullptr)
                     {
                         postData->copyTo (data, 0, postData->getSize());
                         SafeArrayUnaccessData (sa);
@@ -195,7 +195,7 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
-    : browser (0),
+    : browser (nullptr),
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
@@ -216,11 +216,11 @@ void WebBrowserComponent::goToURL (const String& url,
     lastURL = url;
 
     lastHeaders.clear();
-    if (headers != 0)
+    if (headers != nullptr)
         lastHeaders = *headers;
 
     lastPostData.setSize (0);
-    if (postData != 0)
+    if (postData != nullptr)
         lastPostData = *postData;
 
     blankPageShown = false;
@@ -230,7 +230,7 @@ void WebBrowserComponent::goToURL (const String& url,
 
 void WebBrowserComponent::stop()
 {
-    if (browser->browser != 0)
+    if (browser->browser != nullptr)
         browser->browser->Stop();
 }
 
@@ -239,7 +239,7 @@ void WebBrowserComponent::goBack()
     lastURL = String::empty;
     blankPageShown = false;
 
-    if (browser->browser != 0)
+    if (browser->browser != nullptr)
         browser->browser->GoBack();
 }
 
@@ -247,20 +247,20 @@ void WebBrowserComponent::goForward()
 {
     lastURL = String::empty;
 
-    if (browser->browser != 0)
+    if (browser->browser != nullptr)
         browser->browser->GoForward();
 }
 
 void WebBrowserComponent::refresh()
 {
-    if (browser->browser != 0)
+    if (browser->browser != nullptr)
         browser->browser->Refresh();
 }
 
 //==============================================================================
 void WebBrowserComponent::paint (Graphics& g)
 {
-    if (browser->browser == 0)
+    if (browser->browser == nullptr)
         g.fillAll (Colours::white);
 }
 
@@ -268,7 +268,7 @@ void WebBrowserComponent::checkWindowAssociation()
 {
     if (isShowing())
     {
-        if (browser->browser == 0 && getPeer() != 0)
+        if (browser->browser == nullptr && getPeer() != nullptr)
         {
             browser->createBrowser();
             reloadLastURL();
@@ -281,7 +281,7 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (browser != 0 && unloadPageWhenBrowserIsHidden && ! blankPageShown)
+        if (browser != nullptr && unloadPageWhenBrowserIsHidden && ! blankPageShown)
         {
             // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank

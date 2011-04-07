@@ -97,7 +97,7 @@ public:
     /** Returns the current fill type.
         @see setFill
     */
-    const RelativeFillType& getFill() const throw()                 { return mainFill; }
+    const RelativeFillType& getFill() const noexcept                { return mainFill; }
 
     /** Sets the fill type with which the outline will be drawn.
         @see setFill
@@ -112,7 +112,7 @@ public:
     /** Returns the current stroke fill.
         @see setStrokeFill
     */
-    const RelativeFillType& getStrokeFill() const throw()           { return strokeFill; }
+    const RelativeFillType& getStrokeFill() const noexcept          { return strokeFill; }
 
     /** Changes the properties of the outline that will be drawn around the path.
         If the stroke has 0 thickness, no stroke will be drawn.
@@ -126,7 +126,7 @@ public:
     void setStrokeThickness (float newThickness);
 
     /** Returns the current outline style. */
-    const PathStrokeType& getStrokeType() const throw()             { return strokeType; }
+    const PathStrokeType& getStrokeType() const noexcept            { return strokeType; }
 
     //==============================================================================
     /** @internal */
@@ -161,7 +161,7 @@ protected:
     /** Called when the cached stroke should be updated. */
     void strokeChanged();
     /** True if there's a stroke with a non-zero thickness and non-transparent colour. */
-    bool isStrokeVisible() const throw();
+    bool isStrokeVisible() const noexcept;
     /** Updates the details from a FillAndStrokeState object, returning true if something changed. */
     void refreshFillTypes (const FillAndStrokeState& newState, ComponentBuilder::ImageProvider*);
     /** Writes the stroke and fill details to a FillAndStrokeState object. */

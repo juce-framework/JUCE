@@ -62,7 +62,7 @@ static bool shouldDeactivateTitleBar = true;
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
 static UpdateLayeredWinFunc updateLayeredWindow = 0;
 
-bool Desktop::canUseSemiTransparentWindows() throw()
+bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     if (updateLayeredWindow == 0)
     {
@@ -226,7 +226,7 @@ public:
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
                        const int x, const int y,
                        const RectangleList& maskedRegion,
-                       const uint8 updateLayeredWindowAlpha) throw()
+                       const uint8 updateLayeredWindowAlpha) noexcept
     {
         static HDRAWDIB hdd = 0;
         static bool needToCreateDrawDib = true;
@@ -448,7 +448,7 @@ public:
           hasCreatedCaret (false),
           constrainerIsResizing (false),
           currentWindowIcon (0),
-          dropTarget (0),
+          dropTarget (nullptr),
           parentToAddTo (parentToAddTo_),
           updateLayeredWindowAlpha (255)
     {
@@ -461,7 +461,7 @@ public:
         {
             shadower = component->getLookAndFeel().createDropShadowerForComponent (component);
 
-            if (shadower != 0)
+            if (shadower != nullptr)
                 shadower->setOwner (component);
         }
     }
@@ -469,7 +469,7 @@ public:
     ~Win32ComponentPeer()
     {
         setTaskBarIcon (Image());
-        shadower = 0;
+        shadower = nullptr;
 
         // do this before the next bit to avoid messages arriving for this window
         // before it's destroyed
@@ -480,14 +480,14 @@ public:
         if (currentWindowIcon != 0)
             DestroyIcon (currentWindowIcon);
 
-        if (dropTarget != 0)
+        if (dropTarget != nullptr)
         {
             dropTarget->Release();
-            dropTarget = 0;
+            dropTarget = nullptr;
         }
 
       #if JUCE_DIRECT2D
-        direct2DContext = 0;
+        direct2DContext = nullptr;
       #endif
     }
 
@@ -542,7 +542,7 @@ public:
         }
 
       #if JUCE_DIRECT2D
-        if (direct2DContext != 0)
+        if (direct2DContext != nullptr)
             direct2DContext->resized();
       #endif
     }
@@ -683,7 +683,7 @@ public:
                     SendMessageW (hwnd, WM_SETTINGCHANGE, 0, 0);
             }
 
-            if (deletionChecker != 0)
+            if (deletionChecker != nullptr)
                 handleMovedOrResized();
         }
     }
@@ -733,7 +733,7 @@ public:
 
         shouldDeactivateTitleBar = oldDeactivate;
 
-        if (shadower != 0)
+        if (shadower != nullptr)
             shadower->componentBroughtToFront (*component);
 
         return true;
@@ -761,9 +761,9 @@ public:
     {
         Win32ComponentPeer* const otherPeer = dynamic_cast <Win32ComponentPeer*> (other);
 
-        jassert (otherPeer != 0); // wrong type of window?
+        jassert (otherPeer != nullptr); // wrong type of window?
 
-        if (otherPeer != 0)
+        if (otherPeer != nullptr)
         {
             setMinimised (false);
 
@@ -825,7 +825,7 @@ public:
     }
 
     //==============================================================================
-    static Win32ComponentPeer* getOwnerOfWindow (HWND h) throw()
+    static Win32ComponentPeer* getOwnerOfWindow (HWND h) noexcept
     {
         if (h != 0 && GetWindowLongPtr (h, GWLP_USERDATA) == improbableWindowNumber)
             return (Win32ComponentPeer*) (pointer_sized_int) GetWindowLongPtr (h, 8);
@@ -870,7 +870,7 @@ public:
             taskBarIcon->uFlags = 0;
             Shell_NotifyIcon (NIM_DELETE, taskBarIcon);
             DestroyIcon (taskBarIcon->hIcon);
-            taskBarIcon = 0;
+            taskBarIcon = nullptr;
         }
     }
 
@@ -893,7 +893,7 @@ public:
             {
                 Component* const current = Component::getCurrentlyModalComponent();
 
-                if (current != 0)
+                if (current != nullptr)
                     current->inputAttemptWhenModal();
             }
         }
@@ -934,15 +934,15 @@ public:
     }
 
     //==============================================================================
-    bool isInside (HWND h) const throw()
+    bool isInside (HWND h) const noexcept
     {
         return GetAncestor (hwnd, GA_ROOT) == h;
     }
 
     //==============================================================================
-    static bool isKeyDown (const int key) throw()   { return (GetAsyncKeyState (key) & 0x8000) != 0; }
+    static bool isKeyDown (const int key) noexcept  { return (GetAsyncKeyState (key) & 0x8000) != 0; }
 
-    static void updateKeyModifiers() throw()
+    static void updateKeyModifiers() noexcept
     {
         int keyMods = 0;
         if (isKeyDown (VK_SHIFT))   keyMods |= ModifierKeys::shiftModifier;
@@ -1070,7 +1070,7 @@ private:
             clearSingletonInstance();
         }
 
-        LPCTSTR getWindowClassName() const throw()      { return (LPCTSTR) MAKELONG (atom, 0); }
+        LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
 
         juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder);
 
@@ -1149,7 +1149,7 @@ private:
             SetWindowLongPtr (hwnd, 8, (LONG_PTR) this);
             SetWindowLongPtr (hwnd, GWLP_USERDATA, improbableWindowNumber);
 
-            if (dropTarget == 0)
+            if (dropTarget == nullptr)
                 dropTarget = new JuceDropTarget (this);
 
             RegisterDragDrop (hwnd, dropTarget);
@@ -1221,7 +1221,7 @@ private:
         return ! component->isOpaque();
     }
 
-    inline bool hasTitleBar() const throw()         { return (styleFlags & windowHasTitleBar) != 0; }
+    inline bool hasTitleBar() const noexcept        { return (styleFlags & windowHasTitleBar) != 0; }
 
 
     void setIcon (const Image& newIcon)
@@ -1244,7 +1244,7 @@ private:
     void handlePaintMessage()
     {
        #if JUCE_DIRECT2D
-        if (direct2DContext != 0)
+        if (direct2DContext != nullptr)
         {
             RECT r;
 
@@ -1499,7 +1499,7 @@ private:
     {
         if (constrainerIsResizing)
         {
-            if (constrainer != 0)
+            if (constrainer != nullptr)
                 constrainer->resizeEnd();
 
             constrainerIsResizing = false;
@@ -1561,7 +1561,7 @@ private:
         }
 
         return handleKeyUpOrDown (false)
-                || Component::getCurrentlyModalComponent() != 0;
+                || Component::getCurrentlyModalComponent() != nullptr;
     }
 
     bool doKeyDown (const WPARAM key)
@@ -1647,7 +1647,7 @@ private:
                 break;
         }
 
-        if (Component::getCurrentlyModalComponent() != 0)
+        if (Component::getCurrentlyModalComponent() != nullptr)
             used = true;
 
         return used;
@@ -1736,7 +1736,7 @@ private:
 
     bool isConstrainedNativeWindow() const
     {
-        return constrainer != 0
+        return constrainer != nullptr
                 && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable);
     }
 
@@ -1803,7 +1803,7 @@ private:
 
         Component* underMouse = component->getComponentAt (component->getMouseXYRelative());
 
-        if (underMouse == 0)
+        if (underMouse == nullptr)
             underMouse = component;
 
         if (underMouse->isCurrentlyBlockedByAnotherModalComponent())
@@ -1963,7 +1963,7 @@ public:
     {
         Win32ComponentPeer* const peer = getOwnerOfWindow (h);
 
-        if (peer != 0)
+        if (peer != nullptr)
         {
             jassert (isValidPeer (peer));
             return peer->peerWindowProc (h, message, wParam, lParam);
@@ -1981,12 +1981,12 @@ private:
             return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
     }
 
-    static const Point<int> getPointFromLParam (LPARAM lParam) throw()
+    static const Point<int> getPointFromLParam (LPARAM lParam) noexcept
     {
         return Point<int> (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
     }
 
-    const Point<int> getCurrentMousePos() throw()
+    const Point<int> getCurrentMousePos() noexcept
     {
         RECT wr;
         GetWindowRect (hwnd, &wr);
@@ -2142,7 +2142,7 @@ private:
                 if (wParam != FALSE)
                     juce_repeatLastProcessPriority();
                 else
-                    Desktop::getInstance().setKioskModeComponent (0); // turn kiosk mode off if we lose focus
+                    Desktop::getInstance().setKioskModeComponent (nullptr); // turn kiosk mode off if we lose focus
 
                 juce_CheckCurrentlyFocusedTopLevelWindow();
                 modifiersAtLastCallback = -1;
@@ -2184,7 +2184,7 @@ private:
                 return 0;
 
             case WM_QUERYENDSESSION:
-                if (JUCEApplication::getInstance() != 0)
+                if (JUCEApplication::getInstance() != nullptr)
                 {
                     JUCEApplication::getInstance()->systemRequestedQuit();
                     return MessageManager::getInstance()->hasStopMessageBeenSent();
@@ -2307,7 +2307,7 @@ private:
                 return DLGC_WANTALLKEYS;
 
             default:
-                if (taskBarIcon != 0)
+                if (taskBarIcon != nullptr)
                 {
                     static const DWORD taskbarCreatedMessage = RegisterWindowMessage (TEXT("TaskbarCreated"));
 
@@ -2330,7 +2330,7 @@ private:
         {
             Component* const current = Component::getCurrentlyModalComponent();
 
-            if (current != 0)
+            if (current != nullptr)
                 current->inputAttemptWhenModal();
 
             return true;
@@ -2368,7 +2368,7 @@ private:
             reset();
             TextInputTarget* const target = owner.findCurrentTextInputTarget();
 
-            if (target != 0)
+            if (target != nullptr)
                 target->insertTextAtCaret (String::empty);
         }
 
@@ -2379,7 +2379,7 @@ private:
                 // If this occurs, the user has cancelled the composition, so clear their changes..
                 TextInputTarget* const target = owner.findCurrentTextInputTarget();
 
-                if (target != 0)
+                if (target != nullptr)
                 {
                     target->setHighlightedRegion (compositionRange);
                     target->insertTextAtCaret (String::empty);
@@ -2406,7 +2406,7 @@ private:
             TextInputTarget* const target = owner.findCurrentTextInputTarget();
             HIMC hImc = ImmGetContext (hWnd);
 
-            if (target == 0 || hImc == 0)
+            if (target == nullptr || hImc == 0)
                 return;
 
             if (compositionRange.getStart() < 0)
@@ -2550,7 +2550,7 @@ private:
         {
             Component* const targetComp = dynamic_cast <Component*> (target);
 
-            if (targetComp != 0)
+            if (targetComp != nullptr)
             {
                 const Rectangle<int> area (peer.getComponent()
                                               ->getLocalArea (targetComp, target->getCaretRectangle()));
@@ -2581,12 +2581,12 @@ juce_ImplementSingleton_SingleThreaded (Win32ComponentPeer::WindowClassHolder);
 
 
 //==============================================================================
-void ModifierKeys::updateCurrentModifiers() throw()
+void ModifierKeys::updateCurrentModifiers() noexcept
 {
     currentModifiers = Win32ComponentPeer::currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     Win32ComponentPeer::updateKeyModifiers();
 
@@ -2633,7 +2633,7 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
 {
     Win32ComponentPeer* const wp = dynamic_cast <Win32ComponentPeer*> (getPeer());
 
-    if (wp != 0)
+    if (wp != nullptr)
         wp->setTaskBarIcon (newImage);
 }
 
@@ -2641,12 +2641,12 @@ void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
 {
     Win32ComponentPeer* const wp = dynamic_cast <Win32ComponentPeer*> (getPeer());
 
-    if (wp != 0)
+    if (wp != nullptr)
         wp->setTaskBarIconToolTip (tooltip);
 }
 
 //==============================================================================
-void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, const bool bitIsSet) throw()
+void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, const bool bitIsSet) noexcept
 {
     DWORD val = GetWindowLong (h, styleType);
 
@@ -2679,7 +2679,7 @@ bool Process::isForegroundProcess()
     {
         Win32ComponentPeer* const wp = dynamic_cast <Win32ComponentPeer*> (ComponentPeer::getPeer (i));
 
-        if (wp != 0 && wp->isInside (fg))
+        if (wp != nullptr && wp->isInside (fg))
             return true;
     }
 
@@ -2714,7 +2714,7 @@ public:
     {
         const int result = getResult();
 
-        if (callback != 0)
+        if (callback != nullptr)
             callback->modalStateFinished (result);
 
         delete this;
@@ -2726,7 +2726,7 @@ private:
     String title, message;
     ModalComponentManager::Callback* callback;
 
-    static UINT getMessageBoxFlags (AlertWindow::AlertIconType iconType) throw()
+    static UINT getMessageBoxFlags (AlertWindow::AlertIconType iconType) noexcept
     {
         UINT flags = MB_TASKMODAL | MB_SETFOREGROUND;
 
@@ -2743,7 +2743,7 @@ private:
 
     static HWND getWindowForMessageBox (Component* associatedComponent)
     {
-        return associatedComponent != 0 ? (HWND) associatedComponent->getWindowHandle() : 0;
+        return associatedComponent != nullptr ? (HWND) associatedComponent->getWindowHandle() : 0;
     }
 };
 
@@ -2768,8 +2768,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       ModalComponentManager::Callback* callback)
 {
     ScopedPointer<Win32MessageBox> mb (new Win32MessageBox (iconType, title, message, associatedComponent,
-                                                            MB_OKCANCEL, callback, callback != 0));
-    if (callback == 0)
+                                                            MB_OKCANCEL, callback, callback != nullptr));
+    if (callback == nullptr)
         return mb->getResult() != 0;
 
     mb.release();
@@ -2782,8 +2782,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         ModalComponentManager::Callback* callback)
 {
     ScopedPointer<Win32MessageBox> mb (new Win32MessageBox (iconType, title, message, associatedComponent,
-                                                            MB_YESNOCANCEL, callback, callback != 0));
-    if (callback == 0)
+                                                            MB_YESNOCANCEL, callback, callback != nullptr));
+    if (callback == nullptr)
         return mb->getResult();
 
     mb.release();
@@ -2846,13 +2846,13 @@ public:
     }
 };
 
-static ScreenSaverDefeater* screenSaverDefeater = 0;
+static ScreenSaverDefeater* screenSaverDefeater = nullptr;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
         deleteAndZero (screenSaverDefeater);
-    else if (screenSaverDefeater == 0)
+    else if (screenSaverDefeater == nullptr)
         screenSaverDefeater = new ScreenSaverDefeater();
 }
 
@@ -2866,14 +2866,14 @@ bool Desktop::isScreenSaverEnabled()
 
 static bool juce_screenSaverEnabled = true;
 
-void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+void Desktop::setScreenSaverEnabled (const bool isEnabled) noexcept
 {
     juce_screenSaverEnabled = isEnabled;
     SetThreadExecutionState (isEnabled ? ES_CONTINUOUS
                                        : (ES_DISPLAY_REQUIRED | ES_CONTINUOUS));
 }
 
-bool Desktop::isScreenSaverEnabled() throw()
+bool Desktop::isScreenSaverEnabled() noexcept
 {
     return juce_screenSaverEnabled;
 }
@@ -2966,7 +2966,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
 
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)
 {
-    if (cursorHandle != 0 && ! isStandard)
+    if (cursorHandle != nullptr && ! isStandard)
         DestroyCursor ((HCURSOR) cursorHandle);
 }
 
@@ -3007,9 +3007,9 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
 
         case DraggingHandCursor:
         {
-            static void* dragHandCursor = 0;
+            static void* dragHandCursor = nullptr;
 
-            if (dragHandCursor == 0)
+            if (dragHandCursor == nullptr)
             {
                 static const unsigned char dragHandData[] =
                     { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
@@ -3049,7 +3049,7 @@ void MouseCursor::showInWindow (ComponentPeer*) const
 
 void MouseCursor::showInAllWindows() const
 {
-    showInWindow (0);
+    showInWindow (nullptr);
 }
 
 //==============================================================================
@@ -3100,7 +3100,7 @@ public:
 
     HRESULT __stdcall Next (ULONG celt, LPFORMATETC lpFormatEtc, ULONG* pceltFetched)
     {
-        if (pceltFetched != 0)
+        if (pceltFetched != nullptr)
             *pceltFetched = 0;
         else if (celt != 1)
             return S_FALSE;
@@ -3110,7 +3110,7 @@ public:
             copyFormatEtc (lpFormatEtc [0], *format);
             ++index;
 
-            if (pceltFetched != 0)
+            if (pceltFetched != nullptr)
                 *pceltFetched = 1;
 
             return S_OK;

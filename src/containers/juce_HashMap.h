@@ -41,11 +41,11 @@ class DefaultHashFunctions
 {
 public:
     /** Generates a simple hash from an integer. */
-    static int generateHash (const int key, const int upperLimit) throw()         { return std::abs (key) % upperLimit; }
+    static int generateHash (const int key, const int upperLimit) noexcept        { return std::abs (key) % upperLimit; }
     /** Generates a simple hash from a string. */
-    static int generateHash (const String& key, const int upperLimit) throw()     { return key.hashCode() % upperLimit; }
+    static int generateHash (const String& key, const int upperLimit) noexcept    { return key.hashCode() % upperLimit; }
     /** Generates a simple hash from a variant. */
-    static int generateHash (const var& key, const int upperLimit) throw()        { return generateHash (key.toString(), upperLimit); }
+    static int generateHash (const var& key, const int upperLimit) noexcept       { return generateHash (key.toString(), upperLimit); }
 };
 
 
@@ -133,7 +133,7 @@ public:
         {
             HashEntry* h = slots.getUnchecked(i);
 
-            while (h != 0)
+            while (h != nullptr)
             {
                 const ScopedPointer<HashEntry> deleter (h);
                 h = h->nextEntry;
@@ -147,7 +147,7 @@ public:
 
     //==============================================================================
     /** Returns the current number of items in the map. */
-    inline int size() const throw()
+    inline int size() const noexcept
     {
         return totalNumItems;
     }
@@ -160,7 +160,7 @@ public:
     {
         const ScopedLockType sl (getLock());
 
-        for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != 0; entry = entry->nextEntry)
+        for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)
                 return entry->value;
 
@@ -173,7 +173,7 @@ public:
     {
         const ScopedLockType sl (getLock());
 
-        for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != 0; entry = entry->nextEntry)
+        for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)
                 return true;
 
@@ -186,7 +186,7 @@ public:
         const ScopedLockType sl (getLock());
 
         for (int i = getNumSlots(); --i >= 0;)
-            for (const HashEntry* entry = slots.getUnchecked(i); entry != 0; entry = entry->nextEntry)
+            for (const HashEntry* entry = slots.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
                 if (entry->value == valueToLookFor)
                     return true;
 
@@ -207,7 +207,7 @@ public:
         {
             HashEntry* const firstEntry = slots.getUnchecked (hashIndex);
 
-            for (HashEntry* entry = firstEntry; entry != 0; entry = entry->nextEntry)
+            for (HashEntry* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
             {
                 if (entry->key == newKey)
                 {
@@ -230,9 +230,9 @@ public:
         const ScopedLockType sl (getLock());
         const int hashIndex = generateHashFor (keyToRemove);
         HashEntry* entry = slots [hashIndex];
-        HashEntry* previous = 0;
+        HashEntry* previous = nullptr;
 
-        while (entry != 0)
+        while (entry != nullptr)
         {
             if (entry->key == keyToRemove)
             {
@@ -240,7 +240,7 @@ public:
 
                 entry = entry->nextEntry;
 
-                if (previous != 0)
+                if (previous != nullptr)
                     previous->nextEntry = entry;
                 else
                     slots.set (hashIndex, entry);
@@ -263,9 +263,9 @@ public:
         for (int i = getNumSlots(); --i >= 0;)
         {
             HashEntry* entry = slots.getUnchecked(i);
-            HashEntry* previous = 0;
+            HashEntry* previous = nullptr;
 
-            while (entry != 0)
+            while (entry != nullptr)
             {
                 if (entry->value == valueToRemove)
                 {
@@ -273,7 +273,7 @@ public:
 
                     entry = entry->nextEntry;
 
-                    if (previous != 0)
+                    if (previous != nullptr)
                         previous->nextEntry = entry;
                     else
                         slots.set (i, entry);
@@ -298,7 +298,7 @@ public:
         HashMap newTable (newNumberOfSlots);
 
         for (int i = getNumSlots(); --i >= 0;)
-            for (const HashEntry* entry = slots.getUnchecked(i); entry != 0; entry = entry->nextEntry)
+            for (const HashEntry* entry = slots.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
                 newTable.set (entry->key, entry->value);
 
         swapWith (newTable);
@@ -308,14 +308,14 @@ public:
         Each slot corresponds to a single hash-code, and each one can contain multiple items.
         @see getNumSlots()
     */
-    inline int getNumSlots() const throw()
+    inline int getNumSlots() const noexcept
     {
         return slots.size();
     }
 
     //==============================================================================
     /** Efficiently swaps the contents of two hash-maps. */
-    void swapWith (HashMap& otherHashMap) throw()
+    void swapWith (HashMap& otherHashMap) noexcept
     {
         const ScopedLockType lock1 (getLock());
         const ScopedLockType lock2 (otherHashMap.getLock());
@@ -329,7 +329,7 @@ public:
         To lock, you can call getLock().enter() and getLock().exit(), or preferably use
         an object of ScopedLockType as an RAII lock for it.
     */
-    inline const TypeOfCriticalSectionToUse& getLock() const throw()       { return lock; }
+    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return lock; }
 
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
@@ -388,10 +388,10 @@ public:
         */
         bool next()
         {
-            if (entry != 0)
+            if (entry != nullptr)
                 entry = entry->nextEntry;
 
-            while (entry == 0)
+            while (entry == nullptr)
             {
                 if (index >= hashMap.getNumSlots())
                     return false;
@@ -407,7 +407,7 @@ public:
         */
         const KeyType getKey() const
         {
-            return entry != 0 ? entry->key : KeyType();
+            return entry != nullptr ? entry->key : KeyType();
         }
 
         /** Returns the current item's value.
@@ -415,7 +415,7 @@ public:
         */
         const ValueType getValue() const
         {
-            return entry != 0 ? entry->value : ValueType();
+            return entry != nullptr ? entry->value : ValueType();
         }
 
     private:

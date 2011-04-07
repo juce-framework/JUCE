@@ -92,7 +92,7 @@ public:
     {
         createConnection (progressCallback, progressCallbackContext);
 
-        if (responseHeaders != 0 && ! isError())
+        if (responseHeaders != nullptr && ! isError())
         {
             DWORD bufferSizeBytes = 4096;
 
@@ -324,7 +324,7 @@ private:
 
                                     bytesSent += bytesDone;
 
-                                    if (progressCallback != 0 && ! progressCallback (progressCallbackContext, bytesSent, postData.getSize()))
+                                    if (progressCallback != nullptr && ! progressCallback (progressCallbackContext, bytesSent, postData.getSize()))
                                         break;
                                 }
                             }

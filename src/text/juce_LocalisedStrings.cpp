@@ -146,7 +146,7 @@ const String LocalisedStrings::translateWithCurrentMappings (const String& text)
 {
     const SpinLock::ScopedLockType sl (currentMappingsLock);
 
-    if (currentMappings != 0)
+    if (currentMappings != nullptr)
         return currentMappings->translate (text);
 
     return text;

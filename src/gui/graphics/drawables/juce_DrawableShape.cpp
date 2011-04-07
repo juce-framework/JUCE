@@ -106,7 +106,7 @@ void DrawableShape::setFillInternal (RelativeFillType& fill, const RelativeFillT
     if (fill != newFill)
     {
         fill = newFill;
-        positioner = 0;
+        positioner = nullptr;
 
         if (fill.isDynamic())
         {
@@ -115,7 +115,7 @@ void DrawableShape::setFillInternal (RelativeFillType& fill, const RelativeFillT
         }
         else
         {
-            fill.recalculateCoords (0);
+            fill.recalculateCoords (nullptr);
         }
 
         repaint();
@@ -146,7 +146,7 @@ void DrawableShape::setStrokeThickness (const float newThickness)
     setStrokeType (PathStrokeType (newThickness, strokeType.getJointStyle(), strokeType.getEndStyle()));
 }
 
-bool DrawableShape::isStrokeVisible() const throw()
+bool DrawableShape::isStrokeVisible() const noexcept
 {
     return strokeType.getStrokeThickness() > 0.0f && ! strokeFill.fill.isInvisible();
 }
@@ -334,7 +334,7 @@ void DrawableShape::RelativeFillType::writeTo (ValueTree& v, ComponentBuilder::I
     {
         v.setProperty (FillAndStrokeState::type, "image", undoManager);
 
-        if (imageProvider != 0)
+        if (imageProvider != nullptr)
             v.setProperty (FillAndStrokeState::imageId, imageProvider->getIdentifierForImage (fill.image), undoManager);
 
         if (fill.getOpacity() < 1.0f)
@@ -381,7 +381,7 @@ bool DrawableShape::RelativeFillType::readFrom (const ValueTree& v, ComponentBui
     else if (newType == "image")
     {
         Image im;
-        if (imageProvider != 0)
+        if (imageProvider != nullptr)
             im = imageProvider->getImageForIdentifier (v [FillAndStrokeState::imageId]);
 
         fill.setTiledImage (im, AffineTransform::identity);

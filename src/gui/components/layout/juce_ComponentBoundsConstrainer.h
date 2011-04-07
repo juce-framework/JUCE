@@ -46,49 +46,49 @@ class JUCE_API  ComponentBoundsConstrainer
 public:
     //==============================================================================
     /** When first created, the object will not impose any restrictions on the components. */
-    ComponentBoundsConstrainer() throw();
+    ComponentBoundsConstrainer() noexcept;
 
     /** Destructor. */
     virtual ~ComponentBoundsConstrainer();
 
     //==============================================================================
     /** Imposes a minimum width limit. */
-    void setMinimumWidth (int minimumWidth) throw();
+    void setMinimumWidth (int minimumWidth) noexcept;
 
     /** Returns the current minimum width. */
-    int getMinimumWidth() const throw()                         { return minW; }
+    int getMinimumWidth() const noexcept                        { return minW; }
 
     /** Imposes a maximum width limit. */
-    void setMaximumWidth (int maximumWidth) throw();
+    void setMaximumWidth (int maximumWidth) noexcept;
 
     /** Returns the current maximum width. */
-    int getMaximumWidth() const throw()                         { return maxW; }
+    int getMaximumWidth() const noexcept                        { return maxW; }
 
     /** Imposes a minimum height limit. */
-    void setMinimumHeight (int minimumHeight) throw();
+    void setMinimumHeight (int minimumHeight) noexcept;
 
     /** Returns the current minimum height. */
-    int getMinimumHeight() const throw()                        { return minH; }
+    int getMinimumHeight() const noexcept                       { return minH; }
 
     /** Imposes a maximum height limit. */
-    void setMaximumHeight (int maximumHeight) throw();
+    void setMaximumHeight (int maximumHeight) noexcept;
 
     /** Returns the current maximum height. */
-    int getMaximumHeight() const throw()                        { return maxH; }
+    int getMaximumHeight() const noexcept                       { return maxH; }
 
     /** Imposes a minimum width and height limit. */
     void setMinimumSize (int minimumWidth,
-                         int minimumHeight) throw();
+                         int minimumHeight) noexcept;
 
     /** Imposes a maximum width and height limit. */
     void setMaximumSize (int maximumWidth,
-                         int maximumHeight) throw();
+                         int maximumHeight) noexcept;
 
     /** Set all the maximum and minimum dimensions. */
     void setSizeLimits (int minimumWidth,
                         int minimumHeight,
                         int maximumWidth,
-                        int maximumHeight) throw();
+                        int maximumHeight) noexcept;
 
     //==============================================================================
     /** Sets the amount by which the component is allowed to go off-screen.
@@ -110,17 +110,17 @@ public:
     void setMinimumOnscreenAmounts (int minimumWhenOffTheTop,
                                     int minimumWhenOffTheLeft,
                                     int minimumWhenOffTheBottom,
-                                    int minimumWhenOffTheRight) throw();
+                                    int minimumWhenOffTheRight) noexcept;
 
 
     /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
-    int getMinimumWhenOffTheTop() const throw()         { return minOffTop; }
+    int getMinimumWhenOffTheTop() const noexcept        { return minOffTop; }
     /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
-    int getMinimumWhenOffTheLeft() const throw()        { return minOffLeft; }
+    int getMinimumWhenOffTheLeft() const noexcept       { return minOffLeft; }
     /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
-    int getMinimumWhenOffTheBottom() const throw()      { return minOffBottom; }
+    int getMinimumWhenOffTheBottom() const noexcept     { return minOffBottom; }
     /** Returns the minimum distance the bounds can be off-screen. @see setMinimumOnscreenAmounts */
-    int getMinimumWhenOffTheRight() const throw()       { return minOffRight; }
+    int getMinimumWhenOffTheRight() const noexcept      { return minOffRight; }
 
     //==============================================================================
     /** Specifies a width-to-height ratio that the resizer should always maintain.
@@ -130,13 +130,13 @@ public:
 
         @see setResizeLimits
     */
-    void setFixedAspectRatio (double widthOverHeight) throw();
+    void setFixedAspectRatio (double widthOverHeight) noexcept;
 
     /** Returns the aspect ratio that was set with setFixedAspectRatio().
 
         If no aspect ratio is being enforced, this will return 0.
     */
-    double getFixedAspectRatio() const throw();
+    double getFixedAspectRatio() const noexcept;
 
 
     //==============================================================================

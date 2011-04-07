@@ -53,7 +53,7 @@ class JUCE_API  MessageManager
 public:
     //==============================================================================
     /** Returns the global instance of the MessageManager. */
-    static MessageManager* getInstance() throw();
+    static MessageManager* getInstance() noexcept;
 
     //==============================================================================
     /** Runs the event dispatch loop until a stop message is posted.
@@ -76,7 +76,7 @@ public:
 
     /** Returns true if the stopDispatchLoop() method has been called.
     */
-    bool hasStopMessageBeenSent() const throw()         { return quitMessagePosted; }
+    bool hasStopMessageBeenSent() const noexcept        { return quitMessagePosted; }
 
    #if JUCE_MODAL_LOOPS_PERMITTED
     /** Synchronously dispatches messages until a given time has elapsed.
@@ -110,7 +110,7 @@ public:
                                        void* userData);
 
     /** Returns true if the caller-thread is the message thread. */
-    bool isThisTheMessageThread() const throw();
+    bool isThisTheMessageThread() const noexcept;
 
     /** Called to tell the manager that the current thread is the one that's running the dispatch loop.
 
@@ -124,7 +124,7 @@ public:
         (Best to ignore this method unless you really know what you're doing..)
         @see setCurrentMessageThread
     */
-    Thread::ThreadID getCurrentMessageThread() const throw()             { return messageThreadId; }
+    Thread::ThreadID getCurrentMessageThread() const noexcept            { return messageThreadId; }
 
     /** Returns true if the caller thread has currenltly got the message manager locked.
 
@@ -133,7 +133,7 @@ public:
         This will be true if the caller is the message thread, because that automatically
         gains a lock while a message is being dispatched.
     */
-    bool currentThreadHasLockedMessageManager() const throw();
+    bool currentThreadHasLockedMessageManager() const noexcept;
 
     //==============================================================================
     /** Sends a message to all other JUCE applications that are running.
@@ -162,11 +162,11 @@ public:
     /** @internal */
     void deliverBroadcastMessage (const String&);
     /** @internal */
-    ~MessageManager() throw();
+    ~MessageManager() noexcept;
 
 private:
     //==============================================================================
-    MessageManager() throw();
+    MessageManager() noexcept;
 
     friend class MessageListener;
     friend class ChangeBroadcaster;
@@ -290,14 +290,14 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
    */
-    ~MessageManagerLock() throw();
+    ~MessageManagerLock() noexcept;
 
     //==============================================================================
     /** Returns true if the lock was successfully acquired.
 
         (See the constructor that takes a Thread for more info).
     */
-    bool lockWasGained() const throw()                      { return locked; }
+    bool lockWasGained() const noexcept                     { return locked; }
 
 
 private:

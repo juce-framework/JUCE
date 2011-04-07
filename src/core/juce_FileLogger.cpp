@@ -87,9 +87,9 @@ void FileLogger::trimFileSize (int maxFileSizeBytes) const
         if (fileSize > maxFileSizeBytes)
         {
             ScopedPointer <FileInputStream> in (logFile.createInputStream());
-            jassert (in != 0);
+            jassert (in != nullptr);
 
-            if (in != 0)
+            if (in != nullptr)
             {
                 in->setPosition (fileSize - maxFileSizeBytes);
                 String content;
@@ -100,7 +100,7 @@ void FileLogger::trimFileSize (int maxFileSizeBytes) const
                     contentToSave.fillWith (0);
 
                     in->read (contentToSave.getData(), maxFileSizeBytes);
-                    in = 0;
+                    in = nullptr;
 
                     content = contentToSave.toString();
                 }

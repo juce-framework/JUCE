@@ -54,12 +54,12 @@ public:
         threads.removeValue (thread);
     }
 
-    int size() const throw()
+    int size() const noexcept
     {
         return threads.size();
     }
 
-    Thread* getThreadWithID (const Thread::ThreadID targetID) const throw()
+    Thread* getThreadWithID (const Thread::ThreadID targetID) const noexcept
     {
         const SpinLock::ScopedLockType sl (lock);
 
@@ -82,7 +82,7 @@ public:
         {
             Thread* firstThread = getFirstThread();
 
-            if (firstThread != 0)
+            if (firstThread != nullptr)
                 firstThread->stopThread (timeOutMilliseconds);
             else
                 break;
@@ -151,7 +151,7 @@ void JUCE_API juce_threadEntryPoint (void* userData)
 //==============================================================================
 Thread::Thread (const String& threadName)
     : threadName_ (threadName),
-      threadHandle_ (0),
+      threadHandle_ (nullptr),
       threadId_ (0),
       threadPriority_ (5),
       affinityMask_ (0),
@@ -317,7 +317,7 @@ void Thread::stopAllThreads (const int timeOutMilliseconds)
 }
 
 //==============================================================================
-void SpinLock::enter() const throw()
+void SpinLock::enter() const noexcept
 {
     if (! lock.compareAndSetBool (1, 0))
     {
@@ -330,7 +330,7 @@ void SpinLock::enter() const throw()
     }
 }
 
-bool SpinLock::tryEnter() const throw()
+bool SpinLock::tryEnter() const noexcept
 {
     return lock.compareAndSetBool (1, 0);
 }

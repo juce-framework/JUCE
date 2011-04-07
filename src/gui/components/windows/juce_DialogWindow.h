@@ -89,7 +89,7 @@ public:
         @code
         Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
 
-        if (dw != 0)
+        if (dw != nullptr)
             dw->exitModalState (1234);
         @endcode
 
@@ -132,7 +132,7 @@ public:
         @code
         Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
 
-        if (dw != 0)
+        if (dw != nullptr)
             dw->exitModalState (1234);
         @endcode
 

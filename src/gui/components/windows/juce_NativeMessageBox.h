@@ -48,7 +48,7 @@ public:
     static void JUCE_CALLTYPE showMessageBox (AlertWindow::AlertIconType iconType,
                                               const String& title,
                                               const String& message,
-                                              Component* associatedComponent = 0);
+                                              Component* associatedComponent = nullptr);
    #endif
 
     /** Shows a dialog box that just has a message and a single 'ok' button to close it.
@@ -69,7 +69,7 @@ public:
     static void JUCE_CALLTYPE showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                    const String& title,
                                                    const String& message,
-                                                   Component* associatedComponent = 0);
+                                                   Component* associatedComponent = nullptr);
 
     /** Shows a dialog box with two buttons.
 
@@ -103,8 +103,8 @@ public:
                                                const String& title,
                                                const String& message,
                                             #if JUCE_MODAL_LOOPS_PERMITTED
-                                               Component* associatedComponent = 0,
-                                               ModalComponentManager::Callback* callback = 0);
+                                               Component* associatedComponent = nullptr,
+                                               ModalComponentManager::Callback* callback = nullptr);
                                             #else
                                                Component* associatedComponent,
                                                ModalComponentManager::Callback* callback);
@@ -146,8 +146,8 @@ public:
                                                  const String& title,
                                                  const String& message,
                                                #if JUCE_MODAL_LOOPS_PERMITTED
-                                                 Component* associatedComponent = 0,
-                                                 ModalComponentManager::Callback* callback = 0);
+                                                 Component* associatedComponent = nullptr,
+                                                 ModalComponentManager::Callback* callback = nullptr);
                                                #else
                                                  Component* associatedComponent,
                                                  ModalComponentManager::Callback* callback);

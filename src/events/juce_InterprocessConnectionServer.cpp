@@ -55,7 +55,7 @@ bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber)
         return true;
     }
 
-    socket = 0;
+    socket = nullptr;
     return false;
 }
 
@@ -63,24 +63,24 @@ void InterprocessConnectionServer::stop()
 {
     signalThreadShouldExit();
 
-    if (socket != 0)
+    if (socket != nullptr)
         socket->close();
 
     stopThread (4000);
-    socket = 0;
+    socket = nullptr;
 }
 
 void InterprocessConnectionServer::run()
 {
-    while ((! threadShouldExit()) && socket != 0)
+    while ((! threadShouldExit()) && socket != nullptr)
     {
         ScopedPointer <StreamingSocket> clientSocket (socket->waitForNextConnection());
 
-        if (clientSocket != 0)
+        if (clientSocket != nullptr)
         {
             InterprocessConnection* newConnection = createConnectionObject();
 
-            if (newConnection != 0)
+            if (newConnection != nullptr)
                 newConnection->initialiseWithSocket (clientSocket.release());
         }
     }

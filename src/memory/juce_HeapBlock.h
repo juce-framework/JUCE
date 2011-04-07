@@ -78,7 +78,7 @@ public:
         After creation, you can resize the array using the malloc(), calloc(),
         or realloc() methods.
     */
-    HeapBlock() throw() : data (0)
+    HeapBlock() noexcept  : data (nullptr)
     {
     }
 
@@ -108,55 +108,55 @@ public:
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator ElementType*() const throw()                            { return data; }
+    inline operator ElementType*() const noexcept                           { return data; }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline ElementType* getData() const throw()                             { return data; }
+    inline ElementType* getData() const noexcept                            { return data; }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void*() const throw()                                   { return static_cast <void*> (data); }
+    inline operator void*() const noexcept                                  { return static_cast <void*> (data); }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator const void*() const throw()                             { return static_cast <const void*> (data); }
+    inline operator const void*() const noexcept                            { return static_cast <const void*> (data); }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.
     */
-    inline ElementType* operator->() const  throw()                         { return data; }
+    inline ElementType* operator->() const  noexcept                        { return data; }
 
     /** Returns a reference to one of the data elements.
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
         has no idea of the size it currently has allocated.
     */
     template <typename IndexType>
-    inline ElementType& operator[] (IndexType index) const throw()          { return data [index]; }
+    inline ElementType& operator[] (IndexType index) const noexcept         { return data [index]; }
 
     /** Returns a pointer to a data element at an offset from the start of the array.
         This is the same as doing pointer arithmetic on the raw pointer itself.
     */
     template <typename IndexType>
-    inline ElementType* operator+ (IndexType index) const throw()           { return data + index; }
+    inline ElementType* operator+ (IndexType index) const noexcept          { return data + index; }
 
     //==============================================================================
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator== (const ElementType* const otherPointer) const throw()    { return otherPointer == data; }
+    inline bool operator== (const ElementType* const otherPointer) const noexcept   { return otherPointer == data; }
 
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator!= (const ElementType* const otherPointer) const throw()    { return otherPointer != data; }
+    inline bool operator!= (const ElementType* const otherPointer) const noexcept   { return otherPointer != data; }
 
     //==============================================================================
     /** Allocates a specified amount of memory.
@@ -207,7 +207,7 @@ public:
     */
     void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
-        if (data == 0)
+        if (data == nullptr)
             data = static_cast <ElementType*> (::malloc (newNumElements * elementSize));
         else
             data = static_cast <ElementType*> (::realloc (data, newNumElements * elementSize));
@@ -219,13 +219,13 @@ public:
     void free()
     {
         ::free (data);
-        data = 0;
+        data = nullptr;
     }
 
     /** Swaps this object's data with the data of another HeapBlock.
         The two objects simply exchange their data pointers.
     */
-    void swapWith (HeapBlock <ElementType>& other) throw()
+    void swapWith (HeapBlock <ElementType>& other) noexcept
     {
         std::swap (data, other.data);
     }
@@ -234,7 +234,7 @@ public:
         Since the block has no way of knowing its own size, you must make sure that the number of
         elements you specify doesn't exceed the allocated size.
     */
-    void clear (size_t numElements) throw()
+    void clear (size_t numElements) noexcept
     {
         zeromem (data, sizeof (ElementType) * numElements);
     }

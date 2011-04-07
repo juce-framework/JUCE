@@ -107,7 +107,7 @@ public:
 
 protected:
     //==============================================================================
-    AudioPluginFormat() throw();
+    AudioPluginFormat() noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormat);
 };

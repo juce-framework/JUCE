@@ -67,7 +67,7 @@ public:
 
     static void menuCallback (int result, ChangeKeyButton* button)
     {
-        if (button != 0)
+        if (button != nullptr)
         {
             switch (result)
             {
@@ -97,7 +97,7 @@ public:
         }
     }
 
-    void fitToContent (const int h) throw()
+    void fitToContent (const int h) noexcept
     {
         if (keyNum < 0)
         {
@@ -161,7 +161,7 @@ public:
 
     static void assignNewKeyCallback (int result, ChangeKeyButton* button, KeyPress newKey)
     {
-        if (result != 0 && button != 0)
+        if (result != 0 && button != nullptr)
             button->setNewKey (newKey, true);
     }
 
@@ -198,13 +198,13 @@ public:
 
     static void keyChosen (int result, ChangeKeyButton* button)
     {
-        if (result != 0 && button != 0 && button->currentKeyEntryWindow != 0)
+        if (result != 0 && button != nullptr && button->currentKeyEntryWindow != nullptr)
         {
             button->currentKeyEntryWindow->setVisible (false);
             button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
         }
 
-        button->currentKeyEntryWindow = 0;
+        button->currentKeyEntryWindow = nullptr;
     }
 
     void assignNewKey()
@@ -406,7 +406,7 @@ public:
 
     static void resetToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
     {
-        if (result != 0 && owner != 0)
+        if (result != 0 && owner != nullptr)
             owner->getMappings().resetToDefaultMappings();
     }
 
@@ -449,7 +449,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
 KeyMappingEditorComponent::~KeyMappingEditorComponent()
 {
-    tree.setRootItem (0);
+    tree.setRootItem (nullptr);
 }
 
 //==============================================================================
@@ -463,7 +463,7 @@ void KeyMappingEditorComponent::setColours (const Colour& mainBackground,
 
 void KeyMappingEditorComponent::parentHierarchyChanged()
 {
-    treeItem->changeListenerCallback (0);
+    treeItem->changeListenerCallback (nullptr);
 }
 
 void KeyMappingEditorComponent::resized()
@@ -488,14 +488,14 @@ bool KeyMappingEditorComponent::shouldCommandBeIncluded (const CommandID command
 {
     const ApplicationCommandInfo* const ci = mappings.getCommandManager()->getCommandForID (commandID);
 
-    return ci != 0 && (ci->flags & ApplicationCommandInfo::hiddenFromKeyEditor) == 0;
+    return ci != nullptr && (ci->flags & ApplicationCommandInfo::hiddenFromKeyEditor) == 0;
 }
 
 bool KeyMappingEditorComponent::isCommandReadOnly (const CommandID commandID)
 {
     const ApplicationCommandInfo* const ci = mappings.getCommandManager()->getCommandForID (commandID);
 
-    return ci != 0 && (ci->flags & ApplicationCommandInfo::readOnlyInKeyEditor) != 0;
+    return ci != nullptr && (ci->flags & ApplicationCommandInfo::readOnlyInKeyEditor) != 0;
 }
 
 const String KeyMappingEditorComponent::getDescriptionForKeyPress (const KeyPress& key)

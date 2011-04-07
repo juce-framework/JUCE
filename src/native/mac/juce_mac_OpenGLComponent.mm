@@ -134,7 +134,7 @@ public:
     WindowedGLContext (Component& component,
                        const OpenGLPixelFormat& pixelFormat_,
                        NSOpenGLContext* sharedContext)
-        : renderContext (0),
+        : renderContext (nil),
           pixelFormat (pixelFormat_)
     {
         NSOpenGLPixelFormatAttribute attribs[] =
@@ -190,9 +190,9 @@ public:
         renderContext = nil;
     }
 
-    bool makeActive() const throw()
+    bool makeActive() const noexcept
     {
-        jassert (renderContext != 0);
+        jassert (renderContext != nil);
 
         if ([renderContext view] != view)
             [renderContext setView: view];
@@ -201,19 +201,19 @@ public:
         return isActive();
     }
 
-    bool makeInactive() const throw()
+    bool makeInactive() const noexcept
     {
         [view makeInactive];
         return true;
     }
 
-    bool isActive() const throw()
+    bool isActive() const noexcept
     {
         return [NSOpenGLContext currentContext] == renderContext;
     }
 
     const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
-    void* getRawContext() const throw()             { return renderContext; }
+    void* getRawContext() const noexcept            { return renderContext; }
 
     void updateWindowPosition (int /*x*/, int /*y*/, int /*w*/, int /*h*/, int /*outerWindowHeight*/)
     {
@@ -271,15 +271,15 @@ private:
 OpenGLContext* OpenGLComponent::createContext()
 {
     ScopedPointer<WindowedGLContext> c (new WindowedGLContext (*this, preferredPixelFormat,
-                                                               contextToShareListsWith != 0 ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : 0));
+                                                               contextToShareListsWith != nullptr ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : 0));
 
-    return (c->renderContext != 0) ? c.release() : 0;
+    return (c->renderContext != nil) ? c.release() : 0;
 }
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return context != 0 ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle()
-                        : 0;
+    return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle()
+                              : 0;
 }
 
 void juce_glViewport (const int w, const int h)
@@ -358,7 +358,7 @@ public:
                  const OpenGLPixelFormat& pixelFormat_,
                  const GLESContext* const sharedContext,
                  NSUInteger apiType)
-        : component (component_), pixelFormat (pixelFormat_), glLayer (0), context (0),
+        : component (component_), pixelFormat (pixelFormat_), glLayer (nil), context (nil),
           useDepthBuffer (pixelFormat_.depthBufferBits > 0), frameBufferHandle (0), colorBufferHandle (0),
           depthBufferHandle (0), lastWidth (0), lastHeight (0)
     {
@@ -371,7 +371,7 @@ public:
         glLayer = (CAEAGLLayer*) [view layer];
         [peer->view addSubview: view];
 
-        if (sharedContext != 0)
+        if (sharedContext != nullptr)
             context = [[EAGLContext alloc] initWithAPI: apiType
                                             sharegroup: [sharedContext->context sharegroup]];
         else
@@ -396,9 +396,9 @@ public:
         context = nil;
     }
 
-    bool makeActive() const throw()
+    bool makeActive() const noexcept
     {
-        jassert (context != 0);
+        jassert (context != nil);
 
         [EAGLContext setCurrentContext: context];
         glBindFramebufferOES (GL_FRAMEBUFFER_OES, frameBufferHandle);
@@ -411,18 +411,18 @@ public:
         [context presentRenderbuffer: GL_RENDERBUFFER_OES];
     }
 
-    bool makeInactive() const throw()
+    bool makeInactive() const noexcept
     {
         return [EAGLContext setCurrentContext: nil];
     }
 
-    bool isActive() const throw()
+    bool isActive() const noexcept
     {
         return [EAGLContext currentContext] == context;
     }
 
     const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
-    void* getRawContext() const throw()             { return glLayer; }
+    void* getRawContext() const noexcept            { return glLayer; }
 
     void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight)
     {
@@ -528,7 +528,7 @@ OpenGLContext* OpenGLComponent::createContext()
     ScopedAutoReleasePool pool;
     UIViewComponentPeer* peer = dynamic_cast <UIViewComponentPeer*> (getPeer());
 
-    if (peer != 0)
+    if (peer != nullptr)
         return new GLESContext (peer, this, preferredPixelFormat,
                                 dynamic_cast <const GLESContext*> (contextToShareListsWith),
                                 type == openGLES2 ? kEAGLRenderingAPIOpenGLES2 : kEAGLRenderingAPIOpenGLES1);

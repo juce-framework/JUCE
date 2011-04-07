@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ThreadPoolJob::ThreadPoolJob (const String& name)
     : jobName (name),
-      pool (0),
+      pool (nullptr),
       shouldStop (false),
       isActive (false),
       shouldBeDeleted (false)
@@ -45,7 +45,7 @@ ThreadPoolJob::~ThreadPoolJob()
 {
     // you mustn't delete a job while it's still in a pool! Use ThreadPool::removeJob()
     // to remove it first!
-    jassert (pool == 0 || ! pool->contains (this));
+    jassert (pool == nullptr || ! pool->contains (this));
 }
 
 const String ThreadPoolJob::getJobName() const
@@ -122,10 +122,10 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::addJob (ThreadPoolJob* const job)
 {
-    jassert (job != 0);
-    jassert (job->pool == 0);
+    jassert (job != nullptr);
+    jassert (job->pool == nullptr);
 
-    if (job->pool == 0)
+    if (job->pool == nullptr)
     {
         job->pool = this;
         job->shouldStop = false;
@@ -195,7 +195,7 @@ bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
 bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job,
                                      const int timeOutMs) const
 {
-    if (job != 0)
+    if (job != nullptr)
     {
         const uint32 start = Time::getMillisecondCounter();
 
@@ -217,7 +217,7 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
 {
     bool dontWait = true;
 
-    if (job != 0)
+    if (job != nullptr)
     {
         const ScopedLock sl (lock);
 
@@ -233,7 +233,7 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
             else
             {
                 jobs.removeValue (job);
-                job->pool = 0;
+                job->pool = nullptr;
             }
         }
     }
@@ -255,7 +255,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
         {
             ThreadPoolJob* const job = jobs.getUnchecked(i);
 
-            if (selectedJobsToRemove == 0 || selectedJobsToRemove->isJobSuitable (job))
+            if (selectedJobsToRemove == nullptr || selectedJobsToRemove->isJobSuitable (job))
             {
                 if (job->isActive)
                 {
@@ -271,7 +271,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
                     if (deleteInactiveJobs)
                         delete job;
                     else
-                        job->pool = 0;
+                        job->pool = nullptr;
                 }
             }
         }
@@ -330,7 +330,7 @@ bool ThreadPool::setThreadPriorities (const int newPriority)
 
 bool ThreadPool::runNextJob()
 {
-    ThreadPoolJob* job = 0;
+    ThreadPoolJob* job = nullptr;
 
     {
         const ScopedLock sl (lock);
@@ -339,18 +339,18 @@ bool ThreadPool::runNextJob()
         {
             job = jobs[i];
 
-            if (job != 0 && ! (job->isActive || job->shouldStop))
+            if (job != nullptr && ! (job->isActive || job->shouldStop))
                 break;
 
-            job = 0;
+            job = nullptr;
         }
 
-        if (job != 0)
+        if (job != nullptr)
             job->isActive = true;
 
     }
 
-    if (job != 0)
+    if (job != nullptr)
     {
         JUCE_TRY
         {
@@ -366,7 +366,7 @@ bool ThreadPool::runNextJob()
 
                 if (result != ThreadPoolJob::jobNeedsRunningAgain || job->shouldStop)
                 {
-                    job->pool = 0;
+                    job->pool = nullptr;
                     job->shouldStop = true;
                     jobs.removeValue (job);
 

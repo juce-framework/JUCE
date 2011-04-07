@@ -38,7 +38,7 @@ class JUCE_API  UndoableAction
 {
 protected:
     /** Creates an action. */
-    UndoableAction() throw()    {}
+    UndoableAction() noexcept   {}
 
 public:
     /** Destructor. */

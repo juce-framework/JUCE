@@ -76,7 +76,7 @@ public:
         in progress on a different thread, this won't block until it finishes, so there's
         no guarantee that the callback isn't still running when you return from
     */
-    void cancelPendingUpdate() throw();
+    void cancelPendingUpdate() noexcept;
 
     /** If an update has been triggered and is pending, this will invoke it
         synchronously.
@@ -91,7 +91,7 @@ public:
     void handleUpdateNowIfNeeded();
 
     /** Returns true if there's an update callback in the pipeline. */
-    bool isUpdatePending() const throw();
+    bool isUpdatePending() const noexcept;
 
     //==============================================================================
     /** Called back to do whatever your class needs to do.
@@ -104,7 +104,7 @@ public:
 private:
     //==============================================================================
     ReferenceCountedObjectPtr<CallbackMessage> message;
-    Atomic<int>& getDeliveryFlag() const throw();
+    Atomic<int>& getDeliveryFlag() const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncUpdater);
 };

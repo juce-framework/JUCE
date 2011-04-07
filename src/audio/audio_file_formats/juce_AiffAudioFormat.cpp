@@ -153,7 +153,7 @@ public:
         if (samplesAvailable < numSamples)
         {
             for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != 0)
+                if (destSamples[i] != nullptr)
                     zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
 
             numSamples = (int) samplesAvailable;
@@ -242,7 +242,7 @@ public:
     //==============================================================================
     bool write (const int** data, int numSamples)
     {
-        jassert (data != 0 && *data != 0); // the input must contain at least one channel!
+        jassert (data != nullptr && *data != nullptr); // the input must contain at least one channel!
 
         if (writeFailed)
             return false;
@@ -407,7 +407,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
         return w.release();
 
     if (! deleteStreamIfOpeningFails)
-        w->input = 0;
+        w->input = nullptr;
 
     return 0;
 }

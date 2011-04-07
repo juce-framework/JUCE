@@ -66,10 +66,10 @@ public:
     CoreAudioInternal (AudioDeviceID id)
        : inputLatency (0),
          outputLatency (0),
-         callback (0),
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+         callback (nullptr),
+        #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
          audioProcID (0),
-#endif
+        #endif
          isSlaveDevice (false),
          deviceID (id),
          started (false),
@@ -492,7 +492,7 @@ public:
     {
         if (! started)
         {
-            callback = 0;
+            callback = nullptr;
 
             if (deviceID != 0)
             {
@@ -525,7 +525,7 @@ public:
             callback = cb;
         }
 
-        if (inputDevice != 0)
+        if (inputDevice != nullptr)
             return started && inputDevice->start (cb);
         else
             return started;
@@ -535,7 +535,7 @@ public:
     {
         {
             const ScopedLock sl (callbackLock);
-            callback = 0;
+            callback = nullptr;
         }
 
         if (started
@@ -576,7 +576,7 @@ public:
             const ScopedLock sl (callbackLock);
         }
 
-        if (inputDevice != 0)
+        if (inputDevice != nullptr)
             inputDevice->stop (leaveInterruptRunning);
     }
 
@@ -596,7 +596,7 @@ public:
         int i;
         const ScopedLock sl (callbackLock);
 
-        if (callback != 0)
+        if (callback != nullptr)
         {
             if (inputDevice == 0)
             {
@@ -866,7 +866,7 @@ public:
           isOpen_ (false),
           isStarted (false)
     {
-        CoreAudioInternal* device = 0;
+        CoreAudioInternal* device = nullptr;
 
         if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
         {
@@ -979,12 +979,12 @@ public:
 
     int getCurrentBufferSizeSamples()
     {
-        return internal != 0 ? internal->getBufferSize() : 512;
+        return internal != nullptr ? internal->getBufferSize() : 512;
     }
 
     double getCurrentSampleRate()
     {
-        return internal != 0 ? internal->getSampleRate() : 0;
+        return internal != nullptr ? internal->getSampleRate() : 0;
     }
 
     int getCurrentBitDepth()
@@ -994,14 +994,14 @@ public:
 
     const BigInteger getActiveOutputChannels() const
     {
-        return internal != 0 ? internal->activeOutputChans : BigInteger();
+        return internal != nullptr ? internal->activeOutputChans : BigInteger();
     }
 
     const BigInteger getActiveInputChannels() const
     {
         BigInteger chans;
 
-        if (internal != 0)
+        if (internal != nullptr)
         {
             chans = internal->activeInputChans;
 
@@ -1014,7 +1014,7 @@ public:
 
     int getOutputLatencyInSamples()
     {
-        if (internal == 0)
+        if (internal == nullptr)
             return 0;
 
         // this seems like a good guess at getting the latency right - comparing
@@ -1025,7 +1025,7 @@ public:
 
     int getInputLatencyInSamples()
     {
-        if (internal == 0)
+        if (internal == nullptr)
             return 0;
 
         return internal->inputLatency + internal->getBufferSize() * 2;
@@ -1033,9 +1033,9 @@ public:
 
     void start (AudioIODeviceCallback* callback)
     {
-        if (internal != 0 && ! isStarted)
+        if (internal != nullptr && ! isStarted)
         {
-            if (callback != 0)
+            if (callback != nullptr)
                 callback->audioDeviceAboutToStart (this);
 
             isStarted = true;
@@ -1045,21 +1045,21 @@ public:
 
     void stop()
     {
-        if (isStarted && internal != 0)
+        if (isStarted && internal != nullptr)
         {
             AudioIODeviceCallback* const lastCallback = internal->callback;
 
             isStarted = false;
             internal->stop (true);
 
-            if (lastCallback != 0)
+            if (lastCallback != nullptr)
                 lastCallback->audioDeviceStopped();
         }
     }
 
     bool isPlaying()
     {
-        if (internal->callback == 0)
+        if (internal->callback == nullptr)
             isStarted = false;
 
         return isStarted;
@@ -1220,7 +1220,7 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         CoreAudioIODevice* const d = dynamic_cast <CoreAudioIODevice*> (device);
-        if (d == 0)
+        if (d == nullptr)
             return -1;
 
         return asInput ? d->inputIndex

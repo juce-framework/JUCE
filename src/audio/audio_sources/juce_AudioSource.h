@@ -64,7 +64,7 @@ struct JUCE_API  AudioSourceChannelInfo
     /** Convenient method to clear the buffer if the source is not producing any data. */
     void clearActiveBufferRegion() const
     {
-        if (buffer != 0)
+        if (buffer != nullptr)
             buffer->clear (startSample, numSamples);
     }
 };
@@ -90,7 +90,7 @@ class JUCE_API  AudioSource
 protected:
     //==============================================================================
     /** Creates an AudioSource. */
-    AudioSource() throw()       {}
+    AudioSource() noexcept      {}
 
 public:
     /** Destructor. */

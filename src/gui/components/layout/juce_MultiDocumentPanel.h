@@ -66,7 +66,7 @@ public:
 private:
     //==============================================================================
     void updateOrder();
-    MultiDocumentPanel* getOwner() const throw();
+    MultiDocumentPanel* getOwner() const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanelWindow);
 };
@@ -162,7 +162,7 @@ public:
 
         @see getDocument
     */
-    int getNumDocuments() const throw();
+    int getNumDocuments() const noexcept;
 
     /** Returns one of the open documents.
 
@@ -171,7 +171,7 @@ public:
 
         @see getNumDocuments
     */
-    Component* getDocument (int index) const throw();
+    Component* getDocument (int index) const noexcept;
 
     /** Returns the document component that is currently focused or on top.
 
@@ -182,7 +182,7 @@ public:
 
         @see setActiveDocument
     */
-    Component* getActiveDocument() const throw();
+    Component* getActiveDocument() const noexcept;
 
     /** Makes one of the components active and brings it to the top.
 
@@ -211,7 +211,7 @@ public:
 
     /** Returns the result of the last time useFullscreenWhenOneDocument() was called.
     */
-    bool isFullscreenWhenOneDocument() const throw();
+    bool isFullscreenWhenOneDocument() const noexcept;
 
     //==============================================================================
     /** The different layout modes available. */
@@ -228,7 +228,7 @@ public:
     void setLayoutMode (LayoutMode newLayoutMode);
 
     /** Returns the current layout mode. */
-    LayoutMode getLayoutMode() const throw()                            { return mode; }
+    LayoutMode getLayoutMode() const noexcept                           { return mode; }
 
     /** Sets the background colour for the whole panel.
 
@@ -241,7 +241,7 @@ public:
 
         @see setBackgroundColour
     */
-    const Colour& getBackgroundColour() const throw()                   { return backgroundColour; }
+    const Colour& getBackgroundColour() const noexcept                  { return backgroundColour; }
 
 
     //==============================================================================

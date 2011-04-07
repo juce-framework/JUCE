@@ -411,7 +411,7 @@ private:
 AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier)
     : fileOrIdentifier (fileOrIdentifier),
       wantsMidiMessages (false), wasPlaying (false), prepared (false),
-      currentBuffer (0),
+      currentBuffer (nullptr),
       audioUnit (0)
 {
     using namespace AudioUnitFormatHelpers;
@@ -768,20 +768,20 @@ OSStatus AudioUnitPluginInstance::getBeatAndTempo (Float64* outCurrentBeat, Floa
     AudioPlayHead* const ph = getPlayHead();
     AudioPlayHead::CurrentPositionInfo result;
 
-    if (ph != 0 && ph->getCurrentPosition (result))
+    if (ph != nullptr && ph->getCurrentPosition (result))
     {
-        if (outCurrentBeat != 0)
+        if (outCurrentBeat != nullptr)
             *outCurrentBeat = result.ppqPosition;
 
-        if (outCurrentTempo != 0)
+        if (outCurrentTempo != nullptr)
             *outCurrentTempo = result.bpm;
     }
     else
     {
-        if (outCurrentBeat != 0)
+        if (outCurrentBeat != nullptr)
             *outCurrentBeat = 0;
 
-        if (outCurrentTempo != 0)
+        if (outCurrentTempo != nullptr)
             *outCurrentTempo = 120.0;
     }
 
@@ -796,32 +796,32 @@ OSStatus AudioUnitPluginInstance::getMusicalTimeLocation (UInt32* outDeltaSample
     AudioPlayHead* const ph = getPlayHead();
     AudioPlayHead::CurrentPositionInfo result;
 
-    if (ph != 0 && ph->getCurrentPosition (result))
+    if (ph != nullptr && ph->getCurrentPosition (result))
     {
-        if (outTimeSig_Numerator != 0)
+        if (outTimeSig_Numerator != nullptr)
             *outTimeSig_Numerator = result.timeSigNumerator;
 
-        if (outTimeSig_Denominator != 0)
+        if (outTimeSig_Denominator != nullptr)
             *outTimeSig_Denominator = result.timeSigDenominator;
 
-        if (outDeltaSampleOffsetToNextBeat != 0)
+        if (outDeltaSampleOffsetToNextBeat != nullptr)
             *outDeltaSampleOffsetToNextBeat = 0; //xxx
 
-        if (outCurrentMeasureDownBeat != 0)
+        if (outCurrentMeasureDownBeat != nullptr)
             *outCurrentMeasureDownBeat = result.ppqPositionOfLastBarStart; //xxx wrong
     }
     else
     {
-        if (outDeltaSampleOffsetToNextBeat != 0)
+        if (outDeltaSampleOffsetToNextBeat != nullptr)
             *outDeltaSampleOffsetToNextBeat = 0;
 
-        if (outTimeSig_Numerator != 0)
+        if (outTimeSig_Numerator != nullptr)
             *outTimeSig_Numerator = 4;
 
-        if (outTimeSig_Denominator != 0)
+        if (outTimeSig_Denominator != nullptr)
             *outTimeSig_Denominator = 4;
 
-        if (outCurrentMeasureDownBeat != 0)
+        if (outCurrentMeasureDownBeat != nullptr)
             *outCurrentMeasureDownBeat = 0;
     }
 
@@ -838,47 +838,47 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
     AudioPlayHead* const ph = getPlayHead();
     AudioPlayHead::CurrentPositionInfo result;
 
-    if (ph != 0 && ph->getCurrentPosition (result))
+    if (ph != nullptr && ph->getCurrentPosition (result))
     {
-        if (outIsPlaying != 0)
+        if (outIsPlaying != nullptr)
             *outIsPlaying = result.isPlaying;
 
-        if (outTransportStateChanged != 0)
+        if (outTransportStateChanged != nullptr)
         {
             *outTransportStateChanged = result.isPlaying != wasPlaying;
             wasPlaying = result.isPlaying;
         }
 
-        if (outCurrentSampleInTimeLine != 0)
+        if (outCurrentSampleInTimeLine != nullptr)
             *outCurrentSampleInTimeLine = roundToInt (result.timeInSeconds * getSampleRate());
 
-        if (outIsCycling != 0)
+        if (outIsCycling != nullptr)
             *outIsCycling = false;
 
-        if (outCycleStartBeat != 0)
+        if (outCycleStartBeat != nullptr)
             *outCycleStartBeat = 0;
 
-        if (outCycleEndBeat != 0)
+        if (outCycleEndBeat != nullptr)
             *outCycleEndBeat = 0;
     }
     else
     {
-        if (outIsPlaying != 0)
+        if (outIsPlaying != nullptr)
             *outIsPlaying = false;
 
-        if (outTransportStateChanged != 0)
+        if (outTransportStateChanged != nullptr)
             *outTransportStateChanged = false;
 
-        if (outCurrentSampleInTimeLine != 0)
+        if (outCurrentSampleInTimeLine != nullptr)
             *outCurrentSampleInTimeLine = 0;
 
-        if (outIsCycling != 0)
+        if (outIsCycling != nullptr)
             *outIsCycling = false;
 
-        if (outCycleStartBeat != 0)
+        if (outCycleStartBeat != nullptr)
             *outCycleStartBeat = 0;
 
-        if (outCycleEndBeat != 0)
+        if (outCycleEndBeat != nullptr)
             *outCycleEndBeat = 0;
     }
 
@@ -944,7 +944,7 @@ private:
 
     bool createView (const bool createGenericViewIfNeeded)
     {
-        NSView* pluginView = 0;
+        NSView* pluginView = nil;
 
         UInt32 dataSize = 0;
         Boolean isWritable = false;
@@ -989,13 +989,13 @@ private:
 
         wrapper.setView (pluginView);
 
-        if (pluginView != 0)
+        if (pluginView != nil)
         {
             timerCallback();
             startTimer (70);
         }
 
-        return pluginView != 0;
+        return pluginView != nil;
     }
 };
 
@@ -1033,7 +1033,7 @@ public:
             plugin.editorBeingDeleted (this);
     }
 
-    bool isValid() const throw()            { return componentRecord != 0; }
+    bool isValid() const noexcept           { return componentRecord != 0; }
 
     //==============================================================================
     void paint (Graphics& g)
@@ -1155,7 +1155,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
         w = 0;
 
 #if JUCE_SUPPORT_CARBON
-    if (w == 0)
+    if (w == nullptr)
     {
         w = new AudioUnitPluginWindowCarbon (*this);
 
@@ -1164,7 +1164,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
     }
 #endif
 
-    if (w == 0)
+    if (w == nullptr)
         w = new AudioUnitPluginWindowCocoa (*this, true); // use AUGenericView as a fallback
 
     return w.release();
@@ -1174,7 +1174,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 //==============================================================================
 const String AudioUnitPluginInstance::getCategory() const
 {
-    const char* result = 0;
+    const char* result = nullptr;
 
     switch (componentDesc.componentType)
     {
@@ -1327,7 +1327,7 @@ const String AudioUnitPluginInstance::getProgramName (int index)
         {
             const AUPreset* p = (const AUPreset*) CFArrayGetValueAtIndex (presets, i);
 
-            if (p != 0 && p->presetNumber == index)
+            if (p != nullptr && p->presetNumber == index)
             {
                 s = PlatformUtilities::cfStringToJuceString (p->presetName);
                 break;
@@ -1466,7 +1466,7 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
         ScopedPointer <AudioPluginInstance> createdInstance (createInstanceFromDescription (desc));
         AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> ((AudioPluginInstance*) createdInstance);
 
-        if (auInstance != 0)
+        if (auInstance != nullptr)
         {
             auInstance->fillInPluginDescription (desc);
             results.add (new PluginDescription (desc));

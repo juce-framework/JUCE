@@ -62,7 +62,7 @@ const StringArray ProjectExporter::getExporterNames()
 
 ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int index)
 {
-    ProjectExporter* exp = 0;
+    ProjectExporter* exp = nullptr;
 
     switch (index)
     {
@@ -91,14 +91,14 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
     ProjectExporter* exp = MSVCProjectExporterVC6::createForSettings (project, settings);
-    if (exp == 0)    exp = MSVCProjectExporterVC2005::createForSettings (project, settings);
-    if (exp == 0)    exp = MSVCProjectExporterVC2008::createForSettings (project, settings);
-    if (exp == 0)    exp = MSVCProjectExporterVC2010::createForSettings (project, settings);
-    if (exp == 0)    exp = XCodeProjectExporter::createForSettings (project, settings);
-    if (exp == 0)    exp = MakefileProjectExporter::createForSettings (project, settings);
-    if (exp == 0)    exp = AndroidProjectExporter::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2005::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2008::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2010::createForSettings (project, settings);
+    if (exp == nullptr)    exp = XCodeProjectExporter::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MakefileProjectExporter::createForSettings (project, settings);
+    if (exp == nullptr)    exp = AndroidProjectExporter::createForSettings (project, settings);
 
-    jassert (exp != 0);
+    jassert (exp != nullptr);
     return exp;
 }
 

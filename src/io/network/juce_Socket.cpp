@@ -85,7 +85,7 @@ namespace SocketHelpers
        #endif
     }
 
-    bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) throw()
+    bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) noexcept
     {
         const int sndBufSize = 65536;
         const int rcvBufSize = 65536;
@@ -98,7 +98,7 @@ namespace SocketHelpers
                                : (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (one)) == 0));
     }
 
-    bool bindSocketToPort (const int handle, const int port) throw()
+    bool bindSocketToPort (const int handle, const int port) noexcept
     {
         if (handle <= 0 || port <= 0)
             return false;
@@ -114,7 +114,7 @@ namespace SocketHelpers
     int readSocket (const int handle,
                     void* const destBuffer, const int maxBytesToRead,
                     bool volatile& connected,
-                    const bool blockUntilSpecifiedAmountHasArrived) throw()
+                    const bool blockUntilSpecifiedAmountHasArrived) noexcept
     {
         int bytesRead = 0;
 
@@ -149,7 +149,7 @@ namespace SocketHelpers
         return bytesRead;
     }
 
-    int waitForReadiness (const int handle, const bool forReading, const int timeoutMsecs) throw()
+    int waitForReadiness (const int handle, const bool forReading, const int timeoutMsecs) noexcept
     {
         struct timeval timeout;
         struct timeval* timeoutp;
@@ -202,7 +202,7 @@ namespace SocketHelpers
         return FD_ISSET (handle, forReading ? &rset : &wset) ? 1 : 0;
     }
 
-    bool setSocketBlockingState (const int handle, const bool shouldBlock) throw()
+    bool setSocketBlockingState (const int handle, const bool shouldBlock) noexcept
     {
        #if JUCE_WINDOWS
         u_long nonBlocking = shouldBlock ? 0 : 1;
@@ -227,14 +227,14 @@ namespace SocketHelpers
                         void** serverAddress,
                         const String& hostName,
                         const int portNumber,
-                        const int timeOutMillisecs) throw()
+                        const int timeOutMillisecs) noexcept
     {
         struct addrinfo hints = { 0 };
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = isDatagram ? SOCK_DGRAM : SOCK_STREAM;
         hints.ai_flags = AI_NUMERICSERV;
 
-        struct addrinfo* info = 0;
+        struct addrinfo* info = nullptr;
         if (getaddrinfo (hostName.toUTF8(), String (portNumber).toUTF8(), &hints, &info) != 0 || info == 0)
             return false;
 
@@ -468,7 +468,7 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
     return 0;
 }
 
-bool StreamingSocket::isLocal() const throw()
+bool StreamingSocket::isLocal() const noexcept
 {
     return hostName == "127.0.0.1";
 }
@@ -601,7 +601,7 @@ int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
                      : -1;
 }
 
-bool DatagramSocket::isLocal() const throw()
+bool DatagramSocket::isLocal() const noexcept
 {
     return hostName == "127.0.0.1";
 }

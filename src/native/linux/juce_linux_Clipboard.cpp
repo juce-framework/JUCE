@@ -72,7 +72,7 @@ namespace ClipboardHelpers
             else if (actualType == XA_STRING && actualFormat == 8)
                 returnData = String (clipData, numItems);
 
-            if (clipData != 0)
+            if (clipData != nullptr)
                 XFree (clipData);
 
             jassert (bytesLeft == 0 || numItems == 1000000);
@@ -170,7 +170,7 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
         DBG ("requested unsupported clipboard");
     }
 
-    if (data != 0)
+    if (data != nullptr)
     {
         const int maxReasonableSelectionSize = 1000000;
 

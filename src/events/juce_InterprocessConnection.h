@@ -128,10 +128,10 @@ public:
     bool isConnected() const;
 
     /** Returns the socket that this connection is using (or null if it uses a pipe). */
-    StreamingSocket* getSocket() const throw()                  { return socket; }
+    StreamingSocket* getSocket() const noexcept                 { return socket; }
 
     /** Returns the pipe that this connection is using (or null if it uses a socket). */
-    NamedPipe* getPipe() const throw()                          { return pipe; }
+    NamedPipe* getPipe() const noexcept                         { return pipe; }
 
     /** Returns the name of the machine at the other end of this connection.
 

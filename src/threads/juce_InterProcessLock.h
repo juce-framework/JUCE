@@ -105,7 +105,7 @@ public:
         inline ~ScopedLockType()                                            { lock_.exit(); }
 
         /** Returns true if the InterProcessLock was successfully locked. */
-        bool isLocked() const throw()                                       { return lockWasSuccessful; }
+        bool isLocked() const noexcept                                      { return lockWasSuccessful; }
 
     private:
         //==============================================================================

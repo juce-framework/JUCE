@@ -90,29 +90,29 @@ class JUCE_API  AbstractFifo
 public:
     //==============================================================================
     /** Creates a FIFO to manage a buffer with the specified capacity. */
-    AbstractFifo (int capacity) throw();
+    AbstractFifo (int capacity) noexcept;
 
     /** Destructor */
     ~AbstractFifo();
 
     //==============================================================================
     /** Returns the total size of the buffer being managed. */
-    int getTotalSize() const throw();
+    int getTotalSize() const noexcept;
 
     /** Returns the number of items that can currently be added to the buffer without it overflowing. */
-    int getFreeSpace() const throw();
+    int getFreeSpace() const noexcept;
 
     /** Returns the number of items that can currently be read from the buffer. */
-    int getNumReady() const throw();
+    int getNumReady() const noexcept;
 
     /** Clears the buffer positions, so that it appears empty. */
-    void reset() throw();
+    void reset() noexcept;
 
     /** Changes the buffer's total size.
         Note that this isn't thread-safe, so don't call it if there's any danger that it
         might overlap with a call to any other method in this class!
     */
-    void setTotalSize (int newSize) throw();
+    void setTotalSize (int newSize) noexcept;
 
     //==============================================================================
     /** Returns the location within the buffer at which an incoming block of data should be written.
@@ -154,12 +154,12 @@ public:
         @param blockSize2       on exit, this indicates how many items can be written to the block starting at startIndex2
         @see finishedWrite
     */
-    void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw();
+    void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept;
 
     /** Called after reading from the FIFO, to indicate that this many items have been added.
         @see prepareToWrite
     */
-    void finishedWrite (int numWritten) throw();
+    void finishedWrite (int numWritten) noexcept;
 
     /** Returns the location within the buffer from which the next block of data should be read.
 
@@ -199,12 +199,12 @@ public:
         @param blockSize2       on exit, this indicates how many items can be written to the block starting at startIndex2
         @see finishedRead
     */
-    void prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw();
+    void prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept;
 
     /** Called after reading from the FIFO, to indicate that this many items have now been consumed.
         @see prepareToRead
     */
-    void finishedRead (int numRead) throw();
+    void finishedRead (int numRead) noexcept;
 
 
 private:

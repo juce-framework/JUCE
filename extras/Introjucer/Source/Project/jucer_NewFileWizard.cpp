@@ -169,7 +169,7 @@ bool NewFileWizard::runWizardFromMenu (int chosenMenuItemID, const Project::Item
 {
     Type* wiz = wizards [chosenMenuItemID - menuBaseID];
 
-    if (wiz != 0)
+    if (wiz != nullptr)
     {
         wiz->createNewFile (projectGroupToAddTo);
         return true;

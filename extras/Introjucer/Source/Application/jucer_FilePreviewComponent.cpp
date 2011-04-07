@@ -42,14 +42,14 @@ void ItemPreviewComponent::tryToLoadImage()
 
     ScopedPointer <InputStream> input (file.createInputStream());
 
-    if (input != 0)
+    if (input != nullptr)
     {
         const int64 totalSize = input->getTotalLength();
         ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input);
-        input = 0;
+        input = nullptr;
 
         String formatName;
-        if (format != 0)
+        if (format != nullptr)
             formatName = " " + format->getFormatName();
 
         image = ImageCache::getFromFile (file);

@@ -52,7 +52,7 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
     {
         const Drawable* const d = dynamic_cast <const Drawable*> (other.getChildComponent(i));
 
-        if (d != 0)
+        if (d != nullptr)
             addAndMakeVisible (d->createCopy());
     }
 }
@@ -76,7 +76,7 @@ const Rectangle<float> DrawableComposite::getDrawableBounds() const
     {
         const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
 
-        if (d != 0)
+        if (d != nullptr)
             r = r.getUnion (d->isTransformed() ? d->getDrawableBounds().transformed (d->getTransform())
                                                : d->getDrawableBounds());
     }
@@ -120,8 +120,8 @@ void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBounds)
         }
         else
         {
-            setPositioner (0);
-            recalculateCoordinates (0);
+            setPositioner (nullptr);
+            recalculateCoordinates (nullptr);
         }
     }
 }
@@ -173,7 +173,7 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
 void DrawableComposite::parentHierarchyChanged()
 {
     DrawableComposite* parent = getParent();
-    if (parent != 0)
+    if (parent != nullptr)
         originRelativeToComponent = parent->originRelativeToComponent - getPosition();
 }
 
@@ -211,7 +211,7 @@ void DrawableComposite::updateBoundsToFitChildren()
                 {
                     Component* const c = getChildComponent(i);
 
-                    if (c != 0)
+                    if (c != nullptr)
                         c->setBounds (c->getBounds() - delta);
                 }
             }
@@ -331,12 +331,12 @@ const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvi
     v.setID (getComponentID());
     v.setBoundingBox (bounds, 0);
 
-    ValueTree childList (v.getChildListCreating (0));
+    ValueTree childList (v.getChildListCreating (nullptr));
 
     for (int i = 0; i < getNumChildComponents(); ++i)
     {
         const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
-        jassert (d != 0); // You can't save a mix of Drawables and normal components!
+        jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
         childList.addChild (d->createValueTree (imageProvider), -1, 0);
     }

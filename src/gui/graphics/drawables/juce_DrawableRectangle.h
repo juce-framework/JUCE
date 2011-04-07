@@ -53,7 +53,7 @@ public:
     void setRectangle (const RelativeParallelogram& newBounds);
 
     /** Returns the rectangle's bounds. */
-    const RelativeParallelogram& getRectangle() const throw()           { return bounds; }
+    const RelativeParallelogram& getRectangle() const noexcept          { return bounds; }
 
     /** Returns the corner size to be used. */
     const RelativePoint getCornerSize() const                           { return cornerSize; }

@@ -67,7 +67,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     }
     else
     {
-        socket = 0;
+        socket = nullptr;
         return false;
     }
 }
@@ -110,10 +110,10 @@ bool InterprocessConnection::createPipe (const String& pipeName,
 
 void InterprocessConnection::disconnect()
 {
-    if (socket != 0)
+    if (socket != nullptr)
         socket->close();
 
-    if (pipe != 0)
+    if (pipe != nullptr)
     {
         pipe->cancelPendingReads();
         pipe->close();
@@ -123,8 +123,8 @@ void InterprocessConnection::disconnect()
 
     {
         const ScopedLock sl (pipeAndSocketLock);
-        socket = 0;
-        pipe = 0;
+        socket = nullptr;
+        pipe = nullptr;
     }
 
     connectionLostInt();
@@ -134,18 +134,18 @@ bool InterprocessConnection::isConnected() const
 {
     const ScopedLock sl (pipeAndSocketLock);
 
-    return ((socket != 0 && socket->isConnected())
-              || (pipe != 0 && pipe->isOpen()))
+    return ((socket != nullptr && socket->isConnected())
+              || (pipe != nullptr && pipe->isOpen()))
             && isThreadRunning();
 }
 
 const String InterprocessConnection::getConnectedHostName() const
 {
-    if (pipe != 0)
+    if (pipe != nullptr)
     {
         return "localhost";
     }
-    else if (socket != 0)
+    else if (socket != nullptr)
     {
         if (! socket->isLocal())
             return socket->getHostName();
@@ -171,9 +171,9 @@ bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 
     const ScopedLock sl (pipeAndSocketLock);
 
-    if (socket != 0)
+    if (socket != nullptr)
         bytesWritten = socket->write (messageData.getData(), (int) messageData.getSize());
-    else if (pipe != 0)
+    else if (pipe != nullptr)
         bytesWritten = pipe->write (messageData.getData(), (int) messageData.getSize());
 
     return bytesWritten == (int) messageData.getSize();
@@ -264,8 +264,8 @@ bool InterprocessConnection::readNextMessageInt()
     const int maximumMessageSize = 1024 * 1024 * 10; // sanity check
 
     uint32 messageHeader[2];
-    const int bytes = (socket != 0) ? socket->read (messageHeader, sizeof (messageHeader), true)
-                                    : pipe->read (messageHeader, sizeof (messageHeader), pipeReceiveMessageTimeout);
+    const int bytes = socket != nullptr ? socket->read (messageHeader, sizeof (messageHeader), true)
+                                        : pipe  ->read (messageHeader, sizeof (messageHeader), pipeReceiveMessageTimeout);
 
     if (bytes == sizeof (messageHeader)
          && ByteOrder::swapIfBigEndian (messageHeader[0]) == magicMessageHeader)
@@ -283,8 +283,8 @@ bool InterprocessConnection::readNextMessageInt()
                     return false;
 
                 const int numThisTime = jmin (bytesInMessage, 65536);
-                const int bytesIn = (socket != 0) ? socket->read (static_cast <char*> (messageData.getData()) + bytesRead, numThisTime, true)
-                                                  : pipe->read (static_cast <char*> (messageData.getData()) + bytesRead, numThisTime, pipeReceiveMessageTimeout);
+                const int bytesIn = socket != nullptr ? socket->read (static_cast <char*> (messageData.getData()) + bytesRead, numThisTime, true)
+                                                      : pipe  ->read (static_cast <char*> (messageData.getData()) + bytesRead, numThisTime, pipeReceiveMessageTimeout);
 
                 if (bytesIn <= 0)
                     break;
@@ -301,7 +301,7 @@ bool InterprocessConnection::readNextMessageInt()
     {
         {
             const ScopedLock sl (pipeAndSocketLock);
-            socket = 0;
+            socket = nullptr;
         }
 
         connectionLostInt();
@@ -315,7 +315,7 @@ void InterprocessConnection::run()
 {
     while (! threadShouldExit())
     {
-        if (socket != 0)
+        if (socket != nullptr)
         {
             const int ready = socket->waitUntilReady (true, 0);
 
@@ -323,7 +323,7 @@ void InterprocessConnection::run()
             {
                 {
                     const ScopedLock sl (pipeAndSocketLock);
-                    socket = 0;
+                    socket = nullptr;
                 }
 
                 connectionLostInt();
@@ -339,13 +339,13 @@ void InterprocessConnection::run()
                 Thread::sleep (2);
             }
         }
-        else if (pipe != 0)
+        else if (pipe != nullptr)
         {
             if (! pipe->isOpen())
             {
                 {
                     const ScopedLock sl (pipeAndSocketLock);
-                    pipe = 0;
+                    pipe = nullptr;
                 }
 
                 connectionLostInt();

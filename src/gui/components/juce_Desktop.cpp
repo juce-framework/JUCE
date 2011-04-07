@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 Desktop::Desktop()
     : mouseClickCounter (0),
-      kioskModeComponent (0),
+      kioskModeComponent (nullptr),
       allowedOrientations (allOrientations)
 {
     createMouseInputSources();
@@ -47,7 +47,7 @@ Desktop::Desktop()
 Desktop::~Desktop()
 {
     jassert (instance == this);
-    instance = 0;
+    instance = nullptr;
 
     // doh! If you don't delete all your windows before exiting, you're going to
     // be leaking memory!
@@ -56,13 +56,13 @@ Desktop::~Desktop()
 
 Desktop& JUCE_CALLTYPE Desktop::getInstance()
 {
-    if (instance == 0)
+    if (instance == nullptr)
         instance = new Desktop();
 
     return *instance;
 }
 
-Desktop* Desktop::instance = 0;
+Desktop* Desktop::instance = nullptr;
 
 //==============================================================================
 void Desktop::refreshMonitorSizes()
@@ -81,24 +81,24 @@ void Desktop::refreshMonitorSizes()
         for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         {
             ComponentPeer* const p = ComponentPeer::getPeer (i);
-            if (p != 0)
+            if (p != nullptr)
                 p->handleScreenSizeChange();
         }
     }
 }
 
-int Desktop::getNumDisplayMonitors() const throw()
+int Desktop::getNumDisplayMonitors() const noexcept
 {
     return monitorCoordsClipped.size();
 }
 
-const Rectangle<int> Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw()
+const Rectangle<int> Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const noexcept
 {
     return clippedToWorkArea ? monitorCoordsClipped [index]
                              : monitorCoordsUnclipped [index];
 }
 
-const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const throw()
+const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const
 {
     RectangleList rl;
 
@@ -108,7 +108,7 @@ const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWork
     return rl;
 }
 
-const Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) const throw()
+const Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) const noexcept
 {
     return getDisplayMonitorCoordinates (0, clippedToWorkArea);
 }
@@ -138,12 +138,12 @@ const Rectangle<int> Desktop::getMonitorAreaContaining (const Point<int>& positi
 }
 
 //==============================================================================
-int Desktop::getNumComponents() const throw()
+int Desktop::getNumComponents() const noexcept
 {
     return desktopComponents.size();
 }
 
-Component* Desktop::getComponent (const int index) const throw()
+Component* Desktop::getComponent (const int index) const noexcept
 {
     return desktopComponents [index];
 }
@@ -169,7 +169,7 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
 //==============================================================================
 void Desktop::addDesktopComponent (Component* const c)
 {
-    jassert (c != 0);
+    jassert (c != nullptr);
     jassert (! desktopComponents.contains (c));
     desktopComponents.addIfNotAlreadyThere (c);
 }
@@ -218,12 +218,12 @@ int Desktop::getMouseButtonClickCounter()
     return getInstance().mouseClickCounter;
 }
 
-void Desktop::incrementMouseClickCounter() throw()
+void Desktop::incrementMouseClickCounter() noexcept
 {
     ++mouseClickCounter;
 }
 
-int Desktop::getNumDraggingMouseSources() const throw()
+int Desktop::getNumDraggingMouseSources() const noexcept
 {
     int num = 0;
     for (int i = mouseSources.size(); --i >= 0;)
@@ -233,7 +233,7 @@ int Desktop::getNumDraggingMouseSources() const throw()
     return num;
 }
 
-MouseInputSource* Desktop::getDraggingMouseSource (int index) const throw()
+MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept
 {
     int num = 0;
     for (int i = mouseSources.size(); --i >= 0;)
@@ -285,7 +285,7 @@ void Desktop::beginDragAutoRepeat (const int interval)
 {
     if (interval > 0)
     {
-        if (dragRepeater == 0)
+        if (dragRepeater == nullptr)
             dragRepeater = new MouseDragAutoRepeater();
 
         if (dragRepeater->getTimerInterval() != interval)
@@ -293,7 +293,7 @@ void Desktop::beginDragAutoRepeat (const int interval)
     }
     else
     {
-        dragRepeater = 0;
+        dragRepeater = nullptr;
     }
 }
 
@@ -350,7 +350,7 @@ void Desktop::sendMouseMove()
 
         Component* const target = findComponentAt (lastFakeMouseMove);
 
-        if (target != 0)
+        if (target != nullptr)
         {
             Component::BailOutChecker checker (target);
             const Point<int> pos (target->getLocalPoint (0, lastFakeMouseMove));
@@ -383,9 +383,9 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
     if (kioskModeComponent != componentToUse)
     {
         // agh! Don't delete or remove a component from the desktop while it's still the kiosk component!
-        jassert (kioskModeComponent == 0 || ComponentPeer::getPeerFor (kioskModeComponent) != 0);
+        jassert (kioskModeComponent == nullptr || ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
-        if (kioskModeComponent != 0)
+        if (kioskModeComponent != nullptr)
         {
             setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
 
@@ -394,10 +394,10 @@ void Desktop::setKioskModeComponent (Component* componentToUse, const bool allow
 
         kioskModeComponent = componentToUse;
 
-        if (kioskModeComponent != 0)
+        if (kioskModeComponent != nullptr)
         {
             // Only components that are already on the desktop can be put into kiosk mode!
-            jassert (ComponentPeer::getPeerFor (kioskModeComponent) != 0);
+            jassert (ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
             kioskComponentOriginalBounds = kioskModeComponent->getBounds();
 
@@ -415,7 +415,7 @@ void Desktop::setOrientationsEnabled (const int newOrientations)
     allowedOrientations = newOrientations;
 }
 
-bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const throw()
+bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const noexcept
 {
     // Make sure you only pass one valid flag in here...
     jassert (orientation == upright || orientation == upsideDown || orientation == rotatedClockwise || orientation ==  rotatedAntiClockwise);

@@ -66,7 +66,7 @@ public:
 
         E.g. "AIFF"
     */
-    const String getFormatName() const throw()      { return formatName; }
+    const String getFormatName() const noexcept     { return formatName; }
 
     //==============================================================================
     /** Reads samples from the stream.
@@ -225,11 +225,11 @@ protected:
         typedef AudioData::Pointer <DestSampleType, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>    DestType;
         typedef AudioData::Pointer <SourceSampleType, SourceEndianness, AudioData::Interleaved, AudioData::Const>               SourceType;
 
-        static void read (int** destData, int destOffset, int numDestChannels, const void* sourceData, int numSourceChannels, int numSamples) throw()
+        static void read (int** destData, int destOffset, int numDestChannels, const void* sourceData, int numSourceChannels, int numSamples) noexcept
         {
             for (int i = 0; i < numDestChannels; ++i)
             {
-                if (destData[i] != 0)
+                if (destData[i] != nullptr)
                 {
                     DestType dest (destData[i]);
                     dest += destOffset;

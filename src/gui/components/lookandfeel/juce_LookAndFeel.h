@@ -83,7 +83,7 @@ public:
 
         @see setDefaultLookAndFeel
     */
-    static LookAndFeel& getDefaultLookAndFeel() throw();
+    static LookAndFeel& getDefaultLookAndFeel() noexcept;
 
     /** Changes the default look-and-feel.
 
@@ -93,7 +93,7 @@ public:
                                         it's no longer needed.
         @see getDefaultLookAndFeel
     */
-    static void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) throw();
+    static void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noexcept;
 
 
     //==============================================================================
@@ -114,7 +114,7 @@ public:
 
         @see setColour, Component::findColour, Component::setColour
     */
-    const Colour findColour (int colourId) const throw();
+    const Colour findColour (int colourId) const noexcept;
 
     /** Registers a colour to be used for a particular purpose.
 
@@ -122,12 +122,12 @@ public:
 
         @see findColour, Component::findColour, Component::setColour
     */
-    void setColour (int colourId, const Colour& colour) throw();
+    void setColour (int colourId, const Colour& colour) noexcept;
 
     /** Returns true if the specified colour ID has been explicitly set using the
         setColour() method.
     */
-    bool isColourSpecified (int colourId) const throw();
+    bool isColourSpecified (int colourId) const noexcept;
 
 
     //==============================================================================
@@ -626,13 +626,13 @@ public:
                                  float x, float y,
                                  float diameter,
                                  const Colour& colour,
-                                 float outlineThickness) throw();
+                                 float outlineThickness) noexcept;
 
     static void drawGlassPointer (Graphics& g,
                                   float x, float y,
                                   float diameter,
                                   const Colour& colour, float outlineThickness,
-                                  int direction) throw();
+                                  int direction) noexcept;
 
     /** Utility function to draw a shiny, glassy oblong (for text buttons). */
     static void drawGlassLozenge (Graphics& g,
@@ -642,7 +642,7 @@ public:
                                   float outlineThickness,
                                   float cornerSize,
                                   bool flatOnLeft, bool flatOnRight,
-                                  bool flatOnTop, bool flatOnBottom) throw();
+                                  bool flatOnTop, bool flatOnBottom) noexcept;
 
     static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
 
@@ -650,7 +650,7 @@ public:
 private:
     //==============================================================================
     friend JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
-    static void clearDefaultLookAndFeel() throw(); // called at shutdown
+    static void clearDefaultLookAndFeel() noexcept; // called at shutdown
 
     Array <int> colourIds;
     Array <Colour> colours;
@@ -669,7 +669,7 @@ private:
                                bool flatOnLeft,
                                bool flatOnRight,
                                bool flatOnTop,
-                               bool flatOnBottom) throw();
+                               bool flatOnBottom) noexcept;
 
     // This has been deprecated - see the new parameter list..
     virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }

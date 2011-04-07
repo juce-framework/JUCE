@@ -59,8 +59,8 @@ public:
     */
     explicit RelativeRectangle (const String& stringVersion);
 
-    bool operator== (const RelativeRectangle& other) const throw();
-    bool operator!= (const RelativeRectangle& other) const throw();
+    bool operator== (const RelativeRectangle& other) const noexcept;
+    bool operator!= (const RelativeRectangle& other) const noexcept;
 
     //==============================================================================
     /** Calculates the absolute position of this rectangle.

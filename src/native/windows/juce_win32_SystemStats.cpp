@@ -213,12 +213,12 @@ int SystemStats::getMemorySizeInMegabytes()
 }
 
 //==============================================================================
-uint32 juce_millisecondsSinceStartup() throw()
+uint32 juce_millisecondsSinceStartup() noexcept
 {
     return (uint32) timeGetTime();
 }
 
-int64 Time::getHighResolutionTicks() throw()
+int64 Time::getHighResolutionTicks() noexcept
 {
     LARGE_INTEGER ticks;
     QueryPerformanceCounter (&ticks);
@@ -237,17 +237,17 @@ int64 Time::getHighResolutionTicks() throw()
     return ticks.QuadPart + hiResTicksOffset;
 }
 
-double Time::getMillisecondCounterHiRes() throw()
+double Time::getMillisecondCounterHiRes() noexcept
 {
     return getHighResolutionTicks() * hiResTicksScaleFactor;
 }
 
-int64 Time::getHighResolutionTicksPerSecond() throw()
+int64 Time::getHighResolutionTicksPerSecond() noexcept
 {
     return hiResTicksPerSecond;
 }
 
-static int64 juce_getClockCycleCounter() throw()
+static int64 juce_getClockCycleCounter() noexcept
 {
 #if JUCE_USE_INTRINSICS
     // MS intrinsics version...

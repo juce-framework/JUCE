@@ -60,7 +60,7 @@ public:
     /** Returns the name of the typeface.
         @see Font::getTypefaceName
     */
-    const String getName() const throw()       { return name; }
+    const String getName() const noexcept      { return name; }
 
     //==============================================================================
     /** Creates a new system typeface. */
@@ -127,7 +127,7 @@ protected:
     String name;
     bool isFallbackFont;
 
-    explicit Typeface (const String& name) throw();
+    explicit Typeface (const String& name) noexcept;
 
     static const Ptr getFallbackTypeface();
 
@@ -178,7 +178,7 @@ public:
     */
     void setCharacteristics (const String& name, float ascent,
                              bool isBold, bool isItalic,
-                             juce_wchar defaultCharacter) throw();
+                             juce_wchar defaultCharacter) noexcept;
 
     /** Adds a glyph to the typeface.
 
@@ -188,18 +188,18 @@ public:
         The width is the nominal width of the character, and any extra kerning values that
         are specified will be added to this width.
     */
-    void addGlyph (juce_wchar character, const Path& path, float width) throw();
+    void addGlyph (juce_wchar character, const Path& path, float width) noexcept;
 
     /** Specifies an extra kerning amount to be used between a pair of characters.
         The amount will be added to the nominal width of the first character when laying out a string.
     */
-    void addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) throw();
+    void addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) noexcept;
 
     /** Adds a range of glyphs from another typeface.
         This will attempt to pull in the paths and kerning information from another typeface and
         add it to this one.
     */
-    void addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) throw();
+    void addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) noexcept;
 
     /** Saves this typeface as a Juce-formatted font file.
         A CustomTypeface can be created to reload the data that is written - see the CustomTypeface
@@ -239,8 +239,8 @@ private:
     OwnedArray <GlyphInfo> glyphs;
     short lookupTable [128];
 
-    GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) throw();
-    GlyphInfo* findGlyphSubstituting (juce_wchar character) throw();
+    GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;
+    GlyphInfo* findGlyphSubstituting (juce_wchar character) noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface);
 };

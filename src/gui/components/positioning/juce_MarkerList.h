@@ -78,22 +78,22 @@ public:
         RelativeCoordinate position;
 
         /** Returns true if both the names and positions of these two markers match. */
-        bool operator== (const Marker&) const throw();
+        bool operator== (const Marker&) const noexcept;
         /** Returns true if either the name or position of these two markers differ. */
-        bool operator!= (const Marker&) const throw();
+        bool operator!= (const Marker&) const noexcept;
     };
 
     //==============================================================================
     /** Returns the number of markers in the list. */
-    int getNumMarkers() const throw();
+    int getNumMarkers() const noexcept;
 
     /** Returns one of the markers in the list, by its index. */
-    const Marker* getMarker (int index) const throw();
+    const Marker* getMarker (int index) const noexcept;
 
     /** Returns a named marker, or 0 if no such name is found.
         Note that name comparisons are case-sensitive.
     */
-    const Marker* getMarker (const String& name) const throw();
+    const Marker* getMarker (const String& name) const noexcept;
 
     /** Evaluates the given marker and returns its absolute position.
         The parent component must be supplied in case the marker's expression refers to
@@ -115,9 +115,9 @@ public:
     void removeMarker (const String& name);
 
     /** Returns true if all the markers in these two lists match exactly. */
-    bool operator== (const MarkerList& other) const throw();
+    bool operator== (const MarkerList& other) const noexcept;
     /** Returns true if not all the markers in these two lists match exactly. */
-    bool operator!= (const MarkerList& other) const throw();
+    bool operator!= (const MarkerList& other) const noexcept;
 
     //==============================================================================
     /**
@@ -157,7 +157,7 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        ValueTree& getState() throw()       { return state; }
+        ValueTree& getState() noexcept      { return state; }
         int getNumMarkers() const;
         const ValueTree getMarkerState (int index) const;
         const ValueTree getMarkerState (const String& name) const;

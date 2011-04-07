@@ -49,11 +49,11 @@
         // create a stream to the temporary file, and write some data to it...
         ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream());
 
-        if (out != 0)
+        if (out != nullptr)
         {
             out->write ( ...etc )
             out->flush();
-            out = 0; // (deletes the stream)
+            out = nullptr; // (deletes the stream)
 
             // ..now we've finished writing, this will rename the temp file to
             // make it replace the target file we specified above.

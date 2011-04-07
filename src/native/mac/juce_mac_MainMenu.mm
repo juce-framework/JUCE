@@ -59,7 +59,7 @@ class JuceMainMenuHandler   : private MenuBarModel::Listener,
 public:
     //==============================================================================
     JuceMainMenuHandler()
-        : currentModel (0),
+        : currentModel (nullptr),
           lastUpdateTime (0)
     {
         callback = [[JuceMenuCallback alloc] initWithOwner: this];
@@ -67,10 +67,10 @@ public:
 
     ~JuceMainMenuHandler()
     {
-        setMenu (0);
+        setMenu (nullptr);
 
         jassert (instance == this);
-        instance = 0;
+        instance = nullptr;
 
         [callback release];
     }
@@ -79,15 +79,15 @@ public:
     {
         if (currentModel != newMenuBarModel)
         {
-            if (currentModel != 0)
+            if (currentModel != nullptr)
                 currentModel->removeListener (this);
 
             currentModel = newMenuBarModel;
 
-            if (currentModel != 0)
+            if (currentModel != nullptr)
                 currentModel->addListener (this);
 
-            menuBarItemsChanged (0);
+            menuBarItemsChanged (nullptr);
         }
     }
 
@@ -131,7 +131,7 @@ public:
         lastUpdateTime = Time::getMillisecondCounter();
 
         StringArray menuNames;
-        if (currentModel != 0)
+        if (currentModel != nullptr)
             menuNames = currentModel->getMenuBarNames();
 
         NSMenu* menuBar = [NSApp mainMenu];
@@ -155,7 +155,7 @@ public:
     {
         NSMenuItem* item = findMenuItem ([NSApp mainMenu], info);
 
-        if (item != 0)
+        if (item != nil)
             flashMenuBar ([item menu]);
     }
 
@@ -170,14 +170,14 @@ public:
         }
 
         if (Time::getMillisecondCounter() > lastUpdateTime + 500)
-            menuBarItemsChanged (0);
+            menuBarItemsChanged (nullptr);
     }
 
     void invoke (const int commandId, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
     {
-        if (currentModel != 0)
+        if (currentModel != nullptr)
         {
-            if (commandManager != 0)
+            if (commandManager != nullptr)
             {
                 ApplicationCommandTarget::InvocationInfo info (commandId);
                 info.invocationMethod = ApplicationCommandTarget::InvocationInfo::fromMenu;
@@ -194,7 +194,7 @@ public:
     {
         NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf ("<end>", false, true));
 
-        if (text == 0)
+        if (text == nil)
             text = @"";
 
         if (iter.isSeparator)
@@ -209,7 +209,7 @@ public:
 
             [item setEnabled: false];
         }
-        else if (iter.subMenu != 0)
+        else if (iter.subMenu != nullptr)
         {
             NSMenuItem* item = [menuToAddTo addItemWithTitle: text
                                                       action: nil
@@ -238,7 +238,7 @@ public:
             [info addObject: [NSNumber numberWithInt: topLevelIndex]];
             [item setRepresentedObject: info];
 
-            if (iter.commandManager != 0)
+            if (iter.commandManager != nullptr)
             {
                 const Array <KeyPress> keyPresses (iter.commandManager->getKeyMappings()
                                                    ->getKeyPressesAssignedToCommand (iter.itemId));
@@ -313,10 +313,10 @@ private:
             if ([m tag] == info.commandID)
                 return m;
 
-            if ([m submenu] != 0)
+            if ([m submenu] != nil)
             {
                 NSMenuItem* found = findMenuItem ([m submenu], info);
-                if (found != 0)
+                if (found != nil)
                     return found;
             }
         }
@@ -364,7 +364,7 @@ private:
     }
 };
 
-JuceMainMenuHandler* JuceMainMenuHandler::instance = 0;
+JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 
 END_JUCE_NAMESPACE
 
@@ -395,11 +395,11 @@ END_JUCE_NAMESPACE
         NSEvent* e = [NSApp currentEvent];
         if ([e type] == NSKeyDown || [e type] == NSKeyUp)
         {
-            if (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent() != 0)
+            if (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent() != nullptr)
             {
                 JUCE_NAMESPACE::NSViewComponentPeer* peer = dynamic_cast <JUCE_NAMESPACE::NSViewComponentPeer*> (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent()->getPeer());
 
-                if (peer != 0)
+                if (peer != nullptr)
                 {
                     if ([e type] == NSKeyDown)
                         peer->redirectKeyDown (e);
@@ -422,7 +422,7 @@ END_JUCE_NAMESPACE
 
 - (void) menuNeedsUpdate: (NSMenu*) menu;
 {
-    if (JuceMainMenuHandler::instance != 0)
+    if (JuceMainMenuHandler::instance != nullptr)
         JuceMainMenuHandler::instance->updateMenus (menu);
 }
 
@@ -434,7 +434,7 @@ namespace MainMenuHelpers
 {
     NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
     {
-        if (extraItems != 0 && JuceMainMenuHandler::instance != 0 && extraItems->getNumItems() > 0)
+        if (extraItems != nullptr && JuceMainMenuHandler::instance != nullptr && extraItems->getNumItems() > 0)
         {
             PopupMenu::MenuItemIterator iter (*extraItems);
 
@@ -496,7 +496,7 @@ namespace MainMenuHelpers
         // this can't be used in a plugin!
         jassert (JUCEApplication::isStandaloneApp());
 
-        if (JUCEApplication::getInstance() != 0)
+        if (JUCEApplication::getInstance() != nullptr)
         {
             const ScopedAutoReleasePool pool;
 
@@ -524,17 +524,17 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
     {
         const ScopedAutoReleasePool pool;
 
-        if (newMenuBarModel == 0)
+        if (newMenuBarModel == nullptr)
         {
             delete JuceMainMenuHandler::instance;
-            jassert (JuceMainMenuHandler::instance == 0); // should be zeroed in the destructor
-            jassert (extraAppleMenuItems == 0); // you can't specify some extra items without also supplying a model
+            jassert (JuceMainMenuHandler::instance == nullptr); // should be zeroed in the destructor
+            jassert (extraAppleMenuItems == nullptr); // you can't specify some extra items without also supplying a model
 
-            extraAppleMenuItems = 0;
+            extraAppleMenuItems = nullptr;
         }
         else
         {
-            if (JuceMainMenuHandler::instance == 0)
+            if (JuceMainMenuHandler::instance == nullptr)
                 JuceMainMenuHandler::instance = new JuceMainMenuHandler();
 
             JuceMainMenuHandler::instance->setMenu (newMenuBarModel);
@@ -543,20 +543,20 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
 
     MainMenuHelpers::rebuildMainMenu (extraAppleMenuItems);
 
-    if (newMenuBarModel != 0)
+    if (newMenuBarModel != nullptr)
         newMenuBarModel->menuItemsChanged();
 }
 
 MenuBarModel* MenuBarModel::getMacMainMenu()
 {
-    return JuceMainMenuHandler::instance != 0
-            ? JuceMainMenuHandler::instance->currentModel : 0;
+    return JuceMainMenuHandler::instance != nullptr
+             ? JuceMainMenuHandler::instance->currentModel : 0;
 }
 
 void juce_initialiseMacMainMenu()
 {
-    if (JuceMainMenuHandler::instance == 0)
-        MainMenuHelpers::rebuildMainMenu (0);
+    if (JuceMainMenuHandler::instance == nullptr)
+        MainMenuHelpers::rebuildMainMenu (nullptr);
 }
 
 

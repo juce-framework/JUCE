@@ -303,7 +303,7 @@ END_JUCE_NAMESPACE
 {
     [super initWithFrame: frame];
     owner = owner_;
-    stringBeingComposed = 0;
+    stringBeingComposed = nullptr;
     textWasInserted = false;
 
     notificationCenter = [NSNotificationCenter defaultCenter];
@@ -336,13 +336,13 @@ END_JUCE_NAMESPACE
 //==============================================================================
 - (void) drawRect: (NSRect) r
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->drawRect (r);
 }
 
 - (BOOL) isOpaque
 {
-    return owner == 0 || owner->isOpaque();
+    return owner == nullptr || owner->isOpaque();
 }
 
 //==============================================================================
@@ -361,7 +361,7 @@ END_JUCE_NAMESPACE
 
 - (void) asyncMouseDown: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseDown (ev);
 }
 
@@ -380,31 +380,31 @@ END_JUCE_NAMESPACE
 
 - (void) asyncMouseUp: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseUp (ev);
 }
 
 - (void) mouseDragged: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseDrag (ev);
 }
 
 - (void) mouseMoved: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseMove (ev);
 }
 
 - (void) mouseEntered: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseEnter (ev);
 }
 
 - (void) mouseExited: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseExit (ev);
 }
 
@@ -440,7 +440,7 @@ END_JUCE_NAMESPACE
 
 - (void) scrollWheel: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMouseWheel (ev);
 }
 
@@ -453,13 +453,13 @@ END_JUCE_NAMESPACE
 - (void) frameChanged: (NSNotification*) n
 {
     (void) n;
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectMovedOrResized();
 }
 
 - (void) viewDidMoveToWindow
 {
-   if (owner != 0)
+   if (owner != nullptr)
        owner->viewMovedToWindow();
 }
 
@@ -475,18 +475,18 @@ END_JUCE_NAMESPACE
     TextInputTarget* const target = owner->findCurrentTextInputTarget();
     textWasInserted = false;
 
-    if (target != 0)
+    if (target != nullptr)
         [self interpretKeyEvents: [NSArray arrayWithObject: ev]];
     else
         deleteAndZero (stringBeingComposed);
 
-    if ((! textWasInserted) && (owner == 0 || ! owner->redirectKeyDown (ev)))
+    if ((! textWasInserted) && (owner == nullptr || ! owner->redirectKeyDown (ev)))
         [super keyDown: ev];
 }
 
 - (void) keyUp: (NSEvent*) ev
 {
-    if (owner == 0 || ! owner->redirectKeyUp (ev))
+    if (owner == nullptr || ! owner->redirectKeyUp (ev))
         [super keyUp: ev];
 }
 
@@ -500,7 +500,7 @@ END_JUCE_NAMESPACE
     {
         TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
-        if (target != 0)
+        if (target != nullptr)
         {
             target->insertTextAtCaret (nsStringToJuce (newText));
             textWasInserted = true;
@@ -526,7 +526,7 @@ END_JUCE_NAMESPACE
 
     TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
-    if (target != 0)
+    if (target != nullptr)
     {
         const Range<int> currentHighlight (target->getHighlightedRegion());
         target->insertTextAtCaret (*stringBeingComposed);
@@ -537,11 +537,11 @@ END_JUCE_NAMESPACE
 
 - (void) unmarkText
 {
-    if (stringBeingComposed != 0)
+    if (stringBeingComposed != nullptr)
     {
         TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
-        if (target != 0)
+        if (target != nullptr)
         {
             target->insertTextAtCaret (*stringBeingComposed);
             textWasInserted = true;
@@ -553,7 +553,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) hasMarkedText
 {
-    return stringBeingComposed != 0;
+    return stringBeingComposed != nullptr;
 }
 
 - (long) conversationIdentifier
@@ -565,7 +565,7 @@ END_JUCE_NAMESPACE
 {
     TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
-    if (target != 0)
+    if (target != nullptr)
     {
         const Range<int> r ((int) theRange.location,
                             (int) (theRange.location + theRange.length));
@@ -578,15 +578,15 @@ END_JUCE_NAMESPACE
 
 - (NSRange) markedRange
 {
-    return stringBeingComposed != 0 ? NSMakeRange (0, stringBeingComposed->length())
-                                    : NSMakeRange (NSNotFound, 0);
+    return stringBeingComposed != nullptr ? NSMakeRange (0, stringBeingComposed->length())
+                                          : NSMakeRange (NSNotFound, 0);
 }
 
 - (NSRange) selectedRange
 {
     TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
-    if (target != 0)
+    if (target != nullptr)
     {
         const Range<int> highlight (target->getHighlightedRegion());
 
@@ -627,14 +627,14 @@ END_JUCE_NAMESPACE
 //==============================================================================
 - (void) flagsChanged: (NSEvent*) ev
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->redirectModKeyChange (ev);
 }
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 - (BOOL) performKeyEquivalent: (NSEvent*) ev
 {
-    if (owner != 0 && owner->redirectPerformKeyEquivalent (ev))
+    if (owner != nullptr && owner->redirectPerformKeyEquivalent (ev))
         return true;
 
     return [super performKeyEquivalent: ev];
@@ -643,7 +643,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) becomeFirstResponder
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->viewFocusGain();
 
     return true;
@@ -651,7 +651,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) resignFirstResponder
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->viewFocusLoss();
 
     return true;
@@ -659,7 +659,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) acceptsFirstResponder
 {
-    return owner != 0 && owner->canBecomeKeyWindow();
+    return owner != nullptr && owner->canBecomeKeyWindow();
 }
 
 //==============================================================================
@@ -670,7 +670,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) sendDragCallback: (int) type sender: (id <NSDraggingInfo>) sender
 {
-    return owner != 0 && owner->sendDragCallback (type, sender);
+    return owner != nullptr && owner->sendDragCallback (type, sender);
 }
 
 - (NSDragOperation) draggingEntered: (id <NSDraggingInfo>) sender
@@ -728,27 +728,27 @@ END_JUCE_NAMESPACE
 
 - (BOOL) canBecomeKeyWindow
 {
-    return owner != 0 && owner->canBecomeKeyWindow();
+    return owner != nullptr && owner->canBecomeKeyWindow();
 }
 
 - (void) becomeKeyWindow
 {
     [super becomeKeyWindow];
 
-    if (owner != 0)
+    if (owner != nullptr)
         owner->grabFocus();
 }
 
 - (BOOL) windowShouldClose: (id) window
 {
     (void) window;
-    return owner == 0 || owner->windowShouldClose();
+    return owner == nullptr || owner->windowShouldClose();
 }
 
 - (NSRect) constrainFrameRect: (NSRect) frameRect toScreen: (NSScreen*) screen
 {
     (void) screen;
-    if (owner != 0)
+    if (owner != nullptr)
         frameRect = owner->constrainRect (frameRect);
 
     return frameRect;
@@ -764,10 +764,10 @@ END_JUCE_NAMESPACE
     frameRect.origin.y -= proposedFrameSize.height - frameRect.size.height;
     frameRect.size = proposedFrameSize;
 
-    if (owner != 0)
+    if (owner != nullptr)
         frameRect = owner->constrainRect (frameRect);
 
-    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != 0
+    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != nullptr
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
           && (owner->getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowHasTitleBar) != 0)
         JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
@@ -786,7 +786,7 @@ END_JUCE_NAMESPACE
 {
     (void) notification;
 
-    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != 0
+    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != nullptr
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
           && (owner->getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowHasTitleBar) != 0)
         JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
@@ -800,7 +800,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ModifierKeys NSViewComponentPeer::currentModifiers;
-ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = 0;
+ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = nullptr;
 Array<int> NSViewComponentPeer::keysCurrentlyDown;
 
 //==============================================================================
@@ -846,12 +846,12 @@ void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
     }
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     return NSViewComponentPeer::currentModifiers;
 }
 
-void ModifierKeys::updateCurrentModifiers() throw()
+void ModifierKeys::updateCurrentModifiers() noexcept
 {
     currentModifiers = NSViewComponentPeer::currentModifiers;
 }
@@ -861,9 +861,9 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
                                           const int windowStyleFlags,
                                           NSView* viewToAttachTo)
     : ComponentPeer (component_, windowStyleFlags),
-      window (0),
-      view (0),
-      isSharedWindow (viewToAttachTo != 0),
+      window (nil),
+      view (nil),
+      isSharedWindow (viewToAttachTo != nil),
       fullScreen (false),
       insideDrawRect (false),
 #if USE_COREGRAPHICS_RENDERING
@@ -940,7 +940,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
 
 NSViewComponentPeer::~NSViewComponentPeer()
 {
-    view->owner = 0;
+    view->owner = nullptr;
     [view removeFromSuperview];
     [view release];
 
@@ -1025,7 +1025,7 @@ const Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
 {
     NSRect r = [view frame];
 
-    if (global && [view window] != 0)
+    if (global && [view window] != nil)
     {
         r = [view convertRect: r toView: nil];
         NSRect wr = [[view window] frame];
@@ -1063,7 +1063,7 @@ const Point<int> NSViewComponentPeer::globalToLocal (const Point<int>& screenPos
 
 NSRect NSViewComponentPeer::constrainRect (NSRect r)
 {
-    if (constrainer != 0)
+    if (constrainer != nullptr)
     {
         NSRect current = [window frame];
         current.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - current.origin.y - current.size.height;
@@ -1141,7 +1141,7 @@ void NSViewComponentPeer::setMinimised (bool shouldBeMinimised)
 
 bool NSViewComponentPeer::isMinimised() const
 {
-    return window != 0 && [window isMiniaturized];
+    return window != nil && [window isMiniaturized];
 }
 
 void NSViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
@@ -1233,7 +1233,7 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
                           relativeTo: nil];
     }
 
-    if (window != 0 && component->isVisible())
+    if (window != nil && component->isVisible())
     {
         if (makeActiveWindow)
             [window makeKeyAndOrderFront: nil];
@@ -1253,9 +1253,9 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
 void NSViewComponentPeer::toBehind (ComponentPeer* other)
 {
     NSViewComponentPeer* const otherPeer = dynamic_cast <NSViewComponentPeer*> (other);
-    jassert (otherPeer != 0); // wrong type of window?
+    jassert (otherPeer != nullptr); // wrong type of window?
 
-    if (otherPeer != 0)
+    if (otherPeer != nullptr)
     {
         if (isSharedWindow)
         {
@@ -1266,8 +1266,8 @@ void NSViewComponentPeer::toBehind (ComponentPeer* other)
         else
         {
             [window orderWindow: NSWindowBelow
-                     relativeTo: otherPeer->window != 0 ? [otherPeer->window windowNumber]
-                                                        : nil ];
+                     relativeTo: otherPeer->window != nil ? [otherPeer->window windowNumber]
+                                                          : 0 ];
         }
     }
 }
@@ -1294,7 +1294,7 @@ void NSViewComponentPeer::viewFocusLoss()
 {
     if (currentlyFocusedPeer == this)
     {
-        currentlyFocusedPeer = 0;
+        currentlyFocusedPeer = nullptr;
         handleFocusLoss();
     }
 }
@@ -1316,7 +1316,7 @@ void juce_HandleProcessFocusChange()
             NSViewComponentPeer::currentlyFocusedPeer->handleFocusLoss();
 
             // turn kiosk mode off if we lose focus..
-            Desktop::getInstance().setKioskModeComponent (0);
+            Desktop::getInstance().setKioskModeComponent (nullptr);
         }
     }
 }
@@ -1324,12 +1324,12 @@ void juce_HandleProcessFocusChange()
 bool NSViewComponentPeer::isFocused() const
 {
     return isSharedWindow ? this == currentlyFocusedPeer
-                          : (window != 0 && [window isKeyWindow]);
+                          : (window != nil && [window isKeyWindow]);
 }
 
 void NSViewComponentPeer::grabFocus()
 {
-    if (window != 0)
+    if (window != nil)
     {
         [window makeKeyWindow];
         [window makeFirstResponder: view];
@@ -1395,7 +1395,7 @@ bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
 
     // (If we're running modally, don't allow unused keystrokes to be passed
     // along to other blocked views..)
-    if (Component::getCurrentlyModalComponent() != 0)
+    if (Component::getCurrentlyModalComponent() != nullptr)
         used = true;
 
     return used;
@@ -1405,7 +1405,7 @@ bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
 {
     updateKeysDown (ev, false);
     return handleKeyEvent (ev, false)
-            || Component::getCurrentlyModalComponent() != 0;
+            || Component::getCurrentlyModalComponent() != nullptr;
 }
 
 void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)
@@ -1502,8 +1502,8 @@ void NSViewComponentPeer::showArrowCursorIfNeeded()
 {
     MouseInputSource& mouse = Desktop::getInstance().getMainMouseSource();
 
-    if (mouse.getComponentUnderMouse() == 0
-         && Desktop::getInstance().findComponentAt (mouse.getScreenPosition()) == 0)
+    if (mouse.getComponentUnderMouse() == nullptr
+         && Desktop::getInstance().findComponentAt (mouse.getScreenPosition()) == nullptr)
     {
         [[NSCursor arrowCursor] set];
     }
@@ -1578,7 +1578,7 @@ BOOL NSViewComponentPeer::sendDragCallback (const int type, id <NSDraggingInfo> 
 
 bool NSViewComponentPeer::isOpaque()
 {
-    return component == 0 || component->isOpaque();
+    return component == nullptr || component->isOpaque();
 }
 
 void NSViewComponentPeer::drawRect (NSRect r)
@@ -1611,7 +1611,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
         const int xOffset = -roundToInt (r.origin.x);
         const int yOffset = -roundToInt ([view frame].size.height - (r.origin.y + r.size.height));
 
-        const NSRect* rects = 0;
+        const NSRect* rects = nullptr;
         NSInteger numRects = 0;
         [view getRectsBeingDrawn: &rects count: &numRects];
 

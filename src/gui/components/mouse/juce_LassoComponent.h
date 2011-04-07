@@ -107,7 +107,7 @@ public:
         colour is used to draw a line around its edge.
     */
     explicit LassoComponent (const int outlineThickness_ = 1)
-        : source (0),
+        : source (nullptr),
           outlineThickness (outlineThickness_)
     {
     }
@@ -131,13 +131,13 @@ public:
     void beginLasso (const MouseEvent& e,
                      LassoSource <SelectableItemType>* const lassoSource)
     {
-        jassert (source == 0);  // this suggests that you didn't call endLasso() after the last drag...
-        jassert (lassoSource != 0); // the source can't be null!
-        jassert (getParentComponent() != 0);  // you need to add this to a parent component for it to work!
+        jassert (source == nullptr);  // this suggests that you didn't call endLasso() after the last drag...
+        jassert (lassoSource != nullptr); // the source can't be null!
+        jassert (getParentComponent() != nullptr);  // you need to add this to a parent component for it to work!
 
         source = lassoSource;
 
-        if (lassoSource != 0)
+        if (lassoSource != nullptr)
             originalSelection = lassoSource->getLassoSelection().getItemArray();
 
         setSize (0, 0);
@@ -158,7 +158,7 @@ public:
     */
     void dragLasso (const MouseEvent& e)
     {
-        if (source != 0)
+        if (source != nullptr)
         {
             setBounds (Rectangle<int> (dragStartPos, e.getPosition()));
             setVisible (true);
@@ -190,7 +190,7 @@ public:
     */
     void endLasso()
     {
-        source = 0;
+        source = nullptr;
         originalSelection.clear();
         setVisible (false);
     }

@@ -43,7 +43,7 @@ class JUCE_API  MenuBarModel      : private AsyncUpdater,
 {
 public:
     //==============================================================================
-    MenuBarModel() throw();
+    MenuBarModel() noexcept;
 
     /** Destructor. */
     virtual ~MenuBarModel();
@@ -69,7 +69,7 @@ public:
         This will also allow it to flash a menu name when a command from that menu
         is invoked using a keystroke.
     */
-    void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager) throw();
+    void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager) noexcept;
 
     //==============================================================================
     /** A class to receive callbacks when a MenuBarModel changes.
@@ -101,13 +101,13 @@ public:
 
         @see removeListener
     */
-    void addListener (Listener* listenerToAdd) throw();
+    void addListener (Listener* listenerToAdd) noexcept;
 
     /** Removes a listener.
 
         @see addListener
     */
-    void removeListener (Listener* listenerToRemove) throw();
+    void removeListener (Listener* listenerToRemove) noexcept;
 
     //==============================================================================
     /** This method must return a list of the names of the menus. */
@@ -148,7 +148,7 @@ public:
         object then newMenuBarModel must be non-null.
     */
     static void setMacMainMenu (MenuBarModel* newMenuBarModel,
-                                const PopupMenu* extraAppleMenuItems = 0);
+                                const PopupMenu* extraAppleMenuItems = nullptr);
 
     /** MAC ONLY - Returns the menu model that is currently being shown as
         the main menu bar.

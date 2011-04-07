@@ -27,14 +27,14 @@
 
 namespace zlibNamespace
 {
-#if JUCE_INCLUDE_ZLIB_CODE
+ #if JUCE_INCLUDE_ZLIB_CODE
   #undef OS_CODE
   #undef fdopen
   #include "zlib/zlib.h"
   #undef OS_CODE
-#else
+ #else
   #include <zlib.h>
-#endif
+ #endif
 }
 
 BEGIN_JUCE_NAMESPACE
@@ -46,7 +46,7 @@ class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
     GZIPCompressorHelper (const int compressionLevel, const int windowBits)
-        : data (0),
+        : data (nullptr),
           dataSize (0),
           compLevel (compressionLevel),
           strategy (0),
@@ -70,18 +70,18 @@ public:
             deflateEnd (&stream);
     }
 
-    bool needsInput() const throw()
+    bool needsInput() const noexcept
     {
         return dataSize <= 0;
     }
 
-    void setInput (const uint8* const newData, const int size) throw()
+    void setInput (const uint8* const newData, const int size) noexcept
     {
         data = newData;
         dataSize = size;
     }
 
-    int doNextBlock (uint8* const dest, const int destSize) throw()
+    int doNextBlock (uint8* const dest, const int destSize) noexcept
     {
         using namespace zlibNamespace;
         if (streamIsValid)

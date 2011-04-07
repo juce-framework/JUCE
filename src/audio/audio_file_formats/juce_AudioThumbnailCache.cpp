@@ -67,7 +67,7 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode
 {
     ThumbnailCacheEntry* te = findThumbFor (hashCode);
 
-    if (te != 0)
+    if (te != nullptr)
     {
         te->lastUsed = Time::getMillisecondCounter();
 
@@ -84,7 +84,7 @@ void AudioThumbnailCache::storeThumb (const AudioThumbnail& thumb,
 {
     ThumbnailCacheEntry* te = findThumbFor (hashCode);
 
-    if (te == 0)
+    if (te == nullptr)
     {
         te = new ThumbnailCacheEntry();
         te->hash = hashCode;

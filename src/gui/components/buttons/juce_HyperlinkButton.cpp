@@ -58,7 +58,7 @@ void HyperlinkButton::setFont (const Font& newFont,
     repaint();
 }
 
-void HyperlinkButton::setURL (const URL& newURL) throw()
+void HyperlinkButton::setURL (const URL& newURL) noexcept
 {
     url = newURL;
     setTooltip (newURL.toString (false));

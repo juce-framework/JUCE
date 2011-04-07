@@ -34,21 +34,21 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 PathStrokeType::PathStrokeType (const float strokeThickness,
                                 const JointStyle jointStyle_,
-                                const EndCapStyle endStyle_) throw()
+                                const EndCapStyle endStyle_) noexcept
     : thickness (strokeThickness),
       jointStyle (jointStyle_),
       endStyle (endStyle_)
 {
 }
 
-PathStrokeType::PathStrokeType (const PathStrokeType& other) throw()
+PathStrokeType::PathStrokeType (const PathStrokeType& other) noexcept
     : thickness (other.thickness),
       jointStyle (other.jointStyle),
       endStyle (other.endStyle)
 {
 }
 
-PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other) throw()
+PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other) noexcept
 {
     thickness = other.thickness;
     jointStyle = other.jointStyle;
@@ -56,18 +56,18 @@ PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other) throw()
     return *this;
 }
 
-PathStrokeType::~PathStrokeType() throw()
+PathStrokeType::~PathStrokeType() noexcept
 {
 }
 
-bool PathStrokeType::operator== (const PathStrokeType& other) const throw()
+bool PathStrokeType::operator== (const PathStrokeType& other) const noexcept
 {
     return thickness == other.thickness
         && jointStyle == other.jointStyle
         && endStyle == other.endStyle;
 }
 
-bool PathStrokeType::operator!= (const PathStrokeType& other) const throw()
+bool PathStrokeType::operator!= (const PathStrokeType& other) const noexcept
 {
     return ! operator== (other);
 }
@@ -81,7 +81,7 @@ namespace PathStrokeHelpers
                            const float x4, const float y4,
                            float& intersectionX,
                            float& intersectionY,
-                           float& distanceBeyondLine1EndSquared) throw()
+                           float& distanceBeyondLine1EndSquared) noexcept
     {
         if (x2 != x3 || y2 != y3)
         {
@@ -439,7 +439,7 @@ namespace PathStrokeHelpers
     {
         jassert (subPath.size() > 0);
 
-        if (arrowhead != 0)
+        if (arrowhead != nullptr)
             shortenSubPath (subPath, arrowhead->startLength, arrowhead->endLength);
 
         const LineSection& firstLine = subPath.getReference (0);
@@ -457,7 +457,7 @@ namespace PathStrokeHelpers
         {
             destPath.startNewSubPath (firstLine.rx2, firstLine.ry2);
 
-            if (arrowhead != 0)
+            if (arrowhead != nullptr)
                 addArrowhead (destPath, firstLine.rx2, firstLine.ry2, lastX1, lastY1, firstLine.x1, firstLine.y1,
                               width, arrowhead->startWidth);
             else
@@ -500,7 +500,7 @@ namespace PathStrokeHelpers
         {
             destPath.lineTo (lastX2, lastY2);
 
-            if (arrowhead != 0)
+            if (arrowhead != nullptr)
                 addArrowhead (destPath, lastX2, lastY2, lastLine.rx1, lastLine.ry1, lastLine.x2, lastLine.y2,
                               width, arrowhead->endWidth);
             else

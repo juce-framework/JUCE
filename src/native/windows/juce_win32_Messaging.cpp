@@ -35,7 +35,7 @@ static const unsigned int specialCallbackId     = WM_APP + 0x4402;
 
 static const TCHAR* const messageWindowName = _T("JUCEWindow");
 static ATOM messageWindowClassAtom = 0;
-static LPCTSTR getMessageWindowClassName() throw()      { return (LPCTSTR) MAKELONG (messageWindowClassAtom, 0); }
+static LPCTSTR getMessageWindowClassName() noexcept     { return (LPCTSTR) MAKELONG (messageWindowClassAtom, 0); }
 
 HWND juce_messageWindowHandle = 0;
 
@@ -50,7 +50,7 @@ extern long improbableWindowNumber; // defined in windowing.cpp
 static LRESULT CALLBACK juce_MessageWndProc (HWND h,
                                              const UINT message,
                                              const WPARAM wParam,
-                                             const LPARAM lParam) throw()
+                                             const LPARAM lParam) noexcept
 {
     JUCE_TRY
     {
@@ -135,7 +135,7 @@ static bool isEventBlockedByModalComps (MSG& m)
         case WM_SYSKEYDOWN:
         {
             Component* const modal = Component::getCurrentlyModalComponent (0);
-            if (modal != 0)
+            if (modal != nullptr)
                 modal->inputAttemptWhenModal();
 
             return true;
@@ -165,7 +165,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
         }
         else if (m.message == WM_QUIT)
         {
-            if (JUCEApplication::getInstance() != 0)
+            if (JUCEApplication::getInstance() != nullptr)
                 JUCEApplication::getInstance()->systemRequestedQuit();
         }
         else if (! isEventBlockedByModalComps (m))

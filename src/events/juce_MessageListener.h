@@ -40,7 +40,7 @@ class JUCE_API  MessageListener
 protected:
     //==============================================================================
     /** Creates a MessageListener. */
-    MessageListener() throw();
+    MessageListener() noexcept;
 
 public:
     //==============================================================================
@@ -72,7 +72,7 @@ public:
                             references to it after calling this method.
         @see handleMessage
     */
-    void postMessage (Message* message) const throw();
+    void postMessage (Message* message) const noexcept;
 
     //==============================================================================
     /** Checks whether this MessageListener has been deleted.
@@ -86,7 +86,7 @@ public:
         exact same memory location, but I can't think of a good way of avoiding
         this.
     */
-    bool isValidMessageListener() const throw();
+    bool isValidMessageListener() const noexcept;
 };
 
 

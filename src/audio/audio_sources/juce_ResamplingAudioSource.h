@@ -68,7 +68,7 @@ public:
 
         This is the value that was set by setResamplingRatio().
     */
-    double getResamplingRatio() const throw()                   { return ratio; }
+    double getResamplingRatio() const noexcept                  { return ratio; }
 
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate);

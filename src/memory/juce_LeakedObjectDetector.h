@@ -48,8 +48,8 @@ class LeakedObjectDetector
 {
 public:
     //==============================================================================
-    LeakedObjectDetector() throw()                                  { ++(getCounter().numObjects); }
-    LeakedObjectDetector (const LeakedObjectDetector&) throw()      { ++(getCounter().numObjects); }
+    LeakedObjectDetector() noexcept                                 { ++(getCounter().numObjects); }
+    LeakedObjectDetector (const LeakedObjectDetector&) noexcept     { ++(getCounter().numObjects); }
 
     ~LeakedObjectDetector()
     {
@@ -77,7 +77,7 @@ private:
     class LeakCounter
     {
     public:
-        LeakCounter() throw() {}
+        LeakCounter() noexcept {}
 
         ~LeakCounter()
         {
@@ -104,7 +104,7 @@ private:
         return OwnerClass::getLeakedObjectClassName();
     }
 
-    static LeakCounter& getCounter() throw()
+    static LeakCounter& getCounter() noexcept
     {
         static LeakCounter counter;
         return counter;
@@ -134,7 +134,7 @@ private:
   */
   #define JUCE_LEAK_DETECTOR(OwnerClass) \
         friend class JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass>; \
-        static const char* getLeakedObjectClassName() throw() { return #OwnerClass; } \
+        static const char* getLeakedObjectClassName() noexcept { return #OwnerClass; } \
         JUCE_NAMESPACE::LeakedObjectDetector<OwnerClass> JUCE_JOIN_MACRO (leakDetector, __LINE__);
  #else
   #define JUCE_LEAK_DETECTOR(OwnerClass)

@@ -43,8 +43,7 @@ SynthesiserSound::~SynthesiserSound()
 SynthesiserVoice::SynthesiserVoice()
     : currentSampleRate (44100.0),
       currentlyPlayingNote (-1),
-      noteOnTime (0),
-      currentlyPlayingSound (0)
+      noteOnTime (0)
 {
 }
 
@@ -54,7 +53,7 @@ SynthesiserVoice::~SynthesiserVoice()
 
 bool SynthesiserVoice::isPlayingChannel (const int midiChannel) const
 {
-    return currentlyPlayingSound != 0
+    return currentlyPlayingSound != nullptr
             && currentlyPlayingSound->appliesToChannel (midiChannel);
 }
 
@@ -66,7 +65,7 @@ void SynthesiserVoice::setCurrentPlaybackSampleRate (const double newRate)
 void SynthesiserVoice::clearCurrentNote()
 {
     currentlyPlayingNote = -1;
-    currentlyPlayingSound = 0;
+    currentlyPlayingSound = nullptr;
 }
 
 //==============================================================================
@@ -243,9 +242,9 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
                               const int midiNoteNumber,
                               const float velocity)
 {
-    if (voice != 0 && sound != 0)
+    if (voice != nullptr && sound != nullptr)
     {
-        if (voice->currentlyPlayingSound != 0)
+        if (voice->currentlyPlayingSound != nullptr)
             voice->stopNote (false);
 
         voice->startNote (midiNoteNumber,
@@ -273,7 +272,7 @@ void Synthesiser::noteOff (const int midiChannel,
         {
             SynthesiserSound* const sound = voice->getCurrentlyPlayingSound();
 
-            if (sound != 0
+            if (sound != nullptr
                  && sound->appliesToNote (midiNoteNumber)
                  && sound->appliesToChannel (midiChannel))
             {
@@ -345,18 +344,18 @@ SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
     if (stealIfNoneAvailable)
     {
         // currently this just steals the one that's been playing the longest, but could be made a bit smarter..
-        SynthesiserVoice* oldest = 0;
+        SynthesiserVoice* oldest = nullptr;
 
         for (int i = voices.size(); --i >= 0;)
         {
             SynthesiserVoice* const voice = voices.getUnchecked (i);
 
             if (voice->canPlaySound (soundToPlay)
-                 && (oldest == 0 || oldest->noteOnTime > voice->noteOnTime))
+                 && (oldest == nullptr || oldest->noteOnTime > voice->noteOnTime))
                 oldest = voice;
         }
 
-        jassert (oldest != 0);
+        jassert (oldest != nullptr);
         return oldest;
     }
 

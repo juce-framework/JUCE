@@ -42,7 +42,7 @@ namespace CDReaderHelpers
     static int getIntValueForKey (const XmlElement& xml, const String& key, int defaultValue = -1)
     {
         const XmlElement* const block = getElementForKey (xml, key);
-        return block != 0 ? block->getAllSubText().trim().getIntValue() : defaultValue;
+        return block != nullptr ? block->getAllSubText().trim().getIntValue() : defaultValue;
     }
 
     // Get the track offsets for a CD given an XmlElement representing its TOC.Plist.
@@ -50,19 +50,19 @@ namespace CDReaderHelpers
     static const char* getTrackOffsets (XmlDocument& xmlDocument, Array<int>& offsets)
     {
         const ScopedPointer<XmlElement> xml (xmlDocument.getDocumentElement());
-        if (xml == 0)
+        if (xml == nullptr)
             return "Couldn't parse XML in file";
 
         const XmlElement* const dict = xml->getChildByName ("dict");
-        if (dict == 0)
+        if (dict == nullptr)
             return "Couldn't get top level dictionary";
 
         const XmlElement* const sessions = getElementForKey (*dict, "Sessions");
-        if (sessions == 0)
+        if (sessions == nullptr)
             return "Couldn't find sessions key";
 
         const XmlElement* const session = sessions->getFirstChildElement();
-        if (session == 0)
+        if (session == nullptr)
             return "Couldn't find first session";
 
         const int leadOut = getIntValueForKey (*session, "Leadout Block");
@@ -70,7 +70,7 @@ namespace CDReaderHelpers
             return "Couldn't find Leadout Block";
 
         const XmlElement* const trackArray = getElementForKey (*session, "Track Array");
-        if (trackArray == 0)
+        if (trackArray == nullptr)
             return "Couldn't find Track Array";
 
         forEachXmlChildElement (*trackArray, track)
@@ -202,25 +202,25 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
 
         if (track != currentReaderTrack)
         {
-            reader = 0;
+            reader = nullptr;
 
             FileInputStream* const in = tracks [track].createInputStream();
 
-            if (in != 0)
+            if (in != nullptr)
             {
                 BufferedInputStream* const bin = new BufferedInputStream (in, 65536, true);
 
                 AiffAudioFormat format;
                 reader = format.createReaderFor (bin, true);
 
-                if (reader == 0)
+                if (reader == nullptr)
                     currentReaderTrack = -1;
                 else
                     currentReaderTrack = track;
             }
         }
 
-        if (reader == 0)
+        if (reader == nullptr)
             return false;
 
         const int startPos = (int) (startSampleInFile - trackStartSamples.getUnchecked (track));

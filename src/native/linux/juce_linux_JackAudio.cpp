@@ -30,7 +30,7 @@
 #if JUCE_JACK
 
 //==============================================================================
-static void* juce_libjack_handle = 0;
+static void* juce_libjack_handle = nullptr;
 
 void* juce_load_jack_function (const char* const name)
 {
@@ -123,7 +123,7 @@ public:
           inputId (inputId_),
           outputId (outputId_),
           isOpen_ (false),
-          callback (0),
+          callback (nullptr),
           totalNumberOfInputChannels (0),
           totalNumberOfOutputChannels (0)
     {
@@ -294,7 +294,7 @@ public:
     {
         if (isOpen_ && newCallback != callback)
         {
-            if (newCallback != 0)
+            if (newCallback != nullptr)
                 newCallback->audioDeviceAboutToStart (this);
 
             AudioIODeviceCallback* const oldCallback = callback;
@@ -304,7 +304,7 @@ public:
                 callback = newCallback;
             }
 
-            if (oldCallback != 0)
+            if (oldCallback != nullptr)
                 oldCallback->audioDeviceStopped();
         }
     }
@@ -315,7 +315,7 @@ public:
     }
 
     bool isOpen()                           { return isOpen_; }
-    bool isPlaying()                        { return callback != 0; }
+    bool isPlaying()                        { return callback != nullptr; }
     int getCurrentBufferSizeSamples()       { return getBufferSizeSamples (0); }
     double getCurrentSampleRate()           { return getSampleRate (0); }
     int getCurrentBitDepth()                { return 32; }
@@ -375,7 +375,7 @@ private:
             jack_default_audio_sample_t* in
                 = (jack_default_audio_sample_t*) JUCE_NAMESPACE::jack_port_get_buffer ((jack_port_t*) inputPorts.getUnchecked(i), numSamples);
 
-            if (in != 0)
+            if (in != nullptr)
                 inChans [numActiveInChans++] = (float*) in;
         }
 
@@ -384,13 +384,13 @@ private:
             jack_default_audio_sample_t* out
                 = (jack_default_audio_sample_t*) JUCE_NAMESPACE::jack_port_get_buffer ((jack_port_t*) outputPorts.getUnchecked(i), numSamples);
 
-            if (out != 0)
+            if (out != nullptr)
                 outChans [numActiveOutChans++] = (float*) out;
         }
 
         const ScopedLock sl (callbackLock);
 
-        if (callback != 0)
+        if (callback != nullptr)
         {
             callback->audioDeviceIOCallback (const_cast<const float**> (inChans.getData()), numActiveInChans,
                                              outChans, numActiveOutChans, numSamples);
@@ -421,7 +421,7 @@ private:
 
         JackAudioIODevice* device = (JackAudioIODevice*) callbackArgument;
 
-        if (device != 0)
+        if (device != nullptr)
         {
             device->client = 0;
             device->close();

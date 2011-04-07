@@ -65,7 +65,7 @@ private:
 public:
     //==============================================================================
     /** Creates an empty array. */
-    Array() throw()
+    Array() noexcept
        : numUsed (0)
     {
     }
@@ -200,7 +200,7 @@ public:
     //==============================================================================
     /** Returns the current number of elements in the array.
     */
-    inline int size() const throw()
+    inline int size() const noexcept
     {
         return numUsed;
     }
@@ -247,7 +247,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see operator[], getFirst, getLast
     */
-    inline ElementType& getReference (const int index) const throw()
+    inline ElementType& getReference (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         jassert (isPositiveAndBelow (index, numUsed));
@@ -280,7 +280,7 @@ public:
         This pointer will only be valid until the next time a non-const method
         is called on the array.
     */
-    inline ElementType* getRawDataPointer() throw()
+    inline ElementType* getRawDataPointer() noexcept
     {
         return data.elements;
     }
@@ -289,7 +289,7 @@ public:
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ElementType* begin() const throw()
+    inline ElementType* begin() const noexcept
     {
         return data.elements;
     }
@@ -297,7 +297,7 @@ public:
     /** Returns a pointer to the element which follows the last element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ElementType* end() const throw()
+    inline ElementType* end() const noexcept
     {
         return data.elements + numUsed;
     }
@@ -552,7 +552,7 @@ public:
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    void swapWithArray (Array& otherArray) throw()
+    void swapWithArray (Array& otherArray) noexcept
     {
         const ScopedLockType lock1 (getLock());
         const ScopedLockType lock2 (otherArray.getLock());
@@ -884,7 +884,7 @@ public:
                                 is less than zero, the value will be moved to the end
                                 of the array
     */
-    void move (const int currentIndex, int newIndex) throw()
+    void move (const int currentIndex, int newIndex) noexcept
     {
         if (currentIndex != newIndex)
         {
@@ -983,7 +983,7 @@ public:
         To lock, you can call getLock().enter() and getLock().exit(), or preferably use
         an object of ScopedLockType as an RAII lock for it.
     */
-    inline const TypeOfCriticalSectionToUse& getLock() const throw()       { return data; }
+    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return data; }
 
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;

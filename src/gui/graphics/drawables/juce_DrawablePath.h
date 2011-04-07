@@ -93,8 +93,8 @@ public:
             explicit Element (const ValueTree& state);
             ~Element();
 
-            const Identifier getType() const throw()    { return state.getType(); }
-            int getNumControlPoints() const throw();
+            const Identifier getType() const noexcept   { return state.getType(); }
+            int getNumControlPoints() const noexcept;
 
             const RelativePoint getControlPoint (int index) const;
             Value getControlPointValue (int index, UndoManager*) const;

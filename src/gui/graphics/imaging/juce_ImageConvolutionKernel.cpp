@@ -43,7 +43,7 @@ ImageConvolutionKernel::~ImageConvolutionKernel()
 }
 
 //==============================================================================
-float ImageConvolutionKernel::getKernelValue (const int x, const int y) const throw()
+float ImageConvolutionKernel::getKernelValue (const int x, const int y) const noexcept
 {
     if (isPositiveAndBelow (x, size) && isPositiveAndBelow (y, size))
         return values [x + y * size];
@@ -52,7 +52,7 @@ float ImageConvolutionKernel::getKernelValue (const int x, const int y) const th
     return 0;
 }
 
-void ImageConvolutionKernel::setKernelValue (const int x, const int y, const float value) throw()
+void ImageConvolutionKernel::setKernelValue (const int x, const int y, const float value) noexcept
 {
     if (isPositiveAndBelow (x, size) && isPositiveAndBelow (y, size))
     {

@@ -428,13 +428,13 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
-        jassert (destSamples != 0);
+        jassert (destSamples != nullptr);
         const int64 samplesAvailable = lengthInSamples - startSampleInFile;
 
         if (samplesAvailable < numSamples)
         {
             for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != 0)
+                if (destSamples[i] != nullptr)
                     zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
 
             numSamples = (int) samplesAvailable;
@@ -526,7 +526,7 @@ public:
     //==============================================================================
     bool write (const int** data, int numSamples)
     {
-        jassert (data != 0 && *data != 0); // the input must contain at least one channel!
+        jassert (data != nullptr && *data != nullptr); // the input must contain at least one channel!
 
         if (writeFailed)
             return false;
@@ -568,7 +568,7 @@ private:
     int64 headerPosition;
     bool writeFailed;
 
-    static int getChannelMask (const int numChannels) throw()
+    static int getChannelMask (const int numChannels) noexcept
     {
         switch (numChannels)
         {
@@ -723,7 +723,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
-        r->input = 0;
+        r->input = nullptr;
 
     return 0;
 }
@@ -747,23 +747,23 @@ namespace WavFileHelpers
         WavAudioFormat wav;
         ScopedPointer <AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
 
-        if (reader != 0)
+        if (reader != nullptr)
         {
             ScopedPointer <OutputStream> outStream (tempFile.getFile().createOutputStream());
 
-            if (outStream != 0)
+            if (outStream != nullptr)
             {
                 ScopedPointer <AudioFormatWriter> writer (wav.createWriterFor (outStream, reader->sampleRate,
                                                                                reader->numChannels, reader->bitsPerSample,
                                                                                metadata, 0));
 
-                if (writer != 0)
+                if (writer != nullptr)
                 {
                     outStream.release();
 
                     bool ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    writer = 0;
-                    reader = 0;
+                    writer = nullptr;
+                    reader = nullptr;
 
                     return ok && tempFile.overwriteTargetFileWithTemporary();
                 }
@@ -779,11 +779,11 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
     using namespace WavFileHelpers;
     ScopedPointer <WavAudioFormatReader> reader (static_cast <WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
 
-    if (reader != 0)
+    if (reader != nullptr)
     {
         const int64 bwavPos = reader->bwavChunkStart;
         const int64 bwavSize = reader->bwavSize;
-        reader = 0;
+        reader = nullptr;
 
         if (bwavSize > 0)
         {

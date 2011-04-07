@@ -235,7 +235,7 @@ public:
 
 
     /** Returns the currently-active audio device. */
-    AudioIODevice* getCurrentAudioDevice() const throw()                { return currentAudioDevice; }
+    AudioIODevice* getCurrentAudioDevice() const noexcept               { return currentAudioDevice; }
 
     /** Returns the type of audio device currently in use.
         @see setCurrentAudioDeviceType
@@ -380,7 +380,7 @@ public:
 
         @see getDefaultMidiOutputName
     */
-    MidiOutput* getDefaultMidiOutput() const throw()                { return defaultMidiOutput; }
+    MidiOutput* getDefaultMidiOutput() const noexcept               { return defaultMidiOutput; }
 
     /** Returns a list of the types of device supported.
     */
@@ -432,13 +432,13 @@ public:
         Obviously while this is locked, you're blocking the audio thread from running, so
         it must only be used for very brief periods when absolutely necessary.
     */
-    CriticalSection& getAudioCallbackLock() throw()         { return audioCallbackLock; }
+    CriticalSection& getAudioCallbackLock() noexcept        { return audioCallbackLock; }
 
     /** Returns the a lock that can be used to synchronise access to the midi callback.
         Obviously while this is locked, you're blocking the midi system from running, so
         it must only be used for very brief periods when absolutely necessary.
     */
-    CriticalSection& getMidiCallbackLock() throw()          { return midiCallbackLock; }
+    CriticalSection& getMidiCallbackLock() noexcept         { return midiCallbackLock; }
 
 private:
     //==============================================================================

@@ -39,12 +39,12 @@ ComboBox::ItemInfo::ItemInfo (const String& name_, int itemId_, bool isEnabled_,
 {
 }
 
-bool ComboBox::ItemInfo::isSeparator() const throw()
+bool ComboBox::ItemInfo::isSeparator() const noexcept
 {
     return name.isEmpty();
 }
 
-bool ComboBox::ItemInfo::isRealItem() const throw()
+bool ComboBox::ItemInfo::isRealItem() const noexcept
 {
     return ! (isHeading || name.isEmpty());
 }
@@ -70,7 +70,7 @@ ComboBox::~ComboBox()
     if (menuActive)
         PopupMenu::dismissAllActiveMenus();
 
-    label = 0;
+    label = nullptr;
 }
 
 //==============================================================================
@@ -84,7 +84,7 @@ void ComboBox::setEditableText (const bool isEditable)
     }
 }
 
-bool ComboBox::isTextEditable() const throw()
+bool ComboBox::isTextEditable() const noexcept
 {
     return label->isEditable();
 }
@@ -94,7 +94,7 @@ void ComboBox::setJustificationType (const Justification& justification)
     label->setJustificationType (justification);
 }
 
-const Justification ComboBox::getJustificationType() const throw()
+const Justification ComboBox::getJustificationType() const noexcept
 {
     return label->getJustificationType();
 }
@@ -115,7 +115,7 @@ void ComboBox::addItem (const String& newItemText, const int newItemId)
     jassert (newItemId != 0);
 
     // you shouldn't use duplicate item IDs!
-    jassert (getItemForId (newItemId) == 0);
+    jassert (getItemForId (newItemId) == nullptr);
 
     if (newItemText.isNotEmpty() && newItemId != 0)
     {
@@ -155,23 +155,23 @@ void ComboBox::setItemEnabled (const int itemId, const bool shouldBeEnabled)
 {
     ItemInfo* const item = getItemForId (itemId);
 
-    if (item != 0)
+    if (item != nullptr)
         item->isEnabled = shouldBeEnabled;
 }
 
-bool ComboBox::isItemEnabled (int itemId) const throw()
+bool ComboBox::isItemEnabled (int itemId) const noexcept
 {
     const ItemInfo* const item = getItemForId (itemId);
-    return item != 0 && item->isEnabled;
+    return item != nullptr && item->isEnabled;
 }
 
 void ComboBox::changeItemText (const int itemId, const String& newText)
 {
     ItemInfo* const item = getItemForId (itemId);
 
-    jassert (item != 0);
+    jassert (item != nullptr);
 
-    if (item != 0)
+    if (item != nullptr)
         item->name = newText;
 }
 
@@ -185,7 +185,7 @@ void ComboBox::clear (const bool dontSendChangeMessage)
 }
 
 //==============================================================================
-ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const throw()
+ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const noexcept
 {
     if (itemId != 0)
     {
@@ -197,7 +197,7 @@ ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const throw()
     return 0;
 }
 
-ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const throw()
+ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const noexcept
 {
     for (int n = 0, i = 0; i < items.size(); ++i)
     {
@@ -211,7 +211,7 @@ ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const throw()
     return 0;
 }
 
-int ComboBox::getNumItems() const throw()
+int ComboBox::getNumItems() const noexcept
 {
     int n = 0;
 
@@ -226,17 +226,17 @@ const String ComboBox::getItemText (const int index) const
 {
     const ItemInfo* const item = getItemForIndex (index);
 
-    return item != 0 ? item->name : String::empty;
+    return item != nullptr ? item->name : String::empty;
 }
 
-int ComboBox::getItemId (const int index) const throw()
+int ComboBox::getItemId (const int index) const noexcept
 {
     const ItemInfo* const item = getItemForIndex (index);
 
-    return item != 0 ? item->itemId : 0;
+    return item != nullptr ? item->itemId : 0;
 }
 
-int ComboBox::indexOfItemId (const int itemId) const throw()
+int ComboBox::indexOfItemId (const int itemId) const noexcept
 {
     for (int n = 0, i = 0; i < items.size(); ++i)
     {
@@ -270,17 +270,17 @@ void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChangeM
     setSelectedId (getItemId (index), dontSendChangeMessage);
 }
 
-int ComboBox::getSelectedId() const throw()
+int ComboBox::getSelectedId() const noexcept
 {
     const ItemInfo* const item = getItemForId (currentId.getValue());
 
-    return (item != 0 && getText() == item->name) ? item->itemId : 0;
+    return (item != nullptr && getText() == item->name) ? item->itemId : 0;
 }
 
 void ComboBox::setSelectedId (const int newItemId, const bool dontSendChangeMessage)
 {
     const ItemInfo* const item = getItemForId (newItemId);
-    const String newItemText (item != 0 ? item->name : String::empty);
+    const String newItemText (item != nullptr ? item->name : String::empty);
 
     if (lastCurrentId != newItemId || label->getText() != newItemText)
     {
@@ -299,7 +299,7 @@ bool ComboBox::selectIfEnabled (const int index)
 {
     const ItemInfo* const item = getItemForIndex (index);
 
-    if (item != 0 && item->isEnabled)
+    if (item != nullptr && item->isEnabled)
     {
         setSelectedItemIndex (index);
         return true;
@@ -418,9 +418,9 @@ void ComboBox::lookAndFeelChanged()
 
     {
         ScopedPointer <Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
-        jassert (newLabel != 0);
+        jassert (newLabel != nullptr);
 
-        if (label != 0)
+        if (label != nullptr)
         {
             newLabel->setEditable (label->isEditable());
             newLabel->setJustificationType (label->getJustificationType());
@@ -505,7 +505,7 @@ void ComboBox::labelTextChanged (Label*)
 //==============================================================================
 void ComboBox::popupMenuFinishedCallback (int result, ComboBox* box)
 {
-    if (box != 0)
+    if (box != nullptr)
     {
         box->menuActive = false;
 

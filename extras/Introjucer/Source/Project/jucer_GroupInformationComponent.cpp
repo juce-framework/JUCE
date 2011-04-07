@@ -140,7 +140,7 @@ Component* GroupInformationComponent::refreshComponentForRow (int rowNumber, boo
     {
         Project::Item child (item.getChild (rowNumber));
 
-        if (existingComponentToUpdate == 0
+        if (existingComponentToUpdate == nullptr
              || dynamic_cast <FileOptionComponent*> (existingComponentToUpdate)->item != child)
         {
             delete existingComponentToUpdate;

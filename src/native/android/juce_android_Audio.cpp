@@ -165,10 +165,10 @@ public:
 
         if (isRunning)
         {
-            if (outputDevice != 0)
+            if (outputDevice != nullptr)
                 env->CallVoidMethod (outputDevice, android.audioTrackPlay);
 
-            if (inputDevice != 0)
+            if (inputDevice != nullptr)
                 env->CallVoidMethod (inputDevice, android.startRecording);
 
             startThread (8);
@@ -206,7 +206,7 @@ public:
     {
         if (isRunning && callback != newCallback)
         {
-            if (newCallback != 0)
+            if (newCallback != nullptr)
                 newCallback->audioDeviceAboutToStart (this);
 
             const ScopedLock sl (callbackLock);
@@ -223,10 +223,10 @@ public:
             {
                 const ScopedLock sl (callbackLock);
                 lastCallback = callback;
-                callback = 0;
+                callback = nullptr;
             }
 
-            if (lastCallback != 0)
+            if (lastCallback != nullptr)
                 lastCallback->audioDeviceStopped();
         }
     }
@@ -238,7 +238,7 @@ public:
 
         while (! threadShouldExit())
         {
-            if (inputDevice != 0)
+            if (inputDevice != nullptr)
             {
                 jint numRead = env->CallIntMethod (inputDevice, android.audioRecordRead, audioBuffer, 0, actualBufferSize * numDeviceInputChannels);
 
@@ -265,7 +265,7 @@ public:
             {
                 const ScopedLock sl (callbackLock);
 
-                if (callback != 0)
+                if (callback != nullptr)
                 {
                     callback->audioDeviceIOCallback ((const float**) inputChannelBuffer.getArrayOfChannels(), numClientInputChannels,
                                                      outputChannelBuffer.getArrayOfChannels(), numClientOutputChannels,
@@ -277,7 +277,7 @@ public:
                 }
             }
 
-            if (outputDevice != 0)
+            if (outputDevice != nullptr)
             {
                 if (threadShouldExit())
                     break;
@@ -318,14 +318,14 @@ private:
 
     void closeDevices()
     {
-        if (outputDevice != 0)
+        if (outputDevice != nullptr)
         {
             outputDevice.callVoidMethod (android.audioTrackStop);
             outputDevice.callVoidMethod (android.audioTrackRelease);
             outputDevice.clear();
         }
 
-        if (inputDevice != 0)
+        if (inputDevice != nullptr)
         {
             inputDevice.callVoidMethod (android.stopRecording);
             inputDevice.callVoidMethod (android.audioRecordRelease);
@@ -348,7 +348,7 @@ public:
     //==============================================================================
     void scanForDevices() {}
     int getDefaultDeviceIndex (bool forInput) const                     { return 0; }
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const    { return device != 0 ? 0 : -1; }
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const    { return device != nullptr ? 0 : -1; }
     bool hasSeparateInputsAndOutputs() const                            { return false; }
 
     const StringArray getDeviceNames (bool wantInputNames) const
@@ -369,7 +369,7 @@ public:
                                                                           : inputDeviceName);
 
             if (dev->getCurrentSampleRate() <= 0 || dev->getDefaultBufferSize() <= 0)
-                dev = 0;
+                dev = nullptr;
         }
 
         return dev.release();

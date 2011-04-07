@@ -162,7 +162,7 @@ private:
     {
         const Message::Ptr nextMessage (messages.removeAndReturn (0));
 
-        if (nextMessage == 0)
+        if (nextMessage == nullptr)
             return false;
 
         const ScopedAutoReleasePool pool;

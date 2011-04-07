@@ -31,14 +31,14 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MenuBarModel::MenuBarModel() throw()
-    : manager (0)
+MenuBarModel::MenuBarModel() noexcept
+    : manager (nullptr)
 {
 }
 
 MenuBarModel::~MenuBarModel()
 {
-    setApplicationCommandManagerToWatch (0);
+    setApplicationCommandManagerToWatch (nullptr);
 }
 
 //==============================================================================
@@ -47,26 +47,26 @@ void MenuBarModel::menuItemsChanged()
     triggerAsyncUpdate();
 }
 
-void MenuBarModel::setApplicationCommandManagerToWatch (ApplicationCommandManager* const newManager) throw()
+void MenuBarModel::setApplicationCommandManagerToWatch (ApplicationCommandManager* const newManager) noexcept
 {
     if (manager != newManager)
     {
-        if (manager != 0)
+        if (manager != nullptr)
             manager->removeListener (this);
 
         manager = newManager;
 
-        if (manager != 0)
+        if (manager != nullptr)
             manager->addListener (this);
     }
 }
 
-void MenuBarModel::addListener (Listener* const newListener) throw()
+void MenuBarModel::addListener (Listener* const newListener) noexcept
 {
     listeners.add (newListener);
 }
 
-void MenuBarModel::removeListener (Listener* const listenerToRemove) throw()
+void MenuBarModel::removeListener (Listener* const listenerToRemove) noexcept
 {
     // Trying to remove a listener that isn't on the list!
     // If this assertion happens because this object is a dangling pointer, make sure you've not

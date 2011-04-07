@@ -64,7 +64,7 @@ public:
     const Colour getDefaultColour (int tokenType);
 
     /** This is a handy method for checking whether a string is a c++ reserved keyword. */
-    static bool isReservedKeyword (const String& token) throw();
+    static bool isReservedKeyword (const String& token) noexcept;
 
 private:
     //==============================================================================

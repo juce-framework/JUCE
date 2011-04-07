@@ -31,17 +31,17 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ModifierKeys::ModifierKeys (const int flags_) throw()
+ModifierKeys::ModifierKeys (const int flags_) noexcept
     : flags (flags_)
 {
 }
 
-ModifierKeys::ModifierKeys (const ModifierKeys& other) throw()
+ModifierKeys::ModifierKeys (const ModifierKeys& other) noexcept
     : flags (other.flags)
 {
 }
 
-ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) throw()
+ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) noexcept
 {
     flags = other.flags;
     return *this;
@@ -49,12 +49,12 @@ ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) throw()
 
 ModifierKeys ModifierKeys::currentModifiers;
 
-const ModifierKeys ModifierKeys::getCurrentModifiers() throw()
+const ModifierKeys ModifierKeys::getCurrentModifiers() noexcept
 {
     return currentModifiers;
 }
 
-int ModifierKeys::getNumMouseButtonsDown() const throw()
+int ModifierKeys::getNumMouseButtonsDown() const noexcept
 {
     int num = 0;
 

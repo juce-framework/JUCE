@@ -43,24 +43,24 @@ JUCEApplication::JUCEApplication()
     : appReturnValue (0),
       stillInitialising (true)
 {
-    jassert (isStandaloneApp() && appInstance == 0);
+    jassert (isStandaloneApp() && appInstance == nullptr);
     appInstance = this;
 }
 
 JUCEApplication::~JUCEApplication()
 {
-    if (appLock != 0)
+    if (appLock != nullptr)
     {
         appLock->exit();
-        appLock = 0;
+        appLock = nullptr;
     }
 
     jassert (appInstance == this);
-    appInstance = 0;
+    appInstance = nullptr;
 }
 
 JUCEApplication::CreateInstanceFunction JUCEApplication::createInstance = 0;
-JUCEApplication* JUCEApplication::appInstance = 0;
+JUCEApplication* JUCEApplication::appInstance = nullptr;
 
 //==============================================================================
 bool JUCEApplication::moreThanOneInstanceAllowed()
@@ -82,7 +82,7 @@ void JUCEApplication::quit()
     MessageManager::getInstance()->stopDispatchLoop();
 }
 
-void JUCEApplication::setApplicationReturnValue (const int newReturnValue) throw()
+void JUCEApplication::setApplicationReturnValue (const int newReturnValue) noexcept
 {
     appReturnValue = newReturnValue;
 }
@@ -105,7 +105,7 @@ void JUCEApplication::sendUnhandledException (const std::exception* const e,
                                               const char* const sourceFile,
                                               const int lineNumber)
 {
-    if (appInstance != 0)
+    if (appInstance != nullptr)
         appInstance->unhandledException (e, sourceFile, lineNumber);
 }
 
@@ -150,7 +150,7 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
     commandLineParameters = commandLine.trim();
 
 #if ! JUCE_IOS
-    jassert (appLock == 0); // initialiseApp must only be called once!
+    jassert (appLock == nullptr); // initialiseApp must only be called once!
 
     if (! moreThanOneInstanceAllowed())
     {
@@ -158,7 +158,7 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
 
         if (! appLock->enter(0))
         {
-            appLock = 0;
+            appLock = nullptr;
             MessageManager::broadcastMessage (getApplicationName() + "/" + commandLineParameters);
 
             DBG ("Another instance is running - quitting...");
@@ -203,7 +203,7 @@ void JUCEApplication::appWillTerminateByForce()
     {
         const ScopedPointer<JUCEApplication> app (JUCEApplication::getInstance());
 
-        if (app != 0)
+        if (app != nullptr)
             app->shutdownApp();
     }
 
@@ -215,7 +215,7 @@ void JUCEApplication::appWillTerminateByForce()
 int JUCEApplication::main (const String& commandLine)
 {
     ScopedJuceInitialiser_GUI libraryInitialiser;
-    jassert (createInstance != 0);
+    jassert (createInstance != nullptr);
     int returnCode = 0;
 
     {
@@ -250,7 +250,7 @@ int JUCEApplication::main (int argc, const char* argv[])
     JUCE_AUTORELEASEPOOL
 
   #if ! JUCE_WINDOWS
-    jassert (createInstance != 0);
+    jassert (createInstance != nullptr);
     juce_Argv0 = argv[0];
   #endif
 

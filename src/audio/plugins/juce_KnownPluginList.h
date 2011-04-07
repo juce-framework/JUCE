@@ -59,12 +59,12 @@ public:
     /** Returns the number of types currently in the list.
         @see getType
     */
-    int getNumTypes() const throw()                                 { return types.size(); }
+    int getNumTypes() const noexcept                                { return types.size(); }
 
     /** Returns one of the types.
         @see getNumTypes
     */
-    PluginDescription* getType (int index) const throw()            { return types [index]; }
+    PluginDescription* getType (int index) const noexcept           { return types [index]; }
 
     /** Looks for a type in the list which comes from this file.
     */

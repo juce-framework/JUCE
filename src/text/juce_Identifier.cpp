@@ -37,17 +37,17 @@ StringPool& Identifier::getPool()
     return pool;
 }
 
-Identifier::Identifier() throw()
-    : name (0)
+Identifier::Identifier() noexcept
+    : name (nullptr)
 {
 }
 
-Identifier::Identifier (const Identifier& other) throw()
+Identifier::Identifier (const Identifier& other) noexcept
     : name (other.name)
 {
 }
 
-Identifier& Identifier::operator= (const Identifier& other) throw()
+Identifier& Identifier::operator= (const Identifier& other) noexcept
 {
     name = other.name;
     return *this;

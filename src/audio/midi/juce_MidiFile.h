@@ -60,14 +60,14 @@ public:
 
         @see getTrack, addTrack
     */
-    int getNumTracks() const throw();
+    int getNumTracks() const noexcept;
 
     /** Returns a pointer to one of the tracks in the file.
 
         @returns a pointer to the track, or 0 if the index is out-of-range
         @see getNumTracks, addTrack
     */
-    const MidiMessageSequence* getTrack (int index) const throw();
+    const MidiMessageSequence* getTrack (int index) const noexcept;
 
     /** Adds a midi track to the file.
 
@@ -95,7 +95,7 @@ public:
         It it's negative, the upper byte indicates the frames-per-second (but negative), and
         the lower byte is the number of ticks per frame - see setSmpteTimeFormat().
     */
-    short getTimeFormat() const throw();
+    short getTimeFormat() const noexcept;
 
     /** Sets the time format to use when this file is written to a stream.
 
@@ -106,7 +106,7 @@ public:
         @param ticksPerQuarterNote  e.g. 96, 960
         @see setSmpteTimeFormat
     */
-    void setTicksPerQuarterNote (int ticksPerQuarterNote) throw();
+    void setTicksPerQuarterNote (int ticksPerQuarterNote) noexcept;
 
     /** Sets the time format to use when this file is written to a stream.
 
@@ -121,7 +121,7 @@ public:
         @see setTicksPerBeat
     */
     void setSmpteTimeFormat (int framesPerSecond,
-                             int subframeResolution) throw();
+                             int subframeResolution) noexcept;
 
     //==============================================================================
     /** Makes a list of all the tempo-change meta-events from all tracks in the midi file.

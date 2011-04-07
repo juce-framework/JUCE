@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-RectangleList::RectangleList() throw()
+RectangleList::RectangleList() noexcept
 {
 }
 
@@ -62,7 +62,7 @@ void RectangleList::clear()
     rects.clearQuick();
 }
 
-const Rectangle<int> RectangleList::getRectangle (const int index) const throw()
+const Rectangle<int> RectangleList::getRectangle (const int index) const noexcept
 {
     if (isPositiveAndBelow (index, rects.size()))
         return rects.getReference (index);
@@ -70,14 +70,14 @@ const Rectangle<int> RectangleList::getRectangle (const int index) const throw()
     return Rectangle<int>();
 }
 
-bool RectangleList::isEmpty() const throw()
+bool RectangleList::isEmpty() const noexcept
 {
     return rects.size() == 0;
 }
 
 //==============================================================================
-RectangleList::Iterator::Iterator (const RectangleList& list) throw()
-    : current (0),
+RectangleList::Iterator::Iterator (const RectangleList& list) noexcept
+    : current (nullptr),
       owner (list),
       index (list.rects.size())
 {
@@ -87,7 +87,7 @@ RectangleList::Iterator::~Iterator()
 {
 }
 
-bool RectangleList::Iterator::next() throw()
+bool RectangleList::Iterator::next() noexcept
 {
     if (--index >= 0)
     {
@@ -337,7 +337,7 @@ bool RectangleList::getIntersectionWith (const Rectangle<int>& rect, RectangleLi
     return destRegion.rects.size() > 0;
 }
 
-void RectangleList::swapWith (RectangleList& otherList) throw()
+void RectangleList::swapWith (RectangleList& otherList) noexcept
 {
     rects.swapWithArray (otherList.rects);
 }
@@ -417,7 +417,7 @@ void RectangleList::consolidate()
 }
 
 //==============================================================================
-bool RectangleList::containsPoint (const int x, const int y) const throw()
+bool RectangleList::containsPoint (const int x, const int y) const noexcept
 {
     for (int i = getNumRectangles(); --i >= 0;)
         if (rects.getReference (i).contains (x, y))
@@ -448,7 +448,7 @@ bool RectangleList::containsRectangle (const Rectangle<int>& rectangleToCheck) c
     return false;
 }
 
-bool RectangleList::intersectsRectangle (const Rectangle<int>& rectangleToCheck) const throw()
+bool RectangleList::intersectsRectangle (const Rectangle<int>& rectangleToCheck) const noexcept
 {
     for (int i = rects.size(); --i >= 0;)
         if (rects.getReference (i).intersects (rectangleToCheck))
@@ -457,7 +457,7 @@ bool RectangleList::intersectsRectangle (const Rectangle<int>& rectangleToCheck)
     return false;
 }
 
-bool RectangleList::intersects (const RectangleList& other) const throw()
+bool RectangleList::intersects (const RectangleList& other) const noexcept
 {
     for (int i = rects.size(); --i >= 0;)
         if (other.intersectsRectangle (rects.getReference (i)))
@@ -466,7 +466,7 @@ bool RectangleList::intersects (const RectangleList& other) const throw()
     return false;
 }
 
-const Rectangle<int> RectangleList::getBounds() const throw()
+const Rectangle<int> RectangleList::getBounds() const noexcept
 {
     if (rects.size() <= 1)
     {
@@ -498,7 +498,7 @@ const Rectangle<int> RectangleList::getBounds() const throw()
     }
 }
 
-void RectangleList::offsetAll (const int dx, const int dy) throw()
+void RectangleList::offsetAll (const int dx, const int dy) noexcept
 {
     for (int i = rects.size(); --i >= 0;)
     {

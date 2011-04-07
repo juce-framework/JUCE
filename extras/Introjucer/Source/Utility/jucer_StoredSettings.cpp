@@ -29,7 +29,6 @@
 
 //==============================================================================
 StoredSettings::StoredSettings()
-    : props (0)
 {
     flush();
 }
@@ -37,7 +36,7 @@ StoredSettings::StoredSettings()
 StoredSettings::~StoredSettings()
 {
     flush();
-    props = 0;
+    props = nullptr;
     clearSingletonInstance();
 }
 
@@ -47,28 +46,28 @@ juce_ImplementSingleton (StoredSettings);
 //==============================================================================
 PropertiesFile& StoredSettings::getProps()
 {
-    jassert (props != 0);
+    jassert (props != nullptr);
     return *props;
 }
 
 void StoredSettings::flush()
 {
-    if (props != 0)
+    if (props != nullptr)
     {
         props->setValue ("recentFiles", recentFiles.toString());
 
         props->removeValue ("keyMappings");
 
-        if (commandManager != 0)
+        if (commandManager != nullptr)
         {
             ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
-            if (keys != 0)
+            if (keys != nullptr)
                 props->setValue ("keyMappings", (XmlElement*) keys);
         }
     }
 
-    props = 0;
+    props = nullptr;
     props = PropertiesFile::createDefaultAppPropertiesFile ("Jucer2", "settings", String::empty,
                                                             false, 3000, PropertiesFile::storeAsXML);
 
@@ -155,7 +154,7 @@ const Image StoredSettings::getFallbackImage()
 
 const Drawable* StoredSettings::getImageFileIcon()
 {
-    if (imageFileIcon == 0)
+    if (imageFileIcon == nullptr)
     {
         static const unsigned char data[] =
         { 120,218,197,90,75,111,28,199,17,158,181,60,146,98,36,135,28,98,58,185,100,175,1,164,65,87,117,87,63,142,74,156,228,34,3,129,125,80,146,27,37,46,229,141,41,238,130,92,37,240,191,207,87,61,59,195,158,215,138,176,44,154,132,128,209,246,199,154,238,122,126,

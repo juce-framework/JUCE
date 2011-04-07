@@ -98,7 +98,7 @@ SamplerVoice::~SamplerVoice()
 
 bool SamplerVoice::canPlaySound (SynthesiserSound* sound)
 {
-    return dynamic_cast <const SamplerSound*> (sound) != 0;
+    return dynamic_cast <const SamplerSound*> (sound) != nullptr;
 }
 
 void SamplerVoice::startNote (const int midiNoteNumber,
@@ -107,9 +107,9 @@ void SamplerVoice::startNote (const int midiNoteNumber,
                               const int /*currentPitchWheelPosition*/)
 {
     const SamplerSound* const sound = dynamic_cast <const SamplerSound*> (s);
-    jassert (sound != 0); // this object can only play SamplerSounds!
+    jassert (sound != nullptr); // this object can only play SamplerSounds!
 
-    if (sound != 0)
+    if (sound != nullptr)
     {
         const double targetFreq = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
         const double naturalFreq = MidiMessage::getMidiNoteInHertz (sound->midiRootNote);
@@ -172,7 +172,7 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 {
     const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().getObject());
 
-    if (playingSound != 0)
+    if (playingSound != nullptr)
     {
         const float* const inL = playingSound->data->getSampleData (0, 0);
         const float* const inR = playingSound->data->getNumChannels() > 1
@@ -189,8 +189,8 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 
             // just using a very simple linear interpolation here..
             float l = (inL [pos] * invAlpha + inL [pos + 1] * alpha);
-            float r = (inR != 0) ? (inR [pos] * invAlpha + inR [pos + 1] * alpha)
-                                 : l;
+            float r = (inR != nullptr) ? (inR [pos] * invAlpha + inR [pos + 1] * alpha)
+                                       : l;
 
             l *= lgain;
             r *= rgain;
@@ -222,7 +222,7 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
                 }
             }
 
-            if (outR != 0)
+            if (outR != nullptr)
             {
                 *outL++ += l;
                 *outR++ += r;

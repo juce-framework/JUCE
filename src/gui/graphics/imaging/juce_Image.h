@@ -118,10 +118,10 @@ public:
     ~Image();
 
     /** Returns true if the two images are referring to the same internal, shared image. */
-    bool operator== (const Image& other) const throw()      { return image == other.image; }
+    bool operator== (const Image& other) const noexcept     { return image == other.image; }
 
     /** Returns true if the two images are not referring to the same internal, shared image. */
-    bool operator!= (const Image& other) const throw()      { return image != other.image; }
+    bool operator!= (const Image& other) const noexcept     { return image != other.image; }
 
     /** Returns true if this image isn't null.
         If you create an Image with the default constructor, it has no size or content, and is null
@@ -129,7 +129,7 @@ public:
         The isNull() method is the opposite of isValid().
         @see isNull
     */
-    inline bool isValid() const throw()                     { return image != 0; }
+    inline bool isValid() const noexcept                    { return image != nullptr; }
 
     /** Returns true if this image is not valid.
         If you create an Image with the default constructor, it has no size or content, and is null
@@ -137,7 +137,7 @@ public:
         The isNull() method is the opposite of isValid().
         @see isValid
     */
-    inline bool isNull() const throw()                      { return image == 0; }
+    inline bool isNull() const noexcept                     { return image == nullptr; }
 
     /** A null Image object that can be used when you need to return an invalid image.
         This object is the equivalient to an Image created with the default constructor.
@@ -146,30 +146,30 @@ public:
 
     //==============================================================================
     /** Returns the image's width (in pixels). */
-    int getWidth() const throw()                            { return image == 0 ? 0 : image->width; }
+    int getWidth() const noexcept                           { return image == nullptr ? 0 : image->width; }
 
     /** Returns the image's height (in pixels). */
-    int getHeight() const throw()                           { return image == 0 ? 0 : image->height; }
+    int getHeight() const noexcept                          { return image == nullptr ? 0 : image->height; }
 
     /** Returns a rectangle with the same size as this image.
         The rectangle's origin is always (0, 0).
     */
-    const Rectangle<int> getBounds() const throw()          { return image == 0 ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
+    const Rectangle<int> getBounds() const noexcept         { return image == nullptr ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
 
     /** Returns the image's pixel format. */
-    PixelFormat getFormat() const throw()                   { return image == 0 ? UnknownFormat : image->format; }
+    PixelFormat getFormat() const noexcept                  { return image == nullptr ? UnknownFormat : image->format; }
 
     /** True if the image's format is ARGB. */
-    bool isARGB() const throw()                             { return getFormat() == ARGB; }
+    bool isARGB() const noexcept                            { return getFormat() == ARGB; }
 
     /** True if the image's format is RGB. */
-    bool isRGB() const throw()                              { return getFormat() == RGB; }
+    bool isRGB() const noexcept                             { return getFormat() == RGB; }
 
     /** True if the image's format is a single-channel alpha map. */
-    bool isSingleChannel() const throw()                    { return getFormat() == SingleChannel; }
+    bool isSingleChannel() const noexcept                   { return getFormat() == SingleChannel; }
 
     /** True if the image contains an alpha-channel. */
-    bool hasAlphaChannel() const throw()                    { return getFormat() != RGB; }
+    bool hasAlphaChannel() const noexcept                   { return getFormat() != RGB; }
 
     //==============================================================================
     /** Clears a section of the image with a given colour.
@@ -308,25 +308,25 @@ public:
             The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (int y) const throw()                  { return data + y * lineStride; }
+        inline uint8* getLinePointer (int y) const noexcept                 { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
             The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (int x, int y) const throw()          { return data + y * lineStride + x * pixelStride; }
+        inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + y * lineStride + x * pixelStride; }
 
         /** Returns the colour of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        const Colour getPixelColour (int x, int y) const throw();
+        const Colour getPixelColour (int x, int y) const noexcept;
 
         /** Sets the colour of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        void setPixelColour (int x, int y, const Colour& colour) const throw();
+        void setPixelColour (int x, int y, const Colour& colour) const noexcept;
 
         uint8* data;
         PixelFormat pixelFormat;
@@ -390,7 +390,7 @@ public:
 
         @see duplicateIfShared
     */
-    int getReferenceCount() const throw()               { return image == 0 ? 0 : image->getReferenceCount(); }
+    int getReferenceCount() const noexcept              { return image == nullptr ? 0 : image->getReferenceCount(); }
 
     //==============================================================================
     /** This is a base class for task-specific types of image.
@@ -411,9 +411,9 @@ public:
         static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
         static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
 
-        const PixelFormat getPixelFormat() const throw()    { return format; }
-        int getWidth() const throw()                        { return width; }
-        int getHeight() const throw()                       { return height; }
+        const PixelFormat getPixelFormat() const noexcept   { return format; }
+        int getWidth() const noexcept                       { return width; }
+        int getHeight() const noexcept                      { return height; }
 
     protected:
         friend class Image;
@@ -426,7 +426,7 @@ public:
     };
 
     /** @internal */
-    SharedImage* getSharedImage() const throw()         { return image; }
+    SharedImage* getSharedImage() const noexcept        { return image; }
     /** @internal */
     explicit Image (SharedImage* instance);
 

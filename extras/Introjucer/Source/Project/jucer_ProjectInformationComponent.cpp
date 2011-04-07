@@ -76,7 +76,7 @@ public:
             // An export tab..
             ScopedPointer <ProjectExporter> exp (project.createExporter (tabIndex - (2 + project.getNumConfigurations())));
 
-            if (exp != 0)
+            if (exp != nullptr)
                 exp->createPropertyEditors (props);
 
             for (int i = props.size(); --i >= 0;)
@@ -241,7 +241,7 @@ void ProjectInformationComponent::rebuildConfigTabs()
     {
         ScopedPointer <ProjectExporter> exp (project.createExporter (i));
 
-        if (exp != 0)
+        if (exp != nullptr)
         {
             panel = new PropertiesWithHelpComponent (project, index++);
             configTabBox.addTab (exp->getName(), Colours::lightsteelblue, panel, true, -1);
@@ -298,7 +298,7 @@ void ProjectInformationComponent::showConfigMenu()
     }
     else if (r == 1)
     {
-        project.addNewConfiguration (0);
+        project.addNewConfiguration (nullptr);
     }
 }
 
@@ -313,7 +313,7 @@ void ProjectInformationComponent::showExporterMenu()
     {
         ScopedPointer<ProjectExporter> exp (project.createExporter (i));
 
-        if (exp != 0)
+        if (exp != nullptr)
             removeMenu.addItem (i + 20000, "Delete " + exp->getName());
     }
 

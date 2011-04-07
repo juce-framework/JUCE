@@ -103,9 +103,9 @@ int RecentlyOpenedFilesList::createPopupMenuItems (PopupMenu& menuToAddTo,
         {
             bool needsAvoiding = false;
 
-            if (filesToAvoid != 0)
+            if (filesToAvoid != nullptr)
             {
-                for (const File** avoid = filesToAvoid; *avoid != 0; ++avoid)
+                for (const File** avoid = filesToAvoid; *avoid != nullptr; ++avoid)
                 {
                     if (f == **avoid)
                     {

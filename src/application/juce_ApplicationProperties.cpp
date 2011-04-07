@@ -41,7 +41,7 @@ ApplicationProperties::ApplicationProperties()
     : msBeforeSaving (3000),
       options (PropertiesFile::storeAsBinary),
       commonSettingsAreReadOnly (0),
-      processLock (0)
+      processLock (nullptr)
 {
 }
 
@@ -80,10 +80,10 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
         {
             String filenames;
 
-            if (userProps != 0 && ! userOk)
+            if (userProps != nullptr && ! userOk)
                 filenames << '\n' << userProps->getFile().getFullPathName();
 
-            if (commonProps != 0 && ! commonOk)
+            if (commonProps != nullptr && ! commonOk)
                 filenames << '\n' << commonProps->getFile().getFullPathName();
 
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
@@ -109,11 +109,11 @@ void ApplicationProperties::openFiles()
 
     if (appName.isNotEmpty())
     {
-        if (userProps == 0)
+        if (userProps == nullptr)
             userProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
                                                                         false, msBeforeSaving, options, processLock);
 
-        if (commonProps == 0)
+        if (commonProps == nullptr)
             commonProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
                                                                           true, msBeforeSaving, options, processLock);
 
@@ -123,7 +123,7 @@ void ApplicationProperties::openFiles()
 
 PropertiesFile* ApplicationProperties::getUserSettings()
 {
-    if (userProps == 0)
+    if (userProps == nullptr)
         openFiles();
 
     return userProps;
@@ -131,7 +131,7 @@ PropertiesFile* ApplicationProperties::getUserSettings()
 
 PropertiesFile* ApplicationProperties::getCommonSettings (const bool returnUserPropsIfReadOnly)
 {
-    if (commonProps == 0)
+    if (commonProps == nullptr)
         openFiles();
 
     if (returnUserPropsIfReadOnly)
@@ -148,14 +148,14 @@ PropertiesFile* ApplicationProperties::getCommonSettings (const bool returnUserP
 
 bool ApplicationProperties::saveIfNeeded()
 {
-    return (userProps == 0 || userProps->saveIfNeeded())
-         && (commonProps == 0 || commonProps->saveIfNeeded());
+    return (userProps == nullptr || userProps->saveIfNeeded())
+         && (commonProps == nullptr || commonProps->saveIfNeeded());
 }
 
 void ApplicationProperties::closeFiles()
 {
-    userProps = 0;
-    commonProps = 0;
+    userProps = nullptr;
+    commonProps = nullptr;
 }
 
 

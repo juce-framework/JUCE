@@ -67,7 +67,7 @@ public:
 
         @see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipSize
     */
-    explicit TooltipWindow (Component* parentComponent = 0,
+    explicit TooltipWindow (Component* parentComponent = nullptr,
                             int millisecondsBeforeTipAppears = 700);
 
     /** Destructor. */
@@ -77,7 +77,7 @@ public:
     /** Changes the time before the tip appears.
         This lets you change the value that was set in the constructor.
     */
-    void setMillisecondsBeforeTipAppears (int newTimeMs = 700) throw();
+    void setMillisecondsBeforeTipAppears (int newTimeMs = 700) noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the tooltip.

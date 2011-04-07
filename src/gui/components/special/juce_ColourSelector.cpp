@@ -301,7 +301,7 @@ private:
 
     static void menuStaticCallback (int result, SwatchComponent* comp)
     {
-        if (comp != 0)
+        if (comp != nullptr)
         {
             if (result == 1)
                 comp->setColourFromSwatch();
@@ -420,7 +420,7 @@ void ColourSelector::updateHSV()
 
 void ColourSelector::update()
 {
-    if (sliders[0] != 0)
+    if (sliders[0] != nullptr)
     {
         sliders[0]->setValue ((int) colour.getRed());
         sliders[1]->setValue ((int) colour.getGreen());
@@ -428,7 +428,7 @@ void ColourSelector::update()
         sliders[3]->setValue ((int) colour.getAlpha());
     }
 
-    if (colourSpace != 0)
+    if (colourSpace != nullptr)
     {
         colourSpace->updateIfNeeded();
         hueSelector->updateIfNeeded();
@@ -566,7 +566,7 @@ void ColourSelector::resized()
 
 void ColourSelector::sliderValueChanged (Slider*)
 {
-    if (sliders[0] != 0)
+    if (sliders[0] != nullptr)
         setCurrentColour (Colour ((uint8) sliders[0]->getValue(),
                                   (uint8) sliders[1]->getValue(),
                                   (uint8) sliders[2]->getValue(),

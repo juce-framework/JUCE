@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 AudioSourcePlayer::AudioSourcePlayer()
-    : source (0),
+    : source (nullptr),
       sampleRate (0),
       bufferSize (0),
       tempBuffer (2, 8),
@@ -43,7 +43,7 @@ AudioSourcePlayer::AudioSourcePlayer()
 
 AudioSourcePlayer::~AudioSourcePlayer()
 {
-    setSource (0);
+    setSource (nullptr);
 }
 
 void AudioSourcePlayer::setSource (AudioSource* newSource)
@@ -52,7 +52,7 @@ void AudioSourcePlayer::setSource (AudioSource* newSource)
     {
         AudioSource* const oldSource = source;
 
-        if (newSource != 0 && bufferSize > 0 && sampleRate > 0)
+        if (newSource != nullptr && bufferSize > 0 && sampleRate > 0)
             newSource->prepareToPlay (bufferSize, sampleRate);
 
         {
@@ -60,12 +60,12 @@ void AudioSourcePlayer::setSource (AudioSource* newSource)
             source = newSource;
         }
 
-        if (oldSource != 0)
+        if (oldSource != nullptr)
             oldSource->releaseResources();
     }
 }
 
-void AudioSourcePlayer::setGain (const float newGain) throw()
+void AudioSourcePlayer::setGain (const float newGain) noexcept
 {
     gain = newGain;
 }
@@ -81,7 +81,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
     const ScopedLock sl (readLock);
 
-    if (source != 0)
+    if (source != nullptr)
     {
         AudioSourceChannelInfo info;
         int i, numActiveChans = 0, numInputs = 0, numOutputs = 0;
@@ -90,7 +90,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
         // of non-zero pointers..
         for (i = 0; i < totalNumInputChannels; ++i)
         {
-            if (inputChannelData[i] != 0)
+            if (inputChannelData[i] != nullptr)
             {
                 inputChans [numInputs++] = inputChannelData[i];
                 if (numInputs >= numElementsInArray (inputChans))
@@ -100,7 +100,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
         for (i = 0; i < totalNumOutputChannels; ++i)
         {
-            if (outputChannelData[i] != 0)
+            if (outputChannelData[i] != nullptr)
             {
                 outputChans [numOutputs++] = outputChannelData[i];
                 if (numOutputs >= numElementsInArray (outputChans))
@@ -163,7 +163,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
     else
     {
         for (int i = 0; i < totalNumOutputChannels; ++i)
-            if (outputChannelData[i] != 0)
+            if (outputChannelData[i] != nullptr)
                 zeromem (outputChannelData[i], sizeof (float) * numSamples);
     }
 }
@@ -174,13 +174,13 @@ void AudioSourcePlayer::audioDeviceAboutToStart (AudioIODevice* device)
     bufferSize = device->getCurrentBufferSizeSamples();
     zeromem (channels, sizeof (channels));
 
-    if (source != 0)
+    if (source != nullptr)
         source->prepareToPlay (bufferSize, sampleRate);
 }
 
 void AudioSourcePlayer::audioDeviceStopped()
 {
-    if (source != 0)
+    if (source != nullptr)
         source->releaseResources();
 
     sampleRate = 0.0;

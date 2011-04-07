@@ -40,10 +40,10 @@ class JUCE_API  Colour
 public:
     //==============================================================================
     /** Creates a transparent black colour. */
-    Colour() throw();
+    Colour() noexcept;
 
     /** Creates a copy of another Colour object. */
-    Colour (const Colour& other) throw();
+    Colour (const Colour& other) noexcept;
 
     /** Creates a colour from a 32-bit ARGB value.
 
@@ -55,29 +55,29 @@ public:
 
         @see getPixelARGB
     */
-    explicit Colour (uint32 argb) throw();
+    explicit Colour (uint32 argb) noexcept;
 
     /** Creates an opaque colour using 8-bit red, green and blue values */
     Colour (uint8 red,
             uint8 green,
-            uint8 blue) throw();
+            uint8 blue) noexcept;
 
     /** Creates an opaque colour using 8-bit red, green and blue values */
     static const Colour fromRGB (uint8 red,
                                  uint8 green,
-                                 uint8 blue) throw();
+                                 uint8 blue) noexcept;
 
     /** Creates a colour using 8-bit red, green, blue and alpha values. */
     Colour (uint8 red,
             uint8 green,
             uint8 blue,
-            uint8 alpha) throw();
+            uint8 alpha) noexcept;
 
     /** Creates a colour using 8-bit red, green, blue and alpha values. */
     static const Colour fromRGBA (uint8 red,
                                   uint8 green,
                                   uint8 blue,
-                                  uint8 alpha) throw();
+                                  uint8 alpha) noexcept;
 
     /** Creates a colour from 8-bit red, green, and blue values, and a floating-point alpha.
 
@@ -87,13 +87,13 @@ public:
     Colour (uint8 red,
             uint8 green,
             uint8 blue,
-            float alpha) throw();
+            float alpha) noexcept;
 
     /** Creates a colour using 8-bit red, green, blue and float alpha values. */
     static const Colour fromRGBAFloat (uint8 red,
                                        uint8 green,
                                        uint8 blue,
-                                       float alpha) throw();
+                                       float alpha) noexcept;
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -104,7 +104,7 @@ public:
     Colour (float hue,
             float saturation,
             float brightness,
-            uint8 alpha) throw();
+            uint8 alpha) noexcept;
 
     /** Creates a colour using floating point hue, saturation, brightness and alpha values.
 
@@ -114,7 +114,7 @@ public:
     Colour (float hue,
             float saturation,
             float brightness,
-            float alpha) throw();
+            float alpha) noexcept;
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -125,103 +125,103 @@ public:
     static const Colour fromHSV (float hue,
                                  float saturation,
                                  float brightness,
-                                 float alpha) throw();
+                                 float alpha) noexcept;
 
     /** Destructor. */
-    ~Colour() throw();
+    ~Colour() noexcept;
 
     /** Copies another Colour object. */
-    Colour& operator= (const Colour& other) throw();
+    Colour& operator= (const Colour& other) noexcept;
 
     /** Compares two colours. */
-    bool operator== (const Colour& other) const throw();
+    bool operator== (const Colour& other) const noexcept;
     /** Compares two colours. */
-    bool operator!= (const Colour& other) const throw();
+    bool operator!= (const Colour& other) const noexcept;
 
     //==============================================================================
     /** Returns the red component of this colour.
 
         @returns a value between 0x00 and 0xff.
     */
-    uint8 getRed() const throw()                        { return argb.getRed(); }
+    uint8 getRed() const noexcept                       { return argb.getRed(); }
 
     /** Returns the green component of this colour.
 
         @returns a value between 0x00 and 0xff.
     */
-    uint8 getGreen() const throw()                      { return argb.getGreen(); }
+    uint8 getGreen() const noexcept                     { return argb.getGreen(); }
 
     /** Returns the blue component of this colour.
 
         @returns a value between 0x00 and 0xff.
     */
-    uint8 getBlue() const throw()                       { return argb.getBlue(); }
+    uint8 getBlue() const noexcept                      { return argb.getBlue(); }
 
     /** Returns the red component of this colour as a floating point value.
 
         @returns a value between 0.0 and 1.0
     */
-    float getFloatRed() const throw();
+    float getFloatRed() const noexcept;
 
     /** Returns the green component of this colour as a floating point value.
 
         @returns a value between 0.0 and 1.0
     */
-    float getFloatGreen() const throw();
+    float getFloatGreen() const noexcept;
 
     /** Returns the blue component of this colour as a floating point value.
 
         @returns a value between 0.0 and 1.0
     */
-    float getFloatBlue() const throw();
+    float getFloatBlue() const noexcept;
 
     /** Returns a premultiplied ARGB pixel object that represents this colour.
     */
-    const PixelARGB getPixelARGB() const throw();
+    const PixelARGB getPixelARGB() const noexcept;
 
     /** Returns a 32-bit integer that represents this colour.
 
         The format of this number is:
             ((alpha << 24) | (red << 16) | (green << 16) | blue).
     */
-    uint32 getARGB() const throw();
+    uint32 getARGB() const noexcept;
 
     //==============================================================================
     /** Returns the colour's alpha (opacity).
 
         Alpha of 0x00 is completely transparent, 0xff is completely opaque.
     */
-    uint8 getAlpha() const throw()                      { return argb.getAlpha(); }
+    uint8 getAlpha() const noexcept                     { return argb.getAlpha(); }
 
     /** Returns the colour's alpha (opacity) as a floating point value.
 
         Alpha of 0.0 is completely transparent, 1.0 is completely opaque.
     */
-    float getFloatAlpha() const throw();
+    float getFloatAlpha() const noexcept;
 
     /** Returns true if this colour is completely opaque.
 
         Equivalent to (getAlpha() == 0xff).
     */
-    bool isOpaque() const throw();
+    bool isOpaque() const noexcept;
 
     /** Returns true if this colour is completely transparent.
 
         Equivalent to (getAlpha() == 0x00).
     */
-    bool isTransparent() const throw();
+    bool isTransparent() const noexcept;
 
     /** Returns a colour that's the same colour as this one, but with a new alpha value. */
-    const Colour withAlpha (uint8 newAlpha) const throw();
+    const Colour withAlpha (uint8 newAlpha) const noexcept;
 
     /** Returns a colour that's the same colour as this one, but with a new alpha value. */
-    const Colour withAlpha (float newAlpha) const throw();
+    const Colour withAlpha (float newAlpha) const noexcept;
 
     /** Returns a colour that's the same colour as this one, but with a modified alpha value.
 
         The new colour's alpha will be this object's alpha multiplied by the value passed-in.
     */
-    const Colour withMultipliedAlpha (float alphaMultiplier) const throw();
+    const Colour withMultipliedAlpha (float alphaMultiplier) const noexcept;
 
     //==============================================================================
     /** Returns a colour that is the result of alpha-compositing a new colour over this one.
@@ -229,49 +229,49 @@ public:
         If the foreground colour is semi-transparent, it is blended onto this colour
         accordingly.
     */
-    const Colour overlaidWith (const Colour& foregroundColour) const throw();
+    const Colour overlaidWith (const Colour& foregroundColour) const noexcept;
 
     /** Returns a colour that lies somewhere between this one and another.
 
         If amountOfOther is zero, the result is 100% this colour, if amountOfOther
         is 1.0, the result is 100% of the other colour.
     */
-    const Colour interpolatedWith (const Colour& other, float proportionOfOther) const throw();
+    const Colour interpolatedWith (const Colour& other, float proportionOfOther) const noexcept;
 
     //==============================================================================
     /** Returns the colour's hue component.
         The value returned is in the range 0.0 to 1.0
     */
-    float getHue() const throw();
+    float getHue() const noexcept;
 
     /** Returns the colour's saturation component.
         The value returned is in the range 0.0 to 1.0
     */
-    float getSaturation() const throw();
+    float getSaturation() const noexcept;
 
     /** Returns the colour's brightness component.
         The value returned is in the range 0.0 to 1.0
     */
-    float getBrightness() const throw();
+    float getBrightness() const noexcept;
 
     /** Returns the colour's hue, saturation and brightness components all at once.
         The values returned are in the range 0.0 to 1.0
     */
     void getHSB (float& hue,
                  float& saturation,
-                 float& brightness) const throw();
+                 float& brightness) const noexcept;
 
     //==============================================================================
     /** Returns a copy of this colour with a different hue. */
-    const Colour withHue (float newHue) const throw();
+    const Colour withHue (float newHue) const noexcept;
 
     /** Returns a copy of this colour with a different saturation. */
-    const Colour withSaturation (float newSaturation) const throw();
+    const Colour withSaturation (float newSaturation) const noexcept;
 
     /** Returns a copy of this colour with a different brightness.
         @see brighter, darker, withMultipliedBrightness
     */
-    const Colour withBrightness (float newBrightness) const throw();
+    const Colour withBrightness (float newBrightness) const noexcept;
 
     /** Returns a copy of this colour with it hue rotated.
 
@@ -279,21 +279,21 @@ public:
 
         @see brighter, darker, withMultipliedBrightness
     */
-    const Colour withRotatedHue (float amountToRotate) const throw();
+    const Colour withRotatedHue (float amountToRotate) const noexcept;
 
     /** Returns a copy of this colour with its saturation multiplied by the given value.
 
         The new colour's saturation is (this->getSaturation() * multiplier)
         (the result is clipped to legal limits).
     */
-    const Colour withMultipliedSaturation (float multiplier) const throw();
+    const Colour withMultipliedSaturation (float multiplier) const noexcept;
 
     /** Returns a copy of this colour with its brightness multiplied by the given value.
 
         The new colour's saturation is (this->getBrightness() * multiplier)
         (the result is clipped to legal limits).
     */
-    const Colour withMultipliedBrightness (float amount) const throw();
+    const Colour withMultipliedBrightness (float amount) const noexcept;
 
     //==============================================================================
     /** Returns a brighter version of this colour.
@@ -302,7 +302,7 @@ public:
                                 unchanged, and higher values make it brighter
         @see withMultipliedBrightness
     */
-    const Colour brighter (float amountBrighter = 0.4f) const throw();
+    const Colour brighter (float amountBrighter = 0.4f) const noexcept;
 
     /** Returns a darker version of this colour.
 
@@ -310,7 +310,7 @@ public:
                                 unchanged, and higher values make it darker
         @see withMultipliedBrightness
     */
-    const Colour darker (float amountDarker = 0.4f) const throw();
+    const Colour darker (float amountDarker = 0.4f) const noexcept;
 
     //==============================================================================
     /** Returns a colour that will be clearly visible against this colour.
@@ -320,7 +320,7 @@ public:
         that's just a little bit lighter; Colours::black.contrasting (1.0f) will
         return white; Colours::white.contrasting (1.0f) will return black, etc.
     */
-    const Colour contrasting (float amount = 1.0f) const throw();
+    const Colour contrasting (float amount = 1.0f) const noexcept;
 
     /** Returns a colour that contrasts against two colours.
 
@@ -329,14 +329,14 @@ public:
         Handy for things like choosing a highlight colour in text editors, etc.
     */
     static const Colour contrasting (const Colour& colour1,
-                                     const Colour& colour2) throw();
+                                     const Colour& colour2) noexcept;
 
     //==============================================================================
     /** Returns an opaque shade of grey.
 
         @param brightness the level of grey to return - 0 is black, 1.0 is white
     */
-    static const Colour greyLevel (float brightness) throw();
+    static const Colour greyLevel (float brightness) noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this colour.

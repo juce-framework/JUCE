@@ -86,31 +86,31 @@ class WeakReference
 {
 public:
     /** Creates a null SafePointer. */
-    WeakReference() throw() {}
+    WeakReference() noexcept {}
 
     /** Creates a WeakReference that points at the given object. */
-    WeakReference (ObjectType* const object)  : holder (object != 0 ? object->getWeakReference() : 0) {}
+    WeakReference (ObjectType* const object)  : holder (object != nullptr ? object->getWeakReference() : nullptr) {}
 
     /** Creates a copy of another WeakReference. */
-    WeakReference (const WeakReference& other) throw()          : holder (other.holder) {}
+    WeakReference (const WeakReference& other) noexcept         : holder (other.holder) {}
 
     /** Copies another pointer to this one. */
     WeakReference& operator= (const WeakReference& other)       { holder = other.holder; return *this; }
 
     /** Copies another pointer to this one. */
-    WeakReference& operator= (ObjectType* const newObject)      { holder = newObject != 0 ? newObject->getWeakReference() : 0; return *this; }
+    WeakReference& operator= (ObjectType* const newObject)      { holder = newObject != nullptr ? newObject->getWeakReference() : nullptr; return *this; }
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
-    ObjectType* get() const throw()                             { return holder != 0 ? holder->get() : 0; }
+    ObjectType* get() const noexcept                            { return holder != nullptr ? holder->get() : nullptr; }
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
-    operator ObjectType*() const throw()                        { return get(); }
+    operator ObjectType*() const noexcept                       { return get(); }
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
-    ObjectType* operator->() throw()                            { return get(); }
+    ObjectType* operator->() noexcept                           { return get(); }
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
-    const ObjectType* operator->() const throw()                { return get(); }
+    const ObjectType* operator->() const noexcept               { return get(); }
 
     /** This returns true if this reference has been pointing at an object, but that object has
         since been deleted.
@@ -119,10 +119,10 @@ public:
         operator=() to make this refer to a different object will reset this flag to match the status
         of the reference from which you're copying.
     */
-    bool wasObjectDeleted() const throw()                       { return holder != 0 && holder->get() == 0; }
+    bool wasObjectDeleted() const noexcept                      { return holder != nullptr && holder->get() == nullptr; }
 
-    bool operator== (ObjectType* const object) const throw()    { return get() == object; }
-    bool operator!= (ObjectType* const object) const throw()    { return get() != object; }
+    bool operator== (ObjectType* const object) const noexcept   { return get() == object; }
+    bool operator!= (ObjectType* const object) const noexcept   { return get() != object; }
 
     //==============================================================================
     /** This class is used internally by the WeakReference class - don't use it directly
@@ -132,10 +132,10 @@ public:
     class SharedPointer   : public ReferenceCountedObject
     {
     public:
-        explicit SharedPointer (ObjectType* const owner_) throw() : owner (owner_) {}
+        explicit SharedPointer (ObjectType* const owner_) noexcept : owner (owner_) {}
 
-        inline ObjectType* get() const throw()      { return owner; }
-        void clearPointer() throw()                 { owner = 0; }
+        inline ObjectType* get() const noexcept     { return owner; }
+        void clearPointer() noexcept                { owner = nullptr; }
 
     private:
         ObjectType* volatile owner;
@@ -154,13 +154,13 @@ public:
     class Master
     {
     public:
-        Master() throw() {}
+        Master() noexcept {}
 
         ~Master()
         {
             // You must remember to call clear() in your source object's destructor! See the notes
             // for the WeakReference class for an example of how to do this.
-            jassert (sharedPointer == 0 || sharedPointer->get() == 0);
+            jassert (sharedPointer == nullptr || sharedPointer->get() == nullptr);
         }
 
         /** The first call to this method will create an internal object that is shared by all weak
@@ -170,14 +170,14 @@ public:
          */
         const SharedRef& operator() (ObjectType* const object)
         {
-            if (sharedPointer == 0)
+            if (sharedPointer == nullptr)
             {
                 sharedPointer = new SharedPointer (object);
             }
             else
             {
                 // You're trying to create a weak reference to an object that has already been deleted!!
-                jassert (sharedPointer->get() != 0);
+                jassert (sharedPointer->get() != nullptr);
             }
 
             return sharedPointer;
@@ -189,7 +189,7 @@ public:
         */
         void clear()
         {
-            if (sharedPointer != 0)
+            if (sharedPointer != nullptr)
                 sharedPointer->clearPointer();
         }
 

@@ -80,7 +80,7 @@ public:
     virtual ~UnitTest();
 
     /** Returns the name of the test. */
-    const String getName() const throw()        { return name; }
+    const String getName() const noexcept       { return name; }
 
     /** Runs the test, using the specified UnitTestRunner.
         You shouldn't need to call this method directly - use
@@ -231,12 +231,12 @@ public:
     /** Returns the number of TestResult objects that have been performed.
         @see getResult
     */
-    int getNumResults() const throw();
+    int getNumResults() const noexcept;
 
     /** Returns one of the TestResult objects that describes a test that has been run.
         @see getNumResults
     */
-    const TestResult* getResult (int index) const throw();
+    const TestResult* getResult (int index) const noexcept;
 
 protected:
     /** Called when the list of results changes.

@@ -43,10 +43,10 @@ void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Documen
 {
     if (document == closingDoc)
     {
-        jassert (document != 0);
+        jassert (document != nullptr);
         ProjectContentComponent* pcc = findParentComponentOfClass ((ProjectContentComponent*) 0);
 
-        if (pcc != 0)
+        if (pcc != nullptr)
         {
             pcc->hideDocument (document);
             return;
@@ -72,10 +72,10 @@ void DocumentEditorComponent::getAllCommands (Array <CommandID>& commands)
 
 void DocumentEditorComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
 {
-    result.setActive (document != 0);
+    result.setActive (document != nullptr);
     String name;
 
-    if (document != 0)
+    if (document != nullptr)
         name = " '" + document->getName().substring (0, 32) + "'";
 
     switch (commandID)

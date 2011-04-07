@@ -167,7 +167,7 @@ bool File::isHidden() const
 }
 
 //==============================================================================
-const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp
+const char* juce_Argv0 = nullptr;  // referenced from juce_Application.cpp
 
 const File File::getSpecialLocation (const SpecialLocationType type)
 {
@@ -259,11 +259,11 @@ const String File::getVersion() const
 
     NSBundle* bundle = [NSBundle bundleWithPath: juceStringToNS (getFullPathName())];
 
-    if (bundle != 0)
+    if (bundle != nil)
     {
         NSDictionary* info = [bundle infoDictionary];
 
-        if (info != 0)
+        if (info != nil)
         {
             NSString* name = [info valueForKey: @"CFBundleShortVersionString"];
 
@@ -321,7 +321,7 @@ public:
     Pimpl (const File& directory, const String& wildCard_)
         : parentDir (File::addTrailingSeparator (directory.getFullPathName())),
           wildCard (wildCard_),
-          enumerator (0)
+          enumerator (nil)
     {
         const ScopedAutoReleasePool pool;
 
@@ -338,18 +338,18 @@ public:
                Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
         const ScopedAutoReleasePool pool;
-        const char* wildcardUTF8 = 0;
+        const char* wildcardUTF8 = nullptr;
 
         for (;;)
         {
             NSString* file;
-            if (enumerator == 0 || (file = [enumerator nextObject]) == 0)
+            if (enumerator == nil || (file = [enumerator nextObject]) == nil)
                 return false;
 
             [enumerator skipDescendents];
             filenameFound = nsStringToJuce (file);
 
-            if (wildcardUTF8 == 0)
+            if (wildcardUTF8 == nullptr)
                 wildcardUTF8 = wildCard.toUTF8();
 
             if (fnmatch (wildcardUTF8, filenameFound.toUTF8(), FNM_CASEFOLD) != 0)
@@ -358,7 +358,7 @@ public:
             const String path (parentDir + filenameFound);
             updateStatInfoForFile (path, isDir, fileSize, modTime, creationTime, isReadOnly);
 
-            if (isHidden != 0)
+            if (isHidden != nullptr)
                 *isHidden = FileHelpers::isHiddenFile (path);
 
             return true;

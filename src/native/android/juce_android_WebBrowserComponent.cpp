@@ -30,7 +30,7 @@
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
-    : browser (0),
+    : browser (nullptr),
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
@@ -49,11 +49,11 @@ void WebBrowserComponent::goToURL (const String& url,
     lastURL = url;
 
     lastHeaders.clear();
-    if (headers != 0)
+    if (headers != nullptr)
         lastHeaders = *headers;
 
     lastPostData.setSize (0);
-    if (postData != 0)
+    if (postData != nullptr)
         lastPostData = *postData;
 
     blankPageShown = false;

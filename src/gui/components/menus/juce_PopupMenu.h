@@ -197,13 +197,13 @@ public:
 
         (This doesn't count separators).
     */
-    int getNumItems() const throw();
+    int getNumItems() const noexcept;
 
     /** Returns true if the menu contains a command item that triggers the given command. */
     bool containsCommandItem (int commandID) const;
 
     /** Returns true if the menu contains any items that can be used. */
-    bool containsAnyActiveItems() const throw();
+    bool containsAnyActiveItems() const noexcept;
 
     //==============================================================================
     /** Class used to create a set of options to pass to the show() method.
@@ -275,7 +275,7 @@ public:
               int minimumWidth = 0,
               int maximumNumColumns = 0,
               int standardItemHeight = 0,
-              ModalComponentManager::Callback* callback = 0);
+              ModalComponentManager::Callback* callback = nullptr);
 
 
     /** Displays the menu at a specific location.
@@ -296,7 +296,7 @@ public:
                 int minimumWidth = 0,
                 int maximumNumColumns = 0,
                 int standardItemHeight = 0,
-                ModalComponentManager::Callback* callback = 0);
+                ModalComponentManager::Callback* callback = nullptr);
 
     /** Displays the menu as if it's attached to a component such as a button.
 
@@ -309,7 +309,7 @@ public:
                 int minimumWidth = 0,
                 int maximumNumColumns = 0,
                 int standardItemHeight = 0,
-                ModalComponentManager::Callback* callback = 0);
+                ModalComponentManager::Callback* callback = nullptr);
 
     /** Displays and runs the menu modally, with a set of options.
     */
@@ -446,10 +446,10 @@ public:
             You can call this method in your paint() method to find out whether
             to draw a highlight.
         */
-        bool isItemHighlighted() const throw()                  { return isHighlighted; }
+        bool isItemHighlighted() const noexcept                 { return isHighlighted; }
 
         /** @internal */
-        bool isTriggeredAutomatically() const throw()           { return triggeredAutomatically; }
+        bool isTriggeredAutomatically() const noexcept          { return triggeredAutomatically; }
         /** @internal */
         void setHighlighted (bool shouldBeHighlighted);
 

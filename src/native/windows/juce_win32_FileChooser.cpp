@@ -37,7 +37,7 @@ namespace FileChooserHelpers
         {
             Component* c = Desktop::getInstance().getComponent (i);
 
-            if (c != 0 && c->isAlwaysOnTop() && c->isShowing())
+            if (c != nullptr && c->isAlwaysOnTop() && c->isShowing())
                 return true;
         }
 
@@ -98,7 +98,7 @@ namespace FileChooserHelpers
                 FileChooserCallbackInfo* info = (FileChooserCallbackInfo*) ofn->lpOFN->lCustData;
                 FilePreviewComponent* comp = dynamic_cast<FilePreviewComponent*> (info->customComponent->getChildComponent(0));
 
-                if (comp != 0)
+                if (comp != nullptr)
                 {
                     WCHAR path [MAX_PATH * 2] = { 0 };
                     CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
@@ -130,7 +130,7 @@ namespace FileChooserHelpers
         void resized()
         {
             Component* const c = getChildComponent(0);
-            if (c != 0)
+            if (c != nullptr)
                 c->setBounds (getLocalBounds());
         }
 
@@ -166,7 +166,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
     parentWindow.setAlwaysOnTop (areThereAnyAlwaysOnTopWindows());
     parentWindow.addToDesktop (0);
 
-    if (extraInfoComponent == 0)
+    if (extraInfoComponent == nullptr)
         parentWindow.enterModalState();
 
     if (currentFileOrDirectory.isDirectory())
@@ -221,7 +221,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         if (selectMultipleFiles)
             flags |= OFN_ALLOWMULTISELECT;
 
-        if (extraInfoComponent != 0)
+        if (extraInfoComponent != nullptr)
         {
             flags |= OFN_ENABLEHOOK;
 
@@ -254,7 +254,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         of.Flags = flags;
         of.lCustData = (LPARAM) &info;
 
-        if (extraInfoComponent != 0)
+        if (extraInfoComponent != nullptr)
             of.lpfnHook = &openCallback;
 
         if (! (isSaveDialogue ? GetSaveFileName (&of)

@@ -159,7 +159,7 @@ public:
         This is probably a MenuBarComponent, unless a custom one has been set using
         setMenuBarComponent().
     */
-    Component* getMenuBarComponent() const throw();
+    Component* getMenuBarComponent() const noexcept;
 
     /** Replaces the current menu bar with a custom component.
         The component will be owned and deleted by the document window.
@@ -206,13 +206,13 @@ public:
 
     //==============================================================================
     /** Returns the close button, (or 0 if there isn't one). */
-    Button* getCloseButton() const throw();
+    Button* getCloseButton() const noexcept;
 
     /** Returns the minimise button, (or 0 if there isn't one). */
-    Button* getMinimiseButton() const throw();
+    Button* getMinimiseButton() const noexcept;
 
     /** Returns the maximise button, (or 0 if there isn't one). */
-    Button* getMaximiseButton() const throw();
+    Button* getMaximiseButton() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the window.

@@ -38,7 +38,7 @@ public:
           actualBufferSize (0),
           isRunning (false),
           audioUnit (0),
-          callback (0),
+          callback (nullptr),
           floatData (1, 2)
     {
         numInputChannels = 2;
@@ -203,7 +203,7 @@ public:
     {
         if (isRunning && callback != callback_)
         {
-            if (callback_ != 0)
+            if (callback_ != nullptr)
                 callback_->audioDeviceAboutToStart (this);
 
             const ScopedLock sl (callbackLock);
@@ -220,17 +220,17 @@ public:
             {
                 const ScopedLock sl (callbackLock);
                 lastCallback = callback;
-                callback = 0;
+                callback = nullptr;
             }
 
-            if (lastCallback != 0)
+            if (lastCallback != nullptr)
                 lastCallback->audioDeviceStopped();
         }
     }
 
     bool isPlaying()
     {
-        return isRunning && callback != 0;
+        return isRunning && callback != nullptr;
     }
 
     const String getLastError()
@@ -283,7 +283,7 @@ private:
 
         const ScopedLock sl (callbackLock);
 
-        if (callback != 0)
+        if (callback != nullptr)
         {
             if (audioInputIsAvailable && numInputChannels > 0)
             {
@@ -366,7 +366,7 @@ private:
         if (! isRunning)
             return;
 
-        if (inPropertyValue != 0)
+        if (inPropertyValue != nullptr)
         {
             CFDictionaryRef routeChangeDictionary = (CFDictionaryRef) inPropertyValue;
             CFNumberRef routeChangeReasonRef = (CFNumberRef) CFDictionaryGetValue (routeChangeDictionary,
@@ -552,7 +552,7 @@ public:
 
     int getIndexOfDevice (AudioIODevice* device, bool asInput) const
     {
-        return device != 0 ? 0 : -1;
+        return device != nullptr ? 0 : -1;
     }
 
     bool hasSeparateInputsAndOutputs() const    { return false; }

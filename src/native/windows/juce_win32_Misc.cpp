@@ -68,7 +68,7 @@ const String SystemClipboard::getTextFromClipboard()
         {
             const WCHAR* const data = (const WCHAR*) GlobalLock (bufH);
 
-            if (data != 0)
+            if (data != nullptr)
             {
                 result = String (data, (int) (GlobalSize (bufH) / sizeof (WCHAR)));
 

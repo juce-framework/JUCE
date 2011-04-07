@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MemoryBlock::MemoryBlock() throw()
+MemoryBlock::MemoryBlock() noexcept
     : size (0)
 {
 }
@@ -54,7 +54,7 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other)
 {
     if (size > 0)
     {
-        jassert (other.data != 0);
+        jassert (other.data != nullptr);
         data.malloc (size);
         memcpy (data, other.data, size);
     }
@@ -67,19 +67,19 @@ MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t s
 
     if (size > 0)
     {
-        jassert (dataToInitialiseFrom != 0); // non-zero size, but a zero pointer passed-in?
+        jassert (dataToInitialiseFrom != nullptr); // non-zero size, but a zero pointer passed-in?
 
         data.malloc (size);
 
-        if (dataToInitialiseFrom != 0)
+        if (dataToInitialiseFrom != nullptr)
             memcpy (data, dataToInitialiseFrom, size);
     }
 }
 
-MemoryBlock::~MemoryBlock() throw()
+MemoryBlock::~MemoryBlock() noexcept
 {
     jassert (size >= 0);    // should never happen
-    jassert (size == 0 || data != 0); // non-zero size but no data allocated?
+    jassert (size == 0 || data != nullptr); // non-zero size but no data allocated?
 }
 
 MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
@@ -94,17 +94,17 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 }
 
 //==============================================================================
-bool MemoryBlock::operator== (const MemoryBlock& other) const throw()
+bool MemoryBlock::operator== (const MemoryBlock& other) const noexcept
 {
     return matches (other.data, other.size);
 }
 
-bool MemoryBlock::operator!= (const MemoryBlock& other) const throw()
+bool MemoryBlock::operator!= (const MemoryBlock& other) const noexcept
 {
     return ! operator== (other);
 }
 
-bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const throw()
+bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const noexcept
 {
     return size == dataSize
             && memcmp (data, dataToCompare, size) == 0;
@@ -123,7 +123,7 @@ void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
         }
         else
         {
-            if (data != 0)
+            if (data != nullptr)
             {
                 data.realloc (newSize);
 
@@ -146,14 +146,14 @@ void MemoryBlock::ensureSize (const size_t minimumSize, const bool initialiseToZ
         setSize (minimumSize, initialiseToZero);
 }
 
-void MemoryBlock::swapWith (MemoryBlock& other) throw()
+void MemoryBlock::swapWith (MemoryBlock& other) noexcept
 {
     std::swap (size, other.size);
     data.swapWith (other.data);
 }
 
 //==============================================================================
-void MemoryBlock::fillWith (const uint8 value) throw()
+void MemoryBlock::fillWith (const uint8 value) noexcept
 {
     memset (data, (int) value, size);
 }
@@ -168,7 +168,7 @@ void MemoryBlock::append (const void* const srcData, const size_t numBytes)
     }
 }
 
-void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) throw()
+void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) noexcept
 {
     const char* d = static_cast<const char*> (src);
 
@@ -186,7 +186,7 @@ void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) throw
         memcpy (data + offset, d, num);
 }
 
-void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const throw()
+void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const noexcept
 {
     char* d = static_cast<char*> (dst);
 
@@ -232,7 +232,7 @@ const String MemoryBlock::toString() const
 }
 
 //==============================================================================
-int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const throw()
+int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const noexcept
 {
     int res = 0;
 
@@ -256,7 +256,7 @@ int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const 
     return res;
 }
 
-void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int bitsToSet) throw()
+void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int bitsToSet) noexcept
 {
     size_t byte = bitRangeStart >> 3;
     int offsetInByte = (int) bitRangeStart & 7;

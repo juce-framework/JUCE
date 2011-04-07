@@ -38,7 +38,7 @@ ApplicationCommandTarget::ApplicationCommandTarget()
 
 ApplicationCommandTarget::~ApplicationCommandTarget()
 {
-    messageInvoker = 0;
+    messageInvoker = nullptr;
 }
 
 //==============================================================================
@@ -48,7 +48,7 @@ bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bo
     {
         if (async)
         {
-            if (messageInvoker == 0)
+            if (messageInvoker == nullptr)
                 messageInvoker = new CommandTargetMessageInvoker (this);
 
             messageInvoker->postMessage (new Message (0, 0, 0, new ApplicationCommandTarget::InvocationInfo (info)));
@@ -72,7 +72,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::findFirstTargetParentCompone
 {
     Component* c = dynamic_cast <Component*> (this);
 
-    if (c != 0)
+    if (c != nullptr)
         // (unable to use the syntax findParentComponentOfClass <ApplicationCommandTarget> () because of a VC6 compiler bug)
         return c->findParentComponentOfClass ((ApplicationCommandTarget*) 0);
 
@@ -84,7 +84,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::getTargetForCommand (const C
     ApplicationCommandTarget* target = this;
     int depth = 0;
 
-    while (target != 0)
+    while (target != nullptr)
     {
         Array <CommandID> commandIDs;
         target->getAllCommands (commandIDs);
@@ -102,11 +102,11 @@ ApplicationCommandTarget* ApplicationCommandTarget::getTargetForCommand (const C
             break;
     }
 
-    if (target == 0)
+    if (target == nullptr)
     {
         target = JUCEApplication::getInstance();
 
-        if (target != 0)
+        if (target != nullptr)
         {
             Array <CommandID> commandIDs;
             target->getAllCommands (commandIDs);
@@ -135,7 +135,7 @@ bool ApplicationCommandTarget::invoke (const InvocationInfo& info, const bool as
     ApplicationCommandTarget* target = this;
     int depth = 0;
 
-    while (target != 0)
+    while (target != nullptr)
     {
         if (target->tryToInvoke (info, async))
             return true;
@@ -150,11 +150,11 @@ bool ApplicationCommandTarget::invoke (const InvocationInfo& info, const bool as
             break;
     }
 
-    if (target == 0)
+    if (target == nullptr)
     {
         target = JUCEApplication::getInstance();
 
-        if (target != 0)
+        if (target != nullptr)
             return target->tryToInvoke (info, async);
     }
 
@@ -174,7 +174,7 @@ ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID comman
     : commandID (commandID_),
       commandFlags (0),
       invocationMethod (direct),
-      originatingComponent (0),
+      originatingComponent (nullptr),
       isKeyDown (false),
       millisecsSinceKeyPressed (0)
 {

@@ -40,7 +40,7 @@ DrawablePath::DrawablePath()
 DrawablePath::DrawablePath (const DrawablePath& other)
     : DrawableShape (other)
 {
-    if (other.relativePath != 0)
+    if (other.relativePath != nullptr)
         setPath (*other.relativePath);
     else
         setPath (other.path);
@@ -98,7 +98,7 @@ public:
     {
         bool ok = true;
 
-        jassert (owner.relativePath != 0);
+        jassert (owner.relativePath != nullptr);
         const RelativePointPath& path = *owner.relativePath;
 
         for (int i = 0; i < path.elements.size(); ++i)
@@ -117,7 +117,7 @@ public:
 
     void applyToComponentBounds()
     {
-        jassert (owner.relativePath != 0);
+        jassert (owner.relativePath != nullptr);
 
         ComponentScope scope (getComponent());
         owner.applyRelativePath (*owner.relativePath, &scope);
@@ -138,7 +138,7 @@ void DrawablePath::setPath (const RelativePointPath& newRelativePath)
 {
     if (newRelativePath.containsAnyDynamicPoints())
     {
-        if (relativePath == 0 || newRelativePath != *relativePath)
+        if (relativePath == nullptr || newRelativePath != *relativePath)
         {
             relativePath = new RelativePointPath (newRelativePath);
 
@@ -149,7 +149,7 @@ void DrawablePath::setPath (const RelativePointPath& newRelativePath)
     }
     else
     {
-        relativePath = 0;
+        relativePath = nullptr;
         applyRelativePath (newRelativePath, 0);
     }
 }
@@ -256,7 +256,7 @@ DrawablePath::ValueTreeWrapper::Element DrawablePath::ValueTreeWrapper::Element:
     return Element (state.getSibling (-1));
 }
 
-int DrawablePath::ValueTreeWrapper::Element::getNumControlPoints() const throw()
+int DrawablePath::ValueTreeWrapper::Element::getNumControlPoints() const noexcept
 {
     const Identifier i (state.getType());
     if (i == startSubPathElement || i == lineToElement) return 1;
@@ -573,7 +573,7 @@ const ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* 
     v.setID (getComponentID());
     writeTo (v, imageProvider, 0);
 
-    if (relativePath != 0)
+    if (relativePath != nullptr)
         v.readFrom (*relativePath, 0);
     else
         v.readFrom (RelativePointPath (path), 0);

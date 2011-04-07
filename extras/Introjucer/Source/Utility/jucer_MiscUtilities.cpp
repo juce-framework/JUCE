@@ -169,7 +169,7 @@ void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {
     Viewport* const viewport = e.eventComponent->findParentComponentOfClass ((Viewport*) 0);
 
-    if (viewport != 0)
+    if (viewport != nullptr)
     {
         const MouseEvent e2 (e.getEventRelativeTo (viewport));
         viewport->autoScroll (scrollX ? e2.x : 20, scrollY ? e2.y : 20, 8, 16);
@@ -235,7 +235,7 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 //==============================================================================
 PropertyPanelWithTooltips::PropertyPanelWithTooltips()
-    : lastComp (0)
+    : lastComp (nullptr)
 {
     addAndMakeVisible (&panel);
     startTimer (150);
@@ -270,8 +270,8 @@ void PropertyPanelWithTooltips::timerCallback()
 {
     Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
-    if (newComp != 0 && newComp->getTopLevelComponent() != getTopLevelComponent())
-        newComp = 0;
+    if (newComp != nullptr && newComp->getTopLevelComponent() != getTopLevelComponent())
+        newComp = nullptr;
 
     if (newComp != lastComp)
     {
@@ -289,10 +289,10 @@ void PropertyPanelWithTooltips::timerCallback()
 
 const String PropertyPanelWithTooltips::findTip (Component* c)
 {
-    while (c != 0 && c != this)
+    while (c != nullptr && c != this)
     {
         TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
-        if (tc != 0)
+        if (tc != nullptr)
         {
             const String tip (tc->getTooltip());
 
@@ -315,7 +315,7 @@ FloatingLabelComponent::FloatingLabelComponent()
 
 void FloatingLabelComponent::remove()
 {
-    if (getParentComponent() != 0)
+    if (getParentComponent() != nullptr)
         getParentComponent()->removeChildComponent (this);
 }
 

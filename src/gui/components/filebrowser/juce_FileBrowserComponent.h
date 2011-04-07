@@ -104,14 +104,14 @@ public:
         If multiple select isn't active, this will only be 0 or 1. To get the complete
         list of files they've chosen, pass an index to getCurrentFile().
     */
-    int getNumSelectedFiles() const throw();
+    int getNumSelectedFiles() const noexcept;
 
     /** Returns one of the files that the user has chosen.
         If the box has multi-select enabled, the index lets you specify which of the files
         to get - see getNumSelectedFiles() to find out how many files were chosen.
         @see getHighlightedFile
     */
-    const File getSelectedFile (int index) const throw();
+    const File getSelectedFile (int index) const noexcept;
 
     /** Deselects any files that are currently selected.
     */
@@ -132,7 +132,7 @@ public:
         this will only return one of them.
         @see getSelectedFile
     */
-    const File getHighlightedFile() const throw();
+    const File getHighlightedFile() const noexcept;
 
     //==============================================================================
     /** Returns the directory whose contents are currently being shown in the listbox. */
@@ -159,7 +159,7 @@ public:
 
     /** Returns true if the saveMode flag was set when this component was created.
     */
-    bool isSaveMode() const throw();
+    bool isSaveMode() const noexcept;
 
     //==============================================================================
     /** Adds a listener to be told when the user selects and clicks on files.
@@ -204,7 +204,7 @@ public:
     bool isDirectorySuitable (const File&) const;
 
     /** @internal */
-    FilePreviewComponent* getPreviewComponent() const throw();
+    FilePreviewComponent* getPreviewComponent() const noexcept;
 
 protected:
     /** Returns a list of names and paths for the default places the user might want to look.

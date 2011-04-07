@@ -72,10 +72,10 @@ public:
                 const Point<int> mouseDownPos,
                 const Time& mouseDownTime,
                 int numberOfClicks,
-                bool mouseWasDragged) throw();
+                bool mouseWasDragged) noexcept;
 
     /** Destructor. */
-    ~MouseEvent() throw();
+    ~MouseEvent() noexcept;
 
     //==============================================================================
     /** The x-position of the mouse when the event occurred.
@@ -141,7 +141,7 @@ public:
 
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
-    int getMouseDownX() const throw();
+    int getMouseDownX() const noexcept;
 
     /** Returns the y co-ordinate of the last place that a mouse was pressed.
 
@@ -149,7 +149,7 @@ public:
 
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
-    int getMouseDownY() const throw();
+    int getMouseDownY() const noexcept;
 
     /** Returns the co-ordinates of the last place that a mouse was pressed.
 
@@ -157,7 +157,7 @@ public:
 
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
-    const Point<int> getMouseDownPosition() const throw();
+    const Point<int> getMouseDownPosition() const noexcept;
 
     /** Returns the straight-line distance between where the mouse is now and where it
         was the last time the button was pressed.
@@ -167,28 +167,28 @@ public:
 
         @see getDistanceFromDragStartX
     */
-    int getDistanceFromDragStart() const throw();
+    int getDistanceFromDragStart() const noexcept;
 
     /** Returns the difference between the mouse's current x postion and where it was
         when the button was last pressed.
 
         @see getDistanceFromDragStart
     */
-    int getDistanceFromDragStartX() const throw();
+    int getDistanceFromDragStartX() const noexcept;
 
     /** Returns the difference between the mouse's current y postion and where it was
         when the button was last pressed.
 
         @see getDistanceFromDragStart
     */
-    int getDistanceFromDragStartY() const throw();
+    int getDistanceFromDragStartY() const noexcept;
 
     /** Returns the difference between the mouse's current postion and where it was
         when the button was last pressed.
 
         @see getDistanceFromDragStart
     */
-    const Point<int> getOffsetFromDragStart() const throw();
+    const Point<int> getOffsetFromDragStart() const noexcept;
 
     /** Returns true if the mouse has just been clicked.
 
@@ -205,13 +205,13 @@ public:
         @returns    true if the mouse wasn't dragged by more than a few pixels between
                     the last time the button was pressed and released.
     */
-    bool mouseWasClicked() const throw();
+    bool mouseWasClicked() const noexcept;
 
     /** For a click event, the number of times the mouse was clicked in succession.
 
         So for example a double-click event will return 2, a triple-click 3, etc.
     */
-    int getNumberOfClicks() const throw()                               { return numberOfClicks; }
+    int getNumberOfClicks() const noexcept                              { return numberOfClicks; }
 
     /** Returns the time that the mouse button has been held down for.
 
@@ -220,7 +220,7 @@ public:
         If called in other contexts, e.g. a mouseMove, then the returned value
         may be 0 or an undefined value.
     */
-    int getLengthOfMousePress() const throw();
+    int getLengthOfMousePress() const noexcept;
 
     //==============================================================================
     /** The position of the mouse when the event occurred.
@@ -228,7 +228,7 @@ public:
         This position is relative to the top-left of the component to which the
         event applies (as indicated by the MouseEvent::eventComponent field).
     */
-    const Point<int> getPosition() const throw();
+    const Point<int> getPosition() const noexcept;
 
     /** Returns the mouse x position of this event, in global screen co-ordinates.
 
@@ -284,13 +284,13 @@ public:
         The x and y positions of the event that is returned will have been
         adjusted to be relative to the new component.
     */
-    const MouseEvent getEventRelativeTo (Component* otherComponent) const throw();
+    const MouseEvent getEventRelativeTo (Component* otherComponent) const noexcept;
 
     /** Creates a copy of this event with a different position.
         All other members of the event object are the same, but the x and y are
         replaced with these new values.
     */
-    const MouseEvent withNewPosition (const Point<int>& newPosition) const throw();
+    const MouseEvent withNewPosition (const Point<int>& newPosition) const noexcept;
 
     //==============================================================================
     /** Changes the application-wide setting for the double-click time limit.
@@ -300,7 +300,7 @@ public:
 
         @see getDoubleClickTimeout, MouseListener::mouseDoubleClick
     */
-    static void setDoubleClickTimeout (int timeOutMilliseconds) throw();
+    static void setDoubleClickTimeout (int timeOutMilliseconds) noexcept;
 
     /** Returns the application-wide setting for the double-click time limit.
 
@@ -309,7 +309,7 @@ public:
 
         @see setDoubleClickTimeout, MouseListener::mouseDoubleClick
     */
-    static int getDoubleClickTimeout() throw();
+    static int getDoubleClickTimeout() noexcept;
 
 
 private:

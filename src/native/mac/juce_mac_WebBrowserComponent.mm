@@ -98,7 +98,7 @@ public:
     {
         [webView setPolicyDelegate: nil];
         [clickListener release];
-        setView (0);
+        setView (nil);
     }
 
     void goToURL (const String& url,
@@ -110,14 +110,14 @@ public:
                                       cachePolicy: NSURLRequestUseProtocolCachePolicy
                                   timeoutInterval: 30.0];
 
-        if (postData != 0 && postData->getSize() > 0)
+        if (postData != nullptr && postData->getSize() > 0)
         {
             [r setHTTPMethod: @"POST"];
             [r setHTTPBody: [NSData dataWithBytes: postData->getData()
                                            length: postData->getSize()]];
         }
 
-        if (headers != 0)
+        if (headers != nullptr)
         {
             for (int i = 0; i < headers->size(); ++i)
             {
@@ -168,7 +168,7 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
-    : browser (0),
+    : browser (nullptr),
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
@@ -190,11 +190,11 @@ void WebBrowserComponent::goToURL (const String& url,
     lastURL = url;
 
     lastHeaders.clear();
-    if (headers != 0)
+    if (headers != nullptr)
         lastHeaders = *headers;
 
     lastPostData.setSize (0);
-    if (postData != 0)
+    if (postData != nullptr)
         lastPostData = *postData;
 
     blankPageShown = false;

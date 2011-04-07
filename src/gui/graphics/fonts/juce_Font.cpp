@@ -38,7 +38,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace FontValues
 {
-    float limitFontHeight (const float height) throw()
+    float limitFontHeight (const float height) noexcept
     {
         return jlimit (0.1f, 10000.0f, height);
     }
@@ -108,15 +108,15 @@ public:
         face.flags = flags;
         face.lastUsageCount = ++counter;
         face.typeface = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
-        jassert (face.typeface != 0); // the look and feel must return a typeface!
+        jassert (face.typeface != nullptr); // the look and feel must return a typeface!
 
-        if (defaultFace == 0 && font == Font())
+        if (defaultFace == nullptr && font == Font())
             defaultFace = face.typeface;
 
         return face.typeface;
     }
 
-    const Typeface::Ptr getDefaultTypeface() const throw()
+    const Typeface::Ptr getDefaultTypeface() const noexcept
     {
         return defaultFace;
     }
@@ -124,7 +124,7 @@ public:
 private:
     struct CachedFace
     {
-        CachedFace() throw()
+        CachedFace() noexcept
             : lastUsageCount (0), flags (-1)
         {
         }
@@ -153,7 +153,7 @@ void Typeface::setTypefaceCacheSize (int numFontsToCache)
 }
 
 //==============================================================================
-Font::SharedFontInternal::SharedFontInternal (const float height_, const int styleFlags_) throw()
+Font::SharedFontInternal::SharedFontInternal (const float height_, const int styleFlags_) noexcept
     : typefaceName (Font::getDefaultSansSerifFontName()),
       height (height_),
       horizontalScale (1.0f),
@@ -164,7 +164,7 @@ Font::SharedFontInternal::SharedFontInternal (const float height_, const int sty
 {
 }
 
-Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const int styleFlags_) throw()
+Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const int styleFlags_) noexcept
     : typefaceName (typefaceName_),
       height (height_),
       horizontalScale (1.0f),
@@ -175,7 +175,7 @@ Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const
 {
 }
 
-Font::SharedFontInternal::SharedFontInternal (const Typeface::Ptr& typeface_) throw()
+Font::SharedFontInternal::SharedFontInternal (const Typeface::Ptr& typeface_) noexcept
     : typefaceName (typeface_->getName()),
       height (FontValues::defaultFontHeight),
       horizontalScale (1.0f),
@@ -186,7 +186,7 @@ Font::SharedFontInternal::SharedFontInternal (const Typeface::Ptr& typeface_) th
 {
 }
 
-Font::SharedFontInternal::SharedFontInternal (const SharedFontInternal& other) throw()
+Font::SharedFontInternal::SharedFontInternal (const SharedFontInternal& other) noexcept
     : typefaceName (other.typefaceName),
       height (other.height),
       horizontalScale (other.horizontalScale),
@@ -197,7 +197,7 @@ Font::SharedFontInternal::SharedFontInternal (const SharedFontInternal& other) t
 {
 }
 
-bool Font::SharedFontInternal::operator== (const SharedFontInternal& other) const throw()
+bool Font::SharedFontInternal::operator== (const SharedFontInternal& other) const noexcept
 {
     return height == other.height
             && styleFlags == other.styleFlags
@@ -227,28 +227,28 @@ Font::Font (const Typeface::Ptr& typeface)
 {
 }
 
-Font::Font (const Font& other) throw()
+Font::Font (const Font& other) noexcept
     : font (other.font)
 {
 }
 
-Font& Font::operator= (const Font& other) throw()
+Font& Font::operator= (const Font& other) noexcept
 {
     font = other.font;
     return *this;
 }
 
-Font::~Font() throw()
+Font::~Font() noexcept
 {
 }
 
-bool Font::operator== (const Font& other) const throw()
+bool Font::operator== (const Font& other) const noexcept
 {
     return font == other.font
             || *font == *other.font;
 }
 
-bool Font::operator!= (const Font& other) const throw()
+bool Font::operator!= (const Font& other) const noexcept
 {
     return ! operator== (other);
 }
@@ -284,7 +284,7 @@ void Font::setTypefaceName (const String& faceName)
     {
         dupeInternalIfShared();
         font->typefaceName = faceName;
-        font->typeface = 0;
+        font->typeface = nullptr;
         font->ascent = 0;
     }
 }
@@ -330,7 +330,7 @@ void Font::setStyleFlags (const int newFlags)
     {
         dupeInternalIfShared();
         font->styleFlags = newFlags;
-        font->typeface = 0;
+        font->typeface = nullptr;
         font->ascent = 0;
     }
 }
@@ -380,7 +380,7 @@ const Font Font::boldened() const
     return f;
 }
 
-bool Font::isBold() const throw()
+bool Font::isBold() const noexcept
 {
     return (font->styleFlags & bold) != 0;
 }
@@ -398,7 +398,7 @@ const Font Font::italicised() const
     return f;
 }
 
-bool Font::isItalic() const throw()
+bool Font::isItalic() const noexcept
 {
     return (font->styleFlags & italic) != 0;
 }
@@ -409,7 +409,7 @@ void Font::setUnderline (const bool shouldBeUnderlined)
                                       : (font->styleFlags & ~underlined));
 }
 
-bool Font::isUnderlined() const throw()
+bool Font::isUnderlined() const noexcept
 {
     return (font->styleFlags & underlined) != 0;
 }

@@ -144,7 +144,7 @@ public:
 
     /** Returns the AlertWindow that is being used.
     */
-    AlertWindow* getAlertWindow() const throw()         { return alertWindow; }
+    AlertWindow* getAlertWindow() const noexcept        { return alertWindow; }
 
 private:
     //==============================================================================

@@ -66,62 +66,62 @@ public:
     const HostType type;
 
     //==============================================================================
-    bool isAbletonLive() const throw()
+    bool isAbletonLive() const noexcept
     {
         return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric;
     }
 
-    bool isCubase() const throw()
+    bool isCubase() const noexcept
     {
         return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubaseGeneric;
     }
 
-    bool isCubaseBridged() const throw()
+    bool isCubaseBridged() const noexcept
     {
         return type == SteinbergCubase5Bridged;
     }
 
-    bool isTracktion() const throw()
+    bool isTracktion() const noexcept
     {
         return type == MackieTracktion3 || type == MackieTracktionGeneric;
     }
 
-    bool isSonar() const throw()
+    bool isSonar() const noexcept
     {
         return type == CakewalkSonar8 || type == CakewalkSonarGeneric;
     }
 
-    bool isWavelab() const throw()
+    bool isWavelab() const noexcept
     {
         return type == SteinbergWavelab5 || type == SteinbergWavelab6 || type == SteinbergWavelab7 || type == SteinbergWavelabGeneric;
     }
 
-    bool isWavelabLegacy() const throw()
+    bool isWavelabLegacy() const noexcept
     {
         return type == SteinbergWavelab5 || type == SteinbergWavelab6;
     }
 
-    bool isPremiere() const throw()
+    bool isPremiere() const noexcept
     {
         return type == AdobePremierePro;
     }
 
-    bool isLogic() const throw()
+    bool isLogic() const noexcept
     {
         return type == AppleLogic || type == EmagicLogic;
     }
 
-    bool isReceptor() const throw()
+    bool isReceptor() const noexcept
     {
         return type == MuseReceptorGeneric;
     }
 
-    bool isSamplitude() const throw()
+    bool isSamplitude() const noexcept
     {
         return type == MagixSamplitude;
     }
 
-    bool isFruityLoops() const throw()
+    bool isFruityLoops() const noexcept
     {
         return type == FruityLoops;
     }

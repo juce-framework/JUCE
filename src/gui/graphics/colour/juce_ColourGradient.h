@@ -68,7 +68,7 @@ public:
         If you use this constructor instead of the other one, be sure to set all the
         object's public member variables before using it!
     */
-    ColourGradient() throw();
+    ColourGradient() noexcept;
 
     /** Destructor */
     ~ColourGradient();
@@ -99,32 +99,32 @@ public:
     void removeColour (int index);
 
     /** Multiplies the alpha value of all the colours by the given scale factor */
-    void multiplyOpacity (float multiplier) throw();
+    void multiplyOpacity (float multiplier) noexcept;
 
     //==============================================================================
     /** Returns the number of colour-stops that have been added. */
-    int getNumColours() const throw();
+    int getNumColours() const noexcept;
 
     /** Returns the position along the length of the gradient of the colour with this index.
 
         The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
     */
-    double getColourPosition (int index) const throw();
+    double getColourPosition (int index) const noexcept;
 
     /** Returns the colour that was added with a given index.
         The index is from 0 to getNumColours() - 1.
     */
-    const Colour getColour (int index) const throw();
+    const Colour getColour (int index) const noexcept;
 
     /** Changes the colour at a given index.
         The index is from 0 to getNumColours() - 1.
     */
-    void setColour (int index, const Colour& newColour) throw();
+    void setColour (int index, const Colour& newColour) noexcept;
 
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
     */
-    const Colour getColourAtPosition (double position) const throw();
+    const Colour getColourAtPosition (double position) const noexcept;
 
     //==============================================================================
     /** Creates a set of interpolated premultiplied ARGB values.
@@ -134,10 +134,10 @@ public:
     int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const;
 
     /** Returns true if all colours are opaque. */
-    bool isOpaque() const throw();
+    bool isOpaque() const noexcept;
 
     /** Returns true if all colours are completely transparent. */
-    bool isInvisible() const throw();
+    bool isInvisible() const noexcept;
 
     //==============================================================================
     Point<float> point1, point2;
@@ -149,22 +149,22 @@ public:
     */
     bool isRadial;
 
-    bool operator== (const ColourGradient& other) const throw();
-    bool operator!= (const ColourGradient& other) const throw();
+    bool operator== (const ColourGradient& other) const noexcept;
+    bool operator!= (const ColourGradient& other) const noexcept;
 
 
 private:
     //==============================================================================
     struct ColourPoint
     {
-        ColourPoint() throw() {}
+        ColourPoint() noexcept {}
 
-        ColourPoint (const double position_, const Colour& colour_) throw()
+        ColourPoint (const double position_, const Colour& colour_) noexcept
             : position (position_), colour (colour_)
         {}
 
-        bool operator== (const ColourPoint& other) const throw();
-        bool operator!= (const ColourPoint& other) const throw();
+        bool operator== (const ColourPoint& other) const noexcept;
+        bool operator!= (const ColourPoint& other) const noexcept;
 
         double position;
         Colour colour;

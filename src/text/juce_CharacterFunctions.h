@@ -83,30 +83,30 @@ class JUCE_API  CharacterFunctions
 {
 public:
     //==============================================================================
-    static juce_wchar toUpperCase (juce_wchar character) throw();
-    static juce_wchar toLowerCase (juce_wchar character) throw();
+    static juce_wchar toUpperCase (juce_wchar character) noexcept;
+    static juce_wchar toLowerCase (juce_wchar character) noexcept;
 
-    static bool isUpperCase (juce_wchar character) throw();
-    static bool isLowerCase (juce_wchar character) throw();
+    static bool isUpperCase (juce_wchar character) noexcept;
+    static bool isLowerCase (juce_wchar character) noexcept;
 
-    static bool isWhitespace (char character) throw();
-    static bool isWhitespace (juce_wchar character) throw();
+    static bool isWhitespace (char character) noexcept;
+    static bool isWhitespace (juce_wchar character) noexcept;
 
-    static bool isDigit (char character) throw();
-    static bool isDigit (juce_wchar character) throw();
+    static bool isDigit (char character) noexcept;
+    static bool isDigit (juce_wchar character) noexcept;
 
-    static bool isLetter (char character) throw();
-    static bool isLetter (juce_wchar character) throw();
+    static bool isLetter (char character) noexcept;
+    static bool isLetter (juce_wchar character) noexcept;
 
-    static bool isLetterOrDigit (char character) throw();
-    static bool isLetterOrDigit (juce_wchar character) throw();
+    static bool isLetterOrDigit (char character) noexcept;
+    static bool isLetterOrDigit (juce_wchar character) noexcept;
 
     /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legal hex digit. */
-    static int getHexDigitValue (juce_wchar digit) throw();
+    static int getHexDigitValue (juce_wchar digit) noexcept;
 
     //==============================================================================
     template <typename CharPointerType>
-    static double readDoubleValue (CharPointerType& text) throw()
+    static double readDoubleValue (CharPointerType& text) noexcept
     {
         double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
         int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
@@ -236,7 +236,7 @@ public:
     }
 
     template <typename CharPointerType>
-    static double getDoubleValue (const CharPointerType& text) throw()
+    static double getDoubleValue (const CharPointerType& text) noexcept
     {
         CharPointerType t (text);
         return readDoubleValue (t);
@@ -244,7 +244,7 @@ public:
 
     //==============================================================================
     template <typename IntType, typename CharPointerType>
-    static IntType getIntValue (const CharPointerType& text) throw()
+    static IntType getIntValue (const CharPointerType& text) noexcept
     {
         IntType v = 0;
         CharPointerType s (text.findEndOfWhitespace());
@@ -268,7 +268,7 @@ public:
 
     //==============================================================================
     template <typename CharPointerType>
-    static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) throw()
+    static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) noexcept
     {
         size_t len = 0;
 
@@ -279,7 +279,7 @@ public:
     }
 
     template <typename CharPointerType>
-    static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) throw()
+    static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) noexcept
     {
         size_t len = 0;
 
@@ -290,7 +290,7 @@ public:
     }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>
-    static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) throw()
+    static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) noexcept
     {
         for (;;)
         {
@@ -306,7 +306,7 @@ public:
     }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>
-    static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) throw()
+    static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) noexcept
     {
         int numBytesDone = 0;
         maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
@@ -329,7 +329,7 @@ public:
     }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>
-    static void copyWithCharLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) throw()
+    static void copyWithCharLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) noexcept
     {
         while (--maxChars > 0)
         {
@@ -344,7 +344,7 @@ public:
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
-    static int compare (CharPointerType1 s1, CharPointerType2 s2) throw()
+    static int compare (CharPointerType1 s1, CharPointerType2 s2) noexcept
     {
         for (;;)
         {
@@ -362,7 +362,7 @@ public:
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
-    static int compareUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) throw()
+    static int compareUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
     {
         while (--maxChars >= 0)
         {
@@ -380,7 +380,7 @@ public:
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
-    static int compareIgnoreCase (CharPointerType1 s1, CharPointerType2 s2) throw()
+    static int compareIgnoreCase (CharPointerType1 s1, CharPointerType2 s2) noexcept
     {
         for (;;)
         {
@@ -400,7 +400,7 @@ public:
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
-    static int compareIgnoreCaseUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) throw()
+    static int compareIgnoreCaseUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
     {
         while (--maxChars >= 0)
         {
@@ -420,7 +420,7 @@ public:
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
-    static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) throw()
+    static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
     {
         int index = 0;
         const int needleLength = (int) needle.length();
@@ -438,7 +438,7 @@ public:
     }
 
     template <typename CharPointerType1, typename CharPointerType2>
-    static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) throw()
+    static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
     {
         int index = 0;
         const int needleLength = (int) needle.length();
@@ -456,7 +456,7 @@ public:
     }
 
     template <typename Type>
-    static int indexOfChar (Type text, const juce_wchar charToFind) throw()
+    static int indexOfChar (Type text, const juce_wchar charToFind) noexcept
     {
         int i = 0;
 
@@ -472,7 +472,7 @@ public:
     }
 
     template <typename Type>
-    static int indexOfCharIgnoreCase (Type text, juce_wchar charToFind) throw()
+    static int indexOfCharIgnoreCase (Type text, juce_wchar charToFind) noexcept
     {
         charToFind = CharacterFunctions::toLowerCase (charToFind);
         int i = 0;
@@ -490,7 +490,7 @@ public:
     }
 
     template <typename Type>
-    static Type findEndOfWhitespace (const Type& text) throw()
+    static Type findEndOfWhitespace (const Type& text) noexcept
     {
         Type p (text);
 
@@ -529,7 +529,7 @@ public:
     }
 
 private:
-    static double mulexp10 (const double value, int exponent) throw();
+    static double mulexp10 (const double value, int exponent) noexcept;
 };
 
 

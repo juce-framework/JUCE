@@ -53,11 +53,11 @@ private:
 };
 
 //==============================================================================
-MultiTimer::MultiTimer() throw()
+MultiTimer::MultiTimer() noexcept
 {
 }
 
-MultiTimer::MultiTimer (const MultiTimer&) throw()
+MultiTimer::MultiTimer (const MultiTimer&) noexcept
 {
 }
 
@@ -68,7 +68,7 @@ MultiTimer::~MultiTimer()
 }
 
 //==============================================================================
-void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds) throw()
+void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds) noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
@@ -88,7 +88,7 @@ void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds
     newTimer->startTimer (intervalInMilliseconds);
 }
 
-void MultiTimer::stopTimer (const int timerId) throw()
+void MultiTimer::stopTimer (const int timerId) noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
@@ -101,7 +101,7 @@ void MultiTimer::stopTimer (const int timerId) throw()
     }
 }
 
-bool MultiTimer::isTimerRunning (const int timerId) const throw()
+bool MultiTimer::isTimerRunning (const int timerId) const noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 
@@ -115,7 +115,7 @@ bool MultiTimer::isTimerRunning (const int timerId) const throw()
     return false;
 }
 
-int MultiTimer::getTimerInterval (const int timerId) const throw()
+int MultiTimer::getTimerInterval (const int timerId) const noexcept
 {
     const SpinLock::ScopedLockType sl (timerListLock);
 

@@ -39,7 +39,7 @@ KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const command
 {
     // A manager is needed to get the descriptions of commands, and will be called when
     // a command is invoked. So you can't leave this null..
-    jassert (commandManager_ != 0);
+    jassert (commandManager_ != nullptr);
 
     Desktop::getInstance().addFocusChangeListener (this);
 }
@@ -93,7 +93,7 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
 
             const ApplicationCommandInfo* const ci = commandManager->getCommandForID (commandID);
 
-            if (ci != 0)
+            if (ci != nullptr)
             {
                 CommandMapping* const cm = new CommandMapping();
                 cm->commandID = commandID;
@@ -193,7 +193,7 @@ void KeyPressMappingSet::removeKeyPress (const CommandID commandID, const int ke
 }
 
 //==============================================================================
-CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) const throw()
+CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) const noexcept
 {
     for (int i = 0; i < mappings.size(); ++i)
         if (mappings.getUnchecked(i)->keypresses.contains (keyPress))
@@ -202,7 +202,7 @@ CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) 
     return 0;
 }
 
-bool KeyPressMappingSet::containsMapping (const CommandID commandID, const KeyPress& keyPress) const throw()
+bool KeyPressMappingSet::containsMapping (const CommandID commandID, const KeyPress& keyPress) const noexcept
 {
     for (int i = mappings.size(); --i >= 0;)
         if (mappings.getUnchecked(i)->commandID == commandID)
@@ -293,7 +293,7 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
 
         for (int j = 0; j < cm->keypresses.size(); ++j)
         {
-            if (defaultSet == 0
+            if (defaultSet == nullptr
                  || ! defaultSet->containsMapping (cm->commandID, cm->keypresses.getReference (j)))
             {
                 XmlElement* const map = doc->createNewChildElement ("MAPPING");
@@ -305,7 +305,7 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
         }
     }
 
-    if (defaultSet != 0)
+    if (defaultSet != nullptr)
     {
         for (i = 0; i < defaultSet->mappings.size(); ++i)
         {
@@ -338,7 +338,7 @@ bool KeyPressMappingSet::keyPressed (const KeyPress& key,
 
     const ApplicationCommandInfo* const ci = commandManager->getCommandForID (commandID);
 
-    if (ci != 0
+    if (ci != nullptr
          && (ci->flags & ApplicationCommandInfo::wantsKeyUpDownCallbacks) == 0)
     {
         ApplicationCommandInfo info (0);
@@ -351,7 +351,7 @@ bool KeyPressMappingSet::keyPressed (const KeyPress& key,
         }
         else
         {
-            if (originatingComponent != 0)
+            if (originatingComponent != nullptr)
                 originatingComponent->getLookAndFeel().playAlertSound();
         }
     }
@@ -423,7 +423,7 @@ bool KeyPressMappingSet::keyStateChanged (const bool /*isKeyDown*/, Component* o
 
 void KeyPressMappingSet::globalFocusChanged (Component* focusedComponent)
 {
-    if (focusedComponent != 0)
+    if (focusedComponent != nullptr)
         focusedComponent->keyStateChanged (false);
 }
 

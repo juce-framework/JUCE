@@ -53,24 +53,24 @@ public:
 
     //==============================================================================
     /** Creates a void variant. */
-    var() throw();
+    var() noexcept;
 
     /** Destructor. */
-    ~var() throw();
+    ~var() noexcept;
 
     /** A static var object that can be used where you need an empty variant object. */
     static const var null;
 
     var (const var& valueToCopy);
-    var (int value) throw();
-    var (int64 value) throw();
-    var (bool value) throw();
-    var (double value) throw();
+    var (int value) noexcept;
+    var (int64 value) noexcept;
+    var (bool value) noexcept;
+    var (double value) noexcept;
     var (const char* value);
     var (const wchar_t* value);
     var (const String& value);
     var (DynamicObject* object);
-    var (MethodFunction method) throw();
+    var (MethodFunction method) noexcept;
 
     var& operator= (const var& valueToCopy);
     var& operator= (int value);
@@ -83,7 +83,7 @@ public:
     var& operator= (DynamicObject* object);
     var& operator= (MethodFunction method);
 
-    void swapWith (var& other) throw();
+    void swapWith (var& other) noexcept;
 
     operator int() const;
     operator int64() const;
@@ -94,14 +94,14 @@ public:
     const String toString() const;
     DynamicObject* getObject() const;
 
-    bool isVoid() const throw();
-    bool isInt() const throw();
-    bool isInt64() const throw();
-    bool isBool() const throw();
-    bool isDouble() const throw();
-    bool isString() const throw();
-    bool isObject() const throw();
-    bool isMethod() const throw();
+    bool isVoid() const noexcept;
+    bool isInt() const noexcept;
+    bool isInt64() const noexcept;
+    bool isBool() const noexcept;
+    bool isDouble() const noexcept;
+    bool isString() const noexcept;
+    bool isObject() const noexcept;
+    bool isMethod() const noexcept;
 
     //==============================================================================
     /** Writes a binary representation of this value to a stream.
@@ -142,12 +142,12 @@ public:
 
     //==============================================================================
     /** Returns true if this var has the same value as the one supplied. */
-    bool equals (const var& other) const throw();
+    bool equals (const var& other) const noexcept;
 
     /** Returns true if this var has the same value and type as the one supplied.
         This differs from equals() because e.g. "0" and 0 will be considered different.
     */
-    bool equalsWithSameType (const var& other) const throw();
+    bool equalsWithSameType (const var& other) const noexcept;
 
 private:
     class VariantType;
@@ -186,10 +186,10 @@ private:
     ValueUnion value;
 };
 
-bool operator== (const var& v1, const var& v2) throw();
-bool operator!= (const var& v1, const var& v2) throw();
-bool operator== (const var& v1, const String& v2) throw();
-bool operator!= (const var& v1, const String& v2) throw();
+bool operator== (const var& v1, const var& v2) noexcept;
+bool operator!= (const var& v1, const var& v2) noexcept;
+bool operator== (const var& v1, const String& v2) noexcept;
+bool operator!= (const var& v1, const String& v2) noexcept;
 
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__

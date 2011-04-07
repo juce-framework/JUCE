@@ -93,8 +93,8 @@ ScrollBar::ScrollBar (const bool vertical_,
 
 ScrollBar::~ScrollBar()
 {
-    upButton = 0;
-    downButton = 0;
+    upButton = nullptr;
+    downButton = nullptr;
 }
 
 //==============================================================================
@@ -170,7 +170,7 @@ void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
     repeatDelayInMillisecs = repeatDelayInMillisecs_;
     minimumDelayInMillisecs = minimumDelayInMillisecs_;
 
-    if (upButton != 0)
+    if (upButton != nullptr)
     {
         upButton->setRepeatSpeed (initialDelayInMillisecs,  repeatDelayInMillisecs,  minimumDelayInMillisecs);
         downButton->setRepeatSpeed (initialDelayInMillisecs,  repeatDelayInMillisecs,  minimumDelayInMillisecs);
@@ -235,7 +235,7 @@ void ScrollBar::setOrientation (const bool shouldBeVertical)
     {
         vertical = shouldBeVertical;
 
-        if (upButton != 0)
+        if (upButton != nullptr)
         {
             upButton->direction    = vertical ? 0 : 3;
             downButton->direction  = vertical ? 2 : 1;
@@ -247,8 +247,8 @@ void ScrollBar::setOrientation (const bool shouldBeVertical)
 
 void ScrollBar::setButtonVisibility (const bool buttonsAreVisible)
 {
-    upButton = 0;
-    downButton = 0;
+    upButton = nullptr;
+    downButton = nullptr;
 
     if (buttonsAreVisible)
     {
@@ -267,7 +267,7 @@ void ScrollBar::setAutoHide (const bool shouldHideWhenFullRange)
     updateThumbPosition();
 }
 
-bool ScrollBar::autoHides() const throw()
+bool ScrollBar::autoHides() const noexcept
 {
     return autohides;
 }
@@ -312,8 +312,8 @@ void ScrollBar::resized()
 {
     const int length = vertical ? getHeight() : getWidth();
 
-    const int buttonSize = (upButton != 0) ? jmin (getLookAndFeel().getScrollbarButtonSize (*this), length / 2)
-                                           : 0;
+    const int buttonSize = upButton != nullptr ? jmin (getLookAndFeel().getScrollbarButtonSize (*this), length / 2)
+                                               : 0;
 
     if (length < 32 + getLookAndFeel().getMinimumScrollbarThumbSize (*this))
     {
@@ -326,7 +326,7 @@ void ScrollBar::resized()
         thumbAreaSize = length - (buttonSize << 1);
     }
 
-    if (upButton != 0)
+    if (upButton != nullptr)
     {
         if (vertical)
         {

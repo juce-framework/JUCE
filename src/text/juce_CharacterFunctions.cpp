@@ -42,17 +42,17 @@ BEGIN_JUCE_NAMESPACE
 #include "../memory/juce_HeapBlock.h"
 
 //==============================================================================
-juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()
+juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) noexcept
 {
     return towupper ((wchar_t) character);
 }
 
-juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) throw()
+juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) noexcept
 {
     return towlower ((wchar_t) character);
 }
 
-bool CharacterFunctions::isUpperCase (const juce_wchar character) throw()
+bool CharacterFunctions::isUpperCase (const juce_wchar character) noexcept
 {
    #if JUCE_WINDOWS
     return iswupper ((wchar_t) character) != 0;
@@ -61,7 +61,7 @@ bool CharacterFunctions::isUpperCase (const juce_wchar character) throw()
    #endif
 }
 
-bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
+bool CharacterFunctions::isLowerCase (const juce_wchar character) noexcept
 {
    #if JUCE_WINDOWS
     return iswlower ((wchar_t) character) != 0;
@@ -75,50 +75,50 @@ bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
 #endif
 
 //==============================================================================
-bool CharacterFunctions::isWhitespace (const char character) throw()
+bool CharacterFunctions::isWhitespace (const char character) noexcept
 {
     return character == ' ' || (character <= 13 && character >= 9);
 }
 
-bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()
+bool CharacterFunctions::isWhitespace (const juce_wchar character) noexcept
 {
     return iswspace ((wchar_t) character) != 0;
 }
 
-bool CharacterFunctions::isDigit (const char character) throw()
+bool CharacterFunctions::isDigit (const char character) noexcept
 {
     return (character >= '0' && character <= '9');
 }
 
-bool CharacterFunctions::isDigit (const juce_wchar character) throw()
+bool CharacterFunctions::isDigit (const juce_wchar character) noexcept
 {
     return iswdigit ((wchar_t) character) != 0;
 }
 
-bool CharacterFunctions::isLetter (const char character) throw()
+bool CharacterFunctions::isLetter (const char character) noexcept
 {
     return (character >= 'a' && character <= 'z')
         || (character >= 'A' && character <= 'Z');
 }
 
-bool CharacterFunctions::isLetter (const juce_wchar character) throw()
+bool CharacterFunctions::isLetter (const juce_wchar character) noexcept
 {
     return iswalpha ((wchar_t) character) != 0;
 }
 
-bool CharacterFunctions::isLetterOrDigit (const char character) throw()
+bool CharacterFunctions::isLetterOrDigit (const char character) noexcept
 {
     return (character >= 'a' && character <= 'z')
         || (character >= 'A' && character <= 'Z')
         || (character >= '0' && character <= '9');
 }
 
-bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
+bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) noexcept
 {
     return iswalnum ((wchar_t) character) != 0;
 }
 
-int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
+int CharacterFunctions::getHexDigitValue (const juce_wchar digit) noexcept
 {
     unsigned int d = digit - '0';
     if (d < (unsigned int) 10)
@@ -135,7 +135,7 @@ int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
     return -1;
 }
 
-double CharacterFunctions::mulexp10 (const double value, int exponent) throw()
+double CharacterFunctions::mulexp10 (const double value, int exponent) noexcept
 {
     if (exponent == 0)
         return value;

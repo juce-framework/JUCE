@@ -59,7 +59,7 @@ namespace PathHelpers
         return String (start, numChars);
     }
 
-    inline double lengthOf (float x1, float y1, float x2, float y2) throw()
+    inline double lengthOf (float x1, float y1, float x2, float y2) noexcept
     {
         return juce_hypot ((double) (x1 - x2), (double) (y1 - y2));
     }
@@ -123,12 +123,12 @@ Path& Path::operator= (const Path& other)
     return *this;
 }
 
-bool Path::operator== (const Path& other) const throw()
+bool Path::operator== (const Path& other) const noexcept
 {
     return ! operator!= (other);
 }
 
-bool Path::operator!= (const Path& other) const throw()
+bool Path::operator!= (const Path& other) const noexcept
 {
     if (numElements != other.numElements || useNonZeroWinding != other.useNonZeroWinding)
         return true;
@@ -140,7 +140,7 @@ bool Path::operator!= (const Path& other) const throw()
     return false;
 }
 
-void Path::clear() throw()
+void Path::clear() noexcept
 {
     numElements = 0;
     pathXMin = 0;
@@ -149,7 +149,7 @@ void Path::clear() throw()
     pathXMax = 0;
 }
 
-void Path::swapWithPath (Path& other) throw()
+void Path::swapWithPath (Path& other) noexcept
 {
     data.swapWith (other.data);
     swapVariables <size_t> (numElements, other.numElements);
@@ -161,19 +161,19 @@ void Path::swapWithPath (Path& other) throw()
 }
 
 //==============================================================================
-void Path::setUsingNonZeroWinding (const bool isNonZero) throw()
+void Path::setUsingNonZeroWinding (const bool isNonZero) noexcept
 {
     useNonZeroWinding = isNonZero;
 }
 
 void Path::scaleToFit (const float x, const float y, const float w, const float h,
-                       const bool preserveProportions) throw()
+                       const bool preserveProportions) noexcept
 {
     applyTransform (getTransformToScaleToFit (x, y, w, h, preserveProportions));
 }
 
 //==============================================================================
-bool Path::isEmpty() const throw()
+bool Path::isEmpty() const noexcept
 {
     size_t i = 0;
 
@@ -196,14 +196,14 @@ bool Path::isEmpty() const throw()
     return true;
 }
 
-const Rectangle<float> Path::getBounds() const throw()
+const Rectangle<float> Path::getBounds() const noexcept
 {
     return Rectangle<float> (pathXMin, pathYMin,
                              pathXMax - pathXMin,
                              pathYMax - pathYMin);
 }
 
-const Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const throw()
+const Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const noexcept
 {
     return getBounds().transformed (transform);
 }
@@ -497,7 +497,7 @@ void Path::addCentredArc (const float centreX, const float centreY,
                           const float radiusX, const float radiusY,
                           const float rotationOfEllipse,
                           const float fromRadians,
-                          const float toRadians,
+                          float toRadians,
                           const bool startAsNewSubPath)
 {
     if (radiusX > 0.0f && radiusY > 0.0f)
@@ -845,7 +845,7 @@ void Path::addPath (const Path& other,
 }
 
 //==============================================================================
-void Path::applyTransform (const AffineTransform& transform) throw()
+void Path::applyTransform (const AffineTransform& transform) noexcept
 {
     size_t i = 0;
     pathYMin = pathXMin = 0;

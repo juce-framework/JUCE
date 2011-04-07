@@ -57,19 +57,19 @@ public:
         }
     }
 
-    const String& getFamilyName() const throw()     { return family; }
+    const String& getFamilyName() const noexcept    { return family; }
 
-    const String& getFileName (const int style, int& faceIndex) const throw()
+    const String& getFileName (const int style, int& faceIndex) const noexcept
     {
         faceIndex = names[style].faceIndex;
         return names[style].fileName;
     }
 
-    void setMonospaced (bool mono) throw()      { monospaced = mono; }
-    bool getMonospaced() const throw()          { return monospaced; }
+    void setMonospaced (bool mono) noexcept     { monospaced = mono; }
+    bool getMonospaced() const noexcept         { return monospaced; }
 
-    void setSerif (const bool serif) throw()    { hasSerif = serif; }
-    bool getSerif() const throw()               { return hasSerif; }
+    void setSerif (const bool serif) noexcept   { hasSerif = serif; }
+    bool getSerif() const noexcept              { return hasSerif; }
 
 private:
     //==============================================================================
@@ -110,7 +110,7 @@ public:
         {
             const ScopedPointer<XmlElement> fontsInfo (XmlDocument::parse (File ("/etc/fonts/fonts.conf")));
 
-            if (fontsInfo != 0)
+            if (fontsInfo != nullptr)
             {
                 forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
                 {

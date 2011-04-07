@@ -82,7 +82,7 @@ public:
           needsDictionary (false),
           error (true),
           streamIsValid (false),
-          data (0),
+          data (nullptr),
           dataSize (0)
     {
         using namespace zlibNamespace;
@@ -98,9 +98,9 @@ public:
             inflateEnd (&stream);
     }
 
-    bool needsInput() const throw()         { return dataSize <= 0; }
+    bool needsInput() const noexcept        { return dataSize <= 0; }
 
-    void setInput (uint8* const data_, const int size) throw()
+    void setInput (uint8* const data_, const int size) noexcept
     {
         data = data_;
         dataSize = size;
@@ -109,7 +109,7 @@ public:
     int doNextBlock (uint8* const dest, const int destSize)
     {
         using namespace zlibNamespace;
-        if (streamIsValid && data != 0 && ! finished)
+        if (streamIsValid && data != nullptr && ! finished)
         {
             stream.next_in  = data;
             stream.next_out = dest;
@@ -199,9 +199,9 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 {
     if ((howMany > 0) && ! isEof)
     {
-        jassert (destBuffer != 0);
+        jassert (destBuffer != nullptr);
 
-        if (destBuffer != 0)
+        if (destBuffer != nullptr)
         {
             int numRead = 0;
             uint8* d = static_cast <uint8*> (destBuffer);

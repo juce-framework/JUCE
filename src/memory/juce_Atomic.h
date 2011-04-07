@@ -39,56 +39,56 @@ class Atomic
 {
 public:
     /** Creates a new value, initialised to zero. */
-    inline Atomic() throw()
+    inline Atomic() noexcept
         : value (0)
     {
     }
 
     /** Creates a new value, with a given initial value. */
-    inline Atomic (const Type initialValue) throw()
+    inline Atomic (const Type initialValue) noexcept
         : value (initialValue)
     {
     }
 
     /** Copies another value (atomically). */
-    inline Atomic (const Atomic& other) throw()
+    inline Atomic (const Atomic& other) noexcept
         : value (other.get())
     {
     }
 
     /** Destructor. */
-    inline ~Atomic() throw()
+    inline ~Atomic() noexcept
     {
         // This class can only be used for types which are 32 or 64 bits in size.
         static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
     }
 
     /** Atomically reads and returns the current value. */
-    Type get() const throw();
+    Type get() const noexcept;
 
     /** Copies another value onto this one (atomically). */
-    inline Atomic& operator= (const Atomic& other) throw()          { exchange (other.get()); return *this; }
+    inline Atomic& operator= (const Atomic& other) noexcept         { exchange (other.get()); return *this; }
 
     /** Copies another value onto this one (atomically). */
-    inline Atomic& operator= (const Type newValue) throw()          { exchange (newValue); return *this; }
+    inline Atomic& operator= (const Type newValue) noexcept         { exchange (newValue); return *this; }
 
     /** Atomically sets the current value. */
-    void set (Type newValue) throw()                                { exchange (newValue); }
+    void set (Type newValue) noexcept                               { exchange (newValue); }
 
     /** Atomically sets the current value, returning the value that was replaced. */
-    Type exchange (Type value) throw();
+    Type exchange (Type value) noexcept;
 
     /** Atomically adds a number to this value, returning the new value. */
-    Type operator+= (Type amountToAdd) throw();
+    Type operator+= (Type amountToAdd) noexcept;
 
     /** Atomically subtracts a number from this value, returning the new value. */
-    Type operator-= (Type amountToSubtract) throw();
+    Type operator-= (Type amountToSubtract) noexcept;
 
     /** Atomically increments this value, returning the new value. */
-    Type operator++() throw();
+    Type operator++() noexcept;
 
     /** Atomically decrements this value, returning the new value. */
-    Type operator--() throw();
+    Type operator--() noexcept;
 
     /** Atomically compares this value with a target value, and if it is equal, sets
         this to be equal to a new value.
@@ -111,7 +111,7 @@ public:
                  the comparison failed and the value was left unchanged.
         @see compareAndSetValue
     */
-    bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
+    bool compareAndSetBool (Type newValue, Type valueToCompare) noexcept;
 
     /** Atomically compares this value with a target value, and if it is equal, sets
         this to be equal to a new value.
@@ -131,10 +131,10 @@ public:
         @returns the old value before it was changed.
         @see compareAndSetBool
     */
-    Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
+    Type compareAndSetValue (Type newValue, Type valueToCompare) noexcept;
 
     /** Implements a memory read/write barrier. */
-    static void memoryBarrier() throw();
+    static void memoryBarrier() noexcept;
 
     //==============================================================================
    #if JUCE_64BIT
@@ -150,10 +150,10 @@ public:
     volatile Type value;
 
 private:
-    static inline Type castFrom32Bit (int32 value) throw()    { return *(Type*) &value; }
-    static inline Type castFrom64Bit (int64 value) throw()    { return *(Type*) &value; }
-    static inline int32 castTo32Bit (Type value) throw()      { return *(int32*) &value; }
-    static inline int64 castTo64Bit (Type value) throw()      { return *(int64*) &value; }
+    static inline Type castFrom32Bit (int32 value) noexcept   { return *(Type*) &value; }
+    static inline Type castFrom64Bit (int64 value) noexcept   { return *(Type*) &value; }
+    static inline int32 castTo32Bit (Type value) noexcept     { return *(int32*) &value; }
+    static inline int64 castTo64Bit (Type value) noexcept     { return *(int64*) &value; }
 
     Type operator++ (int); // better to just use pre-increment with atomics..
     Type operator-- (int);
@@ -176,10 +176,10 @@ private:
 
   #if JUCE_PPC || JUCE_IOS
     // None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
-    template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()   { jassertfalse; return *a += b; }
-    template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()     { jassertfalse; return ++*a; }
-    template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) throw()     { jassertfalse; return --*a; }
-    template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) throw()
+    template <typename Type> static Type OSAtomicAdd64Barrier (Type b, JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept  { jassertfalse; return *a += b; }
+    template <typename Type> static Type OSAtomicIncrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept    { jassertfalse; return ++*a; }
+    template <typename Type> static Type OSAtomicDecrement64Barrier (JUCE_MAC_ATOMICS_VOLATILE Type* a) noexcept    { jassertfalse; return --*a; }
+    template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, JUCE_MAC_ATOMICS_VOLATILE Type* value) noexcept
         { jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
     #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
@@ -213,13 +213,13 @@ private:
     #define juce_MemoryBarrier _ReadWriteBarrier
   #else
     // (these are defined in juce_win32_Threads.cpp)
-    long juce_InterlockedExchange (volatile long* a, long b) throw();
-    long juce_InterlockedIncrement (volatile long* a) throw();
-    long juce_InterlockedDecrement (volatile long* a) throw();
-    long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
-    long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
-    __int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
-    inline void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
+    long juce_InterlockedExchange (volatile long* a, long b) noexcept;
+    long juce_InterlockedIncrement (volatile long* a) noexcept;
+    long juce_InterlockedDecrement (volatile long* a) noexcept;
+    long juce_InterlockedExchangeAdd (volatile long* a, long b) noexcept;
+    long juce_InterlockedCompareExchange (volatile long* a, long b, long c) noexcept;
+    __int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) noexcept;
+    inline void juce_MemoryBarrier() noexcept  { long x = 0; juce_InterlockedIncrement (&x); }
   #endif
 
   #if JUCE_64BIT
@@ -230,10 +230,10 @@ private:
     #define juce_InterlockedDecrement64(a)          _InterlockedDecrement64(a)
   #else
     // None of these atomics are available in a 32-bit Windows build!!
-    template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
-    template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()      { jassertfalse; Type old = *a; *a = b; return old; }
-    template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()             { jassertfalse; return ++*a; }
-    template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()             { jassertfalse; return --*a; }
+    template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) noexcept  { jassertfalse; Type old = *a; *a += b; return old; }
+    template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) noexcept     { jassertfalse; Type old = *a; *a = b; return old; }
+    template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) noexcept            { jassertfalse; return ++*a; }
+    template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) noexcept            { jassertfalse; return --*a; }
     #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
 #endif
@@ -245,7 +245,7 @@ private:
 
 //==============================================================================
 template <typename Type>
-inline Type Atomic<Type>::get() const throw()
+inline Type Atomic<Type>::get() const noexcept
 {
   #if JUCE_ATOMICS_MAC
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
@@ -262,7 +262,7 @@ inline Type Atomic<Type>::get() const throw()
 }
 
 template <typename Type>
-inline Type Atomic<Type>::exchange (const Type newValue) throw()
+inline Type Atomic<Type>::exchange (const Type newValue) noexcept
 {
   #if JUCE_ATOMICS_ANDROID
     return castFrom32Bit (__atomic_swap (castTo32Bit (newValue), (volatile int*) &value));
@@ -277,7 +277,7 @@ inline Type Atomic<Type>::exchange (const Type newValue) throw()
 }
 
 template <typename Type>
-inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
+inline Type Atomic<Type>::operator+= (const Type amountToAdd) noexcept
 {
   #if JUCE_ATOMICS_MAC
     return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
@@ -299,13 +299,13 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 }
 
 template <typename Type>
-inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
+inline Type Atomic<Type>::operator-= (const Type amountToSubtract) noexcept
 {
     return operator+= (juce_negate (amountToSubtract));
 }
 
 template <typename Type>
-inline Type Atomic<Type>::operator++() throw()
+inline Type Atomic<Type>::operator++() noexcept
 {
   #if JUCE_ATOMICS_MAC
     return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
@@ -321,7 +321,7 @@ inline Type Atomic<Type>::operator++() throw()
 }
 
 template <typename Type>
-inline Type Atomic<Type>::operator--() throw()
+inline Type Atomic<Type>::operator--() noexcept
 {
   #if JUCE_ATOMICS_MAC
     return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
@@ -337,7 +337,7 @@ inline Type Atomic<Type>::operator--() throw()
 }
 
 template <typename Type>
-inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
+inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) noexcept
 {
   #if JUCE_ATOMICS_MAC
     return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
@@ -353,7 +353,7 @@ inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type val
 }
 
 template <typename Type>
-inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) throw()
+inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) noexcept
 {
   #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_ANDROID
     for (;;) // Annoying workaround for only having a bool CAS operation..
@@ -376,7 +376,7 @@ inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type va
 }
 
 template <typename Type>
-inline void Atomic<Type>::memoryBarrier() throw()
+inline void Atomic<Type>::memoryBarrier() noexcept
 {
   #if JUCE_ATOMICS_MAC
     OSMemoryBarrier();

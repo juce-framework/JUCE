@@ -32,21 +32,21 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ReadWriteLock::ReadWriteLock() throw()
+ReadWriteLock::ReadWriteLock() noexcept
     : numWaitingWriters (0),
       numWriters (0),
       writerThreadId (0)
 {
 }
 
-ReadWriteLock::~ReadWriteLock() throw()
+ReadWriteLock::~ReadWriteLock() noexcept
 {
     jassert (readerThreads.size() == 0);
     jassert (numWriters == 0);
 }
 
 //==============================================================================
-void ReadWriteLock::enterRead() const throw()
+void ReadWriteLock::enterRead() const noexcept
 {
     const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const SpinLock::ScopedLockType sl (accessLock);
@@ -82,7 +82,7 @@ void ReadWriteLock::enterRead() const throw()
     }
 }
 
-void ReadWriteLock::exitRead() const throw()
+void ReadWriteLock::exitRead() const noexcept
 {
     const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const SpinLock::ScopedLockType sl (accessLock);
@@ -111,7 +111,7 @@ void ReadWriteLock::exitRead() const throw()
 }
 
 //==============================================================================
-void ReadWriteLock::enterWrite() const throw()
+void ReadWriteLock::enterWrite() const noexcept
 {
     const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const SpinLock::ScopedLockType sl (accessLock);
@@ -136,7 +136,7 @@ void ReadWriteLock::enterWrite() const throw()
     }
 }
 
-bool ReadWriteLock::tryEnterWrite() const throw()
+bool ReadWriteLock::tryEnterWrite() const noexcept
 {
     const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const SpinLock::ScopedLockType sl (accessLock);
@@ -154,7 +154,7 @@ bool ReadWriteLock::tryEnterWrite() const throw()
     return false;
 }
 
-void ReadWriteLock::exitWrite() const throw()
+void ReadWriteLock::exitWrite() const noexcept
 {
     const SpinLock::ScopedLockType sl (accessLock);
 

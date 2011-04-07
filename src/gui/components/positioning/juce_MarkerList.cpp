@@ -59,7 +59,7 @@ MarkerList::~MarkerList()
     listeners.call (&MarkerList::Listener::markerListBeingDeleted, this);
 }
 
-bool MarkerList::operator== (const MarkerList& other) const throw()
+bool MarkerList::operator== (const MarkerList& other) const noexcept
 {
     if (other.markers.size() != markers.size())
         return false;
@@ -67,34 +67,34 @@ bool MarkerList::operator== (const MarkerList& other) const throw()
     for (int i = markers.size(); --i >= 0;)
     {
         const Marker* const m1 = markers.getUnchecked(i);
-        jassert (m1 != 0);
+        jassert (m1 != nullptr);
 
         const Marker* const m2 = other.getMarker (m1->name);
 
-        if (m2 == 0 || *m1 != *m2)
+        if (m2 == nullptr || *m1 != *m2)
             return false;
     }
 
     return true;
 }
 
-bool MarkerList::operator!= (const MarkerList& other) const throw()
+bool MarkerList::operator!= (const MarkerList& other) const noexcept
 {
     return ! operator== (other);
 }
 
 //==============================================================================
-int MarkerList::getNumMarkers() const throw()
+int MarkerList::getNumMarkers() const noexcept
 {
     return markers.size();
 }
 
-const MarkerList::Marker* MarkerList::getMarker (const int index) const throw()
+const MarkerList::Marker* MarkerList::getMarker (const int index) const noexcept
 {
     return markers [index];
 }
 
-const MarkerList::Marker* MarkerList::getMarker (const String& name) const throw()
+const MarkerList::Marker* MarkerList::getMarker (const String& name) const noexcept
 {
     for (int i = 0; i < markers.size(); ++i)
     {
@@ -111,7 +111,7 @@ void MarkerList::setMarker (const String& name, const RelativeCoordinate& positi
 {
     Marker* const m = const_cast <Marker*> (getMarker (name));
 
-    if (m != 0)
+    if (m != nullptr)
     {
         if (m->position != position)
         {
@@ -179,12 +179,12 @@ MarkerList::Marker::Marker (const String& name_, const RelativeCoordinate& posit
 {
 }
 
-bool MarkerList::Marker::operator== (const Marker& other) const throw()
+bool MarkerList::Marker::operator== (const Marker& other) const noexcept
 {
     return name == other.name && position == other.position;
 }
 
-bool MarkerList::Marker::operator!= (const Marker& other) const throw()
+bool MarkerList::Marker::operator!= (const Marker& other) const noexcept
 {
     return ! operator== (other);
 }
@@ -250,14 +250,14 @@ void MarkerList::ValueTreeWrapper::removeMarker (const ValueTree& marker, UndoMa
 
 double MarkerList::getMarkerPosition (const Marker& marker, Component* parentComponent) const
 {
-    if (parentComponent != 0)
+    if (parentComponent != nullptr)
     {
         RelativeCoordinatePositionerBase::ComponentScope scope (*parentComponent);
         return marker.position.resolve (&scope);
     }
     else
     {
-        return marker.position.resolve (0);
+        return marker.position.resolve (nullptr);
     }
 }
 

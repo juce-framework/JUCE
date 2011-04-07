@@ -75,11 +75,11 @@ void Viewport::deleteContentComp()
         // This sets the content comp to a null pointer before deleting the old one, in case
         // anything tries to use the old one while it's in mid-deletion..
         ScopedPointer<Component> oldCompDeleter (contentComp);
-        contentComp = 0;
+        contentComp = nullptr;
     }
     else
     {
-        contentComp = 0;
+        contentComp = nullptr;
     }
 }
 
@@ -91,7 +91,7 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
         contentComp = newViewedComponent;
         deleteContent = deleteComponentWhenNoLongerNeeded;
 
-        if (contentComp != 0)
+        if (contentComp != nullptr)
         {
             contentHolder.addAndMakeVisible (contentComp);
             setViewPosition (0, 0);
@@ -107,7 +107,7 @@ int Viewport::getMaximumVisibleHeight() const   { return contentHolder.getHeight
 
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
 {
-    if (contentComp != 0)
+    if (contentComp != nullptr)
         contentComp->setTopLeftPosition (jmax (jmin (0, contentHolder.getWidth() - contentComp->getWidth()), jmin (0, -xPixelsOffset)),
                                          jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -yPixelsOffset)));
 }
@@ -119,14 +119,14 @@ void Viewport::setViewPosition (const Point<int>& newPosition)
 
 void Viewport::setViewPositionProportionately (const double x, const double y)
 {
-    if (contentComp != 0)
+    if (contentComp != nullptr)
         setViewPosition (jmax (0, roundToInt (x * (contentComp->getWidth() - getWidth()))),
                          jmax (0, roundToInt (y * (contentComp->getHeight() - getHeight()))));
 }
 
 bool Viewport::autoScroll (const int mouseX, const int mouseY, const int activeBorderThickness, const int maximumSpeed)
 {
-    if (contentComp != 0)
+    if (contentComp != nullptr)
     {
         int dx = 0, dy = 0;
 
@@ -191,7 +191,7 @@ void Viewport::updateVisibleArea()
 
     Rectangle<int> contentArea (getLocalBounds());
 
-    if (contentComp != 0 && ! contentArea.contains (contentComp->getBounds()))
+    if (contentComp != nullptr && ! contentArea.contains (contentComp->getBounds()))
     {
         hBarVisible = canShowHBar && (hBarVisible || contentComp->getX() < 0 || contentComp->getRight() > contentArea.getWidth());
         vBarVisible = canShowVBar && (vBarVisible || contentComp->getY() < 0 || contentComp->getBottom() > contentArea.getHeight());
@@ -218,7 +218,7 @@ void Viewport::updateVisibleArea()
     contentHolder.setBounds (contentArea);
 
     Rectangle<int> contentBounds;
-    if (contentComp != 0)
+    if (contentComp != nullptr)
         contentBounds = contentHolder.getLocalArea (contentComp, contentComp->getLocalBounds());
 
     Point<int> visibleOrigin (-contentBounds.getPosition());

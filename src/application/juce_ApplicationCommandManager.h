@@ -155,13 +155,13 @@ public:
 
         @see registerCommand
     */
-    int getNumCommands() const throw()                                              { return commands.size(); }
+    int getNumCommands() const noexcept                                             { return commands.size(); }
 
     /** Returns the details about one of the registered commands.
 
         The index is between 0 and (getNumCommands() - 1).
     */
-    const ApplicationCommandInfo* getCommandForIndex (int index) const throw()      { return commands [index]; }
+    const ApplicationCommandInfo* getCommandForIndex (int index) const noexcept     { return commands [index]; }
 
     /** Returns the details about a given command ID.
 
@@ -169,14 +169,14 @@ public:
         ID number, and return its associated info. If no matching command is found, this
         will return 0.
     */
-    const ApplicationCommandInfo* getCommandForID (CommandID commandID) const throw();
+    const ApplicationCommandInfo* getCommandForID (CommandID commandID) const noexcept;
 
     /** Returns the name field for a command.
 
         An empty string is returned if no command with this ID has been registered.
         @see getDescriptionOfCommand
     */
-    const String getNameOfCommand (CommandID commandID) const throw();
+    const String getNameOfCommand (CommandID commandID) const noexcept;
 
     /** Returns the description field for a command.
 
@@ -185,7 +185,7 @@ public:
 
         @see getNameOfCommand
     */
-    const String getDescriptionOfCommand (CommandID commandID) const throw();
+    const String getDescriptionOfCommand (CommandID commandID) const noexcept;
 
     /** Returns the list of categories.
 
@@ -211,7 +211,7 @@ public:
 
         @see KeyPressMappingSet
     */
-    KeyPressMappingSet* getKeyMappings() const throw()                          { return keyMappings; }
+    KeyPressMappingSet* getKeyMappings() const noexcept                         { return keyMappings; }
 
 
     //==============================================================================
@@ -268,7 +268,7 @@ public:
         If you use this to set a target, make sure you call setFirstCommandTarget (0) before
         deleting the target object.
     */
-    void setFirstCommandTarget (ApplicationCommandTarget* newTarget) throw();
+    void setFirstCommandTarget (ApplicationCommandTarget* newTarget) noexcept;
 
     /** Tries to find the best target to use to perform a given command.
 

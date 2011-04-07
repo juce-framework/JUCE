@@ -94,7 +94,7 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
 
         JUCE_AUTORELEASEPOOL
 
-        LocalisedStrings::setCurrentMappings (0);
+        LocalisedStrings::setCurrentMappings (nullptr);
         Thread::stopAllThreads (3000);
 
       #if JUCE_DEBUG
@@ -118,7 +118,7 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
         initialiseJuce_NonGUI();
 
         MessageManager::getInstance();
-        LookAndFeel::setDefaultLookAndFeel (0);
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
 
       #if JUCE_DEBUG
         try  // This section is just a safety-net for catching builds without RTTI enabled..
@@ -128,7 +128,7 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
 
             // Got an exception here? Then TURN ON RTTI in your compiler settings!!
             o = dynamic_cast <MemoryOutputStream*> (o);
-            jassert (o != 0);
+            jassert (o != nullptr);
         }
         catch (...)
         {

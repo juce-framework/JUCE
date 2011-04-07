@@ -539,7 +539,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 
 
 //==============================================================================
-bool Desktop::canUseSemiTransparentWindows() throw()
+bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     return true;
 }
@@ -575,12 +575,12 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
     return false;
 }
 
-void ModifierKeys::updateCurrentModifiers() throw()
+void ModifierKeys::updateCurrentModifiers() noexcept
 {
     currentModifiers = AndroidComponentPeer::currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     return AndroidComponentPeer::currentModifiers;
 }

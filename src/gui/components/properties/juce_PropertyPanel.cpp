@@ -99,7 +99,7 @@ public:
 
             PropertyPanel* const pp = findParentComponentOfClass ((PropertyPanel*) 0);
 
-            if (pp != 0)
+            if (pp != nullptr)
                 pp->resized();
         }
     }
@@ -181,7 +181,7 @@ public:
         addAndMakeVisible (newSection, 0);
     }
 
-    int getNumSections() const throw()                              { return sections.size(); }
+    int getNumSections() const noexcept                             { return sections.size(); }
     PropertySectionComponent* getSection (const int index) const    { return sections [index]; }
 
 private:

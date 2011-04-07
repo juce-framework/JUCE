@@ -55,18 +55,18 @@ public:
     virtual bool toBool (const ValueUnion&) const               { return false; }
     virtual DynamicObject* toObject (const ValueUnion&) const   { return 0; }
 
-    virtual bool isVoid() const throw()                         { return false; }
-    virtual bool isInt() const throw()                          { return false; }
-    virtual bool isInt64() const throw()                        { return false; }
-    virtual bool isBool() const throw()                         { return false; }
-    virtual bool isDouble() const throw()                       { return false; }
-    virtual bool isString() const throw()                       { return false; }
-    virtual bool isObject() const throw()                       { return false; }
-    virtual bool isMethod() const throw()                       { return false; }
+    virtual bool isVoid() const noexcept                        { return false; }
+    virtual bool isInt() const noexcept                         { return false; }
+    virtual bool isInt64() const noexcept                       { return false; }
+    virtual bool isBool() const noexcept                        { return false; }
+    virtual bool isDouble() const noexcept                      { return false; }
+    virtual bool isString() const noexcept                      { return false; }
+    virtual bool isObject() const noexcept                      { return false; }
+    virtual bool isMethod() const noexcept                      { return false; }
 
-    virtual void cleanUp (ValueUnion&) const throw()  {}
+    virtual void cleanUp (ValueUnion&) const noexcept {}
     virtual void createCopy (ValueUnion& dest, const ValueUnion& source) const      { dest = source; }
-    virtual bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw() = 0;
+    virtual bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept = 0;
     virtual void writeToStream (const ValueUnion& data, OutputStream& output) const = 0;
 };
 
@@ -77,8 +77,8 @@ public:
     VariantType_Void() {}
     static const VariantType_Void instance;
 
-    bool isVoid() const throw()     { return true; }
-    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const throw()  { return otherType.isVoid(); }
+    bool isVoid() const noexcept    { return true; }
+    bool equals (const ValueUnion&, const ValueUnion&, const VariantType& otherType) const noexcept { return otherType.isVoid(); }
     void writeToStream (const ValueUnion&, OutputStream& output) const   { output.writeCompressedInt (0); }
 };
 
@@ -94,9 +94,9 @@ public:
     double toDouble (const ValueUnion& data) const          { return (double) data.intValue; }
     const String toString (const ValueUnion& data) const    { return String (data.intValue); }
     bool toBool (const ValueUnion& data) const              { return data.intValue != 0; }
-    bool isInt() const throw()                              { return true; }
+    bool isInt() const noexcept                             { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.toInt (otherData) == data.intValue;
     }
@@ -121,9 +121,9 @@ public:
     double toDouble (const ValueUnion& data) const          { return (double) data.int64Value; }
     const String toString (const ValueUnion& data) const    { return String (data.int64Value); }
     bool toBool (const ValueUnion& data) const              { return data.int64Value != 0; }
-    bool isInt64() const throw()                            { return true; }
+    bool isInt64() const noexcept                           { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.toInt64 (otherData) == data.int64Value;
     }
@@ -148,9 +148,9 @@ public:
     double toDouble (const ValueUnion& data) const          { return data.doubleValue; }
     const String toString (const ValueUnion& data) const    { return String (data.doubleValue); }
     bool toBool (const ValueUnion& data) const              { return data.doubleValue != 0; }
-    bool isDouble() const throw()                           { return true; }
+    bool isDouble() const noexcept                          { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.toDouble (otherData) == data.doubleValue;
     }
@@ -175,9 +175,9 @@ public:
     double toDouble (const ValueUnion& data) const          { return data.boolValue ? 1.0 : 0.0; }
     const String toString (const ValueUnion& data) const    { return String::charToString (data.boolValue ? '1' : '0'); }
     bool toBool (const ValueUnion& data) const              { return data.boolValue; }
-    bool isBool() const throw()                             { return true; }
+    bool isBool() const noexcept                            { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.toBool (otherData) == data.boolValue;
     }
@@ -196,7 +196,7 @@ public:
     VariantType_String() {}
     static const VariantType_String instance;
 
-    void cleanUp (ValueUnion& data) const throw()                        { delete data.stringValue; }
+    void cleanUp (ValueUnion& data) const noexcept                       { delete data.stringValue; }
     void createCopy (ValueUnion& dest, const ValueUnion& source) const   { dest.stringValue = new String (*source.stringValue); }
 
     int toInt (const ValueUnion& data) const                { return data.stringValue->getIntValue(); };
@@ -206,9 +206,9 @@ public:
     bool toBool (const ValueUnion& data) const              { return data.stringValue->getIntValue() != 0
                                                                       || data.stringValue->trim().equalsIgnoreCase ("true")
                                                                       || data.stringValue->trim().equalsIgnoreCase ("yes"); }
-    bool isString() const throw()                           { return true; }
+    bool isString() const noexcept                          { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.toString (otherData) == *data.stringValue;
     }
@@ -231,15 +231,15 @@ public:
     VariantType_Object() {}
     static const VariantType_Object instance;
 
-    void cleanUp (ValueUnion& data) const throw()                        { if (data.objectValue != 0) data.objectValue->decReferenceCount(); }
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const   { dest.objectValue = source.objectValue; if (dest.objectValue != 0) dest.objectValue->incReferenceCount(); }
+    void cleanUp (ValueUnion& data) const noexcept                       { if (data.objectValue != nullptr) data.objectValue->decReferenceCount(); }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const   { dest.objectValue = source.objectValue; if (dest.objectValue != nullptr) dest.objectValue->incReferenceCount(); }
 
     const String toString (const ValueUnion& data) const    { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
     bool toBool (const ValueUnion& data) const              { return data.objectValue != 0; }
     DynamicObject* toObject (const ValueUnion& data) const  { return data.objectValue; }
-    bool isObject() const throw()                           { return true; }
+    bool isObject() const noexcept                          { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.toObject (otherData) == data.objectValue;
     }
@@ -260,9 +260,9 @@ public:
 
     const String toString (const ValueUnion&) const         { return "Method"; }
     bool toBool (const ValueUnion& data) const              { return data.methodValue != 0; }
-    bool isMethod() const throw()                           { return true; }
+    bool isMethod() const noexcept                          { return true; }
 
-    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const throw()
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
         return otherType.isMethod() && otherData.methodValue == data.methodValue;
     }
@@ -286,11 +286,11 @@ const var::VariantType_Method  var::VariantType_Method::instance;
 
 
 //==============================================================================
-var::var() throw()  : type (&VariantType_Void::instance)
+var::var() noexcept : type (&VariantType_Void::instance)
 {
 }
 
-var::~var() throw()
+var::~var() noexcept
 {
     type->cleanUp (value);
 }
@@ -303,22 +303,22 @@ var::var (const var& valueToCopy)  : type (valueToCopy.type)
     type->createCopy (value, valueToCopy.value);
 }
 
-var::var (const int value_) throw() : type (&VariantType_Int::instance)
+var::var (const int value_) noexcept : type (&VariantType_Int::instance)
 {
     value.intValue = value_;
 }
 
-var::var (const int64 value_) throw() : type (&VariantType_Int64::instance)
+var::var (const int64 value_) noexcept : type (&VariantType_Int64::instance)
 {
     value.int64Value = value_;
 }
 
-var::var (const bool value_) throw()  : type (&VariantType_Bool::instance)
+var::var (const bool value_) noexcept : type (&VariantType_Bool::instance)
 {
     value.boolValue = value_;
 }
 
-var::var (const double value_) throw()  : type (&VariantType_Double::instance)
+var::var (const double value_) noexcept : type (&VariantType_Double::instance)
 {
     value.doubleValue = value_;
 }
@@ -342,24 +342,24 @@ var::var (DynamicObject* const object)  : type (&VariantType_Object::instance)
 {
     value.objectValue = object;
 
-    if (object != 0)
+    if (object != nullptr)
         object->incReferenceCount();
 }
 
-var::var (MethodFunction method_) throw()  : type (&VariantType_Method::instance)
+var::var (MethodFunction method_) noexcept : type (&VariantType_Method::instance)
 {
     value.methodValue = method_;
 }
 
 //==============================================================================
-bool var::isVoid() const throw()                { return type->isVoid(); }
-bool var::isInt() const throw()                 { return type->isInt(); }
-bool var::isInt64() const throw()               { return type->isInt64(); }
-bool var::isBool() const throw()                { return type->isBool(); }
-bool var::isDouble() const throw()              { return type->isDouble(); }
-bool var::isString() const throw()              { return type->isString(); }
-bool var::isObject() const throw()              { return type->isObject(); }
-bool var::isMethod() const throw()              { return type->isMethod(); }
+bool var::isVoid() const noexcept               { return type->isVoid(); }
+bool var::isInt() const noexcept                { return type->isInt(); }
+bool var::isInt64() const noexcept              { return type->isInt64(); }
+bool var::isBool() const noexcept               { return type->isBool(); }
+bool var::isDouble() const noexcept             { return type->isDouble(); }
+bool var::isString() const noexcept             { return type->isString(); }
+bool var::isObject() const noexcept             { return type->isObject(); }
+bool var::isMethod() const noexcept             { return type->isMethod(); }
 
 var::operator int() const                       { return type->toInt (value); }
 var::operator int64() const                     { return type->toInt64 (value); }
@@ -371,7 +371,7 @@ var::operator const String() const              { return type->toString (value);
 DynamicObject* var::getObject() const           { return type->toObject (value); }
 
 //==============================================================================
-void var::swapWith (var& other) throw()
+void var::swapWith (var& other) noexcept
 {
     std::swap (type, other.type);
     std::swap (value, other.value);
@@ -389,20 +389,20 @@ var& var::operator= (DynamicObject* newValue)     { var v (newValue); swapWith (
 var& var::operator= (MethodFunction newValue)     { var v (newValue); swapWith (v); return *this; }
 
 //==============================================================================
-bool var::equals (const var& other) const throw()
+bool var::equals (const var& other) const noexcept
 {
     return type->equals (value, other.value, *other.type);
 }
 
-bool var::equalsWithSameType (const var& other) const throw()
+bool var::equalsWithSameType (const var& other) const noexcept
 {
     return type == other.type && equals (other);
 }
 
-bool operator== (const var& v1, const var& v2) throw()      { return v1.equals (v2); }
-bool operator!= (const var& v1, const var& v2) throw()      { return ! v1.equals (v2); }
-bool operator== (const var& v1, const String& v2) throw()   { return v1.toString() == v2; }
-bool operator!= (const var& v1, const String& v2) throw()   { return v1.toString() != v2; }
+bool operator== (const var& v1, const var& v2) noexcept     { return v1.equals (v2); }
+bool operator!= (const var& v1, const var& v2) noexcept     { return ! v1.equals (v2); }
+bool operator== (const var& v1, const String& v2) noexcept  { return v1.toString() == v2; }
+bool operator!= (const var& v1, const String& v2) noexcept  { return v1.toString() != v2; }
 
 //==============================================================================
 void var::writeToStream (OutputStream& output) const
@@ -440,13 +440,13 @@ const var var::readFromStream (InputStream& input)
 const var var::operator[] (const Identifier& propertyName) const
 {
     DynamicObject* const o = getObject();
-    return o != 0 ? o->getProperty (propertyName) : var::null;
+    return o != nullptr ? o->getProperty (propertyName) : var::null;
 }
 
 const var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
 {
     DynamicObject* const o = getObject();
-    return o != 0 ? o->invokeMethod (method, arguments, numArguments) : var::null;
+    return o != nullptr ? o->invokeMethod (method, arguments, numArguments) : var::null;
 }
 
 const var var::invoke (const var& targetObject, const var* arguments, int numArguments) const
@@ -455,7 +455,7 @@ const var var::invoke (const var& targetObject, const var* arguments, int numArg
     {
         DynamicObject* const target = targetObject.getObject();
 
-        if (target != 0)
+        if (target != nullptr)
             return (target->*(value.methodValue)) (arguments, numArguments);
     }
 

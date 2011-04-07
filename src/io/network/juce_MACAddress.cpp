@@ -68,7 +68,7 @@ const String MACAddress::toString() const
     return s;
 }
 
-int64 MACAddress::toInt64() const throw()
+int64 MACAddress::toInt64() const noexcept
 {
     int64 n = 0;
 
@@ -78,10 +78,10 @@ int64 MACAddress::toInt64() const throw()
     return n;
 }
 
-bool MACAddress::isNull() const throw()                                 { return asInt64 == 0; }
+bool MACAddress::isNull() const noexcept                                { return asInt64 == 0; }
 
-bool MACAddress::operator== (const MACAddress& other) const throw()     { return asInt64 == other.asInt64; }
-bool MACAddress::operator!= (const MACAddress& other) const throw()     { return asInt64 != other.asInt64; }
+bool MACAddress::operator== (const MACAddress& other) const noexcept    { return asInt64 == other.asInt64; }
+bool MACAddress::operator!= (const MACAddress& other) const noexcept    { return asInt64 != other.asInt64; }
 
 
 END_JUCE_NAMESPACE

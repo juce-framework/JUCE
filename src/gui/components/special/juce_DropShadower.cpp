@@ -55,7 +55,7 @@ public:
                             | ComponentPeer::windowIsTemporary
                             | ComponentPeer::windowIgnoresKeyPresses);
         }
-        else if (owner.getParentComponent() != 0)
+        else if (owner.getParentComponent() != nullptr)
         {
             owner.getParentComponent()->addChildComponent (this);
         }
@@ -115,7 +115,7 @@ DropShadower::DropShadower (const float alpha_,
                             const int xOffset_,
                             const int yOffset_,
                             const float blurRadius_)
-   : owner (0),
+   : owner (nullptr),
      xOffset (xOffset_),
      yOffset (yOffset_),
      alpha (alpha_),
@@ -126,7 +126,7 @@ DropShadower::DropShadower (const float alpha_,
 
 DropShadower::~DropShadower()
 {
-    if (owner != 0)
+    if (owner != nullptr)
         owner->removeComponentListener (this);
 
     reentrant = true;
@@ -137,15 +137,15 @@ void DropShadower::setOwner (Component* componentToFollow)
 {
     if (componentToFollow != owner)
     {
-        if (owner != 0)
+        if (owner != nullptr)
             owner->removeComponentListener (this);
 
         // (the component can't be null)
-        jassert (componentToFollow != 0);
+        jassert (componentToFollow != nullptr);
 
         owner = componentToFollow;
 
-        jassert (owner != 0);
+        jassert (owner != nullptr);
         jassert (owner->isOpaque()); // doesn't work properly for semi-transparent comps!
 
         owner->addComponentListener (this);
@@ -177,18 +177,18 @@ void DropShadower::componentVisibilityChanged (Component&)
 
 void DropShadower::updateShadows()
 {
-    if (reentrant || owner == 0)
+    if (reentrant || owner == nullptr)
         return;
 
     ComponentPeer* const peer = owner->getPeer();
-    const bool isOwnerVisible = owner->isVisible() && (peer == 0 || ! peer->isMinimised());
+    const bool isOwnerVisible = owner->isVisible() && (peer == nullptr || ! peer->isMinimised());
 
     const bool createShadowWindows  = shadowWindows.size() == 0
                                          && owner->getWidth() > 0
                                          && owner->getHeight() > 0
                                          && isOwnerVisible
                                          && (Desktop::canUseSemiTransparentWindows()
-                                              || owner->getParentComponent() != 0);
+                                              || owner->getParentComponent() != nullptr);
 
     {
         const ScopedValueSetter<bool> setter (reentrant, true, false);

@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 NamedPipe::NamedPipe()
-    : internal (0)
+    : internal (nullptr)
 {
 }
 
@@ -55,7 +55,7 @@ bool NamedPipe::createNewPipe (const String& pipeName)
 
 bool NamedPipe::isOpen() const
 {
-    return internal != 0;
+    return internal != nullptr;
 }
 
 const String NamedPipe::getName() const

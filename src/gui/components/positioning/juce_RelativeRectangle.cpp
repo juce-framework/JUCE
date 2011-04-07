@@ -104,12 +104,12 @@ RelativeRectangle::RelativeRectangle (const String& s)
     bottom = RelativeCoordinate (Expression::parse (text));
 }
 
-bool RelativeRectangle::operator== (const RelativeRectangle& other) const throw()
+bool RelativeRectangle::operator== (const RelativeRectangle& other) const noexcept
 {
     return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
 }
 
-bool RelativeRectangle::operator!= (const RelativeRectangle& other) const throw()
+bool RelativeRectangle::operator!= (const RelativeRectangle& other) const noexcept
 {
     return ! operator== (other);
 }
@@ -145,7 +145,7 @@ private:
 
 const Rectangle<float> RelativeRectangle::resolve (const Expression::Scope* scope) const
 {
-    if (scope == 0)
+    if (scope == nullptr)
     {
         RelativeRectangleLocalScope scope (*this);
         return resolve (&scope);
@@ -211,7 +211,7 @@ public:
         return ok;
     }
 
-    bool isUsingRectangle (const RelativeRectangle& other) const throw()
+    bool isUsingRectangle (const RelativeRectangle& other) const noexcept
     {
         return rectangle == other;
     }
@@ -255,7 +255,7 @@ void RelativeRectangle::applyToComponent (Component& component) const
     {
         RelativeRectangleComponentPositioner* current = dynamic_cast <RelativeRectangleComponentPositioner*> (component.getPositioner());
 
-        if (current == 0 || ! current->isUsingRectangle (*this))
+        if (current == nullptr || ! current->isUsingRectangle (*this))
         {
             RelativeRectangleComponentPositioner* p = new RelativeRectangleComponentPositioner (component, *this);
 
@@ -265,8 +265,8 @@ void RelativeRectangle::applyToComponent (Component& component) const
     }
     else
     {
-        component.setPositioner (0);
-        component.setBounds (resolve (0).getSmallestIntegerContainer());
+        component.setPositioner (nullptr);
+        component.setBounds (resolve (nullptr).getSmallestIntegerContainer());
     }
 }
 

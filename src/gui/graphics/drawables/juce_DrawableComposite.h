@@ -60,7 +60,7 @@ public:
     /** Returns the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
         @see setBoundingBox
     */
-    const RelativeParallelogram& getBoundingBox() const throw()             { return bounds; }
+    const RelativeParallelogram& getBoundingBox() const noexcept            { return bounds; }
 
     /** Changes the bounding box transform to match the content area, so that any sub-items will
         be drawn at their untransformed positions.

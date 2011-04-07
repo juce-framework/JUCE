@@ -103,7 +103,7 @@ public:
 
     /** Returns true if the player has stopped because its input stream ran out of data.
     */
-    bool hasStreamFinished() const throw()              { return inputStreamEOF; }
+    bool hasStreamFinished() const noexcept             { return inputStreamEOF; }
 
     //==============================================================================
     /** Starts playing (if a source has been selected).
@@ -121,7 +121,7 @@ public:
     void stop();
 
     /** Returns true if it's currently playing. */
-    bool isPlaying() const throw()      { return playing; }
+    bool isPlaying() const noexcept     { return playing; }
 
     //==============================================================================
     /** Changes the gain to apply to the output.
@@ -129,13 +129,13 @@ public:
         @param newGain  a factor by which to multiply the outgoing samples,
                         so 1.0 = 0dB, 0.5 = -6dB, 2.0 = 6dB, etc.
     */
-    void setGain (float newGain) throw();
+    void setGain (float newGain) noexcept;
 
     /** Returns the current gain setting.
 
         @see setGain
     */
-    float getGain() const throw()       { return gain; }
+    float getGain() const noexcept      { return gain; }
 
 
     //==============================================================================

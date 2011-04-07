@@ -114,14 +114,14 @@ public:
     }
 
     //==============================================================================
-    bool isExhausted()                  { return stream != 0 && stream.callBooleanMethod (android.isExhausted); }
-    int64 getTotalLength()              { return stream != 0 ? stream.callLongMethod (android.getTotalLength) : 0; }
-    int64 getPosition()                 { return stream != 0 ? stream.callLongMethod (android.getPosition) : 0; }
-    bool setPosition (int64 wantedPos)  { return stream != 0 && stream.callBooleanMethod (android.setPosition, (jlong) wantedPos); }
+    bool isExhausted()                  { return stream != nullptr && stream.callBooleanMethod (android.isExhausted); }
+    int64 getTotalLength()              { return stream != nullptr ? stream.callLongMethod (android.getTotalLength) : 0; }
+    int64 getPosition()                 { return stream != nullptr ? stream.callLongMethod (android.getPosition) : 0; }
+    bool setPosition (int64 wantedPos)  { return stream != nullptr && stream.callBooleanMethod (android.setPosition, (jlong) wantedPos); }
 
     int read (void* buffer, int bytesToRead)
     {
-        if (stream == 0)
+        if (stream == nullptr)
             return 0;
 
         JNIEnv* env = getEnv();

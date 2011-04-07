@@ -44,7 +44,7 @@ class JUCE_API  PositionableAudioSource  : public AudioSource
 protected:
     //==============================================================================
     /** Creates the PositionableAudioSource. */
-    PositionableAudioSource() throw()   {}
+    PositionableAudioSource() noexcept  {}
 
 public:
     /** Destructor */

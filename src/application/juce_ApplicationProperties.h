@@ -82,7 +82,7 @@ public:
                                const String& folderName,
                                int millisecondsBeforeSaving,
                                int propertiesFileOptions,
-                               InterProcessLock* processLock = 0);
+                               InterProcessLock* processLock = nullptr);
 
     /** Tests whether the files can be successfully written to, and can show
         an error message if not.

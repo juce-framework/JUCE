@@ -47,8 +47,8 @@ void MultiDocumentPanelWindow::maximiseButtonPressed()
 {
     MultiDocumentPanel* const owner = getOwner();
 
-    jassert (owner != 0); // these windows are only designed to be used inside a MultiDocumentPanel!
-    if (owner != 0)
+    jassert (owner != nullptr); // these windows are only designed to be used inside a MultiDocumentPanel!
+    if (owner != nullptr)
         owner->setLayoutMode (MultiDocumentPanel::MaximisedWindowsWithTabs);
 }
 
@@ -56,8 +56,8 @@ void MultiDocumentPanelWindow::closeButtonPressed()
 {
     MultiDocumentPanel* const owner = getOwner();
 
-    jassert (owner != 0); // these windows are only designed to be used inside a MultiDocumentPanel!
-    if (owner != 0)
+    jassert (owner != nullptr); // these windows are only designed to be used inside a MultiDocumentPanel!
+    if (owner != nullptr)
         owner->closeDocument (getContentComponent(), true);
 }
 
@@ -77,11 +77,11 @@ void MultiDocumentPanelWindow::updateOrder()
 {
     MultiDocumentPanel* const owner = getOwner();
 
-    if (owner != 0)
+    if (owner != nullptr)
         owner->updateOrder();
 }
 
-MultiDocumentPanel* MultiDocumentPanelWindow::getOwner() const throw()
+MultiDocumentPanel* MultiDocumentPanelWindow::getOwner() const noexcept
 {
     // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
     return findParentComponentOfClass ((MultiDocumentPanel*) 0);
@@ -106,7 +106,7 @@ public:
         // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
         MultiDocumentPanel* const owner = findParentComponentOfClass ((MultiDocumentPanel*) 0);
 
-        if (owner != 0)
+        if (owner != nullptr)
             owner->updateOrder();
     }
 };
@@ -164,7 +164,7 @@ void MultiDocumentPanel::addWindow (Component* component)
     int x = 4;
     Component* const topComp = getChildComponent (getNumChildComponents() - 1);
 
-    if (topComp != 0 && topComp->getX() == x && topComp->getY() == x)
+    if (topComp != nullptr && topComp->getX() == x && topComp->getY() == x)
         x += 16;
 
     dw->setTopLeftPosition (x, x);
@@ -183,9 +183,9 @@ bool MultiDocumentPanel::addDocument (Component* const component,
 {
     // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
     // with a frame-within-a-frame! Just pass in the bare content component.
-    jassert (dynamic_cast <ResizableWindow*> (component) == 0);
+    jassert (dynamic_cast <ResizableWindow*> (component) == nullptr);
 
-    if (component == 0 || (maximumNumDocuments > 0 && components.size() >= maximumNumDocuments))
+    if (component == nullptr || (maximumNumDocuments > 0 && components.size() >= maximumNumDocuments))
         return false;
 
     components.add (component);
@@ -216,7 +216,7 @@ bool MultiDocumentPanel::addDocument (Component* const component,
     }
     else
     {
-        if (tabComponent == 0 && components.size() > numDocsBeforeTabsUsed)
+        if (tabComponent == nullptr && components.size() > numDocsBeforeTabsUsed)
         {
             addAndMakeVisible (tabComponent = new MDITabbedComponentInternal());
 
@@ -229,7 +229,7 @@ bool MultiDocumentPanel::addDocument (Component* const component,
         }
         else
         {
-            if (tabComponent != 0)
+            if (tabComponent != nullptr)
                 tabComponent->addTab (component->getName(), docColour, component, false);
             else
                 addAndMakeVisible (component);
@@ -263,7 +263,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             {
                 MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
-                if (dw != 0 && dw->getContentComponent() == component)
+                if (dw != nullptr && dw->getContentComponent() == component)
                 {
                     ScopedPointer<MultiDocumentPanelWindow> (dw)->clearContentComponent();
                     break;
@@ -281,7 +281,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
                 {
                     ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)));
 
-                    if (dw != 0)
+                    if (dw != nullptr)
                         dw->clearContentComponent();
                 }
 
@@ -292,7 +292,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
         {
             jassert (components.indexOf (component) >= 0);
 
-            if (tabComponent != 0)
+            if (tabComponent != nullptr)
             {
                 for (int i = tabComponent->getNumTabs(); --i >= 0;)
                     if (tabComponent->getTabContentComponent (i) == component)
@@ -306,12 +306,12 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             if (shouldDelete)
                 delete component;
 
-            if (tabComponent != 0 && tabComponent->getNumTabs() <= numDocsBeforeTabsUsed)
-                tabComponent = 0;
+            if (tabComponent != nullptr && tabComponent->getNumTabs() <= numDocsBeforeTabsUsed)
+                tabComponent = nullptr;
 
             components.removeValue (component);
 
-            if (components.size() > 0 && tabComponent == 0)
+            if (components.size() > 0 && tabComponent == nullptr)
                 addAndMakeVisible (components.getFirst());
         }
 
@@ -326,17 +326,17 @@ bool MultiDocumentPanel::closeDocument (Component* component,
     return true;
 }
 
-int MultiDocumentPanel::getNumDocuments() const throw()
+int MultiDocumentPanel::getNumDocuments() const noexcept
 {
     return components.size();
 }
 
-Component* MultiDocumentPanel::getDocument (const int index) const throw()
+Component* MultiDocumentPanel::getDocument (const int index) const noexcept
 {
     return components [index];
 }
 
-Component* MultiDocumentPanel::getActiveDocument() const throw()
+Component* MultiDocumentPanel::getActiveDocument() const noexcept
 {
     if (mode == FloatingWindows)
     {
@@ -344,7 +344,7 @@ Component* MultiDocumentPanel::getActiveDocument() const throw()
         {
             MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
-            if (dw != 0 && dw->isActiveWindow())
+            if (dw != nullptr && dw->isActiveWindow())
                 return dw->getContentComponent();
         }
     }
@@ -358,10 +358,10 @@ void MultiDocumentPanel::setActiveDocument (Component* component)
     {
         component = getContainerComp (component);
 
-        if (component != 0)
+        if (component != nullptr)
             component->toFront (true);
     }
-    else if (tabComponent != 0)
+    else if (tabComponent != nullptr)
     {
         jassert (components.indexOf (component) >= 0);
 
@@ -394,7 +394,7 @@ void MultiDocumentPanel::useFullscreenWhenOneDocument (const bool shouldUseTabs)
     numDocsBeforeTabsUsed = shouldUseTabs ? 1 : 0;
 }
 
-bool MultiDocumentPanel::isFullscreenWhenOneDocument() const throw()
+bool MultiDocumentPanel::isFullscreenWhenOneDocument() const noexcept
 {
     return numDocsBeforeTabsUsed != 0;
 }
@@ -408,7 +408,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
 
         if (mode == FloatingWindows)
         {
-            tabComponent = 0;
+            tabComponent = nullptr;
         }
         else
         {
@@ -416,7 +416,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
             {
                 MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
-                if (dw != 0)
+                if (dw != nullptr)
                 {
                     dw->getContentComponent()->getProperties().set ("mdiDocumentPos_", dw->getWindowStateAsString());
                     dw->clearContentComponent();
@@ -476,7 +476,7 @@ Component* MultiDocumentPanel::getContainerComp (Component* c) const
         {
             MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
-            if (dw != 0 && dw->getContentComponent() == c)
+            if (dw != nullptr && dw->getContentComponent() == c)
             {
                 c = dw;
                 break;
@@ -495,11 +495,11 @@ void MultiDocumentPanel::componentNameChanged (Component&)
         {
             MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
-            if (dw != 0)
+            if (dw != nullptr)
                 dw->setName (dw->getContentComponent()->getName());
         }
     }
-    else if (tabComponent != 0)
+    else if (tabComponent != nullptr)
     {
         for (int i = tabComponent->getNumTabs(); --i >= 0;)
             tabComponent->setTabName (i, tabComponent->getTabContentComponent (i)->getName());
@@ -518,17 +518,17 @@ void MultiDocumentPanel::updateOrder()
         {
             MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
-            if (dw != 0)
+            if (dw != nullptr)
                 components.add (dw->getContentComponent());
         }
     }
     else
     {
-        if (tabComponent != 0)
+        if (tabComponent != nullptr)
         {
             Component* const current = tabComponent->getCurrentContentComponent();
 
-            if (current != 0)
+            if (current != nullptr)
             {
                 components.removeValue (current);
                 components.add (current);

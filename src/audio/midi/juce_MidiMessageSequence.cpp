@@ -51,7 +51,7 @@ MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& 
     return *this;
 }
 
-void MidiMessageSequence::swapWith (MidiMessageSequence& other) throw()
+void MidiMessageSequence::swapWith (MidiMessageSequence& other) noexcept
 {
     list.swapWithArray (other.list);
 }
@@ -79,7 +79,7 @@ double MidiMessageSequence::getTimeOfMatchingKeyUp (const int index) const
 {
     const MidiEventHolder* const meh = list [index];
 
-    if (meh != 0 && meh->noteOffObject != 0)
+    if (meh != nullptr && meh->noteOffObject != nullptr)
         return meh->noteOffObject->message.getTimeStamp();
     else
         return 0.0;
@@ -89,7 +89,7 @@ int MidiMessageSequence::getIndexOfMatchingKeyUp (const int index) const
 {
     const MidiEventHolder* const meh = list [index];
 
-    return (meh != 0) ? list.indexOf (meh->noteOffObject) : -1;
+    return meh != nullptr ? list.indexOf (meh->noteOffObject) : -1;
 }
 
 int MidiMessageSequence::getIndexOf (MidiEventHolder* const event) const
@@ -190,7 +190,7 @@ void MidiMessageSequence::addSequence (const MidiMessageSequence& other,
 
 //==============================================================================
 int MidiMessageSequence::compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                          const MidiMessageSequence::MidiEventHolder* const second) throw()
+                                          const MidiMessageSequence::MidiEventHolder* const second) noexcept
 {
     const double diff = first->message.getTimeStamp()
                          - second->message.getTimeStamp();
@@ -212,7 +212,7 @@ void MidiMessageSequence::updateMatchedPairs()
 
         if (m1.isNoteOn())
         {
-            list.getUnchecked(i)->noteOffObject = 0;
+            list.getUnchecked(i)->noteOffObject = nullptr;
             const int note = m1.getNoteNumber();
             const int chan = m1.getChannel();
             const int len = list.size();
@@ -339,7 +339,7 @@ void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumbe
 //==============================================================================
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& message_)
    : message (message_),
-     noteOffObject (0)
+     noteOffObject (nullptr)
 {
 }
 

@@ -71,7 +71,7 @@ Uuid::Uuid()
     }
 }
 
-Uuid::~Uuid() throw()
+Uuid::~Uuid() noexcept
 {
 }
 
@@ -97,7 +97,7 @@ bool Uuid::operator!= (const Uuid& other) const
     return ! operator== (other);
 }
 
-bool Uuid::isNull() const throw()
+bool Uuid::isNull() const noexcept
 {
     return (value.asInt64 [0] == 0) && (value.asInt64 [1] == 0);
 }
@@ -130,7 +130,7 @@ Uuid::Uuid (const uint8* const rawData)
 
 Uuid& Uuid::operator= (const uint8* const rawData)
 {
-    if (rawData != 0)
+    if (rawData != nullptr)
         memcpy (value.asBytes, rawData, sizeof (value.asBytes));
     else
         zeromem (value.asBytes, sizeof (value.asBytes));

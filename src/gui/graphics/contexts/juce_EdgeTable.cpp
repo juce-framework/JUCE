@@ -268,7 +268,7 @@ EdgeTable::~EdgeTable()
 }
 
 //==============================================================================
-void EdgeTable::copyEdgeTableData (int* dest, const int destLineStride, const int* src, const int srcLineStride, int numLines) throw()
+void EdgeTable::copyEdgeTableData (int* dest, const int destLineStride, const int* src, const int srcLineStride, int numLines) noexcept
 {
     while (--numLines >= 0)
     {
@@ -278,7 +278,7 @@ void EdgeTable::copyEdgeTableData (int* dest, const int destLineStride, const in
     }
 }
 
-void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) throw()
+void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
 {
     // Convert the table from relative windings to absolute levels..
     int* lineStart = table;
@@ -400,7 +400,7 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding)
     line[0]++;
 }
 
-void EdgeTable::translate (float dx, const int dy) throw()
+void EdgeTable::translate (float dx, const int dy) noexcept
 {
     bounds.translate ((int) std::floor (dx), dy);
 
@@ -547,7 +547,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine)
 #endif
 }
 
-void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2) throw()
+void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2) noexcept
 {
     int* lastItem = dest + (dest[0] * 2 - 1);
 
@@ -733,7 +733,7 @@ void EdgeTable::clipLineToMask (int x, int y, const uint8* mask, int maskStride,
     intersectWithEdgeTableLine (y, tempLine);
 }
 
-bool EdgeTable::isEmpty() throw()
+bool EdgeTable::isEmpty() noexcept
 {
     if (needToCheckEmptinesss)
     {

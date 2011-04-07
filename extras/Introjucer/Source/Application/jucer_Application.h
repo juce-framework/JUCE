@@ -86,9 +86,9 @@ public:
     void shutdown()
     {
       #if JUCE_MAC
-        MenuBarModel::setMacMainMenu (0);
+        MenuBarModel::setMacMainMenu (nullptr);
       #endif
-        menuModel = 0;
+        menuModel = nullptr;
 
         StoredSettings::deleteInstance();
         mainWindows.clear();
@@ -365,7 +365,7 @@ public:
         MainWindow* mw = createNewMainWindow (false);
         ScopedPointer <Project> newProj (NewProjectWizard::runNewProjectWizard (mw));
 
-        if (newProj != 0)
+        if (newProj != nullptr)
         {
             mw->setProject (newProj.release());
             mw->setVisible (true);
@@ -388,7 +388,7 @@ public:
     {
         for (int j = mainWindows.size(); --j >= 0;)
         {
-            if (mainWindows.getUnchecked(j)->getProject() != 0
+            if (mainWindows.getUnchecked(j)->getProject() != nullptr
                  && mainWindows.getUnchecked(j)->getProject()->getFile() == file)
             {
                 mainWindows.getUnchecked(j)->toFront (true);
@@ -442,7 +442,7 @@ public:
         {
             MainWindow* mw = mainWindows[i];
 
-            if (mw != 0 && mw->getProject() != 0)
+            if (mw != nullptr && mw->getProject() != nullptr)
                 projects.add (mw->getProject()->getFile());
         }
 
@@ -494,7 +494,7 @@ private:
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
         {
             MainWindow* mw = dynamic_cast <MainWindow*> (Desktop::getInstance().getComponent (i));
-            if (mainWindows.contains (mw) && mw->getProject() == 0)
+            if (mainWindows.contains (mw) && mw->getProject() == nullptr)
                 return mw;
         }
 

@@ -52,43 +52,43 @@ juce_ImplementSingleton_SingleThreaded (AudioPluginFormatManager);
 //==============================================================================
 void AudioPluginFormatManager::addDefaultFormats()
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // you should only call this method once!
     for (int i = formats.size(); --i >= 0;)
     {
-  #if JUCE_PLUGINHOST_VST && ! (JUCE_MAC && JUCE_64BIT)
-        jassert (dynamic_cast <VSTPluginFormat*> (formats[i]) == 0);
-  #endif
+       #if JUCE_PLUGINHOST_VST && ! (JUCE_MAC && JUCE_64BIT)
+        jassert (dynamic_cast <VSTPluginFormat*> (formats[i]) == nullptr);
+       #endif
 
-  #if JUCE_PLUGINHOST_AU && JUCE_MAC
-        jassert (dynamic_cast <AudioUnitPluginFormat*> (formats[i]) == 0);
-  #endif
+       #if JUCE_PLUGINHOST_AU && JUCE_MAC
+        jassert (dynamic_cast <AudioUnitPluginFormat*> (formats[i]) == nullptr);
+       #endif
 
-  #if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
-        jassert (dynamic_cast <DirectXPluginFormat*> (formats[i]) == 0);
-  #endif
+       #if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
+        jassert (dynamic_cast <DirectXPluginFormat*> (formats[i]) == nullptr);
+       #endif
 
-  #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
-        jassert (dynamic_cast <LADSPAPluginFormat*> (formats[i]) == 0);
-  #endif
+       #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+        jassert (dynamic_cast <LADSPAPluginFormat*> (formats[i]) == nullptr);
+       #endif
     }
-#endif
+   #endif
 
-#if JUCE_PLUGINHOST_AU && JUCE_MAC
+   #if JUCE_PLUGINHOST_AU && JUCE_MAC
     formats.add (new AudioUnitPluginFormat());
-#endif
+   #endif
 
-#if JUCE_PLUGINHOST_VST && ! (JUCE_MAC && JUCE_64BIT)
+   #if JUCE_PLUGINHOST_VST && ! (JUCE_MAC && JUCE_64BIT)
     formats.add (new VSTPluginFormat());
-#endif
+   #endif
 
-#if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
+   #if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
     formats.add (new DirectXPluginFormat());
-#endif
+   #endif
 
-#if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+   #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
     formats.add (new LADSPAPluginFormat());
-#endif
+   #endif
 }
 
 int AudioPluginFormatManager::getNumFormats()
@@ -109,17 +109,17 @@ void AudioPluginFormatManager::addFormat (AudioPluginFormat* const format)
 AudioPluginInstance* AudioPluginFormatManager::createPluginInstance (const PluginDescription& description,
                                                                      String& errorMessage) const
 {
-    AudioPluginInstance* result = 0;
+    AudioPluginInstance* result = nullptr;
 
     for (int i = 0; i < formats.size(); ++i)
     {
         result = formats.getUnchecked(i)->createInstanceFromDescription (description);
 
-        if (result != 0)
+        if (result != nullptr)
             break;
     }
 
-    if (result == 0)
+    if (result == nullptr)
     {
         if (! doesPluginStillExist (description))
             errorMessage = TRANS ("This plug-in file no longer exists");

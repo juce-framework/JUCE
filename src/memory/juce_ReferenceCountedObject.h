@@ -48,7 +48,7 @@
 
     MyClass::Ptr p = new MyClass();
     MyClass::Ptr p2 = p;
-    p = 0;
+    p = nullptr;
     p2->foo();
     @endcode
 
@@ -66,7 +66,7 @@ public:
         This is done automatically by the smart pointer, but is public just
         in case it's needed for nefarious purposes.
     */
-    inline void incReferenceCount() throw()
+    inline void incReferenceCount() noexcept
     {
         ++refCount;
     }
@@ -75,7 +75,7 @@ public:
 
         If the count gets to zero, the object will be deleted.
     */
-    inline void decReferenceCount() throw()
+    inline void decReferenceCount() noexcept
     {
         jassert (getReferenceCount() > 0);
 
@@ -84,7 +84,7 @@ public:
     }
 
     /** Returns the object's current reference count. */
-    inline int getReferenceCount() const throw()
+    inline int getReferenceCount() const noexcept
     {
         return refCount.get();
     }
@@ -132,8 +132,8 @@ class ReferenceCountedObjectPtr
 public:
     //==============================================================================
     /** Creates a pointer to a null object. */
-    inline ReferenceCountedObjectPtr() throw()
-        : referencedObject (0)
+    inline ReferenceCountedObjectPtr() noexcept
+        : referencedObject (nullptr)
     {
     }
 
@@ -141,10 +141,10 @@ public:
 
         This will increment the object's reference-count if it is non-null.
     */
-    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
+    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) noexcept
         : referencedObject (refCountedObject)
     {
-        if (refCountedObject != 0)
+        if (refCountedObject != nullptr)
             refCountedObject->incReferenceCount();
     }
 
@@ -152,10 +152,10 @@ public:
 
         This will increment the object's reference-count (if it is non-null).
     */
-    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
+    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) noexcept
         : referencedObject (other.referencedObject)
     {
-        if (referencedObject != 0)
+        if (referencedObject != nullptr)
             referencedObject->incReferenceCount();
     }
 
@@ -170,13 +170,13 @@ public:
 
         if (newObject != referencedObject)
         {
-            if (newObject != 0)
+            if (newObject != nullptr)
                 newObject->incReferenceCount();
 
             ReferenceCountedObjectClass* const oldObject = referencedObject;
             referencedObject = newObject;
 
-            if (oldObject != 0)
+            if (oldObject != nullptr)
                 oldObject->decReferenceCount();
         }
 
@@ -192,13 +192,13 @@ public:
     {
         if (referencedObject != newObject)
         {
-            if (newObject != 0)
+            if (newObject != nullptr)
                 newObject->incReferenceCount();
 
             ReferenceCountedObjectClass* const oldObject = referencedObject;
             referencedObject = newObject;
 
-            if (oldObject != 0)
+            if (oldObject != nullptr)
                 oldObject->decReferenceCount();
         }
 
@@ -212,20 +212,20 @@ public:
     */
     inline ~ReferenceCountedObjectPtr()
     {
-        if (referencedObject != 0)
+        if (referencedObject != nullptr)
             referencedObject->decReferenceCount();
     }
 
     /** Returns the object that this pointer references.
         The pointer returned may be zero, of course.
     */
-    inline operator ReferenceCountedObjectClass*() const throw()
+    inline operator ReferenceCountedObjectClass*() const noexcept
     {
         return referencedObject;
     }
 
     // the -> operator is called on the referenced object
-    inline ReferenceCountedObjectClass* operator->() const throw()
+    inline ReferenceCountedObjectClass* operator->() const noexcept
     {
         return referencedObject;
     }
@@ -233,7 +233,7 @@ public:
     /** Returns the object that this pointer references.
         The pointer returned may be zero, of course.
     */
-    inline ReferenceCountedObjectClass* getObject() const throw()
+    inline ReferenceCountedObjectClass* getObject() const noexcept
     {
         return referencedObject;
     }
@@ -246,42 +246,42 @@ private:
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectClass* const object2) throw()
+bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectClass* const object2) noexcept
 {
     return object1.getObject() == object2;
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1.getObject() == object2.getObject();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator== (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+bool operator== (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1 == object2.getObject();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectClass* object2) throw()
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectClass* object2) noexcept
 {
     return object1.getObject() != object2;
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1.getObject() != object2.getObject();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
-bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) throw()
+bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
     return object1 != object2.getObject();
 }

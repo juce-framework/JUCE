@@ -40,25 +40,25 @@ class Range
 public:
     //==============================================================================
     /** Constructs an empty range. */
-    Range() throw()
+    Range() noexcept
         : start (ValueType()), end (ValueType())
     {
     }
 
     /** Constructs a range with given start and end values. */
-    Range (const ValueType start_, const ValueType end_) throw()
+    Range (const ValueType start_, const ValueType end_) noexcept
         : start (start_), end (jmax (start_, end_))
     {
     }
 
     /** Constructs a copy of another range. */
-    Range (const Range& other) throw()
+    Range (const Range& other) noexcept
         : start (other.start), end (other.end)
     {
     }
 
     /** Copies another range object. */
-    Range& operator= (const Range& other) throw()
+    Range& operator= (const Range& other) noexcept
     {
         start = other.start;
         end = other.end;
@@ -66,42 +66,42 @@ public:
     }
 
     /** Destructor. */
-    ~Range() throw()
+    ~Range() noexcept
     {
     }
 
     /** Returns the range that lies between two positions (in either order). */
-    static const Range between (const ValueType position1, const ValueType position2) throw()
+    static const Range between (const ValueType position1, const ValueType position2) noexcept
     {
         return (position1 < position2) ? Range (position1, position2)
                                        : Range (position2, position1);
     }
 
     /** Returns a range with the specified start position and a length of zero. */
-    static const Range emptyRange (const ValueType start) throw()
+    static const Range emptyRange (const ValueType start) noexcept
     {
         return Range (start, start);
     }
 
     //==============================================================================
     /** Returns the start of the range. */
-    inline ValueType getStart() const throw()           { return start; }
+    inline ValueType getStart() const noexcept          { return start; }
 
     /** Returns the length of the range. */
-    inline ValueType getLength() const throw()          { return end - start; }
+    inline ValueType getLength() const noexcept         { return end - start; }
 
     /** Returns the end of the range. */
-    inline ValueType getEnd() const throw()             { return end; }
+    inline ValueType getEnd() const noexcept            { return end; }
 
     /** Returns true if the range has a length of zero. */
-    inline bool isEmpty() const throw()                 { return start == end; }
+    inline bool isEmpty() const noexcept                { return start == end; }
 
     //==============================================================================
     /** Changes the start position of the range, leaving the end position unchanged.
         If the new start position is higher than the current end of the range, the end point
         will be pushed along to equal it, leaving an empty range at the new position.
     */
-    void setStart (const ValueType newStart) throw()
+    void setStart (const ValueType newStart) noexcept
     {
         start = newStart;
         if (end < newStart)
@@ -112,13 +112,13 @@ public:
         If the new start position is higher than the current end of the range, the end point
         will be pushed along to equal it, returning an empty range at the new position.
     */
-    const Range withStart (const ValueType newStart) const throw()
+    const Range withStart (const ValueType newStart) const noexcept
     {
         return Range (newStart, jmax (newStart, end));
     }
 
     /** Returns a range with the same length as this one, but moved to have the given start position. */
-    const Range movedToStartAt (const ValueType newStart) const throw()
+    const Range movedToStartAt (const ValueType newStart) const noexcept
     {
         return Range (newStart, end + (newStart - start));
     }
@@ -127,7 +127,7 @@ public:
         If the new end position is below the current start of the range, the start point
         will be pushed back to equal the new end point.
     */
-    void setEnd (const ValueType newEnd) throw()
+    void setEnd (const ValueType newEnd) noexcept
     {
         end = newEnd;
         if (newEnd < start)
@@ -138,13 +138,13 @@ public:
         If the new end position is below the current start of the range, the start point
         will be pushed back to equal the new end point.
     */
-    const Range withEnd (const ValueType newEnd) const throw()
+    const Range withEnd (const ValueType newEnd) const noexcept
     {
         return Range (jmin (start, newEnd), newEnd);
     }
 
     /** Returns a range with the same length as this one, but moved to have the given start position. */
-    const Range movedToEndAt (const ValueType newEnd) const throw()
+    const Range movedToEndAt (const ValueType newEnd) const noexcept
     {
         return Range (start + (newEnd - end), newEnd);
     }
@@ -152,7 +152,7 @@ public:
     /** Changes the length of the range.
         Lengths less than zero are treated as zero.
     */
-    void setLength (const ValueType newLength) throw()
+    void setLength (const ValueType newLength) noexcept
     {
         end = start + jmax (ValueType(), newLength);
     }
@@ -160,14 +160,14 @@ public:
     /** Returns a range with the same start as this one, but a different length.
         Lengths less than zero are treated as zero.
     */
-    const Range withLength (const ValueType newLength) const throw()
+    const Range withLength (const ValueType newLength) const noexcept
     {
         return Range (start, start + newLength);
     }
 
     //==============================================================================
     /** Adds an amount to the start and end of the range. */
-    inline const Range& operator+= (const ValueType amountToAdd) throw()
+    inline const Range& operator+= (const ValueType amountToAdd) noexcept
     {
         start += amountToAdd;
         end += amountToAdd;
@@ -175,7 +175,7 @@ public:
     }
 
     /** Subtracts an amount from the start and end of the range. */
-    inline const Range& operator-= (const ValueType amountToSubtract) throw()
+    inline const Range& operator-= (const ValueType amountToSubtract) noexcept
     {
         start -= amountToSubtract;
         end -= amountToSubtract;
@@ -185,56 +185,56 @@ public:
     /** Returns a range that is equal to this one with an amount added to its
         start and end.
     */
-    const Range operator+ (const ValueType amountToAdd) const throw()
+    const Range operator+ (const ValueType amountToAdd) const noexcept
     {
         return Range (start + amountToAdd, end + amountToAdd);
     }
 
     /** Returns a range that is equal to this one with the specified amount
         subtracted from its start and end. */
-    const Range operator- (const ValueType amountToSubtract) const throw()
+    const Range operator- (const ValueType amountToSubtract) const noexcept
     {
         return Range (start - amountToSubtract, end - amountToSubtract);
     }
 
-    bool operator== (const Range& other) const throw()      { return start == other.start && end == other.end; }
-    bool operator!= (const Range& other) const throw()      { return start != other.start || end != other.end; }
+    bool operator== (const Range& other) const noexcept     { return start == other.start && end == other.end; }
+    bool operator!= (const Range& other) const noexcept     { return start != other.start || end != other.end; }
 
     //==============================================================================
     /** Returns true if the given position lies inside this range. */
-    bool contains (const ValueType position) const throw()
+    bool contains (const ValueType position) const noexcept
     {
         return start <= position && position < end;
     }
 
     /** Returns the nearest value to the one supplied, which lies within the range. */
-    ValueType clipValue (const ValueType value) const throw()
+    ValueType clipValue (const ValueType value) const noexcept
     {
         return jlimit (start, end, value);
     }
 
     /** Returns true if the given range lies entirely inside this range. */
-    bool contains (const Range& other) const throw()
+    bool contains (const Range& other) const noexcept
     {
         return start <= other.start && end >= other.end;
     }
 
     /** Returns true if the given range intersects this one. */
-    bool intersects (const Range& other) const throw()
+    bool intersects (const Range& other) const noexcept
     {
         return other.start < end && start < other.end;
     }
 
     /** Returns the range that is the intersection of the two ranges, or an empty range
         with an undefined start position if they don't overlap. */
-    const Range getIntersectionWith (const Range& other) const throw()
+    const Range getIntersectionWith (const Range& other) const noexcept
     {
         return Range (jmax (start, other.start),
                       jmin (end, other.end));
     }
 
     /** Returns the smallest range that contains both this one and the other one. */
-    const Range getUnionWith (const Range& other) const throw()
+    const Range getUnionWith (const Range& other) const noexcept
     {
         return Range (jmin (start, other.start),
                       jmax (end, other.end));
@@ -250,7 +250,7 @@ public:
         will be the new range, shifted forwards or backwards so that it doesn't extend
         beyond this one, but keeping its original length.
     */
-    const Range constrainRange (const Range& rangeToConstrain) const throw()
+    const Range constrainRange (const Range& rangeToConstrain) const noexcept
     {
         const ValueType otherLen = rangeToConstrain.getLength();
         return getLength() <= otherLen

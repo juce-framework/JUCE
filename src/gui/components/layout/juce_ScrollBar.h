@@ -71,7 +71,7 @@ public:
 
     //==============================================================================
     /** Returns true if the scrollbar is vertical, false if it's horizontal. */
-    bool isVertical() const throw()                                 { return vertical; }
+    bool isVertical() const noexcept                                { return vertical; }
 
     /** Changes the scrollbar's direction.
 
@@ -98,7 +98,7 @@ public:
         as its maximum range.
         @see setAutoHide
     */
-    bool autoHides() const throw();
+    bool autoHides() const noexcept;
 
     //==============================================================================
     /** Sets the minimum and maximum values that the bar will move between.
@@ -122,19 +122,19 @@ public:
     /** Returns the current limits on the thumb position.
         @see setRangeLimits
     */
-    const Range<double> getRangeLimit() const throw()               { return totalRange; }
+    const Range<double> getRangeLimit() const noexcept              { return totalRange; }
 
     /** Returns the lower value that the thumb can be set to.
 
         This is the value set by setRangeLimits().
     */
-    double getMinimumRangeLimit() const throw()                     { return totalRange.getStart(); }
+    double getMinimumRangeLimit() const noexcept                    { return totalRange.getStart(); }
 
     /** Returns the upper value that the thumb can be set to.
 
         This is the value set by setRangeLimits().
     */
-    double getMaximumRangeLimit() const throw()                     { return totalRange.getEnd(); }
+    double getMaximumRangeLimit() const noexcept                    { return totalRange.getEnd(); }
 
     //==============================================================================
     /** Changes the position of the scrollbar's 'thumb'.
@@ -182,17 +182,17 @@ public:
     /** Returns the current thumb range.
         @see getCurrentRange, setCurrentRange
     */
-    const Range<double> getCurrentRange() const throw()             { return visibleRange; }
+    const Range<double> getCurrentRange() const noexcept            { return visibleRange; }
 
     /** Returns the position of the top of the thumb.
         @see getCurrentRange, setCurrentRangeStart
     */
-    double getCurrentRangeStart() const throw()                     { return visibleRange.getStart(); }
+    double getCurrentRangeStart() const noexcept                    { return visibleRange.getStart(); }
 
     /** Returns the current size of the thumb.
         @see getCurrentRange, setCurrentRange
     */
-    double getCurrentRangeSize() const throw()                      { return visibleRange.getLength(); }
+    double getCurrentRangeSize() const noexcept                     { return visibleRange.getLength(); }
 
     //==============================================================================
     /** Sets the amount by which the up and down buttons will move the bar.

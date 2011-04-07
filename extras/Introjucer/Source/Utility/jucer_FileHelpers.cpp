@@ -40,7 +40,7 @@ namespace FileHelpers
     int64 calculateFileHashCode (const File& file)
     {
         ScopedPointer <FileInputStream> stream (file.createInputStream());
-        return stream != 0 ? calculateStreamHashCode (*stream) : 0;
+        return stream != nullptr ? calculateStreamHashCode (*stream) : 0;
     }
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, int numBytes)

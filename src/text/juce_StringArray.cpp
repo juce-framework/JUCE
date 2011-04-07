@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-StringArray::StringArray() throw()
+StringArray::StringArray() noexcept
 {
 }
 
@@ -50,8 +50,8 @@ namespace StringArrayHelpers
     template <typename CharType>
     void addArray (Array<String>& dest, const CharType* const* strings)
     {
-        if (strings != 0)
-            while (*strings != 0)
+        if (strings != nullptr)
+            while (*strings != nullptr)
                 dest.add (*strings++);
     }
 
@@ -93,7 +93,7 @@ StringArray::~StringArray()
 {
 }
 
-bool StringArray::operator== (const StringArray& other) const throw()
+bool StringArray::operator== (const StringArray& other) const noexcept
 {
     if (other.size() != size())
         return false;
@@ -105,7 +105,7 @@ bool StringArray::operator== (const StringArray& other) const throw()
     return true;
 }
 
-bool StringArray::operator!= (const StringArray& other) const throw()
+bool StringArray::operator!= (const StringArray& other) const noexcept
 {
     return ! operator== (other);
 }
@@ -115,7 +115,7 @@ void StringArray::clear()
     strings.clear();
 }
 
-const String& StringArray::operator[] (const int index) const throw()
+const String& StringArray::operator[] (const int index) const noexcept
 {
     if (isPositiveAndBelow (index, strings.size()))
         return strings.getReference (index);
@@ -123,7 +123,7 @@ const String& StringArray::operator[] (const int index) const throw()
     return String::empty;
 }
 
-String& StringArray::getReference (const int index) throw()
+String& StringArray::getReference (const int index) noexcept
 {
     jassert (isPositiveAndBelow (index, strings.size()));
     return strings.getReference (index);
@@ -295,7 +295,7 @@ void StringArray::sort (const bool ignoreCase)
     }
 }
 
-void StringArray::move (const int currentIndex, int newIndex) throw()
+void StringArray::move (const int currentIndex, int newIndex) noexcept
 {
     strings.move (currentIndex, newIndex);
 }
@@ -440,10 +440,10 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
 {
     CharPointer_UTF8 defaultPre (" ("), defaultPost (")");
 
-    if (preNumberString.getAddress() == 0)
+    if (preNumberString.getAddress() == nullptr)
         preNumberString = defaultPre;
 
-    if (postNumberString.getAddress() == 0)
+    if (postNumberString.getAddress() == nullptr)
         postNumberString = defaultPost;
 
     for (int i = 0; i < size() - 1; ++i)

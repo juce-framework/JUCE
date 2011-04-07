@@ -161,7 +161,7 @@ public:
                 jassert (num > 0);
 
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
-                    if (destSamples[i] != 0)
+                    if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
                                 reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
                                 sizeof (int) * num);
@@ -200,7 +200,7 @@ public:
         if (numSamples > 0)
         {
             for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != 0)
+                if (destSamples[i] != nullptr)
                     zeromem (destSamples[i] + startOffsetInDestBuffer,
                              sizeof (int) * numSamples);
         }
@@ -229,7 +229,7 @@ public:
                 while (src == 0 && n > 0)
                     src = buffer [--n];
 
-                if (src != 0)
+                if (src != nullptr)
                 {
                     int* dest = reinterpret_cast<int*> (reservoir.getSampleData(i));
 
@@ -374,7 +374,7 @@ public:
             buf[2] = 0;
 
             for (int i = numChannelsToWrite; --i >= 0;)
-                if (samplesToWrite[i] != 0)
+                if (samplesToWrite[i] != nullptr)
                     for (int j = 0; j < numSamples; ++j)
                         buf [i][j] = (samplesToWrite [i][j] >> bitsToShift);
 
@@ -511,7 +511,7 @@ AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in,
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
-        r->input = 0;
+        r->input = nullptr;
 
     return 0;
 }

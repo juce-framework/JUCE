@@ -49,7 +49,7 @@ void MidiKeyboardState::reset()
     eventsToAdd.clear();
 }
 
-bool MidiKeyboardState::isNoteOn (const int midiChannel, const int n) const throw()
+bool MidiKeyboardState::isNoteOn (const int midiChannel, const int n) const noexcept
 {
     jassert (midiChannel >= 0 && midiChannel <= 16);
 
@@ -57,7 +57,7 @@ bool MidiKeyboardState::isNoteOn (const int midiChannel, const int n) const thro
             && (noteStates[n] & (1 << (midiChannel - 1))) != 0;
 }
 
-bool MidiKeyboardState::isNoteOnForChannels (const int midiChannelMask, const int n) const throw()
+bool MidiKeyboardState::isNoteOnForChannels (const int midiChannelMask, const int n) const noexcept
 {
     return isPositiveAndBelow (n, (int) 128)
             && (noteStates[n] & midiChannelMask) != 0;

@@ -128,7 +128,7 @@ void JuceUpdater::buttonClicked (Button*)
 {
     ScopedPointer<XmlElement> xml (downloadVersionList());
 
-    if (xml == 0 || xml->hasTagName ("html"))
+    if (xml == nullptr || xml->hasTagName ("html"))
     {
         AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Connection Problems...",
                                      "Couldn't connect to the Raw Material Software website!");
@@ -166,7 +166,7 @@ public:
 
         ScopedPointer<InputStream> input (url.createInputStream (false));
 
-        if (input == 0)
+        if (input == nullptr)
         {
             error = "Couldn't connect to the website...";
             return;
@@ -180,7 +180,7 @@ public:
 
         ScopedPointer<OutputStream> output (target.createOutputStream (32768));
 
-        if (output == 0)
+        if (output == nullptr)
         {
             error = "Couldn't write to the destination file...";
             return;
@@ -336,7 +336,9 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
     {
     public:
         UpdateListComponent (JuceUpdater& updater_)
-            : updater (updater_), version (0), applyButton ("Install this version...")
+            : updater (updater_),
+              version (nullptr),
+              applyButton ("Install this version...")
         {
             addAndMakeVisible (&applyButton);
             applyButton.addListener (this);
@@ -360,7 +362,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
 
         void paint (Graphics& g)
         {
-            if (version != 0)
+            if (version != nullptr)
             {
                 g.setColour (Colours::green.withAlpha (0.12f));
 
@@ -379,7 +381,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
         {
             applyButton.changeWidthToFitText (getHeight() - 4);
             applyButton.setTopRightPosition (getWidth(), 2);
-            applyButton.setVisible (version != 0);
+            applyButton.setVisible (version != nullptr);
         }
 
         void buttonClicked (Button*)
@@ -394,7 +396,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
     };
 
     UpdateListComponent* c = dynamic_cast <UpdateListComponent*> (existingComponentToUpdate);
-    if (c == 0)
+    if (c == nullptr)
         c = new UpdateListComponent (*this);
 
     c->setVersion (availableVersions [rowNumber]);

@@ -139,10 +139,10 @@ public:
 
     //==============================================================================
     /** Returns the number of channels in the file. */
-    int getNumChannels() const throw();
+    int getNumChannels() const noexcept;
 
     /** Returns the length of the audio file, in seconds. */
-    double getTotalLength() const throw();
+    double getTotalLength() const noexcept;
 
     /** Draws the waveform for a channel.
 
@@ -175,10 +175,10 @@ public:
                        float verticalZoomFactor);
 
     /** Returns true if the low res preview is fully generated. */
-    bool isFullyLoaded() const throw();
+    bool isFullyLoaded() const noexcept;
 
     /** Returns the number of samples that have been set in the thumbnail. */
-    int64 getNumSamplesFinished() const throw();
+    int64 getNumSamplesFinished() const noexcept;
 
     /** Returns the highest level in the thumbnail.
         Note that because the thumb only stores low-resolution data, this isn't

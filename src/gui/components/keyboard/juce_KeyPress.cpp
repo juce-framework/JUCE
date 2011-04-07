@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-KeyPress::KeyPress() throw()
+KeyPress::KeyPress() noexcept
     : keyCode (0),
       mods (0),
       textCharacter (0)
@@ -41,27 +41,27 @@ KeyPress::KeyPress() throw()
 
 KeyPress::KeyPress (const int keyCode_,
                     const ModifierKeys& mods_,
-                    const juce_wchar textCharacter_) throw()
+                    const juce_wchar textCharacter_) noexcept
     : keyCode (keyCode_),
       mods (mods_),
       textCharacter (textCharacter_)
 {
 }
 
-KeyPress::KeyPress (const int keyCode_) throw()
+KeyPress::KeyPress (const int keyCode_) noexcept
     : keyCode (keyCode_),
       textCharacter (0)
 {
 }
 
-KeyPress::KeyPress (const KeyPress& other) throw()
+KeyPress::KeyPress (const KeyPress& other) noexcept
     : keyCode (other.keyCode),
       mods (other.mods),
       textCharacter (other.textCharacter)
 {
 }
 
-KeyPress& KeyPress::operator= (const KeyPress& other) throw()
+KeyPress& KeyPress::operator= (const KeyPress& other) noexcept
 {
     keyCode = other.keyCode;
     mods = other.mods;
@@ -70,7 +70,7 @@ KeyPress& KeyPress::operator= (const KeyPress& other) throw()
     return *this;
 }
 
-bool KeyPress::operator== (const KeyPress& other) const throw()
+bool KeyPress::operator== (const KeyPress& other) const noexcept
 {
     return mods.getRawFlags() == other.mods.getRawFlags()
             && (textCharacter == other.textCharacter
@@ -83,7 +83,7 @@ bool KeyPress::operator== (const KeyPress& other) const throw()
                            == CharacterFunctions::toLowerCase ((juce_wchar) other.keyCode)));
 }
 
-bool KeyPress::operator!= (const KeyPress& other) const throw()
+bool KeyPress::operator!= (const KeyPress& other) const noexcept
 {
     return ! operator== (other);
 }

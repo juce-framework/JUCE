@@ -47,7 +47,7 @@ MixerAudioSource::~MixerAudioSource()
 //==============================================================================
 void MixerAudioSource::addInputSource (AudioSource* input, const bool deleteWhenRemoved)
 {
-    if (input != 0 && ! inputs.contains (input))
+    if (input != nullptr && ! inputs.contains (input))
     {
         double localRate;
         int localBufferSize;
@@ -70,7 +70,7 @@ void MixerAudioSource::addInputSource (AudioSource* input, const bool deleteWhen
 
 void MixerAudioSource::removeInputSource (AudioSource* input, const bool deleteInput)
 {
-    if (input != 0)
+    if (input != nullptr)
     {
         int index;
 

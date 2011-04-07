@@ -84,21 +84,21 @@ public:
     /** Copies this path from another one. */
     Path& operator= (const Path& other);
 
-    bool operator== (const Path& other) const throw();
-    bool operator!= (const Path& other) const throw();
+    bool operator== (const Path& other) const noexcept;
+    bool operator!= (const Path& other) const noexcept;
 
     //==============================================================================
     /** Returns true if the path doesn't contain any lines or curves. */
-    bool isEmpty() const throw();
+    bool isEmpty() const noexcept;
 
     /** Returns the smallest rectangle that contains all points within the path.
     */
-    const Rectangle<float> getBounds() const throw();
+    const Rectangle<float> getBounds() const noexcept;
 
     /** Returns the smallest rectangle that contains all points within the path
         after it's been transformed with the given tranasform matrix.
     */
-    const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const throw();
+    const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const noexcept;
 
     /** Checks whether a point lies within the path.
 
@@ -182,7 +182,7 @@ public:
 
     //==============================================================================
     /** Removes all lines and curves, resetting the path completely. */
-    void clear() throw();
+    void clear() noexcept;
 
     /** Begins a new subpath with a given starting position.
 
@@ -560,14 +560,14 @@ public:
         The internal data of the two paths is swapped over, so this is much faster than
         copying it to a temp variable and back.
     */
-    void swapWithPath (Path& other) throw();
+    void swapWithPath (Path& other) noexcept;
 
     //==============================================================================
     /** Applies a 2D transform to all the vertices in the path.
 
         @see AffineTransform, scaleToFit, getTransformToScaleToFit
     */
-    void applyTransform (const AffineTransform& transform) throw();
+    void applyTransform (const AffineTransform& transform) noexcept;
 
     /** Rescales this path to make it fit neatly into a given space.
 
@@ -585,7 +585,7 @@ public:
         @see applyTransform, getTransformToScaleToFit
     */
     void scaleToFit (float x, float y, float width, float height,
-                     bool preserveProportions) throw();
+                     bool preserveProportions) noexcept;
 
     /** Returns a transform that can be used to rescale the path to fit into a given space.
 
@@ -631,7 +631,7 @@ public:
 
         @see isUsingNonZeroWinding
     */
-    void setUsingNonZeroWinding (bool isNonZeroWinding) throw();
+    void setUsingNonZeroWinding (bool isNonZeroWinding) noexcept;
 
     /** Returns the flag that indicates whether the path should use a non-zero winding rule.
 

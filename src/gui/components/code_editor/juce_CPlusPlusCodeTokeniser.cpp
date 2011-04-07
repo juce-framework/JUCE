@@ -42,19 +42,19 @@ CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser()
 //==============================================================================
 namespace CppTokeniser
 {
-    bool isIdentifierStart (const juce_wchar c) throw()
+    bool isIdentifierStart (const juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetter (c)
                 || c == '_' || c == '@';
     }
 
-    bool isIdentifierBody (const juce_wchar c) throw()
+    bool isIdentifierBody (const juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetterOrDigit (c)
                 || c == '_' || c == '@';
     }
 
-    bool isReservedKeyword (String::CharPointerType token, const int tokenLength) throw()
+    bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
             { "if", "do", "or", "id", 0 };
@@ -112,7 +112,7 @@ namespace CppTokeniser
         return false;
     }
 
-    int parseIdentifier (CodeDocument::Iterator& source) throw()
+    int parseIdentifier (CodeDocument::Iterator& source) noexcept
     {
         int tokenLength = 0;
         String::CharPointerType::CharType possibleIdentifier [100];
@@ -151,14 +151,14 @@ namespace CppTokeniser
         return true;
     }
 
-    bool isHexDigit (const juce_wchar c) throw()
+    bool isHexDigit (const juce_wchar c) noexcept
     {
         return (c >= '0' && c <= '9')
                 || (c >= 'a' && c <= 'f')
                 || (c >= 'A' && c <= 'F');
     }
 
-    bool parseHexLiteral (CodeDocument::Iterator& source) throw()
+    bool parseHexLiteral (CodeDocument::Iterator& source) noexcept
     {
         if (source.nextChar() != '0')
             return false;
@@ -180,12 +180,12 @@ namespace CppTokeniser
         return skipNumberSuffix (source);
     }
 
-    bool isOctalDigit (const juce_wchar c) throw()
+    bool isOctalDigit (const juce_wchar c) noexcept
     {
         return c >= '0' && c <= '7';
     }
 
-    bool parseOctalLiteral (CodeDocument::Iterator& source) throw()
+    bool parseOctalLiteral (CodeDocument::Iterator& source) noexcept
     {
         if (source.nextChar() != '0')
             return false;
@@ -199,12 +199,12 @@ namespace CppTokeniser
         return skipNumberSuffix (source);
     }
 
-    bool isDecimalDigit (const juce_wchar c) throw()
+    bool isDecimalDigit (const juce_wchar c) noexcept
     {
         return c >= '0' && c <= '9';
     }
 
-    bool parseDecimalLiteral (CodeDocument::Iterator& source) throw()
+    bool parseDecimalLiteral (CodeDocument::Iterator& source) noexcept
     {
         int numChars = 0;
         while (isDecimalDigit (source.peekNextChar()))
@@ -219,7 +219,7 @@ namespace CppTokeniser
         return skipNumberSuffix (source);
     }
 
-    bool parseFloatLiteral (CodeDocument::Iterator& source) throw()
+    bool parseFloatLiteral (CodeDocument::Iterator& source) noexcept
     {
         int numDigits = 0;
 
@@ -304,7 +304,7 @@ namespace CppTokeniser
         return CPlusPlusCodeTokeniser::tokenType_error;
     }
 
-    void skipQuotedString (CodeDocument::Iterator& source) throw()
+    void skipQuotedString (CodeDocument::Iterator& source) noexcept
     {
         const juce_wchar quote = source.nextChar();
 
@@ -320,7 +320,7 @@ namespace CppTokeniser
         }
     }
 
-    void skipComment (CodeDocument::Iterator& source) throw()
+    void skipComment (CodeDocument::Iterator& source) noexcept
     {
         bool lastWasStar = false;
 
@@ -611,7 +611,7 @@ const Colour CPlusPlusCodeTokeniser::getDefaultColour (const int tokenType)
     return Colours::black;
 }
 
-bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) throw()
+bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) noexcept
 {
     return CppTokeniser::isReservedKeyword (token.getCharPointer(), token.length());
 }

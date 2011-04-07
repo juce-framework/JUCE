@@ -54,7 +54,7 @@ public:
     void clear();
 
     /** Returns one of the kernel values. */
-    float getKernelValue (int x, int y) const throw();
+    float getKernelValue (int x, int y) const noexcept;
 
     /** Sets the value of a specific cell in the kernel.
 
@@ -62,7 +62,7 @@ public:
 
         @see setOverallSum
     */
-    void setKernelValue (int x, int y, float value) throw();
+    void setKernelValue (int x, int y, float value) noexcept;
 
     /** Rescales all values in the kernel to make the total add up to a fixed value.
 

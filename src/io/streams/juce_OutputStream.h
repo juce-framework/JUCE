@@ -213,7 +213,7 @@ public:
     void setNewLineString (const String& newLineString);
 
     /** Returns the current new-line string that was set by setNewLineString(). */
-    const String& getNewLineString() const throw()          { return newLineString; }
+    const String& getNewLineString() const noexcept         { return newLineString; }
 
 private:
     //==============================================================================

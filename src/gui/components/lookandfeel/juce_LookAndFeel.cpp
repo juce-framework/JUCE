@@ -82,7 +82,7 @@ namespace LookAndFeelHelpers
                             const float w, const float h,
                             const float cs,
                             const bool curveTopLeft, const bool curveTopRight,
-                            const bool curveBottomLeft, const bool curveBottomRight) throw()
+                            const bool curveBottomLeft, const bool curveBottomRight) noexcept
     {
         const float cs2 = 2.0f * cs;
 
@@ -132,7 +132,7 @@ namespace LookAndFeelHelpers
     const Colour createBaseColour (const Colour& buttonColour,
                                    const bool hasKeyboardFocus,
                                    const bool isMouseOverButton,
-                                   const bool isButtonDown) throw()
+                                   const bool isButtonDown) noexcept
     {
         const float sat = hasKeyboardFocus ? 1.3f : 0.9f;
         const Colour baseColour (buttonColour.withMultipliedSaturation (sat));
@@ -145,7 +145,7 @@ namespace LookAndFeelHelpers
         return baseColour;
     }
 
-    const TextLayout layoutTooltipText (const String& text) throw()
+    const TextLayout layoutTooltipText (const String& text) noexcept
     {
         const float tooltipFontSize = 12.0f;
         const int maxToolTipWidth = 400;
@@ -157,8 +157,8 @@ namespace LookAndFeelHelpers
         return tl;
     }
 
-    LookAndFeel* defaultLF = 0;
-    LookAndFeel* currentDefaultLF = 0;
+    LookAndFeel* defaultLF = nullptr;
+    LookAndFeel* currentDefaultLF = nullptr;
 }
 
 //==============================================================================
@@ -314,11 +314,11 @@ LookAndFeel::LookAndFeel()
 LookAndFeel::~LookAndFeel()
 {
     if (this == LookAndFeelHelpers::currentDefaultLF)
-        setDefaultLookAndFeel (0);
+        setDefaultLookAndFeel (nullptr);
 }
 
 //==============================================================================
-const Colour LookAndFeel::findColour (const int colourId) const throw()
+const Colour LookAndFeel::findColour (const int colourId) const noexcept
 {
     const int index = colourIds.indexOf (colourId);
 
@@ -329,7 +329,7 @@ const Colour LookAndFeel::findColour (const int colourId) const throw()
     return Colours::black;
 }
 
-void LookAndFeel::setColour (const int colourId, const Colour& colour) throw()
+void LookAndFeel::setColour (const int colourId, const Colour& colour) noexcept
 {
     const int index = colourIds.indexOf (colourId);
 
@@ -344,29 +344,29 @@ void LookAndFeel::setColour (const int colourId, const Colour& colour) throw()
     }
 }
 
-bool LookAndFeel::isColourSpecified (const int colourId) const throw()
+bool LookAndFeel::isColourSpecified (const int colourId) const noexcept
 {
     return colourIds.contains (colourId);
 }
 
 //==============================================================================
-LookAndFeel& LookAndFeel::getDefaultLookAndFeel() throw()
+LookAndFeel& LookAndFeel::getDefaultLookAndFeel() noexcept
 {
     // if this happens, your app hasn't initialised itself properly.. if you're
     // trying to hack your own main() function, have a look at
     // JUCEApplication::initialiseForGUI()
-    jassert (LookAndFeelHelpers::currentDefaultLF != 0);
+    jassert (LookAndFeelHelpers::currentDefaultLF != nullptr);
 
     return *LookAndFeelHelpers::currentDefaultLF;
 }
 
-void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) throw()
+void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noexcept
 {
     using namespace LookAndFeelHelpers;
 
-    if (newDefaultLookAndFeel == 0)
+    if (newDefaultLookAndFeel == nullptr)
     {
-        if (defaultLF == 0)
+        if (defaultLF == nullptr)
             defaultLF = new LookAndFeel();
 
         newDefaultLookAndFeel = defaultLF;
@@ -378,17 +378,17 @@ void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) thr
     {
         Component* const c = Desktop::getInstance().getComponent (i);
 
-        if (c != 0)
+        if (c != nullptr)
             c->sendLookAndFeelChange();
     }
 }
 
-void LookAndFeel::clearDefaultLookAndFeel() throw()
+void LookAndFeel::clearDefaultLookAndFeel() noexcept
 {
     using namespace LookAndFeelHelpers;
 
     if (currentDefaultLF == defaultLF)
-        currentDefaultLF = 0;
+        currentDefaultLF = nullptr;
 
     deleteAndZero (defaultLF);
 }
@@ -1161,7 +1161,7 @@ void LookAndFeel::drawPopupMenuItem (Graphics& g,
     {
         Colour textColour (findColour (PopupMenu::textColourId));
 
-        if (textColourToUse != 0)
+        if (textColourToUse != nullptr)
             textColour = *textColourToUse;
 
         if (isHighlighted)
@@ -1189,7 +1189,7 @@ void LookAndFeel::drawPopupMenuItem (Graphics& g,
         const int leftBorder = (height * 5) / 4;
         const int rightBorder = 4;
 
-        if (image != 0)
+        if (image != nullptr)
         {
             g.drawImageWithin (*image,
                                2, 1, leftBorder - 4, height - 2,
@@ -1774,7 +1774,7 @@ void LookAndFeel::layoutFilenameComponent (FilenameComponent& filenameComp,
 
     TextButton* const tb = dynamic_cast <TextButton*> (browseButton);
 
-    if (tb != 0)
+    if (tb != nullptr)
         tb->changeWidthToFitText();
 
     browseButton->setTopRightPosition (filenameComp.getWidth(), 0);
@@ -1892,7 +1892,7 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
     int iconW = 0;
     int iconH = 0;
 
-    if (icon != 0)
+    if (icon != nullptr)
     {
         iconH = (int) font.getHeight();
         iconW = icon->getWidth() * iconH / icon->getHeight() + 4;
@@ -1905,7 +1905,7 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
     if (textX + textW > titleSpaceX + titleSpaceW)
         textX = titleSpaceX + titleSpaceW - textW;
 
-    if (icon != 0)
+    if (icon != nullptr)
     {
         g.setOpacity (isActive ? 1.0f : 0.6f);
         g.drawImageWithin (*icon, textX, (h - iconH) / 2, iconW, iconH,
@@ -1929,7 +1929,7 @@ public:
     //==============================================================================
     GlassWindowButton (const String& name, const Colour& col,
                        const Path& normalShape_,
-                       const Path& toggledShape_) throw()
+                       const Path& toggledShape_) noexcept
         : Button (name),
           colour (col),
           normalShape (normalShape_),
@@ -2046,7 +2046,7 @@ void LookAndFeel::positionDocumentWindowButtons (DocumentWindow&,
     int x = positionTitleBarButtonsOnLeft ? titleBarX + 4
                                           : titleBarX + titleBarW - buttonW - buttonW / 4;
 
-    if (closeButton != 0)
+    if (closeButton != nullptr)
     {
         closeButton->setBounds (x, titleBarY, buttonW, titleBarH);
         x += positionTitleBarButtonsOnLeft ? buttonW : -(buttonW + buttonW / 4);
@@ -2055,13 +2055,13 @@ void LookAndFeel::positionDocumentWindowButtons (DocumentWindow&,
     if (positionTitleBarButtonsOnLeft)
         std::swap (minimiseButton, maximiseButton);
 
-    if (maximiseButton != 0)
+    if (maximiseButton != nullptr)
     {
         maximiseButton->setBounds (x, titleBarY, buttonW, titleBarH);
         x += positionTitleBarButtonsOnLeft ? buttonW : -buttonW;
     }
 
-    if (minimiseButton != 0)
+    if (minimiseButton != nullptr)
         minimiseButton->setBounds (x, titleBarY, buttonW, titleBarH);
 }
 
@@ -2681,7 +2681,7 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
     const int x = 32;
     g.setColour (Colours::black);
 
-    if (icon != 0 && icon->isValid())
+    if (icon != nullptr && icon->isValid())
     {
         g.drawImageWithin (*icon, 2, 2, x - 4, height - 4,
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
@@ -2692,7 +2692,7 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
         const Drawable* d = isDirectory ? getDefaultFolderImage()
                                         : getDefaultDocumentFileImage();
 
-        if (d != 0)
+        if (d != nullptr)
             d->drawWithin (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, height - 4.0f),
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
     }
@@ -2758,7 +2758,7 @@ void LookAndFeel::layoutFileBrowserComponent (FileBrowserComponent& browserComp,
     const int x = 8;
     int w = browserComp.getWidth() - x - x;
 
-    if (previewComp != 0)
+    if (previewComp != nullptr)
     {
         const int previewWidth = w / 3;
         previewComp->setBounds (x + w - previewWidth, 0, previewWidth, browserComp.getHeight());
@@ -2795,7 +2795,7 @@ Drawable* LookAndFeel::loadDrawableFromData (const void* data, size_t numBytes)
 
 const Drawable* LookAndFeel::getDefaultFolderImage()
 {
-    if (folderImage == 0)
+    if (folderImage == nullptr)
     {
         static const unsigned char drawableData[] =
         { 120,218,197,86,77,111,27,55,16,229,182,161,237,6,61,39,233,77,63,192,38,56,195,225,215,209,105,210,2,141,13,20,201,193,109,111,178,181,178,183,145,181,130,180,110,145,127,159,199,93,73,137,87,53,218,91,109,192,160,151,179,156,55,111,222,188,229,155,247,
@@ -2822,7 +2822,7 @@ const Drawable* LookAndFeel::getDefaultFolderImage()
 
 const Drawable* LookAndFeel::getDefaultDocumentFileImage()
 {
-    if (documentImage == 0)
+    if (documentImage == nullptr)
     {
         static const unsigned char drawableData[] =
         { 120,218,213,88,77,115,219,54,16,37,147,208,246,228,214,75,155,246,164,123,29,12,176,216,197,199,49,105,218,94,156,153,78,114,72,219,155,108,75,137,26,89,212,200,116,59,233,175,239,3,105,201,164,68,50,158,166,233,76,196,11,69,60,173,128,197,123,139,183,
@@ -2940,7 +2940,7 @@ void LookAndFeel::drawShinyButtonShape (Graphics& g,
                                         const bool flatOnLeft,
                                         const bool flatOnRight,
                                         const bool flatOnTop,
-                                        const bool flatOnBottom) throw()
+                                        const bool flatOnBottom) noexcept
 {
     if (w <= strokeWidth * 1.1f || h <= strokeWidth * 1.1f)
         return;
@@ -2973,7 +2973,7 @@ void LookAndFeel::drawGlassSphere (Graphics& g,
                                    const float x, const float y,
                                    const float diameter,
                                    const Colour& colour,
-                                   const float outlineThickness) throw()
+                                   const float outlineThickness) noexcept
 {
     if (diameter <= outlineThickness)
         return;
@@ -3015,7 +3015,7 @@ void LookAndFeel::drawGlassPointer (Graphics& g,
                                     const float x, const float y,
                                     const float diameter,
                                     const Colour& colour, const float outlineThickness,
-                                    const int direction) throw()
+                                    const int direction) noexcept
 {
     if (diameter <= outlineThickness)
         return;
@@ -3065,7 +3065,7 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
                                     const bool flatOnLeft,
                                     const bool flatOnRight,
                                     const bool flatOnTop,
-                                    const bool flatOnBottom) throw()
+                                    const bool flatOnBottom) noexcept
 {
     if (width <= outlineThickness || height <= outlineThickness)
         return;

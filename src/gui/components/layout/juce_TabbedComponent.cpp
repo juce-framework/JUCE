@@ -38,7 +38,7 @@ namespace TabbedComponentHelpers
 
     void deleteIfNecessary (Component* const comp)
     {
-        if (comp != 0 && (bool) comp->getProperties() [deleteComponentId])
+        if (comp != nullptr && (bool) comp->getProperties() [deleteComponentId])
             delete comp;
     }
 
@@ -107,7 +107,7 @@ TabbedComponent::TabbedComponent (const TabbedButtonBar::Orientation orientation
 TabbedComponent::~TabbedComponent()
 {
     clearTabs();
-    tabs = 0;
+    tabs = nullptr;
 }
 
 //==============================================================================
@@ -117,7 +117,7 @@ void TabbedComponent::setOrientation (const TabbedButtonBar::Orientation orienta
     resized();
 }
 
-TabbedButtonBar::Orientation TabbedComponent::getOrientation() const throw()
+TabbedButtonBar::Orientation TabbedComponent::getOrientation() const noexcept
 {
     return tabs->getOrientation();
 }
@@ -139,11 +139,11 @@ TabBarButton* TabbedComponent::createTabButton (const String& tabName, const int
 //==============================================================================
 void TabbedComponent::clearTabs()
 {
-    if (panelComponent != 0)
+    if (panelComponent != nullptr)
     {
         panelComponent->setVisible (false);
         removeChildComponent (panelComponent);
-        panelComponent = 0;
+        panelComponent = nullptr;
     }
 
     tabs->clearTabs();
@@ -162,7 +162,7 @@ void TabbedComponent::addTab (const String& tabName,
 {
     contentComponents.insert (insertIndex, WeakReference<Component> (contentComponent));
 
-    if (deleteComponentWhenNotNeeded && contentComponent != 0)
+    if (deleteComponentWhenNotNeeded && contentComponent != nullptr)
         contentComponent->getProperties().set (TabbedComponentHelpers::deleteComponentId, true);
 
     tabs->addTab (tabName, tabBackgroundColour, insertIndex);
@@ -193,12 +193,12 @@ const StringArray TabbedComponent::getTabNames() const
     return tabs->getTabNames();
 }
 
-Component* TabbedComponent::getTabContentComponent (const int tabIndex) const throw()
+Component* TabbedComponent::getTabContentComponent (const int tabIndex) const noexcept
 {
     return contentComponents [tabIndex];
 }
 
-const Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const throw()
+const Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const noexcept
 {
     return tabs->getTabBackgroundColour (tabIndex);
 }
@@ -270,31 +270,31 @@ void TabbedComponent::resized()
     content = BorderSize<int> (edgeIndent).subtractedFrom (outline.subtractedFrom (content));
 
     for (int i = contentComponents.size(); --i >= 0;)
-        if (contentComponents.getReference (i) != 0)
+        if (contentComponents.getReference (i) != nullptr)
             contentComponents.getReference (i)->setBounds (content);
 }
 
 void TabbedComponent::lookAndFeelChanged()
 {
     for (int i = contentComponents.size(); --i >= 0;)
-        if (contentComponents.getReference (i) != 0)
+        if (contentComponents.getReference (i) != nullptr)
             contentComponents.getReference (i)->lookAndFeelChanged();
 }
 
 void TabbedComponent::changeCallback (const int newCurrentTabIndex, const String& newTabName)
 {
-    if (panelComponent != 0)
+    if (panelComponent != nullptr)
     {
         panelComponent->setVisible (false);
         removeChildComponent (panelComponent);
-        panelComponent = 0;
+        panelComponent = nullptr;
     }
 
     if (getCurrentTabIndex() >= 0)
     {
         panelComponent = getTabContentComponent (getCurrentTabIndex());
 
-        if (panelComponent != 0)
+        if (panelComponent != nullptr)
         {
             // do these ops as two stages instead of addAndMakeVisible() so that the
             // component has always got a parent when it gets the visibilityChanged() callback

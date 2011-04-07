@@ -46,7 +46,7 @@ public:
 
         @see isValid
     */
-    KeyPress() throw();
+    KeyPress() noexcept;
 
     /** Creates a KeyPress for a key and some modifiers.
 
@@ -69,23 +69,23 @@ public:
     */
     KeyPress (int keyCode,
               const ModifierKeys& modifiers,
-              juce_wchar textCharacter) throw();
+              juce_wchar textCharacter) noexcept;
 
     /** Creates a keypress with a keyCode but no modifiers or text character.
     */
-    KeyPress (int keyCode) throw();
+    KeyPress (int keyCode) noexcept;
 
     /** Creates a copy of another KeyPress. */
-    KeyPress (const KeyPress& other) throw();
+    KeyPress (const KeyPress& other) noexcept;
 
     /** Copies this KeyPress from another one. */
-    KeyPress& operator= (const KeyPress& other) throw();
+    KeyPress& operator= (const KeyPress& other) noexcept;
 
     /** Compares two KeyPress objects. */
-    bool operator== (const KeyPress& other) const throw();
+    bool operator== (const KeyPress& other) const noexcept;
 
     /** Compares two KeyPress objects. */
-    bool operator!= (const KeyPress& other) const throw();
+    bool operator!= (const KeyPress& other) const noexcept;
 
     //==============================================================================
     /** Returns true if this is a valid KeyPress.
@@ -93,27 +93,27 @@ public:
         A null keypress can be created by the default constructor, in case it's
         needed.
     */
-    bool isValid() const throw()                                { return keyCode != 0; }
+    bool isValid() const noexcept                               { return keyCode != 0; }
 
     /** Returns the key code itself.
 
         This will either be one of the special constants defined in this class,
         or an 8-bit character code.
     */
-    int getKeyCode() const throw()                              { return keyCode; }
+    int getKeyCode() const noexcept                             { return keyCode; }
 
     /** Returns the key modifiers.
 
         @see ModifierKeys
     */
-    const ModifierKeys getModifiers() const throw()             { return mods; }
+    const ModifierKeys getModifiers() const noexcept            { return mods; }
 
     /** Returns the character that is associated with this keypress.
 
         This is the character that you'd expect to see printed if you press this
         keypress in a text editor or similar component.
     */
-    juce_wchar getTextCharacter() const throw()                 { return textCharacter; }
+    juce_wchar getTextCharacter() const noexcept                { return textCharacter; }
 
     /** Checks whether the KeyPress's key is the same as the one provided, without checking
         the modifiers.
@@ -123,7 +123,7 @@ public:
 
         @see getKeyCode
     */
-    bool isKeyCode (int keyCodeToCompare) const throw()         { return keyCode == keyCodeToCompare; }
+    bool isKeyCode (int keyCodeToCompare) const noexcept        { return keyCode == keyCodeToCompare; }
 
     //==============================================================================
     /** Converts a textual key description to a KeyPress.

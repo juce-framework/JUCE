@@ -41,7 +41,6 @@ Label::Label (const String& componentName,
       lastTextValue (labelText),
       font (15.0f),
       justification (Justification::centredLeft),
-      ownerComponent (0),
       horizontalBorderSize (5),
       verticalBorderSize (1),
       minimumHorizontalScale (0.7f),
@@ -60,10 +59,10 @@ Label::~Label()
 {
     textValue.removeListener (this);
 
-    if (ownerComponent != 0)
+    if (ownerComponent != nullptr)
         ownerComponent->removeComponentListener (this);
 
-    editor = 0;
+    editor = nullptr;
 }
 
 //==============================================================================
@@ -80,7 +79,7 @@ void Label::setText (const String& newText,
 
         textWasChanged();
 
-        if (ownerComponent != 0)
+        if (ownerComponent != nullptr)
             componentMovedOrResized (*ownerComponent, true, true);
 
         if (broadcastChangeMessage)
@@ -111,7 +110,7 @@ void Label::setFont (const Font& newFont)
     }
 }
 
-const Font& Label::getFont() const throw()
+const Font& Label::getFont() const noexcept
 {
     return font;
 }
@@ -156,14 +155,14 @@ Component* Label::getAttachedComponent() const
 void Label::attachToComponent (Component* owner,
                                const bool onLeft)
 {
-    if (ownerComponent != 0)
+    if (ownerComponent != nullptr)
         ownerComponent->removeComponentListener (this);
 
     ownerComponent = owner;
 
     leftOfOwnerComp = onLeft;
 
-    if (ownerComponent != 0)
+    if (ownerComponent != nullptr)
     {
         setVisible (owner->isVisible());
         ownerComponent->addComponentListener (this);
@@ -192,7 +191,7 @@ void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bo
 
 void Label::componentParentHierarchyChanged (Component& component)
 {
-    if (component.getParentComponent() != 0)
+    if (component.getParentComponent() != nullptr)
         component.getParentComponent()->addChildComponent (this);
 }
 
@@ -212,7 +211,7 @@ void Label::textWasChanged()
 
 void Label::showEditor()
 {
-    if (editor == 0)
+    if (editor == nullptr)
     {
         addAndMakeVisible (editor = createEditorComponent());
         editor->setText (getText(), false);
@@ -251,7 +250,7 @@ bool Label::updateFromTextEditorContents (TextEditor& ed)
 
         textWasChanged();
 
-        if (ownerComponent != 0)
+        if (ownerComponent != nullptr)
             componentMovedOrResized (*ownerComponent, true, true);
 
         return true;
@@ -262,7 +261,7 @@ bool Label::updateFromTextEditorContents (TextEditor& ed)
 
 void Label::hideEditor (const bool discardCurrentEditorContents)
 {
-    if (editor != 0)
+    if (editor != nullptr)
     {
         WeakReference<Component> deletionChecker (this);
 
@@ -272,23 +271,23 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
 
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents (*outgoingEditor);
-        outgoingEditor = 0;
+        outgoingEditor = nullptr;
         repaint();
 
         if (changed)
             textWasEdited();
 
-        if (deletionChecker != 0)
+        if (deletionChecker != nullptr)
             exitModalState (0);
 
-        if (changed && deletionChecker != 0)
+        if (changed && deletionChecker != nullptr)
             callChangeListeners();
     }
 }
 
 void Label::inputAttemptWhenModal()
 {
-    if (editor != 0)
+    if (editor != nullptr)
     {
         if (lossOfFocusDiscardsChanges)
             textEditorEscapeKeyPressed (*editor);
@@ -297,9 +296,9 @@ void Label::inputAttemptWhenModal()
     }
 }
 
-bool Label::isBeingEdited() const throw()
+bool Label::isBeingEdited() const noexcept
 {
-    return editor != 0;
+    return editor != nullptr;
 }
 
 TextEditor* Label::createEditorComponent()
@@ -348,7 +347,7 @@ void Label::mouseDoubleClick (const MouseEvent& e)
 
 void Label::resized()
 {
-    if (editor != 0)
+    if (editor != nullptr)
         editor->setBoundsInset (BorderSize<int> (0));
 }
 
@@ -387,13 +386,13 @@ public:
 
     Component* getNextComponent (Component* current)
     {
-        return KeyboardFocusTraverser::getNextComponent (dynamic_cast <TextEditor*> (current) != 0
+        return KeyboardFocusTraverser::getNextComponent (dynamic_cast <TextEditor*> (current) != nullptr
                                                             ? current->getParentComponent() : current);
     }
 
     Component* getPreviousComponent (Component* current)
     {
-        return KeyboardFocusTraverser::getPreviousComponent (dynamic_cast <TextEditor*> (current) != 0
+        return KeyboardFocusTraverser::getPreviousComponent (dynamic_cast <TextEditor*> (current) != nullptr
                                                                 ? current->getParentComponent() : current);
     }
 };
@@ -423,7 +422,7 @@ void Label::callChangeListeners()
 //==============================================================================
 void Label::textEditorTextChanged (TextEditor& ed)
 {
-    if (editor != 0)
+    if (editor != nullptr)
     {
         jassert (&ed == editor);
 
@@ -439,7 +438,7 @@ void Label::textEditorTextChanged (TextEditor& ed)
 
 void Label::textEditorReturnKeyPressed (TextEditor& ed)
 {
-    if (editor != 0)
+    if (editor != nullptr)
     {
         jassert (&ed == editor);
 
@@ -451,7 +450,7 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
             WeakReference<Component> deletionChecker (this);
             textWasEdited();
 
-            if (deletionChecker != 0)
+            if (deletionChecker != nullptr)
                 callChangeListeners();
         }
     }
@@ -459,7 +458,7 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
 
 void Label::textEditorEscapeKeyPressed (TextEditor& ed)
 {
-    if (editor != 0)
+    if (editor != nullptr)
     {
         jassert (&ed == editor);
         (void) ed;

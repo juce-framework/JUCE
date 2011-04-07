@@ -65,7 +65,7 @@ void MemoryOutputStream::preallocate (const size_t bytesToPreallocate)
     data.ensureSize (bytesToPreallocate + 1);
 }
 
-void MemoryOutputStream::reset() throw()
+void MemoryOutputStream::reset() noexcept
 {
     position = 0;
     size = 0;
@@ -88,7 +88,7 @@ bool MemoryOutputStream::write (const void* const buffer, int howMany)
     return true;
 }
 
-const void* MemoryOutputStream::getData() const throw()
+const void* MemoryOutputStream::getData() const noexcept
 {
     void* const d = data.getData();
 

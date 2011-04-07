@@ -83,7 +83,7 @@ public:
 
         You can change the bar's orientation with setVertical().
     */
-    bool isVertical() const throw()                  { return vertical; }
+    bool isVertical() const noexcept                 { return vertical; }
 
     /** Returns the depth of the bar.
 
@@ -92,7 +92,7 @@ public:
 
         @see getLength
     */
-    int getThickness() const throw();
+    int getThickness() const noexcept;
 
     /** Returns the length of the bar.
 
@@ -101,7 +101,7 @@ public:
 
         @see getThickness
     */
-    int getLength() const throw();
+    int getLength() const noexcept;
 
     //==============================================================================
     /** Deletes all items from the bar.
@@ -133,7 +133,7 @@ public:
 
         @see getItemId, getItemComponent
     */
-    int getNumItems() const throw();
+    int getNumItems() const noexcept;
 
     /** Returns the ID of the item with the given index.
 
@@ -142,7 +142,7 @@ public:
 
         @see getNumItems
     */
-    int getItemId (int itemIndex) const throw();
+    int getItemId (int itemIndex) const noexcept;
 
     /** Returns the component being used for the item with the given index.
 
@@ -151,7 +151,7 @@ public:
 
         @see getNumItems
     */
-    ToolbarItemComponent* getItemComponent (int itemIndex) const throw();
+    ToolbarItemComponent* getItemComponent (int itemIndex) const noexcept;
 
     /** Clears this toolbar and adds to it the default set of items that the specified
         factory creates.
@@ -174,7 +174,7 @@ public:
     /** Returns the toolbar's current style.
         @see ToolbarItemStyle, setStyle
     */
-    ToolbarItemStyle getStyle() const throw()                { return toolbarStyle; }
+    ToolbarItemStyle getStyle() const noexcept               { return toolbarStyle; }
 
     /** Changes the toolbar's current style.
         @see ToolbarItemStyle, getStyle, ToolbarItemComponent::setStyle

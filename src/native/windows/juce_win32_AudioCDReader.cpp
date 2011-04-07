@@ -222,7 +222,7 @@ public:
     {
     }
 
-    bool isZero() const throw()
+    bool isZero() const noexcept
     {
         for (int i = 0; i < dataLength; ++i)
             if (buffer [dataStartOffset + i] != 0)
@@ -274,7 +274,7 @@ public:
 
     ~CDDeviceHandle()
     {
-        if (controller != 0)
+        if (controller != nullptr)
         {
             controller->shutDown();
             controller = 0;
@@ -691,7 +691,7 @@ void CDController::setPaused (bool paused)
 
 bool CDController::readAudio (CDReadBuffer& rb, CDReadBuffer* overlapBuffer)
 {
-    if (overlapBuffer != 0)
+    if (overlapBuffer != nullptr)
     {
         const bool canDoJitter = (overlapBuffer->bufferSize >= 2352 * framesToCheck);
         const bool doJitter = canDoJitter && ! overlapBuffer->isZero();
@@ -847,7 +847,7 @@ bool CDDeviceHandle::readAudio (CDReadBuffer& buffer, CDReadBuffer* overlapBuffe
 
     buffer.index = 0;
 
-    if (controller != 0 && controller->readAudio (buffer, overlapBuffer))
+    if (controller != nullptr && controller->readAudio (buffer, overlapBuffer))
     {
         if (buffer.wantsIndex)
             buffer.index = controller->getLastIndex();
@@ -862,10 +862,10 @@ void CDDeviceHandle::openDrawer (bool shouldBeOpen)
 {
     if (shouldBeOpen)
     {
-        if (controller != 0)
+        if (controller != nullptr)
         {
             controller->shutDown();
-            controller = 0;
+            controller = nullptr;
         }
 
         if (scsiHandle != 0)
@@ -931,7 +931,7 @@ bool CDDeviceHandle::testController (const int type, CDController* const newCont
     if (! passed)
     {
         controller->shutDown();
-        controller = 0;
+        controller = nullptr;
     }
 
     return passed;
@@ -953,7 +953,7 @@ struct CDDeviceWrapper
 };
 
 //==============================================================================
-int getAddressOfTrack (const TOCTRACK& t) throw()
+int getAddressOfTrack (const TOCTRACK& t) noexcept
 {
     return (((DWORD) t.addr[0]) << 24) + (((DWORD) t.addr[1]) << 16)
             + (((DWORD) t.addr[2]) << 8) + ((DWORD) t.addr[3]);
@@ -1014,7 +1014,7 @@ AudioCDReader::AudioCDReader (void* handle_)
       samplesInBuffer (0)
 {
     using namespace CDReaderHelpers;
-    jassert (handle_ != 0);
+    jassert (handle_ != nullptr);
 
     refreshTrackLengths();
 
@@ -1060,7 +1060,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
             {
                 l[i] = src [i << 1] << 16;
 
-                if (r != 0)
+                if (r != nullptr)
                     r[i] = src [(i << 1) + 1] << 16;
             }
 
@@ -1114,7 +1114,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
                 {
                     *l++ = 0;
 
-                    if (r != 0)
+                    if (r != nullptr)
                         *r++ = 0;
                 }
 
@@ -1322,7 +1322,7 @@ namespace CDBurnerHelpers
         CoInitialize (0);
 
         IDiscMaster* dm;
-        IDiscRecorder* result = 0;
+        IDiscRecorder* result = nullptr;
 
         if (SUCCEEDED (CoCreateInstance (CLSID_MSDiscMasterObj, 0,
                                          CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER,
@@ -1331,11 +1331,11 @@ namespace CDBurnerHelpers
         {
             if (SUCCEEDED (dm->Open()))
             {
-                IEnumDiscRecorders* drEnum = 0;
+                IEnumDiscRecorders* drEnum = nullptr;
 
                 if (SUCCEEDED (dm->EnumDiscRecorders (&drEnum)))
                 {
-                    IDiscRecorder* dr = 0;
+                    IDiscRecorder* dr = nullptr;
                     DWORD dummy;
                     int index = 0;
 
@@ -1346,7 +1346,7 @@ namespace CDBurnerHelpers
                             result = dr;
                             break;
                         }
-                        else if (list != 0)
+                        else if (list != nullptr)
                         {
                             BSTR path;
 
@@ -1365,7 +1365,7 @@ namespace CDBurnerHelpers
                     dm->Close();
             }
 
-            if (master != 0)
+            if (master != nullptr)
                 *master = dm;
             else
                 dm->Release();
@@ -1398,7 +1398,7 @@ public:
     void releaseObjects()
     {
         discRecorder->Close();
-        if (redbook != 0)
+        if (redbook != nullptr)
             redbook->Release();
         discRecorder->Release();
         discMaster->Release();
@@ -1407,7 +1407,7 @@ public:
 
     HRESULT __stdcall QueryCancel (boolean* pbCancel)
     {
-        if (listener != 0 && ! shouldCancel)
+        if (listener != nullptr && ! shouldCancel)
             shouldCancel = listener->audioCDBurnProgress (progress);
 
         *pbCancel = shouldCancel;
@@ -1418,7 +1418,7 @@ public:
     HRESULT __stdcall NotifyBlockProgress (long nCompleted, long nTotal)
     {
         progress = nCompleted / (float) nTotal;
-        shouldCancel = listener != 0 && listener->audioCDBurnProgress (progress);
+        shouldCancel = listener != nullptr && listener->audioCDBurnProgress (progress);
 
         return E_NOTIMPL;
     }
@@ -1520,16 +1520,16 @@ public:
 //==============================================================================
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
 {
-    IDiscMaster* discMaster = 0;
+    IDiscMaster* discMaster = nullptr;
     IDiscRecorder* discRecorder = CDBurnerHelpers::enumCDBurners (0, deviceIndex, &discMaster);
 
-    if (discRecorder != 0)
+    if (discRecorder != nullptr)
         pimpl = new Pimpl (*this, discMaster, discRecorder);
 }
 
 AudioCDBurner::~AudioCDBurner()
 {
-    if (pimpl != 0)
+    if (pimpl != nullptr)
         pimpl.release()->releaseObjects();
 }
 
@@ -1545,7 +1545,7 @@ AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
     ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
     if (b->pimpl == 0)
-        b = 0;
+        b = nullptr;
 
     return b.release();
 }

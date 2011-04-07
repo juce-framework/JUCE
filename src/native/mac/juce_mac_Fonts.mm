@@ -141,7 +141,7 @@ public:
         unitsToHeightScaleFactor = 1.0f / totalHeight;
         fontHeightToCGSizeFactor = 1024.0f / totalHeight;
 #else
-  #if SUPPORT_10_4_FONTS
+       #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
@@ -156,7 +156,7 @@ public:
             fontHeightToCGSizeFactor = 1024.0f / totalHeight;
         }
         else
-  #endif
+       #endif
         {
             fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
@@ -171,9 +171,10 @@ public:
 
     ~MacTypeface()
     {
-#if ! JUCE_IOS
+       #if ! JUCE_IOS
         [nsFont release];
-#endif
+       #endif
+
         if (fontRef != 0)
             CGFontRelease (fontRef);
     }
@@ -206,7 +207,7 @@ public:
         for (int i = 0; i < length; ++i)
             x += advances[i].width;
 #else
-  #if SUPPORT_10_4_FONTS
+       #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             HeapBlock <NSSize> advances (length);
@@ -216,7 +217,7 @@ public:
                 x += advances[i].width;
         }
         else
-  #endif
+       #endif
         {
             HeapBlock <int> advances (length);
 
@@ -253,7 +254,7 @@ public:
         }
 
 #else
-  #if SUPPORT_10_4_FONTS
+       #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             HeapBlock <NSSize> advances (length);
@@ -269,7 +270,7 @@ public:
             }
         }
         else
-  #endif
+       #endif
         {
             HeapBlock <int> advances (length);
 
@@ -300,10 +301,10 @@ public:
 
     bool getOutlineForGlyph (int glyphNumber, Path& path)
     {
-#if JUCE_IOS
+       #if JUCE_IOS
         return false;
-#else
-        if (nsFont == 0)
+       #else
+        if (nsFont == nil)
             return false;
 
         // we might need to apply a transform to the path, so it mustn't have anything else in it
@@ -333,7 +334,7 @@ public:
 
         path.applyTransform (pathTransform);
         return true;
-#endif
+       #endif
     }
 
     //==============================================================================
@@ -344,19 +345,17 @@ public:
 private:
     float ascent, unitsToHeightScaleFactor;
 
-#if JUCE_IOS
-
-#else
+   #if ! JUCE_IOS
     NSFont* nsFont;
     AffineTransform pathTransform;
-#endif
+   #endif
 
     void createGlyphsForString (String::CharPointerType text, const int length, HeapBlock <CGGlyph>& glyphs)
     {
-#if SUPPORT_10_4_FONTS
-  #if ! SUPPORT_ONLY_10_4_FONTS
+      #if SUPPORT_10_4_FONTS
+       #if ! SUPPORT_ONLY_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
-  #endif
+       #endif
         {
             glyphs.malloc (sizeof (NSGlyph) * length, 1);
             NSGlyph* const nsGlyphs = reinterpret_cast<NSGlyph*> (glyphs.getData());
@@ -366,17 +365,17 @@ private:
 
             return;
         }
-#endif
+      #endif
 
-#if ! SUPPORT_ONLY_10_4_FONTS
-        if (charToGlyphMapper == 0)
+       #if ! SUPPORT_ONLY_10_4_FONTS
+        if (charToGlyphMapper == nullptr)
             charToGlyphMapper = new CharToGlyphMapper (fontRef);
 
         glyphs.malloc (length);
 
         for (int i = 0; i < length; ++i)
             glyphs[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text.getAndAdvance());
-#endif
+       #endif
     }
 
 #if ! SUPPORT_ONLY_10_4_FONTS
@@ -495,11 +494,11 @@ const StringArray Font::findAllTypefaceNames()
 
     const ScopedAutoReleasePool pool;
 
-#if JUCE_IOS
+   #if JUCE_IOS
     NSArray* fonts = [UIFont familyNames];
-#else
+   #else
     NSArray* fonts = [[NSFontManager sharedFontManager] availableFontFamilies];
-#endif
+   #endif
 
     for (unsigned int i = 0; i < [fonts count]; ++i)
         names.add (nsStringToJuce ((NSString*) [fonts objectAtIndex: i]));
@@ -510,15 +509,15 @@ const StringArray Font::findAllTypefaceNames()
 
 void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback)
 {
-  #if JUCE_IOS
+   #if JUCE_IOS
     defaultSans  = "Helvetica";
     defaultSerif = "Times New Roman";
     defaultFixed = "Courier New";
-  #else
+   #else
     defaultSans  = "Lucida Grande";
     defaultSerif = "Times New Roman";
     defaultFixed = "Monaco";
-  #endif
+   #endif
 
     defaultFallback = "Arial Unicode MS";
 }

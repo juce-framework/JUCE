@@ -76,8 +76,8 @@ private:
 
     const String getProjectWindowPosName() const
     {
-        jassert (currentProject != 0);
-        if (currentProject == 0)
+        jassert (currentProject != nullptr);
+        if (currentProject == nullptr)
             return String::empty;
 
         return "projectWindowPos_" + currentProject->getProjectUID();

@@ -45,12 +45,12 @@ class JUCE_API  FillType
 public:
     //==============================================================================
     /** Creates a default fill type, of solid black. */
-    FillType() throw();
+    FillType() noexcept;
 
     /** Creates a fill type of a solid colour.
         @see setColour
     */
-    FillType (const Colour& colour) throw();
+    FillType (const Colour& colour) noexcept;
 
     /** Creates a gradient fill type.
         @see setGradient
@@ -61,7 +61,7 @@ public:
         and rotation of the pattern.
         @see setTiledImage
     */
-    FillType (const Image& image, const AffineTransform& transform) throw();
+    FillType (const Image& image, const AffineTransform& transform) noexcept;
 
     /** Creates a copy of another FillType. */
     FillType (const FillType& other);
@@ -70,21 +70,21 @@ public:
     FillType& operator= (const FillType& other);
 
     /** Destructor. */
-    ~FillType() throw();
+    ~FillType() noexcept;
 
     //==============================================================================
     /** Returns true if this is a solid colour fill, and not a gradient or image. */
-    bool isColour() const throw()           { return gradient == 0 && image.isNull(); }
+    bool isColour() const noexcept          { return gradient == nullptr && image.isNull(); }
 
     /** Returns true if this is a gradient fill. */
-    bool isGradient() const throw()         { return gradient != 0; }
+    bool isGradient() const noexcept        { return gradient != nullptr; }
 
     /** Returns true if this is a tiled image pattern fill. */
-    bool isTiledImage() const throw()       { return image.isValid(); }
+    bool isTiledImage() const noexcept      { return image.isValid(); }
 
     /** Turns this object into a solid colour fill.
         If the object was an image or gradient, those fields will no longer be valid. */
-    void setColour (const Colour& newColour) throw();
+    void setColour (const Colour& newColour) noexcept;
 
     /** Turns this object into a gradient fill. */
     void setGradient (const ColourGradient& newGradient);
@@ -92,21 +92,21 @@ public:
     /** Turns this object into a tiled image fill type. The transform allows you to set
         the scaling, offset and rotation of the pattern.
     */
-    void setTiledImage (const Image& image, const AffineTransform& transform) throw();
+    void setTiledImage (const Image& image, const AffineTransform& transform) noexcept;
 
     /** Changes the opacity that should be used.
         If the fill is a solid colour, this just changes the opacity of that colour. For
         gradients and image tiles, it changes the opacity that will be used for them.
     */
-    void setOpacity (float newOpacity) throw();
+    void setOpacity (float newOpacity) noexcept;
 
     /** Returns the current opacity to be applied to the colour, gradient, or image.
         @see setOpacity
     */
-    float getOpacity() const throw()        { return colour.getFloatAlpha(); }
+    float getOpacity() const noexcept       { return colour.getFloatAlpha(); }
 
     /** Returns true if this fill type is completely transparent. */
-    bool isInvisible() const throw();
+    bool isInvisible() const noexcept;
 
     //==============================================================================
     /** The solid colour being used.

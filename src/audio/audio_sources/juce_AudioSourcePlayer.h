@@ -72,17 +72,17 @@ public:
 
         May return 0 if there's no source.
     */
-    AudioSource* getCurrentSource() const throw()       { return source; }
+    AudioSource* getCurrentSource() const noexcept      { return source; }
 
     /** Sets a gain to apply to the audio data.
         @see getGain
     */
-    void setGain (float newGain) throw();
+    void setGain (float newGain) noexcept;
 
     /** Returns the current gain.
         @see setGain
     */
-    float getGain() const throw()                       { return gain; }
+    float getGain() const noexcept                      { return gain; }
 
     //==============================================================================
     /** Implementation of the AudioIODeviceCallback method. */

@@ -62,7 +62,7 @@ public:
 
     /** Returns the current menu bar model being used.
     */
-    MenuBarModel* getModel() const throw();
+    MenuBarModel* getModel() const noexcept;
 
     //==============================================================================
     /** Pops up one of the menu items.

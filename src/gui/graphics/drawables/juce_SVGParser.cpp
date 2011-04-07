@@ -142,7 +142,7 @@ private:
     {
         forEachXmlChildElement (xml, e)
         {
-            Drawable* d = 0;
+            Drawable* d = nullptr;
 
             if (e->hasTagName ("g"))                d = parseGroupElement (*e);
             else if (e->hasTagName ("svg"))         d = parseSVGElement (*e);
@@ -165,7 +165,7 @@ private:
     {
         const XmlElement* const group = xml.getChildByName ("g");
 
-        if (group != 0)
+        if (group != nullptr)
             return parseGroupElement (*group);
 
         return 0;
@@ -688,7 +688,7 @@ private:
 
             const XmlElement* const fillXml = findElementForId (topLevelXml, id);
 
-            if (fillXml != 0
+            if (fillXml != nullptr
                  && (fillXml->hasTagName ("linearGradient")
                       || fillXml->hasTagName ("radialGradient")))
             {
@@ -961,7 +961,7 @@ private:
 
         xml = const_cast <XmlElement*> (topLevelXml)->findParentElementOf (xml);
 
-        if (xml != 0)
+        if (xml != nullptr)
             return getStyleAttribute (xml, attributeName, defaultValue);
 
         return defaultValue;
@@ -974,7 +974,7 @@ private:
 
         xml = const_cast <XmlElement*> (topLevelXml)->findParentElementOf (xml);
 
-        if (xml != 0)
+        if (xml != nullptr)
             return getInheritedAttribute  (xml, attributeName);
 
         return String::empty;
@@ -1284,7 +1284,7 @@ private:
 
             const XmlElement* const found = findElementForId (e, id);
 
-            if (found != 0)
+            if (found != nullptr)
                 return found;
         }
 

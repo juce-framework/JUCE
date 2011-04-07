@@ -161,8 +161,8 @@ public:
         if (mLoggedIn)
             MIDILogOut();
 
-        midiBufferNode = 0;
-        midiTransport = 0;
+        midiBufferNode = nullptr;
+        midiTransport = nullptr;
 
         if (prepared)
             juceFilter->releaseResources();
@@ -172,11 +172,11 @@ public:
 
         if (--numInstances == 0)
         {
-#if JUCE_MAC
+           #if JUCE_MAC
             // Hack to allow any NSWindows to clear themselves up before returning to PT..
             for (int i = 20; --i >= 0;)
                 MessageManager::getInstance()->runDispatchLoopUntil (1);
-#endif
+           #endif
 
             shutdownJuce_GUI();
         }
@@ -204,10 +204,10 @@ public:
         //==============================================================================
         void updateSize()
         {
-            if (editorComp == 0)
+            if (editorComp == nullptr)
             {
                 editorComp = filter->createEditorIfNeeded();
-                jassert (editorComp != 0);
+                jassert (editorComp != nullptr);
             }
 
             if (editorComp->getWidth() != 0 && editorComp->getHeight() != 0)
@@ -251,7 +251,7 @@ public:
 #else
                 void* const hostWindow = (void*) GetWindowFromPort (port);
 #endif
-                wrapper = 0;
+                wrapper = nullptr;
                 wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
 
                 process->touchAllParameters();
@@ -265,11 +265,11 @@ public:
         void DrawContents (Rect*)
         {
 #if JUCE_WINDOWS
-            if (wrapper != 0)
+            if (wrapper != nullptr)
             {
                 ComponentPeer* const peer = wrapper->getPeer();
 
-                if (peer != 0)
+                if (peer != nullptr)
                 {
                     // (seems to be required in PT6.4, but not in 7.x)
                     peer->repaint (wrapper->getLocalBounds());
@@ -289,19 +289,19 @@ public:
 
         void deleteEditorComp()
         {
-            if (editorComp != 0 || wrapper != 0)
+            if (editorComp != 0 || wrapper != nullptr)
             {
                 JUCE_AUTORELEASEPOOL
                 PopupMenu::dismissAllActiveMenus();
 
                 JUCE_NAMESPACE::Component* const modalComponent = JUCE_NAMESPACE::Component::getCurrentlyModalComponent();
-                if (modalComponent != 0)
+                if (modalComponent != nullptr)
                     modalComponent->exitModalState (0);
 
                 filter->editorBeingDeleted (editorComp);
 
-                editorComp = 0;
-                wrapper = 0;
+                editorComp = nullptr;
+                wrapper = nullptr;
             }
         }
 
@@ -363,7 +363,7 @@ public:
             {
                 JUCE_NAMESPACE::Component* const c = getChildComponent (0);
 
-                if (c != 0)
+                if (c != nullptr)
                     c->setBounds (0, 0, getWidth(), getHeight());
 
                 repaint();
@@ -421,7 +421,7 @@ public:
 
     void GetViewRect (Rect* size)
     {
-        if (getView() != 0)
+        if (getView() != nullptr)
             getView()->updateSize();
 
         CEffectProcessRTAS::GetViewRect (size);
@@ -436,7 +436,7 @@ public:
     {
         CEffectProcessRTAS::SetViewPort (port);
 
-        if (getView() != 0)
+        if (getView() != nullptr)
             getView()->attachToWindow (port);
     }
 
@@ -444,8 +444,8 @@ public:
 protected:
     ComponentResult GetDelaySamplesLong (long* aNumSamples)
     {
-        if (aNumSamples != 0)
-            *aNumSamples = juceFilter != 0 ? juceFilter->getLatencySamples() : 0;
+        if (aNumSamples != nullptr)
+            *aNumSamples = juceFilter != nullptr ? juceFilter->getLatencySamples() : 0;
 
         return noErr;
     }
@@ -472,7 +472,7 @@ protected:
 #if JucePlugin_WantsMidiInput
             CEffectType* const type = dynamic_cast <CEffectType*> (this->GetProcessType());
 
-            if (type != 0)
+            if (type != nullptr)
             {
                 char nodeName [64];
                 type->GetProcessTypeName (63, nodeName);
@@ -832,12 +832,12 @@ private:
     bool prepared;
     double sampleRate;
 
-    static float longToFloat (const long n) throw()
+    static float longToFloat (const long n) noexcept
     {
         return (float) ((((double) n) + (double) 0x80000000) / (double) 0xffffffff);
     }
 
-    static long floatToLong (const float n) throw()
+    static long floatToLong (const float n) noexcept
     {
         return roundToInt (jlimit (-(double) 0x80000000, (double) 0x7fffffff,
                                    n * (double) 0xffffffff - (double) 0x80000000));
@@ -992,7 +992,7 @@ private:
                  + String (JucePlugin_Name).substring (0, 4);
     }
 
-    static EPlugIn_StemFormat getFormatForChans (const int numChans) throw()
+    static EPlugIn_StemFormat getFormatForChans (const int numChans) noexcept
     {
         switch (numChans)
         {

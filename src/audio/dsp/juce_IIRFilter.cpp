@@ -50,7 +50,7 @@ IIRFilter::~IIRFilter()
 }
 
 //==============================================================================
-void IIRFilter::reset() throw()
+void IIRFilter::reset() noexcept
 {
     const ScopedLock sl (processLock);
 
@@ -60,7 +60,7 @@ void IIRFilter::reset() throw()
     y2 = 0;
 }
 
-float IIRFilter::processSingleSampleRaw (const float in) throw()
+float IIRFilter::processSingleSampleRaw (const float in) noexcept
 {
     float out = coefficients[0] * in
                  + coefficients[1] * x1
@@ -68,10 +68,10 @@ float IIRFilter::processSingleSampleRaw (const float in) throw()
                  - coefficients[4] * y1
                  - coefficients[5] * y2;
 
-#if JUCE_INTEL
+   #if JUCE_INTEL
     if (! (out < -1.0e-8 || out > 1.0e-8))
         out = 0;
-#endif
+   #endif
 
     x2 = x1;
     x1 = in;
@@ -82,7 +82,7 @@ float IIRFilter::processSingleSampleRaw (const float in) throw()
 }
 
 void IIRFilter::processSamples (float* const samples,
-                                const int numSamples) throw()
+                                const int numSamples) noexcept
 {
     const ScopedLock sl (processLock);
 
@@ -98,10 +98,10 @@ void IIRFilter::processSamples (float* const samples,
                          - coefficients[4] * y1
                          - coefficients[5] * y2;
 
-#if JUCE_INTEL
+           #if JUCE_INTEL
             if (! (out < -1.0e-8 || out > 1.0e-8))
                 out = 0;
-#endif
+           #endif
 
             x2 = x1;
             x1 = in;
@@ -115,7 +115,7 @@ void IIRFilter::processSamples (float* const samples,
 
 //==============================================================================
 void IIRFilter::makeLowPass (const double sampleRate,
-                             const double frequency) throw()
+                             const double frequency) noexcept
 {
     jassert (sampleRate > 0);
 
@@ -132,7 +132,7 @@ void IIRFilter::makeLowPass (const double sampleRate,
 }
 
 void IIRFilter::makeHighPass (const double sampleRate,
-                              const double frequency) throw()
+                              const double frequency) noexcept
 {
     const double n = tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
@@ -149,7 +149,7 @@ void IIRFilter::makeHighPass (const double sampleRate,
 void IIRFilter::makeLowShelf (const double sampleRate,
                               const double cutOffFrequency,
                               const double Q,
-                              const float gainFactor) throw()
+                              const float gainFactor) noexcept
 {
     jassert (sampleRate > 0);
     jassert (Q > 0);
@@ -173,7 +173,7 @@ void IIRFilter::makeLowShelf (const double sampleRate,
 void IIRFilter::makeHighShelf (const double sampleRate,
                                const double cutOffFrequency,
                                const double Q,
-                               const float gainFactor) throw()
+                               const float gainFactor) noexcept
 {
     jassert (sampleRate > 0);
     jassert (Q > 0);
@@ -197,7 +197,7 @@ void IIRFilter::makeHighShelf (const double sampleRate,
 void IIRFilter::makeBandPass (const double sampleRate,
                               const double centreFrequency,
                               const double Q,
-                              const float gainFactor) throw()
+                              const float gainFactor) noexcept
 {
     jassert (sampleRate > 0);
     jassert (Q > 0);
@@ -217,14 +217,14 @@ void IIRFilter::makeBandPass (const double sampleRate,
                      1.0 - alphaOverA);
 }
 
-void IIRFilter::makeInactive() throw()
+void IIRFilter::makeInactive() noexcept
 {
     const ScopedLock sl (processLock);
     active = false;
 }
 
 //==============================================================================
-void IIRFilter::copyCoefficientsFrom (const IIRFilter& other) throw()
+void IIRFilter::copyCoefficientsFrom (const IIRFilter& other) noexcept
 {
     const ScopedLock sl (processLock);
 
@@ -234,7 +234,7 @@ void IIRFilter::copyCoefficientsFrom (const IIRFilter& other) throw()
 
 //==============================================================================
 void IIRFilter::setCoefficients (double c1, double c2, double c3,
-                                 double c4, double c5, double c6) throw()
+                                 double c4, double c5, double c6) noexcept
 {
     const double a = 1.0 / c4;
 

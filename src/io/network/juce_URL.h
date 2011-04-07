@@ -209,11 +209,11 @@ public:
                     error trying to open it.
      */
     InputStream* createInputStream (bool usePostCommand,
-                                    OpenStreamProgressCallback* progressCallback = 0,
-                                    void* progressCallbackContext = 0,
+                                    OpenStreamProgressCallback* progressCallback = nullptr,
+                                    void* progressCallbackContext = nullptr,
                                     const String& extraHeaders = String::empty,
                                     int connectionTimeOutMs = 0,
-                                    StringPairArray* responseHeaders = 0) const;
+                                    StringPairArray* responseHeaders = nullptr) const;
 
 
     //==============================================================================

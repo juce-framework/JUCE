@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 class ActionMessage  : public Message
 {
 public:
-    ActionMessage (const String& messageText, ActionListener* const listener_) throw()
+    ActionMessage (const String& messageText, ActionListener* const listener_) noexcept
         : message (messageText)
     {
         pointerParameter = listener_;
@@ -63,7 +63,7 @@ void ActionBroadcaster::CallbackReceiver::handleMessage (const Message& message)
 ActionBroadcaster::ActionBroadcaster()
 {
     // are you trying to create this object before or after juce has been intialised??
-    jassert (MessageManager::instance != 0);
+    jassert (MessageManager::instance != nullptr);
 
     callback.owner = this;
 }
@@ -71,14 +71,14 @@ ActionBroadcaster::ActionBroadcaster()
 ActionBroadcaster::~ActionBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
-    jassert (MessageManager::instance != 0);
+    jassert (MessageManager::instance != nullptr);
 }
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)
 {
     const ScopedLock sl (actionListenerLock);
 
-    if (listener != 0)
+    if (listener != nullptr)
         actionListeners.add (listener);
 }
 

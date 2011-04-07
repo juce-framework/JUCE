@@ -47,14 +47,14 @@ public:
                             method is called. If manualReset is true, then once the event is signalled,
                             the only way to reset it will be by calling the reset() method.
     */
-    WaitableEvent (bool manualReset = false) throw();
+    WaitableEvent (bool manualReset = false) noexcept;
 
     /** Destructor.
 
         If other threads are waiting on this object when it gets deleted, this
         can cause nasty errors, so be careful!
     */
-    ~WaitableEvent() throw();
+    ~WaitableEvent() noexcept;
 
     //==============================================================================
     /** Suspends the calling thread until the event has been signalled.
@@ -71,7 +71,7 @@ public:
         @returns    true if the object has been signalled, false if the timeout expires first.
         @see signal, reset
     */
-    bool wait (int timeOutMilliseconds = -1) const throw();
+    bool wait (int timeOutMilliseconds = -1) const noexcept;
 
     //==============================================================================
     /** Wakes up any threads that are currently waiting on this object.
@@ -81,14 +81,14 @@ public:
 
         @see wait, reset
     */
-    void signal() const throw();
+    void signal() const noexcept;
 
     //==============================================================================
     /** Resets the event to an unsignalled state.
 
         If it's not already signalled, this does nothing.
     */
-    void reset() const throw();
+    void reset() const noexcept;
 
 
 private:

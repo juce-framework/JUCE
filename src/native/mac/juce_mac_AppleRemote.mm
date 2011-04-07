@@ -61,12 +61,12 @@ namespace
 
     bool createAppleRemoteInterface (io_object_t iod, void** device)
     {
-        jassert (*device == 0);
+        jassert (*device == nullptr);
         io_name_t classname;
 
         if (IOObjectGetClass (iod, classname) == kIOReturnSuccess)
         {
-            IOCFPlugInInterface** cfPlugInInterface = 0;
+            IOCFPlugInInterface** cfPlugInInterface = nullptr;
             SInt32 score = 0;
 
             if (IOCreatePlugInInterfaceForService (iod,

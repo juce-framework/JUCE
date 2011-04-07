@@ -32,29 +32,29 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-FillType::FillType() throw()
-    : colour (0xff000000), image (0)
+FillType::FillType() noexcept
+    : colour (0xff000000)
 {
 }
 
-FillType::FillType (const Colour& colour_) throw()
-    : colour (colour_), image (0)
+FillType::FillType (const Colour& colour_) noexcept
+    : colour (colour_)
 {
 }
 
 FillType::FillType (const ColourGradient& gradient_)
-    : colour (0xff000000), gradient (new ColourGradient (gradient_)), image (0)
+    : colour (0xff000000), gradient (new ColourGradient (gradient_))
 {
 }
 
-FillType::FillType (const Image& image_, const AffineTransform& transform_) throw()
+FillType::FillType (const Image& image_, const AffineTransform& transform_) noexcept
     : colour (0xff000000), image (image_), transform (transform_)
 {
 }
 
 FillType::FillType (const FillType& other)
     : colour (other.colour),
-      gradient (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0),
+      gradient (other.gradient != nullptr ? new ColourGradient (*other.gradient) : 0),
       image (other.image), transform (other.transform)
 {
 }
@@ -64,7 +64,7 @@ FillType& FillType::operator= (const FillType& other)
     if (this != &other)
     {
         colour = other.colour;
-        gradient = (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0);
+        gradient = (other.gradient != nullptr ? new ColourGradient (*other.gradient) : 0);
         image = other.image;
         transform = other.transform;
     }
@@ -72,7 +72,7 @@ FillType& FillType::operator= (const FillType& other)
     return *this;
 }
 
-FillType::~FillType() throw()
+FillType::~FillType() noexcept
 {
 }
 
@@ -81,7 +81,7 @@ bool FillType::operator== (const FillType& other) const
     return colour == other.colour && image == other.image
             && transform == other.transform
             && (gradient == other.gradient
-                 || (gradient != 0 && other.gradient != 0 && *gradient == *other.gradient));
+                 || (gradient != nullptr && other.gradient != nullptr && *gradient == *other.gradient));
 }
 
 bool FillType::operator!= (const FillType& other) const
@@ -89,16 +89,16 @@ bool FillType::operator!= (const FillType& other) const
     return ! operator== (other);
 }
 
-void FillType::setColour (const Colour& newColour) throw()
+void FillType::setColour (const Colour& newColour) noexcept
 {
-    gradient = 0;
+    gradient = nullptr;
     image = Image::null;
     colour = newColour;
 }
 
 void FillType::setGradient (const ColourGradient& newGradient)
 {
-    if (gradient != 0)
+    if (gradient != nullptr)
     {
         *gradient = newGradient;
     }
@@ -110,22 +110,22 @@ void FillType::setGradient (const ColourGradient& newGradient)
     }
 }
 
-void FillType::setTiledImage (const Image& image_, const AffineTransform& transform_) throw()
+void FillType::setTiledImage (const Image& image_, const AffineTransform& transform_) noexcept
 {
-    gradient = 0;
+    gradient = nullptr;
     image = image_;
     transform = transform_;
     colour = Colours::black;
 }
 
-void FillType::setOpacity (const float newOpacity) throw()
+void FillType::setOpacity (const float newOpacity) noexcept
 {
     colour = colour.withAlpha (newOpacity);
 }
 
-bool FillType::isInvisible() const throw()
+bool FillType::isInvisible() const noexcept
 {
-    return colour.isTransparent() || (gradient != 0 && gradient->isInvisible());
+    return colour.isTransparent() || (gradient != nullptr && gradient->isInvisible());
 }
 
 

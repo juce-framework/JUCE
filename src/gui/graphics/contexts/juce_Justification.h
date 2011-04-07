@@ -43,32 +43,32 @@ class JUCE_API  Justification
 public:
     //==============================================================================
     /** Creates a Justification object using a combination of flags. */
-    inline Justification (int flags_) throw()  : flags (flags_) {}
+    inline Justification (int flags_) noexcept : flags (flags_) {}
 
     /** Creates a copy of another Justification object. */
-    Justification (const Justification& other) throw();
+    Justification (const Justification& other) noexcept;
 
     /** Copies another Justification object. */
-    Justification& operator= (const Justification& other) throw();
+    Justification& operator= (const Justification& other) noexcept;
 
-    bool operator== (const Justification& other) const throw()      { return flags == other.flags; }
-    bool operator!= (const Justification& other) const throw()      { return flags != other.flags; }
+    bool operator== (const Justification& other) const noexcept     { return flags == other.flags; }
+    bool operator!= (const Justification& other) const noexcept     { return flags != other.flags; }
 
     //==============================================================================
     /** Returns the raw flags that are set for this Justification object. */
-    inline int getFlags() const throw()                             { return flags; }
+    inline int getFlags() const noexcept                            { return flags; }
 
     /** Tests a set of flags for this object.
 
         @returns true if any of the flags passed in are set on this object.
     */
-    inline bool testFlags (int flagsToTest) const throw()           { return (flags & flagsToTest) != 0; }
+    inline bool testFlags (int flagsToTest) const noexcept          { return (flags & flagsToTest) != 0; }
 
     /** Returns just the flags from this object that deal with vertical layout. */
-    int getOnlyVerticalFlags() const throw();
+    int getOnlyVerticalFlags() const noexcept;
 
     /** Returns just the flags from this object that deal with horizontal layout. */
-    int getOnlyHorizontalFlags() const throw();
+    int getOnlyHorizontalFlags() const noexcept;
 
     //==============================================================================
     /** Adjusts the position of a rectangle to fit it into a space.
@@ -78,7 +78,7 @@ public:
     */
     template <typename ValueType>
     void applyToRectangle (ValueType& x, ValueType& y, ValueType w, ValueType h,
-                           ValueType spaceX, ValueType spaceY, ValueType spaceW, ValueType spaceH) const throw()
+                           ValueType spaceX, ValueType spaceY, ValueType spaceW, ValueType spaceH) const noexcept
     {
         x = spaceX;
         if ((flags & horizontallyCentred) != 0)     x += (spaceW - w) / (ValueType) 2;
@@ -93,7 +93,7 @@ public:
     */
     template <typename ValueType>
     const Rectangle<ValueType> appliedToRectangle (const Rectangle<ValueType>& areaToAdjust,
-                                                   const Rectangle<ValueType>& targetSpace) const throw()
+                                                   const Rectangle<ValueType>& targetSpace) const noexcept
     {
         ValueType x = areaToAdjust.getX(), y = areaToAdjust.getY();
         applyToRectangle (x, y, areaToAdjust.getWidth(), areaToAdjust.getHeight(),

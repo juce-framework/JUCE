@@ -177,7 +177,7 @@ struct fxProgramSet
 
 namespace
 {
-    long vst_swap (const long x) throw()
+    long vst_swap (const long x) noexcept
     {
       #ifdef JUCE_LITTLE_ENDIAN
         return (long) ByteOrder::swap ((uint32) x);
@@ -186,7 +186,7 @@ namespace
       #endif
     }
 
-    float vst_swapFloat (const float x) throw()
+    float vst_swapFloat (const float x) noexcept
     {
       #ifdef JUCE_LITTLE_ENDIAN
         union { uint32 asInt; float asFloat; } n;
@@ -238,7 +238,7 @@ class VSTPluginWindow;
 
 //==============================================================================
 #if JUCE_MAC && JUCE_PPC
-static void* NewCFMFromMachO (void* const machofp) throw()
+static void* NewCFMFromMachO (void* const machofp) noexcept
 {
     void* result = (void*) new char[8];
 
@@ -305,7 +305,7 @@ namespace
         return 0;
     }
 
-    void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) throw()
+    void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) noexcept
     {
         if (e.mods.isLeftButtonDown())
         {
@@ -324,21 +324,21 @@ namespace
         }
     }
 
-    void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) throw()
+    void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) noexcept
     {
         if (e.mods.isLeftButtonDown())          ev.xmotion.state |= Button1Mask;
         else if (e.mods.isRightButtonDown())    ev.xmotion.state |= Button3Mask;
         else if (e.mods.isMiddleButtonDown())   ev.xmotion.state |= Button2Mask;
     }
 
-    void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) throw()
+    void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) noexcept
     {
         if (e.mods.isLeftButtonDown())          ev.xcrossing.state |= Button1Mask;
         else if (e.mods.isRightButtonDown())    ev.xcrossing.state |= Button3Mask;
         else if (e.mods.isMiddleButtonDown())   ev.xcrossing.state |= Button2Mask;
     }
 
-    void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) throw()
+    void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
     {
         if (increment < 0)
         {
@@ -390,7 +390,7 @@ public:
         ScopedPointer <ModuleHandle> m (new ModuleHandle (file));
 
         if (! m->open())
-            m = 0;
+            m = nullptr;
 
         --insideVSTCallback;
         _fpreset(); // (doesn't do any harm)
@@ -732,7 +732,7 @@ public:
         desc.version = getVersion();
         desc.numInputChannels = getNumInputChannels();
         desc.numOutputChannels = getNumOutputChannels();
-        desc.isInstrument = (effect != 0 && (effect->flags & effFlagsIsSynth) != 0);
+        desc.isInstrument = (effect != nullptr && (effect->flags & effFlagsIsSynth) != 0);
     }
 
     void* getPlatformSpecificData()         { return effect; }
@@ -749,7 +749,7 @@ public:
     void processBlock (AudioSampleBuffer& buffer,
                        MidiBuffer& midiMessages);
 
-    bool hasEditor() const                              { return effect != 0 && (effect->flags & effFlagsHasEditor) != 0; }
+    bool hasEditor() const                              { return effect != nullptr && (effect->flags & effFlagsHasEditor) != 0; }
     AudioProcessorEditor* createEditor();
 
     const String getInputChannelName (int index) const;
@@ -759,7 +759,7 @@ public:
     bool isOutputChannelStereoPair (int index) const;
 
     //==============================================================================
-    int getNumParameters()                              { return effect != 0 ? effect->numParams : 0; }
+    int getNumParameters()                              { return effect != nullptr ? effect->numParams : 0; }
     float getParameter (int index);
     void setParameter (int index, float newValue);
     const String getParameterName (int index);
@@ -767,7 +767,7 @@ public:
     bool isParameterAutomatable (int index) const;
 
     //==============================================================================
-    int getNumPrograms()                                { return effect != 0 ? effect->numPrograms : 0; }
+    int getNumPrograms()                                { return effect != nullptr ? effect->numPrograms : 0; }
     int getCurrentProgram()                             { return dispatch (effGetProgram, 0, 0, 0, 0); }
     void setCurrentProgram (int index);
     const String getProgramName (int index);
@@ -814,13 +814,13 @@ private:
     void restoreFromTempParameterStore (const MemoryBlock& mb);
     const String getParameterLabel (int index) const;
 
-    bool usesChunks() const throw()         { return effect != 0 && (effect->flags & effFlagsProgramChunks) != 0; }
+    bool usesChunks() const noexcept        { return effect != nullptr && (effect->flags & effFlagsProgramChunks) != 0; }
     void getChunkData (MemoryBlock& mb, bool isPreset, int maxSizeMB) const;
     void setChunkData (const char* data, int size, bool isPreset);
     bool loadFromFXBFile (const void* data, int numBytes);
     bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB);
 
-    int getVersionNumber() const throw()    { return effect != 0 ? effect->version : 0; }
+    int getVersionNumber() const noexcept   { return effect != nullptr ? effect->version : 0; }
     const String getVersion() const;
     const String getCategory() const;
 
@@ -855,7 +855,7 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
 #if JUCE_PPC
         if (module->fragId != 0)
         {
-            static void* audioMasterCoerced = 0;
+            static void* audioMasterCoerced = nullptr;
             if (audioMasterCoerced == 0)
                 audioMasterCoerced = NewCFMFromMachO ((void*) &audioMaster);
 
@@ -870,7 +870,7 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
 
         --insideVSTCallback;
 
-        if (effect != 0 && effect->magic == kEffectMagic)
+        if (effect != nullptr && effect->magic == kEffectMagic)
         {
 #if JUCE_PPC
             module->coerceAEffectFunctionCalls (effect);
@@ -883,7 +883,7 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
         }
         else
         {
-            effect = 0;
+            effect = nullptr;
         }
     }
     catch (...)
@@ -898,7 +898,7 @@ VSTPluginInstance::~VSTPluginInstance()
 
     jassert (insideVSTCallback == 0);
 
-    if (effect != 0 && effect->magic == kEffectMagic)
+    if (effect != nullptr && effect->magic == kEffectMagic)
     {
         try
         {
@@ -918,8 +918,8 @@ VSTPluginInstance::~VSTPluginInstance()
         {}
     }
 
-    module = 0;
-    effect = 0;
+    module = nullptr;
+    effect = nullptr;
 }
 
 //==============================================================================
@@ -1037,7 +1037,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
     {
         AudioPlayHead* playHead = getPlayHead();
 
-        if (playHead != 0)
+        if (playHead != nullptr)
         {
             AudioPlayHead::CurrentPositionInfo position;
             playHead->getCurrentPosition (position);
@@ -1126,7 +1126,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
 //==============================================================================
 void VSTPluginInstance::handleMidiFromPlugin (const VstEvents* const events)
 {
-    if (events != 0)
+    if (events != nullptr)
     {
         const ScopedLock sl (midiInLock);
         VSTMidiEventList::addEventsToMidiBuffer (events, incomingMidi);
@@ -1157,15 +1157,15 @@ public:
           pluginRefusesToResize (false),
           alreadyInside (false)
     {
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         sizeCheckCount = 0;
         pluginHWND = 0;
-#elif JUCE_LINUX
+       #elif JUCE_LINUX
         pluginWindow = None;
         pluginProc = None;
-#else
+       #else
         addAndMakeVisible (innerWrapper = new InnerWrapperComponent (this));
-#endif
+       #endif
 
         activeVSTWindows.add (this);
 
@@ -1176,11 +1176,12 @@ public:
 
     ~VSTPluginWindow()
     {
-#if JUCE_MAC
-        innerWrapper = 0;
-#else
+       #if JUCE_MAC
+        innerWrapper = nullptr;
+       #else
         closePluginWindow();
-#endif
+       #endif
+
         activeVSTWindows.removeValue (this);
         plugin.editorBeingDeleted (this);
     }
@@ -1194,7 +1195,7 @@ public:
 
         Component* const topComp = getTopLevelComponent();
 
-        if (topComp->getPeer() != 0)
+        if (topComp->getPeer() != nullptr)
         {
             const Point<int> pos (topComp->getLocalPoint (this, Point<int>()));
 
@@ -1257,7 +1258,7 @@ public:
         {
             ComponentPeer* const peer = getPeer();
 
-            if (peer != 0)
+            if (peer != nullptr)
             {
                 const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
                 peer->addMaskedRegion (pos.getX(), pos.getY(), getWidth(), getHeight());
@@ -1380,7 +1381,7 @@ private:
 
         isOpen = true;
 
-        ERect* rect = 0;
+        ERect* rect = nullptr;
         dispatch (effEditGetRect, 0, 0, &rect, 0);
         dispatch (effEditOpen, 0, 0, parentWindow, 0);
 
@@ -1394,7 +1395,7 @@ private:
         // double-check it's not too tiny
         int w = 250, h = 150;
 
-        if (rect != 0)
+        if (rect != nullptr)
         {
             w = rect->right - rect->left;
             h = rect->bottom - rect->top;
@@ -1424,7 +1425,7 @@ private:
         log ("Opening VST UI: " + plugin.name);
         isOpen = true;
 
-        ERect* rect = 0;
+        ERect* rect = nullptr;
         dispatch (effEditGetRect, 0, 0, &rect, 0);
         dispatch (effEditOpen, 0, 0, getWindowHandle(), 0);
 
@@ -1462,7 +1463,7 @@ private:
         w = r.right - r.left;
         h = r.bottom - r.top;
 
-        if (rect != 0)
+        if (rect != nullptr)
         {
             const int rw = rect->right - rect->left;
             const int rh = rect->bottom - rect->top;
@@ -1499,7 +1500,7 @@ private:
 
         int w = 250, h = 150;
 
-        if (rect != 0)
+        if (rect != nullptr)
         {
             w = rect->right - rect->left;
             h = rect->bottom - rect->top;
@@ -1810,7 +1811,7 @@ private:
 
         bool getEmbeddedViewSize (int& w, int& h)
         {
-            ERect* rect = 0;
+            ERect* rect = nullptr;
             owner->dispatch (effEditGetRect, 0, 0, &rect, 0);
             w = rect->right - rect->left;
             h = rect->bottom - rect->top;
@@ -1836,7 +1837,7 @@ private:
         {
             ComponentPeer* const peer = getPeer();
 
-            if (peer != 0)
+            if (peer != nullptr)
             {
                 const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
                 ERect r;
@@ -2110,10 +2111,10 @@ void VSTPluginInstance::getChunkData (MemoryBlock& mb, bool isPreset, int maxSiz
 {
     if (usesChunks())
     {
-        void* data = 0;
+        void* data = nullptr;
         const int bytes = dispatch (effGetChunk, isPreset ? 1 : 0, 0, &data, 0.0f);
 
-        if (data != 0 && bytes <= maxSizeMB * 1024 * 1024)
+        if (data != nullptr && bytes <= maxSizeMB * 1024 * 1024)
         {
             mb.setSize (bytes);
             mb.copyFrom (data, 0, bytes);
@@ -2217,7 +2218,7 @@ namespace
             {
                 String hostName ("Juce VST Host");
 
-                if (JUCEApplication::getInstance() != 0)
+                if (JUCEApplication::getInstance() != nullptr)
                     hostName = JUCEApplication::getInstance()->getApplicationName();
 
                 hostName.copyToUTF8 ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
@@ -2268,7 +2269,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         {
             ++insideVSTCallback;
 #if JUCE_MAC
-            if (getActiveEditor() != 0)
+            if (getActiveEditor() != nullptr)
                 dispatch (effEditIdle, 0, 0, 0, 0);
 #endif
             juce_callAnyTimersSynchronously();
@@ -2295,7 +2296,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         break;
 
     case audioMasterSizeWindow:
-        if (getActiveEditor() != 0)
+        if (getActiveEditor() != nullptr)
             getActiveEditor()->setSize (index, value);
 
         return 1;
@@ -2358,7 +2359,7 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 {
     try
     {
-        if (effect != 0 && effect->resvd2 != 0)
+        if (effect != nullptr && effect->resvd2 != 0)
         {
             return ((VSTPluginInstance*)(effect->resvd2))
                         ->handleCallback (opcode, index, value, ptr, opt);
@@ -2409,7 +2410,7 @@ const String VSTPluginInstance::getVersion() const
 
 int VSTPluginInstance::getUID() const
 {
-    int uid = effect != 0 ? effect->uniqueID : 0;
+    int uid = effect != nullptr ? effect->uniqueID : 0;
 
     if (uid == 0)
         uid = module->file.hashCode();
@@ -2419,7 +2420,7 @@ int VSTPluginInstance::getUID() const
 
 const String VSTPluginInstance::getCategory() const
 {
-    const char* result = 0;
+    const char* result = nullptr;
 
     switch (dispatch (effGetPlugCategory, 0, 0, 0, 0))
     {
@@ -2441,7 +2442,7 @@ const String VSTPluginInstance::getCategory() const
 //==============================================================================
 float VSTPluginInstance::getParameter (int index)
 {
-    if (effect != 0 && isPositiveAndBelow (index, (int) effect->numParams))
+    if (effect != nullptr && isPositiveAndBelow (index, (int) effect->numParams))
     {
         try
         {
@@ -2458,7 +2459,7 @@ float VSTPluginInstance::getParameter (int index)
 
 void VSTPluginInstance::setParameter (int index, float newValue)
 {
-    if (effect != 0 && isPositiveAndBelow (index, (int) effect->numParams))
+    if (effect != nullptr && isPositiveAndBelow (index, (int) effect->numParams))
     {
         try
         {
@@ -2475,7 +2476,7 @@ void VSTPluginInstance::setParameter (int index, float newValue)
 
 const String VSTPluginInstance::getParameterName (int index)
 {
-    if (effect != 0)
+    if (effect != nullptr)
     {
         jassert (index >= 0 && index < effect->numParams);
 
@@ -2489,7 +2490,7 @@ const String VSTPluginInstance::getParameterName (int index)
 
 const String VSTPluginInstance::getParameterLabel (int index) const
 {
-    if (effect != 0)
+    if (effect != nullptr)
     {
         jassert (index >= 0 && index < effect->numParams);
 
@@ -2503,7 +2504,7 @@ const String VSTPluginInstance::getParameterLabel (int index) const
 
 const String VSTPluginInstance::getParameterText (int index)
 {
-    if (effect != 0)
+    if (effect != nullptr)
     {
         jassert (index >= 0 && index < effect->numParams);
 
@@ -2517,7 +2518,7 @@ const String VSTPluginInstance::getParameterText (int index)
 
 bool VSTPluginInstance::isParameterAutomatable (int index) const
 {
-    if (effect != 0)
+    if (effect != nullptr)
     {
         jassert (index >= 0 && index < effect->numParams);
         return dispatch (effCanBeAutomated, index, 0, 0, 0) != 0;
@@ -2560,7 +2561,7 @@ const String VSTPluginInstance::getProgramName (int index)
     {
         return getCurrentProgramName();
     }
-    else if (effect != 0)
+    else if (effect != nullptr)
     {
         char nm [256] = { 0 };
 
@@ -2590,7 +2591,7 @@ void VSTPluginInstance::changeProgramName (int index, const String& newName)
 
 void VSTPluginInstance::updateStoredProgramNames()
 {
-    if (effect != 0 && getNumPrograms() > 0)
+    if (effect != nullptr && getNumPrograms() > 0)
     {
         char nm [256] = { 0 };
 
@@ -2615,7 +2616,7 @@ void VSTPluginInstance::updateStoredProgramNames()
 
 const String VSTPluginInstance::getCurrentProgramName()
 {
-    if (effect != 0)
+    if (effect != nullptr)
     {
         char nm [256] = { 0 };
         dispatch (effGetProgramName, 0, 0, nm, 0);
@@ -2815,20 +2816,20 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
 
         const ReferenceCountedObjectPtr <ModuleHandle> module (ModuleHandle::findOrCreateModule (file));
 
-        if (module != 0)
+        if (module != nullptr)
         {
             shellUIDToCreate = desc.uid;
 
             result = new VSTPluginInstance (module);
 
-            if (result->effect != 0)
+            if (result->effect != nullptr)
             {
                 result->effect->resvd2 = (VstIntPtr) (pointer_sized_int) (VSTPluginInstance*) result;
                 result->initialise();
             }
             else
             {
-                result = 0;
+                result = nullptr;
             }
         }
 

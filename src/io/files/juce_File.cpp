@@ -140,7 +140,7 @@ const String File::parseAbsolutePath (const String& p)
             const String userName (path.substring (1).upToFirstOccurrenceOf ("/", false, false));
 
             struct passwd* const pw = getpwnam (userName.toUTF8());
-            if (pw != 0)
+            if (pw != nullptr)
                 path = addTrailingSeparator (pw->pw_dir) + path.fromFirstOccurrenceOf ("/", false, false);
         }
     }
@@ -729,7 +729,7 @@ bool File::appendText (const String& text,
 {
     const ScopedPointer <FileOutputStream> out (createOutputStream());
 
-    if (out != 0)
+    if (out != nullptr)
     {
         out->writeText (text, asUnicode, writeUnicodeHeaderBytes);
         return true;

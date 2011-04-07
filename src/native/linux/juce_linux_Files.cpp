@@ -133,7 +133,7 @@ const File File::getLinkedTarget() const
 }
 
 //==============================================================================
-const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp
+const char* juce_Argv0 = nullptr;  // referenced from juce_Application.cpp
 
 const File File::getSpecialLocation (const SpecialLocationType type)
 {
@@ -143,10 +143,10 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     {
         const char* homeDir = getenv ("HOME");
 
-        if (homeDir == 0)
+        if (homeDir == nullptr)
         {
             struct passwd* const pw = getpwuid (getuid());
-            if (pw != 0)
+            if (pw != nullptr)
                 homeDir = pw->pw_dir;
         }
 
@@ -184,7 +184,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     }
 
     case invokedExecutableFile:
-        if (juce_Argv0 != 0)
+        if (juce_Argv0 != nullptr)
             return File (CharPointer_UTF8 (juce_Argv0));
         // deliberate fall-through...
 
@@ -240,7 +240,7 @@ public:
 
     ~Pimpl()
     {
-        if (dir != 0)
+        if (dir != nullptr)
             closedir (dir);
     }
 
@@ -248,18 +248,18 @@ public:
                bool* const isDir, bool* const isHidden, int64* const fileSize,
                Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
-        if (dir != 0)
+        if (dir != nullptr)
         {
-            const char* wildcardUTF8 = 0;
+            const char* wildcardUTF8 = nullptr;
 
             for (;;)
             {
                 struct dirent* const de = readdir (dir);
 
-                if (de == 0)
+                if (de == nullptr)
                     break;
 
-                if (wildcardUTF8 == 0)
+                if (wildcardUTF8 == nullptr)
                     wildcardUTF8 = wildCard.toUTF8();
 
                 if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
@@ -268,7 +268,7 @@ public:
 
                     updateStatInfoForFile (parentDir + filenameFound, isDir, fileSize, modTime, creationTime, isReadOnly);
 
-                    if (isHidden != 0)
+                    if (isHidden != nullptr)
                         *isHidden = filenameFound.startsWithChar ('.');
 
                     return true;

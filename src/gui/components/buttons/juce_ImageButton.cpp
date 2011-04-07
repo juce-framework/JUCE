@@ -41,10 +41,7 @@ ImageButton::ImageButton (const String& text_)
       imageX (0),
       imageY (0),
       imageW (0),
-      imageH (0),
-      normalImage (0),
-      overImage (0),
-      downImage (0)
+      imageH (0)
 {
 }
 

@@ -35,7 +35,7 @@ namespace
                                    StringArray& deviceNamesFound,
                                    const int deviceIndexToOpen)
     {
-        snd_seq_t* returnedHandle = 0;
+        snd_seq_t* returnedHandle = nullptr;
         snd_seq_t* seqHandle;
 
         if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
@@ -122,7 +122,7 @@ namespace
 
     snd_seq_t* createMidiDevice (const bool forInput, const String& deviceNameToOpen)
     {
-        snd_seq_t* seqHandle = 0;
+        snd_seq_t* seqHandle = nullptr;
 
         if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
                                                           : SND_SEQ_OPEN_OUTPUT, 0) == 0)
@@ -142,7 +142,7 @@ namespace
             if (portId < 0)
             {
                 snd_seq_close (seqHandle);
-                seqHandle = 0;
+                seqHandle = nullptr;
             }
         }
 
@@ -222,7 +222,7 @@ int MidiOutput::getDefaultDeviceIndex()
 
 MidiOutput* MidiOutput::openDevice (int deviceIndex)
 {
-    MidiOutput* newDevice = 0;
+    MidiOutput* newDevice = nullptr;
 
     StringArray devices;
     snd_seq_t* const handle = iterateMidiDevices (false, devices, deviceIndex);
@@ -238,7 +238,7 @@ MidiOutput* MidiOutput::openDevice (int deviceIndex)
 
 MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 {
-    MidiOutput* newDevice = 0;
+    MidiOutput* newDevice = nullptr;
 
     snd_seq_t* const handle = createMidiDevice (false, deviceName);
 
@@ -313,7 +313,7 @@ public:
             {
                 if (poll (pfd, numPfds, 500) > 0)
                 {
-                    snd_seq_event_t* inputEvent = 0;
+                    snd_seq_event_t* inputEvent = nullptr;
 
                     snd_seq_nonblock (seqHandle, 1);
 
@@ -394,7 +394,7 @@ const StringArray MidiInput::getDevices()
 
 MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
 {
-    MidiInput* newDevice = 0;
+    MidiInput* newDevice = nullptr;
 
     StringArray devices;
     snd_seq_t* const handle = iterateMidiDevices (true, devices, deviceIndex);
@@ -410,7 +410,7 @@ MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
 
 MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
 {
-    MidiInput* newDevice = 0;
+    MidiInput* newDevice = nullptr;
 
     snd_seq_t* const handle = createMidiDevice (true, deviceName);
 

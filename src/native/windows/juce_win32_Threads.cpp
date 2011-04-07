@@ -35,13 +35,13 @@
 #if ! JUCE_USE_INTRINSICS
 // In newer compilers, the inline versions of these are used (in juce_Atomic.h), but in
 // older ones we have to actually call the ops as win32 functions..
-long juce_InterlockedExchange (volatile long* a, long b) throw()                 { return InterlockedExchange (a, b); }
-long juce_InterlockedIncrement (volatile long* a) throw()                        { return InterlockedIncrement (a); }
-long juce_InterlockedDecrement (volatile long* a) throw()                        { return InterlockedDecrement (a); }
-long juce_InterlockedExchangeAdd (volatile long* a, long b) throw()              { return InterlockedExchangeAdd (a, b); }
-long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw()  { return InterlockedCompareExchange (a, b, c); }
+long juce_InterlockedExchange (volatile long* a, long b) noexcept                { return InterlockedExchange (a, b); }
+long juce_InterlockedIncrement (volatile long* a) noexcept                       { return InterlockedIncrement (a); }
+long juce_InterlockedDecrement (volatile long* a) noexcept                       { return InterlockedDecrement (a); }
+long juce_InterlockedExchangeAdd (volatile long* a, long b) noexcept             { return InterlockedExchangeAdd (a, b); }
+long juce_InterlockedCompareExchange (volatile long* a, long b, long c) noexcept { return InterlockedCompareExchange (a, b, c); }
 
-__int64 juce_InterlockedCompareExchange64 (volatile __int64* value, __int64 newValue, __int64 valueToCompare) throw()
+__int64 juce_InterlockedCompareExchange64 (volatile __int64* value, __int64 newValue, __int64 valueToCompare) noexcept
 {
     jassertfalse; // This operation isn't available in old MS compiler versions!
 
@@ -55,7 +55,7 @@ __int64 juce_InterlockedCompareExchange64 (volatile __int64* value, __int64 newV
 #endif
 
 //==============================================================================
-CriticalSection::CriticalSection() throw()
+CriticalSection::CriticalSection() noexcept
 {
     // (just to check the MS haven't changed this structure and broken things...)
   #if JUCE_VC7_OR_EARLIER
@@ -67,48 +67,48 @@ CriticalSection::CriticalSection() throw()
     InitializeCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
-CriticalSection::~CriticalSection() throw()
+CriticalSection::~CriticalSection() noexcept
 {
     DeleteCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
-void CriticalSection::enter() const throw()
+void CriticalSection::enter() const noexcept
 {
     EnterCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
-bool CriticalSection::tryEnter() const throw()
+bool CriticalSection::tryEnter() const noexcept
 {
     return TryEnterCriticalSection ((CRITICAL_SECTION*) internal) != FALSE;
 }
 
-void CriticalSection::exit() const throw()
+void CriticalSection::exit() const noexcept
 {
     LeaveCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
 //==============================================================================
-WaitableEvent::WaitableEvent (const bool manualReset) throw()
+WaitableEvent::WaitableEvent (const bool manualReset) noexcept
     : internal (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0))
 {
 }
 
-WaitableEvent::~WaitableEvent() throw()
+WaitableEvent::~WaitableEvent() noexcept
 {
     CloseHandle (internal);
 }
 
-bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
+bool WaitableEvent::wait (const int timeOutMillisecs) const noexcept
 {
     return WaitForSingleObject (internal, timeOutMillisecs) == WAIT_OBJECT_0;
 }
 
-void WaitableEvent::signal() const throw()
+void WaitableEvent::signal() const noexcept
 {
     SetEvent (internal);
 }
 
-void WaitableEvent::reset() const throw()
+void WaitableEvent::reset() const noexcept
 {
     ResetEvent (internal);
 }
@@ -314,7 +314,7 @@ void Process::terminate()
 //==============================================================================
 void* PlatformUtilities::loadDynamicLibrary (const String& name)
 {
-    void* result = 0;
+    void* result = nullptr;
 
     JUCE_TRY
     {
@@ -411,19 +411,19 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
 {
     const ScopedLock sl (lock);
 
-    if (pimpl == 0)
+    if (pimpl == nullptr)
     {
         pimpl = new Pimpl (name, timeOutMillisecs);
 
         if (pimpl->handle == 0)
-            pimpl = 0;
+            pimpl = nullptr;
     }
     else
     {
         pimpl->refCount++;
     }
 
-    return pimpl != 0;
+    return pimpl != nullptr;
 }
 
 void InterProcessLock::exit()
@@ -431,10 +431,10 @@ void InterProcessLock::exit()
     const ScopedLock sl (lock);
 
     // Trying to release the lock too many times!
-    jassert (pimpl != 0);
+    jassert (pimpl != nullptr);
 
-    if (pimpl != 0 && --(pimpl->refCount) == 0)
-        pimpl = 0;
+    if (pimpl != nullptr && --(pimpl->refCount) == 0)
+        pimpl = nullptr;
 }
 
 

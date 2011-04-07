@@ -40,7 +40,7 @@ Logger::~Logger()
 }
 
 //==============================================================================
-Logger* Logger::currentLogger = 0;
+Logger* Logger::currentLogger = nullptr;
 
 void Logger::setCurrentLogger (Logger* const newLogger,
                                const bool deleteOldLogger)
@@ -54,14 +54,14 @@ void Logger::setCurrentLogger (Logger* const newLogger,
 
 void Logger::writeToLog (const String& message)
 {
-    if (currentLogger != 0)
+    if (currentLogger != nullptr)
         currentLogger->logMessage (message);
     else
         outputDebugString (message);
 }
 
 #if JUCE_LOG_ASSERTIONS
-void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw()
+void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) noexcept
 {
     String m ("JUCE Assertion failure in ");
     m << filename << ", line " << lineNum;

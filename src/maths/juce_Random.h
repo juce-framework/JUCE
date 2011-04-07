@@ -50,44 +50,44 @@ public:
 
         new Random (Time::currentTimeMillis())
     */
-    explicit Random (int64 seedValue) throw();
+    explicit Random (int64 seedValue) noexcept;
 
     /** Destructor. */
-    ~Random() throw();
+    ~Random() noexcept;
 
     /** Returns the next random 32 bit integer.
 
         @returns a random integer from the full range 0x80000000 to 0x7fffffff
     */
-    int nextInt() throw();
+    int nextInt() noexcept;
 
     /** Returns the next random number, limited to a given range.
 
         @returns a random integer between 0 (inclusive) and maxValue (exclusive).
     */
-    int nextInt (int maxValue) throw();
+    int nextInt (int maxValue) noexcept;
 
     /** Returns the next 64-bit random number.
 
         @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
     */
-    int64 nextInt64() throw();
+    int64 nextInt64() noexcept;
 
     /** Returns the next random floating-point number.
 
         @returns a random value in the range 0 to 1.0
     */
-    float nextFloat() throw();
+    float nextFloat() noexcept;
 
     /** Returns the next random floating-point number.
 
         @returns a random value in the range 0 to 1.0
     */
-    double nextDouble() throw();
+    double nextDouble() noexcept;
 
     /** Returns the next random boolean value.
     */
-    bool nextBool() throw();
+    bool nextBool() noexcept;
 
     /** Returns a BigInteger containing a random number.
 
@@ -105,16 +105,16 @@ public:
 
         It's not thread-safe though, so threads should use their own Random object.
     */
-    static Random& getSystemRandom() throw();
+    static Random& getSystemRandom() noexcept;
 
     /** Resets this Random object to a given seed value. */
-    void setSeed (int64 newSeed) throw();
+    void setSeed (int64 newSeed) noexcept;
 
     /** Merges this object's seed with another value.
         This sets the seed to be a value created by combining the current seed and this
         new value.
     */
-    void combineSeed (int64 seedValue) throw();
+    void combineSeed (int64 seedValue) noexcept;
 
     /** Reseeds this generator using a value generated from various semi-random system
         properties like the current time, etc.

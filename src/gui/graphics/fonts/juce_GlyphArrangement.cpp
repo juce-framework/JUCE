@@ -81,7 +81,7 @@ void PositionedGlyph::createPath (Path& path) const
     {
         Typeface* const t = font.getTypeface();
 
-        if (t != 0)
+        if (t != nullptr)
         {
             Path p;
             t->getOutlineForGlyph (glyph, p);
@@ -98,7 +98,7 @@ bool PositionedGlyph::hitTest (float px, float py) const
     {
         Typeface* const t = font.getTypeface();
 
-        if (t != 0)
+        if (t != nullptr)
         {
             Path p;
             t->getOutlineForGlyph (glyph, p);

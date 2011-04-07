@@ -38,7 +38,7 @@ AudioFilterStreamingDeviceManager::AudioFilterStreamingDeviceManager()
 
 AudioFilterStreamingDeviceManager::~AudioFilterStreamingDeviceManager()
 {
-    setFilter (0);
+    setFilter (nullptr);
 
     removeMidiInputCallback (String::empty, player);
     removeAudioCallback (player);

@@ -101,11 +101,11 @@ public:
 
     //==============================================================================
     /** Makes this context the currently active one. */
-    virtual bool makeActive() const throw() = 0;
+    virtual bool makeActive() const noexcept = 0;
     /** If this context is currently active, it is disactivated. */
-    virtual bool makeInactive() const throw() = 0;
+    virtual bool makeInactive() const noexcept = 0;
     /** Returns true if this context is currently active. */
-    virtual bool isActive() const throw() = 0;
+    virtual bool isActive() const noexcept = 0;
 
     /** Swaps the buffers (if the context can do this). */
     virtual void swapBuffers() = 0;
@@ -145,7 +145,7 @@ public:
         On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
         a GLXContext.
     */
-    virtual void* getRawContext() const throw() = 0;
+    virtual void* getRawContext() const noexcept = 0;
 
     /** Deletes the context.
 
@@ -166,7 +166,7 @@ public:
 
 protected:
     //==============================================================================
-    OpenGLContext() throw();
+    OpenGLContext() noexcept;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext);
@@ -223,14 +223,14 @@ public:
         needs to recreate its internal context for some reason, the same context
         will be used again to share lists. So if you pass a context in here,
         don't delete the context while this component is still using it! You can
-        call shareWith (0) to stop this component from sharing with it.
+        call shareWith (nullptr) to stop this component from sharing with it.
     */
     void shareWith (OpenGLContext* contextToShareListsWith);
 
     /** Returns the context that this component is sharing with.
         @see shareWith
     */
-    OpenGLContext* getShareContext() const throw()    { return contextToShareListsWith; }
+    OpenGLContext* getShareContext() const noexcept   { return contextToShareListsWith; }
 
 
     //==============================================================================
@@ -276,7 +276,7 @@ public:
 
         @see newOpenGLContextCreated()
     */
-    OpenGLContext* getCurrentContext() const throw()            { return context; }
+    OpenGLContext* getCurrentContext() const noexcept           { return context; }
 
     /** Makes this component the current openGL context.
 
@@ -307,7 +307,7 @@ public:
 
         @see OpenGLContext::isActive
     */
-    bool isActiveContext() const throw();
+    bool isActiveContext() const noexcept;
 
 
     //==============================================================================
@@ -329,7 +329,7 @@ public:
         thread, this allows you to lock the context for the duration of your rendering
         routine.
     */
-    CriticalSection& getContextLock() throw()       { return contextLock; }
+    CriticalSection& getContextLock() noexcept      { return contextLock; }
 
     //==============================================================================
     /** Returns the native handle of an embedded heavyweight window, if there is one.

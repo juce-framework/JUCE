@@ -177,16 +177,16 @@ public:
     {
         if (dir != 0)
         {
-            const char* wildcardUTF8 = 0;
+            const char* wildcardUTF8 = nullptr;
 
             for (;;)
             {
                 struct dirent* const de = readdir (dir);
 
-                if (de == 0)
+                if (de == nullptr)
                     break;
 
-                if (wildcardUTF8 == 0)
+                if (wildcardUTF8 == nullptr)
                     wildcardUTF8 = wildCard.toUTF8();
 
                 if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)

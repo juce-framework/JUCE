@@ -30,11 +30,11 @@
 //==============================================================================
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
 {
-    ifaddrs* addrs = 0;
+    ifaddrs* addrs = nullptr;
 
     if (getifaddrs (&addrs) == 0)
     {
-        for (const ifaddrs* cursor = addrs; cursor != 0; cursor = cursor->ifa_next)
+        for (const ifaddrs* cursor = addrs; cursor != nullptr; cursor = cursor->ifa_next)
         {
             sockaddr_storage* sto = (sockaddr_storage*) cursor->ifa_addr;
             if (sto->ss_family == AF_LINK)
@@ -95,7 +95,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
 
     NSAppleScript* s = [[NSAppleScript alloc]
                             initWithSource: juceStringToNS (script)];
-    NSDictionary* error = 0;
+    NSDictionary* error = nil;
     const bool ok = [s executeAndReturnError: &error] != nil;
     [s release];
 
@@ -181,19 +181,19 @@ private:
     [request retain];
     data = [[NSMutableData data] retain];
     dataLock = [[NSLock alloc] init];
-    connection = 0;
+    connection = nil;
     initialised = false;
     hasFailed = false;
     hasFinished = false;
     contentLength = -1;
-    headers = 0;
+    headers = nil;
 
     runLoopThread = new JuceURLConnectionMessageThread (self);
     runLoopThread->startThread();
 
     while (runLoopThread->isThreadRunning() && ! initialised)
     {
-        if (callback != 0)
+        if (callback != nullptr)
             callback (context, -1, (int) [[request HTTPBody] length]);
 
         Thread::sleep (1);
@@ -238,7 +238,7 @@ private:
     contentLength = [response expectedContentLength];
 
     [headers release];
-    headers = 0;
+    headers = nil;
 
     if ([response isKindOfClass: [NSHTTPURLResponse class]])
         headers = [[((NSHTTPURLResponse*) response) allHeaderFields] retain];
@@ -251,7 +251,7 @@ private:
     hasFailed = true;
     initialised = true;
 
-    if (runLoopThread != 0)
+    if (runLoopThread != nullptr)
         runLoopThread->signalThreadShouldExit();
 }
 
@@ -270,13 +270,13 @@ private:
     hasFinished = true;
     initialised = true;
 
-    if (runLoopThread != 0)
+    if (runLoopThread != nullptr)
         runLoopThread->signalThreadShouldExit();
 }
 
 - (BOOL) isOpen
 {
-    return connection != 0 && ! hasFailed;
+    return connection != nil && ! hasFailed;
 }
 
 - (int) readPosition
@@ -320,7 +320,7 @@ private:
 {
     [connection cancel];
 
-    if (runLoopThread != 0)
+    if (runLoopThread != nullptr)
         runLoopThread->stopThread (10000);
 }
 
@@ -343,7 +343,7 @@ public:
         JUCE_AUTORELEASEPOOL
         connection = createConnection (progressCallback, progressCallbackContext);
 
-        if (responseHeaders != 0 && connection != 0 && connection->headers != 0)
+        if (responseHeaders != nullptr && connection != nil && connection->headers != nil)
         {
             NSEnumerator* enumerator = [connection->headers keyEnumerator];
             NSString* key;

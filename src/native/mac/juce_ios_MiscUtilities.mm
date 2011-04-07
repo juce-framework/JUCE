@@ -137,7 +137,7 @@ public:
 
     int getResult()
     {
-        jassert (callback == 0);
+        jassert (callback == nullptr);
         const ScopedAutoReleasePool pool;
 
         while (! alert.hidden && alert.superview != nil)
@@ -146,11 +146,11 @@ public:
         return result;
     }
 
-    void buttonClicked (const int buttonIndex) throw()
+    void buttonClicked (const int buttonIndex) noexcept
     {
         result = buttonIndex;
 
-        if (callback != 0)
+        if (callback != nullptr)
             callback->modalStateFinished (result);
 
         if (isAsync)
@@ -204,9 +204,9 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK", nil, callback, callback != 0));
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK", nil, callback, callback != nullptr));
 
-    if (callback == 0)
+    if (callback == nullptr)
         return mb->getResult() == 1;
 
     mb.release();
@@ -218,9 +218,9 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         Component* associatedComponent,
                                                         ModalComponentManager::Callback* callback)
 {
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != 0));
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
 
-    if (callback == 0)
+    if (callback == nullptr)
         return mb->getResult();
 
     mb.release();

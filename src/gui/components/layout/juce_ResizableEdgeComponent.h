@@ -76,7 +76,7 @@ public:
     /** Destructor. */
     ~ResizableEdgeComponent();
 
-    bool isVertical() const throw();
+    bool isVertical() const noexcept;
 
 protected:
     //==============================================================================

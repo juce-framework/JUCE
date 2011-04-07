@@ -40,7 +40,7 @@ class JUCE_API  MemoryBlock
 public:
     //==============================================================================
     /** Create an uninitialised block with 0 size. */
-    MemoryBlock() throw();
+    MemoryBlock() noexcept;
 
     /** Creates a memory block with a given initial size.
 
@@ -61,7 +61,7 @@ public:
     MemoryBlock (const void* dataToInitialiseFrom, size_t sizeInBytes);
 
     /** Destructor. */
-    ~MemoryBlock() throw();
+    ~MemoryBlock() noexcept;
 
     /** Copies another memory block onto this one.
 
@@ -74,17 +74,17 @@ public:
 
         @returns true only if the two blocks are the same size and have identical contents.
     */
-    bool operator== (const MemoryBlock& other) const throw();
+    bool operator== (const MemoryBlock& other) const noexcept;
 
     /** Compares two memory blocks.
 
         @returns true if the two blocks are different sizes or have different contents.
     */
-    bool operator!= (const MemoryBlock& other) const throw();
+    bool operator!= (const MemoryBlock& other) const noexcept;
 
     /** Returns true if the data in this MemoryBlock matches the raw bytes passed-in.
     */
-    bool matches (const void* data, size_t dataSize) const throw();
+    bool matches (const void* data, size_t dataSize) const noexcept;
 
     //==============================================================================
     /** Returns a void pointer to the data.
@@ -92,19 +92,19 @@ public:
         Note that the pointer returned will probably become invalid when the
         block is resized.
     */
-    void* getData() const throw()                                   { return data; }
+    void* getData() const noexcept                                  { return data; }
 
     /** Returns a byte from the memory block.
 
         This returns a reference, so you can also use it to set a byte.
     */
     template <typename Type>
-    char& operator[] (const Type offset) const throw()              { return data [offset]; }
+    char& operator[] (const Type offset) const noexcept             { return data [offset]; }
 
 
     //==============================================================================
     /** Returns the block's current allocated size, in bytes. */
-    size_t getSize() const throw()                                  { return size; }
+    size_t getSize() const noexcept                                 { return size; }
 
     /** Resizes the memory block.
 
@@ -138,7 +138,7 @@ public:
 
         This is handy for clearing a block of memory to zero.
     */
-    void fillWith (uint8 valueToUse) throw();
+    void fillWith (uint8 valueToUse) noexcept;
 
     /** Adds another block of data to the end of this one.
 
@@ -149,7 +149,7 @@ public:
     /** Exchanges the contents of this and another memory block.
         No actual copying is required for this, so it's very fast.
     */
-    void swapWith (MemoryBlock& other) throw();
+    void swapWith (MemoryBlock& other) noexcept;
 
     //==============================================================================
     /** Copies data into this MemoryBlock from a memory address.
@@ -161,7 +161,7 @@ public:
     */
     void copyFrom (const void* srcData,
                    int destinationOffset,
-                   size_t numBytes) throw();
+                   size_t numBytes) noexcept;
 
     /** Copies data from this MemoryBlock to a memory address.
 
@@ -172,7 +172,7 @@ public:
     */
     void copyTo (void* destData,
                  int sourceOffset,
-                 size_t numBytes) const throw();
+                 size_t numBytes) const noexcept;
 
     /** Chops out a section  of the block.
 
@@ -202,11 +202,11 @@ public:
     /** Sets a number of bits in the memory block, treating it as a long binary sequence. */
     void setBitRange (size_t bitRangeStart,
                       size_t numBits,
-                      int binaryNumberToApply) throw();
+                      int binaryNumberToApply) noexcept;
 
     /** Reads a number of bits from the memory block, treating it as one long binary sequence */
     int getBitRange (size_t bitRangeStart,
-                     size_t numBitsToRead) const throw();
+                     size_t numBitsToRead) const noexcept;
 
     //==============================================================================
     /** Returns a string of characters that represent the binary contents of this block.

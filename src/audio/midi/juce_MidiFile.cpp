@@ -55,7 +55,7 @@ namespace MidiFileHelpers
         }
     }
 
-    bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) throw()
+    bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) noexcept
     {
         unsigned int ch = (int) ByteOrder::bigEndianInt (data);
         data += 4;
@@ -164,7 +164,7 @@ namespace MidiFileHelpers
     struct Sorter
     {
         static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                    const MidiMessageSequence::MidiEventHolder* const second) throw()
+                                    const MidiMessageSequence::MidiEventHolder* const second) noexcept
         {
             const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
 
@@ -199,12 +199,12 @@ void MidiFile::clear()
 }
 
 //==============================================================================
-int MidiFile::getNumTracks() const throw()
+int MidiFile::getNumTracks() const noexcept
 {
     return tracks.size();
 }
 
-const MidiMessageSequence* MidiFile::getTrack (const int index) const throw()
+const MidiMessageSequence* MidiFile::getTrack (const int index) const noexcept
 {
     return tracks [index];
 }
@@ -215,18 +215,18 @@ void MidiFile::addTrack (const MidiMessageSequence& trackSequence)
 }
 
 //==============================================================================
-short MidiFile::getTimeFormat() const throw()
+short MidiFile::getTimeFormat() const noexcept
 {
     return timeFormat;
 }
 
-void MidiFile::setTicksPerQuarterNote (const int ticks) throw()
+void MidiFile::setTicksPerQuarterNote (const int ticks) noexcept
 {
     timeFormat = (short) ticks;
 }
 
 void MidiFile::setSmpteTimeFormat (const int framesPerSecond,
-                                   const int subframeResolution) throw()
+                                   const int subframeResolution) noexcept
 {
     timeFormat = (short) (((-framesPerSecond) << 8) | subframeResolution);
 }

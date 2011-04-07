@@ -54,7 +54,7 @@ public:
     {
         numEventsUsed = 0;
 
-        if (events != 0)
+        if (events != nullptr)
             events->numEvents = 0;
     }
 
@@ -110,7 +110,7 @@ public:
         {
             const VstEvent* const e = events->events[i];
 
-            if (e != 0)
+            if (e != nullptr)
             {
                 if (e->type == kVstMidiType)
                 {
@@ -136,7 +136,7 @@ public:
 
             const int size = 20 + sizeof (VstEvent*) * numEventsNeeded;
 
-            if (events == 0)
+            if (events == nullptr)
                 events.calloc (size, 1);
             else
                 events.realloc (size, 1);
@@ -157,7 +157,7 @@ public:
 
     void freeEvents()
     {
-        if (events != 0)
+        if (events != nullptr)
         {
             for (int i = numEventsAllocated; --i >= 0;)
             {

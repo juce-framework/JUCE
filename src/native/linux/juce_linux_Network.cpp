@@ -83,7 +83,7 @@ public:
     {
         createConnection (progressCallback, progressCallbackContext);
 
-        if (responseHeaders != 0 && ! isError())
+        if (responseHeaders != nullptr && ! isError())
         {
             for (int i = 0; i < headerLines.size(); ++i)
             {
@@ -219,7 +219,7 @@ private:
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_flags = AI_NUMERICSERV;
 
-        struct addrinfo* result = 0;
+        struct addrinfo* result = nullptr;
         if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
             return;
 
@@ -387,7 +387,7 @@ private:
 
             totalHeaderSent += numToSend;
 
-            if (progressCallback != 0 && ! progressCallback (progressCallbackContext, totalHeaderSent, requestHeader.getSize()))
+            if (progressCallback != nullptr && ! progressCallback (progressCallbackContext, totalHeaderSent, requestHeader.getSize()))
                 return false;
         }
 

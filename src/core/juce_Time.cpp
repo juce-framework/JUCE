@@ -56,7 +56,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 namespace TimeHelpers
 {
-    struct tm  millisToLocal (const int64 millis) throw()
+    struct tm  millisToLocal (const int64 millis) noexcept
     {
         struct tm result;
         const int64 seconds = millis / 1000;
@@ -110,13 +110,13 @@ namespace TimeHelpers
         return result;
     }
 
-    int extendedModulo (const int64 value, const int modulo) throw()
+    int extendedModulo (const int64 value, const int modulo) noexcept
     {
         return (int) (value >= 0 ? (value % modulo)
                                  : (value - ((value / modulo) + 1) * modulo));
     }
 
-    int doFTime (CharPointer_UTF32 dest, const int maxChars, const String& format, const struct tm* const tm) throw()
+    int doFTime (CharPointer_UTF32 dest, const int maxChars, const String& format, const struct tm* const tm) noexcept
     {
        #if JUCE_ANDROID
         HeapBlock <char> tempDest;
@@ -141,17 +141,17 @@ namespace TimeHelpers
 }
 
 //==============================================================================
-Time::Time() throw()
+Time::Time() noexcept
     : millisSinceEpoch (0)
 {
 }
 
-Time::Time (const Time& other) throw()
+Time::Time (const Time& other) noexcept
     : millisSinceEpoch (other.millisSinceEpoch)
 {
 }
 
-Time::Time (const int64 ms) throw()
+Time::Time (const int64 ms) noexcept
     : millisSinceEpoch (ms)
 {
 }
@@ -163,7 +163,7 @@ Time::Time (const int year,
             const int minutes,
             const int seconds,
             const int milliseconds,
-            const bool useLocalTime) throw()
+            const bool useLocalTime) noexcept
 {
     jassert (year > 100); // year must be a 4-digit version
 
@@ -203,18 +203,18 @@ Time::Time (const int year,
     }
 }
 
-Time::~Time() throw()
+Time::~Time() noexcept
 {
 }
 
-Time& Time::operator= (const Time& other) throw()
+Time& Time::operator= (const Time& other) noexcept
 {
     millisSinceEpoch = other.millisSinceEpoch;
     return *this;
 }
 
 //==============================================================================
-int64 Time::currentTimeMillis() throw()
+int64 Time::currentTimeMillis() noexcept
 {
     static uint32 lastCounterResult = 0xffffffff;
     static int64 correction = 0;
@@ -252,9 +252,9 @@ int64 Time::currentTimeMillis() throw()
 }
 
 //==============================================================================
-uint32 juce_millisecondsSinceStartup() throw();
+uint32 juce_millisecondsSinceStartup() noexcept;
 
-uint32 Time::getMillisecondCounter() throw()
+uint32 Time::getMillisecondCounter() noexcept
 {
     const uint32 now = juce_millisecondsSinceStartup();
 
@@ -274,13 +274,13 @@ uint32 Time::getMillisecondCounter() throw()
     return now;
 }
 
-uint32 Time::getApproximateMillisecondCounter() throw()
+uint32 Time::getApproximateMillisecondCounter() noexcept
 {
     jassert (TimeHelpers::lastMSCounterValue != 0);
     return TimeHelpers::lastMSCounterValue;
 }
 
-void Time::waitForMillisecondCounter (const uint32 targetTime) throw()
+void Time::waitForMillisecondCounter (const uint32 targetTime) noexcept
 {
     for (;;)
     {
@@ -306,19 +306,19 @@ void Time::waitForMillisecondCounter (const uint32 targetTime) throw()
 }
 
 //==============================================================================
-double Time::highResolutionTicksToSeconds (const int64 ticks) throw()
+double Time::highResolutionTicksToSeconds (const int64 ticks) noexcept
 {
     return ticks / (double) getHighResolutionTicksPerSecond();
 }
 
-int64 Time::secondsToHighResolutionTicks (const double seconds) throw()
+int64 Time::secondsToHighResolutionTicks (const double seconds) noexcept
 {
     return (int64) (seconds * (double) getHighResolutionTicksPerSecond());
 }
 
 
 //==============================================================================
-const Time JUCE_CALLTYPE Time::getCurrentTime() throw()
+const Time JUCE_CALLTYPE Time::getCurrentTime() noexcept
 {
     return Time (currentTimeMillis());
 }
@@ -327,7 +327,7 @@ const Time JUCE_CALLTYPE Time::getCurrentTime() throw()
 const String Time::toString (const bool includeDate,
                              const bool includeTime,
                              const bool includeSeconds,
-                             const bool use24HourClock) const throw()
+                             const bool use24HourClock) const noexcept
 {
     String result;
 
@@ -378,16 +378,16 @@ const String Time::formatted (const String& format) const
 }
 
 //==============================================================================
-int Time::getYear() const throw()           { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_year + 1900; }
-int Time::getMonth() const throw()          { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mon; }
-int Time::getDayOfMonth() const throw()     { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mday; }
-int Time::getDayOfWeek() const throw()      { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_wday; }
-int Time::getHours() const throw()          { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_hour; }
-int Time::getMinutes() const throw()        { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_min; }
-int Time::getSeconds() const throw()        { return TimeHelpers::extendedModulo (millisSinceEpoch / 1000, 60); }
-int Time::getMilliseconds() const throw()   { return TimeHelpers::extendedModulo (millisSinceEpoch, 1000); }
+int Time::getYear() const noexcept          { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_year + 1900; }
+int Time::getMonth() const noexcept         { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mon; }
+int Time::getDayOfMonth() const noexcept    { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mday; }
+int Time::getDayOfWeek() const noexcept     { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_wday; }
+int Time::getHours() const noexcept         { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_hour; }
+int Time::getMinutes() const noexcept       { return TimeHelpers::millisToLocal (millisSinceEpoch).tm_min; }
+int Time::getSeconds() const noexcept       { return TimeHelpers::extendedModulo (millisSinceEpoch / 1000, 60); }
+int Time::getMilliseconds() const noexcept  { return TimeHelpers::extendedModulo (millisSinceEpoch, 1000); }
 
-int Time::getHoursInAmPmFormat() const throw()
+int Time::getHoursInAmPmFormat() const noexcept
 {
     const int hours = getHours();
 
@@ -399,17 +399,17 @@ int Time::getHoursInAmPmFormat() const throw()
         return hours - 12;
 }
 
-bool Time::isAfternoon() const throw()
+bool Time::isAfternoon() const noexcept
 {
     return getHours() >= 12;
 }
 
-bool Time::isDaylightSavingTime() const throw()
+bool Time::isDaylightSavingTime() const noexcept
 {
     return TimeHelpers::millisToLocal (millisSinceEpoch).tm_isdst != 0;
 }
 
-const String Time::getTimeZone() const throw()
+const String Time::getTimeZone() const noexcept
 {
     String zone[2];
 

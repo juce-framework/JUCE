@@ -249,7 +249,7 @@ public:
 
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const throw()                            { return threadId_; }
+    ThreadID getThreadId() const noexcept                           { return threadId_; }
 
     /** Returns the name of the thread.
 

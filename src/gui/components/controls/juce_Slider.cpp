@@ -77,7 +77,7 @@ public:
 
     void timerCallback()
     {
-        owner.popupDisplay = 0;
+        owner.popupDisplay = nullptr;
     }
 
 private:
@@ -125,7 +125,7 @@ Slider::Slider (const String& name)
     menuShown (false),
     scrollWheelEnabled (true),
     snapsToMousePos (true),
-    parentForPopupDisplay (0)
+    parentForPopupDisplay (nullptr)
 {
     setWantsKeyboardFocus (false);
     setRepaintsOnMouseActivity (true);
@@ -143,7 +143,7 @@ Slider::~Slider()
     currentValue.removeListener (this);
     valueMin.removeListener (this);
     valueMax.removeListener (this);
-    popupDisplay = 0;
+    popupDisplay = nullptr;
 }
 
 
@@ -281,7 +281,7 @@ void Slider::setTextBoxIsEditable (const bool shouldBeEditable)
 {
     editableText = shouldBeEditable;
 
-    if (valueBox != 0)
+    if (valueBox != nullptr)
         valueBox->setEditable (shouldBeEditable && isEnabled());
 }
 
@@ -289,13 +289,13 @@ void Slider::showTextBox()
 {
     jassert (editableText); // this should probably be avoided in read-only sliders.
 
-    if (valueBox != 0)
+    if (valueBox != nullptr)
         valueBox->showEditor();
 }
 
 void Slider::hideTextBox (const bool discardCurrentEditorContents)
 {
-    if (valueBox != 0)
+    if (valueBox != nullptr)
     {
         valueBox->hideEditor (discardCurrentEditorContents);
 
@@ -333,10 +333,10 @@ void Slider::lookAndFeelChanged()
 
     if (textBoxPos != NoTextBox)
     {
-        const String previousTextBoxContent (valueBox != 0 ? valueBox->getText()
-                                                           : getTextFromValue (currentValue.getValue()));
+        const String previousTextBoxContent (valueBox != nullptr ? valueBox->getText()
+                                                                 : getTextFromValue (currentValue.getValue()));
 
-        valueBox = 0;
+        valueBox = nullptr;
         addAndMakeVisible (valueBox = getLookAndFeel().createSliderTextBox (*this));
 
         valueBox->setWantsKeyboardFocus (false);
@@ -352,7 +352,7 @@ void Slider::lookAndFeelChanged()
     }
     else
     {
-        valueBox = 0;
+        valueBox = nullptr;
     }
 
     if (style == IncDecButtons)
@@ -382,8 +382,8 @@ void Slider::lookAndFeelChanged()
     }
     else
     {
-        incButton = 0;
-        decButton = 0;
+        incButton = nullptr;
+        decButton = nullptr;
     }
 
     setComponentEffect (lf.getSliderEffect());
@@ -488,7 +488,7 @@ void Slider::setValue (double newValue,
 
     if (newValue != lastCurrentValue)
     {
-        if (valueBox != 0)
+        if (valueBox != nullptr)
             valueBox->hideEditor (true);
 
         lastCurrentValue = newValue;
@@ -501,7 +501,7 @@ void Slider::setValue (double newValue,
         updateText();
         repaint();
 
-        if (popupDisplay != 0)
+        if (popupDisplay != nullptr)
             popupDisplay->updatePosition (getTextFromValue (newValue));
 
         if (sendUpdateMessage)
@@ -556,7 +556,7 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
         valueMin = newValue;
         repaint();
 
-        if (popupDisplay != 0)
+        if (popupDisplay != nullptr)
             popupDisplay->updatePosition (getTextFromValue (newValue));
 
         if (sendUpdateMessage)
@@ -593,7 +593,7 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
         valueMax = newValue;
         repaint();
 
-        if (popupDisplay != 0)
+        if (popupDisplay != nullptr)
             popupDisplay->updatePosition (getTextFromValue (valueMax.getValue()));
 
         if (sendUpdateMessage)
@@ -641,7 +641,7 @@ double Slider::getDoubleClickReturnValue (bool& isEnabled_) const
 
 void Slider::updateText()
 {
-    if (valueBox != 0)
+    if (valueBox != nullptr)
         valueBox->setText (getTextFromValue (currentValue.getValue()), false);
 }
 
@@ -872,7 +872,7 @@ void Slider::paint (Graphics& g)
                                                *this);
         }
 
-        if (style == LinearBar && valueBox == 0)
+        if (style == LinearBar && valueBox == nullptr)
         {
             g.setColour (findColour (Slider::textBoxOutlineColourId));
             g.drawRect (0, 0, getWidth(), getHeight(), 1);
@@ -895,7 +895,7 @@ void Slider::resized()
 
     if (style == LinearBar)
     {
-        if (valueBox != 0)
+        if (valueBox != nullptr)
             valueBox->setBounds (getLocalBounds());
     }
     else
@@ -1012,7 +1012,7 @@ void Slider::focusOfChildComponentChanged (FocusChangeType)
 
 static void sliderMenuCallback (int result, Slider* slider)
 {
-    if (slider != 0)
+    if (slider != nullptr)
     {
         switch (result)
         {
@@ -1062,7 +1062,7 @@ void Slider::mouseDown (const MouseEvent& e)
         {
             menuShown = false;
 
-            if (valueBox != 0)
+            if (valueBox != nullptr)
                 valueBox->hideEditor (true);
 
             sliderBeingDragged = 0;
@@ -1110,7 +1110,7 @@ void Slider::mouseDown (const MouseEvent& e)
                 PopupDisplayComponent* const popup = new PopupDisplayComponent (*this);
                 popupDisplay = popup;
 
-                if (parentForPopupDisplay != 0)
+                if (parentForPopupDisplay != nullptr)
                     parentForPopupDisplay->addChildComponent (popup);
                 else
                     popup->addToDesktop (0);
@@ -1138,7 +1138,7 @@ void Slider::mouseUp (const MouseEvent&)
             triggerChangeMessage (false);
 
         sendDragEnd();
-        popupDisplay = 0;
+        popupDisplay = nullptr;
 
         if (style == IncDecButtons)
         {
@@ -1146,7 +1146,7 @@ void Slider::mouseUp (const MouseEvent&)
             decButton->setState (Button::buttonNormal);
         }
     }
-    else if (popupDisplay != 0)
+    else if (popupDisplay != nullptr)
     {
         popupDisplay->startTimer (2000);
     }
@@ -1207,7 +1207,7 @@ void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
 
 namespace SliderHelpers
 {
-    double smallestAngleBetween (double a1, double a2) throw()
+    double smallestAngleBetween (double a1, double a2) noexcept
     {
         return jmin (std::abs (a1 - a2),
                      std::abs (a1 + double_Pi * 2.0 - a2),
@@ -1272,7 +1272,7 @@ void Slider::mouseDrag (const MouseEvent& e)
         else
         {
             if (style == LinearBar && e.mouseWasClicked()
-                 && valueBox != 0 && valueBox->isEditable())
+                 && valueBox != nullptr && valueBox->isEditable())
                 return;
 
             if (style == IncDecButtons && ! incDecDragged)
@@ -1416,7 +1416,7 @@ void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float w
     {
         if (maximum > minimum && ! e.mods.isAnyMouseButtonDown())
         {
-            if (valueBox != 0)
+            if (valueBox != nullptr)
                 valueBox->hideEditor (false);
 
             const double value = (double) currentValue.getValue();

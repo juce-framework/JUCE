@@ -334,9 +334,7 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 //==============================================================================
 void File::findFileSystemRoots (Array<File>& destArray)
 {
-    TCHAR buffer [2048];
-    buffer[0] = 0;
-    buffer[1] = 0;
+    TCHAR buffer [2048] = { 0 };
     GetLogicalDriveStrings (2048, buffer);
 
     const TCHAR* n = buffer;
@@ -585,12 +583,12 @@ public:
 
         filenameFound = findData.cFileName;
 
-        if (isDir != 0)         *isDir = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
-        if (isHidden != 0)      *isHidden = ((findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
-        if (fileSize != 0)      *fileSize = findData.nFileSizeLow + (((int64) findData.nFileSizeHigh) << 32);
-        if (modTime != 0)       *modTime = Time (fileTimeToTime (&findData.ftLastWriteTime));
-        if (creationTime != 0)  *creationTime = Time (fileTimeToTime (&findData.ftCreationTime));
-        if (isReadOnly != 0)    *isReadOnly = ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0);
+        if (isDir != nullptr)         *isDir = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+        if (isHidden != nullptr)      *isHidden = ((findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
+        if (fileSize != nullptr)      *fileSize = findData.nFileSizeLow + (((int64) findData.nFileSizeHigh) << 32);
+        if (modTime != nullptr)       *modTime = Time (fileTimeToTime (&findData.ftLastWriteTime));
+        if (creationTime != nullptr)  *creationTime = Time (fileTimeToTime (&findData.ftCreationTime));
+        if (isReadOnly != nullptr)    *isReadOnly = ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0);
 
         return true;
     }
@@ -728,7 +726,7 @@ void NamedPipe::close()
 
     const ScopedLock sl (lock);
     delete static_cast<NamedPipeInternal*> (internal);
-    internal = 0;
+    internal = nullptr;
 }
 
 bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
@@ -752,7 +750,7 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMillisecon
     int bytesRead = -1;
     bool waitAgain = true;
 
-    while (waitAgain && internal != 0)
+    while (waitAgain && internal != nullptr)
     {
         NamedPipeInternal* const intern = static_cast<NamedPipeInternal*> (internal);
         waitAgain = false;
@@ -820,7 +818,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
     int bytesWritten = -1;
     NamedPipeInternal* const intern = static_cast<NamedPipeInternal*> (internal);
 
-    if (intern != 0 && intern->connect (timeOutMilliseconds))
+    if (intern != nullptr && intern->connect (timeOutMilliseconds))
     {
         if (numBytesToWrite <= 0)
             return 0;
@@ -867,7 +865,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
 
 void NamedPipe::cancelPendingReads()
 {
-    if (internal != 0)
+    if (internal != nullptr)
         SetEvent (static_cast<NamedPipeInternal*> (internal)->cancelEvent);
 }
 

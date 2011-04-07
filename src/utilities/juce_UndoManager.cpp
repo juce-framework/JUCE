@@ -74,7 +74,7 @@ void UndoManager::setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
 //==============================================================================
 bool UndoManager::perform (UndoableAction* const command_, const String& actionName)
 {
-    if (command_ != 0)
+    if (command_ != nullptr)
     {
         ScopedPointer<UndoableAction> command (command_);
 
@@ -92,15 +92,15 @@ bool UndoManager::perform (UndoableAction* const command_, const String& actionN
         {
             OwnedArray<UndoableAction>* commandSet = transactions [nextIndex - 1];
 
-            if (commandSet != 0 && ! newTransaction)
+            if (commandSet != nullptr && ! newTransaction)
             {
                 UndoableAction* lastAction = commandSet->getLast();
 
-                if (lastAction != 0)
+                if (lastAction != nullptr)
                 {
                     UndoableAction* coalescedAction = lastAction->createCoalescedAction (command);
 
-                    if (coalescedAction != 0)
+                    if (coalescedAction != nullptr)
                     {
                         command = coalescedAction;
                         totalUnitsStored -= lastAction->getSizeInUnits();
@@ -192,7 +192,7 @@ bool UndoManager::undo()
 {
     const OwnedArray<UndoableAction>* const commandSet = transactions [nextIndex - 1];
 
-    if (commandSet == 0)
+    if (commandSet == nullptr)
         return false;
 
     bool failed = false;
@@ -226,7 +226,7 @@ bool UndoManager::redo()
 {
     const OwnedArray<UndoableAction>* const commandSet = transactions [nextIndex];
 
-    if (commandSet == 0)
+    if (commandSet == nullptr)
         return false;
 
     bool failed = false;
@@ -265,7 +265,7 @@ void UndoManager::getActionsInCurrentTransaction (Array <const UndoableAction*>&
 {
     const OwnedArray <UndoableAction>* const commandSet = transactions [nextIndex - 1];
 
-    if (commandSet != 0 && ! newTransaction)
+    if (commandSet != nullptr && ! newTransaction)
     {
         for (int i = 0; i < commandSet->size(); ++i)
             actionsFound.add (commandSet->getUnchecked(i));
@@ -276,7 +276,7 @@ int UndoManager::getNumActionsInCurrentTransaction() const
 {
     const OwnedArray <UndoableAction>* const commandSet = transactions [nextIndex - 1];
 
-    if (commandSet != 0 && ! newTransaction)
+    if (commandSet != nullptr && ! newTransaction)
         return commandSet->size();
 
     return 0;

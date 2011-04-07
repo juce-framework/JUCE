@@ -46,19 +46,19 @@ class InternalTimerThread  : private Thread,
 public:
     InternalTimerThread()
         : Thread ("Juce Timer"),
-          firstTimer (0),
+          firstTimer (nullptr),
           callbackNeeded (0)
     {
         triggerAsyncUpdate();
     }
 
-    ~InternalTimerThread() throw()
+    ~InternalTimerThread() noexcept
     {
         stopThread (4000);
 
-        jassert (instance == this || instance == 0);
+        jassert (instance == this || instance == nullptr);
         if (instance == this)
-            instance = 0;
+            instance = nullptr;
     }
 
     void run()
@@ -123,7 +123,7 @@ public:
     {
         const SpinLock::ScopedLockType sl (lock);
 
-        while (firstTimer != 0 && firstTimer->countdownMs <= 0)
+        while (firstTimer != nullptr && firstTimer->countdownMs <= 0)
         {
             Timer* const t = firstTimer;
             t->countdownMs = t->periodMs;
@@ -169,33 +169,33 @@ public:
 
     static void callAnyTimersSynchronously()
     {
-        if (InternalTimerThread::instance != 0)
+        if (InternalTimerThread::instance != nullptr)
             InternalTimerThread::instance->callTimersSynchronously();
     }
 
-    static inline void add (Timer* const tim) throw()
+    static inline void add (Timer* const tim) noexcept
     {
-        if (instance == 0)
+        if (instance == nullptr)
             instance = new InternalTimerThread();
 
         instance->addTimer (tim);
     }
 
-    static inline void remove (Timer* const tim) throw()
+    static inline void remove (Timer* const tim) noexcept
     {
-        if (instance != 0)
+        if (instance != nullptr)
             instance->removeTimer (tim);
     }
 
-    static inline void resetCounter (Timer* const tim, const int newCounter) throw()
+    static inline void resetCounter (Timer* const tim, const int newCounter) noexcept
     {
-        if (instance != 0)
+        if (instance != nullptr)
         {
             tim->countdownMs = newCounter;
             tim->periodMs = newCounter;
 
-            if ((tim->next != 0 && tim->next->countdownMs < tim->countdownMs)
-                 || (tim->previous != 0 && tim->previous->countdownMs > tim->countdownMs))
+            if ((tim->next != nullptr && tim->next->countdownMs < tim->countdownMs)
+                 || (tim->previous != nullptr && tim->previous->countdownMs > tim->countdownMs))
             {
                 instance->removeTimer (tim);
                 instance->addTimer (tim);
@@ -211,12 +211,12 @@ private:
     Atomic <int> callbackNeeded;
 
     //==============================================================================
-    void addTimer (Timer* const t) throw()
+    void addTimer (Timer* const t) noexcept
     {
        #if JUCE_DEBUG
         Timer* tt = firstTimer;
 
-        while (tt != 0)
+        while (tt != nullptr)
         {
             // trying to add a timer that's already here - shouldn't get to this point,
             // so if you get this assertion, let me know!
@@ -225,44 +225,44 @@ private:
             tt = tt->next;
         }
 
-        jassert (t->previous == 0 && t->next == 0);
+        jassert (t->previous == nullptr && t->next == nullptr);
        #endif
 
         Timer* i = firstTimer;
 
-        if (i == 0 || i->countdownMs > t->countdownMs)
+        if (i == nullptr || i->countdownMs > t->countdownMs)
         {
             t->next = firstTimer;
             firstTimer = t;
         }
         else
         {
-            while (i->next != 0 && i->next->countdownMs <= t->countdownMs)
+            while (i->next != nullptr && i->next->countdownMs <= t->countdownMs)
                 i = i->next;
 
-            jassert (i != 0);
+            jassert (i != nullptr);
 
             t->next = i->next;
             t->previous = i;
             i->next = t;
         }
 
-        if (t->next != 0)
+        if (t->next != nullptr)
             t->next->previous = t;
 
-        jassert ((t->next == 0 || t->next->countdownMs >= t->countdownMs)
-                  && (t->previous == 0 || t->previous->countdownMs <= t->countdownMs));
+        jassert ((t->next == nullptr || t->next->countdownMs >= t->countdownMs)
+                  && (t->previous == nullptr || t->previous->countdownMs <= t->countdownMs));
 
         notify();
     }
 
-    void removeTimer (Timer* const t) throw()
+    void removeTimer (Timer* const t) noexcept
     {
        #if JUCE_DEBUG
         Timer* tt = firstTimer;
         bool found = false;
 
-        while (tt != 0)
+        while (tt != nullptr)
         {
             if (tt == t)
             {
@@ -278,7 +278,7 @@ private:
         jassert (found);
        #endif
 
-        if (t->previous != 0)
+        if (t->previous != nullptr)
         {
             jassert (firstTimer != t);
             t->previous->next = t->next;
@@ -289,21 +289,21 @@ private:
             firstTimer = t->next;
         }
 
-        if (t->next != 0)
+        if (t->next != nullptr)
             t->next->previous = t->previous;
 
-        t->next = 0;
-        t->previous = 0;
+        t->next = nullptr;
+        t->previous = nullptr;
     }
 
     int getTimeUntilFirstTimer (const int numMillisecsElapsed) const
     {
         const SpinLock::ScopedLockType sl (lock);
 
-        for (Timer* t = firstTimer; t != 0; t = t->next)
+        for (Timer* t = firstTimer; t != nullptr; t = t->next)
             t->countdownMs -= numMillisecsElapsed;
 
-        return firstTimer != 0 ? firstTimer->countdownMs : 1000;
+        return firstTimer != nullptr ? firstTimer->countdownMs : 1000;
     }
 
     void handleAsyncUpdate()
@@ -314,7 +314,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalTimerThread);
 };
 
-InternalTimerThread* InternalTimerThread::instance = 0;
+InternalTimerThread* InternalTimerThread::instance = nullptr;
 SpinLock InternalTimerThread::lock;
 
 void juce_callAnyTimersSynchronously()
@@ -327,11 +327,11 @@ void juce_callAnyTimersSynchronously()
 static SortedSet <Timer*> activeTimers;
 #endif
 
-Timer::Timer() throw()
+Timer::Timer() noexcept
    : countdownMs (0),
      periodMs (0),
-     previous (0),
-     next (0)
+     previous (nullptr),
+     next (nullptr)
 {
    #if JUCE_DEBUG
     const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
@@ -339,11 +339,11 @@ Timer::Timer() throw()
    #endif
 }
 
-Timer::Timer (const Timer&) throw()
+Timer::Timer (const Timer&) noexcept
    : countdownMs (0),
      periodMs (0),
-     previous (0),
-     next (0)
+     previous (nullptr),
+     next (nullptr)
 {
    #if JUCE_DEBUG
     const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
@@ -360,7 +360,7 @@ Timer::~Timer()
    #endif
 }
 
-void Timer::startTimer (const int interval) throw()
+void Timer::startTimer (const int interval) noexcept
 {
     const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
 
@@ -381,7 +381,7 @@ void Timer::startTimer (const int interval) throw()
     }
 }
 
-void Timer::stopTimer() throw()
+void Timer::stopTimer() noexcept
 {
     const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
 

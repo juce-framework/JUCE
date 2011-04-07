@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
-    : model (0),
+    : model (nullptr),
       itemUnderMouse (-1),
       currentPopupIndex (-1),
       topLevelIndexClicked (0),
@@ -50,11 +50,11 @@ MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
 
 MenuBarComponent::~MenuBarComponent()
 {
-    setModel (0);
+    setModel (nullptr);
     Desktop::getInstance().removeGlobalMouseListener (this);
 }
 
-MenuBarModel* MenuBarComponent::getModel() const throw()
+MenuBarModel* MenuBarComponent::getModel() const noexcept
 {
     return model;
 }
@@ -63,16 +63,16 @@ void MenuBarComponent::setModel (MenuBarModel* const newModel)
 {
     if (model != newModel)
     {
-        if (model != 0)
+        if (model != nullptr)
             model->removeListener (this);
 
         model = newModel;
 
-        if (model != 0)
+        if (model != nullptr)
             model->addListener (this);
 
         repaint();
-        menuBarItemsChanged (0);
+        menuBarItemsChanged (nullptr);
     }
 }
 
@@ -87,7 +87,7 @@ void MenuBarComponent::paint (Graphics& g)
                                             isMouseOverBar,
                                             *this);
 
-    if (model != 0)
+    if (model != nullptr)
     {
         for (int i = 0; i < menuNames.size(); ++i)
         {
@@ -177,7 +177,7 @@ void MenuBarComponent::showMenu (int index)
     if (index != currentPopupIndex)
     {
         PopupMenu::dismissAllActiveMenus();
-        menuBarItemsChanged (0);
+        menuBarItemsChanged (nullptr);
 
         setOpenItem (index);
         setItemUnderMouse (index);
@@ -187,7 +187,7 @@ void MenuBarComponent::showMenu (int index)
             PopupMenu m (model->getMenuForIndex (itemUnderMouse,
                                                  menuNames [itemUnderMouse]));
 
-            if (m.lookAndFeel == 0)
+            if (m.lookAndFeel == nullptr)
                 m.setLookAndFeel (&getLookAndFeel());
 
             const Rectangle<int> itemPos (xPositions [index], 0, xPositions [index + 1] - xPositions [index], getHeight());
@@ -202,7 +202,7 @@ void MenuBarComponent::showMenu (int index)
 
 void MenuBarComponent::menuBarMenuDismissedCallback (int result, MenuBarComponent* bar, int topLevelIndex)
 {
-    if (bar != 0)
+    if (bar != nullptr)
         bar->menuDismissed (topLevelIndex, result);
 }
 
@@ -220,7 +220,7 @@ void MenuBarComponent::handleCommandMessage (int commandId)
     if (currentPopupIndex == topLevelIndexClicked)
         setOpenItem (-1);
 
-    if (commandId != 0 && model != 0)
+    if (commandId != 0 && model != nullptr)
         model->menuItemSelected (commandId, topLevelIndexClicked);
 }
 
@@ -318,7 +318,7 @@ void MenuBarComponent::menuBarItemsChanged (MenuBarModel* /*menuBarModel*/)
 {
     StringArray newNames;
 
-    if (model != 0)
+    if (model != nullptr)
         newNames = model->getMenuBarNames();
 
     if (newNames != menuNames)
@@ -332,7 +332,7 @@ void MenuBarComponent::menuBarItemsChanged (MenuBarModel* /*menuBarModel*/)
 void MenuBarComponent::menuCommandInvoked (MenuBarModel* /*menuBarModel*/,
                                            const ApplicationCommandTarget::InvocationInfo& info)
 {
-    if (model == 0 || (info.commandFlags & ApplicationCommandInfo::dontTriggerVisualFeedback) != 0)
+    if (model == nullptr || (info.commandFlags & ApplicationCommandInfo::dontTriggerVisualFeedback) != 0)
         return;
 
     for (int i = 0; i < menuNames.size(); ++i)

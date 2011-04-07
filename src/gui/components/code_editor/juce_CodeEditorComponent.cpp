@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 class CodeEditorComponent::CodeEditorLine
 {
 public:
-    CodeEditorLine() throw()
+    CodeEditorLine() noexcept
        : highlightColumnStart (0), highlightColumnEnd (0)
     {
     }
@@ -50,7 +50,7 @@ public:
         Array <SyntaxToken> newTokens;
         newTokens.ensureStorageAllocated (8);
 
-        if (analyser == 0)
+        if (analyser == nullptr)
         {
             newTokens.add (SyntaxToken (document.getLine (lineNum), -1));
         }
@@ -144,12 +144,12 @@ public:
 private:
     struct SyntaxToken
     {
-        SyntaxToken (const String& text_, const int type) throw()
+        SyntaxToken (const String& text_, const int type) noexcept
             : text (text_), tokenType (type), width (-1.0f)
         {
         }
 
-        bool operator!= (const SyntaxToken& other) const throw()
+        bool operator!= (const SyntaxToken& other) const noexcept
         {
             return text != other.text || tokenType != other.tokenType;
         }
@@ -218,7 +218,7 @@ private:
         }
     }
 
-    int indexToColumn (int index, const String& line, int spacesPerTab) const throw()
+    int indexToColumn (int index, const String& line, int spacesPerTab) const noexcept
     {
         jassert (index <= line.length());
 
@@ -753,7 +753,7 @@ void CodeEditorComponent::goToStartOfDocument (const bool selecting)
 
 namespace CodeEditorHelpers
 {
-    int findFirstNonWhitespaceChar (const String& line) throw()
+    int findFirstNonWhitespaceChar (const String& line) noexcept
     {
         String::CharPointerType t (line.getCharPointer());
         int i = 0;
@@ -1101,7 +1101,7 @@ void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpac
     }
 }
 
-int CodeEditorComponent::indexToColumn (int lineNum, int index) const throw()
+int CodeEditorComponent::indexToColumn (int lineNum, int index) const noexcept
 {
     String::CharPointerType t (document.getLine (lineNum).getCharPointer());
 
@@ -1123,7 +1123,7 @@ int CodeEditorComponent::indexToColumn (int lineNum, int index) const throw()
     return col;
 }
 
-int CodeEditorComponent::columnToIndex (int lineNum, int column) const throw()
+int CodeEditorComponent::columnToIndex (int lineNum, int column) const noexcept
 {
     String::CharPointerType t (document.getLine (lineNum).getCharPointer());
 
@@ -1158,7 +1158,7 @@ void CodeEditorComponent::resetToDefaultColours()
 {
     coloursForTokenCategories.clear();
 
-    if (codeTokeniser != 0)
+    if (codeTokeniser != nullptr)
     {
         for (int i = codeTokeniser->getTokenTypes().size(); --i >= 0;)
             setColourForTokenType (i, codeTokeniser->getDefaultColour (i));
@@ -1202,7 +1202,7 @@ void CodeEditorComponent::updateCachedIterators (int maxLineNum)
     if (cachedIterators.size() == 0)
         cachedIterators.add (new CodeDocument::Iterator (&document));
 
-    if (codeTokeniser == 0)
+    if (codeTokeniser == nullptr)
         return;
 
     for (;;)
@@ -1231,7 +1231,7 @@ void CodeEditorComponent::updateCachedIterators (int maxLineNum)
 
 void CodeEditorComponent::getIteratorForPosition (int position, CodeDocument::Iterator& source)
 {
-    if (codeTokeniser == 0)
+    if (codeTokeniser == nullptr)
         return;
 
     for (int i = cachedIterators.size(); --i >= 0;)

@@ -101,10 +101,10 @@ const String SystemStats::getLogonName()
 {
     const char* user = getenv ("USER");
 
-    if (user == 0)
+    if (user == nullptr)
     {
         struct passwd* const pw = getpwuid (getuid());
-        if (pw != 0)
+        if (pw != nullptr)
             user = pw->pw_name;
     }
 
@@ -133,7 +133,7 @@ void PlatformUtilities::fpuReset()
 }
 
 //==============================================================================
-uint32 juce_millisecondsSinceStartup() throw()
+uint32 juce_millisecondsSinceStartup() noexcept
 {
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
@@ -141,7 +141,7 @@ uint32 juce_millisecondsSinceStartup() throw()
     return t.tv_sec * 1000 + t.tv_nsec / 1000000;
 }
 
-int64 Time::getHighResolutionTicks() throw()
+int64 Time::getHighResolutionTicks() noexcept
 {
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
@@ -149,12 +149,12 @@ int64 Time::getHighResolutionTicks() throw()
     return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / (int64) 1000);
 }
 
-int64 Time::getHighResolutionTicksPerSecond() throw()
+int64 Time::getHighResolutionTicksPerSecond() noexcept
 {
     return 1000000;  // (microseconds)
 }
 
-double Time::getMillisecondCounterHiRes() throw()
+double Time::getMillisecondCounterHiRes() noexcept
 {
     return getHighResolutionTicks() * 0.001;
 }

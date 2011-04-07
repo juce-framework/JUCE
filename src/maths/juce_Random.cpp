@@ -32,21 +32,21 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Random::Random (const int64 seedValue) throw()
+Random::Random (const int64 seedValue) noexcept
     : seed (seedValue)
 {
 }
 
-Random::~Random() throw()
+Random::~Random() noexcept
 {
 }
 
-void Random::setSeed (const int64 newSeed) throw()
+void Random::setSeed (const int64 newSeed) noexcept
 {
     seed = newSeed;
 }
 
-void Random::combineSeed (const int64 seedValue) throw()
+void Random::combineSeed (const int64 seedValue) noexcept
 {
     seed ^= nextInt64() ^ seedValue;
 }
@@ -61,35 +61,35 @@ void Random::setSeedRandomly()
 }
 
 //==============================================================================
-int Random::nextInt() throw()
+int Random::nextInt() noexcept
 {
     seed = (seed * literal64bit (0x5deece66d) + 11) & literal64bit (0xffffffffffff);
 
     return (int) (seed >> 16);
 }
 
-int Random::nextInt (const int maxValue) throw()
+int Random::nextInt (const int maxValue) noexcept
 {
     jassert (maxValue > 0);
     return (nextInt() & 0x7fffffff) % maxValue;
 }
 
-int64 Random::nextInt64() throw()
+int64 Random::nextInt64() noexcept
 {
     return (((int64) nextInt()) << 32) | (int64) (uint64) (uint32) nextInt();
 }
 
-bool Random::nextBool() throw()
+bool Random::nextBool() noexcept
 {
     return (nextInt() & 0x80000000) != 0;
 }
 
-float Random::nextFloat() throw()
+float Random::nextFloat() noexcept
 {
     return static_cast <uint32> (nextInt()) / (float) 0xffffffff;
 }
 
-double Random::nextDouble() throw()
+double Random::nextDouble() noexcept
 {
     return static_cast <uint32> (nextInt()) / (double) 0xffffffff;
 }
@@ -129,7 +129,7 @@ void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numB
 }
 
 //==============================================================================
-Random& Random::getSystemRandom() throw()
+Random& Random::getSystemRandom() noexcept
 {
     static Random sysRand (1);
     return sysRand;

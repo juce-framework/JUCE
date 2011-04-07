@@ -47,7 +47,7 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (int byte1, int byte2, int byte3, double timeStamp = 0) throw();
+    MidiMessage (int byte1, int byte2, int byte3, double timeStamp = 0) noexcept;
 
     /** Creates a 2-byte short midi message.
 
@@ -56,7 +56,7 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (int byte1, int byte2, double timeStamp = 0) throw();
+    MidiMessage (int byte1, int byte2, double timeStamp = 0) noexcept;
 
     /** Creates a 1-byte short midi message.
 
@@ -64,7 +64,7 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (int byte1, double timeStamp = 0) throw();
+    MidiMessage (int byte1, double timeStamp = 0) noexcept;
 
     /** Creates a midi message from a block of data. */
     MidiMessage (const void* data, int numBytes, double timeStamp = 0);
@@ -94,7 +94,7 @@ public:
         Since the MidiMessage has to contain a valid message, this default constructor
         just initialises it with an empty sysex message.
     */
-    MidiMessage() throw();
+    MidiMessage() noexcept;
 
     /** Creates a copy of another midi message. */
     MidiMessage (const MidiMessage& other);
@@ -113,13 +113,13 @@ public:
 
         @see getRawDataSize
     */
-    uint8* getRawData() const throw()                           { return data; }
+    uint8* getRawData() const noexcept                          { return data; }
 
     /** Returns the number of bytes of data in the message.
 
         @see getRawData
     */
-    int getRawDataSize() const throw()                          { return size; }
+    int getRawDataSize() const noexcept                         { return size; }
 
     //==============================================================================
     /** Returns the timestamp associated with this message.
@@ -138,7 +138,7 @@ public:
 
         @see setTimeStamp, addToTimeStamp
     */
-    double getTimeStamp() const throw()                         { return timeStamp; }
+    double getTimeStamp() const noexcept                        { return timeStamp; }
 
     /** Changes the message's associated timestamp.
 
@@ -146,13 +146,13 @@ public:
 
         @see addToTimeStamp, getTimeStamp
     */
-    void setTimeStamp (double newTimestamp) throw()       { timeStamp = newTimestamp; }
+    void setTimeStamp (double newTimestamp) noexcept      { timeStamp = newTimestamp; }
 
     /** Adds a value to the message's timestamp.
 
         The units for the timestamp will be application-specific.
     */
-    void addToTimeStamp (double delta) throw()            { timeStamp += delta; }
+    void addToTimeStamp (double delta) noexcept           { timeStamp += delta; }
 
     //==============================================================================
     /** Returns the midi channel associated with the message.
@@ -161,14 +161,14 @@ public:
                     if it's a sysex)
         @see isForChannel, setChannel
     */
-    int getChannel() const throw();
+    int getChannel() const noexcept;
 
     /** Returns true if the message applies to the given midi channel.
 
         @param channelNumber    the channel number to look for, in the range 1 to 16
         @see getChannel, setChannel
     */
-    bool isForChannel (int channelNumber) const throw();
+    bool isForChannel (int channelNumber) const noexcept;
 
     /** Changes the message's midi channel.
 
@@ -176,12 +176,12 @@ public:
 
         @param newChannelNumber    the channel number to change it to, in the range 1 to 16
     */
-    void setChannel (int newChannelNumber) throw();
+    void setChannel (int newChannelNumber) noexcept;
 
     //==============================================================================
     /** Returns true if this is a system-exclusive message.
     */
-    bool isSysEx() const throw();
+    bool isSysEx() const noexcept;
 
     /** Returns a pointer to the sysex data inside the message.
 
@@ -189,7 +189,7 @@ public:
 
         @see getSysExDataSize
     */
-    const uint8* getSysExData() const throw();
+    const uint8* getSysExData() const noexcept;
 
     /** Returns the size of the sysex data.
 
@@ -197,7 +197,7 @@ public:
 
         @see getSysExData
     */
-    int getSysExDataSize() const throw();
+    int getSysExDataSize() const noexcept;
 
     //==============================================================================
     /** Returns true if this message is a 'key-down' event.
@@ -210,7 +210,7 @@ public:
 
         @see isNoteOff, getNoteNumber, getVelocity, noteOn
     */
-    bool isNoteOn (bool returnTrueForVelocity0 = false) const throw();
+    bool isNoteOn (bool returnTrueForVelocity0 = false) const noexcept;
 
     /** Creates a key-down message (using a floating-point velocity).
 
@@ -219,7 +219,7 @@ public:
         @param velocity     in the range 0 to 1.0
         @see isNoteOn
     */
-    static const MidiMessage noteOn (int channel, int noteNumber, float velocity) throw();
+    static const MidiMessage noteOn (int channel, int noteNumber, float velocity) noexcept;
 
     /** Creates a key-down message (using an integer velocity).
 
@@ -228,7 +228,7 @@ public:
         @param velocity     in the range 0 to 127
         @see isNoteOn
     */
-    static const MidiMessage noteOn (int channel, int noteNumber, uint8 velocity) throw();
+    static const MidiMessage noteOn (int channel, int noteNumber, uint8 velocity) noexcept;
 
     /** Returns true if this message is a 'key-up' event.
 
@@ -237,7 +237,7 @@ public:
 
         @see isNoteOn, getNoteNumber, getVelocity, noteOff
     */
-    bool isNoteOff (bool returnTrueForNoteOnVelocity0 = true) const throw();
+    bool isNoteOff (bool returnTrueForNoteOnVelocity0 = true) const noexcept;
 
     /** Creates a key-up message.
 
@@ -246,13 +246,13 @@ public:
         @param velocity     in the range 0 to 127
         @see isNoteOff
     */
-    static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) throw();
+    static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) noexcept;
 
     /** Returns true if this message is a 'key-down' or 'key-up' event.
 
         @see isNoteOn, isNoteOff
     */
-    bool isNoteOnOrOff() const throw();
+    bool isNoteOnOrOff() const noexcept;
 
     /** Returns the midi note number for note-on and note-off messages.
 
@@ -261,13 +261,13 @@ public:
 
         @see isNoteOff, getMidiNoteName, getMidiNoteInHertz, setNoteNumber
     */
-    int getNoteNumber() const throw();
+    int getNoteNumber() const noexcept;
 
     /** Changes the midi note number of a note-on or note-off message.
 
         If the message isn't a note on or off, this will do nothing.
     */
-    void setNoteNumber (int newNoteNumber) throw();
+    void setNoteNumber (int newNoteNumber) noexcept;
 
     //==============================================================================
     /** Returns the velocity of a note-on or note-off message.
@@ -278,7 +278,7 @@ public:
 
         @see getFloatVelocity
     */
-    uint8 getVelocity() const throw();
+    uint8 getVelocity() const noexcept;
 
     /** Returns the velocity of a note-on or note-off message.
 
@@ -288,7 +288,7 @@ public:
 
         @see getVelocity, setVelocity
     */
-    float getFloatVelocity() const throw();
+    float getFloatVelocity() const noexcept;
 
     /** Changes the velocity of a note-on or note-off message.
 
@@ -297,7 +297,7 @@ public:
         @param newVelocity  the new velocity, in the range 0 to 1.0
         @see getFloatVelocity, multiplyVelocity
     */
-    void setVelocity (float newVelocity) throw();
+    void setVelocity (float newVelocity) noexcept;
 
     /** Multiplies the velocity of a note-on or note-off message by a given amount.
 
@@ -306,14 +306,14 @@ public:
         @param scaleFactor  the value by which to multiply the velocity
         @see setVelocity
     */
-    void multiplyVelocity (float scaleFactor) throw();
+    void multiplyVelocity (float scaleFactor) noexcept;
 
     //==============================================================================
     /** Returns true if the message is a program (patch) change message.
 
         @see getProgramChangeNumber, getGMInstrumentName
     */
-    bool isProgramChange() const throw();
+    bool isProgramChange() const noexcept;
 
     /** Returns the new program number of a program change message.
 
@@ -322,7 +322,7 @@ public:
 
         @see isProgramChange, getGMInstrumentName
     */
-    int getProgramChangeNumber() const throw();
+    int getProgramChangeNumber() const noexcept;
 
     /** Creates a program-change message.
 
@@ -330,14 +330,14 @@ public:
         @param programNumber    the midi program number, 0 to 127
         @see isProgramChange, getGMInstrumentName
     */
-    static const MidiMessage programChange (int channel, int programNumber) throw();
+    static const MidiMessage programChange (int channel, int programNumber) noexcept;
 
     //==============================================================================
     /** Returns true if the message is a pitch-wheel move.
 
         @see getPitchWheelValue, pitchWheel
     */
-    bool isPitchWheel() const throw();
+    bool isPitchWheel() const noexcept;
 
     /** Returns the pitch wheel position from a pitch-wheel move message.
 
@@ -347,7 +347,7 @@ public:
 
         @see isPitchWheel
     */
-    int getPitchWheelValue() const throw();
+    int getPitchWheelValue() const noexcept;
 
     /** Creates a pitch-wheel move message.
 
@@ -355,7 +355,7 @@ public:
         @param position     the wheel position, in the range 0 to 16383
         @see isPitchWheel
     */
-    static const MidiMessage pitchWheel (int channel, int position) throw();
+    static const MidiMessage pitchWheel (int channel, int position) noexcept;
 
     //==============================================================================
     /** Returns true if the message is an aftertouch event.
@@ -366,7 +366,7 @@ public:
 
         @see getAftertouchValue, getNoteNumber
     */
-    bool isAftertouch() const throw();
+    bool isAftertouch() const noexcept;
 
     /** Returns the amount of aftertouch from an aftertouch messages.
 
@@ -375,7 +375,7 @@ public:
 
         @see isAftertouch
     */
-    int getAfterTouchValue() const throw();
+    int getAfterTouchValue() const noexcept;
 
     /** Creates an aftertouch message.
 
@@ -386,7 +386,7 @@ public:
     */
     static const MidiMessage aftertouchChange (int channel,
                                                int noteNumber,
-                                               int aftertouchAmount) throw();
+                                               int aftertouchAmount) noexcept;
 
     /** Returns true if the message is a channel-pressure change event.
 
@@ -396,14 +396,14 @@ public:
 
         @see channelPressureChange
     */
-    bool isChannelPressure() const throw();
+    bool isChannelPressure() const noexcept;
 
     /** Returns the pressure from a channel pressure change message.
 
         @returns the pressure, in the range 0 to 127
         @see isChannelPressure, channelPressureChange
     */
-    int getChannelPressureValue() const throw();
+    int getChannelPressureValue() const noexcept;
 
     /** Creates a channel-pressure change event.
 
@@ -411,14 +411,14 @@ public:
         @param pressure             the pressure, 0 to 127
         @see isChannelPressure
     */
-    static const MidiMessage channelPressureChange (int channel, int pressure) throw();
+    static const MidiMessage channelPressureChange (int channel, int pressure) noexcept;
 
     //==============================================================================
     /** Returns true if this is a midi controller message.
 
         @see getControllerNumber, getControllerValue, controllerEvent
     */
-    bool isController() const throw();
+    bool isController() const noexcept;
 
     /** Returns the controller number of a controller message.
 
@@ -428,7 +428,7 @@ public:
 
         @see isController, getControllerName, getControllerValue
     */
-    int getControllerNumber() const throw();
+    int getControllerNumber() const noexcept;
 
     /** Returns the controller value from a controller message.
 
@@ -438,7 +438,7 @@ public:
 
         @see isController, getControllerNumber
     */
-    int getControllerValue() const throw();
+    int getControllerValue() const noexcept;
 
     /** Creates a controller message.
 
@@ -449,39 +449,39 @@ public:
     */
     static const MidiMessage controllerEvent (int channel,
                                               int controllerType,
-                                              int value) throw();
+                                              int value) noexcept;
 
     /** Checks whether this message is an all-notes-off message.
 
         @see allNotesOff
     */
-    bool isAllNotesOff() const throw();
+    bool isAllNotesOff() const noexcept;
 
     /** Checks whether this message is an all-sound-off message.
 
         @see allSoundOff
     */
-    bool isAllSoundOff() const throw();
+    bool isAllSoundOff() const noexcept;
 
     /** Creates an all-notes-off message.
 
         @param channel              the midi channel, in the range 1 to 16
         @see isAllNotesOff
     */
-    static const MidiMessage allNotesOff (int channel) throw();
+    static const MidiMessage allNotesOff (int channel) noexcept;
 
     /** Creates an all-sound-off message.
 
         @param channel              the midi channel, in the range 1 to 16
         @see isAllSoundOff
     */
-    static const MidiMessage allSoundOff (int channel) throw();
+    static const MidiMessage allSoundOff (int channel) noexcept;
 
     /** Creates an all-controllers-off message.
 
         @param channel              the midi channel, in the range 1 to 16
     */
-    static const MidiMessage allControllersOff (int channel) throw();
+    static const MidiMessage allControllersOff (int channel) noexcept;
 
     //==============================================================================
     /** Returns true if this event is a meta-event.
@@ -492,7 +492,7 @@ public:
              isTextMetaEvent, isTrackNameEvent, isTempoMetaEvent, isTimeSignatureMetaEvent,
              isKeySignatureMetaEvent, isMidiChannelMetaEvent
     */
-    bool isMetaEvent() const throw();
+    bool isMetaEvent() const noexcept;
 
     /** Returns a meta-event's type number.
 
@@ -502,44 +502,44 @@ public:
              isTextMetaEvent, isTrackNameEvent, isTempoMetaEvent, isTimeSignatureMetaEvent,
              isKeySignatureMetaEvent, isMidiChannelMetaEvent
     */
-    int getMetaEventType() const throw();
+    int getMetaEventType() const noexcept;
 
     /** Returns a pointer to the data in a meta-event.
 
         @see isMetaEvent, getMetaEventLength
     */
-    const uint8* getMetaEventData() const throw();
+    const uint8* getMetaEventData() const noexcept;
 
     /** Returns the length of the data for a meta-event.
 
         @see isMetaEvent, getMetaEventData
     */
-    int getMetaEventLength() const throw();
+    int getMetaEventLength() const noexcept;
 
     //==============================================================================
     /** Returns true if this is a 'track' meta-event. */
-    bool isTrackMetaEvent() const throw();
+    bool isTrackMetaEvent() const noexcept;
 
     /** Returns true if this is an 'end-of-track' meta-event. */
-    bool isEndOfTrackMetaEvent() const throw();
+    bool isEndOfTrackMetaEvent() const noexcept;
 
     /** Creates an end-of-track meta-event.
 
         @see isEndOfTrackMetaEvent
     */
-    static const MidiMessage endOfTrack() throw();
+    static const MidiMessage endOfTrack() noexcept;
 
     /** Returns true if this is an 'track name' meta-event.
 
         You can use the getTextFromTextMetaEvent() method to get the track's name.
     */
-    bool isTrackNameEvent() const throw();
+    bool isTrackNameEvent() const noexcept;
 
     /** Returns true if this is a 'text' meta-event.
 
         @see getTextFromTextMetaEvent
     */
-    bool isTextMetaEvent() const throw();
+    bool isTextMetaEvent() const noexcept;
 
     /** Returns the text from a text meta-event.
 
@@ -552,7 +552,7 @@ public:
 
         @see getTempoMetaEventTickLength, getTempoSecondsPerQuarterNote
     */
-    bool isTempoMetaEvent() const throw();
+    bool isTempoMetaEvent() const noexcept;
 
     /** Returns the tick length from a tempo meta-event.
 
@@ -560,32 +560,32 @@ public:
         @returns the tick length (in seconds).
         @see isTempoMetaEvent
     */
-    double getTempoMetaEventTickLength (short timeFormat) const throw();
+    double getTempoMetaEventTickLength (short timeFormat) const noexcept;
 
     /** Calculates the seconds-per-quarter-note from a tempo meta-event.
 
         @see isTempoMetaEvent, getTempoMetaEventTickLength
     */
-    double getTempoSecondsPerQuarterNote() const throw();
+    double getTempoSecondsPerQuarterNote() const noexcept;
 
     /** Creates a tempo meta-event.
 
         @see isTempoMetaEvent
     */
-    static const MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) throw();
+    static const MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) noexcept;
 
     //==============================================================================
     /** Returns true if this is a 'time-signature' meta-event.
 
         @see getTimeSignatureInfo
     */
-    bool isTimeSignatureMetaEvent() const throw();
+    bool isTimeSignatureMetaEvent() const noexcept;
 
     /** Returns the time-signature values from a time-signature meta-event.
 
         @see isTimeSignatureMetaEvent
     */
-    void getTimeSignatureInfo (int& numerator, int& denominator) const throw();
+    void getTimeSignatureInfo (int& numerator, int& denominator) const noexcept;
 
     /** Creates a time-signature meta-event.
 
@@ -598,13 +598,13 @@ public:
 
         @see getKeySignatureNumberOfSharpsOrFlats
     */
-    bool isKeySignatureMetaEvent() const throw();
+    bool isKeySignatureMetaEvent() const noexcept;
 
     /** Returns the key from a key-signature meta-event.
 
         @see isKeySignatureMetaEvent
     */
-    int getKeySignatureNumberOfSharpsOrFlats() const throw();
+    int getKeySignatureNumberOfSharpsOrFlats() const noexcept;
 
     //==============================================================================
     /** Returns true if this is a 'channel' meta-event.
@@ -614,74 +614,74 @@ public:
 
         @see getMidiChannelMetaEventChannel
     */
-    bool isMidiChannelMetaEvent() const throw();
+    bool isMidiChannelMetaEvent() const noexcept;
 
     /** Returns the channel number from a channel meta-event.
 
         @returns the channel, in the range 1 to 16.
         @see isMidiChannelMetaEvent
     */
-    int getMidiChannelMetaEventChannel() const throw();
+    int getMidiChannelMetaEventChannel() const noexcept;
 
     /** Creates a midi channel meta-event.
 
         @param channel              the midi channel, in the range 1 to 16
         @see isMidiChannelMetaEvent
     */
-    static const MidiMessage midiChannelMetaEvent (int channel) throw();
+    static const MidiMessage midiChannelMetaEvent (int channel) noexcept;
 
     //==============================================================================
     /** Returns true if this is an active-sense message. */
-    bool isActiveSense() const throw();
+    bool isActiveSense() const noexcept;
 
     //==============================================================================
     /** Returns true if this is a midi start event.
 
         @see midiStart
     */
-    bool isMidiStart() const throw();
+    bool isMidiStart() const noexcept;
 
     /** Creates a midi start event. */
-    static const MidiMessage midiStart() throw();
+    static const MidiMessage midiStart() noexcept;
 
     /** Returns true if this is a midi continue event.
 
         @see midiContinue
     */
-    bool isMidiContinue() const throw();
+    bool isMidiContinue() const noexcept;
 
     /** Creates a midi continue event. */
-    static const MidiMessage midiContinue() throw();
+    static const MidiMessage midiContinue() noexcept;
 
     /** Returns true if this is a midi stop event.
 
         @see midiStop
     */
-    bool isMidiStop() const throw();
+    bool isMidiStop() const noexcept;
 
     /** Creates a midi stop event. */
-    static const MidiMessage midiStop() throw();
+    static const MidiMessage midiStop() noexcept;
 
     /** Returns true if this is a midi clock event.
 
         @see midiClock, songPositionPointer
     */
-    bool isMidiClock() const throw();
+    bool isMidiClock() const noexcept;
 
     /** Creates a midi clock event. */
-    static const MidiMessage midiClock() throw();
+    static const MidiMessage midiClock() noexcept;
 
     /** Returns true if this is a song-position-pointer message.
 
         @see getSongPositionPointerMidiBeat, songPositionPointer
     */
-    bool isSongPositionPointer() const throw();
+    bool isSongPositionPointer() const noexcept;
 
     /** Returns the midi beat-number of a song-position-pointer message.
 
         @see isSongPositionPointer, songPositionPointer
     */
-    int getSongPositionPointerMidiBeat() const throw();
+    int getSongPositionPointerMidiBeat() const noexcept;
 
     /** Creates a song-position-pointer message.
 
@@ -691,14 +691,14 @@ public:
 
         @see isSongPositionPointer, getSongPositionPointerMidiBeat
     */
-    static const MidiMessage songPositionPointer (int positionInMidiBeats) throw();
+    static const MidiMessage songPositionPointer (int positionInMidiBeats) noexcept;
 
     //==============================================================================
     /** Returns true if this is a quarter-frame midi timecode message.
 
         @see quarterFrame, getQuarterFrameSequenceNumber, getQuarterFrameValue
     */
-    bool isQuarterFrame() const throw();
+    bool isQuarterFrame() const noexcept;
 
     /** Returns the sequence number of a quarter-frame midi timecode message.
 
@@ -706,21 +706,21 @@ public:
 
         @see isQuarterFrame, getQuarterFrameValue, quarterFrame
     */
-    int getQuarterFrameSequenceNumber() const throw();
+    int getQuarterFrameSequenceNumber() const noexcept;
 
     /** Returns the value from a quarter-frame message.
 
         This will be the lower nybble of the message's data-byte, a value
         between 0 and 15
     */
-    int getQuarterFrameValue() const throw();
+    int getQuarterFrameValue() const noexcept;
 
     /** Creates a quarter-frame MTC message.
 
         @param sequenceNumber   a value 0 to 7 for the upper nybble of the message's data byte
         @param value            a value 0 to 15 for the lower nybble of the message's data byte
     */
-    static const MidiMessage quarterFrame (int sequenceNumber, int value) throw();
+    static const MidiMessage quarterFrame (int sequenceNumber, int value) noexcept;
 
     /** SMPTE timecode types.
 
@@ -736,7 +736,7 @@ public:
 
     /** Returns true if this is a full-frame midi timecode message.
     */
-    bool isFullFrame() const throw();
+    bool isFullFrame() const noexcept;
 
     /** Extracts the timecode information from a full-frame midi timecode message.
 
@@ -747,7 +747,7 @@ public:
                                  int& minutes,
                                  int& seconds,
                                  int& frames,
-                                 SmpteTimecodeType& timecodeType) const throw();
+                                 SmpteTimecodeType& timecodeType) const noexcept;
 
     /** Creates a full-frame MTC message.
     */
@@ -778,14 +778,14 @@ public:
 
         If it is, you can use the getMidiMachineControlCommand() to find out its type.
     */
-    bool isMidiMachineControlMessage() const throw();
+    bool isMidiMachineControlMessage() const noexcept;
 
     /** For an MMC message, this returns its type.
 
         Make sure it's actually an MMC message with isMidiMachineControlMessage() before
         calling this method.
     */
-    MidiMachineControlCommand getMidiMachineControlCommand() const throw();
+    MidiMachineControlCommand getMidiMachineControlCommand() const noexcept;
 
     /** Creates an MMC message.
     */
@@ -800,7 +800,7 @@ public:
     bool isMidiMachineControlGoto (int& hours,
                                    int& minutes,
                                    int& seconds,
-                                   int& frames) const throw();
+                                   int& frames) const noexcept;
 
     /** Creates an MMC "goto" message.
 
@@ -836,14 +836,14 @@ public:
         @param numBytesUsed     on return, this will be set to the number of bytes that were read
     */
     static int readVariableLengthVal (const uint8* data,
-                                      int& numBytesUsed) throw();
+                                      int& numBytesUsed) noexcept;
 
     /** Based on the first byte of a short midi message, this uses a lookup table
         to return the message length (either 1, 2, or 3 bytes).
 
         The value passed in must be 0x80 or higher.
     */
-    static int getMessageLengthFromFirstByte (const uint8 firstByte) throw();
+    static int getMessageLengthFromFirstByte (const uint8 firstByte) noexcept;
 
     //==============================================================================
     /** Returns the name of a midi note number.
@@ -870,7 +870,7 @@ public:
         The frequencyOfA parameter is an optional frequency for 'A', normally 440-444Hz for concert pitch.
         @see getMidiNoteName
     */
-    static const double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) throw();
+    static const double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
 
     /** Returns the standard name of a GM instrument.
 

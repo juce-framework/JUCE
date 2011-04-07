@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-AbstractFifo::AbstractFifo (const int capacity) throw()
+AbstractFifo::AbstractFifo (const int capacity) noexcept
     : bufferSize (capacity)
 {
     jassert (bufferSize > 0);
@@ -39,23 +39,23 @@ AbstractFifo::AbstractFifo (const int capacity) throw()
 
 AbstractFifo::~AbstractFifo() {}
 
-int AbstractFifo::getTotalSize() const throw()            { return bufferSize; }
-int AbstractFifo::getFreeSpace() const throw()            { return bufferSize - getNumReady(); }
+int AbstractFifo::getTotalSize() const noexcept           { return bufferSize; }
+int AbstractFifo::getFreeSpace() const noexcept           { return bufferSize - getNumReady(); }
 
-int AbstractFifo::getNumReady() const throw()
+int AbstractFifo::getNumReady() const noexcept
 {
     const int vs = validStart.get();
     const int ve = validEnd.get();
     return ve >= vs ? (ve - vs) : (bufferSize - (vs - ve));
 }
 
-void AbstractFifo::reset() throw()
+void AbstractFifo::reset() noexcept
 {
     validEnd = 0;
     validStart = 0;
 }
 
-void AbstractFifo::setTotalSize (int newSize) throw()
+void AbstractFifo::setTotalSize (int newSize) noexcept
 {
     jassert (newSize > 0);
     reset();
@@ -63,7 +63,7 @@ void AbstractFifo::setTotalSize (int newSize) throw()
 }
 
 //==============================================================================
-void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw()
+void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept
 {
     const int vs = validStart.get();
     const int ve = validEnd.value;
@@ -88,7 +88,7 @@ void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockS
     }
 }
 
-void AbstractFifo::finishedWrite (int numWritten) throw()
+void AbstractFifo::finishedWrite (int numWritten) noexcept
 {
     jassert (numWritten >= 0 && numWritten < bufferSize);
     int newEnd = validEnd.value + numWritten;
@@ -98,7 +98,7 @@ void AbstractFifo::finishedWrite (int numWritten) throw()
     validEnd = newEnd;
 }
 
-void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const throw()
+void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept
 {
     const int vs = validStart.value;
     const int ve = validEnd.get();
@@ -123,7 +123,7 @@ void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSiz
     }
 }
 
-void AbstractFifo::finishedRead (int numRead) throw()
+void AbstractFifo::finishedRead (int numRead) noexcept
 {
     jassert (numRead >= 0 && numRead <= bufferSize);
 

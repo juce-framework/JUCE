@@ -125,7 +125,7 @@ public:
 
     //==============================================================================
     /** Returns the total number of glyphs in the arrangement. */
-    int getNumGlyphs() const throw()                            { return glyphs.size(); }
+    int getNumGlyphs() const noexcept                           { return glyphs.size(); }
 
     /** Returns one of the glyphs from the arrangement.
 

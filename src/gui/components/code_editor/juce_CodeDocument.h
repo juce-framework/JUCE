@@ -70,7 +70,7 @@ public:
             Don't attempt to call any methods on this until you've given it an owner document
             to refer to!
         */
-        Position() throw();
+        Position() noexcept;
 
         /** Creates a position based on a line and index in a document.
 
@@ -83,7 +83,7 @@ public:
             they will be adjusted to keep them within its limits.
         */
         Position (const CodeDocument* ownerDocument,
-                  int line, int indexInLine) throw();
+                  int line, int indexInLine) noexcept;
 
         /** Creates a position based on a character index in a document.
             This position is placed at the specified number of characters from the start of the
@@ -93,21 +93,21 @@ public:
             inside.
         */
         Position (const CodeDocument* ownerDocument,
-                  int charactersFromStartOfDocument) throw();
+                  int charactersFromStartOfDocument) noexcept;
 
         /** Creates a copy of another position.
 
             This will copy the position, but the new object will not be set to maintain its position,
             even if the source object was set to do so.
         */
-        Position (const Position& other) throw();
+        Position (const Position& other) noexcept;
 
         /** Destructor. */
         ~Position();
 
         Position& operator= (const Position& other);
-        bool operator== (const Position& other) const throw();
-        bool operator!= (const Position& other) const throw();
+        bool operator== (const Position& other) const noexcept;
+        bool operator!= (const Position& other) const noexcept;
 
         /** Points this object at a new position within the document.
 
@@ -120,7 +120,7 @@ public:
         /** Returns the position as the number of characters from the start of the document.
             @see setPosition, getLineNumber, getIndexInLine
         */
-        int getPosition() const throw()             { return characterPos; }
+        int getPosition() const noexcept            { return characterPos; }
 
         /** Moves the position to a new line and index within the line.
 
@@ -136,7 +136,7 @@ public:
         /** Returns the line number of this position.
             The first line in the document is numbered zero, not one!
         */
-        int getLineNumber() const throw()           { return line; }
+        int getLineNumber() const noexcept          { return line; }
 
         /** Returns the number of characters from the start of the line.
 
@@ -144,7 +144,7 @@ public:
             If the line contains any tab characters, the relationship of the index to its
             visual position depends on the number of spaces per tab being used!
         */
-        int getIndexInLine() const throw()          { return indexInLine; }
+        int getIndexInLine() const noexcept         { return indexInLine; }
 
         /** Allows the position to be automatically updated when the document changes.
 
@@ -197,16 +197,16 @@ public:
     const String getTextBetween (const Position& start, const Position& end) const;
 
     /** Returns a line from the document. */
-    const String getLine (int lineIndex) const throw();
+    const String getLine (int lineIndex) const noexcept;
 
     /** Returns the number of characters in the document. */
-    int getNumCharacters() const throw();
+    int getNumCharacters() const noexcept;
 
     /** Returns the number of lines in the document. */
-    int getNumLines() const throw()                     { return lines.size(); }
+    int getNumLines() const noexcept                    { return lines.size(); }
 
     /** Returns the number of characters in the longest line of the document. */
-    int getMaximumLineLength() throw();
+    int getMaximumLineLength() noexcept;
 
     /** Deletes a section of the text.
 
@@ -240,13 +240,13 @@ public:
         This will be either "\n", "\r\n", or (rarely) "\r".
         @see setNewLineCharacters
     */
-    const String getNewLineCharacters() const throw()           { return newLineChars; }
+    const String getNewLineCharacters() const noexcept          { return newLineChars; }
 
     /** Sets the new-line characters that the document should use.
         The string must be either "\n", "\r\n", or (rarely) "\r".
         @see getNewLineCharacters
     */
-    void setNewLineCharacters (const String& newLine) throw();
+    void setNewLineCharacters (const String& newLine) noexcept;
 
     //==============================================================================
     /** Begins a new undo transaction.
@@ -273,7 +273,7 @@ public:
     void clearUndoHistory();
 
     /** Returns the document's UndoManager */
-    UndoManager& getUndoManager() throw()               { return undoManager; }
+    UndoManager& getUndoManager() noexcept              { return undoManager; }
 
     //==============================================================================
     /** Makes a note that the document's current state matches the one that is saved.
@@ -285,21 +285,21 @@ public:
 
         @see hasChangedSinceSavePoint
     */
-    void setSavePoint() throw();
+    void setSavePoint() noexcept;
 
     /** Returns true if the state of the document differs from the state it was in when
         setSavePoint() was last called.
 
         @see setSavePoint
     */
-    bool hasChangedSinceSavePoint() const throw();
+    bool hasChangedSinceSavePoint() const noexcept;
 
     //==============================================================================
     /** Searches for a word-break. */
-    const Position findWordBreakAfter (const Position& position) const throw();
+    const Position findWordBreakAfter (const Position& position) const noexcept;
 
     /** Searches for a word-break. */
-    const Position findWordBreakBefore (const Position& position) const throw();
+    const Position findWordBreakBefore (const Position& position) const noexcept;
 
     //==============================================================================
     /** An object that receives callbacks from the CodeDocument when its text changes.
@@ -321,12 +321,12 @@ public:
         If the listener is already registered, this method has no effect.
         @see removeListener
     */
-    void addListener (Listener* listener) throw();
+    void addListener (Listener* listener) noexcept;
 
     /** Deregisters a listener.
         @see addListener
     */
-    void removeListener (Listener* listener) throw();
+    void removeListener (Listener* listener) noexcept;
 
     //==============================================================================
     /** Iterates the text in a CodeDocument.
@@ -341,8 +341,8 @@ public:
     public:
         Iterator (CodeDocument* document);
         Iterator (const Iterator& other);
-        Iterator& operator= (const Iterator& other) throw();
-        ~Iterator() throw();
+        Iterator& operator= (const Iterator& other) noexcept;
+        ~Iterator() noexcept;
 
         /** Reads the next character and returns it.
             @see peekNextChar
@@ -358,7 +358,7 @@ public:
         /** Returns the position of the next character as its position within the
             whole document.
         */
-        int getPosition() const throw()         { return position; }
+        int getPosition() const noexcept        { return position; }
 
         /** Skips over any whitespace characters until the next character is non-whitespace. */
         void skipWhitespace();
@@ -367,10 +367,10 @@ public:
         void skipToEndOfLine();
 
         /** Returns the line number of the next character. */
-        int getLine() const throw()             { return line; }
+        int getLine() const noexcept            { return line; }
 
         /** Returns true if the iterator has reached the end of the document. */
-        bool isEOF() const throw();
+        bool isEOF() const noexcept;
 
     private:
         CodeDocument* document;

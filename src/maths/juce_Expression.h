@@ -186,8 +186,8 @@ public:
     struct Symbol
     {
         Symbol (const String& scopeUID, const String& symbolName);
-        bool operator== (const Symbol&) const throw();
-        bool operator!= (const Symbol&) const throw();
+        bool operator== (const Symbol&) const noexcept;
+        bool operator!= (const Symbol&) const noexcept;
 
         String scopeUID;    /**< The unique ID of the Scope that contains this symbol. */
         String symbolName;  /**< The name of the symbol. */
@@ -235,7 +235,7 @@ public:
     };
 
     /** Returns the type of this expression. */
-    Type getType() const throw();
+    Type getType() const noexcept;
 
     /** If this expression is a symbol, function or operator, this returns its identifier. */
     const String getSymbolOrFunction() const;

@@ -100,7 +100,7 @@ public:
     {
         const int result = getResult();
 
-        if (callback != 0)
+        if (callback != nullptr)
             callback->modalStateFinished (result);
 
         delete this;
@@ -150,8 +150,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       ModalComponentManager::Callback* callback)
 {
     ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message,
-                                                        @"OK", @"Cancel", nil, callback, callback != 0));
-    if (callback == 0)
+                                                        @"OK", @"Cancel", nil, callback, callback != nullptr));
+    if (callback == nullptr)
         return mb->getResult() == 1;
 
     mb.release();
@@ -164,8 +164,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         ModalComponentManager::Callback* callback)
 {
     ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message,
-                                                        @"Yes", @"Cancel", @"No", callback, callback != 0));
-    if (callback == 0)
+                                                        @"Yes", @"Cancel", @"No", callback, callback != nullptr));
+    if (callback == nullptr)
         return mb->getResult();
 
     mb.release();
@@ -181,7 +181,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0);
 
-    if (draggingSource == 0)
+    if (draggingSource == nullptr)
     {
         jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
         return false;
@@ -189,7 +189,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     Component* sourceComp = draggingSource->getComponentUnderMouse();
 
-    if (sourceComp == 0)
+    if (sourceComp == nullptr)
     {
         jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
         return false;
@@ -199,7 +199,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     NSView* view = (NSView*) sourceComp->getWindowHandle();
 
-    if (view == 0)
+    if (view == nil)
         return false;
 
     NSPasteboard* pboard = [NSPasteboard pasteboardWithName: NSDragPboard];
@@ -236,7 +236,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/
 }
 
 //==============================================================================
-bool Desktop::canUseSemiTransparentWindows() throw()
+bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     return true;
 }
@@ -283,13 +283,13 @@ public:
     }
 };
 
-static ScreenSaverDefeater* screenSaverDefeater = 0;
+static ScreenSaverDefeater* screenSaverDefeater = nullptr;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
         deleteAndZero (screenSaverDefeater);
-    else if (screenSaverDefeater == 0)
+    else if (screenSaverDefeater == nullptr)
         screenSaverDefeater = new ScreenSaverDefeater();
 }
 

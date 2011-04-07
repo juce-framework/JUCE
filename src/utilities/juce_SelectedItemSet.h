@@ -257,7 +257,7 @@ public:
 
         @see getSelectedItem
     */
-    int getNumSelected() const throw()
+    int getNumSelected() const noexcept
     {
         return selectedItems.size();
     }
@@ -268,18 +268,18 @@ public:
 
         @see getNumSelected
     */
-    SelectableItemType getSelectedItem (const int index) const throw()
+    SelectableItemType getSelectedItem (const int index) const noexcept
     {
         return selectedItems [index];
     }
 
     /** True if this item is currently selected. */
-    bool isSelected (ParameterType item) const throw()
+    bool isSelected (ParameterType item) const noexcept
     {
         return selectedItems.contains (item);
     }
 
-    const Array <SelectableItemType>& getItemArray() const throw()          { return selectedItems; }
+    const Array <SelectableItemType>& getItemArray() const noexcept         { return selectedItems; }
 
     //==============================================================================
     /** Can be overridden to do special handling when an item is selected.

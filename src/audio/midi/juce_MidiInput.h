@@ -146,12 +146,12 @@ public:
 
     /** Returns the name of this device.
     */
-    virtual const String getName() const throw()                    { return name; }
+    virtual const String getName() const noexcept                   { return name; }
 
     /** Allows you to set a custom name for the device, in case you don't like the name
         it was given when created.
     */
-    virtual void setName (const String& newName) throw()            { name = newName; }
+    virtual void setName (const String& newName) noexcept           { name = newName; }
 
     //==============================================================================
     /** Starts the device running.

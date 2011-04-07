@@ -79,7 +79,7 @@ void GroupTreeViewItem::checkFileStatus()
     {
         ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
 
-        if (p != 0)
+        if (p != nullptr)
             p->checkFileStatus();
     }
 }
@@ -100,7 +100,7 @@ void GroupTreeViewItem::showDocument()
 {
     ProjectContentComponent* pcc = getProjectContentComponent();
 
-    if (pcc != 0)
+    if (pcc != nullptr)
     {
         if (isRoot())
             pcc->setEditorComponent (new ProjectInformationComponent (item.getProject()), 0);
@@ -237,7 +237,7 @@ void SourceFileTreeViewItem::showDocument()
     ProjectContentComponent* pcc = getProjectContentComponent();
     const File f (getFile());
 
-    if (pcc != 0 && f.exists())
+    if (pcc != nullptr && f.exists())
         pcc->showEditorForFile (f);
 }
 
@@ -247,7 +247,7 @@ void SourceFileTreeViewItem::showPopupMenu()
 
     PopupMenu m;
 
-    if (parentGroup != 0)
+    if (parentGroup != nullptr)
     {
         parentGroup->addCreateFileMenuItems (m);
         m.addSeparator();
@@ -274,7 +274,7 @@ void SourceFileTreeViewItem::showPopupMenu()
         case 4:     triggerAsyncRename (item); break;
 
         default:
-            if (parentGroup != 0)
+            if (parentGroup != nullptr)
                 parentGroup->processCreateFileMenuItem (res);
 
             break;

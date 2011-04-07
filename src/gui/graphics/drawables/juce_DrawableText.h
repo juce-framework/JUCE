@@ -56,7 +56,7 @@ public:
     void setColour (const Colour& newColour);
 
     /** Returns the current text colour. */
-    const Colour& getColour() const throw()                 { return colour; }
+    const Colour& getColour() const noexcept                { return colour; }
 
     /** Sets the font to use.
         Note that the font height and horizontal scale are actually based upon the position
@@ -70,13 +70,13 @@ public:
     void setJustification (const Justification& newJustification);
 
     /** Returns the parallelogram that defines the text bounding box. */
-    const RelativeParallelogram& getBoundingBox() const throw()         { return bounds; }
+    const RelativeParallelogram& getBoundingBox() const noexcept        { return bounds; }
 
     /** Sets the bounding box that contains the text. */
     void setBoundingBox (const RelativeParallelogram& newBounds);
 
     /** Returns the point within the bounds that defines the font's size and scale. */
-    const RelativePoint& getFontSizeControlPoint() const throw()        { return fontSizeControlPoint; }
+    const RelativePoint& getFontSizeControlPoint() const noexcept       { return fontSizeControlPoint; }
 
     /** Sets the control point that defines the font's height and horizontal scale.
         This position is a point within the bounding box parallelogram, whose Y position (relative

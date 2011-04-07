@@ -173,7 +173,7 @@ TabbedButtonBar::TabbedButtonBar (const Orientation orientation_)
 TabbedButtonBar::~TabbedButtonBar()
 {
     tabs.clear();
-    extraTabsButton = 0;
+    extraTabsButton = nullptr;
 }
 
 //==============================================================================
@@ -202,7 +202,7 @@ void TabbedButtonBar::setMinimumTabScaleFactor (double newMinimumScale)
 void TabbedButtonBar::clearTabs()
 {
     tabs.clear();
-    extraTabsButton = 0;
+    extraTabsButton = nullptr;
     setCurrentTabIndex (-1);
 }
 
@@ -222,7 +222,7 @@ void TabbedButtonBar::addTab (const String& tabName,
         newTab->colour = tabBackgroundColour;
         newTab->component = createTabButton (tabName, insertIndex);
 
-        jassert (newTab->component != 0);
+        jassert (newTab->component != nullptr);
 
         tabs.insert (insertIndex, newTab);
         addAndMakeVisible (newTab->component, insertIndex);
@@ -238,7 +238,7 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
 {
     TabInfo* const tab = tabs [tabIndex];
 
-    if (tab != 0 && tab->name != newName)
+    if (tab != nullptr && tab->name != newName)
     {
         tab->name = newName;
         tab->component->setButtonText (newName);
@@ -248,7 +248,7 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
 
 void TabbedButtonBar::removeTab (const int tabIndex)
 {
-    if (tabs [tabIndex] != 0)
+    if (tabs [tabIndex] != nullptr)
     {
         const int oldTabIndex = currentTabIndex;
         if (currentTabIndex == tabIndex)
@@ -275,7 +275,7 @@ int TabbedButtonBar::getNumTabs() const
 const String TabbedButtonBar::getCurrentTabName() const
 {
     TabInfo* tab = tabs [currentTabIndex];
-    return tab == 0 ? String::empty : tab->name;
+    return tab == nullptr ? String::empty : tab->name;
 }
 
 const StringArray TabbedButtonBar::getTabNames() const
@@ -315,7 +315,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMes
 TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 {
     TabInfo* const tab = tabs[index];
-    return tab == 0 ? 0 : static_cast <TabBarButton*> (tab->component);
+    return tab == nullptr ? nullptr : static_cast <TabBarButton*> (tab->component);
 }
 
 int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
@@ -329,7 +329,7 @@ int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
 
 void TabbedButtonBar::lookAndFeelChanged()
 {
-    extraTabsButton = 0;
+    extraTabsButton = nullptr;
     resized();
 }
 
@@ -365,7 +365,7 @@ void TabbedButtonBar::resized()
 
     if (isTooBig)
     {
-        if (extraTabsButton == 0)
+        if (extraTabsButton == nullptr)
         {
             addAndMakeVisible (extraTabsButton = getLookAndFeel().createTabBarExtrasButton());
             extraTabsButton->addListener (behindFrontTab);
@@ -409,18 +409,18 @@ void TabbedButtonBar::resized()
     }
     else
     {
-        extraTabsButton = 0;
+        extraTabsButton = nullptr;
     }
 
     int pos = 0;
 
-    TabBarButton* frontTab = 0;
+    TabBarButton* frontTab = nullptr;
 
     for (i = 0; i < tabs.size(); ++i)
     {
         TabBarButton* const tb = getTabButton (i);
 
-        if (tb != 0)
+        if (tb != nullptr)
         {
             const int bestLength = roundToInt (scale * tb->getBestTabLength (depth));
 
@@ -449,7 +449,7 @@ void TabbedButtonBar::resized()
 
     behindFrontTab->setBounds (getLocalBounds());
 
-    if (frontTab != 0)
+    if (frontTab != nullptr)
     {
         frontTab->toFront (false);
         behindFrontTab->toBehind (frontTab);
@@ -460,14 +460,14 @@ void TabbedButtonBar::resized()
 const Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
 {
     TabInfo* const tab = tabs [tabIndex];
-    return tab == 0 ? Colours::white : tab->colour;
+    return tab == nullptr ? Colours::white : tab->colour;
 }
 
 void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& newColour)
 {
     TabInfo* const tab = tabs [tabIndex];
 
-    if (tab != 0 && tab->colour != newColour)
+    if (tab != nullptr && tab->colour != newColour)
     {
         tab->colour = newColour;
         repaint();
@@ -476,7 +476,7 @@ void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& 
 
 void TabbedButtonBar::extraItemsMenuCallback (int result, TabbedButtonBar* bar)
 {
-    if (bar != 0 && result > 0)
+    if (bar != nullptr && result > 0)
         bar->setCurrentTabIndex (result - 1);
 }
 

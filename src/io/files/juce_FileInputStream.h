@@ -51,7 +51,7 @@ public:
     ~FileInputStream();
 
     //==============================================================================
-    const File& getFile() const throw()                     { return file; }
+    const File& getFile() const noexcept                    { return file; }
 
     //==============================================================================
     int64 getTotalLength();

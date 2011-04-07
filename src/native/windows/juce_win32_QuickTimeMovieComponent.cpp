@@ -76,10 +76,10 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
     closeMovie();
     pimpl->qtControl = 0;
     deleteControl();
-    pimpl = 0;
+    pimpl = nullptr;
 }
 
-bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
+bool QuickTimeMovieComponent::isQuickTimeAvailable() noexcept
 {
     if (! isQTAvailable)
         isQTAvailable = (InitializeQTML (0) == noErr) && (EnterMovies() == noErr);
@@ -369,7 +369,7 @@ static bool openMovie (QTNewMoviePropertyElement* props, int prop, Movie& movie)
 
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle)
 {
-    if (input == 0)
+    if (input == nullptr)
         return false;
 
     dataHandle = 0;
@@ -387,7 +387,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
 
     FileInputStream* const fin = dynamic_cast <FileInputStream*> (input);
 
-    if (fin != 0)
+    if (fin != nullptr)
     {
         CFStringRef filePath = juceStringToCFString (fin->getFile().getFullPathName());
 

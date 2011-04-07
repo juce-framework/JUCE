@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      53
-#define JUCE_BUILDNUMBER        68
+#define JUCE_BUILDNUMBER        69
 
 /** Current Juce version number.
 
@@ -177,7 +177,7 @@ BEGIN_JUCE_NAMESPACE
 extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
-  extern JUCE_API void juce_LogAssertion (const char* filename, int lineNum) throw();
+  extern JUCE_API void juce_LogAssertion (const char* filename, int lineNum) noexcept;
 #endif
 
 #include "../memory/juce_Memory.h"

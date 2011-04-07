@@ -47,7 +47,7 @@ class ArrayAllocationBase  : public TypeOfCriticalSectionToUse
 public:
     //==============================================================================
     /** Creates an empty array. */
-    ArrayAllocationBase() throw()
+    ArrayAllocationBase() noexcept
         : numAllocated (0)
     {
     }
@@ -102,7 +102,7 @@ public:
     }
 
     /** Swap the contents of two objects. */
-    void swapWith (ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    void swapWith (ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse>& other) noexcept
     {
         elements.swapWith (other.elements);
         std::swap (numAllocated, other.numAllocated);

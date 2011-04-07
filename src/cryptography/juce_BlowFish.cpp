@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 {
-    jassert (keyData != 0);
+    jassert (keyData != nullptr);
     jassert (keyBytes > 0);
 
     static const uint32 initialPValues [18] =
@@ -243,13 +243,13 @@ BlowFish::~BlowFish()
 {
 }
 
-uint32 BlowFish::F (const uint32 x) const throw()
+uint32 BlowFish::F (const uint32 x) const noexcept
 {
     return ((s[0][(x >> 24) & 0xff] + s[1][(x >> 16) & 0xff])
                 ^ s[2][(x >> 8) & 0xff]) + s[3][x & 0xff];
 }
 
-void BlowFish::encrypt (uint32& data1, uint32& data2) const throw()
+void BlowFish::encrypt (uint32& data1, uint32& data2) const noexcept
 {
     uint32 l = data1;
     uint32 r = data2;
@@ -265,7 +265,7 @@ void BlowFish::encrypt (uint32& data1, uint32& data2) const throw()
     data2 = l ^ p[16];
 }
 
-void BlowFish::decrypt (uint32& data1, uint32& data2) const throw()
+void BlowFish::decrypt (uint32& data1, uint32& data2) const noexcept
 {
     uint32 l = data1;
     uint32 r = data2;

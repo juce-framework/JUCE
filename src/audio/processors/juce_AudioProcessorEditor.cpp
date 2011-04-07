@@ -36,7 +36,7 @@ AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const owner_)
     : owner (owner_)
 {
     // the filter must be valid..
-    jassert (owner != 0);
+    jassert (owner != nullptr);
 }
 
 AudioProcessorEditor::~AudioProcessorEditor()

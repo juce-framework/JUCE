@@ -216,13 +216,13 @@ public:
         JUCE_AUTORELEASEPOOL
         checkThreadIsAttached();
 
-        if (dataHandle != 0)
+        if (dataHandle != nullptr)
             DisposeHandle (dataHandle);
 
-        if (extractor != 0)
+        if (extractor != nullptr)
         {
             MovieAudioExtractionEnd (extractor);
-            extractor = 0;
+            extractor = nullptr;
         }
 
         DisposeMovie (movie);
@@ -278,7 +278,7 @@ public:
 
             for (int j = numDestChannels; --j >= 0;)
             {
-                if (destSamples[j] != 0)
+                if (destSamples[j] != nullptr)
                 {
                     const short* src = ((const short*) bufferList->mBuffers[0].mData) + j;
 
@@ -297,7 +297,7 @@ public:
             if (((outFlags & kQTMovieAudioExtractionComplete) != 0 || samplesReceived == 0) && numSamples > 0)
             {
                 for (int j = numDestChannels; --j >= 0;)
-                    if (destSamples[j] != 0)
+                    if (destSamples[j] != nullptr)
                         zeromem (destSamples[j] + startOffsetInDestBuffer, sizeof (int) * numSamples);
 
                 break;

@@ -141,7 +141,7 @@ namespace
 {
     const String getDSErrorMessage (HRESULT hr)
     {
-        const char* result = 0;
+        const char* result = nullptr;
 
         switch (hr)
         {
@@ -232,7 +232,7 @@ public:
                               int bufferSize, float* left, float* right)
         : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
           bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
-          pDirectSound (0), pOutputBuffer (0)
+          pDirectSound (nullptr), pOutputBuffer (nullptr)
     {
     }
 
@@ -245,21 +245,21 @@ public:
     {
         HRESULT hr;
 
-        if (pOutputBuffer != 0)
+        if (pOutputBuffer != nullptr)
         {
             log ("closing dsound out: " + name);
             hr = pOutputBuffer->Stop();
             logError (hr);
 
             hr = pOutputBuffer->Release();
-            pOutputBuffer = 0;
+            pOutputBuffer = nullptr;
             logError (hr);
         }
 
-        if (pDirectSound != 0)
+        if (pDirectSound != nullptr)
         {
             hr = pDirectSound->Release();
-            pDirectSound = 0;
+            pDirectSound = nullptr;
             logError (hr);
         }
     }
@@ -269,8 +269,8 @@ public:
         log ("opening dsound out device: " + name + "  rate=" + String (sampleRate)
               + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
-        pDirectSound = 0;
-        pOutputBuffer = 0;
+        pDirectSound = nullptr;
+        pOutputBuffer = nullptr;
         writeOffset = 0;
 
         String error;
@@ -371,7 +371,7 @@ public:
 
     void synchronisePosition()
     {
-        if (pOutputBuffer != 0)
+        if (pOutputBuffer != nullptr)
         {
             DWORD playCursor;
             pOutputBuffer->GetCurrentPosition (&playCursor, &writeOffset);
@@ -420,8 +420,8 @@ public:
 
         if (bytesEmpty >= bytesPerBuffer)
         {
-            void* lpbuf1 = 0;
-            void* lpbuf2 = 0;
+            void* lpbuf1 = nullptr;
+            void* lpbuf2 = nullptr;
             DWORD dwSize1 = 0;
             DWORD dwSize2 = 0;
 
@@ -527,7 +527,7 @@ private:
     int totalBytesPerBuffer, bytesPerBuffer;
     unsigned int lastPlayCursor;
 
-    static inline int convertInputValue (const float v) throw()
+    static inline int convertInputValue (const float v) noexcept
     {
         return jlimit (-32768, 32767, roundToInt (32767.0f * v));
     }
@@ -543,7 +543,7 @@ public:
                              int bufferSize, float* left, float* right)
         : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
           bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
-          pDirectSound (0), pDirectSoundCapture (0), pInputBuffer (0)
+          pDirectSound (nullptr), pDirectSoundCapture (nullptr), pInputBuffer (nullptr)
     {
     }
 
@@ -556,28 +556,28 @@ public:
     {
         HRESULT hr;
 
-        if (pInputBuffer != 0)
+        if (pInputBuffer != nullptr)
         {
             log ("closing dsound in: " + name);
             hr = pInputBuffer->Stop();
             logError (hr);
 
             hr = pInputBuffer->Release();
-            pInputBuffer = 0;
+            pInputBuffer = nullptr;
             logError (hr);
         }
 
-        if (pDirectSoundCapture != 0)
+        if (pDirectSoundCapture != nullptr)
         {
             hr = pDirectSoundCapture->Release();
-            pDirectSoundCapture = 0;
+            pDirectSoundCapture = nullptr;
             logError (hr);
         }
 
-        if (pDirectSound != 0)
+        if (pDirectSound != nullptr)
         {
             hr = pDirectSound->Release();
-            pDirectSound = 0;
+            pDirectSound = nullptr;
             logError (hr);
         }
     }
@@ -587,9 +587,9 @@ public:
         log ("opening dsound in device: " + name
               + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
-        pDirectSound = 0;
-        pDirectSoundCapture = 0;
-        pInputBuffer = 0;
+        pDirectSound = nullptr;
+        pDirectSoundCapture = nullptr;
+        pInputBuffer = nullptr;
         readOffset = 0;
         totalBytesPerBuffer = 0;
 
@@ -645,7 +645,7 @@ public:
 
     void synchronisePosition()
     {
-        if (pInputBuffer != 0)
+        if (pInputBuffer != nullptr)
         {
             DWORD capturePos;
             pInputBuffer->GetCurrentPosition (&capturePos, (DWORD*)&readOffset);
@@ -670,8 +670,8 @@ public:
 
         if (bytesFilled >= bytesPerBuffer)
         {
-            LPBYTE lpbuf1 = 0;
-            LPBYTE lpbuf2 = 0;
+            LPBYTE lpbuf1 = nullptr;
+            LPBYTE lpbuf2 = nullptr;
             DWORD dwsize1 = 0;
             DWORD dwsize2 = 0;
 
@@ -804,7 +804,7 @@ public:
           sampleRate (0.0),
           inputBuffers (1, 1),
           outputBuffers (1, 1),
-          callback (0)
+          callback (nullptr)
     {
         if (outputDeviceIndex_ >= 0)
         {
@@ -894,7 +894,7 @@ public:
 
     void start (AudioIODeviceCallback* call)
     {
-        if (isOpen_ && call != 0 && ! isStarted)
+        if (isOpen_ && call != nullptr && ! isStarted)
         {
             if (! isThreadRunning())
             {
@@ -922,7 +922,7 @@ public:
                 isStarted = false;
             }
 
-            if (callbackLocal != 0)
+            if (callbackLocal != nullptr)
                 callbackLocal->audioDeviceStopped();
         }
     }
@@ -1192,7 +1192,7 @@ private:
             if (lpGUID != 0)
                 outputGuids.add (new GUID (*lpGUID));
             else
-                outputGuids.add (0);
+                outputGuids.add (nullptr);
         }
 
         return TRUE;
@@ -1228,7 +1228,7 @@ private:
             if (lpGUID != 0)
                 inputGuids.add (new GUID (*lpGUID));
             else
-                inputGuids.add (0);
+                inputGuids.add (nullptr);
         }
 
         return TRUE;
@@ -1279,15 +1279,15 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
     for (i = 0; i <= enabledInputs.getHighestBit(); i += 2)
     {
-        float* left = 0;
+        float* left = nullptr;
         if (enabledInputs[i])
             left = inputBuffers.getSampleData (numIns++);
 
-        float* right = 0;
+        float* right = nullptr;
         if (enabledInputs[i + 1])
             right = inputBuffers.getSampleData (numIns++);
 
-        if (left != 0 || right != 0)
+        if (left != nullptr || right != nullptr)
             inChans.add (new DSoundInternalInChannel (dlh.inputDeviceNames [inputDeviceIndex],
                                                       dlh.inputGuids [inputDeviceIndex],
                                                       (int) sampleRate, bufferSizeSamples,
@@ -1305,15 +1305,15 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
     for (i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
     {
-        float* left = 0;
+        float* left = nullptr;
         if (enabledOutputs[i])
             left = outputBuffers.getSampleData (numOuts++);
 
-        float* right = 0;
+        float* right = nullptr;
         if (enabledOutputs[i + 1])
             right = outputBuffers.getSampleData (numOuts++);
 
-        if (left != 0 || right != 0)
+        if (left != nullptr || right != nullptr)
             outChans.add (new DSoundInternalOutChannel (dlh.outputDeviceNames[outputDeviceIndex],
                                                         dlh.outputGuids [outputDeviceIndex],
                                                         (int) sampleRate, bufferSizeSamples,

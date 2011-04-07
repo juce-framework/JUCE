@@ -61,7 +61,7 @@ public:
         ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getParentComponent());
 
         if (isMouseOverOrDragging()
-              && tc != 0
+              && tc != nullptr
               && tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar)
         {
             g.setColour (findColour (Toolbar::editingModeOutlineColourId, true));
@@ -75,7 +75,7 @@ public:
         isDragging = false;
         ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getParentComponent());
 
-        if (tc != 0)
+        if (tc != nullptr)
         {
             tc->dragOffsetX = e.x;
             tc->dragOffsetY = e.y;
@@ -89,13 +89,13 @@ public:
             isDragging = true;
             DragAndDropContainer* const dnd = DragAndDropContainer::findParentDragContainerFor (this);
 
-            if (dnd != 0)
+            if (dnd != nullptr)
             {
                 dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image::null, true);
 
                 ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getParentComponent());
 
-                if (tc != 0)
+                if (tc != nullptr)
                 {
                     tc->isBeingDragged = true;
 
@@ -111,13 +111,13 @@ public:
         isDragging = false;
         ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getParentComponent());
 
-        if (tc != 0)
+        if (tc != nullptr)
         {
             tc->isBeingDragged = false;
 
             Toolbar* const tb = tc->getToolbar();
 
-            if (tb != 0)
+            if (tb != nullptr)
                 tb->updateAllItemPositions (true);
             else if (tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar)
                 delete tc;
@@ -157,7 +157,7 @@ ToolbarItemComponent::ToolbarItemComponent (const int itemId_,
 
 ToolbarItemComponent::~ToolbarItemComponent()
 {
-    overlayComp = 0;
+    overlayComp = nullptr;
 }
 
 Toolbar* ToolbarItemComponent::getToolbar() const
@@ -168,7 +168,7 @@ Toolbar* ToolbarItemComponent::getToolbar() const
 bool ToolbarItemComponent::isToolbarVertical() const
 {
     const Toolbar* const t = getToolbar();
-    return t != 0 && t->isVertical();
+    return t != nullptr && t->isVertical();
 }
 
 void ToolbarItemComponent::setStyle (const Toolbar::ToolbarItemStyle& newStyle)
@@ -243,9 +243,9 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
 
         if (mode == normalMode)
         {
-            overlayComp = 0;
+            overlayComp = nullptr;
         }
-        else if (overlayComp == 0)
+        else if (overlayComp == nullptr)
         {
             addAndMakeVisible (overlayComp = new ItemDragAndDropOverlayComponent());
             overlayComp->parentSizeChanged();

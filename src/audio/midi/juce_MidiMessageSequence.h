@@ -263,12 +263,12 @@ public:
 
     //==============================================================================
     /** Swaps this sequence with another one. */
-    void swapWith (MidiMessageSequence& other) throw();
+    void swapWith (MidiMessageSequence& other) noexcept;
 
     //==============================================================================
     /** @internal */
     static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
-                                const MidiMessageSequence::MidiEventHolder* second) throw();
+                                const MidiMessageSequence::MidiEventHolder* second) noexcept;
 
 private:
     //==============================================================================

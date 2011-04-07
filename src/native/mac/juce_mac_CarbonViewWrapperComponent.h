@@ -147,7 +147,7 @@ public:
                 startTimer (50);
 
                 setSize (w, h);
-                if (getParentComponent() != 0)
+                if (getParentComponent() != nullptr)
                     getParentComponent()->setSize (w, h);
             }
             else

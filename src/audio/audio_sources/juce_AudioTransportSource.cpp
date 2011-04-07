@@ -33,11 +33,11 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 AudioTransportSource::AudioTransportSource()
-    : source (0),
-      resamplerSource (0),
-      bufferingSource (0),
-      positionableSource (0),
-      masterSource (0),
+    : source (nullptr),
+      resamplerSource (nullptr),
+      bufferingSource (nullptr),
+      positionableSource (nullptr),
+      masterSource (nullptr),
       gain (1.0f),
       lastGain (1.0f),
       playing (false),
@@ -53,7 +53,7 @@ AudioTransportSource::AudioTransportSource()
 
 AudioTransportSource::~AudioTransportSource()
 {
-    setSource (0);
+    setSource (nullptr);
 
     releaseResources();
 }
@@ -65,7 +65,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 {
     if (source == newSource)
     {
-        if (source == 0)
+        if (source == nullptr)
             return;
 
         setSource (0, 0, 0); // deselect and reselect to avoid releasing resources wrongly
@@ -74,16 +74,16 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
     readAheadBufferSize = readAheadBufferSize_;
     sourceSampleRate = sourceSampleRateToCorrectFor;
 
-    ResamplingAudioSource* newResamplerSource = 0;
-    BufferingAudioSource* newBufferingSource = 0;
-    PositionableAudioSource* newPositionableSource = 0;
-    AudioSource* newMasterSource = 0;
+    ResamplingAudioSource* newResamplerSource = nullptr;
+    BufferingAudioSource* newBufferingSource = nullptr;
+    PositionableAudioSource* newPositionableSource = nullptr;
+    AudioSource* newMasterSource = nullptr;
 
     ScopedPointer <ResamplingAudioSource> oldResamplerSource (resamplerSource);
     ScopedPointer <BufferingAudioSource> oldBufferingSource (bufferingSource);
     AudioSource* oldMasterSource = masterSource;
 
-    if (newSource != 0)
+    if (newSource != nullptr)
     {
         newPositionableSource = newSource;
 
@@ -101,7 +101,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
         if (isPrepared)
         {
-            if (newResamplerSource != 0 && sourceSampleRate > 0 && sampleRate > 0)
+            if (newResamplerSource != nullptr && sourceSampleRate > 0 && sampleRate > 0)
                 newResamplerSource->setResamplingRatio (sourceSampleRate / sampleRate);
 
             newMasterSource->prepareToPlay (blockSize, sampleRate);
@@ -120,13 +120,13 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
         playing = false;
     }
 
-    if (oldMasterSource != 0)
+    if (oldMasterSource != nullptr)
         oldMasterSource->releaseResources();
 }
 
 void AudioTransportSource::start()
 {
-    if ((! playing) && masterSource != 0)
+    if ((! playing) && masterSource != nullptr)
     {
         {
             const ScopedLock sl (callbackLock);
@@ -177,7 +177,7 @@ double AudioTransportSource::getLengthInSeconds() const
 
 void AudioTransportSource::setNextReadPosition (int64 newPosition)
 {
-    if (positionableSource != 0)
+    if (positionableSource != nullptr)
     {
         if (sampleRate > 0 && sourceSampleRate > 0)
             newPosition = (int64) (newPosition * sourceSampleRate / sampleRate);
@@ -188,7 +188,7 @@ void AudioTransportSource::setNextReadPosition (int64 newPosition)
 
 int64 AudioTransportSource::getNextReadPosition() const
 {
-    if (positionableSource != 0)
+    if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
 
@@ -202,7 +202,7 @@ int64 AudioTransportSource::getTotalLength() const
 {
     const ScopedLock sl (callbackLock);
 
-    if (positionableSource != 0)
+    if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
 
@@ -216,11 +216,11 @@ bool AudioTransportSource::isLooping() const
 {
     const ScopedLock sl (callbackLock);
 
-    return positionableSource != 0
+    return positionableSource != nullptr
             && positionableSource->isLooping();
 }
 
-void AudioTransportSource::setGain (const float newGain) throw()
+void AudioTransportSource::setGain (const float newGain) noexcept
 {
     gain = newGain;
 }
@@ -233,10 +233,10 @@ void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected,
     sampleRate = sampleRate_;
     blockSize = samplesPerBlockExpected;
 
-    if (masterSource != 0)
+    if (masterSource != nullptr)
         masterSource->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
-    if (resamplerSource != 0 && sourceSampleRate > 0)
+    if (resamplerSource != nullptr && sourceSampleRate > 0)
         resamplerSource->setResamplingRatio (sourceSampleRate / sampleRate);
 
     isPrepared = true;
@@ -246,7 +246,7 @@ void AudioTransportSource::releaseResources()
 {
     const ScopedLock sl (callbackLock);
 
-    if (masterSource != 0)
+    if (masterSource != nullptr)
         masterSource->releaseResources();
 
     isPrepared = false;
@@ -258,7 +258,7 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
     inputStreamEOF = false;
 
-    if (masterSource != 0 && ! stopped)
+    if (masterSource != nullptr && ! stopped)
     {
         masterSource->getNextAudioBlock (info);
 

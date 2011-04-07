@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ApplicationCommandInfo::ApplicationCommandInfo (const CommandID commandID_) throw()
+ApplicationCommandInfo::ApplicationCommandInfo (const CommandID commandID_) noexcept
     : commandID (commandID_),
       flags (0)
 {
@@ -40,7 +40,7 @@ ApplicationCommandInfo::ApplicationCommandInfo (const CommandID commandID_) thro
 void ApplicationCommandInfo::setInfo (const String& shortName_,
                                       const String& description_,
                                       const String& categoryName_,
-                                      const int flags_) throw()
+                                      const int flags_) noexcept
 {
     shortName = shortName_;
     description = description_;
@@ -48,7 +48,7 @@ void ApplicationCommandInfo::setInfo (const String& shortName_,
     flags = flags_;
 }
 
-void ApplicationCommandInfo::setActive (const bool b) throw()
+void ApplicationCommandInfo::setActive (const bool b) noexcept
 {
     if (b)
         flags &= ~isDisabled;
@@ -56,7 +56,7 @@ void ApplicationCommandInfo::setActive (const bool b) throw()
         flags |= isDisabled;
 }
 
-void ApplicationCommandInfo::setTicked (const bool b) throw()
+void ApplicationCommandInfo::setTicked (const bool b) noexcept
 {
     if (b)
         flags |= isTicked;
@@ -64,7 +64,7 @@ void ApplicationCommandInfo::setTicked (const bool b) throw()
         flags &= ~isTicked;
 }
 
-void ApplicationCommandInfo::addDefaultKeypress (const int keyCode, const ModifierKeys& modifiers) throw()
+void ApplicationCommandInfo::addDefaultKeypress (const int keyCode, const ModifierKeys& modifiers) noexcept
 {
     defaultKeypresses.add (KeyPress (keyCode, modifiers, 0));
 }

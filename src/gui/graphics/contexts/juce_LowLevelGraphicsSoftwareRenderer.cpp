@@ -70,12 +70,12 @@ public:
         }
     }
 
-    forcedinline void setEdgeTableYPos (const int y) throw()
+    forcedinline void setEdgeTableYPos (const int y) noexcept
     {
         linePixels = (PixelType*) data.getLinePointer (y);
     }
 
-    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const noexcept
     {
         if (replaceExisting)
             linePixels[x].set (sourceColour);
@@ -83,7 +83,7 @@ public:
             linePixels[x].blend (sourceColour, alphaLevel);
     }
 
-    forcedinline void handleEdgeTablePixelFull (const int x) const throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
     {
         if (replaceExisting)
             linePixels[x].set (sourceColour);
@@ -91,7 +91,7 @@ public:
             linePixels[x].blend (sourceColour);
     }
 
-    forcedinline void handleEdgeTableLine (const int x, const int width, const int alphaLevel) const throw()
+    forcedinline void handleEdgeTableLine (const int x, const int width, const int alphaLevel) const noexcept
     {
         PixelARGB p (sourceColour);
         p.multiplyAlpha (alphaLevel);
@@ -104,7 +104,7 @@ public:
             blendLine (dest, p, width);
     }
 
-    forcedinline void handleEdgeTableLineFull (const int x, const int width) const throw()
+    forcedinline void handleEdgeTableLineFull (const int x, const int width) const noexcept
     {
         PixelType* dest = linePixels + x;
 
@@ -121,7 +121,7 @@ private:
     PixelRGB filler [4];
     bool areRGBComponentsEqual;
 
-    inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const throw()
+    inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const noexcept
     {
         do
         {
@@ -130,7 +130,7 @@ private:
         } while (--width > 0);
     }
 
-    forcedinline void replaceLine (PixelRGB* dest, const PixelARGB& colour, int width) const throw()
+    forcedinline void replaceLine (PixelRGB* dest, const PixelARGB& colour, int width) const noexcept
     {
         if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
         {
@@ -168,12 +168,12 @@ private:
         }
     }
 
-    forcedinline void replaceLine (PixelAlpha* const dest, const PixelARGB& colour, int const width) const throw()
+    forcedinline void replaceLine (PixelAlpha* const dest, const PixelARGB& colour, int const width) const noexcept
     {
         memset (dest, colour.getAlpha(), width);
     }
 
-    forcedinline void replaceLine (PixelARGB* dest, const PixelARGB& colour, int width) const throw()
+    forcedinline void replaceLine (PixelARGB* dest, const PixelARGB& colour, int width) const noexcept
     {
         do
         {
@@ -233,7 +233,7 @@ public:
         }
     }
 
-    forcedinline void setY (const int y) throw()
+    forcedinline void setY (const int y) noexcept
     {
         if (vertical)
             linePix = lookupTable [jlimit (0, numEntries, (y * scale - start) >> (int) numScaleBits)];
@@ -241,7 +241,7 @@ public:
             start = roundToInt ((y - yTerm) * grad);
     }
 
-    inline const PixelARGB getPixel (const int x) const throw()
+    inline const PixelARGB getPixel (const int x) const noexcept
     {
         return vertical ? linePix
                         : lookupTable [jlimit (0, numEntries, (x * scale - start) >> (int) numScaleBits)];
@@ -277,13 +277,13 @@ public:
         jassert (roundToInt (std::sqrt (maxDist) * invScale) <= numEntries);
     }
 
-    forcedinline void setY (const int y) throw()
+    forcedinline void setY (const int y) noexcept
     {
         dy = y - gy1;
         dy *= dy;
     }
 
-    inline const PixelARGB getPixel (const int px) const throw()
+    inline const PixelARGB getPixel (const int px) const noexcept
     {
         double x = px - gx1;
         x *= x;
@@ -314,13 +314,13 @@ public:
         tM00 = inverseTransform.mat00;
     }
 
-    forcedinline void setY (const int y) throw()
+    forcedinline void setY (const int y) noexcept
     {
         lineYM01 = inverseTransform.mat01 * y + inverseTransform.mat02 - gx1;
         lineYM11 = inverseTransform.mat11 * y + inverseTransform.mat12 - gy1;
     }
 
-    inline const PixelARGB getPixel (const int px) const throw()
+    inline const PixelARGB getPixel (const int px) const noexcept
     {
         double x = px;
         const double y = tM10 * x + lineYM11;
@@ -353,23 +353,23 @@ public:
     {
     }
 
-    forcedinline void setEdgeTableYPos (const int y) throw()
+    forcedinline void setEdgeTableYPos (const int y) noexcept
     {
         linePixels = (PixelType*) destData.getLinePointer (y);
         GradientType::setY (y);
     }
 
-    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const noexcept
     {
         linePixels[x].blend (GradientType::getPixel (x), alphaLevel);
     }
 
-    forcedinline void handleEdgeTablePixelFull (const int x) const throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
     {
         linePixels[x].blend (GradientType::getPixel (x));
     }
 
-    void handleEdgeTableLine (int x, int width, const int alphaLevel) const throw()
+    void handleEdgeTableLine (int x, int width, const int alphaLevel) const noexcept
     {
         PixelType* dest = linePixels + x;
 
@@ -389,7 +389,7 @@ public:
         }
     }
 
-    void handleEdgeTableLineFull (int x, int width) const throw()
+    void handleEdgeTableLineFull (int x, int width) const noexcept
     {
         PixelType* dest = linePixels + x;
 
@@ -409,7 +409,7 @@ private:
 //==============================================================================
 namespace RenderingHelpers
 {
-    forcedinline int safeModulo (int n, const int divisor) throw()
+    forcedinline int safeModulo (int n, const int divisor) noexcept
     {
         jassert (divisor > 0);
         n %= divisor;
@@ -434,7 +434,7 @@ public:
     {
     }
 
-    forcedinline void setEdgeTableYPos (int y) throw()
+    forcedinline void setEdgeTableYPos (int y) noexcept
     {
         linePixels = (DestPixelType*) destData.getLinePointer (y);
 
@@ -448,19 +448,19 @@ public:
         sourceLineStart = (SrcPixelType*) srcData.getLinePointer (y);
     }
 
-    forcedinline void handleEdgeTablePixel (const int x, int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixel (const int x, int alphaLevel) const noexcept
     {
         alphaLevel = (alphaLevel * extraAlpha) >> 8;
 
         linePixels[x].blend (sourceLineStart [repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)], alphaLevel);
     }
 
-    forcedinline void handleEdgeTablePixelFull (const int x) const throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
     {
         linePixels[x].blend (sourceLineStart [repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)], extraAlpha);
     }
 
-    void handleEdgeTableLine (int x, int width, int alphaLevel) const throw()
+    void handleEdgeTableLine (int x, int width, int alphaLevel) const noexcept
     {
         DestPixelType* dest = linePixels + x;
         alphaLevel = (alphaLevel * extraAlpha) >> 8;
@@ -491,7 +491,7 @@ public:
         }
     }
 
-    void handleEdgeTableLineFull (int x, int width) const throw()
+    void handleEdgeTableLineFull (int x, int width) const noexcept
     {
         DestPixelType* dest = linePixels + x;
         x -= xOffset;
@@ -541,7 +541,7 @@ private:
     SrcPixelType* sourceLineStart;
 
     template <class PixelType1, class PixelType2>
-    static forcedinline void copyRow (PixelType1* dest, PixelType2* src, int width) throw()
+    static forcedinline void copyRow (PixelType1* dest, PixelType2* src, int width) noexcept
     {
         do
         {
@@ -549,7 +549,7 @@ private:
         } while (--width > 0);
     }
 
-    static forcedinline void copyRow (PixelRGB* dest, PixelRGB* src, int width) throw()
+    static forcedinline void copyRow (PixelRGB* dest, PixelRGB* src, int width) noexcept
     {
         memcpy (dest, src, width * sizeof (PixelRGB));
     }
@@ -581,13 +581,13 @@ public:
         scratchBuffer.malloc (scratchSize);
     }
 
-    forcedinline void setEdgeTableYPos (const int newY) throw()
+    forcedinline void setEdgeTableYPos (const int newY) noexcept
     {
         y = newY;
         linePixels = (DestPixelType*) destData.getLinePointer (newY);
     }
 
-    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) throw()
+    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) noexcept
     {
         SrcPixelType p;
         generate (&p, x, 1);
@@ -595,7 +595,7 @@ public:
         linePixels[x].blend (p, (alphaLevel * extraAlpha) >> 8);
     }
 
-    forcedinline void handleEdgeTablePixelFull (const int x) throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) noexcept
     {
         SrcPixelType p;
         generate (&p, x, 1);
@@ -603,7 +603,7 @@ public:
         linePixels[x].blend (p, extraAlpha);
     }
 
-    void handleEdgeTableLine (const int x, int width, int alphaLevel) throw()
+    void handleEdgeTableLine (const int x, int width, int alphaLevel) noexcept
     {
         if (width > scratchSize)
         {
@@ -634,7 +634,7 @@ public:
         }
     }
 
-    forcedinline void handleEdgeTableLineFull (const int x, int width) throw()
+    forcedinline void handleEdgeTableLineFull (const int x, int width) noexcept
     {
         handleEdgeTableLine (x, width, 255);
     }
@@ -658,7 +658,7 @@ public:
 private:
     //==============================================================================
     template <class PixelType>
-    void generate (PixelType* dest, const int x, int numPixels) throw()
+    void generate (PixelType* dest, const int x, int numPixels) noexcept
     {
         this->interpolator.setStartOfLine ((float) x, (float) y, numPixels);
 
@@ -737,7 +737,7 @@ private:
     }
 
     //==============================================================================
-    void render4PixelAverage (PixelARGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) throw()
+    void render4PixelAverage (PixelARGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) noexcept
     {
         uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
 
@@ -773,7 +773,7 @@ private:
                        (uint8) (c[PixelARGB::indexB] >> 16));
     }
 
-    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const int subPixelX) throw()
+    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const int subPixelX) noexcept
     {
         uint32 c[4] = { 128, 128, 128, 128 };
 
@@ -795,7 +795,7 @@ private:
                        (uint8) (c[PixelARGB::indexB] >> 8));
     }
 
-    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const int subPixelY) throw()
+    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const int subPixelY) noexcept
     {
         uint32 c[4] = { 128, 128, 128, 128 };
 
@@ -820,7 +820,7 @@ private:
     }
 
     //==============================================================================
-    void render4PixelAverage (PixelRGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) throw()
+    void render4PixelAverage (PixelRGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) noexcept
     {
         uint32 c[3] = { 256 * 128, 256 * 128, 256 * 128 };
 
@@ -852,7 +852,7 @@ private:
                        (uint8) (c[PixelRGB::indexB] >> 16));
     }
 
-    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const int subPixelX) throw()
+    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const int subPixelX) noexcept
     {
         uint32 c[3] = { 128, 128, 128 };
 
@@ -871,7 +871,7 @@ private:
                        (uint8) (c[PixelRGB::indexB] >> 8));
     }
 
-    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const int subPixelY) throw()
+    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const int subPixelY) noexcept
     {
         uint32 c[3] = { 128, 128, 128 };
 
@@ -893,7 +893,7 @@ private:
     }
 
     //==============================================================================
-    void render4PixelAverage (PixelAlpha* const dest, const uint8* src, const int subPixelX, const int subPixelY) throw()
+    void render4PixelAverage (PixelAlpha* const dest, const uint8* src, const int subPixelX, const int subPixelY) noexcept
     {
         uint32 c = 256 * 128;
         c += src[0] * ((256 - subPixelX) * (256 - subPixelY));
@@ -905,7 +905,7 @@ private:
         *((uint8*) dest) = (uint8) (c >> 16);
     }
 
-    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const int subPixelX) throw()
+    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const int subPixelX) noexcept
     {
         uint32 c = 128;
         c += src[0] * (256 - subPixelX);
@@ -913,7 +913,7 @@ private:
         *((uint8*) dest) = (uint8) (c >> 8);
     }
 
-    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const int subPixelY) throw()
+    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const int subPixelY) noexcept
     {
         uint32 c = 128;
         c += src[0] * (256 - subPixelY);
@@ -926,12 +926,12 @@ private:
     class TransformedImageSpanInterpolator
     {
     public:
-        TransformedImageSpanInterpolator (const AffineTransform& transform, const float pixelOffset_, const int pixelOffsetInt_) throw()
+        TransformedImageSpanInterpolator (const AffineTransform& transform, const float pixelOffset_, const int pixelOffsetInt_) noexcept
             : inverseTransform (transform.inverted()),
               pixelOffset (pixelOffset_), pixelOffsetInt (pixelOffsetInt_)
         {}
 
-        void setStartOfLine (float x, float y, const int numPixels) throw()
+        void setStartOfLine (float x, float y, const int numPixels) noexcept
         {
             jassert (numPixels > 0);
 
@@ -945,7 +945,7 @@ private:
             yBresenham.set ((int) (y1 * 256.0f), (int) (y * 256.0f), numPixels, pixelOffsetInt);
         }
 
-        void next (int& x, int& y) throw()
+        void next (int& x, int& y) noexcept
         {
             x = xBresenham.n;
             xBresenham.stepToNext();
@@ -957,9 +957,9 @@ private:
         class BresenhamInterpolator
         {
         public:
-            BresenhamInterpolator() throw() {}
+            BresenhamInterpolator() noexcept {}
 
-            void set (const int n1, const int n2, const int numSteps_, const int pixelOffsetInt) throw()
+            void set (const int n1, const int n2, const int numSteps_, const int pixelOffsetInt) noexcept
             {
                 numSteps = numSteps_;
                 step = (n2 - n1) / numSteps;
@@ -976,7 +976,7 @@ private:
                 modulo -= numSteps;
             }
 
-            forcedinline void stepToNext() throw()
+            forcedinline void stepToNext() noexcept
             {
                 modulo += remainder;
                 n += step;
@@ -1552,7 +1552,7 @@ public:
 
     //==============================================================================
     template <class Renderer>
-    void iterate (Renderer& r) const throw()
+    void iterate (Renderer& r) const noexcept
     {
         RectangleList::Iterator iter (clip);
 
@@ -1583,7 +1583,7 @@ private:
         }
 
         template <class Renderer>
-        void iterate (Renderer& r) const throw()
+        void iterate (Renderer& r) const noexcept
         {
             RectangleList::Iterator iter (clip);
 
@@ -1623,7 +1623,7 @@ private:
         }
 
         template <class Renderer>
-        void iterate (Renderer& r) const throw()
+        void iterate (Renderer& r) const noexcept
         {
             int left    = roundToInt (area.getX() * 256.0f);
             int top     = roundToInt (area.getY() * 256.0f);
@@ -1794,7 +1794,7 @@ public:
     {
     }
 
-    void setOrigin (const int x, const int y) throw()
+    void setOrigin (const int x, const int y) noexcept
     {
         if (isOnlyTranslated)
         {
@@ -1831,7 +1831,7 @@ public:
 
     bool clipToRectangle (const Rectangle<int>& r)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (isOnlyTranslated)
             {
@@ -1846,12 +1846,12 @@ public:
             }
         }
 
-        return clip != 0;
+        return clip != nullptr;
     }
 
     bool clipToRectangleList (const RectangleList& r)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (isOnlyTranslated)
             {
@@ -1866,12 +1866,12 @@ public:
             }
         }
 
-        return clip != 0;
+        return clip != nullptr;
     }
 
     bool excludeClipRectangle (const Rectangle<int>& r)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             cloneClipIfMultiplyReferenced();
 
@@ -1890,12 +1890,12 @@ public:
             }
         }
 
-        return clip != 0;
+        return clip != nullptr;
     }
 
     void clipToPath (const Path& p, const AffineTransform& transform)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             cloneClipIfMultiplyReferenced();
             clip = clip->clipToPath (p, getTransformWith (transform));
@@ -1904,7 +1904,7 @@ public:
 
     void clipToImageAlpha (const Image& sourceImage, const AffineTransform& t)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (sourceImage.hasAlphaChannel())
             {
@@ -1923,7 +1923,7 @@ public:
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (isOnlyTranslated)
                 return clip->clipRegionIntersects (r.translated (xOffset, yOffset));
@@ -1936,12 +1936,12 @@ public:
 
     const Rectangle<int> getUntransformedClipBounds() const
     {
-        return clip != 0 ? clip->getClipBounds() : Rectangle<int>();
+        return clip != nullptr ? clip->getClipBounds() : Rectangle<int>();
     }
 
     const Rectangle<int> getClipBounds() const
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (isOnlyTranslated)
                 return clip->getClipBounds().translated (-xOffset, -yOffset);
@@ -1989,7 +1989,7 @@ public:
     //==============================================================================
     void fillRect (const Rectangle<int>& r, const bool replaceContents)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (isOnlyTranslated)
             {
@@ -2018,7 +2018,7 @@ public:
 
     void fillRect (const Rectangle<float>& r)
     {
-        if (clip != 0)
+        if (clip != nullptr)
         {
             if (isOnlyTranslated)
             {
@@ -2047,7 +2047,7 @@ public:
 
     void fillPath (const Path& path, const AffineTransform& transform)
     {
-        if (clip != 0)
+        if (clip != nullptr)
             fillShape (new SoftwareRendererClasses::ClipRegion_EdgeTable (clip->getClipBounds(), path, getTransformWith (transform)), false);
     }
 
@@ -2055,7 +2055,7 @@ public:
     {
         jassert (isOnlyTranslated);
 
-        if (clip != 0)
+        if (clip != nullptr)
         {
             SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (edgeTable);
             SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);
@@ -2068,7 +2068,7 @@ public:
     {
         const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber, getTransformWith (transform)));
 
-        if (et != 0 && clip != 0)
+        if (et != nullptr && clip != nullptr)
         {
             SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (*et);
             SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);
@@ -2078,11 +2078,11 @@ public:
 
     void fillShape (SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill, const bool replaceContents)
     {
-        jassert (clip != 0);
+        jassert (clip != nullptr);
 
         shapeToFill = clip->applyClipTo (shapeToFill);
 
-        if (shapeToFill != 0)
+        if (shapeToFill != nullptr)
         {
             Image::BitmapData destData (image, Image::BitmapData::readWrite);
 
@@ -2138,7 +2138,7 @@ public:
                 tx = ((tx + 128) >> 8);
                 ty = ((ty + 128) >> 8);
 
-                if (tiledFillClipRegion != 0)
+                if (tiledFillClipRegion != nullptr)
                 {
                     tiledFillClipRegion->renderImageUntransformed (destData, srcData, alpha, tx, ty, true);
                 }
@@ -2147,7 +2147,7 @@ public:
                     SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (Rectangle<int> (tx, ty, sourceImage.getWidth(), sourceImage.getHeight()).getIntersection (image.getBounds())));
                     c = clip->applyClipTo (c);
 
-                    if (c != 0)
+                    if (c != nullptr)
                         c->renderImageUntransformed (destData, srcData, alpha, tx, ty, false);
                 }
 
@@ -2158,7 +2158,7 @@ public:
         if (transform.isSingularity())
             return;
 
-        if (tiledFillClipRegion != 0)
+        if (tiledFillClipRegion != nullptr)
         {
             tiledFillClipRegion->renderImageTransformed (destData, srcData, alpha, transform, betterQuality, true);
         }
@@ -2170,7 +2170,7 @@ public:
             SoftwareRendererClasses::ClipRegionBase::Ptr c (clip->clone());
             c = c->clipToPath (p, transform);
 
-            if (c != 0)
+            if (c != nullptr)
                 c->renderImageTransformed (destData, srcData, alpha, transform, betterQuality, false);
         }
     }
@@ -2307,7 +2307,7 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
 {
     SavedState* const top = stateStack.getLast();
 
-    if (top != 0)
+    if (top != nullptr)
     {
         currentState = top;
         stateStack.removeLast (1, false);
@@ -2393,7 +2393,7 @@ public:
         if (snapToIntegerCoordinate)
             x = std::floor (x + 0.5f);
 
-        if (edgeTable != 0)
+        if (edgeTable != nullptr)
             state.fillEdgeTable (*edgeTable, x, roundToInt (y));
     }
 
@@ -2444,7 +2444,7 @@ public:
     {
         ++accessCounter;
         int oldestCounter = std::numeric_limits<int>::max();
-        CachedGlyph* oldest = 0;
+        CachedGlyph* oldest = nullptr;
 
         for (int i = glyphs.size(); --i >= 0;)
         {
@@ -2474,7 +2474,7 @@ public:
             oldest = glyphs.getLast();
         }
 
-        jassert (oldest != 0);
+        jassert (oldest != nullptr);
         oldest->lastAccessCount = accessCounter;
         oldest->generate (font, glyphNumber);
         oldest->draw (state, x, y);

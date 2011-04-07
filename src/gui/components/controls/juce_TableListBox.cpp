@@ -49,7 +49,7 @@ public:
     {
         TableListBoxModel* const model = owner.getModel();
 
-        if (model != 0)
+        if (model != nullptr)
         {
             model->paintRowBackground (g, row, getWidth(), getHeight(), isSelected);
 
@@ -58,7 +58,7 @@ public:
 
             for (int i = 0; i < numColumns; ++i)
             {
-                if (columnComponents[i] == 0)
+                if (columnComponents[i] == nullptr)
                 {
                     const int columnId = header.getColumnIdOfIndex (i, true);
                     const Rectangle<int> columnRect (header.getColumnPosition(i).withHeight (getHeight()));
@@ -86,7 +86,7 @@ public:
 
         TableListBoxModel* const model = owner.getModel();
 
-        if (model != 0 && row < owner.getNumRows())
+        if (model != nullptr && row < owner.getNumRows())
         {
             const Identifier columnProperty ("_tableColumnId");
             const int numColumns = owner.getHeader().getNumColumns (true);
@@ -96,16 +96,16 @@ public:
                 const int columnId = owner.getHeader().getColumnIdOfIndex (i, true);
                 Component* comp = columnComponents[i];
 
-                if (comp != 0 && columnId != (int) comp->getProperties() [columnProperty])
+                if (comp != nullptr && columnId != (int) comp->getProperties() [columnProperty])
                 {
                     columnComponents.set (i, 0);
-                    comp = 0;
+                    comp = nullptr;
                 }
 
                 comp = model->refreshComponentForCell (row, columnId, isSelected, comp);
                 columnComponents.set (i, comp, false);
 
-                if (comp != 0)
+                if (comp != nullptr)
                 {
                     comp->getProperties().set (columnProperty, columnId);
 
@@ -132,7 +132,7 @@ public:
     {
         Component* const c = columnComponents.getUnchecked (index);
 
-        if (c != 0)
+        if (c != nullptr)
             c->setBounds (owner.getHeader().getColumnPosition (index)
                             .withY (0).withHeight (getHeight()));
     }
@@ -150,7 +150,7 @@ public:
 
                 const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-                if (columnId != 0 && owner.getModel() != 0)
+                if (columnId != 0 && owner.getModel() != nullptr)
                     owner.getModel()->cellClicked (row, columnId, e);
             }
             else
@@ -162,7 +162,7 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (isEnabled() && owner.getModel() != 0 && ! (e.mouseWasClicked() || isDragging))
+        if (isEnabled() && owner.getModel() != nullptr && ! (e.mouseWasClicked() || isDragging))
         {
             const SparseSet<int> selectedRows (owner.getSelectedRows());
 
@@ -187,7 +187,7 @@ public:
 
             const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-            if (columnId != 0 && owner.getModel() != 0)
+            if (columnId != 0 && owner.getModel() != nullptr)
                 owner.getModel()->cellClicked (row, columnId, e);
         }
     }
@@ -196,7 +196,7 @@ public:
     {
         const int columnId = owner.getHeader().getColumnIdAtX (e.x);
 
-        if (columnId != 0 && owner.getModel() != 0)
+        if (columnId != 0 && owner.getModel() != nullptr)
             owner.getModel()->cellDoubleClicked (row, columnId, e);
     }
 
@@ -204,7 +204,7 @@ public:
     {
         const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
-        if (columnId != 0 && owner.getModel() != 0)
+        if (columnId != 0 && owner.getModel() != nullptr)
             return owner.getModel()->getCellTooltip (row, columnId);
 
         return String::empty;
@@ -268,7 +268,8 @@ private:
 //==============================================================================
 TableListBox::TableListBox (const String& name, TableListBoxModel* const model_)
     : ListBox (name, 0),
-      header (0), model (model_),
+      header (nullptr),
+      model (model_),
       autoSizeOptionsShown (true)
 {
     ListBox::model = this;
@@ -278,7 +279,7 @@ TableListBox::TableListBox (const String& name, TableListBoxModel* const model_)
 
 TableListBox::~TableListBox()
 {
-    header = 0;
+    header = nullptr;
 }
 
 void TableListBox::setModel (TableListBoxModel* const newModel)
@@ -292,10 +293,10 @@ void TableListBox::setModel (TableListBoxModel* const newModel)
 
 void TableListBox::setHeader (TableHeaderComponent* newHeader)
 {
-    jassert (newHeader != 0); // you need to supply a real header for a table!
+    jassert (newHeader != nullptr); // you need to supply a real header for a table!
 
     Rectangle<int> newBounds (0, 0, 100, 28);
-    if (header != 0)
+    if (header != nullptr)
         newBounds = header->getBounds();
 
     header = newHeader;
@@ -319,7 +320,7 @@ void TableListBox::setHeaderHeight (const int newHeight)
 
 void TableListBox::autoSizeColumn (const int columnId)
 {
-    const int width = model != 0 ? model->getColumnAutoSizeWidth (columnId) : 0;
+    const int width = model != nullptr ? model->getColumnAutoSizeWidth (columnId) : 0;
 
     if (width > 0)
         header->setColumnWidth (columnId, width);
@@ -357,14 +358,14 @@ const Rectangle<int> TableListBox::getCellPosition (const int columnId, const in
 Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
 {
     TableListRowComp* const rowComp = dynamic_cast <TableListRowComp*> (getComponentForRowNumber (rowNumber));
-    return rowComp != 0 ? rowComp->findChildComponentForColumn (columnId) : 0;
+    return rowComp != nullptr ? rowComp->findChildComponentForColumn (columnId) : 0;
 }
 
 void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
 {
     ScrollBar* const scrollbar = getHorizontalScrollBar();
 
-    if (scrollbar != 0)
+    if (scrollbar != nullptr)
     {
         const Rectangle<int> pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
 
@@ -382,7 +383,7 @@ void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
 
 int TableListBox::getNumRows()
 {
-    return model != 0 ? model->getNumRows() : 0;
+    return model != nullptr ? model->getNumRows() : 0;
 }
 
 void TableListBox::paintListBoxItem (int, Graphics&, int, int, bool)
@@ -391,7 +392,7 @@ void TableListBox::paintListBoxItem (int, Graphics&, int, int, bool)
 
 Component* TableListBox::refreshComponentForRow (int rowNumber, bool isRowSelected_, Component* existingComponentToUpdate)
 {
-    if (existingComponentToUpdate == 0)
+    if (existingComponentToUpdate == nullptr)
         existingComponentToUpdate = new TableListRowComp (*this);
 
     static_cast <TableListRowComp*> (existingComponentToUpdate)->update (rowNumber, isRowSelected_);
@@ -401,31 +402,31 @@ Component* TableListBox::refreshComponentForRow (int rowNumber, bool isRowSelect
 
 void TableListBox::selectedRowsChanged (int row)
 {
-    if (model != 0)
+    if (model != nullptr)
         model->selectedRowsChanged (row);
 }
 
 void TableListBox::deleteKeyPressed (int row)
 {
-    if (model != 0)
+    if (model != nullptr)
         model->deleteKeyPressed (row);
 }
 
 void TableListBox::returnKeyPressed (int row)
 {
-    if (model != 0)
+    if (model != nullptr)
         model->returnKeyPressed (row);
 }
 
 void TableListBox::backgroundClicked()
 {
-    if (model != 0)
+    if (model != nullptr)
         model->backgroundClicked();
 }
 
 void TableListBox::listWasScrolled()
 {
-    if (model != 0)
+    if (model != nullptr)
         model->listWasScrolled();
 }
 
@@ -445,7 +446,7 @@ void TableListBox::tableColumnsResized (TableHeaderComponent*)
 
 void TableListBox::tableSortOrderChanged (TableHeaderComponent*)
 {
-    if (model != 0)
+    if (model != nullptr)
         model->sortOrderChanged (header->getSortColumnId(),
                                  header->isSortedForwards());
 }
@@ -472,7 +473,7 @@ void TableListBox::updateColumnComponents() const
     {
         TableListRowComp* const rowComp = dynamic_cast <TableListRowComp*> (getComponentForRowNumber (i));
 
-        if (rowComp != 0)
+        if (rowComp != nullptr)
             rowComp->resized();
     }
 }
@@ -494,7 +495,7 @@ const String TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {
     (void) existingComponentToUpdate;
-    jassert (existingComponentToUpdate == 0); // indicates a failure in the code the recycles the components
+    jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
     return 0;
 }
 

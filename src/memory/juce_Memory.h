@@ -146,11 +146,11 @@
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
-inline void zeromem (void* memory, size_t numBytes) throw()         { memset (memory, 0, numBytes); }
+inline void zeromem (void* memory, size_t numBytes) noexcept        { memset (memory, 0, numBytes); }
 
 /** Overwrites a structure or object with zeros. */
 template <typename Type>
-inline void zerostruct (Type& structure) throw()                    { memset (&structure, 0, sizeof (structure)); }
+inline void zerostruct (Type& structure) noexcept                   { memset (&structure, 0, sizeof (structure)); }
 
 /** Delete an object pointer, and sets the pointer to null.
 
@@ -158,14 +158,14 @@ inline void zerostruct (Type& structure) throw()                    { memset (&s
     or other automatic lieftime-management system rather than resorting to deleting raw pointers!
 */
 template <typename Type>
-inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = 0; }
+inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = nullptr; }
 
 /** A handy function which adds a number of bytes to any type of pointer and returns the result.
     This can be useful to avoid casting pointers to a char* and back when you want to move them by
     a specific number of bytes,
 */
 template <typename Type>
-inline Type* addBytesToPointer (Type* pointer, int bytes) throw()   { return (Type*) (((char*) pointer) + bytes); }
+inline Type* addBytesToPointer (Type* pointer, int bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
 
 
 #endif   // __JUCE_MEMORY_JUCEHEADER__

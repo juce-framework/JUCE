@@ -131,7 +131,7 @@ private:
 GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const owner_)
     : AudioProcessorEditor (owner_)
 {
-    jassert (owner_ != 0);
+    jassert (owner_ != nullptr);
     setOpaque (true);
 
     addAndMakeVisible (&panel);

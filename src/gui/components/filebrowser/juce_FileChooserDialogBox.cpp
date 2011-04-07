@@ -138,7 +138,7 @@ bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
     {
         Component* const previewComp = content->chooserComponent.getPreviewComponent();
 
-        if (previewComp != 0)
+        if (previewComp != nullptr)
             w = 400 + previewComp->getWidth();
         else
             w = 600;
@@ -163,7 +163,7 @@ void FileChooserDialogBox::centreWithDefaultSize (Component* componentToCentreAr
     Component* const previewComp = content->chooserComponent.getPreviewComponent();
 
     centreAroundComponent (componentToCentreAround,
-                           previewComp != 0 ? 400 + previewComp->getWidth() : 600,
+                           previewComp != nullptr ? 400 + previewComp->getWidth() : 600,
                            500);
 }
 
@@ -209,7 +209,7 @@ void FileChooserDialogBox::fileDoubleClicked (const File&)
 
 void FileChooserDialogBox::okToOverwriteFileCallback (int result, FileChooserDialogBox* box)
 {
-    if (result != 0 && box != 0)
+    if (result != 0 && box != nullptr)
         box->exitModalState (1);
 }
 
@@ -238,7 +238,7 @@ void FileChooserDialogBox::okButtonPressed()
 void FileChooserDialogBox::createNewFolderCallback (int result, FileChooserDialogBox* box,
                                                     Component::SafePointer<AlertWindow> alert)
 {
-    if (result != 0 && alert != 0 && box != 0)
+    if (result != 0 && alert != nullptr && box != nullptr)
     {
         alert->setVisible (false);
         box->createNewFolderConfirmed (alert->getTextEditorContents ("name"));

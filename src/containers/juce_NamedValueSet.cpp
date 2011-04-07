@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-NamedValueSet::NamedValue::NamedValue() throw()
+NamedValueSet::NamedValue::NamedValue() noexcept
 {
 }
 
@@ -53,13 +53,13 @@ NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (const NamedValu
     return *this;
 }
 
-bool NamedValueSet::NamedValue::operator== (const NamedValueSet::NamedValue& other) const throw()
+bool NamedValueSet::NamedValue::operator== (const NamedValueSet::NamedValue& other) const noexcept
 {
     return name == other.name && value == other.value;
 }
 
 //==============================================================================
-NamedValueSet::NamedValueSet() throw()
+NamedValueSet::NamedValueSet() noexcept
 {
 }
 
@@ -90,7 +90,7 @@ bool NamedValueSet::operator== (const NamedValueSet& other) const
     const NamedValue* i1 = values;
     const NamedValue* i2 = other.values;
 
-    while (i1 != 0 && i2 != 0)
+    while (i1 != nullptr && i2 != nullptr)
     {
         if (! (*i1 == *i2))
             return false;
@@ -107,14 +107,14 @@ bool NamedValueSet::operator!= (const NamedValueSet& other) const
     return ! operator== (other);
 }
 
-int NamedValueSet::size() const throw()
+int NamedValueSet::size() const noexcept
 {
     return values.size();
 }
 
 const var& NamedValueSet::operator[] (const Identifier& name) const
 {
-    for (NamedValue* i = values; i != 0; i = i->nextListItem)
+    for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)
             return i->value;
 
@@ -124,12 +124,12 @@ const var& NamedValueSet::operator[] (const Identifier& name) const
 const var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
 {
     const var* v = getVarPointer (name);
-    return v != 0 ? *v : defaultReturnValue;
+    return v != nullptr ? *v : defaultReturnValue;
 }
 
 var* NamedValueSet::getVarPointer (const Identifier& name) const
 {
-    for (NamedValue* i = values; i != 0; i = i->nextListItem)
+    for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)
             return &(i->value);
 
@@ -140,7 +140,7 @@ bool NamedValueSet::set (const Identifier& name, const var& newValue)
 {
     LinkedListPointer<NamedValue>* i = &values;
 
-    while (i->get() != 0)
+    while (i->get() != nullptr)
     {
         NamedValue* const v = i->get();
 
@@ -162,7 +162,7 @@ bool NamedValueSet::set (const Identifier& name, const var& newValue)
 
 bool NamedValueSet::contains (const Identifier& name) const
 {
-    return getVarPointer (name) != 0;
+    return getVarPointer (name) != nullptr;
 }
 
 bool NamedValueSet::remove (const Identifier& name)
@@ -173,7 +173,7 @@ bool NamedValueSet::remove (const Identifier& name)
     {
         NamedValue* const v = i->get();
 
-        if (v == 0)
+        if (v == nullptr)
             break;
 
         if (v->name == name)
@@ -191,14 +191,14 @@ bool NamedValueSet::remove (const Identifier& name)
 const Identifier NamedValueSet::getName (const int index) const
 {
     const NamedValue* const v = values[index];
-    jassert (v != 0);
+    jassert (v != nullptr);
     return v->name;
 }
 
 const var NamedValueSet::getValueAt (const int index) const
 {
     const NamedValue* const v = values[index];
-    jassert (v != 0);
+    jassert (v != nullptr);
     return v->value;
 }
 
@@ -215,7 +215,7 @@ void NamedValueSet::setFromXmlAttributes (const XmlElement& xml)
 
 void NamedValueSet::copyToXmlAttributes (XmlElement& xml) const
 {
-    for (NamedValue* i = values; i != 0; i = i->nextListItem)
+    for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
     {
         jassert (! i->value.isObject()); // DynamicObjects can't be stored as XML!
 

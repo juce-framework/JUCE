@@ -59,7 +59,7 @@ AsyncUpdater::AsyncUpdater()
     message = new AsyncUpdaterMessage (*this);
 }
 
-inline Atomic<int>& AsyncUpdater::getDeliveryFlag() const throw()
+inline Atomic<int>& AsyncUpdater::getDeliveryFlag() const noexcept
 {
     return static_cast <AsyncUpdaterMessage*> (message.getObject())->shouldDeliver;
 }
@@ -81,7 +81,7 @@ void AsyncUpdater::triggerAsyncUpdate()
         message->post();
 }
 
-void AsyncUpdater::cancelPendingUpdate() throw()
+void AsyncUpdater::cancelPendingUpdate() noexcept
 {
     getDeliveryFlag().set (0);
 }
@@ -95,7 +95,7 @@ void AsyncUpdater::handleUpdateNowIfNeeded()
         handleAsyncUpdate();
 }
 
-bool AsyncUpdater::isUpdatePending() const throw()
+bool AsyncUpdater::isUpdatePending() const noexcept
 {
     return getDeliveryFlag().value != 0;
 }

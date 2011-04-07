@@ -93,7 +93,7 @@ public:
 
         @see setFont
     */
-    const Font& getFont() const throw();
+    const Font& getFont() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the label.
@@ -122,7 +122,7 @@ public:
     void setJustificationType (const Justification& justification);
 
     /** Returns the type of justification, as set in setJustificationType(). */
-    const Justification getJustificationType() const throw()                    { return justification; }
+    const Justification getJustificationType() const noexcept                   { return justification; }
 
     /** Changes the gap that is left between the edge of the component and the text.
         By default there's a small gap left at the sides of the component to allow for
@@ -132,11 +132,11 @@ public:
 
     /** Returns the size of the horizontal gap being left around the text.
     */
-    int getHorizontalBorderSize() const throw()                                 { return horizontalBorderSize; }
+    int getHorizontalBorderSize() const noexcept                                { return horizontalBorderSize; }
 
     /** Returns the size of the vertical gap being left around the text.
     */
-    int getVerticalBorderSize() const throw()                                   { return verticalBorderSize; }
+    int getVerticalBorderSize() const noexcept                                  { return verticalBorderSize; }
 
     /** Makes this label "stick to" another component.
 
@@ -161,7 +161,7 @@ public:
         Returns false if the label is above the other component. This is only relevent if
         attachToComponent() has been called.
     */
-    bool isAttachedOnLeft() const throw()                                       { return leftOfOwnerComp; }
+    bool isAttachedOnLeft() const noexcept                                      { return leftOfOwnerComp; }
 
     /** Specifies the minimum amount that the font can be squashed horizantally before it starts
         using ellipsis.
@@ -170,7 +170,7 @@ public:
     */
     void setMinimumHorizontalScale (float newScale);
 
-    float getMinimumHorizontalScale() const throw()                             { return minimumHorizontalScale; }
+    float getMinimumHorizontalScale() const noexcept                            { return minimumHorizontalScale; }
 
     //==============================================================================
     /**
@@ -226,16 +226,16 @@ public:
                       bool lossOfFocusDiscardsChanges = false);
 
     /** Returns true if this option was set using setEditable(). */
-    bool isEditableOnSingleClick() const throw()                        { return editSingleClick; }
+    bool isEditableOnSingleClick() const noexcept                       { return editSingleClick; }
 
     /** Returns true if this option was set using setEditable(). */
-    bool isEditableOnDoubleClick() const throw()                        { return editDoubleClick; }
+    bool isEditableOnDoubleClick() const noexcept                       { return editDoubleClick; }
 
     /** Returns true if this option has been set in a call to setEditable(). */
-    bool doesLossOfFocusDiscardChanges() const throw()                  { return lossOfFocusDiscardsChanges; }
+    bool doesLossOfFocusDiscardChanges() const noexcept                 { return lossOfFocusDiscardsChanges; }
 
     /** Returns true if the user can edit this label's text. */
-    bool isEditable() const throw()                                     { return editSingleClick || editDoubleClick; }
+    bool isEditable() const noexcept                                    { return editSingleClick || editDoubleClick; }
 
     /** Makes the editor appear as if the label had been clicked by the user.
 
@@ -254,7 +254,7 @@ public:
     void hideEditor (bool discardCurrentEditorContents);
 
     /** Returns true if the editor is currently focused and active. */
-    bool isBeingEdited() const throw();
+    bool isBeingEdited() const noexcept;
 
 protected:
     //==============================================================================

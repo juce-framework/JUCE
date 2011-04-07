@@ -52,7 +52,7 @@ public:
 
     virtual NSApplicationTerminateReply shouldTerminate()
     {
-        if (JUCEApplication::getInstance() != 0)
+        if (JUCEApplication::getInstance() != nullptr)
         {
             JUCEApplication::getInstance()->systemRequestedQuit();
 
@@ -70,7 +70,7 @@ public:
 
     virtual BOOL openFile (NSString* filename)
     {
-        if (JUCEApplication::getInstance() != 0)
+        if (JUCEApplication::getInstance() != nullptr)
         {
             JUCEApplication::getInstance()->anotherInstanceStarted (quotedIfContainsSpaces (filename));
             return YES;
@@ -85,7 +85,7 @@ public:
         for (unsigned int i = 0; i < [filenames count]; ++i)
             files.add (quotedIfContainsSpaces ((NSString*) [filenames objectAtIndex: i]));
 
-        if (files.size() > 0 && JUCEApplication::getInstance() != 0)
+        if (files.size() > 0 && JUCEApplication::getInstance() != nullptr)
             JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (" "));
     }
 
@@ -190,7 +190,7 @@ using namespace JUCE_NAMESPACE;
     }
     else
     {
-        oldDelegate = 0;
+        oldDelegate = nil;
         [center addObserver: self selector: @selector (applicationDidResignActive:)
                        name: NSApplicationDidResignActiveNotification object: NSApp];
 
@@ -206,7 +206,7 @@ using namespace JUCE_NAMESPACE;
 
 - (void) dealloc
 {
-    if (oldDelegate != 0)
+    if (oldDelegate != nil)
         [NSApp setDelegate: oldDelegate];
 
     [[NSDistributedNotificationCenter defaultCenter] removeObserver: self
@@ -266,7 +266,7 @@ using namespace JUCE_NAMESPACE;
         AppDelegateRedirector::CallbackMessagePayload* pl
             = (AppDelegateRedirector::CallbackMessagePayload*) [((NSData*) info) bytes];
 
-        if (pl != 0)
+        if (pl != nullptr)
             redirector->performCallback (pl);
     }
     else
@@ -289,7 +289,7 @@ using namespace JUCE_NAMESPACE;
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
 
-static JuceAppDelegate* juceAppDelegate = 0;
+static JuceAppDelegate* juceAppDelegate = nil;
 
 void MessageManager::runDispatchLoop()
 {
@@ -336,7 +336,7 @@ namespace
             return false;
 
         NSWindow* const w = [e window];
-        if (w == 0 || [w worksWhenModal])
+        if (w == nil || [w worksWhenModal])
             return false;
 
         bool isKey = false, isInputAttempt = false;
@@ -360,7 +360,7 @@ namespace
             case NSRightMouseUp:
             case NSOtherMouseUp:
             case NSOtherMouseDragged:
-                if (Desktop::getInstance().getDraggingMouseSource(0) != 0)
+                if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
                     return false;
                 break;
 
@@ -393,7 +393,7 @@ namespace
                 {
                     NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
 
-                    if ((nsViewPeer == 0 || ! nsViewPeer->isSharedWindow)
+                    if ((nsViewPeer == nullptr || ! nsViewPeer->isSharedWindow)
                             ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
                             : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
                         return false;
@@ -407,7 +407,7 @@ namespace
                 [NSApp activateIgnoringOtherApps: YES];
 
             Component* const modal = Component::getCurrentlyModalComponent (0);
-            if (modal != 0)
+            if (modal != nullptr)
                 modal->inputAttemptWhenModal();
         }
 
@@ -433,7 +433,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
                                            inMode: NSDefaultRunLoopMode
                                           dequeue: YES];
 
-        if (e != 0 && ! isEventBlockedByModalComps (e))
+        if (e != nil && ! isEventBlockedByModalComps (e))
             [NSApp sendEvent: e];
 
         if (Time::getMillisecondCounter() >= endTime)
@@ -447,7 +447,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    if (juceAppDelegate == 0)
+    if (juceAppDelegate == nil)
         juceAppDelegate = [[JuceAppDelegate alloc] init];
 
     // This launches a dummy thread, which forces Cocoa to initialise NSThreads
@@ -460,12 +460,12 @@ void MessageManager::doPlatformSpecificInitialisation()
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    if (juceAppDelegate != 0)
+    if (juceAppDelegate != nil)
     {
         [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
         [[NSNotificationCenter defaultCenter] removeObserver: juceAppDelegate];
         [juceAppDelegate release];
-        juceAppDelegate = 0;
+        juceAppDelegate = nil;
     }
 }
 

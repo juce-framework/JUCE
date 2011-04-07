@@ -59,14 +59,14 @@ public:
     /**
         Creates a ReadWriteLock object.
     */
-    ReadWriteLock() throw();
+    ReadWriteLock() noexcept;
 
     /** Destructor.
 
         If the object is deleted whilst locked, any subsequent behaviour
         is unpredictable.
     */
-    ~ReadWriteLock() throw();
+    ~ReadWriteLock() noexcept;
 
     //==============================================================================
     /** Locks this object for reading.
@@ -77,7 +77,7 @@ public:
 
         @see exitRead, ScopedReadLock
     */
-    void enterRead() const throw();
+    void enterRead() const noexcept;
 
     /** Releases the read-lock.
 
@@ -89,7 +89,7 @@ public:
 
         @see enterRead, ScopedReadLock
     */
-    void exitRead() const throw();
+    void exitRead() const noexcept;
 
     //==============================================================================
     /** Locks this object for writing.
@@ -99,7 +99,7 @@ public:
 
         @see exitWrite, ScopedWriteLock
     */
-    void enterWrite() const throw();
+    void enterWrite() const noexcept;
 
     /** Tries to lock this object for writing.
 
@@ -108,7 +108,7 @@ public:
 
         @see enterWrite
     */
-    bool tryEnterWrite() const throw();
+    bool tryEnterWrite() const noexcept;
 
     /** Releases the write-lock.
 
@@ -120,7 +120,7 @@ public:
 
         @see enterWrite, ScopedWriteLock
     */
-    void exitWrite() const throw();
+    void exitWrite() const noexcept;
 
 
 private:

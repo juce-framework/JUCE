@@ -202,7 +202,7 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
 template <typename Type>
 inline Type jlimit (const Type lowerLimit,
                     const Type upperLimit,
-                    const Type valueToConstrain) throw()
+                    const Type valueToConstrain) noexcept
 {
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
@@ -217,7 +217,7 @@ inline Type jlimit (const Type lowerLimit,
     @endcode
 */
 template <typename Type>
-inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) throw()
+inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
 {
     jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
     return Type() <= valueToTest && valueToTest < upperLimit;
@@ -225,7 +225,7 @@ inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) throw()
 
 #if ! JUCE_VC6
 template <>
-inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) throw()
+inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
@@ -238,7 +238,7 @@ inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) thr
     @endcode
 */
 template <typename Type>
-inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) throw()
+inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noexcept
 {
     jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
     return Type() <= valueToTest && valueToTest <= upperLimit;
@@ -246,7 +246,7 @@ inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) thro
 
 #if ! JUCE_VC6
 template <>
-inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) throw()
+inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
@@ -288,7 +288,7 @@ inline void swapVariables (Type& variable1, Type& variable2)
 /** Using juce_hypot is easier than dealing with the different types of hypot function
     that are provided by the various platforms and compilers. */
 template <typename Type>
-inline Type juce_hypot (Type a, Type b) throw()
+inline Type juce_hypot (Type a, Type b) noexcept
 {
   #if JUCE_WINDOWS
     return static_cast <Type> (_hypot (a, b));
@@ -298,14 +298,14 @@ inline Type juce_hypot (Type a, Type b) throw()
 }
 
 /** 64-bit abs function. */
-inline int64 abs64 (const int64 n) throw()
+inline int64 abs64 (const int64 n) noexcept
 {
     return (n >= 0) ? n : -n;
 }
 
 /** This templated negate function will negate pointers as well as integers */
 template <typename Type>
-inline Type juce_negate (Type n) throw()
+inline Type juce_negate (Type n) noexcept
 {
     return sizeof (Type) == 1 ? (Type) -(signed char) n
         : (sizeof (Type) == 2 ? (Type) -(short) n
@@ -315,7 +315,7 @@ inline Type juce_negate (Type n) throw()
 
 /** This templated negate function will negate pointers as well as integers */
 template <typename Type>
-inline Type* juce_negate (Type* n) throw()
+inline Type* juce_negate (Type* n) noexcept
 {
     return (Type*) -(pointer_sized_int) n;
 }
@@ -363,7 +363,7 @@ inline bool juce_isfinite (FloatingPointType value)
     even numbers will be rounded up or down differently.
 */
 template <typename FloatType>
-inline int roundToInt (const FloatType value) throw()
+inline int roundToInt (const FloatType value) noexcept
 {
     union { int asInt[2]; double asDouble; } n;
     n.asDouble = ((double) value) + 6755399441055744.0;
@@ -380,7 +380,7 @@ inline int roundToInt (const FloatType value) throw()
     This is a slightly slower and slightly more accurate version of roundDoubleToInt(). It works
     fine for values above zero, but negative numbers are rounded the wrong way.
 */
-inline int roundToIntAccurate (const double value) throw()
+inline int roundToIntAccurate (const double value) noexcept
 {
     return roundToInt (value + 1.5e-8);
 }
@@ -396,7 +396,7 @@ inline int roundToIntAccurate (const double value) throw()
     even numbers will be rounded up or down differently. For a more accurate conversion,
     see roundDoubleToIntAccurate().
 */
-inline int roundDoubleToInt (const double value) throw()
+inline int roundDoubleToInt (const double value) noexcept
 {
     return roundToInt (value);
 }
@@ -411,7 +411,7 @@ inline int roundDoubleToInt (const double value) throw()
     rounding values whose floating point component is exactly 0.5, odd numbers and
     even numbers will be rounded up or down differently.
 */
-inline int roundFloatToInt (const float value) throw()
+inline int roundFloatToInt (const float value) noexcept
 {
     return roundToInt (value);
 }

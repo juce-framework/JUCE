@@ -79,31 +79,31 @@ public:
     BigInteger& operator= (const BigInteger& other);
 
     /** Swaps the internal contents of this with another object. */
-    void swapWith (BigInteger& other) throw();
+    void swapWith (BigInteger& other) noexcept;
 
     //==============================================================================
     /** Returns the value of a specified bit in the number.
         If the index is out-of-range, the result will be false.
     */
-    bool operator[] (int bit) const throw();
+    bool operator[] (int bit) const noexcept;
 
     /** Returns true if no bits are set. */
-    bool isZero() const throw();
+    bool isZero() const noexcept;
 
     /** Returns true if the value is 1. */
-    bool isOne() const throw();
+    bool isOne() const noexcept;
 
     /** Attempts to get the lowest bits of the value as an integer.
         If the value is bigger than the integer limits, this will return only the lower bits.
     */
-    int toInteger() const throw();
+    int toInteger() const noexcept;
 
     //==============================================================================
     /** Resets the value to 0. */
     void clear();
 
     /** Clears a particular bit in the number. */
-    void clearBit (int bitNumber) throw();
+    void clearBit (int bitNumber) noexcept;
 
     /** Sets a specified bit to 1. */
     void setBit (int bitNumber);
@@ -136,7 +136,7 @@ public:
         Asking for more than 32 bits isn't allowed (obviously) - for that, use
         getBitRange().
     */
-    int getBitRangeAsInt (int startBit, int numBits) const throw();
+    int getBitRangeAsInt (int startBit, int numBits) const noexcept;
 
     /** Sets a range of bits to an integer value.
 
@@ -153,26 +153,26 @@ public:
     void shiftBits (int howManyBitsLeft, int startBit);
 
     /** Returns the total number of set bits in the value. */
-    int countNumberOfSetBits() const throw();
+    int countNumberOfSetBits() const noexcept;
 
     /** Looks for the index of the next set bit after a given starting point.
 
         This searches from startIndex (inclusive) upwards for the first set bit,
         and returns its index. If no set bits are found, it returns -1.
     */
-    int findNextSetBit (int startIndex = 0) const throw();
+    int findNextSetBit (int startIndex = 0) const noexcept;
 
     /** Looks for the index of the next clear bit after a given starting point.
 
         This searches from startIndex (inclusive) upwards for the first clear bit,
         and returns its index.
     */
-    int findNextClearBit (int startIndex = 0) const throw();
+    int findNextClearBit (int startIndex = 0) const noexcept;
 
     /** Returns the index of the highest set bit in the number.
         If the value is zero, this will return -1.
     */
-    int getHighestBit() const throw();
+    int getHighestBit() const noexcept;
 
     //==============================================================================
     // All the standard arithmetic ops...
@@ -204,12 +204,12 @@ public:
     const BigInteger operator<< (int numBitsToShift) const;
     const BigInteger operator>> (int numBitsToShift) const;
 
-    bool operator== (const BigInteger& other) const throw();
-    bool operator!= (const BigInteger& other) const throw();
-    bool operator<  (const BigInteger& other) const throw();
-    bool operator<= (const BigInteger& other) const throw();
-    bool operator>  (const BigInteger& other) const throw();
-    bool operator>= (const BigInteger& other) const throw();
+    bool operator== (const BigInteger& other) const noexcept;
+    bool operator!= (const BigInteger& other) const noexcept;
+    bool operator<  (const BigInteger& other) const noexcept;
+    bool operator<= (const BigInteger& other) const noexcept;
+    bool operator>  (const BigInteger& other) const noexcept;
+    bool operator>= (const BigInteger& other) const noexcept;
 
     //==============================================================================
     /** Does a signed comparison of two BigIntegers.
@@ -219,7 +219,7 @@ public:
             - < 0 if this number is smaller than the other
             - > 0 if this number is bigger than the other
     */
-    int compare (const BigInteger& other) const throw();
+    int compare (const BigInteger& other) const noexcept;
 
     /** Compares the magnitudes of two BigIntegers, ignoring their signs.
 
@@ -228,7 +228,7 @@ public:
             - < 0 if this number is smaller than the other
             - > 0 if this number is bigger than the other
     */
-    int compareAbsolute (const BigInteger& other) const throw();
+    int compareAbsolute (const BigInteger& other) const noexcept;
 
     /** Divides this value by another one and returns the remainder.
 
@@ -257,17 +257,17 @@ public:
     /** Returns true if the value is less than zero.
         @see setNegative, negate
     */
-    bool isNegative() const throw();
+    bool isNegative() const noexcept;
 
     /** Changes the sign of the number to be positive or negative.
         @see isNegative, negate
     */
-    void setNegative (bool shouldBeNegative) throw();
+    void setNegative (bool shouldBeNegative) noexcept;
 
     /** Inverts the sign of the number.
         @see isNegative, setNegative
     */
-    void negate() throw();
+    void negate() noexcept;
 
     //==============================================================================
     /** Converts the number to a string.
@@ -313,8 +313,8 @@ private:
     void ensureSize (int numVals);
     static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
 
-    static inline int bitToIndex (const int bit) throw()        { return bit >> 5; }
-    static inline uint32 bitToMask (const int bit) throw()      { return 1 << (bit & 31); }
+    static inline int bitToIndex (const int bit) noexcept       { return bit >> 5; }
+    static inline uint32 bitToMask (const int bit) noexcept     { return 1 << (bit & 31); }
 
     JUCE_LEAK_DETECTOR (BigInteger);
 };

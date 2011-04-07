@@ -92,13 +92,13 @@ public:
 
 
     /** Returns a list of all keys in the array. */
-    const StringArray& getAllKeys() const throw()           { return keys; }
+    const StringArray& getAllKeys() const noexcept          { return keys; }
 
     /** Returns a list of all values in the array. */
-    const StringArray& getAllValues() const throw()         { return values; }
+    const StringArray& getAllValues() const noexcept        { return values; }
 
     /** Returns the number of strings in the array */
-    inline int size() const throw()                         { return keys.size(); };
+    inline int size() const noexcept                        { return keys.size(); };
 
 
     //==============================================================================

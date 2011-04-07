@@ -59,7 +59,7 @@ public:
     explicit MACAddress (const uint8 bytes[6]);
 
     /** Returns a pointer to the 6 bytes that make up this address. */
-    const uint8* getBytes() const throw()         { return asBytes; }
+    const uint8* getBytes() const noexcept        { return asBytes; }
 
     /** Returns a dash-separated string in the form "11-22-33-44-55-66" */
     const String toString() const;
@@ -69,13 +69,13 @@ public:
         This uses a little-endian arrangement, with the first byte of the address being
         stored in the least-significant byte of the result value.
     */
-    int64 toInt64() const throw();
+    int64 toInt64() const noexcept;
 
     /** Returns true if this address is null (00-00-00-00-00-00). */
-    bool isNull() const throw();
+    bool isNull() const noexcept;
 
-    bool operator== (const MACAddress& other) const throw();
-    bool operator!= (const MACAddress& other) const throw();
+    bool operator== (const MACAddress& other) const noexcept;
+    bool operator!= (const MACAddress& other) const noexcept;
 
     //==============================================================================
 private:

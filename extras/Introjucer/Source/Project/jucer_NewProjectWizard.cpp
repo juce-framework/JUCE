@@ -490,5 +490,5 @@ Project* NewProjectWizard::runNewProjectWizard (Component* ownerWindow)
         }
     }
 
-    return wizard != 0 ? wizard->runWizard (ownerWindow) : 0;
+    return wizard != nullptr ? wizard->runWizard (ownerWindow) : 0;
 }

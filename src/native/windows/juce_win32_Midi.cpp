@@ -249,7 +249,7 @@ int MidiInput::getDefaultDeviceIndex()
 
 MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const callback)
 {
-    if (callback == 0)
+    if (callback == nullptr)
         return 0;
 
     UINT deviceId = MIDI_MAPPER;

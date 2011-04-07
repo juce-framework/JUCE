@@ -65,7 +65,7 @@ Graphics::Graphics (const Image& imageToDrawOnto)
 {
 }
 
-Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
+Graphics::Graphics (LowLevelGraphicsContext* const internalContext) noexcept
     : context (internalContext),
       saveStatePending (false)
 {

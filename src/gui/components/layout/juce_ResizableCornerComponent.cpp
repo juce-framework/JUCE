@@ -58,7 +58,7 @@ void ResizableCornerComponent::paint (Graphics& g)
 
 void ResizableCornerComponent::mouseDown (const MouseEvent&)
 {
-    if (component == 0)
+    if (component == nullptr)
     {
         jassertfalse; // You've deleted the component that this resizer is supposed to be controlling!
         return;
@@ -66,13 +66,13 @@ void ResizableCornerComponent::mouseDown (const MouseEvent&)
 
     originalBounds = component->getBounds();
 
-    if (constrainer != 0)
+    if (constrainer != nullptr)
         constrainer->resizeStart();
 }
 
 void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
 {
-    if (component == 0)
+    if (component == nullptr)
     {
         jassertfalse; // You've deleted the component that this resizer is supposed to be controlling!
         return;
@@ -81,7 +81,7 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
     Rectangle<int> r (originalBounds.withSize (originalBounds.getWidth() + e.getDistanceFromDragStartX(),
                                                originalBounds.getHeight() + e.getDistanceFromDragStartY()));
 
-    if (constrainer != 0)
+    if (constrainer != nullptr)
     {
         constrainer->setBoundsForComponent (component, r, false, false, true, true);
     }
@@ -89,7 +89,7 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
     {
         Component::Positioner* const positioner = component->getPositioner();
 
-        if (positioner != 0)
+        if (positioner != nullptr)
             positioner->applyNewBounds (r);
         else
             component->setBounds (r);
@@ -98,7 +98,7 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
 
 void ResizableCornerComponent::mouseUp (const MouseEvent&)
 {
-    if (constrainer != 0)
+    if (constrainer != nullptr)
         constrainer->resizeStart();
 }
 

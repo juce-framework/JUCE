@@ -94,13 +94,13 @@ bool FileChooser::showDialog (const bool selectsDirectories,
     results.clear();
 
     // the preview component needs to be the right size before you pass it in here..
-    jassert (previewComponent == 0 || (previewComponent->getWidth() > 10
-                                        && previewComponent->getHeight() > 10));
+    jassert (previewComponent == nullptr || (previewComponent->getWidth() > 10
+                                               && previewComponent->getHeight() > 10));
 
 #if JUCE_WINDOWS
     if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
 #elif JUCE_MAC
-    if (useNativeDialogBox && (previewComponent == 0))
+    if (useNativeDialogBox && (previewComponent == nullptr))
 #else
     if (false)
 #endif
@@ -148,7 +148,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
         }
     }
 
-    if (previouslyFocused != 0)
+    if (previouslyFocused != nullptr)
         previouslyFocused->grabKeyboardFocus();
 
     return results.size() > 0;

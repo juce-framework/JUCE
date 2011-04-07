@@ -57,7 +57,7 @@ public:
     /** Assigns an NSView to this peer.
 
         The view will be retained and released by this component for as long as
-        it is needed. To remove the current view, just call setView (0).
+        it is needed. To remove the current view, just call setView (nullptr).
 
         Note: a void* is used here to avoid including the cocoa headers as
         part of the juce.h, but the method expects an NSView*.

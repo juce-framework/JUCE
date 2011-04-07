@@ -55,10 +55,10 @@ public:
 
     //==============================================================================
     /** Encrypts a pair of 32-bit integers. */
-    void encrypt (uint32& data1, uint32& data2) const throw();
+    void encrypt (uint32& data1, uint32& data2) const noexcept;
 
     /** Decrypts a pair of 32-bit integers. */
-    void decrypt (uint32& data1, uint32& data2) const throw();
+    void decrypt (uint32& data1, uint32& data2) const noexcept;
 
 
 private:
@@ -66,7 +66,7 @@ private:
     uint32 p[18];
     HeapBlock <uint32> s[4];
 
-    uint32 F (uint32 x) const throw();
+    uint32 F (uint32 x) const noexcept;
 
     JUCE_LEAK_DETECTOR (BlowFish);
 };

@@ -108,7 +108,7 @@ public:
 
         @see setMidiChannel
     */
-    int getMidiChannel() const throw()                              { return midiChannel; }
+    int getMidiChannel() const noexcept                             { return midiChannel; }
 
     /** Sets a mask to indicate which incoming midi channels should be represented by
         key movements.
@@ -128,20 +128,20 @@ public:
 
         This is the value that was set with setMidiChannelsToDisplay().
     */
-    int getMidiChannelsToDisplay() const throw()                    { return midiInChannelMask; }
+    int getMidiChannelsToDisplay() const noexcept                   { return midiInChannelMask; }
 
     //==============================================================================
     /** Changes the width used to draw the white keys. */
     void setKeyWidth (float widthInPixels);
 
     /** Returns the width that was set by setKeyWidth(). */
-    float getKeyWidth() const throw()                               { return keyWidth; }
+    float getKeyWidth() const noexcept                              { return keyWidth; }
 
     /** Changes the keyboard's current direction. */
     void setOrientation (Orientation newOrientation);
 
     /** Returns the keyboard's current direction. */
-    const Orientation getOrientation() const throw()                { return orientation; }
+    const Orientation getOrientation() const noexcept               { return orientation; }
 
     /** Sets the range of midi notes that the keyboard will be limited to.
 
@@ -157,13 +157,13 @@ public:
 
         @see setAvailableRange
     */
-    int getRangeStart() const throw()                               { return rangeStart; }
+    int getRangeStart() const noexcept                              { return rangeStart; }
 
     /** Returns the last note in the available range.
 
         @see setAvailableRange
     */
-    int getRangeEnd() const throw()                                 { return rangeEnd; }
+    int getRangeEnd() const noexcept                                { return rangeEnd; }
 
     /** If the keyboard extends beyond the size of the component, this will scroll
         it to show the given key at the start.
@@ -177,13 +177,13 @@ public:
 
         @see setLowestVisibleKey
     */
-    int getLowestVisibleKey() const throw()                         { return firstKey; }
+    int getLowestVisibleKey() const noexcept                        { return firstKey; }
 
     /** Returns the length of the black notes.
 
         This will be their vertical or horizontal length, depending on the keyboard's orientation.
     */
-    int getBlackNoteLength() const throw()                          { return blackNoteLength; }
+    int getBlackNoteLength() const noexcept                         { return blackNoteLength; }
 
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
@@ -268,7 +268,7 @@ public:
     /** This returns the value set by setOctaveForMiddleC().
         @see setOctaveForMiddleC
     */
-    int getOctaveForMiddleC() const throw()             { return octaveNumForMiddleC; }
+    int getOctaveForMiddleC() const noexcept            { return octaveNumForMiddleC; }
 
     //==============================================================================
     /** @internal */

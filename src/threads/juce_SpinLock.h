@@ -45,8 +45,8 @@
 class JUCE_API  SpinLock
 {
 public:
-    inline SpinLock() throw() {}
-    inline ~SpinLock() throw() {}
+    inline SpinLock() noexcept {}
+    inline ~SpinLock() noexcept {}
 
     /** Acquires the lock.
         This will block until the lock has been successfully acquired by this thread.
@@ -57,13 +57,13 @@ public:
         It's strongly recommended that you never call this method directly - instead use the
         ScopedLockType class to manage the locking using an RAII pattern instead.
     */
-    void enter() const throw();
+    void enter() const noexcept;
 
     /** Attempts to acquire the lock, returning true if this was successful. */
-    bool tryEnter() const throw();
+    bool tryEnter() const noexcept;
 
     /** Releases the lock. */
-    inline void exit() const throw()
+    inline void exit() const noexcept
     {
         jassert (lock.value == 1); // Agh! Releasing a lock that isn't currently held!
         lock = 0;

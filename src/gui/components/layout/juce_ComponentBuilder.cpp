@@ -63,7 +63,7 @@ namespace ComponentBuilderHelpers
         {
             Component* const child = findComponentWithID (c->getChildComponent (i), compId);
 
-            if (child != 0)
+            if (child != nullptr)
                 return child;
         }
 
@@ -74,7 +74,7 @@ namespace ComponentBuilderHelpers
                                    const ValueTree& state, Component* parent)
     {
         Component* const c = type.addNewComponentFromState (state, parent);
-        jassert (c != 0 && c->getParentComponent() == parent);
+        jassert (c != nullptr && c->getParentComponent() == parent);
         c->setComponentID (getStateId (state));
         return c;
     }
@@ -83,12 +83,12 @@ namespace ComponentBuilderHelpers
     {
         Component* topLevelComp = builder.getManagedComponent();
 
-        if (topLevelComp != 0)
+        if (topLevelComp != nullptr)
         {
             ComponentBuilder::TypeHandler* const type = builder.getHandlerForState (state);
             const String uid (getStateId (state));
 
-            if (type == 0 || uid.isEmpty())
+            if (type == nullptr || uid.isEmpty())
             {
                 // ..handle the case where a child of the actual state node has changed.
                 if (state.getParent().isValid())
@@ -98,7 +98,7 @@ namespace ComponentBuilderHelpers
             {
                 Component* const changedComp = findComponentWithID (topLevelComp, uid);
 
-                if (changedComp != 0)
+                if (changedComp != nullptr)
                     type->updateComponentFromState (changedComp, state);
             }
         }
@@ -109,7 +109,7 @@ namespace ComponentBuilderHelpers
 const Identifier ComponentBuilder::idProperty ("id");
 
 ComponentBuilder::ComponentBuilder (const ValueTree& state_)
-    : state (state_), imageProvider (0)
+    : state (state_), imageProvider (nullptr)
 {
     state.addListener (this);
 }
@@ -127,7 +127,7 @@ ComponentBuilder::~ComponentBuilder()
 
 Component* ComponentBuilder::getManagedComponent()
 {
-    if (component == 0)
+    if (component == nullptr)
     {
         component = createComponent();
 
@@ -144,18 +144,18 @@ Component* ComponentBuilder::createComponent()
     jassert (types.size() > 0);  // You need to register all the necessary types before you can load a component!
 
     TypeHandler* const type = getHandlerForState (state);
-    jassert (type != 0); // trying to create a component from an unknown type of ValueTree
+    jassert (type != nullptr); // trying to create a component from an unknown type of ValueTree
 
-    return type != 0 ? ComponentBuilderHelpers::createNewComponent (*type, state, 0) : 0;
+    return type != nullptr ? ComponentBuilderHelpers::createNewComponent (*type, state, 0) : 0;
 }
 
 void ComponentBuilder::registerTypeHandler (ComponentBuilder::TypeHandler* const type)
 {
-    jassert (type != 0);
+    jassert (type != nullptr);
 
     // Don't try to move your types around! Once a type has been added to a builder, the
     // builder owns it, and you should leave it alone!
-    jassert (type->builder == 0);
+    jassert (type->builder == nullptr);
 
     types.add (type);
     type->builder = this;
@@ -176,22 +176,22 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandlerForState (const Value
     return 0;
 }
 
-int ComponentBuilder::getNumHandlers() const throw()
+int ComponentBuilder::getNumHandlers() const noexcept
 {
     return types.size();
 }
 
-ComponentBuilder::TypeHandler* ComponentBuilder::getHandler (const int index) const throw()
+ComponentBuilder::TypeHandler* ComponentBuilder::getHandler (const int index) const noexcept
 {
     return types [index];
 }
 
-void ComponentBuilder::setImageProvider (ImageProvider* newImageProvider) throw()
+void ComponentBuilder::setImageProvider (ImageProvider* newImageProvider) noexcept
 {
     imageProvider = newImageProvider;
 }
 
-ComponentBuilder::ImageProvider* ComponentBuilder::getImageProvider() const throw()
+ComponentBuilder::ImageProvider* ComponentBuilder::getImageProvider() const noexcept
 {
     return imageProvider;
 }
@@ -223,7 +223,8 @@ void ComponentBuilder::valueTreeParentChanged (ValueTree& tree)
 
 //==============================================================================
 ComponentBuilder::TypeHandler::TypeHandler (const Identifier& valueTreeType_)
-   : builder (0), valueTreeType (valueTreeType_)
+   : builder (nullptr),
+     valueTreeType (valueTreeType_)
 {
 }
 
@@ -231,10 +232,10 @@ ComponentBuilder::TypeHandler::~TypeHandler()
 {
 }
 
-ComponentBuilder* ComponentBuilder::TypeHandler::getBuilder() const throw()
+ComponentBuilder* ComponentBuilder::TypeHandler::getBuilder() const noexcept
 {
     // A type handler needs to be registered with a ComponentBuilder before using it!
-    jassert (builder != 0);
+    jassert (builder != nullptr);
     return builder;
 }
 
@@ -261,13 +262,13 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
             const ValueTree childState (children.getChild (i));
 
             ComponentBuilder::TypeHandler* const type = getHandlerForState (childState);
-            jassert (type != 0);
+            jassert (type != nullptr);
 
-            if (type != 0)
+            if (type != nullptr)
             {
                 Component* c = findComponentWithID (existingComponents, getStateId (childState));
 
-                if (c == 0)
+                if (c == nullptr)
                     c = createNewComponent (*type, childState, &parent);
 
                 componentsInOrder.add (c);

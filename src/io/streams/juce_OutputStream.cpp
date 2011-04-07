@@ -300,7 +300,7 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileTo
 {
     const ScopedPointer<FileInputStream> in (fileToRead.createInputStream());
 
-    if (in != 0)
+    if (in != nullptr)
         stream.writeFromInputStream (*in, -1);
 
     return stream;

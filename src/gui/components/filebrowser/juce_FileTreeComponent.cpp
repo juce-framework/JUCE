@@ -52,14 +52,13 @@ public:
           owner (owner_),
           parentContentsList (parentContentsList_),
           indexInContentsList (indexInContentsList_),
-          subContentsList (0),
+          subContentsList (nullptr),
           canDeleteSubContentsList (false),
-          thread (thread_),
-          icon (0)
+          thread (thread_)
     {
         DirectoryContentsList::FileInfo fileInfo;
 
-        if (parentContentsList_ != 0
+        if (parentContentsList_ != nullptr
              && parentContentsList_->getFileInfo (indexInContentsList_, fileInfo))
         {
             fileSize = File::descriptionOfSizeInBytes (fileInfo.fileSize);
@@ -99,9 +98,9 @@ public:
 
             if (isDirectory)
             {
-                if (subContentsList == 0)
+                if (subContentsList == nullptr)
                 {
-                    jassert (parentContentsList != 0);
+                    jassert (parentContentsList != nullptr);
 
                     DirectoryContentsList* const l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
                     l->setDirectory (file, true, true);
@@ -110,14 +109,14 @@ public:
                     canDeleteSubContentsList = true;
                 }
 
-                changeListenerCallback (0);
+                changeListenerCallback (nullptr);
             }
         }
     }
 
     void setSubContentsList (DirectoryContentsList* newList)
     {
-        jassert (subContentsList == 0);
+        jassert (subContentsList == nullptr);
         subContentsList = newList;
         newList->addChangeListener (this);
     }
@@ -126,7 +125,7 @@ public:
     {
         clearSubItems();
 
-        if (isOpen() && subContentsList != 0)
+        if (isOpen() && subContentsList != nullptr)
         {
             for (int i = 0; i < subContentsList->getNumFiles(); ++i)
             {
@@ -246,8 +245,8 @@ const File FileTreeComponent::getSelectedFile (const int index) const
 {
     const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index));
 
-    return item != 0 ? item->file
-                     : File::nonexistent;
+    return item != nullptr ? item->file
+                           : File::nonexistent;
 }
 
 void FileTreeComponent::deselectAllFiles()

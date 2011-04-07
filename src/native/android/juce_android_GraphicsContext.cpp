@@ -260,7 +260,7 @@ public:
         }
 
         SavedState* const top = stateStack.getLast();
-        currentState->clipToImage (top != 0 ? top->canvas.get() : originalCanvas,
+        currentState->clipToImage (top != nullptr ? top->canvas.get() : originalCanvas,
                                    temporaryCanvas, temporaryLayerBitmap, maskImage,
                                    bounds.getX(), bounds.getY());
     }
@@ -715,7 +715,7 @@ private:
     ScopedPointer <SavedState> currentState;
     OwnedArray <SavedState> stateStack;
 
-    GlobalRef& getCanvas() const throw()      { return currentState->canvas; }
+    GlobalRef& getCanvas() const noexcept     { return currentState->canvas; }
 
     jobject getCurrentPaint() const     { return currentState->getPaint(); }
     jobject getImagePaint() const       { return currentState->getImagePaint(); }
@@ -775,13 +775,13 @@ private:
         return LocalRef<jobject> (region);
     }
 
-    static int colourToInt (const Colour& col) throw()
+    static int colourToInt (const Colour& col) noexcept
     {
         return col.getARGB();
     }
 
     template <class PixelType>
-    static void copyPixels (jint* const dest, const PixelType* src, const int width, const int pixelStride) throw()
+    static void copyPixels (jint* const dest, const PixelType* src, const int width, const int pixelStride) noexcept
     {
         for (int x = 0; x < width; ++x)
         {

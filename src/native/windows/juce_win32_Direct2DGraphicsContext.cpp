@@ -39,7 +39,7 @@ public:
         D2D1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED, d2dFactory.resetAndGetPointerAddress());
         DWriteCreateFactory (DWRITE_FACTORY_TYPE_SHARED, __uuidof (IDWriteFactory), (IUnknown**) directWriteFactory.resetAndGetPointerAddress());
 
-        if (directWriteFactory != 0)
+        if (directWriteFactory != nullptr)
             directWriteFactory->GetSystemFontCollection (systemFonts.resetAndGetPointerAddress());
     }
 
@@ -64,7 +64,7 @@ class Direct2DLowLevelGraphicsContext   : public LowLevelGraphicsContext
 public:
     Direct2DLowLevelGraphicsContext (HWND hwnd_)
         : hwnd (hwnd_),
-          currentState (0)
+          currentState (nullptr)
     {
         RECT windowRect;
         GetClientRect (hwnd, &windowRect);
@@ -225,7 +225,7 @@ public:
         currentState->createBrush();
         ComSmartPtr <ID2D1Geometry> geometry (pathToPathGeometry (p, transform, currentState->origin));
 
-        if (renderingTarget != 0)
+        if (renderingTarget != nullptr)
             renderingTarget->FillGeometry (geometry, currentState->currentBrush);
     }
 
@@ -250,7 +250,7 @@ public:
         {
             ComSmartPtr <ID2D1Bitmap> tempBitmap;
             renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, tempBitmap.resetAndGetPointerAddress());
-            if (tempBitmap != 0)
+            if (tempBitmap != nullptr)
                 renderingTarget->DrawBitmap (tempBitmap);
         }
 
@@ -356,7 +356,7 @@ public:
             clipsComplex (false), shouldClipComplex (false),
             clipsBitmap (false), shouldClipBitmap (false)
         {
-            if (owner.currentState != 0)
+            if (owner.currentState != nullptr)
             {
                 // xxx seems like a very slow way to create one of these, and this is a performance
                 // bottleneck.. Can the same internal objects be shared by multiple state objects, maybe using copy-on-write?
@@ -614,7 +614,7 @@ public:
         {
             fillType.setOpacity (newOpacity);
 
-            if (currentBrush != 0)
+            if (currentBrush != nullptr)
                 currentBrush->SetOpacity (newOpacity);
         }
 
@@ -807,7 +807,7 @@ private:
 
     static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList& clipRegion)
     {
-        ID2D1PathGeometry* p = 0;
+        ID2D1PathGeometry* p = nullptr;
         SharedD2DFactory::getInstance()->d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr <ID2D1GeometrySink> sink;
@@ -885,7 +885,7 @@ private:
 
     static ID2D1PathGeometry* pathToPathGeometry (const Path& path, const AffineTransform& transform, const Point<int>& point)
     {
-        ID2D1PathGeometry* p = 0;
+        ID2D1PathGeometry* p = nullptr;
         SharedD2DFactory::getInstance()->d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr <ID2D1GeometrySink> sink;

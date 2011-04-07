@@ -312,7 +312,7 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData,
 {
     const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
 
-    if (in != 0)
+    if (in != nullptr)
     {
         in->readIntoMemoryBlock (destData);
         return true;
@@ -325,7 +325,7 @@ const String URL::readEntireTextStream (const bool usePostCommand) const
 {
     const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
 
-    if (in != 0)
+    if (in != nullptr)
         return in->readEntireStreamAsString();
 
     return String::empty;

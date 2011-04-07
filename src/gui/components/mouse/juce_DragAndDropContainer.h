@@ -92,7 +92,7 @@ public:
                         Component* sourceComponent,
                         const Image& dragImage = Image::null,
                         bool allowDraggingToOtherJuceWindows = false,
-                        const Point<int>* imageOffsetFromMouse = 0);
+                        const Point<int>* imageOffsetFromMouse = nullptr);
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;

@@ -74,9 +74,9 @@ public:
         This value is specified either in the constructor or by a subclass changing the
         preferredHeight member variable.
     */
-    int getPreferredHeight() const throw()                  { return preferredHeight; }
+    int getPreferredHeight() const noexcept                 { return preferredHeight; }
 
-    void setPreferredHeight (int newHeight) throw()         { preferredHeight = newHeight; }
+    void setPreferredHeight (int newHeight) noexcept        { preferredHeight = newHeight; }
 
     //==============================================================================
     /** Updates the property component if the item it refers to has changed.

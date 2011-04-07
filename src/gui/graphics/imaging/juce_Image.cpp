@@ -185,18 +185,18 @@ const Image Image::null;
 
 LowLevelGraphicsContext* Image::createLowLevelContext() const
 {
-    return image == 0 ? 0 : image->createLowLevelContext();
+    return image == nullptr ? nullptr : image->createLowLevelContext();
 }
 
 void Image::duplicateIfShared()
 {
-    if (image != 0 && image->getReferenceCount() > 1)
+    if (image != nullptr && image->getReferenceCount() > 1)
         image = image->clone();
 }
 
 const Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const
 {
-    if (image == 0 || (image->width == newWidth && image->height == newHeight))
+    if (image == nullptr || (image->width == newWidth && image->height == newHeight))
         return *this;
 
     Image newImage (image->format, newWidth, newHeight, hasAlphaChannel(), image->getType());
@@ -210,7 +210,7 @@ const Image Image::rescaled (const int newWidth, const int newHeight, const Grap
 
 const Image Image::convertedToFormat (PixelFormat newFormat) const
 {
-    if (image == 0 || newFormat == image->format)
+    if (image == nullptr || newFormat == image->format)
         return *this;
 
     const int w = image->width, h = image->height;
@@ -254,7 +254,7 @@ const Image Image::convertedToFormat (PixelFormat newFormat) const
 
 NamedValueSet* Image::getProperties() const
 {
-    return image == 0 ? 0 : &(image->userData);
+    return image == nullptr ? nullptr : &(image->userData);
 }
 
 //==============================================================================
@@ -263,11 +263,11 @@ Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int
       height (h)
 {
     // The BitmapData class must be given a valid image, and a valid rectangle within it!
-    jassert (image.image != 0);
+    jassert (image.image != nullptr);
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 
     image.image->initialiseBitmapData (*this, x, y, mode);
-    jassert (data != 0 && pixelStride > 0 && lineStride != 0);
+    jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
 Image::BitmapData::BitmapData (const Image& image, const int x, const int y, const int w, const int h)
@@ -275,11 +275,11 @@ Image::BitmapData::BitmapData (const Image& image, const int x, const int y, con
       height (h)
 {
     // The BitmapData class must be given a valid image, and a valid rectangle within it!
-    jassert (image.image != 0);
+    jassert (image.image != nullptr);
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 
     image.image->initialiseBitmapData (*this, x, y, readOnly);
-    jassert (data != 0 && pixelStride > 0 && lineStride != 0);
+    jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
 Image::BitmapData::BitmapData (const Image& image, BitmapData::ReadWriteMode mode)
@@ -287,17 +287,17 @@ Image::BitmapData::BitmapData (const Image& image, BitmapData::ReadWriteMode mod
       height (image.getHeight())
 {
     // The BitmapData class must be given a valid image!
-    jassert (image.image != 0);
+    jassert (image.image != nullptr);
 
     image.image->initialiseBitmapData (*this, 0, 0, mode);
-    jassert (data != 0 && pixelStride > 0 && lineStride != 0);
+    jassert (data != nullptr && pixelStride > 0 && lineStride != 0);
 }
 
 Image::BitmapData::~BitmapData()
 {
 }
 
-const Colour Image::BitmapData::getPixelColour (const int x, const int y) const throw()
+const Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexcept
 {
     jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 
@@ -314,7 +314,7 @@ const Colour Image::BitmapData::getPixelColour (const int x, const int y) const 
     return Colour();
 }
 
-void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& colour) const throw()
+void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& colour) const noexcept
 {
     jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 

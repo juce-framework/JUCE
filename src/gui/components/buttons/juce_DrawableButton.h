@@ -98,13 +98,13 @@ public:
                                 with a reduced opacity
     */
     void setImages (const Drawable* normalImage,
-                    const Drawable* overImage = 0,
-                    const Drawable* downImage = 0,
-                    const Drawable* disabledImage = 0,
-                    const Drawable* normalImageOn = 0,
-                    const Drawable* overImageOn = 0,
-                    const Drawable* downImageOn = 0,
-                    const Drawable* disabledImageOn = 0);
+                    const Drawable* overImage = nullptr,
+                    const Drawable* downImage = nullptr,
+                    const Drawable* disabledImage = nullptr,
+                    const Drawable* normalImageOn = nullptr,
+                    const Drawable* overImageOn = nullptr,
+                    const Drawable* downImageOn = nullptr,
+                    const Drawable* disabledImageOn = nullptr);
 
 
     //==============================================================================
@@ -134,7 +134,7 @@ public:
 
         @see setBackgroundColour
     */
-    const Colour& getBackgroundColour() const throw();
+    const Colour& getBackgroundColour() const noexcept;
 
     /** Gives the button an optional amount of space around the edge of the drawable.
 
@@ -148,10 +148,10 @@ public:
 
     //==============================================================================
     /** Returns the image that the button is currently displaying. */
-    Drawable* getCurrentImage() const throw();
-    Drawable* getNormalImage() const throw();
-    Drawable* getOverImage() const throw();
-    Drawable* getDownImage() const throw();
+    Drawable* getCurrentImage() const noexcept;
+    Drawable* getNormalImage() const noexcept;
+    Drawable* getOverImage() const noexcept;
+    Drawable* getDownImage() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the link.

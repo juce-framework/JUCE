@@ -53,7 +53,7 @@ Button::Button (const String& name)
     text (name),
     buttonPressTime (0),
     lastRepeatTime (0),
-    commandManagerToUse (0),
+    commandManagerToUse (nullptr),
     autoRepeatDelay (-1),
     autoRepeatSpeed (0),
     autoRepeatMinimumDelay (-1),
@@ -77,10 +77,10 @@ Button::~Button()
 {
     isOn.removeListener (this);
 
-    if (commandManagerToUse != 0)
+    if (commandManagerToUse != nullptr)
         commandManagerToUse->removeListener (this);
 
-    repeatTimer = 0;
+    repeatTimer = nullptr;
     clearShortcuts();
 }
 
@@ -102,7 +102,7 @@ void Button::setTooltip (const String& newTooltip)
 
 const String Button::getTooltip()
 {
-    if (generateTooltip && commandManagerToUse != 0 && commandID != 0)
+    if (generateTooltip && commandManagerToUse != nullptr && commandID != 0)
     {
         String tt (commandManagerToUse->getDescriptionOfCommand (commandID));
 
@@ -153,7 +153,7 @@ void Button::setToggleState (const bool shouldBeOn,
         {
             sendClickMessage (ModifierKeys());
 
-            if (deletionWatcher == 0)
+            if (deletionWatcher == nullptr)
                 return;
         }
 
@@ -161,7 +161,7 @@ void Button::setToggleState (const bool shouldBeOn,
         {
             turnOffOtherButtonsInGroup (sendChangeNotification);
 
-            if (deletionWatcher == 0)
+            if (deletionWatcher == nullptr)
                 return;
         }
 
@@ -169,7 +169,7 @@ void Button::setToggleState (const bool shouldBeOn,
     }
 }
 
-void Button::setClickingTogglesState (const bool shouldToggle) throw()
+void Button::setClickingTogglesState (const bool shouldToggle) noexcept
 {
     clickTogglesState = shouldToggle;
 
@@ -177,10 +177,10 @@ void Button::setClickingTogglesState (const bool shouldToggle) throw()
     // up to be a command invoker. Instead, your command handler must flip the state of whatever
     // it is that this button represents, and the button will update its state to reflect this
     // in the applicationCommandListChanged() method.
-    jassert (commandManagerToUse == 0 || ! clickTogglesState);
+    jassert (commandManagerToUse == nullptr || ! clickTogglesState);
 }
 
-bool Button::getClickingTogglesState() const throw()
+bool Button::getClickingTogglesState() const noexcept
 {
     return clickTogglesState;
 }
@@ -206,7 +206,7 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
 {
     Component* const p = getParentComponent();
 
-    if (p != 0 && radioGroupId != 0)
+    if (p != nullptr && radioGroupId != 0)
     {
         WeakReference<Component> deletionWatcher (this);
 
@@ -218,11 +218,11 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
             {
                 Button* const b = dynamic_cast <Button*> (c);
 
-                if (b != 0 && b->getRadioGroupId() == radioGroupId)
+                if (b != nullptr && b->getRadioGroupId() == radioGroupId)
                 {
                     b->setToggleState (false, sendChangeNotification);
 
-                    if (deletionWatcher == 0)
+                    if (deletionWatcher == nullptr)
                         return;
                 }
             }
@@ -275,12 +275,12 @@ void Button::setState (const ButtonState newState)
     }
 }
 
-bool Button::isDown() const throw()
+bool Button::isDown() const noexcept
 {
     return buttonState == buttonDown;
 }
 
-bool Button::isOver() const throw()
+bool Button::isOver() const noexcept
 {
     return buttonState != buttonNormal;
 }
@@ -289,13 +289,13 @@ void Button::buttonStateChanged()
 {
 }
 
-uint32 Button::getMillisecondsSinceButtonDown() const throw()
+uint32 Button::getMillisecondsSinceButtonDown() const noexcept
 {
     const uint32 now = Time::getApproximateMillisecondCounter();
     return now > buttonPressTime ? now - buttonPressTime : 0;
 }
 
-void Button::setTriggeredOnMouseDown (const bool isTriggeredOnMouseDown) throw()
+void Button::setTriggeredOnMouseDown (const bool isTriggeredOnMouseDown) noexcept
 {
     triggerOnMouseDown = isTriggeredOnMouseDown;
 }
@@ -369,7 +369,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
 {
     Component::BailOutChecker checker (this);
 
-    if (commandManagerToUse != 0 && commandID != 0)
+    if (commandManagerToUse != nullptr && commandID != 0)
     {
         ApplicationCommandTarget::InvocationInfo info (commandID);
         info.invocationMethod = ApplicationCommandTarget::InvocationInfo::fromButton;
@@ -473,12 +473,12 @@ void Button::parentHierarchyChanged()
 
     if (newKeySource != keySource.get())
     {
-        if (keySource != 0)
+        if (keySource != nullptr)
             keySource->removeKeyListener (this);
 
         keySource = newKeySource;
 
-        if (keySource != 0)
+        if (keySource != nullptr)
             keySource->addKeyListener (this);
     }
 }
@@ -493,22 +493,22 @@ void Button::setCommandToTrigger (ApplicationCommandManager* const commandManage
 
     if (commandManagerToUse != commandManagerToUse_)
     {
-        if (commandManagerToUse != 0)
+        if (commandManagerToUse != nullptr)
             commandManagerToUse->removeListener (this);
 
         commandManagerToUse = commandManagerToUse_;
 
-        if (commandManagerToUse != 0)
+        if (commandManagerToUse != nullptr)
             commandManagerToUse->addListener (this);
 
         // if you've got clickTogglesState turned on, you shouldn't also connect the button
         // up to be a command invoker. Instead, your command handler must flip the state of whatever
         // it is that this button represents, and the button will update its state to reflect this
         // in the applicationCommandListChanged() method.
-        jassert (commandManagerToUse == 0 || ! clickTogglesState);
+        jassert (commandManagerToUse == nullptr || ! clickTogglesState);
     }
 
-    if (commandManagerToUse != 0)
+    if (commandManagerToUse != nullptr)
         applicationCommandListChanged();
     else
         setEnabled (true);
@@ -525,15 +525,15 @@ void Button::applicationCommandInvoked (const ApplicationCommandTarget::Invocati
 
 void Button::applicationCommandListChanged()
 {
-    if (commandManagerToUse != 0)
+    if (commandManagerToUse != nullptr)
     {
         ApplicationCommandInfo info (0);
 
         ApplicationCommandTarget* const target = commandManagerToUse->getTargetForCommand (commandID, info);
 
-        setEnabled (target != 0 && (info.flags & ApplicationCommandInfo::isDisabled) == 0);
+        setEnabled (target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0);
 
-        if (target != 0)
+        if (target != nullptr)
             setToggleState ((info.flags & ApplicationCommandInfo::isTicked) != 0, false);
     }
 }
@@ -622,7 +622,7 @@ bool Button::keyPressed (const KeyPress& key)
 //==============================================================================
 void Button::setRepeatSpeed (const int initialDelayMillisecs,
                              const int repeatMillisecs,
-                             const int minimumDelayInMillisecs) throw()
+                             const int minimumDelayInMillisecs) noexcept
 {
     autoRepeatDelay = initialDelayMillisecs;
     autoRepeatSpeed = repeatMillisecs;
@@ -670,7 +670,7 @@ void Button::repeatTimerCallback()
 
 Button::RepeatTimer& Button::getRepeatTimer()
 {
-    if (repeatTimer == 0)
+    if (repeatTimer == nullptr)
         repeatTimer = new RepeatTimer (*this);
 
     return *repeatTimer;

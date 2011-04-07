@@ -96,7 +96,7 @@ private:
 
                 BufferingAudioSource* const b = sources[i];
 
-                if (b != 0 && b->readNextBufferChunk())
+                if (b != nullptr && b->readNextBufferChunk())
                     busy = true;
             }
 
@@ -131,7 +131,7 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
       nextPlayPos (0),
       wasSourceLooping (false)
 {
-    jassert (source_ != 0);
+    jassert (source_ != nullptr);
 
     jassert (numberOfSamplesToBuffer_ > 1024); // not much point using this class if you're
                                                //  not using a larger buffer..
@@ -141,7 +141,7 @@ BufferingAudioSource::~BufferingAudioSource()
 {
     SharedBufferingAudioSourceThread* const thread = SharedBufferingAudioSourceThread::getInstanceWithoutCreating();
 
-    if (thread != 0)
+    if (thread != nullptr)
         thread->removeSource (this);
 
     if (deleteSourceWhenDeleted)
@@ -175,7 +175,7 @@ void BufferingAudioSource::releaseResources()
 {
     SharedBufferingAudioSourceThread* const thread = SharedBufferingAudioSourceThread::getInstanceWithoutCreating();
 
-    if (thread != 0)
+    if (thread != nullptr)
         thread->removeSource (this);
 
     buffer.setSize (2, 0);
@@ -242,7 +242,7 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
     SharedBufferingAudioSourceThread* const thread = SharedBufferingAudioSourceThread::getInstanceWithoutCreating();
 
-    if (thread != 0)
+    if (thread != nullptr)
         thread->notify();
 }
 
@@ -261,7 +261,7 @@ void BufferingAudioSource::setNextReadPosition (int64 newPosition)
 
     SharedBufferingAudioSourceThread* const thread = SharedBufferingAudioSourceThread::getInstanceWithoutCreating();
 
-    if (thread != 0)
+    if (thread != nullptr)
         thread->notify();
 }
 

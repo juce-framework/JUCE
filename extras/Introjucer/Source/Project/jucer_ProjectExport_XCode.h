@@ -247,8 +247,8 @@ private:
             const int w = image.getWidth();
             const int h = image.getHeight();
 
-            const char* type = 0;
-            const char* maskType = 0;
+            const char* type = nullptr;
+            const char* maskType = nullptr;
 
             if (w == h)
             {
@@ -258,7 +258,7 @@ private:
                 if (w == 128) { type = "it32"; maskType = "t8mk"; }
             }
 
-            if (type != 0)
+            if (type != nullptr)
             {
                 data.write (type, 4);
                 data.writeIntBigEndian (8 + 4 * w * h);
@@ -975,7 +975,7 @@ private:
         v->setProperty ("buildConfigurations", "(" + indentList (configIDs, ",") + " )", 0);
         v->setProperty ("defaultConfigurationIsVisible", (int) 0, 0);
 
-        if (configsToUse[0] != 0)
+        if (configsToUse[0] != nullptr)
             v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty (Ids::name), 0);
 
         misc.add (v);

@@ -57,9 +57,9 @@ ToolbarItemPalette::~ToolbarItemPalette()
 void ToolbarItemPalette::addComponent (const int itemId, const int index)
 {
     ToolbarItemComponent* const tc = Toolbar::createItem (factory, itemId);
-    jassert (tc != 0);
+    jassert (tc != nullptr);
 
-    if (tc != 0)
+    if (tc != nullptr)
     {
         items.insert (index, tc);
         viewport.getViewedComponent()->addAndMakeVisible (tc, index);

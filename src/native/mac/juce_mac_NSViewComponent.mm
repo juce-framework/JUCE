@@ -35,7 +35,7 @@ public:
     NSViewComponentInternal (NSView* const view_, Component& owner_)
         : ComponentMovementWatcher (&owner_),
           owner (owner_),
-          currentPeer (0),
+          currentPeer (nullptr),
           view (view_)
     {
         [view_ retain];
@@ -67,7 +67,7 @@ public:
     {
         Component* const topComp = owner.getTopLevelComponent();
 
-        if (topComp->getPeer() != 0)
+        if (topComp->getPeer() != nullptr)
         {
             const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
 
@@ -90,7 +90,7 @@ public:
 
             currentPeer = peer;
 
-            if (peer != 0)
+            if (peer != nullptr)
             {
                 [peer->view addSubview: view];
                 componentMovedOrResized (false, false);
@@ -135,21 +135,21 @@ void NSViewComponent::setView (void* view)
 {
     if (view != getView())
     {
-        if (view != 0)
+        if (view != nullptr)
             info = new NSViewComponentInternal ((NSView*) view, *this);
         else
-            info = 0;
+            info = nullptr;
     }
 }
 
 void* NSViewComponent::getView() const
 {
-    return info == 0 ? 0 : info->view;
+    return info == nullptr ? nullptr : info->view;
 }
 
 void NSViewComponent::resizeToFitView()
 {
-    if (info != 0)
+    if (info != nullptr)
         setBounds (info->getViewBounds());
 }
 

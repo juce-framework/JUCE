@@ -68,7 +68,7 @@ RelativePointPath::~RelativePointPath()
 {
 }
 
-bool RelativePointPath::operator== (const RelativePointPath& other) const throw()
+bool RelativePointPath::operator== (const RelativePointPath& other) const noexcept
 {
     if (elements.size() != other.elements.size()
          || usesNonZeroWinding != other.usesNonZeroWinding
@@ -97,12 +97,12 @@ bool RelativePointPath::operator== (const RelativePointPath& other) const throw(
     return true;
 }
 
-bool RelativePointPath::operator!= (const RelativePointPath& other) const throw()
+bool RelativePointPath::operator!= (const RelativePointPath& other) const noexcept
 {
     return ! operator== (other);
 }
 
-void RelativePointPath::swapWith (RelativePointPath& other) throw()
+void RelativePointPath::swapWith (RelativePointPath& other) noexcept
 {
     elements.swapWithArray (other.elements);
     std::swap (usesNonZeroWinding, other.usesNonZeroWinding);
@@ -122,7 +122,7 @@ bool RelativePointPath::containsAnyDynamicPoints() const
 
 void RelativePointPath::addElement (ElementBase* newElement)
 {
-    if (newElement != 0)
+    if (newElement != nullptr)
     {
         elements.add (newElement);
         containsDynamicPoints = containsDynamicPoints || newElement->isDynamic();

@@ -69,7 +69,7 @@ public:
     bool isLooping() const                                      { return looping; }
 
     /** Returns the reader that's being used. */
-    AudioFormatReader* getAudioFormatReader() const throw()     { return reader; }
+    AudioFormatReader* getAudioFormatReader() const noexcept    { return reader; }
 
     //==============================================================================
     /** Implementation of the AudioSource method. */

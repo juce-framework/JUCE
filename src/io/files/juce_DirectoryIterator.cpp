@@ -63,12 +63,12 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
 {
     hasBeenAdvanced = true;
 
-    if (subIterator != 0)
+    if (subIterator != nullptr)
     {
         if (subIterator->next (isDirResult, isHiddenResult, fileSize, modTime, creationTime, isReadOnly))
             return true;
 
-        subIterator = 0;
+        subIterator = nullptr;
     }
 
     String filename;
@@ -104,12 +104,12 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
             if (matches)
             {
                 currentFile = fileFound;
-                if (isHiddenResult != 0)     *isHiddenResult = isHidden;
-                if (isDirResult != 0)        *isDirResult = isDirectory;
+                if (isHiddenResult != nullptr)     *isHiddenResult = isHidden;
+                if (isDirResult != nullptr)        *isDirResult = isDirectory;
 
                 return true;
             }
-            else if (subIterator != 0)
+            else if (subIterator != nullptr)
             {
                 return next();
             }
@@ -121,7 +121,7 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
 
 const File DirectoryIterator::getFile() const
 {
-    if (subIterator != 0 && subIterator->hasBeenAdvanced)
+    if (subIterator != nullptr && subIterator->hasBeenAdvanced)
         return subIterator->getFile();
 
     // You need to call DirectoryIterator::next() before asking it for the file that it found!
@@ -138,8 +138,8 @@ float DirectoryIterator::getEstimatedProgress() const
     if (totalNumFiles <= 0)
         return 0.0f;
 
-    const float detailedIndex = (subIterator != 0) ? index + subIterator->getEstimatedProgress()
-                                                   : (float) index;
+    const float detailedIndex = (subIterator != nullptr) ? index + subIterator->getEstimatedProgress()
+                                                         : (float) index;
 
     return detailedIndex / totalNumFiles;
 }

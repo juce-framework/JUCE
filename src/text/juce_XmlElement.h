@@ -146,7 +146,7 @@ class JUCE_API  XmlElement
 public:
     //==============================================================================
     /** Creates an XmlElement with this tag name. */
-    explicit XmlElement (const String& tagName) throw();
+    explicit XmlElement (const String& tagName) noexcept;
 
     /** Creates a (deep) copy of another element. */
     XmlElement (const XmlElement& other);
@@ -155,7 +155,7 @@ public:
     XmlElement& operator= (const XmlElement& other);
 
     /** Deleting an XmlElement will also delete all its child elements. */
-    ~XmlElement() throw();
+    ~XmlElement() noexcept;
 
     //==============================================================================
     /** Compares two XmlElements to see if they contain the same text and attiributes.
@@ -170,7 +170,7 @@ public:
                                         be in the same order as well
     */
     bool isEquivalentTo (const XmlElement* other,
-                         bool ignoreOrderOfAttributes) const throw();
+                         bool ignoreOrderOfAttributes) const noexcept;
 
     //==============================================================================
     /** Returns an XML text document that represents this element.
@@ -250,7 +250,7 @@ public:
 
         @see hasTagName
     */
-    inline const String& getTagName() const throw()             { return tagName; }
+    inline const String& getTagName() const noexcept            { return tagName; }
 
     /** Tests whether this element has a particular tag name.
 
@@ -258,7 +258,7 @@ public:
 
         @see getTagName
     */
-    bool hasTagName (const String& possibleTagName) const throw();
+    bool hasTagName (const String& possibleTagName) const noexcept;
 
     //==============================================================================
     /** Returns the number of XML attributes this element contains.
@@ -266,7 +266,7 @@ public:
         E.g. for an element such as \<MOOSE legs="4" antlers="2">, this would
         return 2.
     */
-    int getNumAttributes() const throw();
+    int getNumAttributes() const noexcept;
 
     /** Returns the name of one of the elements attributes.
 
@@ -275,7 +275,7 @@ public:
 
         @see getAttributeValue, getStringAttribute
     */
-    const String& getAttributeName (int attributeIndex) const throw();
+    const String& getAttributeName (int attributeIndex) const noexcept;
 
     /** Returns the value of one of the elements attributes.
 
@@ -284,19 +284,19 @@ public:
 
         @see getAttributeName, getStringAttribute
     */
-    const String& getAttributeValue (int attributeIndex) const throw();
+    const String& getAttributeValue (int attributeIndex) const noexcept;
 
     //==============================================================================
     // Attribute-handling methods..
 
     /** Checks whether the element contains an attribute with a certain name. */
-    bool hasAttribute (const String& attributeName) const throw();
+    bool hasAttribute (const String& attributeName) const noexcept;
 
     /** Returns the value of a named attribute.
 
         @param attributeName        the name of the attribute to look up
     */
-    const String& getStringAttribute (const String& attributeName) const throw();
+    const String& getStringAttribute (const String& attributeName) const noexcept;
 
     /** Returns the value of a named attribute.
 
@@ -317,7 +317,7 @@ public:
     */
     bool compareAttribute (const String& attributeName,
                            const String& stringToCompareAgainst,
-                           bool ignoreCase = false) const throw();
+                           bool ignoreCase = false) const noexcept;
 
     /** Returns the value of a named attribute as an integer.
 
@@ -409,11 +409,11 @@ public:
         @param attributeName    the name of the attribute to remove
         @see removeAllAttributes
     */
-    void removeAttribute (const String& attributeName) throw();
+    void removeAttribute (const String& attributeName) noexcept;
 
     /** Removes all attributes from this element.
     */
-    void removeAllAttributes() throw();
+    void removeAllAttributes() noexcept;
 
     //==============================================================================
     // Child element methods..
@@ -424,7 +424,7 @@ public:
 
         @see forEachXmlChildElement
     */
-    XmlElement* getFirstChildElement() const throw()    { return firstChildElement; }
+    XmlElement* getFirstChildElement() const noexcept   { return firstChildElement; }
 
     /** Returns the next of this element's siblings.
 
@@ -432,7 +432,7 @@ public:
         @code
         XmlElement* child = myXmlDocument->getFirstChildElement();
 
-        while (child != 0)
+        while (child != nullptr)
         {
             ...do stuff with this child..
 
@@ -452,7 +452,7 @@ public:
 
         @see getNextElement, isTextElement, forEachXmlChildElement
     */
-    inline XmlElement* getNextElement() const throw()           { return nextListItem; }
+    inline XmlElement* getNextElement() const noexcept          { return nextListItem; }
 
     /** Returns the next of this element's siblings which has the specified tag
         name.
@@ -468,7 +468,7 @@ public:
 
         @see getChildElement
     */
-    int getNumChildElements() const throw();
+    int getNumChildElements() const noexcept;
 
     /** Returns the sub-element at a certain index.
 
@@ -478,7 +478,7 @@ public:
         @returns the n'th child of this element, or 0 if the index is out-of-range
         @see getNextElement, isTextElement, getChildByName
     */
-    XmlElement* getChildElement (int index) const throw();
+    XmlElement* getChildElement (int index) const noexcept;
 
     /** Returns the first sub-element with a given tag-name.
 
@@ -486,7 +486,7 @@ public:
         @returns the first element with this tag name, or 0 if none is found
         @see getNextElement, isTextElement, getChildElement
     */
-    XmlElement* getChildByName (const String& tagNameToLookFor) const throw();
+    XmlElement* getChildByName (const String& tagNameToLookFor) const noexcept;
 
     //==============================================================================
     /** Appends an element to this element's list of children.
@@ -498,7 +498,7 @@ public:
         @see getFirstChildElement, getNextElement, getNumChildElements,
              getChildElement, removeChildElement
     */
-    void addChildElement (XmlElement* newChildElement) throw();
+    void addChildElement (XmlElement* newChildElement) noexcept;
 
     /** Inserts an element into this element's list of children.
 
@@ -512,7 +512,7 @@ public:
         @see addChildElement, insertChildElement
     */
     void insertChildElement (XmlElement* newChildNode,
-                             int indexToInsertAt) throw();
+                             int indexToInsertAt) noexcept;
 
     /** Creates a new element with the given name and returns it, after adding it
         as a child element.
@@ -538,7 +538,7 @@ public:
         will return true.
     */
     bool replaceChildElement (XmlElement* currentChildElement,
-                              XmlElement* newChildNode) throw();
+                              XmlElement* newChildNode) noexcept;
 
     /** Removes a child element.
 
@@ -547,27 +547,27 @@ public:
                                         just remove it
     */
     void removeChildElement (XmlElement* childToRemove,
-                             bool shouldDeleteTheChild) throw();
+                             bool shouldDeleteTheChild) noexcept;
 
     /** Deletes all the child elements in the element.
 
         @see removeChildElement, deleteAllChildElementsWithTagName
     */
-    void deleteAllChildElements() throw();
+    void deleteAllChildElements() noexcept;
 
     /** Deletes all the child elements with a given tag name.
 
         @see removeChildElement
     */
-    void deleteAllChildElementsWithTagName (const String& tagName) throw();
+    void deleteAllChildElementsWithTagName (const String& tagName) noexcept;
 
     /** Returns true if the given element is a child of this one. */
-    bool containsChildElement (const XmlElement* possibleChild) const throw();
+    bool containsChildElement (const XmlElement* possibleChild) const noexcept;
 
     /** Recursively searches all sub-elements to find one that contains the specified
         child element.
     */
-    XmlElement* findParentElementOf (const XmlElement* elementToLookFor) throw();
+    XmlElement* findParentElementOf (const XmlElement* elementToLookFor) noexcept;
 
     //==============================================================================
     /** Sorts the child elements using a comparator.
@@ -615,7 +615,7 @@ public:
 
         @see getAllText, addTextElement, deleteAllTextElements
     */
-    bool isTextElement() const throw();
+    bool isTextElement() const noexcept;
 
     /** Returns the text for a text element.
 
@@ -633,7 +633,7 @@ public:
 
         @see isTextElement, getAllSubText, getChildElementAllSubText
     */
-    const String& getText() const throw();
+    const String& getText() const noexcept;
 
     /** Sets the text in a text element.
 
@@ -679,7 +679,7 @@ public:
 
         @see isTextElement, getText, getAllSubText, addTextElement
     */
-    void deleteAllTextElements() throw();
+    void deleteAllTextElements() noexcept;
 
     /** Creates a text element that can be added to a parent element.
     */
@@ -689,13 +689,13 @@ public:
 private:
     struct XmlAttributeNode
     {
-        XmlAttributeNode (const XmlAttributeNode& other) throw();
-        XmlAttributeNode (const String& name, const String& value) throw();
+        XmlAttributeNode (const XmlAttributeNode& other) noexcept;
+        XmlAttributeNode (const String& name, const String& value) noexcept;
 
         LinkedListPointer<XmlAttributeNode> nextListItem;
         String name, value;
 
-        bool hasName (const String& name) const throw();
+        bool hasName (const String& name) const noexcept;
 
     private:
         XmlAttributeNode& operator= (const XmlAttributeNode&);
@@ -711,11 +711,11 @@ private:
     LinkedListPointer <XmlAttributeNode> attributes;
     String tagName;
 
-    XmlElement (int) throw();
+    XmlElement (int) noexcept;
     void copyChildrenAndAttributesFrom (const XmlElement& other);
     void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
-    void getChildElementsAsArray (XmlElement**) const throw();
-    void reorderChildElements (XmlElement**, int) throw();
+    void getChildElementsAsArray (XmlElement**) const noexcept;
+    void reorderChildElements (XmlElement**, int) noexcept;
 
     JUCE_LEAK_DETECTOR (XmlElement);
 };

@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 UnitTest::UnitTest (const String& name_)
-    : name (name_), runner (0)
+    : name (name_), runner (nullptr)
 {
     getAllTests().add (this);
 }
@@ -53,7 +53,7 @@ void UnitTest::shutdown()   {}
 
 void UnitTest::performTest (UnitTestRunner* const runner_)
 {
-    jassert (runner_ != 0);
+    jassert (runner_ != nullptr);
     runner = runner_;
 
     initialise();
@@ -81,7 +81,7 @@ void UnitTest::expect (const bool result, const String& failureMessage)
 
 //==============================================================================
 UnitTestRunner::UnitTestRunner()
-    : currentTest (0), assertOnFailure (false)
+    : currentTest (nullptr), assertOnFailure (false)
 {
 }
 
@@ -89,12 +89,12 @@ UnitTestRunner::~UnitTestRunner()
 {
 }
 
-int UnitTestRunner::getNumResults() const throw()
+int UnitTestRunner::getNumResults() const noexcept
 {
     return results.size();
 }
 
-const UnitTestRunner::TestResult* UnitTestRunner::getResult (int index) const throw()
+const UnitTestRunner::TestResult* UnitTestRunner::getResult (int index) const noexcept
 {
     return results [index];
 }
@@ -181,7 +181,7 @@ void UnitTestRunner::addPass()
         const ScopedLock sl (results.getLock());
 
         TestResult* const r = results.getLast();
-        jassert (r != 0); // You need to call UnitTest::beginTest() before performing any tests!
+        jassert (r != nullptr); // You need to call UnitTest::beginTest() before performing any tests!
 
         r->passes++;
 
@@ -199,7 +199,7 @@ void UnitTestRunner::addFail (const String& failureMessage)
         const ScopedLock sl (results.getLock());
 
         TestResult* const r = results.getLast();
-        jassert (r != 0); // You need to call UnitTest::beginTest() before performing any tests!
+        jassert (r != nullptr); // You need to call UnitTest::beginTest() before performing any tests!
 
         r->failures++;
 

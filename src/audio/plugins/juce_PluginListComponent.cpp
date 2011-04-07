@@ -55,7 +55,7 @@ PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
 
     setSize (400, 600);
     list.addChangeListener (this);
-    changeListenerCallback (0);
+    changeListenerCallback (nullptr);
 }
 
 PluginListComponent::~PluginListComponent()
@@ -91,7 +91,7 @@ void PluginListComponent::paintListBoxItem (int row,
 
     const PluginDescription* const pd = list.getType (row);
 
-    if (pd != 0)
+    if (pd != nullptr)
     {
         GlyphArrangement ga;
         ga.addCurtailedLineOfText (Font (height * 0.7f, Font::bold), pd->name, 8.0f, height * 0.8f, width - 10.0f, true);
@@ -166,7 +166,7 @@ void PluginListComponent::optionsMenuCallback (int result)
         {
             const PluginDescription* const desc = list.getType (listBox.getSelectedRow());
 
-            if (desc != 0)
+            if (desc != nullptr)
             {
                 if (File (desc->fileOrIdentifier).existsAsFile())
                     File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
@@ -195,7 +195,7 @@ void PluginListComponent::optionsMenuCallback (int result)
 
 void PluginListComponent::optionsMenuStaticCallback (int result, PluginListComponent* pluginList)
 {
-    if (pluginList != 0)
+    if (pluginList != nullptr)
         pluginList->optionsMenuCallback (result);
 }
 
@@ -247,12 +247,12 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
 void PluginListComponent::scanFor (AudioPluginFormat* format)
 {
 #if JUCE_MODAL_LOOPS_PERMITTED
-    if (format == 0)
+    if (format == nullptr)
         return;
 
     FileSearchPath path (format->getDefaultLocationsToSearch());
 
-    if (propertiesToUse != 0)
+    if (propertiesToUse != nullptr)
         path = propertiesToUse->getValue ("lastPluginScanPath_" + format->getName(), path.toString());
 
     {
@@ -271,7 +271,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
         path = pathList.getPath();
     }
 
-    if (propertiesToUse != 0)
+    if (propertiesToUse != nullptr)
     {
         propertiesToUse->setValue ("lastPluginScanPath_" + format->getName(), path.toString());
         propertiesToUse->saveIfNeeded();

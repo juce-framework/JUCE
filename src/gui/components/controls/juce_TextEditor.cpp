@@ -114,7 +114,7 @@ public:
         return atoms.size();
     }
 
-    TextAtom* getAtom (const int index) const throw()
+    TextAtom* getAtom (const int index) const noexcept
     {
         return atoms.getUnchecked (index);
     }
@@ -126,7 +126,7 @@ public:
             TextAtom* const lastAtom = atoms.getLast();
             int i = 0;
 
-            if (lastAtom != 0)
+            if (lastAtom != nullptr)
             {
                 if (! CharacterFunctions::isWhitespace (lastAtom->atomText.getLastCharacter()))
                 {
@@ -347,7 +347,7 @@ public:
         atomX (0),
         atomRight (0),
         atom (0),
-        currentSection (0),
+        currentSection (nullptr),
         sections (sections_),
         sectionIndex (0),
         atomIndex (0),
@@ -360,7 +360,7 @@ public:
         {
             currentSection = sections.getUnchecked (sectionIndex);
 
-            if (currentSection != 0)
+            if (currentSection != nullptr)
                 beginNewLine();
         }
     }
@@ -484,7 +484,7 @@ public:
             }
         }
 
-        if (atom != 0)
+        if (atom != nullptr)
         {
             atomX = atomRight;
             indexInText += atom->numChars;
@@ -541,7 +541,7 @@ public:
         lineHeight = section->font.getHeight();
         maxDescent = section->font.getDescent();
 
-        float x = (atom != 0) ? atom->width : 0;
+        float x = (atom != nullptr) ? atom->width : 0;
 
         while (! shouldWrap (x))
         {
@@ -562,7 +562,7 @@ public:
 
             const TextAtom* const nextAtom = section->getAtom (tempAtomIndex);
 
-            if (nextAtom == 0)
+            if (nextAtom == nullptr)
                 break;
 
             x += nextAtom->width;
@@ -741,7 +741,7 @@ private:
 
     void moveToEndOfLastAtom()
     {
-        if (atom != 0)
+        if (atom != nullptr)
         {
             atomX = atomRight;
 
@@ -1015,14 +1015,14 @@ TextEditor::~TextEditor()
     if (wasFocused)
     {
         ComponentPeer* const peer = getPeer();
-        if (peer != 0)
+        if (peer != nullptr)
             peer->dismissPendingTextInput();
     }
 
     textValue.referTo (Value());
     clearInternal (0);
-    viewport = 0;
-    textHolder = 0;
+    viewport = nullptr;
+    textHolder = nullptr;
 }
 
 //==============================================================================
@@ -1168,12 +1168,12 @@ void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
 {
     if (shouldCaretBeVisible && ! isReadOnly())
     {
-        if (caret == 0)
+        if (caret == nullptr)
             textHolder->addChildComponent (caret = getLookAndFeel().createCaretComponent (this));
     }
     else
     {
-        caret = 0;
+        caret = nullptr;
     }
 
     setMouseCursor (shouldCaretBeVisible ? MouseCursor::IBeamCursor
@@ -1182,7 +1182,7 @@ void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
 
 void TextEditor::updateCaretPosition()
 {
-    if (caret != 0)
+    if (caret != nullptr)
         caret->setCaretPosition (getCaretRectangle().translated (leftIndent, topIndent));
 }
 
@@ -1688,7 +1688,7 @@ void TextEditor::drawContent (Graphics& g)
             }
         }
 
-        const UniformTextSection* lastSection = 0;
+        const UniformTextSection* lastSection = nullptr;
 
         while (i.next() && i.lineY < clip.getBottom())
         {
@@ -1697,7 +1697,7 @@ void TextEditor::drawContent (Graphics& g)
                 if (selection.intersects (Range<int> (i.indexInText, i.indexInText + i.atom->numChars)))
                 {
                     i.drawSelectedText (g, selection, selectedTextColour);
-                    lastSection = 0;
+                    lastSection = nullptr;
                 }
                 else
                 {
@@ -1760,7 +1760,7 @@ void TextEditor::paintOverChildren (Graphics& g)
 //==============================================================================
 static void textEditorMenuCallback (int menuResult, TextEditor* editor)
 {
-    if (editor != 0 && menuResult != 0)
+    if (editor != nullptr && menuResult != 0)
         editor->performPopupMenuAction (menuResult);
 }
 
@@ -2080,7 +2080,7 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
     m.addItem (baseMenuItemID + 5, TRANS("select all"));
     m.addSeparator();
 
-    if (getUndoManager() != 0)
+    if (getUndoManager() != nullptr)
     {
         m.addItem (baseMenuItemID + 6, TRANS("undo"), undoManager.canUndo());
         m.addItem (baseMenuItemID + 7, TRANS("redo"), undoManager.canRedo());
@@ -2141,7 +2141,7 @@ void TextEditor::focusGained (FocusChangeType)
     updateCaretPosition();
 
     ComponentPeer* const peer = getPeer();
-    if (peer != 0 && ! isReadOnly())
+    if (peer != nullptr && ! isReadOnly())
         peer->textInputRequired (getScreenPosition() - peer->getScreenPosition());
 }
 
@@ -2155,7 +2155,7 @@ void TextEditor::focusLost (FocusChangeType)
     underlinedSections.clear();
 
     ComponentPeer* const peer = getPeer();
-    if (peer != 0)
+    if (peer != nullptr)
         peer->dismissPendingTextInput();
 
     updateCaretPosition();
@@ -2224,7 +2224,7 @@ void TextEditor::setTemporaryUnderlining (const Array <Range<int> >& newUnderlin
 }
 
 //==============================================================================
-UndoManager* TextEditor::getUndoManager() throw()
+UndoManager* TextEditor::getUndoManager() noexcept
 {
     return isReadOnly() ? 0 : &undoManager;
 }
@@ -2243,7 +2243,7 @@ void TextEditor::insert (const String& text,
 {
     if (text.isNotEmpty())
     {
-        if (um != 0)
+        if (um != nullptr)
         {
             if (um->getNumActionsInCurrentTransaction() > TextEditorDefs::maxActionsPerTransaction)
                 newTransaction();
@@ -2372,7 +2372,7 @@ void TextEditor::remove (const Range<int>& range,
 
         index = 0;
 
-        if (um != 0)
+        if (um != nullptr)
         {
             Array <UniformTextSection*> removedSections;
 
@@ -2595,7 +2595,7 @@ int TextEditor::findWordBreakBefore (const int position) const
 void TextEditor::splitSection (const int sectionIndex,
                                const int charToSplitAt)
 {
-    jassert (sections[sectionIndex] != 0);
+    jassert (sections[sectionIndex] != nullptr);
 
     sections.insert (sectionIndex + 1,
                      sections.getUnchecked (sectionIndex)->split (charToSplitAt, passwordCharacter));

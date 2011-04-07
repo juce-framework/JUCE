@@ -134,8 +134,8 @@ const String SystemClipboard::getTextFromClipboard()
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
 #endif
 
-    return text == 0 ? String::empty
-                     : nsStringToJuce (text);
+    return text == nil ? String::empty
+                       : nsStringToJuce (text);
 }
 
 #endif

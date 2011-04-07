@@ -49,9 +49,9 @@ AudioFormatManager::~AudioFormatManager()
 //==============================================================================
 void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool makeThisTheDefaultFormat)
 {
-    jassert (newFormat != 0);
+    jassert (newFormat != nullptr);
 
-    if (newFormat != 0)
+    if (newFormat != nullptr)
     {
       #if JUCE_DEBUG
         for (int i = getNumKnownFormats(); --i >= 0;)
@@ -166,11 +166,11 @@ AudioFormatReader* AudioFormatManager::createReaderFor (const File& file)
         {
             InputStream* const in = file.createInputStream();
 
-            if (in != 0)
+            if (in != nullptr)
             {
                 AudioFormatReader* const r = af->createReaderFor (in, true);
 
-                if (r != 0)
+                if (r != nullptr)
                     return r;
             }
         }
@@ -187,7 +187,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
 
     ScopedPointer <InputStream> in (audioFileStream);
 
-    if (in != 0)
+    if (in != nullptr)
     {
         const int64 originalStreamPos = in->getPosition();
 
@@ -195,7 +195,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
         {
             AudioFormatReader* const r = getKnownFormat(i)->createReaderFor (in, false);
 
-            if (r != 0)
+            if (r != nullptr)
             {
                 in.release();
                 return r;

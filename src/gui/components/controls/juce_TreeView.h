@@ -65,7 +65,7 @@ public:
 
         @see getSubItem, mightContainSubItems, addSubItem
     */
-    int getNumSubItems() const throw();
+    int getNumSubItems() const noexcept;
 
     /** Returns one of the item's sub-items.
 
@@ -74,7 +74,7 @@ public:
 
         @see getNumSubItems
     */
-    TreeViewItem* getSubItem (int index) const throw();
+    TreeViewItem* getSubItem (int index) const noexcept;
 
     /** Removes any sub-items. */
     void clearSubItems();
@@ -98,14 +98,14 @@ public:
 
     //==============================================================================
     /** Returns the TreeView to which this item belongs. */
-    TreeView* getOwnerView() const throw()              { return ownerView; }
+    TreeView* getOwnerView() const noexcept             { return ownerView; }
 
     /** Returns the item within which this item is contained. */
-    TreeViewItem* getParentItem() const throw()         { return parentItem; }
+    TreeViewItem* getParentItem() const noexcept        { return parentItem; }
 
     //==============================================================================
     /** True if this item is currently open in the treeview. */
-    bool isOpen() const throw();
+    bool isOpen() const noexcept;
 
     /** Opens or closes the item.
 
@@ -121,7 +121,7 @@ public:
 
         Use this when painting the node, to decide whether to draw it as selected or not.
     */
-    bool isSelected() const throw();
+    bool isSelected() const noexcept;
 
     /** Selects or deselects the item.
 
@@ -137,14 +137,14 @@ public:
         the tree. If false, it is relative to the top-left of the topmost item in the
         tree (so this would be unaffected by scrolling the view).
     */
-    const Rectangle<int> getItemPosition (bool relativeToTreeViewTopLeft) const throw();
+    const Rectangle<int> getItemPosition (bool relativeToTreeViewTopLeft) const noexcept;
 
     /** Sends a signal to the treeview to make it refresh itself.
 
         Call this if your items have changed and you want the tree to update to reflect
         this.
     */
-    void treeHasChanged() const throw();
+    void treeHasChanged() const noexcept;
 
     /** Sends a repaint message to redraw just this item.
 
@@ -159,19 +159,19 @@ public:
 
         @see TreeView::getNumRowsInTree(), TreeView::getItemOnRow()
     */
-    int getRowNumberInTree() const throw();
+    int getRowNumberInTree() const noexcept;
 
     /** Returns true if all the item's parent nodes are open.
 
         This is useful to check whether the item might actually be visible or not.
     */
-    bool areAllParentsOpen() const throw();
+    bool areAllParentsOpen() const noexcept;
 
     /** Changes whether lines are drawn to connect any sub-items to this item.
 
         By default, line-drawing is turned on.
     */
-    void setLinesDrawnForSubItems (bool shouldDrawLines) throw();
+    void setLinesDrawnForSubItems (bool shouldDrawLines) noexcept;
 
     //==============================================================================
     /** Tells the tree whether this item can potentially be opened.
@@ -408,7 +408,7 @@ public:
         mostly useful if you want to draw a wider bar behind the
         highlighted item.
     */
-    void setDrawsInLeftMargin (bool canDrawInLeftMargin) throw();
+    void setDrawsInLeftMargin (bool canDrawInLeftMargin) noexcept;
 
     //==============================================================================
     /** Saves the current state of open/closed nodes so it can be restored later.
@@ -427,7 +427,7 @@ public:
         The caller is responsible for deleting the object that is returned.
         @see TreeView::getOpennessState, restoreOpennessState
     */
-    XmlElement* getOpennessState() const throw();
+    XmlElement* getOpennessState() const noexcept;
 
     /** Restores the openness of this item and all its sub-items from a saved state.
 
@@ -439,14 +439,14 @@ public:
 
         @see TreeView::restoreOpennessState, getOpennessState
     */
-    void restoreOpennessState (const XmlElement& xml) throw();
+    void restoreOpennessState (const XmlElement& xml) noexcept;
 
     //==============================================================================
     /** Returns the index of this item in its parent's sub-items. */
-    int getIndexInParent() const throw();
+    int getIndexInParent() const noexcept;
 
     /** Returns true if this item is the last of its parent's sub-itens. */
-    bool isLastOfSiblings() const throw();
+    bool isLastOfSiblings() const noexcept;
 
     /** Creates a string that can be used to uniquely retrieve this item in the tree.
 
@@ -509,18 +509,18 @@ private:
     friend class TreeViewContentComponent;
 
     void updatePositions (int newY);
-    int getIndentX() const throw();
-    void setOwnerView (TreeView* newOwner) throw();
+    int getIndentX() const noexcept;
+    void setOwnerView (TreeView* newOwner) noexcept;
     void paintRecursively (Graphics& g, int width);
-    TreeViewItem* getTopLevelItem() throw();
-    TreeViewItem* findItemRecursively (int y) throw();
-    TreeViewItem* getDeepestOpenParentItem() throw();
-    int getNumRows() const throw();
-    TreeViewItem* getItemOnRow (int index) throw();
+    TreeViewItem* getTopLevelItem() noexcept;
+    TreeViewItem* findItemRecursively (int y) noexcept;
+    TreeViewItem* getDeepestOpenParentItem() noexcept;
+    int getNumRows() const noexcept;
+    TreeViewItem* getItemOnRow (int index) noexcept;
     void deselectAllRecursively();
-    int countSelectedItemsRecursively (int depth) const throw();
-    TreeViewItem* getSelectedItemWithIndex (int index) throw();
-    TreeViewItem* getNextVisibleItem (bool recurse) const throw();
+    int countSelectedItemsRecursively (int depth) const noexcept;
+    TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
+    TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
     TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem);
@@ -563,7 +563,7 @@ public:
 
         The object passed in will not be deleted by the treeview, it's up to the caller
         to delete it when no longer needed. BUT make absolutely sure that you don't delete
-        this item until you've removed it from the tree, either by calling setRootItem (0),
+        this item until you've removed it from the tree, either by calling setRootItem (nullptr),
         or by deleting the tree first. You can also use deleteRootItem() as a quick way
         to delete it.
     */
@@ -573,11 +573,11 @@ public:
 
         This will be the last object passed to setRootItem(), or 0 if none has been set.
     */
-    TreeViewItem* getRootItem() const throw()                       { return rootItem; }
+    TreeViewItem* getRootItem() const noexcept                      { return rootItem; }
 
     /** This will remove and delete the current root item.
 
-        It's a convenient way of deleting the item and calling setRootItem (0).
+        It's a convenient way of deleting the item and calling setRootItem (nullptr).
     */
     void deleteRootItem();
 
@@ -593,7 +593,7 @@ public:
 
         @see setRootItemVisible
     */
-    bool isRootItemVisible() const throw()                          { return rootItemVisible; }
+    bool isRootItemVisible() const noexcept                         { return rootItemVisible; }
 
     /** Sets whether items are open or closed by default.
 
@@ -608,7 +608,7 @@ public:
 
         @see setDefaultOpenness
     */
-    bool areItemsOpenByDefault() const throw()                      { return defaultOpenness; }
+    bool areItemsOpenByDefault() const noexcept                     { return defaultOpenness; }
 
     /** This sets a flag to indicate that the tree can be used for multi-selection.
 
@@ -626,7 +626,7 @@ public:
 
         @see setMultiSelectEnabled
     */
-    bool isMultiSelectEnabled() const throw()                       { return multiSelectEnabled; }
+    bool isMultiSelectEnabled() const noexcept                      { return multiSelectEnabled; }
 
     /** Sets a flag to indicate whether to hide the open/close buttons.
 
@@ -638,7 +638,7 @@ public:
 
         @see setOpenCloseButtonsVisible
     */
-    bool areOpenCloseButtonsVisible() const throw()                 { return openCloseButtonsVisible; }
+    bool areOpenCloseButtonsVisible() const noexcept                { return openCloseButtonsVisible; }
 
     //==============================================================================
     /** Deselects any items that are currently selected. */
@@ -649,13 +649,13 @@ public:
         tree will be recursed.
         @see getSelectedItem, clearSelectedItems
     */
-    int getNumSelectedItems (int maximumDepthToSearchTo = -1) const throw();
+    int getNumSelectedItems (int maximumDepthToSearchTo = -1) const noexcept;
 
     /** Returns one of the selected items in the tree.
 
         @param index    the index, 0 to (getNumSelectedItems() - 1)
     */
-    TreeViewItem* getSelectedItem (int index) const throw();
+    TreeViewItem* getSelectedItem (int index) const noexcept;
 
     //==============================================================================
     /** Returns the number of rows the tree is using.
@@ -677,18 +677,18 @@ public:
     /** Returns the item that contains a given y position.
         The y is relative to the top of the TreeView component.
     */
-    TreeViewItem* getItemAt (int yPosition) const throw();
+    TreeViewItem* getItemAt (int yPosition) const noexcept;
 
     /** Tries to scroll the tree so that this item is on-screen somewhere. */
     void scrollToKeepItemVisible (TreeViewItem* item);
 
     /** Returns the treeview's Viewport object. */
-    Viewport* getViewport() const throw();
+    Viewport* getViewport() const noexcept;
 
     /** Returns the number of pixels by which each nested level of the tree is indented.
         @see setIndentSize
     */
-    int getIndentSize() const throw()                               { return indentSize; }
+    int getIndentSize() const noexcept                              { return indentSize; }
 
     /** Changes the distance by which each nested level of the tree is indented.
         @see getIndentSize
@@ -800,17 +800,17 @@ private:
     bool multiSelectEnabled : 1;
     bool openCloseButtonsVisible : 1;
 
-    void itemsChanged() throw();
+    void itemsChanged() noexcept;
     void handleAsyncUpdate();
     void moveSelectedRow (int delta);
     void updateButtonUnderMouse (const MouseEvent& e);
-    void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) throw();
-    void hideDragHighlight() throw();
+    void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) noexcept;
+    void hideDragHighlight() noexcept;
     void handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
     void handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
     TreeViewItem* getInsertPosition (int& x, int& y, int& insertIndex,
                                      const StringArray& files, const String& sourceDescription,
-                                     Component* sourceComponent) const throw();
+                                     Component* sourceComponent) const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };

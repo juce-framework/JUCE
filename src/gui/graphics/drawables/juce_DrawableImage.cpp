@@ -34,8 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 DrawableImage::DrawableImage()
-    : image (0),
-      opacity (1.0f),
+    : opacity (1.0f),
       overlayColour (0x00000000)
 {
     bounds.topRight = RelativePoint (Point<float> (1.0f, 0.0f));
@@ -63,7 +62,7 @@ void DrawableImage::setImage (const Image& imageToUse)
     bounds.topLeft = RelativePoint (Point<float> (0.0f, 0.0f));
     bounds.topRight = RelativePoint (Point<float> ((float) image.getWidth(), 0.0f));
     bounds.bottomLeft = RelativePoint (Point<float> (0.0f, (float) image.getHeight()));
-    recalculateCoordinates (0);
+    recalculateCoordinates (nullptr);
 
     repaint();
 }
@@ -92,8 +91,8 @@ void DrawableImage::setBoundingBox (const RelativeParallelogram& newBounds)
         }
         else
         {
-            setPositioner (0);
-            recalculateCoordinates (0);
+            setPositioner (nullptr);
+            recalculateCoordinates (nullptr);
         }
     }
 }
@@ -259,7 +258,7 @@ void DrawableImage::refreshFromValueTree (const ValueTree& tree, ComponentBuilde
 
     jassert (builder.getImageProvider() != 0 || imageIdentifier.isVoid()); // if you're using images, you need to provide something that can load and save them!
 
-    if (builder.getImageProvider() != 0)
+    if (builder.getImageProvider() != nullptr)
         newImage = builder.getImageProvider()->getImageForIdentifier (imageIdentifier);
 
     const RelativeParallelogram newBounds (controller.getBoundingBox());
@@ -290,9 +289,9 @@ const ValueTree DrawableImage::createValueTree (ComponentBuilder::ImageProvider*
 
     if (image.isValid())
     {
-        jassert (imageProvider != 0); // if you're using images, you need to provide something that can load and save them!
+        jassert (imageProvider != nullptr); // if you're using images, you need to provide something that can load and save them!
 
-        if (imageProvider != 0)
+        if (imageProvider != nullptr)
             v.setImageIdentifier (imageProvider->getIdentifierForImage (image), 0);
     }
 

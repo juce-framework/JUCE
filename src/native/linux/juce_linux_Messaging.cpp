@@ -32,7 +32,7 @@
  #define JUCE_DEBUG_XERRORS 1
 #endif
 
-Display* display = 0;
+Display* display = nullptr;
 Window juce_messageWindowHandle = None;
 XContext windowHandleXContext;   // This is referenced from Windowing.cpp
 
@@ -158,7 +158,7 @@ private:
     int bytesInSocket;
     int totalEventCount;
 
-    int getWaitHandle() const throw()       { return fd[1]; }
+    int getWaitHandle() const noexcept      { return fd[1]; }
 
     static bool setNonBlocking (int handle)
     {
@@ -214,7 +214,7 @@ private:
     {
         const Message::Ptr msg (popNextMessage());
 
-        if (msg == 0)
+        if (msg == nullptr)
             return false;
 
         if (msg->intParameter1 == MessageThreadFuncCall::uniqueID)
@@ -375,7 +375,7 @@ void MessageManager::doPlatformSpecificShutdown()
         XCloseDisplay (display);
 
         juce_messageWindowHandle = 0;
-        display = 0;
+        display = nullptr;
 
         LinuxErrorHandling::removeXErrorHandlers();
     }

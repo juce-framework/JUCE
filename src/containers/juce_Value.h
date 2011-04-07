@@ -209,7 +209,7 @@ public:
     explicit Value (ValueSource* valueSource);
 
     /** Returns the ValueSource that this value is referring to. */
-    ValueSource& getValueSource() throw()           { return *value; }
+    ValueSource& getValueSource() noexcept          { return *value; }
 
 
 private:

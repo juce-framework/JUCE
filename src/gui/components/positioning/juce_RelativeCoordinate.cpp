@@ -41,7 +41,7 @@ const String RelativeCoordinate::Strings::y ("y");
 const String RelativeCoordinate::Strings::width ("width");
 const String RelativeCoordinate::Strings::height ("height");
 
-RelativeCoordinate::StandardStrings::Type RelativeCoordinate::StandardStrings::getTypeOf (const String& s) throw()
+RelativeCoordinate::StandardStrings::Type RelativeCoordinate::StandardStrings::getTypeOf (const String& s) noexcept
 {
     if (s == Strings::left)    return left;
     if (s == Strings::right)   return right;
@@ -95,12 +95,12 @@ RelativeCoordinate::~RelativeCoordinate()
 {
 }
 
-bool RelativeCoordinate::operator== (const RelativeCoordinate& other) const throw()
+bool RelativeCoordinate::operator== (const RelativeCoordinate& other) const noexcept
 {
     return term.toString() == other.term.toString();
 }
 
-bool RelativeCoordinate::operator!= (const RelativeCoordinate& other) const throw()
+bool RelativeCoordinate::operator!= (const RelativeCoordinate& other) const noexcept
 {
     return ! operator== (other);
 }
@@ -109,7 +109,7 @@ double RelativeCoordinate::resolve (const Expression::Scope* scope) const
 {
     try
     {
-        if (scope != 0)
+        if (scope != nullptr)
             return term.evaluate (*scope);
         else
             return term.evaluate();
@@ -124,7 +124,7 @@ bool RelativeCoordinate::isRecursive (const Expression::Scope* scope) const
 {
     try
     {
-        if (scope != 0)
+        if (scope != nullptr)
             term.evaluate (*scope);
         else
             term.evaluate();
@@ -141,7 +141,7 @@ void RelativeCoordinate::moveToAbsolute (double newPos, const Expression::Scope*
 {
     try
     {
-        if (scope != 0)
+        if (scope != nullptr)
         {
             term = term.adjustedToGiveNewResult (newPos, *scope);
         }
