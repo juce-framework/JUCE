@@ -18160,6 +18160,9 @@ public:
 	*/
 	static const String getFullUserName();
 
+	/** Returns the host-name of the computer. */
+	static const String getComputerName();
+
 	// CPU and memory information..
 
 	/** Returns the approximate CPU speed.

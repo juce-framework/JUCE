@@ -71,11 +71,11 @@ public:
     ~FilterGraph();
 
     //==============================================================================
-    AudioProcessorGraph& getGraph() throw()         { return graph; }
+    AudioProcessorGraph& getGraph() noexcept         { return graph; }
 
-    int getNumFilters() const throw();
-    const AudioProcessorGraph::Node::Ptr getNode (const int index) const throw();
-    const AudioProcessorGraph::Node::Ptr getNodeForId (const uint32 uid) const throw();
+    int getNumFilters() const noexcept;
+    const AudioProcessorGraph::Node::Ptr getNode (const int index) const noexcept;
+    const AudioProcessorGraph::Node::Ptr getNodeForId (const uint32 uid) const noexcept;
 
     void addFilter (const PluginDescription* desc, double x, double y);
 
@@ -88,14 +88,14 @@ public:
     void getNodePosition (const int nodeId, double& x, double& y) const;
 
     //==============================================================================
-    int getNumConnections() const throw();
-    const AudioProcessorGraph::Connection* getConnection (const int index) const throw();
+    int getNumConnections() const noexcept;
+    const AudioProcessorGraph::Connection* getConnection (const int index) const noexcept;
 
     const AudioProcessorGraph::Connection* getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
-                                                                 uint32 destFilterUID, int destFilterChannel) const throw();
+                                                                 uint32 destFilterUID, int destFilterChannel) const noexcept;
 
     bool canConnect (uint32 sourceFilterUID, int sourceFilterChannel,
-                     uint32 destFilterUID, int destFilterChannel) const throw();
+                     uint32 destFilterUID, int destFilterChannel) const noexcept;
 
     bool addConnection (uint32 sourceFilterUID, int sourceFilterChannel,
                         uint32 destFilterUID, int destFilterChannel);
@@ -130,7 +130,7 @@ private:
     AudioProcessorPlayer player;
 
     uint32 lastUID;
-    uint32 getNextUID() throw();
+    uint32 getNextUID() noexcept;
 
     void createNodeFromXml (const XmlElement& xml);
 

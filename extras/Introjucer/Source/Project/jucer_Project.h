@@ -163,9 +163,9 @@ public:
 
         //==============================================================================
         bool isValid() const                            { return node.isValid(); }
-        const ValueTree& getNode() const throw()        { return node; }
-        ValueTree& getNode() throw()                    { return node; }
-        Project& getProject() const throw()             { return *project; }
+        const ValueTree& getNode() const noexcept       { return node; }
+        ValueTree& getNode() noexcept                   { return node; }
+        Project& getProject() const noexcept            { return *project; }
         bool operator== (const Item& other) const       { return node == other.node && project == other.project; }
         bool operator!= (const Item& other) const       { return ! operator== (other); }
 

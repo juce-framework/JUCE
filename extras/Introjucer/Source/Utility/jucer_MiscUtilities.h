@@ -57,7 +57,7 @@ public:
     PropertyPanelWithTooltips();
     ~PropertyPanelWithTooltips();
 
-    PropertyPanel& getPanel() throw()        { return panel; }
+    PropertyPanel& getPanel() noexcept        { return panel; }
 
     void paint (Graphics& g);
     void resized();

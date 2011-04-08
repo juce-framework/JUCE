@@ -69,16 +69,17 @@ static void juce_getCpuVendor (char* const v)
 {
     int vendor[4] = { 0 };
 
-#ifdef JUCE_64BIT
-#else
+ #if JUCE_64BIT
+    /// xxx todo
+ #else
   #ifndef __MINGW32__
     __try
   #endif
     {
-  #if JUCE_GCC
+       #if JUCE_GCC
         unsigned int dummy = 0;
         __asm__ ("cpuid" : "=a" (dummy), "=b" (vendor[0]), "=c" (vendor[2]),"=d" (vendor[1]) : "a" (0));
-  #else
+       #else
         __asm
         {
             mov eax, 0
@@ -87,15 +88,15 @@ static void juce_getCpuVendor (char* const v)
             mov [vendor + 4], edx
             mov [vendor + 8], ecx
         }
-  #endif
+       #endif
     }
-  #ifndef __MINGW32__
+   #ifndef __MINGW32__
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
         *v = 0;
     }
-  #endif
-#endif
+   #endif
+ #endif
 
     memcpy (v, vendor, 16);
 }
@@ -115,11 +116,11 @@ void SystemStats::initialiseStats()
     cpuFlags.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
     cpuFlags.hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
     cpuFlags.hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
-#ifdef PF_AMD3D_INSTRUCTIONS_AVAILABLE
+   #ifdef PF_AMD3D_INSTRUCTIONS_AVAILABLE
     cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_AMD3D_INSTRUCTIONS_AVAILABLE) != 0;
-#else
+   #else
     cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
-#endif
+   #endif
 
     {
         SYSTEM_INFO systemInfo;
@@ -138,9 +139,9 @@ void SystemStats::initialiseStats()
     (void) res;
     jassert (res == TIMERR_NOERROR);
 
-  #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+   #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-  #endif
+   #endif
 }
 
 //==============================================================================
@@ -187,9 +188,9 @@ const String SystemStats::getOperatingSystemName()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-#ifdef _WIN64
+   #ifdef _WIN64
     return true;
-#else
+   #else
     typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
     LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle (L"kernel32"), "IsWow64Process");
@@ -199,9 +200,8 @@ bool SystemStats::isOperatingSystem64Bit()
     return (fnIsWow64Process != 0)
             && fnIsWow64Process (GetCurrentProcess(), &isWow64)
             && (isWow64 != FALSE);
-#endif
+   #endif
 }
-
 
 //==============================================================================
 int SystemStats::getMemorySizeInMegabytes()
@@ -249,11 +249,11 @@ int64 Time::getHighResolutionTicksPerSecond() noexcept
 
 static int64 juce_getClockCycleCounter() noexcept
 {
-#if JUCE_USE_INTRINSICS
+   #if JUCE_USE_INTRINSICS
     // MS intrinsics version...
     return __rdtsc();
 
-#elif JUCE_GCC
+   #elif JUCE_GCC
     // GNU inline asm version...
     unsigned int hi = 0, lo = 0;
 
@@ -269,7 +269,7 @@ static int64 juce_getClockCycleCounter() noexcept
          : "cc", "eax", "ebx", "ecx", "edx", "memory");
 
     return (int64) ((((uint64) hi) << 32) | lo);
-#else
+   #else
     // MSVC inline asm version...
     unsigned int hi = 0, lo = 0;
 
@@ -283,7 +283,7 @@ static int64 juce_getClockCycleCounter() noexcept
     }
 
     return (int64) ((((uint64) hi) << 32) | lo);
-#endif
+   #endif
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
@@ -345,7 +345,7 @@ int SystemStats::getPageSize()
 const String SystemStats::getLogonName()
 {
     TCHAR text [256] = { 0 };
-    DWORD len = numElementsInArray (text) - 2;
+    DWORD len = numElementsInArray (text) - 1;
     GetUserName (text, &len);
     return String (text, len);
 }
@@ -355,5 +355,12 @@ const String SystemStats::getFullUserName()
     return getLogonName();
 }
 
+const String SystemStats::getComputerName()
+{
+    TCHAR text [MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
+    DWORD len = numElementsInArray (text) - 1;
+    GetComputerName (text, &len);
+    return String (text, len);
+}
 
 #endif

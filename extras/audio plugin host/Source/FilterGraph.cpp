@@ -78,42 +78,42 @@ FilterGraph::~FilterGraph()
     graph.clear();
 }
 
-uint32 FilterGraph::getNextUID() throw()
+uint32 FilterGraph::getNextUID() noexcept
 {
     return ++lastUID;
 }
 
 //==============================================================================
-int FilterGraph::getNumFilters() const throw()
+int FilterGraph::getNumFilters() const noexcept
 {
     return graph.getNumNodes();
 }
 
-const AudioProcessorGraph::Node::Ptr FilterGraph::getNode (const int index) const throw()
+const AudioProcessorGraph::Node::Ptr FilterGraph::getNode (const int index) const noexcept
 {
     return graph.getNode (index);
 }
 
-const AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (const uint32 uid) const throw()
+const AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (const uint32 uid) const noexcept
 {
     return graph.getNodeForId (uid);
 }
 
 void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
 {
-    if (desc != 0)
+    if (desc != nullptr)
     {
         String errorMessage;
 
         AudioPluginInstance* instance
             = AudioPluginFormatManager::getInstance()->createPluginInstance (*desc, errorMessage);
 
-        AudioProcessorGraph::Node* node = 0;
+        AudioProcessorGraph::Node* node = nullptr;
 
-        if (instance != 0)
+        if (instance != nullptr)
             node = graph.addNode (instance);
 
-        if (node != 0)
+        if (node != nullptr)
         {
             node->properties.set ("x", x);
             node->properties.set ("y", y);
@@ -152,7 +152,7 @@ void FilterGraph::setNodePosition (const int nodeId, double x, double y)
 {
     const AudioProcessorGraph::Node::Ptr n (graph.getNodeForId (nodeId));
 
-    if (n != 0)
+    if (n != nullptr)
     {
         n->properties.set ("x", jlimit (0.0, 1.0, x));
         n->properties.set ("y", jlimit (0.0, 1.0, y));
@@ -165,7 +165,7 @@ void FilterGraph::getNodePosition (const int nodeId, double& x, double& y) const
 
     const AudioProcessorGraph::Node::Ptr n (graph.getNodeForId (nodeId));
 
-    if (n != 0)
+    if (n != nullptr)
     {
         x = (double) n->properties ["x"];
         y = (double) n->properties ["y"];
@@ -173,25 +173,25 @@ void FilterGraph::getNodePosition (const int nodeId, double& x, double& y) const
 }
 
 //==============================================================================
-int FilterGraph::getNumConnections() const throw()
+int FilterGraph::getNumConnections() const noexcept
 {
     return graph.getNumConnections();
 }
 
-const AudioProcessorGraph::Connection* FilterGraph::getConnection (const int index) const throw()
+const AudioProcessorGraph::Connection* FilterGraph::getConnection (const int index) const noexcept
 {
     return graph.getConnection (index);
 }
 
 const AudioProcessorGraph::Connection* FilterGraph::getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
-                                                                          uint32 destFilterUID, int destFilterChannel) const throw()
+                                                                          uint32 destFilterUID, int destFilterChannel) const noexcept
 {
     return graph.getConnectionBetween (sourceFilterUID, sourceFilterChannel,
                                        destFilterUID, destFilterChannel);
 }
 
 bool FilterGraph::canConnect (uint32 sourceFilterUID, int sourceFilterChannel,
-                              uint32 destFilterUID, int destFilterChannel) const throw()
+                              uint32 destFilterUID, int destFilterChannel) const noexcept
 {
     return graph.canConnect (sourceFilterUID, sourceFilterChannel,
                              destFilterUID, destFilterChannel);
@@ -245,7 +245,7 @@ const String FilterGraph::loadDocument (const File& file)
     XmlDocument doc (file);
     XmlElement* xml = doc.getDocumentElement();
 
-    if (xml == 0 || ! xml->hasTagName (T("FILTERGRAPH")))
+    if (xml == nullptr || ! xml->hasTagName (T("FILTERGRAPH")))
     {
         delete xml;
         return "Not a valid filter graph file";
@@ -292,14 +292,14 @@ void FilterGraph::setLastDocumentOpened (const File& file)
 }
 
 //==============================================================================
-static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) throw()
+static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcept
 {
     AudioPluginInstance* plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor());
 
-    if (plugin == 0)
+    if (plugin == nullptr)
     {
         jassertfalse
-        return 0;
+        return nullptr;
     }
 
     XmlElement* e = new XmlElement ("FILTER");
@@ -340,19 +340,19 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     AudioPluginInstance* instance
         = AudioPluginFormatManager::getInstance()->createPluginInstance (pd, errorMessage);
 
-    if (instance == 0)
+    if (instance == nullptr)
     {
         // xxx handle ins + outs
     }
 
-    if (instance == 0)
+    if (instance == nullptr)
         return;
 
     AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, xml.getIntAttribute (T("uid"))));
 
     const XmlElement* const state = xml.getChildByName (T("STATE"));
 
-    if (state != 0)
+    if (state != nullptr)
     {
         MemoryBlock m;
         m.fromBase64Encoding (state->getAllSubText());

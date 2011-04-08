@@ -539,7 +539,7 @@ public:
 };
 
 //==============================================================================
-static NPIdentifier getIdentifierFromString (const var::identifier& s) throw()
+static NPIdentifier getIdentifierFromString (const var::identifier& s) noexcept
 {
     return browser.getstringidentifier (s.toString().toUTF8());
 }

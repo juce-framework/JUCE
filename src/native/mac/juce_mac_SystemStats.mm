@@ -182,6 +182,12 @@ const String SystemStats::getFullUserName()
     return nsStringToJuce (NSFullUserName());
 }
 
+const String SystemStats::getComputerName()
+{
+    return nsStringToJuce ([[NSProcessInfo processInfo] hostName])
+            .upToLastOccurrenceOf (".local", false, true);
+}
+
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() noexcept
 {

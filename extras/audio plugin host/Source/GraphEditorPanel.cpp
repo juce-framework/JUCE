@@ -73,13 +73,13 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
              && activePluginWindows.getUnchecked(i)->isGeneric == useGenericView)
             return activePluginWindows.getUnchecked(i);
 
-    AudioProcessorEditor* ui = 0;
+    AudioProcessorEditor* ui = nullptr;
 
     if (! useGenericView)
     {
         ui = node->getProcessor()->createEditorIfNeeded();
 
-        if (ui == 0)
+        if (ui == nullptr)
             useGenericView = true;
     }
 
@@ -88,17 +88,17 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
         ui = new GenericAudioProcessorEditor (node->getProcessor());
     }
 
-    if (ui != 0)
+    if (ui != nullptr)
     {
         AudioPluginInstance* const plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor());
 
-        if (plugin != 0)
+        if (plugin != nullptr)
             ui->setName (plugin->getName());
 
         return new PluginWindow (ui, node, useGenericView);
     }
 
-    return 0;
+    return nullptr;
 }
 
 PluginWindow::~PluginWindow()
@@ -132,7 +132,7 @@ public:
     {
         const AudioProcessorGraph::Node::Ptr node (graph.getNodeForId (filterID_));
 
-        if (node != 0)
+        if (node != nullptr)
         {
             String tip;
 
@@ -195,9 +195,9 @@ public:
 private:
     FilterGraph& graph;
 
-    GraphEditorPanel* getGraphPanel() const throw()
+    GraphEditorPanel* getGraphPanel() const noexcept
     {
-        return findParentComponentOfClass ((GraphEditorPanel*) 0);
+        return findParentComponentOfClass ((GraphEditorPanel*) nullptr);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PinComponent);
@@ -259,11 +259,11 @@ public:
             {
                 AudioProcessorGraph::Node::Ptr f (graph.getNodeForId (filterID));
 
-                if (f != 0)
+                if (f != nullptr)
                 {
                     PluginWindow* const w = PluginWindow::getWindowFor (f, r == 4);
 
-                    if (w != 0)
+                    if (w != nullptr)
                         w->toFront (true);
                 }
             }
@@ -276,8 +276,8 @@ public:
         {
             Point<int> pos (originalPos + Point<int> (e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY()));
 
-            if (getParentComponent() != 0)
-                pos = getParentComponent()->getLocalPoint (0, pos);
+            if (getParentComponent() != nullptr)
+                pos = getParentComponent()->getLocalPoint (nullptr, pos);
 
             graph.setNodePosition (filterID,
                                    (pos.getX() + getWidth() / 2) / (double) getParentWidth(),
@@ -293,11 +293,11 @@ public:
         {
             const AudioProcessorGraph::Node::Ptr f (graph.getNodeForId (filterID));
 
-            if (f != 0)
+            if (f != nullptr)
             {
                 PluginWindow* const w = PluginWindow::getWindowFor (f, false);
 
-                if (w != 0)
+                if (w != nullptr)
                     w->toFront (true);
             }
         }
@@ -343,7 +343,7 @@ public:
         {
             PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i));
 
-            if (pc != 0)
+            if (pc != nullptr)
             {
                 const int total = pc->isInput ? numIns : numOuts;
                 const int index = pc->index == FilterGraph::midiChannelNumber ? (total - 1) : pc->index;
@@ -361,7 +361,7 @@ public:
         {
             PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i));
 
-            if (pc != 0 && pc->index == index && isInput == pc->isInput)
+            if (pc != nullptr && pc->index == index && isInput == pc->isInput)
             {
                 x = getX() + pc->getX() + pc->getWidth() * 0.5f;
                 y = getY() + pc->getY() + pc->getHeight() * 0.5f;
@@ -374,7 +374,7 @@ public:
     {
         const AudioProcessorGraph::Node::Ptr f (graph.getNodeForId (filterID));
 
-        if (f == 0)
+        if (f == nullptr)
         {
             delete this;
             return;
@@ -443,9 +443,9 @@ private:
     int numIns, numOuts;
     DropShadowEffect shadow;
 
-    GraphEditorPanel* getGraphPanel() const throw()
+    GraphEditorPanel* getGraphPanel() const noexcept
     {
-        return findParentComponentOfClass ((GraphEditorPanel*) 0);
+        return findParentComponentOfClass ((GraphEditorPanel*) nullptr);
     }
 
     FilterComponent (const FilterComponent&);
@@ -550,16 +550,16 @@ public:
 
         GraphEditorPanel* const hostPanel = getGraphPanel();
 
-        if (hostPanel != 0)
+        if (hostPanel != nullptr)
         {
             FilterComponent* srcFilterComp = hostPanel->getComponentForFilter (sourceFilterID);
 
-            if (srcFilterComp != 0)
+            if (srcFilterComp != nullptr)
                 srcFilterComp->getPinPos (sourceFilterChannel, false, x1, y1);
 
             FilterComponent* dstFilterComp = hostPanel->getComponentForFilter (destFilterID);
 
-            if (dstFilterComp != 0)
+            if (dstFilterComp != nullptr)
                 dstFilterComp->getPinPos (destFilterChannel, true, x2, y2);
         }
     }
@@ -681,9 +681,9 @@ private:
     Path linePath, hitPath;
     bool dragging;
 
-    GraphEditorPanel* getGraphPanel() const throw()
+    GraphEditorPanel* getGraphPanel() const noexcept
     {
-        return findParentComponentOfClass ((GraphEditorPanel*) 0);
+        return findParentComponentOfClass ((GraphEditorPanel*) nullptr);
     }
 
     void getDistancesFromEnds (int x, int y, double& distanceFromStart, double& distanceFromEnd) const
@@ -702,7 +702,7 @@ private:
 //==============================================================================
 GraphEditorPanel::GraphEditorPanel (FilterGraph& graph_)
     : graph (graph_),
-      draggingConnector (0)
+      draggingConnector (nullptr)
 {
     graph.addChangeListener (this);
     setOpaque (true);
@@ -726,9 +726,9 @@ void GraphEditorPanel::mouseDown (const MouseEvent& e)
     {
         PopupMenu m;
 
-        MainHostWindow* const mainWindow = findParentComponentOfClass ((MainHostWindow*) 0);
+        MainHostWindow* const mainWindow = findParentComponentOfClass ((MainHostWindow*) nullptr);
 
-        if (mainWindow != 0)
+        if (mainWindow != nullptr)
         {
             mainWindow->addPluginsToMenu (m);
 
@@ -750,11 +750,11 @@ FilterComponent* GraphEditorPanel::getComponentForFilter (const uint32 filterID)
     {
         FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i));
 
-        if (fc != 0 && fc->filterID == filterID)
+        if (fc != nullptr && fc->filterID == filterID)
             return fc;
     }
 
-    return 0;
+    return nullptr;
 }
 
 ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProcessorGraph::Connection& conn) const
@@ -763,7 +763,7 @@ ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProc
     {
         ConnectorComponent* const c = dynamic_cast <ConnectorComponent*> (getChildComponent (i));
 
-        if (c != 0
+        if (c != nullptr
              && c->sourceFilterID == conn.sourceNodeId
              && c->destFilterID == conn.destNodeId
              && c->sourceFilterChannel == conn.sourceChannelIndex
@@ -773,7 +773,7 @@ ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProc
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 PinComponent* GraphEditorPanel::findPinAt (const int x, const int y) const
@@ -782,18 +782,18 @@ PinComponent* GraphEditorPanel::findPinAt (const int x, const int y) const
     {
         FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i));
 
-        if (fc != 0)
+        if (fc != nullptr)
         {
             PinComponent* const pin
                 = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(),
                                                                     y - fc->getY()));
 
-            if (pin != 0)
+            if (pin != nullptr)
                 return pin;
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void GraphEditorPanel::resized()
@@ -813,7 +813,7 @@ void GraphEditorPanel::updateComponents()
     {
         FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i));
 
-        if (fc != 0)
+        if (fc != nullptr)
             fc->update();
     }
 
@@ -821,10 +821,10 @@ void GraphEditorPanel::updateComponents()
     {
         ConnectorComponent* const cc = dynamic_cast <ConnectorComponent*> (getChildComponent (i));
 
-        if (cc != 0 && cc != draggingConnector)
+        if (cc != nullptr && cc != draggingConnector)
         {
             if (graph.getConnectionBetween (cc->sourceFilterID, cc->sourceFilterChannel,
-                                            cc->destFilterID, cc->destFilterChannel) == 0)
+                                            cc->destFilterID, cc->destFilterChannel) == nullptr)
             {
                 delete cc;
             }
@@ -869,7 +869,7 @@ void GraphEditorPanel::beginConnectorDrag (const uint32 sourceFilterID, const in
     delete draggingConnector;
     draggingConnector = dynamic_cast <ConnectorComponent*> (e.originalComponent);
 
-    if (draggingConnector == 0)
+    if (draggingConnector == nullptr)
         draggingConnector = new ConnectorComponent (graph);
 
     draggingConnector->setInput (sourceFilterID, sourceFilterChannel);
@@ -885,7 +885,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 {
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
-    if (draggingConnector != 0)
+    if (draggingConnector != nullptr)
     {
         draggingConnector->setTooltip (String::empty);
 
@@ -894,7 +894,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
         PinComponent* const pin = findPinAt (x, y);
 
-        if (pin != 0)
+        if (pin != nullptr)
         {
             uint32 srcFilter = draggingConnector->sourceFilterID;
             int srcChannel = draggingConnector->sourceFilterChannel;
@@ -930,7 +930,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
 void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 {
-    if (draggingConnector == 0)
+    if (draggingConnector == nullptr)
         return;
 
     draggingConnector->setTooltip (String::empty);
@@ -946,7 +946,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 
     PinComponent* const pin = findPinAt (e2.x, e2.y);
 
-    if (pin != 0)
+    if (pin != nullptr)
     {
         if (srcFilter == 0)
         {
@@ -994,7 +994,7 @@ public:
 
         String newTip;
 
-        if (ttc != 0 && ! (underMouse->isMouseButtonDown() || underMouse->isCurrentlyBlockedByAnotherModalComponent()))
+        if (ttc != nullptr && ! (underMouse->isMouseButtonDown() || underMouse->isCurrentlyBlockedByAnotherModalComponent()))
             newTip = ttc->getTooltip();
 
         if (newTip != tip)
@@ -1038,7 +1038,7 @@ GraphDocumentComponent::~GraphDocumentComponent()
 
     deleteAllChildren();
 
-    graphPlayer.setProcessor (0);
+    graphPlayer.setProcessor (nullptr);
     keyState.removeListener (&graphPlayer.getMidiMessageCollector());
 
     graph.clear();

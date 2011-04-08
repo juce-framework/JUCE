@@ -116,6 +116,15 @@ const String SystemStats::getFullUserName()
     return getLogonName();
 }
 
+const String SystemStats::getComputerName()
+{
+    char name [256] = { 0 };
+    if (gethostname (name, sizeof (name) - 1) == 0)
+        return name;
+
+    return String::empty;
+}
+
 //==============================================================================
 void SystemStats::initialiseStats()
 {

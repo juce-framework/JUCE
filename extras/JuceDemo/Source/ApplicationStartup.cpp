@@ -111,6 +111,7 @@ private:
           << "Time and date: " << Time::getCurrentTime().toString (true, true)
           << "\nUser logon name: " << SystemStats::getLogonName()
           << "\nFull user name: " << SystemStats::getFullUserName()
+          << "\nHost name: " << SystemStats::getComputerName()
           << "\nOperating system: " << SystemStats::getOperatingSystemName()
           << "\nCPU vendor: " << SystemStats::getCpuVendor()
           << "\nCPU speed: " << SystemStats::getCpuSpeedInMegaherz() << "MHz"
