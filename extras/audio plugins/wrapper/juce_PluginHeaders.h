@@ -31,6 +31,7 @@
 
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
 
+//==============================================================================
 // Helper class to workaround carbon windows not getting mouse-moves..
 class FakeMouseMoveGenerator  : public Timer
 {
@@ -72,5 +73,58 @@ private:
 #else
 struct FakeMouseMoveGenerator {};
 #endif
+
+
+//==============================================================================
+#if JUCE_SUPPORT_CARBON && JUCE_MAC_WINDOW_VISIBITY_BODGE
+
+/* When you wrap a WindowRef as an NSWindow, it seems to bugger up the HideWindow
+   function, so when the host tries (and fails) to hide the window, this stuff catches
+   the event and forces it to update.
+*/
+static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, void* user)
+{
+    NSWindow* hostWindow = (NSWindow*) user;
+
+    switch (GetEventKind (e))
+    {
+        case kEventWindowInit:    [hostWindow display]; break;
+        case kEventWindowShown:   [hostWindow orderFront: nil]; break;
+        case kEventWindowHidden:  [hostWindow orderOut: nil]; break;
+    }
+
+    return eventNotHandledErr;
+}
+
+static void attachWindowHidingHooks (Component* comp, void* hostWindowRef, NSWindow* nsWindow)
+{
+    const EventTypeSpec eventsToCatch[] =
+    {
+        { kEventClassWindow, kEventWindowInit },
+        { kEventClassWindow, kEventWindowShown },
+        { kEventClassWindow, kEventWindowHidden }
+    };
+
+    EventHandlerRef ref;
+    InstallWindowEventHandler ((WindowRef) hostWindowRef,
+                               NewEventHandlerUPP (windowVisibilityBodge),
+                               GetEventTypeCount (eventsToCatch), eventsToCatch,
+                               (void*) nsWindow, &ref);
+
+    comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+}
+
+static void removeWindowHidingHooks (Component* comp)
+{
+    if (comp != nullptr)
+        RemoveEventHandler ((EventHandlerRef) (void*) (pointer_sized_int)
+                              comp->getProperties() ["carbonEventRef"].toString().getHexValue64());
+}
+
+#else
+ static void attachWindowHidingHooks (void*, void*, void*) {}
+ static void removeWindowHidingHooks (void*) {}
+#endif
+
 
 #endif

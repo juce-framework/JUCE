@@ -31,9 +31,10 @@
 
 // Horrible carbon-based fix for a cocoa bug, where an NSWindow that wraps a carbon
 // window fails to keep its position updated when the user drags the window around..
-#define WINDOWPOSITON_BODGE 1
+#define WINDOWPOSITION_BODGE 1
+#define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
 
-#if WINDOWPOSITON_BODGE
+#if WINDOWPOSITION_BODGE
  #include <Carbon/Carbon.h>
 #endif
 
@@ -68,7 +69,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
 
     NSRect hostWindowScreenFrame = [[hostWindow screen] frame];
 
-#if WINDOWPOSITON_BODGE
+   #if WINDOWPOSITION_BODGE
     {
         Rect winBounds;
         GetWindowBounds ((WindowRef) hostWindowRef, kWindowContentRgn, &winBounds);
@@ -77,7 +78,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
         w.origin.y = hostWindowScreenFrame.size.height + hostWindowScreenFrame.origin.y - winBounds.bottom;
         [hostWindow setFrame: w display: NO animate: NO];
     }
-#endif
+   #endif
 
     NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
     windowPos.x = windowPos.x + jmax (0.0f, (oldWindowFrame.size.width - f.size.width) / 2.0f);
@@ -85,11 +86,11 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
 
     comp->setTopLeftPosition ((int) windowPos.x, (int) windowPos.y);
 
-#if ! JucePlugin_EditorRequiresKeyboardFocus
+   #if ! JucePlugin_EditorRequiresKeyboardFocus
     comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-#else
+   #else
     comp->addToDesktop (ComponentPeer::windowIsTemporary);
-#endif
+   #endif
 
     comp->setVisible (true);
 
@@ -100,6 +101,9 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
                        ordered: NSWindowAbove];
     [hostWindow orderFront: nil];
     [pluginWindow orderFront: nil];
+
+    attachWindowHidingHooks (comp, (WindowRef) hostWindowRef, hostWindow);
+
     return hostWindow;
 }
 
@@ -111,6 +115,7 @@ void removeSubWindow (void* nsWindow, Component* comp)
     NSWindow* hostWindow = (NSWindow*) nsWindow;
     NSWindow* pluginWindow = [pluginView window];
 
+    removeWindowHidingHooks (comp);
     [hostWindow removeChildWindow: pluginWindow];
     comp->removeFromDesktop();
     [hostWindow release];

@@ -31,6 +31,8 @@
 #include <Cocoa/Cocoa.h>
 #include <Carbon/Carbon.h>
 
+#define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
+
 #include "../juce_PluginHeaders.h"
 #include "../juce_PluginHostType.h"
 
@@ -40,33 +42,6 @@
 
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
-
-#if ADD_CARBON_BODGE
-/* When you wrap a WindowRef as an NSWindow, it seems to bugger up the HideWindow
-   function, so when the host tries (and fails) to hide the window, this catches
-   the event and does the job properly.
-*/
-
-static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, void* user)
-{
-    NSWindow* hostWindow = (NSWindow*) user;
-
-    switch (GetEventKind (e))
-    {
-    case kEventWindowInit:
-        [hostWindow display];
-        break;
-    case kEventWindowShown:
-        [hostWindow orderFront: nil];
-        break;
-    case kEventWindowHidden:
-        [hostWindow orderOut: nil];
-        break;
-    }
-
-    return eventNotHandledErr;
-}
-#endif
 
 static void updateComponentPos (Component* const comp)
 {
@@ -176,23 +151,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     [hostWindow orderFront: nil];
     [pluginWindow orderFront: nil];
 
-   #if ADD_CARBON_BODGE
-    {
-        // Adds a callback bodge to work around some problems with wrapped
-        // carbon windows..
-        const EventTypeSpec eventsToCatch[] = {
-            { kEventClassWindow, kEventWindowInit },
-            { kEventClassWindow, kEventWindowShown },
-            { kEventClassWindow, kEventWindowHidden }
-        };
-
-        InstallWindowEventHandler ((WindowRef) windowRef,
-                                   NewEventHandlerUPP (windowVisibilityBodge),
-                                   GetEventTypeCount (eventsToCatch), eventsToCatch,
-                                   (void*) hostWindow, &ref);
-        comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
-    }
-   #endif
+    attachWindowHidingHooks (comp, (WindowRef) windowRef, hostWindow);
 
     return hostWindow;
   #endif
@@ -210,11 +169,7 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
                                     comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
         RemoveEventHandler (ref);
 
-       #if ADD_CARBON_BODGE
-        ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                  comp->getProperties() ["carbonEventRef"].toString().getHexValue64();
-        RemoveEventHandler (ref);
-       #endif
+        removeWindowHidingHooks (comp);
 
         HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                                 comp->getProperties() ["dummyViewRef"].toString().getHexValue64();

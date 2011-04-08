@@ -51,6 +51,8 @@
  class JuceAUView;
 #endif
 
+#define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
+
 #include "../juce_PluginHeaders.h"
 #include "../juce_PluginHostType.h"
 
@@ -1251,22 +1253,14 @@ private:
             NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
             [pluginWindow setNextResponder: hostWindow];
 
-            // Adds a callback bodge to work around some problems with wrapped
-            // carbon windows..
-            const EventTypeSpec eventsToCatch[] = {
-                { kEventClassWindow, kEventWindowShown },
-                { kEventClassWindow, kEventWindowHidden }
-            };
-
-            InstallWindowEventHandler ((WindowRef) windowRef,
-                                       NewEventHandlerUPP (windowVisibilityBodge),
-                                       GetEventTypeCount (eventsToCatch), eventsToCatch,
-                                       (void*) hostWindow, 0);
+            attachWindowHidingHooks (this, (WindowRef) windowRef, hostWindow);
         }
 
         ~ComponentInHIView()
         {
             JUCE_AUTORELEASEPOOL
+
+            removeWindowHidingHooks (this);
 
             NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
             [hostWindow removeChildWindow: pluginWindow];
@@ -1353,27 +1347,6 @@ private:
         NSWindow* hostWindow;
         EditorCompHolder editor;
         bool recursive;
-
-        /* When you wrap a WindowRef as an NSWindow, it seems to bugger up the HideWindow
-           function, so when the host tries (and fails) to hide the window, this catches
-           the event and does the job properly.
-        */
-        static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, void* user)
-        {
-            NSWindow* hostWindow = (NSWindow*) user;
-
-            switch (GetEventKind (e))
-            {
-            case kEventWindowShown:
-                [hostWindow orderFront: nil];
-                break;
-            case kEventWindowHidden:
-                [hostWindow orderOut: nil];
-                break;
-            }
-
-            return eventNotHandledErr;
-        }
     };
 };
 
