@@ -165,40 +165,40 @@
  #include "audio/midi/juce_MidiOutput.h"
 #endif
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
- #include "audio/plugins/formats/juce_AudioUnitPluginFormat.h"
+ #include "audio/plugin_host/formats/juce_AudioUnitPluginFormat.h"
 #endif
 #ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
- #include "audio/plugins/formats/juce_DirectXPluginFormat.h"
+ #include "audio/plugin_host/formats/juce_DirectXPluginFormat.h"
 #endif
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
- #include "audio/plugins/formats/juce_LADSPAPluginFormat.h"
+ #include "audio/plugin_host/formats/juce_LADSPAPluginFormat.h"
 #endif
 #ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
- #include "audio/plugins/formats/juce_VSTMidiEventList.h"
+ #include "audio/plugin_host/formats/juce_VSTMidiEventList.h"
 #endif
 #ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
- #include "audio/plugins/formats/juce_VSTPluginFormat.h"
+ #include "audio/plugin_host/formats/juce_VSTPluginFormat.h"
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
- #include "audio/plugins/juce_AudioPluginFormat.h"
+ #include "audio/plugin_host/juce_AudioPluginFormat.h"
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
- #include "audio/plugins/juce_AudioPluginFormatManager.h"
+ #include "audio/plugin_host/juce_AudioPluginFormatManager.h"
 #endif
 #ifndef __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
- #include "audio/plugins/juce_AudioPluginInstance.h"
+ #include "audio/plugin_host/juce_AudioPluginInstance.h"
 #endif
 #ifndef __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
- #include "audio/plugins/juce_KnownPluginList.h"
+ #include "audio/plugin_host/juce_KnownPluginList.h"
 #endif
 #ifndef __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
- #include "audio/plugins/juce_PluginDescription.h"
+ #include "audio/plugin_host/juce_PluginDescription.h"
 #endif
 #ifndef __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
- #include "audio/plugins/juce_PluginDirectoryScanner.h"
+ #include "audio/plugin_host/juce_PluginDirectoryScanner.h"
 #endif
 #ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
- #include "audio/plugins/juce_PluginListComponent.h"
+ #include "audio/plugin_host/juce_PluginListComponent.h"
 #endif
 #ifndef __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
  #include "audio/processors/juce_AudioPlayHead.h"

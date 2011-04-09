@@ -222,97 +222,97 @@
           <FILE id="EkOemA" name="juce_MidiOutput.h" compile="0" resource="0"
                 file="src/audio/midi/juce_MidiOutput.h"/>
         </GROUP>
-        <GROUP id="rWnJUOyOY" name="plugins">
-          <GROUP id="2KbZnNZ" name="wrapper code">
-            <GROUP id="XD6F6id" name="AU">
-              <FILE id="g8u7Ehw" name="juce_AU_Wrapper.mm" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/AU/juce_AU_Wrapper.mm"/>
-            </GROUP>
-            <GROUP id="3smzJJ1" name="RTAS">
-              <FILE id="Oi5d14V" name="juce_RTAS_DigiCode_Header.h" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode_Header.h"/>
-              <FILE id="cEggbzN" name="juce_RTAS_DigiCode1.cpp" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode1.cpp"/>
-              <FILE id="dVVlniW" name="juce_RTAS_DigiCode2.cpp" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode2.cpp"/>
-              <FILE id="ydwdTzy" name="juce_RTAS_DigiCode3.cpp" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode3.cpp"/>
-              <FILE id="ehXpXBw" name="juce_RTAS_MacUtilities.mm" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_MacUtilities.mm"/>
-              <FILE id="0mzLwTq" name="juce_RTAS_WinUtilities.cpp" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_WinUtilities.cpp"/>
-              <FILE id="z4sBC3E" name="juce_RTAS_Wrapper.cpp" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/RTAS/juce_RTAS_Wrapper.cpp"/>
-            </GROUP>
-            <GROUP id="YuP52Pz" name="VST">
-              <FILE id="VDMcLoB" name="juce_VST_Wrapper.cpp" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/VST/juce_VST_Wrapper.cpp"/>
-              <FILE id="XhNhfUW" name="juce_VST_Wrapper.mm" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/VST/juce_VST_Wrapper.mm"/>
-            </GROUP>
-            <GROUP id="hhHHjJZ" name="Standalone">
-              <FILE id="0aPHUJq" name="juce_AudioFilterStreamer.cpp" compile="0"
-                    resource="0" file="extras/audio plugins/wrapper/Standalone/juce_AudioFilterStreamer.cpp"/>
-              <FILE id="6ml8N6N" name="juce_AudioFilterStreamer.h" compile="0" resource="0"
-                    file="extras/audio plugins/wrapper/Standalone/juce_AudioFilterStreamer.h"/>
-              <FILE id="l0R8qQC" name="juce_StandaloneFilterWindow.cpp" compile="0"
-                    resource="0" file="extras/audio plugins/wrapper/Standalone/juce_StandaloneFilterWindow.cpp"/>
-              <FILE id="OZmMutP" name="juce_StandaloneFilterWindow.h" compile="0"
-                    resource="0" file="extras/audio plugins/wrapper/Standalone/juce_StandaloneFilterWindow.h"/>
-            </GROUP>
-            <FILE id="oIRLyr" name="juce_IncludeCharacteristics.h" compile="0"
-                  resource="0" file="extras/audio plugins/wrapper/juce_IncludeCharacteristics.h"/>
-            <FILE id="UXGF34T" name="juce_PluginHeaders.h" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/juce_PluginHeaders.h"/>
-            <FILE id="FYLoUYQ" name="juce_PluginHostType.h" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/juce_PluginHostType.h"/>
+        <GROUP id="2KbZnNZ" name="plugin_client">
+          <GROUP id="XD6F6id" name="AU">
+            <FILE id="g8u7Ehw" name="juce_AU_Wrapper.mm" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/AU/juce_AU_Wrapper.mm"/>
           </GROUP>
-          <GROUP id="8kNdYQE9H" name="formats">
-            <FILE id="rzrBqySg9" name="juce_AudioUnitPluginFormat.h" compile="0"
-                  resource="0" file="src/audio/plugins/formats/juce_AudioUnitPluginFormat.h"/>
-            <FILE id="gVZnIyoqA" name="juce_AudioUnitPluginFormat.mm" compile="1"
-                  resource="0" file="src/audio/plugins/formats/juce_AudioUnitPluginFormat.mm"/>
-            <FILE id="QprgwuFM" name="juce_DirectXPluginFormat.h" compile="0" resource="0"
-                  file="src/audio/plugins/formats/juce_DirectXPluginFormat.h"/>
-            <FILE id="0gAeJXCcg" name="juce_LADSPAPluginFormat.h" compile="0" resource="0"
-                  file="src/audio/plugins/formats/juce_LADSPAPluginFormat.h"/>
-            <FILE id="2bsu4aay3" name="juce_VSTMidiEventList.h" compile="0" resource="0"
-                  file="src/audio/plugins/formats/juce_VSTMidiEventList.h"/>
-            <FILE id="UHhuUBpt4" name="juce_VSTPluginFormat.cpp" compile="1" resource="0"
-                  file="src/audio/plugins/formats/juce_VSTPluginFormat.cpp"/>
-            <FILE id="t0rwEFLgZ" name="juce_VSTPluginFormat.h" compile="0" resource="0"
-                  file="src/audio/plugins/formats/juce_VSTPluginFormat.h"/>
-            <FILE id="snTslBV0E" name="juce_VSTPluginFormat.mm" compile="1" resource="0"
-                  file="src/audio/plugins/formats/juce_VSTPluginFormat.mm"/>
+          <GROUP id="3smzJJ1" name="RTAS">
+            <FILE id="Oi5d14V" name="juce_RTAS_DigiCode_Header.h" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode_Header.h"/>
+            <FILE id="cEggbzN" name="juce_RTAS_DigiCode1.cpp" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode1.cpp"/>
+            <FILE id="dVVlniW" name="juce_RTAS_DigiCode2.cpp" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode2.cpp"/>
+            <FILE id="ydwdTzy" name="juce_RTAS_DigiCode3.cpp" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode3.cpp"/>
+            <FILE id="ehXpXBw" name="juce_RTAS_MacUtilities.mm" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_MacUtilities.mm"/>
+            <FILE id="0mzLwTq" name="juce_RTAS_WinUtilities.cpp" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_WinUtilities.cpp"/>
+            <FILE id="z4sBC3E" name="juce_RTAS_Wrapper.cpp" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_Wrapper.cpp"/>
           </GROUP>
-          <FILE id="6fimzsZF" name="juce_AudioPluginFormat.cpp" compile="1" resource="0"
-                file="src/audio/plugins/juce_AudioPluginFormat.cpp"/>
-          <FILE id="Ps29NEenH" name="juce_AudioPluginFormat.h" compile="0" resource="0"
-                file="src/audio/plugins/juce_AudioPluginFormat.h"/>
-          <FILE id="E4Fjo7S6" name="juce_AudioPluginFormatManager.cpp" compile="1"
-                resource="0" file="src/audio/plugins/juce_AudioPluginFormatManager.cpp"/>
-          <FILE id="57pdjSyk" name="juce_AudioPluginFormatManager.h" compile="0"
-                resource="0" file="src/audio/plugins/juce_AudioPluginFormatManager.h"/>
-          <FILE id="tp0YD0hOM" name="juce_AudioPluginInstance.cpp" compile="1"
-                resource="0" file="src/audio/plugins/juce_AudioPluginInstance.cpp"/>
-          <FILE id="3o7HPO42q" name="juce_AudioPluginInstance.h" compile="0"
-                resource="0" file="src/audio/plugins/juce_AudioPluginInstance.h"/>
-          <FILE id="w2K6ASHDM" name="juce_KnownPluginList.cpp" compile="1" resource="0"
-                file="src/audio/plugins/juce_KnownPluginList.cpp"/>
-          <FILE id="q1qZ6zLHa" name="juce_KnownPluginList.h" compile="0" resource="0"
-                file="src/audio/plugins/juce_KnownPluginList.h"/>
-          <FILE id="JgG92OfXv" name="juce_PluginDescription.cpp" compile="1"
-                resource="0" file="src/audio/plugins/juce_PluginDescription.cpp"/>
-          <FILE id="uFaaSitp" name="juce_PluginDescription.h" compile="0" resource="0"
-                file="src/audio/plugins/juce_PluginDescription.h"/>
-          <FILE id="wqSXU9SY" name="juce_PluginDirectoryScanner.cpp" compile="1"
-                resource="0" file="src/audio/plugins/juce_PluginDirectoryScanner.cpp"/>
-          <FILE id="NauyAXmkD" name="juce_PluginDirectoryScanner.h" compile="0"
-                resource="0" file="src/audio/plugins/juce_PluginDirectoryScanner.h"/>
-          <FILE id="TLzUY22j" name="juce_PluginListComponent.cpp" compile="1"
-                resource="0" file="src/audio/plugins/juce_PluginListComponent.cpp"/>
-          <FILE id="Ejnmx7FCp" name="juce_PluginListComponent.h" compile="0"
-                resource="0" file="src/audio/plugins/juce_PluginListComponent.h"/>
+          <GROUP id="YuP52Pz" name="VST">
+            <FILE id="VDMcLoB" name="juce_VST_Wrapper.cpp" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/VST/juce_VST_Wrapper.cpp"/>
+            <FILE id="XhNhfUW" name="juce_VST_Wrapper.mm" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/VST/juce_VST_Wrapper.mm"/>
+          </GROUP>
+          <GROUP id="hhHHjJZ" name="Standalone">
+            <FILE id="0aPHUJq" name="juce_AudioFilterStreamer.cpp" compile="0"
+                  resource="0" file="extras/audio plugins/wrapper/Standalone/juce_AudioFilterStreamer.cpp"/>
+            <FILE id="6ml8N6N" name="juce_AudioFilterStreamer.h" compile="0" resource="0"
+                  file="extras/audio plugins/wrapper/Standalone/juce_AudioFilterStreamer.h"/>
+            <FILE id="l0R8qQC" name="juce_StandaloneFilterWindow.cpp" compile="0"
+                  resource="0" file="extras/audio plugins/wrapper/Standalone/juce_StandaloneFilterWindow.cpp"/>
+            <FILE id="OZmMutP" name="juce_StandaloneFilterWindow.h" compile="0"
+                  resource="0" file="extras/audio plugins/wrapper/Standalone/juce_StandaloneFilterWindow.h"/>
+          </GROUP>
+          <FILE id="oIRLyr" name="juce_IncludeCharacteristics.h" compile="0"
+                resource="0" file="extras/audio plugins/wrapper/juce_IncludeCharacteristics.h"/>
+          <FILE id="UXGF34T" name="juce_PluginHeaders.h" compile="0" resource="0"
+                file="extras/audio plugins/wrapper/juce_PluginHeaders.h"/>
+          <FILE id="FYLoUYQ" name="juce_PluginHostType.h" compile="0" resource="0"
+                file="extras/audio plugins/wrapper/juce_PluginHostType.h"/>
+        </GROUP>
+        <GROUP id="rWnJUOyOY" name="plugin_host">
+          <GROUP id="CCwLdZ" name="formats">
+            <FILE id="hh7SnA" name="juce_AudioUnitPluginFormat.h" compile="0" resource="0"
+                  file="src/audio/plugin_host/formats/juce_AudioUnitPluginFormat.h"/>
+            <FILE id="AfNw9t" name="juce_AudioUnitPluginFormat.mm" compile="1"
+                  resource="0" file="src/audio/plugin_host/formats/juce_AudioUnitPluginFormat.mm"/>
+            <FILE id="BNC3qF" name="juce_DirectXPluginFormat.h" compile="0" resource="0"
+                  file="src/audio/plugin_host/formats/juce_DirectXPluginFormat.h"/>
+            <FILE id="zPhnRC" name="juce_LADSPAPluginFormat.h" compile="0" resource="0"
+                  file="src/audio/plugin_host/formats/juce_LADSPAPluginFormat.h"/>
+            <FILE id="GzFTU" name="juce_VSTMidiEventList.h" compile="0" resource="0"
+                  file="src/audio/plugin_host/formats/juce_VSTMidiEventList.h"/>
+            <FILE id="fKEujM" name="juce_VSTPluginFormat.cpp" compile="1" resource="0"
+                  file="src/audio/plugin_host/formats/juce_VSTPluginFormat.cpp"/>
+            <FILE id="xRvvTs" name="juce_VSTPluginFormat.h" compile="0" resource="0"
+                  file="src/audio/plugin_host/formats/juce_VSTPluginFormat.h"/>
+            <FILE id="veVxmN" name="juce_VSTPluginFormat.mm" compile="1" resource="0"
+                  file="src/audio/plugin_host/formats/juce_VSTPluginFormat.mm"/>
+          </GROUP>
+          <FILE id="LADvRi" name="juce_AudioPluginFormat.cpp" compile="1" resource="0"
+                file="src/audio/plugin_host/juce_AudioPluginFormat.cpp"/>
+          <FILE id="zstatz" name="juce_AudioPluginFormat.h" compile="0" resource="0"
+                file="src/audio/plugin_host/juce_AudioPluginFormat.h"/>
+          <FILE id="ERahZN" name="juce_AudioPluginFormatManager.cpp" compile="1"
+                resource="0" file="src/audio/plugin_host/juce_AudioPluginFormatManager.cpp"/>
+          <FILE id="B5LxiQ" name="juce_AudioPluginFormatManager.h" compile="0"
+                resource="0" file="src/audio/plugin_host/juce_AudioPluginFormatManager.h"/>
+          <FILE id="VKCA5h" name="juce_AudioPluginInstance.cpp" compile="1" resource="0"
+                file="src/audio/plugin_host/juce_AudioPluginInstance.cpp"/>
+          <FILE id="eUQAKu" name="juce_AudioPluginInstance.h" compile="0" resource="0"
+                file="src/audio/plugin_host/juce_AudioPluginInstance.h"/>
+          <FILE id="Wvtvb" name="juce_KnownPluginList.cpp" compile="1" resource="0"
+                file="src/audio/plugin_host/juce_KnownPluginList.cpp"/>
+          <FILE id="pvinPb" name="juce_KnownPluginList.h" compile="0" resource="0"
+                file="src/audio/plugin_host/juce_KnownPluginList.h"/>
+          <FILE id="J2HbHq" name="juce_PluginDescription.cpp" compile="1" resource="0"
+                file="src/audio/plugin_host/juce_PluginDescription.cpp"/>
+          <FILE id="VyfHqh" name="juce_PluginDescription.h" compile="0" resource="0"
+                file="src/audio/plugin_host/juce_PluginDescription.h"/>
+          <FILE id="AfcYSP" name="juce_PluginDirectoryScanner.cpp" compile="1"
+                resource="0" file="src/audio/plugin_host/juce_PluginDirectoryScanner.cpp"/>
+          <FILE id="flNupx" name="juce_PluginDirectoryScanner.h" compile="0"
+                resource="0" file="src/audio/plugin_host/juce_PluginDirectoryScanner.h"/>
+          <FILE id="cT3l51" name="juce_PluginListComponent.cpp" compile="1" resource="0"
+                file="src/audio/plugin_host/juce_PluginListComponent.cpp"/>
+          <FILE id="R0Q7LQ" name="juce_PluginListComponent.h" compile="0" resource="0"
+                file="src/audio/plugin_host/juce_PluginListComponent.h"/>
         </GROUP>
         <GROUP id="VJgz2smu3" name="processors">
           <FILE id="MMpl452A7" name="juce_AudioPlayHead.h" compile="0" resource="0"

@@ -71,7 +71,7 @@ const StringPairArray WavAudioFormat::createBWAVMetadata (const String& descript
 //==============================================================================
 namespace WavFileHelpers
 {
-	inline int chunkName (const char* const name) noexcept   { return (int) ByteOrder::littleEndianInt (name); }
+    inline int chunkName (const char* const name) noexcept   { return (int) ByteOrder::littleEndianInt (name); }
 
 #if JUCE_MSVC
   #pragma pack (push, 1)
@@ -244,68 +244,68 @@ struct SMPLChunk
 //==============================================================================
 struct CueChunk
 {
-	struct Cue
-	{
-		uint32 identifier;
-		uint32 order;
-		uint32 chunkID;
-		uint32 chunkStart;
-		uint32 blockStart;
-		uint32 offset;
-	} PACKED;
-
-	uint32 numCues;
-	Cue cues[1];
-
-	void copyTo (StringPairArray& values, const int totalSize) const
+    struct Cue
     {
-		values.set ("NumCuePoints", String (ByteOrder::swapIfBigEndian (numCues)));
+        uint32 identifier;
+        uint32 order;
+        uint32 chunkID;
+        uint32 chunkStart;
+        uint32 blockStart;
+        uint32 offset;
+    } PACKED;
 
-		for (uint32 i = 0; i < numCues; ++i)
-		{
-			if ((uint8*) (cues + (i + 1)) > ((uint8*) this) + totalSize)
+    uint32 numCues;
+    Cue cues[1];
+
+    void copyTo (StringPairArray& values, const int totalSize) const
+    {
+        values.set ("NumCuePoints", String (ByteOrder::swapIfBigEndian (numCues)));
+
+        for (uint32 i = 0; i < numCues; ++i)
+        {
+            if ((uint8*) (cues + (i + 1)) > ((uint8*) this) + totalSize)
                 break;
 
-			const String prefix ("Cue" + String(i));
-			values.set (prefix + "Identifier",	String (ByteOrder::swapIfBigEndian (cues[i].identifier)));
-			values.set (prefix + "Order",		String (ByteOrder::swapIfBigEndian (cues[i].order)));
-			values.set (prefix + "ChunkID",		String (ByteOrder::swapIfBigEndian (cues[i].chunkID)));
-			values.set (prefix + "ChunkStart",	String (ByteOrder::swapIfBigEndian (cues[i].chunkStart)));
-			values.set (prefix + "BlockStart",	String (ByteOrder::swapIfBigEndian (cues[i].blockStart)));
-			values.set (prefix + "Offset",		String (ByteOrder::swapIfBigEndian (cues[i].offset)));
-		}
-	}
+            const String prefix ("Cue" + String(i));
+            values.set (prefix + "Identifier",  String (ByteOrder::swapIfBigEndian (cues[i].identifier)));
+            values.set (prefix + "Order",       String (ByteOrder::swapIfBigEndian (cues[i].order)));
+            values.set (prefix + "ChunkID",     String (ByteOrder::swapIfBigEndian (cues[i].chunkID)));
+            values.set (prefix + "ChunkStart",  String (ByteOrder::swapIfBigEndian (cues[i].chunkStart)));
+            values.set (prefix + "BlockStart",  String (ByteOrder::swapIfBigEndian (cues[i].blockStart)));
+            values.set (prefix + "Offset",      String (ByteOrder::swapIfBigEndian (cues[i].offset)));
+        }
+    }
 
-	static MemoryBlock createFrom (const StringPairArray& values)
+    static MemoryBlock createFrom (const StringPairArray& values)
     {
-		const int numCues = values.getValue ("NumCuePoints", "0").getIntValue();
+        const int numCues = values.getValue ("NumCuePoints", "0").getIntValue();
 
-		if (numCues <= 0)
+        if (numCues <= 0)
             return MemoryBlock();
 
-		const size_t sizeNeeded = sizeof (CueChunk) + (numCues - 1) * sizeof (Cue);
-		MemoryBlock data ((sizeNeeded + 3) & ~3);
-		data.fillWith (0);
+        const size_t sizeNeeded = sizeof (CueChunk) + (numCues - 1) * sizeof (Cue);
+        MemoryBlock data ((sizeNeeded + 3) & ~3);
+        data.fillWith (0);
 
-		CueChunk* const c = static_cast <CueChunk*> (data.getData());
+        CueChunk* const c = static_cast <CueChunk*> (data.getData());
 
-		c->numCues = ByteOrder::swapIfBigEndian ((uint32) numCues);
+        c->numCues = ByteOrder::swapIfBigEndian ((uint32) numCues);
 
-		const String dataChunkID (chunkName ("data"));
+        const String dataChunkID (chunkName ("data"));
 
-		for (int i = 0; i < numCues; ++i)
-		{
-			const String prefix ("Cue" + String(i));
-			c->cues[i].identifier	= ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Identifier", "0").getIntValue());
-			c->cues[i].order		= ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Order", "0").getIntValue());
-			c->cues[i].chunkID		= ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "ChunkID", dataChunkID).getIntValue());
-			c->cues[i].chunkStart	= ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "ChunkStart", "0").getIntValue());
-			c->cues[i].blockStart	= ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "BlockStart", "0").getIntValue());
-			c->cues[i].offset		= ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Offset", "0").getIntValue());
-		}
+        for (int i = 0; i < numCues; ++i)
+        {
+            const String prefix ("Cue" + String(i));
+            c->cues[i].identifier   = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Identifier", "0").getIntValue());
+            c->cues[i].order        = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Order", "0").getIntValue());
+            c->cues[i].chunkID      = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "ChunkID", dataChunkID).getIntValue());
+            c->cues[i].chunkStart   = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "ChunkStart", "0").getIntValue());
+            c->cues[i].blockStart   = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "BlockStart", "0").getIntValue());
+            c->cues[i].offset       = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Offset", "0").getIntValue());
+        }
 
-		return data;
-	}
+        return data;
+    }
 
 } PACKED;
 
@@ -479,13 +479,13 @@ public:
                     input->read (smpl, length);
                     smpl->copyTo (metadataValues, length);
                 }
-				else if (chunkType == chunkName ("cue "))
-				{
-					HeapBlock <CueChunk> cue;
+                else if (chunkType == chunkName ("cue "))
+                {
+                    HeapBlock <CueChunk> cue;
                     cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
                     input->read (cue, length);
                     cue->copyTo (metadataValues, length);
-				}
+                }
                 else if (chunkEnd <= input->getPosition())
                 {
                     break;
@@ -578,7 +578,7 @@ public:
         {
             bwavChunk = BWAVChunk::createFrom (metadataValues);
             smplChunk = SMPLChunk::createFrom (metadataValues);
-			cueChunk  = CueChunk ::createFrom (metadataValues);
+            cueChunk  = CueChunk ::createFrom (metadataValues);
         }
 
         headerPosition = out->getPosition();
@@ -675,7 +675,7 @@ private:
                                + 8 + audioDataSize + (audioDataSize & 1)
                                + (bwavChunk.getSize() > 0 ? (8 + bwavChunk.getSize()) : 0)
                                + (smplChunk.getSize() > 0 ? (8 + smplChunk.getSize()) : 0)
-							   + (cueChunk .getSize() > 0 ? (8 + cueChunk .getSize()) : 0)
+                               + (cueChunk .getSize() > 0 ? (8 + cueChunk .getSize()) : 0)
                                + (8 + 28); // (ds64 chunk)
 
         riffChunkSize += (riffChunkSize & 0x1);
@@ -754,7 +754,7 @@ private:
             output->write (smplChunk.getData(), (int) smplChunk.getSize());
         }
 
-		if (cueChunk.getSize() > 0)
+        if (cueChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("cue "));
             output->writeInt ((int) cueChunk.getSize());

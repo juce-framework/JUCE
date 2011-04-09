@@ -27,8 +27,8 @@
 #define __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
 
 #include "juce_AudioProcessor.h"
-#include "../plugins/juce_AudioPluginFormatManager.h"
-#include "../plugins/juce_KnownPluginList.h"
+#include "../plugin_host/juce_AudioPluginFormatManager.h"
+#include "../plugin_host/juce_KnownPluginList.h"
 #include "../../containers/juce_NamedValueSet.h"
 #include "../../containers/juce_ReferenceCountedArray.h"
 

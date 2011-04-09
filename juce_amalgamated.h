@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	71
+#define JUCE_BUILDNUMBER	72
 
 /** Current Juce version number.
 
@@ -758,6 +758,10 @@ namespace JuceDummyNamespace {}
  #if __has_feature (cxx_noexcept) // (NB: do not add this test to the previous line)
   #define JUCE_COMPILER_SUPPORTS_CXX2011 1
  #endif
+#endif
+
+#if defined (_MSC_VER) && _MSC_VER >= 1600
+ //#define JUCE_COMPILER_SUPPORTS_CXX2011 1
 #endif
 
 #if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_CXX2011)
@@ -21444,7 +21448,7 @@ public:
 	WeakReference& operator= (const WeakReference& other)	   { holder = other.holder; return *this; }
 
 	/** Copies another pointer to this one. */
-	WeakReference& operator= (ObjectType* const newObject)	  { holder = newObject != nullptr ? newObject->getWeakReference() : nullptr; return *this; }
+	WeakReference& operator= (ObjectType* const newObject)	  { holder = (newObject != nullptr) ? newObject->getWeakReference() : nullptr; return *this; }
 
 	/** Returns the object that this pointer refers to, or null if the object no longer exists. */
 	ObjectType* get() const noexcept				{ return holder != nullptr ? holder->get() : nullptr; }
