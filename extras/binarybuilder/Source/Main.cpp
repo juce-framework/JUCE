@@ -24,7 +24,7 @@ static int addFile (const File& file,
     const String name (file.getFileName().toLowerCase()
                            .replaceCharacter (' ', '_')
                            .replaceCharacter ('.', '_')
-                           .retainCharacters (T("abcdefghijklmnopqrstuvwxyz_0123456789")));
+                           .retainCharacters ("abcdefghijklmnopqrstuvwxyz_0123456789"));
 
     std::cout << "Adding " << name << ": "
               << (int) mb.getSize() << " bytes" << std::endl;
@@ -60,9 +60,9 @@ static int addFile (const File& file,
 
 static bool isHiddenFile (const File& f, const File& root)
 {
-    return f.getFileName().endsWithIgnoreCase (T(".scc"))
-         || f.getFileName() == T(".svn")
-         || f.getFileName().startsWithChar (T('.'))
+    return f.getFileName().endsWithIgnoreCase (".scc")
+         || f.getFileName() == ".svn"
+         || f.getFileName().startsWithChar ('.')
          || (f.getSize() == 0 && ! f.isDirectory())
          || (f.getParentDirectory() != root && isHiddenFile (f.getParentDirectory(), root));
 }
@@ -117,8 +117,8 @@ int main (int argc, char* argv[])
     String className (argv[3]);
     className = className.trim();
 
-    const File headerFile (destDirectory.getChildFile (className).withFileExtension (T(".h")));
-    const File cppFile    (destDirectory.getChildFile (className).withFileExtension (T(".cpp")));
+    const File headerFile (destDirectory.getChildFile (className).withFileExtension (".h"));
+    const File cppFile    (destDirectory.getChildFile (className).withFileExtension (".cpp"));
 
     std::cout << "Creating " << headerFile.getFullPathName()
               << " and " << cppFile.getFullPathName()

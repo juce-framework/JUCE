@@ -415,7 +415,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
         {
 /*            AboutBoxComponent aboutComp;
 
-            DialogWindow::showModalDialog (T("About"),
+            DialogWindow::showModalDialog ("About",
                                            &aboutComp,
                                            this, Colours::white,
                                            true, false, false);
@@ -439,7 +439,7 @@ void MainHostWindow::showAudioSettings()
 
     audioSettingsComp.setSize (500, 450);
 
-    DialogWindow::showModalDialog (T("Audio Settings"),
+    DialogWindow::showModalDialog ("Audio Settings",
                                    &audioSettingsComp,
                                    this,
                                    Colours::azure,
@@ -448,7 +448,7 @@ void MainHostWindow::showAudioSettings()
     XmlElement* const audioState = deviceManager.createStateXml();
 
     ApplicationProperties::getInstance()->getUserSettings()
-        ->setValue (T("audioDeviceState"), audioState);
+        ->setValue ("audioDeviceState", audioState);
 
     delete audioState;
 

@@ -184,8 +184,11 @@ const String SystemStats::getFullUserName()
 
 const String SystemStats::getComputerName()
 {
-    return nsStringToJuce ([[NSProcessInfo processInfo] hostName])
-            .upToLastOccurrenceOf (".local", false, true);
+    char name [256] = { 0 };
+    if (gethostname (name, sizeof (name) - 1) == 0)
+        return String (name).upToLastOccurrenceOf (".local", false, true);
+
+    return String::empty;
 }
 
 //==============================================================================

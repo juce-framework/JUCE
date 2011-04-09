@@ -243,31 +243,23 @@ const String FilterGraph::getDocumentTitle()
 const String FilterGraph::loadDocument (const File& file)
 {
     XmlDocument doc (file);
-    XmlElement* xml = doc.getDocumentElement();
+    ScopedPointer<XmlElement> xml (doc.getDocumentElement());
 
-    if (xml == nullptr || ! xml->hasTagName (T("FILTERGRAPH")))
-    {
-        delete xml;
+    if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
         return "Not a valid filter graph file";
-    }
 
     restoreFromXml (*xml);
-    delete xml;
-
     return String::empty;
 }
 
 const String FilterGraph::saveDocument (const File& file)
 {
-    XmlElement* xml = createXml();
-
-    String error;
+    ScopedPointer<XmlElement> xml (createXml());
 
     if (! xml->writeToFile (file, String::empty))
-        error = "Couldn't write to the file";
+        return "Couldn't write to the file";
 
-    delete xml;
-    return error;
+    return String::empty;
 }
 
 const File FilterGraph::getLastDocumentOpened()
@@ -303,14 +295,13 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
     }
 
     XmlElement* e = new XmlElement ("FILTER");
-    e->setAttribute (T("uid"), (int) node->id);
-    e->setAttribute (T("x"), node->properties ["x"].toString());
-    e->setAttribute (T("y"), node->properties ["y"].toString());
-    e->setAttribute (T("uiLastX"), node->properties ["uiLastX"].toString());
-    e->setAttribute (T("uiLastY"), node->properties ["uiLastY"].toString());
+    e->setAttribute ("uid", (int) node->id);
+    e->setAttribute ("x", node->properties ["x"].toString());
+    e->setAttribute ("y", node->properties ["y"].toString());
+    e->setAttribute ("uiLastX", node->properties ["uiLastX"].toString());
+    e->setAttribute ("uiLastY", node->properties ["uiLastY"].toString());
 
     PluginDescription pd;
-
     plugin->fillInPluginDescription (pd);
 
     e->addChildElement (pd.createXml());
@@ -348,9 +339,9 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     if (instance == nullptr)
         return;
 
-    AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, xml.getIntAttribute (T("uid"))));
+    AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, xml.getIntAttribute ("uid")));
 
-    const XmlElement* const state = xml.getChildByName (T("STATE"));
+    const XmlElement* const state = xml.getChildByName ("STATE");
 
     if (state != nullptr)
     {
@@ -360,10 +351,10 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
         node->getProcessor()->setStateInformation (m.getData(), (int) m.getSize());
     }
 
-    node->properties.set ("x", xml.getDoubleAttribute (T("x")));
-    node->properties.set ("y", xml.getDoubleAttribute (T("y")));
-    node->properties.set ("uiLastX", xml.getIntAttribute (T("uiLastX")));
-    node->properties.set ("uiLastY", xml.getIntAttribute (T("uiLastY")));
+    node->properties.set ("x", xml.getDoubleAttribute ("x"));
+    node->properties.set ("y", xml.getDoubleAttribute ("y"));
+    node->properties.set ("uiLastX", xml.getIntAttribute ("uiLastX"));
+    node->properties.set ("uiLastY", xml.getIntAttribute ("uiLastY"));
 }
 
 XmlElement* FilterGraph::createXml() const
@@ -382,10 +373,10 @@ XmlElement* FilterGraph::createXml() const
 
         XmlElement* e = new XmlElement ("CONNECTION");
 
-        e->setAttribute (T("srcFilter"), (int) fc->sourceNodeId);
-        e->setAttribute (T("srcChannel"), fc->sourceChannelIndex);
-        e->setAttribute (T("dstFilter"), (int) fc->destNodeId);
-        e->setAttribute (T("dstChannel"), fc->destChannelIndex);
+        e->setAttribute ("srcFilter", (int) fc->sourceNodeId);
+        e->setAttribute ("srcChannel", fc->sourceChannelIndex);
+        e->setAttribute ("dstFilter", (int) fc->destNodeId);
+        e->setAttribute ("dstChannel", fc->destChannelIndex);
 
         xml->addChildElement (e);
     }
@@ -397,18 +388,18 @@ void FilterGraph::restoreFromXml (const XmlElement& xml)
 {
     clear();
 
-    forEachXmlChildElementWithTagName (xml, e, T("FILTER"))
+    forEachXmlChildElementWithTagName (xml, e, "FILTER")
     {
         createNodeFromXml (*e);
         changed();
     }
 
-    forEachXmlChildElementWithTagName (xml, e, T("CONNECTION"))
+    forEachXmlChildElementWithTagName (xml, e, "CONNECTION")
     {
-        addConnection ((uint32) e->getIntAttribute (T("srcFilter")),
-                       e->getIntAttribute (T("srcChannel")),
-                       (uint32) e->getIntAttribute (T("dstFilter")),
-                       e->getIntAttribute (T("dstChannel")));
+        addConnection ((uint32) e->getIntAttribute ("srcFilter"),
+                       e->getIntAttribute ("srcChannel"),
+                       (uint32) e->getIntAttribute ("dstFilter"),
+                       e->getIntAttribute ("dstChannel"));
     }
 
     graph.removeIllegalConnections();

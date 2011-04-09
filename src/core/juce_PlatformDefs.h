@@ -273,6 +273,10 @@
  #endif
 #endif
 
+#if defined (_MSC_VER) && _MSC_VER >= 1600
+ //#define JUCE_COMPILER_SUPPORTS_CXX2011 1
+#endif
+
 #if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_CXX2011)
  #define noexcept  throw()  // for c++98 compilers, we can fake these newer language features.
  #define nullptr   (0)
