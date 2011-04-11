@@ -44,9 +44,13 @@ const char* const projectItemDragType   = "Project Items";
 const char* const drawableItemDragType  = "Drawable Items";
 const char* const componentItemDragType = "Components";
 
-const char* const sourceFileExtensions  = "cpp;mm;m;c;cc;cxx";
-const char* const headerFileExtensions  = "h;hpp;hxx";
-const char* const sourceOrHeaderFileExtensions = "cpp;mm;m;c;cc;cxx;h;hpp;hxx";
+const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx";
+const char* const headerFileExtensions          = "h;hpp;hxx";
+const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx";
 
+#define JUCE_PLUGINS_ROOT       "src/audio/plugin_client/"
+#define JUCE_PLUGINS_PATH_VST   JUCE_PLUGINS_ROOT "VST/"
+#define JUCE_PLUGINS_PATH_RTAS  JUCE_PLUGINS_ROOT "RTAS/"
+#define JUCE_PLUGINS_PATH_AU    JUCE_PLUGINS_ROOT "AU/"
 
 #endif

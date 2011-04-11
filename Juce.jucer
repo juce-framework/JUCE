@@ -225,46 +225,46 @@
         <GROUP id="2KbZnNZ" name="plugin_client">
           <GROUP id="XD6F6id" name="AU">
             <FILE id="g8u7Ehw" name="juce_AU_Wrapper.mm" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/AU/juce_AU_Wrapper.mm"/>
+                  file="src/audio/plugin_client/AU/juce_AU_Wrapper.mm"/>
           </GROUP>
           <GROUP id="3smzJJ1" name="RTAS">
             <FILE id="Oi5d14V" name="juce_RTAS_DigiCode_Header.h" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode_Header.h"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_DigiCode_Header.h"/>
             <FILE id="cEggbzN" name="juce_RTAS_DigiCode1.cpp" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode1.cpp"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_DigiCode1.cpp"/>
             <FILE id="dVVlniW" name="juce_RTAS_DigiCode2.cpp" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode2.cpp"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_DigiCode2.cpp"/>
             <FILE id="ydwdTzy" name="juce_RTAS_DigiCode3.cpp" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode3.cpp"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_DigiCode3.cpp"/>
             <FILE id="ehXpXBw" name="juce_RTAS_MacUtilities.mm" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_MacUtilities.mm"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_MacUtilities.mm"/>
             <FILE id="0mzLwTq" name="juce_RTAS_WinUtilities.cpp" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_WinUtilities.cpp"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_WinUtilities.cpp"/>
             <FILE id="z4sBC3E" name="juce_RTAS_Wrapper.cpp" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/RTAS/juce_RTAS_Wrapper.cpp"/>
+                  file="src/audio/plugin_client/RTAS/juce_RTAS_Wrapper.cpp"/>
           </GROUP>
           <GROUP id="YuP52Pz" name="VST">
             <FILE id="VDMcLoB" name="juce_VST_Wrapper.cpp" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/VST/juce_VST_Wrapper.cpp"/>
+                  file="src/audio/plugin_client/VST/juce_VST_Wrapper.cpp"/>
             <FILE id="XhNhfUW" name="juce_VST_Wrapper.mm" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/VST/juce_VST_Wrapper.mm"/>
+                  file="src/audio/plugin_client/VST/juce_VST_Wrapper.mm"/>
           </GROUP>
           <GROUP id="hhHHjJZ" name="Standalone">
             <FILE id="0aPHUJq" name="juce_AudioFilterStreamer.cpp" compile="0"
-                  resource="0" file="extras/audio plugins/wrapper/Standalone/juce_AudioFilterStreamer.cpp"/>
+                  resource="0" file="src/audio/plugin_client/Standalone/juce_AudioFilterStreamer.cpp"/>
             <FILE id="6ml8N6N" name="juce_AudioFilterStreamer.h" compile="0" resource="0"
-                  file="extras/audio plugins/wrapper/Standalone/juce_AudioFilterStreamer.h"/>
+                  file="src/audio/plugin_client/Standalone/juce_AudioFilterStreamer.h"/>
             <FILE id="l0R8qQC" name="juce_StandaloneFilterWindow.cpp" compile="0"
-                  resource="0" file="extras/audio plugins/wrapper/Standalone/juce_StandaloneFilterWindow.cpp"/>
+                  resource="0" file="src/audio/plugin_client/Standalone/juce_StandaloneFilterWindow.cpp"/>
             <FILE id="OZmMutP" name="juce_StandaloneFilterWindow.h" compile="0"
-                  resource="0" file="extras/audio plugins/wrapper/Standalone/juce_StandaloneFilterWindow.h"/>
+                  resource="0" file="src/audio/plugin_client/Standalone/juce_StandaloneFilterWindow.h"/>
           </GROUP>
           <FILE id="oIRLyr" name="juce_IncludeCharacteristics.h" compile="0"
-                resource="0" file="extras/audio plugins/wrapper/juce_IncludeCharacteristics.h"/>
+                resource="0" file="src/audio/plugin_client/juce_IncludeCharacteristics.h"/>
           <FILE id="UXGF34T" name="juce_PluginHeaders.h" compile="0" resource="0"
-                file="extras/audio plugins/wrapper/juce_PluginHeaders.h"/>
+                file="src/audio/plugin_client/juce_PluginHeaders.h"/>
           <FILE id="FYLoUYQ" name="juce_PluginHostType.h" compile="0" resource="0"
-                file="extras/audio plugins/wrapper/juce_PluginHostType.h"/>
+                file="src/audio/plugin_client/juce_PluginHostType.h"/>
         </GROUP>
         <GROUP id="rWnJUOyOY" name="plugin_host">
           <GROUP id="CCwLdZ" name="formats">

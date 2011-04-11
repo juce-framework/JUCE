@@ -91,12 +91,12 @@ protected:
 
         if (isRTAS())
         {
-            static const char* files[] = { "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode1.cpp",
-                                           "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode2.cpp",
-                                           "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode3.cpp",
-                                           "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode_Header.h",
-                                           "extras/audio plugins/wrapper/RTAS/juce_RTAS_WinUtilities.cpp",
-                                           "extras/audio plugins/wrapper/RTAS/juce_RTAS_Wrapper.cpp" };
+            static const char* files[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
+                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
+                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
+                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
+                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinUtilities.cpp",
+                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp" };
 
             for (int i = 0; i < numElementsInArray (files); ++i)
                 s.add (getJucePathFromTargetFolder().getChildFile (files[i]));
@@ -614,7 +614,7 @@ protected:
 
         if (isRTAS())
         {
-            RelativePath rsrFile (getJucePathFromTargetFolder().getChildFile ("extras/audio plugins/wrapper/RTAS/juce_RTAS_WinResources.rsr"));
+            RelativePath rsrFile (getJucePathFromTargetFolder().getChildFile (JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinResources.rsr"));
 
             customBuild->setAttribute ("CommandLine", "copy /Y \"" + rsrFile.toWindowsStyle() + "\" \"$(TargetPath)\".rsr");
             customBuild->setAttribute ("Outputs", "\"$(TargetPath)\".rsr");
@@ -711,7 +711,7 @@ protected:
                 extraLinkerOptions += " /FORCE:multiple";
                 linker->setAttribute ("DelayLoadDLLs", "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll");
                 linker->setAttribute ("ModuleDefinitionFile", getJucePathFromTargetFolder()
-                                            .getChildFile ("extras/audio plugins/wrapper/RTAS/juce_RTAS_WinExports.def")
+                                            .getChildFile (JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinExports.def")
                                             .toWindowsStyle());
             }
 

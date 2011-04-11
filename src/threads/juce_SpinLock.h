@@ -60,7 +60,10 @@ public:
     void enter() const noexcept;
 
     /** Attempts to acquire the lock, returning true if this was successful. */
-    bool tryEnter() const noexcept;
+    inline bool tryEnter() const noexcept
+    {
+        return lock.compareAndSetBool (1, 0);
+    }
 
     /** Releases the lock. */
     inline void exit() const noexcept

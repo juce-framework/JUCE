@@ -194,8 +194,8 @@ const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
     Array<RelativePath> s;
     if (isVST())
     {
-        const char* files[] = { "extras/audio plugins/wrapper/VST/juce_VST_Wrapper.cpp",
-                                "extras/audio plugins/wrapper/VST/juce_VST_Wrapper.mm" };
+        const char* files[] = { JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.cpp",
+                                JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.mm" };
 
         for (int i = 0; i < numElementsInArray (files); ++i)
             s.add (getJucePathFromTargetFolder().getChildFile (files[i]));

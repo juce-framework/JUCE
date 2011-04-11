@@ -1101,13 +1101,13 @@ private:
         Array<RelativePath> s;
         if (isRTAS())
         {
-            const char* files[] = { "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode1.cpp",
-                                    "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode2.cpp",
-                                    "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode3.cpp",
-                                    "extras/audio plugins/wrapper/RTAS/juce_RTAS_DigiCode_Header.h",
-                                    "extras/audio plugins/wrapper/RTAS/juce_RTAS_MacResources.r",
-                                    "extras/audio plugins/wrapper/RTAS/juce_RTAS_MacUtilities.mm",
-                                    "extras/audio plugins/wrapper/RTAS/juce_RTAS_Wrapper.cpp" };
+            const char* files[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
+                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
+                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
+                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
+                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacResources.r",
+                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacUtilities.mm",
+                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp" };
 
             for (int i = 0; i < numElementsInArray (files); ++i)
                 s.add (getJucePathFromTargetFolder().getChildFile (files[i]));
@@ -1120,8 +1120,8 @@ private:
     {
         Array<RelativePath> auWrappers;
 
-        const char* files[] = { "extras/audio plugins/wrapper/AU/juce_AU_Resources.r",
-                                "extras/audio plugins/wrapper/AU/juce_AU_Wrapper.mm" };
+        const char* files[] = { JUCE_PLUGINS_PATH_AU "juce_AU_Resources.r",
+                                JUCE_PLUGINS_PATH_AU "juce_AU_Wrapper.mm" };
         int i;
         for (i = 0; i < numElementsInArray (files); ++i)
             auWrappers.add (getJucePathFromTargetFolder().getChildFile (files[i]));

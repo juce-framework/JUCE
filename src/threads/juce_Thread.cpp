@@ -319,20 +319,15 @@ void Thread::stopAllThreads (const int timeOutMilliseconds)
 //==============================================================================
 void SpinLock::enter() const noexcept
 {
-    if (! lock.compareAndSetBool (1, 0))
+    if (! tryEnter())
     {
         for (int i = 20; --i >= 0;)
-            if (lock.compareAndSetBool (1, 0))
+            if (tryEnter())
                 return;
 
-        while (! lock.compareAndSetBool (1, 0))
+        while (! tryEnter())
             Thread::yield();
     }
-}
-
-bool SpinLock::tryEnter() const noexcept
-{
-    return lock.compareAndSetBool (1, 0);
 }
 
 
