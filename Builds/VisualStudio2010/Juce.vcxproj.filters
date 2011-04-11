@@ -307,37 +307,34 @@
     <ClCompile Include="..\..\src\audio\midi\juce_MidiOutput.cpp">
       <Filter>Juce\Source\audio\midi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\AU\juce_AU_Wrapper.mm">
+    <ClCompile Include="..\..\src\audio\plugin_client\AU\juce_AU_Wrapper.mm">
       <Filter>Juce\Source\audio\plugin_client\AU</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode1.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_DigiCode1.cpp">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode2.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_DigiCode2.cpp">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode3.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_DigiCode3.cpp">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_MacUtilities.mm">
+    <ClCompile Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_MacUtilities.mm">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_WinUtilities.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_WinUtilities.cpp">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_Wrapper.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_Wrapper.cpp">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\VST\juce_VST_Wrapper.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\VST\juce_VST_Wrapper.cpp">
       <Filter>Juce\Source\audio\plugin_client\VST</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\VST\juce_VST_Wrapper.mm">
+    <ClCompile Include="..\..\src\audio\plugin_client\VST\juce_VST_Wrapper.mm">
       <Filter>Juce\Source\audio\plugin_client\VST</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\Standalone\juce_AudioFilterStreamer.cpp">
-      <Filter>Juce\Source\audio\plugin_client\Standalone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\extras\audio plugins\wrapper\Standalone\juce_StandaloneFilterWindow.cpp">
+    <ClCompile Include="..\..\src\audio\plugin_client\Standalone\juce_StandaloneFilterWindow.cpp">
       <Filter>Juce\Source\audio\plugin_client\Standalone</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\audio\plugin_host\formats\juce_AudioUnitPluginFormat.mm">
@@ -1431,22 +1428,19 @@
     <ClInclude Include="..\..\src\audio\midi\juce_MidiOutput.h">
       <Filter>Juce\Source\audio\midi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode_Header.h">
+    <ClInclude Include="..\..\src\audio\plugin_client\RTAS\juce_RTAS_DigiCode_Header.h">
       <Filter>Juce\Source\audio\plugin_client\RTAS</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extras\audio plugins\wrapper\Standalone\juce_AudioFilterStreamer.h">
+    <ClInclude Include="..\..\src\audio\plugin_client\Standalone\juce_StandaloneFilterWindow.h">
       <Filter>Juce\Source\audio\plugin_client\Standalone</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extras\audio plugins\wrapper\Standalone\juce_StandaloneFilterWindow.h">
-      <Filter>Juce\Source\audio\plugin_client\Standalone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\extras\audio plugins\wrapper\juce_IncludeCharacteristics.h">
+    <ClInclude Include="..\..\src\audio\plugin_client\juce_IncludeCharacteristics.h">
       <Filter>Juce\Source\audio\plugin_client</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extras\audio plugins\wrapper\juce_PluginHeaders.h">
+    <ClInclude Include="..\..\src\audio\plugin_client\juce_PluginHeaders.h">
       <Filter>Juce\Source\audio\plugin_client</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\extras\audio plugins\wrapper\juce_PluginHostType.h">
+    <ClInclude Include="..\..\src\audio\plugin_client\juce_PluginHostType.h">
       <Filter>Juce\Source\audio\plugin_client</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\audio\plugin_host\formats\juce_AudioUnitPluginFormat.h">

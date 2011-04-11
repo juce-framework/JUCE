@@ -44,6 +44,8 @@ class InternalTimerThread  : private Thread,
                              private AsyncUpdater
 {
 public:
+    typedef SpinLock LockType;
+
     InternalTimerThread()
         : Thread ("Juce Timer"),
           firstTimer (nullptr),
@@ -121,7 +123,7 @@ public:
 
     void callTimers()
     {
-        const SpinLock::ScopedLockType sl (lock);
+        const LockType::ScopedLockType sl (lock);
 
         while (firstTimer != nullptr && firstTimer->countdownMs <= 0)
         {
@@ -131,7 +133,7 @@ public:
             removeTimer (t);
             addTimer (t);
 
-            const SpinLock::ScopedUnlockType ul (lock);
+            const LockType::ScopedUnlockType ul (lock);
 
             JUCE_TRY
             {
@@ -206,7 +208,7 @@ public:
 private:
     friend class Timer;
     static InternalTimerThread* instance;
-    static SpinLock lock;
+    static LockType lock;
     Timer* volatile firstTimer;
     Atomic <int> callbackNeeded;
 
@@ -298,7 +300,7 @@ private:
 
     int getTimeUntilFirstTimer (const int numMillisecsElapsed) const
     {
-        const SpinLock::ScopedLockType sl (lock);
+        const LockType::ScopedLockType sl (lock);
 
         for (Timer* t = firstTimer; t != nullptr; t = t->next)
             t->countdownMs -= numMillisecsElapsed;
@@ -315,7 +317,7 @@ private:
 };
 
 InternalTimerThread* InternalTimerThread::instance = nullptr;
-SpinLock InternalTimerThread::lock;
+InternalTimerThread::LockType InternalTimerThread::lock;
 
 void juce_callAnyTimersSynchronously()
 {
@@ -334,7 +336,7 @@ Timer::Timer() noexcept
      next (nullptr)
 {
    #if JUCE_DEBUG
-    const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
+    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
     activeTimers.add (this);
    #endif
 }
@@ -346,7 +348,7 @@ Timer::Timer (const Timer&) noexcept
      next (nullptr)
 {
    #if JUCE_DEBUG
-    const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
+    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
     activeTimers.add (this);
    #endif
 }
@@ -362,7 +364,7 @@ Timer::~Timer()
 
 void Timer::startTimer (const int interval) noexcept
 {
-    const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
+    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
 
    #if JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
@@ -383,7 +385,7 @@ void Timer::startTimer (const int interval) noexcept
 
 void Timer::stopTimer() noexcept
 {
-    const SpinLock::ScopedLockType sl (InternalTimerThread::lock);
+    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
 
    #if JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..

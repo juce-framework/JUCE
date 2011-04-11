@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
 */
 
 #include "juce_IncludeCharacteristics.h"
-#include "../../../juce_amalgamated.h"
+#include "../../../juce.h"
 
 #ifndef __JUCE_PLUGINHEADERS_JUCEHEADER__
 #define __JUCE_PLUGINHEADERS_JUCEHEADER__
@@ -121,10 +121,10 @@ static void removeWindowHidingHooks (Component* comp)
                               comp->getProperties() ["carbonEventRef"].toString().getHexValue64());
 }
 
-#else
+#elif JUCE_MAC
  static void attachWindowHidingHooks (void*, void*, void*) {}
  static void removeWindowHidingHooks (void*) {}
 #endif
 
 
-#endif
+#endif   // __JUCE_PLUGINHEADERS_JUCEHEADER__

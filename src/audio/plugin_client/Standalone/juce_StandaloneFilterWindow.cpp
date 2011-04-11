@@ -24,7 +24,7 @@
 */
 
 #include "juce_StandaloneFilterWindow.h"
-#include "../juce_PluginHeaders.h"
+
 
 //==============================================================================
 /** Somewhere in the codebase of your plugin, you need to implement this function
@@ -50,57 +50,57 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
     JUCE_TRY
     {
         filter = createPluginFilter();
-
-        if (filter != nullptr)
-        {
-            filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                          JucePlugin_MaxNumOutputChannels,
-                                          44100, 512);
-
-            PropertySet* const globalSettings = getGlobalSettings();
-
-            deviceManager = new AudioFilterStreamingDeviceManager();
-            deviceManager->setFilter (filter);
-
-            ScopedPointer<XmlElement> savedState;
-
-            if (globalSettings != nullptr)
-                savedState = globalSettings->getXmlValue ("audioSetup");
-
-            deviceManager->initialise (filter->getNumInputChannels(),
-                                       filter->getNumOutputChannels(),
-                                       savedState,
-                                       true);
-
-            if (globalSettings != nullptr)
-            {
-                MemoryBlock data;
-
-                if (data.fromBase64Encoding (globalSettings->getValue ("filterState"))
-                     && data.getSize() > 0)
-                {
-                    filter->setStateInformation (data.getData(), data.getSize());
-                }
-            }
-
-            setContentOwned (filter->createEditorIfNeeded(), true);
-
-            const int x = globalSettings->getIntValue ("windowX", -100);
-            const int y = globalSettings->getIntValue ("windowY", -100);
-
-            if (x != -100 && y != -100)
-                setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
-            else
-                centreWithSize (getWidth(), getHeight());
-        }
     }
     JUCE_CATCH_ALL
 
-    if (deviceManager == nullptr)
+    if (filter == nullptr)
     {
         jassertfalse    // Your filter didn't create correctly! In a standalone app that's not too great.
         JUCEApplication::quit();
     }
+
+    filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
+                                  JucePlugin_MaxNumOutputChannels,
+                                  44100, 512);
+
+    PropertySet* const globalSettings = getGlobalSettings();
+
+    deviceManager = new AudioDeviceManager();
+    deviceManager->addAudioCallback (&player);
+    deviceManager->addMidiInputCallback (String::empty, &player);
+
+    player.setProcessor (filter);
+
+    ScopedPointer<XmlElement> savedState;
+
+    if (globalSettings != nullptr)
+        savedState = globalSettings->getXmlValue ("audioSetup");
+
+    deviceManager->initialise (filter->getNumInputChannels(),
+                               filter->getNumOutputChannels(),
+                               savedState,
+                               true);
+
+    if (globalSettings != nullptr)
+    {
+        MemoryBlock data;
+
+        if (data.fromBase64Encoding (globalSettings->getValue ("filterState"))
+             && data.getSize() > 0)
+        {
+            filter->setStateInformation (data.getData(), data.getSize());
+        }
+    }
+
+    setContentOwned (filter->createEditorIfNeeded(), true);
+
+    const int x = globalSettings->getIntValue ("windowX", -100);
+    const int y = globalSettings->getIntValue ("windowY", -100);
+
+    if (x != -100 && y != -100)
+        setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
+    else
+        centreWithSize (getWidth(), getHeight());
 }
 
 StandaloneFilterWindow::~StandaloneFilterWindow()
@@ -119,6 +119,8 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
         }
     }
 
+    deviceManager->removeMidiInputCallback (String::empty, &player);
+    deviceManager->removeAudioCallback (&player);
     deviceManager = nullptr;
 
     if (globalSettings != nullptr && filter != nullptr)
@@ -135,8 +137,7 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
 //==============================================================================
 void StandaloneFilterWindow::deleteFilter()
 {
-    if (deviceManager != nullptr)
-        deviceManager->setFilter (nullptr);
+    player.setProcessor (nullptr);
 
     if (filter != nullptr && getContentComponent() != nullptr)
     {
@@ -156,7 +157,7 @@ void StandaloneFilterWindow::resetFilter()
     if (filter != nullptr)
     {
         if (deviceManager != nullptr)
-            deviceManager->setFilter (filter);
+            player.setProcessor (filter);
 
         setContentOwned (filter->createEditorIfNeeded(), true);
     }
@@ -258,36 +259,23 @@ void StandaloneFilterWindow::resized()
 
 void StandaloneFilterWindow::buttonClicked (Button*)
 {
-    if (filter == nullptr)
-        return;
-
-    PopupMenu m;
-    m.addItem (1, TRANS("Audio Settings..."));
-    m.addSeparator();
-    m.addItem (2, TRANS("Save current state..."));
-    m.addItem (3, TRANS("Load a saved state..."));
-    m.addSeparator();
-    m.addItem (4, TRANS("Reset to default state"));
-
-    switch (m.showAt (&optionsButton))
+    if (filter != nullptr)
     {
-    case 1:
-        showAudioSettingsDialog();
-        break;
+        PopupMenu m;
+        m.addItem (1, TRANS("Audio Settings..."));
+        m.addSeparator();
+        m.addItem (2, TRANS("Save current state..."));
+        m.addItem (3, TRANS("Load a saved state..."));
+        m.addSeparator();
+        m.addItem (4, TRANS("Reset to default state"));
 
-    case 2:
-        saveState();
-        break;
-
-    case 3:
-        loadState();
-        break;
-
-    case 4:
-        resetFilter();
-        break;
-
-    default:
-        break;
+        switch (m.showAt (&optionsButton))
+        {
+            case 1:  showAudioSettingsDialog(); break;
+            case 2:  saveState(); break;
+            case 3:  loadState(); break;
+            case 4:  resetFilter(); break;
+            default: break;
+        }
     }
 }

@@ -250,10 +250,6 @@
                   file="src/audio/plugin_client/VST/juce_VST_Wrapper.mm"/>
           </GROUP>
           <GROUP id="hhHHjJZ" name="Standalone">
-            <FILE id="0aPHUJq" name="juce_AudioFilterStreamer.cpp" compile="0"
-                  resource="0" file="src/audio/plugin_client/Standalone/juce_AudioFilterStreamer.cpp"/>
-            <FILE id="6ml8N6N" name="juce_AudioFilterStreamer.h" compile="0" resource="0"
-                  file="src/audio/plugin_client/Standalone/juce_AudioFilterStreamer.h"/>
             <FILE id="l0R8qQC" name="juce_StandaloneFilterWindow.cpp" compile="0"
                   resource="0" file="src/audio/plugin_client/Standalone/juce_StandaloneFilterWindow.cpp"/>
             <FILE id="OZmMutP" name="juce_StandaloneFilterWindow.h" compile="0"

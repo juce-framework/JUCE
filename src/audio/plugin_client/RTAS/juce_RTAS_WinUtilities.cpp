@@ -23,22 +23,18 @@
   ==============================================================================
 */
 
-#if _MSC_VER
-
 // (these functions are in their own file because of problems including windows.h
 // at the same time as the Digi headers)
 
+#if _MSC_VER
+
+#define _DO_NOT_DECLARE_INTERLOCKED_INTRINSICS_IN_MEMORY // (workaround for a VC build problem)
+#include <intrin.h>
 #include <windows.h>
 
-#ifdef _MSC_VER
-  #pragma pack (push, 8)
-#endif
-
+#pragma pack (push, 8)
 #include "../juce_PluginHeaders.h"
-
-#ifdef _MSC_VER
-  #pragma pack (pop)
-#endif
+#pragma pack (pop)
 
 #if JucePlugin_Build_RTAS
 

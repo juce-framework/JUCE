@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	72
+#define JUCE_BUILDNUMBER	73
 
 /** Current Juce version number.
 
@@ -22135,7 +22135,10 @@ public:
 	void enter() const noexcept;
 
 	/** Attempts to acquire the lock, returning true if this was successful. */
-	bool tryEnter() const noexcept;
+	inline bool tryEnter() const noexcept
+	{
+		return lock.compareAndSetBool (1, 0);
+	}
 
 	/** Releases the lock. */
 	inline void exit() const noexcept

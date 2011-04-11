@@ -26,7 +26,7 @@
 #ifndef __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 #define __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__
 
-#include "juce_AudioFilterStreamer.h"
+#include "../juce_PluginHeaders.h"
 
 
 //==============================================================================
@@ -76,7 +76,8 @@ public:
 
 private:
     ScopedPointer<AudioProcessor> filter;
-    ScopedPointer<AudioFilterStreamingDeviceManager> deviceManager;
+    ScopedPointer<AudioDeviceManager> deviceManager;
+    AudioProcessorPlayer player;
     TextButton optionsButton;
 
     void deleteFilter();
