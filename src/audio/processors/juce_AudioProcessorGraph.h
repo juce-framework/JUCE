@@ -71,10 +71,9 @@ public:
     public:
         //==============================================================================
         /** The ID number assigned to this node.
-
             This is assigned by the graph that owns it, and can't be changed.
         */
-        const uint32 id;
+        const uint32 nodeId;
 
         /** The actual processor object that this node represents. */
         AudioProcessor* getProcessor() const noexcept           { return processor; }
@@ -99,7 +98,7 @@ public:
         const ScopedPointer<AudioProcessor> processor;
         bool isPrepared;
 
-        Node (uint32 id, AudioProcessor* processor);
+        Node (uint32 nodeId, AudioProcessor* processor) noexcept;
 
         void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
         void unprepare();
@@ -115,6 +114,10 @@ public:
     struct JUCE_API  Connection
     {
     public:
+        //==============================================================================
+        Connection (uint32 sourceNodeId, int sourceChannelIndex,
+                    uint32 destNodeId, int destChannelIndex) noexcept;
+
         //==============================================================================
         /** The ID number of the node which is the input source for this connection.
             @see AudioProcessorGraph::getNodeForId

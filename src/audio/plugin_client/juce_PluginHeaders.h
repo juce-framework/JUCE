@@ -24,6 +24,9 @@
 */
 
 #include "juce_IncludeCharacteristics.h"
+
+#define DONT_AUTOLINK_TO_JUCE_LIBRARY 1
+
 #include "../../../juce.h"
 
 #ifndef __JUCE_PLUGINHEADERS_JUCEHEADER__

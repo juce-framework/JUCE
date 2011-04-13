@@ -140,8 +140,9 @@ public:
 
 
 protected:
-    /** @internal */
+   #ifndef DOXYGEN
     CameraDevice (const String& name, int index);
+   #endif
 
 private:
     void* internal;

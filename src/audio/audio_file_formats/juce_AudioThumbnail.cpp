@@ -38,7 +38,7 @@ struct AudioThumbnail::MinMaxValue
     char minValue;
     char maxValue;
 
-    MinMaxValue() : minValue (0), maxValue (0)
+    MinMaxValue() noexcept  : minValue (0), maxValue (0)
     {
     }
 
@@ -281,7 +281,7 @@ public:
         return data.size();
     }
 
-    void getMinMax (int startSample, int endSample, MinMaxValue& result) noexcept
+    void getMinMax (int startSample, int endSample, MinMaxValue& result) const noexcept
     {
         if (startSample >= 0)
         {
@@ -323,12 +323,12 @@ public:
             dest[i] = source[i];
     }
 
-    void resetPeak()
+    void resetPeak() noexcept
     {
         peakLevel = -1;
     }
 
-    int getPeak()
+    int getPeak() noexcept
     {
         if (peakLevel < 0)
         {
@@ -741,6 +741,24 @@ float AudioThumbnail::getApproximatePeak() const
         peak = jmax (peak, channels.getUnchecked(i)->getPeak());
 
     return jlimit (0, 127, peak) / 127.0f;
+}
+
+void AudioThumbnail::getApproximateMinMax (const double startTime, const double endTime, const int channelIndex,
+                                           float& minValue, float& maxValue) const noexcept
+{
+    MinMaxValue result;
+    const ThumbData* const data = channels [channelIndex];
+
+    if (data != nullptr && sampleRate > 0)
+    {
+        const int firstThumbIndex = (int) ((startTime * sampleRate) / samplesPerThumbSample);
+        const int lastThumbIndex  = (int) (((endTime * sampleRate) + samplesPerThumbSample - 1) / samplesPerThumbSample);
+
+        data->getMinMax (jmax (0, firstThumbIndex), lastThumbIndex, result);
+    }
+
+    minValue = result.minValue / 128.0f;
+    maxValue = result.maxValue / 128.0f;
 }
 
 void AudioThumbnail::drawChannel (Graphics& g, const Rectangle<int>& area, double startTime,

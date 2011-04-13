@@ -55,7 +55,7 @@ PluginWindow::PluginWindow (Component* const uiComp,
 void PluginWindow::closeCurrentlyOpenWindowsFor (const uint32 nodeId)
 {
     for (int i = activePluginWindows.size(); --i >= 0;)
-        if (activePluginWindows.getUnchecked(i)->owner->id == nodeId)
+        if (activePluginWindows.getUnchecked(i)->owner->nodeId == nodeId)
             delete activePluginWindows.getUnchecked(i);
 }
 
@@ -839,9 +839,9 @@ void GraphEditorPanel::updateComponents()
     {
         const AudioProcessorGraph::Node::Ptr f (graph.getNode (i));
 
-        if (getComponentForFilter (f->id) == 0)
+        if (getComponentForFilter (f->nodeId) == 0)
         {
-            FilterComponent* const comp = new FilterComponent (graph, f->id);
+            FilterComponent* const comp = new FilterComponent (graph, f->nodeId);
             addAndMakeVisible (comp);
             comp->update();
         }

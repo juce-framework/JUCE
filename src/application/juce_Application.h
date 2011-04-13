@@ -87,8 +87,7 @@
 
     @see MessageManager, DeletedAtShutdown
 */
-class JUCE_API  JUCEApplication  : public ApplicationCommandTarget,
-                                   private ActionListener
+class JUCE_API  JUCEApplication  : public ApplicationCommandTarget
 {
 protected:
     //==============================================================================
@@ -244,20 +243,11 @@ public:
     */
     const String getCommandLineParameters() const noexcept          { return commandLineParameters; }
 
-    //==============================================================================
-    // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
-
-    /** @internal */
-    static int main (const String& commandLine);
-    /** @internal */
-    static int main (int argc, const char* argv[]);
-    /** @internal */
-    static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
-
     /** Returns true if this executable is running as an app (as opposed to being a plugin
         or other kind of shared library. */
-    static inline bool isStandaloneApp() noexcept   { return createInstance != 0; }
+    static inline bool isStandaloneApp() noexcept                   { return createInstance != 0; }
 
+    //==============================================================================
     /** @internal */
     ApplicationCommandTarget* getNextCommandTarget();
     /** @internal */
@@ -266,26 +256,29 @@ public:
     void getAllCommands (Array <CommandID>& commands);
     /** @internal */
     bool perform (const InvocationInfo& info);
-    /** @internal */
-    void actionListenerCallback (const String& message);
-    /** @internal */
+
+    //==============================================================================
+   #ifndef DOXYGEN
+    // The following methods are internal calls - not for public use.
+    static int main (const String& commandLine);
+    static int main (int argc, const char* argv[]);
+    static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
     bool initialiseApp (const String& commandLine);
-    /** @internal */
     int shutdownApp();
-    /** @internal */
     static void appWillTerminateByForce();
-    /** @internal */
     typedef JUCEApplication* (*CreateInstanceFunction)();
-    /** @internal */
     static CreateInstanceFunction createInstance;
+   #endif
 
 private:
     //==============================================================================
+    static JUCEApplication* appInstance;
+
     String commandLineParameters;
+    ScopedPointer<InterProcessLock> appLock;
+    ScopedPointer<ActionListener> broadcastCallback;
     int appReturnValue;
     bool stillInitialising;
-    ScopedPointer<InterProcessLock> appLock;
-    static JUCEApplication* appInstance;
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplication);
 };

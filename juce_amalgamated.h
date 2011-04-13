@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	73
+#define JUCE_BUILDNUMBER	74
 
 /** Current Juce version number.
 
@@ -23112,8 +23112,9 @@ public:
 	/** Returns one of the registered clients. */
 	TimeSliceClient* getClient (int index) const;
 
-	/** @internal */
+   #ifndef DOXYGEN
 	void run();
+   #endif
 
 private:
 	CriticalSection callbackLock, listLock;
@@ -33344,8 +33345,7 @@ public:
 
 	@see MessageManager, DeletedAtShutdown
 */
-class JUCE_API  JUCEApplication  : public ApplicationCommandTarget,
-								   private ActionListener
+class JUCE_API  JUCEApplication  : public ApplicationCommandTarget
 {
 protected:
 
@@ -33497,18 +33497,9 @@ public:
 	*/
 	const String getCommandLineParameters() const noexcept	  { return commandLineParameters; }
 
-	// These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
-
-	/** @internal */
-	static int main (const String& commandLine);
-	/** @internal */
-	static int main (int argc, const char* argv[]);
-	/** @internal */
-	static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
-
 	/** Returns true if this executable is running as an app (as opposed to being a plugin
 		or other kind of shared library. */
-	static inline bool isStandaloneApp() noexcept   { return createInstance != 0; }
+	static inline bool isStandaloneApp() noexcept		   { return createInstance != 0; }
 
 	/** @internal */
 	ApplicationCommandTarget* getNextCommandTarget();
@@ -33518,26 +33509,28 @@ public:
 	void getAllCommands (Array <CommandID>& commands);
 	/** @internal */
 	bool perform (const InvocationInfo& info);
-	/** @internal */
-	void actionListenerCallback (const String& message);
-	/** @internal */
+
+   #ifndef DOXYGEN
+	// The following methods are internal calls - not for public use.
+	static int main (const String& commandLine);
+	static int main (int argc, const char* argv[]);
+	static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
 	bool initialiseApp (const String& commandLine);
-	/** @internal */
 	int shutdownApp();
-	/** @internal */
 	static void appWillTerminateByForce();
-	/** @internal */
 	typedef JUCEApplication* (*CreateInstanceFunction)();
-	/** @internal */
 	static CreateInstanceFunction createInstance;
+   #endif
 
 private:
 
+	static JUCEApplication* appInstance;
+
 	String commandLineParameters;
+	ScopedPointer<InterProcessLock> appLock;
+	ScopedPointer<ActionListener> broadcastCallback;
 	int appReturnValue;
 	bool stillInitialising;
-	ScopedPointer<InterProcessLock> appLock;
-	static JUCEApplication* appInstance;
 
 	JUCE_DECLARE_NON_COPYABLE (JUCEApplication);
 };
@@ -36550,9 +36543,10 @@ public:
 	const Array <int> getPossibleBitDepths();
 	bool canDoStereo();
 	bool canDoMono();
-#if JUCE_MAC
+
+   #if JUCE_MAC
 	bool canHandleFile (const File& fileToTest);
-#endif
+   #endif
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
 										bool deleteStreamIfOpeningFails);
@@ -37224,12 +37218,19 @@ public:
 	*/
 	float getApproximatePeak() const;
 
+	/** Reads the approximate min and max levels from a section of the thumbnail.
+		The lowest and highest samples are returned in minValue and maxValue, but obviously
+		because the thumb only stores low-resolution data, these numbers will only be a rough
+		approximation of the true values.
+	*/
+	void getApproximateMinMax (double startTime, double endTime, int channelIndex,
+							   float& minValue, float& maxValue) const noexcept;
+
 	/** Returns the hash code that was set by setSource() or setReader(). */
 	int64 getHashCode() const;
 
    #ifndef DOXYGEN
-	// (this is only public to avoid a VC6 bug)
-	class LevelDataSource;
+	class LevelDataSource;  // (this is only public to avoid a VC6 bug)
    #endif
 
 private:
@@ -47098,10 +47099,9 @@ public:
 	public:
 
 		/** The ID number assigned to this node.
-
 			This is assigned by the graph that owns it, and can't be changed.
 		*/
-		const uint32 id;
+		const uint32 nodeId;
 
 		/** The actual processor object that this node represents. */
 		AudioProcessor* getProcessor() const noexcept	   { return processor; }
@@ -47125,7 +47125,7 @@ public:
 		const ScopedPointer<AudioProcessor> processor;
 		bool isPrepared;
 
-		Node (uint32 id, AudioProcessor* processor);
+		Node (uint32 nodeId, AudioProcessor* processor) noexcept;
 
 		void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
 		void unprepare();
@@ -47140,6 +47140,9 @@ public:
 	struct JUCE_API  Connection
 	{
 	public:
+
+		Connection (uint32 sourceNodeId, int sourceChannelIndex,
+					uint32 destNodeId, int destChannelIndex) noexcept;
 
 		/** The ID number of the node which is the input source for this connection.
 			@see AudioProcessorGraph::getNodeForId
@@ -48766,8 +48769,7 @@ public:
 		@returns		the value that the callback function returns.
 		@see MessageManagerLock
 	*/
-	void* callFunctionOnMessageThread (MessageCallbackFunction* callback,
-									   void* userData);
+	void* callFunctionOnMessageThread (MessageCallbackFunction* callback, void* userData);
 
 	/** Returns true if the caller-thread is the message thread. */
 	bool isThisTheMessageThread() const noexcept;
@@ -48815,12 +48817,12 @@ public:
 	/** Deregisters a broadcast listener. */
 	void deregisterBroadcastListener (ActionListener* listener);
 
-	/** @internal */
+   #ifndef DOXYGEN
+	// Internal methods - do not use!
 	void deliverMessage (Message*);
-	/** @internal */
 	void deliverBroadcastMessage (const String&);
-	/** @internal */
 	~MessageManager() noexcept;
+   #endif
 
 private:
 
@@ -48946,7 +48948,6 @@ public:
 	~MessageManagerLock() noexcept;
 
 	/** Returns true if the lock was successfully acquired.
-
 		(See the constructor that takes a Thread for more info).
 	*/
 	bool lockWasGained() const noexcept			 { return locked; }
@@ -56566,7 +56567,7 @@ protected:
 	/** @internal */
 	int getDesktopWindowStyleFlags() const;
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
 	/** Overridden to warn people about adding components directly to this component
 		instead of using setContentOwned().
 
@@ -56581,7 +56582,7 @@ protected:
 		a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
 	*/
 	void addAndMakeVisible (Component* child, int zOrder = -1);
-#endif
+   #endif
 
 	ScopedPointer <ResizableCornerComponent> resizableCorner;
 	ScopedPointer <ResizableBorderComponent> resizableBorder;
@@ -59438,6 +59439,7 @@ public:
 													   and feel class how this is used. */
 	};
 
+   #ifndef DOXYGEN
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
@@ -59460,6 +59462,7 @@ public:
 	void parentHierarchyChanged();
 	/** @internal */
 	const Rectangle<int> getTitleBarArea();
+   #endif
 
 private:
 
@@ -66942,8 +66945,9 @@ public:
 	void removeListener (Listener* listenerToRemove);
 
 protected:
-	/** @internal */
+   #ifndef DOXYGEN
 	CameraDevice (const String& name, int index);
+   #endif
 
 private:
 	void* internal;

@@ -186,12 +186,19 @@ public:
     */
     float getApproximatePeak() const;
 
+    /** Reads the approximate min and max levels from a section of the thumbnail.
+        The lowest and highest samples are returned in minValue and maxValue, but obviously
+        because the thumb only stores low-resolution data, these numbers will only be a rough
+        approximation of the true values.
+    */
+    void getApproximateMinMax (double startTime, double endTime, int channelIndex,
+                               float& minValue, float& maxValue) const noexcept;
+
     /** Returns the hash code that was set by setSource() or setReader(). */
     int64 getHashCode() const;
 
    #ifndef DOXYGEN
-    // (this is only public to avoid a VC6 bug)
-    class LevelDataSource;
+    class LevelDataSource;  // (this is only public to avoid a VC6 bug)
    #endif
 
 private:

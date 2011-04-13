@@ -42,10 +42,9 @@ static const int quitMessageId = 0xfffff321;
 MessageManager::MessageManager() noexcept
   : quitMessagePosted (false),
     quitMessageReceived (false),
+    messageThreadId (Thread::getCurrentThreadId()),
     threadWithLock (0)
 {
-    messageThreadId = Thread::getCurrentThreadId();
-
     if (JUCEApplication::isStandaloneApp())
         Thread::setCurrentThreadName ("Juce Message Thread");
 }

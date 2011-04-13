@@ -295,7 +295,7 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
     }
 
     XmlElement* e = new XmlElement ("FILTER");
-    e->setAttribute ("uid", (int) node->id);
+    e->setAttribute ("uid", (int) node->nodeId);
     e->setAttribute ("x", node->properties ["x"].toString());
     e->setAttribute ("y", node->properties ["y"].toString());
     e->setAttribute ("uiLastX", node->properties ["uiLastX"].toString());

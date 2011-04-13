@@ -106,8 +106,7 @@ public:
         @returns            the value that the callback function returns.
         @see MessageManagerLock
     */
-    void* callFunctionOnMessageThread (MessageCallbackFunction* callback,
-                                       void* userData);
+    void* callFunctionOnMessageThread (MessageCallbackFunction* callback, void* userData);
 
     /** Returns true if the caller-thread is the message thread. */
     bool isThisTheMessageThread() const noexcept;
@@ -157,12 +156,12 @@ public:
     void deregisterBroadcastListener (ActionListener* listener);
 
     //==============================================================================
-    /** @internal */
+   #ifndef DOXYGEN
+    // Internal methods - do not use!
     void deliverMessage (Message*);
-    /** @internal */
     void deliverBroadcastMessage (const String&);
-    /** @internal */
     ~MessageManager() noexcept;
+   #endif
 
 private:
     //==============================================================================
@@ -294,11 +293,9 @@ public:
 
     //==============================================================================
     /** Returns true if the lock was successfully acquired.
-
         (See the constructor that takes a Thread for more info).
     */
     bool lockWasGained() const noexcept                     { return locked; }
-
 
 private:
     class BlockingMessage;

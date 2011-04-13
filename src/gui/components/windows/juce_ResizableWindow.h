@@ -340,7 +340,7 @@ protected:
     /** @internal */
     int getDesktopWindowStyleFlags() const;
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component
         instead of using setContentOwned().
 
@@ -355,7 +355,7 @@ protected:
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
     void addAndMakeVisible (Component* child, int zOrder = -1);
-#endif
+   #endif
 
     ScopedPointer <ResizableCornerComponent> resizableCorner;
     ScopedPointer <ResizableBorderComponent> resizableBorder;

@@ -39,6 +39,22 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
+class AppBroadcastCallback  : public ActionListener
+{
+public:
+    AppBroadcastCallback()    { MessageManager::getInstance()->registerBroadcastListener (this); }
+    ~AppBroadcastCallback()   { MessageManager::getInstance()->deregisterBroadcastListener (this); }
+
+    void actionListenerCallback (const String& message)
+    {
+        JUCEApplication* const app = JUCEApplication::getInstance();
+
+        if (app != 0 && message.startsWith (app->getApplicationName() + "/"))
+            app->anotherInstanceStarted (message.substring (app->getApplicationName().length() + 1));
+    }
+};
+
+//==============================================================================
 JUCEApplication::JUCEApplication()
     : appReturnValue (0),
       stillInitialising (true)
@@ -85,12 +101,6 @@ void JUCEApplication::quit()
 void JUCEApplication::setApplicationReturnValue (const int newReturnValue) noexcept
 {
     appReturnValue = newReturnValue;
-}
-
-void JUCEApplication::actionListenerCallback (const String& message)
-{
-    if (message.startsWith (getApplicationName() + "/"))
-        anotherInstanceStarted (message.substring (getApplicationName().length() + 1));
 }
 
 //==============================================================================
@@ -149,7 +159,7 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
 {
     commandLineParameters = commandLine.trim();
 
-#if ! JUCE_IOS
+   #if ! JUCE_IOS
     jassert (appLock == nullptr); // initialiseApp must only be called once!
 
     if (! moreThanOneInstanceAllowed())
@@ -165,17 +175,18 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
             return false;
         }
     }
-#endif
+   #endif
 
     // let the app do its setting-up..
     initialise (commandLineParameters);
 
-#if JUCE_MAC
+   #if JUCE_MAC
     juce_initialiseMacMainMenu(); // needs to be called after the app object has created, to get its name
-#endif
+   #endif
 
-    // register for broadcast new app messages
-    MessageManager::getInstance()->registerBroadcastListener (this);
+   #if ! JUCE_IOS
+    broadcastCallback = new AppBroadcastCallback();
+   #endif
 
     stillInitialising = false;
     return true;
@@ -185,7 +196,7 @@ int JUCEApplication::shutdownApp()
 {
     jassert (appInstance == this);
 
-    MessageManager::getInstance()->deregisterBroadcastListener (this);
+    broadcastCallback = nullptr;
 
     JUCE_TRY
     {
@@ -249,20 +260,20 @@ int JUCEApplication::main (int argc, const char* argv[])
 {
     JUCE_AUTORELEASEPOOL
 
-  #if ! JUCE_WINDOWS
+   #if ! JUCE_WINDOWS
     jassert (createInstance != nullptr);
     juce_Argv0 = argv[0];
-  #endif
+   #endif
 
-  #if JUCE_IOS
+   #if JUCE_IOS
     return juce_iOSMain (argc, argv);
-  #else
+   #else
     String cmd;
     for (int i = 1; i < argc; ++i)
         cmd << argv[i] << ' ';
 
     return JUCEApplication::main (cmd);
-  #endif
+   #endif
 }
 #endif
 

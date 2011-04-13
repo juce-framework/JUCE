@@ -229,6 +229,7 @@ public:
     };
 
     //==============================================================================
+   #ifndef DOXYGEN
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -251,6 +252,7 @@ public:
     void parentHierarchyChanged();
     /** @internal */
     const Rectangle<int> getTitleBarArea();
+   #endif
 
 private:
     //==============================================================================
