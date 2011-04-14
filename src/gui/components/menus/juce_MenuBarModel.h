@@ -132,7 +132,7 @@ public:
                                    int topLevelMenuIndex) = 0;
 
     //==============================================================================
-#if JUCE_MAC || DOXYGEN
+   #if JUCE_MAC || DOXYGEN
     /** MAC ONLY - Sets the model that is currently being shown as the main
         menu bar at the top of the screen on the Mac.
 
@@ -154,8 +154,7 @@ public:
         the main menu bar.
     */
     static MenuBarModel* getMacMainMenu();
-
-#endif
+   #endif
 
     //==============================================================================
     /** @internal */

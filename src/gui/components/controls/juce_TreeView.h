@@ -340,7 +340,7 @@ public:
     //==============================================================================
     /** To allow items from your treeview to be dragged-and-dropped, implement this method.
 
-        If this returns a non-empty name then when the user drags an item, the treeview will
+        If this returns a non-null variant then when the user drags an item, the treeview will
         try to find a DragAndDropContainer in its parent hierarchy, and will use it to trigger
         a drag-and-drop operation, using this string as the source description, with the treeview
         itself as the source component.
@@ -353,7 +353,7 @@ public:
 
         @see DragAndDropContainer::startDragging
     */
-    virtual const String getDragSourceDescription();
+    virtual const var getDragSourceDescription();
 
     /** If you want your item to be able to have files drag-and-dropped onto it, implement this
         method and return true.

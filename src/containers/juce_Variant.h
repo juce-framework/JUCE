@@ -31,6 +31,7 @@
 #include "../io/streams/juce_InputStream.h"
 
 #ifndef DOXYGEN
+ class ReferenceCountedObject;
  class DynamicObject;
 #endif
 
@@ -39,8 +40,8 @@
     A variant class, that can be used to hold a range of primitive values.
 
     A var object can hold a range of simple primitive values, strings, or
-    a reference-counted pointer to a DynamicObject. The var class is intended
-    to act like the values used in dynamic scripting languages.
+    any kind of ReferenceCountedObject. The var class is intended to act like
+    the kind of values used in dynamic scripting languages.
 
     @see DynamicObject
 */
@@ -69,7 +70,7 @@ public:
     var (const char* value);
     var (const wchar_t* value);
     var (const String& value);
-    var (DynamicObject* object);
+    var (ReferenceCountedObject* object);
     var (MethodFunction method) noexcept;
 
     var& operator= (const var& valueToCopy);
@@ -80,19 +81,20 @@ public:
     var& operator= (const char* value);
     var& operator= (const wchar_t* value);
     var& operator= (const String& value);
-    var& operator= (DynamicObject* object);
+    var& operator= (ReferenceCountedObject* object);
     var& operator= (MethodFunction method);
 
     void swapWith (var& other) noexcept;
 
-    operator int() const;
-    operator int64() const;
-    operator bool() const;
-    operator float() const;
-    operator double() const;
+    operator int() const noexcept;
+    operator int64() const noexcept;
+    operator bool() const noexcept;
+    operator float() const noexcept;
+    operator double() const noexcept;
     operator const String() const;
     const String toString() const;
-    DynamicObject* getObject() const;
+    ReferenceCountedObject* getObject() const noexcept;
+    DynamicObject* getDynamicObject() const noexcept;
 
     bool isVoid() const noexcept;
     bool isInt() const noexcept;
@@ -178,7 +180,7 @@ private:
         bool boolValue;
         double doubleValue;
         String* stringValue;
-        DynamicObject* objectValue;
+        ReferenceCountedObject* objectValue;
         MethodFunction methodValue;
     };
 
@@ -188,8 +190,10 @@ private:
 
 bool operator== (const var& v1, const var& v2) noexcept;
 bool operator!= (const var& v1, const var& v2) noexcept;
-bool operator== (const var& v1, const String& v2) noexcept;
-bool operator!= (const var& v1, const String& v2) noexcept;
+bool operator== (const var& v1, const String& v2);
+bool operator!= (const var& v1, const String& v2);
+bool operator== (const var& v1, const char* v2);
+bool operator!= (const var& v1, const char* v2);
 
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__

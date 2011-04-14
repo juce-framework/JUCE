@@ -47,13 +47,12 @@ class DragImageComponent  : public Component,
 {
 public:
     DragImageComponent (const Image& im,
-                        const String& desc,
+                        const var& desc,
                         Component* const sourceComponent,
                         Component* const mouseDragSource_,
                         DragAndDropContainer* const o,
-                        const Point<int>& imageOffset_,
-                        ReferenceCountedObject* const customDataObject)
-        : sourceDetails (desc, sourceComponent, Point<int>(), customDataObject),
+                        const Point<int>& imageOffset_)
+        : sourceDetails (desc, sourceComponent, Point<int>()),
           image (im),
           mouseDragSource (mouseDragSource_),
           owner (o),
@@ -319,12 +318,11 @@ DragAndDropContainer::~DragAndDropContainer()
     dragImageComponent = nullptr;
 }
 
-void DragAndDropContainer::startDragging (const String& sourceDescription,
+void DragAndDropContainer::startDragging (const var& sourceDescription,
                                           Component* sourceComponent,
                                           const Image& dragImage_,
                                           const bool allowDraggingToExternalWindows,
-                                          const Point<int>* imageOffsetFromMouse,
-                                          ReferenceCountedObject* customDataObject)
+                                          const Point<int>* imageOffsetFromMouse)
 {
     Image dragImage (dragImage_);
 
@@ -393,8 +391,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         }
 
         dragImageComponent = new DragImageComponent (dragImage, sourceDescription, sourceComponent,
-                                                     draggingSource->getComponentUnderMouse(), this,
-                                                     imageOffset, customDataObject);
+                                                     draggingSource->getComponentUnderMouse(), this, imageOffset);
 
         currentDragDesc = sourceDescription;
 
@@ -445,12 +442,10 @@ bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const DragAndDr
 }
 
 //==============================================================================
-DragAndDropTarget::SourceDetails::SourceDetails (const String& description_, Component* sourceComponent_,
-                                                 const Point<int>& localPosition_, ReferenceCountedObject* const customDataObject_) noexcept
+DragAndDropTarget::SourceDetails::SourceDetails (const var& description_, Component* sourceComponent_, const Point<int>& localPosition_) noexcept
     : description (description_),
       sourceComponent (sourceComponent_),
-      localPosition (localPosition_),
-      customDataObject (customDataObject_)
+      localPosition (localPosition_)
 {
 }
 

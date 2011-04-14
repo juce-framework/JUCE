@@ -117,9 +117,9 @@ public:
 
             if (selectedRows.size() > 0)
             {
-                const String dragDescription (owner.getModel()->getDragSourceDescription (selectedRows));
+                const var dragDescription (owner.getModel()->getDragSourceDescription (selectedRows));
 
-                if (dragDescription.isNotEmpty())
+                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     isDragging = true;
                     owner.startDragAndDrop (e, dragDescription);
@@ -915,7 +915,7 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     return snapshot;
 }
 
-void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescription)
+void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription)
 {
     DragAndDropContainer* const dragContainer
         = DragAndDropContainer::findParentDragContainerFor (this);
@@ -952,8 +952,8 @@ void ListBoxModel::selectedRowsChanged (int) {}
 void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
-const String ListBoxModel::getDragSourceDescription (const SparseSet<int>&)  { return String::empty; }
-const String ListBoxModel::getTooltipForRow (int)                            { return String::empty; }
+const var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)    { return var::null; }
+const String ListBoxModel::getTooltipForRow (int)                           { return String::empty; }
 
 
 END_JUCE_NAMESPACE

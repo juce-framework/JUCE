@@ -86,7 +86,7 @@ public:
     const String getUniqueName() const          { return file.getFullPathName(); }
     int getItemHeight() const                   { return 22; }
 
-    const String getDragSourceDescription()     { return owner.getDragAndDropDescription(); }
+    const var getDragSourceDescription()        { return owner.getDragAndDropDescription(); }
 
     void itemOpennessChanged (bool isNowOpen)
     {

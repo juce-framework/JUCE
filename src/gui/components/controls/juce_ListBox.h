@@ -139,14 +139,14 @@ public:
 
     /** To allow rows from your list to be dragged-and-dropped, implement this method.
 
-        If this returns a non-empty name then when the user drags a row, the listbox will
+        If this returns a non-null variant then when the user drags a row, the listbox will
         try to find a DragAndDropContainer in its parent hierarchy, and will use it to trigger
         a drag-and-drop operation, using this string as the source description, with the listbox
         itself as the source component.
 
         @see DragAndDropContainer::startDragging
     */
-    virtual const String getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+    virtual const var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
 
     /** You can override this to provide tool tips for specific rows.
         @see TooltipClient
@@ -560,7 +560,7 @@ public:
     /** @internal */
     void colourChanged();
     /** @internal */
-    void startDragAndDrop (const MouseEvent& e, const String& dragDescription);
+    void startDragAndDrop (const MouseEvent& e, const var& dragDescription);
 
 private:
     //==============================================================================

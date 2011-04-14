@@ -168,9 +168,9 @@ public:
 
             if (selectedRows.size() > 0)
             {
-                const String dragDescription (owner.getModel()->getDragSourceDescription (selectedRows));
+                const var dragDescription (owner.getModel()->getDragSourceDescription (selectedRows));
 
-                if (dragDescription.isNotEmpty())
+                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     isDragging = true;
                     owner.startDragAndDrop (e, dragDescription);
@@ -490,7 +490,7 @@ void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
 const String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
-const String TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)        { return String::empty; }
+const var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var::null; }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {

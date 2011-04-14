@@ -86,7 +86,7 @@ public:
     void itemDoubleClicked (const MouseEvent& e);
     void itemSelectionChanged (bool isNowSelected);
     const String getTooltip();
-    const String getDragSourceDescription();
+    const var getDragSourceDescription();
 
     //==============================================================================
     // Drag-and-drop stuff..

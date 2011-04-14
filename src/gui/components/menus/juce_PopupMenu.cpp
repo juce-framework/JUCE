@@ -731,14 +731,16 @@ private:
     {
         const Rectangle<int> mon (Desktop::getInstance()
                                      .getMonitorAreaContaining (target.getCentre(),
-#if JUCE_MAC
+                                                               #if JUCE_MAC
                                                                 true));
-#else
+                                                               #else
                                                                 false)); // on windows, don't stop the menu overlapping the taskbar
-#endif
+                                                               #endif
+
+        const int maxMenuHeight = mon.getHeight() - 24;
 
         int x, y, widthToUse, heightToUse;
-        layoutMenuItems (mon.getWidth() - 24, widthToUse, heightToUse);
+        layoutMenuItems (mon.getWidth() - 24, maxMenuHeight, widthToUse, heightToUse);
 
         if (alignToRectangle)
         {
@@ -779,10 +781,10 @@ private:
 
             if (biggestSpace < widthToUse)
             {
-                layoutMenuItems (biggestSpace + target.getWidth() / 3, widthToUse, heightToUse);
+                layoutMenuItems (biggestSpace + target.getWidth() / 3, maxMenuHeight, widthToUse, heightToUse);
 
                 if (numColumns > 1)
-                    layoutMenuItems (biggestSpace - 4, widthToUse, heightToUse);
+                    layoutMenuItems (biggestSpace - 4, maxMenuHeight, widthToUse, heightToUse);
 
                 tendTowardsRight = (mon.getRight() - target.getRight()) >= (target.getX() - mon.getX());
             }
@@ -807,11 +809,10 @@ private:
                       && owner->windowPos.intersects (windowPos.expanded (-4, -4));
     }
 
-    void layoutMenuItems (const int maxMenuW, int& width, int& height)
+    void layoutMenuItems (const int maxMenuW, const int maxMenuH, int& width, int& height)
     {
         numColumns = 0;
         contentHeight = 0;
-        const int maxMenuH = getParentHeight() - 24;
         int totalW;
 
         do

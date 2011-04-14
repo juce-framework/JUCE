@@ -98,7 +98,7 @@ public:
         }
     }
 
-    const String getDragSourceDescription()
+    const var getDragSourceDescription()
     {
         return "TreeView Items";
     }

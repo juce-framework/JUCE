@@ -176,14 +176,14 @@ public:
 
     /** To allow rows from your table to be dragged-and-dropped, implement this method.
 
-        If this returns a non-empty name then when the user drags a row, the table will try to
+        If this returns a non-null variant then when the user drags a row, the table will try to
         find a DragAndDropContainer in its parent hierarchy, and will use it to trigger a
         drag-and-drop operation, using this string as the source description, and the listbox
         itself as the source component.
 
-        @see DragAndDropContainer::startDragging
+        @see getDragSourceCustomData, DragAndDropContainer::startDragging
     */
-    virtual const String getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+    virtual const var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
 };
 
 

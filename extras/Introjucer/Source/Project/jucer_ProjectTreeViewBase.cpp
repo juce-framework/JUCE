@@ -492,7 +492,7 @@ const String ProjectTreeViewBase::getTooltip()
     return String::empty;
 }
 
-const String ProjectTreeViewBase::getDragSourceDescription()
+const var ProjectTreeViewBase::getDragSourceDescription()
 {
     delayedSelectionTimer = nullptr;
     return projectItemDragType;

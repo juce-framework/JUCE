@@ -57,11 +57,10 @@ public:
     {
     public:
         /** Creates a SourceDetails object from its various settings. */
-        SourceDetails (const String& description, Component* sourceComponent,
-                       const Point<int>& localPosition, ReferenceCountedObject* customDataObject = nullptr) noexcept;
+        SourceDetails (const var& description, Component* sourceComponent, const Point<int>& localPosition) noexcept;
 
-        /** A descriptor string - this is set DragAndDropContainer::startDragging(). */
-        String description;
+        /** A descriptor for the drag - this is set DragAndDropContainer::startDragging(). */
+        var description;
 
         /** The component from the drag operation was started. */
         WeakReference<Component> sourceComponent;
@@ -70,12 +69,6 @@ public:
             Note that for calls such as isInterestedInDragSource(), this may be a null position.
         */
         Point<int> localPosition;
-
-        /** A pointer to a user-supplied object which contains some kind of data which is relevant to
-            the specific classes which are being used. Make sure that you check the type of this object,
-            and safely dynamic_cast it to your required type.
-        */
-        ReferenceCountedObjectPtr<ReferenceCountedObject> customDataObject;
     };
 
     //==============================================================================

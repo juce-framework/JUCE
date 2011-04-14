@@ -73,8 +73,8 @@ public:
         findParentDragContainerFor() is a handy method to call to find the
         drag container to use for a component.
 
-        @param sourceDescription    a string to use as the description of the thing being dragged - this
-                                    will be passed to the objects that might be dropped-onto so they can
+        @param sourceDescription    a string or value to use as the description of the thing being dragged -
+                                    this will be passed to the objects that might be dropped-onto so they can
                                     decide whether they want to handle it
         @param sourceComponent      the component that is being dragged
         @param dragImage            the image to drag around underneath the mouse. If this is a null image,
@@ -86,16 +86,12 @@ public:
                                     at which the image should be drawn from the mouse. If it isn't
                                     specified, then the image will be centred around the mouse. If
                                     an image hasn't been passed-in, this will be ignored.
-        @param customDataObject     Any kind of reference-counted object which you want to have passed to
-                                    the target component. A pointer to this object will be made available
-                                    to the targets in the DragAndDropTarget::SourceDetails class.
     */
-    void startDragging (const String& sourceDescription,
+    void startDragging (const var& sourceDescription,
                         Component* sourceComponent,
                         const Image& dragImage = Image::null,
                         bool allowDraggingToOtherJuceWindows = false,
-                        const Point<int>* imageOffsetFromMouse = nullptr,
-                        ReferenceCountedObject* customDataObject = nullptr);
+                        const Point<int>* imageOffsetFromMouse = nullptr);
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;
@@ -163,17 +159,14 @@ protected:
         and if you want it to then perform a file drag-and-drop, add the filenames you want
         to the array passed in, and return true.
 
-        @param dragSourceDescription        the description passed into the startDrag() call when the drag began
-        @param dragSourceComponent          the component passed into the startDrag() call when the drag began
-        @param files                        on return, the filenames you want to drag
-        @param canMoveFiles                 on return, true if it's ok for the receiver to move the files; false if
-                                            it must make a copy of them (see the performExternalDragDropOfFiles()
-                                            method)
+        @param sourceDetails    information about the source of the drag operation
+        @param files            on return, the filenames you want to drag
+        @param canMoveFiles     on return, true if it's ok for the receiver to move the files; false if
+                                it must make a copy of them (see the performExternalDragDropOfFiles() method)
         @see performExternalDragDropOfFiles
     */
     virtual bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
-                                                       StringArray& files,
-                                                       bool& canMoveFiles);
+                                                       StringArray& files, bool& canMoveFiles);
 
 private:
     //==============================================================================

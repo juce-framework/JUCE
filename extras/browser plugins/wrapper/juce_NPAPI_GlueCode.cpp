@@ -121,9 +121,9 @@ NPError NP_GetValue (void* future, NPPVariable variable, void* value)
 #if JUCE_WINDOWS || JUCE_MAC
 NPError OSCALL NP_GetEntryPoints (NPPluginFuncs* funcs)
 {
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     #pragma EXPORTED_FUNCTION
-#endif
+   #endif
 
     log ("NP_GetEntryPoints");
     if (funcs == 0 || (funcs->size > 0 && funcs->size < sizeof (NPPluginFuncs)))
@@ -138,17 +138,17 @@ NPError OSCALL NP_GetEntryPoints (NPPluginFuncs* funcs)
     funcs->destroystream = NPP_DestroyStream;
     funcs->asfile        = NPP_StreamAsFile;
     funcs->writeready    = NPP_WriteReady;
-#if JUCE_MAC
+   #if JUCE_MAC
     funcs->write         = (NPP_WriteProcPtr) NPP_Write;
-#else
+   #else
     funcs->write         = NPP_Write;
-#endif
+   #endif
     funcs->print         = NPP_Print;
     funcs->event         = NPP_HandleEvent;
     funcs->urlnotify     = NPP_URLNotify;
     funcs->getvalue      = NPP_GetValue;
     funcs->setvalue      = NPP_SetValue;
-    funcs->javaClass     = 0;
+    funcs->javaClass     = nullptr;
 
     return NPERR_NO_ERROR;
 }
@@ -160,9 +160,9 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
                               #endif
                               )
 {
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     #pragma EXPORTED_FUNCTION
-#endif
+   #endif
 
     log ("NP_Initialize");
     if (funcs == 0)
@@ -174,7 +174,7 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
     zerostruct (browser);
     memcpy (&browser, funcs, jmin ((size_t) funcs->size, sizeof (browser)));
 
-#ifdef XP_UNIX
+  #ifdef XP_UNIX
     pluginFuncs->version            = (NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR;
     pluginFuncs->size               = sizeof (NPPluginFuncs);
     pluginFuncs->newp               = NewNPP_NewProc (NPP_New);
@@ -192,16 +192,16 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
   #ifdef OJI
     pluginFuncs->javaClass          = NPP_GetJavaClass();
   #endif
-#endif
+ #endif
 
     return NPERR_NO_ERROR;
 }
 
 NPError OSCALL NP_Shutdown()
 {
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     #pragma EXPORTED_FUNCTION
-#endif
+   #endif
 
     log ("NP_Shutdown");
     return NPERR_NO_ERROR;
@@ -266,36 +266,37 @@ public:
         : npp (npp_)
     {
         log ("BrowserPluginHolderComponent created");
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         parentHWND = 0;
         oldWinProc = 0;
-#else
+       #else
         currentParentView = 0;
-#endif
+       #endif
+
         setOpaque (true);
         setWantsKeyboardFocus (false);
 
         addAndMakeVisible (child = createBrowserPlugin());
-        jassert (child != 0);   // You have to create one of these!
+        jassert (child != nullptr);   // You have to create one of these!
     }
 
     ~BrowserPluginHolderComponent()
     {
         log ("BrowserPluginHolderComponent deleted");
-        setWindow (0);
-        child = 0;
+        setWindow (nullptr);
+        child = nullptr;
     }
 
     //==============================================================================
     void paint (Graphics& g)
     {
-        if (child == 0 || ! child->isOpaque())
+        if (child == nullptr || ! child->isOpaque())
             g.fillAll (Colours::white);
     }
 
     void resized()
     {
-        if (child != 0)
+        if (child != nullptr)
             child->setBounds (getLocalBounds());
     }
 
@@ -370,7 +371,7 @@ private:
 public:
     void setWindow (NPWindow* window)
     {
-        HWND newHWND = (window != 0 ? ((HWND) window->window) : 0);
+        HWND newHWND = (window != nullptr ? ((HWND) window->window) : 0);
 
         if (parentHWND != newHWND)
         {
@@ -428,7 +429,7 @@ public:
                 {
                     NSView* found = findViewAt (v, x, y);
 
-                    if (found != 0)
+                    if (found != nil)
                         return found;
                 }
             }
@@ -437,7 +438,7 @@ public:
                 return parent;
         }
 
-        return 0;
+        return nil;
     }
 
 public:
@@ -454,22 +455,22 @@ public:
 
         log ("setWindow");
 
-        NSView* parentView = 0;
-        NP_CGContext* const cgContext = (window != 0) ? (NP_CGContext*) window->window : 0;
+        NSView* parentView = nil;
+        NP_CGContext* const cgContext = (window != nullptr) ? (NP_CGContext*) window->window : nullptr;
         log ("NP_CGContext: " + String::toHexString ((pointer_sized_int) cgContext));
 
-#ifndef __LP64__
-        WindowRef windowRef = cgContext != 0 ? (WindowRef) cgContext->window : 0;
+       #ifndef __LP64__
+        WindowRef windowRef = cgContext != nullptr ? (WindowRef) cgContext->window : 0;
 
         if (windowRef != 0)
         {
             NSWindow* win = [[[NSWindow alloc] initWithWindowRef: windowRef] autorelease];
-#else
-        NSWindow* win = cgContext != 0 ? (NSWindow*) cgContext->window : 0;
+       #else
+        NSWindow* win = cgContext != nullptr ? (NSWindow*) cgContext->window : nil;
 
-        if (win != 0)
+        if (win != nil)
         {
-#endif
+       #endif
             log ("window: " + nsStringToJuce ([win description]));
 
             const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
@@ -505,7 +506,7 @@ public:
                 if (! isBrowserContentView (parentView))
                     parentView = currentParentView;
             }
-            else if (currentParentView != 0 && ! target.isEmpty())
+            else if (currentParentView != nil && ! target.isEmpty())
             {
                 // Firefox can send lots of spurious resize messages when updating its pages, so this is a
                 // bodge to avoid flickering caused by repeatedly removing and re-adding the view..
@@ -524,7 +525,7 @@ public:
 
             currentParentView = parentView;
 
-            if (parentView != 0)
+            if (parentView != nil)
             {
                 setSize (window->width, window->height);
                 addToDesktop (0, parentView);
@@ -532,7 +533,7 @@ public:
             }
         }
 
-        if (window != 0)
+        if (window != nullptr)
             setSize (window->width, window->height);
     }
 #endif
@@ -673,16 +674,16 @@ private:
 
     bool hasMethod (NPIdentifier name)
     {
-        DynamicObject* const o = object.getObject();
-        return o != 0 && o->hasMethod (identifierToString (name));
+        DynamicObject* const o = object.getDynamicObject();
+        return o != nullptr && o->hasMethod (identifierToString (name));
     }
 
     bool invoke (NPIdentifier name, const NPVariant* args, uint32_t argCount, NPVariant* out)
     {
-        DynamicObject* const o = object.getObject();
+        DynamicObject* const o = object.getDynamicObject();
         const var::identifier methodName (identifierToString (name));
 
-        if (o == 0 || ! o->hasMethod (methodName))
+        if (o == nullptr || ! o->hasMethod (methodName))
             return false;
 
         struct ParamHolder
@@ -700,7 +701,7 @@ private:
 
         const var result (o->invokeMethod (methodName, params.params, argCount));
 
-        if (out != 0)
+        if (out != nullptr)
             createNPVariantFromValue (npp, *out, result);
 
         return true;
@@ -713,21 +714,21 @@ private:
 
     bool hasProperty (NPIdentifier name)
     {
-        DynamicObject* const o = object.getObject();
-        return o != 0 && o->hasProperty (identifierToString (name));
+        DynamicObject* const o = object.getDynamicObject();
+        return o != nullptr && o->hasProperty (identifierToString (name));
     }
 
     bool getProperty (NPIdentifier name, NPVariant* out)
     {
-        DynamicObject* const o = object.getObject();
+        DynamicObject* const o = object.getDynamicObject();
         const var::identifier propName (identifierToString (name));
 
-        if (o == 0 || ! o->hasProperty (propName))
+        if (o == nullptr || ! o->hasProperty (propName))
             return false;
 
         const var result (o->getProperty (propName));
 
-        if (out != 0)
+        if (out != nullptr)
             createNPVariantFromValue (npp, *out, result);
 
         return true;
@@ -735,9 +736,9 @@ private:
 
     bool setProperty (NPIdentifier name, const NPVariant* value)
     {
-        DynamicObject* const o = object.getObject();
+        DynamicObject* const o = object.getDynamicObject();
 
-        if (value == 0 || o == 0)
+        if (value == nullptr || o == nullptr)
             return false;
 
         o->setProperty (identifierToString (name), createValueFromNPVariant (npp, *value));
@@ -746,10 +747,10 @@ private:
 
     bool removeProperty (NPIdentifier name)
     {
-        DynamicObject* const o = object.getObject();
+        DynamicObject* const o = object.getDynamicObject();
         const var::identifier propName (identifierToString (name));
 
-        if (o == 0 || ! o->hasProperty (propName))
+        if (o == nullptr || ! o->hasProperty (propName))
             return false;
 
         o->removeProperty (propName);
@@ -789,33 +790,30 @@ public:
     static bool class_construct (NPObject* npobj, const NPVariant* args, uint32_t argCount, NPVariant* result)  { return ((NPObjectWrappingDynamicObject*) npobj)->construct (args, argCount, result); }
 };
 
-#ifndef NP_CLASS_STRUCT_VERSION_ENUM
 static NPClass sNPObjectWrappingDynamicObject_NPClass =
 {
+   #ifndef NP_CLASS_STRUCT_VERSION_ENUM
     NP_CLASS_STRUCT_VERSION, NPObjectWrappingDynamicObject::createInstance,
     NPObjectWrappingDynamicObject::class_deallocate, NPObjectWrappingDynamicObject::class_invalidate,
     NPObjectWrappingDynamicObject::class_hasMethod, NPObjectWrappingDynamicObject::class_invoke,
     NPObjectWrappingDynamicObject::class_invokeDefault, NPObjectWrappingDynamicObject::class_hasProperty,
     NPObjectWrappingDynamicObject::class_getProperty, NPObjectWrappingDynamicObject::class_setProperty,
     NPObjectWrappingDynamicObject::class_removeProperty
-};
-#else
-static NPClass sNPObjectWrappingDynamicObject_NPClass =
-{
+   #else
     NP_CLASS_STRUCT_VERSION_ENUM, NPObjectWrappingDynamicObject::createInstance,
     NPObjectWrappingDynamicObject::class_deallocate, NPObjectWrappingDynamicObject::class_invalidate,
     NPObjectWrappingDynamicObject::class_hasMethod, NPObjectWrappingDynamicObject::class_invoke,
     NPObjectWrappingDynamicObject::class_invokeDefault, NPObjectWrappingDynamicObject::class_hasProperty,
     NPObjectWrappingDynamicObject::class_getProperty, NPObjectWrappingDynamicObject::class_setProperty,
     NPObjectWrappingDynamicObject::class_removeProperty, NPObjectWrappingDynamicObject::class_enumerate
+   #endif
 };
-#endif
 
 bool NPObjectWrappingDynamicObject::construct (const NPVariant* args, uint32_t argCount, NPVariant* result)
 {
     NPObject* const newObj = browser.createobject (npp, &sNPObjectWrappingDynamicObject_NPClass);
 
-    if (newObj == 0)
+    if (newObj == nullptr)
         return false;
 
     OBJECT_TO_NPVARIANT (newObj, *result);
@@ -824,11 +822,11 @@ bool NPObjectWrappingDynamicObject::construct (const NPVariant* args, uint32_t a
 
 NPObject* NPObjectWrappingDynamicObject::create (NPP npp, const var& objectToWrap)
 {
-    jassert (objectToWrap.getObject() != 0);
+    jassert (objectToWrap.getDynamicObject() != nullptr);
 
     NPObject* const nppObject = browser.createobject (npp, &sNPObjectWrappingDynamicObject_NPClass);
 
-    if (nppObject != 0)
+    if (nppObject != nullptr)
         ((NPObjectWrappingDynamicObject*) nppObject)->object = objectToWrap;
 
     return nppObject;
@@ -845,17 +843,18 @@ static const var createValueFromNPVariant (NPP npp, const NPVariant& v)
     else if (NPVARIANT_IS_DOUBLE (v))
         return var (NPVARIANT_TO_DOUBLE (v));
     else if (NPVARIANT_IS_STRING (v))
-#if JUCE_MAC
-        return var (String::fromUTF8 ((const char*) (NPVARIANT_TO_STRING (v).UTF8Characters),
-                                      (int) NPVARIANT_TO_STRING (v).UTF8Length));
-#else
-        return var (String::fromUTF8 ((const char*) (NPVARIANT_TO_STRING (v).utf8characters),
-                                      (int) NPVARIANT_TO_STRING (v).utf8length));
-#endif
-    else if (NPVARIANT_IS_OBJECT (v) && npp != 0)
+    {
+        return var (String::fromUTF8 ((const char*)
+           #if JUCE_MAC
+            (NPVARIANT_TO_STRING (v).UTF8Characters), (int) NPVARIANT_TO_STRING (v).UTF8Length));
+           #else
+            (NPVARIANT_TO_STRING (v).utf8characters), (int) NPVARIANT_TO_STRING (v).utf8length));
+           #endif
+    }
+    else if (NPVARIANT_IS_OBJECT (v) && npp != nullptr)
         return var (new DynamicObjectWrappingNPObject (npp, NPVARIANT_TO_OBJECT (v)));
 
-    return var();
+    return var::null;
 }
 
 static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)
@@ -875,7 +874,7 @@ static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)
         memcpy (stringCopy, utf8, utf8Len);
         STRINGZ_TO_NPVARIANT (stringCopy, out);
     }
-    else if (v.isObject() && npp != 0)
+    else if (v.getDynamicObject() != nullptr && npp != nullptr)
         OBJECT_TO_NPVARIANT (NPObjectWrappingDynamicObject::create (npp, v), out);
     else
         VOID_TO_NPVARIANT (out);
@@ -888,21 +887,21 @@ public:
     //==============================================================================
     JucePluginInstance (NPP npp_)
         : npp (npp_),
-          holderComp (0),
-          scriptObject (0)
+          holderComp (nullptr),
+          scriptObject (nullptr)
     {
     }
 
     ~JucePluginInstance()
     {
-        setWindow (0);
+        setWindow (nullptr);
     }
 
     bool setWindow (NPWindow* window)
     {
-        if (window != 0)
+        if (window != nullptr)
         {
-            if (holderComp == 0)
+            if (holderComp == nullptr)
                 holderComp = new BrowserPluginHolderComponent (npp);
 
             holderComp->setWindow (window);
@@ -910,7 +909,7 @@ public:
         else
         {
             deleteAndZero (holderComp);
-            scriptObject = 0;
+            scriptObject = nullptr;
         }
 
         return true;
@@ -918,10 +917,10 @@ public:
 
     NPObject* getScriptableObject()
     {
-        if (scriptObject == 0)
+        if (scriptObject == nullptr)
             scriptObject = NPObjectWrappingDynamicObject::create (npp, holderComp->getObject());
 
-        if (scriptObject != 0 && shouldRetainBrowserObject())
+        if (scriptObject != nullptr && shouldRetainBrowserObject())
             browser.retainobject (scriptObject);
 
         return scriptObject;
@@ -947,24 +946,24 @@ private:
 };
 
 //==============================================================================
-static NPP currentlyInitialisingNPP = 0;
+static NPP currentlyInitialisingNPP = nullptr;
 static int numPluginInstances = 0;
 
 NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, char* argn[], char* argv[], NPSavedData* saved)
 {
     log ("NPP_New");
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
-#if JUCE_MAC
+  #if JUCE_MAC
     browser.setvalue (npp, (NPPVariable) NPNVpluginDrawingModel, (void*) NPDrawingModelCoreGraphics);
 
-    #ifdef __LP64__
+   #ifdef __LP64__
     browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, (void*) 1 /*NPEventModelCocoa*/);
-    #else
+   #else
     browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, 0 /*NPEventModelCarbon*/);
-    #endif
-#endif
+   #endif
+  #endif
 
     if (numPluginInstances++ == 0)
     {
@@ -974,7 +973,7 @@ NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, ch
 
     currentlyInitialisingNPP = npp;
     JucePluginInstance* p = new JucePluginInstance (npp);
-    currentlyInitialisingNPP = 0;
+    currentlyInitialisingNPP = nullptr;
 
     npp->pdata = (void*) p;
     return NPERR_NO_ERROR;
@@ -983,12 +982,12 @@ NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, ch
 NPError NPP_Destroy (NPP npp, NPSavedData** save)
 {
     log ("NPP_Destroy");
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     JucePluginInstance* const p = (JucePluginInstance*) npp->pdata;
 
-    if (p != 0)
+    if (p != nullptr)
     {
         delete p;
 
@@ -1005,33 +1004,33 @@ NPError NPP_Destroy (NPP npp, NPSavedData** save)
 
 NPError NPP_SetWindow (NPP npp, NPWindow* pNPWindow)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
-    if (pNPWindow == 0)
+    if (pNPWindow == nullptr)
         return NPERR_GENERIC_ERROR;
 
     JucePluginInstance* const p = (JucePluginInstance*) npp->pdata;
 
-    if (p == 0)
+    if (p == nullptr)
         return NPERR_GENERIC_ERROR;
 
     currentlyInitialisingNPP = npp;
     NPError result = p->setWindow (pNPWindow) ? NPERR_NO_ERROR
                                               : NPERR_MODULE_LOAD_FAILED_ERROR;
-    currentlyInitialisingNPP = 0;
+    currentlyInitialisingNPP = nullptr;
     return result;
 }
 
 //==============================================================================
 NPError NPP_GetValue (NPP npp, NPPVariable variable, void* value)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     JucePluginInstance* const p = (JucePluginInstance*) npp->pdata;
 
-    if (p == 0)
+    if (p == nullptr)
         return NPERR_GENERIC_ERROR;
 
     switch (variable)
@@ -1047,7 +1046,7 @@ NPError NPP_GetValue (NPP npp, NPPVariable variable, void* value)
 
 NPError NPP_NewStream (NPP npp, NPMIMEType type, NPStream* stream, NPBool seekable, ::uint16* stype)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     return NPERR_NO_ERROR;
@@ -1055,7 +1054,7 @@ NPError NPP_NewStream (NPP npp, NPMIMEType type, NPStream* stream, NPBool seekab
 
 ::int32 NPP_WriteReady (NPP npp, NPStream *stream)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     return 0x0fffffff;
@@ -1063,7 +1062,7 @@ NPError NPP_NewStream (NPP npp, NPMIMEType type, NPStream* stream, NPBool seekab
 
 ::int32 NPP_Write (NPP npp, NPStream *stream, ::int32 offset, ::int32 len, void *buffer)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     return len;
@@ -1071,7 +1070,7 @@ NPError NPP_NewStream (NPP npp, NPMIMEType type, NPStream* stream, NPBool seekab
 
 NPError NPP_DestroyStream (NPP npp, NPStream *stream, NPError reason)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     return NPERR_NO_ERROR;
@@ -1079,25 +1078,25 @@ NPError NPP_DestroyStream (NPP npp, NPStream *stream, NPError reason)
 
 void NPP_StreamAsFile (NPP npp, NPStream* stream, const char* fname)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return;
 }
 
 void NPP_Print (NPP npp, NPPrint* printInfo)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return;
 }
 
 void NPP_URLNotify (NPP npp, const char* url, NPReason reason, void* notifyData)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return;
 }
 
 NPError NPP_SetValue (NPP npp, NPNVariable variable, void* value)
 {
-    if (npp == 0)
+    if (npp == nullptr)
         return NPERR_INVALID_INSTANCE_ERROR;
 
     return NPERR_NO_ERROR;
@@ -1105,7 +1104,7 @@ NPError NPP_SetValue (NPP npp, NPNVariable variable, void* value)
 
 ::int16 NPP_HandleEvent (NPP npp, void* ev)
 {
-    if (npp != 0)
+    if (npp != nullptr)
     {
         //JucePluginInstance* const p = (JucePluginInstance*) npp->pdata;
     }
@@ -1119,7 +1118,7 @@ static NPP getInstance (const BrowserPluginComponent* bpc)
 {
     BrowserPluginHolderComponent* holder = dynamic_cast <BrowserPluginHolderComponent*> (bpc->getParentComponent());
 
-    if (holder != 0)
+    if (holder != nullptr)
         return holder->npp;
 
     return currentlyInitialisingNPP;
@@ -1138,7 +1137,7 @@ const String BrowserPluginComponent::getBrowserVersion() const
 {
     if (browserVersionDesc.isEmpty())
     {
-        if (getInstance (this) != 0)
+        if (getInstance (this) != nullptr)
             browserVersionDesc << browser.uagent (getInstance (this));
         else
             browserVersionDesc << "Netscape Plugin V" << (int) ((browser.version >> 8) & 0xff)
@@ -1157,23 +1156,23 @@ const String BrowserPluginComponent::getBrowserURL() const
 {
     String result;
 
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     result = getActiveXBrowserURL (this);
 
     if (result.isNotEmpty())
         return result;
-#endif
+   #endif
 
     // (FireFox doesn't seem happy if you call this from a background thread..)
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
     NPP npp = getInstance (this);
-    if (npp != 0)
+    if (npp != nullptr)
     {
-        NPObject* windowObj = 0;
+        NPObject* windowObj = nullptr;
         browser.getvalue (npp, NPNVWindowNPObject, &windowObj);
 
-        if (windowObj != 0)
+        if (windowObj != nullptr)
         {
             NPVariant location;
             bool ok = browser.getproperty (npp, windowObj,

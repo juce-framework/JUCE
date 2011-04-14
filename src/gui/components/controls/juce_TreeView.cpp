@@ -124,9 +124,9 @@ public:
 
             if (item != nullptr && e.getMouseDownX() >= pos.getX())
             {
-                const String dragDescription (item->getDragSourceDescription());
+                const var dragDescription (item->getDragSourceDescription());
 
-                if (dragDescription.isNotEmpty())
+                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     DragAndDropContainer* const dragContainer
                         = DragAndDropContainer::findParentDragContainerFor (this);
@@ -1291,9 +1291,9 @@ const String TreeViewItem::getTooltip()
     return String::empty;
 }
 
-const String TreeViewItem::getDragSourceDescription()
+const var TreeViewItem::getDragSourceDescription()
 {
-    return String::empty;
+    return var::null;
 }
 
 bool TreeViewItem::isInterestedInFileDrag (const StringArray&)

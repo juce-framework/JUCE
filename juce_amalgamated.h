@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	74
+#define JUCE_BUILDNUMBER	75
 
 /** Current Juce version number.
 
@@ -8724,6 +8724,7 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 /*** End of inlined file: juce_OutputStream.h ***/
 
 #ifndef DOXYGEN
+ class ReferenceCountedObject;
  class DynamicObject;
 #endif
 
@@ -8731,8 +8732,8 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 	A variant class, that can be used to hold a range of primitive values.
 
 	A var object can hold a range of simple primitive values, strings, or
-	a reference-counted pointer to a DynamicObject. The var class is intended
-	to act like the values used in dynamic scripting languages.
+	any kind of ReferenceCountedObject. The var class is intended to act like
+	the kind of values used in dynamic scripting languages.
 
 	@see DynamicObject
 */
@@ -8760,7 +8761,7 @@ public:
 	var (const char* value);
 	var (const wchar_t* value);
 	var (const String& value);
-	var (DynamicObject* object);
+	var (ReferenceCountedObject* object);
 	var (MethodFunction method) noexcept;
 
 	var& operator= (const var& valueToCopy);
@@ -8771,19 +8772,20 @@ public:
 	var& operator= (const char* value);
 	var& operator= (const wchar_t* value);
 	var& operator= (const String& value);
-	var& operator= (DynamicObject* object);
+	var& operator= (ReferenceCountedObject* object);
 	var& operator= (MethodFunction method);
 
 	void swapWith (var& other) noexcept;
 
-	operator int() const;
-	operator int64() const;
-	operator bool() const;
-	operator float() const;
-	operator double() const;
+	operator int() const noexcept;
+	operator int64() const noexcept;
+	operator bool() const noexcept;
+	operator float() const noexcept;
+	operator double() const noexcept;
 	operator const String() const;
 	const String toString() const;
-	DynamicObject* getObject() const;
+	ReferenceCountedObject* getObject() const noexcept;
+	DynamicObject* getDynamicObject() const noexcept;
 
 	bool isVoid() const noexcept;
 	bool isInt() const noexcept;
@@ -8864,7 +8866,7 @@ private:
 		bool boolValue;
 		double doubleValue;
 		String* stringValue;
-		DynamicObject* objectValue;
+		ReferenceCountedObject* objectValue;
 		MethodFunction methodValue;
 	};
 
@@ -8874,8 +8876,10 @@ private:
 
 bool operator== (const var& v1, const var& v2) noexcept;
 bool operator!= (const var& v1, const var& v2) noexcept;
-bool operator== (const var& v1, const String& v2) noexcept;
-bool operator!= (const var& v1, const String& v2) noexcept;
+bool operator== (const var& v1, const String& v2);
+bool operator!= (const var& v1, const String& v2);
+bool operator== (const var& v1, const char* v2);
+bool operator!= (const var& v1, const char* v2);
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__
 /*** End of inlined file: juce_Variant.h ***/
@@ -46472,14 +46476,14 @@ public:
 
 	/** To allow rows from your list to be dragged-and-dropped, implement this method.
 
-		If this returns a non-empty name then when the user drags a row, the listbox will
+		If this returns a non-null variant then when the user drags a row, the listbox will
 		try to find a DragAndDropContainer in its parent hierarchy, and will use it to trigger
 		a drag-and-drop operation, using this string as the source description, with the listbox
 		itself as the source component.
 
 		@see DragAndDropContainer::startDragging
 	*/
-	virtual const String getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+	virtual const var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
 
 	/** You can override this to provide tool tips for specific rows.
 		@see TooltipClient
@@ -46880,7 +46884,7 @@ public:
 	/** @internal */
 	void colourChanged();
 	/** @internal */
-	void startDragAndDrop (const MouseEvent& e, const String& dragDescription);
+	void startDragAndDrop (const MouseEvent& e, const var& dragDescription);
 
 private:
 
@@ -50626,11 +50630,10 @@ public:
 	{
 	public:
 		/** Creates a SourceDetails object from its various settings. */
-		SourceDetails (const String& description, Component* sourceComponent,
-					   const Point<int>& localPosition, ReferenceCountedObject* customDataObject = nullptr) noexcept;
+		SourceDetails (const var& description, Component* sourceComponent, const Point<int>& localPosition) noexcept;
 
-		/** A descriptor string - this is set DragAndDropContainer::startDragging(). */
-		String description;
+		/** A descriptor for the drag - this is set DragAndDropContainer::startDragging(). */
+		var description;
 
 		/** The component from the drag operation was started. */
 		WeakReference<Component> sourceComponent;
@@ -50639,12 +50642,6 @@ public:
 			Note that for calls such as isInterestedInDragSource(), this may be a null position.
 		*/
 		Point<int> localPosition;
-
-		/** A pointer to a user-supplied object which contains some kind of data which is relevant to
-			the specific classes which are being used. Make sure that you check the type of this object,
-			and safely dynamic_cast it to your required type.
-		*/
-		ReferenceCountedObjectPtr<ReferenceCountedObject> customDataObject;
 	};
 
 	/** Callback to check whether this target is interested in the type of object being
@@ -50768,8 +50765,8 @@ public:
 		findParentDragContainerFor() is a handy method to call to find the
 		drag container to use for a component.
 
-		@param sourceDescription	a string to use as the description of the thing being dragged - this
-									will be passed to the objects that might be dropped-onto so they can
+		@param sourceDescription	a string or value to use as the description of the thing being dragged -
+									this will be passed to the objects that might be dropped-onto so they can
 									decide whether they want to handle it
 		@param sourceComponent	  the component that is being dragged
 		@param dragImage		the image to drag around underneath the mouse. If this is a null image,
@@ -50781,16 +50778,12 @@ public:
 									at which the image should be drawn from the mouse. If it isn't
 									specified, then the image will be centred around the mouse. If
 									an image hasn't been passed-in, this will be ignored.
-		@param customDataObject	 Any kind of reference-counted object which you want to have passed to
-									the target component. A pointer to this object will be made available
-									to the targets in the DragAndDropTarget::SourceDetails class.
 	*/
-	void startDragging (const String& sourceDescription,
+	void startDragging (const var& sourceDescription,
 						Component* sourceComponent,
 						const Image& dragImage = Image::null,
 						bool allowDraggingToOtherJuceWindows = false,
-						const Point<int>* imageOffsetFromMouse = nullptr,
-						ReferenceCountedObject* customDataObject = nullptr);
+						const Point<int>* imageOffsetFromMouse = nullptr);
 
 	/** Returns true if something is currently being dragged. */
 	bool isDragAndDropActive() const;
@@ -50856,17 +50849,14 @@ protected:
 		and if you want it to then perform a file drag-and-drop, add the filenames you want
 		to the array passed in, and return true.
 
-		@param dragSourceDescription	the description passed into the startDrag() call when the drag began
-		@param dragSourceComponent	  the component passed into the startDrag() call when the drag began
-		@param files			on return, the filenames you want to drag
-		@param canMoveFiles		 on return, true if it's ok for the receiver to move the files; false if
-											it must make a copy of them (see the performExternalDragDropOfFiles()
-											method)
+		@param sourceDetails	information about the source of the drag operation
+		@param files		on return, the filenames you want to drag
+		@param canMoveFiles	 on return, true if it's ok for the receiver to move the files; false if
+								it must make a copy of them (see the performExternalDragDropOfFiles() method)
 		@see performExternalDragDropOfFiles
 	*/
 	virtual bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
-													   StringArray& files,
-													   bool& canMoveFiles);
+													   StringArray& files, bool& canMoveFiles);
 
 private:
 
@@ -53674,14 +53664,14 @@ public:
 
 	/** To allow rows from your table to be dragged-and-dropped, implement this method.
 
-		If this returns a non-empty name then when the user drags a row, the table will try to
+		If this returns a non-null variant then when the user drags a row, the table will try to
 		find a DragAndDropContainer in its parent hierarchy, and will use it to trigger a
 		drag-and-drop operation, using this string as the source description, and the listbox
 		itself as the source component.
 
-		@see DragAndDropContainer::startDragging
+		@see getDragSourceCustomData, DragAndDropContainer::startDragging
 	*/
-	virtual const String getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+	virtual const var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
 };
 
 /**
@@ -54367,7 +54357,7 @@ public:
 
 	/** To allow items from your treeview to be dragged-and-dropped, implement this method.
 
-		If this returns a non-empty name then when the user drags an item, the treeview will
+		If this returns a non-null variant then when the user drags an item, the treeview will
 		try to find a DragAndDropContainer in its parent hierarchy, and will use it to trigger
 		a drag-and-drop operation, using this string as the source description, with the treeview
 		itself as the source component.
@@ -54380,7 +54370,7 @@ public:
 
 		@see DragAndDropContainer::startDragging
 	*/
-	virtual const String getDragSourceDescription();
+	virtual const var getDragSourceDescription();
 
 	/** If you want your item to be able to have files drag-and-dropped onto it, implement this
 		method and return true.
@@ -59232,7 +59222,7 @@ public:
 	virtual void menuItemSelected (int menuItemID,
 								   int topLevelMenuIndex) = 0;
 
-#if JUCE_MAC || DOXYGEN
+   #if JUCE_MAC || DOXYGEN
 	/** MAC ONLY - Sets the model that is currently being shown as the main
 		menu bar at the top of the screen on the Mac.
 
@@ -59254,8 +59244,7 @@ public:
 		the main menu bar.
 	*/
 	static MenuBarModel* getMacMainMenu();
-
-#endif
+   #endif
 
 	/** @internal */
 	void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info);

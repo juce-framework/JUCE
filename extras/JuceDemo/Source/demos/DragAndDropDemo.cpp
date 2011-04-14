@@ -70,7 +70,7 @@ public:
                     Justification::centredLeft, true);
     }
 
-    const String getDragSourceDescription (const SparseSet<int>& selectedRows)
+    const var getDragSourceDescription (const SparseSet<int>& selectedRows)
     {
         // for our drag desctription, we'll just make a list of the selected
         // row numbers - this will be picked up by the drag target and displayed in
@@ -159,7 +159,7 @@ public:
 
     void itemDropped (const SourceDetails& dragSourceDetails)
     {
-        message = "last rows dropped: " + dragSourceDetails.description;
+        message = "last rows dropped: " + dragSourceDetails.description.toString();
 
         somethingIsBeingDraggedOver = false;
         repaint();
