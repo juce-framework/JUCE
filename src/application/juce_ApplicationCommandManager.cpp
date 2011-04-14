@@ -244,7 +244,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findTargetForComponent (Com
 
     if (target == nullptr && c != nullptr)
         // (unable to use the syntax findParentComponentOfClass <ApplicationCommandTarget> () because of a VC6 compiler bug)
-        target = c->findParentComponentOfClass ((ApplicationCommandTarget*) 0);
+        target = c->findParentComponentOfClass ((ApplicationCommandTarget*) nullptr);
 
     return target;
 }

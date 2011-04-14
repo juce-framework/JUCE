@@ -943,9 +943,10 @@ void TreeView::hideDragHighlight() noexcept
 }
 
 TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
-                                           const StringArray& files, const String& sourceDescription,
-                                           Component* sourceComponent) const noexcept
+                                           const StringArray& files, const SourceDetails& dragSourceDetails) const noexcept
 {
+    x = dragSourceDetails.localPosition.getX();
+    y = dragSourceDetails.localPosition.getY();
     insertIndex = 0;
     TreeViewItem* item = getItemAt (y);
 
@@ -960,7 +961,7 @@ TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
     if (item->getNumSubItems() == 0 || ! item->isOpen())
     {
         if (files.size() > 0 ? item->isInterestedInFileDrag (files)
-                             : item->isInterestedInDragSource (sourceDescription, sourceComponent))
+                             : item->isInterestedInDragSource (dragSourceDetails))
         {
             // Check if we're trying to drag into an empty group item..
             if (oldY > itemPos.getY() + itemPos.getHeight() / 4
@@ -996,12 +997,13 @@ TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
     return item->parentItem;
 }
 
-void TreeView::handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y)
+void TreeView::handleDrag (const StringArray& files, const SourceDetails& dragSourceDetails)
 {
-    const bool scrolled = viewport->autoScroll (x, y, 20, 10);
+    const bool scrolled = viewport->autoScroll (dragSourceDetails.localPosition.getX(),
+                                                dragSourceDetails.localPosition.getY(), 20, 10);
 
-    int insertIndex;
-    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, sourceDescription, sourceComponent);
+    int insertIndex, x, y;
+    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, dragSourceDetails);
 
     if (item != nullptr)
     {
@@ -1010,7 +1012,7 @@ void TreeView::handleDrag (const StringArray& files, const String& sourceDescrip
              || dragInsertPointHighlight->lastIndex != insertIndex)
         {
             if (files.size() > 0 ? item->isInterestedInFileDrag (files)
-                                 : item->isInterestedInDragSource (sourceDescription, sourceComponent))
+                                 : item->isInterestedInDragSource (dragSourceDetails))
                 showDragHighlight (item, insertIndex, x, y);
             else
                 hideDragHighlight();
@@ -1022,12 +1024,12 @@ void TreeView::handleDrag (const StringArray& files, const String& sourceDescrip
     }
 }
 
-void TreeView::handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y)
+void TreeView::handleDrop (const StringArray& files, const SourceDetails& dragSourceDetails)
 {
     hideDragHighlight();
 
-    int insertIndex;
-    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, sourceDescription, sourceComponent);
+    int insertIndex, x, y;
+    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, dragSourceDetails);
 
     if (item != nullptr)
     {
@@ -1038,8 +1040,8 @@ void TreeView::handleDrop (const StringArray& files, const String& sourceDescrip
         }
         else
         {
-            if (item->isInterestedInDragSource (sourceDescription, sourceComponent))
-                item->itemDropped (sourceDescription, sourceComponent, insertIndex);
+            if (item->isInterestedInDragSource (dragSourceDetails))
+                item->itemDropped (dragSourceDetails, insertIndex);
         }
     }
 }
@@ -1057,7 +1059,7 @@ void TreeView::fileDragEnter (const StringArray& files, int x, int y)
 
 void TreeView::fileDragMove (const StringArray& files, int x, int y)
 {
-    handleDrag (files, String::empty, 0, x, y);
+    handleDrag (files, SourceDetails (String::empty, 0, Point<int> (x, y)));
 }
 
 void TreeView::fileDragExit (const StringArray&)
@@ -1067,32 +1069,32 @@ void TreeView::fileDragExit (const StringArray&)
 
 void TreeView::filesDropped (const StringArray& files, int x, int y)
 {
-    handleDrop (files, String::empty, 0, x, y);
+    handleDrop (files, SourceDetails (String::empty, 0, Point<int> (x, y)));
 }
 
-bool TreeView::isInterestedInDragSource (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
+bool TreeView::isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/)
 {
     return true;
 }
 
-void TreeView::itemDragEnter (const String& sourceDescription, Component* sourceComponent, int x, int y)
+void TreeView::itemDragEnter (const SourceDetails& dragSourceDetails)
 {
-    itemDragMove (sourceDescription, sourceComponent, x, y);
+    itemDragMove (dragSourceDetails);
 }
 
-void TreeView::itemDragMove (const String& sourceDescription, Component* sourceComponent, int x, int y)
+void TreeView::itemDragMove (const SourceDetails& dragSourceDetails)
 {
-    handleDrag (StringArray(), sourceDescription, sourceComponent, x, y);
+    handleDrag (StringArray(), dragSourceDetails);
 }
 
-void TreeView::itemDragExit (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
+void TreeView::itemDragExit (const SourceDetails& /*dragSourceDetails*/)
 {
     hideDragHighlight();
 }
 
-void TreeView::itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y)
+void TreeView::itemDropped (const SourceDetails& dragSourceDetails)
 {
-    handleDrop (StringArray(), sourceDescription, sourceComponent, x, y);
+    handleDrop (StringArray(), dragSourceDetails);
 }
 
 //==============================================================================
@@ -1303,12 +1305,12 @@ void TreeViewItem::filesDropped (const StringArray& /*files*/, int /*insertIndex
 {
 }
 
-bool TreeViewItem::isInterestedInDragSource (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
+bool TreeViewItem::isInterestedInDragSource (const DragAndDropTarget::SourceDetails& /*dragSourceDetails*/)
 {
     return false;
 }
 
-void TreeViewItem::itemDropped (const String& /*sourceDescription*/, Component* /*sourceComponent*/, int /*insertIndex*/)
+void TreeViewItem::itemDropped (const DragAndDropTarget::SourceDetails& /*dragSourceDetails*/, int /*insertIndex*/)
 {
 }
 

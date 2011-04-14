@@ -1104,7 +1104,7 @@ private:
             PopupMenu::ItemComponent* mic = dynamic_cast <PopupMenu::ItemComponent*> (c);
 
             if (mic == nullptr && c != nullptr)
-                mic = c->findParentComponentOfClass ((PopupMenu::ItemComponent*) 0);
+                mic = c->findParentComponentOfClass ((PopupMenu::ItemComponent*) nullptr);
 
             if (mic != currentChild
                  && (isOver || (activeSubMenu == nullptr) || ! activeSubMenu->isVisible()))

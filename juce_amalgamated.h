@@ -50619,16 +50619,42 @@ public:
 	/** Destructor. */
 	virtual ~DragAndDropTarget()  {}
 
+	/** Contains details about the source of a drag-and-drop operation.
+		The contents of this
+	*/
+	class JUCE_API  SourceDetails
+	{
+	public:
+		/** Creates a SourceDetails object from its various settings. */
+		SourceDetails (const String& description, Component* sourceComponent,
+					   const Point<int>& localPosition, ReferenceCountedObject* customDataObject = nullptr) noexcept;
+
+		/** A descriptor string - this is set DragAndDropContainer::startDragging(). */
+		String description;
+
+		/** The component from the drag operation was started. */
+		WeakReference<Component> sourceComponent;
+
+		/** The local position of the mouse, relative to the target component.
+			Note that for calls such as isInterestedInDragSource(), this may be a null position.
+		*/
+		Point<int> localPosition;
+
+		/** A pointer to a user-supplied object which contains some kind of data which is relevant to
+			the specific classes which are being used. Make sure that you check the type of this object,
+			and safely dynamic_cast it to your required type.
+		*/
+		ReferenceCountedObjectPtr<ReferenceCountedObject> customDataObject;
+	};
+
 	/** Callback to check whether this target is interested in the type of object being
 		dragged.
 
-		@param sourceDescription	the description string passed into DragAndDropContainer::startDragging()
-		@param sourceComponent	  the component that was passed into DragAndDropContainer::startDragging()
+		@param dragSourceDetails	contains information about the source of the drag operation.
 		@returns			true if this component wants to receive the other callbacks regarging this
 									type of object; if it returns false, no other callbacks will be made.
 	*/
-	virtual bool isInterestedInDragSource (const String& sourceDescription,
-										   Component* sourceComponent) = 0;
+	virtual bool isInterestedInDragSource (const SourceDetails& dragSourceDetails) = 0;
 
 	/** Callback to indicate that something is being dragged over this component.
 
@@ -50638,15 +50664,10 @@ public:
 		Use this callback as a trigger to make your component repaint itself to give the
 		user feedback about whether the item can be dropped here or not.
 
-		@param sourceDescription	the description string passed into DragAndDropContainer::startDragging()
-		@param sourceComponent	  the component that was passed into DragAndDropContainer::startDragging()
-		@param x			the mouse x position, relative to this component
-		@param y			the mouse y position, relative to this component
+		@param dragSourceDetails	contains information about the source of the drag operation.
 		@see itemDragExit
 	*/
-	virtual void itemDragEnter (const String& sourceDescription,
-								Component* sourceComponent,
-								int x, int y);
+	virtual void itemDragEnter (const SourceDetails& dragSourceDetails);
 
 	/** Callback to indicate that the user is dragging something over this component.
 
@@ -50654,14 +50675,9 @@ public:
 		something. Normally overriding itemDragEnter() and itemDragExit() are enough, but
 		this lets you know what happens in-between.
 
-		@param sourceDescription	the description string passed into DragAndDropContainer::startDragging()
-		@param sourceComponent	  the component that was passed into DragAndDropContainer::startDragging()
-		@param x			the mouse x position, relative to this component
-		@param y			the mouse y position, relative to this component
+		@param dragSourceDetails	contains information about the source of the drag operation.
 	*/
-	virtual void itemDragMove (const String& sourceDescription,
-							   Component* sourceComponent,
-							   int x, int y);
+	virtual void itemDragMove (const SourceDetails& dragSourceDetails);
 
 	/** Callback to indicate that something has been dragged off the edge of this component.
 
@@ -50671,12 +50687,10 @@ public:
 		If you've used itemDragEnter() to repaint your component and give feedback, use this
 		as a signal to repaint it in its normal state.
 
-		@param sourceDescription	the description string passed into DragAndDropContainer::startDragging()
-		@param sourceComponent	  the component that was passed into DragAndDropContainer::startDragging()
+		@param dragSourceDetails	contains information about the source of the drag operation.
 		@see itemDragEnter
 	*/
-	virtual void itemDragExit (const String& sourceDescription,
-							   Component* sourceComponent);
+	virtual void itemDragExit (const SourceDetails& dragSourceDetails);
 
 	/** Callback to indicate that the user has dropped something onto this component.
 
@@ -50686,14 +50700,9 @@ public:
 		Note that after this is called, the itemDragExit method may not be called, so you should
 		clean up in here if there's anything you need to do when the drag finishes.
 
-		@param sourceDescription	the description string passed into DragAndDropContainer::startDragging()
-		@param sourceComponent	  the component that was passed into DragAndDropContainer::startDragging()
-		@param x			the mouse x position, relative to this component
-		@param y			the mouse y position, relative to this component
+		@param dragSourceDetails	contains information about the source of the drag operation.
 	*/
-	virtual void itemDropped (const String& sourceDescription,
-							  Component* sourceComponent,
-							  int x, int y) = 0;
+	virtual void itemDropped (const SourceDetails& dragSourceDetails) = 0;
 
 	/** Overriding this allows the target to tell the drag container whether to
 		draw the drag image while the cursor is over it.
@@ -50702,6 +50711,16 @@ public:
 		image will not be shown when the cursor is over this target.
 	*/
 	virtual bool shouldDrawDragImageWhenOver();
+
+private:
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// The parameters for these methods have changed - please update your code!
+	virtual void isInterestedInDragSource (const String&, Component*) {}
+	virtual int itemDragEnter (const String&, Component*, int, int) { return 0; }
+	virtual int itemDragMove (const String&, Component*, int, int) { return 0; }
+	virtual int itemDragExit (const String&, Component*) { return 0; }
+	virtual int itemDropped (const String&, Component*, int, int) { return 0; }
+   #endif
 };
 
 #endif   // __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
@@ -50749,10 +50768,9 @@ public:
 		findParentDragContainerFor() is a handy method to call to find the
 		drag container to use for a component.
 
-		@param sourceDescription	a string to use as the description of the thing being
-									dragged - this will be passed to the objects that might be
-									dropped-onto so they can decide if they want to handle it or
-									not
+		@param sourceDescription	a string to use as the description of the thing being dragged - this
+									will be passed to the objects that might be dropped-onto so they can
+									decide whether they want to handle it
 		@param sourceComponent	  the component that is being dragged
 		@param dragImage		the image to drag around underneath the mouse. If this is a null image,
 									a snapshot of the sourceComponent will be used instead.
@@ -50763,12 +50781,16 @@ public:
 									at which the image should be drawn from the mouse. If it isn't
 									specified, then the image will be centred around the mouse. If
 									an image hasn't been passed-in, this will be ignored.
+		@param customDataObject	 Any kind of reference-counted object which you want to have passed to
+									the target component. A pointer to this object will be made available
+									to the targets in the DragAndDropTarget::SourceDetails class.
 	*/
 	void startDragging (const String& sourceDescription,
 						Component* sourceComponent,
 						const Image& dragImage = Image::null,
 						bool allowDraggingToOtherJuceWindows = false,
-						const Point<int>* imageOffsetFromMouse = nullptr);
+						const Point<int>* imageOffsetFromMouse = nullptr,
+						ReferenceCountedObject* customDataObject = nullptr);
 
 	/** Returns true if something is currently being dragged. */
 	bool isDragAndDropActive() const;
@@ -50842,8 +50864,7 @@ protected:
 											method)
 		@see performExternalDragDropOfFiles
 	*/
-	virtual bool shouldDropFilesWhenDraggedExternally (const String& dragSourceDescription,
-													   Component* dragSourceComponent,
+	virtual bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
 													   StringArray& files,
 													   bool& canMoveFiles);
 
@@ -50852,6 +50873,8 @@ private:
 	friend class DragImageComponent;
 	ScopedPointer <Component> dragImageComponent;
 	String currentDragDesc;
+
+	JUCE_DEPRECATED (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)) { return false; }
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer);
 };
@@ -51100,13 +51123,13 @@ public:
 	/** @internal */
 	void mouseDown (const MouseEvent&);
 	/** @internal */
-	bool isInterestedInDragSource (const String&, Component*);
+	bool isInterestedInDragSource (const SourceDetails&);
 	/** @internal */
-	void itemDragMove (const String&, Component*, int, int);
+	void itemDragMove (const SourceDetails&);
 	/** @internal */
-	void itemDragExit (const String&, Component*);
+	void itemDragExit (const SourceDetails&);
 	/** @internal */
-	void itemDropped (const String&, Component*, int, int);
+	void itemDropped (const SourceDetails&);
 	/** @internal */
 	void updateAllItemPositions (bool animate);
 	/** @internal */
@@ -54388,7 +54411,7 @@ public:
 		To respond to drag-and-drop of files from external applications, see isInterestedInFileDrag().
 		@see DragAndDropTarget::isInterestedInDragSource, itemDropped
 	*/
-	virtual bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+	virtual bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails);
 
 	/** When a things are dropped into this item, this callback is invoked.
 
@@ -54396,7 +54419,7 @@ public:
 		The insertIndex value indicates where in the list of sub-items the new items should be placed.
 		@see isInterestedInDragSource, DragAndDropTarget::itemDropped
 	*/
-	virtual void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex);
+	virtual void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);
 
 	/** Sets a flag to indicate that the item wants to be allowed
 		to draw all the way across to the left edge of the treeview.
@@ -54522,6 +54545,12 @@ private:
 	TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
 	TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
 	TreeViewItem* findItemFromIdentifierString (const String& identifierString);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// The parameters for these methods have changed - please update your code!
+	virtual void isInterestedInDragSource (const String&, Component*) {}
+	virtual int itemDropped (const String&, Component*, int) { return 0; }
+   #endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem);
 };
@@ -54761,15 +54790,15 @@ public:
 	/** @internal */
 	void filesDropped (const StringArray& files, int x, int y);
 	/** @internal */
-	bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+	bool isInterestedInDragSource (const SourceDetails&);
 	/** @internal */
-	void itemDragEnter (const String& sourceDescription, Component* sourceComponent, int x, int y);
+	void itemDragEnter (const SourceDetails&);
 	/** @internal */
-	void itemDragMove (const String& sourceDescription, Component* sourceComponent, int x, int y);
+	void itemDragMove (const SourceDetails&);
 	/** @internal */
-	void itemDragExit (const String& sourceDescription, Component* sourceComponent);
+	void itemDragExit (const SourceDetails&);
 	/** @internal */
-	void itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y);
+	void itemDropped (const SourceDetails&);
 
 private:
 	friend class TreeViewItem;
@@ -54798,11 +54827,10 @@ private:
 	void updateButtonUnderMouse (const MouseEvent& e);
 	void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) noexcept;
 	void hideDragHighlight() noexcept;
-	void handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
-	void handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
+	void handleDrag (const StringArray& files, const SourceDetails&);
+	void handleDrop (const StringArray& files, const SourceDetails&);
 	TreeViewItem* getInsertPosition (int& x, int& y, int& insertIndex,
-									 const StringArray& files, const String& sourceDescription,
-									 Component* sourceComponent) const noexcept;
+									 const StringArray& files, const SourceDetails&) const noexcept;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };
@@ -64832,7 +64860,7 @@ public:
 		the DialogWindow that is created. To find a pointer to this window from your
 		contentComponent, you can do something like this:
 		@code
-		Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
+		Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) nullptr);
 
 		if (dw != nullptr)
 			dw->exitModalState (1234);
@@ -64875,7 +64903,7 @@ public:
 		the DialogWindow that is created. To find a pointer to this window from your
 		contentComponent, you can do something like this:
 		@code
-		Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
+		Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) nullptr);
 
 		if (dw != nullptr)
 			dw->exitModalState (1234);

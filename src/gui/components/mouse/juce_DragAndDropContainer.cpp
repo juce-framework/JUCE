@@ -51,12 +51,12 @@ public:
                         Component* const sourceComponent,
                         Component* const mouseDragSource_,
                         DragAndDropContainer* const o,
-                        const Point<int>& imageOffset_)
-        : image (im),
-          source (sourceComponent),
+                        const Point<int>& imageOffset_,
+                        ReferenceCountedObject* const customDataObject)
+        : sourceDetails (desc, sourceComponent, Point<int>(), customDataObject),
+          image (im),
           mouseDragSource (mouseDragSource_),
           owner (o),
-          dragDesc (desc),
           imageOffset (imageOffset_),
           hasCheckedForExternalDrag (false),
           drawImage (true)
@@ -64,7 +64,7 @@ public:
         setSize (im.getWidth(), im.getHeight());
 
         if (mouseDragSource == nullptr)
-            mouseDragSource = source;
+            mouseDragSource = sourceComponent;
 
         mouseDragSource->addMouseListener (this, false);
 
@@ -83,8 +83,10 @@ public:
         {
             mouseDragSource->removeMouseListener (this);
 
-            if (getCurrentlyOver() != nullptr && getCurrentlyOver()->isInterestedInDragSource (dragDesc, source))
-                getCurrentlyOver()->itemDragExit (dragDesc, source);
+            DragAndDropTarget* const current = getCurrentlyOver();
+
+            if (current != nullptr && current->isInterestedInDragSource (sourceDetails))
+                current->itemDragExit (sourceDetails);
         }
     }
 
@@ -114,15 +116,15 @@ public:
             hit = hit->getComponentAt (relPos.getX(), relPos.getY());
         }
 
-        // (note: use a local copy of the dragDesc member in case the callback runs
+        // (note: use a local copy of this in case the callback runs
         // a modal loop and deletes this object before the method completes)
-        const String dragDescLocal (dragDesc);
+        const DragAndDropTarget::SourceDetails details (sourceDetails);
 
         while (hit != nullptr)
         {
             DragAndDropTarget* const ddt = dynamic_cast <DragAndDropTarget*> (hit);
 
-            if (ddt != nullptr && ddt->isInterestedInDragSource (dragDescLocal, source))
+            if (ddt != nullptr && ddt->isInterestedInDragSource (details))
             {
                 relativePos = hit->getLocalPoint (nullptr, screenPos);
                 return ddt;
@@ -156,13 +158,13 @@ public:
 
                 setVisible (true);
 
-                if (dropAccepted || source == nullptr)
+                if (dropAccepted || sourceDetails.sourceComponent == nullptr)
                 {
                     Desktop::getInstance().getAnimator().fadeOut (this, 120);
                 }
                 else
                 {
-                    const Point<int> target (source->localPointToGlobal (source->getLocalBounds().getCentre()));
+                    const Point<int> target (sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCentre()));
                     const Point<int> ourCentre (localPointToGlobal (getLocalBounds().getCentre()));
 
                     Desktop::getInstance().getAnimator().animateComponent (this,
@@ -177,13 +179,14 @@ public:
 
             if (dropAccepted && ddt != nullptr)
             {
-                // (note: use a local copy of the dragDesc member in case the callback runs
+                // (note: use a local copy of this in case the callback runs
                 // a modal loop and deletes this object before the method completes)
-                const String dragDescLocal (dragDesc);
+                DragAndDropTarget::SourceDetails details (sourceDetails);
+                details.localPosition = relPos;
 
                 currentlyOverComp = nullptr;
 
-                ddt->itemDropped (dragDescLocal, source, relPos.getX(), relPos.getY());
+                ddt->itemDropped (details);
             }
 
             // careful - this object could now be deleted..
@@ -192,9 +195,9 @@ public:
 
     void updateLocation (const bool canDoExternalDrag, const Point<int>& screenPos)
     {
-        // (note: use a local copy of the dragDesc member in case the callback runs
-        // a modal loop and deletes this object before it returns)
-        const String dragDescLocal (dragDesc);
+        // (note: use a local copy of this in case a callback runs a modal loop and deletes
+        // this object before it returns)
+        DragAndDropTarget::SourceDetails details (sourceDetails);
 
         Point<int> newPos (screenPos + imageOffset);
 
@@ -206,28 +209,40 @@ public:
             setTopLeftPosition (newPos.getX(), newPos.getY());
 
             Point<int> relPos;
-            DragAndDropTarget* const ddt = findTarget (screenPos, relPos);
-            Component* ddtComp = dynamic_cast <Component*> (ddt);
+            DragAndDropTarget* const newTarget = findTarget (screenPos, relPos);
+            Component* newTargetComp = dynamic_cast <Component*> (newTarget);
 
-            drawImage = (ddt == nullptr) || ddt->shouldDrawDragImageWhenOver();
+            drawImage = (newTarget == nullptr) || newTarget->shouldDrawDragImageWhenOver();
 
-            if (ddtComp != currentlyOverComp)
+            if (newTargetComp != currentlyOverComp)
             {
-                if (currentlyOverComp != nullptr && source != nullptr
-                      && getCurrentlyOver()->isInterestedInDragSource (dragDescLocal, source))
+                DragAndDropTarget* const lastTarget = getCurrentlyOver();
+
+                if (lastTarget != nullptr && details.sourceComponent != nullptr
+                      && lastTarget->isInterestedInDragSource (details))
+                    lastTarget->itemDragExit (details);
+
+                currentlyOverComp = newTargetComp;
+
+                if (newTarget != nullptr)
                 {
-                    getCurrentlyOver()->itemDragExit (dragDescLocal, source);
+                    details.localPosition = relPos;
+
+                    if (newTarget->isInterestedInDragSource (details))
+                        newTarget->itemDragEnter (details);
                 }
-
-                currentlyOverComp = ddtComp;
-
-                if (ddt != nullptr && ddt->isInterestedInDragSource (dragDescLocal, source))
-                    ddt->itemDragEnter (dragDescLocal, source, relPos.getX(), relPos.getY());
             }
 
-            DragAndDropTarget* target = getCurrentlyOver();
-            if (target != nullptr && target->isInterestedInDragSource (dragDescLocal, source))
-                target->itemDragMove (dragDescLocal, source, relPos.getX(), relPos.getY());
+            {
+                DragAndDropTarget* const target = getCurrentlyOver();
+                if (target != nullptr)
+                {
+                    details.localPosition = relPos;
+
+                    if (target->isInterestedInDragSource (details))
+                        target->itemDragMove (details);
+                }
+            }
 
             if (getCurrentlyOver() == nullptr && canDoExternalDrag && ! hasCheckedForExternalDrag)
             {
@@ -237,7 +252,7 @@ public:
                     StringArray files;
                     bool canMoveFiles = false;
 
-                    if (owner->shouldDropFilesWhenDraggedExternally (dragDescLocal, source, files, canMoveFiles)
+                    if (owner->shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles)
                          && files.size() > 0)
                     {
                         WeakReference<Component> thisWeakRef (this);
@@ -262,7 +277,7 @@ public:
 
     void timerCallback()
     {
-        if (source == nullptr)
+        if (sourceDetails.sourceComponent == nullptr)
         {
             delete this;
         }
@@ -276,8 +291,8 @@ public:
     }
 
 private:
+    DragAndDropTarget::SourceDetails sourceDetails;
     Image image;
-    WeakReference<Component> source;
     WeakReference<Component> mouseDragSource;
     DragAndDropContainer* const owner;
 
@@ -287,7 +302,6 @@ private:
         return dynamic_cast <DragAndDropTarget*> (currentlyOverComp.get());
     }
 
-    String dragDesc;
     const Point<int> imageOffset;
     bool hasCheckedForExternalDrag, drawImage;
 
@@ -309,7 +323,8 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                                           Component* sourceComponent,
                                           const Image& dragImage_,
                                           const bool allowDraggingToExternalWindows,
-                                          const Point<int>* imageOffsetFromMouse)
+                                          const Point<int>* imageOffsetFromMouse,
+                                          ReferenceCountedObject* customDataObject)
 {
     Image dragImage (dragImage_);
 
@@ -378,7 +393,8 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         }
 
         dragImageComponent = new DragImageComponent (dragImage, sourceDescription, sourceComponent,
-                                                     draggingSource->getComponentUnderMouse(), this, imageOffset);
+                                                     draggingSource->getComponentUnderMouse(), this,
+                                                     imageOffset, customDataObject);
 
         currentDragDesc = sourceDescription;
 
@@ -420,46 +436,33 @@ const String DragAndDropContainer::getCurrentDragDescription() const
 
 DragAndDropContainer* DragAndDropContainer::findParentDragContainerFor (Component* c)
 {
-    return c == nullptr ? nullptr : c->findParentComponentOfClass ((DragAndDropContainer*) 0);
+    return c == nullptr ? nullptr : c->findParentComponentOfClass ((DragAndDropContainer*) nullptr);
 }
 
-bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)
+bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails&, StringArray&, bool&)
 {
     return false;
 }
 
+//==============================================================================
+DragAndDropTarget::SourceDetails::SourceDetails (const String& description_, Component* sourceComponent_,
+                                                 const Point<int>& localPosition_, ReferenceCountedObject* const customDataObject_) noexcept
+    : description (description_),
+      sourceComponent (sourceComponent_),
+      localPosition (localPosition_),
+      customDataObject (customDataObject_)
+{
+}
+
+void DragAndDropTarget::itemDragEnter (const SourceDetails&)  {}
+void DragAndDropTarget::itemDragMove  (const SourceDetails&)  {}
+void DragAndDropTarget::itemDragExit  (const SourceDetails&)  {}
+bool DragAndDropTarget::shouldDrawDragImageWhenOver()         { return true; }
 
 //==============================================================================
-void DragAndDropTarget::itemDragEnter (const String&, Component*, int, int)
-{
-}
-
-void DragAndDropTarget::itemDragMove (const String&, Component*, int, int)
-{
-}
-
-void DragAndDropTarget::itemDragExit (const String&, Component*)
-{
-}
-
-bool DragAndDropTarget::shouldDrawDragImageWhenOver()
-{
-    return true;
-}
-
-
-//==============================================================================
-void FileDragAndDropTarget::fileDragEnter (const StringArray&, int, int)
-{
-}
-
-void FileDragAndDropTarget::fileDragMove (const StringArray&, int, int)
-{
-}
-
-void FileDragAndDropTarget::fileDragExit (const StringArray&)
-{
-}
+void FileDragAndDropTarget::fileDragEnter (const StringArray&, int, int)  {}
+void FileDragAndDropTarget::fileDragMove  (const StringArray&, int, int)  {}
+void FileDragAndDropTarget::fileDragExit  (const StringArray&)            {}
 
 
 END_JUCE_NAMESPACE

@@ -97,7 +97,7 @@ public:
             for (int i = propertyComps.size(); --i >= 0;)
                 propertyComps.getUnchecked(i)->setVisible (open);
 
-            PropertyPanel* const pp = findParentComponentOfClass ((PropertyPanel*) 0);
+            PropertyPanel* const pp = findParentComponentOfClass ((PropertyPanel*) nullptr);
 
             if (pp != nullptr)
                 pp->resized();

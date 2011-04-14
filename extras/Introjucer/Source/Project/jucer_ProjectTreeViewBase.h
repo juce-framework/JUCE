@@ -92,8 +92,8 @@ public:
     // Drag-and-drop stuff..
     bool isInterestedInFileDrag (const StringArray& files);
     void filesDropped (const StringArray& files, int insertIndex);
-    bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
-    void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex);
+    bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails);
+    void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);
 
     static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes);
 

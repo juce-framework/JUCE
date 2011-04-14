@@ -279,13 +279,13 @@ public:
     /** @internal */
     void mouseDown (const MouseEvent&);
     /** @internal */
-    bool isInterestedInDragSource (const String&, Component*);
+    bool isInterestedInDragSource (const SourceDetails&);
     /** @internal */
-    void itemDragMove (const String&, Component*, int, int);
+    void itemDragMove (const SourceDetails&);
     /** @internal */
-    void itemDragExit (const String&, Component*);
+    void itemDragExit (const SourceDetails&);
     /** @internal */
-    void itemDropped (const String&, Component*, int, int);
+    void itemDropped (const SourceDetails&);
     /** @internal */
     void updateAllItemPositions (bool animate);
     /** @internal */

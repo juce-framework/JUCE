@@ -563,15 +563,14 @@ void Toolbar::buttonClicked (Button*)
 }
 
 //==============================================================================
-bool Toolbar::isInterestedInDragSource (const String& sourceDescription,
-                                        Component* /*sourceComponent*/)
+bool Toolbar::isInterestedInDragSource (const SourceDetails& dragSourceDetails)
 {
-    return sourceDescription == toolbarDragDescriptor && isEditingActive;
+    return dragSourceDetails.description == toolbarDragDescriptor && isEditingActive;
 }
 
-void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, int y)
+void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
 {
-    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (sourceComponent);
+    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get());
 
     if (tc != nullptr)
     {
@@ -579,7 +578,7 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
         {
             if (tc->getEditingMode() == ToolbarItemComponent::editableOnPalette)
             {
-                ToolbarItemPalette* const palette = tc->findParentComponentOfClass ((ToolbarItemPalette*) 0);
+                ToolbarItemPalette* const palette = tc->findParentComponentOfClass ((ToolbarItemPalette*) nullptr);
 
                 if (palette != nullptr)
                     palette->replaceComponent (tc);
@@ -599,7 +598,8 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
             const int currentIndex = items.indexOf (tc);
             int newIndex = currentIndex;
 
-            const int dragObjectLeft = vertical ? (y - tc->dragOffsetY) : (x - tc->dragOffsetX);
+            const int dragObjectLeft = vertical ? (dragSourceDetails.localPosition.getY() - tc->dragOffsetY)
+                                                : (dragSourceDetails.localPosition.getX() - tc->dragOffsetX);
             const int dragObjectRight = dragObjectLeft + (vertical ? tc->getHeight() : tc->getWidth());
 
             const Rectangle<int> current (Desktop::getInstance().getAnimator()
@@ -641,9 +641,9 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
     }
 }
 
-void Toolbar::itemDragExit (const String&, Component* sourceComponent)
+void Toolbar::itemDragExit (const SourceDetails& dragSourceDetails)
 {
-    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (sourceComponent);
+    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get());
 
     if (tc != nullptr && isParentOf (tc))
     {
@@ -653,9 +653,9 @@ void Toolbar::itemDragExit (const String&, Component* sourceComponent)
     }
 }
 
-void Toolbar::itemDropped (const String&, Component* sourceComponent, int, int)
+void Toolbar::itemDropped (const SourceDetails& dragSourceDetails)
 {
-    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (sourceComponent);
+    ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get());
 
     if (tc != nullptr)
         tc->setState (Button::buttonNormal);
@@ -806,7 +806,7 @@ private:
         {
             Colour background;
 
-            DialogWindow* const dw = findParentComponentOfClass ((DialogWindow*) 0);
+            DialogWindow* const dw = findParentComponentOfClass ((DialogWindow*) nullptr);
 
             if (dw != nullptr)
                 background = dw->getBackgroundColour();

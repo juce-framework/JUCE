@@ -73,10 +73,9 @@ public:
         findParentDragContainerFor() is a handy method to call to find the
         drag container to use for a component.
 
-        @param sourceDescription    a string to use as the description of the thing being
-                                    dragged - this will be passed to the objects that might be
-                                    dropped-onto so they can decide if they want to handle it or
-                                    not
+        @param sourceDescription    a string to use as the description of the thing being dragged - this
+                                    will be passed to the objects that might be dropped-onto so they can
+                                    decide whether they want to handle it
         @param sourceComponent      the component that is being dragged
         @param dragImage            the image to drag around underneath the mouse. If this is a null image,
                                     a snapshot of the sourceComponent will be used instead.
@@ -87,12 +86,16 @@ public:
                                     at which the image should be drawn from the mouse. If it isn't
                                     specified, then the image will be centred around the mouse. If
                                     an image hasn't been passed-in, this will be ignored.
+        @param customDataObject     Any kind of reference-counted object which you want to have passed to
+                                    the target component. A pointer to this object will be made available
+                                    to the targets in the DragAndDropTarget::SourceDetails class.
     */
     void startDragging (const String& sourceDescription,
                         Component* sourceComponent,
                         const Image& dragImage = Image::null,
                         bool allowDraggingToOtherJuceWindows = false,
-                        const Point<int>* imageOffsetFromMouse = nullptr);
+                        const Point<int>* imageOffsetFromMouse = nullptr,
+                        ReferenceCountedObject* customDataObject = nullptr);
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;
@@ -168,8 +171,7 @@ protected:
                                             method)
         @see performExternalDragDropOfFiles
     */
-    virtual bool shouldDropFilesWhenDraggedExternally (const String& dragSourceDescription,
-                                                       Component* dragSourceComponent,
+    virtual bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                        StringArray& files,
                                                        bool& canMoveFiles);
 
@@ -178,6 +180,8 @@ private:
     friend class DragImageComponent;
     ScopedPointer <Component> dragImageComponent;
     String currentDragDesc;
+
+    JUCE_DEPRECATED (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)) { return false; }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer);
 };

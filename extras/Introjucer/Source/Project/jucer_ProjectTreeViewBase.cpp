@@ -336,21 +336,21 @@ void ProjectTreeViewBase::getAllSelectedNodesInTree (Component* componentInTree,
     }
 }
 
-bool ProjectTreeViewBase::isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
+bool ProjectTreeViewBase::isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails)
 {
-    if (sourceDescription != projectItemDragType)
+    if (dragSourceDetails.description != projectItemDragType)
         return false;
 
     OwnedArray <Project::Item> selectedNodes;
-    getAllSelectedNodesInTree (sourceComponent, selectedNodes);
+    getAllSelectedNodesInTree (dragSourceDetails.sourceComponent, selectedNodes);
 
     return selectedNodes.size() > 0 && acceptsDragItems (selectedNodes);
 }
 
-void ProjectTreeViewBase::itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex)
+void ProjectTreeViewBase::itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 {
     OwnedArray <Project::Item> selectedNodes;
-    getAllSelectedNodesInTree (sourceComponent, selectedNodes);
+    getAllSelectedNodesInTree (dragSourceDetails.sourceComponent, selectedNodes);
 
     if (selectedNodes.size() > 0)
     {

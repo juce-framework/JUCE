@@ -74,7 +74,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::findFirstTargetParentCompone
 
     if (c != nullptr)
         // (unable to use the syntax findParentComponentOfClass <ApplicationCommandTarget> () because of a VC6 compiler bug)
-        return c->findParentComponentOfClass ((ApplicationCommandTarget*) 0);
+        return c->findParentComponentOfClass ((ApplicationCommandTarget*) nullptr);
 
     return nullptr;
 }

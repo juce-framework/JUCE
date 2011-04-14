@@ -384,7 +384,7 @@ public:
         To respond to drag-and-drop of files from external applications, see isInterestedInFileDrag().
         @see DragAndDropTarget::isInterestedInDragSource, itemDropped
     */
-    virtual bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+    virtual bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails);
 
     /** When a things are dropped into this item, this callback is invoked.
 
@@ -392,7 +392,7 @@ public:
         The insertIndex value indicates where in the list of sub-items the new items should be placed.
         @see isInterestedInDragSource, DragAndDropTarget::itemDropped
     */
-    virtual void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex);
+    virtual void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);
 
     //==============================================================================
     /** Sets a flag to indicate that the item wants to be allowed
@@ -522,6 +522,12 @@ private:
     TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
     TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
     TreeViewItem* findItemFromIdentifierString (const String& identifierString);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // The parameters for these methods have changed - please update your code!
+    virtual void isInterestedInDragSource (const String&, Component*) {}
+    virtual int itemDropped (const String&, Component*, int) { return 0; }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem);
 };
@@ -769,15 +775,15 @@ public:
     /** @internal */
     void filesDropped (const StringArray& files, int x, int y);
     /** @internal */
-    bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+    bool isInterestedInDragSource (const SourceDetails&);
     /** @internal */
-    void itemDragEnter (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    void itemDragEnter (const SourceDetails&);
     /** @internal */
-    void itemDragMove (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    void itemDragMove (const SourceDetails&);
     /** @internal */
-    void itemDragExit (const String& sourceDescription, Component* sourceComponent);
+    void itemDragExit (const SourceDetails&);
     /** @internal */
-    void itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    void itemDropped (const SourceDetails&);
 
 private:
     friend class TreeViewItem;
@@ -806,11 +812,10 @@ private:
     void updateButtonUnderMouse (const MouseEvent& e);
     void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) noexcept;
     void hideDragHighlight() noexcept;
-    void handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
-    void handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
+    void handleDrag (const StringArray& files, const SourceDetails&);
+    void handleDrop (const StringArray& files, const SourceDetails&);
     TreeViewItem* getInsertPosition (int& x, int& y, int& insertIndex,
-                                     const StringArray& files, const String& sourceDescription,
-                                     Component* sourceComponent) const noexcept;
+                                     const StringArray& files, const SourceDetails&) const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };

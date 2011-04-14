@@ -84,7 +84,7 @@ void MultiDocumentPanelWindow::updateOrder()
 MultiDocumentPanel* MultiDocumentPanelWindow::getOwner() const noexcept
 {
     // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
-    return findParentComponentOfClass ((MultiDocumentPanel*) 0);
+    return findParentComponentOfClass ((MultiDocumentPanel*) nullptr);
 }
 
 
@@ -104,7 +104,7 @@ public:
     void currentTabChanged (int, const String&)
     {
         // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
-        MultiDocumentPanel* const owner = findParentComponentOfClass ((MultiDocumentPanel*) 0);
+        MultiDocumentPanel* const owner = findParentComponentOfClass ((MultiDocumentPanel*) nullptr);
 
         if (owner != nullptr)
             owner->updateOrder();

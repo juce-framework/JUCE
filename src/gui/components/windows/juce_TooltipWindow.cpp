@@ -85,22 +85,35 @@ void TooltipWindow::showFor (const String& tip)
     tipShowing = tip;
 
     Point<int> mousePos (Desktop::getMousePosition());
+    Rectangle<int> parentArea;
 
     if (getParentComponent() != nullptr)
+    {
         mousePos = getParentComponent()->getLocalPoint (nullptr, mousePos);
+        parentArea = getParentComponent()->getLocalBounds();
+    }
+    else
+    {
+        parentArea = Desktop::getInstance().getMonitorAreaContaining (mousePos);
+    }
 
-    int x, y, w, h;
+    int w, h;
     getLookAndFeel().getTooltipSize (tip, w, h);
 
-    if (mousePos.getX() > getParentWidth() / 2)
-        x = mousePos.getX() - (w + 12);
+    int x = mousePos.getX();
+    if (x > parentArea.getCentreX())
+        x -= (w + 12);
     else
-        x = mousePos.getX() + 24;
+        x += 24;
 
-    if (mousePos.getY() > getParentHeight() / 2)
-        y = mousePos.getY() - (h + 6);
+    int y = mousePos.getY();
+    if (y > parentArea.getCentreY())
+        y -= (h + 6);
     else
-        y = mousePos.getY() + 6;
+        y += 6;
+
+    x = jlimit (parentArea.getX(), parentArea.getRight() - w, x);
+    y = jlimit (parentArea.getY(), parentArea.getBottom() - h, y);
 
     setBounds (x, y, w, h);
     setVisible (true);

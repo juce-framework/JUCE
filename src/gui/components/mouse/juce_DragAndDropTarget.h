@@ -49,16 +49,44 @@ public:
     /** Destructor. */
     virtual ~DragAndDropTarget()  {}
 
+    //==============================================================================
+    /** Contains details about the source of a drag-and-drop operation.
+        The contents of this
+    */
+    class JUCE_API  SourceDetails
+    {
+    public:
+        /** Creates a SourceDetails object from its various settings. */
+        SourceDetails (const String& description, Component* sourceComponent,
+                       const Point<int>& localPosition, ReferenceCountedObject* customDataObject = nullptr) noexcept;
+
+        /** A descriptor string - this is set DragAndDropContainer::startDragging(). */
+        String description;
+
+        /** The component from the drag operation was started. */
+        WeakReference<Component> sourceComponent;
+
+        /** The local position of the mouse, relative to the target component.
+            Note that for calls such as isInterestedInDragSource(), this may be a null position.
+        */
+        Point<int> localPosition;
+
+        /** A pointer to a user-supplied object which contains some kind of data which is relevant to
+            the specific classes which are being used. Make sure that you check the type of this object,
+            and safely dynamic_cast it to your required type.
+        */
+        ReferenceCountedObjectPtr<ReferenceCountedObject> customDataObject;
+    };
+
+    //==============================================================================
     /** Callback to check whether this target is interested in the type of object being
         dragged.
 
-        @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
+        @param dragSourceDetails    contains information about the source of the drag operation.
         @returns                    true if this component wants to receive the other callbacks regarging this
                                     type of object; if it returns false, no other callbacks will be made.
     */
-    virtual bool isInterestedInDragSource (const String& sourceDescription,
-                                           Component* sourceComponent) = 0;
+    virtual bool isInterestedInDragSource (const SourceDetails& dragSourceDetails) = 0;
 
     /** Callback to indicate that something is being dragged over this component.
 
@@ -68,15 +96,10 @@ public:
         Use this callback as a trigger to make your component repaint itself to give the
         user feedback about whether the item can be dropped here or not.
 
-        @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
-        @param x                    the mouse x position, relative to this component
-        @param y                    the mouse y position, relative to this component
+        @param dragSourceDetails    contains information about the source of the drag operation.
         @see itemDragExit
     */
-    virtual void itemDragEnter (const String& sourceDescription,
-                                Component* sourceComponent,
-                                int x, int y);
+    virtual void itemDragEnter (const SourceDetails& dragSourceDetails);
 
     /** Callback to indicate that the user is dragging something over this component.
 
@@ -84,14 +107,9 @@ public:
         something. Normally overriding itemDragEnter() and itemDragExit() are enough, but
         this lets you know what happens in-between.
 
-        @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
-        @param x                    the mouse x position, relative to this component
-        @param y                    the mouse y position, relative to this component
+        @param dragSourceDetails    contains information about the source of the drag operation.
     */
-    virtual void itemDragMove (const String& sourceDescription,
-                               Component* sourceComponent,
-                               int x, int y);
+    virtual void itemDragMove (const SourceDetails& dragSourceDetails);
 
     /** Callback to indicate that something has been dragged off the edge of this component.
 
@@ -101,12 +119,10 @@ public:
         If you've used itemDragEnter() to repaint your component and give feedback, use this
         as a signal to repaint it in its normal state.
 
-        @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
+        @param dragSourceDetails    contains information about the source of the drag operation.
         @see itemDragEnter
     */
-    virtual void itemDragExit (const String& sourceDescription,
-                               Component* sourceComponent);
+    virtual void itemDragExit (const SourceDetails& dragSourceDetails);
 
     /** Callback to indicate that the user has dropped something onto this component.
 
@@ -116,14 +132,9 @@ public:
         Note that after this is called, the itemDragExit method may not be called, so you should
         clean up in here if there's anything you need to do when the drag finishes.
 
-        @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
-        @param x                    the mouse x position, relative to this component
-        @param y                    the mouse y position, relative to this component
+        @param dragSourceDetails    contains information about the source of the drag operation.
     */
-    virtual void itemDropped (const String& sourceDescription,
-                              Component* sourceComponent,
-                              int x, int y) = 0;
+    virtual void itemDropped (const SourceDetails& dragSourceDetails) = 0;
 
     /** Overriding this allows the target to tell the drag container whether to
         draw the drag image while the cursor is over it.
@@ -132,7 +143,18 @@ public:
         image will not be shown when the cursor is over this target.
     */
     virtual bool shouldDrawDragImageWhenOver();
-};
 
+
+    //==============================================================================
+private:
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // The parameters for these methods have changed - please update your code!
+    virtual void isInterestedInDragSource (const String&, Component*) {}
+    virtual int itemDragEnter (const String&, Component*, int, int) { return 0; }
+    virtual int itemDragMove (const String&, Component*, int, int) { return 0; }
+    virtual int itemDragExit (const String&, Component*) { return 0; }
+    virtual int itemDropped (const String&, Component*, int, int) { return 0; }
+   #endif
+};
 
 #endif   // __JUCE_DRAGANDDROPTARGET_JUCEHEADER__

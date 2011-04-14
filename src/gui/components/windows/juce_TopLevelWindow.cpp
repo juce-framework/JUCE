@@ -71,7 +71,7 @@ public:
 
             if (tlw == nullptr && c != nullptr)
                 // (unable to use the syntax findParentComponentOfClass <TopLevelWindow> () because of a VC6 compiler bug)
-                tlw = c->findParentComponentOfClass ((TopLevelWindow*) 0);
+                tlw = c->findParentComponentOfClass ((TopLevelWindow*) nullptr);
 
             if (tlw != nullptr)
                 active = tlw;

@@ -133,7 +133,7 @@ public:
     // These methods implement the DragAndDropTarget interface, and allow our component
     // to accept drag-and-drop of objects from other Juce components..
 
-    bool isInterestedInDragSource (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
+    bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/)
     {
         // normally you'd check the sourceDescription value to see if it's the
         // sort of object that you're interested in before returning true, but for
@@ -141,25 +141,25 @@ public:
         return true;
     }
 
-    void itemDragEnter (const String& /*sourceDescription*/, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
+    void itemDragEnter (const SourceDetails& /*dragSourceDetails*/)
     {
         somethingIsBeingDraggedOver = true;
         repaint();
     }
 
-    void itemDragMove (const String& /*sourceDescription*/, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
+    void itemDragMove (const SourceDetails& /*dragSourceDetails*/)
     {
     }
 
-    void itemDragExit (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
+    void itemDragExit (const SourceDetails& /*dragSourceDetails*/)
     {
         somethingIsBeingDraggedOver = false;
         repaint();
     }
 
-    void itemDropped (const String& sourceDescription, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
+    void itemDropped (const SourceDetails& dragSourceDetails)
     {
-        message = "last rows dropped: " + sourceDescription;
+        message = "last rows dropped: " + dragSourceDetails.description;
 
         somethingIsBeingDraggedOver = false;
         repaint();

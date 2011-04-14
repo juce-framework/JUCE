@@ -464,7 +464,7 @@ const var var::invoke (const var& targetObject, const var* arguments, int numArg
 
 const var var::call (const Identifier& method) const
 {
-    return invoke (method, 0, 0);
+    return invoke (method, nullptr, 0);
 }
 
 const var var::call (const Identifier& method, const var& arg1) const
