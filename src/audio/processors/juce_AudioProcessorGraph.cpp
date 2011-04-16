@@ -703,29 +703,40 @@ private:
     Entry* findEntry (const uint32 destNodeId, int& insertIndex) const noexcept
     {
         Entry* result = nullptr;
-        int firstElement = 0, lastElement = entries.size();
 
-        while (firstElement < lastElement)
+        int start = 0;
+        int end = entries.size();
+
+        for (;;)
         {
-            Entry* const firstEntry = entries.getUnchecked (firstElement);
-            if (destNodeId == firstEntry->destNodeId)
+            if (start >= end)
             {
-                result = firstEntry;
                 break;
             }
-
-            const int halfway = (firstElement + lastElement) / 2;
-
-            if (halfway <= firstElement)
+            else if (destNodeId == entries.getUnchecked (start)->destNodeId)
+            {
+                result = entries.getUnchecked (start);
                 break;
-
-            if (destNodeId >= entries.getUnchecked (halfway)->destNodeId)
-                firstElement = halfway;
+            }
             else
-                lastElement = halfway;
+            {
+                const int halfway = (start + end) / 2;
+
+                if (halfway == start)
+                {
+                    if (destNodeId >= entries.getUnchecked (halfway)->destNodeId)
+                        ++start;
+
+                    break;
+                }
+                else if (destNodeId >= entries.getUnchecked (halfway)->destNodeId)
+                    start = halfway;
+                else
+                    end = halfway;
+            }
         }
 
-        insertIndex = firstElement;
+        insertIndex = start;
         return result;
     }
 

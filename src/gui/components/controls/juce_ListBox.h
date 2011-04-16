@@ -560,7 +560,7 @@ public:
     /** @internal */
     void colourChanged();
     /** @internal */
-    void startDragAndDrop (const MouseEvent& e, const var& dragDescription);
+    void startDragAndDrop (const MouseEvent& e, const var& dragDescription, bool allowDraggingToOtherWindows = true);
 
 private:
     //==============================================================================

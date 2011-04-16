@@ -36,6 +36,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos);
 FileOutputStream::FileOutputStream (const File& f, const int bufferSize_)
     : file (f),
       fileHandle (nullptr),
+      status (Result::ok()),
       currentPosition (0),
       bufferSize (bufferSize_),
       bytesInBuffer (0),

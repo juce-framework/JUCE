@@ -445,37 +445,44 @@ const String File::descriptionOfSizeInBytes (const int64 bytes)
 }
 
 //==============================================================================
-bool File::create() const
+const Result File::create() const
 {
     if (exists())
-        return true;
+        return Result::ok();
 
+    const File parentDir (getParentDirectory());
+
+    if (parentDir == *this)
+        return Result::fail ("Cannot create parent directory");
+
+    Result r (parentDir.createDirectory());
+
+    if (r.wasOk())
     {
-        const File parentDir (getParentDirectory());
-
-        if (parentDir == *this || ! parentDir.createDirectory())
-            return false;
-
         FileOutputStream fo (*this, 8);
+
+        r = fo.getStatus();
     }
 
-    return exists();
+    return r;
 }
 
-bool File::createDirectory() const
+const Result File::createDirectory() const
 {
-    if (! isDirectory())
-    {
-        const File parentDir (getParentDirectory());
+    if (isDirectory())
+        return Result::ok();
 
-        if (parentDir == *this || ! parentDir.createDirectory())
-            return false;
+    const File parentDir (getParentDirectory());
 
-        createDirectoryInternal (fullPath.trimCharactersAtEnd (separatorString));
-        return isDirectory();
-    }
+    if (parentDir == *this)
+        return Result::fail ("Cannot create parent directory");
 
-    return true;
+    Result r (parentDir.createDirectory());
+
+    if (r.wasOk())
+        r = createDirectoryInternal (fullPath.trimCharactersAtEnd (separatorString));
+
+    return r;
 }
 
 //==============================================================================

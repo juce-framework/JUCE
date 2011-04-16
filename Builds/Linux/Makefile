@@ -106,6 +106,7 @@ OBJECTS := \
   $(OBJDIR)/juce_Logger_4f4f7f72.o \
   $(OBJDIR)/juce_PerformanceCounter_6422080e.o \
   $(OBJDIR)/juce_RelativeTime_bc5ef35b.o \
+  $(OBJDIR)/juce_Result_d8f437f.o \
   $(OBJDIR)/juce_SystemStats_c00d8758.o \
   $(OBJDIR)/juce_Time_16acdd6f.o \
   $(OBJDIR)/juce_Uuid_f277575d.o \
@@ -717,6 +718,11 @@ $(OBJDIR)/juce_PerformanceCounter_6422080e.o: ../../src/core/juce_PerformanceCou
 $(OBJDIR)/juce_RelativeTime_bc5ef35b.o: ../../src/core/juce_RelativeTime.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_RelativeTime.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Result_d8f437f.o: ../../src/core/juce_Result.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_Result.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SystemStats_c00d8758.o: ../../src/core/juce_SystemStats.cpp

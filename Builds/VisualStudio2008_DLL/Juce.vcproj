@@ -375,6 +375,8 @@
           <File RelativePath="..\..\src\core\juce_PlatformUtilities.h"/>
           <File RelativePath="..\..\src\core\juce_RelativeTime.cpp"/>
           <File RelativePath="..\..\src\core\juce_RelativeTime.h"/>
+          <File RelativePath="..\..\src\core\juce_Result.cpp"/>
+          <File RelativePath="..\..\src\core\juce_Result.h"/>
           <File RelativePath="..\..\src\core\juce_Singleton.h"/>
           <File RelativePath="..\..\src\core\juce_StandardHeader.h"/>
           <File RelativePath="..\..\src\core\juce_SystemStats.cpp"/>

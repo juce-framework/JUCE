@@ -98,6 +98,9 @@
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
  #include "core/juce_RelativeTime.h"
 #endif
+#ifndef __JUCE_RESULT_JUCEHEADER__
+ #include "core/juce_Result.h"
+#endif
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
  #include "core/juce_Singleton.h"
 #endif

@@ -272,6 +272,16 @@ namespace
         if (isReadOnly != nullptr)
             *isReadOnly = access (path.toUTF8(), W_OK) != 0;
     }
+
+    const Result getResultForErrno()
+    {
+        return Result::fail (String (strerror (errno)));
+    }
+
+    const Result getResultForReturnValue (int value)
+    {
+        return value == -1 ? getResultForErrno() : Result::ok();
+    }
 }
 
 bool File::isDirectory() const
@@ -392,9 +402,9 @@ bool File::moveInternal (const File& dest) const
     return false;
 }
 
-void File::createDirectoryInternal (const String& fileName) const
+const Result File::createDirectoryInternal (const String& fileName) const
 {
-    mkdir (fileName.toUTF8(), 0777);
+    return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
 }
 
 //==============================================================================
@@ -414,6 +424,8 @@ void FileInputStream::openHandle()
 
     if (f != -1)
         fileHandle = (void*) f;
+    else
+        status = getResultForErrno();
 }
 
 void FileInputStream::closeHandle()
@@ -427,10 +439,20 @@ void FileInputStream::closeHandle()
 
 size_t FileInputStream::readInternal (void* const buffer, const size_t numBytes)
 {
-    if (fileHandle != 0)
-        return jmax ((ssize_t) 0, ::read ((int) (pointer_sized_int) fileHandle, buffer, numBytes));
+    ssize_t result = 0;
 
-    return 0;
+    if (fileHandle != 0)
+    {
+        result = ::read ((int) (pointer_sized_int) fileHandle, buffer, numBytes);
+
+        if (result < 0)
+        {
+            status = getResultForErrno();
+            result = 0;
+        }
+    }
+
+    return (size_t) result;
 }
 
 //==============================================================================
@@ -445,9 +467,18 @@ void FileOutputStream::openHandle()
             currentPosition = lseek (f, 0, SEEK_END);
 
             if (currentPosition >= 0)
+            {
                 fileHandle = (void*) f;
+            }
             else
+            {
+                status = getResultForErrno();
                 close (f);
+            }
+        }
+        else
+        {
+            status = getResultForErrno();
         }
     }
     else
@@ -456,6 +487,8 @@ void FileOutputStream::openHandle()
 
         if (f != -1)
             fileHandle = (void*) f;
+        else
+            status = getResultForErrno();
     }
 }
 
@@ -470,16 +503,24 @@ void FileOutputStream::closeHandle()
 
 int FileOutputStream::writeInternal (const void* const data, const int numBytes)
 {
-    if (fileHandle != 0)
-        return (int) ::write ((int) (pointer_sized_int) fileHandle, data, numBytes);
+    ssize_t result = 0;
 
-    return 0;
+    if (fileHandle != 0)
+    {
+        result = ::write ((int) (pointer_sized_int) fileHandle, data, numBytes);
+
+        if (result == -1)
+            status = getResultForErrno();
+    }
+
+    return (int) result;
 }
 
 void FileOutputStream::flushInternal()
 {
     if (fileHandle != 0)
-        fsync ((int) (pointer_sized_int) fileHandle);
+        if (fsync ((int) (pointer_sized_int) fileHandle) == -1)
+            status = getResultForErrno();
 }
 
 //==============================================================================

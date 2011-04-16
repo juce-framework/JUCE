@@ -915,7 +915,7 @@ const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     return snapshot;
 }
 
-void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription)
+void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription, bool allowDraggingToOtherWindows)
 {
     DragAndDropContainer* const dragContainer
         = DragAndDropContainer::findParentDragContainerFor (this);
@@ -927,7 +927,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription)
 
         MouseEvent e2 (e.getEventRelativeTo (this));
         const Point<int> p (x - e2.x, y - e2.y);
-        dragContainer->startDragging (dragDescription, this, dragImage, true, &p);
+        dragContainer->startDragging (dragDescription, this, dragImage, allowDraggingToOtherWindows, &p);
     }
     else
     {

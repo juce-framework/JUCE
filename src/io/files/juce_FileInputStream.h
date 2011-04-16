@@ -51,7 +51,14 @@ public:
     ~FileInputStream();
 
     //==============================================================================
-    const File& getFile() const noexcept                    { return file; }
+    /** Returns the file that this stream is reading from. */
+    const File& getFile() const noexcept                { return file; }
+
+    /** Returns the status of the file stream.
+        The result will be ok if the file opened successfully. If an error occurs while
+        opening or reading from the file, this will contain an error message.
+    */
+    const Result getStatus() const                      { return status; }
 
     //==============================================================================
     int64 getTotalLength();
@@ -66,6 +73,7 @@ private:
     File file;
     void* fileHandle;
     int64 currentPosition, totalSize;
+    Result status;
     bool needToSeek;
 
     void openHandle();

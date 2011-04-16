@@ -419,6 +419,8 @@
               file="src/core/juce_RelativeTime.cpp"/>
         <FILE id="51S3JEvsR" name="juce_RelativeTime.h" compile="0" resource="0"
               file="src/core/juce_RelativeTime.h"/>
+        <FILE id="OY7VBZ" name="juce_Result.cpp" compile="1" resource="0" file="src/core/juce_Result.cpp"/>
+        <FILE id="P3z9OH" name="juce_Result.h" compile="0" resource="0" file="src/core/juce_Result.h"/>
         <FILE id="Xzwb9sOhG" name="juce_Singleton.h" compile="0" resource="0"
               file="src/core/juce_Singleton.h"/>
         <FILE id="bFwbnH0yK" name="juce_StandardHeader.h" compile="0" resource="0"

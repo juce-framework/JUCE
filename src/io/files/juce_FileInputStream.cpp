@@ -40,6 +40,7 @@ FileInputStream::FileInputStream (const File& f)
       fileHandle (nullptr),
       currentPosition (0),
       totalSize (0),
+      status (Result::ok()),
       needToSeek (true)
 {
     openHandle();

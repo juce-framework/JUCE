@@ -189,6 +189,7 @@
     <ClCompile Include="..\..\src\core\juce_Logger.cpp"/>
     <ClCompile Include="..\..\src\core\juce_PerformanceCounter.cpp"/>
     <ClCompile Include="..\..\src\core\juce_RelativeTime.cpp"/>
+    <ClCompile Include="..\..\src\core\juce_Result.cpp"/>
     <ClCompile Include="..\..\src\core\juce_SystemStats.cpp"/>
     <ClCompile Include="..\..\src\core\juce_Time.cpp"/>
     <ClCompile Include="..\..\src\core\juce_Uuid.cpp"/>
@@ -549,6 +550,7 @@
     <ClInclude Include="..\..\src\core\juce_PlatformDefs.h"/>
     <ClInclude Include="..\..\src\core\juce_PlatformUtilities.h"/>
     <ClInclude Include="..\..\src\core\juce_RelativeTime.h"/>
+    <ClInclude Include="..\..\src\core\juce_Result.h"/>
     <ClInclude Include="..\..\src\core\juce_Singleton.h"/>
     <ClInclude Include="..\..\src\core\juce_StandardHeader.h"/>
     <ClInclude Include="..\..\src\core\juce_SystemStats.h"/>

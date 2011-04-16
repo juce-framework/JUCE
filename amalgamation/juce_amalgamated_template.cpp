@@ -103,6 +103,7 @@
  #include "../src/maths/juce_Random.cpp"
  #include "../src/core/juce_RelativeTime.cpp"
  #include "../src/core/juce_SystemStats.cpp"
+ #include "../src/core/juce_Result.cpp"
  #include "../src/core/juce_Time.cpp"
  #include "../src/core/juce_Initialisation.cpp"
  #include "../src/containers/juce_AbstractFifo.cpp"

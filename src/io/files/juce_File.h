@@ -31,6 +31,7 @@
 #include "../../text/juce_StringArray.h"
 #include "../../memory/juce_MemoryBlock.h"
 #include "../../memory/juce_ScopedPointer.h"
+#include "../../core/juce_Result.h"
 class FileInputStream;
 class FileOutputStream;
 
@@ -425,18 +426,18 @@ public:
         @returns    true if the file has been created (or if it already existed).
         @see createDirectory
     */
-    bool create() const;
+    const Result create() const;
 
     /** Creates a new directory for this filename.
 
         This will try to create the file as a directory, and fill also create
         any parent directories it needs in order to complete the operation.
 
-        @returns    true if the directory has been created successfully, (or if it
-                    already existed beforehand).
+        @returns    a result to indicate whether the directory was created successfully, or
+                    an error message if it failed.
         @see create
     */
-    bool createDirectory() const;
+    const Result createDirectory() const;
 
     /** Deletes a file.
 
@@ -928,7 +929,7 @@ private:
     File (const String&, int);
     const String getPathUpToLastSlash() const;
 
-    void createDirectoryInternal (const String& fileName) const;
+    const Result createDirectoryInternal (const String& fileName) const;
     bool copyInternal (const File& dest) const;
     bool moveInternal (const File& dest) const;
     bool setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const;

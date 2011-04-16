@@ -67,9 +67,16 @@ public:
     */
     const File& getFile() const                         { return file; }
 
-    /** Returns true if the stream couldn't be opened for some reason.
+    /** Returns the status of the file stream.
+        The result will be ok if the file opened successfully. If an error occurs while
+        opening or writing to the file, this will contain an error message.
     */
-    bool failedToOpen() const                           { return fileHandle == 0; }
+    const Result getStatus() const                      { return status; }
+
+    /** Returns true if the stream couldn't be opened for some reason.
+        @see getResult()
+    */
+    bool failedToOpen() const                           { return status.failed(); }
 
     //==============================================================================
     void flush();
@@ -82,6 +89,7 @@ private:
     //==============================================================================
     File file;
     void* fileHandle;
+    Result status;
     int64 currentPosition;
     int bufferSize, bytesInBuffer;
     HeapBlock <char> buffer;

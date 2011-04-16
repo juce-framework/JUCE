@@ -75,6 +75,7 @@
 		6A53DA58B55E2DE7241BF2C8 = { isa = PBXBuildFile; fileRef = 4555F03DBD059EEDECEF9F85; };
 		0FF71870483AC46D5B7AC5B0 = { isa = PBXBuildFile; fileRef = DF6CAC67C0F2D379BDA03062; };
 		FA01B3EABA192AE041D4FE4D = { isa = PBXBuildFile; fileRef = CFAECB6551F48A1695DEC243; };
+		43047D78351C2D7047F4F81E = { isa = PBXBuildFile; fileRef = 0AD73B8EA0D60D9927B36624; };
 		5BF44F954E56B7C2DD15EAEA = { isa = PBXBuildFile; fileRef = 18B170E96511BBA1019C66F8; };
 		B14EB5F3829CA26DA906D5C0 = { isa = PBXBuildFile; fileRef = 8D2DE1F3CB15D003C90042E7; };
 		D75943C2812EA68CA74D9FDA = { isa = PBXBuildFile; fileRef = CEF91E0C9CBB3EBFF9500FDA; };
@@ -539,6 +540,8 @@
 		8D499CED6DCF525ACD6E39B2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_PlatformUtilities.h; path = ../../src/core/juce_PlatformUtilities.h; sourceTree = SOURCE_ROOT; };
 		CFAECB6551F48A1695DEC243 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RelativeTime.cpp; path = ../../src/core/juce_RelativeTime.cpp; sourceTree = SOURCE_ROOT; };
 		B4137E4612C1D161894D0D27 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_RelativeTime.h; path = ../../src/core/juce_RelativeTime.h; sourceTree = SOURCE_ROOT; };
+		0AD73B8EA0D60D9927B36624 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Result.cpp; path = ../../src/core/juce_Result.cpp; sourceTree = SOURCE_ROOT; };
+		F51969AF328D2C7D52D7436D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Result.h; path = ../../src/core/juce_Result.h; sourceTree = SOURCE_ROOT; };
 		C25D6136DF9CE441D6EB4C42 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Singleton.h; path = ../../src/core/juce_Singleton.h; sourceTree = SOURCE_ROOT; };
 		CA66415F6EAA172B83755954 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_StandardHeader.h; path = ../../src/core/juce_StandardHeader.h; sourceTree = SOURCE_ROOT; };
 		18B170E96511BBA1019C66F8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_SystemStats.cpp; path = ../../src/core/juce_SystemStats.cpp; sourceTree = SOURCE_ROOT; };
@@ -1303,6 +1306,8 @@
 				8D499CED6DCF525ACD6E39B2,
 				CFAECB6551F48A1695DEC243,
 				B4137E4612C1D161894D0D27,
+				0AD73B8EA0D60D9927B36624,
+				F51969AF328D2C7D52D7436D,
 				C25D6136DF9CE441D6EB4C42,
 				CA66415F6EAA172B83755954,
 				18B170E96511BBA1019C66F8,
@@ -2104,6 +2109,7 @@
 				6A53DA58B55E2DE7241BF2C8,
 				0FF71870483AC46D5B7AC5B0,
 				FA01B3EABA192AE041D4FE4D,
+				43047D78351C2D7047F4F81E,
 				5BF44F954E56B7C2DD15EAEA,
 				B14EB5F3829CA26DA906D5C0,
 				D75943C2812EA68CA74D9FDA,

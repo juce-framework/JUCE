@@ -424,6 +424,9 @@
     <ClCompile Include="..\..\src\core\juce_RelativeTime.cpp">
       <Filter>Juce\Source\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\juce_Result.cpp">
+      <Filter>Juce\Source\core</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\core\juce_SystemStats.cpp">
       <Filter>Juce\Source\core</Filter>
     </ClCompile>
@@ -1576,6 +1579,9 @@
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\juce_RelativeTime.h">
+      <Filter>Juce\Source\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\juce_Result.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\juce_Singleton.h">

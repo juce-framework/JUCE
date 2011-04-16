@@ -45,8 +45,7 @@ void RecentlyOpenedFilesList::setMaxNumberOfItems (const int newMaxNumber)
 {
     maxNumberOfItems = jmax (1, newMaxNumber);
 
-    while (getNumFiles() > maxNumberOfItems)
-        files.remove (getNumFiles() - 1);
+    files.removeRange (maxNumberOfItems, getNumFiles());
 }
 
 int RecentlyOpenedFilesList::getNumFiles() const
@@ -66,10 +65,8 @@ void RecentlyOpenedFilesList::clear()
 
 void RecentlyOpenedFilesList::addFile (const File& file)
 {
-    const String path (file.getFullPathName());
-
-    files.removeString (path, true);
-    files.insert (0, path);
+    removeFile (file);
+    files.insert (0, file.getFullPathName());
 
     setMaxNumberOfItems (maxNumberOfItems);
 }

@@ -93,6 +93,17 @@ namespace WindowsFileHelpers
 
         return File::nonexistent;
     }
+
+    const Result getResultForLastError()
+    {
+        TCHAR messageBuffer [256] = { 0 };
+
+        FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                       nullptr, GetLastError(), MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                       messageBuffer, numElementsInArray (messageBuffer) - 1, nullptr);
+
+        return Result::fail (String (messageBuffer));
+    }
 }
 
 //==============================================================================
@@ -192,9 +203,10 @@ bool File::moveInternal (const File& dest) const
     return MoveFile (fullPath.toWideCharPointer(), dest.getFullPathName().toWideCharPointer()) != 0;
 }
 
-void File::createDirectoryInternal (const String& fileName) const
+const Result File::createDirectoryInternal (const String& fileName) const
 {
-    CreateDirectory (fileName.toWideCharPointer(), 0);
+    return CreateDirectory (fileName.toWideCharPointer(), 0) ? Result::ok()
+                                                             : WindowsFileHelpers::getResultForLastError();
 }
 
 //==============================================================================
@@ -215,6 +227,8 @@ void FileInputStream::openHandle()
 
     if (h != INVALID_HANDLE_VALUE)
         fileHandle = (void*) h;
+    else
+        status = WindowsFileHelpers::getResultForLastError();
 }
 
 void FileInputStream::closeHandle()
@@ -227,7 +241,9 @@ size_t FileInputStream::readInternal (void* buffer, size_t numBytes)
     if (fileHandle != 0)
     {
         DWORD actualNum = 0;
-        ReadFile ((HANDLE) fileHandle, buffer, numBytes, &actualNum, 0);
+        if (! ReadFile ((HANDLE) fileHandle, buffer, numBytes, &actualNum, 0))
+            status = WindowsFileHelpers::getResultForLastError();
+
         return (size_t) actualNum;
     }
 
@@ -250,8 +266,11 @@ void FileOutputStream::openHandle()
         {
             fileHandle = (void*) h;
             currentPosition = li.QuadPart;
+            return;
         }
     }
+
+    status = WindowsFileHelpers::getResultForLastError();
 }
 
 void FileOutputStream::closeHandle()
@@ -261,10 +280,12 @@ void FileOutputStream::closeHandle()
 
 int FileOutputStream::writeInternal (const void* buffer, int numBytes)
 {
-    if (fileHandle != 0)
+    if (fileHandle != nullptr)
     {
         DWORD actualNum = 0;
-        WriteFile ((HANDLE) fileHandle, buffer, numBytes, &actualNum, 0);
+        if (! WriteFile ((HANDLE) fileHandle, buffer, numBytes, &actualNum, 0))
+            status = WindowsFileHelpers::getResultForLastError();
+
         return (int) actualNum;
     }
 
@@ -273,8 +294,9 @@ int FileOutputStream::writeInternal (const void* buffer, int numBytes)
 
 void FileOutputStream::flushInternal()
 {
-    if (fileHandle != 0)
-        FlushFileBuffers ((HANDLE) fileHandle);
+    if (fileHandle != nullptr)
+        if (! FlushFileBuffers ((HANDLE) fileHandle))
+            status = WindowsFileHelpers::getResultForLastError();
 }
 
 //==============================================================================

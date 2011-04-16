@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	75
+#define JUCE_BUILDNUMBER	76
 
 /** Current Juce version number.
 
@@ -11998,6 +11998,85 @@ JUCE_API bool operator>= (const Time& time1, const Time& time2);
 #endif   // __JUCE_TIME_JUCEHEADER__
 /*** End of inlined file: juce_Time.h ***/
 
+
+/*** Start of inlined file: juce_Result.h ***/
+#ifndef __JUCE_RESULT_JUCEHEADER__
+#define __JUCE_RESULT_JUCEHEADER__
+
+/**
+	Represents the 'success' or 'failure' of an operation, and holds an associated
+	error message to describe the error when there's a failure.
+
+	E.g.
+	@code
+	const Result myOperation()
+	{
+		if (doSomeKindOfFoobar())
+			return Result::ok();
+		else
+			return Result::fail ("foobar didn't work!");
+	}
+
+	const Result result (myOperation());
+
+	if (result.wasOk())
+	{
+		...it's all good...
+	}
+	else
+	{
+		warnUserAboutFailure ("The foobar operation failed! Error message was: "
+								+ result.getErrorMessage());
+	}
+	@endcode
+*/
+class Result
+{
+public:
+
+	/** Creates and returns a 'successful' result. */
+	static const Result ok() noexcept;
+
+	/** Creates a 'failure' result.
+		If you pass a blank error message in here, a default "Unknown Error" message
+		will be used instead.
+	*/
+	static const Result fail (const String& errorMessage) noexcept;
+
+	/** Returns true if this result indicates a success. */
+	bool wasOk() const noexcept;
+
+	/** Returns true if this result indicates a failure.
+		You can use getErrorMessage() to retrieve the error message associated
+		with the failure.
+	*/
+	bool failed() const noexcept;
+
+	/** Returns true if this result indicates a success.
+		This is equivalent to calling wasOk().
+	*/
+	operator bool() const noexcept;
+
+	/** Returns the error message that was set when this result was created.
+		For a successful result, this will be an empty string;
+	*/
+	const String getErrorMessage() const noexcept;
+
+	Result (const Result& other);
+	Result& operator= (const Result& other);
+
+	bool operator== (const Result& other) const noexcept;
+	bool operator!= (const Result& other) const noexcept;
+
+private:
+	String errorMessage;
+
+	explicit Result (const String& errorMessage) noexcept;
+};
+
+#endif   // __JUCE_RESULT_JUCEHEADER__
+/*** End of inlined file: juce_Result.h ***/
+
 class FileInputStream;
 class FileOutputStream;
 
@@ -12378,18 +12457,18 @@ public:
 		@returns	true if the file has been created (or if it already existed).
 		@see createDirectory
 	*/
-	bool create() const;
+	const Result create() const;
 
 	/** Creates a new directory for this filename.
 
 		This will try to create the file as a directory, and fill also create
 		any parent directories it needs in order to complete the operation.
 
-		@returns	true if the directory has been created successfully, (or if it
-					already existed beforehand).
+		@returns	a result to indicate whether the directory was created successfully, or
+					an error message if it failed.
 		@see create
 	*/
-	bool createDirectory() const;
+	const Result createDirectory() const;
 
 	/** Deletes a file.
 
@@ -12869,7 +12948,7 @@ private:
 	File (const String&, int);
 	const String getPathUpToLastSlash() const;
 
-	void createDirectoryInternal (const String& fileName) const;
+	const Result createDirectoryInternal (const String& fileName) const;
 	bool copyInternal (const File& dest) const;
 	bool moveInternal (const File& dest) const;
 	bool setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const;
@@ -17833,6 +17912,9 @@ private:
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_RESULT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
 
 /*** Start of inlined file: juce_Singleton.h ***/
@@ -19086,7 +19168,14 @@ public:
 	/** Destructor. */
 	~FileInputStream();
 
-	const File& getFile() const noexcept			{ return file; }
+	/** Returns the file that this stream is reading from. */
+	const File& getFile() const noexcept		{ return file; }
+
+	/** Returns the status of the file stream.
+		The result will be ok if the file opened successfully. If an error occurs while
+		opening or reading from the file, this will contain an error message.
+	*/
+	const Result getStatus() const			  { return status; }
 
 	int64 getTotalLength();
 	int read (void* destBuffer, int maxBytesToRead);
@@ -19099,6 +19188,7 @@ private:
 	File file;
 	void* fileHandle;
 	int64 currentPosition, totalSize;
+	Result status;
 	bool needToSeek;
 
 	void openHandle();
@@ -19154,9 +19244,16 @@ public:
 	*/
 	const File& getFile() const			 { return file; }
 
-	/** Returns true if the stream couldn't be opened for some reason.
+	/** Returns the status of the file stream.
+		The result will be ok if the file opened successfully. If an error occurs while
+		opening or writing to the file, this will contain an error message.
 	*/
-	bool failedToOpen() const			   { return fileHandle == 0; }
+	const Result getStatus() const			  { return status; }
+
+	/** Returns true if the stream couldn't be opened for some reason.
+		@see getResult()
+	*/
+	bool failedToOpen() const			   { return status.failed(); }
 
 	void flush();
 	int64 getPosition();
@@ -19167,6 +19264,7 @@ private:
 
 	File file;
 	void* fileHandle;
+	Result status;
 	int64 currentPosition;
 	int bufferSize, bytesInBuffer;
 	HeapBlock <char> buffer;
@@ -22218,6 +22316,13 @@ public:
 
 		If signal() is called when nothing is waiting, the next thread to call wait()
 		will return immediately and reset the signal.
+
+		If the WaitableEvent is manual reset, all threads that are currently waiting on this
+		object will be woken.
+
+		If the WaitableEvent is automatic reset, and there are one or more threads waiting
+		on the object, then one of them will be woken up. If no threads are currently waiting,
+		then the next thread to call wait() will be woken up.
 
 		@see wait, reset
 	*/
@@ -46884,7 +46989,7 @@ public:
 	/** @internal */
 	void colourChanged();
 	/** @internal */
-	void startDragAndDrop (const MouseEvent& e, const var& dragDescription);
+	void startDragAndDrop (const MouseEvent& e, const var& dragDescription, bool allowDraggingToOtherWindows = true);
 
 private:
 
