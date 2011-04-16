@@ -996,7 +996,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 
 void Desktop::getCurrentMonitorPositions (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     monitorCoords.clear();
 
     CGRect r = clipToWorkArea ? [[UIScreen mainScreen] applicationFrame]

@@ -36,11 +36,11 @@
 //==============================================================================
 bool Process::isForegroundProcess()
 {
-#if JUCE_MAC
+   #if JUCE_MAC
     return [NSApp isActive];
-#else
+   #else
     return true; // xxx change this if more than one app is ever possible on the iPhone!
-#endif
+   #endif
 }
 
 void Process::raisePrivilege()

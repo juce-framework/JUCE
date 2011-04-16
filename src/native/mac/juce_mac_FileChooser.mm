@@ -91,7 +91,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* /*extraInfoComponent*/)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     StringArray* filters = new StringArray();
     filters->addTokens (filter.replaceCharacters (",:", ";;"), ";", String::empty);
@@ -168,7 +168,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* extraInfoComponent)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     jassertfalse; //xxx to do
 }

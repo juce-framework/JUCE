@@ -60,12 +60,12 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
                                                     const String& bodyText,
                                                     const StringArray& filesToAttach)
 {
-#if JUCE_IOS
+  #if JUCE_IOS
     //xxx probably need to use MFMailComposeViewController
     jassertfalse;
     return false;
-#else
-    const ScopedAutoReleasePool pool;
+  #else
+    JUCE_AUTORELEASEPOOL
 
     String script;
     script << "tell application \"Mail\"\r\n"
@@ -93,14 +93,13 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     script << "end tell\r\n"
               "end tell\r\n";
 
-    NSAppleScript* s = [[NSAppleScript alloc]
-                            initWithSource: juceStringToNS (script)];
+    NSAppleScript* s = [[NSAppleScript alloc] initWithSource: juceStringToNS (script)];
     NSDictionary* error = nil;
     const bool ok = [s executeAndReturnError: &error] != nil;
     [s release];
 
     return ok;
-#endif
+  #endif
 }
 
 //==============================================================================
@@ -160,7 +159,7 @@ public:
 
         while (! threadShouldExit())
         {
-            const ScopedAutoReleasePool pool;
+            JUCE_AUTORELEASEPOOL
             [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
     }

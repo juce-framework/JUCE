@@ -138,7 +138,7 @@ public:
     int getResult()
     {
         jassert (callback == nullptr);
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         while (! alert.hidden && alert.superview != nil)
             [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
@@ -186,7 +186,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
                                                      const String& title, const String& message,
                                                      Component* associatedComponent)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     iOSMessageBox mb (title, message, @"OK", nil, nil, 0, false);
     (void) mb.getResult();
 }
@@ -195,7 +195,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
                                                           const String& title, const String& message,
                                                           Component* associatedComponent)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     new iOSMessageBox (title, message, @"OK", nil, nil, 0, true);
 }
 

@@ -165,7 +165,7 @@ private:
         if (nextMessage == nullptr)
             return false;
 
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
         MessageManager::getInstance()->deliverMessage (nextMessage);
         return true;
     }

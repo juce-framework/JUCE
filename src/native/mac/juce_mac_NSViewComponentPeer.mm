@@ -980,7 +980,7 @@ void NSViewComponentPeer::setVisible (bool shouldBeVisible)
 
 void NSViewComponentPeer::setTitle (const String& title)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     if (! isSharedWindow)
         [window setTitle: juceStringToNS (title)];
@@ -1774,7 +1774,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 //==============================================================================
 const Image juce_createIconForFile (const File& file)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (file.getFullPathName())];
 

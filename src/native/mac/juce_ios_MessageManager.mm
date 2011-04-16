@@ -86,7 +86,7 @@ void MessageManager::stopDispatchLoop()
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
     uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
@@ -94,7 +94,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
     while (! quitMessagePosted)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
                                  beforeDate: endDate];
@@ -165,7 +165,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
         // call your function..
         jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         CallbackMessagePayload cmp;
         cmp.function = callback;

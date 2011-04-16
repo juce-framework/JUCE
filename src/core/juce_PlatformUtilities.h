@@ -203,28 +203,26 @@ private:
 
 
 //==============================================================================
-#if JUCE_MAC || JUCE_IOS
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
 
-/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
-*/
-class JUCE_API  ScopedAutoReleasePool
-{
-public:
-    ScopedAutoReleasePool();
-    ~ScopedAutoReleasePool();
+ /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII. */
+ class JUCE_API  ScopedAutoReleasePool
+ {
+ public:
+     ScopedAutoReleasePool();
+     ~ScopedAutoReleasePool();
 
-private:
-    void* pool;
+ private:
+     void* pool;
 
-    JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
-};
+     JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
+ };
 
-#define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool pool;
+ /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
+ #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
 
 #else
-
-#define JUCE_AUTORELEASEPOOL
-
+ #define JUCE_AUTORELEASEPOOL
 #endif
 
 

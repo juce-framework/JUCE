@@ -68,7 +68,7 @@ class QTCameraDeviceInteral
 public:
     QTCameraDeviceInteral (CameraDevice* owner, int index)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         session = [[QTCaptureSession alloc] init];
 
@@ -239,7 +239,7 @@ END_JUCE_NAMESPACE
 {
     if (internal->listeners.size() > 0)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         internal->callListeners ([CIImage imageWithCVImageBuffer: videoFrame],
                                  CVPixelBufferGetWidth (videoFrame),
@@ -253,11 +253,11 @@ END_JUCE_NAMESPACE
 {
     const Time now (Time::getCurrentTime());
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
+   #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
     NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: QTSampleBufferHostTimeAttribute];
-#else
+   #else
     NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: @"hostTime"];
-#endif
+   #endif
 
     int64 presentationTime = (hosttime != nil)
             ? ((int64) AudioConvertHostTimeToNanos ([hosttime unsignedLongLongValue]) / 1000000 + 40)
@@ -285,7 +285,7 @@ class QTCaptureViewerComp : public NSViewComponent
 public:
     QTCaptureViewerComp (CameraDevice* const cameraDevice, QTCameraDeviceInteral* const internal)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
         captureView = [[QTCaptureView alloc] init];
         [captureView setCaptureSession: internal->session];
 
@@ -400,7 +400,7 @@ void CameraDevice::removeListener (Listener* listenerToRemove)
 //==============================================================================
 const StringArray CameraDevice::getAvailableDevices()
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     StringArray results;
     NSArray* devs = [QTCaptureDevice inputDevicesWithMediaType: QTMediaTypeVideo];

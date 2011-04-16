@@ -295,7 +295,7 @@ void MessageManager::runDispatchLoop()
 {
     if (! quitMessagePosted) // check that the quit message wasn't already posted..
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         // must only be called by the message thread!
         jassert (isThisTheMessageThread());
@@ -424,7 +424,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
     while (! quitMessagePosted)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
 
@@ -498,7 +498,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
         // call your function..
         jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         AppDelegateRedirector::CallbackMessagePayload cmp;
         cmp.function = callback;

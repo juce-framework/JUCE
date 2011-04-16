@@ -50,7 +50,7 @@ public:
     MacTypeface (const Font& font)
         : Typeface (font.getTypefaceName())
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
         renderingTransform = CGAffineTransformIdentity;
 
         bool needsItalicTransform = false;
@@ -129,7 +129,7 @@ public:
             renderingTransform.c = 0.15f;
         }
 
-#if SUPPORT_ONLY_10_4_FONTS
+      #if SUPPORT_ONLY_10_4_FONTS
         ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
 
         if (atsFont == 0)
@@ -140,7 +140,7 @@ public:
         const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
         unitsToHeightScaleFactor = 1.0f / totalHeight;
         fontHeightToCGSizeFactor = 1024.0f / totalHeight;
-#else
+      #else
        #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
@@ -164,7 +164,7 @@ public:
             unitsToHeightScaleFactor = 1.0f / totalHeight;
             fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
         }
-#endif
+      #endif
 
 #endif
     }
@@ -310,7 +310,7 @@ public:
         // we might need to apply a transform to the path, so it mustn't have anything else in it
         jassert (path.isEmpty());
 
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         NSBezierPath* bez = [NSBezierPath bezierPath];
         [bez moveToPoint: NSMakePoint (0, 0)];
@@ -492,7 +492,7 @@ const StringArray Font::findAllTypefaceNames()
 {
     StringArray names;
 
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
    #if JUCE_IOS
     NSArray* fonts = [UIFont familyNames];

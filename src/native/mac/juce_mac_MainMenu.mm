@@ -498,7 +498,7 @@ namespace MainMenuHelpers
 
         if (JUCEApplication::getInstance() != nullptr)
         {
-            const ScopedAutoReleasePool pool;
+            JUCE_AUTORELEASEPOOL
 
             NSMenu* mainMenu = [[NSMenu alloc] initWithTitle: @"MainMenu"];
             NSMenuItem* item = [mainMenu addItemWithTitle: @"Apple" action: nil keyEquivalent: @""];
@@ -522,7 +522,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
 {
     if (getMacMainMenu() != newMenuBarModel)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         if (newMenuBarModel == nullptr)
         {

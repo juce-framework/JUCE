@@ -571,7 +571,7 @@ const String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressLis
 
 void AudioCDReader::ejectDisk()
 {
-    const ScopedAutoReleasePool p;
+    JUCE_AUTORELEASEPOOL
     [[NSWorkspace sharedWorkspace] unmountAndEjectDeviceAtPath: juceStringToNS (volumeDir.getFullPathName())];
 }
 

@@ -64,7 +64,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
 
 void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     NSCursor* c = nil;
 
     switch (type)

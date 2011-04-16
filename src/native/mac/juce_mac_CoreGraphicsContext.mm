@@ -111,7 +111,7 @@ public:
   #if JUCE_MAC
     static NSImage* createNSImage (const Image& image)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
 
         NSImage* im = [[NSImage alloc] init];
         [im setSize: NSMakeSize (image.getWidth(), image.getHeight())];

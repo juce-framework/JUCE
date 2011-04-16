@@ -40,7 +40,7 @@ static double hiResTicksScaleFactor;
 
 
 //==============================================================================
-#if JUCE_USE_INTRINSICS
+#if JUCE_USE_INTRINSICS || JUCE_64BIT
 
 // CPU info functions using intrinsics...
 
@@ -69,9 +69,6 @@ static void juce_getCpuVendor (char* const v)
 {
     int vendor[4] = { 0 };
 
- #if JUCE_64BIT
-    /// xxx todo
- #else
   #ifndef __MINGW32__
     __try
   #endif
@@ -96,7 +93,6 @@ static void juce_getCpuVendor (char* const v)
         *v = 0;
     }
    #endif
- #endif
 
     memcpy (v, vendor, 16);
 }

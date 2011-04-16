@@ -91,7 +91,7 @@ public:
 
     int getResult() const
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL
         NSInteger r = getRawResult();
         return r == NSAlertDefaultReturn ? 1 : (r == NSAlertOtherReturn ? 2 : 0);
     }
@@ -195,7 +195,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
         return false;
     }
 
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     NSView* view = (NSView*) sourceComp->getWindowHandle();
 
@@ -243,7 +243,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 const Point<int> MouseInputSource::getCurrentMousePosition()
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     const NSPoint p ([NSEvent mouseLocation]);
     return Point<int> (roundToInt (p.x), roundToInt ([[[NSScreen screens] objectAtIndex: 0] frame].size.height - p.y));
 }
@@ -364,7 +364,7 @@ juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback);
 
 void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
 
     DisplaySettingsChangeCallback::getInstance();
 

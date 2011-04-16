@@ -64,7 +64,7 @@ CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
 const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 {
 #if JUCE_IOS
-    const ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     return nsStringToJuce ([juceStringToNS (s) precomposedStringWithCanonicalMapping]);
 #else
     UnicodeMapping map;

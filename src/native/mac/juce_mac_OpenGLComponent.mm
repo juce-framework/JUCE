@@ -525,7 +525,7 @@ private:
 
 OpenGLContext* OpenGLComponent::createContext()
 {
-    ScopedAutoReleasePool pool;
+    JUCE_AUTORELEASEPOOL
     UIViewComponentPeer* peer = dynamic_cast <UIViewComponentPeer*> (getPeer());
 
     if (peer != nullptr)
