@@ -27,6 +27,245 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+#if (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5) \
+     || (JUCE_IOS && defined (__IPHONE_3_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_3_2)
+ #define JUCE_CORETEXT_AVAILABLE 1
+#endif
+
+#if JUCE_CORETEXT_AVAILABLE
+
+//==============================================================================
+class MacTypeface  : public Typeface
+{
+public:
+    //==============================================================================
+    MacTypeface (const Font& font)
+        : Typeface (font.getTypefaceName()),
+          fontRef (nullptr),
+          fontHeightToCGSizeFactor (1.0f),
+          renderingTransform (CGAffineTransformIdentity),
+          ctFontRef (nullptr),
+          attributedStringAtts (nullptr),
+          ascent (0.0f),
+          unitsToHeightScaleFactor (0.0f)
+    {
+        JUCE_AUTORELEASEPOOL
+        CFStringRef name = PlatformUtilities::juceStringToCFString (font.getTypefaceName());
+        ctFontRef = CTFontCreateWithName (name, 1024, nullptr);
+        CFRelease (name);
+
+        if (ctFontRef != nullptr)
+        {
+            bool needsItalicTransform = false;
+
+            if (font.isItalic())
+            {
+                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0, nullptr,
+                                                                        kCTFontItalicTrait, kCTFontItalicTrait);
+
+                if (newFont != nullptr)
+                {
+                    CFRelease (ctFontRef);
+                    ctFontRef = newFont;
+                }
+                else
+                {
+                    needsItalicTransform = true; // couldn't find a proper italic version, so fake it with a transform..
+                }
+            }
+
+            if (font.isBold())
+            {
+                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0, nullptr,
+                                                                        kCTFontBoldTrait, kCTFontBoldTrait);
+                if (newFont != nullptr)
+                {
+                    CFRelease (ctFontRef);
+                    ctFontRef = newFont;
+                }
+            }
+
+            ascent = std::abs ((float) CTFontGetAscent (ctFontRef));
+            const float totalSize = ascent + std::abs ((float) CTFontGetDescent (ctFontRef));
+            ascent /= totalSize;
+
+            pathTransform = AffineTransform::identity.scale (1.0f / totalSize, 1.0f / totalSize);
+
+            if (needsItalicTransform)
+            {
+                pathTransform = pathTransform.sheared (-0.15f, 0.0f);
+                renderingTransform.c = 0.15f;
+            }
+
+            fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
+
+            const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
+            const float ctTotalHeight = abs (CTFontGetAscent (ctFontRef)) + abs (CTFontGetDescent (ctFontRef));
+            unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
+            fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
+
+            const short zero = 0;
+            CFNumberRef numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
+
+            CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
+            CFTypeRef values[] = { ctFontRef, numberRef };
+            attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys, (const void**) &values, numElementsInArray (keys),
+                                                       &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            CFRelease (numberRef);
+        }
+    }
+
+    ~MacTypeface()
+    {
+        if (attributedStringAtts != nullptr)
+            CFRelease (attributedStringAtts);
+
+        if (fontRef != nullptr)
+            CGFontRelease (fontRef);
+
+        if (ctFontRef != nullptr)
+            CFRelease (ctFontRef);
+    }
+
+    float getAscent() const     { return ascent; }
+    float getDescent() const    { return 1.0f - ascent; }
+
+    float getStringWidth (const String& text)
+    {
+        float x = 0;
+
+        if (ctFontRef != nullptr && text.isNotEmpty())
+        {
+            CFStringRef cfText = PlatformUtilities::juceStringToCFString (text);
+            CFAttributedStringRef attribString = CFAttributedStringCreate (kCFAllocatorDefault, cfText, attributedStringAtts);
+            CFRelease (cfText);
+
+            CTLineRef line = CTLineCreateWithAttributedString (attribString);
+            CFArrayRef runArray = CTLineGetGlyphRuns (line);
+
+            for (CFIndex i = 0; i < CFArrayGetCount (runArray); ++i)
+            {
+                CTRunRef run = (CTRunRef) CFArrayGetValueAtIndex (runArray, i);
+                CFIndex length = CTRunGetGlyphCount (run);
+                HeapBlock <CGSize> advances (length);
+                CTRunGetAdvances (run, CFRangeMake (0, 0), advances);
+
+                for (int j = 0; j < length; ++j)
+                    x += (float) advances[j].width;
+            }
+
+            CFRelease (line);
+            CFRelease (attribString);
+
+            x *= unitsToHeightScaleFactor;
+        }
+
+        return x;
+    }
+
+    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
+    {
+        xOffsets.add (0);
+
+        if (ctFontRef != nullptr && text.isNotEmpty())
+        {
+            float x = 0;
+
+            CFStringRef cfText = PlatformUtilities::juceStringToCFString (text);
+            CFAttributedStringRef attribString = CFAttributedStringCreate (kCFAllocatorDefault, cfText, attributedStringAtts);
+            CFRelease (cfText);
+
+            CTLineRef line = CTLineCreateWithAttributedString (attribString);
+            CFArrayRef runArray = CTLineGetGlyphRuns (line);
+
+            for (CFIndex i = 0; i < CFArrayGetCount (runArray); ++i)
+            {
+                CTRunRef run = (CTRunRef) CFArrayGetValueAtIndex (runArray, i);
+                CFIndex length = CTRunGetGlyphCount (run);
+                HeapBlock <CGSize> advances (length);
+                CTRunGetAdvances (run, CFRangeMake (0, 0), advances);
+                HeapBlock <CGGlyph> glyphs (length);
+                CTRunGetGlyphs (run, CFRangeMake (0, 0), glyphs);
+
+                for (int j = 0; j < length; ++j)
+                {
+                    x += (float) advances[j].width;
+                    xOffsets.add (x * unitsToHeightScaleFactor);
+                    resultGlyphs.add (glyphs[j]);
+                }
+            }
+
+            CFRelease (line);
+            CFRelease (attribString);
+        }
+    }
+
+    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
+    {
+        Path path;
+
+        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
+            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
+                                  path, transform);
+
+        return nullptr;
+    }
+
+    bool getOutlineForGlyph (int glyphNumber, Path& path)
+    {
+        jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
+
+        CGPathRef pathRef = CTFontCreatePathForGlyph (ctFontRef, (CGGlyph) glyphNumber, &renderingTransform);
+        CGPathApply (pathRef, &path, pathApplier);
+        CFRelease (pathRef);
+
+        if (! pathTransform.isIdentity())
+            path.applyTransform (pathTransform);
+
+        return true;
+    }
+
+    //==============================================================================
+    CGFontRef fontRef;
+
+    float fontHeightToCGSizeFactor;
+    CGAffineTransform renderingTransform;
+
+private:
+    CTFontRef ctFontRef;
+    CFDictionaryRef attributedStringAtts;
+    float ascent, unitsToHeightScaleFactor;
+    AffineTransform pathTransform;
+
+    static void pathApplier (void* info, const CGPathElement* const element)
+    {
+        Path& path = *static_cast<Path*> (info);
+        const CGPoint* const p = element->points;
+
+        switch (element->type)
+        {
+            case kCGPathElementMoveToPoint:         path.startNewSubPath ((float) p[0].x, (float) -p[0].y); break;
+            case kCGPathElementAddLineToPoint:      path.lineTo          ((float) p[0].x, (float) -p[0].y); break;
+            case kCGPathElementAddQuadCurveToPoint: path.quadraticTo     ((float) p[0].x, (float) -p[0].y,
+                                                                          (float) p[1].x, (float) -p[1].y); break;
+            case kCGPathElementAddCurveToPoint:     path.cubicTo         ((float) p[0].x, (float) -p[0].y,
+                                                                          (float) p[1].x, (float) -p[1].y,
+                                                                          (float) p[2].x, (float) -p[2].y); break;
+            case kCGPathElementCloseSubpath:        path.closeSubPath(); break;
+            default:                                jassertfalse; break;
+        }
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MacTypeface);
+};
+
+#else
+
+//==============================================================================
+// The stuff that follows is a mash-up that supports pre-OSX 10.5 and pre-iOS 3.2 APIs.
+// (Hopefully all of this can be ditched at some point in the future).
+
+//==============================================================================
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
   #define SUPPORT_10_4_FONTS 1
   #define NEW_CGFONT_FUNCTIONS_UNAVAILABLE (CGFontCreateWithFontName == 0)
@@ -482,12 +721,14 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MacTypeface);
 };
 
+#endif
+
+//==============================================================================
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new MacTypeface (font);
 }
 
-//==============================================================================
 const StringArray Font::findAllTypefaceNames()
 {
     StringArray names;

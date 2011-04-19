@@ -749,13 +749,16 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             currentTouches.add (touch);
         }
 
-        if (isDown)
+        if ([touch phase] == UITouchPhaseBegan
+            || [touch phase] == UITouchPhaseStationary
+            || [touch phase] == UITouchPhaseMoved)
         {
             currentModifiers = currentModifiers.withoutMouseButtons();
             handleMouseEvent (touchIndex, pos, currentModifiers, time);
             currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         }
-        else if (isUp)
+        else if ([touch phase] == UITouchPhaseEnded
+                 || [touch phase] == UITouchPhaseCancelled)
         {
             currentModifiers = currentModifiers.withoutMouseButtons();
             currentTouches.remove (touchIndex);
@@ -850,7 +853,11 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (const Range<int>& range, co
             if (currentSelection.isEmpty())
                 target->setHighlightedRegion (currentSelection.withStart (currentSelection.getStart() - 1));
 
-        target->insertTextAtCaret (text);
+        if (text == "\r" || text == "\n" || text == "\r\n")
+            handleKeyPress (KeyPress::returnKey, text[0]);
+        else
+            target->insertTextAtCaret (text);
+
         updateHiddenTextContent (target);
     }
 

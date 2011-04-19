@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      53
-#define JUCE_BUILDNUMBER        76
+#define JUCE_BUILDNUMBER        77
 
 /** Current Juce version number.
 
@@ -186,6 +186,7 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #include "juce_Logger.h"
 #include "../memory/juce_LeakedObjectDetector.h"
 
+#undef TYPE_BOOL  // (stupidly-named CoreServices definition which interferes with other libraries).
 
 END_JUCE_NAMESPACE
 

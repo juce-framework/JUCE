@@ -170,6 +170,41 @@ private:
 };
 
 //==============================================================================
+class DelayChannelOp : public AudioGraphRenderingOp
+{
+public:
+    DelayChannelOp (const int channel_, const int numSamplesDelay_)
+        : channel (channel_),
+          bufferSize (numSamplesDelay_ + 1),
+          readIndex (0), writeIndex (numSamplesDelay_)
+    {
+        buffer.calloc (bufferSize);
+    }
+
+    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
+    {
+        float* data = sharedBufferChans.getSampleData (channel, 0);
+
+        for (int i = numSamples; --i >= 0;)
+        {
+            buffer [writeIndex] = *data;
+            *data++ = buffer [readIndex];
+
+            if (++readIndex  >= bufferSize) readIndex = 0;
+            if (++writeIndex >= bufferSize) writeIndex = 0;
+        }
+    }
+
+private:
+    HeapBlock<float> buffer;
+    const int channel, bufferSize;
+    int readIndex, writeIndex;
+
+    JUCE_DECLARE_NON_COPYABLE (DelayChannelOp);
+};
+
+
+//==============================================================================
 class ProcessBufferOp : public AudioGraphRenderingOp
 {
 public:
@@ -223,7 +258,8 @@ public:
                                    const Array<void*>& orderedNodes_,
                                    Array<void*>& renderingOps)
         : graph (graph_),
-          orderedNodes (orderedNodes_)
+          orderedNodes (orderedNodes_),
+          totalLatency (0)
     {
         nodeIds.add ((uint32) zeroNodeID); // first buffer is read-only zeros
         channels.add (0);
@@ -237,6 +273,8 @@ public:
 
             markAnyUnusedBuffersAsFree (i);
         }
+
+        graph.setLatencySamples (totalLatency);
     }
 
     int getNumBuffersNeeded() const         { return nodeIds.size(); }
@@ -253,6 +291,42 @@ private:
 
     static bool isNodeBusy (uint32 nodeID) noexcept { return nodeID != freeNodeID && nodeID != zeroNodeID; }
 
+    Array <uint32> nodeDelayIDs;
+    Array <int> nodeDelays;
+    int totalLatency;
+
+    int getNodeDelay (const uint32 nodeID) const          { return nodeDelays [nodeDelayIDs.indexOf (nodeID)]; }
+
+    void setNodeDelay (const uint32 nodeID, const int latency)
+    {
+        const int index = nodeDelayIDs.indexOf (nodeID);
+
+        if (index >= 0)
+        {
+            nodeDelays.set (index, latency);
+        }
+        else
+        {
+            nodeDelayIDs.add (nodeID);
+            nodeDelays.add (latency);
+        }
+    }
+
+    int getInputLatencyForNode (const uint32 nodeID) const
+    {
+        int maxLatency = 0;
+
+        for (int i = graph.getNumConnections(); --i >= 0;)
+        {
+            const AudioProcessorGraph::Connection* const c = graph.getConnection (i);
+
+            if (c->destNodeId == nodeID)
+                maxLatency = jmax (maxLatency, getNodeDelay (c->sourceNodeId));
+        }
+
+        return maxLatency;
+    }
+
     //==============================================================================
     void createRenderingOpsForNode (AudioProcessorGraph::Node* const node,
                                     Array<void*>& renderingOps,
@@ -264,6 +338,8 @@ private:
 
         Array <int> audioChannelsToUse;
         int midiBufferToUse = -1;
+
+        int maxLatency = getInputLatencyForNode (node->nodeId);
 
         for (int inputChan = 0; inputChan < numIns; ++inputChan)
         {
@@ -326,6 +402,11 @@ private:
 
                     bufIndex = newFreeBuffer;
                 }
+
+                const int nodeDelay = getNodeDelay (srcNode);
+
+                if (nodeDelay < maxLatency)
+                    renderingOps.add (new DelayChannelOp (bufIndex, maxLatency - nodeDelay));
             }
             else
             {
@@ -348,6 +429,11 @@ private:
                         // we've found one of our input chans that can be re-used..
                         reusableInputIndex = i;
                         bufIndex = sourceBufIndex;
+
+                        const int nodeDelay = getNodeDelay (sourceNodes.getUnchecked (i));
+                        if (nodeDelay < maxLatency)
+                            renderingOps.add (new DelayChannelOp (sourceBufIndex, maxLatency - nodeDelay));
+
                         break;
                     }
                 }
@@ -371,6 +457,10 @@ private:
                     }
 
                     reusableInputIndex = 0;
+                    const int nodeDelay = getNodeDelay (sourceNodes.getFirst());
+
+                    if (nodeDelay < maxLatency)
+                        renderingOps.add (new DelayChannelOp (bufIndex, maxLatency - nodeDelay));
                 }
 
                 for (int j = 0; j < sourceNodes.size(); ++j)
@@ -380,7 +470,30 @@ private:
                         const int srcIndex = getBufferContaining (sourceNodes.getUnchecked(j),
                                                                   sourceOutputChans.getUnchecked(j));
                         if (srcIndex >= 0)
-                            renderingOps.add (new AddChannelOp (srcIndex, bufIndex));
+                        {
+                            const int nodeDelay = getNodeDelay (sourceNodes.getUnchecked (j));
+
+                            if (nodeDelay < maxLatency)
+                            {
+                                if (! isBufferNeededLater (ourRenderingIndex, inputChan,
+                                                           sourceNodes.getUnchecked(j),
+                                                           sourceOutputChans.getUnchecked(j)))
+                                {
+                                    renderingOps.add (new DelayChannelOp (srcIndex, maxLatency - nodeDelay));
+                                }
+                                else // buffer is reused elsewhere, can't be delayed
+                                {
+                                    const int bufferToDelay = getFreeBuffer (false);
+                                    renderingOps.add (new CopyChannelOp (srcIndex, bufferToDelay));
+                                    renderingOps.add (new DelayChannelOp (bufferToDelay, maxLatency - nodeDelay));
+                                    renderingOps.add (new AddChannelOp (bufferToDelay, bufIndex));
+                                }
+                            }
+                            else
+                            {
+                                renderingOps.add (new AddChannelOp (srcIndex, bufIndex));
+                            }
+                        }
                     }
                 }
             }
@@ -442,8 +555,8 @@ private:
             }
             else
             {
-                 // probably a feedback loop, so just use an empty one..
-                 midiBufferToUse = getFreeBuffer (true); // need to pick a buffer even if the processor doesn't use midi
+                // probably a feedback loop, so just use an empty one..
+                midiBufferToUse = getFreeBuffer (true); // need to pick a buffer even if the processor doesn't use midi
             }
         }
         else
@@ -500,6 +613,11 @@ private:
         if (node->getProcessor()->producesMidi())
             markBufferAsContaining (midiBufferToUse, node->nodeId,
                                     AudioProcessorGraph::midiChannelIndex);
+
+        setNodeDelay (node->nodeId, maxLatency + node->getProcessor()->getLatencySamples());
+
+        if (numOuts == 0)
+            totalLatency = maxLatency;
 
         renderingOps.add (new ProcessBufferOp (node, audioChannelsToUse,
                                                totalChans, midiBufferToUse));

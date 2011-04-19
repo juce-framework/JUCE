@@ -198,9 +198,9 @@ public:
     virtual bool redirectKeyDown (NSEvent* ev);
     virtual bool redirectKeyUp (NSEvent* ev);
     virtual void redirectModKeyChange (NSEvent* ev);
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+   #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
     virtual bool redirectPerformKeyEquivalent (NSEvent* ev);
-#endif
+   #endif
 
     virtual BOOL sendDragCallback (int type, id <NSDraggingInfo> sender);
 
@@ -378,71 +378,19 @@ END_JUCE_NAMESPACE
                             waitUntilDone: NO];
 }
 
-- (void) asyncMouseUp: (NSEvent*) ev
-{
-    if (owner != nullptr)
-        owner->redirectMouseUp (ev);
-}
+- (void) asyncMouseUp: (NSEvent*) ev    { if (owner != nullptr) owner->redirectMouseUp    (ev); }
+- (void) mouseDragged: (NSEvent*) ev    { if (owner != nullptr) owner->redirectMouseDrag  (ev); }
+- (void) mouseMoved:   (NSEvent*) ev    { if (owner != nullptr) owner->redirectMouseMove  (ev); }
+- (void) mouseEntered: (NSEvent*) ev    { if (owner != nullptr) owner->redirectMouseEnter (ev); }
+- (void) mouseExited:  (NSEvent*) ev    { if (owner != nullptr) owner->redirectMouseExit  (ev); }
+- (void) scrollWheel:  (NSEvent*) ev    { if (owner != nullptr) owner->redirectMouseWheel (ev); }
 
-- (void) mouseDragged: (NSEvent*) ev
-{
-    if (owner != nullptr)
-        owner->redirectMouseDrag (ev);
-}
-
-- (void) mouseMoved: (NSEvent*) ev
-{
-    if (owner != nullptr)
-        owner->redirectMouseMove (ev);
-}
-
-- (void) mouseEntered: (NSEvent*) ev
-{
-    if (owner != nullptr)
-        owner->redirectMouseEnter (ev);
-}
-
-- (void) mouseExited: (NSEvent*) ev
-{
-    if (owner != nullptr)
-        owner->redirectMouseExit (ev);
-}
-
-- (void) rightMouseDown: (NSEvent*) ev
-{
-    [self mouseDown: ev];
-}
-
-- (void) rightMouseDragged: (NSEvent*) ev
-{
-    [self mouseDragged: ev];
-}
-
-- (void) rightMouseUp: (NSEvent*) ev
-{
-    [self mouseUp: ev];
-}
-
-- (void) otherMouseDown: (NSEvent*) ev
-{
-    [self mouseDown: ev];
-}
-
-- (void) otherMouseDragged: (NSEvent*) ev
-{
-    [self mouseDragged: ev];
-}
-
-- (void) otherMouseUp: (NSEvent*) ev
-{
-    [self mouseUp: ev];
-}
-
-- (void) scrollWheel: (NSEvent*) ev
-{
-    if (owner != nullptr)
-        owner->redirectMouseWheel (ev);
-}
+- (void) rightMouseDown:    (NSEvent*) ev   { [self mouseDown:    ev]; }
+- (void) rightMouseDragged: (NSEvent*) ev   { [self mouseDragged: ev]; }
+- (void) rightMouseUp:      (NSEvent*) ev   { [self mouseUp:      ev]; }
+- (void) otherMouseDown:    (NSEvent*) ev   { [self mouseDown:    ev]; }
+- (void) otherMouseDragged: (NSEvent*) ev   { [self mouseDragged: ev]; }
+- (void) otherMouseUp:      (NSEvent*) ev   { [self mouseUp:      ev]; }
 
 - (BOOL) acceptsFirstMouse: (NSEvent*) ev
 {
@@ -641,26 +589,10 @@ END_JUCE_NAMESPACE
 }
 #endif
 
-- (BOOL) becomeFirstResponder
-{
-    if (owner != nullptr)
-        owner->viewFocusGain();
+- (BOOL) becomeFirstResponder   { if (owner != nullptr) owner->viewFocusGain(); return YES; }
+- (BOOL) resignFirstResponder   { if (owner != nullptr) owner->viewFocusLoss(); return YES; }
 
-    return true;
-}
-
-- (BOOL) resignFirstResponder
-{
-    if (owner != nullptr)
-        owner->viewFocusLoss();
-
-    return true;
-}
-
-- (BOOL) acceptsFirstResponder
-{
-    return owner != nullptr && owner->canBecomeKeyWindow();
-}
+- (BOOL) acceptsFirstResponder  { return owner != nullptr && owner->canBecomeKeyWindow(); }
 
 //==============================================================================
 - (NSArray*) getSupportedDragTypes
@@ -866,14 +798,14 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
       isSharedWindow (viewToAttachTo != nil),
       fullScreen (false),
       insideDrawRect (false),
-#if USE_COREGRAPHICS_RENDERING
+     #if USE_COREGRAPHICS_RENDERING
       usingCoreGraphics (true),
-#else
+     #else
       usingCoreGraphics (false),
-#endif
+     #endif
       recursiveToFrontCall (false)
 {
-    NSRect r = NSMakeRect (0, 0, (float) component->getWidth(),(float) component->getHeight());
+    NSRect r = NSMakeRect (0, 0, (float) component->getWidth(), (float) component->getHeight());
 
     view = [[JuceNSView alloc] initWithOwner: this withFrame: r];
     [view setPostsFrameChangedNotifications: YES];
@@ -1073,12 +1005,12 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
         Rectangle<int> pos (convertToRectInt (r));
         Rectangle<int> original (convertToRectInt (current));
 
-      #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_6
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_6
         if ([window inLiveResize])
-      #else
+       #else
         if ([window respondsToSelector: @selector (inLiveResize)]
              && [window performSelector: @selector (inLiveResize)])
-      #endif
+       #endif
         {
             constrainer->checkBounds (pos, original,
                                       Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
@@ -1111,9 +1043,9 @@ void NSViewComponentPeer::setAlpha (float newAlpha)
     }
     else
     {
-      #if defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5
+       #if defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5
         [view setAlphaValue: (CGFloat) newAlpha];
-      #else
+       #else
         if ([view respondsToSelector: @selector (setAlphaValue:)])
         {
             // PITA dynamic invocation for 10.4 builds..
@@ -1216,22 +1148,17 @@ const BorderSize<int> NSViewComponentPeer::getFrameSize() const
 bool NSViewComponentPeer::setAlwaysOnTop (bool alwaysOnTop)
 {
     if (! isSharedWindow)
-    {
         [window setLevel: alwaysOnTop ? NSFloatingWindowLevel
                                       : NSNormalWindowLevel];
-    }
-
     return true;
 }
 
 void NSViewComponentPeer::toFront (bool makeActiveWindow)
 {
     if (isSharedWindow)
-    {
         [[view superview] addSubview: view
                           positioned: NSWindowAbove
                           relativeTo: nil];
-    }
 
     if (window != nil && component->isVisible())
     {
@@ -1591,7 +1518,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
     if (! component->isOpaque())
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
-  #if USE_COREGRAPHICS_RENDERING
+   #if USE_COREGRAPHICS_RENDERING
     if (usingCoreGraphics)
     {
         CoreGraphicsContext context (cg, (float) [view frame].size.height);
@@ -1601,7 +1528,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
         insideDrawRect = false;
     }
     else
-  #endif
+   #endif
     {
         Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
                     (int) (r.size.width + 0.5f),
@@ -1647,9 +1574,9 @@ const StringArray NSViewComponentPeer::getAvailableRenderingEngines()
 {
     StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
-  #if USE_COREGRAPHICS_RENDERING
+   #if USE_COREGRAPHICS_RENDERING
     s.add ("CoreGraphics Renderer");
-  #endif
+   #endif
 
     return s;
 }
@@ -1661,13 +1588,13 @@ int NSViewComponentPeer::getCurrentRenderingEngine() const
 
 void NSViewComponentPeer::setCurrentRenderingEngine (int index)
 {
-#if USE_COREGRAPHICS_RENDERING
+   #if USE_COREGRAPHICS_RENDERING
     if (usingCoreGraphics != (index > 0))
     {
         usingCoreGraphics = index > 0;
         [view setNeedsDisplay: true];
     }
-#endif
+   #endif
 }
 
 bool NSViewComponentPeer::canBecomeKeyWindow()
@@ -1704,7 +1631,7 @@ void Desktop::createMouseInputSources()
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
-  #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
     if (enableOrDisable)
     {
         [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
@@ -1715,7 +1642,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     {
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
     }
-  #else
+   #else
     if (enableOrDisable)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
@@ -1725,7 +1652,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     {
         SetSystemUIMode (kUIModeNormal, 0);
     }
-  #endif
+   #endif
 }
 
 //==============================================================================

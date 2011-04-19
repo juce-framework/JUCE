@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	76
+#define JUCE_BUILDNUMBER	77
 
 /** Current Juce version number.
 
@@ -5680,6 +5680,8 @@ private:
 
 #endif   // __JUCE_LEAKEDOBJECTDETECTOR_JUCEHEADER__
 /*** End of inlined file: juce_LeakedObjectDetector.h ***/
+
+#undef TYPE_BOOL  // (stupidly-named CoreServices definition which interferes with other libraries).
 
 END_JUCE_NAMESPACE
 
@@ -17777,28 +17779,26 @@ private:
 	JUCE_DECLARE_NON_COPYABLE (PlatformUtilities);
 };
 
-#if JUCE_MAC || JUCE_IOS
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
 
-/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
-*/
-class JUCE_API  ScopedAutoReleasePool
-{
-public:
-	ScopedAutoReleasePool();
-	~ScopedAutoReleasePool();
+ /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII. */
+ class JUCE_API  ScopedAutoReleasePool
+ {
+ public:
+	 ScopedAutoReleasePool();
+	 ~ScopedAutoReleasePool();
 
-private:
-	void* pool;
+ private:
+	 void* pool;
 
-	JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
-};
+	 JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
+ };
 
-#define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool pool;
+ /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
+ #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
 
 #else
-
-#define JUCE_AUTORELEASEPOOL
-
+ #define JUCE_AUTORELEASEPOOL
 #endif
 
 #if JUCE_LINUX
@@ -22317,12 +22317,13 @@ public:
 		If signal() is called when nothing is waiting, the next thread to call wait()
 		will return immediately and reset the signal.
 
-		If the WaitableEvent is manual reset, all threads that are currently waiting on this
-		object will be woken.
+		If the WaitableEvent is manual reset, all current and future threads that wait upon this
+		object will be woken, until reset() is explicitly called.
 
-		If the WaitableEvent is automatic reset, and there are one or more threads waiting
-		on the object, then one of them will be woken up. If no threads are currently waiting,
-		then the next thread to call wait() will be woken up.
+		If the WaitableEvent is automatic reset, and one or more threads is waiting upon the object,
+		then one of them will be woken up. If no threads are currently waiting, then the next thread
+		to call wait() will be woken up. As soon as a thread is woken, the signal is automatically
+		reset.
 
 		@see wait, reset
 	*/
@@ -63814,10 +63815,20 @@ public:
 	/** Returns the context that this component is sharing with.
 		@see shareWith
 	*/
-	OpenGLContext* getShareContext() const noexcept   { return contextToShareListsWith; }
+	OpenGLContext* getShareContext() const noexcept	 { return contextToShareListsWith; }
 
 	/** Flips the openGL buffers over. */
 	void swapBuffers();
+
+	/** Indicates whether the component should perform its rendering on a background thread.
+		By default, this is set to false, and the renderOpenGL() callback happens on the main
+		UI thread, in response to a repaint. If set to true, then the component will create
+		a background thread which it uses to repeatedly call renderOpenGL().
+	*/
+	void setUsingDedicatedThread (bool useDedicatedThread) noexcept;
+
+	/** Returns true if the component is performing the rendering on a background thread. */
+	bool isUsingDedicatedThread() const noexcept	{ return useThread; }
 
 	/** This replaces the normal paint() callback - use it to draw your openGL stuff.
 
@@ -63847,6 +63858,17 @@ public:
 		again in your code.
 	*/
 	virtual void newOpenGLContextCreated() = 0;
+
+	/** This method is called when the component shuts down its OpenGL context.
+
+		You can use this callback to delete textures and any other OpenGL objects you
+		created in the component's context.
+
+		When this callback happens, the context will have been made current
+		using the makeCurrentContextActive() method, so there's no need to call it
+		again in your code.
+	 */
+	virtual void releaseOpenGLContext()			 {}
 
 	/** Returns the context that will draw into this component.
 
@@ -63900,6 +63922,19 @@ public:
 	*/
 	virtual bool renderAndSwapBuffers();
 
+	/** Wait after swapping before next render pass.
+
+		Used when rendering is running on a thread. The default is 20 millseconds, giving
+		a nominal frame rate of just under 50 fps.
+	 */
+	virtual void waitAfterSwapping();
+
+	/** Stop Rendering.
+
+		Use to shut down an openGLComponent properly, whether on a thread or not.
+	 */
+	virtual bool stopRendering();
+
 	/** This returns a critical section that can be used to lock the current context.
 
 		Because the context that is used by this component can change, e.g. when the
@@ -63926,6 +63961,11 @@ public:
 private:
 	const OpenGLType type;
 
+	class OpenGLComponentRenderThread;
+	friend class OpenGLComponentRenderThread;
+	friend class ScopedPointer <OpenGLComponentRenderThread>;
+	ScopedPointer <OpenGLComponentRenderThread> renderThread;
+
 	class OpenGLComponentWatcher;
 	friend class OpenGLComponentWatcher;
 	friend class ScopedPointer <OpenGLComponentWatcher>;
@@ -63935,7 +63975,7 @@ private:
 
 	CriticalSection contextLock;
 	OpenGLPixelFormat preferredPixelFormat;
-	bool needToUpdateViewport;
+	bool needToUpdateViewport, useThread;
 
 	OpenGLContext* createContext();
 	void updateContextPosition();

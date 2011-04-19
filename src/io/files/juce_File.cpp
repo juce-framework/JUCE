@@ -616,17 +616,12 @@ const File File::getNonexistentSibling (const bool putNumbersInBrackets) const
 //==============================================================================
 const String File::getFileExtension() const
 {
-    String ext;
+    const int indexOfDot = fullPath.lastIndexOfChar ('.');
 
-    if (! isDirectory())
-    {
-        const int indexOfDot = fullPath.lastIndexOfChar ('.');
+    if (indexOfDot > fullPath.lastIndexOfChar (separator))
+        return fullPath.substring (indexOfDot);
 
-        if (indexOfDot > fullPath.lastIndexOfChar (separator))
-            ext = fullPath.substring (indexOfDot);
-    }
-
-    return ext;
+    return String::empty;
 }
 
 bool File::hasFileExtension (const String& possibleSuffix) const

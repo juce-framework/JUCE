@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_OpenGLComponent.h"
 #include "../windows/juce_ComponentPeer.h"
 #include "../layout/juce_ComponentMovementWatcher.h"
+#include "../../../threads/juce_Thread.h"
 
 
 //==============================================================================
@@ -129,6 +130,40 @@ OpenGLContext* OpenGLContext::getCurrentContext()
     return nullptr;
 }
 
+//==============================================================================
+class OpenGLComponent::OpenGLComponentRenderThread  : public Thread,
+                                                      public AsyncUpdater
+{
+public:
+    //==============================================================================
+    OpenGLComponentRenderThread (OpenGLComponent& owner_)
+        : Thread ("OpenGL Render"),
+          owner (owner_)
+    {
+    }
+
+    void run()
+    {
+        // Context will get created and callback triggered on first render
+        while (owner.renderAndSwapBuffers() && ! threadShouldExit())
+            owner.waitAfterSwapping();
+
+        triggerAsyncUpdate();
+    }
+
+    void handleAsyncUpdate()
+    {
+        owner.stopRendering();
+    }
+
+    //==============================================================================
+private:
+    OpenGLComponent& owner;
+
+    JUCE_DECLARE_NON_COPYABLE (OpenGLComponentRenderThread);
+};
+
+
 
 //==============================================================================
 class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher
@@ -150,7 +185,7 @@ public:
     void componentPeerChanged()
     {
         const ScopedLock sl (owner->getContextLock());
-        owner->deleteContext();
+        owner->stopRendering();
     }
 
     void componentVisibilityChanged()
@@ -158,7 +193,7 @@ public:
         if (! owner->isShowing())
         {
             const ScopedLock sl (owner->getContextLock());
-            owner->deleteContext();
+            owner->stopRendering();
         }
     }
 
@@ -284,17 +319,38 @@ void OpenGLComponent::swapBuffers()
         context->swapBuffers();
 }
 
+void OpenGLComponent::setUsingDedicatedThread (bool useDedicatedThread) noexcept
+{
+    useThread = useDedicatedThread;
+}
+
 void OpenGLComponent::paint (Graphics&)
 {
-    if (renderAndSwapBuffers())
+    if (useThread)
     {
-        ComponentPeer* const peer = getPeer();
+        if (renderThread == nullptr)
+            renderThread = new OpenGLComponentRenderThread (*this);
 
-        if (peer != nullptr)
-        {
-            const Point<int> topLeft (getScreenPosition() - peer->getScreenPosition());
-            peer->addMaskedRegion (topLeft.getX(), topLeft.getY(), getWidth(), getHeight());
-        }
+        if (! renderThread->isThreadRunning())
+            renderThread->startThread (6);
+
+        // fall-through and update the masking region
+    }
+    else
+    {
+        if (renderThread != nullptr && renderThread->isThreadRunning())
+            renderThread->stopThread (5000);
+
+        if (! renderAndSwapBuffers())
+            return;
+    }
+
+    ComponentPeer* const peer = getPeer();
+
+    if (peer != nullptr)
+    {
+        const Point<int> topLeft (getScreenPosition() - peer->getScreenPosition());
+        peer->addMaskedRegion (topLeft.getX(), topLeft.getY(), getWidth(), getHeight());
     }
 }
 
@@ -313,6 +369,35 @@ bool OpenGLComponent::renderAndSwapBuffers()
 
     renderOpenGL();
     swapBuffers();
+
+    return true;
+}
+
+void OpenGLComponent::waitAfterSwapping()
+{
+    jassert (renderThread != nullptr && Thread::getCurrentThread() == renderThread);
+
+    Thread::sleep (20);
+}
+
+bool OpenGLComponent::stopRendering()
+{
+    const ScopedLock sl (contextLock);
+
+    if (! makeCurrentContextActive())
+        return false;
+
+    releaseOpenGLContext(); // callback to allow for shutdown
+
+    if (renderThread != nullptr && Thread::getCurrentThread() == renderThread)
+    {
+        // make the context inactive - if we're on a thread, this will release the context,
+        // so the main thread can take it and do shutdown
+
+        makeCurrentContextInactive();
+    }
+    else if (context != nullptr)
+        context->deleteContext();
 
     return true;
 }
