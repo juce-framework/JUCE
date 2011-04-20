@@ -346,14 +346,8 @@ public:
 
         Used when rendering is running on a thread. The default is 20 millseconds, giving
         a nominal frame rate of just under 50 fps.
-     */
+    */
     virtual void waitAfterSwapping();
-
-    /** Stop Rendering.
-
-        Use to shut down an openGLComponent properly, whether on a thread or not.
-     */
-    virtual bool stopRendering();
 
     /** This returns a critical section that can be used to lock the current context.
 
@@ -403,6 +397,7 @@ private:
     OpenGLContext* createContext();
     void updateContextPosition();
     void internalRepaint (int x, int y, int w, int h);
+    void stopRendering();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };

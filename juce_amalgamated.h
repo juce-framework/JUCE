@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	77
+#define JUCE_BUILDNUMBER	78
 
 /** Current Juce version number.
 
@@ -12059,6 +12059,11 @@ public:
 	*/
 	operator bool() const noexcept;
 
+	/** Returns true if this result indicates a failure.
+		This is equivalent to calling failed().
+	*/
+	bool operator!() const noexcept;
+
 	/** Returns the error message that was set when this result was created.
 		For a successful result, this will be an empty string;
 	*/
@@ -12074,6 +12079,10 @@ private:
 	String errorMessage;
 
 	explicit Result (const String& errorMessage) noexcept;
+
+	// These casts are private to prevent people trying to use the Result object in numeric contexts
+	operator int() const;
+	operator void*() const;
 };
 
 #endif   // __JUCE_RESULT_JUCEHEADER__
@@ -63926,14 +63935,8 @@ public:
 
 		Used when rendering is running on a thread. The default is 20 millseconds, giving
 		a nominal frame rate of just under 50 fps.
-	 */
+	*/
 	virtual void waitAfterSwapping();
-
-	/** Stop Rendering.
-
-		Use to shut down an openGLComponent properly, whether on a thread or not.
-	 */
-	virtual bool stopRendering();
 
 	/** This returns a critical section that can be used to lock the current context.
 
@@ -63980,6 +63983,7 @@ private:
 	OpenGLContext* createContext();
 	void updateContextPosition();
 	void internalRepaint (int x, int y, int w, int h);
+	void stopRendering();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };

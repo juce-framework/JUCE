@@ -85,6 +85,11 @@ public:
     */
     operator bool() const noexcept;
 
+    /** Returns true if this result indicates a failure.
+        This is equivalent to calling failed().
+    */
+    bool operator!() const noexcept;
+
     /** Returns the error message that was set when this result was created.
         For a successful result, this will be an empty string;
     */
@@ -101,6 +106,10 @@ private:
     String errorMessage;
 
     explicit Result (const String& errorMessage) noexcept;
+
+    // These casts are private to prevent people trying to use the Result object in numeric contexts
+    operator int() const;
+    operator void*() const;
 };
 
 

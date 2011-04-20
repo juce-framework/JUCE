@@ -432,6 +432,7 @@ void ComboBox::lookAndFeelChanged()
     }
 
     addAndMakeVisible (label);
+    setWantsKeyboardFocus (! label->isEditable());
 
     label->addListener (this);
     label->addMouseListener (this, false);

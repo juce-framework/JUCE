@@ -67,26 +67,15 @@ const Result Result::fail (const String& errorMessage) noexcept
     return Result (errorMessage.isEmpty() ? "Unknown Error" : errorMessage);
 }
 
-//==============================================================================
-bool Result::wasOk() const noexcept
-{
-    return errorMessage.isEmpty();
-}
-
-bool Result::failed() const noexcept
-{
-    return errorMessage.isNotEmpty();
-}
-
-Result::operator bool() const noexcept
-{
-    return errorMessage.isEmpty();
-}
-
 const String Result::getErrorMessage() const noexcept
 {
     return errorMessage;
 }
+
+bool Result::wasOk() const noexcept         { return errorMessage.isEmpty(); }
+Result::operator bool() const noexcept      { return errorMessage.isEmpty(); }
+bool Result::failed() const noexcept        { return errorMessage.isNotEmpty(); }
+bool Result::operator!() const noexcept     { return errorMessage.isNotEmpty(); }
 
 
 END_JUCE_NAMESPACE

@@ -148,6 +148,14 @@ public:
         while (owner.renderAndSwapBuffers() && ! threadShouldExit())
             owner.waitAfterSwapping();
 
+        owner.releaseOpenGLContext();
+
+       #if JUCE_LINUX
+        owner.deleteContext();
+       #else
+        owner.makeCurrentContextInactive();
+       #endif
+
         triggerAsyncUpdate();
     }
 
@@ -184,17 +192,13 @@ public:
 
     void componentPeerChanged()
     {
-        const ScopedLock sl (owner->getContextLock());
         owner->stopRendering();
     }
 
     void componentVisibilityChanged()
     {
         if (! owner->isShowing())
-        {
-            const ScopedLock sl (owner->getContextLock());
             owner->stopRendering();
-        }
     }
 
     //==============================================================================
@@ -208,7 +212,8 @@ private:
 OpenGLComponent::OpenGLComponent (const OpenGLType type_)
     : type (type_),
       contextToShareListsWith (nullptr),
-      needToUpdateViewport (true)
+      needToUpdateViewport (true),
+      useThread (false)
 {
     setOpaque (true);
     componentWatcher = new OpenGLComponentWatcher (this);
@@ -216,7 +221,8 @@ OpenGLComponent::OpenGLComponent (const OpenGLType type_)
 
 OpenGLComponent::~OpenGLComponent()
 {
-    deleteContext();
+    stopRendering();
+    renderThread = nullptr;
     componentWatcher = nullptr;
 }
 
@@ -332,14 +338,29 @@ void OpenGLComponent::paint (Graphics&)
             renderThread = new OpenGLComponentRenderThread (*this);
 
         if (! renderThread->isThreadRunning())
+        {
+            renderThread->handleUpdateNowIfNeeded();    // may still be shutting down as well
+
+           #if ! JUCE_LINUX
+            // Except for Linux, create the context etc. first
+            const ScopedLock sl (contextLock);
+
+            if (makeCurrentContextActive()) // Make active just to create
+                makeCurrentContextInactive();
+           #endif
+
             renderThread->startThread (6);
+        }
 
         // fall-through and update the masking region
     }
     else
     {
-        if (renderThread != nullptr && renderThread->isThreadRunning())
-            renderThread->stopThread (5000);
+        if (renderThread != nullptr)
+        {
+            stopRendering();
+            renderThread = nullptr;
+        }
 
         if (! renderAndSwapBuffers())
             return;
@@ -380,26 +401,19 @@ void OpenGLComponent::waitAfterSwapping()
     Thread::sleep (20);
 }
 
-bool OpenGLComponent::stopRendering()
+void OpenGLComponent::stopRendering()
 {
-    const ScopedLock sl (contextLock);
+    if (renderThread != nullptr)
+        renderThread->stopThread (5000);
 
-    if (! makeCurrentContextActive())
-        return false;
-
-    releaseOpenGLContext(); // callback to allow for shutdown
-
-    if (renderThread != nullptr && Thread::getCurrentThread() == renderThread)
+    if (context != nullptr && makeCurrentContextActive())
     {
-        // make the context inactive - if we're on a thread, this will release the context,
-        // so the main thread can take it and do shutdown
+        // On Linux, when threaded, context will have already been cleared
+        const ScopedLock sl (contextLock);
 
-        makeCurrentContextInactive();
+        releaseOpenGLContext();
+        deleteContext();
     }
-    else if (context != nullptr)
-        context->deleteContext();
-
-    return true;
 }
 
 void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
