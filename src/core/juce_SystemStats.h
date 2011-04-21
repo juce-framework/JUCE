@@ -119,19 +119,19 @@ public:
     static const String getCpuVendor();
 
     /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX() noexcept               { return cpuFlags.hasMMX; }
+    static bool hasMMX() noexcept               { return getCPUFlags().hasMMX; }
 
     /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE() noexcept               { return cpuFlags.hasSSE; }
+    static bool hasSSE() noexcept               { return getCPUFlags().hasSSE; }
 
     /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2() noexcept              { return cpuFlags.hasSSE2; }
+    static bool hasSSE2() noexcept              { return getCPUFlags().hasSSE2; }
 
     /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow() noexcept             { return cpuFlags.has3DNow; }
+    static bool has3DNow() noexcept             { return getCPUFlags().has3DNow; }
 
     /** Returns the number of CPUs. */
-    static int getNumCpus() noexcept            { return cpuFlags.numCpus; }
+    static int getNumCpus() noexcept            { return getCPUFlags().numCpus; }
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
@@ -147,13 +147,13 @@ public:
     */
     static int getPageSize();
 
-    //==============================================================================
-    // not-for-public-use platform-specific method gets called at startup to initialise things.
-    static void initialiseStats();
 
 private:
+    //==============================================================================
     struct CPUFlags
     {
+        CPUFlags();
+
         int numCpus;
         bool hasMMX : 1;
         bool hasSSE : 1;
@@ -161,9 +161,8 @@ private:
         bool has3DNow : 1;
     };
 
-    static CPUFlags cpuFlags;
-
     SystemStats();
+    static const CPUFlags& getCPUFlags();
 
     JUCE_DECLARE_NON_COPYABLE (SystemStats);
 };

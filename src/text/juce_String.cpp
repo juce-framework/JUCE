@@ -215,6 +215,20 @@ private:
         return reinterpret_cast <StringHolder*> (reinterpret_cast <char*> (text.getAddress())
                     - (reinterpret_cast <size_t> (reinterpret_cast <StringHolder*> (1)->text) - 1));
     }
+
+    void compileTimeChecks()
+    {
+        // Let me know if any of these assertions fail on your system!
+       #if JUCE_NATIVE_WCHAR_IS_UTF8
+        static_jassert (sizeof (wchar_t) == 1);
+       #elif JUCE_NATIVE_WCHAR_IS_UTF16
+        static_jassert (sizeof (wchar_t) == 2);
+       #elif JUCE_NATIVE_WCHAR_IS_UTF32
+        static_jassert (sizeof (wchar_t) == 4);
+       #else
+        #error "native wchar_t size is unknown"
+       #endif
+    }
 };
 
 StringHolder StringHolder::empty;

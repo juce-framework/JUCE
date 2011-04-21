@@ -874,6 +874,8 @@ void Component::setAlwaysOnTop (const bool shouldStayOnTop)
 {
     if (shouldStayOnTop != flags.alwaysOnTopFlag)
     {
+        BailOutChecker checker (this);
+
         flags.alwaysOnTopFlag = shouldStayOnTop;
 
         if (isOnDesktop())
@@ -894,10 +896,11 @@ void Component::setAlwaysOnTop (const bool shouldStayOnTop)
             }
         }
 
-        if (shouldStayOnTop)
+        if (shouldStayOnTop && ! checker.shouldBailOut())
             toFront (false);
 
-        internalHierarchyChanged();
+        if (! checker.shouldBailOut())
+            internalHierarchyChanged();
     }
 }
 

@@ -9,6 +9,7 @@
 		BAEB975FAD8A99FA884DC593 = { isa = PBXBuildFile; fileRef = 6B236CD90C0803738D7B5235; };
 		D8DBAED4AB03622A655367C6 = { isa = PBXBuildFile; fileRef = 3DE047A554FB376BE3DA4C65; };
 		1622BC343C98F98AC2AC0459 = { isa = PBXBuildFile; fileRef = AA21728A979A53287A0DEFED; };
+		2F1CDA747BD63008A80CB986 = { isa = PBXBuildFile; fileRef = B9E8EA7A70EBC92D121DD5EF; };
 		D397D8CEF8663F449B4439C0 = { isa = PBXBuildFile; fileRef = 18665A7A93EDBA956B64774E; };
 		9EA4F1C0E2356AB5C07CE95E = { isa = PBXBuildFile; fileRef = E6809DE026C8BEAB082B3DEB; };
 		C37934E8A18A3A82637C1445 = { isa = PBXBuildFile; fileRef = 541D7BED72093B09E01E3FD1; };
@@ -21,6 +22,7 @@
 		6B236CD90C0803738D7B5235 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		3DE047A554FB376BE3DA4C65 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		AA21728A979A53287A0DEFED = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B9E8EA7A70EBC92D121DD5EF = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		18665A7A93EDBA956B64774E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E6809DE026C8BEAB082B3DEB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		541D7BED72093B09E01E3FD1 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -52,6 +54,7 @@
 				6B236CD90C0803738D7B5235,
 				3DE047A554FB376BE3DA4C65,
 				AA21728A979A53287A0DEFED,
+				B9E8EA7A70EBC92D121DD5EF,
 				18665A7A93EDBA956B64774E,
 				E6809DE026C8BEAB082B3DEB,
 				541D7BED72093B09E01E3FD1 ); name = Frameworks; sourceTree = "<group>"; };
@@ -145,6 +148,7 @@
 				BAEB975FAD8A99FA884DC593,
 				D8DBAED4AB03622A655367C6,
 				1622BC343C98F98AC2AC0459,
+				2F1CDA747BD63008A80CB986,
 				D397D8CEF8663F449B4439C0,
 				9EA4F1C0E2356AB5C07CE95E,
 				C37934E8A18A3A82637C1445 ); runOnlyForDeploymentPostprocessing = 0; };

@@ -52,6 +52,11 @@ public:
     */
     explicit Random (int64 seedValue) noexcept;
 
+    /** Creates a Random object using a random seed value.
+        Internally, this calls setSeedRandomly() to randomise the seed.
+    */
+    Random();
+
     /** Destructor. */
     ~Random() noexcept;
 

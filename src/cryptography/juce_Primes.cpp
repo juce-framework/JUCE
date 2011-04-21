@@ -171,7 +171,7 @@ const BigInteger Primes::createProbablePrime (const int bitLength,
     {
         randomSeeds = defaultSeeds;
         numRandomSeeds = numElementsInArray (defaultSeeds);
-        Random r (0);
+        Random r;
 
         for (int j = 10; --j >= 0;)
         {

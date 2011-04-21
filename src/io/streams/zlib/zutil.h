@@ -238,7 +238,7 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #endif
 
 /* Diagnostic functions */
-#ifdef DEBUG
+#if 0
 #  include <stdio.h>
    extern int z_verbose;
    extern void z_error    OF((const char *m));
@@ -255,6 +255,8 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  define Tracevv(x)
 #  define Tracec(c,x)
 #  define Tracecv(c,x)
+#  define z_error(x)
+#  define z_verbose 0
 #endif
 
 

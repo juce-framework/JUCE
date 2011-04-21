@@ -29,10 +29,7 @@
 
 namespace SystemStatsHelpers
 {
-    static int64 highResTimerFrequency = 0;
-    static double highResTimerToMillisecRatio = 0;
-
-  #if JUCE_INTEL
+   #if JUCE_INTEL
     void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
     {
         uint32 la = a, lb = b, lc = c, ld = d;
@@ -48,57 +45,51 @@ namespace SystemStatsHelpers
 
         a = la; b = lb; c = lc; d = ld;
     }
-  #endif
+   #endif
 }
 
 //==============================================================================
-void SystemStats::initialiseStats()
+SystemStats::CPUFlags::CPUFlags()
 {
-    using namespace SystemStatsHelpers;
-    static bool initialised = false;
+   #if JUCE_INTEL
+    uint32 familyModel = 0, extFeatures = 0, features = 0, dummy = 0;
+    SystemStatsHelpers::doCPUID (familyModel, extFeatures, dummy, features, 1);
 
-    if (! initialised)
+    hasMMX   = (features & (1 << 23)) != 0;
+    hasSSE   = (features & (1 << 25)) != 0;
+    hasSSE2  = (features & (1 << 26)) != 0;
+    has3DNow = (extFeatures & (1 << 31)) != 0;
+   #else
+    hasMMX = false;
+    hasSSE = false;
+    hasSSE2 = false;
+    has3DNow = false;
+   #endif
+
+   #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+    numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+   #else
+    numCpus = (int) MPProcessors();
+   #endif
+}
+
+#if JUCE_MAC
+struct SharedAppInitialiser
+{
+    SharedAppInitialiser()
     {
-        initialised = true;
-
-      #if JUCE_MAC
+        JUCE_AUTORELEASEPOOL
         [NSApplication sharedApplication];
-      #endif
-
-      #if JUCE_INTEL
-        uint32 familyModel = 0, extFeatures = 0, features = 0, dummy = 0;
-        doCPUID (familyModel, extFeatures, dummy, features, 1);
-
-        cpuFlags.hasMMX = ((features & (1 << 23)) != 0);
-        cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
-        cpuFlags.hasSSE2 = ((features & (1 << 26)) != 0);
-        cpuFlags.has3DNow = ((extFeatures & (1 << 31)) != 0);
-      #else
-        cpuFlags.hasMMX = false;
-        cpuFlags.hasSSE = false;
-        cpuFlags.hasSSE2 = false;
-        cpuFlags.has3DNow = false;
-      #endif
-
-      #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-        cpuFlags.numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
-      #else
-        cpuFlags.numCpus = (int) MPProcessors();
-      #endif
-
-        mach_timebase_info_data_t timebase;
-        (void) mach_timebase_info (&timebase);
-        highResTimerFrequency = (int64) (1.0e9 * timebase.denom / timebase.numer);
-        highResTimerToMillisecRatio = timebase.numer / (1.0e6 * timebase.denom);
-
-        String s (SystemStats::getJUCEVersion());
 
         rlimit lim;
         getrlimit (RLIMIT_NOFILE, &lim);
         lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
         setrlimit (RLIMIT_NOFILE, &lim);
     }
-}
+};
+
+static SharedAppInitialiser sharedAppInitialiser;
+#endif
 
 //==============================================================================
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
@@ -192,25 +183,37 @@ const String SystemStats::getComputerName()
 }
 
 //==============================================================================
-uint32 juce_millisecondsSinceStartup() noexcept
+class HiResCounterHandler
 {
-    return (uint32) (mach_absolute_time() * SystemStatsHelpers::highResTimerToMillisecRatio);
-}
+public:
+    HiResCounterHandler()
+    {
+        mach_timebase_info_data_t timebase;
+        (void) mach_timebase_info (&timebase);
+        highResTimerFrequency = (int64) (1.0e9 * timebase.denom / timebase.numer);
+        highResTimerToMillisecRatio = timebase.numer / (1.0e6 * timebase.denom);
+    }
 
-double Time::getMillisecondCounterHiRes() noexcept
-{
-    return mach_absolute_time() * SystemStatsHelpers::highResTimerToMillisecRatio;
-}
+    inline uint32 millisecondsSinceStartup() const noexcept
+    {
+        return (uint32) (mach_absolute_time() * highResTimerToMillisecRatio);
+    }
 
-int64 Time::getHighResolutionTicks() noexcept
-{
-    return (int64) mach_absolute_time();
-}
+    inline double getMillisecondCounterHiRes() const noexcept
+    {
+        return mach_absolute_time() * highResTimerToMillisecRatio;
+    }
 
-int64 Time::getHighResolutionTicksPerSecond() noexcept
-{
-    return SystemStatsHelpers::highResTimerFrequency;
-}
+    int64 highResTimerFrequency;
+    double highResTimerToMillisecRatio;
+};
+
+static HiResCounterHandler hiResCounterHandler;
+
+uint32 juce_millisecondsSinceStartup() noexcept         { return hiResCounterHandler.millisecondsSinceStartup(); }
+double Time::getMillisecondCounterHiRes() noexcept      { return hiResCounterHandler.getMillisecondCounterHiRes(); }
+int64  Time::getHighResolutionTicksPerSecond() noexcept { return hiResCounterHandler.highResTimerFrequency; }
+int64  Time::getHighResolutionTicks() noexcept          { return (int64) mach_absolute_time(); }
 
 bool Time::setSystemTimeToThisTime() const
 {

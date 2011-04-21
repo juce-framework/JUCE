@@ -35,11 +35,6 @@ void Logger::outputDebugString (const String& text)
 }
 
 //==============================================================================
-static int64 hiResTicksPerSecond;
-static double hiResTicksScaleFactor;
-
-
-//==============================================================================
 #if JUCE_USE_INTRINSICS || JUCE_64BIT
 
 // CPU info functions using intrinsics...
@@ -107,38 +102,33 @@ const String SystemStats::getCpuVendor()
 
 
 //==============================================================================
-void SystemStats::initialiseStats()
+SystemStats::CPUFlags::CPUFlags()
 {
-    cpuFlags.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
-    cpuFlags.hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
-    cpuFlags.hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
+    hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
+    hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
+    hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
    #ifdef PF_AMD3D_INSTRUCTIONS_AVAILABLE
-    cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_AMD3D_INSTRUCTIONS_AVAILABLE) != 0;
+    has3DNow = IsProcessorFeaturePresent (PF_AMD3D_INSTRUCTIONS_AVAILABLE) != 0;
    #else
-    cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
+    has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
    #endif
 
-    {
-        SYSTEM_INFO systemInfo;
-        GetSystemInfo (&systemInfo);
-        cpuFlags.numCpus = systemInfo.dwNumberOfProcessors;
-    }
-
-    LARGE_INTEGER f;
-    QueryPerformanceFrequency (&f);
-    hiResTicksPerSecond = f.QuadPart;
-    hiResTicksScaleFactor = 1000.0 / hiResTicksPerSecond;
-
-    String s (SystemStats::getJUCEVersion());
-
-    const MMRESULT res = timeBeginPeriod (1);
-    (void) res;
-    jassert (res == TIMERR_NOERROR);
-
-   #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
-    _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-   #endif
+    SYSTEM_INFO systemInfo;
+    GetSystemInfo (&systemInfo);
+    numCpus = systemInfo.dwNumberOfProcessors;
 }
+
+#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+struct DebugFlagsInitialiser
+{
+    DebugFlagsInitialiser()
+    {
+        _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    }
+};
+
+static DebugFlagsInitialiser debugFlagsInitialiser;
+#endif
 
 //==============================================================================
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
@@ -214,35 +204,57 @@ uint32 juce_millisecondsSinceStartup() noexcept
     return (uint32) timeGetTime();
 }
 
-int64 Time::getHighResolutionTicks() noexcept
+//==============================================================================
+class HiResCounterHandler
 {
-    LARGE_INTEGER ticks;
-    QueryPerformanceCounter (&ticks);
+public:
+    HiResCounterHandler()
+        : hiResTicksOffset (0)
+    {
+        const MMRESULT res = timeBeginPeriod (1);
+        (void) res;
+        jassert (res == TIMERR_NOERROR);
 
-    const int64 mainCounterAsHiResTicks = (juce_millisecondsSinceStartup() * hiResTicksPerSecond) / 1000;
-    const int64 newOffset = mainCounterAsHiResTicks - ticks.QuadPart;
+        LARGE_INTEGER f;
+        QueryPerformanceFrequency (&f);
+        hiResTicksPerSecond = f.QuadPart;
+        hiResTicksScaleFactor = 1000.0 / hiResTicksPerSecond;
+    }
 
-    // fix for a very obscure PCI hardware bug that can make the counter
-    // sometimes jump forwards by a few seconds..
-    static int64 hiResTicksOffset = 0;
-    const int64 offsetDrift = abs64 (newOffset - hiResTicksOffset);
+    inline int64 getHighResolutionTicks() noexcept
+    {
+        LARGE_INTEGER ticks;
+        QueryPerformanceCounter (&ticks);
 
-    if (offsetDrift > (hiResTicksPerSecond >> 1))
-        hiResTicksOffset = newOffset;
+        const int64 mainCounterAsHiResTicks = (juce_millisecondsSinceStartup() * hiResTicksPerSecond) / 1000;
+        const int64 newOffset = mainCounterAsHiResTicks - ticks.QuadPart;
 
-    return ticks.QuadPart + hiResTicksOffset;
-}
+        // fix for a very obscure PCI hardware bug that can make the counter
+        // sometimes jump forwards by a few seconds..
+        const int64 offsetDrift = abs64 (newOffset - hiResTicksOffset);
 
-double Time::getMillisecondCounterHiRes() noexcept
-{
-    return getHighResolutionTicks() * hiResTicksScaleFactor;
-}
+        if (offsetDrift > (hiResTicksPerSecond >> 1))
+            hiResTicksOffset = newOffset;
 
-int64 Time::getHighResolutionTicksPerSecond() noexcept
-{
-    return hiResTicksPerSecond;
-}
+        return ticks.QuadPart + hiResTicksOffset;
+    }
 
+    inline double getMillisecondCounterHiRes() noexcept
+    {
+        return getHighResolutionTicks() * hiResTicksScaleFactor;
+    }
+
+    int64 hiResTicksPerSecond, hiResTicksOffset;
+    double hiResTicksScaleFactor;
+};
+
+static HiResCounterHandler hiResCounterHandler;
+
+int64  Time::getHighResolutionTicksPerSecond() noexcept  { return hiResCounterHandler.hiResTicksPerSecond; }
+int64  Time::getHighResolutionTicks() noexcept           { return hiResCounterHandler.getHighResolutionTicks(); }
+double Time::getMillisecondCounterHiRes() noexcept       { return hiResCounterHandler.getMillisecondCounterHiRes(); }
+
+//==============================================================================
 static int64 juce_getClockCycleCounter() noexcept
 {
    #if JUCE_USE_INTRINSICS

@@ -36,6 +36,7 @@
  #import <CoreData/CoreData.h>
  #import <MobileCoreServices/MobileCoreServices.h>
  #import <QuartzCore/QuartzCore.h>
+ #import <CoreText/CoreText.h>
  #include <sys/fcntl.h>
  #if JUCE_OPENGL
   #include <OpenGLES/ES1/gl.h>

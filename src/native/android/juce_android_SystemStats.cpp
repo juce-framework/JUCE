@@ -115,15 +115,15 @@ const String SystemStats::getComputerName()
 }
 
 //==============================================================================
-void SystemStats::initialiseStats()
+SystemStats::CPUFlags::CPUFlags()
 {
     // TODO
-    cpuFlags.hasMMX = false;
-    cpuFlags.hasSSE = false;
-    cpuFlags.hasSSE2 = false;
-    cpuFlags.has3DNow = false;
+    hasMMX = false;
+    hasSSE = false;
+    hasSSE2 = false;
+    has3DNow = false;
 
-    cpuFlags.numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
+    numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
 }
 
 void PlatformUtilities::fpuReset() {}

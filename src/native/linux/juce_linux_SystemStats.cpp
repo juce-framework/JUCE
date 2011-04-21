@@ -126,15 +126,15 @@ const String SystemStats::getComputerName()
 }
 
 //==============================================================================
-void SystemStats::initialiseStats()
+SystemStats::CPUFlags::CPUFlags()
 {
     const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
-    cpuFlags.hasMMX = flags.contains ("mmx");
-    cpuFlags.hasSSE = flags.contains ("sse");
-    cpuFlags.hasSSE2 = flags.contains ("sse2");
-    cpuFlags.has3DNow = flags.contains ("3dnow");
+    hasMMX = flags.contains ("mmx");
+    hasSSE = flags.contains ("sse");
+    hasSSE2 = flags.contains ("sse2");
+    has3DNow = flags.contains ("3dnow");
 
-    cpuFlags.numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
+    numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }
 
 void PlatformUtilities::fpuReset()

@@ -112,7 +112,7 @@ uLong ZEXPORT zlibCompileFlags()
     return flags;
 }*/
 
-#ifdef DEBUG
+#if 0
 
 #  ifndef verbose
 #    define verbose 0

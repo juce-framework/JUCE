@@ -215,7 +215,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see getUnchecked, getFirst, getLast
     */
-    inline ElementType operator[] (const int index) const
+    const ElementType operator[] (const int index) const
     {
         const ScopedLockType lock (getLock());
         return isPositiveAndBelow (index, numUsed) ? data.elements [index]

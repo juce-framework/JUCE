@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "../memory/juce_Atomic.h"
-#include "../maths/juce_Random.h"
 #include "juce_PlatformUtilities.h"
 #include "juce_SystemStats.h"
 #include "../text/juce_LocalisedStrings.h"
@@ -42,11 +41,6 @@ BEGIN_JUCE_NAMESPACE
  #include "../gui/components/lookandfeel/juce_LookAndFeel.h"
 #endif
 
-#if JUCE_DEBUG
- extern void juce_CheckForDanglingStreams();  // (in juce_OutputStream.cpp)
-#endif
-
-
 //==============================================================================
 static bool juceInitialisedNonGUI = false;
 
@@ -56,34 +50,8 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_NonGUI()
     {
         juceInitialisedNonGUI = true;
 
-        JUCE_AUTORELEASEPOOL
-
         DBG (SystemStats::getJUCEVersion());
-        SystemStats::initialiseStats();
-        Random::getSystemRandom().setSeedRandomly(); // (mustn't call this before initialiseStats() because it relies on the time being set up)
     }
-
-    // Some basic tests, to keep an eye on things and make sure these types work ok
-    // on all platforms. Let me know if any of these assertions fail on your system!
-    static_jassert (sizeof (pointer_sized_int) == sizeof (void*));
-    static_jassert (sizeof (int8) == 1);
-    static_jassert (sizeof (uint8) == 1);
-    static_jassert (sizeof (int16) == 2);
-    static_jassert (sizeof (uint16) == 2);
-    static_jassert (sizeof (int32) == 4);
-    static_jassert (sizeof (uint32) == 4);
-    static_jassert (sizeof (int64) == 8);
-    static_jassert (sizeof (uint64) == 8);
-
-    #if JUCE_NATIVE_WCHAR_IS_UTF8
-      static_jassert (sizeof (wchar_t) == 1);
-    #elif JUCE_NATIVE_WCHAR_IS_UTF16
-      static_jassert (sizeof (wchar_t) == 2);
-    #elif JUCE_NATIVE_WCHAR_IS_UTF32
-      static_jassert (sizeof (wchar_t) == 4);
-    #else
-      #error "native wchar_t size is unknown"
-    #endif
 }
 
 JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
@@ -92,14 +60,7 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
     {
         juceInitialisedNonGUI = false;
 
-        JUCE_AUTORELEASEPOOL
-
-        LocalisedStrings::setCurrentMappings (nullptr);
         Thread::stopAllThreads (3000);
-
-      #if JUCE_DEBUG
-        juce_CheckForDanglingStreams();
-      #endif
     }
 }
 

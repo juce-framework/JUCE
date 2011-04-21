@@ -37,6 +37,12 @@ Random::Random (const int64 seedValue) noexcept
 {
 }
 
+Random::Random()
+    : seed (1)
+{
+    setSeedRandomly();
+}
+
 Random::~Random() noexcept
 {
 }
@@ -58,6 +64,12 @@ void Random::setSeedRandomly()
     combineSeed (Time::getHighResolutionTicks());
     combineSeed (Time::getHighResolutionTicksPerSecond());
     combineSeed (Time::currentTimeMillis());
+}
+
+Random& Random::getSystemRandom() noexcept
+{
+    static Random sysRand;
+    return sysRand;
 }
 
 //==============================================================================
@@ -126,13 +138,6 @@ void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numB
 
     while (--numBits >= 0)
         arrayToChange.setBit (startBit + numBits, nextBool());
-}
-
-//==============================================================================
-Random& Random::getSystemRandom() noexcept
-{
-    static Random sysRand (1);
-    return sysRand;
 }
 
 END_JUCE_NAMESPACE

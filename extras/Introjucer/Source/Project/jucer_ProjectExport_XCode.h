@@ -682,7 +682,7 @@ private:
 
         if (iPhone)
         {
-            s.addTokens ("UIKit Foundation CoreGraphics AudioToolbox QuartzCore OpenGLES", false);
+            s.addTokens ("UIKit Foundation CoreGraphics CoreText AudioToolbox QuartzCore OpenGLES", false);
         }
         else
         {
