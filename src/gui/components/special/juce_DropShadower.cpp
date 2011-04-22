@@ -249,21 +249,37 @@ void DropShadower::updateShadows()
 
         if (shadowWindows.size() >= 4)
         {
-            for (int i = shadowWindows.size(); --i >= 0;)
-            {
-                shadowWindows.getUnchecked(i)->setAlwaysOnTop (owner->isAlwaysOnTop());
-                shadowWindows.getUnchecked(i)->setVisible (isOwnerVisible);
-            }
-
             const int x = owner->getX();
             const int y = owner->getY() - shadowEdge;
             const int w = owner->getWidth();
             const int h = owner->getHeight() + shadowEdge + shadowEdge;
 
-            shadowWindows.getUnchecked(0)->setBounds (x - shadowEdge, y, shadowEdge, h);
-            shadowWindows.getUnchecked(1)->setBounds (x + w, y, shadowEdge, h);
-            shadowWindows.getUnchecked(2)->setBounds (x, y, w, shadowEdge);
-            shadowWindows.getUnchecked(3)->setBounds (x, owner->getBottom(), w, shadowEdge);
+            for (int i = shadowWindows.size(); --i >= 0;)
+            {
+                // there seem to be rare situations where the dropshadower may be deleted by
+                // callbacks during this loop, so use a weak ref to watch out for this..
+                WeakReference<Component> sw (shadowWindows[i]);
+
+                if (sw == nullptr)
+                    return;
+
+                sw->setAlwaysOnTop (owner->isAlwaysOnTop());
+
+                if (sw == nullptr)
+                    return;
+
+                switch (i)
+                {
+                    case 0: sw->setBounds (x - shadowEdge, y, shadowEdge, h); break;
+                    case 1: sw->setBounds (x + w, y, shadowEdge, h); break;
+                    case 2: sw->setBounds (x, y, w, shadowEdge); break;
+                    case 3: sw->setBounds (x, owner->getBottom(), w, shadowEdge); break;
+                    default: break;
+                }
+
+                if (sw == nullptr)
+                    return;
+            }
         }
     }
 

@@ -649,8 +649,9 @@ public:
 
 private:
     //==============================================================================
-    friend JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI();
-    static void clearDefaultLookAndFeel() noexcept; // called at shutdown
+    friend class WeakReference<LookAndFeel>;
+    WeakReference<LookAndFeel>::Master weakReferenceMaster;
+    const WeakReference<LookAndFeel>::SharedRef& getWeakReference();
 
     Array <int> colourIds;
     Array <Colour> colours;

@@ -98,9 +98,9 @@ void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSeri
     if (juce_IsRunningInWine())
     {
         // If we're running in Wine, then use fonts that might be available on Linux..
-        defaultSans  = "Bitstream Vera Sans";
-        defaultSerif = "Bitstream Vera Serif";
-        defaultFixed = "Bitstream Vera Sans Mono";
+        defaultSans     = "Bitstream Vera Sans";
+        defaultSerif    = "Bitstream Vera Serif";
+        defaultFixed    = "Bitstream Vera Sans Mono";
     }
     else
     {

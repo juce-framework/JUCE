@@ -187,11 +187,11 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         bi.lpszTitle = title.toWideCharPointer();
         bi.lParam = (LPARAM) &info;
         bi.lpfn = browseCallbackProc;
-      #ifdef BIF_USENEWUI
+       #ifdef BIF_USENEWUI
         bi.ulFlags = BIF_USENEWUI | BIF_VALIDATE;
-      #else
+       #else
         bi.ulFlags = 0x50;
-      #endif
+       #endif
 
         LPITEMIDLIST list = SHBrowseForFolder (&bi);
 

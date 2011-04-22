@@ -133,7 +133,6 @@ MainWindow::~MainWindow()
 
     clearContentComponent();
 
-    LookAndFeel::setDefaultLookAndFeel (0);
     deleteAndZero (oldLook);
 }
 
@@ -371,7 +370,7 @@ void MainWindow::menuItemSelected (int menuItemID,
     }
     else if (menuItemID == 201)
     {
-        LookAndFeel::setDefaultLookAndFeel (0);
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
     else if (menuItemID >= 300 && menuItemID < 400)
     {

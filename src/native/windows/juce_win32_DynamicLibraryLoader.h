@@ -48,12 +48,28 @@
 class JUCE_API  DynamicLibraryLoader
 {
 public:
-    DynamicLibraryLoader (const String& name = String::empty);
-    ~DynamicLibraryLoader();
+    DynamicLibraryLoader (const String& name = String::empty)
+        : libHandle (0)
+    {
+        load (name);
+    }
 
-    bool load (const String& libraryName);
+    ~DynamicLibraryLoader()
+    {
+        load (String::empty);
+    }
 
-    void* findProcAddress (const String& functionName);
+    bool load (const String& name)
+    {
+        FreeLibrary ((HMODULE) libHandle);
+        libHandle = name.isNotEmpty() ? LoadLibrary (name.toWideCharPointer()) : 0;
+        return libHandle != 0;
+    }
+
+    void* findProcAddress (const String& functionName)
+    {
+        return (void*) GetProcAddress ((HMODULE) libHandle, functionName.toUTF8()); // (void* cast is required for mingw)
+    }
 
 private:
     void* libHandle;

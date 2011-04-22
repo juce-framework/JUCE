@@ -27,42 +27,11 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#include "../memory/juce_Atomic.h"
 #include "juce_PlatformUtilities.h"
-#include "juce_SystemStats.h"
-#include "../text/juce_LocalisedStrings.h"
-#include "../io/streams/juce_MemoryOutputStream.h"
-#include "../io/streams/juce_MemoryInputStream.h"
-#include "../threads/juce_Thread.h"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #include "../events/juce_MessageManager.h"
- #include "../gui/components/buttons/juce_TextButton.h"
- #include "../gui/components/lookandfeel/juce_LookAndFeel.h"
 #endif
-
-//==============================================================================
-static bool juceInitialisedNonGUI = false;
-
-JUCE_API void JUCE_CALLTYPE initialiseJuce_NonGUI()
-{
-    if (! juceInitialisedNonGUI)
-    {
-        juceInitialisedNonGUI = true;
-
-        DBG (SystemStats::getJUCEVersion());
-    }
-}
-
-JUCE_API void JUCE_CALLTYPE shutdownJuce_NonGUI()
-{
-    if (juceInitialisedNonGUI)
-    {
-        juceInitialisedNonGUI = false;
-
-        Thread::stopAllThreads (3000);
-    }
-}
 
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
@@ -76,27 +45,7 @@ JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
         juceInitialisedGUI = true;
 
         JUCE_AUTORELEASEPOOL
-        initialiseJuce_NonGUI();
-
         MessageManager::getInstance();
-        LookAndFeel::setDefaultLookAndFeel (nullptr);
-
-      #if JUCE_DEBUG
-        try  // This section is just a safety-net for catching builds without RTTI enabled..
-        {
-            MemoryOutputStream mo;
-            OutputStream* o = &mo;
-
-            // Got an exception here? Then TURN ON RTTI in your compiler settings!!
-            o = dynamic_cast <MemoryOutputStream*> (o);
-            jassert (o != nullptr);
-        }
-        catch (...)
-        {
-            // Ended up here? If so, TURN ON RTTI in your compiler settings!!
-            jassertfalse;
-        }
-      #endif
     }
 }
 
@@ -108,20 +57,17 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
 
         JUCE_AUTORELEASEPOOL
         DeletedAtShutdown::deleteAll();
-        LookAndFeel::clearDefaultLookAndFeel();
         delete MessageManager::getInstance();
-
-        shutdownJuce_NonGUI();
     }
 }
 
 #endif
 
-
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 #include "../utilities/juce_UnitTest.h"
+#include "../memory/juce_Atomic.h"
 
 class AtomicTests  : public UnitTest
 {

@@ -369,19 +369,6 @@ MidiOutput::~MidiOutput()
     delete static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal);
 }
 
-void MidiOutput::reset()
-{
-}
-
-bool MidiOutput::getVolume (float& /*leftVol*/, float& /*rightVol*/)
-{
-    return false;
-}
-
-void MidiOutput::setVolume (float /*leftVol*/, float /*rightVol*/)
-{
-}
-
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     CoreMidiHelpers::MidiPortAndEndpoint* const mpe = static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal);
@@ -568,9 +555,6 @@ void MidiInput::stop()
 #else  // Stubs for iOS...
 
 MidiOutput::~MidiOutput() {}
-void MidiOutput::reset() {}
-bool MidiOutput::getVolume (float& /*leftVol*/, float& /*rightVol*/)        { return false; }
-void MidiOutput::setVolume (float /*leftVol*/, float /*rightVol*/)          {}
 void MidiOutput::sendMessageNow (const MidiMessage& message)                {}
 const StringArray MidiOutput::getDevices()                                  { return StringArray(); }
 MidiOutput* MidiOutput::openDevice (int index)                              { return nullptr; }

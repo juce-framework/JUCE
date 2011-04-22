@@ -14,11 +14,6 @@ APPHEADERS
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    // This object makes sure that Juce is initialised and shut down correctly
-    // for the scope of this function call. Make sure this declaration is the
-    // first statement of this function.
-    const ScopedJuceInitialiser_NonGUI juceSystemInitialiser;
-
 
     // ..your code goes here!
 

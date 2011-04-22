@@ -131,8 +131,7 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 }
 
 //==============================================================================
-class OpenGLComponent::OpenGLComponentRenderThread  : public Thread,
-                                                      public AsyncUpdater
+class OpenGLComponent::OpenGLComponentRenderThread  : public Thread
 {
 public:
     //==============================================================================
@@ -144,24 +143,18 @@ public:
 
     void run()
     {
-        // Context will get created and callback triggered on first render
-        while (owner.renderAndSwapBuffers() && ! threadShouldExit())
-            owner.waitAfterSwapping();
+        while (! threadShouldExit())
+        {
+            const uint32 startOfRendering = Time::getMillisecondCounter();
 
-        owner.releaseOpenGLContext();
+            if (! owner.renderAndSwapBuffers())
+                break;
 
-       #if JUCE_LINUX
-        owner.deleteContext();
-       #else
-        owner.makeCurrentContextInactive();
-       #endif
+            const int elapsed = Time::getMillisecondCounter() - startOfRendering;
+            Thread::sleep (jmax (1, 20 - elapsed));
+        }
 
-        triggerAsyncUpdate();
-    }
-
-    void handleAsyncUpdate()
-    {
-        owner.stopRendering();
+        owner.stopRenderThread();
     }
 
     //==============================================================================
@@ -172,9 +165,9 @@ private:
 };
 
 
-
 //==============================================================================
-class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher
+class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher,
+                                                 public AsyncUpdater
 {
 public:
     //==============================================================================
@@ -199,6 +192,11 @@ public:
     {
         if (! owner->isShowing())
             owner->stopRendering();
+    }
+
+    void handleAsyncUpdate()
+    {
+        owner->stopRendering();
     }
 
     //==============================================================================
@@ -339,17 +337,17 @@ void OpenGLComponent::paint (Graphics&)
 
         if (! renderThread->isThreadRunning())
         {
-            renderThread->handleUpdateNowIfNeeded();    // may still be shutting down as well
+            componentWatcher->handleUpdateNowIfNeeded();    // may still be shutting down as well
 
            #if ! JUCE_LINUX
-            // Except for Linux, create the context etc. first
+            // Except for Linux, create the context first
             const ScopedLock sl (contextLock);
 
             if (makeCurrentContextActive()) // Make active just to create
                 makeCurrentContextInactive();
            #endif
 
-            renderThread->startThread (6);
+            startRenderThread();
         }
 
         // fall-through and update the masking region
@@ -375,6 +373,28 @@ void OpenGLComponent::paint (Graphics&)
     }
 }
 
+void OpenGLComponent::startRenderThread()
+{
+    // If this is overriden, user will provide a thread. The renderThread object will
+    // not be used
+    jassert (renderThread != nullptr);
+
+    renderThread->startThread (6);
+}
+
+void OpenGLComponent::stopRenderThread()
+{
+    releaseOpenGLContext();
+
+   #if JUCE_LINUX
+    deleteContext();
+   #else
+    makeCurrentContextInactive();
+   #endif
+
+    componentWatcher->triggerAsyncUpdate();
+}
+
 bool OpenGLComponent::renderAndSwapBuffers()
 {
     const ScopedLock sl (contextLock);
@@ -392,13 +412,6 @@ bool OpenGLComponent::renderAndSwapBuffers()
     swapBuffers();
 
     return true;
-}
-
-void OpenGLComponent::waitAfterSwapping()
-{
-    jassert (renderThread != nullptr && Thread::getCurrentThread() == renderThread);
-
-    Thread::sleep (20);
 }
 
 void OpenGLComponent::stopRendering()

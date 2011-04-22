@@ -50,19 +50,6 @@ MidiOutput::~MidiOutput()
 {
 }
 
-void MidiOutput::reset()
-{
-}
-
-bool MidiOutput::getVolume (float&, float&)
-{
-    return false;
-}
-
-void MidiOutput::setVolume (float, float)
-{
-}
-
 void MidiOutput::sendMessageNow (const MidiMessage&)
 {
 }

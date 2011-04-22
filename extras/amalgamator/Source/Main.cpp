@@ -367,11 +367,6 @@ static void mungeJuce (const File& juceFolder)
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    // This object makes sure that Juce is initialised and shut down correctly
-    // for the scope of this function call. Make sure this declaration is the
-    // first statement of this function.
-    const ScopedJuceInitialiser_NonGUI juceSystemInitialiser;
-
     std::cout << "\n*** The C++ Amalgamator! Written for Juce - www.rawmaterialsoftware.com\n";
 
     if (argc == 4)
@@ -390,7 +385,7 @@ int main (int argc, char* argv[])
     }
     else
     {
-        std::cout << " Usage: amalgamator TemplateFile TargetFile \"FileToReplaceWildcard\"\n\n";
+        std::cout << " Usage: amalgamator TemplateFile TargetFile \"FileToReplaceWildcard\"\n\n"
                      " amalgamator will run through a C++ file and replace any\n"
                      " #include statements with the contents of the file they refer to.\n"
                      " It'll only do this for files that are within the same parent\n"

@@ -317,7 +317,6 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_CameraDevice_ea35306d.o \
   $(OBJDIR)/juce_win32_Direct2DGraphicsContext_9f1b6be1.o \
   $(OBJDIR)/juce_win32_DirectSound_3462415e.o \
-  $(OBJDIR)/juce_win32_DynamicLibraryLoader_2df0d241.o \
   $(OBJDIR)/juce_win32_FileChooser_18a257.o \
   $(OBJDIR)/juce_win32_Files_f3e9a2ef.o \
   $(OBJDIR)/juce_win32_Fonts_e695d7fc.o \
@@ -1773,11 +1772,6 @@ $(OBJDIR)/juce_win32_Direct2DGraphicsContext_9f1b6be1.o: ../../src/native/window
 $(OBJDIR)/juce_win32_DirectSound_3462415e.o: ../../src/native/windows/juce_win32_DirectSound.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_win32_DirectSound.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_win32_DynamicLibraryLoader_2df0d241.o: ../../src/native/windows/juce_win32_DynamicLibraryLoader.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_win32_DynamicLibraryLoader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_FileChooser_18a257.o: ../../src/native/windows/juce_win32_FileChooser.cpp

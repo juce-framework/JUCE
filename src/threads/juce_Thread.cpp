@@ -40,6 +40,13 @@ public:
     {
     }
 
+    ~RunningThreadsList()
+    {
+        // Some threads are still running! Make sure you stop all your
+        // threads cleanly before your app quits!
+        jassert (threads.size() == 0);
+    }
+
     void add (Thread* const thread)
     {
         const SpinLock::ScopedLockType sl (lock);

@@ -312,7 +312,6 @@
 		79B4C2F1C0CF592ACE8093C0 = { isa = PBXBuildFile; fileRef = 3A37CD82212075940421CE4F; };
 		88A87D28B3809665F28DC16E = { isa = PBXBuildFile; fileRef = 7F3EF672D07ECE3E13AAF267; };
 		BC3C22F5350ED7433D303A04 = { isa = PBXBuildFile; fileRef = 58B70C726D186B4E770300BC; };
-		527CF9C21EB7512B2283E61C = { isa = PBXBuildFile; fileRef = 0CFD86AE0B7CBAE2ADE75C53; };
 		0B41EC4D7839F8CBCB8F9A0D = { isa = PBXBuildFile; fileRef = DCD09B6EF4A4A109DE01F152; };
 		B420CD4B589C08EAFA6E3DA4 = { isa = PBXBuildFile; fileRef = 7527A5E8F4F39581159D3E5B; };
 		D4A05D7CA67B6F0527C9BD81 = { isa = PBXBuildFile; fileRef = 1DBF9DAAD0690CB2CA4E9960; };
@@ -1007,7 +1006,6 @@
 		3A37CD82212075940421CE4F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_CameraDevice.cpp; path = ../../src/native/windows/juce_win32_CameraDevice.cpp; sourceTree = SOURCE_ROOT; };
 		7F3EF672D07ECE3E13AAF267 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_Direct2DGraphicsContext.cpp; path = ../../src/native/windows/juce_win32_Direct2DGraphicsContext.cpp; sourceTree = SOURCE_ROOT; };
 		58B70C726D186B4E770300BC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_DirectSound.cpp; path = ../../src/native/windows/juce_win32_DirectSound.cpp; sourceTree = SOURCE_ROOT; };
-		0CFD86AE0B7CBAE2ADE75C53 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_DynamicLibraryLoader.cpp; path = ../../src/native/windows/juce_win32_DynamicLibraryLoader.cpp; sourceTree = SOURCE_ROOT; };
 		BA66E265749F75DBA86EC3F1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_win32_DynamicLibraryLoader.h; path = ../../src/native/windows/juce_win32_DynamicLibraryLoader.h; sourceTree = SOURCE_ROOT; };
 		DCD09B6EF4A4A109DE01F152 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_FileChooser.cpp; path = ../../src/native/windows/juce_win32_FileChooser.cpp; sourceTree = SOURCE_ROOT; };
 		7527A5E8F4F39581159D3E5B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_win32_Files.cpp; path = ../../src/native/windows/juce_win32_Files.cpp; sourceTree = SOURCE_ROOT; };
@@ -1835,7 +1833,6 @@
 				3A37CD82212075940421CE4F,
 				7F3EF672D07ECE3E13AAF267,
 				58B70C726D186B4E770300BC,
-				0CFD86AE0B7CBAE2ADE75C53,
 				BA66E265749F75DBA86EC3F1,
 				DCD09B6EF4A4A109DE01F152,
 				7527A5E8F4F39581159D3E5B,
@@ -2342,7 +2339,6 @@
 				79B4C2F1C0CF592ACE8093C0,
 				88A87D28B3809665F28DC16E,
 				BC3C22F5350ED7433D303A04,
-				527CF9C21EB7512B2283E61C,
 				0B41EC4D7839F8CBCB8F9A0D,
 				B420CD4B589C08EAFA6E3DA4,
 				D4A05D7CA67B6F0527C9BD81,

@@ -1405,8 +1405,6 @@
                 resource="0" file="src/native/windows/juce_win32_Direct2DGraphicsContext.cpp"/>
           <FILE id="CVNbte6ov" name="juce_win32_DirectSound.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_DirectSound.cpp"/>
-          <FILE id="4w3jvZBLt" name="juce_win32_DynamicLibraryLoader.cpp" compile="1"
-                resource="0" file="src/native/windows/juce_win32_DynamicLibraryLoader.cpp"/>
           <FILE id="WuS4E8Pvz" name="juce_win32_DynamicLibraryLoader.h" compile="0"
                 resource="0" file="src/native/windows/juce_win32_DynamicLibraryLoader.h"/>
           <FILE id="bHW3fjXfz" name="juce_win32_FileChooser.cpp" compile="1"

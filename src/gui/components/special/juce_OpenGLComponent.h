@@ -192,10 +192,10 @@ public:
     {
         openGLDefault = 0,
 
-#if JUCE_IOS
+       #if JUCE_IOS
         openGLES1,  /**< On the iPhone, this selects openGL ES 1.0 */
         openGLES2   /**< On the iPhone, this selects openGL ES 2.0 */
-#endif
+       #endif
     };
 
     /** Creates an OpenGLComponent. */
@@ -279,7 +279,8 @@ public:
     /** This method is called when the component shuts down its OpenGL context.
 
         You can use this callback to delete textures and any other OpenGL objects you
-        created in the component's context.
+        created in the component's context. Be aware: if you are using a render
+        thread, this may be called on the thread.
 
         When this callback happens, the context will have been made current
         using the makeCurrentContextActive() method, so there's no need to call it
@@ -342,13 +343,6 @@ public:
     */
     virtual bool renderAndSwapBuffers();
 
-    /** Wait after swapping before next render pass.
-
-        Used when rendering is running on a thread. The default is 20 millseconds, giving
-        a nominal frame rate of just under 50 fps.
-    */
-    virtual void waitAfterSwapping();
-
     /** This returns a critical section that can be used to lock the current context.
 
         Because the context that is used by this component can change, e.g. when the
@@ -370,6 +364,18 @@ public:
         This can be called back on the same thread that created the context. */
     void deleteContext();
 
+protected:
+    /** Kicks off a thread to start rendering.
+        The default implementation creates and manages an internal thread that tries
+        to render at around 50fps, but this can be overloaded to create a custom thread.
+    */
+    virtual void startRenderThread();
+
+    /** Cleans up the rendering thread.
+        Used to shut down the thread that was started by startRenderThread(). If you've
+        created a custom thread, then you should overload this to clean it up and delete it.
+    */
+    virtual void stopRenderThread();
 
     //==============================================================================
     /** @internal */

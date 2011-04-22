@@ -247,6 +247,22 @@ public:
     ComponentAnimator& getAnimator() noexcept                       { return animator; }
 
     //==============================================================================
+    /** Returns the current default look-and-feel for components which don't have one
+        explicitly set.
+        @see setDefaultLookAndFeel
+    */
+    LookAndFeel& getDefaultLookAndFeel() noexcept;
+
+    /** Changes the default look-and-feel.
+        @param newDefaultLookAndFeel    the new look-and-feel object to use - if this is
+                                        set to nullptr, it will revert to using the system's
+                                        default one. The object passed-in must be deleted by the
+                                        caller when it's no longer needed.
+        @see getDefaultLookAndFeel
+    */
+    void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel);
+
+    //==============================================================================
     /** Returns the number of MouseInputSource objects the system has at its disposal.
         In a traditional single-mouse system, there might be only one object. On a multi-touch
         system, there could be one input source per potential finger.
@@ -364,6 +380,9 @@ private:
     void incrementMouseClickCounter() noexcept;
 
     ScopedPointer<Timer> dragRepeater;
+
+    ScopedPointer<LookAndFeel> defaultLookAndFeel;
+    WeakReference<LookAndFeel> currentLookAndFeel;
 
     Component* kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;

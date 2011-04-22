@@ -85,7 +85,7 @@
         START_JUCE_APPLICATION (MyJUCEApp)
     @endcode
 
-    @see MessageManager, DeletedAtShutdown
+    @see MessageManager
 */
 class JUCE_API  JUCEApplication  : public ApplicationCommandTarget
 {
@@ -220,7 +220,7 @@ public:
         and maybe cancel the quit, you'll need to handle this in the systemRequestedQuit()
         method - see that method's help for more info.
 
-        @see MessageManager, DeletedAtShutdown
+        @see MessageManager
     */
     static void quit();
 

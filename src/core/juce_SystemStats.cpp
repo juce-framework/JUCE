@@ -66,6 +66,18 @@ const String SystemStats::getJUCEVersion()
     #undef JUCE_STRINGIFYVERSION2
 }
 
+#if JUCE_DEBUG
+ struct JuceVersionPrinter
+ {
+     JuceVersionPrinter()
+     {
+         DBG (SystemStats::getJUCEVersion());
+     }
+ };
+
+ static JuceVersionPrinter juceVersionPrinter;
+#endif
+
 //==============================================================================
 #ifdef JUCE_DLL
  void* juce_Malloc (int size)                   { return malloc (size); }

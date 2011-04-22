@@ -156,9 +156,6 @@ namespace LookAndFeelHelpers
 
         return tl;
     }
-
-    LookAndFeel* defaultLF = nullptr;
-    LookAndFeel* currentDefaultLF = nullptr;
 }
 
 //==============================================================================
@@ -313,8 +310,12 @@ LookAndFeel::LookAndFeel()
 
 LookAndFeel::~LookAndFeel()
 {
-    if (this == LookAndFeelHelpers::currentDefaultLF)
-        setDefaultLookAndFeel (nullptr);
+    weakReferenceMaster.clear();
+}
+
+const WeakReference<LookAndFeel>::SharedRef& LookAndFeel::getWeakReference()
+{
+    return weakReferenceMaster (this);
 }
 
 //==============================================================================
@@ -352,47 +353,13 @@ bool LookAndFeel::isColourSpecified (const int colourId) const noexcept
 //==============================================================================
 LookAndFeel& LookAndFeel::getDefaultLookAndFeel() noexcept
 {
-    // if this happens, your app hasn't initialised itself properly.. if you're
-    // trying to hack your own main() function, have a look at
-    // JUCEApplication::initialiseForGUI()
-    jassert (LookAndFeelHelpers::currentDefaultLF != nullptr);
-
-    return *LookAndFeelHelpers::currentDefaultLF;
+    return Desktop::getInstance().getDefaultLookAndFeel();
 }
 
 void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noexcept
 {
-    using namespace LookAndFeelHelpers;
-
-    if (newDefaultLookAndFeel == nullptr)
-    {
-        if (defaultLF == nullptr)
-            defaultLF = new LookAndFeel();
-
-        newDefaultLookAndFeel = defaultLF;
-    }
-
-    LookAndFeelHelpers::currentDefaultLF = newDefaultLookAndFeel;
-
-    for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-    {
-        Component* const c = Desktop::getInstance().getComponent (i);
-
-        if (c != nullptr)
-            c->sendLookAndFeelChange();
-    }
+    Desktop::getInstance().setDefaultLookAndFeel (newDefaultLookAndFeel);
 }
-
-void LookAndFeel::clearDefaultLookAndFeel() noexcept
-{
-    using namespace LookAndFeelHelpers;
-
-    if (currentDefaultLF == defaultLF)
-        currentDefaultLF = nullptr;
-
-    deleteAndZero (defaultLF);
-}
-
 
 //==============================================================================
 const Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)

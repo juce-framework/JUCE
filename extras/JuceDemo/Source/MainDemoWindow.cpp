@@ -43,9 +43,6 @@ public:
 
     ~ContentComp()
     {
-        // (need to do this because the old school look-and-feel object is one of our members,
-        // so will be deleted with us, and would leave a dangling pointer if it's selected)
-        LookAndFeel::setDefaultLookAndFeel (0);
     }
 
     //==============================================================================
@@ -402,7 +399,7 @@ public:
             break;
 
         case setDefaultLookAndFeel:
-            LookAndFeel::setDefaultLookAndFeel (0);
+            LookAndFeel::setDefaultLookAndFeel (nullptr);
             break;
 
         case setOldSchoolLookAndFeel:

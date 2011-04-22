@@ -400,7 +400,6 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_CameraDevice.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Direct2DGraphicsContext.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_DirectSound.cpp"/>
-    <ClCompile Include="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_FileChooser.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Files.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Fonts.cpp"/>

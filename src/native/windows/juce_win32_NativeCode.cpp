@@ -51,6 +51,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_InterProcessLock.h"
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../io/files/juce_FileOutputStream.h"
+#include "../../io/streams/juce_MemoryOutputStream.h"
 #include "../../io/files/juce_NamedPipe.h"
 #include "../../io/files/juce_DirectoryIterator.h"
 #include "../../io/network/juce_URL.h"
@@ -95,7 +96,7 @@ BEGIN_JUCE_NAMESPACE
 #define JUCE_INCLUDED_FILE 1
 
 // Now include the actual code files..
-#include "juce_win32_DynamicLibraryLoader.cpp"
+#include "juce_win32_DynamicLibraryLoader.h"
 #include "juce_win32_SystemStats.cpp"
 #include "juce_win32_Threads.cpp"
 #include "juce_win32_Files.cpp"

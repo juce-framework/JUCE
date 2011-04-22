@@ -926,15 +926,14 @@ public:
         DefineManufacturerNamesAndID (JucePlugin_Manufacturer, JucePlugin_RTASManufacturerCode);
         DefinePlugInNamesAndVersion (createRTASName().toUTF8(), JucePlugin_VersionCode);
 
-#ifndef JUCE_DEBUG
+       #ifndef JUCE_DEBUG
         AddGestalt (pluginGestalt_IsCacheable);
-#endif
+       #endif
     }
 
     ~JucePlugInGroup()
     {
         shutdownJuce_GUI();
-        shutdownJuce_NonGUI();
     }
 
     //==============================================================================
@@ -1021,7 +1020,6 @@ CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
     initialiseMacRTAS();
   #endif
 
-    initialiseJuce_NonGUI();
     return new JucePlugInGroup();
 }
 

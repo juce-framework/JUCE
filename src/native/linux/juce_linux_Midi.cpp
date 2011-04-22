@@ -256,19 +256,6 @@ MidiOutput::~MidiOutput()
     delete static_cast <MidiOutputDevice*> (internal);
 }
 
-void MidiOutput::reset()
-{
-}
-
-bool MidiOutput::getVolume (float& leftVol, float& rightVol)
-{
-    return false;
-}
-
-void MidiOutput::setVolume (float leftVol, float rightVol)
-{
-}
-
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     static_cast <MidiOutputDevice*> (internal)->sendMessageNow (message);
@@ -435,9 +422,6 @@ int MidiOutput::getDefaultDeviceIndex()                             { return 0; 
 MidiOutput* MidiOutput::openDevice (int)                            { return nullptr; }
 MidiOutput* MidiOutput::createNewDevice (const String&)             { return nullptr; }
 MidiOutput::~MidiOutput()   {}
-void MidiOutput::reset()    {}
-bool MidiOutput::getVolume (float&, float&)     { return false; }
-void MidiOutput::setVolume (float, float)       {}
 void MidiOutput::sendMessageNow (const MidiMessage&)    {}
 
 MidiInput::MidiInput (const String& name_) : name (name_), internal (0)  {}

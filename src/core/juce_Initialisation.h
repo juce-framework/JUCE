@@ -37,7 +37,7 @@
     Note that if you're creating a Juce DLL for Windows, you may also need to call the
     PlatformUtilities::setCurrentModuleInstanceHandle() method.
 
-    @see shutdownJuce_GUI(), initialiseJuce_NonGUI()
+    @see shutdownJuce_GUI()
 */
 JUCE_API void JUCE_CALLTYPE  initialiseJuce_GUI();
 
@@ -47,58 +47,9 @@ JUCE_API void JUCE_CALLTYPE  initialiseJuce_GUI();
     than using the START_JUCE_APPLICATION macro, call this function in your shutdown
     code to clean up any juce objects that might be lying around.
 
-    @see initialiseJuce_GUI(), initialiseJuce_NonGUI()
+    @see initialiseJuce_GUI()
 */
 JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
-
-
-//==============================================================================
-/** Initialises the core parts of Juce.
-
-    If you're embedding Juce into either a command-line program, call this function
-    at the start of your main() function to make sure that Juce is initialised correctly.
-
-    Note that if you're creating a Juce DLL for Windows, you may also need to call the
-    PlatformUtilities::setCurrentModuleInstanceHandle() method.
-
-    @see shutdownJuce_NonGUI, initialiseJuce_GUI
-*/
-JUCE_API void JUCE_CALLTYPE  initialiseJuce_NonGUI();
-
-/** Clears up any static data being used by Juce's non-gui core classes.
-
-    If you're embedding Juce into either a command-line program, call this function
-    at the end of your main() function if you want to make sure any Juce objects are
-    cleaned up correctly.
-
-    @see initialiseJuce_NonGUI, initialiseJuce_GUI
-*/
-JUCE_API void JUCE_CALLTYPE  shutdownJuce_NonGUI();
-
-
-//==============================================================================
-/** A utility object that helps you initialise and shutdown Juce correctly
-    using an RAII pattern.
-
-    When an instance of this class is created, it calls initialiseJuce_NonGUI(),
-    and when it's deleted, it calls shutdownJuce_NonGUI(), which lets you easily
-    make sure that these functions are matched correctly.
-
-    This class is particularly handy to use at the beginning of a console app's
-    main() function, because it'll take care of shutting down whenever you return
-    from the main() call.
-
-    @see ScopedJuceInitialiser_GUI
-*/
-class ScopedJuceInitialiser_NonGUI
-{
-public:
-    /** The constructor simply calls initialiseJuce_NonGUI(). */
-    ScopedJuceInitialiser_NonGUI()      { initialiseJuce_NonGUI(); }
-
-    /** The destructor simply calls shutdownJuce_NonGUI(). */
-    ~ScopedJuceInitialiser_NonGUI()     { shutdownJuce_NonGUI(); }
-};
 
 
 //==============================================================================

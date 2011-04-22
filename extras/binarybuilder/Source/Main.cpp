@@ -71,11 +71,6 @@ static bool isHiddenFile (const File& f, const File& root)
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    // This object makes sure that Juce is initialised and shut down correctly
-    // for the scope of this function call. Make sure this declaration is the
-    // first statement of this function.
-    const ScopedJuceInitialiser_NonGUI juceSystemInitialiser;
-
     std::cout << "\n BinaryBuilder! Copyright 2007 by Julian Storer - www.rawmaterialsoftware.com\n\n";
 
     if (argc < 4 || argc > 5)

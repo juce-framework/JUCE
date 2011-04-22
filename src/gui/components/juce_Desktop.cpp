@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "mouse/juce_MouseInputSource.h"
 #include "mouse/juce_MouseListener.h"
 #include "mouse/juce_MouseEvent.h"
+#include "lookandfeel/juce_LookAndFeel.h"
 
 
 //==============================================================================
@@ -164,6 +165,33 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
     }
 
     return nullptr;
+}
+
+//==============================================================================
+LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
+{
+    if (currentLookAndFeel == nullptr)
+    {
+        if (defaultLookAndFeel == nullptr)
+            defaultLookAndFeel = new LookAndFeel();
+
+        currentLookAndFeel = defaultLookAndFeel;
+    }
+
+    return *currentLookAndFeel;
+}
+
+void Desktop::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel)
+{
+    currentLookAndFeel = newDefaultLookAndFeel;
+
+    for (int i = getNumComponents(); --i >= 0;)
+    {
+        Component* const c = getComponent (i);
+
+        if (c != nullptr)
+            c->sendLookAndFeelChange();
+    }
 }
 
 //==============================================================================
