@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	80
+#define JUCE_BUILDNUMBER	81
 
 /** Current Juce version number.
 
@@ -21599,7 +21599,7 @@ class WeakReference
 {
 public:
 	/** Creates a null SafePointer. */
-	WeakReference() noexcept {}
+	inline WeakReference() noexcept {}
 
 	/** Creates a WeakReference that points at the given object. */
 	WeakReference (ObjectType* const object)  : holder (object != nullptr ? object->getWeakReference() : nullptr) {}
