@@ -340,12 +340,12 @@ void ValueTree::SharedObject::setProperty (const Identifier& name, const var& ne
     }
     else
     {
-        var* const existingValue = properties.getVarPointer (name);
+        const var* const existingValue = properties.getVarPointer (name);
 
         if (existingValue != nullptr)
         {
             if (*existingValue != newValue)
-                undoManager->perform (new SetPropertyAction (this, name, newValue, properties [name], false, false));
+                undoManager->perform (new SetPropertyAction (this, name, newValue, *existingValue, false, false));
         }
         else
         {

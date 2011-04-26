@@ -239,13 +239,10 @@ namespace
 
     void registerMouseWheelHook()
     {
-        #ifndef WH_MOUSE_LL
-         #define WH_MOUSE_LL 14
-        #endif
-
         if (mouseHookUsers++ == 0)
-            mouseWheelHook = SetWindowsHookEx (WH_MOUSE_LL, mouseWheelHookCallback,
-                                               (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
+            mouseWheelHook = SetWindowsHookEx (7 /*WH_MOUSE*/, mouseWheelHookCallback,
+                                               (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
+                                               GetCurrentThreadId());
     }
 
     void unregisterMouseWheelHook()

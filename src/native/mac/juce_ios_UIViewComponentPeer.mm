@@ -749,19 +749,18 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             currentTouches.add (touch);
         }
 
-        if ([touch phase] == UITouchPhaseBegan
-            || [touch phase] == UITouchPhaseStationary
-            || [touch phase] == UITouchPhaseMoved)
+        if (isDown)
         {
             currentModifiers = currentModifiers.withoutMouseButtons();
             handleMouseEvent (touchIndex, pos, currentModifiers, time);
             currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         }
-        else if ([touch phase] == UITouchPhaseEnded
-                 || [touch phase] == UITouchPhaseCancelled)
+        else if (isUp)
         {
-            currentModifiers = currentModifiers.withoutMouseButtons();
             currentTouches.remove (touchIndex);
+
+            if (currentTouches.size() == 0)
+                currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
         if (isCancel)

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	81
+#define JUCE_BUILDNUMBER	82
 
 /** Current Juce version number.
 
@@ -8860,11 +8860,16 @@ public:
 	/** If this variant is a method pointer, this invokes it on a target object. */
 	const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
 
-	/** Returns true if this var has the same value as the one supplied. */
+	/** Returns true if this var has the same value as the one supplied.
+		Note that this ignores the type, so a string var "123" and an integer var with the
+		value 123 are considered to be equal.
+		@see equalsWithSameType
+	*/
 	bool equals (const var& other) const noexcept;
 
 	/** Returns true if this var has the same value and type as the one supplied.
-		This differs from equals() because e.g. "0" and 0 will be considered different.
+		This differs from equals() because e.g. "123" and 123 will be considered different.
+		@see equals
 	*/
 	bool equalsWithSameType (const var& other) const noexcept;
 
@@ -8905,7 +8910,9 @@ private:
 	ValueUnion value;
 };
 
+/** Compares the values of two var objects, using the var::equals() comparison. */
 bool operator== (const var& v1, const var& v2) noexcept;
+/** Compares the values of two var objects, using the var::equals() comparison. */
 bool operator!= (const var& v1, const var& v2) noexcept;
 bool operator== (const var& v1, const String& v2);
 bool operator!= (const var& v1, const String& v2);
@@ -22635,6 +22642,11 @@ public:
 	*/
 	const String getThreadName() const				  { return threadName_; }
 
+	/** Changes the name of the caller thread.
+		Different OSes may place different length or content limits on this name.
+	*/
+	static void setCurrentThreadName (const String& newThreadName);
+
 	/** Returns the number of currently-running threads.
 
 		@returns  the number of Thread objects known to be currently running.
@@ -22668,7 +22680,6 @@ private:
 	void closeThreadHandle();
 	void killThread();
 	void threadEntryPoint();
-	static void setCurrentThreadName (const String& name);
 	static bool setThreadPriority (void* handle, int priority);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);

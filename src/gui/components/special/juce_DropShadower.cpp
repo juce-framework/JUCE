@@ -260,21 +260,22 @@ void DropShadower::updateShadows()
                 // callbacks during this loop, so use a weak ref to watch out for this..
                 WeakReference<Component> sw (shadowWindows[i]);
 
-                if (sw == nullptr)
-                    return;
+                if (sw != nullptr)
+                    sw->setAlwaysOnTop (owner->isAlwaysOnTop());
 
-                sw->setAlwaysOnTop (owner->isAlwaysOnTop());
+                if (sw != nullptr)
+                    sw->setVisible (isOwnerVisible);
 
-                if (sw == nullptr)
-                    return;
-
-                switch (i)
+                if (sw != nullptr)
                 {
-                    case 0: sw->setBounds (x - shadowEdge, y, shadowEdge, h); break;
-                    case 1: sw->setBounds (x + w, y, shadowEdge, h); break;
-                    case 2: sw->setBounds (x, y, w, shadowEdge); break;
-                    case 3: sw->setBounds (x, owner->getBottom(), w, shadowEdge); break;
-                    default: break;
+                    switch (i)
+                    {
+                        case 0: sw->setBounds (x - shadowEdge, y, shadowEdge, h); break;
+                        case 1: sw->setBounds (x + w, y, shadowEdge, h); break;
+                        case 2: sw->setBounds (x, y, w, shadowEdge); break;
+                        case 3: sw->setBounds (x, owner->getBottom(), w, shadowEdge); break;
+                        default: break;
+                    }
                 }
 
                 if (sw == nullptr)

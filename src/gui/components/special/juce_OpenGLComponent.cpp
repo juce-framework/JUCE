@@ -295,7 +295,8 @@ bool OpenGLComponent::makeCurrentContextActive()
 
             if (context != nullptr)
             {
-                updateContextPosition();
+                if (! useThread)
+                    updateContextPosition();
 
                 if (context->makeActive())
                     newOpenGLContextCreated();
@@ -416,6 +417,8 @@ bool OpenGLComponent::renderAndSwapBuffers()
 
 void OpenGLComponent::stopRendering()
 {
+    componentWatcher->cancelPendingUpdate();
+
     if (renderThread != nullptr)
         renderThread->stopThread (5000);
 

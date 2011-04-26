@@ -2038,7 +2038,7 @@ void Component::sendLookAndFeelChange()
 
 const Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
-    var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId));
+    const var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId));
 
     if (v != nullptr)
         return Colour ((int) *v);

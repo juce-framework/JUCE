@@ -36,13 +36,13 @@ namespace
                                    const int deviceIndexToOpen)
     {
         snd_seq_t* returnedHandle = nullptr;
-        snd_seq_t* seqHandle;
+        snd_seq_t* seqHandle = nullptr;
 
         if (snd_seq_open (&seqHandle, "default", forInput ? SND_SEQ_OPEN_INPUT
                                                           : SND_SEQ_OPEN_OUTPUT, 0) == 0)
         {
-            snd_seq_system_info_t* systemInfo;
-            snd_seq_client_info_t* clientInfo;
+            snd_seq_system_info_t* systemInfo = nullptr;
+            snd_seq_client_info_t* clientInfo = nullptr;
 
             if (snd_seq_system_info_malloc (&systemInfo) == 0)
             {
@@ -80,19 +80,26 @@ namespace
 
                                             if (sourcePort != -1)
                                             {
-                                                snd_seq_set_client_name (seqHandle,
-                                                                         forInput ? "Juce Midi Input"
-                                                                                  : "Juce Midi Output");
+                                                if (forInput)
+                                                {
+                                                    snd_seq_set_client_name (seqHandle, "Juce Midi Input");
 
-                                                const int portId
-                                                    = snd_seq_create_simple_port (seqHandle,
-                                                                                  forInput ? "Juce Midi In Port"
-                                                                                           : "Juce Midi Out Port",
-                                                                                  forInput ? (SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE)
-                                                                                           : (SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ),
-                                                                                  SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+                                                    const int portId = snd_seq_create_simple_port (seqHandle, "Juce Midi In Port",
+                                                                                                   SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
+                                                                                                   SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
-                                                snd_seq_connect_from (seqHandle, portId, sourceClient, sourcePort);
+                                                    snd_seq_connect_from (seqHandle, portId, sourceClient, sourcePort);
+                                                }
+                                                else
+                                                {
+                                                    snd_seq_set_client_name (seqHandle, "Juce Midi Output");
+
+                                                    const int portId = snd_seq_create_simple_port (seqHandle, "Juce Midi Out Port",
+                                                                                                   SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ,
+                                                                                                   SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+
+                                                    snd_seq_connect_to (seqHandle, portId, sourceClient, sourcePort);
+                                                }
 
                                                 returnedHandle = seqHandle;
                                             }

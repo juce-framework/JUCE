@@ -257,6 +257,11 @@ public:
     */
     const String getThreadName() const                              { return threadName_; }
 
+    /** Changes the name of the caller thread.
+        Different OSes may place different length or content limits on this name.
+    */
+    static void setCurrentThreadName (const String& newThreadName);
+
     //==============================================================================
     /** Returns the number of currently-running threads.
 
@@ -292,7 +297,6 @@ private:
     void closeThreadHandle();
     void killThread();
     void threadEntryPoint();
-    static void setCurrentThreadName (const String& name);
     static bool setThreadPriority (void* handle, int priority);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);

@@ -203,25 +203,23 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
 
    #if JUCE_64BIT
     NSView* hostView = (NSView*) nsWindow;
-    if (hostView != 0)
+    if (hostView != nil)
     {
         // xxx is this necessary, or do the hosts detect a change in the child view and do this automatically?
         [hostView setFrameSize: NSMakeSize ([hostView frame].size.width + (newWidth - component->getWidth()),
                                             [hostView frame].size.height + (newHeight - component->getHeight()))];
     }
    #else
-    NSWindow* hostWindow = (NSWindow*) nsWindow;
-    if (hostWindow != 0)
-    {
-        // Can't use the cocoa NSWindow resizing code, or it messes up in Live.
-        Rect r;
-        GetWindowBounds ((WindowRef) [hostWindow windowRef], kWindowContentRgn, &r);
-        r.right += newWidth - component->getWidth();
-        r.bottom += newHeight - component->getHeight();
-        SetWindowBounds ((WindowRef) [hostWindow windowRef], kWindowContentRgn, &r);
 
-        r.left = r.top = 0;
-        InvalWindowRect ((WindowRef) [hostWindow windowRef], &r);
+    HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                            component->getProperties() ["dummyViewRef"].toString().getHexValue64();
+    if (dummyView != 0)
+    {
+        HIRect frameRect;
+        HIViewGetFrame (dummyView, &frameRect);
+        frameRect.size.width = newWidth;
+        frameRect.size.height = newHeight;
+        HIViewSetFrame (dummyView, &frameRect);
     }
    #endif
 }
