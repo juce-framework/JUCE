@@ -748,7 +748,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             for (touchIndex = 0; touchIndex < currentTouches.size(); ++touchIndex)
                 if (currentTouches.getUnchecked (touchIndex) == nil)
                     break;
-            
+
             currentTouches.set (touchIndex, touch);
         }
 
@@ -766,7 +766,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             for (int j = currentTouches.size(); --j >= 0;)
                 if (currentTouches.getUnchecked(j) != nil)
                     ++totalActiveTouches;
-            
+
             if (totalActiveTouches == 0)
                 isCancel = true;
         }
