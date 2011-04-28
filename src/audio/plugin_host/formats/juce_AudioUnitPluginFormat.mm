@@ -72,10 +72,10 @@ namespace AudioUnitFormatHelpers
 
     const String osTypeToString (OSType type)
     {
-        const juce_wchar s[4] = { (juce_wchar) (((uint32) type) >> 24),
-                                  (juce_wchar) (((uint32) type) >> 16),
-                                  (juce_wchar) (((uint32) type) >> 8),
-                                  (juce_wchar)  ((uint32) type) };
+        const juce_wchar s[4] = { (juce_wchar) ((type >> 24) & 0xff),
+                                  (juce_wchar) ((type >> 16) & 0xff),
+                                  (juce_wchar) ((type >> 8) & 0xff),
+                                  (juce_wchar) (type & 0xff) };
         return String (s, 4);
     }
 

@@ -745,8 +745,11 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
 
         if (touchIndex < 0)
         {
-            touchIndex = currentTouches.size();
-            currentTouches.add (touch);
+            for (touchIndex = 0; touchIndex < currentTouches.size(); ++touchIndex)
+                if (currentTouches.getUnchecked (touchIndex) == nil)
+                    break;
+            
+            currentTouches.set (touchIndex, touch);
         }
 
         if (isDown)
@@ -757,14 +760,22 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         }
         else if (isUp)
         {
-            currentTouches.remove (touchIndex);
+            currentTouches.set (touchIndex, nil);
 
-            if (currentTouches.size() == 0)
-                currentModifiers = currentModifiers.withoutMouseButtons();
+            int totalActiveTouches = 0;
+            for (int j = currentTouches.size(); --j >= 0;)
+                if (currentTouches.getUnchecked(j) != nil)
+                    ++totalActiveTouches;
+            
+            if (totalActiveTouches == 0)
+                isCancel = true;
         }
 
         if (isCancel)
+        {
             currentTouches.clear();
+            currentModifiers = currentModifiers.withoutMouseButtons();
+        }
 
         handleMouseEvent (touchIndex, pos, currentModifiers, time);
     }
