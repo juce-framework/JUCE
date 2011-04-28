@@ -271,7 +271,7 @@ private:
 OpenGLContext* OpenGLComponent::createContext()
 {
     ScopedPointer<WindowedGLContext> c (new WindowedGLContext (*this, preferredPixelFormat,
-                                                               contextToShareListsWith != nullptr ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : 0));
+                                                               contextToShareListsWith != nullptr ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : nil));
 
     return (c->renderContext != nil) ? c.release() : nullptr;
 }

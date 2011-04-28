@@ -198,8 +198,13 @@ public:
        #endif
     };
 
-    /** Creates an OpenGLComponent. */
-    OpenGLComponent (OpenGLType type = openGLDefault);
+    /** Creates an OpenGLComponent.
+        If useBackgroundThread is true, the component will launch a background thread
+        to do the rendering. If false, then renderOpenGL() will be called as part of the
+        normal paint() method.
+    */
+    OpenGLComponent (OpenGLType type = openGLDefault,
+                     bool useBackgroundThread = false);
 
     /** Destructor. */
     ~OpenGLComponent();
@@ -237,14 +242,9 @@ public:
     /** Flips the openGL buffers over. */
     void swapBuffers();
 
-    /** Indicates whether the component should perform its rendering on a background thread.
-        By default, this is set to false, and the renderOpenGL() callback happens on the main
-        UI thread, in response to a repaint. If set to true, then the component will create
-        a background thread which it uses to repeatedly call renderOpenGL().
+    /** Returns true if the component is performing the rendering on a background thread.
+        This property is specified in the constructor.
     */
-    void setUsingDedicatedThread (bool useDedicatedThread) noexcept;
-
-    /** Returns true if the component is performing the rendering on a background thread. */
     bool isUsingDedicatedThread() const noexcept        { return useThread; }
 
     /** This replaces the normal paint() callback - use it to draw your openGL stuff.
@@ -323,7 +323,7 @@ public:
     */
     void makeCurrentContextInactive();
 
-    /** Returns true if this component is the active openGL context for the
+    /** Returns true if this component's context is the active openGL context for the
         current thread.
 
         @see OpenGLContext::isActive
@@ -333,12 +333,7 @@ public:
 
     //==============================================================================
     /** Calls the rendering callback, and swaps the buffers afterwards.
-
         This is called automatically by paint() when the component needs to be rendered.
-
-        It can be overridden if you need to decouple the rendering from the paint callback
-        and render with a custom thread.
-
         Returns true if the operation succeeded.
     */
     virtual bool renderAndSwapBuffers();
@@ -352,6 +347,12 @@ public:
     */
     CriticalSection& getContextLock() noexcept      { return contextLock; }
 
+    /** Delete the context.
+        You should only need to call this if you've written a custom thread - if so, make
+        sure that your thread calls this before it terminates.
+    */
+    void deleteContext();
+
     //==============================================================================
     /** Returns the native handle of an embedded heavyweight window, if there is one.
 
@@ -359,10 +360,6 @@ public:
         the opengl context, on the mac it'll be the NSOpenGLView.
     */
     void* getNativeWindowHandle() const;
-
-    /** Delete the context.
-        This can be called back on the same thread that created the context. */
-    void deleteContext();
 
 protected:
     /** Kicks off a thread to start rendering.
@@ -398,12 +395,15 @@ private:
 
     CriticalSection contextLock;
     OpenGLPixelFormat preferredPixelFormat;
-    bool needToUpdateViewport, useThread;
+    bool needToUpdateViewport, needToDeleteContext, threadStarted;
+    const bool useThread;
 
     OpenGLContext* createContext();
+    void updateContext();
     void updateContextPosition();
+    void stopBackgroundThread();
+    void recreateContextAsync();
     void internalRepaint (int x, int y, int w, int h);
-    void stopRendering();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };

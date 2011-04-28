@@ -210,22 +210,9 @@ namespace
 
     LRESULT CALLBACK mouseWheelHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
     {
-        #ifndef WM_MOUSEWHEEL
-         #define WM_MOUSEWHEEL 0x20a
-
-         struct MSLLHOOKSTRUCT
-         {
-            POINT pt;
-            DWORD mouseData;
-            DWORD flags;
-            DWORD time;
-            ULONG_PTR dwExtraInfo;
-         };
-        #endif
-
         if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
         {
-            const MSLLHOOKSTRUCT& hs = *(MSLLHOOKSTRUCT*) lParam;
+            const MOUSEHOOKSTRUCTEX& hs = *(MOUSEHOOKSTRUCTEX*) lParam;
 
             Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x,
                                                                                         hs.pt.y));
@@ -240,7 +227,7 @@ namespace
     void registerMouseWheelHook()
     {
         if (mouseHookUsers++ == 0)
-            mouseWheelHook = SetWindowsHookEx (7 /*WH_MOUSE*/, mouseWheelHookCallback,
+            mouseWheelHook = SetWindowsHookEx (WH_MOUSE, mouseWheelHookCallback,
                                                (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
                                                GetCurrentThreadId());
     }

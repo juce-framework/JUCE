@@ -72,11 +72,10 @@ namespace AudioUnitFormatHelpers
 
     const String osTypeToString (OSType type)
     {
-        char s[4];
-        s[0] = (char) (((uint32) type) >> 24);
-        s[1] = (char) (((uint32) type) >> 16);
-        s[2] = (char) (((uint32) type) >> 8);
-        s[3] = (char) ((uint32) type);
+        const juce_wchar s[4] = { (juce_wchar) (((uint32) type) >> 24),
+                                  (juce_wchar) (((uint32) type) >> 16),
+                                  (juce_wchar) (((uint32) type) >> 8),
+                                  (juce_wchar)  ((uint32) type) };
         return String (s, 4);
     }
 
@@ -87,7 +86,7 @@ namespace AudioUnitFormatHelpers
         return (((OSType) (unsigned char) s[0]) << 24)
              | (((OSType) (unsigned char) s[1]) << 16)
              | (((OSType) (unsigned char) s[2]) << 8)
-             | ((OSType) (unsigned char) s[3]);
+             |  ((OSType) (unsigned char) s[3]);
     }
 
     static const char* auIdentifierPrefix = "AudioUnit:";

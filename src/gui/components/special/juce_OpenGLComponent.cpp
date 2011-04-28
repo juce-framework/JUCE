@@ -131,10 +131,44 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 }
 
 //==============================================================================
-class OpenGLComponent::OpenGLComponentRenderThread  : public Thread
+class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher
 {
 public:
     //==============================================================================
+    OpenGLComponentWatcher (OpenGLComponent* const owner_)
+        : ComponentMovementWatcher (owner_),
+          owner (owner_)
+    {
+    }
+
+    //==============================================================================
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
+    {
+        owner->updateContextPosition();
+    }
+
+    void componentPeerChanged()
+    {
+        owner->recreateContextAsync();
+    }
+
+    void componentVisibilityChanged()
+    {
+        if (! owner->isShowing())
+            owner->stopBackgroundThread();
+    }
+
+    //==============================================================================
+private:
+    OpenGLComponent* const owner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponentWatcher);
+};
+
+//==============================================================================
+class OpenGLComponent::OpenGLComponentRenderThread  : public Thread
+{
+public:
     OpenGLComponentRenderThread (OpenGLComponent& owner_)
         : Thread ("OpenGL Render"),
           owner (owner_)
@@ -154,64 +188,46 @@ public:
             Thread::sleep (jmax (1, 20 - elapsed));
         }
 
-        owner.stopRenderThread();
+       #if JUCE_LINUX
+        owner.deleteContext();
+       #endif
     }
 
-    //==============================================================================
 private:
     OpenGLComponent& owner;
 
     JUCE_DECLARE_NON_COPYABLE (OpenGLComponentRenderThread);
 };
 
-
-//==============================================================================
-class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher,
-                                                 public AsyncUpdater
+void OpenGLComponent::startRenderThread()
 {
-public:
-    //==============================================================================
-    OpenGLComponentWatcher (OpenGLComponent* const owner_)
-        : ComponentMovementWatcher (owner_),
-          owner (owner_)
+    if (renderThread == nullptr)
+        renderThread = new OpenGLComponentRenderThread (*this);
+
+    renderThread->startThread (6);
+}
+
+void OpenGLComponent::stopRenderThread()
+{
+    if (renderThread != nullptr)
     {
+        renderThread->stopThread (5000);
+        renderThread = nullptr;
     }
 
-    //==============================================================================
-    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
-    {
-        owner->updateContextPosition();
-    }
-
-    void componentPeerChanged()
-    {
-        owner->stopRendering();
-    }
-
-    void componentVisibilityChanged()
-    {
-        if (! owner->isShowing())
-            owner->stopRendering();
-    }
-
-    void handleAsyncUpdate()
-    {
-        owner->stopRendering();
-    }
-
-    //==============================================================================
-private:
-    OpenGLComponent* const owner;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponentWatcher);
-};
+   #if ! JUCE_LINUX
+    deleteContext();
+   #endif
+}
 
 //==============================================================================
-OpenGLComponent::OpenGLComponent (const OpenGLType type_)
+OpenGLComponent::OpenGLComponent (const OpenGLType type_, const bool useBackgroundThread)
     : type (type_),
       contextToShareListsWith (nullptr),
       needToUpdateViewport (true),
-      useThread (false)
+      needToDeleteContext (false),
+      threadStarted (false),
+      useThread (useBackgroundThread)
 {
     setOpaque (true);
     componentWatcher = new OpenGLComponentWatcher (this);
@@ -219,15 +235,115 @@ OpenGLComponent::OpenGLComponent (const OpenGLType type_)
 
 OpenGLComponent::~OpenGLComponent()
 {
-    stopRendering();
-    renderThread = nullptr;
+    stopBackgroundThread();
     componentWatcher = nullptr;
+}
+
+const OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
+{
+    OpenGLPixelFormat pf;
+
+    const ScopedLock sl (contextLock);
+    if (context != nullptr)
+        pf = context->getPixelFormat();
+
+    return pf;
+}
+
+void OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
+{
+    if (! (preferredPixelFormat == formatToUse))
+    {
+        const ScopedLock sl (contextLock);
+        preferredPixelFormat = formatToUse;
+        recreateContextAsync();
+    }
+}
+
+void OpenGLComponent::shareWith (OpenGLContext* c)
+{
+    if (contextToShareListsWith != c)
+    {
+        const ScopedLock sl (contextLock);
+        contextToShareListsWith = c;
+        recreateContextAsync();
+    }
+}
+
+void OpenGLComponent::recreateContextAsync()
+{
+    const ScopedLock sl (contextLock);
+    needToDeleteContext = true;
+    repaint();
+}
+
+bool OpenGLComponent::makeCurrentContextActive()
+{
+    return context != nullptr && context->makeActive();
+}
+
+void OpenGLComponent::makeCurrentContextInactive()
+{
+    if (context != nullptr)
+        context->makeInactive();
+}
+
+bool OpenGLComponent::isActiveContext() const noexcept
+{
+    return context != nullptr && context->isActive();
+}
+
+void OpenGLComponent::swapBuffers()
+{
+    if (context != nullptr)
+        context->swapBuffers();
+}
+
+void OpenGLComponent::updateContext()
+{
+    if (needToDeleteContext)
+        deleteContext();
+
+    if (context == nullptr)
+    {
+        const ScopedLock sl (contextLock);
+
+        if (context == nullptr)
+        {
+            context = createContext();
+
+            if (context != nullptr)
+            {
+               #if JUCE_LINUX
+                if (! useThread)
+               #endif
+                    updateContextPosition();
+
+                if (context->makeActive())
+                {
+                    newOpenGLContextCreated();
+                    context->makeInactive();
+                }
+            }
+        }
+    }
 }
 
 void OpenGLComponent::deleteContext()
 {
     const ScopedLock sl (contextLock);
-    context = nullptr;
+    if (context != nullptr)
+    {
+        if (context->makeActive())
+        {
+            releaseOpenGLContext();
+            context->makeInactive();
+        }
+
+        context = nullptr;
+    }
+
+    needToDeleteContext = false;
 }
 
 void OpenGLComponent::updateContextPosition()
@@ -252,120 +368,41 @@ void OpenGLComponent::updateContextPosition()
     }
 }
 
-const OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
+void OpenGLComponent::stopBackgroundThread()
 {
-    OpenGLPixelFormat pf;
-
-    const ScopedLock sl (contextLock);
-    if (context != nullptr)
-        pf = context->getPixelFormat();
-
-    return pf;
-}
-
-void OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
-{
-    if (! (preferredPixelFormat == formatToUse))
+    if (threadStarted)
     {
-        const ScopedLock sl (contextLock);
-        deleteContext();
-        preferredPixelFormat = formatToUse;
+        stopRenderThread();
+        threadStarted = false;
     }
-}
-
-void OpenGLComponent::shareWith (OpenGLContext* c)
-{
-    if (contextToShareListsWith != c)
-    {
-        const ScopedLock sl (contextLock);
-        deleteContext();
-        contextToShareListsWith = c;
-    }
-}
-
-bool OpenGLComponent::makeCurrentContextActive()
-{
-    if (context == nullptr)
-    {
-        const ScopedLock sl (contextLock);
-
-        if (isShowing() && getTopLevelComponent()->getPeer() != nullptr)
-        {
-            context = createContext();
-
-            if (context != nullptr)
-            {
-                if (! useThread)
-                    updateContextPosition();
-
-                if (context->makeActive())
-                    newOpenGLContextCreated();
-            }
-        }
-    }
-
-    return context != nullptr && context->makeActive();
-}
-
-void OpenGLComponent::makeCurrentContextInactive()
-{
-    if (context != nullptr)
-        context->makeInactive();
-}
-
-bool OpenGLComponent::isActiveContext() const noexcept
-{
-    return context != nullptr && context->isActive();
-}
-
-void OpenGLComponent::swapBuffers()
-{
-    if (context != nullptr)
-        context->swapBuffers();
-}
-
-void OpenGLComponent::setUsingDedicatedThread (bool useDedicatedThread) noexcept
-{
-    useThread = useDedicatedThread;
 }
 
 void OpenGLComponent::paint (Graphics&)
 {
+    ComponentPeer* const peer = getPeer();
+
     if (useThread)
     {
-        if (renderThread == nullptr)
-            renderThread = new OpenGLComponentRenderThread (*this);
-
-        if (! renderThread->isThreadRunning())
+        if (peer != nullptr && isShowing())
         {
-            componentWatcher->handleUpdateNowIfNeeded();    // may still be shutting down as well
-
            #if ! JUCE_LINUX
-            // Except for Linux, create the context first
-            const ScopedLock sl (contextLock);
-
-            if (makeCurrentContextActive()) // Make active just to create
-                makeCurrentContextInactive();
+            updateContext();
            #endif
 
-            startRenderThread();
+            if (! threadStarted)
+            {
+                threadStarted = true;
+                startRenderThread();
+            }
         }
-
-        // fall-through and update the masking region
     }
     else
     {
-        if (renderThread != nullptr)
-        {
-            stopRendering();
-            renderThread = nullptr;
-        }
+        updateContext();
 
         if (! renderAndSwapBuffers())
             return;
     }
-
-    ComponentPeer* const peer = getPeer();
 
     if (peer != nullptr)
     {
@@ -374,62 +411,30 @@ void OpenGLComponent::paint (Graphics&)
     }
 }
 
-void OpenGLComponent::startRenderThread()
-{
-    // If this is overriden, user will provide a thread. The renderThread object will
-    // not be used
-    jassert (renderThread != nullptr);
-
-    renderThread->startThread (6);
-}
-
-void OpenGLComponent::stopRenderThread()
-{
-    releaseOpenGLContext();
-
-   #if JUCE_LINUX
-    deleteContext();
-   #else
-    makeCurrentContextInactive();
-   #endif
-
-    componentWatcher->triggerAsyncUpdate();
-}
-
 bool OpenGLComponent::renderAndSwapBuffers()
 {
     const ScopedLock sl (contextLock);
 
-    if (! makeCurrentContextActive())
-        return false;
+   #if JUCE_LINUX
+    updateContext();
+   #endif
 
-    if (needToUpdateViewport)
+    if (context != nullptr)
     {
-        needToUpdateViewport = false;
-        juce_glViewport (getWidth(), getHeight());
-    }
+        if (! makeCurrentContextActive())
+            return false;
 
-    renderOpenGL();
-    swapBuffers();
+        if (needToUpdateViewport)
+        {
+            needToUpdateViewport = false;
+            juce_glViewport (getWidth(), getHeight());
+        }
+
+        renderOpenGL();
+        swapBuffers();
+    }
 
     return true;
-}
-
-void OpenGLComponent::stopRendering()
-{
-    componentWatcher->cancelPendingUpdate();
-
-    if (renderThread != nullptr)
-        renderThread->stopThread (5000);
-
-    if (context != nullptr && makeCurrentContextActive())
-    {
-        // On Linux, when threaded, context will have already been cleared
-        const ScopedLock sl (contextLock);
-
-        releaseOpenGLContext();
-        deleteContext();
-    }
 }
 
 void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
