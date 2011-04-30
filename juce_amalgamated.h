@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	84
+#define JUCE_BUILDNUMBER	85
 
 /** Current Juce version number.
 
@@ -58912,7 +58912,7 @@ public:
 private:
 
 	WeakReference<Component> component;
-	ComponentPeer* lastPeer;
+	uint32 lastPeerID;
 	Array <Component*> registeredParentComps;
 	bool reentrant, wasShowing;
 	Rectangle<int> lastBounds;
@@ -64972,6 +64972,11 @@ public:
 	*/
 	int getStyleFlags() const noexcept			  { return styleFlags; }
 
+	/** Returns a unique ID for this peer.
+		Each peer that is created is given a different ID.
+	*/
+	uint32 getUniqueID() const noexcept			 { return uniqueID; }
+
 	/** Returns the raw handle to whatever kind of window is being used.
 
 		On windows, this is probably a HWND, on the mac, it's likely to be a WindowRef,
@@ -65231,6 +65236,7 @@ private:
 
 	WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
 	Component* lastDragAndDropCompUnderMouse;
+	const uint32 uniqueID;
 	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
 	friend class Component;

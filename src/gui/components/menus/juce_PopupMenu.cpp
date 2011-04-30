@@ -297,7 +297,9 @@ public:
         }
 
         resizeToBestWindowPos();
-        addToDesktop (ComponentPeer::windowIsTemporary | getLookAndFeel().getMenuWindowFlags());
+        addToDesktop (ComponentPeer::windowIsTemporary
+                       | ComponentPeer::windowIgnoresKeyPresses
+                       | getLookAndFeel().getMenuWindowFlags());
 
         getActiveWindows().add (this);
         Desktop::getInstance().addGlobalMouseListener (this);
@@ -849,7 +851,7 @@ private:
 
         for (int col = 0; col < numColumns; ++col)
         {
-            int i, colW = 50, colH = 0;
+            int i, colW = standardItemHeight, colH = 0;
 
             const int numChildren = jmin (items.size() - childNum,
                                           (items.size() + numColumns - 1) / numColumns);

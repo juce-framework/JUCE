@@ -593,13 +593,13 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
     {
         WeakReference<Component> safePointer (this);
 
-#if JUCE_LINUX
+       #if JUCE_LINUX
         // it's wise to give the component a non-zero size before
         // putting it on the desktop, as X windows get confused by this, and
         // a (1, 1) minimum size is enforced here.
         setSize (jmax (1, getWidth()),
                  jmax (1, getHeight()));
-#endif
+       #endif
 
         const Point<int> topLeft (getScreenPosition());
 

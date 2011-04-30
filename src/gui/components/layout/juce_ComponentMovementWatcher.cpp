@@ -29,12 +29,13 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ComponentMovementWatcher.h"
 #include "../../../containers/juce_ScopedValueSetter.h"
+#include "../windows/juce_ComponentPeer.h"
 
 
 //==============================================================================
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
     : component (component_),
-      lastPeer (nullptr),
+      lastPeerID (0),
       reentrant (false),
       wasShowing (component_->isShowing())
 {
@@ -61,15 +62,16 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
         const ScopedValueSetter<bool> setter (reentrant, true);
 
         ComponentPeer* const peer = component->getPeer();
+        const uint32 peerID = peer != nullptr ? peer->getUniqueID() : 0;
 
-        if (peer != lastPeer)
+        if (peerID != lastPeerID)
         {
             componentPeerChanged();
 
             if (component == nullptr)
                 return;
 
-            lastPeer = peer;
+            lastPeerID = peerID;
         }
 
         unregister();

@@ -965,8 +965,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (const uint32 nodeI
     return nullptr;
 }
 
-AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const newProcessor,
-                                                         uint32 nodeId)
+AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const newProcessor, uint32 nodeId)
 {
     if (newProcessor == nullptr)
     {
@@ -983,9 +982,10 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
         // you can't add a node with an id that already exists in the graph..
         jassert (getNodeForId (nodeId) == nullptr);
         removeNode (nodeId);
-    }
 
-    lastNodeId = nodeId;
+        if (nodeId > lastNodeId)
+            lastNodeId = nodeId;
+    }
 
     Node* const n = new Node (nodeId, newProcessor);
     nodes.add (n);

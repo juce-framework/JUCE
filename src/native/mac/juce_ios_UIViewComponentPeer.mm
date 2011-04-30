@@ -735,6 +735,9 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
     {
         UITouch* touch = [touches objectAtIndex: i];
 
+        if ([touch phase] == UITouchPhaseStationary)
+            continue;
+
         CGPoint p = [touch locationInView: view];
         const Point<int> pos ((int) p.x, (int) p.y);
         juce_lastMousePos = pos + getScreenPosition();
@@ -752,14 +755,27 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             currentTouches.set (touchIndex, touch);
         }
 
+        ModifierKeys modsToSend (currentModifiers);
+
         if (isDown)
         {
-            currentModifiers = currentModifiers.withoutMouseButtons();
-            handleMouseEvent (touchIndex, pos, currentModifiers, time);
+            if ([touch phase] != UITouchPhaseBegan)
+                continue;
+
             currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = currentModifiers;
+
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(), time);
+            if (! isValidPeer (this)) // (in case this component was deleted by the event)
+                return;
         }
         else if (isUp)
         {
+            if (! ([touch phase] == UITouchPhaseEnded || [touch phase] == UITouchPhaseCancelled))
+                continue;
+
+            modsToSend = modsToSend.withoutMouseButtons();
             currentTouches.set (touchIndex, nil);
 
             int totalActiveTouches = 0;
@@ -777,7 +793,16 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        handleMouseEvent (touchIndex, pos, currentModifiers, time);
+        handleMouseEvent (touchIndex, pos, modsToSend, time);
+        if (! isValidPeer (this)) // (in case this component was deleted by the event)
+            return;
+
+        if (isUp || isCancel)
+        {
+            handleMouseEvent (touchIndex, Point<int> (-1, -1), currentModifiers, time);
+            if (! isValidPeer (this))
+                return;
+        }
     }
 }
 
@@ -808,7 +833,7 @@ void UIViewComponentPeer::viewFocusLoss()
 
 void juce_HandleProcessFocusChange()
 {
-    if (UIViewComponentPeer::isValidPeer (currentlyFocusedPeer))
+    if (ComponentPeer::isValidPeer (currentlyFocusedPeer))
     {
         if (Process::isForegroundProcess())
         {

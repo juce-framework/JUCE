@@ -103,6 +103,10 @@ public:
     */
     int getStyleFlags() const noexcept                      { return styleFlags; }
 
+    /** Returns a unique ID for this peer.
+        Each peer that is created is given a different ID.
+    */
+    uint32 getUniqueID() const noexcept                     { return uniqueID; }
 
     //==============================================================================
     /** Returns the raw handle to whatever kind of window is being used.
@@ -374,6 +378,7 @@ private:
     //==============================================================================
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
+    const uint32 uniqueID;
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
     friend class Component;

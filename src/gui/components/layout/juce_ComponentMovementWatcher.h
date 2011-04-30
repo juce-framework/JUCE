@@ -80,7 +80,7 @@ public:
 private:
     //==============================================================================
     WeakReference<Component> component;
-    ComponentPeer* lastPeer;
+    uint32 lastPeerID;
     Array <Component*> registeredParentComps;
     bool reentrant, wasShowing;
     Rectangle<int> lastBounds;
