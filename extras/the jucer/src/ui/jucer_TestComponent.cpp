@@ -150,10 +150,10 @@ void TestComponent::paint (Graphics& g)
         g.drawLine (0.0f, (float) getHeight(), (float) getWidth(), 0.0f);
 
         g.setFont (14.0f);
-        g.drawText (T("Jucer Component"),
+        g.drawText ("Jucer Component",
                     0, 0, getWidth(), getHeight() / 2,
                     Justification::centred, true);
-        g.drawText (T("(no file loaded)"),
+        g.drawText ("(no file loaded)",
                     0, getHeight() / 2, getWidth(), getHeight() / 2,
                     Justification::centred, true);
     }
@@ -177,7 +177,7 @@ void TestComponent::showInDialogBox (JucerDocument& document)
 
     TestComponent testComp (0, document.createCopy(), true);
 
-    DialogWindow::showModalDialog (T("Testing: ") + document.getClassName(),
+    DialogWindow::showModalDialog ("Testing: " + document.getClassName(),
                                    &testComp, 0,
                                    Colours::azure,
                                    true, true);

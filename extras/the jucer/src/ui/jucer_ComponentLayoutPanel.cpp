@@ -84,9 +84,6 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     JucerDocument& document;
     ComponentLayout& layout;

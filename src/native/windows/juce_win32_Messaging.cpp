@@ -41,10 +41,6 @@ HWND juce_messageWindowHandle = 0;
 
 extern long improbableWindowNumber; // defined in windowing.cpp
 
-#ifndef WM_APPCOMMAND
- #define WM_APPCOMMAND 0x0319
-#endif
-
 
 //==============================================================================
 static LRESULT CALLBACK juce_MessageWndProc (HWND h,

@@ -154,24 +154,24 @@ void StrokeType::restoreFromString (const String& s)
 
     if (s.isNotEmpty())
     {
-        const float thickness = (float) s.upToFirstOccurrenceOf (T(","), false, false).getDoubleValue();
+        const float thickness = (float) s.upToFirstOccurrenceOf (",", false, false).getDoubleValue();
 
         PathStrokeType::JointStyle joint = stroke.getJointStyle();
 
-        if (s.containsIgnoreCase (T("miter")))
+        if (s.containsIgnoreCase ("miter"))
             joint = PathStrokeType::mitered;
-        else if (s.containsIgnoreCase (T("curve")))
+        else if (s.containsIgnoreCase ("curve"))
             joint = PathStrokeType::curved;
-        else if (s.containsIgnoreCase (T("bevel")))
+        else if (s.containsIgnoreCase ("bevel"))
             joint = PathStrokeType::beveled;
 
         PathStrokeType::EndCapStyle end = stroke.getEndStyle();
 
-        if (s.containsIgnoreCase (T("butt")))
+        if (s.containsIgnoreCase ("butt"))
             end = PathStrokeType::butt;
-        else if (s.containsIgnoreCase (T("square")))
+        else if (s.containsIgnoreCase ("square"))
             end = PathStrokeType::square;
-        else if (s.containsIgnoreCase (T("round")))
+        else if (s.containsIgnoreCase ("round"))
             end = PathStrokeType::rounded;
 
         stroke = PathStrokeType (thickness, joint, end);

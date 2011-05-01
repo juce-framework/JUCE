@@ -94,7 +94,6 @@ public:
     void parentHierarchyChanged();
 
     int borderThickness;
-    juce_UseDebuggingNewOperator
 
 protected:
     PaintRoutine* const owner;

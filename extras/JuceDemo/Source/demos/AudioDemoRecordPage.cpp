@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  13 Nov 2009 3:52:50 pm
+  Creation date:  1 May 2011 12:08:25pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -146,7 +146,7 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
     addAndMakeVisible (explanationLabel = new Label (String::empty,
-                                                     T("This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder.")));
+                                                     L"This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder."));
     explanationLabel->setFont (Font (15.0000f, Font::plain));
     explanationLabel->setJustificationType (Justification::topLeft);
     explanationLabel->setEditable (false, false, false);
@@ -154,16 +154,17 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
     explanationLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (recordButton = new TextButton (String::empty));
-    recordButton->setButtonText (T("Record"));
+    recordButton->setButtonText (L"Record");
     recordButton->addListener (this);
     recordButton->setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
-    recordButton->setColour (TextButton::textColourOffId, Colours::black);
+    recordButton->setColour (TextButton::textColourOnId, Colours::black);
 
 
     //[UserPreSize]
     //[/UserPreSize]
 
     setSize (600, 400);
+
 
     //[Constructor] You can add your own custom stuff here..
     recorder = new AudioRecorder();
@@ -183,6 +184,7 @@ AudioDemoRecordPage::~AudioDemoRecordPage()
     deleteAndZero (liveAudioDisplayComp);
     deleteAndZero (explanationLabel);
     deleteAndZero (recordButton);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]

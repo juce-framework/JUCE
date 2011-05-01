@@ -46,10 +46,10 @@ public:
           document (document_),
           allowChoiceOfNoResource (allowChoiceOfNoResource_)
     {
-        choices.add (T("-- create a new image resource -- "));
+        choices.add ("-- create a new image resource -- ");
         choices.add (String::empty);
         if (allowChoiceOfNoResource_)
-            choices.add (T("<< none >>"));
+            choices.add ("<< none >>");
         choices.addArray (document_.getResources().getResourceNames());
 
         document_.addChangeListener (this);
@@ -63,10 +63,10 @@ public:
           document (*element_->getDocument()),
           allowChoiceOfNoResource (allowChoiceOfNoResource_)
     {
-        choices.add (T("-- create a new image resource -- "));
+        choices.add ("-- create a new image resource -- ");
         choices.add (String::empty);
         if (allowChoiceOfNoResource_)
-            choices.add (T("<< none >>"));
+            choices.add ("<< none >>");
 
         choices.addArray (document.getResources().getResourceNames());
 
@@ -89,8 +89,8 @@ public:
         if (newIndex == 0)
         {
             String resource (document.getResources()
-                     .browseForResource (T("Select an image file to add as a resource"),
-                                         T("*.jpg;*.jpeg;*.png;*.gif;*.svg"),
+                     .browseForResource ("Select an image file to add as a resource",
+                                         "*.jpg;*.jpeg;*.png;*.gif;*.svg",
                                          File::nonexistent,
                                          String::empty));
 
@@ -99,7 +99,7 @@ public:
         }
         else
         {
-            if (choices[newIndex] == T("<< none >>") && allowChoiceOfNoResource)
+            if (choices[newIndex] == "<< none >>" && allowChoiceOfNoResource)
                 setResource (String::empty);
             else
                 setResource (choices [newIndex]);

@@ -56,9 +56,6 @@ public:
     void sortOrderChanged (int newSortColumnId, bool isForwards);
     void selectedRowsChanged (int lastRowSelected);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     JucerDocument& document;
     TableListBox* listBox;

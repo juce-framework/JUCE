@@ -65,9 +65,6 @@ public:
     // reloads any test comps that need to do so
     static void reloadAll();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     JucerDocument* ownerDocument;
     JucerDocument* loadedDocument;

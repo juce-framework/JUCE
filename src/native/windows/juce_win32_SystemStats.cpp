@@ -35,6 +35,12 @@ void Logger::outputDebugString (const String& text)
 }
 
 //==============================================================================
+#ifdef JUCE_DLL
+ JUCE_API void* juceDLL_malloc (size_t sz)    { return ::malloc (sz); }
+ JUCE_API void  juceDLL_free (void* block)    { ::free (block); }
+#endif
+
+//==============================================================================
 #if JUCE_USE_INTRINSICS || JUCE_64BIT
 
 // CPU info functions using intrinsics...

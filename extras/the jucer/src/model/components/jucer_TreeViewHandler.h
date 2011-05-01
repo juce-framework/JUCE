@@ -52,8 +52,8 @@ public:
         TreeView* const t = dynamic_cast <TreeView*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
 
-        e->setAttribute (T("rootVisible"), t->isRootItemVisible());
-        e->setAttribute (T("openByDefault"), t->areItemsOpenByDefault());
+        e->setAttribute ("rootVisible", t->isRootItemVisible());
+        e->setAttribute ("openByDefault", t->areItemsOpenByDefault());
 
         return e;
     }
@@ -66,8 +66,8 @@ public:
         TreeView defaultTreeView;
         TreeView* const t = dynamic_cast <TreeView*> (comp);
 
-        t->setRootItemVisible (xml.getBoolAttribute (T("rootVisible"), defaultTreeView.isRootItemVisible()));
-        t->setDefaultOpenness (xml.getBoolAttribute (T("openByDefault"), defaultTreeView.areItemsOpenByDefault()));
+        t->setRootItemVisible (xml.getBoolAttribute ("rootVisible", defaultTreeView.isRootItemVisible()));
+        t->setDefaultOpenness (xml.getBoolAttribute ("openByDefault", defaultTreeView.areItemsOpenByDefault()));
 
         return true;
     }
@@ -114,18 +114,15 @@ public:
         code.constructorCode << "\n";
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class DemoTreeView : public TreeView
     {
     public:
         DemoTreeView()
-            : TreeView (T("new treeview"))
+            : TreeView ("new treeview")
         {
-            setRootItem (new DemoTreeViewItem (T("Demo root node"), 4));
+            setRootItem (new DemoTreeViewItem ("Demo root node", 4));
         }
 
         ~DemoTreeView()
@@ -174,14 +171,14 @@ private:
     {
     public:
         TreeViewRootItemProperty (TreeView* comp, JucerDocument& document)
-            : ComponentBooleanProperty <TreeView> (T("show root item"), T("Root item visible"), T("Root item visible"), comp, document)
+            : ComponentBooleanProperty <TreeView> ("show root item", "Root item visible", "Root item visible", comp, document)
         {
         }
 
         void setState (bool newState)
         {
             document.perform (new TreeviewRootChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change TreeView root item"));
+                              "Change TreeView root item");
         }
 
         bool getState() const
@@ -225,16 +222,16 @@ private:
     {
     public:
         TreeViewRootOpennessProperty (TreeView* comp, JucerDocument& document)
-            : ComponentChoiceProperty <TreeView> (T("default openness"), comp, document)
+            : ComponentChoiceProperty <TreeView> ("default openness", comp, document)
         {
-            choices.add (T("Items open by default"));
-            choices.add (T("Items closed by default"));
+            choices.add ("Items open by default");
+            choices.add ("Items closed by default");
         }
 
         void setIndex (int newIndex)
         {
             document.perform (new TreeviewOpennessChangeAction (component, *document.getComponentLayout(), newIndex == 0),
-                              T("Change TreeView openness"));
+                              "Change TreeView openness");
         }
 
         int getIndex() const

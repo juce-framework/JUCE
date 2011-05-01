@@ -50,15 +50,15 @@ public:
         return new TestComponent (doc, 0, false);
     }
 
-    const String getXmlTagName() const throw()                  { return T("JUCERCOMP"); }
+    const String getXmlTagName() const throw()                  { return "JUCERCOMP"; }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
         TestComponent* const tc = dynamic_cast <TestComponent*> (comp);
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
-        e->setAttribute (T("sourceFile"), tc->getFilename());
-        e->setAttribute (T("constructorParams"), tc->getConstructorParams());
+        e->setAttribute ("sourceFile", tc->getFilename());
+        e->setAttribute ("constructorParams", tc->getConstructorParams());
 
         return e;
     }
@@ -70,8 +70,8 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        tc->setFilename (xml.getStringAttribute (T("sourceFile"), tc->getFilename()));
-        tc->setConstructorParams (xml.getStringAttribute (T("constructorParams")));
+        tc->setFilename (xml.getStringAttribute ("sourceFile", tc->getFilename()));
+        tc->setConstructorParams (xml.getStringAttribute ("constructorParams"));
 
         return true;
     }
@@ -86,7 +86,7 @@ public:
             jucerCompClassName = tc->getDocument()->getClassName();
 
         if (jucerCompClassName.isEmpty())
-            jucerCompClassName = T("Component");
+            jucerCompClassName = "Component";
 
         return jucerCompClassName;
     }
@@ -114,7 +114,7 @@ public:
 
         TestComponent* const tc = dynamic_cast <TestComponent*> (component);
 
-        code.includeFilesH.add (tc->getFilename().replace (T(".cpp"), T(".h")));
+        code.includeFilesH.add (tc->getFilename().replace (".cpp", ".h"));
     }
 
     //==============================================================================
@@ -153,21 +153,17 @@ public:
 
         if (comp != 0)
             document.perform (new JucerCompFileChangeAction (comp, *document.getComponentLayout(), newFilename),
-                              T("Change Jucer component file"));
+                              "Change Jucer component file");
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
-
     //==============================================================================
     class JucerCompFileProperty  : public FilePropertyComponent,
                                    public ChangeListener
     {
     public:
         JucerCompFileProperty (TestComponent* const component_, JucerDocument& document_)
-            : FilePropertyComponent (T("Jucer file"), false, true),
+            : FilePropertyComponent ("Jucer file", false, true),
               component (component_),
               document (document_)
         {
@@ -207,7 +203,7 @@ private:
     {
     public:
         JucerCompOpenDocProperty (TestComponent* const component_)
-            : ButtonPropertyComponent (T("edit"), false),
+            : ButtonPropertyComponent ("edit", false),
               component (component_)
         {
         }
@@ -223,7 +219,7 @@ private:
 
         const String getButtonText() const
         {
-            return T("Open file for editing");
+            return "Open file for editing";
         }
 
     private:
@@ -235,14 +231,14 @@ private:
     {
     public:
         ConstructorParamsProperty (TestComponent* comp, JucerDocument& document)
-            : ComponentTextProperty <TestComponent> (T("constructor params"), 512, false, comp, document)
+            : ComponentTextProperty <TestComponent> ("constructor params", 512, false, comp, document)
         {
         }
 
         void setText (const String& newText)
         {
             document.perform (new ConstructorParamChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change Viewport content constructor params"));
+                              "Change Viewport content constructor params");
         }
 
         const String getText() const

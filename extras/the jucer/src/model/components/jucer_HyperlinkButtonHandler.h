@@ -45,7 +45,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        HyperlinkButton* hb = new HyperlinkButton (T("new hyperlink"), URL (T("http://www.rawmaterialsoftware.com/juce")));
+        HyperlinkButton* hb = new HyperlinkButton ("new hyperlink", URL ("http://www.rawmaterialsoftware.com/juce"));
 
         setNeedsButtonListener (hb, false);
         return hb;
@@ -68,7 +68,7 @@ public:
 
         XmlElement* const e = ButtonHandler::createXmlFor (comp, layout);
 
-        e->setAttribute (T("url"), hb->getURL().toString (false));
+        e->setAttribute ("url", hb->getURL().toString (false));
 
         return e;
     }
@@ -80,7 +80,7 @@ public:
         if (! ButtonHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        hb->setURL (URL (xml.getStringAttribute (T("url"), hb->getURL().toString (false))));
+        hb->setURL (URL (xml.getStringAttribute ("url", hb->getURL().toString (false))));
 
         return true;
     }
@@ -103,22 +103,20 @@ public:
                              << '\n';
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class HyperlinkURLProperty  : public ComponentTextProperty <HyperlinkButton>
     {
     public:
         HyperlinkURLProperty (HyperlinkButton* component_, JucerDocument& document_)
-            : ComponentTextProperty <HyperlinkButton> (T("URL"), 512, false, component_, document_)
+            : ComponentTextProperty <HyperlinkButton> ("URL", 512, false, component_, document_)
         {}
 
         //==============================================================================
         void setText (const String& newText)
         {
             document.perform (new HyperlinkURLChangeAction (component, *document.getComponentLayout(), URL (newText)),
-                              T("Change hyperlink URL"));
+                              "Change hyperlink URL");
         }
 
         const String getText() const

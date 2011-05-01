@@ -39,14 +39,14 @@ class ElementFillModeProperty   : public ChoicePropertyComponent,
 {
 public:
     ElementFillModeProperty (ColouredElement* const owner_, const bool isForStroke_)
-        : ChoicePropertyComponent (T("fill mode")),
+        : ChoicePropertyComponent ("fill mode"),
           owner (owner_),
           isForStroke (isForStroke_)
     {
-        choices.add (T("Solid Colour"));
-        choices.add (T("Linear Gradient"));
-        choices.add (T("Radial Gradient"));
-        choices.add (T("Image Brush"));
+        choices.add ("Solid Colour");
+        choices.add ("Linear Gradient");
+        choices.add ("Radial Gradient");
+        choices.add ("Image Brush");
 
         owner->getDocument()->addChangeListener (this);
     }
@@ -282,7 +282,7 @@ class EnableStrokeProperty : public BooleanPropertyComponent,
 {
 public:
     EnableStrokeProperty (ColouredElement* const owner_)
-        : BooleanPropertyComponent (T("outline"), T("Outline enabled"), T("No outline")),
+        : BooleanPropertyComponent ("outline", "Outline enabled", "No outline"),
           owner (owner_)
     {
         owner->getDocument()->addChangeListener (this);
@@ -309,7 +309,7 @@ class StrokeThicknessProperty   : public SliderPropertyComponent,
 {
 public:
     StrokeThicknessProperty (ColouredElement* const owner_)
-        : SliderPropertyComponent (T("outline thickness"), 0.1, 200.0, 0.1, 0.3),
+        : SliderPropertyComponent ("outline thickness", 0.1, 200.0, 0.1, 0.3),
           owner (owner_)
     {
         owner->getDocument()->addChangeListener (this);
@@ -344,12 +344,12 @@ class StrokeJointProperty : public ChoicePropertyComponent,
 {
 public:
     StrokeJointProperty (ColouredElement* const owner_)
-        : ChoicePropertyComponent (T("joint style")),
+        : ChoicePropertyComponent ("joint style"),
           owner (owner_)
     {
-        choices.add (T("mitered"));
-        choices.add (T("curved"));
-        choices.add (T("beveled"));
+        choices.add ("mitered");
+        choices.add ("curved");
+        choices.add ("beveled");
 
         owner->getDocument()->addChangeListener (this);
     }
@@ -403,12 +403,12 @@ class StrokeEndCapProperty   : public ChoicePropertyComponent,
 {
 public:
     StrokeEndCapProperty (ColouredElement* const owner_)
-        : ChoicePropertyComponent (T("end-cap style")),
+        : ChoicePropertyComponent ("end-cap style"),
           owner (owner_)
     {
-        choices.add (T("butt"));
-        choices.add (T("square"));
-        choices.add (T("round"));
+        choices.add ("butt");
+        choices.add ("square");
+        choices.add ("round");
 
         owner->getDocument()->addChangeListener (this);
     }
@@ -461,8 +461,8 @@ class ImageBrushResourceProperty    : public ImageResourceProperty <ColouredElem
 {
 public:
     ImageBrushResourceProperty (ColouredElement* const element_, const bool isForStroke_)
-        : ImageResourceProperty <ColouredElement> (element_, isForStroke_ ? T("stroke image")
-                                                                          : T("fill image")),
+        : ImageResourceProperty <ColouredElement> (element_, isForStroke_ ? "stroke image"
+                                                                          : "fill image"),
           isForStroke (isForStroke_)
     {
     }
@@ -554,7 +554,7 @@ class ImageBrushOpacityProperty  : public SliderPropertyComponent,
 {
 public:
     ImageBrushOpacityProperty (ColouredElement* const element_, const bool isForStroke_)
-        : SliderPropertyComponent (T("opacity"), 0.0, 1.0, 0.001),
+        : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
           element (element_),
           isForStroke (isForStroke_)
     {
@@ -635,23 +635,23 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
     switch (getFillType().mode)
     {
     case JucerFillType::solidColour:
-        properties.add (new ElementFillColourProperty (T("colour"), this, ElementFillColourProperty::solidColour, false));
+        properties.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
         break;
 
     case JucerFillType::linearGradient:
     case JucerFillType::radialGradient:
-        properties.add (new ElementFillColourProperty (T("colour 1"), this, ElementFillColourProperty::gradientColour1, false));
-        properties.add (new ElementFillPositionProperty (this, T("x1"), PositionPropertyBase::componentX, true, false));
-        properties.add (new ElementFillPositionProperty (this, T("y1"), PositionPropertyBase::componentY, true, false));
-        properties.add (new ElementFillColourProperty (T("colour 2"), this, ElementFillColourProperty::gradientColour2, false));
-        properties.add (new ElementFillPositionProperty (this, T("x2"), PositionPropertyBase::componentX, false, false));
-        properties.add (new ElementFillPositionProperty (this, T("y2"), PositionPropertyBase::componentY, false, false));
+        properties.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, false));
+        properties.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, false));
+        properties.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, false));
+        properties.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, false));
+        properties.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, false));
+        properties.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, false));
         break;
 
     case JucerFillType::imageBrush:
         properties.add (new ImageBrushResourceProperty (this, false));
-        properties.add (new ImageBrushPositionProperty (this, T("anchor x"), PositionPropertyBase::componentX, false));
-        properties.add (new ImageBrushPositionProperty (this, T("anchor y"), PositionPropertyBase::componentY, false));
+        properties.add (new ImageBrushPositionProperty (this, "anchor x", PositionPropertyBase::componentX, false));
+        properties.add (new ImageBrushPositionProperty (this, "anchor y", PositionPropertyBase::componentY, false));
         properties.add (new ImageBrushOpacityProperty (this, false));
         break;
 
@@ -679,23 +679,23 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
             switch (getStrokeType().fill.mode)
             {
             case JucerFillType::solidColour:
-                properties.add (new ElementFillColourProperty (T("colour"), this, ElementFillColourProperty::solidColour, true));
+                properties.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, true));
                 break;
 
             case JucerFillType::linearGradient:
             case JucerFillType::radialGradient:
-                properties.add (new ElementFillColourProperty (T("colour 1"), this, ElementFillColourProperty::gradientColour1, true));
-                properties.add (new ElementFillPositionProperty (this, T("x1"), PositionPropertyBase::componentX, true, true));
-                properties.add (new ElementFillPositionProperty (this, T("y1"), PositionPropertyBase::componentY, true, true));
-                properties.add (new ElementFillColourProperty (T("colour 2"), this, ElementFillColourProperty::gradientColour2, true));
-                properties.add (new ElementFillPositionProperty (this, T("x2"), PositionPropertyBase::componentX, false, true));
-                properties.add (new ElementFillPositionProperty (this, T("y2"), PositionPropertyBase::componentY, false, true));
+                properties.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, true));
+                properties.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, true));
+                properties.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, true));
+                properties.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, true));
+                properties.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, true));
+                properties.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, true));
                 break;
 
             case JucerFillType::imageBrush:
                 properties.add (new ImageBrushResourceProperty (this, true));
-                properties.add (new ImageBrushPositionProperty (this, T("stroke anchor x"), PositionPropertyBase::componentX, true));
-                properties.add (new ImageBrushPositionProperty (this, T("stroke anchor y"), PositionPropertyBase::componentY, true));
+                properties.add (new ImageBrushPositionProperty (this, "stroke anchor x", PositionPropertyBase::componentX, true));
+                properties.add (new ImageBrushPositionProperty (this, "stroke anchor y", PositionPropertyBase::componentY, true));
                 properties.add (new ImageBrushOpacityProperty (this, true));
                 break;
 
@@ -748,7 +748,7 @@ void ColouredElement::setFillType (const JucerFillType& newType, const bool undo
         if (undoable)
         {
             perform (new FillTypeChangeAction (this, newType),
-                     T("Change fill type"));
+                     "Change fill type");
         }
         else
         {
@@ -809,7 +809,7 @@ void ColouredElement::enableStroke (bool enable, const bool undoable)
         if (undoable)
         {
             perform (new StrokeEnableChangeAction (this, enable),
-                     T("Change stroke mode"));
+                     "Change stroke mode");
         }
         else
         {
@@ -864,7 +864,7 @@ void ColouredElement::setStrokeType (const PathStrokeType& newType, const bool u
         if (undoable)
         {
             perform (new StrokeTypeChangeAction (this, newType),
-                     T("Change stroke type"));
+                     "Change stroke type");
         }
         else
         {
@@ -910,7 +910,7 @@ void ColouredElement::setStrokeFill (const JucerFillType& newType, const bool un
         if (undoable)
         {
             perform (new StrokeFillTypeChangeAction (this, newType),
-                     T("Change stroke fill type"));
+                     "Change stroke fill type");
         }
         else
         {
@@ -998,24 +998,24 @@ void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,
 //==============================================================================
 void ColouredElement::addColourAttributes (XmlElement* const e) const
 {
-    e->setAttribute (T("fill"), fillType.toString());
-    e->setAttribute (T("hasStroke"), isStrokePresent);
+    e->setAttribute ("fill", fillType.toString());
+    e->setAttribute ("hasStroke", isStrokePresent);
 
     if (isStrokePresent && showOutline)
     {
-        e->setAttribute (T("stroke"), strokeType.toString());
-        e->setAttribute (T("strokeColour"), strokeType.fill.toString());
+        e->setAttribute ("stroke", strokeType.toString());
+        e->setAttribute ("strokeColour", strokeType.fill.toString());
     }
 }
 
 bool ColouredElement::loadColourAttributes (const XmlElement& xml)
 {
-    fillType.restoreFromString (xml.getStringAttribute (T("fill"), String::empty));
+    fillType.restoreFromString (xml.getStringAttribute ("fill", String::empty));
 
-    isStrokePresent = showOutline && xml.getBoolAttribute (T("hasStroke"), false);
+    isStrokePresent = showOutline && xml.getBoolAttribute ("hasStroke", false);
 
-    strokeType.restoreFromString (xml.getStringAttribute (T("stroke"), String::empty));
-    strokeType.fill.restoreFromString (xml.getStringAttribute (T("strokeColour"), String::empty));
+    strokeType.restoreFromString (xml.getStringAttribute ("stroke", String::empty));
+    strokeType.fill.restoreFromString (xml.getStringAttribute ("strokeColour", String::empty));
 
     return true;
 }

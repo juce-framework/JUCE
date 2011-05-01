@@ -3,13 +3,13 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  14 Apr 2008 11:28:13 am
+  Creation date:  1 May 2011 12:12:59pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.11
+  Jucer version: 1.12
 
   ------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ MainComponent::MainComponent ()
       quitButton (0)
 {
     addAndMakeVisible (helloWorldLabel = new Label (String::empty,
-                                                    T("Hello World!")));
+                                                    L"Hello World!"));
     helloWorldLabel->setFont (Font (40.0000f, Font::bold));
     helloWorldLabel->setJustificationType (Justification::centred);
     helloWorldLabel->setEditable (false, false, false);
@@ -43,7 +43,7 @@ MainComponent::MainComponent ()
     helloWorldLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (quitButton = new TextButton (String::empty));
-    quitButton->setButtonText (T("Quit"));
+    quitButton->setButtonText (L"Quit");
     quitButton->addListener (this);
 
 
@@ -51,6 +51,7 @@ MainComponent::MainComponent ()
     //[/UserPreSize]
 
     setSize (600, 300);
+
 
     //[Constructor] You can add your own custom stuff here..
     //[/Constructor]
@@ -63,6 +64,7 @@ MainComponent::~MainComponent()
 
     deleteAndZero (helloWorldLabel);
     deleteAndZero (quitButton);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]

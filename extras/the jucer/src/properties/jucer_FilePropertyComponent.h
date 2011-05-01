@@ -38,7 +38,7 @@ public:
     FilePropertyComponent (const String& name,
                           const bool isDirectory,
                           const bool allowEditingOfFilename,
-                          const String& fileBrowserWildcard = T("*"));
+                          const String& fileBrowserWildcard = "*");
 
     ~FilePropertyComponent();
 
@@ -50,9 +50,6 @@ public:
     //==============================================================================
     void refresh();
     void filenameComponentChanged (FilenameComponent*);
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     FilenameComponent* filenameComp;

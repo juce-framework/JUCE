@@ -102,7 +102,7 @@ public:
                                                       colourId,
                                                       newColour,
                                                       false),
-                              T("Change colour"));
+                              "Change colour");
         }
     }
 
@@ -115,11 +115,8 @@ public:
                                                   colourId,
                                                   Colours::black,
                                                   true),
-                          T("Reset colour"));
+                          "Reset colour");
     }
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     const int colourId;

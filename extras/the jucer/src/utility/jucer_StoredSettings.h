@@ -52,9 +52,6 @@ public:
 
     Array <Colour> swatchColours;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     PropertiesFile* props;
 };

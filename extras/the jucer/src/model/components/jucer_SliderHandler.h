@@ -50,7 +50,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new Slider (T("new slider"));
+        return new Slider ("new slider");
     }
 
     //==============================================================================
@@ -59,15 +59,15 @@ public:
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
 
         Slider* const s = dynamic_cast <Slider*> (comp);
-        e->setAttribute (T("min"), s->getMinimum());
-        e->setAttribute (T("max"), s->getMaximum());
-        e->setAttribute (T("int"), s->getInterval());
-        e->setAttribute (T("style"), sliderStyleToString (s->getSliderStyle()));
-        e->setAttribute (T("textBoxPos"), textBoxPosToString (s->getTextBoxPosition()));
-        e->setAttribute (T("textBoxEditable"), s->isTextBoxEditable());
-        e->setAttribute (T("textBoxWidth"), s->getTextBoxWidth());
-        e->setAttribute (T("textBoxHeight"), s->getTextBoxHeight());
-        e->setAttribute (T("skewFactor"), s->getSkewFactor());
+        e->setAttribute ("min", s->getMinimum());
+        e->setAttribute ("max", s->getMaximum());
+        e->setAttribute ("int", s->getInterval());
+        e->setAttribute ("style", sliderStyleToString (s->getSliderStyle()));
+        e->setAttribute ("textBoxPos", textBoxPosToString (s->getTextBoxPosition()));
+        e->setAttribute ("textBoxEditable", s->isTextBoxEditable());
+        e->setAttribute ("textBoxWidth", s->getTextBoxWidth());
+        e->setAttribute ("textBoxHeight", s->getTextBoxHeight());
+        e->setAttribute ("skewFactor", s->getSkewFactor());
 
         return e;
     }
@@ -79,18 +79,18 @@ public:
 
         Slider* const s = dynamic_cast <Slider*> (comp);
 
-        s->setRange (xml.getDoubleAttribute (T("min"), 0.0),
-                     xml.getDoubleAttribute (T("max"), 10.0),
-                     xml.getDoubleAttribute (T("int"), 0.0));
+        s->setRange (xml.getDoubleAttribute ("min", 0.0),
+                     xml.getDoubleAttribute ("max", 10.0),
+                     xml.getDoubleAttribute ("int", 0.0));
 
-        s->setSliderStyle (sliderStringToStyle (xml.getStringAttribute (T("style"), T("LinearHorizontal"))));
+        s->setSliderStyle (sliderStringToStyle (xml.getStringAttribute ("style", "LinearHorizontal")));
 
-        s->setTextBoxStyle (stringToTextBoxPos (xml.getStringAttribute (T("textBoxPos"), T("TextBoxLeft"))),
-                            ! xml.getBoolAttribute (T("textBoxEditable"), true),
-                            xml.getIntAttribute (T("textBoxWidth"), 80),
-                            xml.getIntAttribute (T("textBoxHeight"), 20));
+        s->setTextBoxStyle (stringToTextBoxPos (xml.getStringAttribute ("textBoxPos", "TextBoxLeft")),
+                            ! xml.getBoolAttribute ("textBoxEditable", true),
+                            xml.getIntAttribute ("textBoxWidth", 80),
+                            xml.getIntAttribute ("textBoxHeight", 20));
 
-        s->setSkewFactor (xml.getDoubleAttribute (T("skewFactor"), 1.0));
+        s->setSkewFactor (xml.getDoubleAttribute ("skewFactor", 1.0));
 
         return true;
     }
@@ -135,9 +135,9 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode (T("public SliderListener"),
-                                                     T("void"),
-                                                     T("sliderValueChanged (Slider* sliderThatWasMoved)"),
+            String& callback = code.getCallbackCode ("public SliderListener",
+                                                     "void",
+                                                     "sliderValueChanged (Slider* sliderThatWasMoved)",
                                                      true);
 
             if (callback.isNotEmpty())
@@ -160,9 +160,9 @@ public:
         Slider* s = dynamic_cast <Slider*> (component);
         jassert (s != 0);
 
-        properties.add (new SliderRangeProperty (s, document, T("minimum"), 0));
-        properties.add (new SliderRangeProperty (s, document, T("maximum"), 1));
-        properties.add (new SliderRangeProperty (s, document, T("interval"), 2));
+        properties.add (new SliderRangeProperty (s, document, "minimum", 0));
+        properties.add (new SliderRangeProperty (s, document, "maximum", 1));
+        properties.add (new SliderRangeProperty (s, document, "interval", 2));
         properties.add (new SliderTypeProperty (s, document));
         properties.add (new SliderTextboxProperty (s, document));
         properties.add (new SliderTextboxEditableProperty (s, document));
@@ -178,15 +178,13 @@ public:
         return true; //xxx should be a property
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class SliderTypeProperty  : public ComponentChoiceProperty <Slider>
     {
     public:
         SliderTypeProperty (Slider* slider, JucerDocument& document)
-            : ComponentChoiceProperty <Slider> (T("type"), slider, document)
+            : ComponentChoiceProperty <Slider> ("type", slider, document)
         {
             choices.add ("Linear Horizontal");
             choices.add ("Linear Vertical");
@@ -218,7 +216,7 @@ private:
             if (newIndex >= 0 && newIndex < numElementsInArray (types))
             {
                 document.perform (new SliderTypeChangeAction (component, *document.getComponentLayout(), types [newIndex]),
-                                  T("Change Slider style"));
+                                  "Change Slider style");
             }
         }
 
@@ -279,7 +277,7 @@ private:
     {
     public:
         SliderTextboxProperty (Slider* slider, JucerDocument& document)
-            : ComponentChoiceProperty <Slider> (T("text position"), slider, document)
+            : ComponentChoiceProperty <Slider> ("text position", slider, document)
         {
             choices.add ("No text box");
             choices.add ("Text box on left");
@@ -299,7 +297,7 @@ private:
             if (newIndex >= 0 && newIndex < numElementsInArray (types))
             {
                 document.perform (new SliderTextBoxChangeAction (component, *document.getComponentLayout(), types [newIndex]),
-                                  T("Change Slider textbox"));
+                                  "Change Slider textbox");
             }
         }
 
@@ -360,14 +358,14 @@ private:
     {
     public:
         SliderTextboxEditableProperty (Slider* slider, JucerDocument& document)
-            : ComponentBooleanProperty <Slider> (T("text box mode"), T("Editable"), T("Editable"), slider, document)
+            : ComponentBooleanProperty <Slider> ("text box mode", "Editable", "Editable", slider, document)
         {
         }
 
         void setState (bool newState)
         {
             document.perform (new SliderEditableChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change Slider editability"));
+                              "Change Slider editability");
         }
 
         bool getState() const
@@ -411,7 +409,7 @@ private:
     {
     public:
         SliderTextboxSizeProperty (Slider* slider, JucerDocument& document, const bool isWidth_)
-            : ComponentTextProperty <Slider> (isWidth_ ? T("text box width") : T("text box height"),
+            : ComponentTextProperty <Slider> (isWidth_ ? "text box width" : "text box height",
                                               12, false, slider, document),
               isWidth (isWidth_)
         {
@@ -420,7 +418,7 @@ private:
         void setText (const String& newText)
         {
             document.perform (new SliderBoxSizeChangeAction (component, *document.getComponentLayout(), isWidth, newText.getIntValue()),
-                              T("Change Slider textbox size"));
+                              "Change Slider textbox size");
         }
 
         const String getText() const
@@ -506,7 +504,7 @@ private:
             state [rangeParam] = newText.getDoubleValue();
 
             document.perform (new SliderRangeChangeAction (component, *document.getComponentLayout(), state),
-                              T("Change Slider range"));
+                              "Change Slider range");
         }
 
         const String getText() const
@@ -576,7 +574,7 @@ private:
     {
     public:
         SliderSkewProperty (Slider* slider, JucerDocument& document)
-            : ComponentTextProperty <Slider> (T("skew factor"), 12, false, slider, document)
+            : ComponentTextProperty <Slider> ("skew factor", 12, false, slider, document)
         {
         }
 
@@ -585,7 +583,7 @@ private:
             const double skew = jlimit (0.001, 1000.0, newText.getDoubleValue());
 
             document.perform (new SliderSkewChangeAction (component, *document.getComponentLayout(), skew),
-                              T("Change Slider skew"));
+                              "Change Slider skew");
         }
 
         const String getText() const
@@ -633,27 +631,27 @@ private:
         switch (style)
         {
         case Slider::LinearHorizontal:
-            return T("LinearHorizontal");
+            return "LinearHorizontal";
         case Slider::LinearVertical:
-            return T("LinearVertical");
+            return "LinearVertical";
         case Slider::LinearBar:
-            return T("LinearBar");
+            return "LinearBar";
         case Slider::Rotary:
-            return T("Rotary");
+            return "Rotary";
         case Slider::RotaryHorizontalDrag:
-            return T("RotaryHorizontalDrag");
+            return "RotaryHorizontalDrag";
         case Slider::RotaryVerticalDrag:
-            return T("RotaryVerticalDrag");
+            return "RotaryVerticalDrag";
         case Slider::IncDecButtons:
-            return T("IncDecButtons");
+            return "IncDecButtons";
         case Slider::TwoValueHorizontal:
-            return T("TwoValueHorizontal");
+            return "TwoValueHorizontal";
         case Slider::TwoValueVertical:
-            return T("TwoValueVertical");
+            return "TwoValueVertical";
         case Slider::ThreeValueHorizontal:
-            return T("ThreeValueHorizontal");
+            return "ThreeValueHorizontal";
         case Slider::ThreeValueVertical:
-            return T("ThreeValueVertical");
+            return "ThreeValueVertical";
 
         default:
             jassertfalse
@@ -665,27 +663,27 @@ private:
 
     static Slider::SliderStyle sliderStringToStyle (const String& s)
     {
-        if (s == T("LinearHorizontal"))
+        if (s == "LinearHorizontal")
             return Slider::LinearHorizontal;
-        else if (s == T("LinearVertical"))
+        else if (s == "LinearVertical")
             return Slider::LinearVertical;
-        else if (s == T("LinearBar"))
+        else if (s == "LinearBar")
             return Slider::LinearBar;
-        else if (s == T("Rotary"))
+        else if (s == "Rotary")
             return Slider::Rotary;
-        else if (s == T("RotaryHorizontalDrag"))
+        else if (s == "RotaryHorizontalDrag")
             return Slider::RotaryHorizontalDrag;
-        else if (s == T("RotaryVerticalDrag"))
+        else if (s == "RotaryVerticalDrag")
             return Slider::RotaryVerticalDrag;
-        else if (s == T("IncDecButtons"))
+        else if (s == "IncDecButtons")
             return Slider::IncDecButtons;
-        else if (s.startsWithIgnoreCase (T("TwoValueHoriz")))
+        else if (s.startsWithIgnoreCase ("TwoValueHoriz"))
             return Slider::TwoValueHorizontal;
-        else if (s.startsWithIgnoreCase (T("TwoValueVert")))
+        else if (s.startsWithIgnoreCase ("TwoValueVert"))
             return Slider::TwoValueVertical;
-        else if (s.startsWithIgnoreCase (T("ThreeValueHoriz")))
+        else if (s.startsWithIgnoreCase ("ThreeValueHoriz"))
             return Slider::ThreeValueHorizontal;
-        else if (s.startsWithIgnoreCase (T("ThreeValueVert")))
+        else if (s.startsWithIgnoreCase ("ThreeValueVert"))
             return Slider::ThreeValueVertical;
 
         jassertfalse
@@ -697,15 +695,15 @@ private:
         switch (pos)
         {
         case Slider::NoTextBox:
-            return T("NoTextBox");
+            return "NoTextBox";
         case Slider::TextBoxLeft:
-            return T("TextBoxLeft");
+            return "TextBoxLeft";
         case Slider::TextBoxRight:
-            return T("TextBoxRight");
+            return "TextBoxRight";
         case Slider::TextBoxAbove:
-            return T("TextBoxAbove");
+            return "TextBoxAbove";
         case Slider::TextBoxBelow:
-            return T("TextBoxBelow");
+            return "TextBoxBelow";
         default:
             jassertfalse
             break;
@@ -716,15 +714,15 @@ private:
 
     static const Slider::TextEntryBoxPosition stringToTextBoxPos (const String& s)
     {
-        if (s == T("NoTextBox"))
+        if (s == "NoTextBox")
             return Slider::NoTextBox;
-        else if (s == T("TextBoxLeft"))
+        else if (s == "TextBoxLeft")
             return Slider::TextBoxLeft;
-        else if (s == T("TextBoxRight"))
+        else if (s == "TextBoxRight")
             return Slider::TextBoxRight;
-        else if (s == T("TextBoxAbove"))
+        else if (s == "TextBoxAbove")
             return Slider::TextBoxAbove;
-        else if (s == T("TextBoxBelow"))
+        else if (s == "TextBoxBelow")
             return Slider::TextBoxBelow;
 
         jassertfalse

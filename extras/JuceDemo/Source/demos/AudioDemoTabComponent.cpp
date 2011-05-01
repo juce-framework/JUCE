@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  19 Sep 2009 11:10:57 am
+  Creation date:  1 May 2011 12:07:35pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -116,11 +116,11 @@ AudioDemoTabComponent::AudioDemoTabComponent ()
 {
     addAndMakeVisible (tabbedComponent = new TabbedComponent (TabbedButtonBar::TabsAtTop));
     tabbedComponent->setTabBarDepth (30);
-    tabbedComponent->addTab (T("Audio Device Setup"), Colours::lightgrey, new AudioDemoSetupPage (deviceManager), true);
-    tabbedComponent->addTab (T("File Playback"), Colours::lightgrey, new AudioDemoPlaybackPage (deviceManager), true);
-    tabbedComponent->addTab (T("Synth Playback"), Colours::lightgrey, new AudioDemoSynthPage (deviceManager), true);
-    tabbedComponent->addTab (T("Latency Test"), Colours::lightgrey, new AudioDemoLatencyPage (deviceManager), true);
-    tabbedComponent->addTab (T("Recording"), Colours::lightgrey, new AudioDemoRecordPage (deviceManager), true);
+    tabbedComponent->addTab (L"Audio Device Setup", Colours::lightgrey, new AudioDemoSetupPage (deviceManager), true);
+    tabbedComponent->addTab (L"File Playback", Colours::lightgrey, new AudioDemoPlaybackPage (deviceManager), true);
+    tabbedComponent->addTab (L"Synth Playback", Colours::lightgrey, new AudioDemoSynthPage (deviceManager), true);
+    tabbedComponent->addTab (L"Latency Test", Colours::lightgrey, new AudioDemoLatencyPage (deviceManager), true);
+    tabbedComponent->addTab (L"Recording", Colours::lightgrey, new AudioDemoRecordPage (deviceManager), true);
     tabbedComponent->setCurrentTabIndex (0);
 
 
@@ -129,6 +129,7 @@ AudioDemoTabComponent::AudioDemoTabComponent ()
     //[/UserPreSize]
 
     setSize (600, 400);
+
 
     //[Constructor] You can add your own custom stuff here..
     //[/Constructor]
@@ -140,6 +141,7 @@ AudioDemoTabComponent::~AudioDemoTabComponent()
     //[/Destructor_pre]
 
     deleteAndZero (tabbedComponent);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]

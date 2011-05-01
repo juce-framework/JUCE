@@ -155,8 +155,6 @@ public:
     /** Generates and returns the header and cpp file contents for this component. */
     void getPreviewFiles (String& header, String& cpp);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
     const String getDocumentTitle();

@@ -178,7 +178,7 @@ void ComponentLayout::removeComponent (Component* comp, const bool undoable)
     {
         if (undoable)
         {
-            perform (new DeleteCompAction (comp, *this), T("Delete components"));
+            perform (new DeleteCompAction (comp, *this), "Delete components");
         }
         else
         {
@@ -401,7 +401,7 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
     if (undoable)
     {
         AddCompAction* const action = new AddCompAction (new XmlElement (xml), *this);
-        perform (action, T("Add new components"));
+        perform (action, "Add new components");
 
         return components [action->indexAdded];
     }
@@ -549,7 +549,7 @@ PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDime
 
     Component* const current = getComponentRelativePosTarget (comp, whichDimension);
 
-    m.addItem (menuIdBase, T("Relative to parent component"), true, current == 0);
+    m.addItem (menuIdBase, "Relative to parent component", true, current == 0);
     m.addSeparator();
 
     for (int i = 0; i < components.size(); ++i)
@@ -616,7 +616,7 @@ void ComponentLayout::setComponentPosition (Component* comp,
     {
         if (undoable)
         {
-            perform (new ChangeCompPositionAction (comp, *this, newPos), T("Move components"));
+            perform (new ChangeCompPositionAction (comp, *this, newPos), "Move components");
         }
         else
         {

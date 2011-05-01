@@ -39,7 +39,6 @@
   #define APPCOMMAND_MEDIA_PREVIOUSTRACK    12
   #define APPCOMMAND_MEDIA_STOP             13
   #define APPCOMMAND_MEDIA_PLAY_PAUSE       14
-  #define WM_APPCOMMAND                     0x0319
 #endif
 
 extern void juce_repeatLastProcessPriority(); // in juce_win32_Threads.cpp

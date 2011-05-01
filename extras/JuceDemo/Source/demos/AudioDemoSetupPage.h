@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  18 Sep 2009 11:26:45 am
+  Creation date:  1 May 2011 1:54:18pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_244CE6A7__
-#define __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_244CE6A7__
+#ifndef __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_A3545895__
+#define __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_A3545895__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -51,6 +51,7 @@ public:
     void resized();
 
 
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -62,11 +63,12 @@ private:
     //==============================================================================
     AudioDeviceSelectorComponent* deviceSelector;
 
+
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     AudioDemoSetupPage (const AudioDemoSetupPage&);
-    AudioDemoSetupPage& operator= (const AudioDemoSetupPage&);
+    const AudioDemoSetupPage& operator= (const AudioDemoSetupPage&);
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_244CE6A7__
+#endif   // __JUCER_HEADER_AUDIODEMOSETUPPAGE_AUDIODEMOSETUPPAGE_A3545895__

@@ -59,7 +59,7 @@ public:
           includeAnchorOptions (includeAnchorOptions_),
           allowRelativeOptions (allowRelativeOptions_)
     {
-        addAndMakeVisible (button = new TextButton (T("mode")));
+        addAndMakeVisible (button = new TextButton ("mode"));
         button->addListener (this);
         button->setTriggeredOnMouseDown (true);
         button->setConnectedEdges (TextButton::ConnectedOnLeft | TextButton::ConnectedOnRight);
@@ -186,7 +186,7 @@ public:
         PositionedRectangle::SizeMode sizeW = p.getWidthMode();
         PositionedRectangle::SizeMode sizeH = p.getHeightMode();
 
-        String relCompName (T("parent"));
+        String relCompName ("parent");
 
         Component* const relComp = layout != 0 ? layout->getComponentRelativePosTarget (component, (int) dimension) : 0;
 
@@ -201,19 +201,19 @@ public:
         {
             const PositionedRectangle::PositionMode posMode = (dimension == componentX) ? xMode : yMode;
 
-            m.addItem (10, ((dimension == componentX) ? T("Absolute distance from left of ")
-                                                      : T("Absolute distance from top of ")) + relCompName,
+            m.addItem (10, ((dimension == componentX) ? "Absolute distance from left of "
+                                                      : "Absolute distance from top of ") + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentTopLeft);
 
-            m.addItem (11, ((dimension == componentX) ? T("Absolute distance from right of ")
-                                                      : T("Absolute distance from bottom of ")) + relCompName,
+            m.addItem (11, ((dimension == componentX) ? "Absolute distance from right of "
+                                                      : "Absolute distance from bottom of ") + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentBottomRight);
 
-            m.addItem (12, T("Absolute distance from centre of ") + relCompName,
+            m.addItem (12, "Absolute distance from centre of " + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentCentre);
 
-            m.addItem (13, ((dimension == componentX) ? T("Percentage of width of ")
-                                                      : T("Percentage of height of ")) + relCompName,
+            m.addItem (13, ((dimension == componentX) ? "Percentage of width of "
+                                                      : "Percentage of height of ") + relCompName,
                        true, posMode == PositionedRectangle::proportionOfParentSize);
 
             m.addSeparator();
@@ -222,14 +222,14 @@ public:
             {
                 const PositionedRectangle::AnchorPoint anchor = (dimension == componentX) ? xAnchor : yAnchor;
 
-                m.addItem (14, (dimension == componentX) ? T("Anchored at left of component")
-                                                         : T("Anchored at top of component"),
+                m.addItem (14, (dimension == componentX) ? "Anchored at left of component"
+                                                         : "Anchored at top of component",
                            true, anchor == PositionedRectangle::anchorAtLeftOrTop);
 
-                m.addItem (15, T("Anchored at centre of component"), true, anchor == PositionedRectangle::anchorAtCentre);
+                m.addItem (15, "Anchored at centre of component", true, anchor == PositionedRectangle::anchorAtCentre);
 
-                m.addItem (16, (dimension == componentX) ? T("Anchored at right of component")
-                                                         : T("Anchored at bottom of component"),
+                m.addItem (16, (dimension == componentX) ? "Anchored at right of component"
+                                                         : "Anchored at bottom of component",
                            true, anchor == PositionedRectangle::anchorAtRightOrBottom);
             }
         }
@@ -415,9 +415,6 @@ public:
 
     virtual const RelativePositionedRectangle getPosition() const = 0;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     class PositionPropLabel  : public Label
     {
@@ -448,7 +445,7 @@ protected:
         TextEditor* createEditorComponent()
         {
             TextEditor* textEditor = Label::createEditorComponent();
-            textEditor->setInputRestrictions (14, T("0123456789.-%"));
+            textEditor->setInputRestrictions (14, "0123456789.-%");
 
             return textEditor;
         }

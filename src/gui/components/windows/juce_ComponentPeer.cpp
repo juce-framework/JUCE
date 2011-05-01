@@ -564,9 +564,7 @@ void ComponentPeer::addMaskedRegion (int x, int y, int w, int h)
 //==============================================================================
 const StringArray ComponentPeer::getAvailableRenderingEngines()
 {
-    StringArray s;
-    s.add ("Software Renderer");
-    return s;
+    return StringArray ("Software Renderer");
 }
 
 int ComponentPeer::getCurrentRenderingEngine() const

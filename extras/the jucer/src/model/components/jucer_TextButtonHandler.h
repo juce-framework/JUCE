@@ -49,7 +49,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new TextButton (T("new button"), String::empty);
+        return new TextButton ("new button", String::empty);
     }
 
     void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
@@ -92,12 +92,6 @@ public:
 
         code.constructorCode += s;
     }
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
-
 };
 
 

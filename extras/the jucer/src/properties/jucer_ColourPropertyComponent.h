@@ -58,9 +58,6 @@ public:
         ((ColourPropEditorComponent*) getChildComponent (0))->refresh();
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     class ColourPropEditorComponent     : public ColourEditorComponent
     {

@@ -61,9 +61,6 @@ public:
     void deleteFromPath();
     void getEditableProperties (Array <PropertyComponent*>& properties);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     const PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
                                           const Rectangle<int>& parentArea) const;
@@ -136,9 +133,6 @@ public:
     void createSiblingComponents();
     void changed();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     friend class PathPoint;
     friend class PathPointComponent;
@@ -184,9 +178,6 @@ public:
     void mouseUp (const MouseEvent& e);
 
     void changeListenerCallback (ChangeBroadcaster*);
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     PaintElementPath* const path;

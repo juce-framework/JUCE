@@ -94,14 +94,14 @@ void JucerFillType::reset()
     gradCol1 = Colours::red;
     gradCol2 = Colours::green;
     gradPos1 = RelativePositionedRectangle();
-    gradPos1.rect = PositionedRectangle (T("50 50"));
+    gradPos1.rect = PositionedRectangle ("50 50");
     gradPos2 = RelativePositionedRectangle();
-    gradPos2.rect = PositionedRectangle (T("100 100"));
+    gradPos2.rect = PositionedRectangle ("100 100");
 
     imageResourceName = String::empty;
     imageOpacity = 1.0;
     imageAnchor = RelativePositionedRectangle();
-    imageAnchor.rect = PositionedRectangle (T("0 0"));
+    imageAnchor.rect = PositionedRectangle ("0 0");
 }
 
 //==============================================================================
@@ -152,7 +152,7 @@ void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMetho
 
             s << "g.setGradientFill (ColourGradient (";
 
-            const String indent (String::repeatedString (T(" "), s.length()));
+            const String indent (String::repeatedString (" ", s.length()));
 
             s << colourToCode (gradCol1) << ",\n"
               << indent << castToFloat (x1) << ", " << castToFloat (y1) << ",\n"
@@ -173,7 +173,7 @@ void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMetho
 
             s << "g.setTiledImageFill (";
 
-            const String indent (String::repeatedString (T(" "), s.length()));
+            const String indent (String::repeatedString (" ", s.length()));
 
             s << imageVariable << ",\n"
               << indent << x << ", " << y << ",\n"
@@ -195,23 +195,23 @@ const String JucerFillType::toString() const
     switch (mode)
     {
     case solidColour:
-        return T("solid: ") + colourToHex (colour);
+        return "solid: " + colourToHex (colour);
 
     case linearGradient:
     case radialGradient:
-        return (mode == linearGradient ? T("linear: ")
-                                       : T(" radial: "))
+        return (mode == linearGradient ? "linear: "
+                                       : " radial: ")
                 + positionToString (gradPos1)
-                + T(", ")
+                + ", "
                 + positionToString (gradPos2)
-                + T(", 0=") + colourToHex (gradCol1)
-                + T(", 1=") + colourToHex (gradCol2);
+                + ", 0=" + colourToHex (gradCol1)
+                + ", 1=" + colourToHex (gradCol2);
 
     case imageBrush:
-        return T("image: ") + imageResourceName
-                + T(", ")
+        return "image: " + imageResourceName
+                + ", "
                 + String (imageOpacity)
-                + T(", ")
+                + ", "
                 + positionToString (imageAnchor);
 
     default:
@@ -229,28 +229,28 @@ void JucerFillType::restoreFromString (const String& s)
     if (s.isNotEmpty())
     {
         StringArray toks;
-        toks.addTokens (s, T(",:"), String::empty);
+        toks.addTokens (s, ",:", String::empty);
         toks.trim();
 
-        if (toks[0] == T("solid"))
+        if (toks[0] == "solid")
         {
             mode = solidColour;
             colour = Colour (toks[1].getHexValue32());
         }
-        else if (toks[0] == T("linear")
-                  || toks[0] == T("radial"))
+        else if (toks[0] == "linear"
+                  || toks[0] == "radial")
         {
-            mode = (toks[0] == T("linear")) ? linearGradient : radialGradient;
+            mode = (toks[0] == "linear") ? linearGradient : radialGradient;
 
             gradPos1 = RelativePositionedRectangle();
             gradPos1.rect = PositionedRectangle (toks[1]);
             gradPos2 = RelativePositionedRectangle();
             gradPos2.rect = PositionedRectangle (toks[2]);
 
-            gradCol1 = Colour (toks[3].fromFirstOccurrenceOf (T("="), false, false).getHexValue32());
-            gradCol2 = Colour (toks[4].fromFirstOccurrenceOf (T("="), false, false).getHexValue32());
+            gradCol1 = Colour (toks[3].fromFirstOccurrenceOf ("=", false, false).getHexValue32());
+            gradCol2 = Colour (toks[4].fromFirstOccurrenceOf ("=", false, false).getHexValue32());
         }
-        else if (toks[0] == T("image"))
+        else if (toks[0] == "image")
         {
             mode = imageBrush;
             imageResourceName = toks[1];
@@ -334,7 +334,7 @@ void JucerFillType::loadImage (JucerDocument* const document)
 
                 g.setFont (12.0f);
                 g.setColour (Colours::grey);
-                g.drawText (T("(image missing)"), 0, 0, image.getWidth(), image.getHeight() / 2, Justification::centred, true);
+                g.drawText ("(image missing)", 0, 0, image.getWidth(), image.getHeight() / 2, Justification::centred, true);
 
                 ImageCache::addImageToCache (image, hashCode);
             }

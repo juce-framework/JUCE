@@ -54,8 +54,6 @@ public:
     static const String getCompleteFontCode (const Font& font, const String& typefaceName);
 
     //==============================================================================
-    juce_UseDebuggingNewOperator
-
     void setIndex (int newIndex);
     int getIndex() const;
 };

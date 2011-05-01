@@ -44,22 +44,24 @@
 
     @code
     {
-        WildcardFileFilter wildcardFilter ("*.foo", "Foo files");
+        WildcardFileFilter wildcardFilter ("*.foo", String::empty, "Foo files");
 
-        FileBrowserComponent browser (FileBrowserComponent::loadFileMode,
+        FileBrowserComponent browser (FileBrowserComponent::canSelectFiles,
                                       File::nonexistent,
                                       &wildcardFilter,
-                                      0);
+                                      nullptr);
 
         FileChooserDialogBox dialogBox ("Open some kind of file",
                                         "Please choose some kind of file that you want to open...",
                                         browser,
-                                        getLookAndFeel().alertWindowBackground);
+                                        false,
+                                        Colours::lightgrey);
 
         if (dialogBox.show())
         {
-            File selectedFile = browser.getCurrentFile();
-            ...
+            File selectedFile = browser.getSelectedFile (0);
+
+            ...etc..
         }
     }
     @endcode

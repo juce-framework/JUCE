@@ -105,7 +105,7 @@ public:
         Do not use this method unless you really need access to the internal var object
         for some reason - for normal reading and writing always prefer operator[]() and set().
     */
-    var* getVarPointer (const Identifier& name) const;
+    var* getVarPointer (const Identifier& name) const noexcept;
 
     //==============================================================================
     /** Sets properties to the values of all of an XML element's attributes. */

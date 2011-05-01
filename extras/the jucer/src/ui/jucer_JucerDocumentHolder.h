@@ -72,9 +72,6 @@ public:
 
     static JucerDocumentHolder* getActiveDocumentHolder();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     JucerDocument* const document;
     TabbedComponent* tabbedComponent;

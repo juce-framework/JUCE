@@ -61,10 +61,10 @@ public:
 
         properties.add (new ButtonRadioGroupProperty (b, document));
 
-        properties.add (new ButtonConnectedEdgeProperty (T("connected left"), Button::ConnectedOnLeft, b, document));
-        properties.add (new ButtonConnectedEdgeProperty (T("connected right"), Button::ConnectedOnRight, b, document));
-        properties.add (new ButtonConnectedEdgeProperty (T("connected top"), Button::ConnectedOnTop, b, document));
-        properties.add (new ButtonConnectedEdgeProperty (T("connected bottom"), Button::ConnectedOnBottom, b, document));
+        properties.add (new ButtonConnectedEdgeProperty ("connected left", Button::ConnectedOnLeft, b, document));
+        properties.add (new ButtonConnectedEdgeProperty ("connected right", Button::ConnectedOnRight, b, document));
+        properties.add (new ButtonConnectedEdgeProperty ("connected top", Button::ConnectedOnTop, b, document));
+        properties.add (new ButtonConnectedEdgeProperty ("connected bottom", Button::ConnectedOnBottom, b, document));
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -72,10 +72,10 @@ public:
         Button* const b = dynamic_cast <Button*> (comp);
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
-        e->setAttribute (T("buttonText"), b->getButtonText());
-        e->setAttribute (T("connectedEdges"), b->getConnectedEdgeFlags());
-        e->setAttribute (T("needsCallback"), needsButtonListener (b));
-        e->setAttribute (T("radioGroupId"), b->getRadioGroupId());
+        e->setAttribute ("buttonText", b->getButtonText());
+        e->setAttribute ("connectedEdges", b->getConnectedEdgeFlags());
+        e->setAttribute ("needsCallback", needsButtonListener (b));
+        e->setAttribute ("radioGroupId", b->getRadioGroupId());
 
         return e;
     }
@@ -87,10 +87,10 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        b->setButtonText (xml.getStringAttribute (T("buttonText"), b->getButtonText()));
-        b->setConnectedEdges (xml.getIntAttribute (T("connectedEdges"), 0));
-        setNeedsButtonListener (b, xml.getBoolAttribute (T("needsCallback"), true));
-        b->setRadioGroupId (xml.getIntAttribute (T("radioGroupId"), 0));
+        b->setButtonText (xml.getStringAttribute ("buttonText", b->getButtonText()));
+        b->setConnectedEdges (xml.getIntAttribute ("connectedEdges", 0));
+        setNeedsButtonListener (b, xml.getBoolAttribute ("needsCallback", true));
+        b->setRadioGroupId (xml.getIntAttribute ("radioGroupId", 0));
 
         return true;
     }
@@ -118,20 +118,20 @@ public:
             StringArray flags;
 
             if (b->isConnectedOnLeft())
-                flags.add (T("Button::ConnectedOnLeft"));
+                flags.add ("Button::ConnectedOnLeft");
 
             if (b->isConnectedOnRight())
-                flags.add (T("Button::ConnectedOnRight"));
+                flags.add ("Button::ConnectedOnRight");
 
             if (b->isConnectedOnTop())
-                flags.add (T("Button::ConnectedOnTop"));
+                flags.add ("Button::ConnectedOnTop");
 
             if (b->isConnectedOnBottom())
-                flags.add (T("Button::ConnectedOnBottom"));
+                flags.add ("Button::ConnectedOnBottom");
 
             String s;
             s << memberVariableName << "->setConnectedEdges ("
-              << flags.joinIntoString (T(" | ")) << ");\n";
+              << flags.joinIntoString (" | ") << ");\n";
 
             code.constructorCode += s;
         }
@@ -150,9 +150,9 @@ public:
 
         if (needsButtonListener (component))
         {
-            String& callback = code.getCallbackCode (T("public ButtonListener"),
-                                                     T("void"),
-                                                     T("buttonClicked (Button* buttonThatWasClicked)"),
+            String& callback = code.getCallbackCode ("public ButtonListener",
+                                                     "void",
+                                                     "buttonClicked (Button* buttonThatWasClicked)",
                                                      true);
 
             if (callback.isNotEmpty())
@@ -177,23 +177,20 @@ public:
         button->getProperties().set ("generateListenerCallback", shouldDoCallback);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class ButtonTextProperty  : public ComponentTextProperty <Button>
     {
     public:
         ButtonTextProperty (Button* button_, JucerDocument& document_)
-            : ComponentTextProperty <Button> (T("text"), 100, false, button_, document_)
+            : ComponentTextProperty <Button> ("text", 100, false, button_, document_)
         {
         }
 
         void setText (const String& newText)
         {
             document.perform (new ButtonTextChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change button text"));
+                              "Change button text");
         }
 
         const String getText() const
@@ -236,14 +233,14 @@ private:
     {
     public:
         ButtonCallbackProperty (Button* button, JucerDocument& document)
-            : ComponentBooleanProperty <Button> (T("callback"), T("Generate ButtonListener"), T("Generate ButtonListener"), button, document)
+            : ComponentBooleanProperty <Button> ("callback", "Generate ButtonListener", "Generate ButtonListener", button, document)
         {
         }
 
         void setState (bool newState)
         {
             document.perform (new ButtonCallbackChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change button callback"));
+                              "Change button callback");
         }
 
         bool getState() const       { return needsButtonListener (component); }
@@ -283,14 +280,14 @@ private:
     {
     public:
         ButtonRadioGroupProperty (Button* const button_, JucerDocument& document_)
-            : ComponentTextProperty <Button> (T("radio group"), 10, false, button_, document_)
+            : ComponentTextProperty <Button> ("radio group", 10, false, button_, document_)
         {
         }
 
         void setText (const String& newText)
         {
             document.perform (new ButtonRadioGroupChangeAction (component, *document.getComponentLayout(), newText.getIntValue()),
-                              T("Change radio group ID"));
+                              "Change radio group ID");
         }
 
         const String getText() const
@@ -334,7 +331,7 @@ private:
     public:
         ButtonConnectedEdgeProperty (const String& name, const int flag_,
                                      Button* button, JucerDocument& document)
-            : ComponentBooleanProperty <Button> (name, T("Connected"), T("Connected"), button, document),
+            : ComponentBooleanProperty <Button> (name, "Connected", "Connected", button, document),
               flag (flag_)
         {
         }
@@ -342,7 +339,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new ButtonConnectedChangeAction (component, *document.getComponentLayout(), flag, newState),
-                              T("Change button connected edges"));
+                              "Change button connected edges");
         }
 
         bool getState() const

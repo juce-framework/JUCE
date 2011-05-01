@@ -173,7 +173,7 @@ const String GeneratedCode::getCallbackDefinitions() const
 const String GeneratedCode::getClassDeclaration() const
 {
     StringArray parentClassLines;
-    parentClassLines.addTokens (parentClasses, T(","), String::empty);
+    parentClassLines.addTokens (parentClasses, ",", String::empty);
     parentClassLines.addArray (getExtraParentClasses());
 
     parentClassLines.trim();
@@ -236,7 +236,7 @@ static const String getIncludeFileCode (StringArray files)
     String s;
 
     for (int i = 0; i < files.size(); ++i)
-        s << T("#include \"") << files[i] << T("\"\n");
+        s << "#include \"" << files[i] << "\"\n";
 
     return s;
 }
@@ -371,8 +371,8 @@ void GeneratedCode::applyToCode (String& code,
     }
     else
     {
-        replaceTemplate (code, "metadata", T("  << Metadata isn't shown in the code preview >>\n"));
-        replaceTemplate (code, "staticMemberDefinitions", T("// Static member declarations and resources would go here... (these aren't shown in the code preview)"));
+        replaceTemplate (code, "metadata", "  << Metadata isn't shown in the code preview >>\n");
+        replaceTemplate (code, "staticMemberDefinitions", "// Static member declarations and resources would go here... (these aren't shown in the code preview)");
     }
 
     copyAcrossUserSections (code, oldFileWithUserData);

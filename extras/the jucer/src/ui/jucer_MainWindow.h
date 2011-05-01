@@ -71,9 +71,6 @@ public:
     bool isCommandActive (const CommandID commandID);
     bool perform (const InvocationInfo& info);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     MultiDocHolder* multiDocHolder;
 

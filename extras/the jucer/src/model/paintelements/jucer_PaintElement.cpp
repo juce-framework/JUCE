@@ -121,7 +121,7 @@ void PaintElement::setPosition (const RelativePositionedRectangle& newPosition, 
         if (undoable)
         {
             perform (new PaintElementMoveAction (this, newPosition),
-                     T("Move ") + getTypeName());
+                     "Move " + getTypeName());
         }
         else
         {
@@ -207,10 +207,10 @@ private:
 //==============================================================================
 void PaintElement::getEditableProperties (Array <PropertyComponent*>& properties)
 {
-    properties.add (new ElementPositionProperty (this, T("x"), PositionPropertyBase::componentX));
-    properties.add (new ElementPositionProperty (this, T("y"), PositionPropertyBase::componentY));
-    properties.add (new ElementPositionProperty (this, T("width"), PositionPropertyBase::componentWidth));
-    properties.add (new ElementPositionProperty (this, T("height"), PositionPropertyBase::componentHeight));
+    properties.add (new ElementPositionProperty (this, "x", PositionPropertyBase::componentX));
+    properties.add (new ElementPositionProperty (this, "y", PositionPropertyBase::componentY));
+    properties.add (new ElementPositionProperty (this, "width", PositionPropertyBase::componentWidth));
+    properties.add (new ElementPositionProperty (this, "height", PositionPropertyBase::componentHeight));
 }
 
 //==============================================================================

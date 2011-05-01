@@ -36,7 +36,7 @@ public:
         : document (document_)
     {
         setInterceptsMouseClicks (false, true);
-        addAndMakeVisible (reloadButton = new TextButton (T("Reload")));
+        addAndMakeVisible (reloadButton = new TextButton ("Reload"));
         reloadButton->addListener (this);
     }
 
@@ -65,8 +65,8 @@ public:
         if (r != 0)
         {
             document.getResources()
-                .browseForResource (T("Select a file to replace this resource"),
-                                    T("*"),
+                .browseForResource ("Select a file to replace this resource",
+                                    "*",
                                     File (r->originalFilename),
                                     r->name);
         }
@@ -280,7 +280,7 @@ void ResourceEditorPanel::buttonClicked (Button* b)
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          TRANS("Reloading resources"),
                                          TRANS("The following resources couldn't be reloaded from their original files:\n\n")
-                                            + failed.joinIntoString (T(", ")));
+                                            + failed.joinIntoString (", "));
         }
     }
 }

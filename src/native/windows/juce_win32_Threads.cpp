@@ -118,10 +118,10 @@ void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData)
 {
-  #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+   #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
     AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
                        GetCurrentThreadId(), TRUE);
-  #endif
+   #endif
 
     juce_threadEntryPoint (userData);
 
@@ -147,16 +147,16 @@ void Thread::killThread()
 {
     if (threadHandle_ != 0)
     {
-      #if JUCE_DEBUG
+       #if JUCE_DEBUG
         OutputDebugString (_T("** Warning - Forced thread termination **\n"));
-      #endif
+       #endif
         TerminateThread (threadHandle_, 0);
     }
 }
 
 void Thread::setCurrentThreadName (const String& name)
 {
-  #if JUCE_DEBUG && JUCE_MSVC
+   #if JUCE_DEBUG && JUCE_MSVC
     struct
     {
         DWORD dwType;
@@ -176,9 +176,9 @@ void Thread::setCurrentThreadName (const String& name)
     }
     __except (EXCEPTION_CONTINUE_EXECUTION)
     {}
-  #else
+   #else
     (void) name;
-  #endif
+   #endif
 }
 
 Thread::ThreadID Thread::getCurrentThreadId()
@@ -329,7 +329,7 @@ void PlatformUtilities::freeDynamicLibrary (void* h)
 {
     JUCE_TRY
     {
-        if (h != 0)
+        if (h != nullptr)
             FreeLibrary ((HMODULE) h);
     }
     JUCE_CATCH_ALL
@@ -337,7 +337,7 @@ void PlatformUtilities::freeDynamicLibrary (void* h)
 
 void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 {
-    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name.toUTF8()) : nullptr; // (void* cast is required for mingw)
+    return (h != nullptr) ? (void*) GetProcAddress ((HMODULE) h, name.toUTF8()) : nullptr; // (void* cast is required for mingw)
 }
 
 

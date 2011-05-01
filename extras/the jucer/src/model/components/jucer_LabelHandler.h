@@ -52,7 +52,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new Label (T("new label"), T("label text"));
+        return new Label ("new label", "label text");
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -60,17 +60,17 @@ public:
         Label* const l = dynamic_cast <Label*> (comp);
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
-        e->setAttribute (T("labelText"), l->getText());
+        e->setAttribute ("labelText", l->getText());
 
-        e->setAttribute (T("editableSingleClick"), l->isEditableOnSingleClick());
-        e->setAttribute (T("editableDoubleClick"), l->isEditableOnDoubleClick());
-        e->setAttribute (T("focusDiscardsChanges"), l->doesLossOfFocusDiscardChanges());
+        e->setAttribute ("editableSingleClick", l->isEditableOnSingleClick());
+        e->setAttribute ("editableDoubleClick", l->isEditableOnDoubleClick());
+        e->setAttribute ("focusDiscardsChanges", l->doesLossOfFocusDiscardChanges());
 
-        e->setAttribute (T("fontname"), l->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont).toString());
-        e->setAttribute (T("fontsize"), roundToInt (l->getFont().getHeight() * 100.0) / 100.0);
-        e->setAttribute (T("bold"), l->getFont().isBold());
-        e->setAttribute (T("italic"), l->getFont().isItalic());
-        e->setAttribute (T("justification"), l->getJustificationType().getFlags());
+        e->setAttribute ("fontname", l->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont).toString());
+        e->setAttribute ("fontsize", roundToInt (l->getFont().getHeight() * 100.0) / 100.0);
+        e->setAttribute ("bold", l->getFont().isBold());
+        e->setAttribute ("italic", l->getFont().isItalic());
+        e->setAttribute ("justification", l->getJustificationType().getFlags());
 
         return e;
     }
@@ -85,21 +85,21 @@ public:
         Label defaultLabel (String::empty, String::empty);
 
         Font font;
-        font.setHeight ((float) xml.getDoubleAttribute (T("fontsize"), 15.0));
-        font.setBold (xml.getBoolAttribute (T("bold"), false));
-        font.setItalic (xml.getBoolAttribute (T("italic"), false));
+        font.setHeight ((float) xml.getDoubleAttribute ("fontsize", 15.0));
+        font.setBold (xml.getBoolAttribute ("bold", false));
+        font.setItalic (xml.getBoolAttribute ("italic", false));
         l->setFont (font);
 
-        l->getProperties().set ("typefaceName", xml.getStringAttribute (T("fontname"), FontPropertyComponent::defaultFont));
+        l->getProperties().set ("typefaceName", xml.getStringAttribute ("fontname", FontPropertyComponent::defaultFont));
         updateLabelFont (l);
 
-        l->setJustificationType (Justification (xml.getIntAttribute (T("justification"), Justification::centred)));
+        l->setJustificationType (Justification (xml.getIntAttribute ("justification", Justification::centred)));
 
-        l->setText (xml.getStringAttribute (T("labelText"), T("Label Text")), false);
+        l->setText (xml.getStringAttribute ("labelText", "Label Text"), false);
 
-        l->setEditable (xml.getBoolAttribute (T("editableSingleClick"), defaultLabel.isEditableOnSingleClick()),
-                        xml.getBoolAttribute (T("editableDoubleClick"), defaultLabel.isEditableOnDoubleClick()),
-                        xml.getBoolAttribute (T("focusDiscardsChanges"), defaultLabel.doesLossOfFocusDiscardChanges()));
+        l->setEditable (xml.getBoolAttribute ("editableSingleClick", defaultLabel.isEditableOnSingleClick()),
+                        xml.getBoolAttribute ("editableDoubleClick", defaultLabel.isEditableOnDoubleClick()),
+                        xml.getBoolAttribute ("focusDiscardsChanges", defaultLabel.doesLossOfFocusDiscardChanges()));
 
         return true;
     }
@@ -154,9 +154,9 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode (T("public LabelListener"),
-                                                     T("void"),
-                                                     T("labelTextChanged (Label* labelThatHasChanged)"),
+            String& callback = code.getCallbackCode ("public LabelListener",
+                                                     "void",
+                                                     "labelTextChanged (Label* labelThatHasChanged)",
                                                      true);
 
             if (callback.trim().isNotEmpty())
@@ -197,9 +197,6 @@ public:
                  || ((Label*) label)->isEditableOnDoubleClick(); // xxx should be configurable
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
 
     //==============================================================================
@@ -207,13 +204,13 @@ private:
     {
     public:
         LabelTextProperty (Label* component_, JucerDocument& document_)
-            : ComponentTextProperty <Label> (T("text"), 10000, true, component_, document_)
+            : ComponentTextProperty <Label> ("text", 10000, true, component_, document_)
         {}
 
         void setText (const String& newText)
         {
             document.perform (new LabelTextChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change Label text"));
+                              "Change Label text");
         }
 
         const String getText() const
@@ -258,17 +255,17 @@ private:
     public:
         LabelEditableProperty (Label* component_,
                                JucerDocument& document_)
-           : ComponentChoiceProperty <Label> (T("editing"), component_, document_)
+           : ComponentChoiceProperty <Label> ("editing", component_, document_)
         {
-            choices.add (T("read-only"));
-            choices.add (T("edit on single-click"));
-            choices.add (T("edit on double-click"));
+            choices.add ("read-only");
+            choices.add ("edit on single-click");
+            choices.add ("edit on double-click");
         }
 
         void setIndex (int newIndex)
         {
             document.perform (new LabelEditableChangeAction (component, *document.getComponentLayout(), newIndex),
-                              T("Change Label editability"));
+                              "Change Label editability");
         }
 
         int getIndex() const
@@ -319,16 +316,16 @@ private:
     public:
         LabelLossOfFocusProperty (Label* component_,
                                   JucerDocument& document_)
-           : ComponentChoiceProperty <Label> (T("focus"), component_, document_)
+           : ComponentChoiceProperty <Label> ("focus", component_, document_)
         {
-            choices.add (T("loss of focus discards changes"));
-            choices.add (T("loss of focus commits changes"));
+            choices.add ("loss of focus discards changes");
+            choices.add ("loss of focus commits changes");
         }
 
         void setIndex (int newIndex)
         {
             document.perform (new LabelFocusLossChangeAction (component, *document.getComponentLayout(), newIndex == 0),
-                              T("Change Label focus behaviour"));
+                              "Change Label focus behaviour");
         }
 
         int getIndex() const
@@ -377,7 +374,7 @@ private:
     {
     public:
         LabelJustificationProperty (Label* const label_, JucerDocument& document_)
-            : JustificationProperty (T("layout"), false),
+            : JustificationProperty ("layout", false),
               label (label_),
               document (document_)
         {
@@ -392,7 +389,7 @@ private:
         void setJustification (const Justification& newJustification)
         {
             document.perform (new LabelJustifyChangeAction (label, *document.getComponentLayout(), newJustification),
-                              T("Change Label justification"));
+                              "Change Label justification");
         }
 
         const Justification getJustification() const
@@ -443,7 +440,7 @@ private:
     public:
         FontNameProperty (Label* const label_,
                           JucerDocument& document_)
-            : FontPropertyComponent (T("font")),
+            : FontPropertyComponent ("font"),
               label (label_),
               document (document_)
         {
@@ -458,7 +455,7 @@ private:
         void setTypefaceName (const String& newFontName)
         {
             document.perform (new FontNameChangeAction (label, *document.getComponentLayout(), newFontName),
-                              T("Change Label typeface"));
+                              "Change Label typeface");
         }
 
         const String getTypefaceName() const
@@ -510,7 +507,7 @@ private:
     {
     public:
         FontSizeProperty (Label* const label_, JucerDocument& document_)
-            : SliderPropertyComponent (T("size"), 1.0, 250.0, 0.1, 0.3),
+            : SliderPropertyComponent ("size", 1.0, 250.0, 0.1, 0.3),
               label (label_),
               document (document_)
         {
@@ -527,7 +524,7 @@ private:
             document.getUndoManager().undoCurrentTransactionOnly();
 
             document.perform (new FontSizeChangeAction (label, *document.getComponentLayout(), (float) newValue),
-                              T("Change Label font size"));
+                              "Change Label font size");
         }
 
         double getValue() const
@@ -581,16 +578,16 @@ private:
     {
     public:
         FontStyleProperty (Label* const label_, JucerDocument& document_)
-            : ChoicePropertyComponent (T("style")),
+            : ChoicePropertyComponent ("style"),
               label (label_),
               document (document_)
         {
             document.addChangeListener (this);
 
-            choices.add (T("normal"));
-            choices.add (T("bold"));
-            choices.add (T("italic"));
-            choices.add (T("bold + italic"));
+            choices.add ("normal");
+            choices.add ("bold");
+            choices.add ("italic");
+            choices.add ("bold + italic");
         }
 
         ~FontStyleProperty()
@@ -606,7 +603,7 @@ private:
             f.setItalic (newIndex == 2 || newIndex == 3);
 
             document.perform (new FontStyleChangeAction (label, *document.getComponentLayout(), f),
-                              T("Change Label font style"));
+                              "Change Label font style");
         }
 
         int getIndex() const

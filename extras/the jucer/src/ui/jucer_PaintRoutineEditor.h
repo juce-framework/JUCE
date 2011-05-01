@@ -70,9 +70,6 @@ public:
     //==============================================================================
     void refreshAllElements();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     PaintRoutine& graphics;
     JucerDocument& document;

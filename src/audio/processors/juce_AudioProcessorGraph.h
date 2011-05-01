@@ -399,7 +399,7 @@ private:
     //==============================================================================
     ReferenceCountedArray <Node> nodes;
     OwnedArray <Connection> connections;
-    int lastNodeId;
+    uint32 lastNodeId;
     AudioSampleBuffer renderingBuffers;
     OwnedArray <MidiBuffer> midiBuffers;
 

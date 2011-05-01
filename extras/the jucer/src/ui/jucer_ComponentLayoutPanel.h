@@ -47,9 +47,6 @@ public:
 
     const Image createComponentSnapshot() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ComponentLayout& layout;
 };

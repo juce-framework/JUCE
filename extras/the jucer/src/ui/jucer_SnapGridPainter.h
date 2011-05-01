@@ -46,9 +46,6 @@ public:
     bool updateFromDesign (JucerDocument& design);
     void updateColour();
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     int snapGridSize;
     bool snapShown;

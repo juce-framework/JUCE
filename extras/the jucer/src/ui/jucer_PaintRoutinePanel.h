@@ -48,9 +48,6 @@ public:
     void updatePropertiesList();
     const Rectangle<int> getComponentArea() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     PaintRoutine& routine;
 };

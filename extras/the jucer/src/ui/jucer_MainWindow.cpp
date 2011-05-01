@@ -61,7 +61,7 @@ public:
 
 //==============================================================================
 MainWindow::MainWindow()
-    : DocumentWindow (T("The Jucer"),
+    : DocumentWindow ("The Jucer",
                       Colours::azure,
                       DocumentWindow::allButtons)
 {
@@ -84,7 +84,7 @@ MainWindow::MainWindow()
 
     // restore the last size and position from our settings file..
     restoreWindowStateFromString (StoredSettings::getInstance()->getProps()
-                                    .getValue (T("lastMainWindowPos")));
+                                    .getValue ("lastMainWindowPos"));
 
     // Register all the app commands..
     {
@@ -98,7 +98,7 @@ MainWindow::MainWindow()
 
     commandManager->getKeyMappings()->resetToDefaultMappings();
 
-    XmlElement* const keys = StoredSettings::getInstance()->getProps().getXmlValue (T("keyMappings"));
+    XmlElement* const keys = StoredSettings::getInstance()->getProps().getXmlValue ("keyMappings");
 
     if (keys != 0)
     {
@@ -129,7 +129,7 @@ MainWindow::~MainWindow()
 
     // save the current size and position to our settings file..
     StoredSettings::getInstance()->getProps()
-        .setValue (T("lastMainWindowPos"), getWindowStateAsString());
+        .setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
 
@@ -251,7 +251,7 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
 
         PopupMenu recentFiles;
         StoredSettings::getInstance()->recentFiles.createPopupMenuItems (recentFiles, 100, true, true);
-        menu.addSubMenu (T("Open recent file"), recentFiles);
+        menu.addSubMenu ("Open recent file", recentFiles);
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::close);
@@ -279,13 +279,13 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
         for (i = 0; i < ObjectTypes::numComponentTypes; ++i)
             newComps.addCommandItem (commandManager, CommandIDs::newComponentBase + i);
 
-        menu.addSubMenu (T("Add new component"), newComps);
+        menu.addSubMenu ("Add new component", newComps);
 
         PopupMenu newElements;
         for (i = 0; i < ObjectTypes::numElementTypes; ++i)
             newElements.addCommandItem (commandManager, CommandIDs::newElementBase + i);
 
-        menu.addSubMenu (T("Add new graphic element"), newElements);
+        menu.addSubMenu ("Add new graphic element", newElements);
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);

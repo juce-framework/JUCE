@@ -58,10 +58,10 @@ void FontPropertyComponent::preloadAllFonts()
 }
 
 //==============================================================================
-const String FontPropertyComponent::defaultFont (T("Default font"));
-const String FontPropertyComponent::defaultSans (T("Default sans-serif font"));
-const String FontPropertyComponent::defaultSerif (T("Default serif font"));
-const String FontPropertyComponent::defaultMono (T("Default monospaced font"));
+const String FontPropertyComponent::defaultFont ("Default font");
+const String FontPropertyComponent::defaultSans ("Default sans-serif font");
+const String FontPropertyComponent::defaultSerif ("Default serif font");
+const String FontPropertyComponent::defaultMono ("Default monospaced font");
 
 FontPropertyComponent::FontPropertyComponent (const String& name)
     : ChoicePropertyComponent (name)
@@ -115,13 +115,13 @@ const String FontPropertyComponent::getTypefaceNameCode (const String& typefaceN
     if (typefaceName == defaultFont)
         return String::empty;
     else if (typefaceName == defaultSans)
-        return T("Font::getDefaultSansSerifFontName(), ");
+        return "Font::getDefaultSansSerifFontName(), ";
     else if (typefaceName == defaultSerif)
-        return T("Font::getDefaultSerifFontName(), ");
+        return "Font::getDefaultSerifFontName(), ";
     else if (typefaceName == defaultMono)
-        return T("Font::getDefaultMonospacedFontName(), ");
+        return "Font::getDefaultMonospacedFontName(), ";
 
-    return T("T(\"") + typefaceName + T("\"), ");
+    return "L\"" + typefaceName + "\", ";
 }
 
 const String FontPropertyComponent::getFontStyleCode (const Font& font)
@@ -138,10 +138,10 @@ const String FontPropertyComponent::getFontStyleCode (const Font& font)
 
 const String FontPropertyComponent::getCompleteFontCode (const Font& font, const String& typefaceName)
 {
-    return T("Font (")
+    return "Font ("
         + getTypefaceNameCode (typefaceName)
         + valueToFloat (font.getHeight())
-        + T(", ")
+        + ", "
         + getFontStyleCode (font)
-        + T(")");
+        + ")";
 }

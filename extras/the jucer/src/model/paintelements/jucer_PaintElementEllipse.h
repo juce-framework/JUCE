@@ -37,7 +37,7 @@ class PaintElementEllipse   : public ColouredElement
 public:
     //==============================================================================
     PaintElementEllipse (PaintRoutine* owner)
-        : ColouredElement (owner, T("Ellipse"), true, false)
+        : ColouredElement (owner, "Ellipse", true, false)
     {
     }
 
@@ -137,16 +137,13 @@ public:
         convertToNewPathElement (path);
     }
 
-
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class ShapeToPathProperty  : public ButtonPropertyComponent
     {
     public:
         ShapeToPathProperty (PaintElementEllipse* const element_)
-            : ButtonPropertyComponent (T("path"), false),
+            : ButtonPropertyComponent ("path", false),
               element (element_)
         {
         }
@@ -158,7 +155,7 @@ private:
 
         const String getButtonText() const
         {
-            return T("convert to a path");
+            return "convert to a path";
         }
 
     private:

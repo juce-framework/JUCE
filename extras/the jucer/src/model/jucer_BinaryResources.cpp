@@ -218,10 +218,10 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
 
     for (int i = 0; i < cpp.size(); ++i)
     {
-        if (cpp[i].contains (T("JUCER_RESOURCE:")))
+        if (cpp[i].contains ("JUCER_RESOURCE:"))
         {
             StringArray tokens;
-            tokens.addTokens (cpp[i].fromFirstOccurrenceOf (T(":"), false, false), T(","), T("\"'"));
+            tokens.addTokens (cpp[i].fromFirstOccurrenceOf (":", false, false), ",", "\"'");
             tokens.trim();
             tokens.removeEmptyStrings();
 
@@ -236,11 +236,11 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
                 const int firstLine = i;
 
                 while (i < cpp.size())
-                    if (cpp [i++].contains (T("}")))
+                    if (cpp [i++].contains ("}"))
                         break;
 
-                const String dataString (cpp.joinIntoString (T(" "), firstLine, i - firstLine)
-                                            .fromFirstOccurrenceOf (T("{"), false, false));
+                const String dataString (cpp.joinIntoString (" ", firstLine, i - firstLine)
+                                            .fromFirstOccurrenceOf ("{", false, false));
 
                 MemoryOutputStream out;
                 String::CharPointerType t (dataString.getCharPointer());

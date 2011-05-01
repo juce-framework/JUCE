@@ -35,14 +35,14 @@ public:
     MiscPage()
     {
         addAndMakeVisible (templateDir
-            = new FilenameComponent (T("C++ template folder:"),
+            = new FilenameComponent ("C++ template folder:",
                                      StoredSettings::getInstance()->getTemplatesDir(),
                                      true,
                                      true,
                                      false,
-                                     T("*.*"),
+                                     "*.*",
                                      String::empty,
-                                     T("(select the directory containing template .cpp and .h files)")));
+                                     "(select the directory containing template .cpp and .h files)"));
 
         (new Label (String::empty, templateDir->getName()))->attachToComponent (templateDir, true);
     }
@@ -78,11 +78,11 @@ public:
         text1.appendText ("Jucer", Font (13.0f, Font::bold));
         text1.appendText (" component design tool.", Font (13.0f));
 
-        text2.appendText (T("Jucer v") + JUCEApplication::getInstance()->getApplicationVersion()
-                            + T(", ") + SystemStats::getJUCEVersion(), Font (14.0f, Font::bold));
+        text2.appendText ("Jucer v" + JUCEApplication::getInstance()->getApplicationVersion()
+                            + ", " + SystemStats::getJUCEVersion(), Font (14.0f, Font::bold));
 
-        addAndMakeVisible (link = new HyperlinkButton (T("www.rawmaterialsoftware.com/juce"),
-                                                       URL (T("http://www.rawmaterialsoftware.com/juce"))));
+        addAndMakeVisible (link = new HyperlinkButton ("www.rawmaterialsoftware.com/juce",
+                                                       URL ("http://www.rawmaterialsoftware.com/juce")));
         link->setFont (Font (10.0f, Font::bold | Font::underlined), true);
     }
 
@@ -157,7 +157,7 @@ public:
 static String prefsWindowPos;
 
 PrefsPanel::PrefsPanel()
-    : DialogWindow (T("Jucer Preferences"), Colour::greyLevel (0.92f), true)
+    : DialogWindow ("Jucer Preferences", Colour::greyLevel (0.92f), true)
 {
     PrefsTabComp* const p = new PrefsTabComp();
     p->setSize (456, 510);

@@ -29,11 +29,11 @@
 
 
 #ifndef INTERNET_FLAG_NEED_FILE
-  #define INTERNET_FLAG_NEED_FILE 0x00000010
+ #define INTERNET_FLAG_NEED_FILE 0x00000010
 #endif
 
 #ifndef INTERNET_OPTION_DISABLE_AUTODIAL
-  #define INTERNET_OPTION_DISABLE_AUTODIAL 70
+ #define INTERNET_OPTION_DISABLE_AUTODIAL 70
 #endif
 
 //==============================================================================

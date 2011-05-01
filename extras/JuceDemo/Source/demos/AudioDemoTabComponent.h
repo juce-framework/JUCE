@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  19 Sep 2009 11:10:57 am
+  Creation date:  1 May 2011 12:07:35pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_10720733__
-#define __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_10720733__
+#ifndef __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_ADE99E0E__
+#define __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_ADE99E0E__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -81,6 +81,7 @@ public:
     void resized();
 
 
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -92,6 +93,7 @@ private:
     //==============================================================================
     TabbedComponent* tabbedComponent;
 
+
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     AudioDemoTabComponent (const AudioDemoTabComponent&);
@@ -99,4 +101,4 @@ private:
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_10720733__
+#endif   // __JUCER_HEADER_AUDIODEMOTABCOMPONENT_AUDIODEMOTABCOMPONENT_ADE99E0E__

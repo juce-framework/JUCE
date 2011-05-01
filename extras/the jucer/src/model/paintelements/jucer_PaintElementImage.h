@@ -47,7 +47,7 @@ public:
 
     //==============================================================================
     PaintElementImage (PaintRoutine* owner)
-        : PaintElement (owner, T("Image")),
+        : PaintElement (owner, "Image"),
           opacity (1.0),
           mode (stretched)
     {
@@ -88,7 +88,7 @@ public:
             g.fillRect (r);
 
             g.setColour (Colours::black);
-            g.drawText (T("(image missing)"),
+            g.drawText ("(image missing)",
                         r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                         Justification::centred, true);
         }
@@ -178,7 +178,7 @@ public:
                       << imageVariable  << "->drawWithin (g, "
                       << x << ", " << y << ", " << w << ", " << h
                       << ",\n"
-                      << String::repeatedString (T(" "), imageVariable.length() + 18)
+                      << String::repeatedString (" ", imageVariable.length() + 18)
                       << (mode == stretched ? "RectanglePlacement::stretchToFit"
                                             : (mode == proportionalReducingOnly ? "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize"
                                                                                 : "RectanglePlacement::centred"))
@@ -231,7 +231,7 @@ public:
             if (undoable)
             {
                 perform (new SetResourceAction (this, newName),
-                         T("Change image resource"));
+                         "Change image resource");
             }
             else
             {
@@ -286,7 +286,7 @@ public:
             if (undoable)
             {
                 perform (new SetOpacityAction (this, newOpacity),
-                         T("Change image opacity"));
+                         "Change image opacity");
             }
             else
             {
@@ -356,7 +356,7 @@ public:
             if (undoable)
             {
                 perform (new SetStretchModeAction (this, newMode),
-                         T("Change image mode"));
+                         "Change image mode");
             }
             else
             {
@@ -371,9 +371,9 @@ public:
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
-        e->setAttribute (T("resource"), resourceName);
-        e->setAttribute (T("opacity"), opacity);
-        e->setAttribute (T("mode"), (int) mode);
+        e->setAttribute ("resource", resourceName);
+        e->setAttribute ("opacity", opacity);
+        e->setAttribute ("mode", (int) mode);
 
         return e;
     }
@@ -383,9 +383,9 @@ public:
         if (xml.hasTagName (getTagName()))
         {
             position.restoreFromXml (xml, position);
-            resourceName = xml.getStringAttribute (T("resource"), String::empty);
-            opacity = xml.getDoubleAttribute (T("opacity"), 1.0);
-            mode = (StretchMode) xml.getIntAttribute (T("mode"), (int) stretched);
+            resourceName = xml.getStringAttribute ("resource", String::empty);
+            opacity = xml.getDoubleAttribute ("opacity", 1.0);
+            mode = (StretchMode) xml.getIntAttribute ("mode", (int) stretched);
 
             repaint();
             return true;
@@ -397,9 +397,6 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     String resourceName;
     double opacity;
@@ -410,7 +407,7 @@ private:
     {
     public:
         ImageElementResourceProperty (PaintElementImage* const element_)
-            : ImageResourceProperty <PaintElementImage> (element_, T("image source"))
+            : ImageResourceProperty <PaintElementImage> (element_, "image source")
         {
         }
 
@@ -432,7 +429,7 @@ private:
     {
     public:
         OpacityProperty (PaintElementImage* const element_)
-            : SliderPropertyComponent (T("opacity"), 0.0, 1.0, 0.001),
+            : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
               element (element_)
         {
             element->getDocument()->addChangeListener (this);
@@ -469,12 +466,12 @@ private:
     {
     public:
         StretchModeProperty (PaintElementImage* const element_)
-            : ChoicePropertyComponent (T("stretch mode")),
+            : ChoicePropertyComponent ("stretch mode"),
               element (element_)
         {
-            choices.add (T("Stretched to fit"));
-            choices.add (T("Maintain aspect ratio"));
-            choices.add (T("Maintain aspect ratio, only reduce in size"));
+            choices.add ("Stretched to fit");
+            choices.add ("Maintain aspect ratio");
+            choices.add ("Maintain aspect ratio, only reduce in size");
 
             element->getDocument()->addChangeListener (this);
         }
@@ -507,7 +504,7 @@ private:
     {
     public:
         ResetSizeProperty (PaintElementImage* const element_)
-            : ButtonPropertyComponent (T("reset"), false),
+            : ButtonPropertyComponent ("reset", false),
               element (element_)
         {
         }
@@ -517,7 +514,7 @@ private:
             element->resetToImageSize();
         }
 
-        const String getButtonText() const          { return T("reset to image size"); }
+        const String getButtonText() const          { return "reset to image size"; }
 
     private:
         PaintElementImage* const element;

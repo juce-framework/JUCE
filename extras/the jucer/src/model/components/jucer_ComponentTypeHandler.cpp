@@ -144,11 +144,11 @@ XmlElement* ComponentTypeHandler::createXmlFor (Component* comp, const Component
 {
     XmlElement* e = new XmlElement (getXmlTagName());
 
-    e->setAttribute (T("name"), comp->getName());
-    e->setAttribute (T("id"), String::toHexString (getComponentId (comp)));
-    e->setAttribute (T("memberName"), comp->getProperties() ["memberName"].toString());
-    e->setAttribute (T("virtualName"), comp->getProperties() ["virtualName"].toString());
-    e->setAttribute (T("explicitFocusOrder"), comp->getExplicitFocusOrder());
+    e->setAttribute ("name", comp->getName());
+    e->setAttribute ("id", String::toHexString (getComponentId (comp)));
+    e->setAttribute ("memberName", comp->getProperties() ["memberName"].toString());
+    e->setAttribute ("virtualName", comp->getProperties() ["virtualName"].toString());
+    e->setAttribute ("explicitFocusOrder", comp->getExplicitFocusOrder());
 
     RelativePositionedRectangle pos (getComponentPosition (comp));
     pos.updateFromComponent (*comp, layout);
@@ -156,7 +156,7 @@ XmlElement* ComponentTypeHandler::createXmlFor (Component* comp, const Component
 
     SettableTooltipClient* const ttc = dynamic_cast <SettableTooltipClient*> (comp);
     if (ttc != 0 && ttc->getTooltip().isNotEmpty())
-        e->setAttribute (T("tooltip"), ttc->getTooltip());
+        e->setAttribute ("tooltip", ttc->getTooltip());
 
     for (int i = 0; i < colours.size(); ++i)
     {
@@ -179,11 +179,11 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
     if (! xml.hasTagName (getXmlTagName()))
         return false;
 
-    comp->setName (xml.getStringAttribute (T("name"), comp->getName()));
-    setComponentId (comp, xml.getStringAttribute (T("id")).getHexValue64());
-    comp->getProperties().set ("memberName", xml.getStringAttribute (T("memberName")));
-    comp->getProperties().set ("virtualName", xml.getStringAttribute (T("virtualName")));
-    comp->setExplicitFocusOrder (xml.getIntAttribute (T("explicitFocusOrder")));
+    comp->setName (xml.getStringAttribute ("name", comp->getName()));
+    setComponentId (comp, xml.getStringAttribute ("id").getHexValue64());
+    comp->getProperties().set ("memberName", xml.getStringAttribute ("memberName"));
+    comp->getProperties().set ("virtualName", xml.getStringAttribute ("virtualName"));
+    comp->setExplicitFocusOrder (xml.getIntAttribute ("explicitFocusOrder"));
 
     RelativePositionedRectangle currentPos (getComponentPosition (comp));
     currentPos.updateFromComponent (*comp, layout);
@@ -196,7 +196,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
 
     SettableTooltipClient* const ttc = dynamic_cast <SettableTooltipClient*> (comp);
     if (ttc != 0)
-        ttc->setTooltip (xml.getStringAttribute (T("tooltip")));
+        ttc->setTooltip (xml.getStringAttribute ("tooltip"));
 
     for (int i = 0; i < colours.size(); ++i)
     {
@@ -267,7 +267,7 @@ class TooltipProperty   : public ComponentTextProperty <Component>
 {
 public:
     TooltipProperty (Component* comp, JucerDocument& document)
-        : ComponentTextProperty <Component> (T("tooltip"), 1024, false, comp, document)
+        : ComponentTextProperty <Component> ("tooltip", 1024, false, comp, document)
     {
     }
 
@@ -280,7 +280,7 @@ public:
     void setText (const String& newText)
     {
         document.perform (new SetTooltipAction (component, *document.getComponentLayout(), newText),
-                          T("Change tooltip"));
+                          "Change tooltip");
     }
 
 private:
@@ -371,7 +371,7 @@ class FocusOrderProperty   : public ComponentTextProperty <Component>
 {
 public:
     FocusOrderProperty (Component* comp, JucerDocument& document)
-        : ComponentTextProperty <Component> (T("focus order"), 8, false, comp, document)
+        : ComponentTextProperty <Component> ("focus order", 8, false, comp, document)
     {
     }
 
@@ -383,7 +383,7 @@ public:
     void setText (const String& newText)
     {
         document.perform (new SetFocusOrderAction (component, *document.getComponentLayout(), jmax (0, newText.getIntValue())),
-                          T("Change focus order"));
+                          "Change focus order");
     }
 
 private:
@@ -426,10 +426,10 @@ void ComponentTypeHandler::getEditableProperties (Component* component,
     properties.add (new ComponentNameProperty (component, document));
     properties.add (new ComponentVirtualClassProperty (component, document));
 
-    properties.add (new ComponentPositionProperty (component, document, T("x"), ComponentPositionProperty::componentX));
-    properties.add (new ComponentPositionProperty (component, document, T("y"), ComponentPositionProperty::componentY));
-    properties.add (new ComponentPositionProperty (component, document, T("width"), ComponentPositionProperty::componentWidth));
-    properties.add (new ComponentPositionProperty (component, document, T("height"), ComponentPositionProperty::componentHeight));
+    properties.add (new ComponentPositionProperty (component, document, "x", ComponentPositionProperty::componentX));
+    properties.add (new ComponentPositionProperty (component, document, "y", ComponentPositionProperty::componentY));
+    properties.add (new ComponentPositionProperty (component, document, "width", ComponentPositionProperty::componentWidth));
+    properties.add (new ComponentPositionProperty (component, document, "height", ComponentPositionProperty::componentHeight));
 
     if (dynamic_cast <SettableTooltipClient*> (component) != 0)
         properties.add (new TooltipProperty (component, document));
@@ -483,11 +483,11 @@ const String ComponentTypeHandler::getColourIntialisationCode (Component* compon
     {
         if (component->isColourSpecified (colours[i]->colourId))
         {
-            s << objectName << T("->setColour (")
+            s << objectName << "->setColour ("
               << colours[i]->colourIdCode
-              << T(", ")
+              << ", "
               << colourToCode (component->findColour (colours[i]->colourId))
-              << T(");\n");
+              << ");\n";
         }
     }
 
@@ -521,9 +521,9 @@ void ComponentTypeHandler::fillInMemberVariableDeclarations (GeneratedCode& code
     }
 
     code.privateMemberDeclarations
-        << T("* ") << memberVariableName << T(";\n");
+        << "* " << memberVariableName << ";\n";
 
-    code.initialisers.add (memberVariableName + T(" (0)"));
+    code.initialisers.add (memberVariableName + " (0)");
 }
 
 void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -537,9 +537,9 @@ void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* com
       << x << ", " << y << ", " << w << ", " << h << ");\n";
 
     if (pos.rect.isPositionAbsolute())
-        code.constructorCode += r + T("\n");
+        code.constructorCode += r + "\n";
     else
-        code.getCallbackCode (String::empty, T("void"), T("resized()"), false) += r;
+        code.getCallbackCode (String::empty, "void", "resized()", false) += r;
 }
 
 const String ComponentTypeHandler::getCreationParameters (Component* component)

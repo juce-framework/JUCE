@@ -129,7 +129,7 @@ void JucerDocument::setParentClasses (const String& classes)
     if (classes != parentClasses)
     {
         StringArray parentClassLines;
-        parentClassLines.addTokens (classes, T(","), String::empty);
+        parentClassLines.addTokens (classes, ",", String::empty);
         parentClassLines.trim();
         parentClassLines.removeEmptyStrings();
         parentClassLines.removeDuplicates (false);
@@ -139,12 +139,12 @@ void JucerDocument::setParentClasses (const String& classes)
             String s (parentClassLines[i]);
             String type;
 
-            if (s.startsWith (T("public "))
-                || s.startsWith (T("protected "))
-                || s.startsWith (T("private ")))
+            if (s.startsWith ("public ")
+                || s.startsWith ("protected ")
+                || s.startsWith ("private "))
             {
-                type = s.upToFirstOccurrenceOf (T(" "), true, false);
-                s = s.fromFirstOccurrenceOf (T(" "), false, false);
+                type = s.upToFirstOccurrenceOf (" ", true, false);
+                s = s.fromFirstOccurrenceOf (" ", false, false);
 
                 if (s.trim().isEmpty())
                     type = s = String::empty;
@@ -155,7 +155,7 @@ void JucerDocument::setParentClasses (const String& classes)
             parentClassLines.set (i, s);
         }
 
-        parentClasses = parentClassLines.joinIntoString (T(", "));
+        parentClasses = parentClassLines.joinIntoString (", ");
         changed();
     }
 }
@@ -331,30 +331,30 @@ XmlElement* JucerDocument::createXml() const
 {
     XmlElement* doc = new XmlElement (jucerCompXmlTag);
 
-    doc->setAttribute (T("documentType"), getTypeName());
-    doc->setAttribute (T("className"), className);
-    doc->setAttribute (T("componentName"), componentName);
-    doc->setAttribute (T("parentClasses"), parentClasses);
-    doc->setAttribute (T("constructorParams"), constructorParams);
-    doc->setAttribute (T("variableInitialisers"), variableInitialisers);
-    doc->setAttribute (T("snapPixels"), snapGridPixels);
-    doc->setAttribute (T("snapActive"), snapActive);
-    doc->setAttribute (T("snapShown"), snapShown);
-    doc->setAttribute (T("overlayOpacity"), (double) componentOverlayOpacity);
-    doc->setAttribute (T("fixedSize"), fixedSize);
-    doc->setAttribute (T("initialWidth"), initialWidth);
-    doc->setAttribute (T("initialHeight"), initialHeight);
+    doc->setAttribute ("documentType", getTypeName());
+    doc->setAttribute ("className", className);
+    doc->setAttribute ("componentName", componentName);
+    doc->setAttribute ("parentClasses", parentClasses);
+    doc->setAttribute ("constructorParams", constructorParams);
+    doc->setAttribute ("variableInitialisers", variableInitialisers);
+    doc->setAttribute ("snapPixels", snapGridPixels);
+    doc->setAttribute ("snapActive", snapActive);
+    doc->setAttribute ("snapShown", snapShown);
+    doc->setAttribute ("overlayOpacity", (double) componentOverlayOpacity);
+    doc->setAttribute ("fixedSize", fixedSize);
+    doc->setAttribute ("initialWidth", initialWidth);
+    doc->setAttribute ("initialHeight", initialHeight);
 
     if (activeExtraMethods.size() > 0)
     {
-        XmlElement* extraMethods = new XmlElement (T("METHODS"));
+        XmlElement* extraMethods = new XmlElement ("METHODS");
         doc->addChildElement (extraMethods);
 
         for (int i = 0; i < activeExtraMethods.size(); ++i)
         {
-            XmlElement* e = new XmlElement (T("METHOD"));
+            XmlElement* e = new XmlElement ("METHOD");
             extraMethods ->addChildElement (e);
-            e->setAttribute (T("name"), activeExtraMethods[i]);
+            e->setAttribute ("name", activeExtraMethods[i]);
         }
     }
 
@@ -364,17 +364,17 @@ XmlElement* JucerDocument::createXml() const
 bool JucerDocument::loadFromXml (const XmlElement& xml)
 {
     if (xml.hasTagName (jucerCompXmlTag)
-         && getTypeName().equalsIgnoreCase (xml.getStringAttribute (T("documentType"), ObjectTypes::documentTypeNames[0])))
+         && getTypeName().equalsIgnoreCase (xml.getStringAttribute ("documentType", ObjectTypes::documentTypeNames[0])))
     {
-        className = xml.getStringAttribute (T("className"), defaultClassName);
-        componentName = xml.getStringAttribute (T("componentName"), String::empty);
-        parentClasses = xml.getStringAttribute (T("parentClasses"), defaultParentClasses);
-        constructorParams = xml.getStringAttribute (T("constructorParams"), String::empty);
-        variableInitialisers = xml.getStringAttribute (T("variableInitialisers"), String::empty);
+        className = xml.getStringAttribute ("className", defaultClassName);
+        componentName = xml.getStringAttribute ("componentName", String::empty);
+        parentClasses = xml.getStringAttribute ("parentClasses", defaultParentClasses);
+        constructorParams = xml.getStringAttribute ("constructorParams", String::empty);
+        variableInitialisers = xml.getStringAttribute ("variableInitialisers", String::empty);
 
-        fixedSize = xml.getBoolAttribute (T("fixedSize"), false);
-        initialWidth = xml.getIntAttribute (T("initialWidth"), 300);
-        initialHeight = xml.getIntAttribute (T("initialHeight"), 200);
+        fixedSize = xml.getBoolAttribute ("fixedSize", false);
+        initialWidth = xml.getIntAttribute ("initialWidth", 300);
+        initialHeight = xml.getIntAttribute ("initialHeight", 200);
 
         snapGridPixels = xml.getIntAttribute ("snapPixels", snapGridPixels);
         snapActive = xml.getBoolAttribute ("snapActive", snapActive);
@@ -410,7 +410,7 @@ const String JucerDocument::loadDocument (const File& file)
 {
     String error (TRANS("Not a valid Jucer cpp file"));
 
-    const File cppFile (file.withFileExtension (T(".cpp")));
+    const File cppFile (file.withFileExtension (".cpp"));
 
     const String cppFileString (cppFile.loadFileAsString());
 
@@ -467,18 +467,18 @@ XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
     StringArray lines;
     lines.addLines (cpp);
 
-    int startLine = indexOfLineStartingWith (lines, T("BEGIN_JUCER_METADATA"), 0);
+    int startLine = indexOfLineStartingWith (lines, "BEGIN_JUCER_METADATA", 0);
 
     if (startLine > 0)
     {
-        int endLine = indexOfLineStartingWith (lines, T("END_JUCER_METADATA"), 0);
+        int endLine = indexOfLineStartingWith (lines, "END_JUCER_METADATA", 0);
 
         if (endLine > startLine)
         {
             String xmlText;
 
             for (int i = startLine + 1; i < endLine; ++i)
-                xmlText << lines[i] << T("\n");
+                xmlText << lines[i] << "\n";
 
             XmlDocument doc (xmlText);
             return doc.getDocumentElement();
@@ -525,10 +525,10 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
         code.constructorCode
             << "\nsetSize (" << initialWidth << ", " << initialHeight << ");\n";
 
-    code.getCallbackCode (String::empty, T("void"), T("paint (Graphics& g)"), false)
+    code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
         << "//[UserPaint] Add your own custom painting code here..\n//[/UserPaint]";
 
-    code.getCallbackCode (String::empty, T("void"), T("resized()"), false)
+    code.getCallbackCode (String::empty, "void", "resized()", false)
         << "//[UserResized] Add your own custom resize handling here..\n//[/UserResized]";
 
     // add optional methods
@@ -541,10 +541,10 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
         {
             String& s = code.getCallbackCode (baseClasses[i], returnValues[i], methods[i], false);
 
-            if (! s.contains (T("//[")))
+            if (! s.contains ("//["))
             {
-                String userCommentTag (T("UserCode_"));
-                userCommentTag += methods[i].upToFirstOccurrenceOf (T("("), false, false).trim();
+                String userCommentTag ("UserCode_");
+                userCommentTag += methods[i].upToFirstOccurrenceOf ("(", false, false).trim();
 
                 s << "\n//["
                   << userCommentTag
@@ -567,7 +567,7 @@ void JucerDocument::fillInPaintCode (GeneratedCode& code) const
     for (int i = 0; i < getNumPaintRoutines(); ++i)
     {
         getPaintRoutine (i)
-            ->fillInGeneratedCode (code, code.getCallbackCode (String::empty, T("void"), T("paint (Graphics& g)"), false));
+            ->fillInGeneratedCode (code, code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false));
     }
 }
 
@@ -576,8 +576,8 @@ bool JucerDocument::findTemplateFiles (String& templateH, String& templateCpp) c
 {
     const File templateDir (StoredSettings::getInstance()->getTemplatesDir());
 
-    const File hTemplate   (templateDir.getChildFile (T("jucer_ComponentTemplate.h")));
-    const File cppTemplate (templateDir.getChildFile (T("jucer_ComponentTemplate.cpp")));
+    const File hTemplate   (templateDir.getChildFile ("jucer_ComponentTemplate.h"));
+    const File cppTemplate (templateDir.getChildFile ("jucer_ComponentTemplate.cpp"));
 
     if (! (cppTemplate.existsAsFile() && hTemplate.existsAsFile()))
         return false;
@@ -608,7 +608,7 @@ void JucerDocument::getPreviewFiles (String& h, String& cpp)
     {
         GeneratedCode generated (this);
         fillInGeneratedCode (generated);
-        generated.includeFilesCPP.insert (0, getFile().withFileExtension (T("h")).getFileName());
+        generated.includeFilesCPP.insert (0, getFile().withFileExtension ("h").getFileName());
 
         generated.applyToCode (h, getClassName(), true);
         generated.applyToCode (cpp, getClassName(), true);

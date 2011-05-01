@@ -49,6 +49,10 @@ public:
         patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
         or .aiff.
 
+        Passing an empty string as a pattern will fail to match anything, so by leaving
+        either the file or directory pattern parameter empty means you can control
+        whether files or directories are found.
+
         The description is a name to show the user in a list of possible patterns, so
         for the wav/aiff example, your description might be "audio files".
     */

@@ -78,9 +78,6 @@ public:
     Component::SafePointer<Component> target;
     const int borderThickness;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     ResizableBorderComponent* border;
 

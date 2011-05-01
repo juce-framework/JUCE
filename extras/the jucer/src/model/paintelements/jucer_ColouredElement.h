@@ -72,9 +72,6 @@ public:
     void addColourAttributes (XmlElement* const e) const;
     bool loadColourAttributes (const XmlElement& xml);
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     JucerFillType fillType;
 

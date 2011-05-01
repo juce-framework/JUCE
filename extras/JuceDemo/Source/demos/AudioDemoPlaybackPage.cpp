@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  18 Sep 2009 7:17:11 pm
+  Creation date:  1 May 2011 12:08:14pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -133,7 +133,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
       zoomSlider (0)
 {
     addAndMakeVisible (zoomLabel = new Label (String::empty,
-                                              T("zoom:")));
+                                              L"zoom:"));
     zoomLabel->setFont (Font (15.0000f, Font::plain));
     zoomLabel->setJustificationType (Justification::centredRight);
     zoomLabel->setEditable (false, false, false);
@@ -143,14 +143,14 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     addAndMakeVisible (thumbnail = new DemoThumbnailComp());
 
     addAndMakeVisible (startStopButton = new TextButton (String::empty));
-    startStopButton->setButtonText (T("Play/Stop"));
+    startStopButton->setButtonText (L"Play/Stop");
     startStopButton->addListener (this);
     startStopButton->setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
 
     addAndMakeVisible (fileTreeComp = new FileTreeComponent (directoryList));
 
     addAndMakeVisible (explanation = new Label (String::empty,
-                                                T("Select an audio file in the treeview above, and this page will display its waveform, and let you play it..")));
+                                                L"Select an audio file in the treeview above, and this page will display its waveform, and let you play it.."));
     explanation->setFont (Font (14.0000f, Font::plain));
     explanation->setJustificationType (Justification::bottomRight);
     explanation->setEditable (false, false, false);
@@ -169,6 +169,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     //[/UserPreSize]
 
     setSize (600, 400);
+
 
     //[Constructor] You can add your own custom stuff here..
     directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
@@ -198,6 +199,7 @@ AudioDemoPlaybackPage::~AudioDemoPlaybackPage()
     deleteAndZero (fileTreeComp);
     deleteAndZero (explanation);
     deleteAndZero (zoomSlider);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]

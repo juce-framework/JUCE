@@ -37,7 +37,7 @@ class PaintElementRoundedRectangle  : public ColouredElement
 public:
     //==============================================================================
     PaintElementRoundedRectangle (PaintRoutine* owner)
-        : ColouredElement (owner, T("Rounded Rectangle"), true, false)
+        : ColouredElement (owner, "Rounded Rectangle", true, false)
     {
         cornerSize = 10.0;
     }
@@ -107,7 +107,7 @@ public:
             if (undoable)
             {
                 perform (new SetCornerSizeAction (this, newSize),
-                         T("Change rounded rectangle corner size"));
+                         "Change rounded rectangle corner size");
             }
             else
             {
@@ -163,7 +163,7 @@ public:
         XmlElement* const e = new XmlElement (getTagName());
 
         position.applyToXml (*e);
-        e->setAttribute (T("cornerSize"), cornerSize);
+        e->setAttribute ("cornerSize", cornerSize);
         addColourAttributes (e);
 
         return e;
@@ -174,7 +174,7 @@ public:
         if (xml.hasTagName (getTagName()))
         {
             position.restoreFromXml (xml, position);
-            cornerSize = xml.getDoubleAttribute (T("cornerSize"), 10.0);
+            cornerSize = xml.getDoubleAttribute ("cornerSize", 10.0);
             loadColourAttributes (xml);
 
             return true;
@@ -197,9 +197,6 @@ public:
         convertToNewPathElement (path);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     double cornerSize;
 
@@ -209,7 +206,7 @@ private:
     {
     public:
         CornerSizeProperty (PaintElementRoundedRectangle* const owner_)
-            : SliderPropertyComponent (T("corner size"), 1.0, 200.0, 0.5, 0.4),
+            : SliderPropertyComponent ("corner size", 1.0, 200.0, 0.5, 0.4),
               owner (owner_)
         {
             owner->getDocument()->addChangeListener (this);
@@ -240,7 +237,7 @@ private:
     {
     public:
         ShapeToPathProperty (PaintElementRoundedRectangle* const element_)
-            : ButtonPropertyComponent (T("path"), false),
+            : ButtonPropertyComponent ("path", false),
               element (element_)
         {
         }
@@ -252,7 +249,7 @@ private:
 
         const String getButtonText() const
         {
-            return T("convert to a path");
+            return "convert to a path";
         }
 
     private:

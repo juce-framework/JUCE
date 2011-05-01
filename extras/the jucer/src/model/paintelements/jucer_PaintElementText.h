@@ -39,8 +39,8 @@ class PaintElementText   : public ColouredElement
 public:
     //==============================================================================
     PaintElementText (PaintRoutine* owner)
-        : ColouredElement (owner, T("Text"), false, false),
-          text (T("Your text goes here")),
+        : ColouredElement (owner, "Text", false, false),
+          text ("Your text goes here"),
           font (15.0f),
           typefaceName (FontPropertyComponent::defaultFont),
           justification (Justification::centred)
@@ -355,9 +355,6 @@ public:
 
         convertToNewPathElement (path);
     }
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     String text;

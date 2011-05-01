@@ -41,7 +41,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        Viewport* const v = new UpdatingViewport (T("new viewport"));
+        Viewport* const v = new UpdatingViewport ("new viewport");
         v->setViewedComponent (new ViewportDemoContentComp());
 
         return v;
@@ -52,14 +52,14 @@ public:
         Viewport* const v = dynamic_cast <Viewport*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
 
-        e->setAttribute (T("vscroll"), v->isVerticalScrollBarShown());
-        e->setAttribute (T("hscroll"), v->isHorizontalScrollBarShown());
-        e->setAttribute (T("scrollbarThickness"), v->getScrollBarThickness());
+        e->setAttribute ("vscroll", v->isVerticalScrollBarShown());
+        e->setAttribute ("hscroll", v->isHorizontalScrollBarShown());
+        e->setAttribute ("scrollbarThickness", v->getScrollBarThickness());
 
-        e->setAttribute (T("contentType"), getViewportContentType (v));
-        e->setAttribute (T("jucerFile"), getViewportJucerComponentFile (v));
-        e->setAttribute (T("contentClass"), getViewportGenericComponentClass (v));
-        e->setAttribute (T("constructorParams"), getViewportConstructorParams (v));
+        e->setAttribute ("contentType", getViewportContentType (v));
+        e->setAttribute ("jucerFile", getViewportJucerComponentFile (v));
+        e->setAttribute ("contentClass", getViewportGenericComponentClass (v));
+        e->setAttribute ("constructorParams", getViewportConstructorParams (v));
 
         return e;
     }
@@ -71,15 +71,15 @@ public:
 
         Viewport defaultViewport;
         Viewport* const v = dynamic_cast <Viewport*> (comp);
-        v->setScrollBarsShown (xml.getBoolAttribute (T("vscroll"), defaultViewport.isVerticalScrollBarShown()),
-                               xml.getBoolAttribute (T("hscroll"), defaultViewport.isHorizontalScrollBarShown()));
+        v->setScrollBarsShown (xml.getBoolAttribute ("vscroll", defaultViewport.isVerticalScrollBarShown()),
+                               xml.getBoolAttribute ("hscroll", defaultViewport.isHorizontalScrollBarShown()));
 
-        v->setScrollBarThickness (xml.getIntAttribute (T("scrollbarThickness"), defaultViewport.getScrollBarThickness()));
+        v->setScrollBarThickness (xml.getIntAttribute ("scrollbarThickness", defaultViewport.getScrollBarThickness()));
 
-        setViewportJucerComponentFile (v, xml.getStringAttribute (T("jucerFile"), String::empty));
-        setViewportGenericComponentClass (v, xml.getStringAttribute (T("contentClass")));
-        setViewportContentType (v, xml.getIntAttribute (T("contentType"), 0));
-        setViewportConstructorParams (v, xml.getStringAttribute (T("constructorParams")));
+        setViewportJucerComponentFile (v, xml.getStringAttribute ("jucerFile", String::empty));
+        setViewportGenericComponentClass (v, xml.getStringAttribute ("contentClass"));
+        setViewportContentType (v, xml.getIntAttribute ("contentType", 0));
+        setViewportConstructorParams (v, xml.getStringAttribute ("constructorParams"));
 
         return true;
     }
@@ -152,7 +152,7 @@ public:
 
                 if (doc != 0)
                 {
-                    code.includeFilesCPP.add (doc->getFile().withFileExtension (T("h"))
+                    code.includeFilesCPP.add (doc->getFile().withFileExtension ("h")
                                                 .getRelativePathFrom (code.document->getFile().getParentDirectory())
                                                 .replaceCharacter ('\\', '/'));
 
@@ -259,8 +259,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class UpdatingViewport  : public Viewport
@@ -268,10 +266,6 @@ private:
     public:
         UpdatingViewport (const String& name)
             : Viewport (name)
-        {
-        }
-
-        ~UpdatingViewport()
         {
         }
 
@@ -291,10 +285,6 @@ private:
             setSize (2048, 2048);
         }
 
-        ~ViewportDemoContentComp()
-        {
-        }
-
         void paint (Graphics& g)
         {
             g.fillCheckerBoard (getLocalBounds(), 50, 50,
@@ -308,8 +298,8 @@ private:
     {
     public:
         ViewportScrollbarShownProperty (Viewport* comp, JucerDocument& document, const bool vertical_)
-            : ComponentBooleanProperty <Viewport> (vertical_ ? T("V scrollbar") : T("H scrollbar"),
-                                                   T("enabled"), T("enabled"),
+            : ComponentBooleanProperty <Viewport> (vertical_ ? "V scrollbar" : "H scrollbar",
+                                                   "enabled", "enabled",
                                                    comp, document),
                vertical (vertical_)
         {
@@ -318,7 +308,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new ViewportScrollbarChangeAction (component, *document.getComponentLayout(), vertical, newState),
-                              T("Change Viewport scrollbar"));
+                              "Change Viewport scrollbar");
         }
 
         bool getState() const
@@ -375,7 +365,7 @@ private:
     {
     public:
         ViewportScrollbarSizeProperty (Viewport* comp, JucerDocument& document_)
-            : SliderPropertyComponent (T("scrollbar size"), 3.0, 30.0, 1.0, 1.0),
+            : SliderPropertyComponent ("scrollbar size", 3.0, 30.0, 1.0, 1.0),
               component (comp),
               document (document_)
         {
@@ -392,7 +382,7 @@ private:
             document.getUndoManager().undoCurrentTransactionOnly();
 
             document.perform (new ViewportScrollbarSizeChangeAction (component, *document.getComponentLayout(), roundToInt (newValue)),
-                              T("Change Viewport scrollbar size"));
+                              "Change Viewport scrollbar size");
         }
 
         double getValue() const
@@ -444,17 +434,17 @@ private:
     {
     public:
         ViewportContentTypeProperty (Viewport* comp, JucerDocument& document)
-            : ComponentChoiceProperty <Viewport> (T("content"), comp, document)
+            : ComponentChoiceProperty <Viewport> ("content", comp, document)
         {
-            choices.add (T("No content component"));
-            choices.add (T("Jucer content component"));
-            choices.add (T("Named content component"));
+            choices.add ("No content component");
+            choices.add ("Jucer content component");
+            choices.add ("Named content component");
         }
 
         void setIndex (int newIndex)
         {
             document.perform (new ViewportContentTypeChangeAction (component, *document.getComponentLayout(), newIndex),
-                              T("Change Viewport content type"));
+                              "Change Viewport content type");
         }
 
         int getIndex() const
@@ -501,7 +491,7 @@ private:
     {
     public:
         ViewportJucerFileProperty (Viewport* const component_, JucerDocument& document_)
-            : FilePropertyComponent (T("Jucer file"), false, true),
+            : FilePropertyComponent ("Jucer file", false, true),
               component (component_),
               document (document_)
         {
@@ -520,7 +510,7 @@ private:
                                                              newFile.getRelativePathFrom (document.getFile().getParentDirectory())
                                                                     .replaceCharacter ('\\', '/')
 ),
-                              T("Change Jucer component file"));
+                              "Change Jucer component file");
         }
 
         const File getFile() const
@@ -577,14 +567,14 @@ private:
     {
     public:
         ViewportContentClassProperty (Viewport* comp, JucerDocument& document)
-            : ComponentTextProperty <Viewport> (T("content class"), 256, false, comp, document)
+            : ComponentTextProperty <Viewport> ("content class", 256, false, comp, document)
         {
         }
 
         void setText (const String& newText)
         {
             document.perform (new ViewportClassNameChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change Viewport content class"));
+                              "Change Viewport content class");
         }
 
         const String getText() const
@@ -630,14 +620,14 @@ private:
     {
     public:
         ConstructorParamsProperty (Viewport* comp, JucerDocument& document)
-            : ComponentTextProperty <Viewport> (T("constructor params"), 512, false, comp, document)
+            : ComponentTextProperty <Viewport> ("constructor params", 512, false, comp, document)
         {
         }
 
         void setText (const String& newText)
         {
             document.perform (new ConstructorParamChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change Viewport content constructor params"));
+                              "Change Viewport content constructor params");
         }
 
         const String getText() const

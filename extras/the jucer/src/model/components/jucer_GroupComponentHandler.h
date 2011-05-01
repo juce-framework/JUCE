@@ -44,7 +44,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new GroupComponent (T("new group"), T("group"));
+        return new GroupComponent ("new group", "group");
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -52,12 +52,12 @@ public:
         GroupComponent* const g = (GroupComponent*) comp;
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
-        e->setAttribute (T("title"), g->getText());
+        e->setAttribute ("title", g->getText());
 
         GroupComponent defaultComp (String::empty, String::empty);
 
         if (g->getTextLabelPosition().getFlags() != defaultComp.getTextLabelPosition().getFlags())
-            e->setAttribute (T("textpos"), g->getTextLabelPosition().getFlags());
+            e->setAttribute ("textpos", g->getTextLabelPosition().getFlags());
 
         return e;
     }
@@ -69,8 +69,8 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        g->setText (xml.getStringAttribute (T("title"), g->getText()));
-        g->setTextLabelPosition (Justification (xml.getIntAttribute (T("textpos"), g->getTextLabelPosition().getFlags())));
+        g->setText (xml.getStringAttribute ("title", g->getText()));
+        g->setTextLabelPosition (Justification (xml.getIntAttribute ("textpos", g->getTextLabelPosition().getFlags())));
 
         return true;
     }
@@ -117,23 +117,20 @@ public:
         addColourProperties (component, document, properties);
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class GroupTitleProperty   : public ComponentTextProperty <GroupComponent>
     {
     public:
         GroupTitleProperty (GroupComponent* component_, JucerDocument& document_)
-            : ComponentTextProperty <GroupComponent> (T("text"), 200, false, component_, document_)
+            : ComponentTextProperty <GroupComponent> ("text", 200, false, component_, document_)
         {}
 
         //==============================================================================
         void setText (const String& newText)
         {
             document.perform (new GroupTitleChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change group title"));
+                              "Change group title");
         }
 
         const String getText() const
@@ -178,7 +175,7 @@ private:
     {
     public:
         GroupJustificationProperty (GroupComponent* const group_, JucerDocument& document_)
-            : JustificationProperty (T("layout"), true),
+            : JustificationProperty ("layout", true),
               group (group_),
               document (document_)
         {
@@ -193,7 +190,7 @@ private:
         void setJustification (const Justification& newJustification)
         {
             document.perform (new GroupJustifyChangeAction (group, *document.getComponentLayout(), newJustification),
-                              T("Change text label position"));
+                              "Change text label position");
         }
 
         const Justification getJustification() const

@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  18 Sep 2009 5:32:11 pm
+  Creation date:  1 May 2011 1:54:50pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_BFCD772A__
-#define __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_BFCD772A__
+#ifndef __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_7C897E97__
+#define __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_7C897E97__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -55,6 +55,7 @@ public:
     void buttonClicked (Button* buttonThatWasClicked);
 
 
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -69,6 +70,7 @@ private:
     TextButton* startTestButton;
     TextEditor* testResultsBox;
 
+
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     AudioDemoLatencyPage (const AudioDemoLatencyPage&);
@@ -76,4 +78,4 @@ private:
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_BFCD772A__
+#endif   // __JUCER_HEADER_AUDIODEMOLATENCYPAGE_AUDIODEMOLATENCYPAGE_7C897E97__

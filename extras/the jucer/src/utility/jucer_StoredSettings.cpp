@@ -54,32 +54,32 @@ void StoredSettings::flush()
 {
     if (props != 0)
     {
-        props->setValue (T("recentFiles"), recentFiles.toString());
+        props->setValue ("recentFiles", recentFiles.toString());
 
-        props->removeValue (T("keyMappings"));
+        props->removeValue ("keyMappings");
 
         XmlElement* keys = commandManager->getKeyMappings()->createXml (true);
 
         if (keys != 0)
         {
-            props->setValue (T("keyMappings"), keys);
+            props->setValue ("keyMappings", keys);
             delete keys;
         }
 
         for (int i = 0; i < swatchColours.size(); ++i)
-            props->setValue (T("swatchColour") + String (i), colourToHex (swatchColours [i]));
+            props->setValue ("swatchColour" + String (i), colourToHex (swatchColours [i]));
     }
 
     deleteAndZero (props);
 
-    props = PropertiesFile::createDefaultAppPropertiesFile (T("Jucer"),
-                                                            T("settings"),
+    props = PropertiesFile::createDefaultAppPropertiesFile ("Jucer",
+                                                            "settings",
                                                             String::empty,
                                                             false, 3000,
                                                             PropertiesFile::storeAsXML);
 
     // recent files...
-    recentFiles.restoreFromString (props->getValue (T("recentFiles")));
+    recentFiles.restoreFromString (props->getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 
     // swatch colours...
@@ -99,7 +99,7 @@ void StoredSettings::flush()
     {
         Colour defaultCol (colours [2 + i]);
 
-        swatchColours.add (Colour (props->getValue (T("swatchColour") + String (i),
+        swatchColours.add (Colour (props->getValue ("swatchColour" + String (i),
                                                     colourToHex (defaultCol)).getHexValue32()));
     }
 }
@@ -109,11 +109,11 @@ const File StoredSettings::getTemplatesDir() const
     File defaultTemplateDir (File::getSpecialLocation (File::currentExecutableFile)
                                 .getParentDirectory());
 
-    return File (props->getValue (T("templateDir"),
+    return File (props->getValue ("templateDir",
                                   defaultTemplateDir.getFullPathName()));
 }
 
 void StoredSettings::setTemplatesDir (const File& newDir)
 {
-    props->setValue (T("templateDir"), newDir.getFullPathName());
+    props->setValue ("templateDir", newDir.getFullPathName());
 }

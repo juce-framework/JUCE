@@ -66,9 +66,6 @@ public:
 
     class MagnifierComponent;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 protected:
     JucerDocument& document;
 

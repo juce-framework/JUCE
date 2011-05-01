@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 Dec 2009 9:04:27 pm
+  Creation date:  1 May 2011 12:07:57pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_79B4A77C__
-#define __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_79B4A77C__
+#ifndef __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_ABDF1DF__
+#define __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_ABDF1DF__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -61,6 +61,7 @@ public:
     static const char* demoPng_png;
     static const int demoPng_pngSize;
 
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -93,6 +94,7 @@ private:
     ToggleButton* clipToPathToggle;
     ToggleButton* clipToImageToggle;
 
+
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     RenderingTestComponent (const RenderingTestComponent&);
@@ -100,4 +102,4 @@ private:
 };
 
 
-#endif   // __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_79B4A77C__
+#endif   // __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_ABDF1DF__

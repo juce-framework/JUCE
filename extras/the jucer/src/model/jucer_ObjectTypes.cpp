@@ -97,9 +97,9 @@ JucerDocument* loadDocumentFromFile (const File& f, const bool showErrorMessage)
 
     if (file == File::nonexistent && showErrorMessage)
     {
-        FileChooser fc (T("Open a Jucer C++ file..."),
+        FileChooser fc ("Open a Jucer C++ file...",
                         StoredSettings::getInstance()->recentFiles.getFile (0),
-                        T("*.cpp"));
+                        "*.cpp");
 
         if (! fc.browseForFileToOpen())
             return 0;
@@ -120,7 +120,7 @@ JucerDocument* loadDocumentFromFile (const File& f, const bool showErrorMessage)
         return 0;
     }
 
-    const String docType (xml->getStringAttribute (T("documentType")));
+    const String docType (xml->getStringAttribute ("documentType"));
     delete xml;
 
     // (reverse order so ComponentDocument is default last-case)

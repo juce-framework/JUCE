@@ -156,9 +156,6 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     PaintRoutine& paintRoutine;
     JucerDocument* document;

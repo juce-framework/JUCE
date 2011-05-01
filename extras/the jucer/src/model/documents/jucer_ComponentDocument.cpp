@@ -46,7 +46,7 @@ ComponentDocument::~ComponentDocument()
 //==============================================================================
 const String ComponentDocument::getTypeName() const
 {
-    return T("Component");
+    return "Component";
 }
 
 JucerDocument* ComponentDocument::createCopy()

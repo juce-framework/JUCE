@@ -41,7 +41,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new ComboBox (T("new combo box"));
+        return new ComboBox ("new combo box");
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -51,11 +51,11 @@ public:
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
 
-        e->setAttribute (T("editable"), c->isTextEditable());
-        e->setAttribute (T("layout"), c->getJustificationType().getFlags());
-        e->setAttribute (T("items"), c->getProperties() ["items"].toString());
-        e->setAttribute (T("textWhenNonSelected"), c->getTextWhenNothingSelected());
-        e->setAttribute (T("textWhenNoItems"), c->getTextWhenNoChoicesAvailable());
+        e->setAttribute ("editable", c->isTextEditable());
+        e->setAttribute ("layout", c->getJustificationType().getFlags());
+        e->setAttribute ("items", c->getProperties() ["items"].toString());
+        e->setAttribute ("textWhenNonSelected", c->getTextWhenNothingSelected());
+        e->setAttribute ("textWhenNoItems", c->getTextWhenNoChoicesAvailable());
 
         return e;
     }
@@ -70,11 +70,11 @@ public:
         ComboBox* const c = dynamic_cast <ComboBox*> (comp);
         jassert (c != 0);
 
-        c->setEditableText (xml.getBoolAttribute (T("editable"), defaultBox.isTextEditable()));
-        c->setJustificationType (Justification (xml.getIntAttribute (T("layout"), defaultBox.getJustificationType().getFlags())));
-        c->getProperties().set ("items", xml.getStringAttribute (T("items"), String::empty));
-        c->setTextWhenNothingSelected (xml.getStringAttribute (T("textWhenNonSelected"), defaultBox.getTextWhenNothingSelected()));
-        c->setTextWhenNoChoicesAvailable (xml.getStringAttribute (T("textWhenNoItems"), defaultBox.getTextWhenNoChoicesAvailable()));
+        c->setEditableText (xml.getBoolAttribute ("editable", defaultBox.isTextEditable()));
+        c->setJustificationType (Justification (xml.getIntAttribute ("layout", defaultBox.getJustificationType().getFlags())));
+        c->getProperties().set ("items", xml.getStringAttribute ("items", String::empty));
+        c->setTextWhenNothingSelected (xml.getStringAttribute ("textWhenNonSelected", defaultBox.getTextWhenNothingSelected()));
+        c->setTextWhenNoChoicesAvailable (xml.getStringAttribute ("textWhenNoItems", defaultBox.getTextWhenNoChoicesAvailable()));
 
         updateItems (c);
 
@@ -140,9 +140,9 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode (T("public ComboBoxListener"),
-                                                     T("void"),
-                                                     T("comboBoxChanged (ComboBox* comboBoxThatHasChanged)"),
+            String& callback = code.getCallbackCode ("public ComboBoxListener",
+                                                     "void",
+                                                     "comboBoxChanged (ComboBox* comboBoxThatHasChanged)",
                                                      true);
 
             if (callback.trim().isNotEmpty())
@@ -179,16 +179,13 @@ public:
         return true; // xxx should be configurable
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class ComboEditableProperty  : public ComponentBooleanProperty <ComboBox>
     {
     public:
         ComboEditableProperty (ComboBox* component_, JucerDocument& document_)
-            : ComponentBooleanProperty <ComboBox> (T("editable"), T("Text is editable"), T("Text is editable"), component_, document_)
+            : ComponentBooleanProperty <ComboBox> ("editable", "Text is editable", "Text is editable", component_, document_)
         {
         }
 
@@ -196,7 +193,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new ComboEditableChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change combo box editability"));
+                              "Change combo box editability");
         }
 
         bool getState() const
@@ -240,7 +237,7 @@ private:
     {
     public:
         ComboJustificationProperty (ComboBox* component_, JucerDocument& document_)
-            : JustificationProperty (T("text layout"), false),
+            : JustificationProperty ("text layout", false),
               component (component_),
               document (document_)
         {
@@ -250,7 +247,7 @@ private:
         void setJustification (const Justification& newJustification)
         {
             document.perform (new ComboJustifyChangeAction (component, *document.getComponentLayout(), newJustification),
-                              T("Change combo box justification"));
+                              "Change combo box justification");
         }
 
         const Justification getJustification() const        { return component->getJustificationType(); }
@@ -294,14 +291,14 @@ private:
     {
     public:
         ComboItemsProperty (ComboBox* component_, JucerDocument& document_)
-            : ComponentTextProperty <ComboBox> (T("items"), 10000, true, component_, document_)
+            : ComponentTextProperty <ComboBox> ("items", 10000, true, component_, document_)
         {}
 
         //==============================================================================
         void setText (const String& newText)
         {
             document.perform (new ComboItemsChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change combo box items"));
+                              "Change combo box items");
         }
 
         const String getText() const
@@ -347,14 +344,14 @@ private:
     {
     public:
         ComboTextWhenNoneSelectedProperty (ComboBox* component_, JucerDocument& document_)
-            : ComponentTextProperty <ComboBox> (T("text when none selected"), 200, false, component_, document_)
+            : ComponentTextProperty <ComboBox> ("text when none selected", 200, false, component_, document_)
         {}
 
         //==============================================================================
         void setText (const String& newText)
         {
             document.perform (new ComboNonSelTextChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change combo box text when nothing selected"));
+                              "Change combo box text when nothing selected");
         }
 
         const String getText() const
@@ -398,14 +395,14 @@ private:
     {
     public:
         ComboTextWhenNoItemsProperty (ComboBox* component_, JucerDocument& document_)
-            : ComponentTextProperty <ComboBox> (T("text when no items"), 200, false, component_, document_)
+            : ComponentTextProperty <ComboBox> ("text when no items", 200, false, component_, document_)
         {}
 
         //==============================================================================
         void setText (const String& newText)
         {
             document.perform (new ComboNoItemTextChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change combo box 'no items' text"));
+                              "Change combo box 'no items' text");
         }
 
         const String getText() const

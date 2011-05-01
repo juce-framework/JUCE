@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  13 Nov 2009 3:52:50 pm
+  Creation date:  1 May 2011 12:08:25pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_4FF281BF__
-#define __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_4FF281BF__
+#ifndef __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_E12E1947__
+#define __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_E12E1947__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -56,6 +56,7 @@ public:
     void visibilityChanged();
 
 
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -70,6 +71,7 @@ private:
     Label* explanationLabel;
     TextButton* recordButton;
 
+
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     AudioDemoRecordPage (const AudioDemoRecordPage&);
@@ -77,4 +79,4 @@ private:
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_4FF281BF__
+#endif   // __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_E12E1947__

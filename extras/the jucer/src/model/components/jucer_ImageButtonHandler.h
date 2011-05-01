@@ -53,7 +53,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new ImageButton (T("new button"));
+        return new ImageButton ("new button");
     }
 
     void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
@@ -87,19 +87,19 @@ public:
 
         ImageButton* const ib = (ImageButton*) comp;
 
-        e->setAttribute (T("keepProportions"), doesImageKeepProportions (ib));
+        e->setAttribute ("keepProportions", doesImageKeepProportions (ib));
 
-        e->setAttribute (T("resourceNormal"), getImageResource (ib, normalImage));
-        e->setAttribute (T("opacityNormal"), getImageOpacity (ib, normalImage));
-        e->setAttribute (T("colourNormal"), getImageColour (ib, normalImage).toString());
+        e->setAttribute ("resourceNormal", getImageResource (ib, normalImage));
+        e->setAttribute ("opacityNormal", getImageOpacity (ib, normalImage));
+        e->setAttribute ("colourNormal", getImageColour (ib, normalImage).toString());
 
-        e->setAttribute (T("resourceOver"), getImageResource (ib, overImage));
-        e->setAttribute (T("opacityOver"), getImageOpacity (ib, overImage));
-        e->setAttribute (T("colourOver"), getImageColour (ib, overImage).toString());
+        e->setAttribute ("resourceOver", getImageResource (ib, overImage));
+        e->setAttribute ("opacityOver", getImageOpacity (ib, overImage));
+        e->setAttribute ("colourOver", getImageColour (ib, overImage).toString());
 
-        e->setAttribute (T("resourceDown"), getImageResource (ib, downImage));
-        e->setAttribute (T("opacityDown"), getImageOpacity (ib, downImage));
-        e->setAttribute (T("colourDown"), getImageColour (ib, downImage).toString());
+        e->setAttribute ("resourceDown", getImageResource (ib, downImage));
+        e->setAttribute ("opacityDown", getImageOpacity (ib, downImage));
+        e->setAttribute ("colourDown", getImageColour (ib, downImage).toString());
 
         return e;
     }
@@ -112,19 +112,19 @@ public:
         ImageButton* const ib = (ImageButton*) comp;
         ComponentLayout& l = const_cast <ComponentLayout&> (*layout);
 
-        setImageKeepProportions (l, ib, xml.getBoolAttribute (T("keepProportions"), true), false);
+        setImageKeepProportions (l, ib, xml.getBoolAttribute ("keepProportions", true), false);
 
-        setImageResource (l, ib, normalImage, xml.getStringAttribute (T("resourceNormal"), String::empty), false);
-        setImageOpacity (l, ib, normalImage, (float) xml.getDoubleAttribute (T("opacityNormal"), 1.0f), false);
-        setImageColour (l, ib, normalImage, Colour::fromString (xml.getStringAttribute (T("colourNormal"), T("0"))), false);
+        setImageResource (l, ib, normalImage, xml.getStringAttribute ("resourceNormal", String::empty), false);
+        setImageOpacity (l, ib, normalImage, (float) xml.getDoubleAttribute ("opacityNormal", 1.0f), false);
+        setImageColour (l, ib, normalImage, Colour::fromString (xml.getStringAttribute ("colourNormal", "0")), false);
 
-        setImageResource (l, ib, overImage, xml.getStringAttribute (T("resourceOver"), String::empty), false);
-        setImageOpacity (l, ib, overImage, (float) xml.getDoubleAttribute (T("opacityOver"), 1.0f), false);
-        setImageColour (l, ib, overImage, Colour::fromString (xml.getStringAttribute (T("colourOver"), T("0"))), false);
+        setImageResource (l, ib, overImage, xml.getStringAttribute ("resourceOver", String::empty), false);
+        setImageOpacity (l, ib, overImage, (float) xml.getDoubleAttribute ("opacityOver", 1.0f), false);
+        setImageColour (l, ib, overImage, Colour::fromString (xml.getStringAttribute ("colourOver", "0")), false);
 
-        setImageResource (l, ib, downImage, xml.getStringAttribute (T("resourceDown"), String::empty), false);
-        setImageOpacity (l, ib, downImage, (float) xml.getDoubleAttribute (T("opacityDown"), 1.0f), false);
-        setImageColour (l, ib, downImage, Colour::fromString (xml.getStringAttribute (T("colourDown"), T("0"))), false);
+        setImageResource (l, ib, downImage, xml.getStringAttribute ("resourceDown", String::empty), false);
+        setImageOpacity (l, ib, downImage, (float) xml.getDoubleAttribute ("opacityDown", 1.0f), false);
+        setImageColour (l, ib, downImage, Colour::fromString (xml.getStringAttribute ("colourDown", "0")), false);
 
         return true;
     }
@@ -140,7 +140,7 @@ public:
         s << getColourIntialisationCode (component, memberVariableName)
           << '\n';
 
-        const String indent (String::repeatedString (T(" "), memberVariableName.length() + 13));
+        const String indent (String::repeatedString (" ", memberVariableName.length() + 13));
 
         s << memberVariableName << "->setImages (false, true, "
           << boolToString (doesImageKeepProportions (ib)) << ",\n"
@@ -243,7 +243,7 @@ public:
             if (undoable)
             {
                 layout.getDocument()->perform (new SetImageResourceAction (button, layout, role, newName),
-                                               T("Change image resource"));
+                                               "Change image resource");
             }
             else
             {
@@ -537,11 +537,6 @@ public:
                        getImageOpacity (ib, downImage),
                        getImageColour (ib, downImage));
     }
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
 };
 
 

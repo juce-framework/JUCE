@@ -46,7 +46,7 @@ public:
     Component* createTestComponent (const bool alwaysFillBackground);
 
     int getNumPaintRoutines() const                             { return 1; }
-    const StringArray getPaintRoutineNames() const              { StringArray s; s.add (T("Graphics")); return s; }
+    const StringArray getPaintRoutineNames() const              { return StringArray ("Graphics"); }
     PaintRoutine* getPaintRoutine (const int index) const       { return index == 0 ? backgroundGraphics : 0; }
 
     ComponentLayout* getComponentLayout() const                 { return components; }
@@ -56,10 +56,6 @@ public:
     bool loadFromXml (const XmlElement& xml);
 
     void fillInGeneratedCode (GeneratedCode& code) const;
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 
 private:
     //==============================================================================

@@ -46,7 +46,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new ToggleButton (T("new toggle button"));
+        return new ToggleButton ("new toggle button");
     }
 
     void getEditableProperties (Component* component, JucerDocument& document, Array <PropertyComponent*>& properties)
@@ -63,7 +63,7 @@ public:
         ToggleButton* tb = (ToggleButton*) comp;
 
         XmlElement* e = ButtonHandler::createXmlFor (comp, layout);
-        e->setAttribute (T("state"), tb->getToggleState());
+        e->setAttribute ("state", tb->getToggleState());
 
         return e;
     }
@@ -75,7 +75,7 @@ public:
         if (! ButtonHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        tb->setToggleState (xml.getBoolAttribute (T("state"), false), false);
+        tb->setToggleState (xml.getBoolAttribute ("state", false), false);
         return true;
     }
 
@@ -96,22 +96,19 @@ public:
         code.constructorCode += s;
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     class ToggleButtonStateProperty : public ComponentBooleanProperty <ToggleButton>
     {
     public:
         ToggleButtonStateProperty (ToggleButton* button_, JucerDocument& document_)
-            : ComponentBooleanProperty <ToggleButton> (T("initial state"), T("on"), T("off"), button_, document_)
+            : ComponentBooleanProperty <ToggleButton> ("initial state", "on", "off", button_, document_)
         {
         }
 
         void setState (bool newState)
         {
             document.perform (new ToggleStateChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change ToggleButton state"));
+                              "Change ToggleButton state");
         }
 
         bool getState() const

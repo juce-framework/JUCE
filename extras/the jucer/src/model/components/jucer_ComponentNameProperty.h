@@ -38,7 +38,7 @@ class ComponentNameProperty  : public ComponentTextProperty <Component>
 {
 public:
     ComponentNameProperty (Component* component_, JucerDocument& document_)
-        : ComponentTextProperty <Component> (T("name"), 40, false, component_, document_)
+        : ComponentTextProperty <Component> ("name", 40, false, component_, document_)
     {
     }
 
@@ -50,15 +50,13 @@ public:
     void setText (const String& newText)
     {
         document.perform (new CompNameChangeAction (component, *document.getComponentLayout(), newText),
-                          T("Change component name"));
+                          "Change component name");
     }
 
     const String getText() const
     {
         return component->getName();
     }
-
-    juce_UseDebuggingNewOperator
 
 private:
     class CompNameChangeAction  : public ComponentUndoableAction <Component>
@@ -100,7 +98,7 @@ class ComponentMemberNameProperty  : public ComponentTextProperty <Component>
 {
 public:
     ComponentMemberNameProperty (Component* component_, JucerDocument& document_)
-        : ComponentTextProperty <Component> (T("member name"), 40, false, component_, document_)
+        : ComponentTextProperty <Component> ("member name", 40, false, component_, document_)
     {
     }
 
@@ -112,15 +110,13 @@ public:
     void setText (const String& newText)
     {
         document.perform (new CompMemberNameChangeAction (component, *document.getComponentLayout(), newText),
-                          T("Change component member name"));
+                          "Change component member name");
     }
 
     const String getText() const
     {
         return document.getComponentLayout()->getComponentMemberVariableName (component);
     }
-
-    juce_UseDebuggingNewOperator
 
 private:
     class CompMemberNameChangeAction  : public ComponentUndoableAction <Component>
@@ -161,7 +157,7 @@ class ComponentVirtualClassProperty  : public ComponentTextProperty <Component>
 {
 public:
     ComponentVirtualClassProperty (Component* component_, JucerDocument& document_)
-        : ComponentTextProperty <Component> (T("virtual class"), 40, false, component_, document_)
+        : ComponentTextProperty <Component> ("virtual class", 40, false, component_, document_)
     {
     }
 
@@ -173,15 +169,13 @@ public:
     void setText (const String& newText)
     {
         document.perform (new CompVirtualClassChangeAction (component, *document.getComponentLayout(), newText),
-                          T("Change component virtual class name"));
+                          "Change component virtual class name");
     }
 
     const String getText() const
     {
         return document.getComponentLayout()->getComponentVirtualClassName (component);
     }
-
-    juce_UseDebuggingNewOperator
 
 private:
     class CompVirtualClassChangeAction  : public ComponentUndoableAction <Component>

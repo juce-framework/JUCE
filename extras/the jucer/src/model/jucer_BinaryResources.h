@@ -91,8 +91,6 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code) const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================

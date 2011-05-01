@@ -42,7 +42,7 @@ public:
     Component* createNewComponent (JucerDocument*)
     {
         TabbedComponent* const t = new TabbedComponent (TabbedButtonBar::TabsAtTop);
-        t->setName (T("new tabbed component"));
+        t->setName ("new tabbed component");
 
         for (int i = 3; --i >= 0;)
             addNewTab (t);
@@ -56,16 +56,16 @@ public:
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
 
         if (t->getOrientation() == TabbedButtonBar::TabsAtTop)
-            e->setAttribute (T("orientation"), T("top"));
+            e->setAttribute ("orientation", "top");
         else if (t->getOrientation() == TabbedButtonBar::TabsAtBottom)
-            e->setAttribute (T("orientation"), T("bottom"));
+            e->setAttribute ("orientation", "bottom");
         else if (t->getOrientation() == TabbedButtonBar::TabsAtLeft)
-            e->setAttribute (T("orientation"), T("left"));
+            e->setAttribute ("orientation", "left");
         else if (t->getOrientation() == TabbedButtonBar::TabsAtRight)
-            e->setAttribute (T("orientation"), T("right"));
+            e->setAttribute ("orientation", "right");
 
-        e->setAttribute (T("tabBarDepth"), t->getTabBarDepth());
-        e->setAttribute (T("initialTab"), t->getCurrentTabIndex());
+        e->setAttribute ("tabBarDepth", t->getTabBarDepth());
+        e->setAttribute ("initialTab", t->getCurrentTabIndex());
 
         for (int i = 0; i < t->getNumTabs(); ++i)
             e->addChildElement (getTabState (t, i));
@@ -80,18 +80,18 @@ public:
 
         TabbedComponent* const t = dynamic_cast <TabbedComponent*> (comp);
 
-        if (xml.getStringAttribute (T("orientation")) == T("top"))
+        if (xml.getStringAttribute ("orientation") == "top")
             t->setOrientation (TabbedButtonBar::TabsAtTop);
-        else if (xml.getStringAttribute (T("orientation")) == T("bottom"))
+        else if (xml.getStringAttribute ("orientation") == "bottom")
             t->setOrientation (TabbedButtonBar::TabsAtBottom);
-        else if (xml.getStringAttribute (T("orientation")) == T("left"))
+        else if (xml.getStringAttribute ("orientation") == "left")
             t->setOrientation (TabbedButtonBar::TabsAtLeft);
-        else if (xml.getStringAttribute (T("orientation")) == T("right"))
+        else if (xml.getStringAttribute ("orientation") == "right")
             t->setOrientation (TabbedButtonBar::TabsAtRight);
 
         TabbedComponent defaultTabComp (TabbedButtonBar::TabsAtTop);
 
-        t->setTabBarDepth (xml.getIntAttribute (T("tabBarDepth"), defaultTabComp.getTabBarDepth()));
+        t->setTabBarDepth (xml.getIntAttribute ("tabBarDepth", defaultTabComp.getTabBarDepth()));
 
         t->clearTabs();
 
@@ -101,7 +101,7 @@ public:
             restoreTabState (t, t->getNumTabs() - 1, *e);
         }
 
-        t->setCurrentTabIndex (xml.getIntAttribute (T("initialTab"), 0));
+        t->setCurrentTabIndex (xml.getIntAttribute ("initialTab", 0));
 
         return true;
     }
@@ -220,7 +220,7 @@ public:
                 code.constructorCode << ", new " << contentClassName;
 
                 if (getTabConstructorParams (t, i).trim().isNotEmpty())
-                    code.constructorCode << T(" ");
+                    code.constructorCode << " ";
 
                 code.constructorCode << "(" << getTabConstructorParams (t, i).trim() << "), true);\n";
             }
@@ -255,10 +255,10 @@ public:
 
         if (tdc != 0)
         {
-            xml->setAttribute (T("useJucerComp"), tdc->isUsingJucerComp);
-            xml->setAttribute (T("contentClassName"), tdc->contentClassName);
-            xml->setAttribute (T("constructorParams"), tdc->constructorParams);
-            xml->setAttribute (T("jucerComponentFile"), tdc->jucerComponentFile);
+            xml->setAttribute ("useJucerComp", tdc->isUsingJucerComp);
+            xml->setAttribute ("contentClassName", tdc->contentClassName);
+            xml->setAttribute ("constructorParams", tdc->constructorParams);
+            xml->setAttribute ("jucerComponentFile", tdc->jucerComponentFile);
         }
 
         return xml;
@@ -274,10 +274,10 @@ public:
 
         if (tdc != 0)
         {
-            tdc->isUsingJucerComp = xml.getBoolAttribute (T("useJucerComp"), false);
-            tdc->contentClassName = xml.getStringAttribute (T("contentClassName"));
-            tdc->constructorParams = xml.getStringAttribute (T("constructorParams"));
-            tdc->jucerComponentFile = xml.getStringAttribute (T("jucerComponentFile"));
+            tdc->isUsingJucerComp = xml.getBoolAttribute ("useJucerComp", false);
+            tdc->contentClassName = xml.getStringAttribute ("contentClassName");
+            tdc->constructorParams = xml.getStringAttribute ("constructorParams");
+            tdc->jucerComponentFile = xml.getStringAttribute ("jucerComponentFile");
 
             tdc->updateContent();
         }
@@ -364,9 +364,6 @@ public:
         }
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class TabDemoContentComp : public Component
@@ -446,12 +443,12 @@ private:
     {
     public:
         TabOrientationProperty (TabbedComponent* comp, JucerDocument& document)
-            : ComponentChoiceProperty <TabbedComponent> (T("tab position"), comp, document)
+            : ComponentChoiceProperty <TabbedComponent> ("tab position", comp, document)
         {
-            choices.add (T("Tabs at top"));
-            choices.add (T("Tabs at bottom"));
-            choices.add (T("Tabs at left"));
-            choices.add (T("Tabs at right"));
+            choices.add ("Tabs at top");
+            choices.add ("Tabs at bottom");
+            choices.add ("Tabs at left");
+            choices.add ("Tabs at right");
         }
 
         void setIndex (int newIndex)
@@ -462,7 +459,7 @@ private:
                                                                   TabbedButtonBar::TabsAtRight };
 
             document.perform (new TabOrienationChangeAction (component, *document.getComponentLayout(), orientations [newIndex]),
-                              T("Change TabComponent orientation"));
+                              "Change TabComponent orientation");
         }
 
         int getIndex() const
@@ -521,7 +518,7 @@ private:
     {
     public:
         TabInitialTabProperty (TabbedComponent* comp, JucerDocument& document)
-            : ComponentChoiceProperty <TabbedComponent> (T("initial tab"), comp, document)
+            : ComponentChoiceProperty <TabbedComponent> ("initial tab", comp, document)
         {
             for (int i = 0; i < comp->getNumTabs(); ++i)
                 choices.add ("Tab " + String (i) + ": \"" + comp->getTabNames() [i] + "\"");
@@ -576,7 +573,7 @@ private:
     {
     public:
         TabDepthProperty (TabbedComponent* comp, JucerDocument& document_)
-            : SliderPropertyComponent (T("tab depth"), 10.0, 80.0, 1.0, 1.0),
+            : SliderPropertyComponent ("tab depth", 10.0, 80.0, 1.0, 1.0),
               component (comp),
               document (document_)
         {
@@ -593,7 +590,7 @@ private:
             document.getUndoManager().undoCurrentTransactionOnly();
 
             document.perform (new TabDepthChangeAction (component, *document.getComponentLayout(), roundToInt (newValue)),
-                              T("Change TabComponent tab depth"));
+                              "Change TabComponent tab depth");
         }
 
         double getValue() const
@@ -645,7 +642,7 @@ private:
     {
     public:
         TabAddTabProperty (TabbedComponent* comp, JucerDocument& document_)
-            : ButtonPropertyComponent (T("add tab"), false),
+            : ButtonPropertyComponent ("add tab", false),
               component (comp),
               document (document_)
         {
@@ -654,12 +651,12 @@ private:
         void buttonClicked()
         {
             document.perform (new AddTabAction (component, *document.getComponentLayout()),
-                              T("Add a new tab"));
+                              "Add a new tab");
         }
 
         const String getButtonText() const
         {
-            return T("Create a new tab");
+            return "Create a new tab";
         }
 
         TabbedComponent* const component;
@@ -699,7 +696,7 @@ private:
     {
     public:
         TabRemoveTabProperty (TabbedComponent* comp, JucerDocument& document_)
-            : ButtonPropertyComponent (T("remove tab"), true),
+            : ButtonPropertyComponent ("remove tab", true),
               component (comp),
               document (document_)
         {
@@ -719,13 +716,13 @@ private:
             if (r > 0)
             {
                 document.perform (new RemoveTabAction (component, *document.getComponentLayout(), r - 1),
-                                  T("Remove a tab"));
+                                  "Remove a tab");
             }
         }
 
         const String getButtonText() const
         {
-            return T("Delete a tab...");
+            return "Delete a tab...";
         }
 
         TabbedComponent* const component;
@@ -779,7 +776,7 @@ private:
     {
     public:
         TabNameProperty (TabbedComponent* comp, JucerDocument& document, const int tabIndex_)
-            : ComponentTextProperty <TabbedComponent> (T("name"), 200, false, comp, document),
+            : ComponentTextProperty <TabbedComponent> ("name", 200, false, comp, document),
               tabIndex (tabIndex_)
         {
         }
@@ -787,7 +784,7 @@ private:
         void setText (const String& newText)
         {
             document.perform (new TabNameChangeAction (component, *document.getComponentLayout(), tabIndex, newText),
-                              T("Change tab name"));
+                              "Change tab name");
         }
 
         const String getText() const
@@ -837,7 +834,7 @@ private:
     {
     public:
         TabColourProperty (TabbedComponent* comp, JucerDocument& document_, const int tabIndex_)
-            : ColourPropertyComponent (T("colour"), false),
+            : ColourPropertyComponent ("colour", false),
               component (comp),
               document (document_),
               tabIndex (tabIndex_)
@@ -855,7 +852,7 @@ private:
             document.getUndoManager().undoCurrentTransactionOnly();
 
             document.perform (new TabColourChangeAction (component, *document.getComponentLayout(), tabIndex, newColour),
-                              T("Change tab colour"));
+                              "Change tab colour");
         }
 
         const Colour getColour() const
@@ -913,17 +910,17 @@ private:
     {
     public:
         TabContentTypeProperty (TabbedComponent* comp, JucerDocument& document, const int tabIndex_)
-            : ComponentChoiceProperty <TabbedComponent> (T("content type"), comp, document),
+            : ComponentChoiceProperty <TabbedComponent> ("content type", comp, document),
               tabIndex (tabIndex_)
         {
-            choices.add (T("Jucer content component"));
-            choices.add (T("Named content component"));
+            choices.add ("Jucer content component");
+            choices.add ("Named content component");
         }
 
         void setIndex (int newIndex)
         {
             document.perform (new TabContentTypeChangeAction (component, *document.getComponentLayout(), tabIndex, newIndex == 0),
-                              T("Change tab content type"));
+                              "Change tab content type");
         }
 
         int getIndex() const
@@ -975,7 +972,7 @@ private:
     {
     public:
         TabJucerFileProperty (TabbedComponent* const component_, JucerDocument& document_, const int tabIndex_)
-            : FilePropertyComponent (T("jucer file"), false, true),
+            : FilePropertyComponent ("jucer file", false, true),
               component (component_),
               document (document_),
               tabIndex (tabIndex_)
@@ -994,7 +991,7 @@ private:
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(), tabIndex,
                                                              newFile.getRelativePathFrom (document.getFile().getParentDirectory())
                                                                     .replaceCharacter ('\\', '/')),
-                              T("Change tab component file"));
+                              "Change tab component file");
         }
 
         const File getFile() const
@@ -1046,7 +1043,7 @@ private:
     {
     public:
         TabContentClassProperty (TabbedComponent* comp, JucerDocument& document, const int tabIndex_)
-            : ComponentTextProperty <TabbedComponent> (T("content class"), 256, false, comp, document),
+            : ComponentTextProperty <TabbedComponent> ("content class", 256, false, comp, document),
               tabIndex (tabIndex_)
         {
         }
@@ -1054,7 +1051,7 @@ private:
         void setText (const String& newText)
         {
             document.perform (new TabClassNameChangeAction (component, *document.getComponentLayout(), tabIndex, newText),
-                              T("Change TabbedComponent content class"));
+                              "Change TabbedComponent content class");
         }
 
         const String getText() const
@@ -1104,7 +1101,7 @@ private:
     {
     public:
         TabContentConstructorParamsProperty (TabbedComponent* comp, JucerDocument& document, const int tabIndex_)
-            : ComponentTextProperty <TabbedComponent> (T("constructor params"), 512, false, comp, document),
+            : ComponentTextProperty <TabbedComponent> ("constructor params", 512, false, comp, document),
               tabIndex (tabIndex_)
         {
         }
@@ -1112,7 +1109,7 @@ private:
         void setText (const String& newText)
         {
             document.perform (new TabConstructorParamChangeAction (component, *document.getComponentLayout(), tabIndex, newText),
-                              T("Change TabbedComponent content constructor param"));
+                              "Change TabbedComponent content constructor param");
         }
 
         const String getText() const
@@ -1163,7 +1160,7 @@ private:
     public:
         TabMoveProperty (TabbedComponent* comp, JucerDocument& document_,
                          const int tabIndex_, const int totalNumTabs_)
-            : ButtonPropertyComponent (T("move tab"), false),
+            : ButtonPropertyComponent ("move tab", false),
               component (comp),
               document (document_),
               tabIndex (tabIndex_),
@@ -1175,21 +1172,21 @@ private:
         void buttonClicked()
         {
             PopupMenu m;
-            m.addItem (1, T("Move this tab up"), tabIndex > 0);
-            m.addItem (2, T("Move this tab down"), tabIndex < totalNumTabs - 1);
+            m.addItem (1, "Move this tab up", tabIndex > 0);
+            m.addItem (2, "Move this tab down", tabIndex < totalNumTabs - 1);
 
             const int r = m.showAt (this);
 
             if (r != 0)
             {
                 document.perform (new MoveTabAction (component, *document.getComponentLayout(), tabIndex, tabIndex + (r == 2 ? 1 : -1)),
-                                  T("Move a tab"));
+                                  "Move a tab");
             }
         }
 
         const String getButtonText() const
         {
-            return T("Move this tab...");
+            return "Move this tab...";
         }
 
         TabbedComponent* const component;

@@ -3,13 +3,13 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  14 Apr 2008 11:28:13 am
+  Creation date:  1 May 2011 12:12:59pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.11
+  Jucer version: 1.12
 
   ------------------------------------------------------------------------------
 
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_D0F6CD31__
-#define __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_D0F6CD31__
+#ifndef __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_5ACBBA44__
+#define __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_5ACBBA44__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -53,6 +53,7 @@ public:
     void buttonClicked (Button* buttonThatWasClicked);
 
 
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -65,11 +66,12 @@ private:
     TextButton* quitButton;
     Path internalPath1;
 
+
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     MainComponent (const MainComponent&);
-    MainComponent& operator= (const MainComponent&);
+    const MainComponent& operator= (const MainComponent&);
 };
 
 
-#endif   // __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_D0F6CD31__
+#endif   // __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_5ACBBA44__

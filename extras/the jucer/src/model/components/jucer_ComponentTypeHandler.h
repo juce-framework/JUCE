@@ -75,7 +75,7 @@ public:
                                  const String& xmlTagName);
 
     #define registerColour(colourId, colourName, xmlTagName)   \
-        registerEditableColour (colourId, #colourId, T(colourName), T(xmlTagName))
+        registerEditableColour (colourId, #colourId, colourName, xmlTagName)
 
     void addColourProperties (Component* component,
                               JucerDocument& document,
@@ -121,9 +121,6 @@ public:
                                       const ComponentLayout* layout);
 
     static JucerDocument* findParentDocument (Component* component);
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
 
 protected:
     //==============================================================================

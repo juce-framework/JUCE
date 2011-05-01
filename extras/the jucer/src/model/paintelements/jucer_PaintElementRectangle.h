@@ -145,10 +145,6 @@ public:
         convertToNewPathElement (path);
     }
 
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     class ShapeToPathProperty  : public ButtonPropertyComponent
     {

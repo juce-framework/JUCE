@@ -185,6 +185,10 @@
  #include <dwrite.h>
 #endif
 
+#ifndef WM_APPCOMMAND
+ #define WM_APPCOMMAND 0x0319
+#endif
+
 //==============================================================================
 /** A simple COM smart pointer.
     Avoids having to include ATL just to get one of these.

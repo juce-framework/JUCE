@@ -125,7 +125,7 @@ const String quotedString (const String& s)
         }
     }
 
-    return "T(\"" + replaceCEscapeChars (s) + "\")";
+    return "L\"" + replaceCEscapeChars (s) + "\"";
 }
 
 const String replaceStringTranslations (String s, JucerDocument* document)
@@ -190,7 +190,7 @@ const String makeValidCppIdentifier (String s,
              && CharacterFunctions::isLetter (s[i - 1])
              && CharacterFunctions::isUpperCase (s[i])
              && ! CharacterFunctions::isUpperCase (s[i - 1]))
-            s = s.substring (0, i) + T(" ") + s.substring (i);
+            s = s.substring (0, i) + " " + s.substring (i);
 
     String allowedChars ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789");
     if (allowTemplates)
@@ -218,7 +218,7 @@ const String makeValidCppIdentifier (String s,
     }
 
     if (CharacterFunctions::isDigit (n[0]))
-        n = T("_") + n;
+        n = "_" + n;
 
     // make sure it's not a reserved c++ keyword..
     static const char* const reservedWords[] =
@@ -328,7 +328,7 @@ const String positionToString (const RelativePositionedRectangle& pos)
     StringArray toks;
     toks.addTokens (pos.rect.toString(), false);
 
-    return toks[0] + T(" ") + toks[1];
+    return toks[0] + " " + toks[1];
 }
 
 void positionToXY (const RelativePositionedRectangle& position,
@@ -451,7 +451,7 @@ void positionToCode (const RelativePositionedRectangle& position,
             x << " + " << d;
     }
 
-    if (w != T("0"))
+    if (w != "0")
     {
         if (position.rect.getAnchorPointX() == PositionedRectangle::anchorAtRightOrBottom)
             x << " - " << w;
@@ -497,7 +497,7 @@ void positionToCode (const RelativePositionedRectangle& position,
             y << " + " << d;
     }
 
-    if (h != T("0"))
+    if (h != "0")
     {
         if (position.rect.getAnchorPointY() == PositionedRectangle::anchorAtRightOrBottom)
             y << " - " << h;

@@ -48,7 +48,7 @@ public:
     //==============================================================================
     Component* createNewComponent (JucerDocument*)
     {
-        return new TextEditor (T("new text editor"));
+        return new TextEditor ("new text editor");
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
@@ -56,14 +56,14 @@ public:
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         TextEditor* te = (TextEditor*) comp;
 
-        e->setAttribute (T("initialText"), comp->getProperties() ["initialText"].toString());
+        e->setAttribute ("initialText", comp->getProperties() ["initialText"].toString());
 
-        e->setAttribute (T("multiline"), te->isMultiLine());
-        e->setAttribute (T("retKeyStartsLine"), te->getReturnKeyStartsNewLine());
-        e->setAttribute (T("readonly"), te->isReadOnly());
-        e->setAttribute (T("scrollbars"), te->areScrollbarsShown());
-        e->setAttribute (T("caret"), te->isCaretVisible());
-        e->setAttribute (T("popupmenu"), te->isPopupMenuEnabled());
+        e->setAttribute ("multiline", te->isMultiLine());
+        e->setAttribute ("retKeyStartsLine", te->getReturnKeyStartsNewLine());
+        e->setAttribute ("readonly", te->isReadOnly());
+        e->setAttribute ("scrollbars", te->areScrollbarsShown());
+        e->setAttribute ("caret", te->isCaretVisible());
+        e->setAttribute ("popupmenu", te->isPopupMenuEnabled());
 
         return e;
     }
@@ -76,14 +76,14 @@ public:
         TextEditor* te = (TextEditor*) comp;
         TextEditor defaultEditor;
 
-        te->setMultiLine (xml.getBoolAttribute (T("multiline"), defaultEditor.isMultiLine()));
-        te->setReturnKeyStartsNewLine (xml.getBoolAttribute (T("retKeyStartsLine"), defaultEditor.getReturnKeyStartsNewLine()));
-        te->setReadOnly (xml.getBoolAttribute (T("readonly"), defaultEditor.isReadOnly()));
-        te->setScrollbarsShown (xml.getBoolAttribute (T("scrollbars"), defaultEditor.areScrollbarsShown()));
-        te->setCaretVisible (xml.getBoolAttribute (T("caret"), defaultEditor.isCaretVisible()));
-        te->setPopupMenuEnabled (xml.getBoolAttribute (T("popupmenu"), defaultEditor.isPopupMenuEnabled()));
+        te->setMultiLine (xml.getBoolAttribute ("multiline", defaultEditor.isMultiLine()));
+        te->setReturnKeyStartsNewLine (xml.getBoolAttribute ("retKeyStartsLine", defaultEditor.getReturnKeyStartsNewLine()));
+        te->setReadOnly (xml.getBoolAttribute ("readonly", defaultEditor.isReadOnly()));
+        te->setScrollbarsShown (xml.getBoolAttribute ("scrollbars", defaultEditor.areScrollbarsShown()));
+        te->setCaretVisible (xml.getBoolAttribute ("caret", defaultEditor.isCaretVisible()));
+        te->setPopupMenuEnabled (xml.getBoolAttribute ("popupmenu", defaultEditor.isPopupMenuEnabled()));
 
-        const String initialText (xml.getStringAttribute (T("initialText")));
+        const String initialText (xml.getStringAttribute ("initialText"));
         te->setText (initialText, false);
         te->getProperties().set ("initialText", initialText);
         return true;
@@ -131,27 +131,24 @@ public:
         code.constructorCode += s;
     }
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //==============================================================================
     class TextEditorMultiLineProperty  : public ComponentChoiceProperty <TextEditor>
     {
     public:
         TextEditorMultiLineProperty (TextEditor* component_, JucerDocument& document_)
-            : ComponentChoiceProperty <TextEditor> (T("mode"), component_, document_)
+            : ComponentChoiceProperty <TextEditor> ("mode", component_, document_)
         {
-            choices.add (T("single line"));
-            choices.add (T("multi-line, return key starts new line"));
-            choices.add (T("multi-line, return key disabled"));
+            choices.add ("single line");
+            choices.add ("multi-line, return key starts new line");
+            choices.add ("multi-line, return key disabled");
         }
 
         //==============================================================================
         void setIndex (int newIndex)
         {
             document.perform (new TextEditorMultilineChangeAction (component, *document.getComponentLayout(), newIndex),
-                              T("Change TextEditor multiline mode"));
+                              "Change TextEditor multiline mode");
         }
 
         int getIndex() const
@@ -197,7 +194,7 @@ private:
     {
     public:
         TextEditorReadOnlyProperty (TextEditor* component_, JucerDocument& document_)
-            : ComponentBooleanProperty <TextEditor> (T("editable"), T("Editable"), T("Editable"), component_, document_)
+            : ComponentBooleanProperty <TextEditor> ("editable", "Editable", "Editable", component_, document_)
         {
         }
 
@@ -205,7 +202,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new TextEditorReadonlyChangeAction (component, *document.getComponentLayout(), ! newState),
-                              T("Change TextEditor read-only mode"));
+                              "Change TextEditor read-only mode");
         }
 
         bool getState() const        { return ! component->isReadOnly(); }
@@ -246,7 +243,7 @@ private:
     {
     public:
         TextEditorScrollbarsProperty (TextEditor* component_, JucerDocument& document_)
-            : ComponentBooleanProperty <TextEditor> (T("scrollbars"), T("Scrollbars enabled"), T("Scrollbars enabled"), component_, document_)
+            : ComponentBooleanProperty <TextEditor> ("scrollbars", "Scrollbars enabled", "Scrollbars enabled", component_, document_)
         {
         }
 
@@ -254,7 +251,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new TextEditorScrollbarChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change TextEditor scrollbars"));
+                              "Change TextEditor scrollbars");
         }
 
         bool getState() const        { return component->areScrollbarsShown(); }
@@ -295,7 +292,7 @@ private:
     {
     public:
         TextEditorCaretProperty (TextEditor* component_, JucerDocument& document_)
-            : ComponentBooleanProperty <TextEditor> (T("caret"), T("Caret visible"), T("Caret visible"), component_, document_)
+            : ComponentBooleanProperty <TextEditor> ("caret", "Caret visible", "Caret visible", component_, document_)
         {
         }
 
@@ -303,7 +300,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new TextEditorCaretChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change TextEditor caret"));
+                              "Change TextEditor caret");
         }
 
         bool getState() const        { return component->isCaretVisible(); }
@@ -344,7 +341,7 @@ private:
     {
     public:
         TextEditorPopupMenuProperty (TextEditor* component_, JucerDocument& document_)
-            : ComponentBooleanProperty <TextEditor> (T("popup menu"), T("Popup menu enabled"), T("Popup menu enabled"), component_, document_)
+            : ComponentBooleanProperty <TextEditor> ("popup menu", "Popup menu enabled", "Popup menu enabled", component_, document_)
         {
         }
 
@@ -352,7 +349,7 @@ private:
         void setState (bool newState)
         {
             document.perform (new TextEditorPopupMenuChangeAction (component, *document.getComponentLayout(), newState),
-                              T("Change TextEditor popup menu"));
+                              "Change TextEditor popup menu");
         }
 
         bool getState() const        { return component->isPopupMenuEnabled(); }
@@ -393,14 +390,14 @@ private:
     {
     public:
         TextEditorInitialTextProperty (TextEditor* component_, JucerDocument& document_)
-            : ComponentTextProperty <TextEditor> (T("initial text"), 10000, true, component_, document_)
+            : ComponentTextProperty <TextEditor> ("initial text", 10000, true, component_, document_)
         {}
 
         //==============================================================================
         void setText (const String& newText)
         {
             document.perform (new TextEditorInitialTextChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change TextEditor initial text"));
+                              "Change TextEditor initial text");
         }
 
         const String getText() const

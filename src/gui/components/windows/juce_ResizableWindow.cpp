@@ -204,12 +204,12 @@ void ResizableWindow::resized()
 {
     if (resizableBorder != nullptr)
     {
-      #if JUCE_WINDOWS || JUCE_LINUX
+       #if JUCE_WINDOWS || JUCE_LINUX
         // hide the resizable border if the OS already provides one..
         resizableBorder->setVisible (! (isFullScreen() || isUsingNativeTitleBar()));
-      #else
+       #else
         resizableBorder->setVisible (! isFullScreen());
-      #endif
+       #endif
 
         resizableBorder->setBorderThickness (getBorderThickness());
         resizableBorder->setSize (getWidth(), getHeight());
@@ -218,12 +218,12 @@ void ResizableWindow::resized()
 
     if (resizableCorner != nullptr)
     {
-      #if JUCE_MAC
+       #if JUCE_MAC
         // hide the resizable border if the OS already provides one..
         resizableCorner->setVisible (! (isFullScreen() || isUsingNativeTitleBar()));
-      #else
+       #else
         resizableCorner->setVisible (! isFullScreen());
-      #endif
+       #endif
 
         const int resizerSize = 18;
         resizableCorner->setBounds (getWidth() - resizerSize,
@@ -236,9 +236,9 @@ void ResizableWindow::resized()
 
     updateLastPos();
 
-  #if JUCE_DEBUG
+   #if JUCE_DEBUG
     hasBeenResized = true;
-  #endif
+   #endif
 }
 
 void ResizableWindow::childBoundsChanged (Component* child)
@@ -369,7 +369,7 @@ void ResizableWindow::paint (Graphics& g)
                                                     getBorderThickness(), *this);
     }
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     /* If this fails, then you've probably written a subclass with a resized()
        callback but forgotten to make it call its parent class's resized() method.
 
@@ -382,7 +382,7 @@ void ResizableWindow::paint (Graphics& g)
        layout.
     */
     jassert (hasBeenResized || (getWidth() == 0 && getHeight() == 0));
-#endif
+   #endif
 }
 
 void ResizableWindow::lookAndFeelChanged()

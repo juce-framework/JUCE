@@ -34,12 +34,8 @@ class GenericComponent  : public Component
 {
 public:
     GenericComponent()
-        : Component (T("new component")),
-          actualClassName (T("Component"))
-    {
-    }
-
-    ~GenericComponent()
+        : Component ("new component"),
+          actualClassName ("Component")
     {
     }
 
@@ -97,8 +93,8 @@ public:
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
-        e->setAttribute (T("class"), ((GenericComponent*) comp)->actualClassName);
-        e->setAttribute (T("params"), ((GenericComponent*) comp)->constructorParams);
+        e->setAttribute ("class", ((GenericComponent*) comp)->actualClassName);
+        e->setAttribute ("params", ((GenericComponent*) comp)->constructorParams);
 
         return e;
     }
@@ -108,8 +104,8 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        ((GenericComponent*) comp)->actualClassName = xml.getStringAttribute (T("class"), T("Component"));
-        ((GenericComponent*) comp)->constructorParams = xml.getStringAttribute (T("params"), String::empty);
+        ((GenericComponent*) comp)->actualClassName = xml.getStringAttribute ("class", "Component");
+        ((GenericComponent*) comp)->constructorParams = xml.getStringAttribute ("params", String::empty);
         return true;
     }
 
@@ -144,14 +140,12 @@ public:
             code.constructorCode << "\n";
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     class GenericCompClassProperty  : public ComponentTextProperty <GenericComponent>
     {
     public:
         GenericCompClassProperty (GenericComponent* comp, JucerDocument& document)
-            : ComponentTextProperty <GenericComponent> (T("class"), 300, false, comp, document)
+            : ComponentTextProperty <GenericComponent> ("class", 300, false, comp, document)
         {
         }
 
@@ -159,7 +153,7 @@ private:
         {
             document.perform (new GenericCompClassChangeAction (component, *document.getComponentLayout(),
                                                                 makeValidCppIdentifier (newText, false, false, true)),
-                              T("Change generic component class"));
+                              "Change generic component class");
         }
 
         const String getText() const
@@ -202,14 +196,14 @@ private:
     {
     public:
         GenericCompParamsProperty (GenericComponent* comp, JucerDocument& document)
-            : ComponentTextProperty <GenericComponent> (T("constructor params"), 1024, true, comp, document)
+            : ComponentTextProperty <GenericComponent> ("constructor params", 1024, true, comp, document)
         {
         }
 
         void setText (const String& newText)
         {
             document.perform (new GenericCompParamsChangeAction (component, *document.getComponentLayout(), newText),
-                              T("Change generic component class"));
+                              "Change generic component class");
         }
 
         const String getText() const

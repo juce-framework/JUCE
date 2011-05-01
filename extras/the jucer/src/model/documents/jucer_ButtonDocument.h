@@ -73,11 +73,6 @@ public:
     //==============================================================================
     PaintRoutine* paintRoutines[7];
     bool paintStatesEnabled [7];
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
 };
 
 

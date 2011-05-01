@@ -47,7 +47,7 @@ ButtonDocument::ButtonDocument()
     paintStatesEnabled [downOn] = false;
     paintStatesEnabled [background] = false;
 
-    parentClasses = T("public Button");
+    parentClasses = "public Button";
 
     for (int i = 7; --i >= 0;)
     {
@@ -174,7 +174,7 @@ int ButtonDocument::chooseBestEnabledPaintRoutine (int paintRoutineWanted) const
 //==============================================================================
 const String ButtonDocument::getTypeName() const
 {
-    return T("Button");
+    return "Button";
 }
 
 JucerDocument* ButtonDocument::createCopy()
@@ -198,8 +198,8 @@ XmlElement* ButtonDocument::createXml() const
     for (int i = 0; i < 7; ++i)
     {
         XmlElement* e = paintRoutines [i]->createXml();
-        e->setAttribute (T("buttonState"), stateNames [i]);
-        e->setAttribute (T("enabled"), paintStatesEnabled [i]);
+        e->setAttribute ("buttonState", stateNames [i]);
+        e->setAttribute ("enabled", paintStatesEnabled [i]);
 
         doc->addChildElement (e);
     }
@@ -216,10 +216,10 @@ bool ButtonDocument::loadFromXml (const XmlElement& xml)
 
         forEachXmlChildElementWithTagName (xml, e, PaintRoutine::xmlTagName)
         {
-            const int stateIndex = stateNameToIndex (e->getStringAttribute (T("buttonState")));
+            const int stateIndex = stateNameToIndex (e->getStringAttribute ("buttonState"));
 
             paintRoutines [stateIndex]->loadFromXml (*e);
-            paintStatesEnabled [stateIndex] = e->getBoolAttribute (T("enabled"), stateIndex < normalOn);
+            paintStatesEnabled [stateIndex] = e->getBoolAttribute ("enabled", stateIndex < normalOn);
         }
 
         changed();
@@ -247,7 +247,7 @@ class ButtonStatePaintEnabledProperty   : public BooleanPropertyComponent,
 {
 public:
     ButtonStatePaintEnabledProperty (const String& name, ButtonDocument& document_, const int stateMethod_)
-        : BooleanPropertyComponent (name, T("enabled"), T("disabled")),
+        : BooleanPropertyComponent (name, "enabled", "disabled"),
           document (document_),
           stateMethod (stateMethod_)
     {
@@ -286,7 +286,7 @@ void ButtonDocument::addExtraClassProperties (PropertyPanel* panel)
     for (int i = 1; i < 7; ++i)
         props.add (new ButtonStatePaintEnabledProperty (stateNames[i], *this, i));
 
-    panel->addSection (T("Button paint routines"), props);
+    panel->addSection ("Button paint routines", props);
 }
 
 //==============================================================================
@@ -341,8 +341,8 @@ void ButtonDocument::fillInGeneratedCode (GeneratedCode& code) const
 {
     JucerDocument::fillInGeneratedCode (code);
 
-    code.parentClassInitialiser = T("Button (") + quotedString (code.componentName) + T(")");
-    code.removeCallback (T("void"), T("paint (Graphics& g)"));
+    code.parentClassInitialiser = "Button (" + quotedString (code.componentName) + ")";
+    code.removeCallback ("void", "paint (Graphics& g)");
 }
 
 void ButtonDocument::fillInPaintCode (GeneratedCode& code) const
@@ -354,9 +354,9 @@ void ButtonDocument::fillInPaintCode (GeneratedCode& code) const
         if (paintStatesEnabled [i])
             paintRoutines[i]->fillInGeneratedCode (code, paintCode [i]);
 
-    String& s = code.getCallbackCode (T("public Button"),
-                                      T("void"),
-                                      T("paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)"),
+    String& s = code.getCallbackCode ("public Button",
+                                      "void",
+                                      "paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)",
                                       false);
 
     int numPaintRoutines = getNumPaintRoutines();

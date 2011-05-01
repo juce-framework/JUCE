@@ -38,7 +38,7 @@ class PaintElementGroup   : public PaintElement
 public:
     //==============================================================================
     PaintElementGroup (PaintRoutine* owner)
-        : PaintElement (owner, T("Group"))
+        : PaintElement (owner, "Group")
     {
     }
 
@@ -229,8 +229,6 @@ public:
         }
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     OwnedArray <PaintElement> subElements;
 
@@ -238,7 +236,7 @@ private:
     {
     public:
         UngroupProperty (PaintElementGroup* const element_)
-            : ButtonPropertyComponent (T("ungroup"), false),
+            : ButtonPropertyComponent ("ungroup", false),
               element (element_)
         {
         }
@@ -250,7 +248,7 @@ private:
 
         const String getButtonText() const
         {
-            return T("Ungroup");
+            return "Ungroup";
         }
 
     private:

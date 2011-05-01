@@ -227,7 +227,7 @@ void PaintRoutine::removeElement (PaintElement* element, const bool undoable)
         if (undoable)
         {
             perform (new DeleteElementAction (element),
-                     T("Delete ") + element->getTypeName());
+                     "Delete " + element->getTypeName());
         }
         else
         {
@@ -591,7 +591,7 @@ XmlElement* PaintRoutine::createXml() const
 {
     XmlElement* const xml = new XmlElement (xmlTagName);
 
-    xml->setAttribute (T("backgroundColour"), colourToHex (backgroundColour));
+    xml->setAttribute ("backgroundColour", colourToHex (backgroundColour));
 
     for (int i = 0; i < elements.size(); ++i)
         xml->addChildElement (elements.getUnchecked (i)->createXml());
@@ -603,7 +603,7 @@ bool PaintRoutine::loadFromXml (const XmlElement& xml)
 {
     if (xml.hasTagName (xmlTagName))
     {
-        backgroundColour = Colour (xml.getStringAttribute (T("backgroundColour"), colourToHex (Colours::white)).getHexValue32());
+        backgroundColour = Colour (xml.getStringAttribute ("backgroundColour", colourToHex (Colours::white)).getHexValue32());
 
         clear();
 

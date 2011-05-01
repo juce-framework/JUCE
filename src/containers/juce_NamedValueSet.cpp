@@ -127,7 +127,7 @@ const var NamedValueSet::getWithDefault (const Identifier& name, const var& defa
     return v != nullptr ? *v : defaultReturnValue;
 }
 
-var* NamedValueSet::getVarPointer (const Identifier& name) const
+var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
 {
     for (NamedValue* i = values; i != nullptr; i = i->nextListItem)
         if (i->name == name)

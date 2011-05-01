@@ -74,9 +74,6 @@ public:
 
     const Image createComponentLayerSnapshot() const;
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     JucerDocument& document;
     ComponentLayout& layout;

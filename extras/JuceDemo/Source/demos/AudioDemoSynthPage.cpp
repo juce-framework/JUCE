@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  18 Sep 2009 9:46:49 pm
+  Creation date:  1 May 2011 12:06:00pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -25,7 +25,7 @@
 #include "AudioDemoSynthPage.h"
 
 
-//[MiscUserDefs]
+//[MiscUserDefs] You can add your own user definitions and misc code here...
 
 //==============================================================================
 /** Our demo synth sound is just a basic sine wave..
@@ -257,13 +257,13 @@ AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (keyboardComponent = new MidiKeyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard));
 
     addAndMakeVisible (sineButton = new ToggleButton (String::empty));
-    sineButton->setButtonText (T("Use sine wave"));
+    sineButton->setButtonText (L"Use sine wave");
     sineButton->setRadioGroupId (321);
     sineButton->addListener (this);
     sineButton->setToggleState (true, false);
 
     addAndMakeVisible (sampledButton = new ToggleButton (String::empty));
-    sampledButton->setButtonText (T("Use sampled sound"));
+    sampledButton->setButtonText (L"Use sampled sound");
     sampledButton->setRadioGroupId (321);
     sampledButton->addListener (this);
 
@@ -274,6 +274,7 @@ AudioDemoSynthPage::AudioDemoSynthPage (AudioDeviceManager& deviceManager_)
     //[/UserPreSize]
 
     setSize (600, 400);
+
 
     //[Constructor] You can add your own custom stuff here..
     deviceManager.addAudioCallback (liveAudioDisplayComp);
@@ -299,6 +300,7 @@ AudioDemoSynthPage::~AudioDemoSynthPage()
     deleteAndZero (sineButton);
     deleteAndZero (sampledButton);
     deleteAndZero (liveAudioDisplayComp);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]

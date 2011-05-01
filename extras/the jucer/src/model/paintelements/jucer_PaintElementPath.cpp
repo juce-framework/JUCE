@@ -102,11 +102,11 @@ class PathWindingModeProperty    : public ChoicePropertyComponent,
 {
 public:
     PathWindingModeProperty (PaintElementPath* const owner_)
-        : ChoicePropertyComponent (T("winding rule")),
+        : ChoicePropertyComponent ("winding rule"),
           owner (owner_)
     {
-        choices.add (T("Non-zero winding"));
-        choices.add (T("Even/odd winding"));
+        choices.add ("Non-zero winding");
+        choices.add ("Even/odd winding");
 
         owner->getDocument()->addChangeListener (this);
     }
@@ -129,7 +129,7 @@ private:
 
 //==============================================================================
 PaintElementPath::PaintElementPath (PaintRoutine* owner)
-    : ColouredElement (owner, T("Path"), true, true),
+    : ColouredElement (owner, "Path", true, true),
       nonZeroWinding (true)
 {
 }
@@ -213,7 +213,7 @@ void PaintElementPath::setCurrentBounds (const Rectangle<int>& b,
                               scaleStartX, scaleStartY,
                               parentArea);
 
-            perform (new ChangePointAction (destPoint, i, p), T("Move path"));
+            perform (new ChangePointAction (destPoint, i, p), "Move path");
         }
     }
 }
@@ -372,7 +372,7 @@ static const String positionToPairOfValues (const RelativePositionedRectangle& p
 {
     String x, y, w, h;
     positionToCode (position, layout, x, y, w, h);
-    return castToFloat (x) + T(", ") + castToFloat (y);
+    return castToFloat (x) + ", " + castToFloat (y);
 }
 
 void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
@@ -438,7 +438,7 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     r << '\n';
 
     if (somePointsAreRelative)
-        code.getCallbackCode (String::empty, T("void"), T("resized()"), false)
+        code.getCallbackCode (String::empty, "void", "resized()", false)
             << pathVariable << ".clear();\n" << r;
     else
         code.constructorCode << r;
@@ -469,7 +469,7 @@ XmlElement* PaintElementPath::createXml() const
     XmlElement* e = new XmlElement (getTagName());
     position.applyToXml (*e);
     addColourAttributes (e);
-    e->setAttribute (T("nonZeroWinding"), nonZeroWinding);
+    e->setAttribute ("nonZeroWinding", nonZeroWinding);
 
     e->addTextElement (pathToString());
 
@@ -482,7 +482,7 @@ bool PaintElementPath::loadFromXml (const XmlElement& xml)
     {
         position.restoreFromXml (xml, position);
         loadColourAttributes (xml);
-        nonZeroWinding = xml.getBoolAttribute (T("nonZeroWinding"), true);
+        nonZeroWinding = xml.getBoolAttribute ("nonZeroWinding", true);
 
         restorePathFromString (xml.getAllSubText().trim());
 
@@ -588,21 +588,21 @@ void PaintElementPath::restorePathFromString (const String& s)
     {
         PathPoint* p = new PathPoint (this);
 
-        if (tokens[i] == T("s"))
+        if (tokens[i] == "s")
         {
             p->type = Path::Iterator::startNewSubPath;
             p->pos [0] = RelativePositionedRectangle();
             p->pos [0].rect = PositionedRectangle (tokens [i + 1] + " " + tokens [i + 2]);
             i += 2;
         }
-        else if (tokens[i] == T("l"))
+        else if (tokens[i] == "l")
         {
             p->type = Path::Iterator::lineTo;
             p->pos [0] = RelativePositionedRectangle();
             p->pos [0].rect = PositionedRectangle (tokens [i + 1] + " " + tokens [i + 2]);
             i += 2;
         }
-        else if (tokens[i] == T("q"))
+        else if (tokens[i] == "q")
         {
             p->type = Path::Iterator::quadraticTo;
             p->pos [0] = RelativePositionedRectangle();
@@ -611,7 +611,7 @@ void PaintElementPath::restorePathFromString (const String& s)
             p->pos [1].rect = PositionedRectangle (tokens [i + 3] + " " + tokens [i + 4]);
             i += 4;
         }
-        else if (tokens[i] == T("c"))
+        else if (tokens[i] == "c")
         {
             p->type = Path::Iterator::cubicTo;
             p->pos [0] = RelativePositionedRectangle();
@@ -622,7 +622,7 @@ void PaintElementPath::restorePathFromString (const String& s)
             p->pos [2].rect = PositionedRectangle (tokens [i + 5] + " " + tokens [i + 6]);
             i += 6;
         }
-        else if (tokens[i] == T("x"))
+        else if (tokens[i] == "x")
         {
             p->type = Path::Iterator::closePath;
         }
@@ -771,7 +771,7 @@ void PaintElementPath::setNonZeroWinding (const bool nonZero, const bool undoabl
     {
         if (undoable)
         {
-            perform (new ChangeWindingAction (this, nonZero), T("Change path winding rule"));
+            perform (new ChangeWindingAction (this, nonZero), "Change path winding rule");
         }
         else
         {
@@ -818,7 +818,7 @@ void PaintElementPath::setSubpathClosed (int index, const bool closed, const boo
 
                 PathPoint p2 (*p);
                 p2.type = Path::Iterator::closePath;
-                perform (new ChangePointAction (p, p2), T("Close subpath"));
+                perform (new ChangePointAction (p, p2), "Close subpath");
                 return;
             }
         }
@@ -828,7 +828,7 @@ void PaintElementPath::setSubpathClosed (int index, const bool closed, const boo
         PathPoint* p = addPoint (points.size() - 1, undoable);
         PathPoint p2 (*p);
         p2.type = Path::Iterator::closePath;
-        perform (new ChangePointAction (p, p2), T("Close subpath"));
+        perform (new ChangePointAction (p, p2), "Close subpath");
     }
 }
 
@@ -880,7 +880,7 @@ PathPoint* PaintElementPath::addPoint (int pointIndexToAddItAfter, const bool un
     if (undoable)
     {
         AddPointAction* action = new AddPointAction (this, pointIndexToAddItAfter);
-        perform (action, T("Add path point"));
+        perform (action, "Add path point");
         return points [action->indexAdded];
     }
     else
@@ -990,7 +990,7 @@ void PaintElementPath::deletePoint (int pointIndex, const bool undoable)
 {
     if (undoable)
     {
-        perform (new DeletePointAction (this, pointIndex), T("Delete path point"));
+        perform (new DeletePointAction (this, pointIndex), "Delete path point");
     }
     else
     {
@@ -1131,7 +1131,7 @@ void PaintElementPath::movePoint (int index, int pointNumber,
 
         if (undoable)
         {
-            perform (new ChangePointAction (p, index, newPoint), T("Move path point"));
+            perform (new ChangePointAction (p, index, newPoint), "Move path point");
         }
         else
         {
@@ -1174,7 +1174,7 @@ void PaintElementPath::setPoint (int index, int pointNumber, const RelativePosit
 
             if (undoable)
             {
-                perform (new ChangePointAction (p, index, newPoint), T("Change path point position"));
+                perform (new ChangePointAction (p, index, newPoint), "Change path point position");
             }
             else
             {

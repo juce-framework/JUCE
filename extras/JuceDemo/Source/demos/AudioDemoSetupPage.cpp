@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  18 Sep 2009 11:26:45 am
+  Creation date:  1 May 2011 1:54:18pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -41,6 +41,7 @@ AudioDemoSetupPage::AudioDemoSetupPage (AudioDeviceManager& deviceManager_)
 
     setSize (600, 400);
 
+
     //[Constructor] You can add your own custom stuff here..
     //[/Constructor]
 }
@@ -51,6 +52,7 @@ AudioDemoSetupPage::~AudioDemoSetupPage()
     //[/Destructor_pre]
 
     deleteAndZero (deviceSelector);
+
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]

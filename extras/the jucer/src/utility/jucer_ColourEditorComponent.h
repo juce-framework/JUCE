@@ -93,8 +93,6 @@ public:
             setColour (cs->getCurrentColour());
     }
 
-    juce_UseDebuggingNewOperator
-
 private:
     Colour colour;
     bool canResetToDefault;
@@ -109,13 +107,13 @@ private:
               defaultButton (0)
         {
             addAndMakeVisible (selector = new ColourSelectorWithSwatches());
-            selector->setName (T("Colour"));
+            selector->setName ("Colour");
             selector->setCurrentColour (owner->getColour());
             selector->addChangeListener (owner);
 
             if (canResetToDefault)
             {
-                addAndMakeVisible (defaultButton = new TextButton (T("Reset to Default")));
+                addAndMakeVisible (defaultButton = new TextButton ("Reset to Default"));
                 defaultButton->addListener (this);
             }
         }
