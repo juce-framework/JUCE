@@ -373,10 +373,10 @@ namespace Visuals
 
         if (desiredDepth == 32)
         {
-#if JUCE_USE_XSHM
+           #if JUCE_USE_XSHM
             if (XSHMHelpers::isShmAvailable())
             {
-#if JUCE_USE_XRENDER
+               #if JUCE_USE_XRENDER
                 if (XRender::isAvailable())
                 {
                     XRenderPictFormat* pictFormat = XRender::findPictureFormat();
@@ -412,7 +412,7 @@ namespace Visuals
                         }
                     }
                 }
-#endif
+               #endif
                 if (visual == 0)
                 {
                     visual = findVisualWithDepth (32);
@@ -420,7 +420,7 @@ namespace Visuals
                         matchedDepth = 32;
                 }
             }
-#endif
+           #endif
         }
 
         if (visual == 0 && desiredDepth >= 24)
@@ -459,7 +459,7 @@ public:
 
         ScopedXLock xlock;
 
-#if JUCE_USE_XSHM
+       #if JUCE_USE_XSHM
         usingXShm = false;
 
         if ((imageDepth > 16) && XSHMHelpers::isShmAvailable())
@@ -504,12 +504,12 @@ public:
         }
 
         if (! usingXShm)
-#endif
+       #endif
         {
             imageDataAllocated.allocate (lineStride * h, format_ == Image::ARGB && clearImage);
             imageData = imageDataAllocated;
 
-            xImage = (XImage*) juce_calloc (sizeof (XImage));
+            xImage = (XImage*) ::calloc (1, sizeof (XImage));
 
             xImage->width = w;
             xImage->height = h;
@@ -555,7 +555,7 @@ public:
         if (gc != None)
             XFreeGC (display, gc);
 
-#if JUCE_USE_XSHM
+       #if JUCE_USE_XSHM
         if (usingXShm)
         {
             XShmDetach (display, &segmentInfo);
@@ -567,7 +567,7 @@ public:
             shmctl (segmentInfo.shmid, IPC_RMID, 0);
         }
         else
-#endif
+       #endif
         {
             xImage->data = nullptr;
             XDestroyImage (xImage);
@@ -1091,9 +1091,9 @@ public:
     void toBehind (ComponentPeer* other)
     {
         LinuxComponentPeer* const otherPeer = dynamic_cast <LinuxComponentPeer*> (other);
-        jassert (otherPeer != 0); // wrong type of window?
+        jassert (otherPeer != nullptr); // wrong type of window?
 
-        if (otherPeer != 0)
+        if (otherPeer != nullptr)
         {
             setMinimised (false);
 
@@ -1733,7 +1733,7 @@ private:
             : peer (peer_),
               lastTimeImageUsed (0)
         {
-          #if JUCE_USE_XSHM
+           #if JUCE_USE_XSHM
             shmCompletedDrawing = true;
 
             useARGBImagesForRendering = XSHMHelpers::isShmAvailable();
@@ -1750,15 +1750,15 @@ private:
                 useARGBImagesForRendering = (testImage->bits_per_pixel == 32);
                 XDestroyImage (testImage);
             }
-          #endif
+           #endif
         }
 
         void timerCallback()
         {
-          #if JUCE_USE_XSHM
+           #if JUCE_USE_XSHM
             if (! shmCompletedDrawing)
                 return;
-          #endif
+           #endif
             if (! regionsNeedingRepaint.isEmpty())
             {
                 stopTimer();
@@ -1781,13 +1781,13 @@ private:
 
         void performAnyPendingRepaintsNow()
         {
-          #if JUCE_USE_XSHM
+           #if JUCE_USE_XSHM
             if (! shmCompletedDrawing)
             {
                 startTimer (repaintTimerPeriod);
                 return;
             }
-          #endif
+           #endif
 
             peer->clearMaskedRegion();
 
@@ -1800,12 +1800,12 @@ private:
                 if (image.isNull() || image.getWidth() < totalArea.getWidth()
                      || image.getHeight() < totalArea.getHeight())
                 {
-                  #if JUCE_USE_XSHM
+                   #if JUCE_USE_XSHM
                     image = Image (new XBitmapImage (useARGBImagesForRendering ? Image::ARGB
                                                                                : Image::RGB,
-                  #else
+                   #else
                     image = Image (new XBitmapImage (Image::RGB,
-                  #endif
+                   #endif
                                                      (totalArea.getWidth() + 31) & ~31,
                                                      (totalArea.getHeight() + 31) & ~31,
                                                      false, peer->depth, peer->visual));
@@ -1832,9 +1832,9 @@ private:
 
                 for (RectangleList::Iterator i (originalRepaintRegion); i.next();)
                 {
-                  #if JUCE_USE_XSHM
+                   #if JUCE_USE_XSHM
                     shmCompletedDrawing = false;
-                  #endif
+                   #endif
                     const Rectangle<int>& r = *i.getRectangle();
 
                     static_cast<XBitmapImage*> (image.getSharedImage())
@@ -1848,9 +1848,9 @@ private:
             startTimer (repaintTimerPeriod);
         }
 
-      #if JUCE_USE_XSHM
+       #if JUCE_USE_XSHM
         void notifyPaintCompleted()                 { shmCompletedDrawing = true; }
-      #endif
+       #endif
 
     private:
         enum { repaintTimerPeriod = 1000 / 100 };
@@ -1860,9 +1860,9 @@ private:
         uint32 lastTimeImageUsed;
         RectangleList regionsNeedingRepaint;
 
-      #if JUCE_USE_XSHM
+       #if JUCE_USE_XSHM
         bool useARGBImagesForRendering, shmCompletedDrawing;
-      #endif
+       #endif
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager);
     };
 
@@ -1901,9 +1901,9 @@ private:
     {
         int keyMods = 0;
 
-        if (status & ShiftMask)     keyMods |= ModifierKeys::shiftModifier;
-        if (status & ControlMask)   keyMods |= ModifierKeys::ctrlModifier;
-        if (status & Keys::AltMask)       keyMods |= ModifierKeys::altModifier;
+        if ((status & ShiftMask) != 0)     keyMods |= ModifierKeys::shiftModifier;
+        if ((status & ControlMask) != 0)   keyMods |= ModifierKeys::ctrlModifier;
+        if ((status & Keys::AltMask) != 0) keyMods |= ModifierKeys::altModifier;
 
         currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
 

@@ -39,8 +39,16 @@
 #define WIN32_LEAN_AND_MEAN 1
 
 #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable : 4100 4201 4514 4312 4995)
+ #ifndef _CPPRTTI
+  #error "You're compiling without RTTI enabled! This is needed for a lot of JUCE classes, please update your compiler settings!"
+ #endif
+
+ #ifndef _CPPUNWIND
+  #error "You're compiling without exceptions enabled! This is needed for a lot of JUCE classes, please update your compiler settings!"
+ #endif
+
+ #pragma warning (push)
+ #pragma warning (disable : 4100 4201 4514 4312 4995)
 #endif
 
 #define _WIN32_WINNT 0x0500

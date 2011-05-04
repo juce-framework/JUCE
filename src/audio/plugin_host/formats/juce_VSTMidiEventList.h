@@ -142,14 +142,7 @@ public:
                 events.realloc (size, 1);
 
             for (int i = numEventsAllocated; i < numEventsNeeded; ++i)
-            {
-                VstMidiEvent* const e = (VstMidiEvent*) juce_calloc (jmax ((int) sizeof (VstMidiEvent),
-                                                                           (int) sizeof (VstMidiSysexEvent)));
-                e->type = kVstMidiType;
-                e->byteSize = sizeof (VstMidiEvent);
-
-                events->events[i] = (VstEvent*) e;
-            }
+                events->events[i] = allocateVSTEvent();
 
             numEventsAllocated = numEventsNeeded;
         }
@@ -160,14 +153,7 @@ public:
         if (events != nullptr)
         {
             for (int i = numEventsAllocated; --i >= 0;)
-            {
-                VstMidiEvent* const e = (VstMidiEvent*) (events->events[i]);
-
-                if (e->type == kVstSysExType)
-                    delete[] (((VstMidiSysexEvent*) e)->sysexDump);
-
-                juce_free (e);
-            }
+                freeVSTEvent (events->events[i]);
 
             events.free();
             numEventsUsed = 0;
@@ -180,6 +166,23 @@ public:
 
 private:
     int numEventsUsed, numEventsAllocated;
+
+    static VstEvent* allocateVSTEvent()
+    {
+        VstEvent* const e = (VstEvent*) ::calloc (1, sizeof (VstMidiEvent) > sizeof (VstMidiSysexEvent) ? sizeof (VstMidiEvent)
+                                                                                                        : sizeof (VstMidiSysexEvent));
+        e->type = kVstMidiType;
+        e->byteSize = sizeof (VstMidiEvent);
+        return e;
+    }
+
+    static void freeVSTEvent (VstEvent* e)
+    {
+        if (e->type == kVstSysExType)
+            delete[] (((VstMidiSysexEvent*) e)->sysexDump);
+
+        ::free (e);
+    }
 };
 
 

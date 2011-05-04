@@ -257,23 +257,6 @@ void MessageManager::broadcastMessage (const String& value)
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
-   #if JUCE_DEBUG
-    try  // This section is just a safety-net for catching builds without RTTI enabled..
-    {
-        MemoryOutputStream mo;
-        OutputStream* o = &mo;
-
-        // Got an exception here? Then TURN ON RTTI in your compiler settings!!
-        o = dynamic_cast <MemoryOutputStream*> (o);
-        jassert (o != nullptr);
-    }
-    catch (...)
-    {
-        // Ended up here? If so, TURN ON RTTI in your compiler settings!!
-        jassertfalse;
-    }
-   #endif
-
     OleInitialize (0);
 
     // this name has to be different for each app/dll instance because otherwise
