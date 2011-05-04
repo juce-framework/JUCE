@@ -190,13 +190,15 @@ public:
     {
         mach_timebase_info_data_t timebase;
         (void) mach_timebase_info (&timebase);
-        highResTimerFrequency = (int64) (1.0e9 * timebase.denom / timebase.numer);
-        highResTimerToMillisecRatio = timebase.numer / (1.0e6 * timebase.denom);
+        highResTimerFrequency = (timebase.denom * (int64) 1000000000) / timebase.numer;
+        numerator = timebase.numer;
+        denominator = timebase.denom * (int64) 1000000;
+        highResTimerToMillisecRatio = numerator / (double) denominator;
     }
 
     inline uint32 millisecondsSinceStartup() const noexcept
     {
-        return (uint32) (mach_absolute_time() * highResTimerToMillisecRatio);
+        return (uint32) ((mach_absolute_time() * numerator) / denominator);
     }
 
     inline double getMillisecondCounterHiRes() const noexcept
@@ -205,6 +207,9 @@ public:
     }
 
     int64 highResTimerFrequency;
+
+private:
+    int64 numerator, denominator;
     double highResTimerToMillisecRatio;
 };
 

@@ -69,6 +69,13 @@ inline void deleteAndZero (Type& pointer)                           { delete poi
 template <typename Type>
 inline Type* addBytesToPointer (Type* pointer, int bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
 
+/** A handy function which returns the difference between any two pointers, in bytes.
+    The address of the second pointer is subtracted from the first, and the difference in bytes is returned.
+*/
+template <typename Type1, typename Type2>
+inline int getAddressDifference (Type1* pointer1, Type2* pointer2) noexcept  { return (int) (((const char*) pointer1) - (const char*) pointer2); }
+
+
 //==============================================================================
 /* In a win32 DLL build, we'll expose some malloc/free functions that live inside the DLL, and use these for
    allocating all the objects - that way all juce objects in the DLL and in the host will live in the same heap,

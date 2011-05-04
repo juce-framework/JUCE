@@ -2052,7 +2052,7 @@ struct StringCopier
         jassert (maxBufferSizeBytes >= 0); // keep this value positive, or no characters will be copied!
 
         if (buffer == nullptr)
-            return (int) CharPointerType_Dest::getBytesRequiredFor (source);
+            return (int) (CharPointerType_Dest::getBytesRequiredFor (source) + sizeof (typename CharPointerType_Dest::CharType));
 
         return CharPointerType_Dest (buffer).writeWithDestByteLimit (source, maxBufferSizeBytes);
     }

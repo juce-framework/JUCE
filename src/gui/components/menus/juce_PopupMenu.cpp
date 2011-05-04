@@ -373,13 +373,10 @@ public:
     {
         if (isVisible())
         {
+            WeakReference<Component> deletionChecker (this);
+
             activeSubMenu = nullptr;
             currentChild = nullptr;
-
-            exitModalState (item != nullptr ? item->itemId : 0);
-
-            if (makeInvisible)
-                setVisible (false);
 
             if (item != nullptr
                  && item->commandManager != nullptr
@@ -387,6 +384,11 @@ public:
             {
                 *managerOfChosenCommand = item->commandManager;
             }
+
+            exitModalState (item != nullptr ? item->itemId : 0);
+
+            if (makeInvisible && (deletionChecker != nullptr))
+                setVisible (false);
         }
     }
 

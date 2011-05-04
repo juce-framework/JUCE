@@ -121,11 +121,13 @@ juce_ImplementSingleton (SharedBufferingAudioSourceThread)
 //==============================================================================
 BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
                                             const bool deleteSourceWhenDeleted_,
-                                            int numberOfSamplesToBuffer_)
+                                            const int numberOfSamplesToBuffer_,
+                                            const int numberOfChannels_)
     : source (source_),
       deleteSourceWhenDeleted (deleteSourceWhenDeleted_),
       numberOfSamplesToBuffer (jmax (1024, numberOfSamplesToBuffer_)),
-      buffer (2, 0),
+      numberOfChannels (numberOfChannels_),
+      buffer (numberOfChannels_, 0),
       bufferValidStart (0),
       bufferValidEnd (0),
       nextPlayPos (0),
@@ -155,7 +157,7 @@ void BufferingAudioSource::prepareToPlay (int samplesPerBlockExpected, double sa
 
     sampleRate = sampleRate_;
 
-    buffer.setSize (2, jmax (samplesPerBlockExpected * 2, numberOfSamplesToBuffer));
+    buffer.setSize (numberOfChannels, jmax (samplesPerBlockExpected * 2, numberOfSamplesToBuffer));
     buffer.clear();
 
     bufferValidStart = 0;
@@ -178,7 +180,7 @@ void BufferingAudioSource::releaseResources()
     if (thread != nullptr)
         thread->removeSource (this);
 
-    buffer.setSize (2, 0);
+    buffer.setSize (numberOfChannels, 0);
     source->releaseResources();
 }
 
@@ -205,7 +207,7 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
         if (validStart < validEnd)
         {
-            for (int chan = jmin (2, info.buffer->getNumChannels()); --chan >= 0;)
+            for (int chan = jmin (numberOfChannels, info.buffer->getNumChannels()); --chan >= 0;)
             {
                 const int startBufferIndex = (validStart + nextPlayPos) % buffer.getNumSamples();
                 const int endBufferIndex = (validEnd + nextPlayPos) % buffer.getNumSamples();

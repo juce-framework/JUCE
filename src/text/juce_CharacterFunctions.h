@@ -308,7 +308,7 @@ public:
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) noexcept
     {
-        int numBytesDone = 0;
+        typename DestCharPointerType::CharType const* const startAddress = dest.getAddress();
         maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
         for (;;)
@@ -320,12 +320,12 @@ public:
             if (c == 0 || maxBytes < 0)
                 break;
 
-            numBytesDone += bytesNeeded;
             dest.write (c);
         }
 
         dest.writeNull();
-        return numBytesDone;
+
+        return getAddressDifference (dest.getAddress(), startAddress);
     }
 
     template <typename DestCharPointerType, typename SrcCharPointerType>

@@ -201,6 +201,9 @@ public:
 
         This stores the current device, its samplerate, block size, etc, and
         can be restored later with initialise().
+
+        Note that this can return a null pointer if no settings have been explicitly changed
+        (i.e. if the device manager has just been left in its default state).
     */
     XmlElement* createStateXml() const;
 

@@ -160,7 +160,7 @@ public:
     {
         const ScopedLockType sl (getLock());
 
-        for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != nullptr; entry = entry->nextEntry)
+        for (const HashEntry* entry = slots.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)
                 return entry->value;
 
@@ -173,7 +173,7 @@ public:
     {
         const ScopedLockType sl (getLock());
 
-        for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != nullptr; entry = entry->nextEntry)
+        for (const HashEntry* entry = slots.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)
                 return true;
 
@@ -203,25 +203,22 @@ public:
         const ScopedLockType sl (getLock());
         const int hashIndex = generateHashFor (newKey);
 
-        if (isPositiveAndBelow (hashIndex, getNumSlots()))
+        HashEntry* const firstEntry = slots.getUnchecked (hashIndex);
+
+        for (HashEntry* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
         {
-            HashEntry* const firstEntry = slots.getUnchecked (hashIndex);
-
-            for (HashEntry* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
+            if (entry->key == newKey)
             {
-                if (entry->key == newKey)
-                {
-                    entry->value = newValue;
-                    return;
-                }
+                entry->value = newValue;
+                return;
             }
-
-            slots.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
-            ++totalNumItems;
-
-            if (totalNumItems > (getNumSlots() * 3) / 2)
-                remapTable (getNumSlots() * 2);
         }
+
+        slots.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
+        ++totalNumItems;
+
+        if (totalNumItems > (getNumSlots() * 3) / 2)
+            remapTable (getNumSlots() * 2);
     }
 
     /** Removes an item with the given key. */
@@ -229,7 +226,7 @@ public:
     {
         const ScopedLockType sl (getLock());
         const int hashIndex = generateHashFor (keyToRemove);
-        HashEntry* entry = slots [hashIndex];
+        HashEntry* entry = slots.getUnchecked (hashIndex);
         HashEntry* previous = nullptr;
 
         while (entry != nullptr)

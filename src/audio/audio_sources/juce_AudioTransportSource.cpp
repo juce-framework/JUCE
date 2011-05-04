@@ -89,7 +89,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
         if (readAheadBufferSize_ > 0)
             newPositionableSource = newBufferingSource
-                = new BufferingAudioSource (newPositionableSource, false, readAheadBufferSize_);
+                = new BufferingAudioSource (newPositionableSource, false, readAheadBufferSize_, maxNumChannels);
 
         newPositionableSource->setNextReadPosition (0);
 

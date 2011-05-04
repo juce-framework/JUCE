@@ -78,6 +78,13 @@ public:
     /** Returns this identifier's raw string pointer. */
     operator const String::CharPointerType() const noexcept             { return name; }
 
+    /** Checks a given string for characters that might not be valid in an Identifier.
+        Since Identifiers are used as a script variables and XML attributes, they should only contain
+        alphanumeric characters and underscores.
+    */
+    static bool isValidIdentifier (const String& possibleIdentifier) noexcept;
+
+
 private:
     //==============================================================================
     String::CharPointerType name;

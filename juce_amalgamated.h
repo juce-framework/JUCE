@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	85
+#define JUCE_BUILDNUMBER	86
 
 /** Current Juce version number.
 
@@ -895,102 +895,6 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #ifndef __JUCE_MEMORY_JUCEHEADER__
 #define __JUCE_MEMORY_JUCEHEADER__
 
-/*
-	This file defines the various juce_malloc(), juce_free() macros that can be used in
-	preference to the standard calls.
-
-	None of this stuff is actually used in the library itself, and will probably be
-	deprecated at some point in the future, to force everyone to use HeapBlock and other
-	safer allocation methods.
-*/
-
-#if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS && ! DOXYGEN
-  #ifndef JUCE_DLL
-
-	// Win32 debug non-DLL versions..
-
-	#define juce_malloc(numBytes)		 _malloc_dbg  (numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-	#define juce_calloc(numBytes)		 _calloc_dbg  (1, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-	#define juce_realloc(location, numBytes)	  _realloc_dbg (location, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-	#define juce_free(location)		   _free_dbg	(location, _NORMAL_BLOCK)
-
-  #else
-
-	// Win32 debug DLL versions..
-
-	// For the DLL, we'll define some functions in the DLL that will be used for allocation - that
-	// way all juce calls in the DLL and in the host API will all use the same allocator.
-	extern JUCE_API void* juce_DebugMalloc (int size, const char* file, int line);
-	extern JUCE_API void* juce_DebugCalloc (int size, const char* file, int line);
-	extern JUCE_API void* juce_DebugRealloc (void* block, int size, const char* file, int line);
-	extern JUCE_API void juce_DebugFree (void* block);
-
-	#define juce_malloc(numBytes)		 JUCE_NAMESPACE::juce_DebugMalloc (numBytes, __FILE__, __LINE__)
-	#define juce_calloc(numBytes)		 JUCE_NAMESPACE::juce_DebugCalloc (numBytes, __FILE__, __LINE__)
-	#define juce_realloc(location, numBytes)	  JUCE_NAMESPACE::juce_DebugRealloc (location, numBytes, __FILE__, __LINE__)
-	#define juce_free(location)		   JUCE_NAMESPACE::juce_DebugFree (location)
-
-	#define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
-			  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-			  static void* operator new (size_t, void* p)	 { return p; } \
-			  static void operator delete (void* p)	   { juce_free (p); } \
-			  static void operator delete (void*, void*)	  {}
-  #endif
-
-#elif defined (JUCE_DLL) && ! DOXYGEN
-
-  // Win32 DLL (release) versions..
-
-  // For the DLL, we'll define some functions in the DLL that will be used for allocation - that
-  // way all juce calls in the DLL and in the host API will all use the same allocator.
-  extern JUCE_API void* juce_Malloc (int size);
-  extern JUCE_API void* juce_Calloc (int size);
-  extern JUCE_API void* juce_Realloc (void* block, int size);
-  extern JUCE_API void juce_Free (void* block);
-
-  #define juce_malloc(numBytes)		 JUCE_NAMESPACE::juce_Malloc (numBytes)
-  #define juce_calloc(numBytes)		 JUCE_NAMESPACE::juce_Calloc (numBytes)
-  #define juce_realloc(location, numBytes)	  JUCE_NAMESPACE::juce_Realloc (location, numBytes)
-  #define juce_free(location)		   JUCE_NAMESPACE::juce_Free (location)
-
-  #define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
-			  static void* operator new (size_t sz)	   { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-			  static void* operator new (size_t, void* p)	 { return p; } \
-			  static void operator delete (void* p)	   { juce_free (p); } \
-			  static void operator delete (void*, void*)	  {}
-#else
-
-  // Mac, Linux and Win32 (release) versions..
-
-  /** This can be used instead of calling malloc directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
-  #define juce_malloc(numBytes)		 malloc (numBytes)
-
-  /** This can be used instead of calling calloc directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
-  #define juce_calloc(numBytes)		 calloc (1, numBytes)
-
-  /** This can be used instead of calling realloc directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
-  #define juce_realloc(location, numBytes)	  realloc (location, numBytes)
-
-  /** This can be used instead of calling free directly.
-	  Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
-  */
-  #define juce_free(location)		   free (location)
-
-#endif
-
-/** (Deprecated) This was a win32-specific way of checking for object leaks - now please
-	use the JUCE_LEAK_DETECTOR instead.
-*/
-#ifndef juce_UseDebuggingNewOperator
-  #define juce_UseDebuggingNewOperator
-#endif
-
 #if JUCE_MSVC || DOXYGEN
   /** This is a compiler-independent way of declaring a variable as being thread-local.
 
@@ -1030,6 +934,35 @@ inline void deleteAndZero (Type& pointer)			   { delete pointer; pointer = nullp
 */
 template <typename Type>
 inline Type* addBytesToPointer (Type* pointer, int bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
+
+/** A handy function which returns the difference between any two pointers, in bytes.
+	The address of the second pointer is subtracted from the first, and the difference in bytes is returned.
+*/
+template <typename Type1, typename Type2>
+inline int getAddressDifference (Type1* pointer1, Type2* pointer2) noexcept  { return (int) (((const char*) pointer1) - (const char*) pointer2); }
+
+/* In a win32 DLL build, we'll expose some malloc/free functions that live inside the DLL, and use these for
+   allocating all the objects - that way all juce objects in the DLL and in the host will live in the same heap,
+   avoiding problems when an object is created in one module and passed across to another where it is deleted.
+   By piggy-backing on the JUCE_LEAK_DETECTOR macro, these allocators can be injected into most juce classes.
+*/
+#if JUCE_MSVC && defined (JUCE_DLL) && ! DOXYGEN
+ extern JUCE_API void* juceDLL_malloc (size_t);
+ extern JUCE_API void  juceDLL_free (void*);
+
+ #define JUCE_LEAK_DETECTOR(OwnerClass)  public:\
+			  static void* operator new (size_t sz)	   { return JUCE_NAMESPACE::juceDLL_malloc ((int) sz); } \
+			  static void* operator new (size_t, void* p)	 { return p; } \
+			  static void operator delete (void* p)	   { JUCE_NAMESPACE::juceDLL_free (p); } \
+			  static void operator delete (void*, void*)	  {}
+#endif
+
+/** (Deprecated) This was a win32-specific way of checking for object leaks - now please
+	use the JUCE_LEAK_DETECTOR instead.
+*/
+#ifndef juce_UseDebuggingNewOperator
+  #define juce_UseDebuggingNewOperator
+#endif
 
 #endif   // __JUCE_MEMORY_JUCEHEADER__
 
@@ -1912,7 +1845,7 @@ public:
 	template <typename DestCharPointerType, typename SrcCharPointerType>
 	static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) noexcept
 	{
-		int numBytesDone = 0;
+		typename DestCharPointerType::CharType const* const startAddress = dest.getAddress();
 		maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
 		for (;;)
@@ -1924,12 +1857,12 @@ public:
 			if (c == 0 || maxBytes < 0)
 				break;
 
-			numBytesDone += bytesNeeded;
 			dest.write (c);
 		}
 
 		dest.writeNull();
-		return numBytesDone;
+
+		return getAddressDifference (dest.getAddress(), startAddress);
 	}
 
 	template <typename DestCharPointerType, typename SrcCharPointerType>
@@ -8008,6 +7941,12 @@ public:
 	/** Returns this identifier's raw string pointer. */
 	operator const String::CharPointerType() const noexcept		 { return name; }
 
+	/** Checks a given string for characters that might not be valid in an Identifier.
+		Since Identifiers are used as a script variables and XML attributes, they should only contain
+		alphanumeric characters and underscores.
+	*/
+	static bool isValidIdentifier (const String& possibleIdentifier) noexcept;
+
 private:
 
 	String::CharPointerType name;
@@ -8053,7 +7992,7 @@ public:
 	operator const String() const		   { return getDefault(); }
 };
 
-/** An predefined object representing a new-line, which can be written to a string or stream.
+/** A predefined object representing a new-line, which can be written to a string or stream.
 
 	To write a new-line to a stream, you can use the predefined 'newLine' variable like this:
 	@code
@@ -9317,7 +9256,7 @@ public:
 		Do not use this method unless you really need access to the internal var object
 		for some reason - for normal reading and writing always prefer operator[]() and set().
 	*/
-	var* getVarPointer (const Identifier& name) const;
+	var* getVarPointer (const Identifier& name) const noexcept;
 
 	/** Sets properties to the values of all of an XML element's attributes. */
 	void setFromXmlAttributes (const XmlElement& xml);
@@ -10791,7 +10730,7 @@ public:
 	{
 		const ScopedLockType sl (getLock());
 
-		for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != nullptr; entry = entry->nextEntry)
+		for (const HashEntry* entry = slots.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
 			if (entry->key == keyToLookFor)
 				return entry->value;
 
@@ -10803,7 +10742,7 @@ public:
 	{
 		const ScopedLockType sl (getLock());
 
-		for (const HashEntry* entry = slots [generateHashFor (keyToLookFor)]; entry != nullptr; entry = entry->nextEntry)
+		for (const HashEntry* entry = slots.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
 			if (entry->key == keyToLookFor)
 				return true;
 
@@ -10832,25 +10771,22 @@ public:
 		const ScopedLockType sl (getLock());
 		const int hashIndex = generateHashFor (newKey);
 
-		if (isPositiveAndBelow (hashIndex, getNumSlots()))
+		HashEntry* const firstEntry = slots.getUnchecked (hashIndex);
+
+		for (HashEntry* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
 		{
-			HashEntry* const firstEntry = slots.getUnchecked (hashIndex);
-
-			for (HashEntry* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
+			if (entry->key == newKey)
 			{
-				if (entry->key == newKey)
-				{
-					entry->value = newValue;
-					return;
-				}
+				entry->value = newValue;
+				return;
 			}
-
-			slots.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
-			++totalNumItems;
-
-			if (totalNumItems > (getNumSlots() * 3) / 2)
-				remapTable (getNumSlots() * 2);
 		}
+
+		slots.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
+		++totalNumItems;
+
+		if (totalNumItems > (getNumSlots() * 3) / 2)
+			remapTable (getNumSlots() * 2);
 	}
 
 	/** Removes an item with the given key. */
@@ -10858,7 +10794,7 @@ public:
 	{
 		const ScopedLockType sl (getLock());
 		const int hashIndex = generateHashFor (keyToRemove);
-		HashEntry* entry = slots [hashIndex];
+		HashEntry* entry = slots.getUnchecked (hashIndex);
 		HashEntry* previous = nullptr;
 
 		while (entry != nullptr)
@@ -11952,6 +11888,10 @@ public:
 		This returns a monotonically increasing value which it unaffected by changes to the
 		system clock. It should be accurate to within a few millisecs, depending on platform,
 		hardware, etc.
+
+		Being a 32-bit return value, it will of course wrap back to 0 after 2^32 seconds of
+		uptime, so be careful to take that into account. If you need a 64-bit time, you can
+		use currentTimeMillis() instead.
 
 		@see getApproximateMillisecondCounter
 	*/
@@ -38449,10 +38389,12 @@ public:
 		@param deleteSourceWhenDeleted  if true, then the input source object will
 										be deleted when this object is deleted
 		@param numberOfSamplesToBuffer  the size of buffer to use for reading ahead
+		@param numberOfChannels	 the number of channels that will be played
 	*/
 	BufferingAudioSource (PositionableAudioSource* source,
 						  bool deleteSourceWhenDeleted,
-						  int numberOfSamplesToBuffer);
+						  int numberOfSamplesToBuffer,
+						  int numberOfChannels = 2);
 
 	/** Destructor.
 
@@ -38486,7 +38428,7 @@ private:
 
 	PositionableAudioSource* source;
 	bool deleteSourceWhenDeleted;
-	int numberOfSamplesToBuffer;
+	int numberOfSamplesToBuffer, numberOfChannels;
 	AudioSampleBuffer buffer;
 	CriticalSection bufferStartPosLock;
 	int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
@@ -43908,6 +43850,9 @@ public:
 
 		This stores the current device, its samplerate, block size, etc, and
 		can be restored later with initialise().
+
+		Note that this can return a null pointer if no settings have been explicitly changed
+		(i.e. if the device manager has just been left in its default state).
 	*/
 	XmlElement* createStateXml() const;
 
@@ -47730,7 +47675,7 @@ private:
 
 	ReferenceCountedArray <Node> nodes;
 	OwnedArray <Connection> connections;
-	int lastNodeId;
+	uint32 lastNodeId;
 	AudioSampleBuffer renderingBuffers;
 	OwnedArray <MidiBuffer> midiBuffers;
 
@@ -57819,22 +57764,24 @@ private:
 
 	@code
 	{
-		WildcardFileFilter wildcardFilter ("*.foo", "Foo files");
+		WildcardFileFilter wildcardFilter ("*.foo", String::empty, "Foo files");
 
-		FileBrowserComponent browser (FileBrowserComponent::loadFileMode,
+		FileBrowserComponent browser (FileBrowserComponent::canSelectFiles,
 									  File::nonexistent,
 									  &wildcardFilter,
-									  0);
+									  nullptr);
 
 		FileChooserDialogBox dialogBox ("Open some kind of file",
 										"Please choose some kind of file that you want to open...",
 										browser,
-										getLookAndFeel().alertWindowBackground);
+										false,
+										Colours::lightgrey);
 
 		if (dialogBox.show())
 		{
-			File selectedFile = browser.getCurrentFile();
-			...
+			File selectedFile = browser.getSelectedFile (0);
+
+			...etc..
 		}
 	}
 	@endcode
@@ -58446,6 +58393,10 @@ public:
 		The wildcardPatterns parameter is a comma or semicolon-delimited set of
 		patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
 		or .aiff.
+
+		Passing an empty string as a pattern will fail to match anything, so by leaving
+		either the file or directory pattern parameter empty means you can control
+		whether files or directories are found.
 
 		The description is a name to show the user in a list of possible patterns, so
 		for the wav/aiff example, your description might be "audio files".

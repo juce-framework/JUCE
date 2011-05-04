@@ -276,7 +276,9 @@ uint32 Time::getMillisecondCounter() noexcept
 
 uint32 Time::getApproximateMillisecondCounter() noexcept
 {
-    jassert (TimeHelpers::lastMSCounterValue != 0);
+    if (TimeHelpers::lastMSCounterValue == 0)
+        getMillisecondCounter();
+
     return TimeHelpers::lastMSCounterValue;
 }
 

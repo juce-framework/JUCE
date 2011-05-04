@@ -274,8 +274,6 @@ public:
         timerCallback();
     }
 
-    ~ScreenSaverDefeater() {}
-
     void timerCallback()
     {
         if (Process::isForegroundProcess())

@@ -72,13 +72,14 @@ public:
         {
             const uint32 now = Time::getMillisecondCounter();
 
-            if (now <= lastTime)
+            if (now == lastTime)
             {
-                wait (2);
+                wait (1);
                 continue;
             }
 
-            const int elapsed = now - lastTime;
+            const int elapsed = now >= lastTime ? (now - lastTime)
+                                                : (std::numeric_limits<uint32>::max() - (lastTime - now));
             lastTime = now;
 
             const int timeUntilFirstTimer = getTimeUntilFirstTimer (elapsed);
