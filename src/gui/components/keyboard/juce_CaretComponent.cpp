@@ -44,7 +44,7 @@ CaretComponent::~CaretComponent()
 
 void CaretComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (caretColourId));
+    g.fillAll (findColour (caretColourId, true));
 }
 
 void CaretComponent::timerCallback()

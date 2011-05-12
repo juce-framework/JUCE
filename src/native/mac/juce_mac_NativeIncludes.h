@@ -69,6 +69,7 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <sys/mount.h>
+#include <sys/utsname.h>
 #include <fnmatch.h>
 #include <utime.h>
 #include <dlfcn.h>

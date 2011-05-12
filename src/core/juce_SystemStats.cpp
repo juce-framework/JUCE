@@ -66,7 +66,7 @@ const String SystemStats::getJUCEVersion()
     #undef JUCE_STRINGIFYVERSION2
 }
 
-#if JUCE_DEBUG
+#if JUCE_DEBUG && ! JUCE_ANDROID
  struct JuceVersionPrinter
  {
      JuceVersionPrinter()

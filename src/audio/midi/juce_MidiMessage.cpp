@@ -348,7 +348,7 @@ int MidiMessage::getNoteNumber() const noexcept
 void MidiMessage::setNoteNumber (const int newNoteNumber) noexcept
 {
     if (isNoteOnOrOff())
-        data[1] = newNoteNumber & 127;
+        data[1] = (char) (newNoteNumber & 127);
 }
 
 uint8 MidiMessage::getVelocity() const noexcept

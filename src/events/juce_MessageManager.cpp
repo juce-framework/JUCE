@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 MessageManager* MessageManager::instance = nullptr;
 
-static const int quitMessageId = 0xfffff321;
+enum { quitMessageId = 0xfffff321 };
 
 MessageManager::MessageManager() noexcept
   : quitMessagePosted (false),
@@ -105,7 +105,7 @@ void MessageManager::deliverMessage (Message* const message)
             {
                 callbackMessage->messageCallback();
             }
-            else if (message->intParameter1 == quitMessageId)
+            else if (message->intParameter1 == (int) quitMessageId)
             {
                 quitMessageReceived = true;
             }
@@ -129,7 +129,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    postMessageToQueue (new Message (quitMessageId, 0, 0, nullptr));
+    postMessageToQueue (new Message ((int) quitMessageId, 0, 0, nullptr));
     quitMessagePosted = true;
 }
 

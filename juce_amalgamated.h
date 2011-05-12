@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	87
+#define JUCE_BUILDNUMBER	88
 
 /** Current Juce version number.
 
@@ -9394,6 +9394,8 @@ template <class ReferenceCountedObjectClass>
 class ReferenceCountedObjectPtr
 {
 public:
+	/** The class being referenced by this pointer. */
+	typedef ReferenceCountedObjectClass ReferencedType;
 
 	/** Creates a pointer to a null object. */
 	inline ReferenceCountedObjectPtr() noexcept

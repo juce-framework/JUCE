@@ -87,6 +87,7 @@
 
  typedef long VstInt32;
  typedef long VstIntPtr;
+
  enum Vst2StringConstants
  {
     kVstMaxNameLen       = 64,

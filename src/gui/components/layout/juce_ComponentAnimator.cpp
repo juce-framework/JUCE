@@ -152,6 +152,7 @@ public:
             : image (component.createComponentSnapshot (component.getLocalBounds()))
         {
             setBounds (component.getBounds());
+            setTransform (component.getTransform());
             setAlpha (component.getAlpha());
             setInterceptsMouseClicks (false, false);
 

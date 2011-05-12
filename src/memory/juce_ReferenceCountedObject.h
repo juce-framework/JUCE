@@ -130,6 +130,9 @@ template <class ReferenceCountedObjectClass>
 class ReferenceCountedObjectPtr
 {
 public:
+    /** The class being referenced by this pointer. */
+    typedef ReferenceCountedObjectClass ReferencedType;
+
     //==============================================================================
     /** Creates a pointer to a null object. */
     inline ReferenceCountedObjectPtr() noexcept

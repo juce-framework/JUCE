@@ -99,7 +99,17 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 
 const String SystemStats::getOperatingSystemName()
 {
-    return "Mac OS X";
+   #if JUCE_IOS
+    String s ("iOS ");
+   #else
+    String s ("Mac OSX ");
+   #endif
+
+    struct utsname uts;
+    if (uname (&uts) >= 0)
+        s << uts.release;
+
+    return s;
 }
 
 #if ! JUCE_IOS

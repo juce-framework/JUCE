@@ -87,8 +87,8 @@ void AudioFormatReaderSource::getNextAudioBlock (const AudioSourceChannelInfo& i
 
         if (looping)
         {
-            const int newStart = start % (int) reader->lengthInSamples;
-            const int newEnd = (start + info.numSamples) % (int) reader->lengthInSamples;
+            const int newStart = (int) (start % (int) reader->lengthInSamples);
+            const int newEnd = (int) ((start + info.numSamples) % (int) reader->lengthInSamples);
 
             if (newEnd > newStart)
             {

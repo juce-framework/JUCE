@@ -209,8 +209,8 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         {
             for (int chan = jmin (numberOfChannels, info.buffer->getNumChannels()); --chan >= 0;)
             {
-                const int startBufferIndex = (validStart + nextPlayPos) % buffer.getNumSamples();
-                const int endBufferIndex = (validEnd + nextPlayPos) % buffer.getNumSamples();
+                const int startBufferIndex = (int) ((validStart + nextPlayPos) % buffer.getNumSamples());
+                const int endBufferIndex = (int) ((validEnd + nextPlayPos) % buffer.getNumSamples());
 
                 if (startBufferIndex < endBufferIndex)
                 {
@@ -313,8 +313,8 @@ bool BufferingAudioSource::readNextBufferChunk()
 
     if (sectionToReadStart != sectionToReadEnd)
     {
-        const int bufferIndexStart = sectionToReadStart % buffer.getNumSamples();
-        const int bufferIndexEnd = sectionToReadEnd % buffer.getNumSamples();
+        const int bufferIndexStart = (int) (sectionToReadStart % buffer.getNumSamples());
+        const int bufferIndexEnd = (int) (sectionToReadEnd % buffer.getNumSamples());
 
         if (bufferIndexStart < bufferIndexEnd)
         {

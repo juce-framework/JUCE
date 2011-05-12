@@ -37,6 +37,8 @@ JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activ
 {
     android.initialise (env, activity, appFile, appDataDir);
 
+    DBG (SystemStats::getJUCEVersion());
+
     JUCEApplication::createInstance = &juce_CreateApplication;
 
     initialiseJuce_GUI();
@@ -60,8 +62,11 @@ void PlatformUtilities::beep()
 //==============================================================================
 void Logger::outputDebugString (const String& text)
 {
-    getEnv()->CallStaticVoidMethod (android.activityClass, android.printToConsole,
-                                    javaString (text).get());
+    JNIEnv* const env = getEnv();
+
+    if (env != nullptr)
+        env->CallStaticVoidMethod (android.activityClass, android.printToConsole,
+                                   javaString (text).get());
 }
 
 //==============================================================================

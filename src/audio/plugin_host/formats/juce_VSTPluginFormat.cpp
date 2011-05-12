@@ -222,6 +222,28 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 static int shellUIDToCreate = 0;
 static int insideVSTCallback = 0;
 
+class IdleCallRecursionPreventer
+{
+public:
+    IdleCallRecursionPreventer()
+        : isMessageThread (MessageManager::getInstance()->isThisTheMessageThread())
+    {
+        if (isMessageThread)
+            ++insideVSTCallback;
+    }
+
+    ~IdleCallRecursionPreventer()
+    {
+        if (isMessageThread)
+            --insideVSTCallback;
+    }
+
+private:
+    const bool isMessageThread;
+
+    JUCE_DECLARE_NON_COPYABLE (IdleCallRecursionPreventer);
+};
+
 class VSTPluginWindow;
 
 //==============================================================================
@@ -382,7 +404,8 @@ public:
         }
 
         _fpreset(); // (doesn't do any harm)
-        ++insideVSTCallback;
+
+        const IdleCallRecursionPreventer icrp;
         shellUIDToCreate = 0;
 
         log ("Attempting to load VST: " + file.getFullPathName());
@@ -392,7 +415,6 @@ public:
         if (! m->open())
             m = nullptr;
 
-        --insideVSTCallback;
         _fpreset(); // (doesn't do any harm)
 
         return m.release();
@@ -402,24 +424,21 @@ public:
     ModuleHandle (const File& file_)
         : file (file_),
           moduleMain (0),
-#if JUCE_WINDOWS || JUCE_LINUX
+         #if JUCE_WINDOWS || JUCE_LINUX
           hModule (0)
-#elif JUCE_MAC
-          fragId (0),
-          resHandle (0),
-          bundleRef (0),
-          resFileId (0)
-#endif
+         #elif JUCE_MAC
+          fragId (0), resHandle (0), bundleRef (0), resFileId (0)
+         #endif
     {
         getActiveModules().add (this);
 
-#if JUCE_WINDOWS || JUCE_LINUX
+       #if JUCE_WINDOWS || JUCE_LINUX
         fullParentDirectoryPathName = file_.getParentDirectory().getFullPathName();
-#elif JUCE_MAC
+       #elif JUCE_MAC
         FSRef ref;
         PlatformUtilities::makeFSRefFromPath (&ref, file_.getParentDirectory().getFullPathName());
         FSGetCatalogInfo (&ref, kFSCatInfoNone, 0, 0, &parentDirFSSpec, 0);
-#endif
+       #endif
     }
 
     ~ModuleHandle()
@@ -435,7 +454,7 @@ public:
 
     bool open()
     {
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         static bool timePeriodSet = false;
 
         if (! timePeriodSet)
@@ -443,7 +462,7 @@ public:
             timePeriodSet = true;
             timeBeginPeriod (2);
         }
-#endif
+       #endif
 
         pluginName = file.getFileNameWithoutExtension();
 
@@ -594,7 +613,7 @@ public:
 
     void close()
     {
-#if JUCE_PPC
+       #if JUCE_PPC
         if (fragId != 0)
         {
             if (moduleMain != 0)
@@ -607,7 +626,7 @@ public:
                 CloseResFile (resFileId);
         }
         else
-#endif
+       #endif
         if (bundleRef != 0)
         {
             CFBundleCloseBundleResourceMap (bundleRef, resFileId);
@@ -622,7 +641,7 @@ public:
 
     void closeEffect (AEffect* eff)
     {
-#if JUCE_PPC
+       #if JUCE_PPC
         if (fragId != 0)
         {
             Array<void*> thingsToDelete;
@@ -638,13 +657,13 @@ public:
                 disposeMachOFromCFM (thingsToDelete[i]);
         }
         else
-#endif
+       #endif
         {
             eff->dispatcher (eff, effClose, 0, 0, 0, 0);
         }
     }
 
-#if JUCE_PPC
+   #if JUCE_PPC
     static void* newMachOFromCFM (void* cfmfp)
     {
         if (cfmfp == 0)
@@ -679,7 +698,7 @@ public:
             eff->processReplacing = (AEffectProcessProc) newMachOFromCFM ((void*) eff->processReplacing);
         }
     }
-#endif
+   #endif
 
 #endif
 
@@ -832,7 +851,8 @@ private:
 
 //==============================================================================
 VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module_)
-    : effect (0),
+    : effect (nullptr),
+      name (module_->pluginName),
       wantsMidiMessages (false),
       initialised (false),
       isPowerOn (false),
@@ -841,40 +861,36 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
 {
     try
     {
+        const IdleCallRecursionPreventer icrp;
         _fpreset();
 
-        ++insideVSTCallback;
-
-        name = module->pluginName;
         log ("Creating VST instance: " + name);
 
-#if JUCE_MAC
+      #if JUCE_MAC
         if (module->resFileId != 0)
             UseResFile (module->resFileId);
 
-#if JUCE_PPC
+       #if JUCE_PPC
         if (module->fragId != 0)
         {
             static void* audioMasterCoerced = nullptr;
-            if (audioMasterCoerced == 0)
+            if (audioMasterCoerced == nullptr)
                 audioMasterCoerced = NewCFMFromMachO ((void*) &audioMaster);
 
             effect = module->moduleMain ((audioMasterCallback) audioMasterCoerced);
         }
         else
-#endif
-#endif
+       #endif
+      #endif
         {
             effect = module->moduleMain (&audioMaster);
         }
 
-        --insideVSTCallback;
-
         if (effect != nullptr && effect->magic == kEffectMagic)
         {
-#if JUCE_PPC
+           #if JUCE_PPC
             module->coerceAEffectFunctionCalls (effect);
-#endif
+           #endif
 
             jassert (effect->resvd2 == 0);
             jassert (effect->object != 0);
@@ -887,25 +903,21 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
         }
     }
     catch (...)
-    {
-        --insideVSTCallback;
-    }
+    {}
 }
 
 VSTPluginInstance::~VSTPluginInstance()
 {
     const ScopedLock sl (lock);
 
-    jassert (insideVSTCallback == 0);
-
     if (effect != nullptr && effect->magic == kEffectMagic)
     {
         try
         {
-#if JUCE_MAC
+           #if JUCE_MAC
             if (module->resFileId != 0)
                 UseResFile (module->resFileId);
-#endif
+           #endif
 
             // Must delete any editors before deleting the plugin instance!
             jassert (getActiveEditor() == 0);
@@ -1147,9 +1159,9 @@ public:
     //==============================================================================
     VSTPluginWindow (VSTPluginInstance& plugin_)
         : AudioProcessorEditor (&plugin_),
-#if ! JUCE_MAC
+         #if ! JUCE_MAC
           ComponentMovementWatcher (this),
-#endif
+         #endif
           plugin (plugin_),
           isOpen (false),
           recursiveResize (false),
@@ -1201,17 +1213,17 @@ public:
 
             recursiveResize = true;
 
-#if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             if (pluginHWND != 0)
                 MoveWindow (pluginHWND, pos.getX(), pos.getY(), getWidth(), getHeight(), TRUE);
-#elif JUCE_LINUX
+           #elif JUCE_LINUX
             if (pluginWindow != 0)
             {
                 XResizeWindow (display, pluginWindow, getWidth(), getHeight());
                 XMoveWindow (display, pluginWindow, pos.getX(), pos.getY());
                 XMapRaised (display, pluginWindow);
             }
-#endif
+           #endif
 
             recursiveResize = false;
         }
@@ -1263,7 +1275,7 @@ public:
                 const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
                 peer->addMaskedRegion (pos.getX(), pos.getY(), getWidth(), getHeight());
 
-#if JUCE_LINUX
+               #if JUCE_LINUX
                 if (pluginWindow != 0)
                 {
                     const Rectangle<int> clip (g.getClipBounds());
@@ -1279,7 +1291,7 @@ public:
 
                     sendEventToChild (&ev);
                 }
-#endif
+               #endif
             }
         }
         else
@@ -1292,14 +1304,14 @@ public:
     //==============================================================================
     void timerCallback()
     {
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         if (--sizeCheckCount <= 0)
         {
             sizeCheckCount = 10;
 
             checkPluginWindowSize();
         }
-#endif
+       #endif
 
         try
         {
@@ -1319,7 +1331,7 @@ public:
     //==============================================================================
     void mouseDown (const MouseEvent& e)
     {
-#if JUCE_LINUX
+       #if JUCE_LINUX
         if (pluginWindow == 0)
             return;
 
@@ -1340,11 +1352,11 @@ public:
 
         sendEventToChild (&ev);
 
-#elif JUCE_WINDOWS
+       #elif JUCE_WINDOWS
         (void) e;
 
         toFront (true);
-#endif
+       #endif
     }
 
     void broughtToFront()
@@ -1352,9 +1364,9 @@ public:
         activeVSTWindows.removeValue (this);
         activeVSTWindows.add (this);
 
-#if JUCE_MAC
+       #if JUCE_MAC
         dispatch (effEditTop, 0, 0, 0, 0);
-#endif
+       #endif
     }
 
     //==============================================================================
@@ -1363,14 +1375,14 @@ private:
     bool isOpen, recursiveResize;
     bool pluginWantsKeys, pluginRefusesToResize, alreadyInside;
 
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     HWND pluginHWND;
     void* originalWndProc;
     int sizeCheckCount;
-#elif JUCE_LINUX
+   #elif JUCE_LINUX
     Window pluginWindow;
     EventProcPtr pluginProc;
-#endif
+   #endif
 
     //==============================================================================
 #if JUCE_MAC
@@ -1436,7 +1448,7 @@ private:
         // Install keyboard hooks
         pluginWantsKeys = (dispatch (effKeysRequired, 0, 0, 0, 0) == 0);
 
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         originalWndProc = 0;
         pluginHWND = GetWindow ((HWND) getWindowHandle(), GW_CHILD);
 
@@ -1491,7 +1503,7 @@ private:
             }
         }
 
-#elif JUCE_LINUX
+       #elif JUCE_LINUX
         pluginWindow = getChildWindow ((Window) getWindowHandle());
 
         if (pluginWindow != 0)
@@ -1514,7 +1526,7 @@ private:
 
         if (pluginWindow != 0)
             XMapRaised (display, pluginWindow);
-#endif
+       #endif
 
         // double-check it's not too tiny
         w = jmax (w, 32);
@@ -1522,9 +1534,9 @@ private:
 
         setSize (w, h);
 
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         checkPluginWindowSize();
-#endif
+       #endif
 
         startTimer (18 + JUCE_NAMESPACE::Random::getSystemRandom().nextInt (5));
         repaint();
@@ -1542,7 +1554,7 @@ private:
 
             dispatch (effEditClose, 0, 0, 0, 0);
 
-#if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             #pragma warning (push)
             #pragma warning (disable: 4244)
 
@@ -1557,11 +1569,11 @@ private:
                 DestroyWindow (pluginHWND);
 
             pluginHWND = 0;
-#elif JUCE_LINUX
+           #elif JUCE_LINUX
             stopTimer();
             pluginWindow = 0;
             pluginProc = 0;
-#endif
+           #endif
         }
     }
 #endif
@@ -2142,35 +2154,30 @@ void VSTPluginInstance::timerCallback()
 
 int VSTPluginInstance::dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const
 {
-    const ScopedLock sl (lock);
-
-    ++insideVSTCallback;
     int result = 0;
 
-    try
+    if (effect != nullptr)
     {
-        if (effect != 0)
+        const ScopedLock sl (lock);
+        const IdleCallRecursionPreventer icrp;
+
+        try
         {
-          #if JUCE_MAC
+           #if JUCE_MAC
             if (module->resFileId != 0)
                 UseResFile (module->resFileId);
-          #endif
+           #endif
 
             result = effect->dispatcher (effect, opcode, index, value, ptr, opt);
 
-          #if JUCE_MAC
+           #if JUCE_MAC
             module->resFileId = CurResFile();
-          #endif
-
-            --insideVSTCallback;
-            return result;
+           #endif
         }
-    }
-    catch (...)
-    {
+        catch (...)
+        {}
     }
 
-    --insideVSTCallback;
     return result;
 }
 
@@ -2267,19 +2274,19 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
     case audioMasterIdle:
         if (insideVSTCallback == 0 && MessageManager::getInstance()->isThisTheMessageThread())
         {
-            ++insideVSTCallback;
-#if JUCE_MAC
+            const IdleCallRecursionPreventer icrp;
+
+           #if JUCE_MAC
             if (getActiveEditor() != nullptr)
                 dispatch (effEditIdle, 0, 0, 0, 0);
-#endif
+           #endif
+
             juce_callAnyTimersSynchronously();
 
             handleUpdateNowIfNeeded();
 
             for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
                 ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
-
-            --insideVSTCallback;
         }
         break;
 
@@ -2742,10 +2749,10 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
 
     try
     {
-#if JUCE_MAC
+       #if JUCE_MAC
         if (instance->module->resFileId != 0)
             UseResFile (instance->module->resFileId);
-#endif
+       #endif
 
         instance->fillInPluginDescription (desc);
 
@@ -2756,9 +2763,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
             // Normal plugin...
             results.add (new PluginDescription (desc));
 
-            ++insideVSTCallback;
             instance->dispatch (effOpen, 0, 0, 0, 0);
-            --insideVSTCallback;
         }
         else
         {
@@ -2843,11 +2848,11 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
 {
     const File f (fileOrIdentifier);
 
-#if JUCE_MAC
+  #if JUCE_MAC
     if (f.isDirectory() && f.hasFileExtension (".vst"))
         return true;
 
-#if JUCE_PPC
+   #if JUCE_PPC
     FSRef fileRef;
     if (PlatformUtilities::makeFSRefFromPath (&fileRef, f.getFullPathName()))
     {
@@ -2862,14 +2867,14 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
                 return true;
         }
     }
-#endif
+   #endif
 
     return false;
-#elif JUCE_WINDOWS
+  #elif JUCE_WINDOWS
     return f.existsAsFile() && f.hasFileExtension (".dll");
-#elif JUCE_LINUX
+  #elif JUCE_LINUX
     return f.existsAsFile() && f.hasFileExtension (".so");
-#endif
+  #endif
 }
 
 const String VSTPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
@@ -2916,15 +2921,15 @@ void VSTPluginFormat::recursiveFileSearch (StringArray& results, const File& dir
 
 const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
-#if JUCE_MAC
+   #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-#elif JUCE_WINDOWS
+   #elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
     return FileSearchPath (programFiles + "\\Steinberg\\VstPlugins");
-#elif JUCE_LINUX
+   #elif JUCE_LINUX
     return FileSearchPath ("/usr/lib/vst");
-#endif
+   #endif
 }
 
 
