@@ -2154,6 +2154,9 @@
     <ClInclude Include="..\..\src\io\files\juce_FileSearchPath.h">
       <Filter>Juce\Source\io\files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\io\files\juce_MemoryMappedFile.h">
+      <Filter>Juce\Source\io\files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\io\files\juce_NamedPipe.h">
       <Filter>Juce\Source\io\files</Filter>
     </ClInclude>

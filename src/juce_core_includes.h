@@ -146,6 +146,9 @@
 #ifndef __JUCE_FILESEARCHPATH_JUCEHEADER__
  #include "io/files/juce_FileSearchPath.h"
 #endif
+#ifndef __JUCE_MEMORYMAPPEDFILE_JUCEHEADER__
+ #include "io/files/juce_MemoryMappedFile.h"
+#endif
 #ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
  #include "io/files/juce_NamedPipe.h"
 #endif

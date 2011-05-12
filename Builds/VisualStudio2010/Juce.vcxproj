@@ -741,6 +741,7 @@
     <ClInclude Include="..\..\src\io\files\juce_FileInputStream.h"/>
     <ClInclude Include="..\..\src\io\files\juce_FileOutputStream.h"/>
     <ClInclude Include="..\..\src\io\files\juce_FileSearchPath.h"/>
+    <ClInclude Include="..\..\src\io\files\juce_MemoryMappedFile.h"/>
     <ClInclude Include="..\..\src\io\files\juce_NamedPipe.h"/>
     <ClInclude Include="..\..\src\io\files\juce_TemporaryFile.h"/>
     <ClInclude Include="..\..\src\io\files\juce_ZipFile.h"/>

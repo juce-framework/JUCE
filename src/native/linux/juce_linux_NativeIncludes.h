@@ -42,6 +42,7 @@
 #include <sys/ptrace.h>
 #include <sys/vfs.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <fnmatch.h>
 #include <utime.h>
 #include <pwd.h>

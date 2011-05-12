@@ -54,6 +54,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/streams/juce_MemoryOutputStream.h"
 #include "../../io/files/juce_NamedPipe.h"
 #include "../../io/files/juce_DirectoryIterator.h"
+#include "../../io/files/juce_MemoryMappedFile.h"
 #include "../../io/network/juce_URL.h"
 #include "../../io/network/juce_MACAddress.h"
 #include "../../core/juce_PlatformUtilities.h"

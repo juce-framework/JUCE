@@ -524,6 +524,47 @@ void FileOutputStream::flushInternal()
 }
 
 //==============================================================================
+MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
+    : address (nullptr),
+      internal (nullptr),
+      length (0)
+{
+    jassert (mode == readOnly || mode == readWrite);
+
+    const int fd = open (file.getFullPathName().toUTF8(),
+                         mode == readWrite ? (O_CREAT + O_RDWR) : O_RDONLY, 00644);
+
+    internal = reinterpret_cast<void*> (fd);
+
+    if (fd != -1)
+    {
+        const int64 fileSize = file.getSize();
+
+        address = mmap (0, (size_t) fileSize,
+                        mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
+                        MAP_SHARED, fd, 0);
+
+        if (address == MAP_FAILED)
+            address = nullptr;
+        else
+            length = (size_t) fileSize;
+    }
+}
+
+MemoryMappedFile::~MemoryMappedFile()
+{
+    const int fd = reinterpret_cast <int> (internal);
+
+    if (fd != 0)
+    {
+        if (address != nullptr)
+            munmap (address, length);
+
+        close (fd);
+    }
+}
+
+//==============================================================================
 const File juce_getExecutableFile()
 {
    #if JUCE_ANDROID

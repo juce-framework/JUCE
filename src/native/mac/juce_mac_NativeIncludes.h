@@ -70,6 +70,7 @@
 #include <sys/param.h>
 #include <sys/mount.h>
 #include <sys/utsname.h>
+#include <sys/mman.h>
 #include <fnmatch.h>
 #include <utime.h>
 #include <dlfcn.h>

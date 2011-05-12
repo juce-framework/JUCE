@@ -789,6 +789,7 @@
             <File RelativePath="..\..\src\io\files\juce_FileOutputStream.h"/>
             <File RelativePath="..\..\src\io\files\juce_FileSearchPath.cpp"/>
             <File RelativePath="..\..\src\io\files\juce_FileSearchPath.h"/>
+            <File RelativePath="..\..\src\io\files\juce_MemoryMappedFile.h"/>
             <File RelativePath="..\..\src\io\files\juce_NamedPipe.cpp"/>
             <File RelativePath="..\..\src\io\files\juce_NamedPipe.h"/>
             <File RelativePath="..\..\src\io\files\juce_TemporaryFile.cpp"/>

@@ -300,6 +300,56 @@ void FileOutputStream::flushInternal()
 }
 
 //==============================================================================
+MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
+    : address (nullptr),
+      internal (nullptr),
+      length (0)
+{
+    jassert (mode == readOnly || mode == readWrite);
+
+    DWORD accessMode = GENERIC_READ, shareMode = FILE_SHARE_READ, createType = OPEN_EXISTING;
+    DWORD protect = PAGE_READONLY, access = FILE_MAP_READ;
+
+    if (mode == readWrite)
+    {
+        accessMode = GENERIC_READ | GENERIC_WRITE;
+        createType = OPEN_ALWAYS;
+        protect = PAGE_READWRITE;
+        access = FILE_MAP_ALL_ACCESS;
+    }
+
+    HANDLE h = CreateFile (file.getFullPathName().toWideCharPointer(), accessMode, FILE_SHARE_READ, 0,
+                           createType, FILE_ATTRIBUTE_NORMAL, 0);
+
+    internal = (void*) h;
+
+    if (h != INVALID_HANDLE_VALUE)
+    {
+        const int64 fileSize = file.getSize();
+
+        HANDLE mappingHandle = CreateFileMapping (h, 0, protect, (DWORD) (fileSize >> 32), (DWORD) fileSize, 0);
+        if (mappingHandle != 0)
+        {
+            address = MapViewOfFile (mappingHandle, access, 0, 0, (SIZE_T) fileSize);
+
+            if (address != nullptr)
+                length = (size_t) fileSize;
+
+            CloseHandle (mappingHandle);
+        }
+    }
+}
+
+MemoryMappedFile::~MemoryMappedFile()
+{
+    if (address != nullptr)
+        UnmapViewOfFile (address);
+
+    if (internal != nullptr)
+        CloseHandle ((HANDLE) internal);
+}
+
+//==============================================================================
 int64 File::getSize() const
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;

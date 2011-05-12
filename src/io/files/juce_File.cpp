@@ -380,53 +380,48 @@ bool File::isAbsolutePath (const String& path)
 const File File::getChildFile (String relativePath) const
 {
     if (isAbsolutePath (relativePath))
-    {
-        // the path is really absolute..
         return File (relativePath);
-    }
-    else
+
+    String path (fullPath);
+
+    // It's relative, so remove any ../ or ./ bits at the start..
+    if (relativePath[0] == '.')
     {
-        // it's relative, so remove any ../ or ./ bits at the start.
-        String path (fullPath);
+       #if JUCE_WINDOWS
+        relativePath = relativePath.replaceCharacter ('/', '\\').trimStart();
+       #else
+        relativePath = relativePath.trimStart();
+       #endif
 
-        if (relativePath[0] == '.')
+        while (relativePath[0] == '.')
         {
-           #if JUCE_WINDOWS
-            relativePath = relativePath.replaceCharacter ('/', '\\').trimStart();
-           #else
-            relativePath = relativePath.trimStart();
-           #endif
-
-            while (relativePath[0] == '.')
+            if (relativePath[1] == '.')
             {
-                if (relativePath[1] == '.')
+                if (relativePath [2] == 0 || relativePath[2] == separator)
                 {
-                    if (relativePath [2] == 0 || relativePath[2] == separator)
-                    {
-                        const int lastSlash = path.lastIndexOfChar (separator);
-                        if (lastSlash >= 0)
-                            path = path.substring (0, lastSlash);
+                    const int lastSlash = path.lastIndexOfChar (separator);
+                    if (lastSlash >= 0)
+                        path = path.substring (0, lastSlash);
 
-                        relativePath = relativePath.substring (3);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else if (relativePath[1] == separator)
-                {
-                    relativePath = relativePath.substring (2);
+                    relativePath = relativePath.substring (3);
                 }
                 else
                 {
                     break;
                 }
             }
+            else if (relativePath[1] == separator)
+            {
+                relativePath = relativePath.substring (2);
+            }
+            else
+            {
+                break;
+            }
         }
-
-        return File (addTrailingSeparator (path) + relativePath);
     }
+
+    return File (addTrailingSeparator (path) + relativePath);
 }
 
 const File File::getSiblingFile (const String& fileName) const
@@ -904,6 +899,8 @@ const File File::createTempFile (const String& fileNameEnding)
 
 #include "../../utilities/juce_UnitTest.h"
 #include "../../maths/juce_Random.h"
+#include "juce_MemoryMappedFile.h"
+
 
 class FileTests  : public UnitTest
 {
@@ -1021,6 +1018,39 @@ public:
             expect (mb.getSize() == 10);
             expect (mb[0] == '0');
         }
+
+        beginTest ("Memory-mapped files");
+
+        {
+            MemoryMappedFile mmf (tempFile, MemoryMappedFile::readOnly);
+            expect (mmf.getSize() == 10);
+            expect (mmf.getData() != nullptr);
+            expect (memcmp (mmf.getData(), "0123456789", 10) == 0);
+        }
+
+        {
+            const File tempFile2 (tempFile.getNonexistentSibling (false));
+            expect (tempFile2.create());
+            expect (tempFile2.appendData ("xxxxxxxxxx", 10));
+
+            {
+                MemoryMappedFile mmf (tempFile2, MemoryMappedFile::readWrite);
+                expect (mmf.getSize() == 10);
+                expect (mmf.getData() != nullptr);
+                memcpy (mmf.getData(), "abcdefghij", 10);
+            }
+
+            {
+                MemoryMappedFile mmf (tempFile2, MemoryMappedFile::readWrite);
+                expect (mmf.getSize() == 10);
+                expect (mmf.getData() != nullptr);
+                expect (memcmp (mmf.getData(), "abcdefghij", 10) == 0);
+            }
+
+            expect (tempFile2.deleteFile());
+        }
+
+        beginTest ("More writing");
 
         expect (tempFile.appendData ("abcdefghij", 10));
         expect (tempFile.getSize() == 20);

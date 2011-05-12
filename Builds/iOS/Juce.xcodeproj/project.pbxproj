@@ -898,6 +898,7 @@
 		4EEF0B0BB4C3D1956B04122B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_FileOutputStream.h; path = ../../src/io/files/juce_FileOutputStream.h; sourceTree = SOURCE_ROOT; };
 		59B2FFF817679AEA84375E1B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FileSearchPath.cpp; path = ../../src/io/files/juce_FileSearchPath.cpp; sourceTree = SOURCE_ROOT; };
 		49BF2B02A6D7B4438FC24839 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_FileSearchPath.h; path = ../../src/io/files/juce_FileSearchPath.h; sourceTree = SOURCE_ROOT; };
+		00B348FA35A7F691AEF84FBA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MemoryMappedFile.h; path = ../../src/io/files/juce_MemoryMappedFile.h; sourceTree = SOURCE_ROOT; };
 		D9B3C04F8EB4228DD59002E7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_NamedPipe.cpp; path = ../../src/io/files/juce_NamedPipe.cpp; sourceTree = SOURCE_ROOT; };
 		42DA88264F768BAACD0414A3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_NamedPipe.h; path = ../../src/io/files/juce_NamedPipe.h; sourceTree = SOURCE_ROOT; };
 		17C3AF03FF7AE88AE0C73311 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_TemporaryFile.cpp; path = ../../src/io/files/juce_TemporaryFile.cpp; sourceTree = SOURCE_ROOT; };
@@ -1713,6 +1714,7 @@
 				4EEF0B0BB4C3D1956B04122B,
 				59B2FFF817679AEA84375E1B,
 				49BF2B02A6D7B4438FC24839,
+				00B348FA35A7F691AEF84FBA,
 				D9B3C04F8EB4228DD59002E7,
 				42DA88264F768BAACD0414A3,
 				17C3AF03FF7AE88AE0C73311,

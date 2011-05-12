@@ -1177,6 +1177,8 @@
                 file="src/io/files/juce_FileSearchPath.cpp"/>
           <FILE id="YJYo7slcr" name="juce_FileSearchPath.h" compile="0" resource="0"
                 file="src/io/files/juce_FileSearchPath.h"/>
+          <FILE id="gPKPMY" name="juce_MemoryMappedFile.h" compile="0" resource="0"
+                file="src/io/files/juce_MemoryMappedFile.h"/>
           <FILE id="hwijIMGzE" name="juce_NamedPipe.cpp" compile="1" resource="0"
                 file="src/io/files/juce_NamedPipe.cpp"/>
           <FILE id="Jv4ugNwIx" name="juce_NamedPipe.h" compile="0" resource="0"
