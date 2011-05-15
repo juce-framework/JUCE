@@ -44,7 +44,7 @@ class InternalTimerThread  : private Thread,
                              private AsyncUpdater
 {
 public:
-    typedef SpinLock LockType;
+    typedef CriticalSection LockType; // (mysteriously, using a SpinLock here causes problems on some XP machines..)
 
     InternalTimerThread()
         : Thread ("Juce Timer"),
@@ -146,7 +146,7 @@ public:
         /* This is needed as a memory barrier to make sure all processing of current timers is done
            before the boolean is set. This set should never fail since if it was false in the first place,
            we wouldn't get a message (so it can't be changed from false to true from under us), and if we
-           get a message then the value is true and the other thread can only  set  it to true again and
+           get a message then the value is true and the other thread can only set it to true again and
            we will get another callback to set it to false.
         */
         callbackNeeded.set (0);

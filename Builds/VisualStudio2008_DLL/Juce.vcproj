@@ -534,6 +534,7 @@
               <File RelativePath="..\..\src\gui\components\keyboard\juce_KeyPressMappingSet.h"/>
               <File RelativePath="..\..\src\gui\components\keyboard\juce_ModifierKeys.cpp"/>
               <File RelativePath="..\..\src\gui\components\keyboard\juce_ModifierKeys.h"/>
+              <File RelativePath="..\..\src\gui\components\keyboard\juce_TextEditorKeyMapper.h"/>
               <File RelativePath="..\..\src\gui\components\keyboard\juce_TextInputTarget.h"/>
             </Filter>
             <Filter Name="layout">

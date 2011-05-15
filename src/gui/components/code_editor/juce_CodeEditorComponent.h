@@ -116,40 +116,36 @@ public:
     const CodeDocument::Position getPositionAt (int x, int y);
 
     //==============================================================================
-    void cursorLeft (bool moveInWholeWordSteps, bool selecting);
-    void cursorRight (bool moveInWholeWordSteps, bool selecting);
-    void cursorDown (bool selecting);
-    void cursorUp (bool selecting);
+    bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
+    bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
+    bool moveCaretUp (bool selecting);
+    bool moveCaretDown (bool selecting);
+    bool scrollDown();
+    bool scrollUp();
+    bool pageUp (bool selecting);
+    bool pageDown (bool selecting);
+    bool moveCaretToTop (bool selecting);
+    bool moveCaretToStartOfLine (bool selecting);
+    bool moveCaretToEnd (bool selecting);
+    bool moveCaretToEndOfLine (bool selecting);
+    bool deleteBackwards (bool moveInWholeWordSteps);
+    bool deleteForwards (bool moveInWholeWordSteps);
+    bool copyToClipboard();
+    bool cutToClipboard();
+    bool pasteFromClipboard();
+    bool undo();
+    bool redo();
 
-    void pageDown (bool selecting);
-    void pageUp (bool selecting);
+    bool selectAll();
+    void deselectAll();
 
-    void scrollDown();
-    void scrollUp();
     void scrollToLine (int newFirstLineOnScreen);
     void scrollBy (int deltaLines);
     void scrollToColumn (int newFirstColumnOnScreen);
     void scrollToKeepCaretOnScreen();
 
-    void goToStartOfDocument (bool selecting);
-    void goToStartOfLine (bool selecting);
-    void goToEndOfDocument (bool selecting);
-    void goToEndOfLine (bool selecting);
-
-    void deselectAll();
-    void selectAll();
-
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
-    void cut();
-    void copy();
-    void copyThenCut();
-    void paste();
-    void backspace (bool moveInWholeWordSteps);
-    void deleteForward (bool moveInWholeWordSteps);
-
-    void undo();
-    void redo();
 
     //==============================================================================
     const Range<int> getHighlightedRegion() const;
@@ -307,6 +303,7 @@ private:
     void scrollToLineInternal (int line);
     void scrollToColumnInternal (double column);
     void newTransaction();
+    void cut();
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

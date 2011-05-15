@@ -53,6 +53,8 @@ bool AudioIODevice::showControlPanel()
     return false;
 }
 
+//==============================================================================
+void AudioIODeviceCallback::audioDeviceError (const String&) {}
 
 
 END_JUCE_NAMESPACE

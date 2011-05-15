@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	89
+#define JUCE_BUILDNUMBER	90
 
 /** Current Juce version number.
 
@@ -1647,8 +1647,8 @@ public:
 	template <typename CharPointerType>
 	static double readDoubleValue (CharPointerType& text) noexcept
 	{
-		double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
-		int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
+		double result[3] = { 0 }, accumulator[2] = { 0 };
+		int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
 		int exponent = 0, decPointIndex = 0, digit = 0;
 		int lastDigit = 0, numSignificantDigits = 0;
 		bool isNegative = false, digitsFound = false;
@@ -8734,16 +8734,16 @@ public:
 	var (ReferenceCountedObject* object);
 	var (MethodFunction method) noexcept;
 
-	var& operator= (const var& valueToCopy);
-	var& operator= (int value);
-	var& operator= (int64 value);
-	var& operator= (bool value);
-	var& operator= (double value);
-	var& operator= (const char* value);
-	var& operator= (const wchar_t* value);
-	var& operator= (const String& value);
-	var& operator= (ReferenceCountedObject* object);
-	var& operator= (MethodFunction method);
+	const var& operator= (const var& valueToCopy);
+	const var& operator= (int value);
+	const var& operator= (int64 value);
+	const var& operator= (bool value);
+	const var& operator= (double value);
+	const var& operator= (const char* value);
+	const var& operator= (const wchar_t* value);
+	const var& operator= (const String& value);
+	const var& operator= (ReferenceCountedObject* object);
+	const var& operator= (MethodFunction method);
 
 	void swapWith (var& other) noexcept;
 
@@ -18835,6 +18835,8 @@ private:
 	bool negative;
 
 	void ensureSize (int numVals);
+	void shiftLeft (int bits, int startBit);
+	void shiftRight (int bits, int startBit);
 	static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
 
 	static inline int bitToIndex (const int bit) noexcept	   { return bit >> 5; }
@@ -19258,6 +19260,7 @@ private:
 	void openHandle();
 	void closeHandle();
 	void flushInternal();
+	bool flushBuffer();
 	int64 setPositionInternal (int64 newPosition);
 	int writeInternal (const void* data, int numBytes);
 
@@ -20835,6 +20838,7 @@ private:
 	friend class ScopedPointer <GZIPCompressorHelper>;
 	ScopedPointer <GZIPCompressorHelper> helper;
 	bool doNextBlock();
+	void flushInternal();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream);
 };
@@ -21076,6 +21080,8 @@ private:
 	MemoryBlock& data;
 	MemoryBlock internalBlock;
 	size_t position, size;
+
+	void trimExternalBlockSize();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream);
 };
@@ -38124,9 +38130,14 @@ public:
 	*/
 	virtual void audioDeviceAboutToStart (AudioIODevice* device) = 0;
 
-	/** Called to indicate that the device has stopped.
-	*/
+	/** Called to indicate that the device has stopped. */
 	virtual void audioDeviceStopped() = 0;
+
+	/** This can be overridden to be told if the device generates an error while operating.
+		Be aware that this could be called by any thread! And not all devices perform
+		this callback.
+	*/
+	virtual void audioDeviceError (const String& errorMessage);
 };
 
 /**
@@ -38727,6 +38738,8 @@ private:
 	double sampleRate, sourceSampleRate;
 	int blockSize, readAheadBufferSize;
 	bool isPrepared, inputStreamEOF;
+
+	void releaseMasterResources();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioTransportSource);
 };
@@ -42920,6 +42933,27 @@ public:
 	/** @internal */
 	void setTemporaryUnderlining (const Array <Range<int> >&);
 
+	bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
+	bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
+	bool moveCaretUp (bool selecting);
+	bool moveCaretDown (bool selecting);
+	bool pageUp (bool selecting);
+	bool pageDown (bool selecting);
+	bool scrollDown();
+	bool scrollUp();
+	bool moveCaretToTop (bool selecting);
+	bool moveCaretToStartOfLine (bool selecting);
+	bool moveCaretToEnd (bool selecting);
+	bool moveCaretToEndOfLine (bool selecting);
+	bool deleteBackwards (bool moveInWholeWordSteps);
+	bool deleteForwards (bool moveInWholeWordSteps);
+	bool copyToClipboard();
+	bool cutToClipboard();
+	bool pasteFromClipboard();
+	bool selectAll();
+	bool undo();
+	bool redo();
+
 	/** This adds the items to the popup menu.
 
 		By default it adds the cut/copy/paste items, but you can override this if
@@ -43052,7 +43086,7 @@ private:
 	int indexAtPosition (float x, float y);
 	int findWordBreakAfter (int position) const;
 	int findWordBreakBefore (int position) const;
-
+	bool moveCaretWithTransation (int newPos, bool selecting);
 	friend class TextHolderComponent;
 	friend class TextEditorViewport;
 	void drawContent (Graphics& g);
@@ -43060,6 +43094,8 @@ private:
 	float getWordWrapWidth() const;
 	void timerCallbackInt();
 	void repaintText (const Range<int>& range);
+	void scrollByLines (int deltaLines);
+	bool undoOrRedo (bool shouldUndo);
 	UndoManager* getUndoManager() noexcept;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
@@ -47364,6 +47400,7 @@ private:
 	void scanFor (AudioPluginFormat* format);
 	static void optionsMenuStaticCallback (int result, PluginListComponent*);
 	void optionsMenuCallback (int result);
+	void updateList();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
 };
@@ -49521,6 +49558,8 @@ private:
 	DropShadowEffect shadow;
 	Path path;
 	int offset;
+
+	void updateShadowAndOffset();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton);
 };
@@ -52238,40 +52277,36 @@ public:
 	*/
 	const CodeDocument::Position getPositionAt (int x, int y);
 
-	void cursorLeft (bool moveInWholeWordSteps, bool selecting);
-	void cursorRight (bool moveInWholeWordSteps, bool selecting);
-	void cursorDown (bool selecting);
-	void cursorUp (bool selecting);
+	bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
+	bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
+	bool moveCaretUp (bool selecting);
+	bool moveCaretDown (bool selecting);
+	bool scrollDown();
+	bool scrollUp();
+	bool pageUp (bool selecting);
+	bool pageDown (bool selecting);
+	bool moveCaretToTop (bool selecting);
+	bool moveCaretToStartOfLine (bool selecting);
+	bool moveCaretToEnd (bool selecting);
+	bool moveCaretToEndOfLine (bool selecting);
+	bool deleteBackwards (bool moveInWholeWordSteps);
+	bool deleteForwards (bool moveInWholeWordSteps);
+	bool copyToClipboard();
+	bool cutToClipboard();
+	bool pasteFromClipboard();
+	bool undo();
+	bool redo();
 
-	void pageDown (bool selecting);
-	void pageUp (bool selecting);
+	bool selectAll();
+	void deselectAll();
 
-	void scrollDown();
-	void scrollUp();
 	void scrollToLine (int newFirstLineOnScreen);
 	void scrollBy (int deltaLines);
 	void scrollToColumn (int newFirstColumnOnScreen);
 	void scrollToKeepCaretOnScreen();
 
-	void goToStartOfDocument (bool selecting);
-	void goToStartOfLine (bool selecting);
-	void goToEndOfDocument (bool selecting);
-	void goToEndOfLine (bool selecting);
-
-	void deselectAll();
-	void selectAll();
-
 	void insertTextAtCaret (const String& textToInsert);
 	void insertTabAtCaret();
-	void cut();
-	void copy();
-	void copyThenCut();
-	void paste();
-	void backspace (bool moveInWholeWordSteps);
-	void deleteForward (bool moveInWholeWordSteps);
-
-	void undo();
-	void redo();
 
 	const Range<int> getHighlightedRegion() const;
 	void setHighlightedRegion (const Range<int>& newRange);
@@ -52422,6 +52457,7 @@ private:
 	void scrollToLineInternal (int line);
 	void scrollToColumnInternal (double column);
 	void newTransaction();
+	void cut();
 
 	int indexToColumn (int line, int index) const noexcept;
 	int columnToIndex (int line, int column) const noexcept;
@@ -53426,7 +53462,8 @@ private:
 	double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
 	int velocityModeThreshold;
 	float rotaryStart, rotaryEnd;
-	int numDecimalPlaces, mouseXWhenLastDragged, mouseYWhenLastDragged;
+	int numDecimalPlaces;
+	Point<int> mousePosWhenLastDragged;
 	int mouseDragStartX, mouseDragStartY;
 	int sliderRegionStart, sliderRegionSize;
 	int sliderBeingDragged;
@@ -55763,6 +55800,9 @@ protected:
 	*/
 	virtual void getRoots (StringArray& rootNames, StringArray& rootPaths);
 
+	/** Updates the items in the dropdown list of recent paths with the values from getRoots(). */
+	void resetRecentPaths();
+
 private:
 
 	ScopedPointer <DirectoryContentsList> fileList;
@@ -56995,6 +57035,7 @@ private:
 	bool hasBeenResized;
 	#endif
 
+	void initialise (bool addToDesktop);
 	void updateLastPos();
 	void setContent (Component* newComp, bool takeOwnership, bool resizeToFit);
 
@@ -58862,6 +58903,340 @@ private:
 
 #endif
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
+
+/*** Start of inlined file: juce_TextEditorKeyMapper.h ***/
+#ifndef __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
+#define __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Keypress.h ***/
+#ifndef __JUCE_KEYPRESS_JUCEHEADER__
+#define __JUCE_KEYPRESS_JUCEHEADER__
+
+/**
+	Represents a key press, including any modifier keys that are needed.
+
+	E.g. a KeyPress might represent CTRL+C, SHIFT+ALT+H, Spacebar, Escape, etc.
+
+	@see Component, KeyListener, Button::addShortcut, KeyPressMappingManager
+*/
+class JUCE_API  KeyPress
+{
+public:
+
+	/** Creates an (invalid) KeyPress.
+
+		@see isValid
+	*/
+	KeyPress() noexcept;
+
+	/** Creates a KeyPress for a key and some modifiers.
+
+		e.g.
+		CTRL+C would be: KeyPress ('c', ModifierKeys::ctrlModifier)
+		SHIFT+Escape would be: KeyPress (KeyPress::escapeKey, ModifierKeys::shiftModifier)
+
+		@param keyCode	  a code that represents the key - this value must be
+							one of special constants listed in this class, or an
+							8-bit character code such as a letter (case is ignored),
+							digit or a simple key like "," or ".". Note that this
+							isn't the same as the textCharacter parameter, so for example
+							a keyCode of 'a' and a shift-key modifier should have a
+							textCharacter value of 'A'.
+		@param modifiers	the modifiers to associate with the keystroke
+		@param textCharacter	the character that would be printed if someone typed
+							this keypress into a text editor. This value may be
+							null if the keypress is a non-printing character
+		@see getKeyCode, isKeyCode, getModifiers
+	*/
+	KeyPress (int keyCode,
+			  const ModifierKeys& modifiers,
+			  juce_wchar textCharacter) noexcept;
+
+	/** Creates a keypress with a keyCode but no modifiers or text character.
+	*/
+	KeyPress (int keyCode) noexcept;
+
+	/** Creates a copy of another KeyPress. */
+	KeyPress (const KeyPress& other) noexcept;
+
+	/** Copies this KeyPress from another one. */
+	KeyPress& operator= (const KeyPress& other) noexcept;
+
+	/** Compares two KeyPress objects. */
+	bool operator== (const KeyPress& other) const noexcept;
+
+	/** Compares two KeyPress objects. */
+	bool operator!= (const KeyPress& other) const noexcept;
+
+	/** Returns true if this is a valid KeyPress.
+
+		A null keypress can be created by the default constructor, in case it's
+		needed.
+	*/
+	bool isValid() const noexcept				   { return keyCode != 0; }
+
+	/** Returns the key code itself.
+
+		This will either be one of the special constants defined in this class,
+		or an 8-bit character code.
+	*/
+	int getKeyCode() const noexcept				 { return keyCode; }
+
+	/** Returns the key modifiers.
+
+		@see ModifierKeys
+	*/
+	const ModifierKeys getModifiers() const noexcept		{ return mods; }
+
+	/** Returns the character that is associated with this keypress.
+
+		This is the character that you'd expect to see printed if you press this
+		keypress in a text editor or similar component.
+	*/
+	juce_wchar getTextCharacter() const noexcept		{ return textCharacter; }
+
+	/** Checks whether the KeyPress's key is the same as the one provided, without checking
+		the modifiers.
+
+		The values for key codes can either be one of the special constants defined in
+		this class, or an 8-bit character code.
+
+		@see getKeyCode
+	*/
+	bool isKeyCode (int keyCodeToCompare) const noexcept	{ return keyCode == keyCodeToCompare; }
+
+	/** Converts a textual key description to a KeyPress.
+
+		This attempts to decode a textual version of a keypress, e.g. "CTRL + C" or "SPACE".
+
+		This isn't designed to cope with any kind of input, but should be given the
+		strings that are created by the getTextDescription() method.
+
+		If the string can't be parsed, the object returned will be invalid.
+
+		@see getTextDescription
+	*/
+	static const KeyPress createFromDescription (const String& textVersion);
+
+	/** Creates a textual description of the key combination.
+
+		e.g. "CTRL + C" or "DELETE".
+
+		To store a keypress in a file, use this method, along with createFromDescription()
+		to retrieve it later.
+	*/
+	const String getTextDescription() const;
+
+	/** Creates a textual description of the key combination, using unicode icon symbols if possible.
+
+		On OSX, this uses the Apple symbols for command, option, shift, etc, instead of the textual
+		modifier key descriptions that are returned by getTextDescription()
+	*/
+	const String getTextDescriptionWithIcons() const;
+
+	/** Checks whether the user is currently holding down the keys that make up this
+		KeyPress.
+
+		Note that this will return false if any extra modifier keys are
+		down - e.g. if the keypress is CTRL+X and the user is actually holding CTRL+ALT+x
+		then it will be false.
+	*/
+	bool isCurrentlyDown() const;
+
+	/** Checks whether a particular key is held down, irrespective of modifiers.
+
+		The values for key codes can either be one of the special constants defined in
+		this class, or an 8-bit character code.
+	*/
+	static bool isKeyCurrentlyDown (int keyCode);
+
+	// Key codes
+	//
+	// Note that the actual values of these are platform-specific and may change
+	// without warning, so don't store them anywhere as constants. For persisting/retrieving
+	// KeyPress objects, use getTextDescription() and createFromDescription() instead.
+	//
+
+	static const int spaceKey;	  /**< key-code for the space bar */
+	static const int escapeKey;	 /**< key-code for the escape key */
+	static const int returnKey;	 /**< key-code for the return key*/
+	static const int tabKey;	/**< key-code for the tab key*/
+
+	static const int deleteKey;	 /**< key-code for the delete key (not backspace) */
+	static const int backspaceKey;  /**< key-code for the backspace key */
+	static const int insertKey;	 /**< key-code for the insert key */
+
+	static const int upKey;	 /**< key-code for the cursor-up key */
+	static const int downKey;	   /**< key-code for the cursor-down key */
+	static const int leftKey;	   /**< key-code for the cursor-left key */
+	static const int rightKey;	  /**< key-code for the cursor-right key */
+	static const int pageUpKey;	 /**< key-code for the page-up key */
+	static const int pageDownKey;   /**< key-code for the page-down key */
+	static const int homeKey;	   /**< key-code for the home key */
+	static const int endKey;	/**< key-code for the end key */
+
+	static const int F1Key;	 /**< key-code for the F1 key */
+	static const int F2Key;	 /**< key-code for the F2 key */
+	static const int F3Key;	 /**< key-code for the F3 key */
+	static const int F4Key;	 /**< key-code for the F4 key */
+	static const int F5Key;	 /**< key-code for the F5 key */
+	static const int F6Key;	 /**< key-code for the F6 key */
+	static const int F7Key;	 /**< key-code for the F7 key */
+	static const int F8Key;	 /**< key-code for the F8 key */
+	static const int F9Key;	 /**< key-code for the F9 key */
+	static const int F10Key;	/**< key-code for the F10 key */
+	static const int F11Key;	/**< key-code for the F11 key */
+	static const int F12Key;	/**< key-code for the F12 key */
+	static const int F13Key;	/**< key-code for the F13 key */
+	static const int F14Key;	/**< key-code for the F14 key */
+	static const int F15Key;	/**< key-code for the F15 key */
+	static const int F16Key;	/**< key-code for the F16 key */
+
+	static const int numberPad0;	 /**< key-code for the 0 on the numeric keypad. */
+	static const int numberPad1;	 /**< key-code for the 1 on the numeric keypad. */
+	static const int numberPad2;	 /**< key-code for the 2 on the numeric keypad. */
+	static const int numberPad3;	 /**< key-code for the 3 on the numeric keypad. */
+	static const int numberPad4;	 /**< key-code for the 4 on the numeric keypad. */
+	static const int numberPad5;	 /**< key-code for the 5 on the numeric keypad. */
+	static const int numberPad6;	 /**< key-code for the 6 on the numeric keypad. */
+	static const int numberPad7;	 /**< key-code for the 7 on the numeric keypad. */
+	static const int numberPad8;	 /**< key-code for the 8 on the numeric keypad. */
+	static const int numberPad9;	 /**< key-code for the 9 on the numeric keypad. */
+
+	static const int numberPadAdd;		/**< key-code for the add sign on the numeric keypad. */
+	static const int numberPadSubtract;	   /**< key-code for the subtract sign on the numeric keypad. */
+	static const int numberPadMultiply;	   /**< key-code for the multiply sign on the numeric keypad. */
+	static const int numberPadDivide;	 /**< key-code for the divide sign on the numeric keypad. */
+	static const int numberPadSeparator;	  /**< key-code for the comma on the numeric keypad. */
+	static const int numberPadDecimalPoint;   /**< key-code for the decimal point sign on the numeric keypad. */
+	static const int numberPadEquals;	 /**< key-code for the equals key on the numeric keypad. */
+	static const int numberPadDelete;	 /**< key-code for the delete key on the numeric keypad. */
+
+	static const int playKey;	/**< key-code for a multimedia 'play' key, (not all keyboards will have one) */
+	static const int stopKey;	/**< key-code for a multimedia 'stop' key, (not all keyboards will have one) */
+	static const int fastForwardKey; /**< key-code for a multimedia 'fast-forward' key, (not all keyboards will have one) */
+	static const int rewindKey;	  /**< key-code for a multimedia 'rewind' key, (not all keyboards will have one) */
+
+private:
+
+	int keyCode;
+	ModifierKeys mods;
+	juce_wchar textCharacter;
+
+	JUCE_LEAK_DETECTOR (KeyPress);
+};
+
+#endif   // __JUCE_KEYPRESS_JUCEHEADER__
+
+/*** End of inlined file: juce_Keypress.h ***/
+
+/** This class is used to invoke a range of text-editor navigation methods on
+	an object, based upon a keypress event.
+
+	It's currently used internally by the TextEditor and CodeEditorComponent.
+*/
+template <class CallbackClass>
+struct TextEditorKeyMapper
+{
+	/** Checks the keypress and invokes one of a range of navigation functions that
+		the target class must implement, based on the key event.
+	*/
+	static bool invokeKeyFunction (CallbackClass& target, const KeyPress& key)
+	{
+		const bool isShiftDown = key.getModifiers().isShiftDown();
+		const bool ctrlOrAltDown = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
+
+		if (key == KeyPress (KeyPress::downKey, ModifierKeys::ctrlModifier, 0)
+			 && target.scrollUp())
+			return true;
+
+		if (key == KeyPress (KeyPress::upKey, ModifierKeys::ctrlModifier, 0)
+			 && target.scrollDown())
+			return true;
+
+	   #if JUCE_MAC
+		if (key.getModifiers().isCommandDown())
+		{
+			if (key.isKeyCode (KeyPress::upKey))
+				return target.moveCaretToTop (isShiftDown);
+
+			if (key.isKeyCode (KeyPress::downKey))
+				return target.moveCaretToEnd (isShiftDown);
+
+			if (key.isKeyCode (KeyPress::leftKey))
+				return target.moveCaretToStartOfLine (isShiftDown);
+
+			if (key.isKeyCode (KeyPress::rightKey))
+				return target.moveCaretToEndOfLine (isShiftDown);
+		}
+	   #endif
+
+		if (key.isKeyCode (KeyPress::upKey))
+			return target.moveCaretUp (isShiftDown);
+
+		if (key.isKeyCode (KeyPress::downKey))
+			return target.moveCaretDown (isShiftDown);
+
+		if (key.isKeyCode (KeyPress::leftKey))
+			return target.moveCaretLeft (ctrlOrAltDown, isShiftDown);
+
+		if (key.isKeyCode (KeyPress::rightKey))
+			return target.moveCaretRight (ctrlOrAltDown, isShiftDown);
+
+		if (key.isKeyCode (KeyPress::pageUpKey))
+			return target.pageUp (isShiftDown);
+
+		if (key.isKeyCode (KeyPress::pageDownKey))
+			return target.pageDown (isShiftDown);
+
+		if (key.isKeyCode (KeyPress::homeKey))
+			return ctrlOrAltDown ? target.moveCaretToTop (isShiftDown)
+								 : target.moveCaretToStartOfLine (isShiftDown);
+
+		if (key.isKeyCode (KeyPress::endKey))
+			return ctrlOrAltDown ? target.moveCaretToEnd (isShiftDown)
+								 : target.moveCaretToEndOfLine (isShiftDown);
+
+		if (key == KeyPress ('c', ModifierKeys::commandModifier, 0)
+			  || key == KeyPress (KeyPress::insertKey, ModifierKeys::ctrlModifier, 0))
+			return target.copyToClipboard();
+
+		if (key == KeyPress ('x', ModifierKeys::commandModifier, 0)
+			  || key == KeyPress (KeyPress::deleteKey, ModifierKeys::shiftModifier, 0))
+			return target.cutToClipboard();
+
+		if (key == KeyPress ('v', ModifierKeys::commandModifier, 0)
+			  || key == KeyPress (KeyPress::insertKey, ModifierKeys::shiftModifier, 0))
+			return target.pasteFromClipboard();
+
+		if (key.isKeyCode (KeyPress::backspaceKey))
+			return target.deleteBackwards (ctrlOrAltDown);
+
+		if (key.isKeyCode (KeyPress::deleteKey))
+			return target.deleteForwards (ctrlOrAltDown);
+
+		if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
+			return target.selectAll();
+
+		if (key == KeyPress ('z', ModifierKeys::commandModifier, 0))
+			return target.undo();
+
+		if (key == KeyPress ('y', ModifierKeys::commandModifier, 0)
+			 || key == KeyPress ('z', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0))
+			return target.redo();
+
+		return false;
+	}
+};
+
+#endif   // __JUCE_TEXTEDITORKEYMAPPER_JUCEHEADER__
+
+/*** End of inlined file: juce_TextEditorKeyMapper.h ***/
+
 
 #endif
 #ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
@@ -63087,6 +63462,8 @@ private:
 	ScopedPointer<MidiInputSelectorComponentListBox> midiInputsList;
 	ScopedPointer<ComboBox> midiOutputSelector;
 	ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
+
+	void updateAllControls();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent);
 };

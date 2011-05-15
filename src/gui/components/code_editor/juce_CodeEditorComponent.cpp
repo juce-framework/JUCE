@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_CodeEditorComponent.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
+#include "../keyboard/juce_TextEditorKeyMapper.h"
 #include "../../../utilities/juce_SystemClipboard.h"
 
 
@@ -628,7 +629,7 @@ void CodeEditorComponent::cut()
     insertTextAtCaret (String::empty);
 }
 
-void CodeEditorComponent::copy()
+bool CodeEditorComponent::copyToClipboard()
 {
     newTransaction();
 
@@ -636,16 +637,19 @@ void CodeEditorComponent::copy()
 
     if (selection.isNotEmpty())
         SystemClipboard::copyTextToClipboard (selection);
+
+    return true;
 }
 
-void CodeEditorComponent::copyThenCut()
+bool CodeEditorComponent::cutToClipboard()
 {
-    copy();
+    copyToClipboard();
     cut();
     newTransaction();
+    return true;
 }
 
-void CodeEditorComponent::paste()
+bool CodeEditorComponent::pasteFromClipboard()
 {
     newTransaction();
     const String clip (SystemClipboard::getTextFromClipboard());
@@ -654,9 +658,10 @@ void CodeEditorComponent::paste()
         insertTextAtCaret (clip);
 
     newTransaction();
+    return true;
 }
 
-void CodeEditorComponent::cursorLeft (const bool moveInWholeWordSteps, const bool selecting)
+bool CodeEditorComponent::moveCaretLeft (const bool moveInWholeWordSteps, const bool selecting)
 {
     newTransaction();
 
@@ -664,9 +669,11 @@ void CodeEditorComponent::cursorLeft (const bool moveInWholeWordSteps, const boo
         moveCaretTo (document.findWordBreakBefore (caretPos), selecting);
     else
         moveCaretTo (caretPos.movedBy (-1), selecting);
+
+    return true;
 }
 
-void CodeEditorComponent::cursorRight (const bool moveInWholeWordSteps, const bool selecting)
+bool CodeEditorComponent::moveCaretRight (const bool moveInWholeWordSteps, const bool selecting)
 {
     newTransaction();
 
@@ -674,6 +681,8 @@ void CodeEditorComponent::cursorRight (const bool moveInWholeWordSteps, const bo
         moveCaretTo (document.findWordBreakAfter (caretPos), selecting);
     else
         moveCaretTo (caretPos.movedBy (1), selecting);
+
+    return true;
 }
 
 void CodeEditorComponent::moveLineDelta (const int delta, const bool selecting)
@@ -691,7 +700,7 @@ void CodeEditorComponent::moveLineDelta (const int delta, const bool selecting)
     columnToTryToMaintain = colToMaintain;
 }
 
-void CodeEditorComponent::cursorDown (const bool selecting)
+bool CodeEditorComponent::moveCaretDown (const bool selecting)
 {
     newTransaction();
 
@@ -699,9 +708,11 @@ void CodeEditorComponent::cursorDown (const bool selecting)
         moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), selecting);
     else
         moveLineDelta (1, selecting);
+
+    return true;
 }
 
-void CodeEditorComponent::cursorUp (const bool selecting)
+bool CodeEditorComponent::moveCaretUp (const bool selecting)
 {
     newTransaction();
 
@@ -709,46 +720,53 @@ void CodeEditorComponent::cursorUp (const bool selecting)
         moveCaretTo (CodeDocument::Position (&document, 0, 0), selecting);
     else
         moveLineDelta (-1, selecting);
+
+    return true;
 }
 
-void CodeEditorComponent::pageDown (const bool selecting)
+bool CodeEditorComponent::pageDown (const bool selecting)
 {
     newTransaction();
-
     scrollBy (jlimit (0, linesOnScreen, 1 + document.getNumLines() - firstLineOnScreen - linesOnScreen));
     moveLineDelta (linesOnScreen, selecting);
+    return true;
 }
 
-void CodeEditorComponent::pageUp (const bool selecting)
+bool CodeEditorComponent::pageUp (const bool selecting)
 {
     newTransaction();
-
     scrollBy (-linesOnScreen);
     moveLineDelta (-linesOnScreen, selecting);
+    return true;
 }
 
-void CodeEditorComponent::scrollUp()
+bool CodeEditorComponent::scrollUp()
 {
     newTransaction();
     scrollBy (1);
 
     if (caretPos.getLineNumber() < firstLineOnScreen)
         moveLineDelta (1, false);
+
+    return true;
 }
 
-void CodeEditorComponent::scrollDown()
+bool CodeEditorComponent::scrollDown()
 {
     newTransaction();
     scrollBy (-1);
 
     if (caretPos.getLineNumber() >= firstLineOnScreen + linesOnScreen)
         moveLineDelta (-1, false);
+
+    return true;
 }
 
-void CodeEditorComponent::goToStartOfDocument (const bool selecting)
+bool CodeEditorComponent::moveCaretToTop (const bool selecting)
 {
     newTransaction();
     moveCaretTo (CodeDocument::Position (&document, 0, 0), selecting);
+    return true;
 }
 
 namespace CodeEditorHelpers
@@ -771,7 +789,7 @@ namespace CodeEditorHelpers
     }
 }
 
-void CodeEditorComponent::goToStartOfLine (const bool selecting)
+bool CodeEditorComponent::moveCaretToStartOfLine (const bool selecting)
 {
     newTransaction();
 
@@ -781,21 +799,24 @@ void CodeEditorComponent::goToStartOfLine (const bool selecting)
         index = 0;
 
     moveCaretTo (CodeDocument::Position (&document, caretPos.getLineNumber(), index), selecting);
+    return true;
 }
 
-void CodeEditorComponent::goToEndOfDocument (const bool selecting)
+bool CodeEditorComponent::moveCaretToEnd (const bool selecting)
 {
     newTransaction();
     moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), selecting);
+    return true;
 }
 
-void CodeEditorComponent::goToEndOfLine (const bool selecting)
+bool CodeEditorComponent::moveCaretToEndOfLine (const bool selecting)
 {
     newTransaction();
     moveCaretTo (CodeDocument::Position (&document, caretPos.getLineNumber(), std::numeric_limits<int>::max()), selecting);
+    return true;
 }
 
-void CodeEditorComponent::backspace (const bool moveInWholeWordSteps)
+bool CodeEditorComponent::deleteBackwards (const bool moveInWholeWordSteps)
 {
     if (moveInWholeWordSteps)
     {
@@ -809,9 +830,10 @@ void CodeEditorComponent::backspace (const bool moveInWholeWordSteps)
     }
 
     cut();
+    return true;
 }
 
-void CodeEditorComponent::deleteForward (const bool moveInWholeWordSteps)
+bool CodeEditorComponent::deleteForwards (const bool moveInWholeWordSteps)
 {
     if (moveInWholeWordSteps)
     {
@@ -827,26 +849,30 @@ void CodeEditorComponent::deleteForward (const bool moveInWholeWordSteps)
     }
 
     cut();
+    return true;
 }
 
-void CodeEditorComponent::selectAll()
+bool CodeEditorComponent::selectAll()
 {
     newTransaction();
     moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), false);
     moveCaretTo (CodeDocument::Position (&document, 0, 0), true);
+    return true;
 }
 
 //==============================================================================
-void CodeEditorComponent::undo()
+bool CodeEditorComponent::undo()
 {
     document.undo();
     scrollToKeepCaretOnScreen();
+    return true;
 }
 
-void CodeEditorComponent::redo()
+bool CodeEditorComponent::redo()
 {
     document.redo();
     scrollToKeepCaretOnScreen();
+    return true;
 }
 
 void CodeEditorComponent::newTransaction()
@@ -881,114 +907,29 @@ const String CodeEditorComponent::getTextInRange (const Range<int>& range) const
 //==============================================================================
 bool CodeEditorComponent::keyPressed (const KeyPress& key)
 {
-    const bool moveInWholeWordSteps = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
-    const bool shiftDown = key.getModifiers().isShiftDown();
-
-    if (key.isKeyCode (KeyPress::leftKey))
+    if (! TextEditorKeyMapper<CodeEditorComponent>::invokeKeyFunction (*this, key))
     {
-        cursorLeft (moveInWholeWordSteps, shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::rightKey))
-    {
-        cursorRight (moveInWholeWordSteps, shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::upKey))
-    {
-        if (key.getModifiers().isCtrlDown() && ! shiftDown)
-            scrollDown();
-#if JUCE_MAC
-        else if (key.getModifiers().isCommandDown())
-            goToStartOfDocument (shiftDown);
-#endif
+        if (key == KeyPress::tabKey || key.getTextCharacter() == '\t')
+        {
+            insertTabAtCaret();
+        }
+        else if (key == KeyPress::returnKey)
+        {
+            newTransaction();
+            insertTextAtCaret (document.getNewLineCharacters());
+        }
+        else if (key.isKeyCode (KeyPress::escapeKey))
+        {
+            newTransaction();
+        }
+        else if (key.getTextCharacter() >= ' ')
+        {
+            insertTextAtCaret (String::charToString (key.getTextCharacter()));
+        }
         else
-            cursorUp (shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::downKey))
-    {
-        if (key.getModifiers().isCtrlDown() && ! shiftDown)
-            scrollUp();
-#if JUCE_MAC
-        else if (key.getModifiers().isCommandDown())
-            goToEndOfDocument (shiftDown);
-#endif
-        else
-            cursorDown (shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::pageDownKey))
-    {
-        pageDown (shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::pageUpKey))
-    {
-        pageUp (shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::homeKey))
-    {
-        if (moveInWholeWordSteps)
-            goToStartOfDocument (shiftDown);
-        else
-            goToStartOfLine (shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::endKey))
-    {
-        if (moveInWholeWordSteps)
-            goToEndOfDocument (shiftDown);
-        else
-            goToEndOfLine (shiftDown);
-    }
-    else if (key.isKeyCode (KeyPress::backspaceKey))
-    {
-        backspace (moveInWholeWordSteps);
-    }
-    else if (key.isKeyCode (KeyPress::deleteKey))
-    {
-        deleteForward (moveInWholeWordSteps);
-    }
-    else if (key == KeyPress ('c', ModifierKeys::commandModifier, 0))
-    {
-        copy();
-    }
-    else if (key == KeyPress ('x', ModifierKeys::commandModifier, 0))
-    {
-        copyThenCut();
-    }
-    else if (key == KeyPress ('v', ModifierKeys::commandModifier, 0))
-    {
-        paste();
-    }
-    else if (key == KeyPress ('z', ModifierKeys::commandModifier, 0))
-    {
-        undo();
-    }
-    else if (key == KeyPress ('y', ModifierKeys::commandModifier, 0)
-              || key == KeyPress ('z', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0))
-    {
-        redo();
-    }
-    else if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
-    {
-        selectAll();
-    }
-    else if (key == KeyPress::tabKey || key.getTextCharacter() == '\t')
-    {
-        insertTabAtCaret();
-    }
-    else if (key == KeyPress::returnKey)
-    {
-        newTransaction();
-        insertTextAtCaret (document.getNewLineCharacters());
-    }
-    else if (key.isKeyCode (KeyPress::escapeKey))
-    {
-        newTransaction();
-    }
-    else if (key.getTextCharacter() >= ' ')
-    {
-        insertTextAtCaret (String::charToString (key.getTextCharacter()));
-    }
-    else
-    {
-        return false;
+        {
+            return false;
+        }
     }
 
     return true;

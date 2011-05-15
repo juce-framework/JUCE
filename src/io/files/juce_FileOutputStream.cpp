@@ -74,7 +74,7 @@ bool FileOutputStream::flushBuffer()
 
     if (bytesInBuffer > 0)
     {
-        ok = writeInternal (buffer, bytesInBuffer);
+        ok = (writeInternal (buffer, bytesInBuffer) == bytesInBuffer);
         bytesInBuffer = 0;
     }
 

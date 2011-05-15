@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
+#include "../keyboard/juce_TextEditorKeyMapper.h"
 
 
 //==============================================================================
@@ -1032,19 +1033,27 @@ void TextEditor::newTransaction()
     undoManager.beginNewTransaction();
 }
 
-void TextEditor::doUndoRedo (const bool isRedo)
+bool TextEditor::undoOrRedo (const bool shouldUndo)
 {
     if (! isReadOnly())
     {
-        if (isRedo ? undoManager.redo()
-                   : undoManager.undo())
+        newTransaction();
+
+        if (shouldUndo ? undoManager.undo()
+                       : undoManager.redo())
         {
             scrollToMakeSureCursorIsVisible();
             repaint();
             textChanged();
+            return true;
         }
     }
+
+    return false;
 }
+
+bool TextEditor::undo()     { return undoOrRedo (true); }
+bool TextEditor::redo()     { return undoOrRedo (false); }
 
 //==============================================================================
 void TextEditor::setMultiLine (const bool shouldBeMultiLine,
@@ -1885,163 +1894,199 @@ void TextEditor::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, flo
 }
 
 //==============================================================================
+bool TextEditor::moveCaretWithTransation (const int newPos, const bool selecting)
+{
+    newTransaction();
+    moveCaretTo (newPos, selecting);
+    return true;
+}
+
+bool TextEditor::moveCaretLeft (bool moveInWholeWordSteps, bool selecting)
+{
+    int pos = getCaretPosition();
+
+    if (moveInWholeWordSteps)
+        pos = findWordBreakBefore (pos);
+    else
+        --pos;
+
+    return moveCaretWithTransation (pos, selecting);
+}
+
+bool TextEditor::moveCaretRight (bool moveInWholeWordSteps, bool selecting)
+{
+    int pos = getCaretPosition();
+
+    if (moveInWholeWordSteps)
+        pos = findWordBreakAfter (pos);
+    else
+        ++pos;
+
+    return moveCaretWithTransation (pos, selecting);
+}
+
+bool TextEditor::moveCaretUp (bool selecting)
+{
+    if (! isMultiLine())
+        return moveCaretToStartOfLine (selecting);
+
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
+    return moveCaretWithTransation (indexAtPosition (caretPos.getX(), caretPos.getY() - 1.0f), selecting);
+}
+
+bool TextEditor::moveCaretDown (bool selecting)
+{
+    if (! isMultiLine())
+        return moveCaretToEndOfLine (selecting);
+
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
+    return moveCaretWithTransation (indexAtPosition (caretPos.getX(), caretPos.getBottom() + 1.0f), selecting);
+}
+
+bool TextEditor::pageUp (bool selecting)
+{
+    if (! isMultiLine())
+        return moveCaretToStartOfLine (selecting);
+
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
+    return moveCaretWithTransation (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()), selecting);
+}
+
+bool TextEditor::pageDown (bool selecting)
+{
+    if (! isMultiLine())
+        return moveCaretToEndOfLine (selecting);
+
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
+    return moveCaretWithTransation (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()), selecting);
+}
+
+void TextEditor::scrollByLines (int deltaLines)
+{
+    ScrollBar* scrollbar = viewport->getVerticalScrollBar();
+
+    if (scrollbar != nullptr)
+        scrollbar->moveScrollbarInSteps (deltaLines);
+}
+
+bool TextEditor::scrollDown()
+{
+    scrollByLines (-1);
+    return true;
+}
+
+bool TextEditor::scrollUp()
+{
+    scrollByLines (1);
+    return true;
+}
+
+bool TextEditor::moveCaretToTop (bool selecting)
+{
+    return moveCaretWithTransation (0, selecting);
+}
+
+bool TextEditor::moveCaretToStartOfLine (bool selecting)
+{
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
+    return moveCaretWithTransation (indexAtPosition (0.0f, caretPos.getY()), selecting);
+}
+
+bool TextEditor::moveCaretToEnd (bool selecting)
+{
+    return moveCaretWithTransation (getTotalNumChars(), selecting);
+}
+
+bool TextEditor::moveCaretToEndOfLine (bool selecting)
+{
+    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
+    return moveCaretWithTransation (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
+}
+
+bool TextEditor::deleteBackwards (bool moveInWholeWordSteps)
+{
+    if (moveInWholeWordSteps)
+        moveCaretTo (findWordBreakBefore (getCaretPosition()), true);
+    else if (selection.isEmpty() && selection.getStart() > 0)
+        selection.setStart (selection.getEnd() - 1);
+
+    cut();
+    return true;
+}
+
+bool TextEditor::deleteForwards (bool /*moveInWholeWordSteps*/)
+{
+    if (selection.isEmpty() && selection.getStart() < getTotalNumChars())
+        selection.setEnd (selection.getStart() + 1);
+
+    cut();
+    return true;
+}
+
+bool TextEditor::copyToClipboard()
+{
+    newTransaction();
+    copy();
+    return true;
+}
+
+bool TextEditor::cutToClipboard()
+{
+    newTransaction();
+    copy();
+    cut();
+    return true;
+}
+
+bool TextEditor::pasteFromClipboard()
+{
+    newTransaction();
+    paste();
+    return true;
+}
+
+bool TextEditor::selectAll()
+{
+    newTransaction();
+    moveCaretTo (getTotalNumChars(), false);
+    moveCaretTo (0, true);
+    return true;
+}
+
+//==============================================================================
 bool TextEditor::keyPressed (const KeyPress& key)
 {
     if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0))
         return false;
 
-    const bool moveInWholeWordSteps = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
-    const Rectangle<float> caretPos (getCaretRectangle().toFloat());
-
-    if (key.isKeyCode (KeyPress::leftKey)
-         || key.isKeyCode (KeyPress::upKey))
+    if (! TextEditorKeyMapper<TextEditor>::invokeKeyFunction (*this, key))
     {
-        newTransaction();
-
-        int newPos;
-
-        if (isMultiLine() && key.isKeyCode (KeyPress::upKey))
-            newPos = indexAtPosition (caretPos.getX(), caretPos.getY() - 1.0f);
-        else if (moveInWholeWordSteps)
-            newPos = findWordBreakBefore (getCaretPosition());
-        else
-            newPos = getCaretPosition() - 1;
-
-        moveCaretTo (newPos, key.getModifiers().isShiftDown());
-    }
-    else if (key.isKeyCode (KeyPress::rightKey)
-              || key.isKeyCode (KeyPress::downKey))
-    {
-        newTransaction();
-
-        int newPos;
-
-        if (isMultiLine() && key.isKeyCode (KeyPress::downKey))
-            newPos = indexAtPosition (caretPos.getX(), caretPos.getBottom() + 1.0f);
-        else if (moveInWholeWordSteps)
-            newPos = findWordBreakAfter (getCaretPosition());
-        else
-            newPos = getCaretPosition() + 1;
-
-        moveCaretTo (newPos, key.getModifiers().isShiftDown());
-    }
-    else if (key.isKeyCode (KeyPress::pageDownKey) && isMultiLine())
-    {
-        newTransaction();
-
-        moveCaretTo (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()),
-                     key.getModifiers().isShiftDown());
-    }
-    else if (key.isKeyCode (KeyPress::pageUpKey) && isMultiLine())
-    {
-        newTransaction();
-
-        moveCaretTo (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()),
-                     key.getModifiers().isShiftDown());
-    }
-    else if (key.isKeyCode (KeyPress::homeKey))
-    {
-        newTransaction();
-
-        if (isMultiLine() && ! moveInWholeWordSteps)
-            moveCaretTo (indexAtPosition (0.0f, caretPos.getY()),
-                         key.getModifiers().isShiftDown());
-        else
-            moveCaretTo (0, key.getModifiers().isShiftDown());
-    }
-    else if (key.isKeyCode (KeyPress::endKey))
-    {
-        newTransaction();
-
-        if (isMultiLine() && ! moveInWholeWordSteps)
-            moveCaretTo (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()),
-                         key.getModifiers().isShiftDown());
-        else
-            moveCaretTo (getTotalNumChars(), key.getModifiers().isShiftDown());
-    }
-    else if (key.isKeyCode (KeyPress::backspaceKey))
-    {
-        if (moveInWholeWordSteps)
+        if (key == KeyPress::returnKey)
         {
-            moveCaretTo (findWordBreakBefore (getCaretPosition()), true);
+            newTransaction();
+
+            if (returnKeyStartsNewLine)
+                insertTextAtCaret ("\n");
+            else
+                returnPressed();
+        }
+        else if (key.isKeyCode (KeyPress::escapeKey))
+        {
+            newTransaction();
+            moveCaretTo (getCaretPosition(), false);
+            escapePressed();
+        }
+        else if (key.getTextCharacter() >= ' '
+                  || (tabKeyUsed && (key.getTextCharacter() == '\t')))
+        {
+            insertTextAtCaret (String::charToString (key.getTextCharacter()));
+
+            lastTransactionTime = Time::getApproximateMillisecondCounter();
         }
         else
         {
-            if (selection.isEmpty() && selection.getStart() > 0)
-                selection.setStart (selection.getEnd() - 1);
+            return false;
         }
-
-        cut();
-    }
-    else if (key.isKeyCode (KeyPress::deleteKey))
-    {
-        if (key.getModifiers().isShiftDown())
-            copy();
-
-        if (selection.isEmpty() && selection.getStart() < getTotalNumChars())
-            selection.setEnd (selection.getStart() + 1);
-
-        cut();
-    }
-    else if (key == KeyPress ('c', ModifierKeys::commandModifier, 0)
-              || key == KeyPress (KeyPress::insertKey, ModifierKeys::ctrlModifier, 0))
-    {
-        newTransaction();
-        copy();
-    }
-    else if (key == KeyPress ('x', ModifierKeys::commandModifier, 0))
-    {
-        newTransaction();
-        copy();
-        cut();
-    }
-    else if (key == KeyPress ('v', ModifierKeys::commandModifier, 0)
-              || key == KeyPress (KeyPress::insertKey, ModifierKeys::shiftModifier, 0))
-    {
-        newTransaction();
-        paste();
-    }
-    else if (key == KeyPress ('z', ModifierKeys::commandModifier, 0))
-    {
-        newTransaction();
-        doUndoRedo (false);
-    }
-    else if (key == KeyPress ('y', ModifierKeys::commandModifier, 0))
-    {
-        newTransaction();
-        doUndoRedo (true);
-    }
-    else if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
-    {
-        newTransaction();
-        moveCaretTo (getTotalNumChars(), false);
-        moveCaretTo (0, true);
-    }
-    else if (key == KeyPress::returnKey)
-    {
-        newTransaction();
-
-        if (returnKeyStartsNewLine)
-            insertTextAtCaret ("\n");
-        else
-            returnPressed();
-    }
-    else if (key.isKeyCode (KeyPress::escapeKey))
-    {
-        newTransaction();
-        moveCaretTo (getCaretPosition(), false);
-        escapePressed();
-    }
-    else if (key.getTextCharacter() >= ' '
-              || (tabKeyUsed && (key.getTextCharacter() == '\t')))
-    {
-        insertTextAtCaret (String::charToString (key.getTextCharacter()));
-
-        lastTransactionTime = Time::getApproximateMillisecondCounter();
-    }
-    else
-    {
-        return false;
     }
 
     return true;
@@ -2052,10 +2097,10 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
     if (! isKeyDown)
         return false;
 
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     if (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0).isCurrentlyDown())
         return false;  // We need to explicitly allow alt-F4 to pass through on Windows
-#endif
+   #endif
 
     // (overridden to avoid forwarding key events to the parent)
     return ! ModifierKeys::getCurrentModifiers().isCommandDown();
@@ -2091,38 +2136,14 @@ void TextEditor::performPopupMenuAction (const int menuItemID)
 {
     switch (menuItemID)
     {
-    case baseMenuItemID + 1:
-        copy();
-        cut();
-        break;
-
-    case baseMenuItemID + 2:
-        copy();
-        break;
-
-    case baseMenuItemID + 3:
-        paste();
-        break;
-
-    case baseMenuItemID + 4:
-        cut();
-        break;
-
-    case baseMenuItemID + 5:
-        moveCaretTo (getTotalNumChars(), false);
-        moveCaretTo (0, true);
-        break;
-
-    case baseMenuItemID + 6:
-        doUndoRedo (false);
-        break;
-
-    case baseMenuItemID + 7:
-        doUndoRedo (true);
-        break;
-
-    default:
-        break;
+        case baseMenuItemID + 1:    cutToClipboard(); break;
+        case baseMenuItemID + 2:    copyToClipboard(); break;
+        case baseMenuItemID + 3:    pasteFromClipboard(); break;
+        case baseMenuItemID + 4:    cut(); break;
+        case baseMenuItemID + 5:    selectAll(); break;
+        case baseMenuItemID + 6:    undo(); break;
+        case baseMenuItemID + 7:    redo(); break;
+        default: break;
     }
 }
 

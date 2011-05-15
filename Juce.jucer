@@ -713,6 +713,8 @@
                   file="src/gui/components/keyboard/juce_ModifierKeys.cpp"/>
             <FILE id="sEv20iWws" name="juce_ModifierKeys.h" compile="0" resource="0"
                   file="src/gui/components/keyboard/juce_ModifierKeys.h"/>
+            <FILE id="ohA4B9" name="juce_TextEditorKeyMapper.h" compile="0" resource="0"
+                  file="src/gui/components/keyboard/juce_TextEditorKeyMapper.h"/>
             <FILE id="xafOvZlQw" name="juce_TextInputTarget.h" compile="0" resource="0"
                   file="src/gui/components/keyboard/juce_TextInputTarget.h"/>
           </GROUP>

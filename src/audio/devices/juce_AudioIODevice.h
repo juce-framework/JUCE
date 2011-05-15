@@ -107,9 +107,14 @@ public:
     */
     virtual void audioDeviceAboutToStart (AudioIODevice* device) = 0;
 
-    /** Called to indicate that the device has stopped.
-    */
+    /** Called to indicate that the device has stopped. */
     virtual void audioDeviceStopped() = 0;
+
+    /** This can be overridden to be told if the device generates an error while operating.
+        Be aware that this could be called by any thread! And not all devices perform
+        this callback.
+    */
+    virtual void audioDeviceError (const String& errorMessage);
 };
 
 

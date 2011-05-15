@@ -682,6 +682,7 @@
 		15C6FD019B274AA51B4E2D76 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_KeyPressMappingSet.h; path = ../../src/gui/components/keyboard/juce_KeyPressMappingSet.h; sourceTree = SOURCE_ROOT; };
 		B1E8FF009812F29C2620E6BB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ModifierKeys.cpp; path = ../../src/gui/components/keyboard/juce_ModifierKeys.cpp; sourceTree = SOURCE_ROOT; };
 		FAEEA3536AD17B2667A1BB94 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ModifierKeys.h; path = ../../src/gui/components/keyboard/juce_ModifierKeys.h; sourceTree = SOURCE_ROOT; };
+		D64DD9F41E4598606855DFCF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_TextEditorKeyMapper.h; path = ../../src/gui/components/keyboard/juce_TextEditorKeyMapper.h; sourceTree = SOURCE_ROOT; };
 		7356F5E93CEA4D472D83D8E5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_TextInputTarget.h; path = ../../src/gui/components/keyboard/juce_TextInputTarget.h; sourceTree = SOURCE_ROOT; };
 		921B616E2229AEB6390D2B57 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ComponentAnimator.cpp; path = ../../src/gui/components/layout/juce_ComponentAnimator.cpp; sourceTree = SOURCE_ROOT; };
 		FE1072B5FB77E8FEE1BEBDFE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ComponentAnimator.h; path = ../../src/gui/components/layout/juce_ComponentAnimator.h; sourceTree = SOURCE_ROOT; };
@@ -1447,6 +1448,7 @@
 				15C6FD019B274AA51B4E2D76,
 				B1E8FF009812F29C2620E6BB,
 				FAEEA3536AD17B2667A1BB94,
+				D64DD9F41E4598606855DFCF,
 				7356F5E93CEA4D472D83D8E5 ); name = keyboard; sourceTree = "<group>"; };
 		D75AAB3AB61247E962C00692 = { isa = PBXGroup; children = (
 				921B616E2229AEB6390D2B57,

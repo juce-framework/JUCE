@@ -1809,6 +1809,9 @@
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_ModifierKeys.h">
       <Filter>Juce\Source\gui\components\keyboard</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\keyboard\juce_TextEditorKeyMapper.h">
+      <Filter>Juce\Source\gui\components\keyboard</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_TextInputTarget.h">
       <Filter>Juce\Source\gui\components\keyboard</Filter>
     </ClInclude>

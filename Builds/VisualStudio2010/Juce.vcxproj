@@ -626,6 +626,7 @@
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_KeyPress.h"/>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_KeyPressMappingSet.h"/>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_ModifierKeys.h"/>
+    <ClInclude Include="..\..\src\gui\components\keyboard\juce_TextEditorKeyMapper.h"/>
     <ClInclude Include="..\..\src\gui\components\keyboard\juce_TextInputTarget.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentAnimator.h"/>
     <ClInclude Include="..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.h"/>

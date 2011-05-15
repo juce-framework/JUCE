@@ -233,7 +233,7 @@ private:
         sp = stack;
     }
 
-    int readLZWByte (const int inputCodeSize)
+    int readLZWByte()
     {
         if (fresh)
         {
@@ -367,12 +367,13 @@ private:
 
     bool readImage (const int interlace, const int transparent)
     {
-        unsigned char c;
+        {
+            unsigned char c;
+            if (input.read (&c, 1) != 1)
+                return false;
 
-        if (input.read (&c, 1) != 1)
-            return false;
-
-        initialise (c);
+            initialise (c);
+        }
 
         if (transparent >= 0)
         {
@@ -389,7 +390,7 @@ private:
         uint8* p = destData.data;
         const bool hasAlpha = image.hasAlphaChannel();
 
-        while ((index = readLZWByte (c)) >= 0)
+        while ((index = readLZWByte()) >= 0)
         {
             const uint8* const paletteEntry = palette [index];
 
