@@ -78,7 +78,7 @@ DocumentWindow::DocumentWindow (const String& title,
 {
     setResizeLimits (128, 128, 32768, 32768);
 
-    lookAndFeelChanged();
+    DocumentWindow::lookAndFeelChanged();
 }
 
 DocumentWindow::~DocumentWindow()

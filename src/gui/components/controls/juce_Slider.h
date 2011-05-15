@@ -825,7 +825,8 @@ private:
     double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
     int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
-    int numDecimalPlaces, mouseXWhenLastDragged, mouseYWhenLastDragged;
+    int numDecimalPlaces;
+    Point<int> mousePosWhenLastDragged;
     int mouseDragStartX, mouseDragStartY;
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;

@@ -200,7 +200,7 @@ public:
         isRunning = false;
         timeSliceThread.removeTimeSliceClient (this);
 
-        while (useTimeSlice() == 0)
+        while (writePendingData() == 0)
         {}
     }
 
@@ -229,6 +229,11 @@ public:
     }
 
     int useTimeSlice()
+    {
+        return writePendingData();
+    }
+
+    int writePendingData()
     {
         const int numToDo = getTotalSize() / 4;
 

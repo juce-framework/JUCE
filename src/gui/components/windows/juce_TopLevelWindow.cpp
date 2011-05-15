@@ -149,7 +149,7 @@ TopLevelWindow::TopLevelWindow (const String& name,
     setOpaque (true);
 
     if (addToDesktop_)
-        Component::addToDesktop (getDesktopWindowStyleFlags());
+        Component::addToDesktop (TopLevelWindow::getDesktopWindowStyleFlags());
     else
         setDropShadowEnabled (true);
 

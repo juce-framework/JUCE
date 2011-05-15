@@ -97,6 +97,7 @@ private:
     void openHandle();
     void closeHandle();
     void flushInternal();
+    bool flushBuffer();
     int64 setPositionInternal (int64 newPosition);
     int writeInternal (const void* data, int numBytes);
 

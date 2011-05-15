@@ -143,11 +143,11 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
 {
-    flush();
+    flushInternal();
 }
 
 //==============================================================================
-void GZIPCompressorOutputStream::flush()
+void GZIPCompressorOutputStream::flushInternal()
 {
     if (! helper->finished)
     {
@@ -158,6 +158,11 @@ void GZIPCompressorOutputStream::flush()
     }
 
     destStream->flush();
+}
+
+void GZIPCompressorOutputStream::flush()
+{
+    flushInternal();
 }
 
 bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)

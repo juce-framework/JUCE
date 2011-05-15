@@ -55,7 +55,7 @@ FileLogger::FileLogger (const File& logFile_,
             << welcomeMessage << newLine
             << "Log started: " << Time::getCurrentTime().toString (true, true) << newLine;
 
-    logMessage (welcome);
+    FileLogger::logMessage (welcome);
 }
 
 FileLogger::~FileLogger()

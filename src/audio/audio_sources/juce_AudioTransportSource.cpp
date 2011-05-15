@@ -55,7 +55,7 @@ AudioTransportSource::~AudioTransportSource()
 {
     setSource (nullptr);
 
-    releaseResources();
+    releaseMasterResources();
 }
 
 void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
@@ -242,7 +242,7 @@ void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected,
     isPrepared = true;
 }
 
-void AudioTransportSource::releaseResources()
+void AudioTransportSource::releaseMasterResources()
 {
     const ScopedLock sl (callbackLock);
 
@@ -250,6 +250,11 @@ void AudioTransportSource::releaseResources()
         masterSource->releaseResources();
 
     isPrepared = false;
+}
+
+void AudioTransportSource::releaseResources()
+{
+    releaseMasterResources();
 }
 
 void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info)

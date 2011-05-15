@@ -43,22 +43,17 @@ class GIFLoader
 public:
     GIFLoader (InputStream& in)
         : input (in),
-          dataBlockIsZero (false),
-          fresh (false),
-          finished (false)
+          dataBlockIsZero (false), fresh (false), finished (false),
+          currentBit (0), lastBit (0), lastByteIndex (0),
+          codeSize (0), setCodeSize (0),
+          maxCode (0), maxCodeSize (0),
+          firstcode (0), oldcode (0), clearCode (0), endCode (0)
     {
-        currentBit = lastBit = lastByteIndex = 0;
-        maxCode = maxCodeSize = codeSize = setCodeSize = 0;
-        firstcode = oldcode = 0;
-        clearCode = end_code = 0;
-
         int imageWidth, imageHeight;
         int transparent = -1;
 
-        if (! getSizeFromHeader (imageWidth, imageHeight))
-            return;
-
-        if ((imageWidth <= 0) || (imageHeight <= 0))
+        if (! (getSizeFromHeader (imageWidth, imageHeight)
+                && imageWidth > 0 && imageHeight > 0))
             return;
 
         unsigned char buf [16];
@@ -112,8 +107,6 @@ public:
         }
     }
 
-    ~GIFLoader() {}
-
     Image image;
 
 private:
@@ -125,11 +118,11 @@ private:
     int codeSize, setCodeSize;
     int maxCode, maxCodeSize;
     int firstcode, oldcode;
-    int clearCode, end_code;
+    int clearCode, endCode;
     enum { maxGifCode = 1 << 12 };
     int table [2] [maxGifCode];
     int stack [2 * maxGifCode];
-    int *sp;
+    int* sp;
 
     bool getSizeFromHeader (int& w, int& h)
     {
@@ -208,40 +201,41 @@ private:
         return n;
     }
 
-    int readLZWByte (const bool initialise, const int inputCodeSize)
+    void clearTable()
     {
-        int code, incode, i;
-
-        if (initialise)
+        int i;
+        for (i = 0; i < clearCode; ++i)
         {
-            setCodeSize = inputCodeSize;
-            codeSize = setCodeSize + 1;
-            clearCode = 1 << setCodeSize;
-            end_code = clearCode + 1;
-            maxCodeSize = 2 * clearCode;
-            maxCode = clearCode + 2;
-
-            getCode (0, true);
-
-            fresh = true;
-
-            for (i = 0; i < clearCode; ++i)
-            {
-                table[0][i] = 0;
-                table[1][i] = i;
-            }
-
-            for (; i < maxGifCode; ++i)
-            {
-                table[0][i] = 0;
-                table[1][i] = 0;
-            }
-
-            sp = stack;
-
-            return 0;
+            table[0][i] = 0;
+            table[1][i] = i;
         }
-        else if (fresh)
+
+        for (; i < maxGifCode; ++i)
+        {
+            table[0][i] = 0;
+            table[1][i] = 0;
+        }
+    }
+
+    void initialise (const int inputCodeSize)
+    {
+        setCodeSize = inputCodeSize;
+        codeSize = setCodeSize + 1;
+        clearCode = 1 << setCodeSize;
+        endCode = clearCode + 1;
+        maxCodeSize = 2 * clearCode;
+        maxCode = clearCode + 2;
+
+        getCode (0, true);
+
+        fresh = true;
+        clearTable();
+        sp = stack;
+    }
+
+    int readLZWByte (const int inputCodeSize)
+    {
+        if (fresh)
         {
             fresh = false;
 
@@ -258,31 +252,21 @@ private:
         if (sp > stack)
             return *--sp;
 
+        int code;
+
         while ((code = getCode (codeSize, false)) >= 0)
         {
             if (code == clearCode)
             {
-                for (i = 0; i < clearCode; ++i)
-                {
-                    table[0][i] = 0;
-                    table[1][i] = i;
-                }
-
-                for (; i < maxGifCode; ++i)
-                {
-                    table[0][i] = 0;
-                    table[1][i] = 0;
-                }
-
+                clearTable();
                 codeSize = setCodeSize + 1;
                 maxCodeSize = 2 * clearCode;
                 maxCode = clearCode + 2;
                 sp = stack;
                 firstcode = oldcode = getCode (codeSize, false);
                 return firstcode;
-
             }
-            else if (code == end_code)
+            else if (code == endCode)
             {
                 if (dataBlockIsZero)
                     return -2;
@@ -297,7 +281,7 @@ private:
                     return -2;
             }
 
-            incode = code;
+            const int incode = code;
 
             if (code >= maxCode)
             {
@@ -385,9 +369,10 @@ private:
     {
         unsigned char c;
 
-        if (input.read (&c, 1) != 1
-             || readLZWByte (true, c) < 0)
+        if (input.read (&c, 1) != 1)
             return false;
+
+        initialise (c);
 
         if (transparent >= 0)
         {
@@ -404,7 +389,7 @@ private:
         uint8* p = destData.data;
         const bool hasAlpha = image.hasAlphaChannel();
 
-        while ((index = readLZWByte (false, c)) >= 0)
+        while ((index = readLZWByte (c)) >= 0)
         {
             const uint8* const paletteEntry = palette [index];
 

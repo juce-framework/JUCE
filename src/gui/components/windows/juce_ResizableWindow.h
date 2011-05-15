@@ -372,6 +372,7 @@ private:
     bool hasBeenResized;
     #endif
 
+    void initialise (bool addToDesktop);
     void updateLastPos();
     void setContent (Component* newComp, bool takeOwnership, bool resizeToFit);
 

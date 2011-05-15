@@ -41,18 +41,12 @@ ResizableWindow::ResizableWindow (const String& name,
       ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
-      lastNonFullScreenPos (50, 50, 256, 256),
       constrainer (nullptr)
      #if JUCE_DEBUG
       , hasBeenResized (false)
      #endif
 {
-    defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
-
-    lastNonFullScreenPos.setBounds (50, 50, 256, 256);
-
-    if (addToDesktop_)
-        Component::addToDesktop (getDesktopWindowStyleFlags());
+    initialise (addToDesktop_);
 }
 
 ResizableWindow::ResizableWindow (const String& name,
@@ -62,7 +56,6 @@ ResizableWindow::ResizableWindow (const String& name,
       ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
-      lastNonFullScreenPos (50, 50, 256, 256),
       constrainer (nullptr)
      #if JUCE_DEBUG
       , hasBeenResized (false)
@@ -70,10 +63,7 @@ ResizableWindow::ResizableWindow (const String& name,
 {
     setBackgroundColour (backgroundColour_);
 
-    defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
-
-    if (addToDesktop_)
-        Component::addToDesktop (getDesktopWindowStyleFlags());
+    initialise (addToDesktop_);
 }
 
 ResizableWindow::~ResizableWindow()
@@ -91,6 +81,16 @@ ResizableWindow::~ResizableWindow()
     // have you been adding your own components directly to this window..? tut tut tut.
     // Read the instructions for using a ResizableWindow!
     jassert (getNumChildComponents() == 0);
+}
+
+void ResizableWindow::initialise (const bool addToDesktop)
+{
+    defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
+
+    lastNonFullScreenPos.setBounds (50, 50, 256, 256);
+
+    if (addToDesktop)
+        Component::addToDesktop (ResizableWindow::getDesktopWindowStyleFlags());
 }
 
 int ResizableWindow::getDesktopWindowStyleFlags() const

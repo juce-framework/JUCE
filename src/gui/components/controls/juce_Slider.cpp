@@ -52,8 +52,7 @@ public:
     void paintContent (Graphics& g, int w, int h)
     {
         g.setFont (font);
-        g.setColour (Colours::black);
-
+        g.setColour (findColour (TooltipWindow::textColourId, true));
         g.drawFittedText (text, 0, 0, w, h, Justification::centred, 1);
     }
 
@@ -130,7 +129,7 @@ Slider::Slider (const String& name)
     setWantsKeyboardFocus (false);
     setRepaintsOnMouseActivity (true);
 
-    lookAndFeelChanged();
+    Slider::lookAndFeelChanged();
     updateText();
 
     currentValue.addListener (this);
@@ -1029,8 +1028,7 @@ void Slider::mouseDown (const MouseEvent& e)
 {
     mouseWasHidden = false;
     incDecDragged = false;
-    mouseXWhenLastDragged = e.x;
-    mouseYWhenLastDragged = e.y;
+    mousePosWhenLastDragged = e.getPosition();
     mouseDragStartX = e.getMouseDownX();
     mouseDragStartY = e.getMouseDownY();
 
@@ -1223,8 +1221,8 @@ void Slider::mouseDrag (const MouseEvent& e)
     {
         if (style == Rotary)
         {
-            int dx = e.x - sliderRect.getCentreX();
-            int dy = e.y - sliderRect.getCentreY();
+            const int dx = e.x - sliderRect.getCentreX();
+            const int dy = e.y - sliderRect.getCentreY();
 
             if (dx * dx + dy * dy > 25)
             {
@@ -1329,8 +1327,8 @@ void Slider::mouseDrag (const MouseEvent& e)
             {
                 const int mouseDiff = (isHorizontal() || style == RotaryHorizontalDrag
                                          || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                        ? e.x - mouseXWhenLastDragged
-                                        : e.y - mouseYWhenLastDragged;
+                                        ? e.x - mousePosWhenLastDragged.getX()
+                                        : e.y - mousePosWhenLastDragged.getY();
 
                 const double maxSpeed = jmax (200, sliderRegionSize);
                 double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));
@@ -1389,8 +1387,7 @@ void Slider::mouseDrag (const MouseEvent& e)
                 minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
         }
 
-        mouseXWhenLastDragged = e.x;
-        mouseYWhenLastDragged = e.y;
+        mousePosWhenLastDragged = e.getPosition();
     }
 }
 

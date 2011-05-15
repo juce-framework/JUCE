@@ -117,7 +117,7 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     content->newFolderButton.addListener (this);
     content->chooserComponent.addListener (this);
 
-    selectionChanged();
+    FileChooserDialogBox::selectionChanged();
 }
 
 FileChooserDialogBox::~FileChooserDialogBox()

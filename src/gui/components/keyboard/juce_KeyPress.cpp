@@ -127,7 +127,55 @@ namespace KeyPressHelpers
         { "rewind",         KeyPress::rewindKey }
     };
 
-    const String numberPadPrefix()      { return "numpad "; }
+    struct ModifierDescription
+    {
+        const char* name;
+        int flag;
+    };
+
+    static const ModifierDescription modifierNames[] =
+    {
+        { "ctrl",      ModifierKeys::ctrlModifier },
+        { "control",   ModifierKeys::ctrlModifier },
+        { "ctl",       ModifierKeys::ctrlModifier },
+        { "shift",     ModifierKeys::shiftModifier },
+        { "shft",      ModifierKeys::shiftModifier },
+        { "alt",       ModifierKeys::altModifier },
+        { "option",    ModifierKeys::altModifier },
+        { "command",   ModifierKeys::commandModifier },
+        { "cmd",       ModifierKeys::commandModifier }
+    };
+
+    const char* numberPadPrefix() noexcept      { return "numpad "; }
+
+    int getNumpadKeyCode (const String& desc)
+    {
+        if (desc.containsIgnoreCase (numberPadPrefix()))
+        {
+            const juce_wchar lastChar = desc.trimEnd().getLastCharacter();
+
+            switch (lastChar)
+            {
+                case '0': case '1': case '2': case '3': case '4':
+                case '5': case '6': case '7': case '8': case '9':
+                    return KeyPress::numberPad0 + lastChar - '0';
+
+                case '+':   return KeyPress::numberPadAdd;
+                case '-':   return KeyPress::numberPadSubtract;
+                case '*':   return KeyPress::numberPadMultiply;
+                case '/':   return KeyPress::numberPadDivide;
+                case '.':   return KeyPress::numberPadDecimalPoint;
+                case '=':   return KeyPress::numberPadEquals;
+
+                default:    break;
+            }
+
+            if (desc.endsWith ("separator"))  return KeyPress::numberPadSeparator;
+            if (desc.endsWith ("delete"))     return KeyPress::numberPadDelete;
+        }
+
+        return 0;
+    }
 }
 
 //==============================================================================
@@ -135,22 +183,9 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
 {
     int modifiers = 0;
 
-    if (desc.containsWholeWordIgnoreCase ("ctrl")
-         || desc.containsWholeWordIgnoreCase ("control")
-         || desc.containsWholeWordIgnoreCase ("ctl"))
-        modifiers |= ModifierKeys::ctrlModifier;
-
-    if (desc.containsWholeWordIgnoreCase ("shift")
-         || desc.containsWholeWordIgnoreCase ("shft"))
-        modifiers |= ModifierKeys::shiftModifier;
-
-    if (desc.containsWholeWordIgnoreCase ("alt")
-         || desc.containsWholeWordIgnoreCase ("option"))
-        modifiers |= ModifierKeys::altModifier;
-
-    if (desc.containsWholeWordIgnoreCase ("command")
-         || desc.containsWholeWordIgnoreCase ("cmd"))
-        modifiers |= ModifierKeys::commandModifier;
+    for (int i = 0; i < numElementsInArray (KeyPressHelpers::modifierNames); ++i)
+        if (desc.containsWholeWordIgnoreCase (KeyPressHelpers::modifierNames[i].name))
+            modifiers |= KeyPressHelpers::modifierNames[i].flag;
 
     int key = 0;
 
@@ -164,44 +199,28 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
     }
 
     if (key == 0)
-    {
-        // see if it's a numpad key..
-        if (desc.containsIgnoreCase (KeyPressHelpers::numberPadPrefix()))
-        {
-            const juce_wchar lastChar = desc.trimEnd().getLastCharacter();
+        key = KeyPressHelpers::getNumpadKeyCode (desc);
 
-            if (lastChar >= '0' && lastChar <= '9') key = numberPad0 + lastChar - '0';
-            else if (lastChar == '+')               key = numberPadAdd;
-            else if (lastChar == '-')               key = numberPadSubtract;
-            else if (lastChar == '*')               key = numberPadMultiply;
-            else if (lastChar == '/')               key = numberPadDivide;
-            else if (lastChar == '.')               key = numberPadDecimalPoint;
-            else if (lastChar == '=')               key = numberPadEquals;
-            else if (desc.endsWith ("separator"))   key = numberPadSeparator;
-            else if (desc.endsWith ("delete"))      key = numberPadDelete;
-        }
+    if (key == 0)
+    {
+        // see if it's a function key..
+        if (! desc.containsChar ('#')) // avoid mistaking hex-codes like "#f1"
+            for (int i = 1; i <= 12; ++i)
+                if (desc.containsWholeWordIgnoreCase ("f" + String (i)))
+                    key = F1Key + i - 1;
 
         if (key == 0)
         {
-            // see if it's a function key..
-            if (! desc.containsChar ('#')) // avoid mistaking hex-codes like "#f1"
-                for (int i = 1; i <= 12; ++i)
-                    if (desc.containsWholeWordIgnoreCase ("f" + String (i)))
-                        key = F1Key + i - 1;
+            // give up and use the hex code..
+            const int hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
+                                    .toLowerCase()
+                                    .retainCharacters ("0123456789abcdef")
+                                    .getHexValue32();
 
-            if (key == 0)
-            {
-                // give up and use the hex code..
-                const int hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
-                                        .toLowerCase()
-                                        .retainCharacters ("0123456789abcdef")
-                                        .getHexValue32();
-
-                if (hexCode > 0)
-                    key = hexCode;
-                else
-                    key = CharacterFunctions::toUpperCase (desc.getLastCharacter());
-            }
+            if (hexCode > 0)
+                key = hexCode;
+            else
+                key = CharacterFunctions::toUpperCase (desc.getLastCharacter());
         }
     }
 

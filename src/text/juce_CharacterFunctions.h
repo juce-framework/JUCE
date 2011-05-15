@@ -108,8 +108,8 @@ public:
     template <typename CharPointerType>
     static double readDoubleValue (CharPointerType& text) noexcept
     {
-        double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
-        int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
+        double result[3] = { 0 }, accumulator[2] = { 0 };
+        int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
         int exponent = 0, decPointIndex = 0, digit = 0;
         int lastDigit = 0, numSignificantDigits = 0;
         bool isNegative = false, digitsFound = false;

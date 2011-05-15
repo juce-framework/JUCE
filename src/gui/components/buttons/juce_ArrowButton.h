@@ -72,6 +72,8 @@ private:
     Path path;
     int offset;
 
+    void updateShadowAndOffset();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton);
 };
 

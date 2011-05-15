@@ -45,7 +45,7 @@ ArrowButton::ArrowButton (const String& name,
                                                     0.5f, 0.5f));
 
     setComponentEffect (&shadow);
-    buttonStateChanged();
+    updateShadowAndOffset();
 }
 
 ArrowButton::~ArrowButton()
@@ -66,6 +66,11 @@ void ArrowButton::paintButton (Graphics& g,
 }
 
 void ArrowButton::buttonStateChanged()
+{
+    updateShadowAndOffset();
+}
+
+void ArrowButton::updateShadowAndOffset()
 {
     offset = (isDown()) ? 1 : 0;
 

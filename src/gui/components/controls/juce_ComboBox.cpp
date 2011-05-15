@@ -59,7 +59,7 @@ ComboBox::ComboBox (const String& name)
       noChoicesMessage (TRANS("(no choices)"))
 {
     setRepaintsOnMouseActivity (true);
-    lookAndFeelChanged();
+    ComboBox::lookAndFeelChanged();
     currentId.addListener (this);
 }
 

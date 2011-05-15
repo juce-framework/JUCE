@@ -102,7 +102,7 @@ AlertWindow::AlertWindow (const String& title,
     if (! JUCEApplication::isStandaloneApp())
         setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
 
-    lookAndFeelChanged();
+    AlertWindow::lookAndFeelChanged();
 
     constrainer.setMinimumOnscreenAmounts (0x10000, 0x10000, 0x10000, 0x10000);
 }

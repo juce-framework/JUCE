@@ -43,8 +43,6 @@ AudioFormatReaderSource::AudioFormatReaderSource (AudioFormatReader* const reade
 
 AudioFormatReaderSource::~AudioFormatReaderSource()
 {
-    releaseResources();
-
     if (deleteReader)
         delete reader;
 }

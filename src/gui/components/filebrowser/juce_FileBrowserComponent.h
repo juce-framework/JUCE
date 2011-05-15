@@ -212,6 +212,9 @@ protected:
     */
     virtual void getRoots (StringArray& rootNames, StringArray& rootPaths);
 
+    /** Updates the items in the dropdown list of recent paths with the values from getRoots(). */
+    void resetRecentPaths();
+
 private:
     //==============================================================================
     ScopedPointer <DirectoryContentsList> fileList;

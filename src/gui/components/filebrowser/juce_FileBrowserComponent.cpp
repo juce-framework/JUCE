@@ -101,19 +101,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     addAndMakeVisible (&currentPathBox);
     currentPathBox.setEditableText (true);
-
-    StringArray rootNames, rootPaths;
-    getRoots (rootNames, rootPaths);
-
-    for (int i = 0; i < rootNames.size(); ++i)
-    {
-        if (rootNames[i].isEmpty())
-            currentPathBox.addSeparator();
-        else
-            currentPathBox.addItem (rootNames[i], i + 1);
-    }
-
-    currentPathBox.addSeparator();
+    resetRecentPaths();
     currentPathBox.addListener (this);
 
     addAndMakeVisible (&filenameBox);
@@ -269,6 +257,24 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
 
     goUpButton->setEnabled (currentRoot.getParentDirectory().isDirectory()
                              && currentRoot.getParentDirectory() != currentRoot);
+}
+
+void FileBrowserComponent::resetRecentPaths()
+{
+    currentPathBox.clear();
+
+    StringArray rootNames, rootPaths;
+    getRoots (rootNames, rootPaths);
+
+    for (int i = 0; i < rootNames.size(); ++i)
+    {
+        if (rootNames[i].isEmpty())
+            currentPathBox.addSeparator();
+        else
+            currentPathBox.addItem (rootNames[i], i + 1);
+    }
+
+    currentPathBox.addSeparator();
 }
 
 void FileBrowserComponent::goUp()
@@ -475,7 +481,7 @@ void FileBrowserComponent::comboBoxChanged (ComboBox*)
 
 void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
 {
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     Array<File> roots;
     File::findFileSystemRoots (roots);
     rootPaths.clear();
@@ -511,9 +517,8 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
     rootNames.add ("Documents");
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add ("Desktop");
-#endif
 
-#if JUCE_MAC
+   #elif JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
     rootNames.add ("Home folder");
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
@@ -538,16 +543,15 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
             rootNames.add (volume.getFileName());
         }
     }
-#endif
 
-#if JUCE_LINUX
+   #else
     rootPaths.add ("/");
     rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
     rootNames.add ("Home folder");
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add ("Desktop");
-#endif
+   #endif
 }
 
 

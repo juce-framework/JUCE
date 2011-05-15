@@ -526,7 +526,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
                 if (n != nullptr)
                     childAppender.append (n);
                 else
-                    return;
+                    break;
             }
         }
         else  // must be a character block

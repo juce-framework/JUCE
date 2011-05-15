@@ -39,7 +39,7 @@ SubregionStream::SubregionStream (InputStream* const sourceStream,
     startPositionInSourceStream (startPositionInSourceStream_),
     lengthOfSourceStream (lengthOfSourceStream_)
 {
-    setPosition (0);
+    SubregionStream::setPosition (0);
 }
 
 SubregionStream::~SubregionStream()

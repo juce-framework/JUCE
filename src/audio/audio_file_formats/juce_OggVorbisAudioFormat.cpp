@@ -90,11 +90,6 @@ static const char* const oggExtensions[] = { ".ogg", 0 };
 //==============================================================================
 class OggReader : public AudioFormatReader
 {
-    OggVorbisNamespace::OggVorbis_File ovFile;
-    OggVorbisNamespace::ov_callbacks callbacks;
-    AudioSampleBuffer reservoir;
-    int reservoirStart, samplesInReservoir;
-
 public:
     //==============================================================================
     OggReader (InputStream* const inp)
@@ -242,33 +237,28 @@ public:
     }
 
 private:
+    OggVorbisNamespace::OggVorbis_File ovFile;
+    OggVorbisNamespace::ov_callbacks callbacks;
+    AudioSampleBuffer reservoir;
+    int reservoirStart, samplesInReservoir;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader);
 };
 
 //==============================================================================
 class OggWriter  : public AudioFormatWriter
 {
-    OggVorbisNamespace::ogg_stream_state os;
-    OggVorbisNamespace::ogg_page og;
-    OggVorbisNamespace::ogg_packet op;
-    OggVorbisNamespace::vorbis_info vi;
-    OggVorbisNamespace::vorbis_comment vc;
-    OggVorbisNamespace::vorbis_dsp_state vd;
-    OggVorbisNamespace::vorbis_block vb;
-
 public:
-    bool ok;
-
     //==============================================================================
     OggWriter (OutputStream* const out,
                const double sampleRate,
                const int numChannels,
                const int bitsPerSample,
                const int qualityIndex)
-        : AudioFormatWriter (out, TRANS (oggFormatName), sampleRate, numChannels, bitsPerSample)
+        : AudioFormatWriter (out, TRANS (oggFormatName), sampleRate, numChannels, bitsPerSample),
+          ok (false)
     {
         using namespace OggVorbisNamespace;
-        ok = false;
 
         vorbis_info_init (&vi);
 
@@ -314,7 +304,7 @@ public:
         if (ok)
         {
             // write a zero-length packet to show ogg that we're finished..
-            write (0, 0);
+            writeSamples (0);
 
             ogg_stream_clear (&os);
             vorbis_block_clear (&vb);
@@ -335,27 +325,37 @@ public:
     //==============================================================================
     bool write (const int** samplesToWrite, int numSamples)
     {
-        using namespace OggVorbisNamespace;
-        if (! ok)
-            return false;
-
-        if (numSamples > 0)
+        if (ok)
         {
-            const double gain = 1.0 / 0x80000000u;
-            float** const vorbisBuffer = vorbis_analysis_buffer (&vd, numSamples);
+            using namespace OggVorbisNamespace;
 
-            for (int i = numChannels; --i >= 0;)
+            if (numSamples > 0)
             {
-                float* const dst = vorbisBuffer[i];
-                const int* const src = samplesToWrite [i];
+                const double gain = 1.0 / 0x80000000u;
+                float** const vorbisBuffer = vorbis_analysis_buffer (&vd, numSamples);
 
-                if (src != nullptr && dst != nullptr)
+                for (int i = numChannels; --i >= 0;)
                 {
-                    for (int j = 0; j < numSamples; ++j)
-                        dst[j] = (float) (src[j] * gain);
+                    float* const dst = vorbisBuffer[i];
+                    const int* const src = samplesToWrite [i];
+
+                    if (src != nullptr && dst != nullptr)
+                    {
+                        for (int j = 0; j < numSamples; ++j)
+                            dst[j] = (float) (src[j] * gain);
+                    }
                 }
             }
+
+            writeSamples (numSamples);
         }
+
+        return ok;
+    }
+
+    void writeSamples (int numSamples)
+    {
+        using namespace OggVorbisNamespace;
 
         vorbis_analysis_wrote (&vd, numSamples);
 
@@ -381,11 +381,19 @@ public:
                 }
             }
         }
-
-        return true;
     }
 
+    bool ok;
+
 private:
+    OggVorbisNamespace::ogg_stream_state os;
+    OggVorbisNamespace::ogg_page og;
+    OggVorbisNamespace::ogg_packet op;
+    OggVorbisNamespace::vorbis_info vi;
+    OggVorbisNamespace::vorbis_comment vc;
+    OggVorbisNamespace::vorbis_dsp_state vd;
+    OggVorbisNamespace::vorbis_block vb;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter);
 };
 

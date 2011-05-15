@@ -55,7 +55,7 @@ PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
 
     setSize (400, 600);
     list.addChangeListener (this);
-    changeListenerCallback (nullptr);
+    updateList();
 }
 
 PluginListComponent::~PluginListComponent()
@@ -71,6 +71,11 @@ void PluginListComponent::resized()
 }
 
 void PluginListComponent::changeListenerCallback (ChangeBroadcaster*)
+{
+    updateList();
+}
+
+void PluginListComponent::updateList()
 {
     listBox.updateContent();
     listBox.repaint();

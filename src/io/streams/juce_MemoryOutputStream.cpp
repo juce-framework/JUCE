@@ -51,10 +51,15 @@ MemoryOutputStream::MemoryOutputStream (MemoryBlock& memoryBlockToWriteTo,
 
 MemoryOutputStream::~MemoryOutputStream()
 {
-    flush();
+    trimExternalBlockSize();
 }
 
 void MemoryOutputStream::flush()
+{
+    trimExternalBlockSize();
+}
+
+void MemoryOutputStream::trimExternalBlockSize()
 {
     if (&data != &internalBlock)
         data.setSize (size, false);

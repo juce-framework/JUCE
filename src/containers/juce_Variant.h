@@ -73,16 +73,16 @@ public:
     var (ReferenceCountedObject* object);
     var (MethodFunction method) noexcept;
 
-    var& operator= (const var& valueToCopy);
-    var& operator= (int value);
-    var& operator= (int64 value);
-    var& operator= (bool value);
-    var& operator= (double value);
-    var& operator= (const char* value);
-    var& operator= (const wchar_t* value);
-    var& operator= (const String& value);
-    var& operator= (ReferenceCountedObject* object);
-    var& operator= (MethodFunction method);
+    const var& operator= (const var& valueToCopy);
+    const var& operator= (int value);
+    const var& operator= (int64 value);
+    const var& operator= (bool value);
+    const var& operator= (double value);
+    const var& operator= (const char* value);
+    const var& operator= (const wchar_t* value);
+    const var& operator= (const String& value);
+    const var& operator= (ReferenceCountedObject* object);
+    const var& operator= (MethodFunction method);
 
     void swapWith (var& other) noexcept;
 

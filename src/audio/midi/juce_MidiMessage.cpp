@@ -301,8 +301,8 @@ int MidiMessage::getChannel() const noexcept
 {
     if ((data[0] & 0xf0) != 0xf0)
         return (data[0] & 0xf) + 1;
-    else
-        return 0;
+
+    return 0;
 }
 
 bool MidiMessage::isForChannel (const int channel) const noexcept
@@ -355,8 +355,8 @@ uint8 MidiMessage::getVelocity() const noexcept
 {
     if (isNoteOnOrOff())
         return data[2];
-    else
-        return 0;
+
+    return 0;
 }
 
 float MidiMessage::getFloatVelocity() const noexcept
@@ -383,6 +383,7 @@ bool MidiMessage::isAftertouch() const noexcept
 
 int MidiMessage::getAfterTouchValue() const noexcept
 {
+    jassert (isAftertouch());
     return data[2];
 }
 
@@ -407,7 +408,6 @@ bool MidiMessage::isChannelPressure() const noexcept
 int MidiMessage::getChannelPressureValue() const noexcept
 {
     jassert (isChannelPressure());
-
     return data[1];
 }
 
@@ -427,6 +427,7 @@ bool MidiMessage::isProgramChange() const noexcept
 
 int MidiMessage::getProgramChangeNumber() const noexcept
 {
+    jassert (isProgramChange());
     return data[1];
 }
 
@@ -445,6 +446,7 @@ bool MidiMessage::isPitchWheel() const noexcept
 
 int MidiMessage::getPitchWheelValue() const noexcept
 {
+    jassert (isPitchWheel());
     return data[1] | (data[2] << 7);
 }
 
@@ -454,7 +456,8 @@ const MidiMessage MidiMessage::pitchWheel (const int channel,
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
     jassert (isPositiveAndBelow (position, (int) 0x4000));
 
-    return MidiMessage (MidiHelpers::initialByte (0xe0, channel), position & 127, (position >> 7) & 127);
+    return MidiMessage (MidiHelpers::initialByte (0xe0, channel),
+                        position & 127, (position >> 7) & 127);
 }
 
 bool MidiMessage::isController() const noexcept
@@ -465,14 +468,12 @@ bool MidiMessage::isController() const noexcept
 int MidiMessage::getControllerNumber() const noexcept
 {
     jassert (isController());
-
     return data[1];
 }
 
 int MidiMessage::getControllerValue() const noexcept
 {
     jassert (isController());
-
     return data[2];
 }
 
@@ -481,12 +482,13 @@ const MidiMessage MidiMessage::controllerEvent (const int channel, const int con
     // the channel must be between 1 and 16 inclusive
     jassert (channel > 0 && channel <= 16);
 
-    return MidiMessage (MidiHelpers::initialByte (0xb0, channel), controllerType & 127, value & 127);
+    return MidiMessage (MidiHelpers::initialByte (0xb0, channel),
+                        controllerType & 127, value & 127);
 }
 
 const MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const float velocity) noexcept
 {
-    return noteOn (channel, noteNumber, (uint8)(velocity * 127.0f));
+    return noteOn (channel, noteNumber, (uint8) (velocity * 127.0f));
 }
 
 const MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const uint8 velocity) noexcept
@@ -494,7 +496,8 @@ const MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, 
     jassert (channel > 0 && channel <= 16);
     jassert (isPositiveAndBelow (noteNumber, (int) 128));
 
-    return MidiMessage (MidiHelpers::initialByte (0x90, channel), noteNumber & 127, MidiHelpers::validVelocity (velocity));
+    return MidiMessage (MidiHelpers::initialByte (0x90, channel),
+                        noteNumber & 127, MidiHelpers::validVelocity (velocity));
 }
 
 const MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8 velocity) noexcept
@@ -502,7 +505,8 @@ const MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber,
     jassert (channel > 0 && channel <= 16);
     jassert (isPositiveAndBelow (noteNumber, (int) 128));
 
-    return MidiMessage (MidiHelpers::initialByte (0x80, channel), noteNumber & 127, MidiHelpers::validVelocity (velocity));
+    return MidiMessage (MidiHelpers::initialByte (0x80, channel),
+                        noteNumber & 127, MidiHelpers::validVelocity (velocity));
 }
 
 const MidiMessage MidiMessage::allNotesOff (const int channel) noexcept
@@ -534,15 +538,10 @@ const MidiMessage MidiMessage::masterVolume (const float volume)
 {
     const int vol = jlimit (0, 0x3fff, roundToInt (volume * 0x4000));
 
-    uint8 buf[8];
-    buf[0] = 0xf0;
-    buf[1] = 0x7f;
-    buf[2] = 0x7f;
-    buf[3] = 0x04;
-    buf[4] = 0x01;
-    buf[5] = (uint8) (vol & 0x7f);
-    buf[6] = (uint8) (vol >> 7);
-    buf[7] = 0xf7;
+    const uint8 buf[] = { 0xf0, 0x7f, 0x7f, 0x04, 0x01,
+                          (uint8) (vol & 0x7f),
+                          (uint8) (vol >> 7),
+                          0xf7 };
 
     return MidiMessage (buf, 8);
 }
@@ -574,17 +573,10 @@ int MidiMessage::getSysExDataSize() const noexcept
     return isSysEx() ? size - 2 : 0;
 }
 
-bool MidiMessage::isMetaEvent() const noexcept
-{
-    return *data == 0xff;
-}
-
-bool MidiMessage::isActiveSense() const noexcept
-{
-    return *data == 0xfe;
-}
-
 //==============================================================================
+bool MidiMessage::isMetaEvent() const noexcept      { return *data == 0xff; }
+bool MidiMessage::isActiveSense() const noexcept    { return *data == 0xfe; }
+
 int MidiMessage::getMetaEventType() const noexcept
 {
     return *data != 0xff ? -1 : data[1];
@@ -603,26 +595,20 @@ int MidiMessage::getMetaEventLength() const noexcept
 
 const uint8* MidiMessage::getMetaEventData() const noexcept
 {
+    jassert (isMetaEvent());
+
     int n;
     const uint8* d = data + 2;
     readVariableLengthVal (d, n);
     return d + n;
 }
 
-bool MidiMessage::isTrackMetaEvent() const noexcept
-{
-    return getMetaEventType() == 0;
-}
-
-bool MidiMessage::isEndOfTrackMetaEvent() const noexcept
-{
-    return getMetaEventType() == 47;
-}
+bool MidiMessage::isTrackMetaEvent() const noexcept         { return getMetaEventType() == 0; }
+bool MidiMessage::isEndOfTrackMetaEvent() const noexcept    { return getMetaEventType() == 47; }
 
 bool MidiMessage::isTextMetaEvent() const noexcept
 {
     const int t = getMetaEventType();
-
     return t > 0 && t < 16;
 }
 
@@ -631,23 +617,13 @@ const String MidiMessage::getTextFromTextMetaEvent() const
     return String (reinterpret_cast <const char*> (getMetaEventData()), getMetaEventLength());
 }
 
-bool MidiMessage::isTrackNameEvent() const noexcept
-{
-    return (data[1] == 3) && (*data == 0xff);
-}
-
-bool MidiMessage::isTempoMetaEvent() const noexcept
-{
-    return (data[1] == 81) && (*data == 0xff);
-}
-
-bool MidiMessage::isMidiChannelMetaEvent() const noexcept
-{
-    return (data[1] == 0x20) && (*data == 0xff) && (data[2] == 1);
-}
+bool MidiMessage::isTrackNameEvent() const noexcept         { return (data[1] == 3)    && (*data == 0xff); }
+bool MidiMessage::isTempoMetaEvent() const noexcept         { return (data[1] == 81)   && (*data == 0xff); }
+bool MidiMessage::isMidiChannelMetaEvent() const noexcept   { return (data[1] == 0x20) && (*data == 0xff) && (data[2] == 1); }
 
 int MidiMessage::getMidiChannelMetaEventChannel() const noexcept
 {
+    jassert (isMidiChannelMetaEvent());
     return data[3] + 1;
 }
 
@@ -693,13 +669,10 @@ double MidiMessage::getTempoMetaEventTickLength (const short timeFormat) const n
 
 const MidiMessage MidiMessage::tempoMetaEvent (int microsecondsPerQuarterNote) noexcept
 {
-    uint8 d[8];
-    d[0] = 0xff;
-    d[1] = 81;
-    d[2] = 3;
-    d[3] = (uint8) (microsecondsPerQuarterNote >> 16);
-    d[4] = (uint8) ((microsecondsPerQuarterNote >> 8) & 0xff);
-    d[5] = (uint8) (microsecondsPerQuarterNote & 0xff);
+    const uint8 d[] = { 0xff, 81, 3,
+                        (uint8) (microsecondsPerQuarterNote >> 16),
+                        (uint8) (microsecondsPerQuarterNote >> 8),
+                        (uint8) microsecondsPerQuarterNote };
 
     return MidiMessage (d, 6, 0.0);
 }
@@ -726,12 +699,6 @@ void MidiMessage::getTimeSignatureInfo (int& numerator, int& denominator) const 
 
 const MidiMessage MidiMessage::timeSignatureMetaEvent (const int numerator, const int denominator)
 {
-    uint8 d[8];
-    d[0] = 0xff;
-    d[1] = 0x58;
-    d[2] = 0x04;
-    d[3] = (uint8) numerator;
-
     int n = 1;
     int powerOfTwo = 0;
 
@@ -741,20 +708,15 @@ const MidiMessage MidiMessage::timeSignatureMetaEvent (const int numerator, cons
         ++powerOfTwo;
     }
 
-    d[4] = (uint8) powerOfTwo;
-    d[5] = 0x01;
-    d[6] = 96;
+    const uint8 d[] = { 0xff, 0x58, 0x04, (uint8) numerator,
+                        (uint8) powerOfTwo, 1, 96 };
 
     return MidiMessage (d, 7, 0.0);
 }
 
 const MidiMessage MidiMessage::midiChannelMetaEvent (const int channel) noexcept
 {
-    uint8 d[8];
-    d[0] = 0xff;
-    d[1] = 0x20;
-    d[2] = 0x01;
-    d[3] = (uint8) jlimit (0, 0xff, channel - 1);
+    const uint8 d[] = { 0xff, 0x20, 0x01, (uint8) jlimit (0, 0xff, channel - 1) };
 
     return MidiMessage (d, 4, 0.0);
 }
@@ -775,15 +737,8 @@ const MidiMessage MidiMessage::endOfTrack() noexcept
 }
 
 //==============================================================================
-bool MidiMessage::isSongPositionPointer() const noexcept
-{
-    return *data == 0xf2;
-}
-
-int MidiMessage::getSongPositionPointerMidiBeat() const noexcept
-{
-    return data[1] | (data[2] << 7);
-}
+bool MidiMessage::isSongPositionPointer() const noexcept         { return *data == 0xf2; }
+int MidiMessage::getSongPositionPointerMidiBeat() const noexcept { return data[1] | (data[2] << 7); }
 
 const MidiMessage MidiMessage::songPositionPointer (const int positionInMidiBeats) noexcept
 {
@@ -792,63 +747,23 @@ const MidiMessage MidiMessage::songPositionPointer (const int positionInMidiBeat
                         (positionInMidiBeats >> 7) & 127);
 }
 
-bool MidiMessage::isMidiStart() const noexcept
-{
-    return *data == 0xfa;
-}
+bool MidiMessage::isMidiStart() const noexcept                  { return *data == 0xfa; }
+const MidiMessage MidiMessage::midiStart() noexcept             { return MidiMessage (0xfa); }
 
-const MidiMessage MidiMessage::midiStart() noexcept
-{
-    return MidiMessage (0xfa);
-}
+bool MidiMessage::isMidiContinue() const noexcept               { return *data == 0xfb; }
+const MidiMessage MidiMessage::midiContinue() noexcept          { return MidiMessage (0xfb); }
 
-bool MidiMessage::isMidiContinue() const noexcept
-{
-    return *data == 0xfb;
-}
+bool MidiMessage::isMidiStop() const noexcept                   { return *data == 0xfc; }
+const MidiMessage MidiMessage::midiStop() noexcept              { return MidiMessage (0xfc); }
 
-const MidiMessage MidiMessage::midiContinue() noexcept
-{
-    return MidiMessage (0xfb);
-}
+bool MidiMessage::isMidiClock() const noexcept                  { return *data == 0xf8; }
+const MidiMessage MidiMessage::midiClock() noexcept             { return MidiMessage (0xf8); }
 
-bool MidiMessage::isMidiStop() const noexcept
-{
-    return *data == 0xfc;
-}
+bool MidiMessage::isQuarterFrame() const noexcept               { return *data == 0xf1; }
+int MidiMessage::getQuarterFrameSequenceNumber() const noexcept { return ((int) data[1]) >> 4; }
+int MidiMessage::getQuarterFrameValue() const noexcept          { return ((int) data[1]) & 0x0f; }
 
-const MidiMessage MidiMessage::midiStop() noexcept
-{
-    return MidiMessage (0xfc);
-}
-
-bool MidiMessage::isMidiClock() const noexcept
-{
-    return *data == 0xf8;
-}
-
-const MidiMessage MidiMessage::midiClock() noexcept
-{
-    return MidiMessage (0xf8);
-}
-
-bool MidiMessage::isQuarterFrame() const noexcept
-{
-    return *data == 0xf1;
-}
-
-int MidiMessage::getQuarterFrameSequenceNumber() const noexcept
-{
-    return ((int) data[1]) >> 4;
-}
-
-int MidiMessage::getQuarterFrameValue() const noexcept
-{
-    return ((int) data[1]) & 0x0f;
-}
-
-const MidiMessage MidiMessage::quarterFrame (const int sequenceNumber,
-                                             const int value) noexcept
+const MidiMessage MidiMessage::quarterFrame (const int sequenceNumber, const int value) noexcept
 {
     return MidiMessage (0xf1, (sequenceNumber << 4) | value);
 }
@@ -862,10 +777,7 @@ bool MidiMessage::isFullFrame() const noexcept
             && data[4] == 0x01;
 }
 
-void MidiMessage::getFullFrameParameters (int& hours,
-                                          int& minutes,
-                                          int& seconds,
-                                          int& frames,
+void MidiMessage::getFullFrameParameters (int& hours, int& minutes, int& seconds, int& frames,
                                           MidiMessage::SmpteTimecodeType& timecodeType) const noexcept
 {
     jassert (isFullFrame());
@@ -877,23 +789,16 @@ void MidiMessage::getFullFrameParameters (int& hours,
     frames  = data[8];
 }
 
-const MidiMessage MidiMessage::fullFrame (const int hours,
-                                          const int minutes,
-                                          const int seconds,
-                                          const int frames,
+const MidiMessage MidiMessage::fullFrame (const int hours, const int minutes,
+                                          const int seconds, const int frames,
                                           MidiMessage::SmpteTimecodeType timecodeType)
 {
-    uint8 d[10];
-    d[0] = 0xf0;
-    d[1] = 0x7f;
-    d[2] = 0x7f;
-    d[3] = 0x01;
-    d[4] = 0x01;
-    d[5] = (uint8) ((hours & 0x01f) | (timecodeType << 5));
-    d[6] = (uint8) minutes;
-    d[7] = (uint8) seconds;
-    d[8] = (uint8) frames;
-    d[9] = 0xf7;
+    const uint8 d[] = { 0xf0, 0x7f, 0x7f, 0x01, 0x01,
+                        (uint8) ((hours & 0x01f) | (timecodeType << 5)),
+                        (uint8) minutes,
+                        (uint8) seconds,
+                        (uint8) frames,
+                        0xf7 };
 
     return MidiMessage (d, 10, 0.0);
 }
@@ -915,22 +820,13 @@ MidiMessage::MidiMachineControlCommand MidiMessage::getMidiMachineControlCommand
 
 const MidiMessage MidiMessage::midiMachineControlCommand (MidiMessage::MidiMachineControlCommand command)
 {
-    uint8 d[6];
-    d[0] = 0xf0;
-    d[1] = 0x7f;
-    d[2] = 0x00;
-    d[3] = 0x06;
-    d[4] = (uint8) command;
-    d[5] = 0xf7;
+    const uint8 d[] = { 0xf0, 0x7f, 0, 6, (uint8) command, 0xf7 };
 
     return MidiMessage (d, 6, 0.0);
 }
 
 //==============================================================================
-bool MidiMessage::isMidiMachineControlGoto (int& hours,
-                                            int& minutes,
-                                            int& seconds,
-                                            int& frames) const noexcept
+bool MidiMessage::isMidiMachineControlGoto (int& hours, int& minutes, int& seconds, int& frames) const noexcept
 {
     if (size >= 12
          && data[0] == 0xf0
@@ -951,24 +847,14 @@ bool MidiMessage::isMidiMachineControlGoto (int& hours,
     return false;
 }
 
-const MidiMessage MidiMessage::midiMachineControlGoto (int hours,
-                                                       int minutes,
-                                                       int seconds,
-                                                       int frames)
+const MidiMessage MidiMessage::midiMachineControlGoto (int hours, int minutes, int seconds, int frames)
 {
-    uint8 d[12];
-    d[0] = 0xf0;
-    d[1] = 0x7f;
-    d[2] = 0x00;
-    d[3] = 0x06;
-    d[4] = 0x44;
-    d[5] = 0x06;
-    d[6] = 0x01;
-    d[7] = (uint8) hours;
-    d[8] = (uint8) minutes;
-    d[9] = (uint8) seconds;
-    d[10] = (uint8) frames;
-    d[11] = 0xf7;
+    const uint8 d[] = { 0xf0, 0x7f, 0, 6, 0x44, 6, 1,
+                        (uint8) hours,
+                        (uint8) minutes,
+                        (uint8) seconds,
+                        (uint8) frames,
+                        0xf7 };
 
     return MidiMessage (d, 12, 0.0);
 }

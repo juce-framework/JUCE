@@ -676,91 +676,79 @@ bool BigInteger::operator>  (const BigInteger& other) const noexcept    { return
 bool BigInteger::operator>= (const BigInteger& other) const noexcept    { return compare (other) >= 0; }
 
 //==============================================================================
-void BigInteger::shiftBits (int bits, const int startBit)
+void BigInteger::shiftLeft (int bits, const int startBit)
 {
-    if (highestBit < 0)
-        return;
-
     if (startBit > 0)
     {
-        if (bits < 0)
-        {
-            // right shift
-            for (int i = startBit; i <= highestBit; ++i)
-                setBit (i, operator[] (i - bits));
+        for (int i = highestBit + 1; --i >= startBit;)
+            setBit (i + bits, operator[] (i));
 
-            highestBit = getHighestBit();
-        }
-        else if (bits > 0)
-        {
-            // left shift
-            for (int i = highestBit + 1; --i >= startBit;)
-                setBit (i + bits, operator[] (i));
-
-            while (--bits >= 0)
-                clearBit (bits + startBit);
-        }
+        while (--bits >= 0)
+            clearBit (bits + startBit);
     }
     else
     {
-        if (bits < 0)
+        ensureSize (bitToIndex (highestBit + bits) + 1);
+
+        const int wordsToMove = bitToIndex (bits);
+        int top = 1 + bitToIndex (highestBit);
+        highestBit += bits;
+
+        if (wordsToMove > 0)
         {
-            // right shift
-            bits = -bits;
+            int i;
+            for (i = top; --i >= 0;)
+                values [i + wordsToMove] = values [i];
 
-            if (bits > highestBit)
-            {
-                clear();
-            }
-            else
-            {
-                const int wordsToMove = bitToIndex (bits);
-                int top = 1 + bitToIndex (highestBit) - wordsToMove;
-                highestBit -= bits;
+            for (i = 0; i < wordsToMove; ++i)
+                values [i] = 0;
 
-                if (wordsToMove > 0)
-                {
-                    int i;
-                    for (i = 0; i < top; ++i)
-                        values [i] = values [i + wordsToMove];
-
-                    for (i = 0; i < wordsToMove; ++i)
-                        values [top + i] = 0;
-
-                    bits &= 31;
-                }
-
-                if (bits != 0)
-                {
-                    const int invBits = 32 - bits;
-
-                    --top;
-                    for (int i = 0; i < top; ++i)
-                        values[i] = (values[i] >> bits) | (values [i + 1] << invBits);
-
-                    values[top] = (values[top] >> bits);
-                }
-
-                highestBit = getHighestBit();
-            }
+            bits &= 31;
         }
-        else if (bits > 0)
-        {
-            // left shift
-            ensureSize (bitToIndex (highestBit + bits) + 1);
 
+        if (bits != 0)
+        {
+            const int invBits = 32 - bits;
+
+            for (int i = top + 1 + wordsToMove; --i > wordsToMove;)
+                values[i] = (values[i] << bits) | (values [i - 1] >> invBits);
+
+            values [wordsToMove] = values [wordsToMove] << bits;
+        }
+
+        highestBit = getHighestBit();
+    }
+}
+
+void BigInteger::shiftRight (int bits, const int startBit)
+{
+    if (startBit > 0)
+    {
+        for (int i = startBit; i <= highestBit; ++i)
+            setBit (i, operator[] (i + bits));
+
+        highestBit = getHighestBit();
+    }
+    else
+    {
+        if (bits > highestBit)
+        {
+            clear();
+        }
+        else
+        {
             const int wordsToMove = bitToIndex (bits);
-            int top = 1 + bitToIndex (highestBit);
-            highestBit += bits;
+            int top = 1 + bitToIndex (highestBit) - wordsToMove;
+            highestBit -= bits;
 
             if (wordsToMove > 0)
             {
                 int i;
-                for (i = top; --i >= 0;)
-                    values [i + wordsToMove] = values [i];
+                for (i = 0; i < top; ++i)
+                    values [i] = values [i + wordsToMove];
 
                 for (i = 0; i < wordsToMove; ++i)
-                    values [i] = 0;
+                    values [top + i] = 0;
 
                 bits &= 31;
             }
@@ -769,14 +757,26 @@ void BigInteger::shiftBits (int bits, const int startBit)
             {
                 const int invBits = 32 - bits;
 
-                for (int i = top + 1 + wordsToMove; --i > wordsToMove;)
-                    values[i] = (values[i] << bits) | (values [i - 1] >> invBits);
+                --top;
+                for (int i = 0; i < top; ++i)
+                    values[i] = (values[i] >> bits) | (values [i + 1] << invBits);
 
-                values [wordsToMove] = values [wordsToMove] << bits;
+                values[top] = (values[top] >> bits);
             }
 
             highestBit = getHighestBit();
         }
+    }
+}
+
+void BigInteger::shiftBits (int bits, const int startBit)
+{
+    if (highestBit >= 0)
+    {
+        if (bits < 0)
+            shiftRight (-bits, startBit);
+        else if (bits > 0)
+            shiftLeft (bits, startBit);
     }
 }
 

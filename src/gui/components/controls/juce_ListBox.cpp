@@ -355,8 +355,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const model_)
 {
     addAndMakeVisible (viewport = new ListViewport (*this));
 
-    setWantsKeyboardFocus (true);
-    colourChanged();
+    ListBox::setWantsKeyboardFocus (true);
+    ListBox::colourChanged();
 }
 
 ListBox::~ListBox()

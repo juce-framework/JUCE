@@ -378,16 +378,16 @@ void var::swapWith (var& other) noexcept
     std::swap (value, other.value);
 }
 
-var& var::operator= (const var& newValue)               { type->cleanUp (value); type = newValue.type; type->createCopy (value, newValue.value); return *this; }
-var& var::operator= (const int newValue)                { type->cleanUp (value); type = &VariantType_Int::instance; value.intValue = newValue; return *this; }
-var& var::operator= (const int64 newValue)              { type->cleanUp (value); type = &VariantType_Int64::instance; value.int64Value = newValue; return *this; }
-var& var::operator= (const bool newValue)               { type->cleanUp (value); type = &VariantType_Bool::instance; value.boolValue = newValue; return *this; }
-var& var::operator= (const double newValue)             { type->cleanUp (value); type = &VariantType_Double::instance; value.doubleValue = newValue; return *this; }
-var& var::operator= (const char* const newValue)        { var v (newValue); swapWith (v); return *this; }
-var& var::operator= (const wchar_t* const newValue)     { var v (newValue); swapWith (v); return *this; }
-var& var::operator= (const String& newValue)            { var v (newValue); swapWith (v); return *this; }
-var& var::operator= (ReferenceCountedObject* newValue)  { var v (newValue); swapWith (v); return *this; }
-var& var::operator= (MethodFunction newValue)           { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (const var& newValue)               { type->cleanUp (value); type = newValue.type; type->createCopy (value, newValue.value); return *this; }
+const var& var::operator= (const int newValue)                { type->cleanUp (value); type = &VariantType_Int::instance; value.intValue = newValue; return *this; }
+const var& var::operator= (const int64 newValue)              { type->cleanUp (value); type = &VariantType_Int64::instance; value.int64Value = newValue; return *this; }
+const var& var::operator= (const bool newValue)               { type->cleanUp (value); type = &VariantType_Bool::instance; value.boolValue = newValue; return *this; }
+const var& var::operator= (const double newValue)             { type->cleanUp (value); type = &VariantType_Double::instance; value.doubleValue = newValue; return *this; }
+const var& var::operator= (const char* const newValue)        { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (const wchar_t* const newValue)     { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (const String& newValue)            { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (ReferenceCountedObject* newValue)  { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (MethodFunction newValue)           { var v (newValue); swapWith (v); return *this; }
 
 //==============================================================================
 bool var::equals (const var& other) const noexcept

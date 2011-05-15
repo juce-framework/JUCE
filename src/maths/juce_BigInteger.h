@@ -311,6 +311,8 @@ private:
     bool negative;
 
     void ensureSize (int numVals);
+    void shiftLeft (int bits, int startBit);
+    void shiftRight (int bits, int startBit);
     static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
 
     static inline int bitToIndex (const int bit) noexcept       { return bit >> 5; }
