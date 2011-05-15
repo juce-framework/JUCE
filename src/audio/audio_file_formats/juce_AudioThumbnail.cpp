@@ -706,7 +706,12 @@ void AudioThumbnail::setLevels (const MinMaxValue* const* values, int thumbIndex
     for (int i = jmin (numChans, channels.size()); --i >= 0;)
         channels.getUnchecked(i)->write (values[i], thumbIndex, numValues);
 
-    numSamplesFinished = jmax (numSamplesFinished, (thumbIndex + numValues) * (int64) samplesPerThumbSample);
+    const int64 start = thumbIndex * (int64) samplesPerThumbSample;
+    const int64 end = (thumbIndex + numValues) * (int64) samplesPerThumbSample;
+
+    if (numSamplesFinished >= start && end > numSamplesFinished)
+        numSamplesFinished = end;
+
     totalSamples = jmax (numSamplesFinished, totalSamples);
     window->invalidate();
     sendChangeMessage();

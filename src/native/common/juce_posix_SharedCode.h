@@ -526,42 +526,37 @@ void FileOutputStream::flushInternal()
 //==============================================================================
 MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
     : address (nullptr),
-      internal (nullptr),
-      length (0)
+      length (0),
+      fileHandle (0)
 {
     jassert (mode == readOnly || mode == readWrite);
 
-    const int fd = open (file.getFullPathName().toUTF8(),
-                         mode == readWrite ? (O_CREAT + O_RDWR) : O_RDONLY, 00644);
+    fileHandle = open (file.getFullPathName().toUTF8(),
+                       mode == readWrite ? (O_CREAT + O_RDWR) : O_RDONLY, 00644);
 
-    internal = reinterpret_cast<void*> (fd);
-
-    if (fd != -1)
+    if (fileHandle != -1)
     {
         const int64 fileSize = file.getSize();
 
-        address = mmap (0, (size_t) fileSize,
+        void* m = mmap (0, (size_t) fileSize,
                         mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
-                        MAP_SHARED, fd, 0);
+                        MAP_SHARED, fileHandle, 0);
 
-        if (address == MAP_FAILED)
-            address = nullptr;
-        else
+        if (m != MAP_FAILED)
+        {
+            address = m;
             length = (size_t) fileSize;
+        }
     }
 }
 
 MemoryMappedFile::~MemoryMappedFile()
 {
-    const int fd = reinterpret_cast <int> (internal);
+    if (address != nullptr)
+        munmap (address, length);
 
-    if (fd != 0)
-    {
-        if (address != nullptr)
-            munmap (address, length);
-
-        close (fd);
-    }
+    if (fileHandle != 0)
+        close (fileHandle);
 }
 
 //==============================================================================

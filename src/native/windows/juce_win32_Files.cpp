@@ -302,8 +302,8 @@ void FileOutputStream::flushInternal()
 //==============================================================================
 MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
     : address (nullptr),
-      internal (nullptr),
-      length (0)
+      length (0),
+      fileHandle (nullptr)
 {
     jassert (mode == readOnly || mode == readWrite);
 
@@ -321,10 +321,9 @@ MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMo
     HANDLE h = CreateFile (file.getFullPathName().toWideCharPointer(), accessMode, FILE_SHARE_READ, 0,
                            createType, FILE_ATTRIBUTE_NORMAL, 0);
 
-    internal = (void*) h;
-
     if (h != INVALID_HANDLE_VALUE)
     {
+        fileHandle = (void*) h;
         const int64 fileSize = file.getSize();
 
         HANDLE mappingHandle = CreateFileMapping (h, 0, protect, (DWORD) (fileSize >> 32), (DWORD) fileSize, 0);
@@ -345,8 +344,8 @@ MemoryMappedFile::~MemoryMappedFile()
     if (address != nullptr)
         UnmapViewOfFile (address);
 
-    if (internal != nullptr)
-        CloseHandle ((HANDLE) internal);
+    if (fileHandle != nullptr)
+        CloseHandle ((HANDLE) fileHandle);
 }
 
 //==============================================================================

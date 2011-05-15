@@ -19463,8 +19463,13 @@ public:
 private:
 
 	void* address;
-	void* internal;
 	size_t length;
+
+   #if JUCE_WINDOWS
+	void* fileHandle;
+   #else
+	int fileHandle;
+   #endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedFile);
 };
