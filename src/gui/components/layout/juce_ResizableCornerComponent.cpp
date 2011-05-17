@@ -99,7 +99,7 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
 void ResizableCornerComponent::mouseUp (const MouseEvent&)
 {
     if (constrainer != nullptr)
-        constrainer->resizeStart();
+        constrainer->resizeEnd();
 }
 
 bool ResizableCornerComponent::hitTest (int x, int y)

@@ -54,6 +54,7 @@ public:
     bool canDoStereo();
     bool canDoMono();
     bool isCompressed();
+    const StringArray getQualityOptions();
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
@@ -65,7 +66,6 @@ public:
                                         int bitsPerSample,
                                         const StringPairArray& metadataValues,
                                         int qualityOptionIndex);
-
 private:
     JUCE_LEAK_DETECTOR (FlacAudioFormat);
 };

@@ -2043,7 +2043,8 @@ const Colour Component::findColour (const int colourId, const bool inheritFromPa
     if (v != nullptr)
         return Colour ((int) *v);
 
-    if (inheritFromParent && parentComponent != nullptr)
+    if (inheritFromParent && parentComponent != nullptr
+         && (lookAndFeel == nullptr || ! lookAndFeel->isColourSpecified (colourId)))
         return parentComponent->findColour (colourId, true);
 
     return getLookAndFeel().findColour (colourId);

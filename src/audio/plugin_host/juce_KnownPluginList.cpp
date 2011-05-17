@@ -179,34 +179,29 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (const StringArray& files,
 {
     for (int i = 0; i < files.size(); ++i)
     {
-        bool loaded = false;
-
         for (int j = 0; j < AudioPluginFormatManager::getInstance()->getNumFormats(); ++j)
         {
             AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (j);
 
             if (scanAndAddFile (files[i], true, typesFound, *format))
-                loaded = true;
+                return;
         }
 
-        if (! loaded)
+        const File f (files[i]);
+
+        if (f.isDirectory())
         {
-            const File f (files[i]);
+            StringArray s;
 
-            if (f.isDirectory())
             {
-                StringArray s;
+                Array<File> subFiles;
+                f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
 
-                {
-                    Array<File> subFiles;
-                    f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
-
-                    for (int j = 0; j < subFiles.size(); ++j)
-                        s.add (subFiles.getReference(j).getFullPathName());
-                }
-
-                scanAndAddDragAndDroppedFiles (s, typesFound);
+                for (int j = 0; j < subFiles.size(); ++j)
+                    s.add (subFiles.getReference(j).getFullPathName());
             }
+
+            scanAndAddDragAndDroppedFiles (s, typesFound);
         }
     }
 }

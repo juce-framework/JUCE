@@ -488,7 +488,7 @@ FlacAudioFormat::~FlacAudioFormat()
 
 const Array <int> FlacAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 22050, 32000, 44100, 48000, 88200, 96000, 0 };
+    const int rates[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000, 0 };
     return Array <int> (rates);
 }
 
@@ -532,6 +532,12 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
     }
 
     return nullptr;
+}
+
+const StringArray FlacAudioFormat::getQualityOptions()
+{
+    const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
+    return StringArray (options);
 }
 
 END_JUCE_NAMESPACE

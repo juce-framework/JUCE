@@ -1115,11 +1115,10 @@ bool NSViewComponentPeer::contains (const Point<int>& position, bool trueIfInACh
             && isPositiveAndBelow (position.getY(), component->getHeight())))
         return false;
 
-    NSPoint p;
-    p.x = (float) position.getX();
-    p.y = (float) position.getY();
+    NSRect frameRect = [view frame];
 
-    NSView* v = [view hitTest: p];
+    NSView* v = [view hitTest: NSMakePoint (frameRect.origin.x + position.getX(),
+                                            frameRect.origin.y + frameRect.size.height - position.getY())];
 
     if (trueIfInAChildWindow)
         return v != nil;
