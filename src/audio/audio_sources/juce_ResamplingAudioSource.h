@@ -28,6 +28,7 @@
 
 #include "juce_AudioSource.h"
 #include "../../threads/juce_SpinLock.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -77,8 +78,7 @@ public:
 
 private:
     //==============================================================================
-    AudioSource* const input;
-    const bool deleteInputWhenDeleted;
+    OptionalScopedPointer<AudioSource> input;
     double ratio, lastRatio;
     AudioSampleBuffer buffer;
     int bufferPos, sampsInBuffer;

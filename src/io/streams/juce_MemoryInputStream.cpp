@@ -39,10 +39,7 @@ MemoryInputStream::MemoryInputStream (const void* const sourceData,
       position (0)
 {
     if (keepInternalCopy)
-    {
-        internalCopy.append (data, sourceDataSize);
-        data = static_cast <const char*> (internalCopy.getData());
-    }
+        createInternalCopy();
 }
 
 MemoryInputStream::MemoryInputStream (const MemoryBlock& sourceData,
@@ -52,10 +49,14 @@ MemoryInputStream::MemoryInputStream (const MemoryBlock& sourceData,
       position (0)
 {
     if (keepInternalCopy)
-    {
-        internalCopy = sourceData;
-        data = static_cast <const char*> (internalCopy.getData());
-    }
+        createInternalCopy();
+}
+
+void MemoryInputStream::createInternalCopy()
+{
+    internalCopy.malloc (dataSize);
+    memcpy (internalCopy, data, dataSize);
+    data = internalCopy;
 }
 
 MemoryInputStream::~MemoryInputStream()
@@ -71,6 +72,9 @@ int MemoryInputStream::read (void* const buffer, const int howMany)
 {
     jassert (howMany >= 0);
     const int num = jmin (howMany, (int) (dataSize - position));
+    if (num <= 0)
+        return 0;
+
     memcpy (buffer, data + position, num);
     position += num;
     return (int) num;
@@ -78,7 +82,7 @@ int MemoryInputStream::read (void* const buffer, const int howMany)
 
 bool MemoryInputStream::isExhausted()
 {
-    return (position >= dataSize);
+    return position >= dataSize;
 }
 
 bool MemoryInputStream::setPosition (const int64 pos)
@@ -93,6 +97,7 @@ int64 MemoryInputStream::getPosition()
 }
 
 
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 #include "../../utilities/juce_UnitTest.h"

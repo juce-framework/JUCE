@@ -1823,7 +1823,7 @@ void Component::paintComponent (Graphics& g)
             paint (imG);
         }
 
-        g.setColour (Colours::black.withAlpha (getAlpha()));
+        g.setColour (Colours::black);
         g.drawImageAt (bufferedImage, 0, 0);
     }
     else
@@ -1914,9 +1914,9 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 {
     jassert (! g.isClipEmpty());
 
-  #if JUCE_DEBUG
+   #if JUCE_DEBUG
     flags.isInsidePaintCall = true;
-  #endif
+   #endif
 
     if (effect != nullptr)
     {
@@ -1943,9 +1943,9 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
         paintComponentAndChildren (g);
     }
 
-  #if JUCE_DEBUG
+   #if JUCE_DEBUG
     flags.isInsidePaintCall = false;
-  #endif
+   #endif
 }
 
 void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) noexcept

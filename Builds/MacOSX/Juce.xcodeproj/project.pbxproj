@@ -32,6 +32,7 @@
 		6DC6DEEE8A1A6092830A79C8 = { isa = PBXBuildFile; fileRef = D86718CE7E5DEF2071AC3D17; };
 		2862E190ECA33D2CE1458B51 = { isa = PBXBuildFile; fileRef = 9A8053936C35A19B9E98623A; };
 		0791EB173E6A9F959E692AA2 = { isa = PBXBuildFile; fileRef = E2A56C23BF2BB466BB273E3E; };
+		3B64EF7F57EAC5C51460059D = { isa = PBXBuildFile; fileRef = 5403C2A4DEE7B9B3B34235F8; };
 		16D537EB6D3BFAB3AAB54B11 = { isa = PBXBuildFile; fileRef = 3988438157D4B75177703F8A; };
 		0C22446F12486AD139A640CB = { isa = PBXBuildFile; fileRef = 6841D6AC927D02113F3AEBD4; };
 		95CF50482DC7139FCB40EB1C = { isa = PBXBuildFile; fileRef = C7DB1BB9AF7FE0A2AA38D767; };
@@ -420,6 +421,8 @@
 		C63D6EC0555C13C1B79A6AAD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_PositionableAudioSource.h; path = ../../src/audio/audio_sources/juce_PositionableAudioSource.h; sourceTree = SOURCE_ROOT; };
 		E2A56C23BF2BB466BB273E3E = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ResamplingAudioSource.cpp; path = ../../src/audio/audio_sources/juce_ResamplingAudioSource.cpp; sourceTree = SOURCE_ROOT; };
 		BE5DB55285441D501FED3C00 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ResamplingAudioSource.h; path = ../../src/audio/audio_sources/juce_ResamplingAudioSource.h; sourceTree = SOURCE_ROOT; };
+		5403C2A4DEE7B9B3B34235F8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ReverbAudioSource.cpp; path = ../../src/audio/audio_sources/juce_ReverbAudioSource.cpp; sourceTree = SOURCE_ROOT; };
+		0F70C4D118AC7625B4C42CD4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ReverbAudioSource.h; path = ../../src/audio/audio_sources/juce_ReverbAudioSource.h; sourceTree = SOURCE_ROOT; };
 		3988438157D4B75177703F8A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ToneGeneratorAudioSource.cpp; path = ../../src/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp; sourceTree = SOURCE_ROOT; };
 		6AC857F51FD805D7BD3EF712 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ToneGeneratorAudioSource.h; path = ../../src/audio/audio_sources/juce_ToneGeneratorAudioSource.h; sourceTree = SOURCE_ROOT; };
 		6841D6AC927D02113F3AEBD4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioDeviceManager.cpp; path = ../../src/audio/devices/juce_AudioDeviceManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -435,6 +438,7 @@
 		11C1A96A35A2F03F8C34BD43 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Decibels.h; path = ../../src/audio/dsp/juce_Decibels.h; sourceTree = SOURCE_ROOT; };
 		E68EB4BC75216B5B56E3F937 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_IIRFilter.cpp; path = ../../src/audio/dsp/juce_IIRFilter.cpp; sourceTree = SOURCE_ROOT; };
 		EE2259D9768027C2C001EEAD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_IIRFilter.h; path = ../../src/audio/dsp/juce_IIRFilter.h; sourceTree = SOURCE_ROOT; };
+		2C55CE1674244DB199C3033F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Reverb.h; path = ../../src/audio/dsp/juce_Reverb.h; sourceTree = SOURCE_ROOT; };
 		B457515938E7141D5E79B671 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MidiBuffer.cpp; path = ../../src/audio/midi/juce_MidiBuffer.cpp; sourceTree = SOURCE_ROOT; };
 		0604C2E17F0E0DFEFDA19F8D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_MidiBuffer.h; path = ../../src/audio/midi/juce_MidiBuffer.h; sourceTree = SOURCE_ROOT; };
 		891E0B1AD09C0EA44297E0F2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MidiFile.cpp; path = ../../src/audio/midi/juce_MidiFile.cpp; sourceTree = SOURCE_ROOT; };
@@ -1158,6 +1162,8 @@
 				C63D6EC0555C13C1B79A6AAD,
 				E2A56C23BF2BB466BB273E3E,
 				BE5DB55285441D501FED3C00,
+				5403C2A4DEE7B9B3B34235F8,
+				0F70C4D118AC7625B4C42CD4,
 				3988438157D4B75177703F8A,
 				6AC857F51FD805D7BD3EF712 ); name = audio_sources; sourceTree = "<group>"; };
 		BF8F3D00CE4E97468E8BBC55 = { isa = PBXGroup; children = (
@@ -1174,7 +1180,8 @@
 				812620B53BE820D26A63B65D,
 				11C1A96A35A2F03F8C34BD43,
 				E68EB4BC75216B5B56E3F937,
-				EE2259D9768027C2C001EEAD ); name = dsp; sourceTree = "<group>"; };
+				EE2259D9768027C2C001EEAD,
+				2C55CE1674244DB199C3033F ); name = dsp; sourceTree = "<group>"; };
 		99B60B012D5CCF0BD861011D = { isa = PBXGroup; children = (
 				B457515938E7141D5E79B671,
 				0604C2E17F0E0DFEFDA19F8D,
@@ -2063,6 +2070,7 @@
 				6DC6DEEE8A1A6092830A79C8,
 				2862E190ECA33D2CE1458B51,
 				0791EB173E6A9F959E692AA2,
+				3B64EF7F57EAC5C51460059D,
 				16D537EB6D3BFAB3AAB54B11,
 				0C22446F12486AD139A640CB,
 				95CF50482DC7139FCB40EB1C,

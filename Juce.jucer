@@ -155,6 +155,10 @@
                 resource="0" file="src/audio/audio_sources/juce_ResamplingAudioSource.cpp"/>
           <FILE id="OwBLFkBfi" name="juce_ResamplingAudioSource.h" compile="0"
                 resource="0" file="src/audio/audio_sources/juce_ResamplingAudioSource.h"/>
+          <FILE id="c0kck4" name="juce_ReverbAudioSource.cpp" compile="1" resource="0"
+                file="src/audio/audio_sources/juce_ReverbAudioSource.cpp"/>
+          <FILE id="e6MDHO" name="juce_ReverbAudioSource.h" compile="0" resource="0"
+                file="src/audio/audio_sources/juce_ReverbAudioSource.h"/>
           <FILE id="VfalfqDz" name="juce_ToneGeneratorAudioSource.cpp" compile="1"
                 resource="0" file="src/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp"/>
           <FILE id="8tIYggXl2" name="juce_ToneGeneratorAudioSource.h" compile="0"
@@ -189,6 +193,7 @@
                 file="src/audio/dsp/juce_IIRFilter.cpp"/>
           <FILE id="Vu9xVqUfN" name="juce_IIRFilter.h" compile="0" resource="0"
                 file="src/audio/dsp/juce_IIRFilter.h"/>
+          <FILE id="niPdbF" name="juce_Reverb.h" compile="0" resource="0" file="src/audio/dsp/juce_Reverb.h"/>
         </GROUP>
         <GROUP id="XmZUIie8o" name="midi">
           <FILE id="aVLir6CLm" name="juce_MidiBuffer.cpp" compile="1" resource="0"

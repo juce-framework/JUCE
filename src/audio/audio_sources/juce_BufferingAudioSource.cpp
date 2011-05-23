@@ -120,11 +120,10 @@ juce_ImplementSingleton (SharedBufferingAudioSourceThread)
 
 //==============================================================================
 BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
-                                            const bool deleteSourceWhenDeleted_,
+                                            const bool deleteSourceWhenDeleted,
                                             const int numberOfSamplesToBuffer_,
                                             const int numberOfChannels_)
-    : source (source_),
-      deleteSourceWhenDeleted (deleteSourceWhenDeleted_),
+    : source (source_, deleteSourceWhenDeleted),
       numberOfSamplesToBuffer (jmax (1024, numberOfSamplesToBuffer_)),
       numberOfChannels (numberOfChannels_),
       buffer (numberOfChannels_, 0),
@@ -145,9 +144,6 @@ BufferingAudioSource::~BufferingAudioSource()
 
     if (thread != nullptr)
         thread->removeSource (this);
-
-    if (deleteSourceWhenDeleted)
-        delete source;
 }
 
 //==============================================================================

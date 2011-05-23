@@ -30,6 +30,7 @@
 #include "../../threads/juce_Thread.h"
 #include "../audio_file_formats/juce_AudioFormatReader.h"
 #include "../dsp/juce_AudioSampleBuffer.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -44,7 +45,8 @@ public:
     //==============================================================================
     /** Creates an AudioFormatReaderSource for a given reader.
 
-        @param sourceReader                     the reader to use as the data source
+        @param sourceReader                     the reader to use as the data source - this must
+                                                not be null
         @param deleteReaderWhenThisIsDeleted    if true, the reader passed-in will be deleted
                                                 when this object is deleted; if false it will be
                                                 left up to the caller to manage its lifetime
@@ -93,8 +95,7 @@ public:
 
 private:
     //==============================================================================
-    AudioFormatReader* reader;
-    bool deleteReader;
+    OptionalScopedPointer<AudioFormatReader> reader;
 
     int64 volatile nextPlayPos;
     bool volatile looping;

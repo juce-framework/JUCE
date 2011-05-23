@@ -80,7 +80,9 @@ private:
     //==============================================================================
     const char* data;
     size_t dataSize, position;
-    MemoryBlock internalCopy;
+    HeapBlock<char> internalCopy;
+
+    void createInternalCopy();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream);
 };

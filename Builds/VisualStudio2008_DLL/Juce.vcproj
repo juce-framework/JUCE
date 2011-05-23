@@ -164,6 +164,8 @@
             <File RelativePath="..\..\src\audio\audio_sources\juce_PositionableAudioSource.h"/>
             <File RelativePath="..\..\src\audio\audio_sources\juce_ResamplingAudioSource.cpp"/>
             <File RelativePath="..\..\src\audio\audio_sources\juce_ResamplingAudioSource.h"/>
+            <File RelativePath="..\..\src\audio\audio_sources\juce_ReverbAudioSource.cpp"/>
+            <File RelativePath="..\..\src\audio\audio_sources\juce_ReverbAudioSource.h"/>
             <File RelativePath="..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.cpp"/>
             <File RelativePath="..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.h"/>
           </Filter>
@@ -183,6 +185,7 @@
             <File RelativePath="..\..\src\audio\dsp\juce_Decibels.h"/>
             <File RelativePath="..\..\src\audio\dsp\juce_IIRFilter.cpp"/>
             <File RelativePath="..\..\src\audio\dsp\juce_IIRFilter.h"/>
+            <File RelativePath="..\..\src\audio\dsp\juce_Reverb.h"/>
           </Filter>
           <Filter Name="midi">
             <File RelativePath="..\..\src\audio\midi\juce_MidiBuffer.cpp"/>

@@ -32,21 +32,16 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ChannelRemappingAudioSource::ChannelRemappingAudioSource (AudioSource* const source_,
-                                                          const bool deleteSourceWhenDeleted_)
-   : requiredNumberOfChannels (2),
-     source (source_),
-     deleteSourceWhenDeleted (deleteSourceWhenDeleted_),
+                                                          const bool deleteSourceWhenDeleted)
+   : source (source_, deleteSourceWhenDeleted),
+     requiredNumberOfChannels (2),
      buffer (2, 16)
 {
     remappedInfo.buffer = &buffer;
     remappedInfo.startSample = 0;
 }
 
-ChannelRemappingAudioSource::~ChannelRemappingAudioSource()
-{
-    if (deleteSourceWhenDeleted)
-        delete source;
-}
+ChannelRemappingAudioSource::~ChannelRemappingAudioSource() {}
 
 //==============================================================================
 void ChannelRemappingAudioSource::setNumberOfChannelsToProduce (const int requiredNumberOfChannels_)

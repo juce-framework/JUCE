@@ -184,6 +184,7 @@
  #include "../src/audio/audio_sources/juce_BufferingAudioSource.cpp"
  #include "../src/audio/audio_sources/juce_ChannelRemappingAudioSource.cpp"
  #include "../src/audio/audio_sources/juce_IIRFilterAudioSource.cpp"
+ #include "../src/audio/audio_sources/juce_ReverbAudioSource.cpp"
  #include "../src/audio/audio_sources/juce_MixerAudioSource.cpp"
  #include "../src/audio/audio_sources/juce_ResamplingAudioSource.cpp"
  #include "../src/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp"

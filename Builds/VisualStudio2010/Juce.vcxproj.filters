@@ -265,6 +265,9 @@
     <ClCompile Include="..\..\src\audio\audio_sources\juce_ResamplingAudioSource.cpp">
       <Filter>Juce\Source\audio\audio_sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\audio\audio_sources\juce_ReverbAudioSource.cpp">
+      <Filter>Juce\Source\audio\audio_sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.cpp">
       <Filter>Juce\Source\audio\audio_sources</Filter>
     </ClCompile>
@@ -1380,6 +1383,9 @@
     <ClInclude Include="..\..\src\audio\audio_sources\juce_ResamplingAudioSource.h">
       <Filter>Juce\Source\audio\audio_sources</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\audio\audio_sources\juce_ReverbAudioSource.h">
+      <Filter>Juce\Source\audio\audio_sources</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.h">
       <Filter>Juce\Source\audio\audio_sources</Filter>
     </ClInclude>
@@ -1402,6 +1408,9 @@
       <Filter>Juce\Source\audio\dsp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\audio\dsp\juce_IIRFilter.h">
+      <Filter>Juce\Source\audio\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\audio\dsp\juce_Reverb.h">
       <Filter>Juce\Source\audio\dsp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiBuffer.h">

@@ -116,6 +116,9 @@
 #ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
  #include "audio/audio_sources/juce_ResamplingAudioSource.h"
 #endif
+#ifndef __JUCE_REVERBAUDIOSOURCE_JUCEHEADER__
+ #include "audio/audio_sources/juce_ReverbAudioSource.h"
+#endif
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
  #include "audio/audio_sources/juce_ToneGeneratorAudioSource.h"
 #endif
@@ -139,6 +142,9 @@
 #endif
 #ifndef __JUCE_IIRFILTER_JUCEHEADER__
  #include "audio/dsp/juce_IIRFilter.h"
+#endif
+#ifndef __JUCE_REVERB_JUCEHEADER__
+ #include "audio/dsp/juce_Reverb.h"
 #endif
 #ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
  #include "audio/midi/juce_MidiBuffer.h"

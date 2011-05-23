@@ -392,6 +392,8 @@ public:
 
         The x position is an integer, but the top and bottom of the line can be sub-pixel
         positions, and these will be anti-aliased if necessary.
+
+        The bottom parameter must be greater than or equal to the top parameter.
     */
     void drawVerticalLine (int x, float top, float bottom) const;
 
@@ -399,6 +401,8 @@ public:
 
         The y position is an integer, but the left and right ends of the line can be sub-pixel
         positions, and these will be anti-aliased if necessary.
+
+        The right parameter must be greater than or equal to the left parameter.
     */
     void drawHorizontalLine (int y, float left, float right) const;
 

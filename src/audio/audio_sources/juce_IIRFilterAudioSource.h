@@ -29,6 +29,7 @@
 #include "juce_AudioSource.h"
 #include "../dsp/juce_IIRFilter.h"
 #include "../../containers/juce_OwnedArray.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -41,7 +42,7 @@ public:
     //==============================================================================
     /** Creates a IIRFilterAudioSource for a given input source.
 
-        @param inputSource              the input source to read from
+        @param inputSource              the input source to read from - this must not be null
         @param deleteInputWhenDeleted   if true, the input source will be deleted when
                                         this object is deleted
     */
@@ -52,8 +53,7 @@ public:
     ~IIRFilterAudioSource();
 
     //==============================================================================
-    /** Changes the filter to use the same parameters as the one being passed in.
-    */
+    /** Changes the filter to use the same parameters as the one being passed in. */
     void setFilterParameters (const IIRFilter& newSettings);
 
     //==============================================================================
@@ -61,11 +61,9 @@ public:
     void releaseResources();
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill);
 
-
 private:
     //==============================================================================
-    AudioSource* const input;
-    const bool deleteInputWhenDeleted;
+    OptionalScopedPointer<AudioSource> input;
     OwnedArray <IIRFilter> iirFilters;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IIRFilterAudioSource);

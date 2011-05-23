@@ -29,6 +29,7 @@
 #include "juce_AudioSource.h"
 #include "../../text/juce_XmlElement.h"
 #include "../../containers/juce_Array.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -135,11 +136,9 @@ public:
 
 private:
     //==============================================================================
-    int requiredNumberOfChannels;
+    OptionalScopedPointer<AudioSource> source;
     Array <int> remappedInputs, remappedOutputs;
-
-    AudioSource* const source;
-    const bool deleteSourceWhenDeleted;
+    int requiredNumberOfChannels;
 
     AudioSampleBuffer buffer;
     AudioSourceChannelInfo remappedInfo;

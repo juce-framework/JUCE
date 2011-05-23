@@ -73,7 +73,7 @@ using namespace JUCE_NAMESPACE;
         if (f.getFileName().matchesWildcard ((*filters)[i], true))
             return true;
 
-    return f.isDirectory();
+    return f.isDirectory() && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
 }
 @end
 

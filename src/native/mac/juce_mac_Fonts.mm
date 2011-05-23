@@ -217,6 +217,9 @@ public:
         jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
 
         CGPathRef pathRef = CTFontCreatePathForGlyph (ctFontRef, (CGGlyph) glyphNumber, &renderingTransform);
+        if (pathRef == 0)
+            return false;
+
         CGPathApply (pathRef, &path, pathApplier);
         CFRelease (pathRef);
 

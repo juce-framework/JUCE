@@ -65,6 +65,7 @@ OBJECTS := \
   $(OBJDIR)/juce_IIRFilterAudioSource_807ee8aa.o \
   $(OBJDIR)/juce_MixerAudioSource_bc6f772b.o \
   $(OBJDIR)/juce_ResamplingAudioSource_8511875e.o \
+  $(OBJDIR)/juce_ReverbAudioSource_3ae42aa6.o \
   $(OBJDIR)/juce_ToneGeneratorAudioSource_77f504b3.o \
   $(OBJDIR)/juce_AudioDeviceManager_c24db832.o \
   $(OBJDIR)/juce_AudioIODevice_f7da876b.o \
@@ -512,6 +513,11 @@ $(OBJDIR)/juce_MixerAudioSource_bc6f772b.o: ../../src/audio/audio_sources/juce_M
 $(OBJDIR)/juce_ResamplingAudioSource_8511875e.o: ../../src/audio/audio_sources/juce_ResamplingAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_ResamplingAudioSource.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ReverbAudioSource_3ae42aa6.o: ../../src/audio/audio_sources/juce_ReverbAudioSource.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_ReverbAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ToneGeneratorAudioSource_77f504b3.o: ../../src/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp

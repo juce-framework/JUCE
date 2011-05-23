@@ -29,6 +29,7 @@
 #include "juce_PositionableAudioSource.h"
 #include "../../threads/juce_Thread.h"
 #include "../dsp/juce_AudioSampleBuffer.h"
+#include "../../memory/juce_OptionalScopedPointer.h"
 
 
 //==============================================================================
@@ -90,14 +91,13 @@ public:
 
 private:
     //==============================================================================
-    PositionableAudioSource* source;
-    bool deleteSourceWhenDeleted;
+    OptionalScopedPointer<PositionableAudioSource> source;
     int numberOfSamplesToBuffer, numberOfChannels;
     AudioSampleBuffer buffer;
     CriticalSection bufferStartPosLock;
     int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
-    bool wasSourceLooping;
     double volatile sampleRate;
+    bool wasSourceLooping;
 
     friend class SharedBufferingAudioSourceThread;
     bool readNextBufferChunk();

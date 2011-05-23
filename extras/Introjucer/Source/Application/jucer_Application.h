@@ -127,7 +127,7 @@ public:
     //==============================================================================
     const String getApplicationName()
     {
-        return "The Jucer V" + getApplicationVersion();
+        return String (ProjectInfo::projectName) + " " + getApplicationVersion();
     }
 
     const String getApplicationVersion()

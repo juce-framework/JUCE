@@ -148,6 +148,7 @@
     <ClCompile Include="..\..\src\audio\audio_sources\juce_IIRFilterAudioSource.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_sources\juce_MixerAudioSource.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_sources\juce_ResamplingAudioSource.cpp"/>
+    <ClCompile Include="..\..\src\audio\audio_sources\juce_ReverbAudioSource.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.cpp"/>
     <ClCompile Include="..\..\src\audio\devices\juce_AudioDeviceManager.cpp"/>
     <ClCompile Include="..\..\src\audio\devices\juce_AudioIODevice.cpp"/>
@@ -483,6 +484,7 @@
     <ClInclude Include="..\..\src\audio\audio_sources\juce_MixerAudioSource.h"/>
     <ClInclude Include="..\..\src\audio\audio_sources\juce_PositionableAudioSource.h"/>
     <ClInclude Include="..\..\src\audio\audio_sources\juce_ResamplingAudioSource.h"/>
+    <ClInclude Include="..\..\src\audio\audio_sources\juce_ReverbAudioSource.h"/>
     <ClInclude Include="..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.h"/>
     <ClInclude Include="..\..\src\audio\devices\juce_AudioDeviceManager.h"/>
     <ClInclude Include="..\..\src\audio\devices\juce_AudioIODevice.h"/>
@@ -491,6 +493,7 @@
     <ClInclude Include="..\..\src\audio\dsp\juce_AudioSampleBuffer.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_Decibels.h"/>
     <ClInclude Include="..\..\src\audio\dsp\juce_IIRFilter.h"/>
+    <ClInclude Include="..\..\src\audio\dsp\juce_Reverb.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiBuffer.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiFile.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiInput.h"/>

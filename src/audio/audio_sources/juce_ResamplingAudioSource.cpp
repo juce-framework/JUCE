@@ -32,10 +32,9 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
-                                              const bool deleteInputWhenDeleted_,
+                                              const bool deleteInputWhenDeleted,
                                               const int numChannels_)
-    : input (inputSource),
-      deleteInputWhenDeleted (deleteInputWhenDeleted_),
+    : input (inputSource, deleteInputWhenDeleted),
       ratio (1.0),
       lastRatio (1.0),
       buffer (numChannels_, 0),
@@ -45,11 +44,7 @@ ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
     jassert (input != nullptr);
 }
 
-ResamplingAudioSource::~ResamplingAudioSource()
-{
-    if (deleteInputWhenDeleted)
-        delete input;
-}
+ResamplingAudioSource::~ResamplingAudioSource() {}
 
 void ResamplingAudioSource::setResamplingRatio (const double samplesInPerOutputSample)
 {

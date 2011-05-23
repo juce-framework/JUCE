@@ -33,29 +33,18 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 AudioFormatReaderSource::AudioFormatReaderSource (AudioFormatReader* const reader_,
                                                   const bool deleteReaderWhenThisIsDeleted)
-    : reader (reader_),
-      deleteReader (deleteReaderWhenThisIsDeleted),
+    : reader (reader_, deleteReaderWhenThisIsDeleted),
       nextPlayPos (0),
       looping (false)
 {
     jassert (reader != nullptr);
 }
 
-AudioFormatReaderSource::~AudioFormatReaderSource()
-{
-    if (deleteReader)
-        delete reader;
-}
+AudioFormatReaderSource::~AudioFormatReaderSource() {}
 
-void AudioFormatReaderSource::setNextReadPosition (int64 newPosition)
-{
-    nextPlayPos = newPosition;
-}
-
-void AudioFormatReaderSource::setLooping (bool shouldLoop)
-{
-    looping = shouldLoop;
-}
+int64 AudioFormatReaderSource::getTotalLength() const                   { return reader->lengthInSamples; }
+void AudioFormatReaderSource::setNextReadPosition (int64 newPosition)   { nextPlayPos = newPosition; }
+void AudioFormatReaderSource::setLooping (bool shouldLoop)              { looping = shouldLoop; }
 
 int64 AudioFormatReaderSource::getNextReadPosition() const
 {
@@ -63,19 +52,8 @@ int64 AudioFormatReaderSource::getNextReadPosition() const
                    : nextPlayPos;
 }
 
-int64 AudioFormatReaderSource::getTotalLength() const
-{
-    return reader->lengthInSamples;
-}
-
-void AudioFormatReaderSource::prepareToPlay (int /*samplesPerBlockExpected*/,
-                                             double /*sampleRate*/)
-{
-}
-
-void AudioFormatReaderSource::releaseResources()
-{
-}
+void AudioFormatReaderSource::prepareToPlay (int /*samplesPerBlockExpected*/, double /*sampleRate*/) {}
+void AudioFormatReaderSource::releaseResources() {}
 
 void AudioFormatReaderSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
 {
@@ -90,39 +68,26 @@ void AudioFormatReaderSource::getNextAudioBlock (const AudioSourceChannelInfo& i
 
             if (newEnd > newStart)
             {
-                info.buffer->readFromAudioReader (reader,
-                                                  info.startSample,
-                                                  newEnd - newStart,
-                                                  newStart,
-                                                  true, true);
+                info.buffer->readFromAudioReader (reader, info.startSample,
+                                                  newEnd - newStart, newStart, true, true);
             }
             else
             {
                 const int endSamps = (int) reader->lengthInSamples - newStart;
 
-                info.buffer->readFromAudioReader (reader,
-                                                  info.startSample,
-                                                  endSamps,
-                                                  newStart,
-                                                  true, true);
+                info.buffer->readFromAudioReader (reader, info.startSample,
+                                                  endSamps, newStart, true, true);
 
-                info.buffer->readFromAudioReader (reader,
-                                                  info.startSample + endSamps,
-                                                  newEnd,
-                                                  0,
-                                                  true, true);
+                info.buffer->readFromAudioReader (reader, info.startSample + endSamps,
+                                                  newEnd, 0, true, true);
             }
 
             nextPlayPos = newEnd;
         }
         else
         {
-            info.buffer->readFromAudioReader (reader,
-                                              info.startSample,
-                                              info.numSamples,
-                                              start,
-                                              true, true);
-
+            info.buffer->readFromAudioReader (reader, info.startSample,
+                                              info.numSamples, start, true, true);
             nextPlayPos += info.numSamples;
         }
     }
