@@ -242,7 +242,7 @@ private:
         void clear() noexcept
         {
             last = 0;
-            zeromem (buffer, bufferSize * sizeof (float));
+            buffer.clear (bufferSize);
         }
 
         void setFeedbackAndDamp (const float f, const float d) noexcept
@@ -293,7 +293,7 @@ private:
 
         void clear() noexcept
         {
-            zeromem (buffer, bufferSize * sizeof (float));
+            buffer.clear (bufferSize);
         }
 
         inline float process (const float input) noexcept

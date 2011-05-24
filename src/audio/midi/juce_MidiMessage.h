@@ -256,8 +256,7 @@ public:
 
     /** Returns the midi note number for note-on and note-off messages.
 
-        If the message isn't a note-on or off, the value returned will be
-        meaningless.
+        If the message isn't a note-on or off, the value returned is undefined.
 
         @see isNoteOff, getMidiNoteName, getMidiNoteInHertz, setNoteNumber
     */
@@ -273,7 +272,6 @@ public:
     /** Returns the velocity of a note-on or note-off message.
 
         The value returned will be in the range 0 to 127.
-
         If the message isn't a note-on or off event, it will return 0.
 
         @see getFloatVelocity
@@ -283,7 +281,6 @@ public:
     /** Returns the velocity of a note-on or note-off message.
 
         The value returned will be in the range 0 to 1.0
-
         If the message isn't a note-on or off event, it will return 0.
 
         @see getVelocity, setVelocity
@@ -307,6 +304,22 @@ public:
         @see setVelocity
     */
     void multiplyVelocity (float scaleFactor) noexcept;
+
+    //==============================================================================
+    /** Returns true if this message is a 'sustain pedal down' controller message. */
+    bool isSustainPedalOn() const noexcept;
+    /** Returns true if this message is a 'sustain pedal up' controller message. */
+    bool isSustainPedalOff() const noexcept;
+
+    /** Returns true if this message is a 'sostenuto pedal down' controller message. */
+    bool isSostenutoPedalOn() const noexcept;
+    /** Returns true if this message is a 'sostenuto pedal up' controller message. */
+    bool isSostenutoPedalOff() const noexcept;
+
+    /** Returns true if this message is a 'soft pedal down' controller message. */
+    bool isSoftPedalOn() const noexcept;
+    /** Returns true if this message is a 'soft pedal up' controller message. */
+    bool isSoftPedalOff() const noexcept;
 
     //==============================================================================
     /** Returns true if the message is a program (patch) change message.
@@ -439,6 +452,11 @@ public:
         @see isController, getControllerNumber
     */
     int getControllerValue() const noexcept;
+
+    /** Returns true if this message is a controller message and if it has the specified
+        controller type.
+    */
+    bool isControllerOfType (int controllerType) const noexcept;
 
     /** Creates a controller message.
 

@@ -878,10 +878,10 @@ private:
 
         int64 riffChunkSize = 4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
                                + 8 + audioDataSize + (audioDataSize & 1)
-                               + (bwavChunk.getSize() > 0 ? (8 + bwavChunk.getSize()) : 0)
-                               + (smplChunk.getSize() > 0 ? (8 + smplChunk.getSize()) : 0)
-                               + (instChunk.getSize() > 0 ? (8 + instChunk.getSize()) : 0)
-                               + (cueChunk .getSize() > 0 ? (8 + cueChunk .getSize()) : 0)
+                               + (bwavChunk.getSize() > 0 ? (8  + bwavChunk.getSize()) : 0)
+                               + (smplChunk.getSize() > 0 ? (8  + smplChunk.getSize()) : 0)
+                               + (instChunk.getSize() > 0 ? (8  + instChunk.getSize()) : 0)
+                               + (cueChunk .getSize() > 0 ? (8  + cueChunk .getSize()) : 0)
                                + (listChunk.getSize() > 0 ? (12 + listChunk.getSize()) : 0)
                                + (8 + 28); // (ds64 chunk)
 

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	92
+#define JUCE_BUILDNUMBER	93
 
 /** Current Juce version number.
 
@@ -39379,7 +39379,7 @@ private:
 		void clear() noexcept
 		{
 			last = 0;
-			zeromem (buffer, bufferSize * sizeof (float));
+			buffer.clear (bufferSize);
 		}
 
 		void setFeedbackAndDamp (const float f, const float d) noexcept
@@ -39429,7 +39429,7 @@ private:
 
 		void clear() noexcept
 		{
-			zeromem (buffer, bufferSize * sizeof (float));
+			buffer.clear (bufferSize);
 		}
 
 		inline float process (const float input) noexcept
@@ -39932,8 +39932,7 @@ public:
 
 	/** Returns the midi note number for note-on and note-off messages.
 
-		If the message isn't a note-on or off, the value returned will be
-		meaningless.
+		If the message isn't a note-on or off, the value returned is undefined.
 
 		@see isNoteOff, getMidiNoteName, getMidiNoteInHertz, setNoteNumber
 	*/
@@ -39948,7 +39947,6 @@ public:
 	/** Returns the velocity of a note-on or note-off message.
 
 		The value returned will be in the range 0 to 127.
-
 		If the message isn't a note-on or off event, it will return 0.
 
 		@see getFloatVelocity
@@ -39958,7 +39956,6 @@ public:
 	/** Returns the velocity of a note-on or note-off message.
 
 		The value returned will be in the range 0 to 1.0
-
 		If the message isn't a note-on or off event, it will return 0.
 
 		@see getVelocity, setVelocity
@@ -39982,6 +39979,21 @@ public:
 		@see setVelocity
 	*/
 	void multiplyVelocity (float scaleFactor) noexcept;
+
+	/** Returns true if this message is a 'sustain pedal down' controller message. */
+	bool isSustainPedalOn() const noexcept;
+	/** Returns true if this message is a 'sustain pedal up' controller message. */
+	bool isSustainPedalOff() const noexcept;
+
+	/** Returns true if this message is a 'sostenuto pedal down' controller message. */
+	bool isSostenutoPedalOn() const noexcept;
+	/** Returns true if this message is a 'sostenuto pedal up' controller message. */
+	bool isSostenutoPedalOff() const noexcept;
+
+	/** Returns true if this message is a 'soft pedal down' controller message. */
+	bool isSoftPedalOn() const noexcept;
+	/** Returns true if this message is a 'soft pedal up' controller message. */
+	bool isSoftPedalOff() const noexcept;
 
 	/** Returns true if the message is a program (patch) change message.
 
@@ -40110,6 +40122,11 @@ public:
 		@see isController, getControllerNumber
 	*/
 	int getControllerValue() const noexcept;
+
+	/** Returns true if this message is a controller message and if it has the specified
+		controller type.
+	*/
+	bool isControllerOfType (int controllerType) const noexcept;
 
 	/** Creates a controller message.
 
@@ -48727,6 +48744,8 @@ private:
 	int currentlyPlayingNote;
 	uint32 noteOnTime;
 	SynthesiserSound::Ptr currentlyPlayingSound;
+	bool keyIsDown; // the voice may still be playing when the key is not down (i.e. sustain pedal)
+	bool sostenutoPedalDown;
 
 	JUCE_LEAK_DETECTOR (SynthesiserVoice);
 };
@@ -48831,6 +48850,8 @@ public:
 
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
+
+		The midiChannel parameter is the channel, between 1 and 16 inclusive.
 	*/
 	virtual void noteOn (int midiChannel,
 						 int midiNoteNumber,
@@ -48845,6 +48866,8 @@ public:
 
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
+
+		The midiChannel parameter is the channel, between 1 and 16 inclusive.
 	*/
 	virtual void noteOff (int midiChannel,
 						  int midiNoteNumber,
@@ -48855,7 +48878,8 @@ public:
 		This will turn off any voices that are playing a sound on the given midi channel.
 
 		If midiChannel is 0 or less, then all voices will be turned off, regardless of
-		which channel they're playing.
+		which channel they're playing. Otherwise it represents a valid midi channel, from
+		1 to 16 inclusive.
 
 		If allowTailOff is true, the voices will be allowed to fade out the notes gracefully
 		(if they can do). If this is false, the notes will all be cut off immediately.
@@ -48874,7 +48898,7 @@ public:
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
 
-		@param midiChannel	  the midi channel for the event
+		@param midiChannel	  the midi channel, from 1 to 16 inclusive
 		@param wheelValue	   the wheel position, from 0 to 0x3fff, as returned by MidiMessage::getPitchWheelValue()
 	*/
 	virtual void handlePitchWheel (int midiChannel,
@@ -48888,13 +48912,17 @@ public:
 		This method will be called automatically according to the midi data passed into
 		renderNextBlock(), but may be called explicitly too.
 
-		@param midiChannel	  the midi channel for the event
+		@param midiChannel	  the midi channel, from 1 to 16 inclusive
 		@param controllerNumber	 the midi controller type, as returned by MidiMessage::getControllerNumber()
 		@param controllerValue	  the midi controller value, between 0 and 127, as returned by MidiMessage::getControllerValue()
 	*/
 	virtual void handleController (int midiChannel,
 								   int controllerNumber,
 								   int controllerValue);
+
+	virtual void handleSustainPedal (int midiChannel, bool isDown);
+	virtual void handleSostenutoPedal (int midiChannel, bool isDown);
+	virtual void handleSoftPedal (int midiChannel, bool isDown);
 
 	/** Tells the synthesiser what the sample rate is for the audio it's being used to
 		render.
@@ -48953,15 +48981,20 @@ protected:
 					 int midiNoteNumber,
 					 float velocity);
 
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-	// Temporary method here to cause a compiler error - note the new parameters for this method.
-	int findFreeVoice (const bool) const { return 0; }
-   #endif
-
 private:
+
 	double sampleRate;
 	uint32 lastNoteOnCounter;
 	bool shouldStealNotes;
+	BigInteger sustainPedalsDown;
+
+	void handleMidiEvent (const MidiMessage& m);
+	void stopVoice (SynthesiserVoice* voice, bool allowTailOff);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// Note the new parameters for this method.
+	virtual int findFreeVoice (const bool) const { return 0; }
+   #endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser);
 };

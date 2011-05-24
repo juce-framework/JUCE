@@ -925,16 +925,14 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     jassert (minOutputChannels >= 0 && minOutputChannels <= maxOutputChannels);
     jassert (minInputChannels >= 0 && minInputChannels <= maxInputChannels);
 
-    if (deviceManager_.getAvailableDeviceTypes().size() > 1)
+    const OwnedArray<AudioIODeviceType>& types = deviceManager_.getAvailableDeviceTypes();
+
+    if (types.size() > 1)
     {
         deviceTypeDropDown = new ComboBox (String::empty);
 
-        for (int i = 0; i < deviceManager_.getAvailableDeviceTypes().size(); ++i)
-        {
-            deviceTypeDropDown
-                ->addItem (deviceManager_.getAvailableDeviceTypes().getUnchecked(i)->getTypeName(),
-                           i + 1);
-        }
+        for (int i = 0; i < types.size(); ++i)
+            deviceTypeDropDown->addItem (types.getUnchecked(i)->getTypeName(), i + 1);
 
         addAndMakeVisible (deviceTypeDropDown);
         deviceTypeDropDown->addListener (this);

@@ -420,6 +420,16 @@ const MidiMessage MidiMessage::channelPressureChange (const int channel,
     return MidiMessage (MidiHelpers::initialByte (0xd0, channel), pressure & 0x7f);
 }
 
+bool MidiMessage::isSustainPedalOn() const noexcept     { return isControllerOfType (0x40) && data[2] >= 64; }
+bool MidiMessage::isSustainPedalOff() const noexcept    { return isControllerOfType (0x40) && data[2] <  64; }
+
+bool MidiMessage::isSostenutoPedalOn() const noexcept   { return isControllerOfType (0x42) && data[2] >= 64; }
+bool MidiMessage::isSostenutoPedalOff() const noexcept  { return isControllerOfType (0x42) && data[2] <  64; }
+
+bool MidiMessage::isSoftPedalOn() const noexcept        { return isControllerOfType (0x43) && data[2] >= 64; }
+bool MidiMessage::isSoftPedalOff() const noexcept       { return isControllerOfType (0x43) && data[2] <  64; }
+
+
 bool MidiMessage::isProgramChange() const noexcept
 {
     return (data[0] & 0xf0) == 0xc0;
@@ -463,6 +473,11 @@ const MidiMessage MidiMessage::pitchWheel (const int channel,
 bool MidiMessage::isController() const noexcept
 {
     return (data[0] & 0xf0) == 0xb0;
+}
+
+bool MidiMessage::isControllerOfType (const int controllerType) const noexcept
+{
+    return (data[0] & 0xf0) == 0xb0 && data[1] == controllerType;
 }
 
 int MidiMessage::getControllerNumber() const noexcept
