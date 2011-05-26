@@ -45,12 +45,9 @@ public:
 
     void buttonClicked (Button* button)
     {
-        if (button == owner.getMinimiseButton())
-            owner.minimiseButtonPressed();
-        else if (button == owner.getMaximiseButton())
-            owner.maximiseButtonPressed();
-        else if (button == owner.getCloseButton())
-            owner.closeButtonPressed();
+        if      (button == owner.getMinimiseButton())  owner.minimiseButtonPressed();
+        else if (button == owner.getMaximiseButton())  owner.maximiseButtonPressed();
+        else if (button == owner.getCloseButton())     owner.closeButtonPressed();
     }
 
 private:
@@ -309,14 +306,9 @@ int DocumentWindow::getDesktopWindowStyleFlags() const
 {
     int styleFlags = ResizableWindow::getDesktopWindowStyleFlags();
 
-    if ((requiredButtons & minimiseButton) != 0)
-        styleFlags |= ComponentPeer::windowHasMinimiseButton;
-
-    if ((requiredButtons & maximiseButton) != 0)
-        styleFlags |= ComponentPeer::windowHasMaximiseButton;
-
-    if ((requiredButtons & closeButton) != 0)
-        styleFlags |= ComponentPeer::windowHasCloseButton;
+    if ((requiredButtons & minimiseButton) != 0)  styleFlags |= ComponentPeer::windowHasMinimiseButton;
+    if ((requiredButtons & maximiseButton) != 0)  styleFlags |= ComponentPeer::windowHasMaximiseButton;
+    if ((requiredButtons & closeButton) != 0)     styleFlags |= ComponentPeer::windowHasCloseButton;
 
     return styleFlags;
 }
@@ -357,11 +349,11 @@ void DocumentWindow::lookAndFeelChanged()
 
         if (getCloseButton() != nullptr)
         {
-          #if JUCE_MAC
+           #if JUCE_MAC
             getCloseButton()->addShortcut (KeyPress ('w', ModifierKeys::commandModifier, 0));
-          #else
+           #else
             getCloseButton()->addShortcut (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0));
-          #endif
+           #endif
         }
     }
 

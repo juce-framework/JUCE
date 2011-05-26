@@ -41,10 +41,6 @@ public:
     {
     }
 
-    ~ColourEditorComponent()
-    {
-    }
-
     void paint (Graphics& g)
     {
         g.fillAll (Colours::grey);
@@ -104,36 +100,31 @@ private:
         ColourSelectorComp (ColourEditorComponent* owner_,
                             const bool canResetToDefault)
             : owner (owner_),
-              defaultButton (0)
+              defaultButton ("Reset to Default")
         {
-            addAndMakeVisible (selector = new ColourSelectorWithSwatches());
-            selector->setName ("Colour");
-            selector->setCurrentColour (owner->getColour());
-            selector->addChangeListener (owner);
+            addAndMakeVisible (&selector);
+            selector.setName ("Colour");
+            selector.setCurrentColour (owner->getColour());
+            selector.addChangeListener (owner);
 
             if (canResetToDefault)
             {
-                addAndMakeVisible (defaultButton = new TextButton ("Reset to Default"));
-                defaultButton->addListener (this);
+                addAndMakeVisible (&defaultButton);
+                defaultButton.addListener (this);
             }
-        }
-
-        ~ColourSelectorComp()
-        {
-            deleteAllChildren();
         }
 
         void resized()
         {
-            if (defaultButton != 0)
+            if (defaultButton.isVisible())
             {
-                selector->setBounds (0, 0, getWidth(), getHeight() - 30);
-                defaultButton->changeWidthToFitText (22);
-                defaultButton->setTopLeftPosition (10, getHeight() - 26);
+                selector.setBounds (0, 0, getWidth(), getHeight() - 30);
+                defaultButton.changeWidthToFitText (22);
+                defaultButton.setTopLeftPosition (10, getHeight() - 26);
             }
             else
             {
-                selector->setBounds (0, 0, getWidth(), getHeight());
+                selector.setBounds (0, 0, getWidth(), getHeight());
             }
         }
 
@@ -141,7 +132,7 @@ private:
         {
             owner->resetToDefault();
             owner->refresh();
-            selector->setCurrentColour (owner->getColour());
+            selector.setCurrentColour (owner->getColour());
         }
 
     private:
@@ -149,10 +140,6 @@ private:
         {
         public:
             ColourSelectorWithSwatches()
-            {
-            }
-
-            ~ColourSelectorWithSwatches()
             {
             }
 
@@ -173,8 +160,8 @@ private:
         };
 
         ColourEditorComponent* owner;
-        ColourSelectorWithSwatches* selector;
-        TextButton* defaultButton;
+        ColourSelectorWithSwatches selector;
+        TextButton defaultButton;
     };
 };
 

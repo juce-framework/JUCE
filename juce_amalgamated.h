@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	93
+#define JUCE_BUILDNUMBER	94
 
 /** Current Juce version number.
 
@@ -47268,8 +47268,7 @@ public:
 		Call this when the number of rows in the list changes, or if you want it
 		to call refreshComponentForRow() on all the row components.
 
-		Be careful not to call it from a different thread, though, as it's not
-		thread-safe.
+		This must only be called from the main message thread.
 	*/
 	void updateContent();
 

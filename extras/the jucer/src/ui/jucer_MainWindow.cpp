@@ -45,10 +45,6 @@ public:
         setBackgroundColour (Colour (0xffe6f0ff));
     }
 
-    ~MultiDocHolder()
-    {
-    }
-
     bool tryToCloseDocument (Component* component)
     {
         JucerDocumentHolder* const holder = dynamic_cast <JucerDocumentHolder*> (component);

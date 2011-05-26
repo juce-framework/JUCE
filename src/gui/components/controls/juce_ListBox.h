@@ -196,8 +196,7 @@ public:
         Call this when the number of rows in the list changes, or if you want it
         to call refreshComponentForRow() on all the row components.
 
-        Be careful not to call it from a different thread, though, as it's not
-        thread-safe.
+        This must only be called from the main message thread.
     */
     void updateContent();
 

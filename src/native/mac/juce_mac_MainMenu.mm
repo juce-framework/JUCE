@@ -109,21 +109,20 @@ public:
     void updateSubMenu (NSMenuItem* parentItem, const PopupMenu& menuToCopy,
                         const String& name, const int menuId, const int tag)
     {
-        [parentItem setTag: tag];
-        NSMenu* menu = [parentItem submenu];
-
-        [menu setTitle: juceStringToNS (name)];
-
-        while ([menu numberOfItems] > 0)
-            [menu removeItemAtIndex: 0];
+        // Note: This method used to update the contents of the existing menu in-place, but that caused
+        // weird side-effects which messed-up keyboard focus when switching between windows. By creating
+        // a new menu and replacing the old one with it, that problem seems to be avoided..
+        NSMenu* menu = [[NSMenu alloc] initWithTitle: juceStringToNS (name)];
 
         PopupMenu::MenuItemIterator iter (menuToCopy);
-
         while (iter.next())
             addMenuItem (iter, menu, menuId, tag);
 
         [menu setAutoenablesItems: false];
         [menu update];
+        [parentItem setTag: tag];
+        [parentItem setSubmenu: menu];
+        [menu release];
     }
 
     void menuBarItemsChanged (MenuBarModel*)
@@ -247,31 +246,15 @@ public:
                 {
                     const KeyPress& kp = keyPresses.getReference(0);
 
-                    if (kp.getKeyCode() != KeyPress::backspaceKey
-                         && kp.getKeyCode() != KeyPress::deleteKey) // (adding these is annoying because it flashes the menu bar
-                                                                    // every time you press the key while editing text)
+                    if (kp.getKeyCode() != KeyPress::backspaceKey   // (adding these is annoying because it flashes the menu bar
+                         && kp.getKeyCode() != KeyPress::deleteKey) // every time you press the key while editing text)
                     {
                         juce_wchar key = kp.getTextCharacter();
-
-                        if (kp.getKeyCode() == KeyPress::backspaceKey)
-                            key = NSBackspaceCharacter;
-                        else if (kp.getKeyCode() == KeyPress::deleteKey)
-                            key = NSDeleteCharacter;
-                        else if (key == 0)
+                        if (key == 0)
                             key = (juce_wchar) kp.getKeyCode();
 
-                        unsigned int mods = 0;
-                        if (kp.getModifiers().isShiftDown())
-                            mods |= NSShiftKeyMask;
-                        if (kp.getModifiers().isCtrlDown())
-                            mods |= NSControlKeyMask;
-                        if (kp.getModifiers().isAltDown())
-                            mods |= NSAlternateKeyMask;
-                        if (kp.getModifiers().isCommandDown())
-                            mods |= NSCommandKeyMask;
-
                         [item setKeyEquivalent: juceStringToNS (String::charToString (key))];
-                        [item setKeyEquivalentModifierMask: mods];
+                        [item setKeyEquivalentModifierMask: juceModsToNSMods (kp.getModifiers())];
                     }
                 }
             }
@@ -361,6 +344,16 @@ private:
         }
 
         [menu release];
+    }
+
+    static unsigned int juceModsToNSMods (const ModifierKeys& mods)
+    {
+        unsigned int m = 0;
+        if (mods.isShiftDown())    m |= NSShiftKeyMask;
+        if (mods.isCtrlDown())     m |= NSControlKeyMask;
+        if (mods.isAltDown())      m |= NSAlternateKeyMask;
+        if (mods.isCommandDown())  m |= NSCommandKeyMask;
+        return m;
     }
 };
 

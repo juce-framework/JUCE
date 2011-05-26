@@ -45,22 +45,19 @@ public:
         : input (in),
           dataBlockIsZero (false), fresh (false), finished (false),
           currentBit (0), lastBit (0), lastByteIndex (0),
-          codeSize (0), setCodeSize (0),
-          maxCode (0), maxCodeSize (0),
+          codeSize (0), setCodeSize (0), maxCode (0), maxCodeSize (0),
           firstcode (0), oldcode (0), clearCode (0), endCode (0)
     {
         int imageWidth, imageHeight;
-        int transparent = -1;
-
-        if (! (getSizeFromHeader (imageWidth, imageHeight)
-                && imageWidth > 0 && imageHeight > 0))
+        if (! getSizeFromHeader (imageWidth, imageHeight))
             return;
 
-        unsigned char buf [16];
+        uint8 buf [16];
         if (in.read (buf, 3) != 3)
             return;
 
         int numColours = 2 << (buf[0] & 7);
+        int transparent = -1;
 
         if ((buf[0] & 0x80) != 0)
             readPalette (numColours);
@@ -72,36 +69,33 @@ public:
 
             if (buf[0] == '!')
             {
-                if (input.read (buf, 1) != 1)
-                    break;
+                if (readExtension (transparent))
+                    continue;
 
-                if (processExtension (buf[0], transparent) < 0)
-                    break;
-
-                continue;
+                break;
             }
 
             if (buf[0] != ',')
                 continue;
 
-            if (input.read (buf, 9) != 9)
-                break;
+            if (input.read (buf, 9) == 9)
+            {
+                imageWidth  = makeWord (buf[4], buf[5]);
+                imageHeight = makeWord (buf[6], buf[7]);
 
-            imageWidth  = makeWord (buf[4], buf[5]);
-            imageHeight = makeWord (buf[6], buf[7]);
+                numColours = 2 << (buf[8] & 7);
 
-            numColours = 2 << (buf[8] & 7);
+                if ((buf[8] & 0x80) != 0)
+                    if (! readPalette (numColours))
+                        break;
 
-            if ((buf[8] & 0x80) != 0)
-                if (! readPalette (numColours))
-                    break;
+                image = Image (transparent >= 0 ? Image::ARGB : Image::RGB,
+                               imageWidth, imageHeight, transparent >= 0);
 
-            image = Image ((transparent >= 0) ? Image::ARGB : Image::RGB,
-                           imageWidth, imageHeight, (transparent >= 0));
+                image.getProperties()->set ("originalImageHadAlpha", transparent >= 0);
 
-            image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
-
-            readImage ((buf[8] & 0x40) != 0, transparent);
+                readImage ((buf[8] & 0x40) != 0, transparent);
+            }
 
             break;
         }
@@ -111,8 +105,8 @@ public:
 
 private:
     InputStream& input;
-    uint8 buffer [300];
-    uint8 palette [256][4];
+    uint8 buffer [260];
+    PixelARGB palette [256];
     bool dataBlockIsZero, fresh, finished;
     int currentBit, lastBit, lastByteIndex;
     int codeSize, setCodeSize;
@@ -126,19 +120,17 @@ private:
 
     bool getSizeFromHeader (int& w, int& h)
     {
-        char b[8];
+        char b[6];
 
-        if (input.read (b, 6) == 6)
+        if (input.read (b, 6) == 6
+             && (strncmp ("GIF87a", b, 6) == 0
+                  || strncmp ("GIF89a", b, 6) == 0))
         {
-            if ((strncmp ("GIF87a", b, 6) == 0)
-                 || (strncmp ("GIF89a", b, 6) == 0))
+            if (input.read (b, 4) == 4)
             {
-                if (input.read (b, 4) == 4)
-                {
-                    w = makeWord (b[0], b[1]);
-                    h = makeWord (b[2], b[3]);
-                    return true;
-                }
+                w = makeWord (b[0], b[1]);
+                h = makeWord (b[2], b[3]);
+                return w > 0 && h > 0;
             }
         }
 
@@ -147,25 +139,21 @@ private:
 
     bool readPalette (const int numCols)
     {
-        unsigned char rgb[4];
-
         for (int i = 0; i < numCols; ++i)
         {
+            uint8 rgb[4];
             input.read (rgb, 3);
 
-            palette [i][0] = rgb[0];
-            palette [i][1] = rgb[1];
-            palette [i][2] = rgb[2];
-            palette [i][3] = 0xff;
+            palette[i].setARGB (0xff, rgb[0], rgb[1], rgb[2]);
+            palette[i].premultiply();
         }
 
         return true;
     }
 
-    int readDataBlock (unsigned char* dest)
+    int readDataBlock (uint8* const dest)
     {
-        unsigned char n;
-
+        uint8 n;
         if (input.read (&n, 1) == 1)
         {
             dataBlockIsZero = (n == 0);
@@ -177,9 +165,13 @@ private:
         return -1;
     }
 
-    int processExtension (const int type, int& transparent)
+    int readExtension (int& transparent)
     {
-        unsigned char b [300];
+        uint8 type;
+        if (input.read (&type, 1) != 1)
+            return false;
+
+        uint8 b [260];
         int n = 0;
 
         if (type == 0xf9)
@@ -188,7 +180,7 @@ private:
             if (n < 0)
                 return 1;
 
-            if ((b[0] & 0x1) != 0)
+            if ((b[0] & 1) != 0)
                 transparent = b[3];
         }
 
@@ -198,7 +190,7 @@ private:
         }
         while (n > 0);
 
-        return n;
+        return n >= 0;
     }
 
     void clearTable()
@@ -271,7 +263,7 @@ private:
                 if (dataBlockIsZero)
                     return -2;
 
-                unsigned char buf [260];
+                uint8 buf [260];
 
                 int n;
                 while ((n = readDataBlock (buf)) > 0)
@@ -341,7 +333,7 @@ private:
             buffer[0] = buffer [lastByteIndex - 2];
             buffer[1] = buffer [lastByteIndex - 1];
 
-            const int n = readDataBlock (&buffer[2]);
+            const int n = readDataBlock (buffer + 2);
 
             if (n == 0)
                 finished = true;
@@ -367,66 +359,40 @@ private:
 
     bool readImage (const int interlace, const int transparent)
     {
-        {
-            unsigned char c;
-            if (input.read (&c, 1) != 1)
-                return false;
+        uint8 c;
+        if (input.read (&c, 1) != 1)
+            return false;
 
-            initialise (c);
-        }
+        initialise (c);
 
         if (transparent >= 0)
-        {
-            palette [transparent][0] = 0;
-            palette [transparent][1] = 0;
-            palette [transparent][2] = 0;
-            palette [transparent][3] = 0;
-        }
+            palette [transparent].setARGB (0, 0, 0, 0);
 
-        int index;
-        int xpos = 0, ypos = 0, pass = 0;
+        int xpos = 0, ypos = 0, yStep = 8, pass = 0;
 
         const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
-        uint8* p = destData.data;
-        const bool hasAlpha = image.hasAlphaChannel();
+        uint8* p = destData.getPixelPointer (0, 0);
 
-        while ((index = readLZWByte()) >= 0)
+        for (;;)
         {
-            const uint8* const paletteEntry = palette [index];
+            const int index = readLZWByte();
+            if (index < 0)
+                break;
 
-            if (hasAlpha)
-            {
-                ((PixelARGB*) p)->setARGB (paletteEntry[3],
-                                           paletteEntry[0],
-                                           paletteEntry[1],
-                                           paletteEntry[2]);
-
-                ((PixelARGB*) p)->premultiply();
-            }
+            if (transparent >= 0)
+                ((PixelARGB*) p)->set (palette [index]);
             else
-            {
-                ((PixelRGB*) p)->setARGB (0,
-                                          paletteEntry[0],
-                                          paletteEntry[1],
-                                          paletteEntry[2]);
-            }
+                ((PixelRGB*)  p)->set (palette [index]);
 
             p += destData.pixelStride;
-            ++xpos;
 
-            if (xpos == destData.width)
+            if (++xpos == destData.width)
             {
                 xpos = 0;
 
                 if (interlace)
                 {
-                    switch (pass)
-                    {
-                        case 0:
-                        case 1:     ypos += 8; break;
-                        case 2:     ypos += 4; break;
-                        case 3:     ypos += 2; break;
-                    }
+                    ypos += yStep;
 
                     while (ypos >= destData.height)
                     {
@@ -434,29 +400,27 @@ private:
 
                         switch (pass)
                         {
-                            case 1:     ypos = 4; break;
-                            case 2:     ypos = 2; break;
-                            case 3:     ypos = 1; break;
+                            case 1:     ypos = 4; yStep = 8; break;
+                            case 2:     ypos = 2; yStep = 4; break;
+                            case 3:     ypos = 1; yStep = 2; break;
                             default:    return true;
                         }
                     }
                 }
                 else
                 {
-                    ++ypos;
+                    if (++ypos >= destData.height)
+                        break;
                 }
 
                 p = destData.getPixelPointer (xpos, ypos);
             }
-
-            if (ypos >= destData.height)
-                break;
         }
 
         return true;
     }
 
-    static inline int makeWord (const uint8 a, const uint8 b)    { return (b << 8) | a; }
+    static inline int makeWord (const int a, const int b)    { return (b << 8) | a; }
 
     JUCE_DECLARE_NON_COPYABLE (GIFLoader);
 };

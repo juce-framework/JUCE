@@ -32,11 +32,11 @@ package.libpaths = {
 }
 
 package.config["Debug"].links = { 
-    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound"
+    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound", "dl", "Xext"
 }
 
 package.config["Release"].links = { 
-    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound"
+    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound", "dl", "Xext"
 }
 
 package.linkflags = { "static-runtime" }
